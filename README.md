@@ -13,6 +13,17 @@ with the original vendors, or legal clearance of the implementation.
 All **510 icon bindings** use independently authored SVGs. The exporter accepts
 authored catalogs only and cannot restore legacy bitmaps.
 
+## Ủng hộ phát triển / Donate
+
+Nếu OpenMatrix9 hữu ích với bạn, bạn có thể donate để hỗ trợ phát triển và kiểm
+thử các chức năng CAD, import/export 3DM và tương thích openNURBS.
+Mọi đóng góp đều tự nguyện. Cảm ơn bạn đã hỗ trợ dự án!
+
+- **PayPal:** gửi tới **`nguyenthaiduy277@gmail.com`** trong PayPal.
+- **MoMo:** quét mã QR dưới đây. Tên người nhận: **NGUYEN THAI DUY**.
+
+<img src="docs/images/donate/momo-qr.png" alt="Mã QR MoMo donate cho NGUYEN THAI DUY" width="300">
+
 ## Build và cài đặt
 
 Xem [hướng dẫn build FreeCAD và OpenMatrix9 trên Windows](docs/build-windows.md):
