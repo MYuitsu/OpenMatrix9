@@ -1,5 +1,9 @@
 # Build and validation
 
+Hướng dẫn từng bước bằng tiếng Việt: [build FreeCAD cùng OM9, build riêng OM9
+với SDK, và dùng với FreeCAD installer/portable](build-windows.md). Standalone
+native module cần SDK/ABI khớp; installer runtime đơn lẻ chưa đủ để build.
+
 The runtime does not require commercial CAD installations, proprietary resource
 archives, private manuals or this developer's filesystem paths.
 

@@ -13,6 +13,17 @@ with the original vendors, or legal clearance of the implementation.
 All **510 icon bindings** use independently authored SVGs. The exporter accepts
 authored catalogs only and cannot restore legacy bitmaps.
 
+## Build và cài đặt
+
+Xem [hướng dẫn build FreeCAD và OpenMatrix9 trên Windows](docs/build-windows.md):
+
+- **Build cùng FreeCAD từ source**: clone workspace, tích hợp CMake, Pixi, build và chạy.
+- **Build riêng OpenMatrix9**: dùng source/build SDK và dependencies của FreeCAD đã build.
+- **Dùng với FreeCAD installer/portable**: yêu cầu ABI/SDK khớp, vị trí `.pyd` và resources, kiểm tra sau cài.
+
+OpenMatrix9 có module native C++/Rust; chỉ clone vào `Mod` chưa đủ.
+Bản cài FreeCAD thông thường không tự cung cấp SDK để build module này.
+
 ## Tiến độ lệnh / Command progress
 
 Cập nhật: **2026-10-06**. Bảng này mô tả phạm vi đang có trong source public.
