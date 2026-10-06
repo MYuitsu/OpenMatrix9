@@ -1,5 +1,7 @@
 # OpenMatrix9
 
+![OpenMatrix9 — Open-source Jewelry CAD Workbench](Resources/branding/introduction.png)
+
 An experimental jewelry CAD workbench for FreeCAD. Rust owns command catalog,
 state and behavior; C++/Qt provides native integration. Unsupported commands
 remain visible and disabled.
