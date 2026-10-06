@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Ring Resizer</title>
+<desc>Create different sizes of the completed ring design. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<g transform="translate(4 4) scale(.75)"><ellipse cx="16" cy="16" rx="11" ry="13" fill="none" stroke="#4260FF" stroke-width="3"/><path d="M8 7 Q2 16 8 25" fill="none" stroke="#9ABFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M2 9 V2 H9 M23 2 H30 V9 M30 23 V30 H23 M9 30 H2 V23" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 16 H2" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 13 L2 16 L5 19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 16 H30" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 13 L30 16 L27 19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

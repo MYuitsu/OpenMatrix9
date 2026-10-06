@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-06",
+  "scope": "Local OpenMatrix9 publication snapshot; remote unchanged",
+  "icons": {
+    "authored_bindings": 510,
+    "svg_files": 510,
+    "remaining_png_bindings_replaced": 142,
+    "generic_symbols_redrawn": 12,
+    "source_audit_errors": 0,
+    "native_checks_passed": 3093,
+    "native_checks_total": 3093
+  },
+  "tests": {
+    "python_passed": 23,
+    "rust_passed": 68,
+    "native_module_build": "passed",
+    "private_fixture_free_native_test_configuration": "passed; five procedural suites enabled, optional ring/unmeshed suites disabled",
+    "all_native_3dm_test_execution": "not rerun for this publication task"
+  },
+  "secret_scan": {
+    "tool": "Gitleaks 8.30.1",
+    "redaction": "100 percent",
+    "original_commits_scanned": 16,
+    "original_history_findings": 0,
+    "clean_tree_findings": 0,
+    "new_root_history_findings": 0
+  },
+  "git": {
+    "root_commits": 1,
+    "parent_commits": 0,
+    "old_refs_or_alternates_retained": false,
+    "remote_attached": false,
+    "github_push_or_visibility_change": false,
+    "private_backup_outside_repository": true
+  },
+  "limits": [
+    "Technical exclusions and tests do not certify copyright clearance, code ownership or complete command implementation.",
+    "Old remote history, forks, caches and third-party clones are not modified by this local snapshot.",
+    "The backup contains historical materials and must not be published."
+  ]
+}

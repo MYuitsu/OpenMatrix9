@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Extend curve</title>
+  <desc>Existing curve with an extended continuation. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M4 26 Q14 26 18 15" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 15 Q20 9 27 5" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 9 L27 5" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 5 H27 V10" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="15" r="1.9" fill="#FFFFFF"/>
+</svg>

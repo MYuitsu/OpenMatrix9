@@ -1,0 +1,78 @@
+# OM9-MEASURE-002: shared native menu/mouse/CMD distance and read-only invariants.
+import os,json,traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(300,loop.quit);loop.exec();QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def cmd(text):
+    field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def run():
+    global field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('DistanceTest');doc.UndoMode=1;settle()
+        window=Gui.getMainWindow();window.show();window.resize(1500,1000);settle()
+        field=command_input(window);prompt=command_prompt(window);action=window.findChild(QtGui.QAction,'Distance')
+        check('OM9-MEASURE-002 original Distance action registered',action is not None and action.isEnabled())
+        obj=doc.addObject('Part::Box','Reference');doc.recompute();Gui.Selection.addSelection(obj);settle()
+        before=(len(doc.Objects),doc.UndoCount if hasattr(doc,'UndoCount') else len(doc.UndoNames),len(doc.RedoNames),[o.Name for o in Gui.Selection.getSelection()])
+        cmd('Distance');cmd('1,2,3');cmd('4,6,15');check('CMD spatial distance reports 13 mm',prompt.text()=='Distance: 13 mm')
+        action.trigger();settle();cmd('0,0,0');cmd('Unit=in');cmd('304.8,0,0');check('menu session uses same CMD inputs and unit conversion',prompt.text()=='Distance: 12 in')
+        cmd('Distance');cmd('0,0,0');cmd('Unit=unknown');check('invalid unit reports error', 'Unit must' in prompt.text());cmd('Unit=ft');cmd('304.8,0,0');check('invalid unit retains first point and valid unit succeeds',prompt.text()=='Distance: 1 ft')
+        cmd('Distance');cmd('nan,0,0');check('nonfinite point rejected','Invalid point' in prompt.text());cmd('0,0,0');cmd('0,0,0');check('coincident points report zero',prompt.text()=='Distance: 0 mm')
+        cmd('Distance');cmd('0,0,0');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle();check('Esc cancels Distance', 'cancelled' in prompt.text().lower())
+        area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
+        viewer=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport();center=viewer.rect().center()
+        height=Gui.activeDocument().activeView().getCameraNode().height.getValue();expected=height*50/viewer.height()
+        action.trigger();settle();QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=center-QtCore.QPoint(25,0));settle();QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=center+QtCore.QPoint(25,0));settle()
+        check('two native mouse points report calibrated plane distance',prompt.text().startswith('Distance: ') and abs(float(prompt.text().split()[1])-expected)<1e-4)
+        for slot,normalPoint in [(2,'100,0,0'),(3,'0,100,0')]:
+            planeSub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==slot);area.setActiveSubWindow(planeSub);settle()
+            planeViewer=next(w for w in planeSub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport();planeCenter=planeViewer.rect().center()
+            planeHeight=Gui.activeDocument().activeView().getCameraNode().height.getValue();planeExpected=planeHeight*50/planeViewer.height()
+            action.trigger();settle();QtTest.QTest.mouseClick(planeViewer,QtCore.Qt.LeftButton,pos=planeCenter-QtCore.QPoint(25,0));settle();QtTest.QTest.mouseClick(planeViewer,QtCore.Qt.LeftButton,pos=planeCenter+QtCore.QPoint(25,0));settle()
+            check('mouse distance calibrated in native C-plane '+str(slot),prompt.text().startswith('Distance: ') and abs(float(prompt.text().split()[1])-planeExpected)<1e-4)
+            cmd('Distance');cmd(normalPoint);QtTest.QTest.mouseClick(planeViewer,QtCore.Qt.LeftButton,pos=planeCenter);settle()
+            check('mixed CMD and mouse point respects plane normal '+str(slot),prompt.text().startswith('Distance: ') and abs(float(prompt.text().split()[1])-100)<0.01)
+        area.setActiveSubWindow(sub);settle()
+        after=(len(doc.Objects),doc.UndoCount if hasattr(doc,'UndoCount') else len(doc.UndoNames),len(doc.RedoNames),[o.Name for o in Gui.Selection.getSelection()])
+        result['read_only_before']=before;result['read_only_after']=after
+        check('measurements preserve objects Undo Redo and selection',before==after)
+        cmd('Distance');cmd('0,0,0');cmd('Line');check('CMD Line replaces pending Distance',prompt.text().startswith('Start of line'));QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle()
+        for unit,point,expectedText in [('cm','30,40,0','Distance: 5 cm'),('m','300,400,0','Distance: 0.5 m')]:
+            cmd('Distance');cmd('0,0,0');cmd('Unit='+unit);cmd(point);check('native '+unit+' unit conversion',prompt.text()==expectedText)
+        cmd('Distance');cmd('0,0,0')
+        other=App.newDocument('DistanceOther');App.setActiveDocument(doc.Name)
+        cmd('3,4,0');check('rapid document switch cancels pending measurement',prompt.text()!='Distance: 5 mm')
+        App.closeDocument(other.Name);settle();area.setActiveSubWindow(sub);settle()
+        class Restricted:
+            def __init__(self,allowView=False):self.form=QtWidgets.QWidget();self.allowView=allowView
+            def isAllowedAlterView(self):return self.allowView
+            def isAllowedAlterDocument(self):return False
+            def isAllowedAlterSelection(self):return False
+        cmd('Distance');cmd('0,0,0');Gui.Control.showDialog(Restricted());settle()
+        check('task view lock disables Distance',not action.isEnabled())
+        Gui.Control.closeDialog();settle();cmd('3,4,0');check('task unlock does not revive cancelled measurement',prompt.text()!='Distance: 5 mm')
+        Gui.Control.showDialog(Restricted(True));settle();check('document lock allows read-only Distance when view interaction allowed',action.isEnabled())
+        cmd('Distance');cmd('0,0,0');cmd('3,4,0');check('read-only task measurement reports exact distance',prompt.text()=='Distance: 5 mm');Gui.Control.closeDialog();settle()
+        cmd('Distance');cmd('0,0,0');Gui.activateWorkbench('NoneWorkbench');settle();Gui.activateWorkbench('OpenMatrix9Workbench');settle();cmd('3,4,0')
+        check('workbench reactivation does not revive pending measurement',prompt.text()!='Distance: 5 mm')
+        editors=window.findChildren(QtWidgets.QTextEdit)
+        report=next((w for w in editors if w.metaObject().className().endswith('ReportOutput')),None)
+        result['report_widgets']=[{'class':w.metaObject().className(),'name':w.objectName(),'text':w.toPlainText()[-2000:]} for w in editors]
+        check('distance results remain in native feedback history',report is not None and 'Distance: 13 mm' in report.toPlainText() and 'Distance: 12 in' in report.toPlainText() and 'Distance: 5 cm' in report.toPlainText())
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(500,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

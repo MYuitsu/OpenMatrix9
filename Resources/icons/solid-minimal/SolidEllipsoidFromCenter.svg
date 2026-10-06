@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Ellipsoid</title>
+<desc>Solid stretched ellipsoid. OpenMatrix9 minimal-solid-v3-warm-highlight; authored vector geometry.</desc>
+<ellipse cx="16" cy="16" rx="14" ry="9" fill="none" stroke="#A668D1" stroke-width="2.2"/><ellipse cx="16" cy="16" rx="14" ry="3" fill="none" stroke="#A668D1" stroke-width="1.6"/><path d="M16 7 C10 9 10 23 16 25 C22 23 22 9 16 7" fill="none" stroke="#A668D1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

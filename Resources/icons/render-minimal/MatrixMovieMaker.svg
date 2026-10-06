@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Movie Maker</title>
+<desc>Assemble static rendered image sequences into movies. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 4 H29 V28 H3 Z" fill="#1EBEC3" fill-opacity="0.13" stroke="#1EBEC3" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 4 V28 M25 4 V28 M3 10 H7 M3 17 H7 M3 23 H7 M25 10 H29 M25 17 H29 M25 23 H29" fill="none" stroke="#CEFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 10 L21 16 L12 22 Z" fill="#FFFFFF" fill-opacity="0.4" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

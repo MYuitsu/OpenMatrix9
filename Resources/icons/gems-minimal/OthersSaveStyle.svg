@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Save Styles</title>
+<desc>Save setting or cutter parameters to a style sheet. OpenMatrix9 minimal-gems-v1-reviewed; authored vector geometry.</desc>
+<path d="M5 3 H21 L27 9 V29 H5 Z" fill="#3E88C8" fill-opacity="0.12" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3 V9 H27" fill="none" stroke="#CDE7FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(3 4) scale(.55)"><path d="M3 11 L9 4 H23 L29 11 L16 28 Z" fill="#7CB8F5" fill-opacity="0.3" stroke="#7CB8F5" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11 H29 M9 4 L11 11 L16 28 L21 11 L23 4 M11 11 L16 4 L21 11" fill="none" stroke="#CDE7FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M29 13 V25 H20" fill="none" stroke="#FFE105" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 22 L20 25 L23 28" fill="none" stroke="#FFE105" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

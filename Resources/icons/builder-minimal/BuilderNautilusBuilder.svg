@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Nautilus</title>
+<desc>Create a nautilus or spiral from a provided circle. OpenMatrix9 minimal-builder-v1-reviewed; authored vector geometry.</desc>
+<path d="M29 27 V18 C29 0 3 -1 3 17 C3 32 25 33 25 18 C25 6 9 5 9 17 C9 26 21 27 21 18 C21 12 14 12 14 17 Q14 21 17 20" fill="none" stroke="#D92D32" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 13 C22 5 9 4 6 14" fill="none" stroke="#FF6065" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

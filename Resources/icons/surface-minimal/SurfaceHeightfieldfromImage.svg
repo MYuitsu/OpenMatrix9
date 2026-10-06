@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Heightfield from image</title>
+<desc>Create height geometry from image grayscale values. OpenMatrix9 minimal-surface-v1-reviewed; authored vector geometry.</desc>
+<path d="M2 3 H14 V12 H2 Z" fill="#FFFFFF" fill-opacity="0.08" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 L6 7 L9 10 L12 6" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 24 L15 13 L21 21 L25 16 L29 24 L20 29 L5 29 Z" fill="#5FCB62" fill-opacity="0.3" stroke="#5FCB62" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 13 L14 29 M25 16 L23 28 M5 24 L20 29 L29 24 M11 19 L17 23 L24 20" fill="none" stroke="#0A6C0A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

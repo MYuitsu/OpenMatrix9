@@ -1,0 +1,175 @@
+# OM9-IFACE-001 / OM9-VIEW-006 / OM9-VIEW-007: real documents, transactions and cameras.
+import configparser, hashlib, json, os, traceback
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+from PySide6 import QtCore, QtGui, QtWidgets
+
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+result={'checks':[], 'scale':os.environ.get('QT_SCALE_FACTOR','1')}
+
+def check(name, ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok: raise AssertionError(name)
+
+def settle():
+    loop=QtCore.QEventLoop()
+    QtCore.QTimer.singleShot(450,loop.quit)
+    loop.exec()
+
+def history():
+    return [b.property('om9Command') for b in dock.findChildren(QtWidgets.QToolButton)
+            if b.objectName().startswith('OM9History')]
+
+def wait_camera(predicate):
+    # FreeCAD animates camera changes; verify the destination after completion.
+    loop=QtCore.QEventLoop();timer=QtCore.QTimer();elapsed=QtCore.QElapsedTimer();elapsed.start()
+    timer.setInterval(20)
+    def poll():
+        if predicate() or elapsed.elapsed()>3000: loop.quit()
+    timer.timeout.connect(poll);timer.start();loop.exec();timer.stop()
+    return predicate()
+
+def click(key):
+    button=dock.findChild(QtWidgets.QToolButton,'OM9Workspace'+key)
+    check(key+' available',button is not None and button.isEnabled())
+    button.click();settle()
+
+def run():
+    global dock
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        window=Gui.getMainWindow();window.resize(1440,1000)
+        dock=window.findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar')
+        check('workspace row installed',dock is not None and dock.findChild(QtWidgets.QToolButton,'OM9WorkspaceSelectAll') is not None)
+        resources=Path(App.getHomePath())/'Mod/OpenMatrix9/Resources'
+        assets=configparser.ConfigParser();assets.read(resources/'menu/icons.ini')
+        manifest=json.loads((resources/'menu/source-manifest.json').read_text())
+        workspace_keys=('SelectAll','SelectNone','Delete','ViewLeft','ViewRear','ViewBottom','ViewIsometric')
+        check('all new workspace images packaged',all(key in assets and not QtGui.QImage(str(resources/assets[key]['image'])).isNull() for key in workspace_keys))
+        check('workspace RGB+5 hashes match provenance',all(hashlib.sha256((resources/assets[key]['image']).read_bytes()).hexdigest()==manifest['shifted_icons'][key]['sha256'] for key in workspace_keys[:-1]))
+        check('workspace disabled without document',all(not dock.findChild(QtWidgets.QToolButton,'OM9Workspace'+key).isEnabled()
+            for key in ('SelectAll','SelectNone','Delete','FitAll','ViewZoomZoomSelected','Views')))
+        doc=App.newDocument('WorkspaceTest');doc.UndoMode=1
+        one=doc.addObject('Part::Feature','One');one.Shape=Part.makeBox(4,6,8)
+        two=doc.addObject('Part::Feature','Two');two.Shape=Part.makeBox(3,4,5,App.Vector(100,0,0))
+        doc.recompute();settle()
+        Gui.Selection.addSelection(doc.Name,'One');settle()
+        doc.openTransaction('Task undo fixture');two.Label='Workspace two';doc.commitTransaction();settle()
+        class RestrictedTask:
+            def __init__(self): self.form=QtWidgets.QWidget()
+            def isAllowedAlterDocument(self): return False
+            def isAllowedAlterSelection(self): return False
+            def isAllowedAlterView(self): return True
+        task=RestrictedTask();Gui.Control.showDialog(task);settle()
+        check('task permission fixture has no edited object',Gui.activeDocument().getInEdit() is None)
+        check('restricted task disables sidebar selection and deletion',all(not dock.findChild(QtWidgets.QToolButton,'OM9Workspace'+key).isEnabled() for key in ('SelectAll','SelectNone','Delete')))
+        check('restricted task permits sidebar camera',dock.findChild(QtGui.QAction,'OM9WorkspaceViewTop').isEnabled())
+        camera_menu=window.findChild(QtGui.QAction,'OM9_ViewTop')
+        check('restricted task permits menu bar camera',camera_menu is not None and camera_menu.isEnabled())
+        check('restricted task preserves native Undo availability',dock.findChild(QtWidgets.QToolButton,'OM9Undo').isEnabled())
+        check('restricted task preserves native file availability',all(any(b.property('om9IconKey')==key and b.isEnabled() for b in dock.findChildren(QtWidgets.QToolButton)) for key in ('FileNew','FileOpen','FileSave','FileSaveAs')))
+        Gui.runCommand('OM9_Undo');settle();check('Undo works inside restricted task',two.Label=='Two')
+        Gui.runCommand('OM9_Redo');settle();check('Redo works inside restricted task',two.Label=='Workspace two')
+        count=list(history());Gui.runCommand('OM9_SelectNone');Gui.runCommand('OM9_Delete');settle()
+        check('restricted task rejects commands without changing document',history()==count and doc.getObject('One') is not None and {o.Name for o in Gui.Selection.getSelection()}=={'One'})
+        Gui.Control.closeDialog();settle()
+        click('SelectAll')
+        check('SelectAll selects active objects',{o.Name for o in Gui.Selection.getSelection()}=={'One','Two'})
+        count=len(history());click('SelectAll')
+        check('unchanged selection adds no history',len(history())==count)
+        group=doc.addObject('App::DocumentObjectGroup','Group');group.addObject(two);doc.recompute()
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(doc.Name,'Two');settle()
+        click('SelectAll')
+        check('SelectAll includes grouped objects and document siblings',{o.Name for o in Gui.Selection.getSelection()}=={'One','Two','Group'})
+        doc.removeObject('Group');doc.recompute();settle()
+        click('SelectNone');check('SelectNone clears active selection',not Gui.Selection.getSelection())
+        check('delete and selected fit disabled without selection',all(not dock.findChild(QtWidgets.QToolButton,'OM9Workspace'+key).isEnabled() for key in ('Delete','ViewZoomZoomSelected','SelectNone')))
+        count=len(history());Gui.runCommand('OM9_SelectNone');Gui.runCommand('OM9_Delete');settle()
+        check('disabled no-op commands keep history and objects',len(history())==count and len(doc.Objects)==2)
+        Gui.Selection.addSelection(doc.Name,'One');settle()
+        click('FitAll')
+        from pivy import coin
+        camera=Gui.activeDocument().activeView().getCameraNode()
+        if not isinstance(camera,coin.SoOrthographicCamera):
+            Gui.activeDocument().activeView().setCameraType('Orthographic');click('FitAll')
+            camera=Gui.activeDocument().activeView().getCameraNode()
+        height=camera.height.getValue()
+        click('ViewZoomZoomSelected')
+        check('Zoom Selected frames chosen object',camera.height.getValue()<height/2 and {o.Name for o in Gui.Selection.getSelection()}=={'One'})
+        for key,direction in [('ViewTop',(0,0,-1)),('ViewFront',(0,1,0)),('ViewRight',(-1,0,0)),
+                              ('ViewLeft',(1,0,0)),('ViewRear',(0,-1,0)),('ViewBottom',(0,0,1))]:
+            action=dock.findChild(QtGui.QAction,'OM9Workspace'+key)
+            check(key+' action available',action is not None and action.isEnabled())
+            action.trigger();settle()
+            check(key+' completes camera transition',wait_camera(lambda: sum((Gui.activeDocument().activeView().getViewDirection()[i]-direction[i])**2 for i in range(3))<1e-8))
+            actual=Gui.activeDocument().activeView().getViewDirection()
+            result.setdefault('camera_directions',{})[key]=list(actual)
+            check(key+' changes camera',sum((actual[i]-direction[i])**2 for i in range(3))<1e-8)
+        action=dock.findChild(QtGui.QAction,'OM9WorkspaceViewIsometric');action.trigger();settle()
+        check('Isometric completes camera transition',wait_camera(lambda: all(abs(abs(Gui.activeDocument().activeView().getViewDirection()[i])-3**-0.5)<1e-5 for i in range(3))))
+        direction=Gui.activeDocument().activeView().getViewDirection()
+        check('Isometric camera has three nonzero axes',all(abs(direction[i])>0.3 for i in range(3)))
+        count=len(history());click('Delete')
+        check('Delete removes only selected object',doc.getObject('One') is None and doc.getObject('Two') is not None)
+        check('successful Delete enters history',len(history())==min(count+1,20))
+        undo=dock.findChild(QtWidgets.QToolButton,'OM9Undo');check('Undo enabled after Delete',undo.isEnabled())
+        undo.click();settle()
+        check('Undo restores deleted shape',doc.getObject('One') is not None and abs(doc.getObject('One').Shape.Volume-192)<1e-8)
+        redo=dock.findChild(QtWidgets.QToolButton,'OM9Redo');check('Redo enabled after Undo',redo.isEnabled())
+        redo.click();settle();check('Redo deletes again',doc.getObject('One') is None and doc.getObject('Two') is not None)
+        dock.findChild(QtWidgets.QToolButton,'OM9Undo').click();settle()
+        # Dependencies trigger the real FreeCAD dialog; cancel must leave history unchanged.
+        dependent=doc.addObject('App::FeaturePython','Dependent')
+        dependent.addProperty('App::PropertyLink','Target');dependent.Target=doc.getObject('One')
+        doc.recompute();Gui.Selection.clearSelection();Gui.Selection.addSelection(doc.Name,'One');settle()
+        seen=[]
+        def reject_dependency():
+            dialogs=[w for w in QtWidgets.QApplication.topLevelWidgets() if isinstance(w,QtWidgets.QMessageBox) and w.isVisible()]
+            if dialogs:
+                seen.append(True);dialogs[0].done(QtWidgets.QMessageBox.No)
+            else: QtCore.QTimer.singleShot(50,reject_dependency)
+        count=list(history());QtCore.QTimer.singleShot(50,reject_dependency)
+        dock.findChild(QtWidgets.QToolButton,'OM9WorkspaceDelete').click();settle()
+        check('cancel dependency Delete preserves document and history',seen and doc.getObject('One') is not None and dependent.Target==doc.getObject('One') and history()==count)
+        # A foreign-document selection must never make Delete act on that document.
+        other=App.newDocument('OtherWorkspace');other.addObject('Part::Feature','Foreign').Shape=Part.makeBox(1,1,1);other.recompute()
+        App.setActiveDocument(doc.Name);Gui.Selection.clearSelection();Gui.Selection.addSelection(other.Name,'Foreign');settle()
+        check('foreign selection does not enable active Delete',not dock.findChild(QtWidgets.QToolButton,'OM9WorkspaceDelete').isEnabled())
+        count=list(history());Gui.runCommand('OM9_Delete');settle()
+        check('foreign selection command preserves both documents',other.getObject('Foreign') is not None and doc.getObject('One') is not None and history()==count)
+        Gui.Selection.addSelection(doc.Name,'One');settle()
+        check('mixed document selection Delete disabled',not dock.findChild(QtWidgets.QToolButton,'OM9WorkspaceDelete').isEnabled())
+        click('SelectNone')
+        check('SelectNone preserves foreign selection',{o.Name for o in Gui.Selection.getSelection('*')}=={'Foreign'})
+        Gui.Selection.clearSelection();doc.recompute()
+        path=out/'workspace.FCStd';doc.saveAs(str(path))
+        App.closeDocument(doc.Name);Gui.Selection.clearSelection();App.closeDocument(other.Name);settle()
+        check('workspace disables after closing documents',not dock.findChild(QtWidgets.QToolButton,'OM9WorkspaceFitAll').isEnabled())
+        loaded=App.openDocument(str(path));settle()
+        check('save and reload preserve surviving geometry',loaded.getObject('One') is not None and loaded.getObject('Two') is not None and abs(loaded.getObject('One').Shape.Volume-192)<1e-8)
+        for _ in range(3): Gui.activateWorkbench('PartWorkbench');Gui.activateWorkbench('OpenMatrix9Workbench')
+        check('one workspace row after workbench switches',len(dock.findChildren(QtWidgets.QToolButton,'OM9WorkspaceSelectAll'))==1)
+        Gui.Selection.addSelection(loaded.Name,'One')
+        dock.findChild(QtWidgets.QToolButton,'OM9Group1').click();settle()
+        selected_fit=next((b for b in dock.findChildren(QtWidgets.QToolButton) if b.objectName().startswith('OM9Command') and b.property('om9IconKey')=='ViewZoomZoomSelected'),None)
+        check('original Zoom Selected icon enabled',selected_fit is not None and selected_fit.isEnabled())
+        selected_fit.click();settle()
+        window.resize(1024,600);settle()
+        first=dock.findChild(QtWidgets.QToolButton,'OM9WorkspaceSelectAll');last=dock.findChild(QtWidgets.QToolButton,'OM9WorkspaceViews')
+        check('workspace row fits compact width',first.y()==last.y())
+        dock.findChild(QtWidgets.QToolButton,'OM9Group0').click();Gui.activeDocument().activeView().viewIsometric();Gui.activeDocument().activeView().fitAll();settle()
+        dock.grab().save(str(out/'workspace-sidebar.png'))
+        dock.findChild(QtWidgets.QAbstractButton,'OM9SectionTitle1').parentWidget().parentWidget().grab().save(str(out/'workspace-main.png'))
+        dock.widget().widget().grab().save(str(out/'workspace-full-sidebar.png'))
+        window.grab().save(str(out/'workspace-window.png'))
+        result['ok']=True
+    except Exception: result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+    if not result['ok']: App.Console.PrintError(result['error'])
+    Gui.Control.closeDialog()
+    for name in list(App.listDocuments()): App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,QtWidgets.QApplication.quit)
+
+QtCore.QTimer.singleShot(1000,run)

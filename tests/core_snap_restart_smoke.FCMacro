@@ -1,0 +1,25 @@
+import os,json,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+def run():
+    result={'checks':[]}
+    try:
+        saved=App.ParamGet('User parameter:BaseApp/Preferences/Mod/OpenMatrix9/Osnap').GetInt('State',-1)
+        expected=int(os.environ.get('OM9_EXPECTED_SNAP_STATE','1'))
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        window=Gui.getMainWindow()
+        master=window.findChild(QtWidgets.QToolButton,'OM9OsnapMaster')
+        end=window.findChild(QtGui.QAction,'Osnap E')
+        mid=window.findChild(QtGui.QAction,'Osnap M')
+        point=window.findChild(QtGui.QAction,'Osnap P')
+        for name,ok in [('native configuration retained expected independent mode state',saved==expected),('new process restores master switch',master is not None and master.isChecked()==bool(expected&1)),('new process restores independent End',end is not None and end.isChecked()==bool(expected&2)),('new process restores independent Mid',mid is not None and mid.isChecked()==bool(expected&4)),('new process restores independent Point',point is not None and point.isChecked()==bool(expected&8))]:
+            result['checks'].append({'name':name,'passed':bool(ok)})
+            if not ok:raise AssertionError(name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(500,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

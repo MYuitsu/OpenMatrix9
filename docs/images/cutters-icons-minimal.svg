@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="328">
+<rect width="100%" height="100%" fill="#333333"/>
+<text x="16" y="28" font-family="Arial,sans-serif" font-size="20" fill="white">OpenMatrix9 — Cutters / minimal SVG</text>
+<text x="16" y="48" font-family="Arial,sans-serif" font-size="12" fill="#cccccc">11 icons · orange cutters · cream cut faces · shared Scallop and Boolean · 64px and 24px samples</text>
+<g transform="translate(0 64)">
+<rect x="4" y="4" width="152" height="124" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">01</text>
+<g transform="translate(24 24) scale(2)"><path d="M12 3 H20 V12 L26 16 L20 19 V29 H12 V19 L6 16 L12 12 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 16 Q16 23 26 16" fill="none" stroke="#FFFFCF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 5 V11 M15 22 V27" fill="none" stroke="#FFC88E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(120 45) scale(.75)"><path d="M12 3 H20 V12 L26 16 L20 19 V29 H12 V19 L6 16 L12 12 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 16 Q16 23 26 16" fill="none" stroke="#FFFFCF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 5 V11 M15 22 V27" fill="none" stroke="#FFC88E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="80" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Gem Cutter</text>
+</g>
+<g transform="translate(160 64)">
+<rect x="4" y="4" width="152" height="124" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">02</text>
+<g transform="translate(24 24) scale(2)"><path d="M4 5 L27 2 V27 L4 30 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 5 V30 M7 6 V28" fill="none" stroke="#FFC88E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(9 5) scale(.6)"><path d="M12 3 H20 V12 L26 16 L20 19 V29 H12 V19 L6 16 L12 12 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 16 Q16 23 26 16" fill="none" stroke="#FFFFCF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 5 V11 M15 22 V27" fill="none" stroke="#FFC88E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+<g transform="translate(120 45) scale(.75)"><path d="M4 5 L27 2 V27 L4 30 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 5 V30 M7 6 V28" fill="none" stroke="#FFC88E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(9 5) scale(.6)"><path d="M12 3 H20 V12 L26 16 L20 19 V29 H12 V19 L6 16 L12 12 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 16 Q16 23 26 16" fill="none" stroke="#FFFFCF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 5 V11 M15 22 V27" fill="none" stroke="#FFC88E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+<text x="80" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Gem Cutter Library</text>
+</g>
+<g transform="translate(320 64)">
+<rect x="4" y="4" width="152" height="124" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">03</text>
+<g transform="translate(24 24) scale(2)"><path d="M4 3 H19 L28 11 V28 H12 L4 20 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 3 L12 11 V28 M12 11 H28" fill="none" stroke="#FFC88E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 5 Q23 15 21 27" fill="none" stroke="#FFFFCF" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(120 45) scale(.75)"><path d="M4 3 H19 L28 11 V28 H12 L4 20 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 3 L12 11 V28 M12 11 H28" fill="none" stroke="#FFC88E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 5 Q23 15 21 27" fill="none" stroke="#FFFFCF" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="80" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Channel Builder</text>
+</g>
+<g transform="translate(480 64)">
+<rect x="4" y="4" width="152" height="124" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">04</text>
+<g transform="translate(24 24) scale(2)"><path d="M4 12 L13 3 L28 10 L20 29 L5 23 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12 L12 15 L19 8 M7 20 L13 23 L25 14" fill="none" stroke="#FFFFCF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 23 L13 27 L20 29" fill="none" stroke="#FFC88E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(120 45) scale(.75)"><path d="M4 12 L13 3 L28 10 L20 29 L5 23 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12 L12 15 L19 8 M7 20 L13 23 L25 14" fill="none" stroke="#FFFFCF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 23 L13 27 L20 29" fill="none" stroke="#FFC88E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="80" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Micro Prong Cutter</text>
+</g>
+<g transform="translate(640 64)">
+<rect x="4" y="4" width="152" height="124" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">05</text>
+<g transform="translate(24 24) scale(2)"><path d="M4 3 H19 L28 11 V28 H12 L4 20 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 3 L12 11 V28 M12 11 H28" fill="none" stroke="#FFC88E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 5 L19 10 L15 14 L23 19 L20 24 L26 27" fill="none" stroke="#FFFFCF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(120 45) scale(.75)"><path d="M4 3 H19 L28 11 V28 H12 L4 20 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 3 L12 11 V28 M12 11 H28" fill="none" stroke="#FFC88E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 5 L19 10 L15 14 L23 19 L20 24 L26 27" fill="none" stroke="#FFFFCF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="80" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Bright Cut Channel</text>
+</g>
+<g transform="translate(800 64)">
+<rect x="4" y="4" width="152" height="124" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">06</text>
+<g transform="translate(24 24) scale(2)"><path d="M5 11 L16 4 L27 11 V25 L16 29 L5 24 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 11 L16 6 L25 11 L21 18 L9 15 Z" fill="#FFFFCF" fill-opacity="0.48" stroke="#FFFFCF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 24 L16 29 L27 25" fill="none" stroke="#FFC88E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(120 45) scale(.75)"><path d="M5 11 L16 4 L27 11 V25 L16 29 L5 24 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 11 L16 6 L25 11 L21 18 L9 15 Z" fill="#FFFFCF" fill-opacity="0.48" stroke="#FFFFCF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 24 L16 29 L27 25" fill="none" stroke="#FFC88E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="80" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Bright Cutter</text>
+</g>
+<g transform="translate(960 64)">
+<rect x="4" y="4" width="152" height="124" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">07</text>
+<g transform="translate(24 24) scale(2)"><path d="M4 10 Q8 19 12 10 Q16 19 20 10 Q24 19 28 10 L24 25 Q16 31 8 25 Z" fill="#F3782B" fill-opacity="0.16" stroke="#F3782B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 V5 M12 10 V4 M20 10 V4 M28 10 V5 M8 25 Q16 21 24 25" fill="none" stroke="#FF9C5C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 9 L9 15 M15 9 L17 15 M23 9 L25 15" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(120 45) scale(.75)"><path d="M4 10 Q8 19 12 10 Q16 19 20 10 Q24 19 28 10 L24 25 Q16 31 8 25 Z" fill="#F3782B" fill-opacity="0.16" stroke="#F3782B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 V5 M12 10 V4 M20 10 V4 M28 10 V5 M8 25 Q16 21 24 25" fill="none" stroke="#FF9C5C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 9 L9 15 M15 9 L17 15 M23 9 L25 15" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="80" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Scallop Bezel</text>
+</g>
+<g transform="translate(1120 64)">
+<rect x="4" y="4" width="152" height="124" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">08</text>
+<g transform="translate(24 24) scale(2)"><ellipse cx="16" cy="19" rx="12" ry="10" fill="none" stroke="#FFFFFF" stroke-width="2.1"/><path d="M5 4 H27 V17 Q16 8 5 17 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 17 Q16 8 27 17" fill="none" stroke="#FFFFCF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 22 H19 M16 19 V25" fill="none" stroke="#FFC88E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(120 45) scale(.75)"><ellipse cx="16" cy="19" rx="12" ry="10" fill="none" stroke="#FFFFFF" stroke-width="2.1"/><path d="M5 4 H27 V17 Q16 8 5 17 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 17 Q16 8 27 17" fill="none" stroke="#FFFFCF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 22 H19 M16 19 V25" fill="none" stroke="#FFC88E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="80" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Cut to Finger Rail</text>
+</g>
+<g transform="translate(0 196)">
+<rect x="4" y="4" width="152" height="124" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">09</text>
+<g transform="translate(24 24) scale(2)"><path d="M6 10 L18 4 L27 10 V23 L15 29 L6 23 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10 L15 16 L27 10 M15 16 V29" fill="none" stroke="#FFC88E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 17 L16 10 L29 17 L16 24 Z" fill="#FFFFCF" fill-opacity="0.1" stroke="#FFFFCF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(120 45) scale(.75)"><path d="M6 10 L18 4 L27 10 V23 L15 29 L6 23 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10 L15 16 L27 10 M15 16 V29" fill="none" stroke="#FFC88E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 17 L16 10 L29 17 L16 24 Z" fill="#FFFFCF" fill-opacity="0.1" stroke="#FFFFCF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="80" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Plane and Cube Cutters</text>
+</g>
+<g transform="translate(160 196)">
+<rect x="4" y="4" width="152" height="124" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">10</text>
+<g transform="translate(24 24) scale(2)"><path d="M16 3 V29 M3 16 H29" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4 H11 Q11 10 4 11 Z" fill="#FFC88E" fill-opacity="0.9" stroke="#FF6605" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 4 H21 Q21 10 28 11 Z" fill="#FF6605" fill-opacity="0.2" stroke="#FF6605" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 28 H11 Q11 22 4 21 Z" fill="#FF6605" fill-opacity="0.2" stroke="#FF6605" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 28 H21 Q21 22 28 21 Z" fill="#FF6605" fill-opacity="0.2" stroke="#FF6605" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(120 45) scale(.75)"><path d="M16 3 V29 M3 16 H29" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4 H11 Q11 10 4 11 Z" fill="#FFC88E" fill-opacity="0.9" stroke="#FF6605" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 4 H21 Q21 10 28 11 Z" fill="#FF6605" fill-opacity="0.2" stroke="#FF6605" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 28 H11 Q11 22 4 21 Z" fill="#FF6605" fill-opacity="0.2" stroke="#FF6605" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 28 H21 Q21 22 28 21 Z" fill="#FF6605" fill-opacity="0.2" stroke="#FF6605" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="80" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Quad Flip Routines</text>
+</g>
+<g transform="translate(320 196)">
+<rect x="4" y="4" width="152" height="124" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">11</text>
+<g transform="translate(24 24) scale(2)"><path d="M3 5 H19 V22 H3 Z" fill="#9ABFFF" fill-opacity="0.2" stroke="#4260FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="22" cy="21" rx="8" ry="8" fill="none" stroke="#4260FF" stroke-width="2.6"/><path d="M19 13 V22 H14" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 27 H12 M9 24 V30 M19 27 H25" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(120 45) scale(.75)"><path d="M3 5 H19 V22 H3 Z" fill="#9ABFFF" fill-opacity="0.2" stroke="#4260FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="22" cy="21" rx="8" ry="8" fill="none" stroke="#4260FF" stroke-width="2.6"/><path d="M19 13 V22 H14" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 27 H12 M9 24 V30 M19 27 H25" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="80" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Boolean Builder</text>
+</g>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>3D printing</title>
+<desc>Open tools for adding model supports before 3D printing. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<ellipse cx="16" cy="10" rx="8" ry="7" fill="none" stroke="#FFFFFF" stroke-width="2.4"/><path d="M10 15 L8 26 M16 17 V26 M22 15 L24 26 M3 29 H29" fill="none" stroke="#4260FF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 26 L16 20 L24 26" fill="none" stroke="#9ABFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

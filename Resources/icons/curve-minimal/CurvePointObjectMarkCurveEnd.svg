@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Mark curve end</title>
+  <desc>Last endpoint marked on a curve. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M5 25 C8 5 22 26 27 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="27" cy="7" r="3.2199999999999998" fill="#FFFFFF"/><path d="M27 7 V20 L21 17 L27 14" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

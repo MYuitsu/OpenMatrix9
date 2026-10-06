@@ -1,0 +1,99 @@
+# OM9-VIEW-005 native capture, menu/CMD dialogs and cancellation.
+import os,json,traceback,re
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+# Coin recomputes clipping planes during redraw; preserve the actual view pose/zoom.
+def camera_pose(text):return re.sub(r'  (?:nearDistance|farDistance) [^\n]+\n','',text)
+def same_cameras(cameras):return [camera_pose(c) for c in cameras]==[camera_pose(v.getCamera()) for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')]
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    (out/'progress.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(350,loop.quit);loop.exec();QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def capture(path=None,filter=None,cmd=False,overwrite_no=False,error=False):
+    def answer():
+        dialog=QtWidgets.QApplication.activeModalWidget()
+        (out/'dialog-status.json').write_text(json.dumps({'active':str(type(dialog)),'widgets':[(w.metaObject().className(),w.objectName(),w.windowTitle()) for w in QtWidgets.QApplication.topLevelWidgets()],'native_disabled':QtWidgets.QApplication.testAttribute(QtCore.Qt.AA_DontUseNativeDialogs)},indent=2),encoding='utf-8')
+        if not isinstance(dialog,QtWidgets.QFileDialog):
+            QtCore.QTimer.singleShot(50,answer);return
+        result.setdefault('dialogs',[]).append(dialog.objectName())
+        if path is None:dialog.reject();return
+        if filter:dialog.selectNameFilter(filter);dialog.filterSelected.emit(filter)
+        dialog.setDirectory(str(path.parent))
+        def choose():
+            edit=dialog.findChild(QtWidgets.QLineEdit,'fileNameEdit');edit.setFocus();edit.setText(path.name)
+            def save():
+                buttons=dialog.findChild(QtWidgets.QDialogButtonBox)
+                (out/'file-choice.json').write_text(json.dumps({'files':dialog.selectedFiles(),'text':edit.text(),'directory':dialog.directory().absolutePath(),'save_enabled':buttons.button(QtWidgets.QDialogButtonBox.Save).isEnabled()},indent=2),encoding='utf-8')
+                if overwrite_no or error:
+                    def message():
+                        box=QtWidgets.QApplication.activeModalWidget()
+                        if not isinstance(box,QtWidgets.QMessageBox):QtCore.QTimer.singleShot(50,message);return
+                        result.setdefault('messages',[]).append(box.text())
+                        if overwrite_no:
+                            QtTest.QTest.mouseClick(box.button(QtWidgets.QMessageBox.No),QtCore.Qt.LeftButton)
+                            QtCore.QTimer.singleShot(100,dialog.reject)
+                        else:box.accept()
+                    QtCore.QTimer.singleShot(50,message)
+                QtTest.QTest.mouseClick(buttons.button(QtWidgets.QDialogButtonBox.Save),QtCore.Qt.LeftButton)
+            QtCore.QTimer.singleShot(150,save)
+        QtCore.QTimer.singleShot(150,choose)
+    QtCore.QTimer.singleShot(150,answer)
+    if cmd:
+        field.setText('ViewCaptureToFile');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return)
+    else:action.trigger()
+    settle()
+def command(text):
+    field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def run():
+    global action,field
+    try:
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_DontUseNativeDialogs,True)
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('CaptureTest');doc.UndoMode=1;settle()
+        box=doc.addObject('Part::Box','Box');doc.recompute();Gui.Selection.addSelection(box)
+        window=Gui.getMainWindow();window.resize(1500,1000);window.show();settle();area=window.findChild(QtWidgets.QMdiArea)
+        field=command_input(window)
+        sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==1);area.setActiveSubWindow(sub);settle();command('Zoom_Selected')
+        action=window.findChild(QtGui.QAction,'ViewCaptureToFile');check('original capture action registered',action is not None and action.isEnabled())
+        cameras=[v.getCamera() for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')];undo=doc.UndoCount
+        capture();check('menu cancellation writes no image',not list(out.glob('*.png')))
+        png=out/'ảnh viewport.png';capture(png)
+        image=QtGui.QImage(str(png));check('menu writes valid PNG',png.is_file() and not image.isNull())
+        viewer=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport()
+        check('image matches active viewport pixel size',image.width()==round(viewer.width()*viewer.devicePixelRatioF()) and image.height()==round(viewer.height()*viewer.devicePixelRatioF()))
+        colors={image.pixelColor(x,y).rgba() for x in range(0,image.width(),max(1,image.width()//30)) for y in range(0,image.height(),max(1,image.height()//30))}
+        check('capture contains rendered scene pixels',len(colors)>5)
+        bmp=out/'viewport.bmp';capture(bmp,'Bitmap image (*.bmp)',True);check('CMD writes valid BMP',not QtGui.QImage(str(bmp)).isNull() and bmp.read_bytes()[:2]==b'BM')
+        jpg=out/'viewport.jpg';capture(jpg,'JPEG image (*.jpg *.jpeg)',True);check('CMD writes valid JPEG',not QtGui.QImage(str(jpg)).isNull() and jpg.read_bytes()[:2]==bytes([255,216]))
+        capture(out/'suffixless','Bitmap image (*.bmp)',True);check('chosen filter supplies default extension',(out/'suffixless.bmp').is_file() and not QtGui.QImage(str(out/'suffixless.bmp')).isNull())
+        original=png.read_bytes();capture(png,overwrite_no=True);check('declined overwrite preserves original bytes',png.read_bytes()==original)
+        invalid=out/'unsupported.tiff';capture(invalid,cmd=True,error=True);check('unsupported extension reports error without writing',not invalid.exists() and any('PNG, BMP or JPEG' in text for text in result.get('messages',[])))
+        capture(cmd=True);check('CMD cancel preserves saved images',png.is_file() and bmp.is_file() and jpg.is_file())
+        result['camera_before']=cameras;result['camera_after']=[v.getCamera() for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')]
+        check('capture preserves camera pose zoom geometry selection and Undo',same_cameras(cameras) and len(doc.Objects)==1 and abs(box.Shape.Volume-1000)<1e-9 and Gui.Selection.getSelection()==[box] and doc.UndoCount==undo)
+        other=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(other);settle();capture(out/'looking-down.png',cmd=True)
+        check('capture follows newly active viewport',not QtGui.QImage(str(out/'looking-down.png')).isNull() and (out/'looking-down.png').read_bytes()!=png.read_bytes())
+        area.setActiveSubWindow(sub);settle()
+        class Restricted:
+            def __init__(self):self.form=QtWidgets.QWidget()
+            def isAllowedAlterView(self):return False
+            def isAllowedAlterDocument(self):return False
+            def isAllowedAlterSelection(self):return False
+        Gui.Control.showDialog(Restricted());settle();check('read-only capture remains available in restricted task',action.isEnabled())
+        capture(out/'restricted.png',cmd=True);check('restricted capture writes image without changing camera pose or zoom',(out/'restricted.png').is_file() and same_cameras(cameras))
+        Gui.Control.closeDialog();settle()
+        command('Line');prompt=command_prompt(window).text();capture(out/'during-line.png',cmd=True)
+        check('CMD capture preserves pending Curve prompt',command_prompt(window).text()==prompt and (out/'during-line.png').is_file())
+        QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle();result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(500,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

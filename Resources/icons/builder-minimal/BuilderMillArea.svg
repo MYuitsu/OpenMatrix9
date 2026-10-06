@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Mill area</title>
+<desc>Milling area reference: rectangular fixture outline. OpenMatrix9 minimal-builder-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 5 H28 V27 H4 Z" fill="#D92D32" fill-opacity="0.08" stroke="#D92D32" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 5 H24 V23 H8 Z" fill="#FFFFFF" fill-opacity="0.3" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

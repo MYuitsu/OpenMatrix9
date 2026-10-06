@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Gem Update</title>
+<desc>Restore lost gem recognition on model gems. OpenMatrix9 minimal-gems-v1-reviewed; authored vector geometry.</desc>
+<g transform="translate(0 0) scale(.68)"><path d="M3 11 L9 4 H23 L29 11 L16 28 Z" fill="#7CB8F5" fill-opacity="0.3" stroke="#7CB8F5" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11 H29 M9 4 L11 11 L16 28 L21 11 L23 4 M11 11 L16 4 L21 11" fill="none" stroke="#CDE7FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M17 19 L21 15 Q25 12 28 16 Q30 19 26 22 L21 27 Q17 30 14 26 Q12 23 16 20 M18 24 L25 17" fill="none" stroke="#FFE105" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

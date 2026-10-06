@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Set plane</title>
+<desc>Set-plane reference: oriented plane with axes. OpenMatrix9 minimal-subd-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 21 L15 8 L29 18 L17 30 Z" fill="#FFB5A2" fill-opacity="0.2" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 20 L26 13" fill="none" stroke="#FF0505" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 13 H26 V17" fill="none" stroke="#FF0505" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 20 L7 13" fill="none" stroke="#059A4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 17 V13 H11" fill="none" stroke="#059A4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 20 V3" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 6 L16 3 L19 6" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

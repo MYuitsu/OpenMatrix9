@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Select naked edges</title>
+<desc>Select naked edges, extending contiguous selection when present. OpenMatrix9 minimal-subd-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 10 Q16 3 28 9 L28 26 Q16 20 4 28 Z" fill="#FFB5A2" fill-opacity="0.2" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 28 Q16 20 28 26" fill="none" stroke="#FF6A68" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 19 Q16 12 28 18 M16 7 V24" fill="none" stroke="#FF6A68" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 Q16 3 28 9 L28 26 Q16 20 4 28 Z" fill="none" stroke="#FF60AF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 9 V3 H9 M23 3 H29 V9 M29 23 V29 H23 M9 29 H3 V23" fill="none" stroke="#FF6A68" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

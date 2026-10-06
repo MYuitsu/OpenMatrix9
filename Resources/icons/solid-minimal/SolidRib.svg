@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Rib to boundary</title>
+<desc>Thicken an open curve and extrude it toward a boundary. OpenMatrix9 minimal-solid-v3-warm-highlight; authored vector geometry.</desc>
+<path d="M3 15 L22 7 L29 14 L10 22 Z" fill="#A668D1" fill-opacity="0.18" stroke="#A668D1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15 V22 L10 29 L29 21 V14 M10 22 V29" fill="none" stroke="#A668D1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21 L9 6 L14 4 L25 13 L25 17 L14 10 L14 23 Z" fill="#FFD166" fill-opacity="0.25" stroke="#FFD166" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 6 L14 10 M14 4 V10" fill="none" stroke="#FFD166" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

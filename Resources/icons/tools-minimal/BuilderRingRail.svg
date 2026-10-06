@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Ring rail</title>
+<desc>Place a ring rail using a finger size, region or custom dimensions. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<ellipse cx="16" cy="16" rx="11" ry="13" fill="none" stroke="#4260FF" stroke-width="3"/><path d="M8 7 Q2 16 8 25" fill="none" stroke="#9ABFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

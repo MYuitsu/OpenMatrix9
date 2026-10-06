@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Apply Displacement</title>
+<desc>Create a texture-driven displacement display mesh. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<path d="M15 4 Q17 2 19 5 Q23 3 24 8 Q29 8 27 13 Q31 16 27 19 Q29 24 24 24 Q23 29 19 27 Q16 31 13 27 Q8 29 8 24 Q3 24 5 19 Q1 16 5 13 Q3 8 8 8 Q9 3 13 5 Z" fill="#1C4B4B" fill-opacity="0.3" stroke="#59C5C5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 8 Q11 12 8 16 Q11 21 8 24 M24 8 Q21 12 24 16 Q21 21 24 24 M6 12 Q12 15 16 11 Q20 15 26 12 M6 20 Q12 17 16 22 Q20 17 26 20" fill="none" stroke="#CEFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

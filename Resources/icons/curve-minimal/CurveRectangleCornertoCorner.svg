@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Rectangle</title>
+  <desc>Rectangle defined by opposite corners. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M6 7 H26 V25 H6 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="25" r="2.3" fill="#FFFFFF"/><circle cx="26" cy="7" r="2.3" fill="#FFFFFF"/>
+</svg>

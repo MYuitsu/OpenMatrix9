@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Quad Flip Routines</title>
+<desc>Split and mirror a selected quadrant into all four quadrants around F4. OpenMatrix9 minimal-cutters-v1-reviewed; authored vector geometry.</desc>
+<path d="M16 3 V29 M3 16 H29" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4 H11 Q11 10 4 11 Z" fill="#FFC88E" fill-opacity="0.9" stroke="#FF6605" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 4 H21 Q21 10 28 11 Z" fill="#FF6605" fill-opacity="0.2" stroke="#FF6605" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 28 H11 Q11 22 4 21 Z" fill="#FF6605" fill-opacity="0.2" stroke="#FF6605" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 28 H21 Q21 22 28 21 Z" fill="#FF6605" fill-opacity="0.2" stroke="#FF6605" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

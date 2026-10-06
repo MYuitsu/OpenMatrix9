@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Channel Border Curve</title>
+<desc>Create an offset border curve around a group of gem curves. OpenMatrix9 minimal-settings-v1-reviewed; authored vector geometry.</desc>
+<path d="M7 5 Q16 1 25 5 L27 25 Q16 31 5 25 Z" fill="none" stroke="#C655A3" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="16" cy="10" rx="5" ry="3" fill="none" stroke="#FFFFFF" stroke-width="1.5"/><ellipse cx="16" cy="21" rx="5" ry="3" fill="none" stroke="#FFFFFF" stroke-width="1.5"/><circle cx="7" cy="5" r="2.1849999999999996" fill="#F6C3E6"/><circle cx="27" cy="25" r="2.1849999999999996" fill="#F6C3E6"/>
+</svg>

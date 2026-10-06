@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Reset plane</title>
+<desc>Reset-plane reference: restore a plane and axes. OpenMatrix9 minimal-subd-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 23 L18 16 L29 23 L14 30 Z" fill="#FFB5A2" fill-opacity="0.2" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 24 L24 19" fill="none" stroke="#FF0505" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 19 H24 V23" fill="none" stroke="#FF0505" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 24 L6 19" fill="none" stroke="#059A4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 23 V19 H10" fill="none" stroke="#059A4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 13 C3 1 26 1 27 12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 9 L27 12 L29 8" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="440"><rect width="100%" height="100%" fill="#333"/><text x="16" y="30" font-family="sans-serif" font-size="20" fill="white">OpenMatrix9 — Utilities / authored SVG</text>
+<g transform="translate(0 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 21 V8" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12 L10 8 L14 12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 21 V8" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 12 L23 8 L27 12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 21 V8" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12 L10 8 L14 12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 21 V8" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 12 L23 8 L27 12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeDirection</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<g transform="scale(.8)"><path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M20 19 L29 28 M29 19 L20 28" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<g transform="scale(.8)"><path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M20 19 L29 28 M29 19 L20 28" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeDiagnosticsSelectBadO</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9">bjects</text></g>
+<g transform="translate(320 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M8 17 L13 23 L26 8" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M8 17 L13 23 L26 8" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeDiagnosticsCheck</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L4 23 L16 29 L28 23" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L4 23 L16 29 L28 23" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeEdgeToolsShowEdges</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 8 H13 M19 8 H28" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="8" r="2.3" fill="#FFFFFF"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 8 H13 M19 8 H28" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="8" r="2.3" fill="#FFFFFF"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeEdgeToolsSplitEdge</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 4 H13" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 2 L13 4 L10 6" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 4 H19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2 L19 4 L22 6" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 4 H13" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 2 L13 4 L10 6" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 4 H19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2 L19 4 L22 6" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeEdgeToolsMergeEdge</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 7 H12 V27 H3 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 7 H29 V27 H20 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8 L20 8 M12 26 L20 26" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 7 H12 V27 H3 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 7 H29 V27 H20 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8 L20 8 M12 26 L20 26" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeEdgeToolsJoin2NakedEd</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9">ges</text></g>
+<g transform="translate(1120 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 7 H12 V27 H3 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 7 H29 V27 H20 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11 L18 15 L14 19 L18 23" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 7 H12 V27 H3 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 7 H29 V27 H20 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11 L18 15 L14 19 L18 23" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeEdgeToolsUnjoinEdge</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(0 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<g transform="scale(.8)"><path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M22 19 V28 H30 M22 28 L29 21" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<g transform="scale(.8)"><path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M22 19 V28 H30 M22 28 L29 21" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">DimensionMake2DDrawing</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeBoundingBox</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(320 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9 V25 M8 17 H25" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="17" r="2.3" fill="#FFFFFF"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9 V25 M8 17 H25" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="17" r="2.3" fill="#FFFFFF"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeCenterPoint</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M5 5 H17 V17 H5 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 15 H27 V27 H15 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M5 5 H17 V17 H5 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 15 H27 V27 H15 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">EditGroupsGroup</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M5 5 H17 V17 H5 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 15 H27 V27 H15 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 26 L10 21 M22 10 L27 5" fill="none" stroke="#80A9E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M5 5 H17 V17 H5 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 15 H27 V27 H15 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 26 L10 21 M22 10 L27 5" fill="none" stroke="#80A9E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">EditGroupsUnGroup</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 3 H29 V13 H18 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 9 L23 23 M23 9 L9 23" fill="none" stroke="#80A9E8" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 3 H29 V13 H18 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 9 L23 23 M23 9 L9 23" fill="none" stroke="#80A9E8" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">OthersExtractBadSurface</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 5 H29 V27 H3 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 8 H12 V24 H6 Z" fill="#D5E7FF" fill-opacity="0.6" stroke="#D5E7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 8 H19 V24 H13 Z" fill="#80A9E8" fill-opacity="0.6" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 8 H26 V24 H20 Z" fill="#315EA8" fill-opacity="0.6" stroke="#315EA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 5 H29 V27 H3 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 8 H12 V24 H6 Z" fill="#D5E7FF" fill-opacity="0.6" stroke="#D5E7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 8 H19 V24 H13 Z" fill="#80A9E8" fill-opacity="0.6" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 8 H26 V24 H20 Z" fill="#315EA8" fill-opacity="0.6" stroke="#315EA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ViewShowZBuffer</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(1120 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 7 L25 4 L28 26 L7 29 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 7 L28 26 M25 4 L7 29 M6 18 L26 15" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12 L20 11 L21 20 L13 21 Z" fill="#315EA8" fill-opacity="0.8" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 13 V19 M13 16 H19" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 7 L25 4 L28 26 L7 29 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 7 L28 26 M25 4 L7 29 M6 18 L26 15" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12 L20 11 L21 20 L13 21 Z" fill="#315EA8" fill-opacity="0.8" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 13 V19 M13 16 H19" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">MeshMeshRepairToolsFillHole</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(0 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 7 L25 4 L28 26 L7 29 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 7 L28 26 M25 4 L7 29 M6 18 L26 15" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12 L20 11 L21 20 L13 21 Z" fill="#315EA8" fill-opacity="0.8" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="10" r="2.76" fill="#FFFFFF"/><circle cx="24" cy="23" r="2.76" fill="#FFFFFF"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 7 L25 4 L28 26 L7 29 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 7 L28 26 M25 4 L7 29 M6 18 L26 15" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12 L20 11 L21 20 L13 21 Z" fill="#315EA8" fill-opacity="0.8" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="10" r="2.76" fill="#FFFFFF"/><circle cx="24" cy="23" r="2.76" fill="#FFFFFF"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">MeshMeshRepairToolsFillHoles</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 7 L25 4 L28 26 L7 29 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 7 L28 26 M25 4 L7 29 M6 18 L26 15" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 13 L12 16 L9 19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 16 H20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 13 L20 16 L23 19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 7 L25 4 L28 26 L7 29 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 7 L28 26 M25 4 L7 29 M6 18 L26 15" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 13 L12 16 L9 19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 16 H20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 13 L20 16 L23 19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">MeshMeshRepairToolsAlignMesh</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9">Vertices</text></g>
+<g transform="translate(320 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 8 L25 27 M27 8 L7 27 M6 18 L26 18" fill="none" stroke="#D8BF91" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 8 L25 27 M27 8 L7 27 M6 18 L26 18" fill="none" stroke="#D8BF91" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">MeshFromNURBSObject</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<g transform="scale(.8)"><path d="M4 7 L25 4 L28 26 L7 29 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 7 L28 26 M25 4 L7 29 M6 18 L26 15" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M20 23 H29" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<g transform="scale(.8)"><path d="M4 7 L25 4 L28 26 L7 29 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 7 L28 26 M25 4 L7 29 M6 18 L26 15" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M20 23 H29" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">MeshMeshEditToolsCollapseRed</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9">uceVertexCount</text></g>
+<g transform="translate(640 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 7 Q13 17 13 26 M20 6 Q23 17 22 26 M6 14 Q15 10 27 14 M6 21 Q16 17 26 21" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 7 Q13 17 13 26 M20 6 Q23 17 22 26 M6 14 Q15 10 27 14 M6 21 Q16 17 26 21" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">MeshApplyMeshUVN</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<g transform="scale(.8)"><path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M19 19 L28 19 L29 29 L20 29 Z M19 19 L29 29" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<g transform="scale(.8)"><path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M19 19 L28 19 L29 29 L20 29 Z M19 19 L29 29" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">MeshMeshEditToolsExtractRend</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9">erMesh</text></g>
+</svg>

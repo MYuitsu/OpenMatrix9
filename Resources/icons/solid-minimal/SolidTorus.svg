@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Torus</title>
+<desc>Closed ring with a central opening. OpenMatrix9 minimal-solid-v3-warm-highlight; authored vector geometry.</desc>
+<path d="M2 16 C2 2 30 2 30 16 C30 30 2 30 2 16 Z M10 15 C10 9 22 9 22 15 C22 21 10 21 10 15 Z" fill="#A668D1" fill-opacity="0.18" stroke="#A668D1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 13 C5 27 27 27 29 13 M10 15 C12 18 20 18 22 15" fill="none" stroke="#A668D1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

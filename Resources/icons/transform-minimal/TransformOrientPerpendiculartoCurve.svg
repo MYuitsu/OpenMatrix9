@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Orient perpendicular</title>
+<desc>Orient an object perpendicular to a curve. OpenMatrix9 minimal-transform-v2-reviewed; authored vector geometry.</desc>
+<path d="M3 27 Q9 12 28 15" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7 H20 V16 H12 Z" fill="#FF5B05" fill-opacity="0.28" stroke="#FF5B05" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7 L15 4 H23 L20 7 Z" fill="#FF9566" fill-opacity="0.18" stroke="#FF9566" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 7 L23 4 V13 L20 16 Z" fill="#FF5B05" fill-opacity="0.18" stroke="#FF5B05" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 17 L16 22 H21" fill="none" stroke="#FF9566" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

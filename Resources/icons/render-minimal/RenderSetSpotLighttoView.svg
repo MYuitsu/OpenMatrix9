@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Set Spotlight to View</title>
+<desc>Move the camera position and target to match a selected spotlight. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 4 H13 V12 H3 Z" fill="#FFFFFF" fill-opacity="0.08" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 6 L18 3 V13 L13 10" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 8 L20 28 L29 20 Z" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 20 H14" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 17 L14 20 L11 23" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

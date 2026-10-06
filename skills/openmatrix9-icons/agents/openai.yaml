@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenMatrix9 Icons"
+  short_description: "Create and review recognizable minimal SVG icons"
+  default_prompt: "Use $openmatrix9-icons to create or review OpenMatrix9 menu icons at their actual display size."

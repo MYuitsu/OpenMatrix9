@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Sweep 2 rails</title>
+<desc>Profiles swept between two rails. OpenMatrix9 minimal-surface-v1-reviewed; authored vector geometry.</desc>
+<g transform="translate(0 3) scale(.8)"><path d="M4 27 C4 9 14 2 27 6 L29 19 C17 14 12 20 12 29 Z" fill="#5FCB62" fill-opacity="0.3" stroke="#5FCB62" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 20 Q14 10 28 13 M11 9 Q17 5 28 10" fill="none" stroke="#0A6C0A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 27 C4 9 14 2 27 6" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 29 C12 20 17 14 29 19" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M24 5 Q25 1 29 3 Q32 5 27 8 L24 12 H30" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

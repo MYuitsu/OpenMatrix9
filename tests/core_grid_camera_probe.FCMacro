@@ -1,0 +1,60 @@
+import os,json,traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtGui,QtTest
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'views':[]}
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(350,loop.quit);loop.exec();QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('GridCameraProbe');settle()
+        window=Gui.getMainWindow();window.show();window.resize(1500,1000);settle();area=window.findChild(QtWidgets.QMdiArea)
+        field=command_input(window)
+        def command(text):
+            field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+        def drag(target,modifier=QtCore.Qt.NoModifier):
+            start=target.rect().center();end=start+QtCore.QPoint(0,max(5,min(30,target.height()//4)))
+            if modifier==QtCore.Qt.ControlModifier:QtTest.QTest.keyPress(target,QtCore.Qt.Key_Control)
+            QtTest.QTest.mousePress(target,QtCore.Qt.LeftButton,modifier,pos=start)
+            QtTest.QTest.mouseMove(target,end);QtTest.QTest.mouseRelease(target,QtCore.Qt.LeftButton,modifier,pos=end)
+            if modifier==QtCore.Qt.ControlModifier:QtTest.QTest.keyRelease(target,QtCore.Qt.Key_Control)
+            settle()
+        for slot in range(4):
+            sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==slot);area.setActiveSubWindow(sub);settle()
+            view=Gui.activeDocument().activeView();camera=view.getCameraOrientation()
+            search=coin.SoSearchAction();search.setName('OM9ConstructionGrid');search.apply(view.getSceneGraph());grid=search.getPath().getTail() if search.getPath() else None
+            camera=view.getCameraNode()
+            before=camera.position.getValue();right=camera.orientation.getValue().multVec(coin.SbVec3f(1,0,0));origin_before=camera.getViewVolume(1.5).projectToScreen(coin.SbVec3f(0,0,0)).getValue()
+            view.saveImage(str(out/('grid-'+str(slot)+'-before.png')),600,400,'Current')
+            camera.position=before+right*7.3;settle();origin_after=camera.getViewVolume(1.5).projectToScreen(coin.SbVec3f(0,0,0)).getValue()
+            view.saveImage(str(out/('grid-'+str(slot)+'-pan.png')),600,400,'Current')
+            first=QtGui.QImage(str(out/('grid-'+str(slot)+'-before.png')));second=QtGui.QImage(str(out/('grid-'+str(slot)+'-pan.png')))
+            changed=sum(first.pixel(x,y)!=second.pixel(x,y) for y in range(50,350) for x in range(50,550))
+            transform=grid.getChild(0).getChild(1);axis=transform.rotation.getValue().multVec(coin.SbVec3f(1,0,0))
+            def spacing():
+                volume=camera.getViewVolume(1.5);a=volume.projectToScreen(coin.SbVec3f(0,0,0));b=volume.projectToScreen(axis)
+                return ((b[0]-a[0])*600)**2+((b[1]-a[1])*400)**2
+            before_zoom=spacing()
+            if camera.isOfType(coin.SoOrthographicCamera.getClassTypeId()):camera.height=camera.height.getValue()/2
+            else:camera.heightAngle=camera.heightAngle.getValue()/2
+            settle();after_zoom=spacing();view.saveImage(str(out/('grid-'+str(slot)+'-zoom.png')),600,400,'Current')
+            target=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer');position=target.rect().center()
+            wheel=QtGui.QWheelEvent(QtCore.QPointF(position),QtCore.QPointF(target.mapToGlobal(position)),QtCore.QPoint(),QtCore.QPoint(0,120),QtCore.Qt.NoButton,QtCore.Qt.NoModifier,QtCore.Qt.NoScrollPhase,False)
+            QtWidgets.QApplication.sendEvent(target,wheel);settle();settle();after_wheel=spacing();view.saveImage(str(out/('grid-'+str(slot)+'-wheel.png')),600,400,'Current')
+            zoom_image=QtGui.QImage(str(out/('grid-'+str(slot)+'-zoom.png')));wheel_image=QtGui.QImage(str(out/('grid-'+str(slot)+'-wheel.png')))
+            wheel_changed=sum(zoom_image.pixel(x,y)!=wheel_image.pixel(x,y) for y in range(50,350) for x in range(50,550))
+            drag(target.viewport(),QtCore.Qt.ControlModifier);after_ctrl=spacing();view.saveImage(str(out/('grid-'+str(slot)+'-ctrl.png')),600,400,'Current')
+            Gui.runCommand('Zoom_Dynamic');settle();drag(target.viewport());after_menu=spacing()
+            command('Zoom_Dynamic');drag(target.viewport());after_cmd=spacing()
+            result['views'].append({'slot':slot,'grid':grid is not None,'origin_before':origin_before,'origin_after':origin_after,'changed_pixels':changed,'wheel_changed_pixels':wheel_changed,'grid_unit_spacing_before':before_zoom**0.5,'grid_unit_spacing_after':after_zoom**0.5,'grid_unit_spacing_wheel':after_wheel**0.5,'grid_unit_spacing_ctrl':after_ctrl**0.5,'grid_unit_spacing_menu':after_menu**0.5,'grid_unit_spacing_cmd':after_cmd**0.5,'wheel_accepted':wheel.isAccepted()})
+        result['ok']=all(v['grid'] and v['changed_pixels']>100 and v['wheel_changed_pixels']>100 and v['origin_before']!=v['origin_after'] and v['grid_unit_spacing_after']>v['grid_unit_spacing_before']*1.8 and v['grid_unit_spacing_wheel']>v['grid_unit_spacing_after'] and v['grid_unit_spacing_ctrl']<v['grid_unit_spacing_wheel'] and v['grid_unit_spacing_menu']<v['grid_unit_spacing_ctrl'] and v['grid_unit_spacing_cmd']<v['grid_unit_spacing_menu'] for v in result['views'])
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(500,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

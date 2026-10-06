@@ -1,0 +1,167 @@
+import tempfile
+import FreeCAD as App, FreeCADGui as Gui, Part
+import os, json, traceback
+from pathlib import Path
+from PySide6 import QtCore, QtWidgets, QtGui, QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+result={'checks':[]}
+def check(name, value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value: raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm
+        import OpenMatrix9Gui as native
+        doc=App.newDocument('ThreeDmTest');doc.UndoMode=1
+        obj=doc.addObject('Part::Feature','Box');obj.Shape=Part.makeBox(10,10,10)
+        obj.Label='Jewelry α';obj.Placement.Base=App.Vector(20,0,0)
+        obj.addProperty('App::PropertyString','OM9LayerPath');obj.OM9LayerPath='Metal::Gold'
+        doc.recompute()
+        target=out/'test.3dm';ThreeDm.export_file(target,[obj])
+        check('Rhino 5 header',b'5' in target.read_bytes()[:32])
+        obj.Label='Source object'
+        imported=ThreeDm.import_file(target,doc)
+        check('one object imported',len(imported)==1)
+        shape=imported[0].Shape
+        check('valid solid',shape.isValid() and len(shape.Solids)==1)
+        check('volume',abs(shape.Volume-1000)<1e-5)
+        measured_brep=out/'measurement-box.brep';shape.exportBrep(str(measured_brep))
+        measured=native.measure3dmBrep(str(measured_brep))
+        check('adaptive CAD metrics',abs(measured['volume']-1000)<1e-7 and abs(measured['area']-600)<1e-7)
+        check('world placement',abs(shape.BoundBox.XMin-20)<1e-6)
+        check('name and layer',imported[0].Label=='Jewelry α' and imported[0].OM9LayerPath=='Metal::Gold')
+        doc.undo();check('single Undo removes import',len(doc.Objects)==1)
+        doc.redo();check('Redo restores import',len(doc.Objects)>1)
+        before=target.read_bytes()
+        try:ThreeDm.export_file(target,[doc.addObject('App::FeaturePython','Unsupported')])
+        except Exception:pass
+        check('failed export preserves target',target.read_bytes()==before)
+        fixtures=Path(tempfile.gettempdir())/'om9-3dm-native'
+        line=ThreeDm.import_file(fixtures/'inch.3dm',doc)[0]
+        check('inch units normalize to mm',abs(line.Shape.Length-25.4)<1e-7)
+        count=len(doc.Objects)
+        try:ThreeDm.import_file(fixtures/'bad.3dm',doc)
+        except Exception:pass
+        check('failed import leaves document unchanged',len(doc.Objects)==count)
+        doc.saveAs(str(out/'test.FCStd'))
+        name=doc.Name;App.closeDocument(name);doc=App.openDocument(str(out/'test.FCStd'))
+        check('FCStd reload geometry and metadata',any(getattr(o,'OM9LayerPath','')=='Metal::Gold' and o.Shape.isValid() for o in doc.Objects))
+        import Mesh
+        mesh=doc.addObject('Mesh::Feature','TranslatedMesh');mesh.Mesh=Mesh.Mesh([[App.Vector(0,0,0),App.Vector(1,0,0),App.Vector(0,1,0)]])
+        mesh.Placement.Base=App.Vector(30,0,0);doc.recompute()
+        mesh_target=out/'mesh.3dm';ThreeDm.export_file(mesh_target,[mesh]);restored=ThreeDm.import_file(mesh_target,doc)[0]
+        check('translated mesh applied once',abs(restored.Mesh.BoundBox.XMin-30)<1e-6)
+        group=doc.addObject('App::Part','Parent');group.Placement.Base=App.Vector(100,0,0);group.addObject(mesh);doc.recompute()
+        ThreeDm.export_file(mesh_target,[mesh]);restored=ThreeDm.import_file(mesh_target,doc)[0]
+        check('nested mesh world placement',abs(restored.Mesh.BoundBox.XMin-130)<1e-6)
+        part=doc.Objects[0];group.addObject(part);doc.recompute()
+        part_target=out/'nested-part.3dm';ThreeDm.export_file(part_target,[part]);part_copy=ThreeDm.import_file(part_target,doc)[0]
+        check('nested Part world placement',abs(part_copy.Shape.BoundBox.XMin-120)<1e-6)
+        before=len(doc.Objects)
+        try:ThreeDm.import_file(fixtures/'unsupported.3dm',doc)
+        except RuntimeError:pass
+        check('unsupported input leaves document unchanged',len(doc.Objects)==before)
+        metadata=ThreeDm.import_file(fixtures/'box.3dm',doc)[0]
+        check('hidden and locked object metadata',not metadata.ViewObject.Visibility and metadata.OM9Locked and not metadata.ViewObject.Selectable)
+        metadata.ViewObject.ShapeColor=(0.0,1.0,0.0)
+        color_target=out/'color.3dm';ThreeDm.export_file(color_target,[metadata]);color_copy=ThreeDm.import_file(color_target,doc)[0]
+        check('export honors edited object color',tuple(color_copy.OM9Color[:3])==(0.0,1.0,0.0))
+        nested=ThreeDm.import_file(fixtures/'nested.3dm',doc)[0]
+        check('parent layer hides and locks objects',not nested.ViewObject.Visibility and nested.OM9Locked)
+        wire=doc.addObject('Part::Feature','Polyline');wire.Shape=Part.makePolygon([App.Vector(0,0,0),App.Vector(3,0,0),App.Vector(3,4,0)])
+        wire_target=out/'wire.3dm';ThreeDm.export_file(wire_target,[wire]);wire_copy=ThreeDm.import_file(wire_target,doc)[0]
+        check('polyline length preserved',abs(wire_copy.Shape.Length-7)<1e-6)
+        body=doc.addObject('PartDesign::Body','Body');tip=body.newObject('PartDesign::Feature','Tip');tip.Shape=Part.makeBox(1,1,1);body.Tip=tip;doc.recompute()
+        before=target.read_bytes();rejected=False
+        try:ThreeDm.export_file(target,[body,tip])
+        except RuntimeError:rejected=True
+        check('Body plus Tip rejects duplicate geometry',rejected and target.read_bytes()==before)
+        api_target=out/'api.3dm';native.export3dm(str(api_target),doc.Name,[wire.Name])
+        check('native programmatic import/export',len(native.import3dm(str(api_target),doc.Name))==1)
+        count=len(doc.Objects);original_insert=ThreeDm._insert_prepared
+        def fail_insertion(name, prepared):
+            App.getDocument(name).addObject('Part::Feature','PartialImport')
+            raise RuntimeError('injected insertion failure')
+        try:
+            ThreeDm._insert_prepared=fail_insertion
+            try:ThreeDm.import_file(target,doc)
+            except RuntimeError:pass
+        finally:ThreeDm._insert_prepared=original_insert
+        check('host failure rolls back transaction',len(doc.Objects)==count)
+        standard_target=out/'standard.3dm';ThreeDm.export([wire],str(standard_target))
+        check('standard FreeCAD import/export entry points',len(ThreeDm.insert(str(standard_target),doc.Name))==1)
+        layer=doc.addObject('App::DocumentObjectGroup','ExportLayer');layer.addObject(wire)
+        layer_target=out/'layer.3dm';native.export3dm(str(layer_target),doc.Name,[layer.Name,wire.Name])
+        check('layer group plus contained geometry exports once',len(native.import3dm(str(layer_target),doc.Name))==1)
+        previous_name=doc.Name;opened=ThreeDm.open(str(standard_target))
+        check('standard FreeCAD open creates a project',opened is not None and any(hasattr(o,'Shape') for o in opened.Objects))
+        App.closeDocument(opened.Name);App.setActiveDocument(previous_name)
+        class RestrictedTask:
+            def __init__(self):self.form=QtWidgets.QWidget()
+            def isAllowedAlterDocument(self):return False
+            def isAllowedAlterSelection(self):return False
+            def isAllowedAlterView(self):return True
+        Gui.Control.showDialog(RestrictedTask());QtWidgets.QApplication.processEvents()
+        before=standard_target.read_bytes();rejected=False
+        try:ThreeDm.export([wire],str(standard_target))
+        except RuntimeError:rejected=True
+        finally:Gui.Control.closeDialog()
+        check('standard export respects task guard',rejected and standard_target.read_bytes()==before)
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_DontUseNativeDialogs,True)
+        def choose(path, reject_overwrite=False):
+            dialog=QtWidgets.QApplication.activeModalWidget()
+            if isinstance(dialog,QtWidgets.QFileDialog):
+                if path is None:dialog.reject()
+                else:
+                    dialog.setDirectory(str(path.parent))
+                    def enter():
+                        edit=dialog.findChild(QtWidgets.QLineEdit,'fileNameEdit');edit.setText(path.name)
+                        def accept():
+                            if dialog.acceptMode()==QtWidgets.QFileDialog.AcceptOpen:
+                                def choose_mode():
+                                    mode=QtWidgets.QApplication.activeModalWidget()
+                                    if not isinstance(mode,QtWidgets.QInputDialog):QtCore.QTimer.singleShot(50,choose_mode);return
+                                    mode.setTextValue('Geometry only');mode.accept()
+                                QtCore.QTimer.singleShot(50,choose_mode)
+                            buttons=dialog.findChild(QtWidgets.QDialogButtonBox)
+                            role=QtWidgets.QDialogButtonBox.Open if dialog.acceptMode()==QtWidgets.QFileDialog.AcceptOpen else QtWidgets.QDialogButtonBox.Save
+                            if reject_overwrite:
+                                def reject_confirmation():
+                                    box=QtWidgets.QApplication.activeModalWidget()
+                                    if not isinstance(box,QtWidgets.QMessageBox):QtCore.QTimer.singleShot(50,reject_confirmation);return
+                                    result['overwrite_confirmation_seen']=True
+                                    QtTest.QTest.mouseClick(box.button(QtWidgets.QMessageBox.No),QtCore.Qt.LeftButton)
+                                    QtCore.QTimer.singleShot(50,dialog.reject)
+                                QtCore.QTimer.singleShot(50,reject_confirmation)
+                            QtTest.QTest.mouseClick(buttons.button(role),QtCore.Qt.LeftButton)
+                        QtCore.QTimer.singleShot(150,accept)
+                    QtCore.QTimer.singleShot(150,enter)
+            else:QtCore.QTimer.singleShot(50,lambda:choose(path,reject_overwrite))
+        before=len(doc.Objects);QtCore.QTimer.singleShot(100,lambda:choose(target));Gui.runCommand('Import3dm')
+        check('menu command imports geometry',len(doc.Objects)>before)
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(doc.Objects[0])
+        command_target=out/'cmd.3dm';QtCore.QTimer.singleShot(100,lambda:choose(command_target))
+        field=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        field.setFocus();cursor=field.textCursor();cursor.setPosition(int(field.property('om9InputStart')));cursor.movePosition(QtGui.QTextCursor.End,QtGui.QTextCursor.KeepAnchor);cursor.insertText('Export3dm');field.setTextCursor(cursor);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return)
+        check('CMD export writes Rhino 5',command_target.exists() and b'5' in command_target.read_bytes()[:32])
+        overwrite_target=out/'overwrite.3dm';overwrite_target.write_bytes(b'previous file')
+        QtCore.QTimer.singleShot(100,lambda:choose(out/'overwrite',True));Gui.runCommand('Export3dm')
+        check('extension resolves before overwrite confirmation',result.get('overwrite_confirmation_seen',False) and overwrite_target.read_bytes()==b'previous file')
+        def history():return [b.property('om9Command') for b in Gui.getMainWindow().findChildren(QtWidgets.QToolButton) if b.objectName().startswith('OM9History')]
+        loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(250,loop.quit);loop.exec()
+        previous=history();before=len(doc.Objects);QtCore.QTimer.singleShot(100,lambda:choose(None));Gui.runCommand('Import3dm')
+        check('cancel leaves document unchanged',len(doc.Objects)==before)
+        check('cancel creates no successful history',history()==previous)
+        Gui.activeDocument().activeView().viewAxonometric();Gui.activeDocument().activeView().fitAll();QtWidgets.QApplication.processEvents()
+        Gui.getMainWindow().grab().save(str(out/'runtime.png'))
+        Gui.activeDocument().activeView().saveImage(str(out/'geometry.png'),800,600,'Current')
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

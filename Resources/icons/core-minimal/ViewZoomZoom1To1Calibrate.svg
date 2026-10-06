@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Calibrate 1:1</title>
+<desc>Calibrate screen scale for actual-size viewing; authored OpenMatrix9 vector.</desc>
+<path d="M3 5 H29 V24 H3 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="16" y="17" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#FFFFFF">1:1</text><path d="M8 29 H24 M8 27 V30 M24 27 V30" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

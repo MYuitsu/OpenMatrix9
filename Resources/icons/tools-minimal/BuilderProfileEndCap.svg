@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Profile End Cap</title>
+<desc>Create a blended cap from a profile. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 12 H28 V28 H4 Z" fill="#9ABFFF" fill-opacity="0.2" stroke="#4260FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12 Q16 -4 28 12 Z" fill="#9ABFFF" fill-opacity="0.4" stroke="#4260FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12 H28" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 4 V12" fill="none" stroke="#9ABFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

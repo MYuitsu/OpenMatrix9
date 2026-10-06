@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Group</title>
+<desc>Group selected objects; authored OpenMatrix9 vector.</desc>
+<path d="M5 5 H17 V17 H5 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 15 H27 V27 H15 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Variable offset</title>
+<desc>Deform the surface while offsetting. OpenMatrix9 minimal-surface-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 24 Q15 17 27 22 L29 29 Q15 25 5 30 Z" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15 Q16 2 27 4 L29 11 Q16 8 5 21 Z" fill="#5FCB62" fill-opacity="0.3" stroke="#5FCB62" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 23 V13" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 16 L16 13 L19 16" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="3" cy="15" r="2.1849999999999996" fill="#FFFFFF"/><circle cx="27" cy="4" r="2.1849999999999996" fill="#FFFFFF"/>
+</svg>

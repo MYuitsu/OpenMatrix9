@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Four View Capture</title>
+<desc>Capture or render all four viewports. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 3 H29 V29 H3 Z" fill="#71E6E1" fill-opacity="0.13" stroke="#71E6E1" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3 V29 M3 16 H29" fill="none" stroke="#CEFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 6 H13 V13 H6 Z M20 7 H25 V12 H20 Z M7 20 H12 V26 H7 Z" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 22 L23 19 L27 22 L23 25 Z M19 22 V26 L23 28 L27 26 V22 M23 25 V28" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Intersect two sets</title>
+  <desc>Intersection points between two sets of curves. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M5 5 V27 M14 5 V27" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11 H29 M3 21 H29" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="11" r="2.3" fill="#FFFFFF"/><circle cx="5" cy="21" r="2.3" fill="#FFFFFF"/><circle cx="14" cy="11" r="2.3" fill="#FFFFFF"/><circle cx="14" cy="21" r="2.3" fill="#FFFFFF"/>
+</svg>

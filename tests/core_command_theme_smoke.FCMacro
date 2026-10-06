@@ -1,0 +1,57 @@
+# User-selected Matrix9 command panel, nested grid and colors.
+import os,json,traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtGui,QtTest
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(200,loop.quit);loop.exec()
+def check(name,value):result['checks'].append({'name':name,'passed':bool(value)})
+def node(view,name):
+    s=coin.SoSearchAction();s.setName(name);s.setInterest(coin.SoSearchAction.FIRST);s.apply(view.getSceneGraph());return s.getPath().getTail() if s.getPath() else None
+def command(text):
+    field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def run():
+    global field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('MatrixCommandTheme');settle()
+        window=Gui.getMainWindow();window.show();window.resize(1500,1000);settle();area=window.findChild(QtWidgets.QMdiArea);dock=window.findChild(QtWidgets.QDockWidget,'OM9CommandFrame');field=command_input(window);history=window.findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        check('Command is docked above viewports',window.dockWidgetArea(dock)==QtCore.Qt.TopDockWidgetArea and dock.geometry().bottom()<area.geometry().top())
+        check('Command uses one editable text document with live prompt',history is field and not history.isReadOnly() and field.property('om9InputStart') is not None)
+        color=dock.palette().color(QtGui.QPalette.Window);check('Command green matches selected screenshot',color==QtGui.QColor(130,180,140))
+        image=field.grab().toImage();check('whole console shares the green command background',image.pixelColor(image.width()-3,image.height()-3)==QtGui.QColor(130,180,140))
+        views=Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor');check('native four viewports remain',len(views)==4)
+        for view in views:
+            slot=view.getWidget().property('om9ViewSlot') if hasattr(view,'getWidget') else None
+            major=node(view,'OM9GridMajor');minor=node(view,'OM9GridMinor');check('grid has major and minor lines '+str(view),major is not None and minor is not None)
+            if major is not None and minor is not None:
+                mc=major.getChild(0).rgb.getValues()[0];nc=minor.getChild(0).rgb.getValues()[0];check('major grid is brighter than subdivisions '+str(view),sum(mc)>sum(nc))
+                coords=major.getChild(1).point.getValues();check('major lines follow 5 mm spacing '+str(view),all(abs(p[0]/5-round(p[0]/5))<1e-5 and abs(p[1]/5-round(p[1]/5))<1e-5 for p in coords))
+            index=views.index(view);file=out/('native-view-'+str(index)+'.png');view.saveImage(str(file),384,192,'Current');grid=node(view,'OM9ConstructionGrid');state=grid.whichChild.getValue();grid.whichChild=-1;file=out/('native-background-view-'+str(index)+'.png');view.saveImage(str(file),384,192,'Current');grid.whichChild=state;im=QtGui.QImage(str(file));black=sum(im.pixelColor(x,y)==QtGui.QColor(0,0,0) for y in range(10,182,4) for x in range(10,374,4));check('native viewport renders black slot '+str(index),black>0.6*43*91)
+        check('grid creates no model geometry',not doc.Objects)
+        sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle();widget=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer');field.clear();widget.setFocus();QtTest.QTest.keyClicks(widget,'Line');settle();check('typing in viewport enters command line',field.text()=='Line' and field.hasFocus());QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle();command('0,0,0');command('3,4,0');check('command line creates native geometry',len(doc.Objects)==1 and abs(doc.Objects[-1].Shape.Length-5)<1e-8)
+        check('new Curve uses visible Matrix green on black',len(doc.Objects)==1 and max(abs(a-b) for a,b in zip(doc.Objects[-1].ViewObject.LineColor[:3],(0,130/255,85/255)))<1e-5)
+        if history is not None:
+            check('transcript echoes command and point input','Line' in history.toPlainText() and '3,4,0' in history.toPlainText())
+            field.setText('draft');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Up);check('Up recalls previous input',field.text()=='3,4,0');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Down);check('Down restores unsubmitted draft',field.text()=='draft');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);check('Esc clears command draft',not field.text())
+            check('Curve success enters transcript','Line created' in history.toPlainText());command('Line');command('nonsense');message=command_prompt(window).text();QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);check('Curve error stays in transcript after cancel',message in history.toPlainText())
+        command('');command('0,0,0');command('2,0,0');check('empty Enter repeats last available command',len(doc.Objects)==2 and abs(doc.Objects[-1].Shape.Length-2)<1e-8)
+        command('Distance');command('0,0,0');command('3,4,0');check('measurement output enters transcript',history is not None and '5 mm' in history.toPlainText())
+        modal=QtWidgets.QDialog(window);edit=QtWidgets.QLineEdit(modal);layout=QtWidgets.QVBoxLayout(modal);layout.addWidget(edit);modal.setModal(True);modal.show();edit.setFocus();settle();before=field.text();QtTest.QTest.keyClicks(edit,'abc');check('dialog typing stays in dialog',edit.text()=='abc' and field.text()==before);modal.close();settle()
+        class NativeTask:
+            def __init__(self):self.form=QtWidgets.QWidget()
+            def isAllowedAlterView(self):return True
+        Gui.Control.showDialog(NativeTask());settle();field.clear();widget.setFocus();QtTest.QTest.keyClicks(widget,'r');settle();check('native task viewport keys are not redirected to CMD',not field.text());Gui.Control.closeDialog();settle()
+        Gui.activateWorkbench('PartWorkbench');settle();check('command panel hides on workbench exit',not dock.isVisible());file=out/'native-part-restored.png';Gui.activeDocument().activeView().saveImage(str(file),384,192,'Current');im=QtGui.QImage(str(file));black=sum(im.pixelColor(x,y)==QtGui.QColor(0,0,0) for y in range(10,182,4) for x in range(10,374,4));check('leaving OM9 restores native viewport background',black<0.1*43*91);Gui.activateWorkbench('OpenMatrix9Workbench');settle();check('command transcript survives workbench switch',history is not None and '3,4,0' in history.toPlainText())
+        result['ok']=all(c['passed'] for c in result['checks'])
+        if not result['ok']:result['error']='Failed: '+', '.join(c['name'] for c in result['checks'] if not c['passed'])
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(300,window.close)
+QtCore.QTimer.singleShot(1800,run)

@@ -1,0 +1,15 @@
+[package]
+name = "openmatrix9_rust"
+version = "0.1.0"
+edition = "2024"
+license = "LGPL-2.1-or-later"
+
+[lib]
+name = "openmatrix9_rust"
+crate-type = ["staticlib", "rlib"]
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"

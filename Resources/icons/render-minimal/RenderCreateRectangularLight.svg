@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Create Rectangular Light</title>
+<desc>Create a rectangular area light emitting in one direction. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<path d="M8 8 H24 V24 H8 Z" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3 V5 M16 3 V5 M23 3 V5 M9 27 V29 M16 27 V29 M23 27 V29 M3 9 H5 M3 16 H5 M3 23 H5 M27 9 H29 M27 16 H29 M27 23 H29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

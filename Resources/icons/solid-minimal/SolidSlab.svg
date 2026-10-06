@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Slab from curve</title>
+<desc>Offset, extrude and cap a curve to form a slab. OpenMatrix9 minimal-solid-v3-warm-highlight; authored vector geometry.</desc>
+<path d="M3 11 Q16 3 28 11 L28 19 Q17 11 3 19 Z" fill="#FFD166" fill-opacity="0.15" stroke="#FFD166" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 19 V26 Q17 18 28 26 V19" fill="#A668D1" fill-opacity="0.18" stroke="#A668D1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15 Q16 7 28 15" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/>
+</svg>

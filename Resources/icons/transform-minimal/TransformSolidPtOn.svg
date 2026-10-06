@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Solid points on</title>
+<desc>Show solid edge editing grips. OpenMatrix9 minimal-transform-v2-reviewed; authored vector geometry.</desc>
+<path d="M5 11 H20 V27 H5 Z" fill="#FF5B05" fill-opacity="0.28" stroke="#FF5B05" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 11 L12 4 H27 L20 11 Z" fill="#FF9566" fill-opacity="0.18" stroke="#FF9566" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 11 L27 4 V20 L20 27 Z" fill="#FF5B05" fill-opacity="0.18" stroke="#FF5B05" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="11" r="2.1849999999999996" fill="#FFFFFF"/><circle cx="12" cy="4" r="2.1849999999999996" fill="#FFFFFF"/><circle cx="27" cy="4" r="2.1849999999999996" fill="#FFFFFF"/><circle cx="20" cy="11" r="2.1849999999999996" fill="#FFFFFF"/><circle cx="5" cy="27" r="2.1849999999999996" fill="#FFFFFF"/><circle cx="20" cy="27" r="2.1849999999999996" fill="#FFFFFF"/><circle cx="27" cy="20" r="2.1849999999999996" fill="#FFFFFF"/>
+</svg>

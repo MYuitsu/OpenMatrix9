@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Soft move</title>
+<desc>Move nearby control points with a soft falloff. OpenMatrix9 minimal-transform-v2-reviewed; authored vector geometry.</desc>
+<path d="M3 4 H12 V28 H3 Z" fill="#FFFFFF" fill-opacity="0.08" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 28 H29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 6 C26 6 26 22 28 28 H8 Z" fill="#FF5B05" fill-opacity="0.28" stroke="#FF5B05" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7 V28 M17 10 V28 M22 16 V28" fill="none" stroke="#FF9566" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 4 H23" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 1 L23 4 L19 7" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

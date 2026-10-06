@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Scallop Bezel</title>
+<desc>Create scalloped bezel designs with shaped cutters. OpenMatrix9 minimal-settings-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 10 Q8 19 12 10 Q16 19 20 10 Q24 19 28 10 L24 25 Q16 31 8 25 Z" fill="#F3782B" fill-opacity="0.16" stroke="#F3782B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 V5 M12 10 V4 M20 10 V4 M28 10 V5 M8 25 Q16 21 24 25" fill="none" stroke="#FF9C5C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 9 L9 15 M15 9 L17 15 M23 9 L25 15" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

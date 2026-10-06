@@ -1,0 +1,73 @@
+# OM9-INFO-008: native menu/CMD visibility, alignment and maximized view switching.
+import os,json,traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(350,loop.quit);loop.exec()
+    # Nested event loops defer deletion posted by the outer macro callback.
+    # Finish native closed-view teardown before closing its document or testing
+    # reconstruction, as the ordinary application event loop would do.
+    QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def command(text):
+    field=command_input(window);field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def run():
+    global window
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('ViewTabsTest');doc.UndoMode=1;settle();window=Gui.getMainWindow();window.show();settle()
+        action=window.findChild(QtGui.QAction,'ViewportTabs');check('OM9-INFO-008 original command registered and enabled',action is not None and action.isEnabled())
+        if os.environ.get('OM9_TABS_EXPECT_STATE'):
+            expected=int(os.environ['OM9_TABS_EXPECT_STATE']);initial=window.findChild(QtWidgets.QDockWidget,'OM9ViewportTabsDock');areas=[QtCore.Qt.TopDockWidgetArea,QtCore.Qt.BottomDockWidgetArea,QtCore.Qt.LeftDockWidgetArea,QtCore.Qt.RightDockWidgetArea]
+            check('configuration restored across native process restart',App.ParamGet('User parameter:BaseApp/Preferences/Mod/OpenMatrix9/ViewportTabs').GetInt('State')==expected and initial.isVisible()==bool(expected&1) and window.dockWidgetArea(initial)==areas[expected>>1])
+        command('ViewportTabs Show');tabs=window.findChild(QtWidgets.QTabBar,'OM9ViewportTabs');dock=window.findChild(QtWidgets.QDockWidget,'OM9ViewportTabsDock');area=window.findChild(QtWidgets.QMdiArea)
+        check('four active-document tabs are visible',dock.isVisible() and tabs.count()==4 and [tabs.tabText(i) for i in range(4)]==['Looking Down','Perspective','Side View','Through Finger'])
+        box=doc.addObject('Part::Box','TabsGeometry');doc.recompute();Gui.Selection.clearSelection();Gui.Selection.addSelection(box);settle()
+        baseline=[v.getCamera() for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')];undos=doc.UndoCount
+        action.trigger();settle();check('menu toggles same strip off',not dock.isVisible());command('ViewportTabs');check('CMD toggles same strip on',dock.isVisible())
+        command('ViewportTabs Hide');command('ViewportTabs Hide');check('Hide is idempotent',not dock.isVisible());command('ViewportTabs Show')
+        for name,dock_area in [('Top',QtCore.Qt.TopDockWidgetArea),('Left',QtCore.Qt.LeftDockWidgetArea),('Right',QtCore.Qt.RightDockWidgetArea),('Bottom',QtCore.Qt.BottomDockWidgetArea)]:
+            command('ViewportTabs Align '+name);check('Align '+name+' positions native strip',window.dockWidgetArea(dock)==dock_area and dock.isVisible())
+        command('ViewportTabs Align unknown');check('invalid option leaves alignment and visibility unchanged',window.dockWidgetArea(dock)==QtCore.Qt.BottomDockWidgetArea and dock.isVisible())
+        check('visibility/alignment changes preserve geometry selection Undo and cameras',doc.Objects==[box] and Gui.Selection.getSelection()==[box] and abs(box.Shape.Volume-1000)<1e-6 and doc.UndoCount==undos and [v.getCamera() for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')]==baseline)
+        area.activeSubWindow().showMaximized();settle();QtTest.QTest.mouseClick(tabs,QtCore.Qt.LeftButton,pos=tabs.tabRect(2).center());settle()
+        check('mouse tab switches maximized view to Side View',area.activeSubWindow().widget().property('om9ViewSlot')==2 and area.activeSubWindow().isMaximized())
+        command('ViewportTabs Hide');command('ViewportTabs Show');check('toggle preserves maximized active viewport',area.activeSubWindow().isMaximized() and area.activeSubWindow().widget().property('om9ViewSlot')==2)
+        Gui.runCommand('RestoreViewports');settle();check('Restore returns four normal views with matching active tab',not area.activeSubWindow().isMaximized() and tabs.currentIndex()==2)
+        other=App.newDocument('ViewTabsOther');settle();tabs.setCurrentIndex(3);settle();check('tabs target active document only',App.activeDocument()==other and Gui.activeDocument().activeView() in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor') and area.activeSubWindow().widget().property('om9ViewSlot')==3)
+        Gui.activateWorkbench('PartWorkbench');settle();check('owned tabs hide outside workbench',not dock.isVisible());Gui.activateWorkbench('OpenMatrix9Workbench');settle();check('reactivation creates no duplicate strip',dock.isVisible() and len(window.findChildren(QtWidgets.QTabBar,'OM9ViewportTabs'))==1)
+        command('ViewportTabs Align Left');command('ViewportTabs Hide');Gui.activateWorkbench('PartWorkbench');settle();Gui.activateWorkbench('OpenMatrix9Workbench');settle();check('visibility and alignment preferences survive workbench switch',not dock.isVisible() and window.dockWidgetArea(dock)==QtCore.Qt.LeftDockWidgetArea);command('ViewportTabs Align Bottom');command('ViewportTabs Show')
+        victim=next(s for s in area.subWindowList() if s.isVisible() and s.widget().property('om9ViewSlot')==1);victim.close();settle();settle()
+        check('closing a quadrant reconstructs four live tab targets',len(Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor'))==4 and tabs.count()==4 and all(tabs.isTabEnabled(i) for i in range(4)))
+        tabs.setCurrentIndex(1);settle();check('reconstructed tab activates correct new native view',area.activeSubWindow().widget().property('om9ViewSlot')==1)
+        path=out/'tabs.FCStd';other.saveAs(str(path));App.closeDocument(other.Name);other=App.openDocument(str(path));settle();settle();tabs.setCurrentIndex(2);settle()
+        check('save reload rebuilds four tabs for reopened document',App.activeDocument()==other and len(Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor'))==4 and area.activeSubWindow().widget().property('om9ViewSlot')==2)
+        class Restricted:
+            def __init__(self):self.form=QtWidgets.QWidget()
+            def isAllowedAlterView(self):return False
+            def isAllowedAlterDocument(self):return False
+            def isAllowedAlterSelection(self):return False
+        Gui.Control.showDialog(Restricted());settle();check('restricted task disables viewport tabs action',not action.isEnabled());command('ViewportTabs Hide');check('restricted CMD cannot hide tabs',dock.isVisible());before=area.activeSubWindow();QtTest.QTest.mouseClick(tabs,QtCore.Qt.LeftButton,pos=tabs.tabRect(0).center());settle();check('restricted mouse tab cannot change active view',area.activeSubWindow()==before)
+        victim=next(s for s in area.subWindowList() if s.isVisible() and s.widget().property('om9ViewSlot')==1);victim.close();settle();settle()
+        check('restricted task defers quadrant reconstruction',len(Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor'))==3 and area.activeSubWindow()==before)
+        Gui.Control.closeDialog();settle();settle();check('permission restoration resumes reconstruction and preserves focus',len(Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor'))==4 and area.activeSubWindow()==before)
+        window.grab().save(str(out/'viewport-tabs.png'))
+        command('ViewportTabs Align Right');command('ViewportTabs Hide')
+        check('nondefault tab preference is stored in user parameters',App.ParamGet('User parameter:BaseApp/Preferences/Mod/OpenMatrix9/ViewportTabs').GetInt('State')==6)
+        for name in list(App.listDocuments()):
+            if name.startswith('ViewTabs') or name=='tabs':App.closeDocument(name)
+        settle();result['after_close']={'documents':list(App.listDocuments()),'tabs_visible':dock.isVisible(),'command_enabled':action.isEnabled()};check('no document hides tabs and disables command',not dock.isVisible() and not action.isEnabled())
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):
+            if name.startswith('ViewTabs'):App.closeDocument(name)
+        QtCore.QTimer.singleShot(0,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

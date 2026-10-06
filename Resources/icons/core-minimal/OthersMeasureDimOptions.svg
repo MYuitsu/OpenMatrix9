@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Dimension Options</title>
+<desc>Configure dimension annotation settings; authored OpenMatrix9 vector.</desc>
+<g transform="scale(.8)"><path d="M6.0 18.0 L6.0 26.0 M26.0 18.0 L26.0 26.0 M6 22 L26 22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="22" r="2.3" fill="#80A9E8"/><circle cx="26" cy="22" r="2.3" fill="#80A9E8"/></g><path d="M19 21 H29 M19 26 H29 M22 18 V24 M27 23 V29" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

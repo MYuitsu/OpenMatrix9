@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Split sides</title>
+<desc>Insert parallel edges on both sides of selected edges. OpenMatrix9 minimal-subd-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 10 Q16 3 28 9 L28 26 Q16 20 4 28 Z" fill="#FFB5A2" fill-opacity="0.2" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 28 Q16 20 28 26" fill="none" stroke="#FF6A68" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 7 V24" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 8 V25 M21 7 V24" fill="none" stroke="#FF0505" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

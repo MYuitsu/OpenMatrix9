@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Sphere</title>
+<desc>Solid sphere with circular silhouette. OpenMatrix9 minimal-solid-v3-warm-highlight; authored vector geometry.</desc>
+<ellipse cx="16" cy="16" rx="12" ry="12" fill="none" stroke="#A668D1" stroke-width="2.2"/><ellipse cx="16" cy="16" rx="12" ry="4" fill="none" stroke="#A668D1" stroke-width="1.6"/><path d="M16 4 C8 8 8 24 16 28 C24 24 24 8 16 4" fill="none" stroke="#A668D1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

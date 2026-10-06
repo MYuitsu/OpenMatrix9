@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Gem Cutter</title>
+<desc>Generate gem cutters for one or multiple stones. OpenMatrix9 minimal-cutters-v1-reviewed; authored vector geometry.</desc>
+<path d="M12 3 H20 V12 L26 16 L20 19 V29 H12 V19 L6 16 L12 12 Z" fill="#C05D05" fill-opacity="0.35" stroke="#F2793A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 16 Q16 23 26 16" fill="none" stroke="#FFFFCF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 5 V11 M15 22 V27" fill="none" stroke="#FFC88E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Apply Edge Softening</title>
+<desc>Create a softened display mesh for selected geometry. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<path d="M6 10 Q6 8 8 7 L18 3 Q20 2 22 4 L27 8 Q29 9 29 12 V22 Q29 24 27 25 L17 29 Q15 30 13 28 L6 24 Q4 23 4 21 V12 Q4 10 6 10 Z" fill="#1C4B4B" fill-opacity="0.3" stroke="#59C5C5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10 L13 14 Q16 16 19 14 L27 10 M16 16 V27" fill="none" stroke="#CEFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

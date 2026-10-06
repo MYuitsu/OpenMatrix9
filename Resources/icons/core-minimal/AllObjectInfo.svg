@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>All Object Info</title>
+<desc>Inspect information for all objects; authored OpenMatrix9 vector.</desc>
+<path d="M6 3 H20 L27 10 V29 H6 Z" fill="#FFFFFF" fill-opacity="0.06" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3 V10 H27" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><g transform="scale(.8)"><path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M25 19 V29 M25 15 V16" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

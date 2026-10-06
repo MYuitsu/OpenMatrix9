@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Match surfaces</title>
+<desc>Adjust a surface edge to match continuity of a neighbor. OpenMatrix9 minimal-surface-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 8 L13 5 V28 L3 26 Z" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 5 Q28 9 29 23 L18 28 Z" fill="#5FCB62" fill-opacity="0.3" stroke="#5FCB62" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 5 V28 M18 5 V28" fill="none" stroke="#5FCB62" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 16 H15" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 13 L15 16 L18 19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,50 @@
+# OM9-SNAP-007 original command/state and point-object geometry.
+import os,json,traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(350,loop.quit);loop.exec();QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def cmd(text):
+    field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def measure():
+    cmd('Distance');cmd('0,0,0');QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=pixel);settle()
+    return float(prompt.text().split()[1]) if prompt.text().startswith('Distance: ') else float('nan')
+def run():
+    global field,target,pixel,prompt
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('PointSnap');doc.UndoMode=1;settle()
+        point=doc.addObject('Part::Feature','Point');point.Shape=Part.Vertex(App.Vector(0,0,10))
+        curve=doc.addObject('Part::Feature','Curve');curve.Shape=Part.makeLine(App.Vector(0,0,10),App.Vector(10,0,10));doc.recompute();settle()
+        window=Gui.getMainWindow();window.show();window.resize(1500,1000);settle()
+        field=command_input(window);prompt=command_prompt(window)
+        action=window.findChild(QtGui.QAction,'Osnap P');button=window.findChild(QtWidgets.QToolButton,'OM9SnapPoint')
+        check('OM9-SNAP-007 original Point menu and sidebar registered',action is not None and action.isCheckable() and action.isEnabled() and button is not None and button.isEnabled())
+        area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
+        target=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport();pixel=target.rect().center()+QtCore.QPoint(3,2)
+        cmd('Osnap P');check('CMD enables Point independently',action.isChecked())
+        check('master off disables Point geometry',measure()<5)
+        cmd('Osnap On');check('mouse snaps exact spatial point object',abs(measure()-10)<1e-9)
+        point.ViewObject.Visibility=False;settle();check('Point excludes curve endpoint when point object hidden',measure()<5)
+        point.ViewObject.Visibility=True;point.Placement.Base=App.Vector(0,0,20);doc.recompute();settle();check('Point uses object world placement',abs(measure()-30)<1e-9)
+        point.Placement=App.Placement();point.Shape=Part.makeCompound([Part.Vertex(App.Vector(0,0,10)),Part.Vertex(App.Vector(20,0,40))]);doc.recompute();settle();check('Point compound chooses nearest projected point',abs(measure()-10)<1e-9)
+        action.trigger();settle();check('menu disables Point and sidebar together',not action.isChecked() and not button.isChecked())
+        QtTest.QTest.mouseClick(button,QtCore.Qt.LeftButton);settle();check('sidebar mouse restores shared Point mode',action.isChecked() and button.isChecked())
+        cmd('Osnap Off');check('master off preserves Point mode',action.isChecked() and measure()<5);cmd('Osnap On')
+        check('point snapping creates no geometry selection or Undo',len(doc.Objects)==2 and not doc.UndoNames and not doc.RedoNames and not Gui.Selection.getSelection())
+        Gui.activateWorkbench('PartWorkbench');settle();Gui.activateWorkbench('OpenMatrix9Workbench');settle()
+        check('Point-only state survives workbench reactivation',action.isChecked() and App.ParamGet('User parameter:BaseApp/Preferences/Mod/OpenMatrix9/Osnap').GetInt('State',-1)==9)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(500,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

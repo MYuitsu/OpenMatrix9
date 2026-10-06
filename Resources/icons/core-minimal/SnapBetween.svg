@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Between Snap</title>
+<desc>Find a position between picked points; authored OpenMatrix9 vector.</desc>
+<path d="M4 24 L28 8" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="24" r="2.875" fill="#80A9E8"/><circle cx="28" cy="8" r="2.875" fill="#80A9E8"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#FFFFFF"/>
+</svg>

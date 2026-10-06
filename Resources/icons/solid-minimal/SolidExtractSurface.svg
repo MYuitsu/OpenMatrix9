@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Extract surface</title>
+<desc>Separate a component face from a polysurface. OpenMatrix9 minimal-solid-v3-warm-highlight; authored vector geometry.</desc>
+<path d="M3 19 L13 24 V30 L3 25 Z" fill="#A668D1" fill-opacity="0.18" stroke="#A668D1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 24 L26 18 V24 L13 30 Z" fill="#A668D1" fill-opacity="0.18" stroke="#A668D1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 8 L18 2 L27 8 L13 14 Z" fill="#FFD166" fill-opacity="0.25" stroke="#FFD166" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 21 V15" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 18 L16 15 L19 18" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Arc blend</title>
+  <desc>Two circular arcs connecting curve ends with adjustable bulge. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M3 25 H6 M26 5 V2" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 25 V15 H26 V5" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><path d="M6 25 A10 10 0 0 0 16 15 A10 10 0 0 1 26 5" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="25" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="26" cy="5" r="1.9549999999999998" fill="#FFFFFF"/>
+</svg>

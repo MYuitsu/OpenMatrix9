@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Clayoo ring</title>
+<desc>Create a simple band from a Clayoo surface. OpenMatrix9 minimal-builder-v1-reviewed; authored vector geometry.</desc>
+<g transform="rotate(-24 16 16)"><ellipse cx="16" cy="16" rx="10" ry="13" fill="none" stroke="#FFFFFF" stroke-width="3.2"/><ellipse cx="16" cy="16" rx="7" ry="10" fill="none" stroke="#F2BEA9" stroke-width="2"/><path d="M6 16 Q6 29 16 29 Q26 29 26 16" fill="none" stroke="#D92D32" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12 L9 13 M23 13 L26 12 M10 27 L12 24 M20 24 L22 27" fill="none" stroke="#F2BEA9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>

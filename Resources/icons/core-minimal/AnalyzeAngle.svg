@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Angle</title>
+<desc>Measure an angle; authored OpenMatrix9 vector.</desc>
+<path d="M5 26 H29 M5 26 L24 5" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 26 Q17 19 13 17" fill="none" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="8" y="12" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FFFFFF">A</text>
+</svg>

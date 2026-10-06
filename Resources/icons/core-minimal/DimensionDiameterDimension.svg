@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Diameter Dimension</title>
+<desc>Annotate a circle diameter; authored OpenMatrix9 vector.</desc>
+<circle cx="16" cy="17" r="10" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M5.17157287525381 22.17157287525381 L10.82842712474619 27.82842712474619 M21.17157287525381 6.17157287525381 L26.82842712474619 11.82842712474619 M8 25 L24 9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="25" r="2.3" fill="#80A9E8"/><circle cx="24" cy="9" r="2.3" fill="#80A9E8"/><text x="6" y="7" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="bold" fill="#FFFFFF">Ø</text>
+</svg>

@@ -1,0 +1,69 @@
+"""Exercise the complete authored icon catalog and independent F6 resources."""
+import configparser,hashlib,json,os,traceback
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+from PySide6 import QtCore,QtGui,QtWidgets
+
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+result={'checks':[]}
+def check(name,passed):
+    result['checks'].append({'name':name,'passed':bool(passed)})
+    if not passed:raise AssertionError(name)
+
+def run():
+    try:
+        window=Gui.getMainWindow();window.resize(1440,1000)
+        Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents()
+        dock=window.findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar')
+        check('native sidebar loaded',dock is not None)
+        resources=Path(App.getHomePath())/'Mod/OpenMatrix9/Resources'
+        ini=configparser.ConfigParser(interpolation=None);ini.read(resources/'menu/icons.ini',encoding='utf-8')
+        menu=configparser.ConfigParser(interpolation=None);menu.optionxform=str;menu.read(resources/'menu/MainMenu.ini',encoding='utf-8')
+        manifest=json.loads((resources/'menu/source-manifest.json').read_text(encoding='utf-8'))
+        check('complete 510 icon bindings',len(ini.sections())==510)
+        for key in ini.sections():
+            file=resources/ini[key]['image']
+            check(key+': authored SVG',ini[key]['source']=='OpenMatrix9-authored-svg' and file.suffix=='.svg')
+            check(key+': manifest hash',hashlib.sha256(file.read_bytes()).hexdigest()==manifest['authored_symbols'][key]['sha256'])
+            source=QtGui.QImage(str(file));check(key+': Qt loading',not source.isNull() and source.size()==QtCore.QSize(32,32))
+            reader=QtGui.QImageReader(str(file));reader.setScaledSize(QtCore.QSize(523,523));scaled=reader.read()
+            check(key+': large Qt render',not scaled.isNull() and scaled.size()==QtCore.QSize(523,523))
+        for section in menu.values():
+            if not section.get('Name') or not section.get('IconCount'):continue
+            name=section['Name'];keys=[v for k,v in section.items() if k.startswith('Icon') and k[4:].isdigit()]
+            selectors=[b for b in dock.findChildren(QtWidgets.QAbstractButton) if b.objectName().startswith('OM9Group') and b.toolTip()==name]
+            check(name+': group selector',len(selectors)==1);selectors[0].click();QtWidgets.QApplication.processEvents()
+            buttons=[b for b in dock.findChildren(QtWidgets.QToolButton) if b.objectName().startswith('OM9Command')]
+            check(name+': menu order',[b.property('om9IconKey') for b in buttons]==keys)
+            for b in buttons:
+                key=b.property('om9IconKey');source=QtGui.QImage(str(resources/ini[key]['image']))
+                expected=source.scaled(24,24,QtCore.Qt.KeepAspectRatio,QtCore.Qt.SmoothTransformation)
+                actual=b.icon().pixmap(24,24).toImage()
+                check(key+': native 24px image',actual.convertToFormat(QtGui.QImage.Format_ARGB32)==expected.convertToFormat(QtGui.QImage.Format_ARGB32))
+                check(key+': disabled color',actual==b.icon().pixmap(24,24,QtGui.QIcon.Disabled).toImage())
+            if name in {'File','View','Utilities','Measure','Render'}:dock.grab().save(str(out/(name.lower()+'-sidebar.png')))
+        auxiliary=[b for b in dock.findChildren(QtWidgets.QToolButton) if b.property('om9IconKey') and not b.objectName().startswith('OM9Command') and not b.icon().isNull()]
+        check('auxiliary icon buttons present',len(auxiliary)>40)
+        for b in auxiliary:
+            key=b.property('om9IconKey');size=b.iconSize();source=QtGui.QImage(str(resources/ini[key]['image']))
+            expected=source.scaled(size,QtCore.Qt.KeepAspectRatio,QtCore.Qt.SmoothTransformation);actual=b.icon().pixmap(size).toImage()
+            check(key+': auxiliary image',actual.convertToFormat(QtGui.QImage.Format_ARGB32)==expected.convertToFormat(QtGui.QImage.Format_ARGB32))
+        App.newDocument('PublicSourceSmoke');QtWidgets.QApplication.processEvents()
+        event=QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_F6,QtCore.Qt.NoModifier)
+        QtWidgets.QApplication.sendEvent(window,event);QtWidgets.QApplication.processEvents()
+        popup=window.findChild(QtWidgets.QMenu,'OM9F6Menu')
+        check('authored F6 menu opens',popup is not None and popup.isVisible())
+        groups=[a.menu() for a in popup.actions() if a.menu()]
+        check('eight context groups',len(groups)==8)
+        check('generic SubD context label',any(g.title()=='SubD' for g in groups))
+        commands=[a.property('om9OriginalCommand') for g in groups for a in g.actions() if a.property('om9OriginalCommand')]
+        check('authored context commands loaded','Line' in commands and 'Properties' in commands and 'Copy' in commands)
+        popup.grab().save(str(out/'f6-menu.png'));popup.close()
+        result['auxiliary_buttons']=len(auxiliary);result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(2300,run)

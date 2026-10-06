@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>MillWork</title>
+<desc>Milling builder reference: vertical cutter and cutting path. OpenMatrix9 minimal-builder-v1-reviewed; authored vector geometry.</desc>
+<path d="M11 3 H21 V11 H11 Z" fill="#D92D32" fill-opacity="0.3" stroke="#D92D32" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 3 V11 M18 3 V11" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11 H18 V19 L16 23 L14 19 Z" fill="#FFFFFF" fill-opacity="0.15" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 28 H10 L14 25 H25 L28 28" fill="none" stroke="#D92D32" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 25 H11 M23 25 H27" fill="none" stroke="#FF6065" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

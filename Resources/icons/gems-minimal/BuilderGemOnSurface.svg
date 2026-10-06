@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Gem on Surface</title>
+<desc>Place gems one at a time on a surface. OpenMatrix9 minimal-gems-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 13 Q13 5 27 9 L29 27 Q17 22 5 29 Z" fill="#7CB8F5" fill-opacity="0.12" stroke="#3E88C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.54 18.30 L17.30 21.54 L12.70 21.54 L9.46 18.30 L9.46 13.70 L12.70 10.46 L17.30 10.46 L20.54 13.70 Z" fill="#7CB8F5" fill-opacity="0.24" stroke="#7CB8F5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.120000000000001 16 L15 13.120000000000001 L17.88 16" fill="none" stroke="#CDE7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 21 L29 23 L25 25 L24 29 Z" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

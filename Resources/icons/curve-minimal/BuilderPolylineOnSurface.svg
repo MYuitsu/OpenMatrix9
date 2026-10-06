@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Polyline on surface</title>
+  <desc>Straight segments with picked vertices on a surface. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 24 L14 13 L26 21" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="24" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="14" cy="13" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="26" cy="21" r="1.9549999999999998" fill="#FFFFFF"/>
+</svg>

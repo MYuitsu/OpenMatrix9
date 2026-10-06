@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Object Checker</title>
+<desc>Report whether an object is valid. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<g transform="translate(0 0) scale(.75)"><path d="M4 9 L18 3 L28 9 V23 L14 29 L4 23 Z" fill="#9ABFFF" fill-opacity="0.22" stroke="#4260FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9 L14 15 L28 9 M14 15 V29" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M13 23 L19 29 L29 14" fill="none" stroke="#4260FF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 23 L19 28 L29 14" fill="none" stroke="#9ABFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Profile Placer</title>
+<desc>Place closed section curves on a rail for sweep operations. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 27 Q15 15 29 7" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="8" cy="23" rx="4" ry="6" fill="none" stroke="#4260FF" stroke-width="2.4"/><ellipse cx="16" cy="16" rx="4" ry="6" fill="none" stroke="#4260FF" stroke-width="2.4"/><ellipse cx="25" cy="9" rx="4" ry="6" fill="none" stroke="#4260FF" stroke-width="2.4"/>
+</svg>

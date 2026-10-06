@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Baguettes Between Curves</title>
+<desc>Reference cue: a tapered baguette between two bounding curves. OpenMatrix9 minimal-gems-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 8 Q16 4 29 10 M3 26 Q16 20 29 26" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.5 9.5 H22.5 L20.55 22.5 H11.45 Z" fill="#3E88C8" fill-opacity="0.35" stroke="#7CB8F5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.75 12.36 H19.25 L18.34 19.64 H13.66 Z" fill="none" stroke="#CDE7FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

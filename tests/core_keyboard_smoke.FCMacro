@@ -1,0 +1,75 @@
+# Original Matrix shortcut defaults, real Qt key input and native geometry.
+import os,json,traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtGui,QtTest
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(300,loop.quit);loop.exec()
+def check(name,value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def cmd(text):
+    field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def key(k,mods=QtCore.Qt.NoModifier):
+    target.setFocus();QtTest.QTest.keyClick(target,k,mods);settle()
+def grid():
+    search=coin.SoSearchAction();search.setName('OM9ConstructionGrid');search.apply(Gui.activeDocument().activeView().getSceneGraph());return search.getPath().getTail()
+def run():
+    global field,target
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('MatrixKeyboard');doc.UndoMode=1;settle()
+        window=Gui.getMainWindow();window.show();window.resize(1500,1000);window.raise_();window.activateWindow();settle()
+        area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
+        target=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport()
+        field=command_input(window);prompt=command_prompt(window)
+        key(QtCore.Qt.Key_F2);history=window.findChild(QtWidgets.QDockWidget,'OM9CommandHistory')
+        check('F2 opens Matrix command history',history is not None and history.isVisible())
+        key(QtCore.Qt.Key_F2);check('F2 toggles history off',not history.isVisible())
+        cmd('Distance');before=prompt.text();dialog=QtWidgets.QDialog(window);dialog.setModal(True);entry=QtWidgets.QLineEdit(dialog);dialog.show();entry.setFocus();settle()
+        QtTest.QTest.keyClick(entry,QtCore.Qt.Key_F4);settle();check('F4 in modal dialog does not advance Distance',prompt.text()==before)
+        dialog.close();settle()
+        class AltGuard(QtCore.QObject):
+            def eventFilter(self,receiver,event):
+                if event.type()==QtCore.QEvent.KeyPress and event.key()==QtCore.Qt.Key_F4 and event.modifiers()&QtCore.Qt.AltModifier:return True
+                return False
+        guard=AltGuard(field);field.installEventFilter(guard);QtTest.QTest.keyClick(field,QtCore.Qt.Key_F4,QtCore.Qt.AltModifier);settle();field.removeEventFilter(guard);check('Alt F4 does not supply Distance origin',prompt.text()==before)
+        key(QtCore.Qt.Key_Escape)
+        cmd('Distance');key(QtCore.Qt.Key_F4);cmd('3,4,0');check('F4 supplies C-plane origin to Distance',prompt.text()=='Distance: 5 mm')
+        cmd('Line');key(QtCore.Qt.Key_F4);cmd('5,2,0');check('F4 and CMD share Line geometry',abs(doc.Objects[-1].Shape.Length-29**0.5)<1e-8)
+        camera=Gui.activeDocument().activeView().getCameraNode();camera.position.setValue(7,9,100);camera.height=37
+        key(QtCore.Qt.Key_F5);check('F5 centers active camera preserving zoom',abs(camera.position.getValue()[0])<1e-6 and abs(camera.height.getValue()-37)<1e-6)
+        previous=grid().whichChild.getValue();key(QtCore.Qt.Key_F7);check('F7 toggles only active native grid',grid().whichChild.getValue()!=previous)
+        previous=grid().whichChild.getValue();field.setFocus();QtTest.QTest.keyClick(field,QtCore.Qt.Key_F7);settle();check('F7 works while CMD has focus',grid().whichChild.getValue()!=previous)
+        cmd('Osnap On');key(QtCore.Qt.Key_F8);ortho=window.findChild(QtGui.QAction,'Ortho');check('F8 turns Ortho on through shared command',ortho is not None and ortho.isChecked())
+        cmd('Line');key(QtCore.Qt.Key_F4);center=target.rect().center();QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=center+QtCore.QPoint(60,-20));settle()
+        points=[v.Point for v in doc.Objects[-1].Shape.Vertexes];check('F8 mouse Line locks to C-plane axis',abs(points[-1].y)<1e-6 and points[-1].x>0)
+        cmd('Line');key(QtCore.Qt.Key_F4);QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,QtCore.Qt.ShiftModifier,pos=center+QtCore.QPoint(60,-20));settle()
+        check('Shift temporarily releases enabled Ortho',abs(doc.Objects[-1].Shape.Vertexes[-1].Point.y)>0.1 and ortho.isChecked())
+        cmd('Ortho');check('CMD toggles the same F8 state',not ortho.isChecked())
+        cmd('Line');key(QtCore.Qt.Key_F4);QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,QtCore.Qt.ShiftModifier,pos=center+QtCore.QPoint(60,-20));settle()
+        check('Shift temporarily engages disabled Ortho',abs(doc.Objects[-1].Shape.Vertexes[-1].Point.y)<1e-6 and not ortho.isChecked())
+        cmd('Line');key(QtCore.Qt.Key_F4);key(QtCore.Qt.Key_Escape);check('Esc cancels pending geometry',prompt.text().startswith('Command:'))
+        Gui.Selection.clearSelection();key(QtCore.Qt.Key_F6);menu=window.findChild(QtWidgets.QMenu,'OM9F6Menu');check('F6 opens context menu with original modes',menu is not None and menu.isVisible() and {a.text() for a in menu.actions()}=={'General','Curve','Gem','Surface','T-Splines','User','Report','Materials'})
+        curve_menu=next(a.menu() for a in menu.actions() if a.text()=='Curve');line_action=next(a for a in curve_menu.actions() if a.text()=='Line');check('F6 original Line action enabled',line_action.isEnabled());line_action.trigger();menu.close();settle();cmd('0,0,0');cmd('4,0,0');check('F6 Line uses same native implementation',abs(doc.Objects[-1].Shape.Length-4)<1e-8)
+        Gui.Selection.addSelection(doc.Objects[-1]);key(QtCore.Qt.Key_F6);menu=window.findChild(QtWidgets.QMenu,'OM9F6Menu');check('F6 changes with selected curve',menu.property('om9SelectionType')=='Curve');menu.close();settle()
+        key(QtCore.Qt.Key_T,QtCore.Qt.ControlModifier);check('Ctrl T opens native property inspector',any(d.isVisible() for d in window.findChildren(QtWidgets.QDockWidget) if d.objectName() in ('Std_PropertyView','Combo View','Property view','Model')))
+        key(QtCore.Qt.Key_W,QtCore.Qt.ControlModifier);check('Ctrl W reserved for UnGroup does not close document',App.activeDocument() is doc)
+        key(QtCore.Qt.Key_Q,QtCore.Qt.ControlModifier);check('Ctrl Q reserved for Group does not quit',App.activeDocument() is doc)
+        field.setFocus();QtTest.QTest.keyClick(field,QtCore.Qt.Key_W,QtCore.Qt.ControlModifier);settle();check('Ctrl W in CMD does not close document',App.activeDocument() is doc and prompt.text().startswith('UnGroup:'))
+        key(QtCore.Qt.Key_F10);check('F10 reserves original PointsOn instead of host action',prompt.text().startswith('PointsOn:'))
+        key(QtCore.Qt.Key_C,QtCore.Qt.ControlModifier|QtCore.Qt.AltModifier);check('Ctrl Alt C reserves original Center Object',prompt.text().startswith('gvCenterObjects:'))
+        field.setFocus();field.setText('abc');QtTest.QTest.keyClick(field,QtCore.Qt.Key_A,QtCore.Qt.ControlModifier);check('Ctrl A still selects text in CMD',field.selectedText().replace('\u2029','\n')==field.toPlainText() and field.selectedText().endswith('abc'))
+        key(QtCore.Qt.Key_F2);history=window.findChild(QtWidgets.QDockWidget,'OM9CommandHistory');result['history_text']=history.findChild(QtWidgets.QTextEdit).toPlainText();result['report_text_widgets']=[(w.objectName(),w.metaObject().className(),w.toPlainText()[:250]) for w in window.findChildren(QtWidgets.QTextEdit)];check('history contains typed commands and measurement result','Distance' in history.findChild(QtWidgets.QTextEdit).toPlainText() and '5 mm' in history.findChild(QtWidgets.QTextEdit).toPlainText())
+        history.hide();Gui.activateWorkbench('PartWorkbench');settle();check('Matrix shortcuts deactivate with workbench',not history.isVisible())
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(500,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

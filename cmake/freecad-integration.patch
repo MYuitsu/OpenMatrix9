@@ -1,0 +1,13 @@
+diff --git a/src/Mod/CMakeLists.txt b/src/Mod/CMakeLists.txt
+index 032e19800f..f71dc76180 100644
+--- a/src/Mod/CMakeLists.txt
++++ b/src/Mod/CMakeLists.txt
+@@ -131,3 +131,8 @@ endif(BUILD_TUX)
+ if(BUILD_WEB)
+     add_subdirectory(Web)
+ endif(BUILD_WEB)
++
++option(BUILD_OPENMATRIX9 "Build the Rust/Qt OpenMatrix9 workbench" OFF)
++if(BUILD_OPENMATRIX9)
++    add_subdirectory("${CMAKE_SOURCE_DIR}/Mod/OpenMatrix9" "${CMAKE_BINARY_DIR}/Mod/OpenMatrix9")
++endif()

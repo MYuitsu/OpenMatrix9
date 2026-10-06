@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Append face</title>
+<desc>Draw new faces to close a surface. OpenMatrix9 minimal-subd-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 4 H13 V28 H3 Z" fill="#FFB5A2" fill-opacity="0.2" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 15 L27 8 V24 L13 28 Z" fill="#FFB5A2" fill-opacity="0.3" stroke="#FF6A68" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="13" cy="15" r="2.1849999999999996" fill="#FFFFFF"/><circle cx="27" cy="8" r="2.1849999999999996" fill="#FFFFFF"/><circle cx="27" cy="24" r="2.1849999999999996" fill="#FFFFFF"/><path d="M23 4 H29 M26 2 V8" fill="none" stroke="#FF6A68" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

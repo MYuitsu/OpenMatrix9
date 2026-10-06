@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Raised band</title>
+<desc>Place raised or sunken lettering or closed planar designs on a band. OpenMatrix9 minimal-builder-v1-reviewed; authored vector geometry.</desc>
+<path d="M5 12 C5 5 27 5 27 12 V23 C27 31 5 31 5 23 Z" fill="#D92D32" fill-opacity="0.22" stroke="#D92D32" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="16" cy="12" rx="11" ry="5" fill="none" stroke="#FF6065" stroke-width="2.4"/><path d="M5 12 C5 20 27 20 27 12" fill="none" stroke="#990505" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 25 L16 16 L21 25 M13 22 H19" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 28 L16 19" fill="none" stroke="#FF6065" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

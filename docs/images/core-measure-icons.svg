@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="440"><rect width="100%" height="100%" fill="#333"/><text x="16" y="30" font-family="sans-serif" font-size="20" fill="white">OpenMatrix9 — Measure / authored SVG</text>
+<g transform="translate(0 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M5 26 H29 M5 26 L24 5" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 26 Q17 19 13 17" fill="none" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="8" y="12" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FFFFFF">A</text>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M5 26 H29 M5 26 L24 5" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 26 Q17 19 13 17" fill="none" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="8" y="12" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FFFFFF">A</text>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeAngle</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M6.0 18.0 L6.0 26.0 M26.0 18.0 L26.0 26.0 M6 22 L26 22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="22" r="2.3" fill="#80A9E8"/><circle cx="26" cy="22" r="2.3" fill="#80A9E8"/><text x="16" y="13" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#FFFFFF">D</text>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M6.0 18.0 L6.0 26.0 M26.0 18.0 L26.0 26.0 M6 22 L26 22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="22" r="2.3" fill="#80A9E8"/><circle cx="26" cy="22" r="2.3" fill="#80A9E8"/><text x="16" y="13" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#FFFFFF">D</text>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeDistance</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(320 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 24 Q9 4 18 14 T28 8" fill="none" stroke="#80A9E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><text x="8" y="10" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#FFFFFF">L</text>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 24 Q9 4 18 14 T28 8" fill="none" stroke="#80A9E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><text x="8" y="10" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#FFFFFF">L</text>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeLength</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M5 27 A11 11 0 0 1 27 27 M16 27 L24 9" fill="none" stroke="#FFFFFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="27" r="2.3" fill="#80A9E8"/><text x="25" y="8" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="bold" fill="#FFFFFF">R</text>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M5 27 A11 11 0 0 1 27 27 M16 27 L24 9" fill="none" stroke="#FFFFFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="27" r="2.3" fill="#80A9E8"/><text x="25" y="8" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="bold" fill="#FFFFFF">R</text>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AnalyzeRadius</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M6.0 18.0 L6.0 26.0 M26.0 18.0 L26.0 26.0 M6 22 L26 22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="22" r="2.3" fill="#80A9E8"/><circle cx="26" cy="22" r="2.3" fill="#80A9E8"/><path d="M6 11 V26 M26 15 V26" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M6.0 18.0 L6.0 26.0 M26.0 18.0 L26.0 26.0 M6 22 L26 22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="22" r="2.3" fill="#80A9E8"/><circle cx="26" cy="22" r="2.3" fill="#80A9E8"/><path d="M6 11 V26 M26 15 V26" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">OthersMeasureDimHorizontal</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M26.0 6.0 L18.0 6.0 M26.0 26.0 L18.0 26.0 M22 6 L22 26" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="22" cy="6" r="2.3" fill="#80A9E8"/><circle cx="22" cy="26" r="2.3" fill="#80A9E8"/><path d="M10 6 H26 M14 26 H26" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M26.0 6.0 L18.0 6.0 M26.0 26.0 L18.0 26.0 M22 6 L22 26" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="22" cy="6" r="2.3" fill="#80A9E8"/><circle cx="22" cy="26" r="2.3" fill="#80A9E8"/><path d="M10 6 H26 M14 26 H26" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">OthersMeasureDimVertical</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M5 26 H29 M5 26 L24 5" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 26 Q17 19 13 17" fill="none" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="19" y="17" text-anchor="middle" font-family="sans-serif" font-size="7" font-weight="bold" fill="#FFFFFF">30</text>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M5 26 H29 M5 26 L24 5" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 26 Q17 19 13 17" fill="none" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="19" y="17" text-anchor="middle" font-family="sans-serif" font-size="7" font-weight="bold" fill="#FFFFFF">30</text>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">DimensionAngleDimension</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(1120 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4.253505868145134 21.09194738980073 L9.746494131854867 26.90805261019927 M22.253505868145133 4.09194738980073 L27.746494131854867 9.90805261019927 M7 24 L25 7" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="24" r="2.3" fill="#80A9E8"/><circle cx="25" cy="7" r="2.3" fill="#80A9E8"/><path d="M3 29 H15 M3 29 V17" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4.253505868145134 21.09194738980073 L9.746494131854867 26.90805261019927 M22.253505868145133 4.09194738980073 L27.746494131854867 9.90805261019927 M7 24 L25 7" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="24" r="2.3" fill="#80A9E8"/><circle cx="25" cy="7" r="2.3" fill="#80A9E8"/><path d="M3 29 H15 M3 29 V17" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">DimensionRotatedDimension</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(0 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4.253505868145134 21.09194738980073 L9.746494131854867 26.90805261019927 M22.253505868145133 4.09194738980073 L27.746494131854867 9.90805261019927 M7 24 L25 7" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="24" r="2.3" fill="#80A9E8"/><circle cx="25" cy="7" r="2.3" fill="#80A9E8"/><path d="M3 20 L11 28 M21 3 L29 11" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4.253505868145134 21.09194738980073 L9.746494131854867 26.90805261019927 M22.253505868145133 4.09194738980073 L27.746494131854867 9.90805261019927 M7 24 L25 7" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="24" r="2.3" fill="#80A9E8"/><circle cx="25" cy="7" r="2.3" fill="#80A9E8"/><path d="M3 20 L11 28 M21 3 L29 11" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">DimensionAlignedDimension</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="17" r="10" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M5.17157287525381 22.17157287525381 L10.82842712474619 27.82842712474619 M21.17157287525381 6.17157287525381 L26.82842712474619 11.82842712474619 M8 25 L24 9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="25" r="2.3" fill="#80A9E8"/><circle cx="24" cy="9" r="2.3" fill="#80A9E8"/><text x="6" y="7" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="bold" fill="#FFFFFF">Ø</text>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="17" r="10" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M5.17157287525381 22.17157287525381 L10.82842712474619 27.82842712474619 M21.17157287525381 6.17157287525381 L26.82842712474619 11.82842712474619 M8 25 L24 9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="25" r="2.3" fill="#80A9E8"/><circle cx="24" cy="9" r="2.3" fill="#80A9E8"/><text x="6" y="7" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="bold" fill="#FFFFFF">Ø</text>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">DimensionDiameterDimension</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(320 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M5 27 A11 11 0 0 1 27 27 M16 27 L24 9" fill="none" stroke="#FFFFFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="27" r="2.3" fill="#80A9E8"/><text x="25" y="8" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="bold" fill="#FFFFFF">R</text><path d="M16 27 H29" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M5 27 A11 11 0 0 1 27 27 M16 27 L24 9" fill="none" stroke="#FFFFFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="27" r="2.3" fill="#80A9E8"/><text x="25" y="8" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="bold" fill="#FFFFFF">R</text><path d="M16 27 H29" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">DimensionRadialDimension</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M28 7 H18 L5 26" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 21 V26 H10" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M28 7 H18 L5 26" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 21 V26 H10" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">DimensionLeader</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M5 6 H27 M16 6 V27 M11 27 H21 M5 6 V10 M27 6 V10" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M5 6 H27 M16 6 V27 M11 27 H21 M5 6 V10 M27 6 V10" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">DimensionTextBlock</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M5 6 H27 M16 6 V27 M11 27 H21 M5 6 V10 M27 6 V10" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 22 L26 13 L29 16 L20 25 L16 26 Z" fill="#FFFFFF" fill-opacity="0.12" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 15 L27 18" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M5 6 H27 M16 6 V27 M11 27 H21 M5 6 V10 M27 6 V10" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 22 L26 13 L29 16 L20 25 L16 26 Z" fill="#FFFFFF" fill-opacity="0.12" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 15 L27 18" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">OthersMeasureEditText</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M6.0 18.0 L6.0 26.0 M26.0 18.0 L26.0 26.0 M6 22 L26 22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="22" r="2.3" fill="#80A9E8"/><circle cx="26" cy="22" r="2.3" fill="#80A9E8"/><path d="M17 22 L26 13 L29 16 L20 25 L16 26 Z" fill="#FFFFFF" fill-opacity="0.12" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 15 L27 18" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M6.0 18.0 L6.0 26.0 M26.0 18.0 L26.0 26.0 M6 22 L26 22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="22" r="2.3" fill="#80A9E8"/><circle cx="26" cy="22" r="2.3" fill="#80A9E8"/><path d="M17 22 L26 13 L29 16 L20 25 L16 26 Z" fill="#FFFFFF" fill-opacity="0.12" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 15 L27 18" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">OthersMeasureEditDim</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(1120 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M6.0 18.0 L6.0 26.0 M26.0 18.0 L26.0 26.0 M6 22 L26 22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="22" r="2.3" fill="#80A9E8"/><circle cx="26" cy="22" r="2.3" fill="#80A9E8"/><text x="16" y="13" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FFFFFF">T</text><path d="M4 6 H10" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 3 L10 6 L7 9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 6 H22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M25 3 L22 6 L25 9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M6.0 18.0 L6.0 26.0 M26.0 18.0 L26.0 26.0 M6 22 L26 22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="22" r="2.3" fill="#80A9E8"/><circle cx="26" cy="22" r="2.3" fill="#80A9E8"/><text x="16" y="13" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#FFFFFF">T</text><path d="M4 6 H10" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 3 L10 6 L7 9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 6 H22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M25 3 L22 6 L25 9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">DimensionRecenterDimensionTe</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9">xt</text></g>
+<g transform="translate(0 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<g transform="scale(.8)"><path d="M6.0 18.0 L6.0 26.0 M26.0 18.0 L26.0 26.0 M6 22 L26 22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="22" r="2.3" fill="#80A9E8"/><circle cx="26" cy="22" r="2.3" fill="#80A9E8"/></g><path d="M19 21 H29 M19 26 H29 M22 18 V24 M27 23 V29" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<g transform="scale(.8)"><path d="M6.0 18.0 L6.0 26.0 M26.0 18.0 L26.0 26.0 M6 22 L26 22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="22" r="2.3" fill="#80A9E8"/><circle cx="26" cy="22" r="2.3" fill="#80A9E8"/></g><path d="M19 21 H29 M19 26 H29 M22 18 V24 M27 23 V29" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">OthersMeasureDimOptions</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+</svg>

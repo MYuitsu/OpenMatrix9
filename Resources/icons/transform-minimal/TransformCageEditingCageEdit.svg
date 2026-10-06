@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Cage edit</title>
+<desc>Deform an object with cage controls. OpenMatrix9 minimal-transform-v2-reviewed; authored vector geometry.</desc>
+<path d="M3 10 L9 4 L25 8 L29 14 L24 27 L8 29 L3 23 Z" fill="#FF5B05" fill-opacity="0.06" stroke="#FF5B05" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 L18 14 L29 14 M18 14 L14 29 M9 4 L18 14 M3 23 L14 29 L24 27" fill="none" stroke="#FF5B05" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 15 Q12 11 19 17 L17 25 Q12 20 7 23 Z" fill="#FFFFFF" fill-opacity="0.2" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="29" cy="14" r="2.1849999999999996" fill="#FFFFFF"/><circle cx="8" cy="29" r="2.1849999999999996" fill="#FFFFFF"/>
+</svg>

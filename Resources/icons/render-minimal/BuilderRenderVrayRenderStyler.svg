@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Render Styler</title>
+<desc>Prepare styled renders using scene and material controls. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<path d="M8 10 L12 4 H21 L25 10 L16 24 Z" fill="#1C4B4B" fill-opacity="0.3" stroke="#59C5C5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 10 H25 M12 4 L16 24 L21 4" fill="none" stroke="#CEFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 25 L16 30 L29 25" fill="none" stroke="#59C5C5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 L5 12 M28 5 L25 8 M28 13 H30" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

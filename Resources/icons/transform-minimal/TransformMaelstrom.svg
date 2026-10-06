@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Maelstrom</title>
+<desc>Twist a region between two reference circles. OpenMatrix9 minimal-transform-v2-reviewed; authored vector geometry.</desc>
+<path d="M3 3 H29 V29 H3 Z" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12 Q21 2 25 14 Q29 28 14 27 Q1 26 7 13 Q13 4 21 12 Q28 20 17 22 Q10 23 11 16 Q12 11 17 14" fill="none" stroke="#FF5B05" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 6 A10 10 0 0 1 26 16 M6 16 A10 10 0 0 0 16 26" fill="none" stroke="#FF9566" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/>
+</svg>

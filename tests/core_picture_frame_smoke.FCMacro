@@ -1,0 +1,168 @@
+# OM9-VIEW-001 command integration; separate from the host capability probe.
+import os,json,traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+snap_mode=os.environ.get('OM9_PICTURE_SNAP_MODE','End')
+if snap_mode not in ('End','Mid'):raise ValueError('Unsupported fixture snap mode')
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    (out/'progress.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(350,loop.quit);loop.exec();QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def command(text):
+    field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def start(cmd=False,cancel=False):
+    def answer():
+        dialog=QtWidgets.QApplication.activeModalWidget()
+        if not isinstance(dialog,QtWidgets.QFileDialog):QtCore.QTimer.singleShot(50,answer);return
+        if cancel:dialog.reject();return
+        dialog.setDirectory(str(source.parent))
+        def choose():
+            edit=dialog.findChild(QtWidgets.QLineEdit,'fileNameEdit');edit.setFocus();edit.setText(source.name)
+            QtCore.QTimer.singleShot(100,lambda:QtTest.QTest.mouseClick(dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Open),QtCore.Qt.LeftButton))
+        QtCore.QTimer.singleShot(100,choose)
+    QtCore.QTimer.singleShot(100,answer)
+    if cmd:command('PictureFrame')
+    else:action.trigger();settle()
+def run():
+    global field,action,source
+    try:
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_DontUseNativeDialogs,True)
+        source=out/'guide.png';image=QtGui.QImage(120,60,QtGui.QImage.Format_RGBA8888);image.fill(QtGui.QColor(200,40,20,180));image.save(str(source))
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('PictureFrameTest');doc.UndoMode=1;settle()
+        window=Gui.getMainWindow();window.show();window.resize(1500,1000);settle();field=command_input(window);action=window.findChild(QtGui.QAction,'PictureFrame')
+        command('Osnap On')
+        check('OM9-VIEW-001 original command registered',action is not None and action.isEnabled())
+        start(cancel=True);check('image-browser cancel creates no object',not doc.Objects)
+        start(cmd=True);command('1,2,0');command('-10');check('invalid width keeps session without model object',not doc.Objects and 'PictureFrame' in command_prompt(window).text())
+        command('20');obj=doc.Objects[0]
+        check('CMD creates native image with aspect and first-corner placement',obj.TypeId=='Image::ImagePlane' and abs(obj.XSize.Value-20)<1e-9 and abs(obj.YSize.Value-10)<1e-9 and obj.Placement.Base==App.Vector(11,7,0))
+        check('native image default self illumination and autoname',obj.ViewObject.DisplayMode=='No shading' and obj.Label=='guide')
+        doc.undo();settle();check('PictureFrame transaction Undo removes output',not doc.Objects);doc.redo();settle();check('PictureFrame transaction Redo restores output',len(doc.Objects)==1)
+        start();command('Vertical=Yes');command('SelfIllumination=No');command('Autoname=No');command('0,0,0');command('10');vertical=doc.Objects[-1]
+        check('Vertical CMD uses construction-plane normal for image height',abs(vertical.XSize.Value-10)<1e-9 and abs(vertical.YSize.Value-5)<1e-9 and (vertical.Placement.Rotation.multVec(App.Vector(0,1,0))-App.Vector(0,0,1)).Length<1e-9)
+        check('explicit lighting and autoname options applied',vertical.ViewObject.DisplayMode=='Shading' and vertical.Label.startswith('PictureFrame'))
+        start(cmd=True);command('0,0,0');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle();check('Esc cancels placement without output',len(doc.Objects)==2)
+        start(cmd=True);command('0,0,0');command('Line');check('switching CMD to Line cancels image session',command_prompt(window).text().startswith('Start of line') and len(doc.Objects)==2);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle()
+        area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
+        start();viewer=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport();center=viewer.rect().center()
+        QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=center-QtCore.QPoint(25,0));settle()
+        hover=center+QtCore.QPoint(25,10)
+        event=QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(hover),QtCore.QPointF(viewer.mapToGlobal(hover)),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.ShiftModifier)
+        QtWidgets.QApplication.sendEvent(viewer,event);settle()
+        search=coin.SoSearchAction();search.setName('OM9PictureFramePreview');search.apply(Gui.activeDocument().activeView().getSceneGraph())
+        check('mouse hover creates transient preview without model output',search.getPath() is not None and len(doc.Objects)==2)
+        node=search.getPath().getTail();coordinates=next(node.getChild(i) for i in range(node.getNumChildren()) if isinstance(node.getChild(i),coin.SoCoordinate3))
+        vertices=[App.Vector(*coordinates.point[i].getValue()) for i in range(4)]
+        check('preview geometry retains source aspect and Shift axis',abs((vertices[1]-vertices[0]).Length/(vertices[3]-vertices[0]).Length-2)<1e-5 and abs(vertices[1].y-vertices[0].y)<1e-5)
+        QtTest.QTest.keyClick(viewer,QtCore.Qt.Key_F8);settle()
+        freeEvent=QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(hover),QtCore.QPointF(viewer.mapToGlobal(hover)),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.NoModifier)
+        def preview_axis():
+            search=coin.SoSearchAction();search.setName('OM9PictureFramePreview');search.apply(Gui.activeDocument().activeView().getSceneGraph());node=search.getPath().getTail()
+            coords=next(node.getChild(i) for i in range(node.getNumChildren()) if isinstance(node.getChild(i),coin.SoCoordinate3));return App.Vector(*coords.point[1].getValue())-App.Vector(*coords.point[0].getValue())
+        QtWidgets.QApplication.sendEvent(viewer,freeEvent);settle();check('F8 enabled constrains PictureFrame preview without Shift',abs(preview_axis().y)<1e-5)
+        QtWidgets.QApplication.sendEvent(viewer,event);settle();check('Shift releases enabled F8 in PictureFrame preview',abs(preview_axis().y)>0.1)
+        command('Osnap Off');QtWidgets.QApplication.sendEvent(viewer,freeEvent);settle();check('Osnap master off disables PictureFrame Ortho',abs(preview_axis().y)>0.1)
+        command('Osnap On');QtTest.QTest.keyClick(viewer,QtCore.Qt.Key_F8);settle();QtWidgets.QApplication.sendEvent(viewer,event);settle()
+        Gui.activeDocument().activeView().saveImage(str(out/'native-preview.png'),600,400,'Current')
+        originalScene=Gui.activeDocument().activeView().getSceneGraph()
+        second=App.newDocument('PictureFrameOtherDocument');settle()
+        search=coin.SoSearchAction();search.setName('OM9PictureFramePreview');search.apply(originalScene)
+        check('switching document cancels preview without cross-document output',search.getPath() is None and not second.Objects and len(doc.Objects)==2)
+        App.setActiveDocument(doc.Name);settle();App.closeDocument(second.Name);settle();area.setActiveSubWindow(sub);settle();command('20')
+        check('returning to original document does not revive placement',len(doc.Objects)==2)
+        start();QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=center-QtCore.QPoint(25,0));settle();QtWidgets.QApplication.sendEvent(viewer,event);settle()
+        Gui.activateWorkbench('NoneWorkbench');settle()
+        search=coin.SoSearchAction();search.setName('OM9PictureFramePreview');search.apply(originalScene)
+        check('leaving workbench cancels preview with no output',search.getPath() is None and len(doc.Objects)==2)
+        Gui.activateWorkbench('OpenMatrix9Workbench');settle();area.setActiveSubWindow(sub);settle();command('20')
+        check('reactivating workbench does not revive placement',len(doc.Objects)==2)
+        start();QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=center-QtCore.QPoint(25,0));settle();QtWidgets.QApplication.sendEvent(viewer,event);settle()
+        class Restricted:
+            def __init__(self):self.form=QtWidgets.QWidget()
+            def isAllowedAlterView(self):return False
+            def isAllowedAlterDocument(self):return False
+            def isAllowedAlterSelection(self):return False
+        Gui.Control.showDialog(Restricted());settle()
+        search=coin.SoSearchAction();search.setName('OM9PictureFramePreview');search.apply(originalScene)
+        check('restricted task cancels preview and disables PictureFrame',search.getPath() is None and not action.isEnabled() and len(doc.Objects)==2)
+        Gui.Control.closeDialog();settle();command('20')
+        check('closing task does not revive cancelled image placement',len(doc.Objects)==2)
+        start();QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=center-QtCore.QPoint(25,0));settle();QtWidgets.QApplication.sendEvent(viewer,event);settle()
+        other=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==1)
+        area.setActiveSubWindow(other);settle()
+        search=coin.SoSearchAction();search.setName('OM9PictureFramePreview');search.apply(originalScene)
+        check('switching viewport clears preview from previous view',search.getPath() is None and len(doc.Objects)==2)
+        area.setActiveSubWindow(sub);settle();QtWidgets.QApplication.sendEvent(viewer,event);settle()
+        QtTest.QTest.keyClick(viewer,QtCore.Qt.Key_Escape);settle()
+        search=coin.SoSearchAction();search.setName('OM9PictureFramePreview');search.apply(Gui.activeDocument().activeView().getSceneGraph())
+        check('Esc removes hover preview without creating an object',search.getPath() is None and len(doc.Objects)==2)
+        start();QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=center-QtCore.QPoint(25,0));settle()
+        QtWidgets.QApplication.sendEvent(viewer,event);settle()
+        QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,QtCore.Qt.ShiftModifier,pos=hover);settle()
+        search=coin.SoSearchAction();search.setName('OM9PictureFramePreview');search.apply(Gui.activeDocument().activeView().getSceneGraph())
+        check('committing image removes transient preview',search.getPath() is None)
+        mouse=doc.Objects[-1];check('two mouse points with Shift create proportional native image',len(doc.Objects)==3 and mouse.XSize.Value>0 and abs(mouse.XSize.Value/mouse.YSize.Value-2)<1e-9 and (mouse.Placement.Rotation.multVec(App.Vector(1,0,0))-App.Vector(1,0,0)).Length<1e-9)
+        start();QtTest.QTest.keyClick(viewer,QtCore.Qt.Key_F8);QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=center-QtCore.QPoint(25,0));settle();QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=hover);settle()
+        check('F8 PictureFrame commit uses same constraint as preview',len(doc.Objects)==4 and (doc.Objects[-1].Placement.Rotation.multVec(App.Vector(1,0,0))-App.Vector(1,0,0)).Length<1e-9)
+        QtTest.QTest.keyClick(viewer,QtCore.Qt.Key_F8);doc.undo();settle()
+        movedName=mouse.Name;oldPlacement=App.Placement(mouse.Placement);oldWidth=mouse.XSize.Value;oldHeight=mouse.YSize.Value
+        movedPlacement=App.Placement(App.Vector(7,8,9),App.Rotation(App.Vector(0,0,1),30))
+        doc.openTransaction('Move and scale PictureFrame guide');mouse.Placement=movedPlacement;mouse.XSize=oldWidth*2;mouse.YSize=oldHeight*2;doc.recompute();doc.commitTransaction();settle()
+        check('native guide can move rotate and scale retaining image aspect',mouse.Placement.Base==App.Vector(7,8,9) and abs(mouse.XSize.Value/mouse.YSize.Value-2)<1e-9 and abs(mouse.XSize.Value-oldWidth*2)<1e-9)
+        doc.undo();settle();mouse=doc.getObject(movedName)
+        check('guide transform Undo restores placement and dimensions',(mouse.Placement.Base-oldPlacement.Base).Length<1e-9 and abs(mouse.XSize.Value-oldWidth)<1e-9 and abs(mouse.YSize.Value-oldHeight)<1e-9)
+        doc.redo();settle();mouse=doc.getObject(movedName)
+        check('guide transform Redo restores moved scaled guide',mouse.Placement.Base==App.Vector(7,8,9) and abs(mouse.XSize.Value-oldWidth*2)<1e-9)
+        for slot,xaxis,yaxis in [(2,App.Vector(0,1,0),App.Vector(0,0,1)),(3,App.Vector(1,0,0),App.Vector(0,0,1))]:
+            planeSub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==slot);area.setActiveSubWindow(planeSub);settle()
+            start(cmd=True);command('1,2,3');command('12');frame=doc.Objects[-1]
+            expectedCenter=App.Vector(1,2,3)+xaxis*6+yaxis*3
+            check('CMD PictureFrame follows native C-plane slot '+str(slot),(frame.Placement.Base-expectedCenter).Length<1e-9 and (frame.Placement.Rotation.multVec(App.Vector(1,0,0))-xaxis).Length<1e-9 and (frame.Placement.Rotation.multVec(App.Vector(0,1,0))-yaxis).Length<1e-9 and abs(frame.XSize.Value-12)<1e-9 and abs(frame.YSize.Value-6)<1e-9)
+            doc.undo();settle();check('C-plane test placement remains one undoable output slot '+str(slot),len(doc.Objects)==3)
+        area.setActiveSubWindow(sub);settle()
+        import Part
+        guide=doc.addObject('Part::Feature','SnapGuide');guide.Shape=Part.makeLine(App.Vector(-10 if snap_mode=='Mid' else 0,0,10),App.Vector(10,0,10));doc.recompute();settle()
+        command('Osnap M' if snap_mode=='Mid' else 'Osnap E');command('Osnap On');start(cmd=True)
+        QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=viewer.rect().center()+QtCore.QPoint(3,2));settle();command('20')
+        snapped_frame=doc.Objects[-1]
+        check('PictureFrame mouse first corner shares exact spatial '+snap_mode+' Snap',(snapped_frame.Placement.Base-App.Vector(10,5,10)).Length<1e-9)
+        doc.undo();settle()
+        start(cmd=True);command('-10,0,10')
+        snap_hover=viewer.rect().center()+QtCore.QPoint(3,2)
+        snap_event=QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(snap_hover),QtCore.QPointF(viewer.mapToGlobal(snap_hover)),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.NoModifier)
+        QtWidgets.QApplication.sendEvent(viewer,snap_event);settle()
+        snap_search=coin.SoSearchAction();snap_search.setName('OM9PictureFramePreview');snap_search.apply(Gui.activeDocument().activeView().getSceneGraph())
+        check(snap_mode+' Snap hover supplies PictureFrame preview',snap_search.getPath() is not None)
+        coords_search=coin.SoSearchAction();coords_search.setType(coin.SoCoordinate3.getClassTypeId());coords_search.apply(snap_search.getPath().getTail())
+        coordinates=coords_search.getPath().getTail().point
+        snap_vertices=[coordinates[i].getValue() for i in range(coordinates.getNum())]
+        check('hover preview uses exact snapped width and elevation',len(snap_vertices)==4 and abs(max(p[0] for p in snap_vertices)-min(p[0] for p in snap_vertices)-10)<1e-6 and all(abs(p[2]-10)<1e-6 for p in snap_vertices))
+        QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=viewer.rect().center()+QtCore.QPoint(3,2));settle()
+        snapped_frame=doc.Objects[-1]
+        check('PictureFrame second mouse corner uses exact '+snap_mode+' Snap',(snapped_frame.Placement.Base-App.Vector(-5,2.5,10)).Length<1e-9 and abs(snapped_frame.XSize.Value-10)<1e-9 and abs(snapped_frame.YSize.Value-5)<1e-9)
+        doc.undo();settle();check('snapped PictureFrame retains one native undo transaction',len(doc.Objects)==4)
+        doc.removeObject(guide.Name);doc.recompute();command('Osnap Off');settle()
+        check('all four cameras remain live before save',len(Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor'))==4 and all(v.getCamera() for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')))
+        Gui.activeDocument().activeView().saveImage(str(out/'native-before-reload.png'),600,400,'Current')
+        window.grab().save(str(out/'picture-frame-before-reload.png'))
+        path=out/'picture-frame.FCStd';doc.saveAs(str(path));App.closeDocument(doc.Name);settle();source.unlink();doc=App.openDocument(str(path));settle();settle()
+        check('command outputs survive reload without source image',len(doc.Objects)==3 and all(Path(o.ImageFile).is_file() and not QtGui.QImage(o.ImageFile).isNull() for o in doc.Objects))
+        moved=doc.getObject(movedName)
+        check('reload retains moved guide rotation dimensions and raster',moved.Placement.Base==App.Vector(7,8,9) and abs(moved.XSize.Value-oldWidth*2)<1e-9 and abs(moved.YSize.Value-oldHeight*2)<1e-9 and (moved.Placement.Rotation.multVec(App.Vector(1,0,0))-movedPlacement.Rotation.multVec(App.Vector(1,0,0))).Length<1e-9)
+        check('reload restores four live native cameras',len(Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor'))==4 and all(v.getCamera() for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')))
+        Gui.activeDocument().activeView().saveImage(str(out/'native-after-reload.png'),600,400,'Current')
+        window.grab().save(str(out/'picture-frame.png'));result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(500,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

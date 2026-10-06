@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Control Points</title>
+<desc>Show curve control handles; authored OpenMatrix9 vector.</desc>
+<path d="M4 26 C7 3 22 30 28 5" fill="none" stroke="#80A9E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 26 L7 5 L22 27 L28 5" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 3 H9 V7 H5 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 25 H24 V29 H20 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

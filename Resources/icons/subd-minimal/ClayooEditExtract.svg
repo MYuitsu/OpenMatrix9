@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Extract faces</title>
+<desc>Duplicate or remove selected faces from a SubD model. OpenMatrix9 minimal-subd-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 14 L13 9 L21 13 V26 L11 30 L3 26 Z" fill="#FFB5A2" fill-opacity="0.2" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 4 L24 2.5 L29 8 L19 11 Z" fill="#FFB5A2" fill-opacity="0.4" stroke="#FF6A68" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 14 L11 19 L21 13 M11 19 V30" fill="none" stroke="#FF6A68" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 19 V12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 15 L18 12 L21 15" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

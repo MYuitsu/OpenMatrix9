@@ -1,0 +1,121 @@
+# OM9-VIEWPORT-001: real native views, not placeholder widgets.
+import os, json, traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore, QtWidgets, QtTest, QtGui
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+result={'checks':[]}
+def check(name,value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    if not value: raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(250,loop.quit);loop.exec()
+def grid(view):
+    search=coin.SoSearchAction();search.setName('OM9ConstructionGrid');search.setInterest(coin.SoSearchAction.FIRST);search.apply(view.getSceneGraph())
+    return search.getPath().getTail() if search.getPath() else None
+def command(text):
+    field.setFocus();field.setText('');QtTest.QTest.keyClicks(field,text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def activate(slot):
+    sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==slot)
+    area.setActiveSubWindow(sub);settle();return sub
+def viewer(sub):
+    return next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer')
+def run():
+    global field,area
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('CoreViewsTest')
+        loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(800,loop.quit);loop.exec()
+        views=Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')
+        check('OM9-VIEWPORT-001 four native document views',len(views)==4)
+        window=Gui.getMainWindow();window.resize(1500,1000);settle();area=window.findChild(QtWidgets.QMdiArea)
+        field=command_input(window)
+        subs={s.widget().property('om9ViewSlot'):s for s in area.subWindowList() if s.widget().property('om9ViewSlot') is not None}
+        check('four correct viewport titles',all(subs[i].widget().windowTitle()==name for i,name in enumerate(['Looking Down','Perspective','Side View','Through Finger'])))
+        check('four independent visible grids',all(grid(v) is not None and grid(v).whichChild.getValue()!=-1 for v in views))
+        check('grid is not document geometry',not doc.Objects)
+        check('two by two layout',len({s.geometry().topLeft().x() for s in subs.values()})==2 and len({s.geometry().topLeft().y() for s in subs.values()})==2)
+        cameras=[v.getCameraNode() for v in views]
+        check('one perspective three orthographic cameras',sum(c.isOfType(coin.SoPerspectiveCamera.getClassTypeId()) for c in cameras)==1)
+        # Active view changes must not jump back to Looking Down or reset F7.
+        sub=activate(2);target=viewer(sub).viewport();QtTest.QTest.keyClick(target,QtCore.Qt.Key_F7);settle()
+        check('F7 only hides active grid',sum(grid(v).whichChild.getValue()==-1 for v in views)==1)
+        activate(0);activate(2);check('view switch preserves grid visibility',grid(Gui.activeDocument().activeView()).whichChild.getValue()==-1)
+        command('ShowGrid');check('CMD ShowGrid toggles all four',len({grid(v).whichChild.getValue() for v in views})==1)
+        button=window.findChild(QtWidgets.QToolButton,'OM9DisplayToggle0');check('Display Show Grid button enabled',button.isEnabled())
+        QtTest.QTest.mouseClick(button,QtCore.Qt.LeftButton);settle();check('mouse Show Grid toggles all four on',all(grid(v).whichChild.getValue()!=-1 for v in views))
+        # F4 is a point input; mouse and typed coordinates share per-view construction plane.
+        for slot,zero_axis in [(0,2),(2,0),(3,1)]:
+            sub=activate(slot);target=viewer(sub).viewport();command('Line');QtTest.QTest.keyClick(target,QtCore.Qt.Key_F4);settle()
+            QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=target.rect().center()+QtCore.QPoint(35,-20));settle()
+            shape=doc.Objects[-1].Shape;points=[v.Point for v in shape.Vertexes]
+            check(f'F4 and mouse C-plane slot {slot}',points[0].Length<1e-7 and all(abs((p.x,p.y,p.z)[zero_axis])<1e-5 for p in points) and shape.Length>0)
+            command('Line');command('0,0,0');command('2,3,0')
+            check(f'CMD C-plane slot {slot}',all(abs((v.Point.x,v.Point.y,v.Point.z)[zero_axis])<1e-7 for v in doc.Objects[-1].Shape.Vertexes) and abs(doc.Objects[-1].Shape.Length-13**0.5)<1e-7)
+        activate(0);source=Gui.activeDocument().activeView().getCameraNode();source.height=31;source.position.setValue(4,5,100)
+        perspective=next(c for c in cameras if c.isOfType(coin.SoPerspectiveCamera.getClassTypeId()));old_perspective=perspective.position.getValue().getValue()
+        command('SynchronizeViews')
+        check('SynchronizeViews copies planar scale',all(abs(c.height.getValue()-31)<1e-6 for c in cameras if c.isOfType(coin.SoOrthographicCamera.getClassTypeId())))
+        check('SynchronizeViews preserves Perspective',perspective.position.getValue().getValue()==old_perspective)
+        activate(1);perspective=Gui.activeDocument().activeView().getCameraNode();expected_height=2*perspective.focalDistance.getValue()*__import__('math').tan(perspective.heightAngle.getValue()/2)
+        command('SynchronizeViews');check('OM9-VIEW-003 Perspective source synchronizes planar scale',all(abs(c.height.getValue()-expected_height)<1e-4 for c in cameras if c.isOfType(coin.SoOrthographicCamera.getClassTypeId())))
+        activate(0);source=Gui.activeDocument().activeView().getCameraNode();source.height=31
+        command('CenterViewport');check('CenterViewport preserves scale',abs(source.height.getValue()-31)<1e-6 and abs(source.position.getValue()[0])<1e-6 and abs(source.position.getValue()[1])<1e-6)
+        source.height=37;grid(Gui.activeDocument().activeView()).whichChild=-1
+        activate(1);Gui.activeDocument().activeView().getCameraNode().heightAngle=0.42;activate(0)
+        path=out/'core-views.FCStd';doc.saveAs(str(path));App.closeDocument(doc.Name);doc=App.openDocument(str(path));settle();settle()
+        views=Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')
+        check('reload reconstructs exactly four views',len(views)==4)
+        result['perspective_before_activation']=[v.getCameraNode().heightAngle.getValue() for v in views if v.getCameraNode().isOfType(coin.SoPerspectiveCamera.getClassTypeId())]
+        activate(0);check('reload preserves camera and grid',abs(Gui.activeDocument().activeView().getCameraNode().height.getValue()-37)<1e-6 and grid(Gui.activeDocument().activeView()).whichChild.getValue()==-1)
+        activate(1);result['perspective_reload']={'angle':Gui.activeDocument().activeView().getCameraNode().heightAngle.getValue(),'metadata':doc.Meta.get('OpenMatrix9.ViewCamera.1')};check('reload preserves Perspective zoom angle',abs(Gui.activeDocument().activeView().getCameraNode().heightAngle.getValue()-0.42)<1e-6);activate(0)
+        activate(1);Gui.runCommand('Std_OrthographicCamera',1);settle()
+        check('explicit native Orthographic command still changes projection',Gui.activeDocument().activeView().getCameraNode().isOfType(coin.SoOrthographicCamera.getClassTypeId()))
+        Gui.runCommand('Std_PerspectiveCamera',1);settle()
+        check('explicit native Perspective command still changes projection',Gui.activeDocument().activeView().getCameraNode().isOfType(coin.SoPerspectiveCamera.getClassTypeId()))
+        Gui.activeDocument().activeView().getCameraNode().heightAngle=0.42;activate(0);activate(1)
+        check('projection action refresh preserves user zoom on view switch',abs(Gui.activeDocument().activeView().getCameraNode().heightAngle.getValue()-0.42)<1e-6);activate(0)
+        Gui.runCommand('RestoreViewports');settle();check('menu RestoreViewports resets grids and scale',all(grid(v).whichChild.getValue()!=-1 for v in views) and abs(Gui.activeDocument().activeView().getCameraNode().height.getValue()-50)<1e-6)
+        for unused in range(3):Gui.activateWorkbench('PartWorkbench');settle();Gui.activateWorkbench('OpenMatrix9Workbench');settle()
+        check('reactivation does not duplicate views or CMD',len(Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor'))==4 and len(window.findChildren(QtWidgets.QDockWidget,'OM9CommandFrame'))==1)
+        activate(2);view=Gui.activeDocument().activeView();background=coin.SoSeparator();background.setName('OM9WorkspaceBackground');view.getSceneGraph().addChild(background)
+        Gui.runCommand('RestoreViewports');settle()
+        check('Restore retains active nonzero viewport',area.activeSubWindow().widget().property('om9ViewSlot')==2)
+        search=coin.SoSearchAction();search.setName('OM9WorkspaceBackground');search.apply(view.getSceneGraph())
+        check('Restore clears owned workspace background node',search.getPath() is None)
+        a_subs=set(s for s in area.subWindowList() if s.widget().property('om9ViewSlot') is not None)
+        a_doc=doc;other=App.newDocument('CoreViewsTestOther');settle();settle()
+        check('active document owns all visible workspace quadrants',all(not s.isVisible() for s in a_subs))
+        Gui.activateWorkbench('PartWorkbench');settle()
+        result['after_deactivate']={'workbench':Gui.activeWorkbench().name(),'grids':{name:[grid(v).whichChild.getValue() for v in Gui.getDocument(name).mdiViewsOfType('Gui::View3DInventor')] for name in (a_doc.Name,other.Name)}}
+        check('all document grids hidden outside workbench',all(grid(v).whichChild.getValue()==-1 for name in (a_doc.Name,other.Name) for v in Gui.getDocument(name).mdiViewsOfType('Gui::View3DInventor')))
+        Gui.activateWorkbench('OpenMatrix9Workbench');settle();Gui.setActiveDocument(a_doc.Name);settle()
+        check('document switch restores four quadrants and grid state',all(s.isVisible() for s in a_subs) and all(grid(v).whichChild.getValue()!=-1 for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')))
+        class RestrictedTask:
+            def __init__(self):self.form=QtWidgets.QWidget()
+            def isAllowedAlterDocument(self):return False
+            def isAllowedAlterSelection(self):return False
+            def isAllowedAlterView(self):return False
+        sub=activate(0);target=viewer(sub).viewport();camera=Gui.activeDocument().activeView().getCameraNode();camera.position.setValue(4,5,100)
+        state=grid(Gui.activeDocument().activeView()).whichChild.getValue();task=RestrictedTask();Gui.Control.showDialog(task);settle()
+        QtTest.QTest.keyClick(target,QtCore.Qt.Key_F7);QtTest.QTest.keyClick(target,QtCore.Qt.Key_F5);settle()
+        check('restricted task blocks F5 and F7',grid(Gui.activeDocument().activeView()).whichChild.getValue()==state and abs(camera.position.getValue()[0]-4)<1e-6)
+        Gui.Control.closeDialog();settle();App.closeDocument(other.Name);settle()
+        Gui.activeDocument().activeView().saveImage(str(out/'native-viewport.png'),600,400,'Current')
+        result['render_debug']={'camera':Gui.activeDocument().activeView().getCamera(),'objects':[(o.Name,o.ViewObject.Visibility) for o in App.activeDocument().Objects], 'grid':grid(Gui.activeDocument().activeView()).whichChild.getValue()}
+        image=QtGui.QImage(str(out/'native-viewport.png'));dark=sum(image.pixelColor(x,y).lightness()<200 for x in range(100,180) for y in range(150,300))
+        check('grid renders away from model and navigation cube',dark>20)
+        window.grab().save(str(out/'core-workspace.png'))
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):
+            if name.startswith('CoreViewsTest') or name=='core_views':App.closeDocument(name)
+        QtCore.QTimer.singleShot(0,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

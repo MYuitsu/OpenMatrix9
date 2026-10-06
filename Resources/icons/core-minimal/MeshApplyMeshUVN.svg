@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Apply Mesh UVN</title>
+<desc>Fit mesh geometry onto a target surface; authored OpenMatrix9 vector.</desc>
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 7 Q13 17 13 26 M20 6 Q23 17 22 26 M6 14 Q15 10 27 14 M6 21 Q16 17 26 21" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

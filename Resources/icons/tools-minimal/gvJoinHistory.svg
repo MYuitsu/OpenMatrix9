@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Join History</title>
+<desc>Create a child curve corresponding to joined source curves. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 8 Q8 2 14 8 M19 8 Q25 14 29 7" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 23 Q8 17 16 23 Q24 29 29 22" fill="none" stroke="#4260FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 8 V15 M23 9 V16" fill="none" stroke="#9ABFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><ellipse cx="26" cy="6" rx="4" ry="4" fill="none" stroke="#FFD705" stroke-width="1.8"/><path d="M26 4 V6 H28" fill="none" stroke="#FFD705" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

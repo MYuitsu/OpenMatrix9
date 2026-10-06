@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Subdivision level</title>
+<desc>Control how accurately the SubD mesh displays an object. OpenMatrix9 minimal-subd-v1-reviewed; authored vector geometry.</desc>
+<ellipse cx="16" cy="16" rx="12" ry="12" fill="none" stroke="#FFFFFF" stroke-width="2.2"/><path d="M4 16 A12 12 0 0 0 28 16" fill="#FFB5A2" fill-opacity="0.2" stroke="#FF6A68" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="16" cy="16" rx="5" ry="12" fill="none" stroke="#FF6A68" stroke-width="1.5"/><ellipse cx="16" cy="16" rx="12" ry="4" fill="none" stroke="#FF6A68" stroke-width="1.5"/><path d="M7 7 Q16 12 25 7 M7 25 Q16 20 25 25 M8 7 Q13 16 8 25 M24 7 Q19 16 24 25" fill="none" stroke="#FF6A68" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Baguette Builder</title>
+<desc>Create a baguette cut with independently controlled top and bottom widths. OpenMatrix9 minimal-gems-v1-reviewed; authored vector geometry.</desc>
+<path d="M7.0 4.5 H25.0 L22.3 27.5 H9.7 Z" fill="#3E88C8" fill-opacity="0.35" stroke="#7CB8F5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.5 9.559999999999999 H20.5 L19.24 22.44 H12.76 Z" fill="none" stroke="#CDE7FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

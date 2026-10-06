@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Design Report</title>
+<desc>Generate a design report; authored OpenMatrix9 vector.</desc>
+<path d="M6 3 H20 L27 10 V29 H6 Z" fill="#FFFFFF" fill-opacity="0.06" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3 V10 H27" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 12 H21 V18 H10 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 23 H22 M10 26 H19" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

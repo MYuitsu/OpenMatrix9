@@ -1,0 +1,46 @@
+# Shared snap input integration, not completion of Curve specifications.
+import os,json,traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(350,loop.quit);loop.exec();QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def cmd(text):
+    field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def run():
+    global field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('SnapPointTools');doc.UndoMode=1;settle()
+        guide=doc.addObject('Part::Feature','Guide');guide.Shape=Part.makeLine(App.Vector(-10,0,10),App.Vector(10,0,10));doc.recompute();settle()
+        window=Gui.getMainWindow();window.show();window.resize(1500,1000);settle()
+        field=command_input(window);prompt=command_prompt(window)
+        area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
+        target=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport();pixel=target.rect().center()+QtCore.QPoint(3,2)
+        cmd('Osnap M');cmd('Osnap On')
+        cmd('Angle');cmd('0,0,0');QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=pixel);settle();cmd('0,0,0');cmd('10,0,0')
+        check('Angle uses exact spatial Mid Snap',prompt.text().startswith('Angle: 90') and len(doc.Objects)==1 and not doc.UndoNames)
+        window.findChild(QtGui.QAction,'Line').trigger();settle();cmd('0,0,0');QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=pixel);settle()
+        line=doc.Objects[-1]
+        check('Line menu and mouse use shared spatial Mid Snap',len(doc.Objects)==2 and abs(line.Shape.Length-10)<1e-9 and any((v.Point-App.Vector(0,0,10)).Length<1e-9 for v in line.Shape.Vertexes))
+        check('finishing snapped Line consumes mouse release without selecting source',not Gui.Selection.getSelection())
+        cmd('Polyline');cmd('0,0,0');QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=pixel);settle();cmd('10,0,10');cmd('')
+        polyline=doc.Objects[-1]
+        check('Polyline CMD and mouse retain exact Mid Snap vertex',len(doc.Objects)==3 and len(polyline.Shape.Edges)==2 and any((v.Point-App.Vector(0,0,10)).Length<1e-9 for v in polyline.Shape.Vertexes))
+        doc.undo();settle();check('snapped Polyline creates one Undo transaction',len(doc.Objects)==2)
+        doc.redo();settle();check('snapped Polyline Redo retains native geometry',len(doc.Objects)==3 and abs(doc.Objects[-1].Shape.Length-20)<1e-9)
+        cmd('Line');cmd('0,0,0');cmd('Osnap Off');QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=pixel);settle()
+        check('master toggle during Line preserves tool and uses plane fallback',len(doc.Objects)==4 and doc.Objects[-1].Shape.Length<5 and all(abs(v.Point.z)<1e-9 for v in doc.Objects[-1].Shape.Vertexes))
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(500,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

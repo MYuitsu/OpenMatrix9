@@ -1,0 +1,106 @@
+# OM9-VIEW-004/008/009: actual Qt drags and camera feedback, same menu/CMD handlers.
+import os,json,traceback,math
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App, FreeCADGui as Gui
+from pivy import coin
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(350,loop.quit);loop.exec()
+def command(text):
+    field.setFocus();field.setText('');QtTest.QTest.keyClicks(field,text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def target():
+    sub=area.activeSubWindow()
+    viewer=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer')
+    return viewer.viewport()
+def camera():return Gui.activeDocument().activeView().getCameraNode()
+def drag(widget,start,end,mod=QtCore.Qt.NoModifier):
+    class InputTrace(QtCore.QObject):
+        def eventFilter(self,receiver,event):
+            if receiver is widget and event.type() in (QtCore.QEvent.MouseButtonPress,QtCore.QEvent.MouseButtonRelease):
+                result.setdefault('mouse_events',[]).append({'type':int(event.type()),'position':str(event.position())})
+            return False
+    trace=InputTrace(widget);QtWidgets.QApplication.instance().installEventFilter(trace)
+    if mod&QtCore.Qt.ControlModifier:QtTest.QTest.keyPress(widget,QtCore.Qt.Key_Control)
+    QtTest.QTest.mousePress(widget,QtCore.Qt.LeftButton,mod,pos=start);QtTest.QTest.mouseMove(widget,end);QtTest.QTest.mouseRelease(widget,QtCore.Qt.LeftButton,mod,pos=end);settle()
+    if mod&QtCore.Qt.ControlModifier:QtTest.QTest.keyRelease(widget,QtCore.Qt.Key_Control)
+    QtWidgets.QApplication.instance().removeEventFilter(trace)
+
+def hover(widget,point):
+    QtTest.QTest.mouseMove(widget,point)
+    event=QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(point),QtCore.QPointF(widget.mapToGlobal(point)),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.NoModifier)
+    QtWidgets.QApplication.sendEvent(widget,event);settle()
+def run():
+    global field,area
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('ViewControlsTest');doc.UndoMode=1;settle()
+        window=Gui.getMainWindow();window.resize(1500,1000);window.show();window.raise_();window.activateWindow();settle();field=command_input(window);area=window.findChild(QtWidgets.QMdiArea)
+        check('original view command names registered',all(window.findChild(QtGui.QAction,name) is not None for name in ('Zoom_Window','Zoom_Dynamic','Crosshairs')))
+        widget=target();center=widget.rect().center();before=camera().height.getValue()
+        drag(widget,center,center+QtCore.QPoint(0,max(5,min(80,widget.height()//4))),QtCore.Qt.ControlModifier)
+        result['first_ctrl']={'height_before':before,'height_after':camera().height.getValue(),'prompt':command_prompt(window).text()}
+        check('Ctrl zoom works before invoking any view tool',camera().height.getValue()>before)
+        camera().height=before
+        command('Zoom_Window');widget=target();center=widget.rect().center();before=camera().height.getValue()
+        ratio=widget.devicePixelRatioF();start=center+QtCore.QPoint(-widget.width()//5,-widget.height()//4);end=center+QtCore.QPoint(widget.width()//6,-widget.height()//12)
+        # Native boxZoom receives rounded physical endpoints, then uses an integer pixel center.
+        pixel=lambda value:int(value*ratio+0.5)
+        view=Gui.activeDocument().activeView();x=(pixel(start.x())+pixel(end.x()))//2;y=int(widget.height()*ratio)-(pixel(start.y())+pixel(end.y()))//2
+        result['input_region']={'start_global':str(widget.mapToGlobal(start)),'end_global':str(widget.mapToGlobal(end)),'screen':str(window.screen().availableGeometry()),'window':str(window.geometry()),'active_slot':area.activeSubWindow().widget().property('om9ViewSlot')}
+        window.grab().save(str(out/'before-zoom.png'))
+        volume=camera().getViewVolume(widget.width()/widget.height());a,b=volume.projectPointToLine(coin.SbVec2f(x/(int(widget.width()*ratio)-1),y/(int(widget.height()*ratio)-1)))
+        a=App.Vector(*a.getValue());b=App.Vector(*b.getValue());delta=b-a;wanted=a+delta*(-a.z/delta.z)
+        drag(widget,end,start)
+        result['drag_state']={'visible':widget.isVisible(),'enabled':widget.isEnabled(),'prompt':command_prompt(window).text(),'active_slot':area.activeSubWindow().widget().property('om9ViewSlot'),'rubber_bands':len(window.findChildren(QtWidgets.QRubberBand)),'height_before':before,'height_after':camera().height.getValue()}
+        result['viewport']={'logical':[widget.width(),widget.height()],'ratio':ratio,'render_pixels':str(widget.property('om9ZoomViewportPixels')),'rectangle':[start.x(),start.y(),end.x(),end.y()]}
+        check('OM9-VIEW-008 reversed CMD drag zooms correct scale',abs(camera().height.getValue()-before*max(abs(end.x()-start.x())/widget.width(),abs(end.y()-start.y())/widget.height()))<0.2)
+        focus=camera().position.getValue();result['window_center']={'actual':list(focus),'expected':[wanted.x,wanted.y,wanted.z]};check('window center matches independent ray projection',abs(focus[0]-wanted.x)<0.25 and abs(focus[1]-wanted.y)<0.25)
+        check('view tools create no model object or Undo transaction',not doc.Objects and doc.UndoCount==0)
+        command('RestoreViewports');widget=target();center=widget.rect().center();before=camera().height.getValue();Gui.runCommand('Zoom_Window');settle();drag(widget,center,center+QtCore.QPoint(1,1))
+        check('tiny box does not zoom',abs(camera().height.getValue()-before)<1e-6)
+        QtTest.QTest.keyClick(widget,QtCore.Qt.Key_Escape);settle();check('box Esc clears rubber band',not window.findChildren(QtWidgets.QRubberBand))
+        Gui.runCommand('Zoom_Dynamic');settle();widget=target();center=widget.rect().center();before=camera().height.getValue()
+        drag(widget,center,center+QtCore.QPoint(0,80));check('OM9-VIEW-004 menu drag changes zoom',camera().height.getValue()>before)
+        before=camera().height.getValue();drag(widget,center,center+QtCore.QPoint(0,-70),QtCore.Qt.ControlModifier)
+        check('Ctrl left drag zooms in',camera().height.getValue()<before)
+        before=camera().height.getValue();command('Zoom_Dynamic');QtTest.QTest.mousePress(widget,QtCore.Qt.LeftButton,pos=center);QtTest.QTest.mouseMove(widget,center+QtCore.QPoint(0,80));settle()
+        check('dynamic drag previews camera change',camera().height.getValue()>before)
+        QtTest.QTest.keyClick(widget,QtCore.Qt.Key_Escape);QtTest.QTest.mouseRelease(widget,QtCore.Qt.LeftButton,pos=center+QtCore.QPoint(0,80));settle()
+        check('dynamic Esc restores starting camera',abs(camera().height.getValue()-before)<1e-5)
+        area.setActiveSubWindow(next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==1));settle();widget=target();center=widget.rect().center();before=camera().heightAngle.getValue()
+        command('Zoom_Dynamic');QtTest.QTest.mousePress(widget,QtCore.Qt.LeftButton,pos=center);QtTest.QTest.mouseMove(widget,center+QtCore.QPoint(0,20));settle()
+        check('Perspective dynamic preview changes angle',camera().heightAngle.getValue()>before)
+        QtTest.QTest.keyClick(widget,QtCore.Qt.Key_Escape);QtTest.QTest.mouseRelease(widget,QtCore.Qt.LeftButton,pos=center+QtCore.QPoint(0,20));settle();check('Perspective Esc restores zoom angle',abs(camera().heightAngle.getValue()-before)<1e-6)
+        area.setActiveSubWindow(next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0));settle()
+        command('Crosshairs');widget=target();hover(widget,QtCore.QPoint(45,65));lines=widget.findChild(QtWidgets.QWidget,'OM9Crosshairs')
+        result['crosshair']={'exists':lines is not None,'visible':lines.isVisible() if lines else False,'cursor':str(lines.property('om9Cursor')) if lines else None}
+        check('OM9-VIEW-009 crosshairs track cursor',lines is not None and lines.isVisible() and lines.property('om9Cursor')==QtCore.QPoint(45,65))
+        lines.grab().save(str(out/'crosshairs.png'))
+        Gui.runCommand('Crosshairs');settle();check('menu Crosshairs toggles off',not lines.isVisible())
+        command('Crosshairs');hover(widget,QtCore.QPoint(60,80));Gui.activateWorkbench('PartWorkbench');settle();check('crosshairs hide outside OM9',not lines.isVisible())
+        Gui.activateWorkbench('OpenMatrix9Workbench');settle();widget=target();hover(widget,QtCore.QPoint(55,75));check('crosshair toggle survives workbench switch',widget.findChild(QtWidgets.QWidget,'OM9Crosshairs').isVisible())
+        command('Zoom_Dynamic');QtTest.QTest.mousePress(widget,QtCore.Qt.LeftButton,pos=widget.rect().center());QtTest.QTest.mouseMove(widget,widget.rect().center()+QtCore.QPoint(0,50));settle()
+        other=App.newDocument('ViewControlsOther');settle();check('document switch cancels view tool',command_prompt(window).text().startswith('Command:'))
+        class Restricted:
+            def __init__(self):self.form=QtWidgets.QWidget()
+            def isAllowedAlterDocument(self):return False
+            def isAllowedAlterSelection(self):return False
+            def isAllowedAlterView(self):return False
+        task=Restricted();Gui.Control.showDialog(task);settle();widget=target();before=camera().height.getValue();drag(widget,widget.rect().center(),widget.rect().center()+QtCore.QPoint(0,80),QtCore.Qt.ControlModifier)
+        check('restricted task disables view tool actions',all(not window.findChild(QtGui.QAction,name).isEnabled() for name in ('Zoom_Window','Zoom_Dynamic','Crosshairs')))
+        check('restricted task blocks Ctrl zoom',abs(camera().height.getValue()-before)<1e-6);Gui.Control.closeDialog();settle()
+        window.grab().save(str(out/'view-controls.png'));result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):
+            if name.startswith('ViewControls'):App.closeDocument(name)
+        QtCore.QTimer.singleShot(0,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

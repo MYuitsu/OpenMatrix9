@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Smart Blend</title>
+<desc>Blend a curve between two blend points. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M6 23 C6 0 26 0 26 23" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 23 H9 M6 20 V26" fill="none" stroke="#FF0CA1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="23" r="2.1849999999999996" fill="#FF0CA1"/><path d="M23 23 H29 M26 20 V26" fill="none" stroke="#FF0CA1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="26" cy="23" r="2.1849999999999996" fill="#FF0CA1"/>
+</svg>

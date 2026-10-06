@@ -1,0 +1,8 @@
+*.svg text eol=lf
+*.py text eol=lf
+*.rs text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.ini text eol=lf

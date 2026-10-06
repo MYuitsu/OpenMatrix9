@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Create Point Light</title>
+<desc>Create a light emitting from one point in all directions. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<ellipse cx="16" cy="16" rx="5" ry="5" fill="none" stroke="#FFFFFF" stroke-width="2.5"/><path d="M16 3 V7 M16 25 V29 M3 16 H7 M25 16 H29 M6 6 L9 9 M23 23 L26 26 M26 6 L23 9 M9 23 L6 26" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

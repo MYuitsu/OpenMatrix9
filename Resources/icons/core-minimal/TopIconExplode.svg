@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Explode</title>
+<desc>Separate joined components; authored OpenMatrix9 vector.</desc>
+<path d="M12 12 H20 V20 H12 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4 L9 9 M23 9 L28 4 M4 28 L9 23 M23 23 L28 28" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

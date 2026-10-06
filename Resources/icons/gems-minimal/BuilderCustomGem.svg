@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Custom Gem Builder</title>
+<desc>Create a faceted gem from a custom planar outline. OpenMatrix9 minimal-gems-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 11 L9 4 H23 L29 11 L16 28 Z" fill="#4987FF" fill-opacity="0.3" stroke="#4987FF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11 H29 M9 4 L11 11 L16 28 L21 11 L23 4 M11 11 L16 4 L21 11" fill="none" stroke="#CDE7FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="4" r="2.1849999999999996" fill="#90B0FF"/><circle cx="23" cy="4" r="2.1849999999999996" fill="#90B0FF"/><circle cx="16" cy="28" r="2.1849999999999996" fill="#90B0FF"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Polyline</title>
+  <desc>Connected straight segments with three vertices. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M5 25 L13 7 L27 20" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="25" r="2.3" fill="#FFFFFF"/><circle cx="13" cy="7" r="2.3" fill="#FFFFFF"/><circle cx="27" cy="20" r="2.3" fill="#FFFFFF"/>
+</svg>

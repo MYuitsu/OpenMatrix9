@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Freeform knot</title>
+<desc>Create custom freeform knot shapes. OpenMatrix9 minimal-builder-v1-reviewed; authored vector geometry.</desc>
+<path d="M19 10 C10 -1 1 9 7 17 L22 27 C30 32 32 17 24 16 L10 15 C0 14 8 31 16 25 L24 9 C29 1 16 2 16 8" fill="none" stroke="#D92D32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 18 L14 21 M19 9 L22 12 M18 22 L20 18" fill="none" stroke="#FF6065" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

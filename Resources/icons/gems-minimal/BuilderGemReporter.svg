@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Gem Reporter</title>
+<desc>View and save the list, counts and weights of gems in use. OpenMatrix9 minimal-gems-v1-reviewed; authored vector geometry.</desc>
+<path d="M5 3 H21 L27 9 V29 H5 Z" fill="#3E88C8" fill-opacity="0.12" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3 V9 H27" fill="none" stroke="#CDE7FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.70 12.53 L13.53 14.70 L10.47 14.70 L8.30 12.53 L8.30 9.47 L10.47 7.30 L13.53 7.30 L15.70 9.47 Z" fill="#7CB8F5" fill-opacity="0.24" stroke="#7CB8F5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.08 11 L12 9.08 L13.92 11" fill="none" stroke="#CDE7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10 H23 M19 14 H23 M8 20 H23 M8 25 H23 M15 18 V27" fill="none" stroke="#7CB8F5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

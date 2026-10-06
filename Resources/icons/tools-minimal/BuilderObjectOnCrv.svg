@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Object on curve</title>
+<desc>Place objects along a curve with spacing, taper and orientation controls. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 27 Q17 26 29 5" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="8" cy="25" rx="4" ry="4" fill="none" stroke="#4260FF" stroke-width="2.4"/><ellipse cx="18" cy="18" rx="4" ry="4" fill="none" stroke="#4260FF" stroke-width="2.4"/><ellipse cx="26" cy="9" rx="4" ry="4" fill="none" stroke="#4260FF" stroke-width="2.4"/>
+</svg>

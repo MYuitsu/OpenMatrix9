@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Layer Lock</title>
+<desc>Lock the layer; authored OpenMatrix9 vector.</desc>
+<path d="M7 14 H25 V29 H7 Z" fill="#f5b400" fill-opacity="0.16" stroke="#f5b400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 14 V8 A5 5 0 0 1 21 8 V14" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

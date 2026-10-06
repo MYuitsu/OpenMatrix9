@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Profile</title>
+<desc>Make a closed planar curve an editable profile with control handles. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 26 V19 Q16 -1 28 19 V26 Z" fill="#4260FF" fill-opacity="0.32" stroke="#4260FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 26 V19 Q16 -1 28 19 V26 Z" fill="none" stroke="#FFDE2A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="26" r="2.1849999999999996" fill="#FFFFFF"/><circle cx="16" cy="9" r="2.1849999999999996" fill="#FFFFFF"/><circle cx="28" cy="26" r="2.1849999999999996" fill="#FFFFFF"/>
+</svg>

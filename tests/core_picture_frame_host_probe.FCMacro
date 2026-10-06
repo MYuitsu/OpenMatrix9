@@ -1,0 +1,31 @@
+# Host capability probe, not proof that the PictureFrame command is implemented.
+import os,json,traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore,QtGui
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def run():
+    try:
+        source=out/'picture-frame-probe.png';image=QtGui.QImage(120,60,QtGui.QImage.Format_RGBA8888);image.fill(QtGui.QColor(230,80,30,160));image.save(str(source))
+        doc=App.newDocument('PictureFrameHostProbe');doc.UndoMode=1;doc.openTransaction('PictureFrame host capability')
+        plane=doc.addObject('Image::ImagePlane','PictureFrame');plane.ImageFile=str(source);plane.XSize=20;plane.YSize=10;plane.Placement.Base=App.Vector(10,5,0);plane.ViewObject.DisplayMode='No shading';doc.recompute();doc.commitTransaction()
+        check('OM9-VIEW-001 native image feature and no-shading mode available',plane.TypeId=='Image::ImagePlane' and plane.ViewObject.DisplayMode=='No shading')
+        check('native image size remains after assignment',abs(plane.XSize.Value-20)<1e-9 and abs(plane.YSize.Value-10)<1e-9)
+        check('native image file copied into document storage',Path(plane.ImageFile).is_file() and Path(plane.ImageFile)!=source)
+        doc.undo();check('native image creation Undo removes feature',not doc.Objects);doc.redo();plane=doc.getObject('PictureFrame');check('native image creation Redo restores feature',plane is not None and Path(plane.ImageFile).is_file())
+        path=out/'picture-frame-probe.FCStd';doc.saveAs(str(path));App.closeDocument(doc.Name)
+        source.unlink();doc=App.openDocument(str(path));plane=doc.getObject('PictureFrame')
+        restored=QtGui.QImage(plane.ImageFile)
+        check('native embedded image survives removing original source',not restored.isNull() and restored.width()==120 and restored.height()==60)
+        check('native image placement size and display survive reload',abs(plane.XSize.Value-20)<1e-9 and abs(plane.YSize.Value-10)<1e-9 and plane.Placement.Base==App.Vector(10,5,0) and plane.ViewObject.DisplayMode=='No shading')
+        check('native embedded raster retains alpha component',restored.hasAlphaChannel() and restored.pixelColor(0,0).alpha()==160)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(500,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

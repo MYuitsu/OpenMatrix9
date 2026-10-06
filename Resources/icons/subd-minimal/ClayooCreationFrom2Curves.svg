@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>From 2 curves</title>
+<desc>Create a SubD surface or solid from two open curves. OpenMatrix9 minimal-subd-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 4 Q11 16 4 28 L28 28 Q21 16 28 4 Z" fill="#FFB5A2" fill-opacity="0.2" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4 Q11 16 4 28 M28 4 Q21 16 28 28" fill="none" stroke="#FF6A68" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 12 H27 M5 21 H27" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Outside ring rail</title>
+<desc>Add an outside rail for a two-rail sweep. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M10 3 H23 L29 10 V23 L23 29 H10 L3 23 V10 Z" fill="#9ABFFF" fill-opacity="0.05" stroke="#4260FF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="16" cy="16" rx="8" ry="10" fill="none" stroke="#FFFFFF" stroke-width="2.2"/>
+</svg>

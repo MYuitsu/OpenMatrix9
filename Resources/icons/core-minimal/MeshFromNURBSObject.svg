@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Mesh from Surface</title>
+<desc>Generate a mesh from surface geometry; authored OpenMatrix9 vector.</desc>
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 8 L25 27 M27 8 L7 27 M6 18 L26 18" fill="none" stroke="#D8BF91" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

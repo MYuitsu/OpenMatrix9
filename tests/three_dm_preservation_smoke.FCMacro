@@ -1,0 +1,105 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, shutil, hashlib, traceback
+from pathlib import Path
+from PySide6 import QtCore,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+result={'checks':[]}
+def check(name,value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, OpenMatrix9Gui as native
+        invalid=False
+        try:state.validate_manifest({'schema_version':1})
+        except RuntimeError:invalid=True
+        check('malformed manifest rejected',invalid)
+        source=Path(tempfile.gettempdir())/'om9-preservation.3dm'
+        copy=out/'input.3dm';shutil.copyfile(source,copy)
+        with tempfile.TemporaryDirectory() as staging:
+            for mode in (2,4294967295):
+                rejected=False
+                try:native.prepare3dmArchive(str(copy),staging,0,mode)
+                except RuntimeError:rejected=True
+                check('invalid native mode rejected',rejected and not (Path(staging)/'source.3dm').exists())
+        oversized=False
+        try:state.validate_manifest({'schema_version':1,'padding':'x'*(state.MAX_MANIFEST+1)})
+        except RuntimeError:oversized=True
+        check('32 MiB manifest bound',oversized)
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_DontUseNativeDialogs,True)
+        def menu_import(path,needs_units=False):
+            phase=['file'];seen=[]
+            def choose():
+                dialog=QtWidgets.QApplication.activeModalWidget()
+                if phase[0]=='file' and isinstance(dialog,QtWidgets.QFileDialog):
+                    dialog.setDirectory(str(path.parent))
+                    phase[0]='mode'
+                    def enter():
+                        dialog.findChild(QtWidgets.QLineEdit,'fileNameEdit').setText(path.name)
+                        QtCore.QTimer.singleShot(150,lambda:dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Open).click())
+                    QtCore.QTimer.singleShot(150,enter)
+                elif phase[0]=='mode' and isinstance(dialog,QtWidgets.QInputDialog):
+                    seen.append('mode');dialog.setTextValue('Preserve source data');phase[0]='units' if needs_units else 'done';dialog.accept()
+                elif phase[0]=='units' and isinstance(dialog,QtWidgets.QInputDialog):
+                    seen.append('units');dialog.setDoubleValue(2);phase[0]='done';dialog.accept()
+                (out/'modal-progress.json').write_text(json.dumps(dict(phase=phase[0],modal=type(dialog).__name__,seen=seen)))
+                if phase[0]!='done':QtCore.QTimer.singleShot(50,choose)
+            QtCore.QTimer.singleShot(100,choose);Gui.runCommand('Import3dm')
+            return seen
+        menu_doc=App.newDocument('PreserveMenu')
+        seen=menu_import(copy)
+        check('menu preservation mode',seen==['mode'] and any(hasattr(o,'OM9SourceArchive') for o in menu_doc.Objects))
+        App.closeDocument(menu_doc.Name)
+        menu_doc=App.newDocument('UnitlessPreserveMenu')
+        seen=menu_import(Path(tempfile.gettempdir())/'om9-inventory-unitless.3dm',True)
+        check('unitless preserve requests explicit scale',seen==['mode','units'] and any(hasattr(o,'OM9SourceArchive') for o in menu_doc.Objects))
+        App.closeDocument(menu_doc.Name)
+        doc=App.newDocument('Preservation')
+        before=len(doc.Objects)
+        original_bind=state.bind_archive
+        def failed_bind(document, prepared):
+            document.addObject('App::FeaturePython','InjectedFailure')
+            raise RuntimeError('injected binding failure')
+        state.bind_archive=failed_bind
+        try:
+            failed=False
+            try:ThreeDm.import_file(str(copy),doc,mode='preserve')
+            except RuntimeError:failed=True
+            check('binding failure rolled back',failed and len(doc.Objects)==before)
+        finally:state.bind_archive=original_bind
+        first=ThreeDm.import_file(str(copy),doc,mode='preserve')
+        containers=[o for o in doc.Objects if hasattr(o,'OM9SourceArchive')]
+        check('container',len(containers)==1)
+        check('mixed geometry and retained',len(first)==2 and sum(o.OM9Capability=='retained' for o in first)==1)
+        original=[state.archive_identity(o) for o in first]
+        second=ThreeDm.import_file(str(copy),doc,mode='preserve')
+        check('namespaces disjoint',not set(original).intersection(state.archive_identity(o) for o in second))
+        doc.undo();check('single undo',len([o for o in doc.Objects if hasattr(o,'OM9SourceArchive')])==1)
+        doc.redo();check('single redo',len([o for o in doc.Objects if hasattr(o,'OM9SourceArchive')])==2)
+        target=out/'preserved.FCStd';doc.saveAs(str(target));name=doc.Name;App.closeDocument(name);copy.unlink()
+        doc=App.openDocument(str(target));Gui.activeDocument()
+        containers=[o for o in doc.Objects if hasattr(o,'OM9SourceArchive')]
+        for container in containers:
+            loaded=state.load_archive_state(container)
+            check('included snapshot hash',hashlib.sha256(Path(loaded['snapshot']).read_bytes()).hexdigest()==container.OM9ArchiveHash)
+        check('identity reopened',set(original).issubset({state.archive_identity(o) for o in doc.Objects if state.archive_identity(o)}))
+        check('CAD valid',all(o.Shape.isValid() for o in doc.Objects if o.isDerivedFrom('Part::Feature')))
+        destination=out/'guarded.3dm';destination.write_bytes(b'unchanged')
+        rejected=False
+        try:ThreeDm.export_file(str(destination),doc.Objects)
+        except RuntimeError:rejected=True
+        check('preserve export blocked atomically',rejected and destination.read_bytes()==b'unchanged')
+        cad=[o for o in doc.Objects if o.isDerivedFrom('Part::Feature')]
+        rejected=False
+        try:ThreeDm.export_file(str(destination),cad)
+        except RuntimeError:rejected=True
+        check('source geometry needs explicit omission choice',rejected and destination.read_bytes()==b'unchanged')
+        ThreeDm.export_file(str(out/'geometry-only.3dm'),cad,geometry_only=True)
+        check('explicit geometry export', (out/'geometry-only.3dm').stat().st_size>32)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

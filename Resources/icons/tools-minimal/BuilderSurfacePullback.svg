@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Surface Pullback</title>
+<desc>Create recessed areas from a closed curve on a jewelry surface. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 7 Q16 0 28 7 L27 27 Q16 22 5 29 Z" fill="#9ABFFF" fill-opacity="0.22" stroke="#4260FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 10 Q16 6 23 10 L22 19 L16 24 L10 19 Z" fill="#9ABFFF" fill-opacity="0.1" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 13 Q16 10 20 13 L19 18 L16 20 L13 18 Z" fill="none" stroke="#9ABFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

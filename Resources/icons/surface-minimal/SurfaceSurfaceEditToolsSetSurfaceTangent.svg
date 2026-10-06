@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Set surface tangent</title>
+<desc>Set the tangent direction of an untrimmed edge. OpenMatrix9 minimal-surface-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 11 Q15 3 27 9 L28 26 Q15 21 5 28 Z" fill="#5FCB62" fill-opacity="0.3" stroke="#5FCB62" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 11 L5 28" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="19" r="2.1849999999999996" fill="#FFFFFF"/><path d="M5 19 L22 7" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 7 H22 V12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

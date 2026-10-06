@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Celtic knot</title>
+<desc>Create a classic Celtic knot with a grid-based layout. OpenMatrix9 minimal-builder-v1-reviewed; authored vector geometry.</desc>
+<path d="M14 8 C5 0 0 9 8 16 L16 24 C24 32 32 23 24 16 L16 8" fill="none" stroke="#D92D32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 8 C27 0 32 9 24 16 M22 18 L16 24 C8 32 0 23 8 16 L16 8" fill="none" stroke="#FF6065" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 16 L12 20 M16 8 L20 12 M20 20 L24 16" fill="none" stroke="#D92D32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

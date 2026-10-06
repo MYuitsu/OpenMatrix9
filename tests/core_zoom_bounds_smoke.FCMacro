@@ -1,0 +1,94 @@
+# OM9-VIEW-006/007: original names, active-view framing and model invariants.
+import os, json, traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(350,loop.quit);loop.exec()
+    QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def command(text):
+    field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def focus():
+    cam=view.getCameraNode();direction=cam.orientation.getValue().multVec(coin.SbVec3f(0,0,-1))
+    return tuple(cam.position.getValue()+direction*cam.focalDistance.getValue())
+def contains(objects,sub):
+    widget=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport()
+    volume=view.getCameraNode().getViewVolume(widget.width()/widget.height())
+    for obj in objects:
+        bounds=obj.Shape.BoundBox
+        for x in (bounds.XMin,bounds.XMax):
+            for y in (bounds.YMin,bounds.YMax):
+                for z in (bounds.ZMin,bounds.ZMax):
+                    point=volume.projectToScreen(coin.SbVec3f(x,y,z))
+                    if not(-0.001<=point[0]<=1.001 and -0.001<=point[1]<=1.001):
+                        result.setdefault('outside',[]).append({'point':tuple(point),'aspect':widget.width()/widget.height(),'corner':(x,y,z)})
+                        return False
+    return True
+def run():
+    global field,view
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('ZoomBounds');doc.UndoMode=1;settle()
+        window=Gui.getMainWindow();window.resize(1500,1000);window.show();settle()
+        area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0)
+        area.setActiveSubWindow(sub);settle();view=Gui.activeDocument().activeView()
+        field=command_input(window)
+        extents=window.findChild(QtGui.QAction,'Zoom_Extents');selected=window.findChild(QtGui.QAction,'Zoom_Selected')
+        check('OM9-VIEW-006/007 original actions registered',extents is not None and selected is not None)
+        a=doc.addObject('Part::Box','Near');a.Length=a.Width=a.Height=2
+        b=doc.addObject('Part::Box','Far');b.Length=b.Width=b.Height=2;b.Placement.Base=App.Vector(100,0,0);doc.recompute();settle()
+        Gui.Selection.clearSelection();settle();check('empty selection disables Zoom_Selected',not selected.isEnabled())
+        before=view.getCamera();command('Zoom_Selected');check('empty selection CMD preserves camera',view.getCamera()==before)
+        others=[v for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor') if v!=view];cameras=[v.getCamera() for v in others]
+        undo=doc.UndoCount;rotation=view.getCameraOrientation();extents.trigger();settle()
+        full_height=view.getCameraNode().height.getValue();check('OM9-VIEW-006 menu centers all model bounds',abs(focus()[0]-51)<0.01 and abs(focus()[1]-1)<0.01)
+        check('all model corners project inside active viewport',contains([a,b],sub))
+        check('extents changes only active view',[v.getCamera() for v in others]==cameras)
+        Gui.Selection.addSelection(a);settle();check('selected geometry enables action',selected.isEnabled())
+        command('Zoom_Selected');small_height=view.getCameraNode().height.getValue()
+        check('OM9-VIEW-007 CMD frames selected object',abs(focus()[0]-1)<0.01 and small_height<full_height/10)
+        command('Zoom_Extents');check('extents CMD matches menu framing',abs(view.getCameraNode().height.getValue()-full_height)<0.001 and abs(focus()[0]-51)<0.01)
+        selected.trigger();settle();check('selected menu matches CMD framing',abs(view.getCameraNode().height.getValue()-small_height)<0.001 and abs(focus()[0]-1)<0.01)
+        Gui.Selection.addSelection(b);settle()
+        prefs=App.ParamGet('User parameter:BaseApp/Preferences/View');limit=prefs.GetInt('MaxViewSelections',100);prefs.SetInt('MaxViewSelections',1)
+        command('Zoom_Selected');check('selected fits multiple separated objects despite host selection limit',abs(focus()[0]-51)<0.01 and view.getCameraNode().height.getValue()>small_height*10);prefs.SetInt('MaxViewSelections',limit)
+        check('zoom preserves model selection orientation and Undo',len(doc.Objects)==2 and abs(a.Shape.Volume-8)<1e-9 and abs(b.Shape.Volume-8)<1e-9 and Gui.Selection.getSelection()==[a,b] and view.getCameraOrientation()==rotation and doc.UndoCount==undo)
+        for slot in (1,2,3):
+            sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==slot);area.setActiveSubWindow(sub);settle();view=Gui.activeDocument().activeView()
+            orientation=view.getCameraOrientation();command('Zoom_Extents')
+            check('extents fits all corners in viewport '+str(slot),contains([a,b],sub) and view.getCameraOrientation()==orientation)
+            Gui.Selection.clearSelection();Gui.Selection.addSelection(b);settle();command('Zoom_Selected')
+            result.setdefault('framing',[]).append({'slot':slot,'focus':focus(),'contained':contains([b],sub),'camera':view.getCamera(),'selection':[o.Name for o in Gui.Selection.getSelection()]})
+            check('selected fits far object in viewport '+str(slot),contains([b],sub) and abs(focus()[0]-101)<0.01)
+        empty=doc.addObject('Part::Feature','Empty');doc.recompute();Gui.Selection.clearSelection();Gui.Selection.addSelection(empty)
+        sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==1);area.setActiveSubWindow(sub);settle();view=Gui.activeDocument().activeView();before=view.getCamera();command('Zoom_Selected')
+        check('unrenderable selection preserves Perspective camera',view.getCamera()==before)
+        Gui.Selection.clearSelection();doc.removeObject(empty.Name);doc.recompute();Gui.Selection.addSelection(b)
+        sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==3);area.setActiveSubWindow(sub);settle();view=Gui.activeDocument().activeView()
+        class Restricted:
+            def __init__(self):self.form=QtWidgets.QWidget()
+            def isAllowedAlterView(self):return False
+            def isAllowedAlterDocument(self):return False
+            def isAllowedAlterSelection(self):return False
+        before=view.getCamera();Gui.Control.showDialog(Restricted());settle()
+        check('task locks both zoom actions',not extents.isEnabled() and not selected.isEnabled())
+        command('Zoom_Extents');command('Zoom_Selected');check('task blocks CMD camera changes',view.getCamera()==before)
+        Gui.Control.closeDialog();settle()
+        height=view.getCameraNode().height.getValue();path=out/'zoom.FCStd';doc.saveAs(str(path));App.closeDocument(doc.Name);settle();doc=App.openDocument(str(path));settle();settle()
+        sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==3);area.setActiveSubWindow(sub);settle();view=Gui.activeDocument().activeView()
+        check('zoom camera survives save reload',abs(focus()[0]-101)<0.01 and abs(view.getCameraNode().height.getValue()-height)<0.001)
+        check('zoom save reload preserves geometry',len(doc.Objects)==2 and abs(doc.getObject('Far').Shape.Volume-8)<1e-9)
+        window.grab().save(str(out/'zoom-bounds.png'));result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(500,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

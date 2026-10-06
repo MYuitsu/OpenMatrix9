@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Rope</title>
+<desc>Create a braided rope around an input curve. OpenMatrix9 minimal-builder-v1-reviewed; authored vector geometry.</desc>
+<path d="M7 28 C1 20 11 3 27 5" fill="none" stroke="#C82623" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 25 Q13 25 10 18 Q7 12 18 12 Q25 13 25 4" fill="none" stroke="#FF6065" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 19 Q13 18 16 9 M11 8 Q16 10 21 6" fill="none" stroke="#D92D32" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

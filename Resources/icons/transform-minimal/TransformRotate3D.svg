@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Rotate 3D</title>
+<desc>Rotate around a specified spatial axis. OpenMatrix9 minimal-transform-v2-reviewed; authored vector geometry.</desc>
+<path d="M5 4 V27" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 22 H27 V27 H7 Z" fill="#FF5B05" fill-opacity="0.28" stroke="#FF5B05" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 5 Q27 6 25 19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 15 L25 19 L29 16" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

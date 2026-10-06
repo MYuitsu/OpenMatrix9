@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Render Scheduler</title>
+<desc>Schedule renders from multiple saved design files. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<g transform="translate(0 -1) scale(.75)"><path d="M5 3 H21 L27 9 V29 H5 Z" fill="#59C5C5" fill-opacity="0.08" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3 V9 H27" fill="none" stroke="#CEFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(6 1) scale(.55)"><ellipse cx="16" cy="19" rx="7" ry="10" fill="none" stroke="#59C5C5" stroke-width="2.2"/><path d="M11 9 L14 4 H19 L22 9 L16 14 Z" fill="#59C5C5" fill-opacity="0.25" stroke="#59C5C5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g><ellipse cx="24" cy="24" rx="6" ry="6" fill="none" stroke="#FFFFFF" stroke-width="2"/><path d="M24 21 V24 H27" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

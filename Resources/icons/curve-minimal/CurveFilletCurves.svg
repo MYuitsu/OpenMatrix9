@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Fillet curves</title>
+  <desc>Rounded connection between two separate curves. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M5 27 V18 M14 9 H27" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 18 Q5 9 14 9" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="18" r="1.9" fill="#FFFFFF"/><circle cx="14" cy="9" r="1.9" fill="#FFFFFF"/>
+</svg>

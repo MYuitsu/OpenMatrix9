@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Curve Transform</title>
+<desc>Bend a curve like wire with hold and bend controls. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 26 H28" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><path d="M3 26 C19 26 14 8 28 6" fill="none" stroke="#4260FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="3" cy="26" r="2.1849999999999996" fill="#FFFFFF"/><circle cx="28" cy="6" r="2.1849999999999996" fill="#9ABFFF"/><path d="M27 22 V13" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 16 L27 13 L30 16" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Section curve</title>
+  <desc>Profile where a cutting plane intersects a solid. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M6 11 L20 5 L27 12 L13 18 Z M6 11 V24 L13 29 L27 23 V12 M13 18 V29" fill="none" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 17 L14 22 L26 17 L19 12 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

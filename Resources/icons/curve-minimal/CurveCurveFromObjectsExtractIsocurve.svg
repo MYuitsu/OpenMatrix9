@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Extract isocurve</title>
+  <desc>One parameter curve highlighted on a surface. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 20 Q16 14 27 18 M15 10 L17 24" fill="none" stroke="#59CBE8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 20 Q16 14 27 18" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="20" r="1.9" fill="#FFFFFF"/><circle cx="27" cy="18" r="1.9" fill="#FFFFFF"/>
+</svg>

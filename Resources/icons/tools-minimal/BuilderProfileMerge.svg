@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Profile Merge</title>
+<desc>Create a new profile from overlapping profiles while retaining originals. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 27 V19 Q10 2 16 14 Q22 2 29 19 V27 Z" fill="#4260FF" fill-opacity="0.3" stroke="#4260FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 27 V19 Q10 2 16 14 Q22 2 29 19 V27 Z" fill="none" stroke="#FFDE2A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 14 Q19 20 19 27 M16 14 Q13 20 13 27" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

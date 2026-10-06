@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Batch Render</title>
+<desc>Create multiple material variants from one model file. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 24 V3 H23 M6 27 V6 H26" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 9 H29 V29 H9 Z" fill="#59C5C5" fill-opacity="0.14" stroke="#59C5C5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(10 11) scale(.55)"><ellipse cx="16" cy="19" rx="7" ry="10" fill="none" stroke="#59C5C5" stroke-width="2.2"/><path d="M11 9 L14 4 H19 L22 9 L16 14 Z" fill="#59C5C5" fill-opacity="0.25" stroke="#59C5C5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>

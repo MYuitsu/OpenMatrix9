@@ -1,0 +1,47 @@
+# Build outputs
+/build/
+/cmake-build-*/
+/rust/target/
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Local editor and OS files
+.vs/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Local credentials
+.env
+.env.*
+!.env.example
+
+# Private research and redistributed commercial assets are never public inputs.
+/ref/
+/analysis/
+/danhsach_file_*.txt
+/Resources/icons/rgb-plus5/
+/Resources/icons/original/
+/Resources/icons/modern/
+/tests/fixtures/
+*.pdf
+*.chm
+*.frx
+*.frm
+*.vbp
+*.vbw
+*.ocx
+*.tlb
+*.3dm
+*.dll
+*.exe
+*.pyd
+*.pdb
+*.lib
+*.obj
+*.pem
+*.key
+*.p12
+*.pfx

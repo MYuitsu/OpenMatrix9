@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Metal weights</title>
+<desc>Calculate design weight using assigned material or available metal types. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M16 3 V27 M9 29 H23 M4 9 H28 M6 9 L3 20 H11 L6 9 M26 9 L21 20 H29 L26 9" fill="none" stroke="#4260FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 20 Q7 25 10 20 M22 20 Q25 25 28 20" fill="none" stroke="#9ABFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="9" r="2.1849999999999996" fill="#FFFFFF"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Mesh Repair</title>
+<desc>Create a single watertight mesh for 3D printing. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 12 L15 4 L27 12 L25 29 H4 Z" fill="#9ABFFF" fill-opacity="0.1" stroke="#4260FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 12 L25 29 M27 12 L4 29 M15 4 L15 20" fill="none" stroke="#4260FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 3 V8 L23 10 L26 6 L24 2 Q30 3 29 9 Q28 16 22 15 L10 28 Q5 29 4 25 Q4 22 7 21 L18 10 Q14 7 18 3 Z" fill="#FFFFFF" fill-opacity="0.3" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,63 @@
+# Native acceptance for user-selected grid extent and Command prompt layout.
+import os,json,traceback,sys
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]};clipboard_before=QtCore.QMimeData()
+for fmt in QtWidgets.QApplication.clipboard().mimeData().formats():clipboard_before.setData(fmt,QtWidgets.QApplication.clipboard().mimeData().data(fmt))
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(150,loop.quit);loop.exec()
+def check(name,value):result['checks'].append({'name':name,'passed':bool(value)})
+def node(view,name):
+    s=coin.SoSearchAction();s.setName(name);s.setInterest(coin.SoSearchAction.FIRST);s.apply(view.getSceneGraph());return s.getPath().getTail() if s.getPath() else None
+def command(text):
+    field.setFocus();c=field.textCursor();c.setPosition(int(field.property('om9InputStart')));c.movePosition(QtGui.QTextCursor.End,QtGui.QTextCursor.KeepAnchor);c.insertText(text);field.setTextCursor(c);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def option_pos(word):
+    start=int(field.property('om9InputStart'))-len(str(field.property('om9Prompt')));offset=str(field.property('om9Prompt')).find(word);c=field.textCursor();c.setPosition(start+offset);return field.cursorRect(c).center()
+def run():
+    global field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('MatrixGridCommand');doc.UndoMode=1;settle();window=Gui.getMainWindow();window.show();window.resize(1500,1000);settle()
+        field=window.findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript');dock=window.findChild(QtWidgets.QDockWidget,'OM9CommandFrame')
+        height=field.viewport().height();line=field.fontMetrics().lineSpacing();result['default_layout']={'viewport_height':height,'line_spacing':line,'dock_height':dock.height()}
+        check('default Command shows two history rows and one input row',int(field.property('om9HistoryRows'))==2 and line<=height<2*line)
+        check('prompt input stays a single unwrapped line',field.lineWrapMode()==QtWidgets.QPlainTextEdit.NoWrap)
+        base=dock.height();pos=QtCore.QPoint(dock.geometry().center().x(),dock.geometry().bottom()+2);end=pos+QtCore.QPoint(0,60)
+        for kind,p,button,buttons in [(QtCore.QEvent.MouseMove,pos,QtCore.Qt.NoButton,QtCore.Qt.NoButton),(QtCore.QEvent.MouseButtonPress,pos,QtCore.Qt.LeftButton,QtCore.Qt.LeftButton),(QtCore.QEvent.MouseMove,end,QtCore.Qt.NoButton,QtCore.Qt.LeftButton),(QtCore.QEvent.MouseButtonRelease,end,QtCore.Qt.LeftButton,QtCore.Qt.NoButton)]:
+            QtWidgets.QApplication.sendEvent(window,QtGui.QMouseEvent(kind,QtCore.QPointF(p),QtCore.QPointF(window.mapToGlobal(p)),button,buttons,QtCore.Qt.NoModifier));settle()
+        result['separator_drag']={'before':base,'after':dock.height()};check('mouse drag expands Command dock separator',dock.height()>=base+40)
+        window.resizeDocks([dock],[base],QtCore.Qt.Vertical);settle();window.resizeDocks([dock],[base+100],QtCore.Qt.Vertical);settle();check('Command expands to show more history',dock.height()>=base+80);window.resizeDocks([dock],[base],QtCore.Qt.Vertical);settle();check('Command shrinks back to compact size',abs(dock.height()-base)<5)
+        views=Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')
+        for i,v in enumerate(views):
+            major=node(v,'OM9GridMajor');minor=node(v,'OM9GridMinor');mc=list(major.getChild(1).point.getValues());nc=list(minor.getChild(1).point.getValues());allp=mc+nc
+            check('grid extent is exactly 40 mm square '+str(i),all(abs(p[0])<=20 and abs(p[1])<=20 for p in allp) and min(p[0] for p in allp)==-20 and max(p[0] for p in allp)==20)
+            check('grid has eight major cells and forty minor cells '+str(i),len(mc)==32 and len(nc)==128 and len(set(round(float(p[0]),5) for p in mc)|{0})==9)
+            v.saveImage(str(out/('grid-view-'+str(i)+'.png')),640,480,'Current')
+        check('grid creates no document geometry',not doc.Objects)
+        command('Polyline');prompt=str(field.property('om9Prompt'));check('Polyline uses Matrix parentheses and default state',prompt=='Start of polyline ( PersistentClose=No ): ')
+        selections=field.extraSelections();input_start=int(field.property('om9InputStart'));check('initial P is underlined without changing copied text',any(s.format.fontUnderline() and s.cursor.selectedText()=='P' and s.cursor.position()<=input_start for s in selections))
+        command('P=Y');check('initial-letter setting updates displayed state','PersistentClose=Yes' in str(field.property('om9Prompt')));command('p=n')
+        command('0,0');command('4,0');command('4,3');check('after three points Close and Undo are displayed','Close Mode=Line' in str(field.property('om9Prompt')) and 'Undo' in str(field.property('om9Prompt')))
+        field.grab().save(str(out/'prompt-options.png'));command('U');points=node(views[0],'OM9CurvePreviewPoints');check('U removes last picked point without document Undo',points is not None and len(points.point.getValues())==2 and not doc.Objects)
+        QtTest.QTest.mouseClick(field.viewport(),QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,option_pos('Length'));settle();check('clicking Length uses the shared input handler',str(field.property('om9Prompt'))=='Length of next segment: ')
+        command('5');command('4,10');points=node(views[0],'OM9CurvePreviewPoints');check('clicked Length applies five mm to the next segment',points is not None and abs(float(points.point.getValues()[-1][1])-5)<1e-5)
+        command('C');check('C commits one closed polyline',len(doc.Objects)==1 and doc.Objects[0].Shape.isClosed());doc.undo();settle();check('one document Undo removes committed polyline',not doc.Objects)
+        command('Polyline');command('0,0');command('4,0');command('4,3');c=field.textCursor();c.movePosition(QtGui.QTextCursor.End);field.setTextCursor(c);QtTest.QTest.keyClicks(field,'draft');before=field.toPlainText();field.selectAll();field.copy();check('underline does not add markup to copied transcript',QtWidgets.QApplication.clipboard().text()==before and 'PersistentClose=No' in before)
+        QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle();check('Esc returns clean Command input',str(field.property('om9Prompt'))=='Command: ' and int(field.property('om9InputStart'))==field.document().characterCount()-1)
+        command('Line');command('B');check('Line initial shortcut displays BothSides Yes','BothSides=Yes' in str(field.property('om9Prompt')));command('0,0');command('2,0');check('BothSides shortcut preserves native geometry',len(doc.Objects)==1 and abs(doc.Objects[0].Shape.Length-4)<1e-7)
+        before=field.toPlainText();field.selectAll();QtWidgets.QApplication.sendEvent(field,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Q,QtCore.Qt.ControlModifier|QtCore.Qt.AltModifier,'@'));check('AltGr typing cannot replace selected protected history',field.toPlainText()==before+'@');field.setPlainText(before)
+        c=field.textCursor();c.movePosition(QtGui.QTextCursor.End);c.insertText('abc');c.setPosition(int(field.property('om9InputStart')));c.movePosition(QtGui.QTextCursor.End,QtGui.QTextCursor.KeepAnchor);field.setTextCursor(c);before=field.toPlainText();event=QtGui.QInputMethodEvent();event.setCommitString('x',-1,1);QtWidgets.QApplication.sendEvent(field,event);check('IME replacement accounts for selected draft before prompt bounds',field.toPlainText()==before);field.setPlainText(before[:-3])
+        c=field.textCursor();c.movePosition(QtGui.QTextCursor.End);c.insertText('a'*1024);field.setTextCursor(c);before=field.toPlainText();QtWidgets.QApplication.sendEvent(field,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Q,QtCore.Qt.ControlModifier|QtCore.Qt.AltModifier,'@'));check('AltGr respects live input length limit',field.toPlainText()==before);field.setPlainText(before)
+        c=field.textCursor();c.setPosition(int(field.property('om9InputStart')));c.movePosition(QtGui.QTextCursor.End,QtGui.QTextCursor.KeepAnchor);field.setTextCursor(c);event=QtGui.QInputMethodEvent();event.setCommitString('abc');QtWidgets.QApplication.sendEvent(field,event);check('IME can replace a full length selected draft',field.toPlainText()==before[:-1024]+'abc');field.setPlainText(before[:-1024])
+        for value,mods,label in [(chr(0x1f600),QtCore.Qt.NoModifier,'surrogate pair'),(chr(0x200d),QtCore.Qt.ControlModifier|QtCore.Qt.ShiftModifier,'Unicode format'),('a',QtCore.Qt.AltModifier,'Alt printable')]:
+            before=field.toPlainText();field.selectAll();QtWidgets.QApplication.sendEvent(field,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_unknown,mods,value));check(label+' input preserves selected protected history',field.toPlainText()==before+value);field.setPlainText(before)
+            c=field.textCursor();c.movePosition(QtGui.QTextCursor.End);c.insertText('a'*1024);field.setTextCursor(c);before=field.toPlainText();QtWidgets.QApplication.sendEvent(field,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_unknown,mods,value));check(label+' input respects live length limit',field.toPlainText()==before);field.setPlainText(before[:-1024])
+        window.grab().save(str(out/'command-panel.png'));result['ok']=all(c['passed'] for c in result['checks'])
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        QtWidgets.QApplication.clipboard().setMimeData(clipboard_before)
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(250,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

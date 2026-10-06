@@ -1,0 +1,37 @@
+diff --git a/src/Gui/CommandView.cpp b/src/Gui/CommandView.cpp
+index c5b0d4f13b..9c14aa476a 100644
+--- a/src/Gui/CommandView.cpp
++++ b/src/Gui/CommandView.cpp
+@@ -171,9 +171,15 @@ bool StdOrthographicCamera::isActive()
+         return false;
+     }
+ 
++    // Action refresh can run while a closing viewport has detached its camera.
++    if (auto inventor = qobject_cast<View3DInventor*>(view);
++        inventor && !inventor->getViewer()->getSoRenderManager()->getCamera()) {
++        return false;
++    }
++
+     const std::string& camera = view->getCamera();
+     const bool mode = camera.find("OrthographicCamera") != std::string_view::npos;
+-    _pcAction->setChecked(mode);
++    _pcAction->setBlockedChecked(mode);
+ 
+     return true;
+ }
+@@ -218,9 +224,14 @@ bool StdPerspectiveCamera::isActive()
+         return false;
+     }
+ 
++    if (auto inventor = qobject_cast<View3DInventor*>(view);
++        inventor && !inventor->getViewer()->getSoRenderManager()->getCamera()) {
++        return false;
++    }
++
+     const std::string& camera = view->getCamera();
+     const bool mode = camera.find("PerspectiveCamera") != std::string_view::npos;
+-    _pcAction->setChecked(mode);
++    _pcAction->setBlockedChecked(mode);
+ 
+     return true;
+ }

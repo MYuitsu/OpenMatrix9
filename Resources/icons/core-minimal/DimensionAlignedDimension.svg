@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Aligned Dimension</title>
+<desc>Annotate along two chosen points; authored OpenMatrix9 vector.</desc>
+<path d="M4.253505868145134 21.09194738980073 L9.746494131854867 26.90805261019927 M22.253505868145133 4.09194738980073 L27.746494131854867 9.90805261019927 M7 24 L25 7" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="24" r="2.3" fill="#80A9E8"/><circle cx="25" cy="7" r="2.3" fill="#80A9E8"/><path d="M3 20 L11 28 M21 3 L29 11" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

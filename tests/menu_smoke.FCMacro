@@ -1,0 +1,206 @@
+# Runtime checks only. Product catalog/state/dispatch stay in Rust/C++.
+import json
+import configparser
+import hashlib
+import os
+from pathlib import Path
+import traceback
+import FreeCAD as App
+import FreeCADGui as Gui
+from PySide6 import QtCore, QtWidgets, QtGui
+QtWidgets.QApplication.setAttribute(QtCore.Qt.ApplicationAttribute.AA_DontUseNativeDialogs, True)
+App.ParamGet('User parameter:BaseApp/Preferences/Dialog').SetBool('DontUseNativeDialog', True)
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+out.mkdir(parents=True, exist_ok=True)
+result = {'checks': [], 'scale': os.environ.get('QT_SCALE_FACTOR', '1')}
+def check(name, passed):
+    result['checks'].append({'name': name, 'passed': bool(passed)})
+    if not passed:
+        raise AssertionError(name)
+
+def buttons(parent, prefix):
+    return [b for b in parent.findChildren(QtWidgets.QAbstractButton) if b.objectName().startswith(prefix)]
+
+def file_dialog_command(command, filename=None):
+    seen=[]
+    def respond():
+        dialogs=[w for w in QtWidgets.QApplication.topLevelWidgets() if isinstance(w, QtWidgets.QFileDialog) and w.isVisible()]
+        if not dialogs:
+            QtCore.QTimer.singleShot(50, respond)
+            return
+        seen.append(True)
+        if filename:
+            dialogs[0].setDirectory(str(filename.parent))
+            dialogs[0].selectFile(filename.name)
+            edit=dialogs[0].findChild(QtWidgets.QLineEdit,'fileNameEdit')
+            if edit: edit.setText(filename.name)
+            dialogs[0].accept()
+        else:
+            dialogs[0].reject()
+    QtCore.QTimer.singleShot(100, respond)
+    Gui.runCommand(command)
+    check(command+' dialog exercised', bool(seen))
+    settle()
+
+def settle():
+    loop=QtCore.QEventLoop()
+    QtCore.QTimer.singleShot(450,loop.quit)
+    loop.exec()
+
+def run_smoke():
+    try:
+        window = Gui.getMainWindow()
+        window.resize(1440, 1000)
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        QtWidgets.QApplication.processEvents()
+        dock = window.findChild(QtWidgets.QDockWidget, 'OpenMatrix9Sidebar')
+        check('native sidebar loaded', dock is not None)
+        check('seven section titles', len(buttons(dock, 'OM9SectionTitle')) == 7)
+        check('18 menu selectors', len(buttons(dock, 'OM9Group')) == 18)
+        check('11 quick buttons', len(buttons(dock, 'OM9Quick')) == 11)
+        resource_root=Path(App.getHomePath())/'Mod/OpenMatrix9/Resources'
+        menu=configparser.ConfigParser(interpolation=None);menu.optionxform=str
+        menu.read(resource_root/'menu/MainMenu.ini',encoding='utf-8')
+        required={v.strip() for s in menu for k,v in menu[s].items() if k.startswith('Icon') and k[4:].isdigit()}
+        assets=configparser.ConfigParser(interpolation=None)
+        assets.read(resource_root/'menu/icons.ini',encoding='utf-8')
+        check('434 menu icon images load from installed resources',len(required)==434 and all(
+            assets[k]['status'] in ('resolved','fallback') and not QtGui.QImage(str(resource_root/assets[k]['image'])).isNull() for k in required))
+        manifest=json.loads((resource_root/'menu/source-manifest.json').read_text(encoding='utf-8'))
+        curve_keys={v for s in menu.values() if s.get('Name')=='Curve'
+                    for k,v in s.items() if k.startswith('Icon') and k[4:].isdigit()}
+        solid_keys={v for s in menu.values() if s.get('Name')=='Solid'
+                    for k,v in s.items() if k.startswith('Icon') and k[4:].isdigit()}
+        transform_keys={v for s in menu.values() if s.get('Name')=='Transform'
+                        for k,v in s.items() if k.startswith('Icon') and k[4:].isdigit()}
+        surface_keys={v for s in menu.values() if s.get('Name')=='Surface'
+                      for k,v in s.items() if k.startswith('Icon') and k[4:].isdigit()}
+        authored_keys=required
+        check('All menu icons use authored SVG',len(curve_keys)==58 and len(solid_keys)==30 and len(transform_keys)==40 and len(surface_keys)==40 and all(
+            assets[k]['status']=='resolved' and
+                assets[k]['source']=='OpenMatrix9-authored-svg' and assets[k]['image'].endswith('.svg')
+            for k in required))
+        check('authored menu hashes match the installed manifest',all(
+            hashlib.sha256((resource_root/assets[k]['image']).read_bytes()).hexdigest()==manifest['authored_symbols'][k]['sha256']
+            for k in authored_keys))
+        check('No legacy icon PNGs are installed',not any((resource_root/'icons').rglob('*.png')))
+        rendered=set()
+        for selector in buttons(dock,'OM9Group'):
+            selector.click();QtWidgets.QApplication.processEvents()
+            for button in buttons(dock,'OM9Command')+buttons(dock,'OM9Quick'):
+                key=button.property('om9IconKey')
+                source=QtGui.QImage(str(resource_root/assets[key]['image']))
+                expected=source.scaled(24,24,QtCore.Qt.KeepAspectRatio,QtCore.Qt.SmoothTransformation)
+                actual=button.icon().pixmap(24,24).toImage()
+                check_key=actual.convertToFormat(QtGui.QImage.Format_ARGB32)==expected.convertToFormat(QtGui.QImage.Format_ARGB32)
+                if not check_key:raise AssertionError('Rendered icon differs from packaged resource: '+key)
+                if not button.isEnabled() and actual != button.icon().pixmap(24,24,QtGui.QIcon.Disabled).toImage():
+                    raise AssertionError('Disabled icon loses color: '+key)
+                rendered.add(key)
+            if selector.text() in ('Curve','Builder','Gems','Render'):
+                dock.grab().save(str(out/('menu-'+selector.text().lower()+'.png')))
+        check('every menu and quick icon renders its packaged image in full color',required<=rendered)
+        dock.findChild(QtWidgets.QToolButton,'OM9Group0').click()
+        snap=dock.findChild(QtWidgets.QToolButton,'OM9SnapEnd')
+        check('snap icon loaded while unsupported command stays disabled',snap is not None and not snap.icon().isNull() and not snap.isEnabled())
+        display_keys=['Dial_Wireframe','Dial_Shaded','Dial_Ghosted','Dial_Tech Shade','Dial_Working Render']
+        display_ok=True
+        for i,key in enumerate(display_keys):
+            button=dock.findChild(QtWidgets.QToolButton,'OM9Display'+str(i))
+            source=QtGui.QImage(str(resource_root/assets[key]['image']))
+            size=button.iconSize() if button is not None else QtCore.QSize(24,24)
+            display_ok=display_ok and button is not None and not button.isEnabled() and not source.isNull() and (
+                button.icon().pixmap(size).toImage().convertToFormat(QtGui.QImage.Format_ARGB32)==
+                source.scaled(size,QtCore.Qt.KeepAspectRatio,QtCore.Qt.SmoothTransformation).convertToFormat(QtGui.QImage.Format_ARGB32))
+        check('five display modes render selected resources and stay disabled',display_ok)
+        check('reference sidebar component counts',len(buttons(dock,'OM9DisplayToggle'))==6 and
+            len([w for w in dock.findChildren(QtWidgets.QComboBox) if w.objectName().startswith('OM9DisplayCombo')])==2 and
+            len(buttons(dock,'OM9InfoIcon'))==22 and
+            len([w for w in dock.findChildren(QtWidgets.QLabel) if w.objectName().startswith('OM9LayerName')])==32 and
+            len([w for w in dock.findChildren(QtWidgets.QFrame) if w.objectName()=='OM9ProjectCategory'])==5)
+        check('compact toolbar rows do not wrap at startup width',
+            dock.findChild(QtWidgets.QToolButton,'OM9Display4').y()==dock.findChild(QtWidgets.QToolButton,'OM9DisplayToggle0').y() and
+            all(dock.findChild(QtWidgets.QToolButton,'OM9InfoIcon'+str(r*11+10)).y()==
+                dock.findChild(QtWidgets.QToolButton,'OM9InfoIcon'+str(r*11)).y() for r in range(2)) and
+            dock.findChild(QtWidgets.QToolButton,'OM9GridSnap').y()==dock.findChild(QtWidgets.QToolButton,'OM9SnapExtra0').y())
+        check('starts without document', App.activeDocument() is None)
+        unsupported = dock.findChild(QtWidgets.QToolButton, 'OM9Command2')
+        check('unsupported disabled', unsupported is not None and not unsupported.isEnabled())
+        for _ in range(3):
+            Gui.activateWorkbench('PartWorkbench')
+            Gui.activateWorkbench('OpenMatrix9Workbench')
+        check('one sidebar after three switches', len([d for d in window.findChildren(QtWidgets.QDockWidget) if d.objectName() == 'OpenMatrix9Sidebar']) == 1)
+        dock.findChild(QtWidgets.QToolButton,'OM9SectionClose1').click()
+        dock.findChild(QtGui.QAction,'OM9RestorePanels').trigger()
+        check('closed main menu restored',not dock.findChild(QtWidgets.QAbstractButton,'OM9SectionTitle1').isHidden())
+        before = len(App.listDocuments())
+        new = dock.findChild(QtWidgets.QToolButton, 'OM9Command0')
+        new.click()
+        QtWidgets.QApplication.processEvents()
+        check('New creates document', len(App.listDocuments()) == before + 1)
+        check('successful New appears in history', len(buttons(dock, 'OM9History')) == 1)
+        doc = App.activeDocument()
+        doc.addObject('App::FeaturePython', 'SmokeObject')
+        doc.recompute()
+        Gui.runCommand('OM9_FileNew')
+        QtCore.QTimer.singleShot(600, finish_smoke)
+    except Exception:
+        fail_smoke()
+
+def finish_smoke():
+    try:
+        window=Gui.getMainWindow()
+        dock=window.findChild(QtWidgets.QDockWidget, 'OpenMatrix9Sidebar')
+        check('menu alias updates visible history', len(buttons(dock, 'OM9History')) == 2)
+        before=len(App.listDocuments())
+        file_dialog_command('OM9_FileOpen')
+        check('cancel Open keeps documents/history', len(App.listDocuments())==before and len(buttons(dock,'OM9History'))==2)
+        file_dialog_command('OM9_FileSaveAs')
+        check('cancel SaveAs keeps history', len(buttons(dock,'OM9History'))==2)
+        path=out/'smoke.FCStd'
+        file_dialog_command('OM9_FileSaveAs',path)
+        result['saved_path']=App.activeDocument().FileName
+        check('SaveAs writes actual file', path.exists() and Path(App.activeDocument().FileName).resolve()==path.resolve())
+        QtWidgets.QApplication.processEvents()
+        App.closeDocument(App.activeDocument().Name)
+        file_dialog_command('OM9_FileOpen',path)
+        check('Open loads saved document', App.activeDocument() is not None and Path(App.activeDocument().FileName).resolve()==path.resolve())
+        check('SaveAs and Open acknowledged in history',len(buttons(dock,'OM9History'))==4)
+        App.activeDocument().addObject('App::FeaturePython','PendingRecompute')
+        Gui.runCommand('OM9_FileSave')
+        settle()
+        check('Save with pending recompute acknowledged',len(buttons(dock,'OM9History'))==5)
+        dock.grab().save(str(out/'menu-sidebar.png'))
+        dock.widget().widget().grab().save(str(out/'menu-full-sidebar.png'))
+        for index,name in ((1,'main'),(2,'display'),(3,'snaps'),(4,'info'),(5,'layers'),(6,'projects')):
+            dock.findChild(QtWidgets.QAbstractButton,'OM9SectionTitle'+str(index)).parentWidget().parentWidget().grab().save(str(out/('panel-'+name+'.png')))
+        window.resize(1024, 600)
+        QtWidgets.QApplication.processEvents()
+        scroll=dock.findChild(QtWidgets.QScrollArea)
+        check('small window has scroll area',scroll is not None)
+        scroll.verticalScrollBar().setValue(scroll.verticalScrollBar().maximum())
+        QtWidgets.QApplication.processEvents()
+        slot=dock.findChild(QtWidgets.QFrame,'OM9ProjectSlot')
+        point=slot.mapTo(scroll.viewport(),QtCore.QPoint(0,0))
+        check('Projects reachable in small window',scroll.viewport().rect().contains(point))
+        result['ok']=True
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        if os.environ.get('OM9_SMOKE_KEEP_OPEN') != '1':
+            for name in list(App.listDocuments()): App.closeDocument(name)
+            QtCore.QTimer.singleShot(100, QtWidgets.QApplication.quit)
+        else:
+            window.resize(1440,1000)
+            window.showNormal()
+    except Exception:
+        fail_smoke()
+
+def fail_smoke():
+    result['ok']=False
+    result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+    App.Console.PrintError(result['error'])
+    for name in list(App.listDocuments()): App.closeDocument(name)
+    QtCore.QTimer.singleShot(100, QtWidgets.QApplication.quit)
+
+QtCore.QTimer.singleShot(1000, run_smoke)

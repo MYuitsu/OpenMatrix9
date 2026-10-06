@@ -1,0 +1,416 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1152" height="1024" viewBox="0 0 1152 1024">
+<rect width="100%" height="100%" fill="#333333"/>
+<text x="16" y="28" font-family="Arial,sans-serif" font-size="20" fill="white">OpenMatrix9 — Curve / minimal SVG</text>
+<text x="16" y="48" font-family="Arial,sans-serif" font-size="12" fill="#cccccc">58 icons · yellow curves · cyan surfaces #59CBE8 · white points/arrows · 64px and 24px samples</text>
+<g transform="translate(0 64)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">01</text>
+<g transform="translate(22 24) scale(2)"><path d="M5 25 L13 7 L27 20" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="25" r="2.3" fill="#FFFFFF"/><circle cx="13" cy="7" r="2.3" fill="#FFFFFF"/><circle cx="27" cy="20" r="2.3" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M5 25 L13 7 L27 20" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="25" r="2.3" fill="#FFFFFF"/><circle cx="13" cy="7" r="2.3" fill="#FFFFFF"/><circle cx="27" cy="20" r="2.3" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Polyline</text>
+</g>
+<g transform="translate(144 64)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">02</text>
+<g transform="translate(22 24) scale(2)"><path d="M7 25 L25 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="25" r="2.3" fill="#FFFFFF"/><circle cx="25" cy="7" r="2.3" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M7 25 L25 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="25" r="2.3" fill="#FFFFFF"/><circle cx="25" cy="7" r="2.3" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Line</text>
+</g>
+<g transform="translate(288 64)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">03</text>
+<g transform="translate(22 24) scale(2)"><path d="M5 24 C5 15 13 22 16 16 S26 15 27 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="24" r="2.3" fill="#FFFFFF"/><circle cx="16" cy="16" r="2.3" fill="#FFFFFF"/><circle cx="27" cy="7" r="2.3" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M5 24 C5 15 13 22 16 16 S26 15 27 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="24" r="2.3" fill="#FFFFFF"/><circle cx="16" cy="16" r="2.3" fill="#FFFFFF"/><circle cx="27" cy="7" r="2.3" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Interpolate points</text>
+</g>
+<g transform="translate(432 64)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">04</text>
+<g transform="translate(22 24) scale(2)"><path d="M6 7 H26 V25 H6 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="25" r="2.3" fill="#FFFFFF"/><circle cx="26" cy="7" r="2.3" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M6 7 H26 V25 H6 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="25" r="2.3" fill="#FFFFFF"/><circle cx="26" cy="7" r="2.3" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Rectangle</text>
+</g>
+<g transform="translate(576 64)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">05</text>
+<g transform="translate(22 24) scale(2)"><circle cx="16" cy="16" r="10" fill="none" stroke="#FFFF05" stroke-width="2.6"/><path d="M16 16 L23 9" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="23" cy="9" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><circle cx="16" cy="16" r="10" fill="none" stroke="#FFFF05" stroke-width="2.6"/><path d="M16 16 L23 9" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="23" cy="9" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Circle</text>
+</g>
+<g transform="translate(720 64)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">06</text>
+<g transform="translate(22 24) scale(2)"><ellipse cx="16" cy="16" rx="12" ry="8" fill="none" stroke="#FFFF05" stroke-width="2.6"/><path d="M16 8 V16 H28" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.9" fill="#FFFFFF"/><circle cx="16" cy="8" r="1.9" fill="#FFFFFF"/><circle cx="28" cy="16" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><ellipse cx="16" cy="16" rx="12" ry="8" fill="none" stroke="#FFFF05" stroke-width="2.6"/><path d="M16 8 V16 H28" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.9" fill="#FFFFFF"/><circle cx="16" cy="8" r="1.9" fill="#FFFFFF"/><circle cx="28" cy="16" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Ellipse</text>
+</g>
+<g transform="translate(864 64)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">07</text>
+<g transform="translate(22 24) scale(2)"><path d="M6 7 A19 19 0 0 1 25 26" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 7 V26 H25" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="7" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="6" cy="26" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="25" cy="26" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M6 7 A19 19 0 0 1 25 26" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 7 V26 H25" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="7" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="6" cy="26" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="25" cy="26" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Arc: center / angle</text>
+</g>
+<g transform="translate(1008 64)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">08</text>
+<g transform="translate(22 24) scale(2)"><path d="M6 25 Q6 6 26 6" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 25 V9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 13 L6 9 L9 13" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="25" r="2.3" fill="#FFFFFF"/><circle cx="26" cy="6" r="2.3" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M6 25 Q6 6 26 6" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 25 V9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 13 L6 9 L9 13" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="25" r="2.3" fill="#FFFFFF"/><circle cx="26" cy="6" r="2.3" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Arc: end / tangent</text>
+</g>
+<g transform="translate(0 184)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">09</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 25 C8 5 24 30 28 13" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="25" r="1.9" fill="#FFFFFF"/><circle cx="10" cy="17" r="1.9" fill="#FFFFFF"/><circle cx="21" cy="22" r="1.9" fill="#FFFFFF"/><circle cx="28" cy="13" r="1.9" fill="#FFFFFF"/><path d="M8 10 C12 2 23 2 26 8" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 8 H26 V4" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 25 C8 5 24 30 28 13" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="25" r="1.9" fill="#FFFFFF"/><circle cx="10" cy="17" r="1.9" fill="#FFFFFF"/><circle cx="21" cy="22" r="1.9" fill="#FFFFFF"/><circle cx="28" cy="13" r="1.9" fill="#FFFFFF"/><path d="M8 10 C12 2 23 2 26 8" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 8 H26 V4" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Rebuild curve</text>
+</g>
+<g transform="translate(144 184)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">10</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 24 C12 24 18 8 28 8" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 20 C12 20 18 4 28 4 M4 28 C12 28 18 12 28 12" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 24 C12 24 18 8 28 8" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 20 C12 20 18 4 28 4 M4 28 C12 28 18 12 28 12" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Refit to tolerance</text>
+</g>
+<g transform="translate(288 184)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">11</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 25 Q9 25 10 20 M22 12 Q23 7 28 7" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20 C12 11 20 21 22 12" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.9" fill="#FFFFFF"/><circle cx="22" cy="12" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 25 Q9 25 10 20 M22 12 Q23 7 28 7" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20 C12 11 20 21 22 12" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.9" fill="#FFFFFF"/><circle cx="22" cy="12" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Blend curves</text>
+</g>
+<g transform="translate(432 184)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">12</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 25 Q9 25 10 20 M22 12 Q23 7 28 7" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20 C10 8 22 24 22 12" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20 V8 M22 12 V24" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="8" r="1.9" fill="#FFFFFF"/><circle cx="22" cy="24" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 25 Q9 25 10 20 M22 12 Q23 7 28 7" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20 C10 8 22 24 22 12" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20 V8 M22 12 V24" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="8" r="1.9" fill="#FFFFFF"/><circle cx="22" cy="24" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Blend with handles</text>
+</g>
+<g transform="translate(576 184)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">13</text>
+<g transform="translate(22 24) scale(2)"><path d="M3 13 V4 H12 M20 4 H29 V13" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 11 Q8 4 11 9 M22 6 Q29 8 23 11" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 27 C12 14 20 31 27 17" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="27" r="1.9" fill="#FFFFFF"/><circle cx="27" cy="17" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M3 13 V4 H12 M20 4 H29 V13" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 11 Q8 4 11 9 M22 6 Q29 8 23 11" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 27 C12 14 20 31 27 17" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="27" r="1.9" fill="#FFFFFF"/><circle cx="27" cy="17" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Curve from 2 views</text>
+</g>
+<g transform="translate(720 184)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">14</text>
+<g transform="translate(22 24) scale(2)"><path d="M3 13 V4 H12 M20 4 H29 V13" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 11 Q8 4 11 9 M22 6 Q29 8 23 11" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 27 C10 14 17 24 19 14" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="23" r="6" fill="none" stroke="#FFD705" stroke-width="2.6"/><path d="M23 19 V23 L26 25" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M3 13 V4 H12 M20 4 H29 V13" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 11 Q8 4 11 9 M22 6 Q29 8 23 11" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 27 C10 14 17 24 19 14" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="23" r="6" fill="none" stroke="#FFD705" stroke-width="2.6"/><path d="M23 19 V23 L26 25" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">2-view history</text>
+</g>
+<g transform="translate(864 184)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">15</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 4 Q15 1 25 5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 24 Q17 18 27 22" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 7 L14 20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 15 L14 20 L19 18" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 4 Q15 1 25 5" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 24 Q17 18 27 22" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 7 L14 20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 15 L14 20 L19 18" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Pull curve to surface</text>
+</g>
+<g transform="translate(1008 184)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">16</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 4 Q16 1 25 4" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 24 Q17 18 27 22" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 7 V21" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 18 L9 21 L11.5 18" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 7 V20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.5 17 L23 20 L25.5 17" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 4 Q16 1 25 4" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 24 Q17 18 27 22" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 7 V21" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 18 L9 21 L11.5 18" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 7 V20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.5 17 L23 20 L25.5 17" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Project curve</text>
+</g>
+<g transform="translate(0 304)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">17</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 4 L23 7 L18 28 L10 24 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 22 Q15 16 21 13" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 4 L23 7 L18 28 L10 24 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 22 Q15 16 21 13" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Surface intersection</text>
+</g>
+<g transform="translate(144 304)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">18</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 10 Q16 3 28 10" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 25 Q16 18 28 25" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9 V20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 16.5 L16 20 L19.5 16.5" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 10 Q16 3 28 10" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 25 Q16 18 28 25" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 9 V20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 16.5 L16 20 L19.5 16.5" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Offset curve</text>
+</g>
+<g transform="translate(288 304)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">19</text>
+<g transform="translate(22 24) scale(2)"><path d="M3 9 L23 4 L29 26 L9 30 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 15 Q16 9 25 12" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 25 Q19 19 28 22" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 14 L18 21" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 18.5 L18 21 L20 17" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M3 9 L23 4 L29 26 L9 30 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 15 Q16 9 25 12" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 25 Q19 19 28 22" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 14 L18 21" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 18.5 L18 21 L20 17" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Offset on surface</text>
+</g>
+<g transform="translate(432 304)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">20</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 20 Q16 14 27 18 M15 10 L17 24" fill="none" stroke="#59CBE8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 20 Q16 14 27 18" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="20" r="1.9" fill="#FFFFFF"/><circle cx="27" cy="18" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 20 Q16 14 27 18 M15 10 L17 24" fill="none" stroke="#59CBE8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 20 Q16 14 27 18" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="20" r="1.9" fill="#FFFFFF"/><circle cx="27" cy="18" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Extract isocurve</text>
+</g>
+<g transform="translate(576 304)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">21</text>
+<g transform="translate(22 24) scale(2)"><path d="M5 27 V18 M14 9 H27" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 18 Q5 9 14 9" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="18" r="1.9" fill="#FFFFFF"/><circle cx="14" cy="9" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M5 27 V18 M14 9 H27" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 18 Q5 9 14 9" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="18" r="1.9" fill="#FFFFFF"/><circle cx="14" cy="9" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Fillet curves</text>
+</g>
+<g transform="translate(720 304)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">22</text>
+<g transform="translate(22 24) scale(2)"><path d="M12 6 H21 M27 12 V20 M21 26 H12 M6 20 V12" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12 Q6 6 12 6 M21 6 Q27 6 27 12 M27 20 Q27 26 21 26 M12 26 Q6 26 6 20" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M12 6 H21 M27 12 V20 M21 26 H12 M6 20 V12" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12 Q6 6 12 6 M21 6 Q27 6 27 12 M27 20 Q27 26 21 26 M12 26 Q6 26 6 20" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Fillet corners</text>
+</g>
+<g transform="translate(864 304)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">23</text>
+<g transform="translate(22 24) scale(2)"><path d="M5 27 V17 M15 7 H27" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 17 L15 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="17" r="1.9" fill="#FFFFFF"/><circle cx="15" cy="7" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M5 27 V17 M15 7 H27" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 17 L15 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="17" r="1.9" fill="#FFFFFF"/><circle cx="15" cy="7" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Chamfer curves</text>
+</g>
+<g transform="translate(1008 304)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">24</text>
+<g transform="translate(22 24) scale(2)"><path d="M3 7 Q8 1 13 7 V17 Q8 11 3 17 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 11 Q8 6 12 11" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 17 H29 V29 H19 Z" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 25 Q24 19 27 25" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 9 L24 14" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 14 H24 V9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M3 7 Q8 1 13 7 V17 Q8 11 3 17 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 11 Q8 6 12 11" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 17 H29 V29 H19 Z" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 25 Q24 19 27 25" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 9 L24 14" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 14 H24 V9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Create UV curves</text>
+</g>
+<g transform="translate(0 424)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">25</text>
+<g transform="translate(22 24) scale(2)"><path d="M19 17 H29 V29 H19 Z" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 25 Q24 19 27 25" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7 Q8 1 13 7 V17 Q8 11 3 17 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 11 Q8 6 12 11" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 14 L17 9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 14 V9 H22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M19 17 H29 V29 H19 Z" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 25 Q24 19 27 25" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7 Q8 1 13 7 V17 Q8 11 3 17 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 11 Q8 6 12 11" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 14 L17 9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 14 V9 H22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Apply UV curves</text>
+</g>
+<g transform="translate(144 424)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">26</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 24 C6 13 12 24 16 15 S25 18 28 6" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="24" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="9" cy="19" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="16" cy="15" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="22" cy="13" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="28" cy="6" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 24 C6 13 12 24 16 15 S25 18 28 6" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="24" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="9" cy="19" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="16" cy="15" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="22" cy="13" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="28" cy="6" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Curve through points</text>
+</g>
+<g transform="translate(288 424)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">27</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 26 Q14 26 18 15" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 15 Q20 9 27 5" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 9 L27 5" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 5 H27 V10" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="15" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 26 Q14 26 18 15" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 15 Q20 9 27 5" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 9 L27 5" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 5 H27 V10" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="15" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Extend curve</text>
+</g>
+<g transform="translate(432 424)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">28</text>
+<g transform="translate(22 24) scale(2)"><path d="M16 4 L27 10 V22 L16 28 L5 22 V10 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L27 10" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.9" fill="#FFFFFF"/><circle cx="27" cy="10" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M16 4 L27 10 V22 L16 28 L5 22 V10 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L27 10" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.9" fill="#FFFFFF"/><circle cx="27" cy="10" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Polygon</text>
+</g>
+<g transform="translate(576 424)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">29</text>
+<g transform="translate(22 24) scale(2)"><path d="M16 16 C12 13 11 19 16 20 C24 22 25 9 16 8 C3 6 2 27 17 28 C28 29 31 17 27 8" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M16 16 C12 13 11 19 16 20 C24 22 25 9 16 8 C3 6 2 27 17 28 C28 29 31 17 27 8" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Spiral</text>
+</g>
+<g transform="translate(720 424)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">30</text>
+<g transform="translate(22 24) scale(2)"><path d="M16 3 V29" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><path d="M7 7 C7 2 25 2 25 7 S7 12 7 16 S25 20 25 25 S7 30 7 25" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M25 7 C25 11 7 11 7 16 M7 16 C7 20 25 20 25 25" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M16 3 V29" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><path d="M7 7 C7 2 25 2 25 7 S7 12 7 16 S25 20 25 25 S7 30 7 25" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M25 7 C25 11 7 11 7 16 M7 16 C7 20 25 20 25 25" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Helix</text>
+</g>
+<g transform="translate(864 424)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">31</text>
+<g transform="translate(22 24) scale(2)"><path d="M16 5 V10 M16 22 V27 M5 16 H10 M22 16 H27" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M16 5 V10 M16 22 V27 M5 16 H10 M22 16 H27" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Point</text>
+</g>
+<g transform="translate(1008 424)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">32</text>
+<g transform="translate(22 24) scale(2)"><path d="M5 25 C8 5 22 26 27 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="25" r="3.2199999999999998" fill="#FFFFFF"/><path d="M5 25 V12 L11 15 L5 18" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M5 25 C8 5 22 26 27 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="25" r="3.2199999999999998" fill="#FFFFFF"/><path d="M5 25 V12 L11 15 L5 18" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Mark curve start</text>
+</g>
+<g transform="translate(0 544)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">33</text>
+<g transform="translate(22 24) scale(2)"><path d="M5 25 C8 5 22 26 27 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="27" cy="7" r="3.2199999999999998" fill="#FFFFFF"/><path d="M27 7 V20 L21 17 L27 14" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M5 25 C8 5 22 26 27 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="27" cy="7" r="3.2199999999999998" fill="#FFFFFF"/><path d="M27 7 V20 L21 17 L27 14" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Mark curve end</text>
+</g>
+<g transform="translate(144 544)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">34</text>
+<g transform="translate(22 24) scale(2)"><circle cx="16" cy="17" r="10" fill="none" stroke="#FFFF05" stroke-width="2.6"/><circle cx="26" cy="17" r="2.875" fill="#FFFFFF"/><path d="M25 10 Q21 4 13 4" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 2 L13 4 L17 6" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><circle cx="16" cy="17" r="10" fill="none" stroke="#FFFF05" stroke-width="2.6"/><circle cx="26" cy="17" r="2.875" fill="#FFFFFF"/><path d="M25 10 Q21 4 13 4" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 2 L13 4 L17 6" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Adjust closed seam</text>
+</g>
+<g transform="translate(288 544)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">35</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 25 Q7 9 16 16" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 Q24 23 28 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="25" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="16" cy="16" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="25" cy="17" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="28" cy="7" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 25 Q7 9 16 16" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 Q24 23 28 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="25" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="16" cy="16" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="25" cy="17" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="28" cy="7" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Continue interpolate</text>
+</g>
+<g transform="translate(432 544)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">36</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 18 H28" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 13 V23 M16 13 V23 M26 13 V23" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="16" cy="18" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="26" cy="18" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 18 H28" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 13 V23 M16 13 V23 M26 13 V23" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="16" cy="18" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="26" cy="18" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Divide curve</text>
+</g>
+<g transform="translate(576 544)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">37</text>
+<g transform="translate(22 24) scale(2)"><circle cx="12" cy="16" r="8" fill="none" stroke="#FFFFFF" stroke-width="2.6"/><circle cx="21" cy="16" r="8" fill="none" stroke="#FFFFFF" stroke-width="2.6"/><path d="M16.5 9.4 A8 8 0 0 1 16.5 22.6 A8 8 0 0 1 16.5 9.4" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><circle cx="12" cy="16" r="8" fill="none" stroke="#FFFFFF" stroke-width="2.6"/><circle cx="21" cy="16" r="8" fill="none" stroke="#FFFFFF" stroke-width="2.6"/><path d="M16.5 9.4 A8 8 0 0 1 16.5 22.6 A8 8 0 0 1 16.5 9.4" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Curve boolean</text>
+</g>
+<g transform="translate(720 544)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">38</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 10 Q14 3 28 10 M4 27 Q14 20 28 27" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 18 Q14 11 28 18" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 7 V12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 10 L16 12 L18 10" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 24 V19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 21 L16 19 L18 21" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 10 Q14 3 28 10 M4 27 Q14 20 28 27" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 18 Q14 11 28 18" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 7 V12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 10 L16 12 L18 10" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 24 V19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 21 L16 19 L18 21" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Tween curves</text>
+</g>
+<g transform="translate(864 544)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">39</text>
+<g transform="translate(22 24) scale(2)"><path d="M5 17 L19 11 L27 17 L13 23 Z M5 17 V25 L13 29 L27 23 V17 M13 23 V29" fill="none" stroke="#59CBE8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 17 L19 11" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 6 L19 2" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12 V6" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.5 8.5 L12 6 L14.5 8.5" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M5 17 L19 11 L27 17 L13 23 Z M5 17 V25 L13 29 L27 23 V17 M13 23 V29" fill="none" stroke="#59CBE8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 17 L19 11" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 6 L19 2" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12 V6" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.5 8.5 L12 6 L14.5 8.5" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Duplicate edge</text>
+</g>
+<g transform="translate(1008 544)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">40</text>
+<g transform="translate(22 24) scale(2)"><path d="M3 19 Q10 15 18 18 L19 29 Q11 25 4 29 Z" fill="#59CBE8" fill-opacity="0.55" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 19 Q10 15 18 18 L19 29 Q11 25 4 29 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 5 Q19 1 27 4 L28 15 Q20 11 13 15 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 25 V17" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 20 L23 17 L26 20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M3 19 Q10 15 18 18 L19 29 Q11 25 4 29 Z" fill="#59CBE8" fill-opacity="0.55" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 19 Q10 15 18 18 L19 29 Q11 25 4 29 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 5 Q19 1 27 4 L28 15 Q20 11 13 15 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 25 V17" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 20 L23 17 L26 20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Duplicate border</text>
+</g>
+<g transform="translate(0 664)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">41</text>
+<g transform="translate(22 24) scale(2)"><path d="M5 25 C5 5 27 27 27 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 25 V5 L27 27 V7" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><g fill="#FFFFFF"><rect x="3" y="3" width="4" height="4"/><rect x="25" y="25" width="4" height="4"/></g><circle cx="5" cy="25" r="1.9" fill="#FFFFFF"/><circle cx="27" cy="7" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M5 25 C5 5 27 27 27 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 25 V5 L27 27 V7" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><g fill="#FFFFFF"><rect x="3" y="3" width="4" height="4"/><rect x="25" y="25" width="4" height="4"/></g><circle cx="5" cy="25" r="1.9" fill="#FFFFFF"/><circle cx="27" cy="7" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Control-point curve</text>
+</g>
+<g transform="translate(144 664)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">42</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 25 Q9 8 17 17" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 17 Q27 28 27 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 17 L27 28 V7" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><rect x="25" y="26" width="4" height="4" fill="#FFFFFF"/><circle cx="17" cy="17" r="1.9" fill="#FFFFFF"/><circle cx="27" cy="7" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 25 Q9 8 17 17" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 17 Q27 28 27 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 17 L27 28 V7" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><rect x="25" y="26" width="4" height="4" fill="#FFFFFF"/><circle cx="17" cy="17" r="1.9" fill="#FFFFFF"/><circle cx="27" cy="7" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Continue control</text>
+<text x="72" y="110" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">curve</text>
+</g>
+<g transform="translate(288 664)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">43</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 25 L24 12" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 25 H24" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 25 A11 11 0 0 0 15.7 18.3" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 25 L24 12" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 25 H24" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 25 A11 11 0 0 0 15.7 18.3" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Extract angle</text>
+<text x="72" y="110" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">isocurve</text>
+</g>
+<g transform="translate(432 664)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">44</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 26 Q7 4 10 26 M13 26 Q16 4 19 26 M22 26 Q25 4 28 26" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 15 H25" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="15" r="1.9" fill="#FFFFFF"/><circle cx="16" cy="15" r="1.9" fill="#FFFFFF"/><circle cx="25" cy="15" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 26 Q7 4 10 26 M13 26 Q16 4 19 26 M22 26 Q25 4 28 26" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 15 H25" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="15" r="1.9" fill="#FFFFFF"/><circle cx="16" cy="15" r="1.9" fill="#FFFFFF"/><circle cx="25" cy="15" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Cross-section</text>
+<text x="72" y="110" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">profiles</text>
+</g>
+<g transform="translate(576 664)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">45</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 25 Q7 16 11 22 T19 21 Q23 20 22 16" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 12 L25 6 L28 9 L22 15 L18 16 Z M24 7 L27 10" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 25 Q7 16 11 22 T19 21 Q23 20 22 16" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 12 L25 6 L28 9 L22 15 L18 16 Z M24 7 L27 10" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Sketch</text>
+</g>
+<g transform="translate(720 664)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">46</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 24 Q9 17 13 23 T22 19" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 12 L25 6 L28 9 L22 15 L18 16 Z M24 7 L27 10" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 24 Q9 17 13 23 T22 19" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 12 L25 6 L28 9 L22 15 L18 16 Z M24 7 L27 10" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Sketch on surface</text>
+</g>
+<g transform="translate(864 664)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">47</text>
+<g transform="translate(22 24) scale(2)"><path d="M3 12 L14 7 L27 15 L24 28 L5 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 12 L24 28 M14 7 L5 28 M14 7 L24 28" fill="none" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 24 Q9 17 13 23 T22 19" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 12 L25 6 L28 9 L22 15 L18 16 Z M24 7 L27 10" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M3 12 L14 7 L27 15 L24 28 L5 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 12 L24 28 M14 7 L5 28 M14 7 L24 28" fill="none" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 24 Q9 17 13 23 T22 19" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 12 L25 6 L28 9 L22 15 L18 16 Z M24 7 L27 10" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Sketch on mesh</text>
+</g>
+<g transform="translate(1008 664)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">48</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 24 L14 13 L26 21" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="24" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="14" cy="13" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="26" cy="21" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 24 L14 13 L26 21" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="24" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="14" cy="13" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="26" cy="21" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Polyline on surface</text>
+</g>
+<g transform="translate(0 784)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">49</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 24 C8 14 12 21 16 17 S23 24 26 14" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="24" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="16" cy="17" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="26" cy="14" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 24 C8 14 12 21 16 17 S23 24 26 14" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="24" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="16" cy="17" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="26" cy="14" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Interpolate on</text>
+<text x="72" y="110" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">surface</text>
+</g>
+<g transform="translate(144 784)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">50</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 25 C6 7 24 29 28 5" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><path d="M4 25 L10 16 L19 19 L25 15 L28 5" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="25" r="1.9" fill="#FFFFFF"/><circle cx="10" cy="16" r="1.9" fill="#FFFFFF"/><circle cx="19" cy="19" r="1.9" fill="#FFFFFF"/><circle cx="25" cy="15" r="1.9" fill="#FFFFFF"/><circle cx="28" cy="5" r="1.9" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 25 C6 7 24 29 28 5" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><path d="M4 25 L10 16 L19 19 L25 15 L28 5" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="25" r="1.9" fill="#FFFFFF"/><circle cx="10" cy="16" r="1.9" fill="#FFFFFF"/><circle cx="19" cy="19" r="1.9" fill="#FFFFFF"/><circle cx="25" cy="15" r="1.9" fill="#FFFFFF"/><circle cx="28" cy="5" r="1.9" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Convert curve to</text>
+<text x="72" y="110" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">lines</text>
+</g>
+<g transform="translate(288 784)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">51</text>
+<g transform="translate(22 24) scale(2)"><path d="M6 11 L20 5 L27 12 L13 18 Z M6 11 V24 L13 29 L27 23 V12 M13 18 V29" fill="none" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 17 L14 22 L26 17 L19 12 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M6 11 L20 5 L27 12 L13 18 Z M6 11 V24 L13 29 L27 23 V12 M13 18 V29" fill="none" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 17 L14 22 L26 17 L19 12 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Section curve</text>
+</g>
+<g transform="translate(432 784)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">52</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 25 Q8 16 16 16 M16 16 Q24 16 28 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 16 H22" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><circle cx="16" cy="16" r="2.875" fill="#FFFFFF"/><path d="M10 9 L15 13" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 13 H15 V9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 25 Q8 16 16 16 M16 16 Q24 16 28 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 16 H22" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><circle cx="16" cy="16" r="2.875" fill="#FFFFFF"/><path d="M10 9 L15 13" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 13 H15 V9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Match curve ends</text>
+</g>
+<g transform="translate(576 784)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">53</text>
+<g transform="translate(22 24) scale(2)"><path d="M6 11 L20 5 L27 12 L13 18 Z M6 11 V24 L13 29 L27 23 V12 M13 18 V29" fill="none" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 11 L20 5 L27 12 V23 L13 29 L6 24 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M6 11 L20 5 L27 12 L13 18 Z M6 11 V24 L13 29 L27 23 V12 M13 18 V29" fill="none" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 11 L20 5 L27 12 V23 L13 29 L6 24 Z" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Silhouette</text>
+</g>
+<g transform="translate(720 784)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">54</text>
+<g transform="translate(22 24) scale(2)"><path d="M6 11 L20 5 L27 12 L13 18 Z M6 11 V24 L13 29 L27 23 V12 M13 18 V29" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 5 V17 L6 24 M20 17 L27 23" fill="none" stroke="#FFFF05" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M6 11 L20 5 L27 12 L13 18 Z M6 11 V24 L13 29 L27 23 V12 M13 18 V29" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 5 V17 L6 24 M20 17 L27 23" fill="none" stroke="#FFFF05" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Extract wireframe</text>
+</g>
+<g transform="translate(864 784)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">55</text>
+<g transform="translate(22 24) scale(2)"><path d="M4 24 Q16 19 28 24" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><path d="M4 24 C10 24 10 11 16 11 S22 24 28 24" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 20 V12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 15 L16 12 L19 15" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="11" r="2.07" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M4 24 Q16 19 28 24" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><path d="M4 24 C10 24 10 11 16 11 S22 24 28 24" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 20 V12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 15 L16 12 L19 15" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="11" r="2.07" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Soft edit curve</text>
+</g>
+<g transform="translate(1008 784)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">56</text>
+<g transform="translate(22 24) scale(2)"><path d="M3 23 L23 18 L29 27 L9 30 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 25 Q16 19 26 23" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 7 Q14 1 24 5" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 20 V6" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 10 L16 6 L19.5 10" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M3 23 L23 18 L29 27 L9 30 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 25 Q16 19 26 23" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 7 Q14 1 24 5" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 20 V6" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 10 L16 6 L19.5 10" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Offset along normal</text>
+</g>
+<g transform="translate(0 904)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">57</text>
+<g transform="translate(22 24) scale(2)"><path d="M3 25 H6 M26 5 V2" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 25 V15 H26 V5" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><path d="M6 25 A10 10 0 0 0 16 15 A10 10 0 0 1 26 5" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="25" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="26" cy="5" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M3 25 H6 M26 5 V2" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 25 V15 H26 V5" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/><path d="M6 25 A10 10 0 0 0 16 15 A10 10 0 0 1 26 5" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="25" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="26" cy="5" r="1.9549999999999998" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Arc blend</text>
+</g>
+<g transform="translate(144 904)">
+<rect x="4" y="4" width="136" height="112" rx="4" fill="#696969"/>
+<text x="12" y="20" font-family="Arial,sans-serif" font-size="11" fill="#dddddd">58</text>
+<g transform="translate(22 24) scale(2)"><path d="M5 5 V27 M14 5 V27" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11 H29 M3 21 H29" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="11" r="2.3" fill="#FFFFFF"/><circle cx="5" cy="21" r="2.3" fill="#FFFFFF"/><circle cx="14" cy="11" r="2.3" fill="#FFFFFF"/><circle cx="14" cy="21" r="2.3" fill="#FFFFFF"/></g>
+<g transform="translate(104 45) scale(0.75)"><path d="M5 5 V27 M14 5 V27" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11 H29 M3 21 H29" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="11" r="2.3" fill="#FFFFFF"/><circle cx="5" cy="21" r="2.3" fill="#FFFFFF"/><circle cx="14" cy="11" r="2.3" fill="#FFFFFF"/><circle cx="14" cy="21" r="2.3" fill="#FFFFFF"/></g>
+<text x="72" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="white">Intersect two sets</text>
+</g>
+</svg>

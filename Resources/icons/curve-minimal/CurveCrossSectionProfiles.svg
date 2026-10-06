@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Cross-section profiles</title>
+  <desc>A cross-section curve through several parallel profiles. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M4 26 Q7 4 10 26 M13 26 Q16 4 19 26 M22 26 Q25 4 28 26" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 15 H25" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="15" r="1.9" fill="#FFFFFF"/><circle cx="16" cy="15" r="1.9" fill="#FFFFFF"/><circle cx="25" cy="15" r="1.9" fill="#FFFFFF"/>
+</svg>

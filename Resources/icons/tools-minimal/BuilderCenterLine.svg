@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Center line</title>
+<desc>Calculate a center line from a surface and two curves on it. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 27 Q9 7 19 4 L29 10 Q20 12 16 29 Z" fill="#9ABFFF" fill-opacity="0.07" stroke="#4260FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 27 Q9 7 19 4 M16 29 Q20 12 29 10" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 28 Q15 10 24 7" fill="none" stroke="#4260FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

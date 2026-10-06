@@ -1,0 +1,95 @@
+# OM9-CURVE-001/002: keyboard input and actual Qt mouse events, native Part geometry.
+import json, os, traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[],'input':'Qt keyboard/mouse event simulation'}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok: raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(450,loop.quit);loop.exec()
+def type_command(text):
+    field.setFocus();field.setText('');QtTest.QTest.keyClicks(field,text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def run():
+    global field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');window=Gui.getMainWindow();window.resize(1400,950)
+        field=command_input(window);check('CMD input exists',field is not None)
+        action=window.findChild(QtGui.QAction,'Line');check('Line unavailable without document',action is not None and not action.isEnabled())
+        doc=App.newDocument('CurveTest');doc.UndoMode=1;Gui.activeDocument().activeView().viewTop();settle()
+        sidebar=window.findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar')
+        type_command('Line');check('invocation does not enter success history',not [b for b in sidebar.findChildren(QtWidgets.QToolButton) if b.objectName().startswith('OM9History')])
+        type_command('0,0,0');type_command('3,4,0')
+        check('CMD Line has correct geometry',len(doc.Objects)==1 and len(doc.Objects[-1].Shape.Edges)==1 and abs(doc.Objects[-1].Shape.Length-5)<1e-7)
+        doc.undo();check('Line undo removes object',len(doc.Objects)==0);doc.redo();check('Line redo restores length',abs(doc.Objects[-1].Shape.Length-5)<1e-7)
+        type_command('Polyline');type_command('0,0,0');type_command('10,0,0');type_command('10,10,0');type_command('Close')
+        check('CMD closed Polyline has 3 edges',len(doc.Objects[-1].Shape.Edges)==3 and doc.Objects[-1].Shape.isClosed())
+        count=len(doc.Objects);type_command('Line');type_command('0,0,0');type_command('nan,1,2');check('invalid input creates no object',len(doc.Objects)==count)
+        QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle();check('Esc creates no object',len(doc.Objects)==count)
+        type_command('Polyline');type_command('0,0,0');type_command('Length');type_command('5');type_command('6,8,0');type_command('')
+        check('Length option creates constrained segment',abs(doc.Objects[-1].Shape.Length-5)<1e-7)
+        count=len(doc.Objects)
+        dock=window.findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar');group=dock.findChild(QtWidgets.QToolButton,'OM9Group5')
+        check('Curve group exists',group is not None);QtTest.QTest.mouseClick(group,QtCore.Qt.LeftButton);settle()
+        button=next((b for b in dock.findChildren(QtWidgets.QToolButton) if b.property('om9IconKey')=='CurveLineSingleLine'),None)
+        check('Line mouse button enabled',button is not None and button.isEnabled());QtTest.QTest.mouseClick(button,QtCore.Qt.LeftButton);settle()
+        viewer=next((w for w in window.findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible()),None)
+        check('active viewer found',viewer is not None)
+        target=viewer.viewport();center=target.rect().center()
+        def xy_pick(position):
+            ratio=viewer.devicePixelRatioF();x=round(position.x()*ratio);y=round(target.height()*ratio)-round(position.y()*ratio)-1
+            first,second=Gui.activeDocument().activeView().projectPointToLine(x,y)
+            delta=second-first;return first+delta*(-first.z/delta.z)
+        expected=[xy_pick(center-QtCore.QPoint(70,0)),xy_pick(center+QtCore.QPoint(70,0))]
+        QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=center-QtCore.QPoint(70,0));settle()
+        QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=center+QtCore.QPoint(70,0));settle()
+        check('mouse Line commits a native edge',len(doc.Objects)==count+1 and len(doc.Objects[-1].Shape.Edges)==1 and doc.Objects[-1].Shape.Length>0)
+        mouse=doc.Objects[-1].Shape;coords=[v.Point for v in mouse.Vertexes]
+        check('mouse coordinates match independent host ray projection',all((actual-wanted).Length<1e-5 for actual,wanted in zip(coords,expected)))
+        type_command('Line')
+        for p in coords: type_command(f'{p.x:.12g},{p.y:.12g},{p.z:.12g}')
+        check('mouse and CMD produce equivalent geometry',abs(doc.Objects[-1].Shape.Length-mouse.Length)<1e-6 and all((a.Point-b.Point).Length<1e-6 for a,b in zip(mouse.Vertexes,doc.Objects[-1].Shape.Vertexes)))
+        polybutton=next((b for b in dock.findChildren(QtWidgets.QToolButton) if b.property('om9IconKey')=='CurvePolylinePolyline'),None)
+        check('Polyline mouse button enabled',polybutton is not None and polybutton.isEnabled());QtTest.QTest.mouseClick(polybutton,QtCore.Qt.LeftButton);settle()
+        for delta in (QtCore.QPoint(-60,-40),QtCore.QPoint(60,-40),QtCore.QPoint(60,40)):
+            QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=center+delta);settle()
+        QtTest.QTest.keyClick(target,QtCore.Qt.Key_Return);settle()
+        check('mouse Polyline Enter commits 2 edges',len(doc.Objects[-1].Shape.Edges)==2)
+        mousepoly=doc.Objects[-1].Shape;type_command('Polyline')
+        for vertex in mousepoly.Vertexes:
+            p=vertex.Point;type_command(f'{p.x:.12g},{p.y:.12g},{p.z:.12g}')
+        type_command('');check('Polyline mouse and CMD equivalent',len(doc.Objects[-1].Shape.Edges)==2 and abs(doc.Objects[-1].Shape.Length-mousepoly.Length)<1e-6)
+        path=out/'curve.FCStd';doc.saveAs(str(path));saved=[o.Shape.Length for o in doc.Objects];App.closeDocument(doc.Name);doc=App.openDocument(str(path));settle()
+        check('save reload preserves geometry',len(doc.Objects)==len(saved) and all(abs(o.Shape.Length-length)<1e-7 for o,length in zip(doc.Objects,saved)))
+        type_command('Line');type_command('0,0,0');other=App.newDocument('CurveOther');settle();type_command('3,4,0')
+        check('document switch cancels session',not other.Objects)
+        type_command('Line');type_command('0,0,0')
+        App.setActiveDocument(doc.Name);App.setActiveDocument(other.Name)
+        check('rapid document round trip cancels immediately',command_prompt(window).text().startswith('Command:'))
+        type_command('Line');type_command('0,0,0');name=other.Name;App.closeDocument(name);other=App.newDocument(name)
+        check('document replacement cancels immediately',command_prompt(window).text().startswith('Command:'))
+        settle();Gui.setActiveDocument(other.Name);settle()
+        type_command('Line');Gui.activeDocument().activeView().setAnimationEnabled(False);Gui.activeDocument().activeView().viewFront();settle()
+        result['front_before']={'app':App.activeDocument().Name,'gui':Gui.activeDocument().Document.Name,'prompt':command_prompt(window).text()}
+        current=next(w for w in window.findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible())
+        QtTest.QTest.mouseClick(current.viewport(),QtCore.Qt.LeftButton,pos=current.viewport().rect().center());settle()
+        result['front_after']=command_prompt(window).text()
+        check('parallel XY ray is rejected without losing command',not other.Objects and 'cannot intersect' in command_prompt(window).text())
+        type_command('0,0,0');type_command('3,4,0');check('CMD recovers after rejected ray',len(other.Objects)==1 and abs(other.Objects[0].Shape.Length-5)<1e-7)
+        for unused in range(3): Gui.activateWorkbench('PartWorkbench');settle();Gui.activateWorkbench('OpenMatrix9Workbench');settle()
+        check('workbench switches preserve single CMD dock',len(window.findChildren(QtWidgets.QDockWidget,'OM9CommandFrame'))==1)
+        window.grab().save(str(out/'curve-runtime.png'));result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+        result['debug']={'prompt':command_prompt(window).text() if field else '',
+                         'objects':[(o.Name,len(o.Shape.Edges),o.Shape.isClosed()) for o in App.activeDocument().Objects] if App.activeDocument() else []}
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):
+            if name.startswith(('CurveTest','CurveOther')): App.closeDocument(name)
+        if os.environ.get('OM9_SMOKE_KEEP_OPEN')!='1': QtCore.QTimer.singleShot(0,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

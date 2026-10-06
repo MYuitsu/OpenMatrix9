@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Props Library</title>
+<desc>Load a selected prop and place it in the viewport. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 5 L27 2 V28 L3 30 Z" fill="#1C4B4B" fill-opacity="0.3" stroke="#59C5C5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 5 V28" fill="none" stroke="#CEFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(9 7) scale(.6)"><ellipse cx="16" cy="19" rx="7" ry="10" fill="none" stroke="#59C5C5" stroke-width="2.2"/><path d="M11 9 L14 4 H19 L22 9 L16 14 Z" fill="#59C5C5" fill-opacity="0.25" stroke="#59C5C5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>

@@ -1,0 +1,32 @@
+import configparser
+from pathlib import Path
+import sys
+import tempfile
+import unittest
+from unittest.mock import patch
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+from export_menu_assets import export_assets
+from test_export_menu_assets import rui
+
+
+class RenderExportTests(unittest.TestCase):
+    def test_render_color_roles_precede_legacy_png(self):
+        cases={'BuilderRenderEditor':'#59C5C5','RenderCreatePointLight':'#FFFFFF',
+               'AnalyzeSurfaceEnvironmentMap':'#42EBEB','RenderSaveRenderWindowAs':'#60D0D0'}
+        for key,color in cases.items():
+            with self.subTest(key=key),tempfile.TemporaryDirectory() as tmp:
+                ref=Path(tmp)/'ref';ref.mkdir()
+                (ref/'MainMenu.ini').write_text('[Menu18]\nName=Render\nIcon1='+key+'\n')
+                (ref/'Matrix.rui').write_text(rui())
+                legacy={('ButtonIcons.bin',key+'_1'):{'bytes':b'legacy','size':[25,25],
+                    'png_sha256':'a'*64,'original_png_sha256':'b'*64}}
+                output=Path(tmp)/'Resources'
+                with patch('export_menu_assets.read_shifted_icons',return_value=legacy):
+                    report=export_assets(ref,output,allow_original=True)
+                ini=configparser.ConfigParser();ini.read(output/'menu/icons.ini')
+                self.assertEqual(ini[key]['source'],'OpenMatrix9-authored-svg')
+                self.assertIn(key,report['authored_symbols'])
+                self.assertNotIn(key,report['shifted_icons'])
+                asset=(output/ini[key]['image']).read_text()
+                self.assertIn(color,asset)
+                if key=='RenderCreatePointLight': self.assertNotIn('#59C5C5',asset)

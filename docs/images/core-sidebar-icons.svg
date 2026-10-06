@@ -1,0 +1,611 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1464"><rect width="100%" height="100%" fill="#333"/><text x="16" y="30" font-family="sans-serif" font-size="20" fill="white">OpenMatrix9 — Sidebar / authored SVG</text>
+<g transform="translate(0 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 4 H18 V19 H3 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 14 H28 V29 H13 Z" fill="#D5E7FF" fill-opacity="0.16" stroke="#D5E7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 4 H18 V19 H3 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 14 H28 V29 H13 Z" fill="#D5E7FF" fill-opacity="0.16" stroke="#D5E7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">TopIconDuplicate</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 26 C7 3 22 30 28 5" fill="none" stroke="#80A9E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="26" r="2.3" fill="#FFFFFF"/><circle cx="16" cy="16" r="2.3" fill="#FFFFFF"/><circle cx="28" cy="5" r="2.3" fill="#FFFFFF"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 26 C7 3 22 30 28 5" fill="none" stroke="#80A9E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="26" r="2.3" fill="#FFFFFF"/><circle cx="16" cy="16" r="2.3" fill="#FFFFFF"/><circle cx="28" cy="5" r="2.3" fill="#FFFFFF"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">TopIconEditPointsOn</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(320 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 26 C7 3 22 30 28 5" fill="none" stroke="#80A9E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 26 L7 5 L22 27 L28 5" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 3 H9 V7 H5 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 25 H24 V29 H20 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 26 C7 3 22 30 28 5" fill="none" stroke="#80A9E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 26 L7 5 L22 27 L28 5" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 3 H9 V7 H5 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 25 H24 V29 H20 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">TopIconControlPointsOn</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M16 3 V29" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 8 L11 4 V27 L4 23 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 8 L21 4 V27 L28 23 Z" fill="#D5E7FF" fill-opacity="0.16" stroke="#D5E7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M16 3 V29" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 8 L11 4 V27 L4 23 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 8 L21 4 V27 L28 23 Z" fill="#D5E7FF" fill-opacity="0.16" stroke="#D5E7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">TopIconMirror</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M16 3 V29" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7 L16 3 L20 7 M12 25 L16 29 L20 25" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H29" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 12 L3 16 L7 20 M25 12 L29 16 L25 20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M16 3 V29" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7 L16 3 L20 7 M12 25 L16 29 L20 25" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H29" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 12 L3 16 L7 20 M25 12 L29 16 L25 20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">TopIconMove</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M8 8 A11 11 0 1 1 5 22" fill="none" stroke="#80A9E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 8 L8 3" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 3 L14 4 M8 3 L3 8" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M8 8 A11 11 0 1 1 5 22" fill="none" stroke="#80A9E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 8 L8 3" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 3 L14 4 M8 3 L3 8" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">TopIconRotate</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M12 12 H20 V20 H12 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4 L9 9 M23 9 L28 4 M4 28 L9 23 M23 23 L28 28" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M12 12 H20 V20 H12 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4 L9 9 M23 9 L28 4 M4 28 L9 23 M23 23 L28 28" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">TopIconExplode</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(1120 56)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 10 H14 V22 H3 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 10 H29 V22 H18 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 16 H22" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 10 H14 V22 H3 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 10 H29 V22 H18 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 16 H22" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">TopIconJoin</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(0 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 8 H13 V26 H3 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 8 H29 V26 H19 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3 V29" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 8 H13 V26 H3 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 8 H29 V26 H19 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3 V29" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">TopIconSplit</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 13 H29" fill="none" stroke="#80A9E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="25" r="3" fill="none" stroke="#FFFFFF" stroke-width="1.8"/><circle cx="18" cy="25" r="3" fill="none" stroke="#FFFFFF" stroke-width="1.8"/><path d="M10 22 L22 4 M16 22 L6 4" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 13 H29" fill="none" stroke="#80A9E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="25" r="3" fill="none" stroke="#FFFFFF" stroke-width="1.8"/><circle cx="18" cy="25" r="3" fill="none" stroke="#FFFFFF" stroke-width="1.8"/><path d="M10 22 L22 4 M16 22 L6 4" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">TopIconTrim</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(320 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="16" r="11" fill="none" stroke="#80A9E8" stroke-width="2.2"/><circle cx="16" cy="16" r="7" fill="none" stroke="#FF4747" stroke-width="2.2"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="16" r="11" fill="none" stroke="#80A9E8" stroke-width="2.2"/><circle cx="16" cy="16" r="7" fill="none" stroke="#FF4747" stroke-width="2.2"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">TopIconRingRail</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M7 13 Q21 6 27 23" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 6 V13 H14" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M7 13 Q21 6 27 23" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 6 V13 H14" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">Undo</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<g transform="translate(32 0) scale(-1 1)"><path d="M7 13 Q21 6 27 23" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 6 V13 H14" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+
+</g><g transform="translate(112 40) scale(.75)">
+<g transform="translate(32 0) scale(-1 1)"><path d="M7 13 Q21 6 27 23" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 6 V13 H14" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">Redo</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 5 H28 V26 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="16" y="21" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF">F</text>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 5 H28 V26 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="16" y="21" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF">F</text>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ViewFront</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 5 H28 V26 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="16" y="21" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF">T</text>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 5 H28 V26 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="16" y="21" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF">T</text>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ViewTop</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(1120 184)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 5 H28 V26 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="16" y="21" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF">R</text>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 5 H28 V26 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="16" y="21" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF">R</text>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ViewRight</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(0 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">FitAll</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 6 H14 V14 H6 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="10" r="4" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M10 25 L16 17 L22 25 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 6 H14 V14 H6 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="10" r="4" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M10 25 L16 17 L22 25 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">SelectAll</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(320 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 26 L26 6" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 26 L26 6" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">SelectNone</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M8 9 H24 L22 29 H10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 6 H27 M12 3 H20 M14 13 V24 M19 13 V24" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M8 9 H24 L22 29 H10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 6 H27 M12 3 H20 M14 13 V24 M19 13 V24" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">Delete</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 5 H28 V26 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="16" y="21" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF">L</text>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 5 H28 V26 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="16" y="21" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF">L</text>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ViewLeft</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 5 H28 V26 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="16" y="21" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF">B</text>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 5 H28 V26 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="16" y="21" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF">B</text>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ViewRear</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 5 H28 V26 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="16" y="21" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF">D</text>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 5 H28 V26 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="16" y="21" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF">D</text>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ViewBottom</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(1120 312)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M7 24 L24 7" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="24" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M7 24 L24 7" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="24" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ToolsObjectSnapEnd</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(0 440)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 25 Q14 8 28 8" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="14" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 25 Q14 8 28 8" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="14" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ToolsObjectSnapNear</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 440)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="16" r="4.6" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="16" r="4.6" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ToolsObjectSnapPoint</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(320 440)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 16 H29" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 16 H29" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ToolsObjectSnapMidpoint</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 440)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="16" r="11" fill="none" stroke="#FFFFFF" stroke-width="2.2"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="16" r="11" fill="none" stroke="#FFFFFF" stroke-width="2.2"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ToolsObjectSnapCenter</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 440)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 26 L28 6 M4 7 L28 25" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 26 L28 6 M4 7 L28 25" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ToolsObjectSnapIntersection</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 440)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 26 H28 M16 3 V26 M16 20 H22 V26" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="26" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 26 H28 M16 3 V26 M16 20 H22 V26" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="26" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ToolsObjectSnapPerpendicular</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9">To</text></g>
+<g transform="translate(960 440)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="19" r="9" fill="none" stroke="#FFFFFF" stroke-width="2.2"/><path d="M3 10 H29" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="10" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="19" r="9" fill="none" stroke="#FFFFFF" stroke-width="2.2"/><path d="M3 10 H29" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="10" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ToolsObjectSnapTangentTo</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(1120 440)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="16" r="10" fill="none" stroke="#FFFFFF" stroke-width="2.2"/><circle cx="6" cy="16" r="2.875" fill="#80A9E8"/><circle cx="16" cy="6" r="2.875" fill="#80A9E8"/><circle cx="26" cy="16" r="2.875" fill="#80A9E8"/><circle cx="16" cy="26" r="2.875" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="16" r="10" fill="none" stroke="#FFFFFF" stroke-width="2.2"/><circle cx="6" cy="16" r="2.875" fill="#80A9E8"/><circle cx="16" cy="6" r="2.875" fill="#80A9E8"/><circle cx="26" cy="16" r="2.875" fill="#80A9E8"/><circle cx="16" cy="26" r="2.875" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ToolsObjectSnapQuadrant</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(0 568)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 24 C5 3 15 10 16 16 S27 30 28 7" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 24 C5 3 15 10 16 16 S27 30 28 7" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ToolsObjectSnapKnot</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 568)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 5 H29 V23 H3 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 23 V29 M10 29 H22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 5 H29 V23 H3 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 23 V29 M10 29 H22" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">InfoSettingsDisplayPropertie</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9">s</text></g>
+<g transform="translate(320 568)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M13 3 H19 L20 8 L24 10 L28 9 L30 15 L26 18 L25 23 L27 26 L21 29 L17 26 L12 25 L8 27 L5 21 L8 17 L7 12 L3 9 L7 4 L11 6 Z" fill="#80A9E8" fill-opacity="0.12" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="5" fill="none" stroke="#80A9E8" stroke-width="2"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M13 3 H19 L20 8 L24 10 L28 9 L30 15 L26 18 L25 23 L27 26 L21 29 L17 26 L12 25 L8 27 L5 21 L8 17 L7 12 L3 9 L7 4 L11 6 Z" fill="#80A9E8" fill-opacity="0.12" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="5" fill="none" stroke="#80A9E8" stroke-width="2"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">RhinoOptions</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 568)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<g transform="scale(.8)"><path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M25 19 V29 M25 15 V16" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<g transform="scale(.8)"><path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M25 19 V29 M25 15 V16" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">GVObjectInfo</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 568)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<g transform="scale(.8)"><path d="M4 4 H28 V28 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4 V28 M20 4 V28 M4 12 H28 M4 20 H28" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M20 22 H29 M20 27 H29 M23 19 V25 M27 24 V30" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<g transform="scale(.8)"><path d="M4 4 H28 V28 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4 V28 M20 4 V28 M4 12 H28 M4 20 H28" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M20 22 H29 M20 27 H29 M23 19 V25 M27 24 V30" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ViewGridOptions</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 568)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<g transform="scale(.8)"><path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M20 24 H29 M24 19 V29" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<g transform="scale(.8)"><path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M20 24 H29 M24 19 V29" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ObjectProperties</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 568)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M6 3 H20 L27 10 V29 H6 Z" fill="#FFFFFF" fill-opacity="0.06" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3 V10 H27" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><g transform="scale(.8)"><path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M25 19 V29 M25 15 V16" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M6 3 H20 L27 10 V29 H6 Z" fill="#FFFFFF" fill-opacity="0.06" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3 V10 H27" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><g transform="scale(.8)"><path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M25 19 V29 M25 15 V16" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">AllObjectInfo</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(1120 568)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M6 3 H20 L27 10 V29 H6 Z" fill="#FFFFFF" fill-opacity="0.06" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3 V10 H27" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 14 H22 M10 19 H22 M10 24 H19" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7 V26" fill="none" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M6 3 H20 L27 10 V29 H6 Z" fill="#FFFFFF" fill-opacity="0.06" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3 V10 H27" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 14 H22 M10 19 H22 M10 24 H19" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 7 V26" fill="none" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">CommandHistory</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(0 696)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M6 3 H20 L27 10 V29 H6 Z" fill="#FFFFFF" fill-opacity="0.06" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3 V10 H27" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 22 L26 13 L29 16 L20 25 L16 26 Z" fill="#FFFFFF" fill-opacity="0.12" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 15 L27 18" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M6 3 H20 L27 10 V29 H6 Z" fill="#FFFFFF" fill-opacity="0.06" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3 V10 H27" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 22 L26 13 L29 16 L20 25 L16 26 Z" fill="#FFFFFF" fill-opacity="0.12" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 15 L27 18" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ProjectNotes</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 696)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#EC45C4" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#EC45C4" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">SuperSelect</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(320 696)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 4 H28 V28 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 4 V28 M4 16 H28" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 29 H11 M14 29 H21 M24 29 H28" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 4 H28 V28 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 4 V28 M4 16 H28" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 29 H11 M14 29 H21 M24 29 H28" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">InfoSettingsViewportTabsTogg</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9">le</text></g>
+<g transform="translate(480 696)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="10" r="2.3" fill="#FFFFFF"/><circle cx="28" cy="10" r="2.3" fill="#FFFFFF"/><circle cx="16" cy="29" r="2.3" fill="#FFFFFF"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="10" r="2.3" fill="#FFFFFF"/><circle cx="28" cy="10" r="2.3" fill="#FFFFFF"/><circle cx="16" cy="29" r="2.3" fill="#FFFFFF"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">InfoSettingsBoxEdit</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 696)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 5 H11 V27 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 3 H20 V27 H13 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 7 H29 V27 H22 Z" fill="#D5E7FF" fill-opacity="0.16" stroke="#D5E7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 5 H11 V27 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 3 H20 V27 H13 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 7 H29 V27 H22 Z" fill="#D5E7FF" fill-opacity="0.16" stroke="#D5E7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">InfoSettingsLibraries</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 696)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 4 H29 L20 15 V27 L12 29 V15 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 4 H29 L20 15 V27 L12 29 V15 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">InfoSettingsSelectionFilter</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 696)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M6 3 H20 L27 10 V29 H6 Z" fill="#FFFFFF" fill-opacity="0.06" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3 V10 H27" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 12 H21 V18 H10 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 23 H22 M10 26 H19" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M6 3 H20 L27 10 V29 H6 Z" fill="#FFFFFF" fill-opacity="0.06" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3 V10 H27" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 12 H21 V18 H10 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 23 H22 M10 26 H19" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">InfoSettingsDesignReport</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(1120 696)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M16 16 V3" fill="none" stroke="#FFD705" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7 L16 3 L20 7" fill="none" stroke="#FFD705" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L3 28" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 23 V28 H8" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L29 28" fill="none" stroke="#05D7E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 28 H29 V23" fill="none" stroke="#05D7E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M16 16 V3" fill="none" stroke="#FFD705" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7 L16 3 L20 7" fill="none" stroke="#FFD705" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L3 28" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 23 V28 H8" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L29 28" fill="none" stroke="#05D7E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 28 H29 V23" fill="none" stroke="#05D7E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">InfoSettingsGumballAlignment</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(0 824)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M16 16 V3" fill="none" stroke="#FFD705" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7 L16 3 L20 7" fill="none" stroke="#FFD705" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L3 28" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 23 V28 H8" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L29 28" fill="none" stroke="#05D7E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 28 H29 V23" fill="none" stroke="#05D7E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#FFFFFF"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M16 16 V3" fill="none" stroke="#FFD705" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7 L16 3 L20 7" fill="none" stroke="#FFD705" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L3 28" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 23 V28 H8" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L29 28" fill="none" stroke="#05D7E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 28 H29 V23" fill="none" stroke="#05D7E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#FFFFFF"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">InfoSettingsRelocateGumball</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 824)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M16 16 V3" fill="none" stroke="#FFD705" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7 L16 3 L20 7" fill="none" stroke="#FFD705" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L3 28" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 23 V28 H8" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L29 28" fill="none" stroke="#05D7E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 28 H29 V23" fill="none" stroke="#05D7E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="9" fill="none" stroke="#80A9E8" stroke-width="1.5"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M16 16 V3" fill="none" stroke="#FFD705" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7 L16 3 L20 7" fill="none" stroke="#FFD705" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L3 28" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 23 V28 H8" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L29 28" fill="none" stroke="#05D7E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 28 H29 V23" fill="none" stroke="#05D7E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="9" fill="none" stroke="#80A9E8" stroke-width="1.5"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">InfoSettingsGumballON</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(320 824)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M16 16 V3" fill="none" stroke="#EC45C4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7 L16 3 L20 7" fill="none" stroke="#EC45C4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L3 28" fill="none" stroke="#EC45C4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 23 V28 H8" fill="none" stroke="#EC45C4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L29 28" fill="none" stroke="#EC45C4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 28 H29 V23" fill="none" stroke="#EC45C4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="9" fill="none" stroke="#EC45C4" stroke-width="1.5"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M16 16 V3" fill="none" stroke="#EC45C4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7 L16 3 L20 7" fill="none" stroke="#EC45C4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L3 28" fill="none" stroke="#EC45C4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 23 V28 H8" fill="none" stroke="#EC45C4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16 L29 28" fill="none" stroke="#EC45C4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 28 H29 V23" fill="none" stroke="#EC45C4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="9" fill="none" stroke="#EC45C4" stroke-width="1.5"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">InfoSettingsSmartTargetsGumb</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9">allON</text></g>
+<g transform="translate(480 824)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M5 26 H27 M5 26 V4 M5 26 L26 5" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="26" r="2.875" fill="#80A9E8"/><circle cx="26" cy="5" r="2.875" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M5 26 H27 M5 26 V4 M5 26 L26 5" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="26" r="2.875" fill="#80A9E8"/><circle cx="26" cy="5" r="2.875" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">RhinoSmartTrackON</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 824)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<g transform="scale(.8)"><circle cx="16" cy="16" r="11" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M16 8 V16 L23 20" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M19 20 L29 20 L29 29 L19 29 Z" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<g transform="scale(.8)"><circle cx="16" cy="16" r="11" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M16 8 V16 L23 20" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M19 20 L29 20 L29 29 L19 29 Z" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">RhinoHistoryON</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 824)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M5 7 H26 V26 H15" fill="none" stroke="#FFD705" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 22 L11 26 L15 30" fill="none" stroke="#FFD705" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 15 L12 20 L5 25 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M5 7 H26 V26 H15" fill="none" stroke="#FFD705" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 22 L11 26 L15 30" fill="none" stroke="#FFD705" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 15 L12 20 L5 25 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">GVHistoryUpdateON</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 824)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M5 7 H26 V26 H15" fill="none" stroke="#FFD705" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 22 L11 26 L15 30" fill="none" stroke="#FFD705" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="21" r="3.4499999999999997" fill="#FF4747"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M5 7 H26 V26 H15" fill="none" stroke="#FFD705" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 22 L11 26 L15 30" fill="none" stroke="#FFD705" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="21" r="3.4499999999999997" fill="#FF4747"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">GVHistoryRecordON</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(1120 824)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M5 7 H26 V26 H15" fill="none" stroke="#FFD705" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 22 L11 26 L15 30" fill="none" stroke="#FFD705" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 17 L12 26 M12 17 L3 26" fill="none" stroke="#FF4747" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M5 7 H26 V26 H15" fill="none" stroke="#FFD705" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 22 L11 26 L15 30" fill="none" stroke="#FFD705" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 17 L12 26 M12 17 L3 26" fill="none" stroke="#FF4747" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">InfoSettingsGVClearHistory</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(0 952)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 4 H28 V28 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4 V28 M20 4 V28 M4 12 H28 M4 20 H28" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 5 V16 H27" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 4 H28 V28 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4 V28 M20 4 V28 M4 12 H28 M4 20 H28" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 5 V16 H27" fill="none" stroke="#FF4747" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">GridON</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 952)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<g transform="scale(.8)"><path d="M4 4 H28 V28 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4 V28 M20 4 V28 M4 12 H28 M4 20 H28" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M23 16 V29 M19 20 H27" fill="none" stroke="#F2793A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<g transform="scale(.8)"><path d="M4 4 H28 V28 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4 V28 M20 4 V28 M4 12 H28 M4 20 H28" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M23 16 V29 M19 20 H27" fill="none" stroke="#F2793A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">PreviewCutterON</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(320 952)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="16" r="11" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M16 5 A11 11 0 0 0 16 27 Z" fill="#80A9E8" fill-opacity="0.5" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="16" r="11" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M16 5 A11 11 0 0 0 16 27 Z" fill="#80A9E8" fill-opacity="0.5" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">PreviewShadeON</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 952)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="16" r="10" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#EC45C4" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="16" r="10" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M3 10 V3 H10 M22 3 H29 V10 M29 22 V29 H22 M10 29 H3 V22" fill="none" stroke="#EC45C4" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ShadeSelectedOnlyON</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 952)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#80A9E8" fill-opacity="0.2" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 18 H29" fill="none" stroke="#FF4747" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#80A9E8" fill-opacity="0.2" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 18 H29" fill="none" stroke="#FF4747" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">GVGemView_1</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 952)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#25BC69" fill-opacity="0.16" stroke="#25BC69" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 7 V26 M5 18 H27" fill="none" stroke="#FF4747" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#25BC69" fill-opacity="0.16" stroke="#25BC69" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 7 V26 M5 18 H27" fill="none" stroke="#FF4747" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">GVSurfaceView_1</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 952)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 4 H28 V28 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4 V28 M20 4 V28 M4 12 H28 M4 20 H28" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="20" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 4 H28 V28 H4 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4 V28 M20 4 V28 M4 12 H28 M4 20 H28" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="20" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">GridSnapON</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(1120 952)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M5 4 V27 H28" fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 21 H11 V27" fill="none" stroke="#80A9E8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M5 4 V27 H28" fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 21 H11 V27" fill="none" stroke="#80A9E8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">OrthoSnapON</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(0 1080)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="17" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="17" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">PlanarSnapON</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 1080)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3 V20" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="20" r="3.4499999999999997" fill="#FFFFFF"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#80A9E8" fill-opacity="0.16" stroke="#80A9E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3 V20" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="20" r="3.4499999999999997" fill="#FFFFFF"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ProjectSnapON</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(320 1080)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 24 L28 8" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="24" r="2.875" fill="#80A9E8"/><circle cx="28" cy="8" r="2.875" fill="#80A9E8"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#FFFFFF"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 24 L28 8" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="24" r="2.875" fill="#80A9E8"/><circle cx="28" cy="8" r="2.875" fill="#80A9E8"/><circle cx="16" cy="16" r="3.4499999999999997" fill="#FFFFFF"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">SnapBetween</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 1080)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="17" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 8 Q15 3 28 8 L25 27 Q15 23 7 28 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18 Q16 13 26 18" fill="none" stroke="#D5E7FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="17" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">SnapOnSurface</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 1080)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="3.4499999999999997" fill="#80A9E8"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">SnapOnPolysurface</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 1080)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M10 6 L23 16 L10 26 Z" fill="#2678c9" fill-opacity="0.6" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M10 6 L23 16 L10 26 Z" fill="#2678c9" fill-opacity="0.6" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">LayerArrow</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 1080)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M7 14 H25 V29 H7 Z" fill="#f5b400" fill-opacity="0.16" stroke="#f5b400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 14 V8 A5 5 0 0 1 21 8 V14" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M7 14 H25 V29 H7 Z" fill="#f5b400" fill-opacity="0.16" stroke="#f5b400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 14 V8 A5 5 0 0 1 21 8 V14" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">LayerLock</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(1120 1080)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 16 Q16 2 29 16 Q16 30 3 16 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="4" fill="none" stroke="#2678c9" stroke-width="2.2"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 16 Q16 2 29 16 Q16 30 3 16 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="4" fill="none" stroke="#2678c9" stroke-width="2.2"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">LayerVisibility</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(0 1208)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 16 Q16 2 29 16 Q16 30 3 16 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 27 L27 5" fill="none" stroke="#2678c9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 16 Q16 2 29 16 Q16 30 3 16 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 27 L27 5" fill="none" stroke="#2678c9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">LayerHide</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 1208)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 16 Q16 2 29 16 Q16 30 3 16 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="4" fill="none" stroke="#2678c9" stroke-width="2.2"/><path d="M16 1 V5 M16 27 V31" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 16 Q16 2 29 16 Q16 30 3 16 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="4" fill="none" stroke="#2678c9" stroke-width="2.2"/><path d="M16 1 V5 M16 27 V31" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">LayerShow</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(320 1208)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 9 H12 L16 13 H29 L25 27 H3 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H27" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 19 V29 M19 24 H29" fill="none" stroke="#f5b400" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 9 H12 L16 13 H29 L25 27 H3 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H27" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 19 V29 M19 24 H29" fill="none" stroke="#f5b400" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ProjectAdd</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 1208)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 9 H12 L16 13 H29 L25 27 H3 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H27" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 19 H29" fill="none" stroke="#f5b400" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M25 15 L29 19 L25 23" fill="none" stroke="#f5b400" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 9 H12 L16 13 H29 L25 27 H3 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H27" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 19 H29" fill="none" stroke="#f5b400" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M25 15 L29 19 L25 23" fill="none" stroke="#f5b400" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ProjectOut</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 1208)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 9 H12 L16 13 H29 L25 27 H3 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H27" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 19 H14" fill="none" stroke="#f5b400" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 15 L14 19 L18 23" fill="none" stroke="#f5b400" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 9 H12 L16 13 H29 L25 27 H3 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H27" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 19 H14" fill="none" stroke="#f5b400" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 15 L14 19 L18 23" fill="none" stroke="#f5b400" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ProjectIn</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 1208)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M4 3 H24 L29 8 V29 H4 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3 H22 V12 H9 Z" fill="#FFFFFF" fill-opacity="0.15" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 20 H24 V29 H9 Z" fill="#FFFFFF" fill-opacity="0.1" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M4 3 H24 L29 8 V29 H4 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3 H22 V12 H9 Z" fill="#FFFFFF" fill-opacity="0.15" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 20 H24 V29 H9 Z" fill="#FFFFFF" fill-opacity="0.1" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ProjectSave</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 1208)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 9 H12 L16 13 H29 L25 27 H3 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H27" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 19 L29 29 M29 19 L19 29" fill="none" stroke="#e66352" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 9 H12 L16 13 H29 L25 27 H3 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H27" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 19 L29 29 M29 19 L19 29" fill="none" stroke="#e66352" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ProjectDelete</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(1120 1208)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M3 9 H12 L16 13 H29 L25 27 H3 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H27" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 19 H11 M15 19 H19 M23 19 H27" fill="none" stroke="#f5b400" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M3 9 H12 L16 13 H29 L25 27 H3 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H27" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 19 H11 M15 19 H19 M23 19 H27" fill="none" stroke="#f5b400" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ProjectManager</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(0 1336)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#2678c9" fill-opacity="0.16" stroke="#2678c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">ViewIsometric</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(160 1336)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#25BC69" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#25BC69" fill-opacity="0.2" stroke="#25BC69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 9 L23 25 M23 9 L9 25" fill="none" stroke="#AE5CE7" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#25BC69" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#25BC69" fill-opacity="0.2" stroke="#25BC69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 9 L23 25 M23 9 L9 25" fill="none" stroke="#AE5CE7" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">Dial_Wireframe</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(320 1336)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#25BC69" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#25BC69" fill-opacity="0.2" stroke="#25BC69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12 Q16 8 24 12 L25 24 Q16 29 7 24 Z" fill="#25BC69" fill-opacity="0.3" stroke="#25BC69" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 8 H22" fill="none" stroke="#AE5CE7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#25BC69" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#25BC69" fill-opacity="0.2" stroke="#25BC69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12 Q16 8 24 12 L25 24 Q16 29 7 24 Z" fill="#25BC69" fill-opacity="0.3" stroke="#25BC69" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 8 H22" fill="none" stroke="#AE5CE7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">Dial_Shaded</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(480 1336)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#25BC69" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#25BC69" fill-opacity="0.2" stroke="#25BC69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 6 H22" fill="none" stroke="#EC45C4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 17 Q16 22 23 17" fill="none" stroke="#D5E7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#25BC69" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#25BC69" fill-opacity="0.2" stroke="#25BC69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 6 H22" fill="none" stroke="#EC45C4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 17 Q16 22 23 17" fill="none" stroke="#D5E7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">Dial_Working Shade</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(640 1336)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#D8BF91" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#D8BF91" fill-opacity="0.2" stroke="#D8BF91" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 6 H22" fill="none" stroke="#FF4747" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12 L24 24 M24 12 L8 24" fill="none" stroke="#FFD705" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#D8BF91" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#D8BF91" fill-opacity="0.2" stroke="#D8BF91" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 6 H22" fill="none" stroke="#FF4747" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12 L24 24 M24 12 L8 24" fill="none" stroke="#FFD705" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">Dial_Working Render</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(800 1336)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#25BC69" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#25BC69" fill-opacity="0.2" stroke="#25BC69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="18" r="6" fill="none" stroke="#FFFFFF" stroke-width="1.3"/><path d="M10 6 H22" fill="none" stroke="#EC45C4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#25BC69" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#25BC69" fill-opacity="0.2" stroke="#25BC69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="18" r="6" fill="none" stroke="#FFFFFF" stroke-width="1.3"/><path d="M10 6 H22" fill="none" stroke="#EC45C4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">Dial_Ghosted</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+<g transform="translate(960 1336)"><rect x="4" y="4" width="152" height="120" rx="4" fill="#696969"/><g transform="translate(16 24) scale(2)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#25BC69" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#25BC69" fill-opacity="0.2" stroke="#25BC69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12 Q16 8 24 12 L25 24 Q16 29 7 24 Z" fill="#FFFFFF" fill-opacity="0.3" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 6 H22" fill="none" stroke="#AE5CE7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><g transform="translate(112 40) scale(.75)">
+<circle cx="16" cy="18" r="10" fill="none" stroke="#25BC69" stroke-width="2.2"/><path d="M10 7 L13 3 H19 L22 7 L16 13 Z" fill="#25BC69" fill-opacity="0.2" stroke="#25BC69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12 Q16 8 24 12 L25 24 Q16 29 7 24 Z" fill="#FFFFFF" fill-opacity="0.3" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 6 H22" fill="none" stroke="#AE5CE7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</g><text x="8" y="105" fill="white" font-family="sans-serif" font-size="9">Dial_Tech Shade</text><text x="8" y="117" fill="white" font-family="sans-serif" font-size="9"></text></g>
+</svg>

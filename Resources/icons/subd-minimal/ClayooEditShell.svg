@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Shell</title>
+<desc>Hollow a solid SubD object while removing selected faces. OpenMatrix9 minimal-subd-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 9 V24 C4 32 28 32 28 24 V9" fill="#FFB5A2" fill-opacity="0.2" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="16" cy="9" rx="12" ry="6" fill="none" stroke="#FF6A68" stroke-width="2.2"/><ellipse cx="16" cy="9" rx="7" ry="3" fill="none" stroke="#FFFFFF" stroke-width="2.2"/><path d="M9 9 V22 Q16 27 23 22 V9" fill="none" stroke="#FF6A68" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

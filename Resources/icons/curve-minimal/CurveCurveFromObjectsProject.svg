@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Project curve</title>
+  <desc>Parallel projection rays from a curve onto a surface. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M4 14 Q12 7 26 11 L28 25 Q16 21 6 28 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 4 Q16 1 25 4" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 24 Q17 18 27 22" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 7 V21" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 18 L9 21 L11.5 18" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 7 V20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.5 17 L23 20 L25.5 17" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

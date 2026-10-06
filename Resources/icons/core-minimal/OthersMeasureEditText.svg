@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Edit Text</title>
+<desc>Edit annotation text; authored OpenMatrix9 vector.</desc>
+<path d="M5 6 H27 M16 6 V27 M11 27 H21 M5 6 V10 M27 6 V10" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 22 L26 13 L29 16 L20 25 L16 26 Z" fill="#FFFFFF" fill-opacity="0.12" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 15 L27 18" fill="none" stroke="#80A9E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Target at curve end</title>
+<desc>Add a Smart Target at the end of an existing curve. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 26 C3 12 13 7 21 15" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 15 H29 M21 7 V23" fill="none" stroke="#FF0CA1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="21" cy="15" r="2.1849999999999996" fill="#FF0CA1"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Environment Map Analysis</title>
+<desc>Evaluate surface smoothness from a reflected image. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<ellipse cx="16" cy="16" rx="12" ry="12" fill="none" stroke="#42EBEB" stroke-width="2.6"/><path d="M7 8 Q19 13 26 8 M4 16 Q16 21 28 16 M7 24 Q17 27 25 23" fill="none" stroke="#CEFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 4 Q7 15 16 28" fill="none" stroke="#59C5C5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,57 @@
+# OM9-CURVE-001 / Command console: picked chain, live preview, Enter and copy.
+import os,json,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]};clipboard_before=QtCore.QMimeData()
+for fmt in QtWidgets.QApplication.clipboard().mimeData().formats():clipboard_before.setData(fmt,QtWidgets.QApplication.clipboard().mimeData().data(fmt))
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(150,loop.quit);loop.exec()
+def check(name,value):result['checks'].append({'name':name,'passed':bool(value)})
+def node(view,name):
+    s=coin.SoSearchAction();s.setName(name);s.setInterest(coin.SoSearchAction.FIRST);s.apply(view.getSceneGraph());return s.getPath().getTail() if s.getPath() else None
+def command(text):
+    if old is not None:old.setText(text);QtTest.QTest.keyClick(old,QtCore.Qt.Key_Return)
+    else:
+        field.setFocus();c=field.textCursor();c.setPosition(int(field.property('om9InputStart')));c.movePosition(QtGui.QTextCursor.End,QtGui.QTextCursor.KeepAnchor);c.insertText(text);field.setTextCursor(c);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return)
+    settle()
+def click(widget,pos):
+    for kind,buttons in [(QtCore.QEvent.MouseButtonPress,QtCore.Qt.LeftButton),(QtCore.QEvent.MouseButtonRelease,QtCore.Qt.NoButton)]:
+        event=QtGui.QMouseEvent(kind,QtCore.QPointF(pos),QtCore.QPointF(widget.mapToGlobal(pos)),QtCore.Qt.LeftButton,buttons,QtCore.Qt.NoModifier);QtWidgets.QApplication.sendEvent(widget,event)
+def run():
+    global field,old
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('PolylineConsole');doc.UndoMode=1;settle()
+        window=Gui.getMainWindow();window.show();window.resize(1500,1000);settle();dock=window.findChild(QtWidgets.QDockWidget,'OM9CommandFrame');field=window.findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript');old=window.findChild(QtWidgets.QLineEdit,'OM9CommandInput')
+        check('one visible text surface contains prompt and input',old is None and field is not None and not field.isReadOnly() and 'Command:' in field.toPlainText())
+        if old is None:
+            check('initial Command input is empty',int(field.property('om9InputStart'))==field.document().characterCount()-1)
+            field.setMaximumBlockCount(3);command('Polyline');command('bad');start=int(field.property('om9InputStart'));check('bounded history keeps valid live input boundary after multiline error',0<=start<=field.document().characterCount()-1 and start==field.document().characterCount()-1);command('0,0,0');check('CMD recovers after history eviction',not doc.Objects and 'Next point' in str(field.property('om9Prompt')));QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);field.setMaximumBlockCount(10000)
+        area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle();view=Gui.activeDocument().activeView();viewer=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer');target=viewer.viewport();center=target.rect().center();points=[QtCore.QPoint(round(target.width()*x),round(target.height()*y)) for x,y in [(0.2,0.6),(0.35,0.25),(0.6,0.55),(0.75,0.8)]]
+        command('Polyline');result['viewport']={'size':[target.width(),target.height()],'active':str(view),'prompt':field.property('om9Prompt')}
+        for i,pos in enumerate(points):
+            click(target,pos);settle();preview=node(view,'OM9CurvePreview');markers=node(view,'OM9CurvePreviewPoints');result.setdefault('picks',[]).append({'point':[pos.x(),pos.y()],'count':len(markers.point.getValues()) if markers else None,'prompt':field.property('om9Prompt'),'size':[target.width(),target.height()]});check('click '+str(i+1)+' keeps session without document objects',not doc.Objects);check('click '+str(i+1)+' displays accepted vertices',markers is not None and len(markers.point.getValues())==i+1)
+            if i>0:check('click '+str(i+1)+' displays connected straight segments',preview is not None)
+        check('preview is visible in all four native views',all(node(v,'OM9CurvePreview') is not None for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')))
+        accepted=[tuple(p) for p in node(view,'OM9CurvePreviewPoints').point.getValues()] if node(view,'OM9CurvePreviewPoints') else []
+        hp=QtCore.QPoint(round(target.width()*0.85),round(target.height()*0.2));event=QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(hp),QtCore.QPointF(target.mapToGlobal(hp)),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.NoModifier);QtWidgets.QApplication.sendEvent(target,event);settle();coords=node(view,'OM9CurvePreviewLine');check('hover adds only a temporary next segment',coords is not None and len(coords.point.getValues())==5 and not doc.Objects);result['hover_vertices']=len(coords.point.getValues()) if coords else None
+        QtTest.QTest.keyClick(target,QtCore.Qt.Key_Return);settle();check('viewport Enter commits one open wire with three edges',len(doc.Objects)==1 and len(doc.Objects[0].Shape.Edges)==3 and not doc.Objects[0].Shape.isClosed());check('commit removes temporary preview and point handles',all(node(v,'OM9CurvePreview') is None for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')))
+        if doc.Objects:check('committed vertices equal picked preview points',len(accepted)==4 and all((v.Point-App.Vector(*p)).Length<1e-5 for v,p in zip(doc.Objects[0].Shape.Vertexes,accepted)))
+        doc.undo();settle();check('one Undo removes the whole polyline',not doc.Objects);doc.redo();settle();check('Redo restores the complete polyline',len(doc.Objects)==1 and len(doc.Objects[0].Shape.Edges)==3)
+        command('Polyline');click(target,points[0]);settle();QtTest.QTest.keyClick(target,QtCore.Qt.Key_Return);settle();check('Enter with one point keeps session and reports validation',len(doc.Objects)==1 and 'More distinct' in field.toPlainText());QtTest.QTest.keyClick(target,QtCore.Qt.Key_Escape);settle();check('Esc removes preview without geometry',len(doc.Objects)==1 and node(view,'OM9CurvePreview') is None)
+        if old is None:
+            field.setFocus();QtTest.QTest.keyClicks(field,'draft');settle();field.selectAll();QtTest.QTest.keyClick(field,QtCore.Qt.Key_C,QtCore.Qt.ControlModifier);copied=QtWidgets.QApplication.clipboard().text();check('copy includes history and current prompt with draft',copied==field.toPlainText() and 'Polyline created' in copied and copied.endswith('Command: draft'))
+            before=field.toPlainText();QtTest.QTest.keyClick(field,QtCore.Qt.Key_Backspace);check('editing selection spanning history preserves it',field.toPlainText()==before)
+            c=field.textCursor();c.setPosition(0);field.setTextCursor(c);QtTest.QTest.keyClicks(field,'x');check('typing at history relocates to live input without modifying history',field.toPlainText().startswith(before[:int(field.property('om9InputStart'))]) and field.toPlainText().endswith('draftx'))
+            command('Polyline');c=field.textCursor();c.movePosition(QtGui.QTextCursor.End);c.insertText('a');field.setTextCursor(c);prefix=field.toPlainText()[:int(field.property('om9InputStart'))];QtTest.QTest.keyClick(field,QtCore.Qt.Key_Backspace,QtCore.Qt.ControlModifier);check('Ctrl Backspace preserves protected prompt',field.toPlainText()==prefix);event=QtGui.QInputMethodEvent();event.setCommitString('x',-1,1);QtWidgets.QApplication.sendEvent(field,event);check('IME replacement cannot cross prompt boundary',field.toPlainText()==prefix);event=QtGui.QInputMethodEvent();event.setCommitString('a\nb');QtWidgets.QApplication.sendEvent(field,event);check('IME multiline commit stays one input line',field.toPlainText()==prefix+'a b');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);command('Polyline');command('0,0,0');command('3,4,0');command('');check('same text surface CMD creates 5 mm Polyline',len(doc.Objects)==2 and abs(doc.Objects[-1].Shape.Length-5)<1e-8)
+        command('Polyline');command('0,0,0');views=Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor');Gui.activateWorkbench('PartWorkbench');settle();check('workbench exit removes every transient preview',all(node(v,'OM9CurvePreview') is None for v in views) and len(doc.Objects)==2);Gui.activateWorkbench('OpenMatrix9Workbench');settle();command('Polyline');command('0,0,0');other=App.newDocument('PolylineOther');settle();check('document switch clears preview in original document',all(node(v,'OM9CurvePreview') is None for v in views) and not other.Objects);App.setActiveDocument(doc.Name);settle();App.closeDocument(other.Name);settle()
+        for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor'):v.saveImage(str(out/('view-'+str(id(v))+'.png')),640,360,'Current')
+        window.grab().save(str(out/'console.png'));result['ok']=all(c['passed'] for c in result['checks'])
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        QtWidgets.QApplication.clipboard().setMimeData(clipboard_before)
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(250,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

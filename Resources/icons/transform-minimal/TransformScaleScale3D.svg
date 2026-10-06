@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Scale 3D</title>
+<desc>Uniform scale on three axes. OpenMatrix9 minimal-transform-v2-reviewed; authored vector geometry.</desc>
+<path d="M3 11 H20 V28 H3 Z" fill="#FF5B05" fill-opacity="0.28" stroke="#FF5B05" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11 L11 3 H28 L20 11 Z" fill="#FF9566" fill-opacity="0.18" stroke="#FF9566" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 11 L28 3 V20 L20 28 Z" fill="#FF5B05" fill-opacity="0.18" stroke="#FF5B05" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 15 H16 V23 H8 Z" fill="#FFFFFF" fill-opacity="0.28" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 15 L12 11 H20 L16 15 Z" fill="#FFFFFF" fill-opacity="0.18" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 15 L20 11 V19 L16 23 Z" fill="#FFFFFF" fill-opacity="0.18" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

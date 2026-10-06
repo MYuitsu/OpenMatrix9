@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Line</title>
+  <desc>A straight segment defined by two endpoints. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M7 25 L25 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="25" r="2.3" fill="#FFFFFF"/><circle cx="25" cy="7" r="2.3" fill="#FFFFFF"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Fillet corners</title>
+  <desc>Closed outline with rounded corners. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M12 6 H21 M27 12 V20 M21 26 H12 M6 20 V12" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12 Q6 6 12 6 M21 6 Q27 6 27 12 M27 20 Q27 26 21 26 M12 26 Q6 26 6 20" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

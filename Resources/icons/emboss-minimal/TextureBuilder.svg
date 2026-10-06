@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Texture Builder</title>
+<desc>Create surface texture from a grayscale image. OpenMatrix9 minimal-emboss-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 13 L19 4 L29 19 L14 28 Z" fill="#FFFFB2" fill-opacity="0.18" stroke="#FFFFB2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 16 L10 7 L14 13 L17 4 M12 24 L16 13 L20 20 L23 11 M18 26 L22 22 L26 23" fill="none" stroke="#FFE057" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 13 L14 28 L29 19" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

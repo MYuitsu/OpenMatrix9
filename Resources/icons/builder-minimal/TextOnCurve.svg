@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Text on curve</title>
+<desc>Create 2D or 3D text along a curve. OpenMatrix9 minimal-builder-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 25 Q16 13 29 25" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><g transform="rotate(-18 9 16)"><path d="M5 18 L9 7 L13 18 M6.5 14 H11.5" fill="none" stroke="#FF7168" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="rotate(18 23 16)"><path d="M19 18 V7 H24 Q29 7 25 12 Q30 16 25 18 Z M19 12 H25" fill="none" stroke="#FF7168" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>

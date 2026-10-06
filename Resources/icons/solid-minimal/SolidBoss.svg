@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Boss to boundary</title>
+<desc>Extrude a closed profile toward and join a boundary surface. OpenMatrix9 minimal-solid-v3-warm-highlight; authored vector geometry.</desc>
+<path d="M3 8 L23 3 L29 9 L9 14 Z" fill="#A668D1" fill-opacity="0.18" stroke="#A668D1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11 V25 C10 30 22 30 22 25 V8" fill="#FFD166" fill-opacity="0.2" stroke="#FFD166" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="16" cy="25" rx="6" ry="2.5" fill="none" stroke="#FFD166" stroke-width="2.2"/><path d="M16 22 V9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 12 L16 9 L19 12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

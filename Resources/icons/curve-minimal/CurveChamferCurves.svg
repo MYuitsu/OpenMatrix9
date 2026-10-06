@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Chamfer curves</title>
+  <desc>Straight beveled connection replacing a sharp corner. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M5 27 V17 M15 7 H27" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 17 L15 7" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="17" r="1.9" fill="#FFFFFF"/><circle cx="15" cy="7" r="1.9" fill="#FFFFFF"/>
+</svg>

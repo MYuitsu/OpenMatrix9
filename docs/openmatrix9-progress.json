@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-06",
+  "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
+  "active_item": null,
+  "items": [
+    {
+      "key": "public-source-snapshot",
+      "stage": "ui-menu",
+      "feature_ids": [],
+      "procedure_va": null,
+      "status": "validated",
+      "outputs": [
+        "Resources/icons",
+        "Resources/menu/icons.ini",
+        "Resources/menu/source-manifest.json",
+        "Resources/menu/ContextMenu.xml",
+        "tools/core_icons.py",
+        "tools/export_menu_assets.py",
+        "tools/public_source_audit.py",
+        "tests/public_icons_smoke.FCMacro",
+        "docs/public-source-review.md",
+        "LICENSE",
+        "THIRD_PARTY_NOTICES.md"
+      ],
+      "evidence": [
+        "510 authored SVG bindings; 154 remaining core/sidebar symbols redrawn.",
+        "Imported research, raw artwork, decompiled references, private models and transient artifacts moved outside the repository.",
+        "Authored-only exporter and source audit reject legacy/external resources.",
+        "Independent F6 configuration loaded through the native host.",
+        "RelWithDebInfo native build and isolated runtime: 3093/3093 checks passed.",
+        "Local history reset to one root commit at the owner's explicit request; final history scan is documented in public-source-checks.json."
+      ],
+      "tests": [
+        {"command": "python -m unittest discover -s tools/tests", "result": "23 passed"},
+        {"command": "cargo test --manifest-path rust/Cargo.toml", "result": "68 passed"},
+        {"command": "tests/run_menu_smoke.ps1 -Macro public_icons_smoke.FCMacro", "result": "3093/3093 passed in isolated runtime"}
+      ],
+      "uncertainties": [
+        "Technical audit does not establish copyright clearance or complete command implementation.",
+        "The prior remote history is not changed; no GitHub publication or force-push was performed.",
+        "Historical research evidence is retained privately and is not part of this public ledger."
+      ],
+      "next_document": "docs/public-source-review.md",
+      "next_action": "Review provenance limits and choose a publication destination. Do not publish an unchanged old remote."
+    }
+  ]
+}

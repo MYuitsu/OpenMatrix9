@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Loft</title>
+<desc>Create a SubD surface through two or more curves. OpenMatrix9 minimal-subd-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 28 Q10 7 14 4 L27 10 Q23 14 28 27 Z" fill="#FFB5A2" fill-opacity="0.2" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 28 Q16 17 28 27 M7 18 Q16 9 26 17 M14 4 Q23 2 27 10" fill="none" stroke="#FF6A68" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Extract Render Mesh</title>
+<desc>Extract the object display mesh; authored OpenMatrix9 vector.</desc>
+<g transform="scale(.8)"><path d="M16 4 L28 10 V23 L16 29 L4 23 V10 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10 L16 16 L28 10 M16 16 V29" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M19 19 L28 19 L29 29 L20 29 Z M19 19 L29 29" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

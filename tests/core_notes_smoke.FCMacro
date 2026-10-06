@@ -1,0 +1,82 @@
+# OM9-FILE-008 / OM9-INFO-006 native shared notes workflow.
+import os,json,traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtTest,QtGui
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]};key='OpenMatrix9.ProjectNotes'
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(350,loop.quit);loop.exec()
+def invoke(token,text,finish='done',cmd=False,close_document=None):
+    def edit():
+        try:
+            dialog=window.findChild(QtWidgets.QDialog,'OM9ProjectNotes')
+            check('notes dialog opens',dialog is not None)
+            field=dialog.findChild(QtWidgets.QPlainTextEdit,'OM9NotesText')
+            result.setdefault('loaded',[]).append(field.toPlainText())
+            field.setFocus();field.setPlainText(text)
+            if close_document:App.closeDocument(close_document)
+            if finish=='x':dialog.close()
+            elif finish=='esc':
+                def unblock():
+                    if dialog.isVisible():result['esc_blocked']=True;dialog.reject()
+                watchdog=QtCore.QTimer(dialog);watchdog.setSingleShot(True);watchdog.timeout.connect(unblock);watchdog.start(800)
+                QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape)
+            else:dialog.findChild(QtWidgets.QPushButton,'OM9NotesDone').click()
+        except Exception:
+            result['callback_error']=traceback.format_exc()
+            for dialog in window.findChildren(QtWidgets.QDialog):dialog.reject()
+    QtCore.QTimer.singleShot(200,edit)
+    if cmd:
+        field=command_input(window);field.setText(token);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return)
+    else:Gui.runCommand(token)
+    settle()
+    if 'callback_error' in result:raise AssertionError(result['callback_error'])
+def run():
+    global window
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('NotesTest');doc.UndoMode=1;doc.Meta={'unrelated':'preserved'};settle();window=Gui.getMainWindow();window.show()
+        check('Notes menu actions enabled',all(window.findChild(QtGui.QAction,n).isEnabled() for n in ('OM9_FileNotes','OM9_ProjectNotes')))
+        notes='Ghi chú nhẫn\nSize 12 — 金'
+        invoke('OM9_FileNotes',notes,'x');check('OM9-FILE-008 X saves Unicode notes',doc.Meta.get(key)==notes)
+        check('notes preserve metadata and create no geometry',doc.Meta['unrelated']=='preserved' and len(doc.Objects)==1 and not hasattr(doc.Objects[0],'Shape') and not doc.Objects[0].ViewObject.ShowInTree)
+        doc.undo();check('note edit Undo restores previous metadata',key not in doc.Meta);doc.redo();check('note edit Redo restores text',doc.Meta.get(key)==notes)
+        invoke('ProjectNotes',notes+'\nDone',cmd=True);check('OM9-INFO-006 CMD Done saves shared notes',doc.Meta.get(key)==notes+'\nDone' and result['loaded'][-1]==notes)
+        undos=doc.UndoCount;invoke('OM9_ProjectNotes',notes+'\nDone');check('unchanged notes create no Undo entry',doc.UndoCount==undos)
+        Gui.runCommand('Zoom_Window');invoke('Notes','discard','esc',cmd=True);check('Esc cancels modal notes during pending zoom',doc.Meta.get(key)==notes+'\nDone' and not result.get('esc_blocked',False))
+        field=command_input(window);field.setText('Line');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+        field.setText('0,0,0');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+        invoke('Notes','discard curve interruption','esc',cmd=True)
+        check('CMD Notes interrupts pending Curve without geometry or note changes',len(doc.Objects)==1 and doc.Meta.get(key)==notes+'\nDone' and not result.get('esc_blocked',False))
+        path=out/'notes.FCStd';doc.saveAs(str(path));App.closeDocument(doc.Name);doc=App.openDocument(str(path));settle();check('notes survive FCStd reload',doc.Meta.get(key)==notes+'\nDone' and doc.Meta['unrelated']=='preserved')
+        other=App.newDocument('NotesOther');settle();invoke('OM9_FileNotes','other','x');check('notes are independent per document',other.Meta.get(key)=='other' and doc.Meta.get(key)==notes+'\nDone')
+        invoke('OM9_ProjectNotes','discard after close',close_document=other.Name);check('closing originating document prevents stale note commit',doc.Meta.get(key)==notes+'\nDone')
+        App.setActiveDocument(doc.Name);settle();shape=doc.addObject('Part::Box','NotesSelectionFixture');doc.recompute();Gui.Selection.addSelection(shape)
+        invoke('Notes','preserve selection','x',cmd=True);check('note editing preserves selection and geometry',Gui.Selection.getSelection()==[shape] and shape.Shape.Volume>0)
+        class Restricted:
+            def __init__(self):self.form=QtWidgets.QWidget()
+            def isAllowedAlterDocument(self):return False
+            def isAllowedAlterSelection(self):return False
+            def isAllowedAlterView(self):return False
+        task=Restricted();Gui.Control.showDialog(task);settle()
+        check('restricted task disables both note actions',all(not window.findChild(QtGui.QAction,n).isEnabled() for n in ('OM9_FileNotes','OM9_ProjectNotes')))
+        field=command_input(window);field.setText('Notes');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+        check('restricted CMD cannot open notes editor',window.findChild(QtWidgets.QDialog,'OM9ProjectNotes') is None);Gui.Control.closeDialog();settle()
+        legacy=App.newDocument('NotesLegacy');legacy.UndoMode=1;legacy.Meta={key:'existing notes'};settle();invoke('OM9_ProjectNotes','edited existing notes');legacy.undo()
+        check('Undo first edit preserves preexisting project notes',legacy.Meta.get(key)=='existing notes')
+        legacy.redo();check('migration Redo restores edited notes and hides storage',legacy.Meta.get(key)=='edited existing notes' and not legacy.Objects[0].ViewObject.ShowInTree)
+        shape=legacy.addObject('Part::Box','NotesDeleteFixture');legacy.recompute();Gui.Selection.clearSelection();Gui.runCommand('OM9_SelectAll');settle();check('Select All excludes internal note storage',Gui.Selection.getSelection()==[shape])
+        Gui.runCommand('OM9_Delete');settle();check('Delete selected geometry preserves project notes',legacy.Meta.get(key)=='edited existing notes' and len(legacy.Objects)==1 and hasattr(legacy.Objects[0],'OM9NotesSchema'))
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):
+            if name.startswith('Notes') or name=='notes':App.closeDocument(name)
+        QtCore.QTimer.singleShot(0,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

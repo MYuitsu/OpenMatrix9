@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Set Renderer</title>
+<desc>Choose the rendering engine. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<path d="M17 3 L26 8 L17 20 L10 15 Z" fill="#59C5C5" fill-opacity="0.25" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 15 L17 20 Q13 27 4 28 Q9 24 7 21 Z" fill="#2BFFFF" fill-opacity="0.3" stroke="#2BFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 24 L26 28 L30 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

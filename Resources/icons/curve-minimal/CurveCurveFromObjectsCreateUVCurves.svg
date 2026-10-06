@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Create UV curves</title>
+  <desc>Unwrap a surface curve onto a flat parameter grid. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M3 7 Q8 1 13 7 V17 Q8 11 3 17 Z" fill="#59CBE8" fill-opacity="0.16" stroke="#59CBE8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 11 Q8 6 12 11" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 17 H29 V29 H19 Z" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 25 Q24 19 27 25" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 9 L24 14" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 14 H24 V9" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

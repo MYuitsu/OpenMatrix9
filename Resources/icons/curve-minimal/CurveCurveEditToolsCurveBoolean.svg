@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Curve boolean</title>
+  <desc>Overlapping regions used to trim, split and join curves. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <circle cx="12" cy="16" r="8" fill="none" stroke="#FFFFFF" stroke-width="2.6"/><circle cx="21" cy="16" r="8" fill="none" stroke="#FFFFFF" stroke-width="2.6"/><path d="M16.5 9.4 A8 8 0 0 1 16.5 22.6 A8 8 0 0 1 16.5 9.4" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

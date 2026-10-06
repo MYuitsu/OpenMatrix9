@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Prong on Surface</title>
+<desc>Place individual prongs on a selected surface. OpenMatrix9 minimal-settings-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 13 Q14 6 27 10 L29 27 Q17 23 5 29 Z" fill="#A73283" fill-opacity="0.18" stroke="#C655A3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 6.0 Q16 3.0 19.5 6.0 V22.0 Q16 24.0 12.5 22.0 Z" fill="#A73283" fill-opacity="0.3" stroke="#C655A3" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 6.0 Q16 8.0 19.5 6.0" fill="none" stroke="#F6C3E6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

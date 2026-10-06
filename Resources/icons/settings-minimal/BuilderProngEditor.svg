@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Prong Editor</title>
+<desc>Edit an individual prong using control handles. OpenMatrix9 minimal-settings-v1-reviewed; authored vector geometry.</desc>
+<path d="M9.5 6.0 Q14 3.0 18.5 6.0 V26.0 Q14 28.0 9.5 26.0 Z" fill="#A73283" fill-opacity="0.3" stroke="#C655A3" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.5 6.0 Q14 8.0 18.5 6.0" fill="none" stroke="#F6C3E6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="14" cy="4" r="2.3" fill="#FFFFFF"/><circle cx="14" cy="28" r="2.3" fill="#FFFFFF"/><path d="M22 14 H29" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 11 L29 14 L26 17" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 22 H28 V26 H24 Z" fill="#FFFFFF" fill-opacity="0.3" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

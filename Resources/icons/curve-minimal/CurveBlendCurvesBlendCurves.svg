@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Blend curves</title>
+  <desc>Smooth transition joining two curve ends. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M4 25 Q9 25 10 20 M22 12 Q23 7 28 7" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20 C12 11 20 21 22 12" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.9" fill="#FFFFFF"/><circle cx="22" cy="12" r="1.9" fill="#FFFFFF"/>
+</svg>

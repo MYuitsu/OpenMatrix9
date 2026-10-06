@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Circle</title>
+  <desc>Circle with center and radius. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <circle cx="16" cy="16" r="10" fill="none" stroke="#FFFF05" stroke-width="2.6"/><path d="M16 16 L23 9" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="1.9549999999999998" fill="#FFFFFF"/><circle cx="23" cy="9" r="1.9549999999999998" fill="#FFFFFF"/>
+</svg>

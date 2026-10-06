@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Smart MSR</title>
+<desc>Select and manipulate Smart Targets without breaking history. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M7 14 H21 M14 7 V21" fill="none" stroke="#FF0CA1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="14" cy="14" r="2.1849999999999996" fill="#FF0CA1"/><path d="M3 10 V3 H10 M21 3 H28 V10 M28 20 V28 H21 M10 28 H3 V21" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 16 L28 22 L23 24 L20 29 Z" fill="#FF0CA1" fill-opacity="0.22" stroke="#FF0CA1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

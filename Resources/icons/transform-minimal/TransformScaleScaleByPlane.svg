@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Scale by plane</title>
+<desc>Different scales in two plane directions. OpenMatrix9 minimal-transform-v2-reviewed; authored vector geometry.</desc>
+<path d="M3 4 H29 V29 H3 Z" fill="#FF5B05" fill-opacity="0.1" stroke="#FF5B05" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 20 H12 V29 H3 Z" fill="#FFFFFF" fill-opacity="0.28" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20 H26 V8 M12 20 L26 8" fill="none" stroke="#FF5B05" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 17 L25 5" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 5 H25 V10" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

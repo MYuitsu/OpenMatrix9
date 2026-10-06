@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Four rail profile</title>
+<desc>Place profiles on four rails for a four-rail sweep. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 29 Q7 16 7 3 M10 29 Q12 16 13 3 M22 29 Q20 16 19 3 M29 29 Q25 16 25 3" fill="none" stroke="#4260FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="16" cy="16" rx="12" ry="5" fill="none" stroke="#FFFFFF" stroke-width="2.2"/>
+</svg>

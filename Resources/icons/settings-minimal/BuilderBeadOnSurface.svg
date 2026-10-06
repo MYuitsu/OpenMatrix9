@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Bead on Surface</title>
+<desc>Place beads or objects on a selected surface. OpenMatrix9 minimal-settings-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 13 Q14 6 27 10 L29 27 Q17 23 5 29 Z" fill="#A73283" fill-opacity="0.18" stroke="#C655A3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="7" fill="#C655A3" fill-opacity=".35" stroke="#FF67D0" stroke-width="2.2"/><path d="M13.2 14.25 Q14.6 11.8 17.75 12.149999999999999" fill="none" stroke="#F6C3E6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

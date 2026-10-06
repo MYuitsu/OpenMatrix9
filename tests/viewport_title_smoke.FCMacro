@@ -1,0 +1,89 @@
+# OM9-VIEWPORT-001 / RH5-VIEW / RH5-DISPLAY: native titles and per-view modes.
+import os,json,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest,QtOpenGLWidgets
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(250,loop.quit);loop.exec();QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def all_for_doc():return {int(s.widget().property('om9ViewSlot')):s for s in area.subWindowList() if s.widget().property('om9ViewSlot') is not None and s.widget().property('om9DocumentName')==App.activeDocument().Name}
+def title(sub):return sub.widget().findChild(QtWidgets.QLabel,'OM9ViewportLabel')
+def menu(sub):return sub.widget().findChild(QtWidgets.QMenu,'OM9ViewportMenu')
+def action(sub,name):return next(a for a in menu(sub).actions() if a.text()==name)
+def mode(sub,name):
+    arrow=sub.widget().findChild(QtWidgets.QToolButton,'OM9ViewportDropdown');QtCore.QTimer.singleShot(100,lambda:action(sub,name).trigger());QtCore.QTimer.singleShot(150,menu(sub).close);QtTest.QTest.mouseClick(arrow,QtCore.Qt.LeftButton);settle()
+def dbl(sub):QtTest.QTest.mouseDClick(title(sub),QtCore.Qt.LeftButton);settle()
+def run():
+    global window,area
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('ViewportTitle');doc.UndoMode=1;settle();window=Gui.getMainWindow();window.show();window.resize(1500,1000);window.activateWindow();QtWidgets.QApplication.setActiveWindow(window);settle();area=window.findChild(QtWidgets.QMdiArea);subs=all_for_doc()
+        check('four native viewports have original small title labels',len(subs)==4 and [title(subs[i]).text() for i in range(4)]==['Looking Down','Perspective','Side View','Through Finger'])
+        check('four native dropdown menus are present',all(menu(s) is not None and s.widget().findChild(QtWidgets.QToolButton,'OM9ViewportDropdown').isVisible() for s in subs.values()))
+        check('native MDI title chrome is suppressed inside OM9',all(s.windowFlags()&QtCore.Qt.FramelessWindowHint for s in subs.values()))
+        for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor'):
+            search=coin.SoSearchAction();search.setName('OM9ViewportPresentation');search.apply(v.getSceneGraph());style=search.getPath().getTail();check('presentation preserves line widths and point marker sizes',style.pointSize.isIgnored() and style.lineWidth.isIgnored() and style.linePattern.isIgnored())
+        box=doc.addObject('Part::Box','ModeGeometry');box.Placement.Base=App.Vector(4,5,0);doc.recompute();Gui.Selection.addSelection(box);settle();camera=[v.getCamera() for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')];undos=doc.UndoCount;selection=Gui.Selection.getSelection();volume=box.Shape.Volume
+        for i in range(4):
+            dbl(subs[i]);check('double-click maximizes only slot '+str(i),area.activeSubWindow()==subs[i] and subs[i].isMaximized() and sum(s.isVisible() for s in subs.values())==1)
+            window.resize(1420+i*10,960);settle();check('single viewport survives resize '+str(i),subs[i].isMaximized() and sum(s.isVisible() for s in subs.values())==1)
+            dbl(subs[i]);check('double-click restores four normal views '+str(i),all(s.isVisible() and not s.isMaximized() for s in subs.values()))
+        mode(subs[2],'Maximize');check('dropdown Maximize targets its own inactive view',area.activeSubWindow()==subs[2] and subs[2].isMaximized());mode(subs[2],'Restore 4V');check('dropdown Restore 4V returns four views',all(s.isVisible() and not s.isMaximized() for s in subs.values()))
+        check('original display mode names are retained',all(name in [a.text() for a in menu(subs[0]).actions()] for name in ['Wireframe','Shaded','Rendered','Ghosted','X-Ray','Technical','Plastic','Working Shade']))
+        check('unimplemented modes are disabled',not action(subs[0],'Rendered').isEnabled() and not action(subs[0],'Ghosted').isEnabled())
+        Gui.runCommand('Std_DrawStyle',2);settle();check('native Wireframe style reconciles title modes',all(s.widget().property('om9ViewportMode')=='Wireframe' for s in subs.values()));mode(subs[1],'Shaded');check('Shaded changes only the requested viewport',subs[1].widget().property('om9ViewportMode')=='Shaded' and all(subs[i].widget().property('om9ViewportMode')=='Wireframe' for i in [0,2,3]));check('display radio marks track current viewport mode',action(subs[1],'Shaded').isChecked() and action(subs[0],'Wireframe').isChecked())
+        for i,s in subs.items():s.widget().findChild(QtWidgets.QWidget,'OM9ViewportTitle').grab().save(str(out/('title-'+str(i)+'.png')))
+        popup=menu(subs[1]);popup.popup(subs[1].widget().mapToGlobal(QtCore.QPoint(0,0)));settle();popup.grab().save(str(out/'display-menu.png'));popup.close();settle()
+        result['camera_before']=camera;result['camera_after']=[v.getCamera() for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')]
+        # Native scene captures verify the view-local presentation used by export too.
+        def frame(s):
+            area.setActiveSubWindow(s);Gui.activeDocument().activeView().redraw();settle()
+            gl=s.widget().findChild(QtOpenGLWidgets.QOpenGLWidget)
+            path=out/'frame.png';Gui.activeDocument().activeView().saveImage(str(path),round(gl.width()*gl.devicePixelRatioF()),round(gl.height()*gl.devicePixelRatioF()),'Current','',0)
+            return QtGui.QImage(str(path))
+        # Save live frames for inspection; mode change must change filled surface pixels.
+        neighbor=frame(subs[0]);shaded=frame(subs[1]);shaded.save(str(out/'shaded.png'));mode(subs[1],'Wireframe');wire=frame(subs[1]);wire.save(str(out/'wireframe.png'));check('Wireframe and Shaded render differently',shaded!=wire);check('changing display keeps other view rendering unchanged',frame(subs[0])==neighbor)
+        Gui.runCommand('Std_DrawStyle',5);settle();check('native Shaded resets all local mode marks',all(s.widget().property('om9ViewportMode')=='Shaded' and action(s,'Shaded').isChecked() for s in subs.values()));mode(subs[1],'Wireframe');check('local Wireframe preserves other Shaded modes',all(subs[i].widget().property('om9ViewportMode')=='Shaded' for i in [0,2,3]))
+        Gui.runCommand('Std_DrawStyle',5);settle();mode(subs[0],'Wireframe');Gui.runCommand('Std_DrawStyle',5);settle();check('native Shaded resets a lone first-view Wireframe',all(s.widget().property('om9ViewportMode')=='Shaded' for s in subs.values()))
+        check('title and mode actions preserve geometry selection and Undo',abs(box.Shape.Volume-volume)<1e-7 and Gui.Selection.getSelection()==selection and doc.UndoCount==undos and len(doc.Objects)==1)
+        # Coin auto-clipping adapts near/far planes on redraw; pose and zoom must stay identical.
+        import re
+        pose=lambda text:re.sub(r'  (?:nearDistance|farDistance) [^\n]+\n','',text)
+        check('title layout actions preserve camera pose and zoom',[pose(c) for c in camera]==[pose(c) for c in result['camera_after']])
+        mode(subs[0],'Wireframe');mode(subs[2],'Wireframe');mode(subs[3],'Wireframe');second=doc.addObject('Part::Box','NewModeGeometry');second.Placement.Base=App.Vector(-12,5,0);doc.recompute();settle()
+        def topology(obj):
+            values=[]
+            def walk(node):
+                if node.isOfType(coin.SoSwitch.getClassTypeId()):values.append(node.whichChild.getValue())
+                if node.isOfType(coin.SoGroup.getClassTypeId()):
+                    for child in node.getChildren():walk(child)
+            walk(obj.ViewObject.RootNode);return values
+        check('new geometry retains shared shaded topology with mixed view modes',topology(second)==topology(box));mode(subs[1],'Wireframe');new_wire=frame(subs[1]);mode(subs[1],'Shaded');check('new geometry renders filled in the Shaded view',frame(subs[1])!=new_wire)
+        field=window.findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript');Gui.runCommand('Polyline');settle();count=len(doc.Objects);mode(subs[0],'Shaded');check('dropdown display change preserves the active point command','Start of polyline' in str(field.property('om9Prompt')) and len(doc.Objects)==count);dbl(subs[0]);check('maximize does not cancel the active point command','Start of polyline' in str(field.property('om9Prompt')));dbl(subs[0]);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle()
+        class Restricted:
+            def __init__(self):self.form=QtWidgets.QWidget()
+            def isAllowedAlterView(self):return False
+            def isAllowedAlterDocument(self):return False
+            def isAllowedAlterSelection(self):return False
+        Gui.Control.showDialog(Restricted());settle();dbl(subs[0]);check('restricted task blocks title maximize',not subs[0].isMaximized());check('restricted task disables dropdown actions',not action(subs[0],'Maximize').isEnabled() and not action(subs[0],'Shaded').isEnabled());Gui.Control.closeDialog();settle()
+        Gui.activateWorkbench('PartWorkbench');settle();check('workbench exit hides custom labels and restores native title chrome',all(not title(s).isVisible() and not bool(s.windowFlags()&QtCore.Qt.FramelessWindowHint) for s in subs.values()))
+        Gui.runCommand('Std_DrawStyle',2);settle();provider=box.ViewObject.RootNode;switches=[]
+        def switches_in(node):
+            if node.isOfType(coin.SoSwitch.getClassTypeId()):switches.append(node.whichChild.getValue())
+            if node.isOfType(coin.SoGroup.getClassTypeId()):
+                for child in node.getChildren():switches_in(child)
+        switches_in(provider);native_switches=list(switches)
+        Gui.activateWorkbench('OpenMatrix9Workbench');settle();check('reactivation reuses one header per view',all(len(s.widget().findChildren(QtWidgets.QWidget,'OM9ViewportTitle'))==1 and title(s).isVisible() for s in subs.values()));Gui.activateWorkbench('PartWorkbench');settle();switches.clear();switches_in(provider);check('reentry restores original native Wireframe provider topology',switches==native_switches);Gui.activateWorkbench('OpenMatrix9Workbench');settle()
+        other=App.newDocument('ViewportTitleOther');settle();other_subs=all_for_doc();check('new document has four own labels',len(other_subs)==4 and all(title(s).isVisible() for s in other_subs.values()));dbl(other_subs[3]);App.setActiveDocument(doc.Name);settle();check('document switch returns correct visible four views',all(s.isVisible() for s in subs.values()) and all(not s.isVisible() for s in other_subs.values()));App.closeDocument(other.Name);settle()
+        victim=subs[2];victim.close();settle();settle();rebuilt=all_for_doc();check('closed viewport rebuilds a single title and menu',len(rebuilt)==4 and title(rebuilt[2]) is not None and len(rebuilt[2].widget().findChildren(QtWidgets.QWidget,'OM9ViewportTitle'))==1)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        if Gui.Control.activeDialog():Gui.Control.closeDialog()
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(250,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

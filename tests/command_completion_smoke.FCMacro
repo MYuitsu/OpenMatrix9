@@ -1,0 +1,47 @@
+# OM9-IFACE-001: pinned command, separator and named-command suggestions.
+import os,json,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]};saved=QtCore.QMimeData()
+for fmt in QtWidgets.QApplication.clipboard().mimeData().formats():saved.setData(fmt,QtWidgets.QApplication.clipboard().mimeData().data(fmt))
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(160,loop.quit);loop.exec()
+def check(name,value):result['checks'].append({'name':name,'passed':bool(value)})
+def set_input(text):
+    c=field.textCursor();c.setPosition(int(field.property('om9InputStart')));c.movePosition(QtGui.QTextCursor.End,QtGui.QTextCursor.KeepAnchor);c.insertText(text);field.setTextCursor(c);field.setFocus();settle()
+def command(text):set_input(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def pinned():
+    c=field.textCursor();c.setPosition(int(field.property('om9InputStart')));rect=field.cursorRect(c);return rect.top()>=0 and rect.bottom()<=field.viewport().height()
+def run():
+    global field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('CommandCompletion');doc.UndoMode=1;settle();window=Gui.getMainWindow();window.show();window.resize(1500,1000);window.activateWindow();QtWidgets.QApplication.setActiveWindow(window);settle();field=window.findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript');dock=window.findChild(QtWidgets.QDockWidget,'OM9CommandFrame');history=window.findChild(QtWidgets.QPlainTextEdit,'OM9CommandHistoryPane');divider=window.findChild(QtWidgets.QWidget,'OM9CommandSeparator')
+        check('visible separator is above live command row',divider is not None and divider.isVisible() and divider.geometry().bottom()<field.viewport().geometry().top())
+        check('history and pinned input share one text document',history is not None and history.document()==field.document())
+        if history is not None:
+            for i in range(20):command('unknown'+str(i))
+            set_input('draft');history.verticalScrollBar().setValue(0);settle();check('history scroll never hides the live command',pinned() and field.toPlainText().endswith('draft'));field.grab().save(str(out/'history-scrolled.png')); result['render_diagnostics']={'text_tail':field.toPlainText()[-300:],'field':str(field.geometry()),'viewport':str(field.viewport().geometry()),'input_cursor':str(field.cursorRect()),'scroll':[field.verticalScrollBar().value(),field.verticalScrollBar().maximum(),field.horizontalScrollBar().value()],'history_scroll':[history.verticalScrollBar().value(),history.verticalScrollBar().maximum(),history.horizontalScrollBar().value()],'font':field.font().toString()}
+            before=dock.height()
+            for height in [before+120,field.minimumHeight()+4,before]:
+                window.resizeDocks([dock],[height],QtCore.Qt.Vertical);settle();check('live command remains visible at dock height '+str(height),pinned())
+            history.selectAll();QtTest.QTest.keyClick(history,QtCore.Qt.Key_C,QtCore.Qt.ControlModifier);check('copy from history includes current command and draft',QtWidgets.QApplication.clipboard().text()==field.toPlainText())
+        QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle();set_input('');old_blocks=field.document().blockCount();QtWidgets.QApplication.clipboard().setText('Line\u2029x\u2028y');QtTest.QTest.keyClick(field,QtCore.Qt.Key_V,QtCore.Qt.ControlModifier);settle();check('Unicode paste stays in the single live input block',field.document().blockCount()==old_blocks and field.toPlainText().endswith('Command: Line x y') and pinned());set_input('pol');popup=window.findChild(QtWidgets.QListWidget,'OM9CommandSuggestions');check('typing a prefix opens suggestions',popup is not None and popup.isVisible())
+        if popup is not None:
+            labels=[popup.item(i).data(QtCore.Qt.UserRole) for i in range(popup.count())];check('suggestions retain original Polygon and Polyline names','Polygon' in labels and 'Polyline' in labels)
+            item=next((popup.item(i) for i in range(popup.count()) if popup.item(i).data(QtCore.Qt.UserRole)=='Polygon'),None);check('unimplemented Polygon is visibly unavailable',item is not None and not bool(item.flags()&QtCore.Qt.ItemIsEnabled))
+            check('available Polyline is selected',popup.currentItem() is not None and popup.currentItem().data(QtCore.Qt.UserRole)=='Polyline');set_input('l');enabled=[popup.item(i).data(QtCore.Qt.UserRole) for i in range(popup.count()) if popup.item(i).flags()&QtCore.Qt.ItemIsEnabled];before=popup.currentItem().data(QtCore.Qt.UserRole);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Down);check('Down selects the next available command',popup.currentItem().data(QtCore.Qt.UserRole)==enabled[(enabled.index(before)+1)%len(enabled)]);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Up);check('Up restores the prior available command',popup.currentItem().data(QtCore.Qt.UserRole)==before);set_input('pol')
+            field.viewport().grab().save(str(out/'live-viewport.png'));history.viewport().grab().save(str(out/'history-viewport.png'));img=field.viewport().grab().toImage();check('live prompt has visible text pixels',sum(1 for y in range(img.height()) for x in range(img.width()) if img.pixelColor(x,y).red()<80 and img.pixelColor(x,y).green()<80 and img.pixelColor(x,y).blue()<80)>40);field.grab().save(str(out/'command-prefix.png'));popup.grab().save(str(out/'suggestions.png'))
+            QtTest.QTest.keyClick(field,QtCore.Qt.Key_Tab);settle();check('Tab fills a command without executing it',field.toPlainText().endswith('Command: Polyline') and not doc.Objects)
+            QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle();check('Enter starts the shared Polyline handler','Start of polyline' in str(field.property('om9Prompt')) and not doc.Objects)
+            set_input('L');check('point tool options do not open named-command suggestions',not popup.isVisible());command('0,0');command('3,4');command('');check('completion-created Polyline uses native geometry',len(doc.Objects)==1 and abs(doc.Objects[-1].Shape.Length-5)<1e-7)
+            set_input('lin');check('Line prefix opens suggestions',popup.isVisible());QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle();check('first Esc dismisses suggestions and preserves typed prefix',not popup.isVisible() and field.toPlainText().endswith('lin'));QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle();check('second Esc clears the draft',field.toPlainText().endswith('Command: '))
+            set_input('lin');item=next(popup.item(i) for i in range(popup.count()) if popup.item(i).data(QtCore.Qt.UserRole)=='Line');QtTest.QTest.mouseClick(popup.viewport(),QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,popup.visualItemRect(item).center());settle();check('mouse suggestion starts the same Line handler','Start of line' in str(field.property('om9Prompt')));command('0,0');command('2,0');check('mouse completion preserves native geometry',len(doc.Objects)==2 and abs(doc.Objects[-1].Shape.Length-2)<1e-7)
+            set_input('pol');set_input('Line');check('exact typed command wins over a previous substring selection',popup.currentItem() is not None and popup.currentItem().data(QtCore.Qt.UserRole)=='Line');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle();check('Enter runs the exact typed Line command','Start of line' in str(field.property('om9Prompt')));QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle();set_input('3,4,0');check('coordinate input does not open named-command suggestions',not popup.isVisible());set_input('no_such_command');check('no matches hides suggestions',not popup.isVisible());set_input('lin');Gui.activateWorkbench('PartWorkbench');settle();check('workbench exit closes suggestions',not popup.isVisible());Gui.activateWorkbench('OpenMatrix9Workbench');settle()
+        result['ok']=all(c['passed'] for c in result['checks'])
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        QtWidgets.QApplication.clipboard().setMimeData(saved);(out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(250,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

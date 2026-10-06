@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Crease</title>
+<desc>Add sharp edges to a SubD surface. OpenMatrix9 minimal-subd-v1-reviewed; authored vector geometry.</desc>
+<path d="M4 9 L18 3 L28 9 V23 L14 29 L4 23 Z" fill="#FFB5A2" fill-opacity="0.2" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9 L14 15 L28 9 M14 15 V29" fill="none" stroke="#FF6A68" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9 L14 15 L28 9 M14 15 V29" fill="none" stroke="#05B3FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

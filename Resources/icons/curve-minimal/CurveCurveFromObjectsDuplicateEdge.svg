@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>Duplicate edge</title>
+  <desc>A single edge copied from a solid. OpenMatrix9 minimal-curve-v4-cyan; authored vector geometry.</desc>
+  <path d="M5 17 L19 11 L27 17 L13 23 Z M5 17 V25 L13 29 L27 23 V17 M13 23 V29" fill="none" stroke="#59CBE8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 17 L19 11" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 6 L19 2" fill="none" stroke="#FFFF05" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12 V6" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.5 8.5 L12 6 L14.5 8.5" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

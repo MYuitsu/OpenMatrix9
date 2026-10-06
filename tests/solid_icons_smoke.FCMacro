@@ -1,0 +1,82 @@
+"""Verify the 30 packaged Solid SVGs through the actual FreeCAD sidebar."""
+import configparser
+import hashlib
+import json
+import os
+from pathlib import Path
+import traceback
+import FreeCAD as App
+import FreeCADGui as Gui
+from PySide6 import QtCore, QtGui, QtWidgets
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+out.mkdir(parents=True, exist_ok=True)
+result = {'checks': [], 'scale': os.environ.get('QT_SCALE_FACTOR', '1')}
+
+
+def check(name, passed):
+    result['checks'].append({'name': name, 'passed': bool(passed)})
+    if not passed:
+        raise AssertionError(name)
+
+
+def run():
+    try:
+        window = Gui.getMainWindow()
+        window.resize(1440, 1000)
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        QtWidgets.QApplication.processEvents()
+        dock = window.findChild(QtWidgets.QDockWidget, 'OpenMatrix9Sidebar')
+        check('native sidebar loaded', dock is not None)
+        resources = Path(App.getHomePath()) / 'Mod/OpenMatrix9/Resources'
+        menu = configparser.ConfigParser(interpolation=None)
+        menu.optionxform = str
+        menu.read(resources / 'menu/MainMenu.ini', encoding='utf-8')
+        assets = configparser.ConfigParser(interpolation=None)
+        assets.read(resources / 'menu/icons.ini', encoding='utf-8')
+        report = json.loads((resources / 'menu/source-manifest.json').read_text(encoding='utf-8'))
+        keys = [v for s in menu.values() if s.get('Name') == 'Solid'
+                for k, v in s.items() if k.startswith('Icon') and k[4:].isdigit()]
+        check('exactly 30 Solid bindings', len(keys) == 30 and len(set(keys)) == 30)
+        for key in keys:
+            asset = assets[key]
+            check(key + ': authored SVG', asset['source'] == 'OpenMatrix9-authored-svg'
+                  and asset['image'].endswith('.svg') and asset['status'] == 'resolved')
+            file = resources / asset['image']
+            check(key + ': manifest hash', hashlib.sha256(file.read_bytes()).hexdigest()
+                  == report['authored_symbols'][key]['sha256'])
+            source = QtGui.QImage(str(file))
+            check(key + ': Qt SVG loader', not source.isNull() and source.size() == QtCore.QSize(32, 32))
+            renderer = QtGui.QImageReader(str(file))
+            renderer.setScaledSize(QtCore.QSize(512, 512))
+            scaled = renderer.read()
+            check(key + ': scalable Qt render', not scaled.isNull() and scaled.size() == QtCore.QSize(512, 512))
+        selectors = [b for b in dock.findChildren(QtWidgets.QAbstractButton)
+                     if b.objectName().startswith('OM9Group') and b.text() == 'Solid']
+        check('one Solid selector', len(selectors) == 1)
+        selectors[0].click()
+        QtWidgets.QApplication.processEvents()
+        buttons = [b for b in dock.findChildren(QtWidgets.QToolButton)
+                   if b.objectName().startswith('OM9Command')]
+        check('30 Solid buttons in native grid', len(buttons) == 30)
+        check('native grid preserves menu order', [b.property('om9IconKey') for b in buttons] == keys)
+        for button in buttons:
+            key = button.property('om9IconKey')
+            source = QtGui.QImage(str(resources / assets[key]['image']))
+            expected = source.scaled(24, 24, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+            actual = button.icon().pixmap(24, 24).toImage()
+            check(key + ': native button image', actual.convertToFormat(QtGui.QImage.Format_ARGB32)
+                  == expected.convertToFormat(QtGui.QImage.Format_ARGB32))
+            check(key + ': disabled palette preserved', actual
+                  == button.icon().pixmap(24, 24, QtGui.QIcon.Disabled).toImage())
+        dock.grab().save(str(out / 'solid-sidebar.png'))
+        result['ok'] = True
+    except Exception:
+        result['ok'] = False
+        result['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        Gui.getMainWindow().close()
+
+
+QtCore.QTimer.singleShot(1200, run)

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Flow along surface</title>
+<desc>Map objects from a base surface to a target surface. OpenMatrix9 minimal-transform-v2-reviewed; authored vector geometry.</desc>
+<path d="M3 4 H12 V28 H3 Z" fill="#FFFFFF" fill-opacity="0.08" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12 H11 M7 5 V26 M4 21 H11" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 27 Q15 12 27 4 L30 9 Q22 17 23 27 Z" fill="#FF5B05" fill-opacity="0.28" stroke="#FF5B05" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 21 L23 23 M19 13 L27 15" fill="none" stroke="#FF9566" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

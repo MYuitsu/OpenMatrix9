@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Align Mesh Vertices</title>
+<desc>Align mesh vertices; authored OpenMatrix9 vector.</desc>
+<path d="M4 7 L25 4 L28 26 L7 29 Z" fill="#D8BF91" fill-opacity="0.16" stroke="#D8BF91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 7 L28 26 M25 4 L7 29 M6 18 L26 15" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16 H12" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 13 L12 16 L9 19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 16 H20" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 13 L20 16 L23 19" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

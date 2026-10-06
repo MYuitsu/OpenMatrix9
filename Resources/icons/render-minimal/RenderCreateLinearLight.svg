@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Create Linear Light</title>
+<desc>Create a tube-like light between two endpoints. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<path d="M5 23 L23 5 L27 9 L9 27 Z" fill="#FFFFFF" fill-opacity="0.1" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 16 L3 13 M12 10 L9 7 M18 4 L15 2 M16 26 L19 29 M22 20 L25 23 M28 14 L30 17" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

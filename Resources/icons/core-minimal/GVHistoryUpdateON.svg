@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>History Update</title>
+<desc>Toggle dependency updates; authored OpenMatrix9 vector.</desc>
+<path d="M5 7 H26 V26 H15" fill="none" stroke="#FFD705" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 22 L11 26 L15 30" fill="none" stroke="#FFD705" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 15 L12 20 L5 25 Z" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

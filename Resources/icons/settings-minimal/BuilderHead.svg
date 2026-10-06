@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Head Builder</title>
+<desc>Create a basket or half-bezel head around an existing stone. OpenMatrix9 minimal-settings-v1-reviewed; authored vector geometry.</desc>
+<path d="M7 10 L11.05 5.05 H20.95 L25 10 L16 17.2 Z" fill="#F6C3E6" fill-opacity="0.15" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 10 H25 M11.05 5.05 L16 17.2 L20.95 5.05" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="16" cy="24" rx="7" ry="4" fill="none" stroke="#C655A3" stroke-width="2.4"/><path d="M5 7 L10 25 M27 7 L22 25 M16 16 V28 M5 7 V4 M27 7 V4" fill="none" stroke="#C655A3" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 18 Q16 22 24 18" fill="none" stroke="#F6C3E6" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,96 @@
+# Matrix mouse input: real native camera, selection and shared command geometry.
+import os,json,traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App,FreeCADGui as Gui,Part
+from pivy import coin
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(180,loop.quit);loop.exec()
+def check(name,value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def command(text):
+    field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def pose():
+    cam=Gui.activeDocument().activeView().getCameraNode();return list(cam.position.getValue())+list(cam.orientation.getValue().getValue())+[cam.focalDistance.getValue(),cam.height.getValue() if hasattr(cam,'height') else cam.heightAngle.getValue()]
+def same_pose(a,b):return max(abs(x-y) for x,y in zip(a,b))<1e-5
+def drag(widget,a,b,button=QtCore.Qt.RightButton,mods=QtCore.Qt.NoModifier):
+    modifiers=[(QtCore.Qt.ControlModifier,QtCore.Qt.Key_Control),(QtCore.Qt.ShiftModifier,QtCore.Qt.Key_Shift),(QtCore.Qt.AltModifier,QtCore.Qt.Key_Alt)]
+    for flag,key in modifiers:
+        if mods&flag:QtTest.QTest.keyPress(widget,key)
+    QtTest.QTest.mousePress(widget,button,mods,pos=a)
+    event=QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(b),QtCore.QPointF(widget.mapToGlobal(b)),QtCore.Qt.NoButton,button,mods)
+    QtWidgets.QApplication.sendEvent(widget,event);QtTest.QTest.mouseRelease(widget,button,mods,pos=b)
+    for flag,key in reversed(modifiers):
+        if mods&flag:QtTest.QTest.keyRelease(widget,key)
+    settle()
+def wheel(widget,delta):
+    p=widget.rect().center();event=QtGui.QWheelEvent(QtCore.QPointF(p),QtCore.QPointF(widget.mapToGlobal(p)),QtCore.QPoint(),QtCore.QPoint(0,delta),QtCore.Qt.NoButton,QtCore.Qt.NoModifier,QtCore.Qt.NoScrollPhase,False)
+    QtWidgets.QApplication.sendEvent(widget,event);settle()
+def run():
+    global field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('MatrixMouse');doc.UndoMode=1;settle()
+        window=Gui.getMainWindow();window.show();window.resize(1500,1000);window.raise_();window.activateWindow();settle();field=command_input(window);area=window.findChild(QtWidgets.QMdiArea)
+        views={s.widget().property('om9ViewSlot'):s for s in area.subWindowList()}
+        snapshots={}
+        for slot in (0,1,2,3):
+            area.setActiveSubWindow(views[slot]);settle();native=Gui.activeDocument().activeView();widget=next(w for w in views[slot].widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer');center=widget.rect().center();camera=native.getCameraNode();snapshots[slot]=native.getCamera()
+            before=App.Vector(*camera.position.getValue());orientation=tuple(camera.orientation.getValue().getValue());drag(widget,center,center+QtCore.QPoint(35,18),mods=QtCore.Qt.ShiftModifier)
+            check('Shift right drag pans without rotating slot '+str(slot),(App.Vector(*camera.position.getValue())-before).Length>0.1 and tuple(camera.orientation.getValue().getValue())==orientation)
+            before=native.getCamera();drag(widget,center,center+QtCore.QPoint(28,12));check('right drag navigates slot '+str(slot),native.getCamera()!=before)
+            check('plain right drag rotates only Perspective slot '+str(slot),(tuple(camera.orientation.getValue().getValue())!=orientation)==(slot==1))
+            size=camera.heightAngle if slot==1 else camera.height;before=size.getValue();drag(widget,center,center+QtCore.QPoint(0,25),mods=QtCore.Qt.ControlModifier);check('Ctrl right drag zooms slot '+str(slot),size.getValue()>before)
+            before=size.getValue();wheel(widget,120);check('wheel zooms in slot '+str(slot),size.getValue()<before)
+        area.setActiveSubWindow(views[0]);settle();widget=next(w for w in views[0].widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer');viewport=widget.viewport();center=widget.rect().center();command('RestoreViewports')
+        cam=Gui.activeDocument().activeView().getCameraNode();before=tuple(cam.orientation.getValue().getValue());drag(widget,center,center+QtCore.QPoint(24,18),mods=QtCore.Qt.ControlModifier|QtCore.Qt.ShiftModifier);check('Ctrl Shift right forces parallel orbit',tuple(cam.orientation.getValue().getValue())!=before);command('RestoreViewports')
+        cam=Gui.activeDocument().activeView().getCameraNode();before=App.Vector(*cam.position.getValue());orientation=tuple(cam.orientation.getValue().getValue());drag(widget,center,center+QtCore.QPoint(0,18),mods=QtCore.Qt.AltModifier);check('Alt right dollies along camera direction',(App.Vector(*cam.position.getValue())-before).Length>0.1 and tuple(cam.orientation.getValue().getValue())==orientation)
+        before=tuple(cam.orientation.getValue().getValue());drag(widget,center,center+QtCore.QPoint(0,18),mods=QtCore.Qt.ShiftModifier|QtCore.Qt.AltModifier);check('Shift Alt right tilts camera',tuple(cam.orientation.getValue().getValue())!=before)
+        before=App.Vector(*cam.position.getValue());drag(widget,center,center+QtCore.QPoint(24,18),mods=QtCore.Qt.ControlModifier|QtCore.Qt.AltModifier);check('Ctrl Alt right turns camera at same position',(App.Vector(*cam.position.getValue())-before).Length<1e-5);command('RestoreViewports')
+        first=doc.addObject('Part::Feature','First');first.Shape=Part.makeBox(3,3,1,App.Vector(-6,-1.5,0));second=doc.addObject('Part::Feature','Second');second.Shape=Part.makeBox(3,3,1,App.Vector(3,-1.5,0));doc.recompute();settle()
+        Gui.activeDocument().activeView().saveImage(str(out/'selection-probe.png'),582,290,'Current');result['camera_probe']=Gui.activeDocument().activeView().getCamera();result['visibility']=[(o.Name,o.ViewObject.Visibility,o.ViewObject.DisplayMode) for o in doc.Objects]
+        def pixel(p):
+            x,y=Gui.activeDocument().activeView().getPointOnScreen(p)[:2];ratio=widget.devicePixelRatioF();return QtCore.QPoint(round(x/ratio),round((viewport.height()*ratio-y-1)/ratio))
+        a=pixel(App.Vector(-6,0,1));b=pixel(App.Vector(3,0,1));Gui.Selection.clearSelection()
+        QtTest.QTest.mouseClick(widget,QtCore.Qt.LeftButton,pos=a);settle();result['selection_probe']={'a':[a.x(),a.y()],'b':[b.x(),b.y()],'widget':[widget.width(),widget.height()],'viewport':[viewport.width(),viewport.height()],'native_pick':Gui.activeDocument().activeView().getObjectInfo((a.x(),viewport.height()-a.y()-1)),'selected':[(s.ObjectName,list(s.SubElementNames)) for s in Gui.Selection.getSelectionEx()]};check('left click selects whole native object',Gui.Selection.getSelection()==[first] and not Gui.Selection.getSelectionEx()[0].SubElementNames)
+        QtTest.QTest.mouseClick(widget,QtCore.Qt.LeftButton,QtCore.Qt.ShiftModifier,pos=b);settle();check('Shift left adds selection',set(o.Name for o in Gui.Selection.getSelection())=={'First','Second'})
+        QtTest.QTest.keyPress(widget,QtCore.Qt.Key_Control);QtTest.QTest.mouseClick(widget,QtCore.Qt.LeftButton,QtCore.Qt.ControlModifier,pos=a);QtTest.QTest.keyRelease(widget,QtCore.Qt.Key_Control);settle();check('Ctrl left click removes without zoom',Gui.Selection.getSelection()==[second])
+        Gui.Selection.clearSelection();left=pixel(App.Vector(-7,2,1));right=pixel(App.Vector(-2,-2,1));drag(widget,left,right,QtCore.Qt.LeftButton);check('left to right box contains whole object',Gui.Selection.getSelection()==[first])
+        Gui.Selection.clearSelection();inside=pixel(App.Vector(-4,2,1));outer=pixel(App.Vector(-7,-2,1));drag(widget,inside,outer,QtCore.Qt.LeftButton);check('right to left box selects crossed object',Gui.Selection.getSelection()==[first])
+        Gui.Selection.clearSelection();drag(widget,outer,inside,QtCore.Qt.LeftButton);check('window excludes partly crossed object',not Gui.Selection.getSelection())
+        wire=doc.addObject('Part::Feature','LongWire');wire.Shape=Part.makePolygon([App.Vector(-12,5,0),App.Vector(-9,5,0),App.Vector(12,5,0)]);doc.recompute();settle();Gui.Selection.addSelection(wire,'Edge2')
+        lo=pixel(App.Vector(-13,6,0));hi=pixel(App.Vector(-8,4,0));QtTest.QTest.keyPress(widget,QtCore.Qt.Key_Control);QtTest.QTest.keyPress(widget,QtCore.Qt.Key_Shift);drag(widget,lo,hi,QtCore.Qt.LeftButton,QtCore.Qt.ControlModifier|QtCore.Qt.ShiftModifier);QtTest.QTest.keyRelease(widget,QtCore.Qt.Key_Shift);QtTest.QTest.keyRelease(widget,QtCore.Qt.Key_Control);settle()
+        check('Ctrl Shift window adds contained edge and retains previous edge',set(name for s in Gui.Selection.getSelectionEx() if s.ObjectName=='LongWire' for name in s.SubElementNames)=={'Edge1','Edge2'})
+        command('Polyline');command('0,0,0');command('2,0,0');QtTest.QTest.mouseClick(widget,QtCore.Qt.RightButton,pos=center);settle();check('right click completes Polyline via shared CMD geometry',doc.Objects[-1].Name.startswith('Polyline') and abs(doc.Objects[-1].Shape.Length-2)<1e-8)
+        count=len(doc.Objects);command('Line');command('0,0,0');before=Gui.activeDocument().activeView().getCamera();drag(widget,center,center+QtCore.QPoint(0,25),QtCore.Qt.LeftButton,QtCore.Qt.ControlModifier);check('Ctrl left zoom retains active Curve and adds no point',len(doc.Objects)==count and Gui.activeDocument().activeView().getCamera()!=before);command('3,0,0');check('Curve continues after mouse navigation',len(doc.Objects)==count+1 and abs(doc.Objects[-1].Shape.Length-3)<1e-8)
+        QtTest.QTest.mouseClick(widget,QtCore.Qt.RightButton,pos=center);settle();command('0,0,0');command('4,0,0');check('idle right click repeats last shared command',abs(doc.Objects[-1].Shape.Length-4)<1e-8)
+        command('Distance');command('0,0,0');count=len(doc.Objects);drag(widget,center,center+QtCore.QPoint(0,20),QtCore.Qt.LeftButton,QtCore.Qt.ControlModifier);field.setText('3,4,0');QtTest.QTest.mouseClick(widget,QtCore.Qt.RightButton,pos=center);settle();check('navigation retains Distance and right click accepts CMD text',len(doc.Objects)==count and command_prompt(window).text()=='Distance: 5 mm' and not field.text())
+        field.setText('Line');QtTest.QTest.mouseClick(widget,QtCore.Qt.RightButton,pos=center);settle();command('0,0,0');command('5,0,0');check('right click executes pending CMD command before repeating',abs(doc.Objects[-1].Shape.Length-5)<1e-8)
+        before=pose();QtTest.QTest.mousePress(widget,QtCore.Qt.RightButton,pos=center);event=QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(center+QtCore.QPoint(25,15)),QtCore.QPointF(widget.mapToGlobal(center+QtCore.QPoint(25,15))),QtCore.Qt.NoButton,QtCore.Qt.RightButton,QtCore.Qt.NoModifier);QtWidgets.QApplication.sendEvent(widget,event);QtTest.QTest.keyClick(widget,QtCore.Qt.Key_Escape);QtTest.QTest.mouseRelease(widget,QtCore.Qt.RightButton,pos=center+QtCore.QPoint(25,15));settle();result['cancel_camera']={'before':before,'after':pose()};check('Esc rolls back native mouse navigation',same_pose(before,pose()))
+        QtTest.QTest.mouseClick(widget,QtCore.Qt.MiddleButton,pos=center);settle();menu=window.findChild(QtWidgets.QMenu,'OM9MouseHistory');check('middle click opens recent command menu',menu is not None and menu.isVisible());menu.close();settle()
+        settings=App.ParamGet('User parameter:BaseApp/Preferences/Mod/OpenMatrix9/Mouse');settings.SetInt('MiddleButtonAction',1);before=Gui.activeDocument().activeView().getCamera();drag(widget,center,center+QtCore.QPoint(20,15),QtCore.Qt.MiddleButton);check('middle button can use persisted pan mapping',Gui.activeDocument().activeView().getCamera()!=before);settings.SetInt('MiddleButtonAction',0)
+        command('Crosshairs');QtTest.QTest.mousePress(widget,QtCore.Qt.RightButton,pos=center);loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(650,loop.quit);loop.exec();menu=window.findChild(QtWidgets.QMenu,'OM9F6Menu');check('holding right button opens shared F6 context',menu is not None and menu.isVisible());QtTest.QTest.mouseRelease(widget,QtCore.Qt.RightButton,pos=center);menu.close();settle()
+        p=QtCore.QPoint(50,70);event=QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(p),QtCore.QPointF(viewport.mapToGlobal(p)),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.NoModifier);QtWidgets.QApplication.sendEvent(viewport,event);settle();lines=viewport.findChild(QtWidgets.QWidget,'OM9Crosshairs');check('closing held-right menu restores mouse hover',lines is not None and lines.property('om9Cursor')==p)
+        class Restricted:
+            def __init__(self):self.form=QtWidgets.QWidget()
+            def isAllowedAlterView(self):return False
+            def isAllowedAlterSelection(self):return False
+            def isAllowedAlterDocument(self):return False
+        Gui.Control.showDialog(Restricted());settle();before=pose();drag(widget,center,center+QtCore.QPoint(35,18));wheel(widget,120);result['restricted_camera']={'before':before,'after':pose()};check('restricted task blocks mouse camera changes',same_pose(before,pose()));Gui.Control.closeDialog();settle()
+        before=pose();QtTest.QTest.mousePress(widget,QtCore.Qt.RightButton,pos=center)
+        event=QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(center+QtCore.QPoint(20,15)),QtCore.QPointF(widget.mapToGlobal(center+QtCore.QPoint(20,15))),QtCore.Qt.NoButton,QtCore.Qt.RightButton,QtCore.Qt.NoModifier);QtWidgets.QApplication.sendEvent(widget,event);before=pose()
+        viewport.releaseMouse();QtWidgets.QApplication.sendEvent(viewport,QtCore.QEvent(QtCore.QEvent.UngrabMouse))
+        event=QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(center+QtCore.QPoint(40,30)),QtCore.QPointF(widget.mapToGlobal(center+QtCore.QPoint(40,30))),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.NoModifier);QtWidgets.QApplication.sendEvent(widget,event);settle();check('lost capture stops navigation on no-button hover',same_pose(before,pose()));QtTest.QTest.mouseRelease(widget,QtCore.Qt.RightButton,pos=center)
+        QtTest.QTest.mousePress(widget,QtCore.Qt.RightButton,pos=center);before=pose();QtWidgets.QApplication.sendEvent(widget,event);settle();check('missing held button cancels gesture without camera motion',same_pose(before,pose()));QtTest.QTest.mouseRelease(widget,QtCore.Qt.RightButton,pos=center)
+        QtTest.QTest.mousePress(widget,QtCore.Qt.RightButton,pos=center);QtWidgets.QApplication.sendEvent(window,QtCore.QEvent(QtCore.QEvent.ApplicationDeactivate));loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(650,loop.quit);loop.exec();menu=window.findChild(QtWidgets.QMenu,'OM9F6Menu');check('application deactivation cancels pending held-right menu',menu is None or not menu.isVisible());QtTest.QTest.mouseRelease(widget,QtCore.Qt.RightButton,pos=center)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(300,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

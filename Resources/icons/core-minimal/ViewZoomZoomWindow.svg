@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Zoom Window</title>
+<desc>Magnify a chosen rectangular region; authored OpenMatrix9 vector.</desc>
+<path d="M3 3 H26 V23 H3 Z" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="13" cy="13" r="8" fill="none" stroke="#80A9E8" stroke-width="2.2"/><path d="M19 19 L29 29" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

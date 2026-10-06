@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>WebViewer</title>
+<desc>Reference cue: viewer window with a 3D object; detailed operation unverified. OpenMatrix9 minimal-render-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 4 H29 V28 H3 Z" fill="#05E3D7" fill-opacity="0.08" stroke="#05E3D7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 9 H29" fill="none" stroke="#CEFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 17 L17 12 L24 16 V23 L16 27 L9 23 Z M9 17 L16 21 L24 16 M16 21 V27" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

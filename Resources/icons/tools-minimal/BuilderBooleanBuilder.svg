@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>Boolean Builder</title>
+<desc>Use objects and cutters for cut, join or unjoin operations. OpenMatrix9 minimal-tools-v1-reviewed; authored vector geometry.</desc>
+<path d="M3 5 H19 V22 H3 Z" fill="#9ABFFF" fill-opacity="0.2" stroke="#4260FF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="22" cy="21" rx="8" ry="8" fill="none" stroke="#4260FF" stroke-width="2.6"/><path d="M19 13 V22 H14" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 27 H12 M9 24 V30 M19 27 H25" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

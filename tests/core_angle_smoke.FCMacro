@@ -1,0 +1,46 @@
+# OM9-MEASURE-001 four-point native workflow; object snaps not covered here.
+import os,json,traceback
+from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(300,loop.quit);loop.exec();QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def cmd(text):
+    field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def run():
+    global field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('AngleTest');doc.UndoMode=1;settle()
+        window=Gui.getMainWindow();window.show();window.resize(1500,1000);settle();field=command_input(window);prompt=command_prompt(window);action=window.findChild(QtGui.QAction,'Angle')
+        check('OM9-MEASURE-001 original Angle command registered',action is not None and action.isEnabled())
+        cmd('Angle');check('Angle first line start prompt',prompt.text()=='Angle: Start of first line')
+        cmd('1,2,3');check('Angle first line end prompt',prompt.text()=='Angle: End of first line')
+        cmd('4,2,3');check('Angle second line start prompt',prompt.text()=='Angle: Start of second line')
+        cmd('7,8,9');check('Angle second line end prompt',prompt.text()=='Angle: End of second line')
+        cmd('7,12,9');check('CMD four-point angle with distinct origins is 90 degrees',prompt.text()=='Angle: 90 degrees')
+        action.trigger();settle();cmd('0,0,0');cmd('0,0,0');check('degenerate first line retains end prompt','nonzero length' in prompt.text())
+        cmd('1,0,0');cmd('0,0,0');cmd('0,0,0');check('degenerate second line can retry endpoint','nonzero length' in prompt.text());cmd('1,1,0');check('menu shares CMD geometry after invalid retries',prompt.text()=='Angle: 45 degrees')
+        cmd('Angle');cmd('TwoObjects');check('unimplemented TwoObjects cue reports gap without committing','not implemented' in prompt.text());QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle();check('Esc cancels Angle',prompt.text()=='Angle cancelled')
+        area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
+        viewer=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport();center=viewer.rect().center()
+        action.trigger();settle()
+        for pos in [center-QtCore.QPoint(40,0),center+QtCore.QPoint(40,0),center-QtCore.QPoint(0,40),center+QtCore.QPoint(0,40)]:QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=pos);settle()
+        check('four native mouse points measure perpendicular lines',prompt.text().startswith('Angle: ') and abs(float(prompt.text().split()[1])-90)<1e-5)
+        check('Angle creates no model or Undo output',not doc.Objects and not doc.UndoNames and not doc.RedoNames and not Gui.Selection.getSelection())
+        report=next((w for w in window.findChildren(QtWidgets.QTextEdit) if w.metaObject().className().endswith('ReportOutput')),None)
+        check('Angle results retained in native feedback history',report is not None and 'Angle: 90 degrees' in report.toPlainText() and 'Angle: 45 degrees' in report.toPlainText())
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(500,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)
