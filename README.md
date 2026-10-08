@@ -39,7 +39,7 @@ Bản cài FreeCAD thông thường không tự cung cấp SDK để build modul
 
 ## Tiến độ lệnh / Command progress
 
-Cập nhật: **2026-10-06**. Bảng này mô tả phạm vi đang có trong source public.
+Cập nhật: **2026-10-08**. Bảng này mô tả phạm vi đang có trong source public.
 **510 icon bindings không tương đương 510 lệnh đã hoàn thành.** Lệnh chưa có
 implementation vẫn hiển thị nhưng bị vô hiệu hóa. Có tên trong command completion
 hoặc có phím tắt không chứng minh lệnh đã chạy được.
@@ -70,10 +70,10 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 | Mirror | `TopIconMirror` | Tạo bản đối xứng qua mặt phẳng. | 🔴 |
 | Move | `TopIconMove` | Di chuyển đối tượng. | 🔴 |
 | Rotate | `TopIconRotate` | Xoay đối tượng quanh tâm hoặc trục. | 🔴 |
-| Explode | `TopIconExplode` | Tách đối tượng ghép thành các thành phần. | 🔴 |
-| Join | `TopIconJoin` | Ghép các đường hoặc mặt tương thích. | 🔴 |
+| Explode | `TopIconExplode` | Native Explode: [phạm vi, thao tác và giới hạn](docs/features/OM9-TOP11-005.md). | 🟢 |
+| Join | `TopIconJoin` | Native Join: [phạm vi, thao tác và giới hạn](docs/features/OM9-TOP11-008.md). | 🟢 |
 | Split | `TopIconSplit` | Chia đối tượng bằng đối tượng cắt. | 🔴 |
-| Trim | `TopIconTrim` | Cắt bỏ phần thừa của đối tượng. | 🔴 |
+| Trim | `TopIconTrim` | Native Trim: [phạm vi, thao tác và giới hạn](docs/features/OM9-TOP11-010.md). | 🟢 |
 | Ring Rail | `TopIconRingRail` | Tạo đường dẫn cơ sở cho thân nhẫn. | 🔴 |
 
 #### File
@@ -169,13 +169,13 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 |---|---|---|---|
 | Polyline | `CurvePolylinePolyline` | Vẽ đường gấp khúc qua nhiều điểm bằng chuột hoặc console. | 🟢 |
 | Line | `CurveLineSingleLine` | Vẽ đoạn thẳng giữa các điểm bằng chuột hoặc console. | 🟢 |
-| Interpolate Points | `CurveFreeFormInterpolatePoints` | Vẽ đường cong nội suy qua các điểm. | 🔴 |
+| Interpolate Points | `CurveFreeFormInterpolatePoints` | Vẽ B-spline qua điểm bằng chuột/CMD; Degree, Knots, Close/Sharp, Undo. Tangent chưa hỗ trợ. | 🟢 |
 | Rectangle Cornerto Corner | `CurveRectangleCornertoCorner` | Vẽ hình chữ nhật bằng hai góc. | 🔴 |
 | Circle Center Radius | `CurveCircleCenterRadius` | Vẽ đường tròn từ tâm và bán kính. | 🔴 |
 | Ellipse From Center | `CurveEllipseFromCenter` | Vẽ ellipse từ tâm. | 🔴 |
 | Arc Center Start Angle | `CurveArcCenterStartAngle` | Vẽ cung tròn từ tâm, điểm đầu và góc. | 🔴 |
 | Arc Start End Direction | `CurveArcStartEndDirection` | Vẽ cung tròn theo điểm đầu, điểm cuối và hướng. | 🔴 |
-| Curve Rebuild | `OthersCurveRebuild` | Dựng lại đường cong với cấu trúc control points mới. | 🔴 |
+| Curve Rebuild | `OthersCurveRebuild` | Dựng lại curve/polyline theo PointCount/Degree; preview độ lệch lấy mẫu, DeleteInput, Undo. Current layer chưa hỗ trợ. | 🟢 |
 | Refit To Tolerance | `CurveCurveEditToolsRefitToTolerance` | Fit lại đường cong theo dung sai. | 🔴 |
 | Blend Curves | `CurveBlendCurvesBlendCurves` | Tạo đường nối chuyển tiếp giữa các đường cong. | 🔴 |
 | Blend Crv | `CurveBlendCurvesBlendCrv` | Tạo đường blend với điều kiện liên tục. | 🔴 |
@@ -230,15 +230,15 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 
 | Tên lệnh / mục menu | Mã catalog | Ý nghĩa | Trạng thái |
 |---|---|---|---|
-| Sweep1 Rail | `SurfaceSweepSweep1Rail` | Quét profile theo một rail để tạo mặt. | 🔴 |
-| Sweep2 Rails | `SurfaceSweepSweep2Rails` | Quét profile theo hai rail để tạo mặt. | 🔴 |
+| Sweep1 Rail | `SurfaceSweepSweep1Rail` | Native Sweep1: rail → profiles → preview/OK; Reverse, seam và Frenet. [Phạm vi](docs/features/OM9-SURFACE-001.md). | 🟢 |
+| Sweep2 Rails | `SurfaceSweepSweep2Rails` | Native Sweep2: hai rail → profiles; kiểm tra bám rail, preview/OK. [Giới hạn kernel](docs/features/OM9-SURFACE-003.md). | 🟢 |
 | Profile Sweep | `SurfaceSweepProfileSweep` | Quét mặt từ profile theo workflow Profile Sweep. | 🔴 |
 | Planar Curves | `SurfacePlanarCurves` | Tạo mặt phẳng từ các đường biên đồng phẳng. | 🔴 |
 | Plane Cornerto Corner | `SurfacePlaneCornertoCorner` | Tạo mặt phẳng bằng hai góc. | 🔴 |
 | Surface Rebuild | `OthersSurfaceRebuild` | Dựng lại mặt với cấu trúc control points mới. | 🔴 |
 | Blend Surface | `SurfaceBlendSurface` | Tạo mặt chuyển tiếp giữa các mặt. | 🔴 |
 | Variable Blend Surfaces | `SurfaceVariableFilletBlendChamferVariableBlendSurfaces` | Tạo blend giữa các mặt với tham số biến thiên. | 🔴 |
-| Loft | `SurfaceLoft` | Tạo mặt loft qua các tiết diện. | 🔴 |
+| Loft | `SurfaceLoft` | Native Loft: profiles/edges → Normal hoặc Straight Sections; seam, Reverse, Closed loft. [Phạm vi](docs/features/OM9-SURFACE-009.md). | 🟢 |
 | Curve Network | `SurfaceCurveNetwork` | Tạo mặt từ mạng đường cong. | 🔴 |
 | Shrink Trimmed Surface | `SurfaceSurfaceEditToolsShrinkTrimmedSurface` | Thu gọn miền nền của mặt đã trim. | 🔴 |
 | Patch | `SurfacePatch` | Tạo mặt patch phủ vùng biên. | 🔴 |
@@ -275,10 +275,10 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 
 | Tên lệnh / mục menu | Mã catalog | Ý nghĩa | Trạng thái |
 |---|---|---|---|
-| Union | `SolidUnion` | Hợp các khối bằng Boolean. | 🔴 |
-| Difference | `SolidDifference` | Trừ khối cắt khỏi khối đích. | 🔴 |
-| Intersection | `SolidIntersection` | Lấy phần giao của các khối. | 🔴 |
-| Boolean Two Objects | `SolidBooleanTwoObjects` | Thực hiện Boolean theo workflow hai đối tượng. | 🔴 |
+| Union | `SolidUnion` | Native BooleanUnion: [phạm vi, thao tác và giới hạn](docs/features/OM9-SOLID-003.md). | 🟢 |
+| Difference | `SolidDifference` | Native BooleanDifference: [phạm vi, thao tác và giới hạn](docs/features/OM9-SOLID-001.md). | 🟢 |
+| Intersection | `SolidIntersection` | Native BooleanIntersection: [phạm vi, thao tác và giới hạn](docs/features/OM9-SOLID-002.md). | 🟢 |
+| Boolean Two Objects | `SolidBooleanTwoObjects` | Native Boolean2Objects: [phạm vi, thao tác và giới hạn](docs/features/OM9-SOLID-004.md). | 🟢 |
 | Cap Planar Holes | `SolidCapPlanarHoles` | Đóng các lỗ đồng phẳng để tạo khối kín. | 🔴 |
 | Extract Surface | `SolidExtractSurface` | Trích một mặt khỏi khối hoặc polysurface. | 🔴 |
 | Fillet Edge | `SolidFilletEdgeFilletEdge` | Bo tròn các cạnh khối. | 🔴 |
@@ -286,8 +286,8 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 | Extrude Planar Curve Straight | `SolidExtrudePlanarCurveStraight` | Extrude đường kín đồng phẳng theo phương thẳng. | 🔴 |
 | GVDAll Extrude | `SolidGVDAllExtrude` | Extrude theo workflow GVD. | 🔴 |
 | Pipe | `SolidPipe` | Tạo ống theo đường dẫn. | 🔴 |
-| Box Cornerto Corner Height | `SolidBoxCornertoCornerHeight` | Tạo hộp từ hai góc đáy và chiều cao. | 🔴 |
-| Sphere Center Radius | `SolidSphereCenterRadius` | Tạo cầu từ tâm và bán kính. | 🔴 |
+| Box Cornerto Corner Height | `SolidBoxCornertoCornerHeight` | Native Box: hai góc đáy/Length, Width, Height; 3Point, CMD/mouse, preview, Undo và save/reload. [Phạm vi](docs/features/OM9-SOLID-012.md). | 🟢 |
+| Sphere Center Radius | `SolidSphereCenterRadius` | Native Sphere: tâm + bán kính/điểm, CMD/mouse, Osnap, preview và save/reload. [Phạm vi](docs/features/OM9-SOLID-014.md). | 🟢 |
 | Ellipsoid From Center | `SolidEllipsoidFromCenter` | Tạo ellipsoid từ tâm. | 🔴 |
 | Torus | `SolidTorus` | Tạo khối xuyến. | 🔴 |
 | Cylinder | `SolidCylinder` | Tạo hình trụ. | 🔴 |

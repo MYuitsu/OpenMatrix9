@@ -1,0 +1,148 @@
+# OM9-CURVE-003 / OM9-CURVE-009: native menu/CMD, geometry and transaction evidence.
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+sys.path.insert(0, str(Path(__file__).parent))
+from command_console_support import command_input, command_prompt
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+result = {'checks': []}
+def check(name, value):
+    result['checks'].append({'name': name, 'passed': bool(value)})
+    if not value: raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop(); QtCore.QTimer.singleShot(200, loop.quit); loop.exec()
+def enter(text):
+    field.setFocus(); field.setText(text); QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return); settle()
+def button(dialog, name):
+    return dialog.findChild(QtWidgets.QPushButton, name)
+def rebuild(objects, menu=False):
+    Gui.Selection.clearSelection()
+    for obj in objects: Gui.Selection.addSelection(obj)
+    if menu: window.findChild(QtGui.QAction, 'Rebuild').trigger(); settle()
+    else: enter('Rebuild')
+    dialog=window.findChild(QtWidgets.QDialog, 'OM9RebuildDialog')
+    result['last_rebuild']={'prompt':command_prompt(window).text(),'app':App.activeDocument().Name if App.activeDocument() else None,'view':str(Gui.activeDocument().activeView()) if Gui.activeDocument() else None,'active_window':str(QtWidgets.QApplication.activeWindow()),'focus':str(QtWidgets.QApplication.focusWidget())}
+    check('Rebuild opens options', dialog is not None and dialog.isVisible())
+    return dialog
+def run():
+    global window, field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench'); window=Gui.getMainWindow()
+        field=command_input(window)
+        doc=App.newDocument('SplineTest'); doc.UndoMode=1
+        Gui.activeDocument().activeView().viewTop(); settle()
+        action=window.findChild(QtGui.QAction, 'InterpCrv')
+        check('OM9-CURVE-003 native command enabled', action is not None and action.isEnabled())
+        action.trigger(); settle()
+        points=[App.Vector(0,0,0),App.Vector(2,3,1),App.Vector(5,-2,2),App.Vector(9,1,-1),App.Vector(12,0,0)]
+        for p in points: enter(f'{p.x},{p.y},{p.z}')
+        check('Interp preview leaves document untouched', not doc.Objects)
+        enter('')
+        source=doc.Objects[-1]; edge=source.Shape.Edges[0]; curve=edge.Curve
+        check('Interp creates one valid cubic B-spline edge', source.Shape.isValid() and len(source.Shape.Edges)==1 and isinstance(curve,Part.BSplineCurve) and curve.Degree==3)
+        check('Native curve passes through all picked 3D points', all((curve.value(i/4)-p).Length<1e-7 for i,p in enumerate(points)))
+        enter('InterpCrv')
+        for p in points: enter(f'{p.x},{p.y},{p.z}')
+        enter('')
+        check('Menu and CMD produce equivalent native curves', all((doc.Objects[-1].Shape.Edges[0].Curve.value(i/32)-curve.value(i/32)).Length<1e-7 for i in range(33)))
+        count=len(doc.Objects); enter('InterpCrv'); enter('0,0'); enter('1,2'); enter('Degree=2')
+        check('Invalid Interp degree does not commit', len(doc.Objects)==count)
+        QtTest.QTest.keyClick(field, QtCore.Qt.Key_Escape); settle()
+        check('Interp Esc clears preview without objects', len(doc.Objects)==count)
+        enter('InterpCrv')
+        for text in ['0,0','5,0','6,4','1,6','-2,2']: enter(text)
+        enter('Close'); closed=doc.Objects[-1]
+        check('Smooth close is a periodic native B-spline', closed.Shape.Edges[0].Curve.isPeriodic() and closed.Shape.isClosed())
+        seam=closed.Shape.Edges[0].Curve
+        check('Periodic native seam agrees', (seam.value(seam.FirstParameter)-seam.value(seam.LastParameter)).Length<1e-7)
+        closed_points=[App.Vector(0,0,0),App.Vector(5,0,0),App.Vector(6,4,0),App.Vector(1,6,0),App.Vector(-2,2,0)]
+        check('Periodic native interpolation agrees with picked points', all((seam.value(i/5)-p).Length<1e-7 for i,p in enumerate(closed_points)))
+        viewer=next(w for w in window.findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible())
+        target=viewer.viewport(); center=target.rect().center()
+        picks=[center+QtCore.QPoint(-70,0),center+QtCore.QPoint(0,-60),center+QtCore.QPoint(80,0),center+QtCore.QPoint(0,70)]
+        count=len(doc.Objects); enter('InterpCrv')
+        for position in picks: QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=position); settle()
+        check('Mouse Interp points stay in preview', len(doc.Objects)==count)
+        QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=picks[0]+QtCore.QPoint(2,0)); settle()
+        check('Mouse AutoClose commits a periodic curve without Osnap', len(doc.Objects)==count+1 and doc.Objects[-1].Shape.Edges[0].Curve.isPeriodic())
+        count=len(doc.Objects); enter('InterpCrv')
+        for position in picks: QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=position); settle()
+        QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,QtCore.Qt.AltModifier,pos=picks[0]+QtCore.QPoint(2,0)); settle()
+        check('Alt suspends AutoClose', len(doc.Objects)==count)
+        QtTest.QTest.keyClick(target,QtCore.Qt.Key_Escape); settle()
+        check('Mouse Esc cancels the suspended close', len(doc.Objects)==count)
+        count=len(doc.Objects); dialog=rebuild([source], menu=True)
+        dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(8)
+        dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree').setValue(3)
+        button(dialog,'OM9RebuildPreview').click(); settle()
+        check('Rebuild preview does not edit document', len(doc.Objects)==count and source.Shape.isSame(edge))
+        check('Rebuild reports sampled deviation', 'mm' in dialog.findChild(QtWidgets.QLabel,'OM9RebuildDeviation').text())
+        button(dialog,'OM9RebuildCancel').click(); settle()
+        check('Rebuild cancel preserves input', len(doc.Objects)==count and source in doc.Objects)
+        dialog=rebuild([source]); dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(8)
+        dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree').setValue(3)
+        dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(False)
+        button(dialog,'OM9RebuildOK').click(); settle()
+        rebuilt=doc.Objects[-1]; fitted=rebuilt.Shape.Edges[0].Curve
+        check('Rebuild keeps original and exact requested structure', source in doc.Objects and fitted.Degree==3 and fitted.NbPoles==8 and rebuilt.Shape.isValid())
+        check('Rebuild preserves open endpoints', (fitted.value(fitted.FirstParameter)-points[0]).Length<1e-7 and (fitted.value(fitted.LastParameter)-points[-1]).Length<1e-7)
+        doc.undo(); check('Rebuild undo removes only output', len(doc.Objects)==count and source in doc.Objects)
+        doc.redo(); check('Rebuild redo restores output', len(doc.Objects)==count+1)
+        count=len(doc.Objects); source_name=source.Name
+        dialog=rebuild([source,closed]); dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(12)
+        dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(True)
+        button(dialog,'OM9RebuildOK').click(); settle()
+        check('Batch DeleteInput is atomic', len(doc.Objects)==count and doc.getObject(source_name) is None and all(o.Shape.Edges[0].Curve.NbPoles==12 for o in doc.Objects[-2:]))
+        check('Closed Rebuild stays periodic', doc.Objects[-1].Shape.Edges[0].Curve.isPeriodic() and doc.Objects[-1].Shape.isClosed())
+        doc.undo(); check('Batch Undo restores both sources', doc.getObject(source_name) is not None and len(doc.Objects)==count)
+        doc.redo(); check('Batch Redo repeats replacement', doc.getObject(source_name) is None and len(doc.Objects)==count)
+        box=doc.addObject('Part::Feature','InvalidSurface'); box.Shape=Part.makeBox(2,2,2); doc.recompute()
+        count=len(doc.Objects); Gui.Selection.clearSelection(); Gui.Selection.addSelection(box); enter('Rebuild')
+        check('Surface selection is rejected without mutation', len(doc.Objects)==count and window.findChild(QtWidgets.QDialog,'OM9RebuildDialog') is None)
+        Gui.Selection.clearSelection(); enter('Rebuild'); Gui.Selection.addSelection(doc.Objects[-2]); enter('')
+        dialog=window.findChild(QtWidgets.QDialog,'OM9RebuildDialog')
+        check('Postselection Enter opens Rebuild', dialog is not None and dialog.isVisible())
+        dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(3)
+        dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree').setValue(5)
+        button(dialog,'OM9RebuildOK').click(); settle()
+        check('Invalid Rebuild options stay editable and do not mutate', dialog.isVisible() and len(doc.Objects)==count)
+        button(dialog,'OM9RebuildCancel').click(); settle()
+        polyline=doc.addObject('Part::Feature','PolylineInput')
+        polyline.Shape=Part.makePolygon([App.Vector(0,0,0),App.Vector(4,0,0),App.Vector(6,3,0),App.Vector(8,4,0)])
+        doc.recompute(); dialog=rebuild([polyline]); dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(False)
+        button(dialog,'OM9RebuildOK').click(); settle()
+        check('Rebuild accepts connected polyline wires', doc.Objects[-1]!=polyline and doc.Objects[-1].Shape.Edges[0].Curve.NbPoles>=4)
+        container=doc.addObject('App::Part','CurveContainer')
+        container.Placement=App.Placement(App.Vector(40,-10,6),App.Rotation(App.Vector(0,0,1),90))
+        child=doc.addObject('Part::Feature','PlacedCurve'); container.addObject(child)
+        child.Shape=Part.makeLine(App.Vector(1,2,3),App.Vector(7,5,-1))
+        child.Placement=App.Placement(App.Vector(4,0,0),App.Rotation(App.Vector(0,0,1),30)); doc.recompute()
+        wanted=[container.Placement.multVec(v.Point) for v in child.Shape.Vertexes]
+        count=len(doc.Objects); dialog=rebuild([child]); dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(False)
+        saved_placement=App.Placement(container.Placement.toMatrix())
+        container.Placement=App.Placement(App.Vector(70,-10,6),App.Rotation(App.Vector(0,0,1),90)); doc.recompute()
+        button(dialog,'OM9RebuildOK').click(); settle()
+        check('Rebuild rejects a changed parent placement', len(doc.Objects)==count and dialog.isVisible())
+        button(dialog,'OM9RebuildCancel').click(); settle(); container.Placement=saved_placement; doc.recompute()
+        dialog=rebuild([child]); dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(False)
+        button(dialog,'OM9RebuildOK').click(); settle()
+        got=doc.Objects[-1].Shape.Vertexes
+        check('Rebuild preserves world placement inside transformed containers', len(got)==2 and all((a.Point-b).Length<1e-7 for a,b in zip(got,wanted)))
+        shapes=[o for o in doc.Objects if hasattr(o,'Shape')]
+        lengths=[o.Shape.Length for o in shapes]; path=out/'splines.FCStd'; doc.saveAs(str(path)); App.closeDocument(doc.Name)
+        doc=App.openDocument(str(path)); settle()
+        shapes=[o for o in doc.Objects if hasattr(o,'Shape')]
+        check('Spline save/reload preserves geometry', len(shapes)==len(lengths) and all(abs(o.Shape.Length-length)<1e-7 for o,length in zip(shapes,lengths)))
+        dialog=rebuild([doc.Objects[0]]); other=App.newDocument('SplineTestOther'); settle()
+        check('Document switch cancels Rebuild options', window.findChild(QtWidgets.QDialog,'OM9RebuildDialog') is None and not other.Objects)
+        result['ok']=True
+    except Exception:
+        result['ok']=False; result['error']=traceback.format_exc()
+        result['debug']={'prompt':command_prompt(window).text(),'dialogs':[(d.objectName(),d.isVisible()) for d in window.findChildren(QtWidgets.QDialog)]}
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):
+            if name.startswith('SplineTest'): App.closeDocument(name)
+        if os.environ.get('OM9_SMOKE_KEEP_OPEN')!='1': QtCore.QTimer.singleShot(0,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

@@ -1,5 +1,6 @@
-//! OM9-CURVE-001/002: shared mouse and command-frame session.
+//! OM9-CURVE-001/002/003: shared mouse and command-frame session.
 //! Host choices: millimetres, 1e-7 mm minimum segment, finite coordinates <1e9 mm.
+use crate::spline::{self, Knots, Spline};
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Effect {
     Waiting,
@@ -17,11 +18,17 @@ pub struct CurveSession {
     length: Option<f64>,
     awaiting_length: bool,
     frame: Option<([f64; 3], [[f64; 3]; 3])>,
+    degree: usize,
+    knots: Knots,
+    spline: Option<Spline>,
+    awaiting_option: Option<String>,
 }
 pub fn name(icon: &str) -> Option<&'static str> {
     match icon {
         "CurvePolylinePolyline" => Some("Polyline"),
         "CurveLineSingleLine" => Some("Line"),
+        "CurveFreeFormInterpolatePoints" => Some("InterpCrv"),
+        "OthersCurveRebuild" => Some("Rebuild"),
         _ => None,
     }
 }
@@ -31,12 +38,15 @@ impl CurveSession {
             "Line"
         } else if name.eq_ignore_ascii_case("Polyline") {
             "Polyline"
+        } else if name.eq_ignore_ascii_case("InterpCrv") {
+            "InterpCrv"
         } else {
             return Err("Unknown Curve command".into());
         };
         *self = Self {
             name,
             active: true,
+            degree: 3,
             ..Self::default()
         };
         Ok(())
@@ -67,6 +77,17 @@ impl CurveSession {
     pub fn output(&self) -> &[[f64; 3]] {
         &self.output
     }
+    pub fn spline(&self) -> Option<&Spline> { self.spline.as_ref() }
+    pub fn preview_spline(&self, hover: Option<[f64;3]>) -> Result<Spline,String> {
+        self.preview_spline_closed(hover,false)
+    }
+    pub fn preview_spline_closed(&self, hover: Option<[f64;3]>, close: bool) -> Result<Spline,String> {
+        let mut points=self.points.clone();
+        if let Some(p)=hover {if points.last().is_none_or(|&a| spline::distance(a,p)>=spline::TOLERANCE) {points.push(p);}}
+        let closed=(close || self.persistent_close) && points.len()>=3;
+        if closed && points.len()>3 && spline::distance(points[0],*points.last().unwrap())<spline::TOLERANCE {points.pop();}
+        spline::interpolate(&points,self.degree,self.knots,closed)
+    }
     pub fn points(&self) -> &[[f64; 3]] {
         &self.points
     }
@@ -76,9 +97,12 @@ impl CurveSession {
         self.active = false;
         self.points.clear();
         self.output.clear();
+        self.spline=None;
+        self.awaiting_option=None;
         Effect::Cancelled
     }
     pub fn prompt(&self) -> String {
+        if let Some(option)=&self.awaiting_option {return format!("{option} of interpolated curve: ");}
         if self.awaiting_length {
             return "Length of next segment: ".into();
         }
@@ -86,6 +110,10 @@ impl CurveSession {
             return "Command: ".into();
         }
         let state = if self.persistent_close { "Yes" } else { "No" };
+        if self.name=="InterpCrv" {
+            let knots=match self.knots {Knots::Uniform=>"Uniform",Knots::Chord=>"Chord",Knots::SqrtChord=>"SqrtChrd"};
+            return format!("{} point of interpolated curve. Enter when done ( Degree={} Knots={} PersistentClose={} Close Sharp Undo ): ",if self.points.is_empty(){"Start"}else{"Next"},self.degree,knots,state);
+        }
         if self.points.is_empty() {
             if self.name == "Line" {
                 format!(
@@ -114,6 +142,13 @@ impl CurveSession {
             return Err("More distinct points are required".into());
         }
         let mut points = self.points.clone();
+        if self.name=="InterpCrv" {
+            let closed=close || (self.persistent_close && points.len()>=3);
+            if closed && points.len()>2 && spline::distance(points[0],*points.last().unwrap())<spline::TOLERANCE {points.pop();}
+            let fitted=spline::interpolate(&points,self.degree,self.knots,closed)?;
+            self.spline=Some(fitted);self.output=points;self.active=false;
+            return Ok(Effect::Commit);
+        }
         if close || (self.persistent_close && points.len() > 2) {
             let first = points[0];
             if points.last() != Some(&first) {
@@ -161,10 +196,11 @@ impl CurveSession {
         if self.awaiting_length {
             return Err("Enter the numeric length before picking a direction".into());
         }
+        if self.awaiting_option.is_some() {return Err("Enter the pending option value before picking a point".into());}
         if p.iter().any(|x| !x.is_finite() || x.abs() > 1e9) {
             return Err("Coordinate must be finite and within 1e9 mm".into());
         }
-        if self.points.len() >= 4096 {
+        if self.points.len() >= if self.name=="InterpCrv" {spline::MAX_POLES} else {4096} {
             return Err("Point limit reached; finish or cancel".into());
         }
         if let Some(a) = self.points.last() {
@@ -197,6 +233,12 @@ impl CurveSession {
         if !self.active {
             return Err("No active command".into());
         }
+        if let Some(option)=self.awaiting_option.clone() {
+            self.awaiting_option=None;
+            let result=self.input(&format!("{option}={text}"));
+            if result.is_err() {self.awaiting_option=Some(option);}
+            return result;
+        }
         if self.awaiting_length {
             let length = number(text)?;
             if length < 1e-7 {
@@ -214,6 +256,32 @@ impl CurveSession {
         let (key, value) = lower
             .split_once('=')
             .map_or((lower.as_str(), None), |(k, v)| (k.trim(), Some(v.trim())));
+        if self.name=="InterpCrv" {
+            match key {
+                "degree"|"d"|"knots"|"k" if value.is_none()=>{
+                    self.awaiting_option=Some(if key=="degree"||key=="d" {"Degree"} else {"Knots"}.into());return Ok(Effect::Waiting);
+                },
+                "degree"|"d"=>{
+                    let degree=value.unwrap().parse::<usize>().map_err(|_|"Enter an odd degree from 1 to 11")?;
+                    if !(1..=11).contains(&degree)||degree%2==0 {return Err("Enter an odd degree from 1 to 11".into());}
+                    self.degree=degree;return Ok(Effect::Waiting);
+                },
+                "knots"|"k"=>{
+                    self.knots=match value {Some("uniform"|"u")=>Knots::Uniform,Some("chord"|"c")=>Knots::Chord,Some("sqrtchrd"|"sqrtchord"|"s")=>Knots::SqrtChord,_=>return Err("Knots must be Uniform, Chord or SqrtChrd".into())};return Ok(Effect::Waiting);
+                },
+                "persistentclose"|"p"=>{self.persistent_close=option_bool(value,self.persistent_close)?;return Ok(Effect::Waiting);},
+                "close"|"c" if value.is_none()=>return self.finish(true),
+                "sharp"|"s" if value.is_none()=>{
+                    if self.points.len()<3 {return Err("Sharp needs at least 3 points".into());}
+                    let mut points=self.points.clone();if spline::distance(points[0],*points.last().unwrap())>=spline::TOLERANCE {points.push(points[0]);}
+                    let fitted=spline::interpolate(&points,self.degree,self.knots,false)?;
+                    self.output=points;self.spline=Some(fitted);self.active=false;return Ok(Effect::Commit);
+                },
+                "undo"|"u" if value.is_none()=>{self.points.pop().ok_or("No point to undo")?;return Ok(Effect::Waiting);},
+                "starttangent"|"endtangent"=>return Err("Tangent constraints are not implemented".into()),
+                _=>{},
+            }
+        }
         if self.name == "Polyline" && (key == "close" || key == "c") && value.is_none() {
             return self.finish(true);
         }

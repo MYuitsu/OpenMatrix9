@@ -10,6 +10,7 @@ pub fn names() -> &'static [&'static str] {
             .lines()
             .filter(|s| !s.is_empty() && !s.starts_with('#'))
             .collect();
+        names.extend(["Sweep1", "Sweep2", "Loft", "Box", "Sphere"]);
         names.extend(
             crate::core_keyboard::ICONS
                 .into_iter()

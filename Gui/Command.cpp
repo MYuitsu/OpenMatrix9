@@ -2,6 +2,9 @@
 #include "CoreThreeDm.h"
 #include "NativeCommands.h"
 #include "CurveController.h"
+#include "SurfaceController.h"
+#include "EditController.h"
+#include "SolidController.h"
 #include "CoreWorkspace.h"
 #include "CoreViewControls.h"
 #include "CoreNotes.h"
@@ -69,6 +72,9 @@ bool om9NativeCommandAvailable(std::size_t index) {
     if(OpenMatrix9Gui::CoreDistance::handles(index))return OpenMatrix9Gui::CoreDistance::instance().available();
     if(OpenMatrix9Gui::CorePictureFrame::handles(index))return OpenMatrix9Gui::CorePictureFrame::instance().available();
     if(OpenMatrix9Gui::CoreNotes::handles(index))return OpenMatrix9Gui::CoreNotes::available(index);
+    if(OpenMatrix9Gui::SurfaceController::handles(index))return OpenMatrix9Gui::SurfaceController::instance().available(index);
+    if(OpenMatrix9Gui::EditController::handles(index))return OpenMatrix9Gui::EditController::instance().available(index);
+    if(OpenMatrix9Gui::SolidController::handles(index))return OpenMatrix9Gui::SolidController::instance().available(index);
     if(OpenMatrix9Gui::isCurveCommand(index))return OpenMatrix9Gui::CurveController::instance().available(index);
     if(OpenMatrix9Gui::CoreWorkspace::handles(index))return OpenMatrix9Gui::CoreWorkspace::instance().available(index);
     if(OpenMatrix9Gui::CoreViewControls::handles(index))return OpenMatrix9Gui::CoreViewControls::instance().available(index);
@@ -92,6 +98,9 @@ bool om9NativeCommandAvailable(std::size_t index) {
     return command && command->isActive();
 }
 bool om9ExecuteNativeCommand(std::size_t index) {
+    if(OpenMatrix9Gui::EditController::handles(index))return OpenMatrix9Gui::EditController::instance().start(index);
+    if(OpenMatrix9Gui::SolidController::handles(index))return OpenMatrix9Gui::SolidController::instance().start(index);
+    if(OpenMatrix9Gui::SurfaceController::handles(index))return OpenMatrix9Gui::SurfaceController::instance().start(index);
     if(auto operation=om9_3dm_operation(index)) {
         if(!om9NativeCommandAvailable(index))return false;
         return executeThreeDm(operation);

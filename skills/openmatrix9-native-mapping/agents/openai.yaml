@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenMatrix9 · VB6 và Ghidra"
+  short_description: "Đối chiếu từng hàm native để hiểu hành vi gốc Matrix9"
+  default_prompt: "Dùng $openmatrix9-native-mapping để đối chiếu hàm VB6 với Ghidra theo VA và ghi bằng chứng phục vụ triển khai Rust."

@@ -10,6 +10,11 @@
 #include "CoreSnaps.h"
 #include "CoreKeyboard.h"
 #include "CoreMouse.h"
+#include "CurveGeometry.h"
+#include "CoreRebuild.h"
+#include "SurfaceController.h"
+#include "EditController.h"
+#include "SolidController.h"
 #include <Base/Interpreter.h>
 #include <Base/Placement.h>
 #include <Base/Console.h>
@@ -29,6 +34,8 @@
 #include <Inventor/nodes/SoLineSet.h>
 #include <Inventor/nodes/SoPointSet.h>
 #include <Inventor/nodes/SoDrawStyle.h>
+#include <Inventor/nodes/SoCamera.h>
+#include <Inventor/SoRenderManager.h>
 #include <Gui/View3DInventor.h>
 #include <Gui/View3DInventorViewer.h>
 #include <QApplication>
@@ -75,7 +82,13 @@ void commit(App::Document& doc,const char* label) {
         PyRef point(PyObject_CallFunction(vector.value,"ddd",x,y,z));
         if(PyList_Append(points.value,point.value)<0)throw std::runtime_error("Cannot append Curve point");
     }
-    PyRef shape(PyObject_CallMethod(part.value,"makePolygon","O",points.value));
+    PyRef shape([&]()->PyObject* {
+        if(std::string(label)=="InterpCrv") {
+            if(!om9_curve_spline_publish())throw std::runtime_error("No committed interpolated spline");
+            auto spline=OpenMatrix9Gui::publishedSplineShape();return Py_NewRef(spline.value);
+        }
+        return PyObject_CallMethod(part.value,"makePolygon","O",points.value);
+    }());
     PyRef valid(PyObject_CallMethod(shape.value,"isValid",nullptr));
     if(PyObject_IsTrue(valid.value)!=1)throw std::runtime_error("Part produced invalid geometry");
     doc.openTransaction(std::string(label));
@@ -91,7 +104,7 @@ void commit(App::Document& doc,const char* label) {
 }
 }
 namespace OpenMatrix9Gui {
-bool isCurveCommand(std::size_t index) {const char* id=om9_command_id(index);return id && (std::string(id)=="Line" || std::string(id)=="Polyline");}
+bool isCurveCommand(std::size_t index) {const char* id=om9_command_id(index);return id && (std::string(id)=="Line" || std::string(id)=="Polyline" || std::string(id)=="InterpCrv" || std::string(id)=="Rebuild");}
 CurveController& CurveController::instance(){static auto* controller=new CurveController;return *controller;}
 CurveController::CurveController():QObject(qApp) {
     deleteConnection=App::GetApplication().signalDeleteDocument.connect([this](const App::Document& doc){if(document==doc.getName())cancel();});
@@ -106,10 +119,10 @@ void CurveController::activate() {
         auto* title=new QWidget(dock);title->setFixedHeight(0);dock->setTitleBarWidget(title);
         auto* body=new QWidget(dock);auto* layout=new QVBoxLayout(body);layout->setContentsMargins(4,2,4,2);layout->setSpacing(0);
         console=new CommandConsole(body);layout->addWidget(console,1);
-        console->completionEnabled=[this]{return enabled&&!om9_curve_active()&&!CoreDistance::instance().active()&&!CorePictureFrame::instance().active()&&!CoreViewControls::instance().toolActive();};
-        console->completionAvailable=[](const QString& name){for(std::size_t i=0;i<om9_command_count();++i)if(name.compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0)return om9NativeCommandAvailable(i);return false;};
+        console->completionEnabled=[this]{return enabled&&!om9_curve_active()&&!CoreRebuild::instance().active()&&!EditController::instance().active()&&!SolidController::instance().active()&&!SurfaceController::instance().active()&&!CoreDistance::instance().active()&&!CorePictureFrame::instance().active()&&!CoreViewControls::instance().toolActive();};
+        console->completionAvailable=[](const QString& name){for(std::size_t i=0;i<om9_command_count();++i)if(EditController::matches(i,name)||SolidController::matches(i,name)||SurfaceController::matches(i,name)||name.compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0)return om9NativeCommandAvailable(i);return false;};
         console->accepted=[this]{acceptInput();};
-        console->cancelled=[this]{console->setInputText({});historyPosition=-1;CoreDistance::instance().cancel();CorePictureFrame::instance().cancel();cancel();};
+        console->cancelled=[this]{cancelInput();};
         console->recalled=[this](int direction){
             if(inputHistory.isEmpty())return;
             if(historyPosition<0){if(direction>0)return;historyDraft=console->inputText();historyPosition=inputHistory.size();}
@@ -130,9 +143,11 @@ bool CurveController::available(std::size_t index)const {
 bool CurveController::validDocument()const {auto* doc=App::GetApplication().getActiveDocument();return !document.empty()&&doc&&documentIdentity==doc&&document==doc->getName()&&available(command);}
 bool CurveController::start(std::size_t index) {
     if(!available(index))return false;CoreDistance::instance().cancel();CorePictureFrame::instance().cancel();CoreViewControls::instance().cancel();cancel();command=index;documentIdentity=App::GetApplication().getActiveDocument();document=App::GetApplication().getActiveDocument()->getName();
+    if(CoreRebuild::handles(index))return CoreRebuild::instance().start(index);
     const bool ok=om9_curve_start(om9_command_id(index));refresh();qApp->installEventFilter(this);CoreMouse::instance().prioritize();return ok;
 }
-void CurveController::cancel(){clearPreview();om9_curve_cancel();document.clear();documentIdentity=nullptr;refresh();}
+void CurveController::cancel(){CoreRebuild::instance().cancel();EditController::instance().cancel();SurfaceController::instance().cancel();SolidController::instance().cancel();clearPreview();om9_curve_cancel();document.clear();documentIdentity=nullptr;refresh();}
+void CurveController::cancelInput(){if(console)console->setInputText({});historyPosition=-1;CoreDistance::instance().cancel();CorePictureFrame::instance().cancel();cancel();}
 void CurveController::acceptInput(){submit(console?console->takeInput():QString());}
 bool CurveController::pendingInput()const{return console&&!console->inputText().trimmed().isEmpty();}
 void CurveController::logMessage(const QString& message){if(console)console->logMessage(message);}
@@ -141,11 +156,19 @@ void CurveController::clearPreview(){
     for(const auto& [owner,node]:previewOwners){if(owner->findChild(node)>=0)owner->removeChild(node);owner->unref();}
     previewOwners.clear();
 }
-void CurveController::updatePreview(const double* hover){
+void CurveController::updatePreview(const double* hover,bool close){
     clearPreview();const auto count=om9_curve_preview_count();
-    if(!count||!om9_curve_active()||QString::fromUtf8(om9_command_id(command))!="Polyline")return;
+    const bool interpolated=QString::fromUtf8(om9_command_id(command))=="InterpCrv";
+    if(!count||!om9_curve_active()||(!interpolated&&QString::fromUtf8(om9_command_id(command))!="Polyline"))return;
     auto* gui=Gui::Application::Instance->activeDocument();if(!gui)return;
     std::vector<SbVec3f> picked;for(std::size_t i=0;i<count;++i)picked.emplace_back(float(om9_curve_preview_coordinate(i,0)),float(om9_curve_preview_coordinate(i,1)),float(om9_curve_preview_coordinate(i,2)));
+    std::vector<SbVec3f> line=picked;
+    if(hover)line.emplace_back(float(hover[0]),float(hover[1]),float(hover[2]));
+    if(interpolated){
+        if(om9_curve_preview_spline_closed(hover,close)){
+            line.clear();for(int i=0;i<=128;++i)line.emplace_back(float(om9_spline_value(i/128.,0)),float(om9_spline_value(i/128.,1)),float(om9_spline_value(i/128.,2)));
+        }else line.clear();
+    }
     for(auto* base:gui->getMDIViews()){
         auto* view=dynamic_cast<Gui::View3DInventor*>(base);if(!view)continue;
         auto* root=dynamic_cast<SoSeparator*>(view->getViewer()->getSceneGraph());if(!root)continue;
@@ -155,9 +178,9 @@ void CurveController::updatePreview(const double* hover){
         auto* content=new SoSeparator;content->setName("OM9CurvePreview");skip->addChild(content);
         auto* pick=new SoPickStyle;pick->style=SoPickStyle::UNPICKABLE;content->addChild(pick);
         auto* color=new SoBaseColor;color->rgb.setValue(0,130.f/255.f,85.f/255.f);content->addChild(color);
-        auto* coords=new SoCoordinate3;coords->setName("OM9CurvePreviewLine");coords->point.setValues(0,int(count),picked.data());if(hover)coords->point.set1Value(int(count),float(hover[0]),float(hover[1]),float(hover[2]));content->addChild(coords);
+        auto* coords=new SoCoordinate3;coords->setName("OM9CurvePreviewLine");if(!line.empty())coords->point.setValues(0,int(line.size()),line.data());content->addChild(coords);
         auto* style=new SoDrawStyle;style->lineWidth=1;content->addChild(style);
-        auto* lines=new SoLineSet;lines->numVertices.set1Value(0,int(count)+(hover?1:0));content->addChild(lines);
+        auto* lines=new SoLineSet;lines->numVertices.set1Value(0,int(line.size()));content->addChild(lines);
         auto* markers=new SoSeparator;content->addChild(markers);
         auto* points=new SoCoordinate3;points->setName("OM9CurvePreviewPoints");points->point.setValues(0,int(count),picked.data());markers->addChild(points);
         auto* outer=new SoDrawStyle;outer->pointSize=7;markers->addChild(outer);markers->addChild(new SoPointSet);
@@ -166,15 +189,22 @@ void CurveController::updatePreview(const double* hover){
         view->getViewer()->redraw();
     }
 }
-void CurveController::refresh(){if(CoreDistance::instance().active()||CorePictureFrame::instance().active())return;char message[2048]={};om9_curve_message(message,sizeof(message));setPrompt(QString::fromUtf8(message));if(om9_curve_active())logMessage(QString::fromUtf8(message));}
+void CurveController::refresh(){if(CoreRebuild::instance().active()||CoreDistance::instance().active()||CorePictureFrame::instance().active())return;char message[2048]={};om9_curve_message(message,sizeof(message));setPrompt(QString::fromUtf8(message));if(om9_curve_active())logMessage(QString::fromUtf8(message));}
 void CurveController::submit(const QString& text) {
     if(!enabled)return;
     const auto input=text.trimmed();
     if(!input.isEmpty()){if(inputHistory.isEmpty()||inputHistory.back()!=input)inputHistory.append(input);if(inputHistory.size()>1000)inputHistory.removeFirst();}
     historyPosition=-1;historyDraft.clear();
+    if(SolidController::instance().active()){SolidController::instance().submit(input);return;}
+    for(std::size_t i=0;i<om9_command_count();++i)if(SolidController::matches(i,input)){SolidController::instance().start(i);return;}
+    if(SurfaceController::instance().active()){SurfaceController::instance().submit(input);return;}
+    if(EditController::instance().active()){EditController::instance().submit(input);return;}
+    for(std::size_t i=0;i<om9_command_count();++i)if(EditController::matches(i,input)){EditController::instance().start(i);return;}
+    for(std::size_t i=0;i<om9_command_count();++i)if(SurfaceController::matches(i,input)){SurfaceController::instance().start(i);return;}
     CoreKeyboard::instance().record(input);
     if(CoreKeyboard::instance().submit(input))return;
     if(CoreSnaps::submit(input))return;
+    if(CoreRebuild::instance().active()){CoreRebuild::instance().submit(input);return;}
     for(std::size_t i=0;i<om9_command_count();++i)if(om9_3dm_operation(i)&&input.compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0){cancel();om9_sidebar_record_execution(i,om9ExecuteNativeCommand(i));refresh();return;}
     if(input.compare("Distance",Qt::CaseInsensitive)==0||input.compare("Angle",Qt::CaseInsensitive)==0){for(std::size_t i=0;i<om9_command_count();++i)if(CoreDistance::handles(i)&&input.compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0){CoreDistance::instance().start(i);return;}}
     if(CoreDistance::instance().active()){
@@ -198,12 +228,12 @@ void CurveController::submit(const QString& text) {
     if(om9_curve_active()) {
         if(!validDocument()){cancel();return;}updateInputFrame();result(om9_curve_input(text.toUtf8().constData()));return;
     }
-    for(std::size_t i=0;i<om9_command_count();++i)if((isCurveCommand(i)||CoreWorkspace::handles(i)||CoreViewControls::handles(i))&&text.trimmed().compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0){if(CoreViewControls::handles(i)){om9_sidebar_record_execution(i,CoreViewControls::instance().execute(i));}else if(CoreWorkspace::handles(i)){om9_sidebar_record_execution(i,CoreWorkspace::instance().execute(i));refresh();}else if(!start(i))setPrompt("Open an editable document with a 3D view first");return;}
+    for(std::size_t i=0;i<om9_command_count();++i)if((isCurveCommand(i)||CoreWorkspace::handles(i)||CoreViewControls::handles(i))&&text.trimmed().compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0){if(CoreViewControls::handles(i)){om9_sidebar_record_execution(i,CoreViewControls::instance().execute(i));}else if(CoreWorkspace::handles(i)){om9_sidebar_record_execution(i,CoreWorkspace::instance().execute(i));refresh();}else if(!available(i))setPrompt("Open an editable document with a 3D view first");else start(i);return;}
     if(input.isEmpty()){
         if(om9_sidebar_history_count()){const auto previous=om9_sidebar_history_command(0);if(om9NativeCommandAvailable(previous)){logMessage("Command: "+QString::fromUtf8(om9_command_id(previous)));om9_sidebar_record_execution(previous,om9ExecuteNativeCommand(previous));return;}}
         refresh();return;
     }
-    setPrompt("Unknown or unsupported command. Available: Line, Polyline");logMessage(console->property("om9Prompt").toString());
+    setPrompt("Unknown or unsupported command. Available: Line, Polyline, InterpCrv, Rebuild");logMessage(console->property("om9Prompt").toString());
 }
 void CurveController::result(unsigned int effect) {
     refresh();
@@ -254,6 +284,13 @@ bool CurveController::eventFilter(QObject* watched,QEvent* event) {
     // C-plane belongs to the native viewport, independently of its camera orientation.
     try {
         updateInputFrame();
+        // OM9-CURVE-003: close within 10 logical pixels, independently of Osnap.
+        if(QString::fromUtf8(om9_command_id(command))=="InterpCrv"&&om9_curve_preview_count()>=3&&!mouse->modifiers().testFlag(Qt::AltModifier)){
+            const double first[3]={om9_curve_preview_coordinate(0,0),om9_curve_preview_coordinate(0,1),om9_curve_preview_coordinate(0,2)};
+            SbVec3f projected;viewer->getSoRenderManager()->getCamera()->getViewVolume(float(viewer->viewport()->width())/viewer->viewport()->height()).projectToScreen(SbVec3f(float(first[0]),float(first[1]),float(first[2])),projected);
+            const double x=projected[0]*(viewer->viewport()->width()-1),y=(1-projected[1])*(viewer->viewport()->height()-1);
+            if(std::hypot(x-pos.x(),y-pos.y())<=10&&projected[2]>=0&&projected[2]<=1){if(hovering)updatePreview(first,true);else result(om9_curve_input("Close"));return !hovering;}
+        }
         Base::Vector3d snapped;
         const auto deliver=[&](double x,double y,double z){
             const bool shift=mouse->modifiers().testFlag(Qt::ShiftModifier);

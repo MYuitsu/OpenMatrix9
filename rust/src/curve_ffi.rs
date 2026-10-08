@@ -127,6 +127,25 @@ pub extern "C" fn om9_curve_count() -> usize {
     state().lock().ok().map_or(0, |s| s.session.output().len())
 }
 #[unsafe(no_mangle)]
+pub extern "C" fn om9_curve_spline_publish() -> bool {
+    let Ok(s)=state().lock() else {return false;};
+    crate::spline_ffi::publish(s.session.spline().cloned().ok_or("No committed spline".into()))
+}
+/// # Safety
+/// `hover` is null or points to three readable world coordinates.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_curve_preview_spline(hover: *const f64) -> bool {
+    unsafe {om9_curve_preview_spline_closed(hover,false)}
+}
+/// # Safety
+/// `hover` is null or points to three readable world coordinates.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_curve_preview_spline_closed(hover: *const f64, close: bool) -> bool {
+    let Ok(s)=state().lock() else {return false;};
+    let point=if hover.is_null() {None} else {let p=unsafe{std::slice::from_raw_parts(hover,3)};Some([p[0],p[1],p[2]])};
+    crate::spline_ffi::publish(s.session.preview_spline_closed(point,close))
+}
+#[unsafe(no_mangle)]
 pub extern "C" fn om9_curve_preview_count() -> usize {
     state().lock().ok().map_or(0, |s| {
         if s.session.active() {

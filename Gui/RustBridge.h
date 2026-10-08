@@ -1,11 +1,51 @@
 #pragma once
 #include <cstddef>
+#include <cstddef>
+extern "C" {
+unsigned int om9_solid_kind(const char*);
+bool om9_solid_start(const char*);
+void om9_solid_cancel();
+unsigned int om9_solid_phase();
+unsigned int om9_solid_input(const char*);
+unsigned int om9_solid_point(double,double,double,bool);
+bool om9_solid_frame(const double*);
+bool om9_solid_geometry(double*,bool,double,double,double,bool);
+bool om9_solid_height_axis(double*);
+std::size_t om9_solid_message(char*,std::size_t);
+}
+extern "C" {
+unsigned om9_edit_kind(const char*);
+bool om9_edit_start(const char*);
+void om9_edit_cancel();
+unsigned om9_edit_phase();
+bool om9_edit_add(const char*);
+bool om9_edit_finish();
+void om9_edit_back();
+bool om9_edit_undo();
+bool om9_edit_cycle();
+unsigned om9_edit_mode();
+std::size_t om9_edit_count(unsigned);
+bool om9_edit_delete_input(int);
+}
 
 extern "C"
 {
 bool om9_3dm_overlay_allowed(unsigned int capability,unsigned int action,bool knownReferences,bool isInstance);
 std::ptrdiff_t om9_3dm_dependency_closure(std::size_t nodeCount,const std::size_t* offsets,const std::size_t* edges,std::size_t edgeCount,const std::size_t* selected,std::size_t selectedCount,std::size_t* output,std::size_t capacity);
 std::ptrdiff_t om9_3dm_copy_budget(std::size_t bytes,std::size_t copies,std::size_t total);
+unsigned int om9_surface_kind(const char*);
+unsigned int om9_surface_sweep2_contact(std::size_t);
+bool om9_surface_options_valid(unsigned int,unsigned int,bool);
+bool om9_surface_transport(const double*,double*);
+bool om9_surface_start(const char*);
+bool om9_surface_add(const char*,bool closed);
+bool om9_surface_finish();
+bool om9_surface_undo();
+bool om9_surface_back();
+void om9_surface_cancel();
+unsigned int om9_surface_phase();
+std::size_t om9_surface_count();
+std::size_t om9_surface_message(char*,std::size_t);
 bool om9_3dm_archive_mode_valid(unsigned int mode);
 bool om9_3dm_archive_capability_valid(unsigned int capability);
 bool om9_3dm_archive_legacy_export_allowed(unsigned int mode);
@@ -22,6 +62,20 @@ unsigned int om9_curve_input(const char* text);
 unsigned int om9_curve_point(double x,double y,double z);
 void om9_curve_cancel();
 bool om9_curve_active();
+bool om9_curve_spline_publish();
+bool om9_curve_preview_spline(const double* hover);
+bool om9_curve_preview_spline_closed(const double* hover,bool close);
+bool om9_spline_rebuild(const double* xyz,std::size_t count,std::size_t poles,std::size_t degree,bool closed);
+bool om9_spline_options(std::size_t poles,std::size_t degree);
+std::size_t om9_spline_degree();
+bool om9_spline_periodic();
+std::size_t om9_spline_pole_count();
+double om9_spline_pole(std::size_t i,std::size_t axis);
+std::size_t om9_spline_knot_count();
+double om9_spline_knot(std::size_t i);
+std::size_t om9_spline_multiplicity(std::size_t i);
+double om9_spline_value(double u,std::size_t axis);
+std::size_t om9_spline_message(char* buffer,std::size_t capacity);
 std::size_t om9_curve_count();
 std::size_t om9_curve_preview_count();
 double om9_curve_preview_coordinate(std::size_t point,std::size_t axis);

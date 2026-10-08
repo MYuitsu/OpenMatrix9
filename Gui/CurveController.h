@@ -17,6 +17,7 @@ public:
     bool available(std::size_t command) const;
     bool start(std::size_t command);
     void cancel();
+    void cancelInput();
     void acceptInput();
     bool pendingInput()const;
     void logMessage(const QString&);
@@ -27,7 +28,7 @@ private:
     CurveController();
     void submit(const QString&);void result(unsigned int);void refresh();bool validDocument() const;
     QPointer<QDockWidget> dock;QPointer<CommandConsole> console;
-    void clearPreview();void updatePreview(const double* hover=nullptr);
+    void clearPreview();void updatePreview(const double* hover=nullptr,bool close=false);
     std::vector<std::pair<SoSeparator*,SoSeparator*>> previewOwners;
     QStringList inputHistory;QString historyDraft;int historyPosition=-1;
     QPointer<QObject> releaseTarget;

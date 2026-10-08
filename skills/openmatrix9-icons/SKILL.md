@@ -73,6 +73,11 @@ images and disabled colors; use the existing Curve smoke when applicable.
 Record what was actually checked and link a gallery. Do not claim arbitrary DPI
 support, complete feature implementation or copyright clearance from icon tests.
 
+Before reporting completion, follow [progress synchronization](../openmatrix9-workflow/references/progress.md)
+to check relevant Spec v1 items and align the project README and ledger with
+the completed artwork or integration scope. Icon verification does not advance
+the command's implementation status.
+
 Maintain the repository skill and installed Codex copy together when updating
 this skill, within the user's authorization. The installed copy is discoverable
 as `$openmatrix9-icons`.

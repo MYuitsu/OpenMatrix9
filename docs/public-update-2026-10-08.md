@@ -3,7 +3,9 @@
 This branch adds the verified development source for 3DM preservation exchange,
 reference/version checks, native field editing, CAD Wireframe and faster import.
 It preserves the public authored icon set, branding and donation instructions.
-Uncommitted Curve/Edit/Surface work in the owner's checkout is not included.
+It also includes Curve/Spline, Rebuild, Edit, Surface and Solid implementation,
+native command integration, Rust tests, FreeCAD macros and authored feature guides
+from the owner's current checkout. The original working trees remain intact.
 Full openNURBS exchange remains incomplete:7 packages remain open;the total
 number of future test batches is not yet enumerated.
 
@@ -42,3 +44,13 @@ Actual FreeCAD serial/parallel ring comparison9 checks and final queued Qt
 Import/Export8 checks passed with process exit0. Publication review findings
 were addressed. The source audit retains510 authored SVG bindings with0 errors.
 [Check summary](public-update-checks-2026-10-08.json).
+
+The combined publication also passed107 Rust tests and10 actual FreeCAD suites
+(3498 checks), including Curve26, Spline/Rebuild40, Surface96, Solid69, Edit115,
+Wireframe25, 3DM menus18, native queued Import/Export8, included-file copy8 and
+the authored icon/F6 suite3093. The latter first caught an old T-Splines display
+label; restoring SubD and rerunning the suite passed. Public feature guides,
+skills and build instructions are included. Strict Rust formatting/Clippy remain
+nonpassing and are recorded, without suppressions. FreeCAD core's matching copy
+fix is published separately in MYuitsu/FreeCAD main.
+[Combined source evidence](all-code-checks-2026-10-08.json).

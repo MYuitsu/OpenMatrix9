@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenMatrix9 · Build và kiểm chứng"
+  short_description: "Kiểm chứng Rust, ABI, module native và giao diện FreeCAD"
+  default_prompt: "Dùng $openmatrix9-build-validation để build OpenMatrix9 theo môi trường thực tế và ghi bằng chứng kiểm chứng giao diện trong FreeCAD."

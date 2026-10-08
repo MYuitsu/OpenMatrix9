@@ -51,9 +51,9 @@ New-Item -ItemType Directory -Force C:\CAD
 Set-Location C:\CAD
 git clone --recurse-submodules https://github.com/MYuitsu/FreeCAD.git FreeCAD-src
 Set-Location C:\CAD\FreeCAD-src
-git checkout 0205a6b3b5eb9546760a2aa39391354504f20194
+git checkout c6b02d6f45c6e696afff20c808a9f03da9b0b0ae
 git submodule update --init --recursive
-git clone --branch codex/3dm-preservation-fast-import https://github.com/MYuitsu/OpenMatrix9.git Mod/OpenMatrix9
+git clone --branch main https://github.com/MYuitsu/OpenMatrix9.git Mod/OpenMatrix9
 git -C Mod/OpenMatrix9 rev-parse HEAD
 ```
 
@@ -63,12 +63,18 @@ Nếu đã clone module thì dùng thư mục đó, không clone đè.
 
 ### 2. Tích hợp CMake
 
-Trước khi build FreeCAD, áp dụng bản sửa copy file nhúng đã dùng để kiểm chứng
-FCStd/copy trong OM9:
+Commit FreeCAD được pin ở trên đã có bản sửa copy file nhúng. Trước khi build,
+kiểm tra bản sửa đã có; chỉ apply nếu dùng baseline cũ chưa có patch:
 
 ```powershell
-git apply --check Mod/OpenMatrix9/patches/freecad-property-file-included-copy.patch
-git apply Mod/OpenMatrix9/patches/freecad-property-file-included-copy.patch
+$copyPatch = 'Mod/OpenMatrix9/patches/freecad-property-file-included-copy.patch'
+git apply --reverse --check $copyPatch
+if ($LASTEXITCODE -ne 0) {
+    git apply --check $copyPatch
+    if ($LASTEXITCODE -ne 0) { throw 'Core copy patch does not match this source' }
+    git apply $copyPatch
+    if ($LASTEXITCODE -ne 0) { throw 'Core copy patch failed' }
+}
 ```
 
 Nếu patch đã có, kiểm tra bằng `git apply --reverse --check` và không apply lại.
@@ -149,7 +155,7 @@ Ví dụ source/SDK ở `C:\CAD\FreeCAD-src`, module ở `C:\CAD\OpenMatrix9`:
 
 ```powershell
 Set-Location C:\CAD
-git clone --branch codex/3dm-preservation-fast-import https://github.com/MYuitsu/OpenMatrix9.git OpenMatrix9
+git clone --branch main https://github.com/MYuitsu/OpenMatrix9.git OpenMatrix9
 Set-Location C:\CAD\FreeCAD-src
 pixi shell
 ```

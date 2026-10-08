@@ -90,6 +90,9 @@ fn data() -> Option<&'static Bundle> {
                 native: native(icon).and_then(|v| CString::new(v).ok()),
                 caption: CString::new(
                     crate::curve::name(icon)
+                        .or_else(|| crate::edit::Kind::from_name(icon).map(|k| k.caption()))
+                        .or_else(|| crate::surface::Kind::from_name(icon).map(|k| k.caption()))
+                        .or_else(|| crate::solid::Kind::from_name(icon).map(|k| k.caption()))
                         .or_else(|| crate::core_3dm::caption(icon))
                         .or_else(|| crate::core_views::command(icon))
                         .or_else(|| crate::core_distance::command(icon))
@@ -185,6 +188,18 @@ pub extern "C" fn om9_command_success(i: usize, effects: u32) -> bool {
 }
 #[unsafe(no_mangle)]
 pub extern "C" fn om9_command_permissions(i: usize) -> u32 {
+    if command(i).and_then(|c| c.icon.to_str().ok()).and_then(crate::edit::Kind::from_name).is_some() {
+        return 1;
+    }
+    if command(i).and_then(|c| c.icon.to_str().ok()).and_then(crate::solid::Kind::from_name).is_some() {
+        return 1;
+    }
+    if command(i).and_then(|c| c.icon.to_str().ok()).and_then(crate::curve::name).is_some() {
+        return 1;
+    }
+    if command(i).and_then(|c| c.icon.to_str().ok()).and_then(crate::surface::Kind::from_name).is_some() {
+        return 1;
+    }
     match crate::core_3dm::om9_3dm_operation(i) {
         1 => return 1,
         2 => return 0,

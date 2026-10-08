@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "scope": "Combined implemented source; not full openNURBS acceptance",
+  "source_base": "85ea4d0595ae0d3416b48c968bed930381d17c46",
+  "freecad_core_commit": "c6b02d6f45c6e696afff20c808a9f03da9b0b0ae",
+  "rust": {
+    "passed": 107,
+    "failed": 0,
+    "suites": 26
+  },
+  "python": {
+    "passed": 29,
+    "skipped": 1,
+    "failed": 0
+  },
+  "native_build": "MSVC x64 RelWithDebInfo, matched FreeCAD SDK; module and worker linked",
+  "runtime_suites": [
+    {
+      "macro": "curve_smoke.FCMacro",
+      "checks": 26,
+      "passed": true,
+      "process_exit": 0,
+      "local_report_sha256": "7bcd0c543c73f5e87ba9b0fe638b2bf59cc6b9437fa76324dda4959bb5f3e589"
+    },
+    {
+      "macro": "curve_spline_smoke.FCMacro",
+      "checks": 40,
+      "passed": true,
+      "process_exit": 0,
+      "local_report_sha256": "230040dbdfd9e8ef86690b2d7e84bf31d3b7d7022ec4502dc52ae0fe8ecd0f97"
+    },
+    {
+      "macro": "surface_commands_smoke.FCMacro",
+      "checks": 96,
+      "passed": true,
+      "process_exit": 0,
+      "local_report_sha256": "86bf02231f2a353bcf6fb611404e9037efad0f3ab05fc511f38eca94b0cab42b"
+    },
+    {
+      "macro": "solid_commands_smoke.FCMacro",
+      "checks": 69,
+      "passed": true,
+      "process_exit": 0,
+      "local_report_sha256": "f87c284e4b68de0acc70d813bb574bd524a1389262a130c17a7148ffa3203acf"
+    },
+    {
+      "macro": "edit_commands_smoke.FCMacro",
+      "checks": 115,
+      "passed": true,
+      "process_exit": 0,
+      "local_report_sha256": "708d87ecd2286c2ed9ce2850e9e9ab0a7dec13cd8e56f13f5ab69d6e9628c190"
+    },
+    {
+      "macro": "cad_wireframe_smoke.FCMacro",
+      "checks": 25,
+      "passed": true,
+      "process_exit": 0,
+      "local_report_sha256": "7f5ff4fad29d1c12a8f4dd21678dc4d9f96ccc7afcf7397ae89cb0a4ca248b2b"
+    },
+    {
+      "macro": "three_dm_exchange_menu_smoke.FCMacro",
+      "checks": 18,
+      "passed": true,
+      "process_exit": 0,
+      "local_report_sha256": "7c74cb5bddd6e3f62b26ef46b46b13e10bb5085341bdf9bf8c1f0a015b5113f6"
+    },
+    {
+      "macro": "three_dm_native_action_crash_smoke.FCMacro",
+      "checks": 8,
+      "passed": true,
+      "process_exit": 0,
+      "local_report_sha256": "f31b7ab2dc194ef2ce3091f54f79059e24ce0282b33034597ad1942e6829ca26"
+    },
+    {
+      "macro": "three_dm_included_file_copy_smoke.FCMacro",
+      "checks": 8,
+      "passed": true,
+      "process_exit": 0,
+      "local_report_sha256": "ffbd4c2891c56fcf280ec0aaf6ae62803d8a74c15d7adde78611f8b072f0af74"
+    },
+    {
+      "macro": "public_icons_smoke.FCMacro",
+      "checks": 3093,
+      "passed": true,
+      "process_exit": 0,
+      "local_report_sha256": "e5369cf09f732f43f6802cb96933f3cc90d1b5a5dd722b98b77b0fd7d8f56166"
+    }
+  ],
+  "runtime_checks": 3498,
+  "lint": {
+    "cargo_fmt_check": "Nonpassing: incoming Curve/Spline and tests need rustfmt",
+    "cargo_clippy_strict": "Nonpassing: 16 diagnostics (style/modernization and missing FFI Safety documentation); not suppressed"
+  },
+  "review": "README/private-reference links fixed; F6 display label restored to SubD; worker colocated with tested FreeCAD.exe",
+  "full_opennurbs_complete": false,
+  "unclosed_full_exchange_packages": 7,
+  "new_rhino_batches": 0,
+  "remaining_total_test_batches": null,
+  "private_models_vendor_references_binaries_distributed": false,
+  "binaries_sha256": {
+    "OpenMatrix9Gui.pyd": "4ea3639522abe339ae4dcb318ce938367a25b01ec4cc1437bc40a962f1d956ab",
+    "OM9ThreeDmImportWorker.exe": "fbba3f27cef1f9ccc792caa5d8412abf81023c27e3b8d5f54923a4c4121fe756",
+    "FreeCADApp.dll": "8089f152320305a5dd1ff068cfb57c32b9bf7aab00fdb6a171867eb28f05862a"
+  }
+}

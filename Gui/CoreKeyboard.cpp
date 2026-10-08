@@ -96,7 +96,7 @@ void CoreKeyboard::history(){
 void CoreKeyboard::contextMenu(){
     auto* window=Gui::getMainWindow();if(menu){menu->close();delete menu.data();}menu=new QMenu(window);menu->setObjectName("OM9F6Menu");const auto type=selectedType();menu->setProperty("om9SelectionType",type);
     QFile file(QDir(QString::fromStdString(App::Application::getHomePath())).filePath("Mod/OpenMatrix9/Resources/menu/ContextMenu.xml"));QDomDocument source;if(file.open(QIODevice::ReadOnly))source.setContent(&file);
-    const QStringList names={"General","Curve","Gem","Surface","T-Splines","User","Report","Materials"};const QStringList modes={"ObjectActions","CurveLayout","GemLayout","SurfaceModeling","TSplines","User","Report","Materials"};
+    const QStringList names={"General","Curve","Gem","Surface","SubD","User","Report","Materials"};const QStringList modes={"ObjectActions","CurveLayout","GemLayout","SurfaceModeling","TSplines","User","Report","Materials"};
     const auto groups=source.elementsByTagName("ObjectContextMenuGroup");
     for(int mode=0;mode<names.size();++mode){auto* submenu=menu->addMenu(names[mode]);QDomElement chosen;
         for(int pass=0;pass<2&&chosen.isNull();++pass)for(int g=0;g<groups.size();++g){const auto group=groups.at(g).toElement();const auto wanted=pass==0?type:QString("Default");if(group.firstChildElement("Mode").text()==modes[mode]&&group.firstChildElement("EnglishName").text()==wanted){chosen=group;break;}}

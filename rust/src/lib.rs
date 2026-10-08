@@ -12,10 +12,15 @@ pub mod core_view_controls;
 pub mod core_view_tabs;
 pub mod core_views;
 pub mod curve;
+pub mod spline;
+pub mod spline_ffi;
 mod curve_ffi;
 pub mod ffi;
+pub mod edit;
 pub mod menu;
 pub mod state;
+pub mod surface;
+pub mod solid;
 pub mod workspace;
 
 pub mod viewport_title;

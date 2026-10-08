@@ -135,6 +135,20 @@ set(
     Command.cpp
     CurveController.cpp
     CurveController.h
+    SurfaceController.cpp
+    EditController.cpp
+    EditController.h
+    EditGeometry.cpp
+    EditGeometry.h
+    SurfaceController.h
+    SolidController.cpp
+    SolidController.h
+    SurfaceGeometry.cpp
+    SurfaceGeometry.h
+    CurveGeometry.cpp
+    CurveGeometry.h
+    CoreRebuild.cpp
+    CoreRebuild.h
     CommandConsole.cpp
     CommandConsole.h
     CoreWorkspace.cpp
@@ -245,6 +259,12 @@ SET_BIN_DIR(OM9ThreeDmImportWorker)
 set_target_properties(OM9ThreeDmImportWorker PROPERTIES DEBUG_OUTPUT_NAME OM9ThreeDmImportWorker)
 add_dependencies(OpenMatrix9Gui OM9ThreeDmImportWorker)
 install(TARGETS OM9ThreeDmImportWorker RUNTIME DESTINATION bin)
+# Optional isolated native output for validation while an SDK instance is open.
+set(OPENMATRIX9_RUNTIME_OUTPUT_DIR "" CACHE PATH "Isolated OpenMatrix9Gui runtime output directory")
+if(OPENMATRIX9_RUNTIME_OUTPUT_DIR)
+    set_target_properties(OpenMatrix9Gui PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OPENMATRIX9_RUNTIME_OUTPUT_DIR}")
+    set_target_properties(OM9ThreeDmImportWorker PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OPENMATRIX9_RUNTIME_OUTPUT_DIR}")
+endif()
 
 
 SET_PYTHON_PREFIX_SUFFIX(

@@ -1,0 +1,212 @@
+"""OM9-TOP11-005/008/010 and OM9-SOLID-001..004 native contracts."""
+import json, os, traceback, math
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+result = {'checks': []}
+def check(name, ok, fatal=True):
+    result['checks'].append({'name': name, 'passed': bool(ok)})
+    if not ok and fatal: raise AssertionError(name)
+def events(): QtWidgets.QApplication.processEvents()
+def enter(text=''):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_End, QtCore.Qt.ControlModifier))
+    if text: QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(QtCore.QEvent.KeyPress, 0, QtCore.Qt.NoModifier, text))
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Return, QtCore.Qt.NoModifier))
+    events()
+def feature(doc, name, shape):
+    o = doc.addObject('Part::Feature', name); o.Shape = shape; return o
+def start(doc, command, inputs):
+    Gui.Selection.clearSelection()
+    for o in inputs: Gui.Selection.addSelection(o)
+    enter(command)
+def outputs(doc, fid): return [o for o in doc.Objects if getattr(o,'OM9FeatureId','') == fid]
+def dialog(): return next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog, 'OM9EditOptions') if d.isVisible()), None)
+def accept():
+    d = dialog()
+    check('native edit preview opens', d is not None)
+    button = d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok)
+    check('native edit preview valid: '+d.findChild(QtWidgets.QLabel,'OM9EditStatus').text(), button.isEnabled())
+    button.click(); events()
+    check('edit commit closes preview',dialog() is None)
+def viewer(): return next(w for w in Gui.getMainWindow().findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible())
+def click_world(point):
+    view=Gui.activeDocument().activeView(); p=view.getPointOnScreen(point)
+    target=viewer().viewport()
+    ratio=viewer().devicePixelRatioF()
+    QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=QtCore.QPoint(round(p[0]/ratio),round(target.height()-(p[1]+1)/ratio))); events()
+def persist(doc, fid, count):
+    found = outputs(doc,fid); lengths = sum(o.Shape.Length for o in found)
+    doc.undo(); check(fid+': atomic Undo', len(doc.Objects)==count)
+    doc.redo(); check(fid+': Redo', len(outputs(doc,fid))==len(found))
+    path = out/(fid+'.FCStd'); doc.recompute(); doc.saveAs(str(path)); App.closeDocument(doc.Name)
+    doc = App.openDocument(str(path))
+    check(fid+': FCStd persistence', abs(sum(o.Shape.Length for o in outputs(doc,fid))-lengths)<1e-6)
+    App.closeDocument(doc.Name)
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench'); events()
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        doc=App.newDocument('JoinCurves'); doc.UndoMode=1
+        a=feature(doc,'A',Part.makeLine(App.Vector(0,0,0),App.Vector(5,0,0)))
+        b=feature(doc,'B',Part.makeLine(App.Vector(10,0,0),App.Vector(5,0,0)))
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(a);Gui.Selection.addSelection(b);enter('F6')
+        menu=Gui.getMainWindow().findChild(QtWidgets.QMenu,'OM9F6Menu')
+        check('F6 Edit mappings are enabled',menu is not None and all(any(action.property('om9OriginalCommand')==command and action.isEnabled() for sub in menu.findChildren(QtWidgets.QMenu) for action in sub.actions()) for command in ['OM9_TopIconJoin','OM9_TopIconExplode','OM9_TopIconTrim','OM9_SolidUnion','OM9_SolidDifference','OM9_SolidIntersection','OM9_SolidBooleanTwoObjects']))
+        action=next(action for sub in menu.findChildren(QtWidgets.QMenu) for action in sub.actions() if action.property('om9OriginalCommand')=='OM9_TopIconJoin');action.trigger();menu.close();events();enter()
+        check('OM9-TOP11-008: Join enters native workflow', 'Join' in str(console.property('om9Prompt')))
+        accept(); joined=outputs(doc,'OM9-TOP11-008')
+        check('OM9-TOP11-008: connected reversed edges form wire', len(joined)==1 and joined[0].Shape.ShapeType=='Wire' and abs(joined[0].Shape.Length-10)<1e-7)
+        check('Join consumes inputs', doc.getObject('A') is None and doc.getObject('B') is None)
+        persist(doc,'OM9-TOP11-008',2)
+        doc=App.newDocument('ExplodeWire'); doc.UndoMode=1
+        wire=feature(doc,'W',Part.makePolygon([App.Vector(0,0,0),App.Vector(4,0,0),App.Vector(4,3,0)]))
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(wire);Gui.runCommand('OM9_TopIconExplode');events();enter();accept();pieces=outputs(doc,'OM9-TOP11-005')
+        check('OM9-TOP11-005: polyline components', len(pieces)==2 and sorted(round(o.Shape.Length,6) for o in pieces)==[3,4])
+        persist(doc,'OM9-TOP11-005',1)
+        for name,fid,volume in [('BooleanUnion','OM9-SOLID-003',1500),('BooleanDifference','OM9-SOLID-001',500),('BooleanIntersection','OM9-SOLID-002',500)]:
+            doc=App.newDocument(name); doc.UndoMode=1
+            a=feature(doc,'A',Part.makeBox(10,10,10)); b=feature(doc,'B',Part.makeBox(10,10,10,App.Vector(5,0,0)))
+            start(doc,name,[a,b] if name=='BooleanUnion' else [a]); enter()
+            if name!='BooleanUnion': enter('B'); enter()
+            check(name+': preview adds no document object',len(doc.Objects)==2)
+            accept(); found=outputs(doc,fid)
+            check(fid+': analytic volume',len(found)==1 and found[0].Shape.isValid() and abs(found[0].Shape.Volume-volume)<1e-6)
+            check(name+': source policy', (doc.getObject('A') is None if name=='BooleanDifference' else doc.getObject('A') is not None) and doc.getObject('B') is not None)
+            persist(doc,fid,2)
+        doc=App.newDocument('TrimCross'); doc.UndoMode=1
+        a=feature(doc,'A',Part.makeLine(App.Vector(-5,0,0),App.Vector(5,0,0)))
+        b=feature(doc,'B',Part.makeLine(App.Vector(0,-5,0),App.Vector(0,5,0)))
+        start(doc,'Trim',[a,b]); enter(); check('Trim split preview creates no objects',len(doc.Objects)==2)
+        enter('A@3,0,0'); enter(); pieces=outputs(doc,'OM9-TOP11-010')
+        check('OM9-TOP11-010: removes picked segment only',abs(sum(o.Shape.Length for o in pieces)-15)<1e-7)
+        persist(doc,'OM9-TOP11-010',2)
+        doc=App.newDocument('JoinedSurfaces'); doc.UndoMode=1
+        box=Part.makeBox(10,10,10)
+        a=feature(doc,'A',box.Faces[0]); b=feature(doc,'B',box.Faces[2])
+        start(doc,'Join',[a,b]); enter(); accept(); found=outputs(doc,'OM9-TOP11-008')
+        check('Join adjacent faces makes connected open shell',len(found)==1 and found[0].Shape.ShapeType=='Shell' and len(found[0].Shape.Faces)==2 and abs(found[0].Shape.Area-200)<1e-7)
+        start(doc,'Explode',found); enter(); accept()
+        check('Explode joined shell preserves face areas',len(outputs(doc,'OM9-TOP11-005'))==2 and all(abs(o.Shape.Area-100)<1e-7 for o in outputs(doc,'OM9-TOP11-005')))
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('ExplodeBox'); doc.UndoMode=1
+        a=feature(doc,'A',Part.makeBox(2,3,4)); start(doc,'Explode',[a]); enter(); accept()
+        check('Explode solid produces six original faces',len(outputs(doc,'OM9-TOP11-005'))==6 and abs(sum(o.Shape.Area for o in outputs(doc,'OM9-TOP11-005'))-52)<1e-7)
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('TwoObjects'); doc.UndoMode=1
+        a=feature(doc,'A',Part.makeBox(10,10,10)); b=feature(doc,'B',Part.makeBox(10,10,10,App.Vector(5,0,0)))
+        start(doc,'Boolean2Objects',[a,b]); enter(); check('Boolean2Objects Union preview',dialog() is not None and dialog().findChild(QtWidgets.QLabel,'OM9EditStatus').text().startswith('Union'))
+        for mode in ['A minus B','B minus A','Intersection','Inversion Intersection','Union']:
+            QtTest.QTest.mouseClick(viewer().viewport(),QtCore.Qt.LeftButton,pos=viewer().viewport().rect().center()); events()
+            check('OM9-SOLID-004 mouse cycles '+mode,dialog().findChild(QtWidgets.QLabel,'OM9EditStatus').text().startswith(mode))
+            check('Boolean2Objects cycles without document edits',len(doc.Objects)==2 and a.ViewObject.Visibility and b.ViewObject.Visibility)
+        enter('Next'); dialog().findChild(QtWidgets.QCheckBox,'OM9EditDeleteInput').setChecked(True); accept()
+        check('Boolean2Objects commits selected difference',abs(outputs(doc,'OM9-SOLID-004')[0].Shape.Volume-500)<1e-6 and doc.getObject('A') is None and doc.getObject('B') is None)
+        persist(doc,'OM9-SOLID-004',2)
+        doc=App.newDocument('BooleanXor');doc.UndoMode=1
+        a=feature(doc,'A',Part.makeBox(10,10,10));b=feature(doc,'B',Part.makeBox(10,10,10,App.Vector(5,0,0)))
+        start(doc,'Boolean2Objects',[a,b]);enter()
+        for i in range(4):enter('Next')
+        accept();pieces=outputs(doc,'OM9-SOLID-004')
+        check('Inversion Intersection keeps both unshared halves',len(pieces)==2 and abs(sum(o.Shape.Volume for o in pieces)-1000)<1e-6)
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('DisjointUnion'); doc.UndoMode=1
+        a=feature(doc,'A',Part.makeBox(2,2,2)); b=feature(doc,'B',Part.makeBox(2,2,2,App.Vector(10,0,0)))
+        start(doc,'BooleanUnion',[a,b]); enter(); accept()
+        check('Disjoint union remains two solids',len(outputs(doc,'OM9-SOLID-003'))==2 and abs(sum(o.Shape.Volume for o in outputs(doc,'OM9-SOLID-003'))-16)<1e-7)
+        start(doc,'BooleanIntersection',[a]); enter(); enter('B'); enter()
+        check('Empty intersection cannot accept',dialog() is not None and not dialog().findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+        before=len(doc.Objects); enter(); check('Empty intersection creates no output',len(doc.Objects)==before); enter('Cancel');check('Cancel restores visible inputs',a.ViewObject.Visibility and b.ViewObject.Visibility)
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('StaleInput'); doc.UndoMode=1
+        a=feature(doc,'A',Part.makeBox(4,4,4)); b=feature(doc,'B',Part.makeBox(4,4,4,App.Vector(2,0,0)))
+        start(doc,'BooleanUnion',[a,b]); enter(); b.Placement.Base=App.Vector(20,0,0);doc.recompute();enter()
+        check('Changed input rejected before transaction',len(doc.Objects)==2 and not outputs(doc,'OM9-SOLID-003'));enter('Cancel')
+        start(doc,'BooleanUnion',[a,b]);enter();other=App.newDocument('OtherEditDoc');events();check('Active document switch cancels edit',dialog() is None);App.closeDocument(other.Name);App.setActiveDocument(doc.Name)
+        start(doc,'Join',[a,b]); enter();check('Join refuses closed solids',len(doc.Objects)==2 and dialog() is None);enter('Cancel')
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('DependentInputs');doc.UndoMode=1
+        a=feature(doc,'A',Part.makeBox(4,4,4));b=feature(doc,'B',Part.makeBox(4,4,4,App.Vector(2,0,0)))
+        link=doc.addObject('App::Link','Reference');link.setLink(a)
+        start(doc,'BooleanUnion',[a,b]);enter();dialog().findChild(QtWidgets.QCheckBox,'OM9EditDeleteInput').setChecked(True);enter()
+        check('DeleteInput rejects unrelated dependent model',len(doc.Objects)==3 and link.LinkedObject==a and not outputs(doc,'OM9-SOLID-003'));enter('Cancel')
+        start(doc,'BooleanUnion',[a,b]);enter();d=dialog();d.findChild(QtWidgets.QCheckBox,'OM9EditDeleteInput').setChecked(True);enter();d.findChild(QtWidgets.QCheckBox,'OM9EditDeleteInput').setChecked(False);events()
+        enabled=d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).isEnabled()
+        check('DeleteInput correction re-enables valid commit',enabled,False)
+        if enabled:
+            accept();check('Corrected DeleteInput keeps referenced source',link.LinkedObject==a and len(outputs(doc,'OM9-SOLID-003'))==1)
+        else:enter('Cancel')
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('GroupedJoin'); doc.UndoMode=1
+        group=doc.addObject('App::Part','Group')
+        a=feature(doc,'A',Part.makeLine(App.Vector(0,0,0),App.Vector(5,0,0)));b=feature(doc,'B',Part.makeLine(App.Vector(5,0,0),App.Vector(10,0,0)))
+        group.addObject(a);group.addObject(b);group.Placement=App.Placement(App.Vector(20,30,40),App.Rotation(App.Vector(0,0,1),90));doc.recompute()
+        start(doc,'Join',[a,b]);enter();accept();o=outputs(doc,'OM9-TOP11-008')[0]
+        check('Grouped Join creates world-coordinate wire',(o.Shape.CenterOfMass-App.Vector(20,35,40)).Length<1e-7)
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('DisconnectedSurfaceJoin')
+        box=Part.makeBox(10,10,10)
+        a=feature(doc,'A',box.Faces[0]);b=feature(doc,'B',box.Faces[2]);c=feature(doc,'C',Part.makePlane(3,3,App.Vector(50,50,50)))
+        start(doc,'Join',[a,b,c]);enter()
+        check('Join rejects shell plus disconnected face',dialog() is not None and not dialog().findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).isEnabled(),False);enter('Cancel')
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('MixedSolidCompound')
+        a=feature(doc,'A',Part.makeCompound([Part.makeBox(4,4,4),Part.makeLine(App.Vector(10,0,0),App.Vector(11,0,0))]));b=feature(doc,'B',Part.makeBox(4,4,4,App.Vector(2,0,0)))
+        start(doc,'BooleanUnion',[a,b]);enter();check('Boolean rejects compound containing unsupported edges',dialog() is None and not outputs(doc,'OM9-SOLID-003'),False);enter('Cancel')
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('SmallParentChange');doc.UndoMode=1;group=doc.addObject('App::Part','Group')
+        a=feature(doc,'A',Part.makeBox(4,4,4));b=feature(doc,'B',Part.makeBox(4,4,4,App.Vector(2,0,0)));group.addObject(a);group.addObject(b);group.Placement.Base=App.Vector(10000,0,0);doc.recompute()
+        start(doc,'BooleanUnion',[a,b]);enter();group.Placement.Base=App.Vector(10000.001,0,0);doc.recompute();enter()
+        check('Fine parent placement change invalidates snapshot',not outputs(doc,'OM9-SOLID-003'),False);enter('Cancel');App.closeDocument(doc.Name)
+        doc=App.newDocument('TrimBoundary');doc.UndoMode=1
+        a=feature(doc,'A',Part.makeLine(App.Vector(-5,0,0),App.Vector(5,0,0)));b=feature(doc,'B',Part.makeLine(App.Vector(0,-5,0),App.Vector(0,5,0)))
+        doc.recompute();Gui.activeDocument().activeView().viewTop();Gui.activeDocument().activeView().fitAll();events()
+        start(doc,'Trim',[a,b]);enter();click_world(App.Vector(0,0,0));enter()
+        check('Trim mouse shared boundary rejects ambiguous removal',len(doc.Objects)==2 and not outputs(doc,'OM9-TOP11-010'),False);enter('Cancel');App.closeDocument(doc.Name)
+        doc=App.newDocument('TrimBoundaryTranslated');doc.UndoMode=1;x=10000.0047
+        a=feature(doc,'A',Part.makeLine(App.Vector(x-5,0,0),App.Vector(x+5,0,0)));b=feature(doc,'B',Part.makeLine(App.Vector(x,-5,0),App.Vector(x,5,0)))
+        doc.recompute();Gui.activeDocument().activeView().viewTop();Gui.activeDocument().activeView().fitAll();events()
+        start(doc,'Trim',[a,b]);enter();click_world(App.Vector(x,0,0));enter()
+        check('Trim translated shared boundary rejects float ambiguity',len(doc.Objects)==2 and not outputs(doc,'OM9-TOP11-010'),False)
+        click_world(App.Vector(x+3,0,0));enter()
+        check('Trim translated interior remains pickable',abs(sum(o.Shape.Length for o in outputs(doc,'OM9-TOP11-010'))-15)<1e-6,False);enter('Cancel');App.closeDocument(doc.Name)
+        doc=App.newDocument('TrimMouse');doc.UndoMode=1
+        a=feature(doc,'A',Part.makeLine(App.Vector(-5,0,0),App.Vector(5,0,0)));b=feature(doc,'B',Part.makeLine(App.Vector(0,-5,0),App.Vector(0,5,0)))
+        doc.recompute();Gui.activeDocument().activeView().viewTop();Gui.activeDocument().activeView().fitAll();events()
+        start(doc,'Trim',[a,b]);enter();click_world(App.Vector(3,0,0));enter('Undo');enter()
+        check('Trim Undo prevents no-op acceptance',len(doc.Objects)==2 and not outputs(doc,'OM9-TOP11-010'))
+        click_world(App.Vector(3,0,0));enter();pieces=outputs(doc,'OM9-TOP11-010')
+        check('Trim picks transient split preview by mouse',abs(sum(o.Shape.Length for o in pieces)-15)<1e-6)
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('TrimSurfaces');doc.UndoMode=1
+        a=feature(doc,'A',Part.makePlane(10,10,App.Vector(-5,-5,0)))
+        b=feature(doc,'B',Part.Face(Part.makePolygon([App.Vector(0,-5,-5),App.Vector(0,5,-5),App.Vector(0,5,5),App.Vector(0,-5,5),App.Vector(0,-5,-5)])))
+        start(doc,'Trim',[a,b]);enter();enter('A@3,0,0');enter()
+        result['surface_trim_probe']={'a_bbox':str(a.Shape.BoundBox) if doc.getObject('A') else None,'b_bbox':str(b.Shape.BoundBox) if doc.getObject('B') else None,'prompt':str(console.property('om9Prompt')),'areas':[o.Shape.Area for o in outputs(doc,'OM9-TOP11-010')]}
+        check('Trim intersecting surfaces retains unpicked regions',abs(sum(o.Shape.Area for o in outputs(doc,'OM9-TOP11-010'))-150)<1e-6)
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('TrimCircle');doc.UndoMode=1
+        a=feature(doc,'A',Part.makeCircle(5));b=feature(doc,'B',Part.makeLine(App.Vector(-7,0,0),App.Vector(7,0,0)))
+        doc.recompute();Gui.activeDocument().activeView().viewTop();Gui.activeDocument().activeView().fitAll();events()
+        start(doc,'Trim',[a,b]);enter();click_world(App.Vector(3,4,0));enter()
+        result['circle_trim_prompt']=str(console.property('om9Prompt'))
+        check('Trim circle by mouse preserves analytic arc geometry',abs(sum(o.Shape.Length for o in outputs(doc,'OM9-TOP11-010'))-(5*math.pi+14))<1e-6)
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('ApparentTrim')
+        a=feature(doc,'A',Part.makeLine(App.Vector(-5,0,0),App.Vector(5,0,0)));b=feature(doc,'B',Part.makeLine(App.Vector(0,-5,1),App.Vector(0,5,1)))
+        start(doc,'Trim',[a,b]);enter();enter('A@3,0,0');enter();check('Apparent intersection rejects without geometry edits',len(doc.Objects)==2 and not outputs(doc,'OM9-TOP11-010'));enter('Cancel')
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('CloseSession');a=feature(doc,'A',Part.makeBox(2,2,2));b=feature(doc,'B',Part.makeBox(2,2,2,App.Vector(1,0,0)))
+        start(doc,'BooleanUnion',[a,b]);enter();App.closeDocument(doc.Name);events();check('Document close clears native preview',dialog() is None)
+        result['ok']=all(c['passed'] for c in result['checks'])
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()): App.closeDocument(name)
+        out.mkdir(parents=True,exist_ok=True);(out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        if os.environ.get('OM9_SMOKE_KEEP_OPEN')!='1': Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)
