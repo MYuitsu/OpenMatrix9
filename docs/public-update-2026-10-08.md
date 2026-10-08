@@ -33,10 +33,11 @@ Legacy-reader tests require independently configured upstream SDK2013 tools.
 FreeCAD macros requiring local fixtures or installed Rhino5 should be run only
 after supplying their inputs;they are not an automatic public acceptance suite.
 
-The source preservation path relies on the existing FreeCAD PropertyFileIncluded
-copy fix. The patch in patches/freecad-property-file-included-copy.patch documents
-this core dependency. A matching SDK/core build is required for verified copy
-and FCStd resource behavior;an arbitrary installed FreeCAD is not certified.
+The former PropertyFileIncluded core-copy dependency is superseded by plugin-owned
+chunked payload storage. FreeCAD's source changes have been reverted to the original
+baseline. A matching SDK/ABI build is still required; an arbitrary installed
+FreeCAD is not certified. See the stock-core storage validation report for current
+copy, Undo/Redo, migration and FCStd evidence.
 
 Pre-push checks on this publication source: Rust75 passed; Python29 passed and
 1 optional integration test skipped; native module/worker build and link passed.
@@ -51,6 +52,14 @@ Wireframe25, 3DM menus18, native queued Import/Export8, included-file copy8 and
 the authored icon/F6 suite3093. The latter first caught an old T-Splines display
 label; restoring SubD and rerunning the suite passed. Public feature guides,
 skills and build instructions are included. Strict Rust formatting/Clippy remain
-nonpassing and are recorded, without suppressions. FreeCAD core's matching copy
-fix is published separately in MYuitsu/FreeCAD main.
+nonpassing and are recorded, without suppressions. Those combined checks used the
+earlier core build; the subsequent plugin storage validation uses a fresh build
+from the original FreeCAD baseline.
 [Combined source evidence](all-code-checks-2026-10-08.json).
+
+The subsequent plugin storage update passed12 FreeCAD suites/382 checks on
+freshly rebuilt baseline core, 107 Rust tests, 37 Python tests (one optional
+integration skipped) and three native Merge/Hatch suites. Both caller-owned
+regression rings and native legacy FCStd exchange are covered. Source audit
+reports510 SVG bindings and zero errors. No new Rhino5 application run is claimed.
+[Current storage evidence](plugin-storage-checks-2026-10-08.json).

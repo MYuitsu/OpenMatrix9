@@ -1,0 +1,54 @@
+"""Migrate a native 3DM/Hatch legacy FCStd and verify decoded exchange."""
+import copy,hashlib,json,os,tempfile,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm,ThreeDmStorage as storage,ThreeDmHatch as hatch,OpenMatrix9Gui as native
+        fixture=Path(tempfile.gettempdir())/'om9-hatch-loops-mm.3dm'
+        external=out/'source.3dm';external.write_bytes(fixture.read_bytes())
+        doc=App.newDocument('LegacyNativeExchange');objects=ThreeDm.import_file(str(external),doc,mode='preserve')
+        names=[o.Name for o in objects];expected=[json.loads(o.OM9SourceRecord) for o in objects]
+        # Fixture construction deliberately uses old property types, without an
+        # undo transaction; production migration never replaces a property type.
+        for obj in doc.Objects:
+            for name,limit in storage.LIMITS.items():
+                if name+'Chunks' not in obj.PropertiesList:continue
+                raw=storage.read(obj,name,limit);included=out/(obj.Name+'-'+name+'.bin');included.write_bytes(raw)
+                for suffix in ('','Chunks','Digest','StorageVersion'):
+                    obj.removeProperty(name+suffix)
+                obj.addProperty('App::PropertyFileIncluded',name);setattr(obj,name,str(included));obj.Proxy=None
+        saved=out/'legacy-native.FCStd';doc.saveAs(str(saved));App.closeDocument(doc.Name)
+        external.unlink()
+        for p in out.glob('*.bin'):p.unlink()
+        doc=App.openDocument(str(saved));Gui.updateGui();objects=[doc.getObject(n) for n in names]
+        doc.recompute()
+        check('legacy native payloads migrate from embedded bytes',all('OM9HatchLoopFileChunks' in obj.PropertiesList and 'OM9SourceArchiveChunks' in obj.OM9ArchiveOwner.PropertiesList for obj in objects))
+        target=out/'unchanged.3dm';ThreeDm.export_file(str(target),objects)
+        decoded={r['source_uuid']:r for r in json.loads(native.inspect3dm(str(target)))['records']}
+        check('migrated native archive preserves UUID and decoded Hatch fields',all(decoded[r['source_uuid']]['hatch_loop_current']==r['hatch_loop_current'] for r in expected))
+        doc.UndoMode=1;obj=objects[0];baseline=hatch.loops(obj);edited=copy.deepcopy(baseline)
+        for cv in edited['loops'][0]['curve']['cvs']:cv[0]*=1.1
+        doc.openTransaction('Edit migrated Hatch');hatch.update_loops(obj,edited);doc.commitTransaction()
+        doc.undo();check('migrated native Hatch edit Undo',hatch.loops(obj)==baseline)
+        doc.redo();check('migrated native Hatch edit Redo',hatch.loops(obj)==edited)
+        copied=doc.copyObject(obj,False);hatch.update_loops(copied,baseline)
+        check('migrated Hatch copy has independent current loops',hatch.loops(obj)==edited and hatch.loops(copied)==baseline)
+        doc.removeObject(copied.Name);doc.saveAs(str(saved));App.closeDocument(doc.Name)
+        doc=App.openDocument(str(saved));Gui.updateGui();objects=[doc.getObject(n) for n in names]
+        ThreeDm.export_file(str(target),objects)
+        decoded={r['source_uuid']:r for r in json.loads(native.inspect3dm(str(target)))['records']}
+        check('migrated edited FCStd exports without original resources',decoded[objects[0].OM9SourceUUID]['hatch_loop_current']==edited and not external.exists())
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

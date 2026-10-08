@@ -3,6 +3,9 @@
 """OpenMatrix9 App initialization."""
 
 import FreeCAD as App
+from ThreeDmStorage import ensure_observer
+
+ensure_observer()
 
 App.addImportType("Rhino 3DM (*.3dm)", "ThreeDm")
 App.addExportType("Rhino 5 3DM (*.3dm)", "ThreeDm")

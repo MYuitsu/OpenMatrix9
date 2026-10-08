@@ -1,0 +1,83 @@
+"""Verify OM9 binary storage/copy/reopen on a stock-core runtime."""
+import hashlib,json,os,tempfile,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+import ThreeDmStorage as storage
+
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        document=App.newDocument('PluginPayloads');document.UndoMode=1
+        raw=bytes(range(256))*1100+b'\x00\xfforiginal'
+        original=document.addObject('App::FeaturePython','Original')
+        storage.bind(original,'OM9SourceArchive',raw,storage.LIMITS['OM9SourceArchive'])
+        check('new archive has no included-file core dependency',original.getTypeIdOfProperty('OM9SourceArchive')=='App::PropertyString')
+        copied=document.copyObject(original,False)
+        check('copy recovers independent temporary path',original.OM9SourceArchive!=copied.OM9SourceArchive and Path(copied.OM9SourceArchive).read_bytes()==raw)
+        document.openTransaction('Edit copied payload')
+        storage.write(copied,'OM9SourceArchive',b'edited',storage.LIMITS['OM9SourceArchive']);document.commitTransaction()
+        check('copy edit preserves original bytes',storage.read(original,'OM9SourceArchive',512*1024*1024)==raw)
+        document.undo();check('payload undo',storage.read(copied,'OM9SourceArchive',512*1024*1024)==raw)
+        document.redo();check('payload redo',storage.read(copied,'OM9SourceArchive',512*1024*1024)==b'edited')
+        other=App.newDocument('OtherPluginPayloads');cross=other.copyObject(original,False)
+        check('cross-document copied bytes',storage.read(cross,'OM9SourceArchive',512*1024*1024)==raw)
+        App.closeDocument(other.Name)
+        check('closing copied document preserves original',Path(original.OM9SourceArchive).read_bytes()==raw)
+        unwanted=document.copyObject(original,False);document.removeObject(unwanted.Name)
+        check('deleting copied object preserves original',storage.read(original,'OM9SourceArchive',512*1024*1024)==raw)
+        before=(list(original.OM9SourceArchiveChunks),original.OM9SourceArchiveDigest)
+        document.openTransaction('Invalid payload');rejected=False
+        try:storage.write(original,'OM9SourceArchive',b'too long',1)
+        except RuntimeError:rejected=True
+        document.abortTransaction()
+        check('oversize leaves properties unchanged',rejected and before==(list(original.OM9SourceArchiveChunks),original.OM9SourceArchiveDigest))
+        names=(original.Name,copied.Name);saved=out/'plugin-payloads.FCStd';document.saveAs(str(saved))
+        for obj in (original,copied):Path(storage.path(obj,'OM9SourceArchive',512*1024*1024)).unlink()
+        App.closeDocument(document.Name);document=App.openDocument(str(saved));original,copied=[document.getObject(n) for n in names]
+        check('FCStd reopens exact binary bytes without any old cache',Path(original.OM9SourceArchive).read_bytes()==raw and Path(copied.OM9SourceArchive).read_bytes()==b'edited')
+        legacy=App.newDocument('LegacyPayloads');legacy.UndoMode=1
+        source=out/'legacy.bin';source.write_bytes(raw)
+        for label,name,digest_name in [('Archive','OM9SourceArchive','OM9ArchiveHash'),('Hatch','OM9HatchLoopFile','OM9HatchLoopHash')]:
+            obj=legacy.addObject('App::FeaturePython',label);obj.addProperty('App::PropertyFileIncluded',name);setattr(obj,name,str(source));obj.addProperty('App::PropertyString',digest_name);setattr(obj,digest_name,hashlib.sha256(raw).hexdigest())
+        legacy_saved=out/'legacy-payloads.FCStd';legacy.saveAs(str(legacy_saved));App.closeDocument(legacy.Name);source.unlink();legacy=App.openDocument(str(legacy_saved))
+        legacy.openTransaction('Copy legacy archive')
+        alias=legacy.copyObject(legacy.Archive,False);legacy.commitTransaction()
+        check('stock legacy copy reproduces shared included-file path',alias.OM9SourceArchive==legacy.Archive.OM9SourceArchive)
+        legacy_rows=[(legacy.Archive,'OM9SourceArchive'),(legacy.Hatch,'OM9HatchLoopFile'),(alias,'OM9SourceArchive')]
+        Gui.updateGui()
+        result['legacy_status']={'pending':bool(legacy.HasPendingTransaction),'restoring':bool(legacy.Restoring),'properties':[list(o.PropertiesList) for o,n in legacy_rows]}
+        check('legacy migration preserves file-owning properties and omits old bytes',all(o.getTypeIdOfProperty(n)=='App::PropertyFileIncluded' and 'Transient' in o.getPropertyStatus(n) and n+'CachePath' in o.PropertiesList and storage.read(o,n,storage.LIMITS[n])==raw for o,n in legacy_rows))
+        legacy.undo()
+        check('legacy migration undo restores all aliased included bytes',all(n+'Chunks' not in o.PropertiesList and 'Transient' not in o.getPropertyStatus(n) and storage.read(o,n,storage.LIMITS[n])==raw for o,n in legacy_rows))
+        legacy.redo()
+        check('legacy migration redo restores all aliased chunk bytes',all(storage.read(o,n,storage.LIMITS[n])==raw for o,n in legacy_rows))
+        legacy.undo()
+        real_bind=storage.bind;calls=[0]
+        def failing_bind(*args):
+            calls[0]+=1
+            real_bind(*args)
+            if calls[0]==2:raise RuntimeError('Injected migration failure')
+        storage.bind=failing_bind;rejected=False
+        try:storage.migrate_document(legacy)
+        except RuntimeError:rejected=True
+        finally:storage.bind=real_bind
+        check('failed migration rolls back every aliased legacy payload',rejected and all(n+'Chunks' not in o.PropertiesList and storage.read(o,n,storage.LIMITS[n])==raw for o,n in legacy_rows))
+        storage.migrate_document(legacy)
+        for obj,name in [(legacy.Archive,'OM9SourceArchive'),(legacy.Hatch,'OM9HatchLoopFile')]:
+            c=legacy.copyObject(obj,False);storage.write(c,name,b'new',storage.LIMITS[name]);legacy.removeObject(c.Name)
+            check('migrated '+name+' copy/edit/delete preserves source',storage.read(obj,name,storage.LIMITS[name])==raw)
+        legacy.saveAs(str(legacy_saved));App.closeDocument(legacy.Name);legacy=App.openDocument(str(legacy_saved));Gui.updateGui()
+        check('migrated FCStd reopens without legacy included files',all(storage.read(o,n,storage.LIMITS[n])==raw for o,n in [(legacy.Archive,'OM9SourceArchive'),(legacy.Hatch,'OM9HatchLoopFile')]))
+        result['ok']=True
+        result['core_sha256']=hashlib.sha256((Path(App.getHomePath())/'bin/FreeCADApp.dll').read_bytes()).hexdigest()
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

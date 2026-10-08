@@ -744,7 +744,7 @@ Import 3DM trong bản phát triển đã được tăng tốc bằng tiến tr�
 |Hatch current fields|Sửa origin/trục/base point/góc/tỷ lệ/pattern; giữ native loop khi copy/block, Undo/Redo và FCStd.|✅|
 |Hatch boundary preview|Hiển thị đường biên từ native NURBS; dựng lại từ FCStd, độc lập dữ liệu export.|✅|
 |Hatch loop native và dữ liệu con|Giữ NURBS/Arc/Polyline/PolyCurve lồng nhau; kiểm tra userdata/reference và gradient None còn dữ liệu.|✅|
-|Hatch typed loop edits (API)|Sửa CV/weight/knot/radius/điểm/đường ghép, thêm/xóa biên; Undo/Redo, copy/block và FCStd trong phạm vi test; cần bản sửa core FileIncluded.|✅|
+|Hatch typed loop edits (API)|Sửa CV/weight/knot/radius/điểm/đường ghép, thêm/xóa biên; Undo/Redo, copy/block và FCStd trong phạm vi test; payload do plugin lưu.|✅|
 |Hatch loop editor: numeric controls|Double-click/menu sửa trường số của5 kiểu curve, role/thêm circle/xóa loop; Undo/Redo, copy và FCStd trong phạm vi đã test.|✅|
 |Hatch loop editor: structural rows|Nhân đôi/xóa CV, knot, point, parameter và segment; kiểm tra native, Undo/Redo và FCStd trong phạm vi test.|✅|
 |Hatch loop/pattern/render đầy đủ|Còn tạo/đổi kiểu native, curve tham chiếu/surface, nội dung pattern và fill/dash; kiểm chứng Rhino5 thực tế.|⬜|
@@ -771,7 +771,7 @@ Kiểm tra: native35/35, GUI1910/1910, nhẫn894/894; Rhino5 10/10 vòng mở/l�
 
 Full regression trước đó: FreeCAD1901/1901; native30/30. Rust không đổi, giữ bằng chứng75/75. [Bằng chứng và giới hạn](docs/validation/2026-10-07-trim-domain-correspondence.md).
 
-Chỉnh Hatch loop qua API cần FreeCAD có bản sửa `PropertyFileIncluded` để file của bản sao độc lập. Build chỉ OpenMatrix9 trên bản cài FreeCAD cũ chưa được xác nhận cho chức năng này; xem báo cáo kiểm chứng phía trên.
+Payload archive/Hatch được plugin lưu trong FCStd, không cần bản sửa core `PropertyFileIncluded`. Project cũ được chuyển có kiểm tra hash và hỗ trợ Undo/Redo; xem [kiểm chứng trên core gốc](docs/validation/2026-10-08-plugin-payload-storage.md). Binary OM9 vẫn phải khớp SDK/ABI của bản FreeCAD đang dùng; xem [hướng dẫn build](docs/build-windows.md).
 
 Giao diện trường số Hatch loop qua104 kiểm tra, thao tác hàng CV/knot/point/segment qua103; full regression1479/1479. Còn tạo/đổi kiểu native và rationality, surface/reference/plugin, pattern/render và Rhino5 thực tế. [Phạm vi và bằng chứng](docs/validation/2026-10-07-3dm-hatch-loop-rows.md).
 

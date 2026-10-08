@@ -101,5 +101,6 @@
     "OpenMatrix9Gui.pyd": "4ea3639522abe339ae4dcb318ce938367a25b01ec4cc1437bc40a962f1d956ab",
     "OM9ThreeDmImportWorker.exe": "fbba3f27cef1f9ccc792caa5d8412abf81023c27e3b8d5f54923a4c4121fe756",
     "FreeCADApp.dll": "8089f152320305a5dd1ff068cfb57c32b9bf7aab00fdb6a171867eb28f05862a"
-  }
+  },
+  "core_dependency_superseded_by": "plugin-storage-checks-2026-10-08.json"
 }

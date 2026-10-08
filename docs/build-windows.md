@@ -51,7 +51,7 @@ New-Item -ItemType Directory -Force C:\CAD
 Set-Location C:\CAD
 git clone --recurse-submodules https://github.com/MYuitsu/FreeCAD.git FreeCAD-src
 Set-Location C:\CAD\FreeCAD-src
-git checkout c6b02d6f45c6e696afff20c808a9f03da9b0b0ae
+git checkout 0205a6b3b5eb9546760a2aa39391354504f20194
 git submodule update --init --recursive
 git clone --branch main https://github.com/MYuitsu/OpenMatrix9.git Mod/OpenMatrix9
 git -C Mod/OpenMatrix9 rev-parse HEAD
@@ -63,23 +63,10 @@ Nếu đã clone module thì dùng thư mục đó, không clone đè.
 
 ### 2. Tích hợp CMake
 
-Commit FreeCAD được pin ở trên đã có bản sửa copy file nhúng. Trước khi build,
-kiểm tra bản sửa đã có; chỉ apply nếu dùng baseline cũ chưa có patch:
-
-```powershell
-$copyPatch = 'Mod/OpenMatrix9/patches/freecad-property-file-included-copy.patch'
-git apply --reverse --check $copyPatch
-if ($LASTEXITCODE -ne 0) {
-    git apply --check $copyPatch
-    if ($LASTEXITCODE -ne 0) { throw 'Core copy patch does not match this source' }
-    git apply $copyPatch
-    if ($LASTEXITCODE -ne 0) { throw 'Core copy patch failed' }
-}
-```
-
-Nếu patch đã có, kiểm tra bằng `git apply --reverse --check` và không apply lại.
-Nếu source khác khiến patch không khớp, cần đối chiếu core trước khi công bố
-copy/FCStd đã được kiểm chứng trên SDK đó.
+Payload 3DM/Hatch được OM9 lưu thành các khối nhị phân trong FCStd, kèm SHA256.
+Không cần sửa `PropertyFileIncluded` của FreeCAD. Project cũ được chuyển sang
+cách lưu của plugin sau khi mở; cache cho converter được tạo lại từ dữ liệu nhúng.
+FreeCAD main tại commit hoàn tác `21d36cfa1e` có cây source giống baseline trên.
 
 Từ `FreeCAD-src`, nếu chưa có `BUILD_OPENMATRIX9`:
 

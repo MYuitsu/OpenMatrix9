@@ -2,7 +2,7 @@
   "schema_version": 1,
   "updated_at": "2026-10-08",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
-  "active_item": "combined-implemented-source",
+  "active_item": "plugin-owned-3dm-payload-storage",
   "items": [
     {
       "key": "public-source-snapshot",
@@ -452,7 +452,7 @@
         "Rust 107 passed; Python 29 passed and 1 optional integration skipped; native build/link passed.",
         "10 actual FreeCAD reports / 3498 checks passed, including all 510 SVG bindings and native 3DM menus/copy.",
         "F6 regression failed with T-Splines label; restored public SubD display label and reran full icon/menu test successfully.",
-        "FreeCAD PropertyFileIncluded copy fix published in MYuitsu/FreeCAD main.",
+        "Historical core-copy dependency superseded by plugin-owned payload storage; FreeCAD main restored to the original source tree.",
         "Rust formatting/strict Clippy remain nonpassing; see report. No full openNURBS completion claimed."
       ],
       "tests": [
@@ -473,6 +473,31 @@
         "Rust formatting/strict Clippy cleanup",
         "7 full-exchange packages remain open; future test count not yet enumerated"
       ]
+    },
+    {
+      "key": "plugin-owned-3dm-payload-storage",
+      "stage": "build-validation",
+      "status": "validated_scoped_source",
+      "feature_ids": [
+        "OM9-FILE-012"
+      ],
+      "outputs": [
+        "ThreeDmStorage.py",
+        "docs/validation/2026-10-08-plugin-payload-storage.md",
+        "docs/plugin-storage-checks-2026-10-08.json"
+      ],
+      "evidence": [
+        "FreeCAD source reverted to original baseline; core DLLs freshly rebuilt. No FileIncluded core patch required.",
+        "12 actual FreeCAD suites / 382 checks passed on baseline core; Python37 passed/1 optional integration skipped.",
+        "Actual stock-core legacy FileIncluded aliases retain bytes through additive migration Undo/Redo and injected bind abort; migrated native Hatch FCStd exports after edit/copy/reopen without source resources.",
+        "Old file-owning properties retained untouched; Transient omits obsolete payload bytes. Cache retention bounded per host and cleaned on deletion/close.",
+        "Generated geometry/instance manifests include native wire_density; strict staging comparisons retained."
+      ],
+      "remaining": [
+        "Matching SDK/ABI remains required; arbitrary installed FreeCAD not certified.",
+        "7 full-exchange packages remain open; future test batch count not yet enumerated."
+      ],
+      "next_action": "Continue the scoped openNURBS exchange plan; validate additional target types/resources/document payloads separately."
     }
   ]
 }

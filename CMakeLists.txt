@@ -13,6 +13,7 @@ set(OpenMatrix9_Scripts
     Init.py
     ThreeDm.py
     ThreeDmArchiveState.py
+    ThreeDmStorage.py
     ThreeDmTextDot.py
     ThreeDmPointCloud.py
     ThreeDmHatch.py

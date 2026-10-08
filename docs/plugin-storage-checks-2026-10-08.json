@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-08",
+  "base_om9_commit": "65822b3c5505a45fd6b94e38be17d275b40b9e42",
+  "freecad_source_commit": "21d36cfa1eb110a1d0667050ff31706298805bbd",
+  "freecad_original_baseline": "0205a6b3b5eb9546760a2aa39391354504f20194",
+  "freecad_tree_matches_baseline": true,
+  "core_sha256": {
+    "FreeCADBase.dll": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66",
+    "FreeCADApp.dll": "bbf70ba61048e7bd349d037d0c424c0b9c24d61fed5c3f5a1fd6fb779fe5d21a"
+  },
+  "python": {
+    "passed": 37,
+    "skipped": 1
+  },
+  "runtime": {
+    "suites": 12,
+    "checks": 382,
+    "reports": [
+      {
+        "macro": "three_dm_plugin_storage_smoke.FCMacro",
+        "ok": true,
+        "checks": 18,
+        "artifact": "H:\\FreeCAD-src\\build\\om9-publish-20261008\\build\\three_dm_plugin_storage_smoke-1\\61b90ba7751b4719aaf057e3bea603f4",
+        "report_sha256": "f917bb751a3ea501a70d88a18c62f108bd9cc8b7b5d87440015f19b78dac76fb"
+      },
+      {
+        "macro": "three_dm_legacy_payload_exchange_smoke.FCMacro",
+        "ok": true,
+        "checks": 6,
+        "artifact": "H:\\FreeCAD-src\\build\\om9-publish-20261008\\build\\three_dm_legacy_payload_exchange_smoke-1\\87c42bf386024311af28bdfda6d9ee8c",
+        "report_sha256": "d268792173fe0e6aceb361940dc56af7f7a91d81458b98f271dd69990de6e4da"
+      },
+      {
+        "macro": "three_dm_preservation_ring_smoke.FCMacro",
+        "ok": true,
+        "checks": 10,
+        "artifact": "H:\\FreeCAD-src\\build\\om9-publish-20261008\\build\\three_dm_preservation_ring_smoke-1\\e5acd41baa43475289cc9b2bb1a4c727",
+        "report_sha256": "7970df252a3e7bd9024b0a36e766c119a836b35ca56f52b035418e7f01b86aba"
+      },
+      {
+        "macro": "three_dm_hatch_loop_edit_smoke.FCMacro",
+        "ok": true,
+        "checks": 132,
+        "artifact": "H:\\FreeCAD-src\\build\\om9-publish-20261008\\build\\three_dm_hatch_loop_edit_smoke-1\\7fe739ecf08f49cdb83096fcd7559b0e",
+        "report_sha256": "cfaeb8dd69a6d68c5409ba01858a4905a86aed0fd5ca5c3fcc92150c6b6a2e20"
+      },
+      {
+        "macro": "three_dm_hatch_shared_loop_edit_smoke.FCMacro",
+        "ok": true,
+        "checks": 12,
+        "artifact": "H:\\FreeCAD-src\\build\\om9-publish-20261008\\build\\three_dm_hatch_shared_loop_edit_smoke-1\\3077c220f1224cceb26b09b021eb45a0",
+        "report_sha256": "54d141d4addb00b7db69c07ca08f7ad81f01af4a521787278f4274d4ffc6d585"
+      },
+      {
+        "macro": "three_dm_hatch_loop_ui_smoke.FCMacro",
+        "ok": true,
+        "checks": 104,
+        "artifact": "H:\\FreeCAD-src\\build\\om9-publish-20261008\\build\\three_dm_hatch_loop_ui_smoke-1\\31b3cce768c44b40878718e6e1e18781",
+        "report_sha256": "e983fc11af588957c49a007a78068bf3ecce1b5eaa1670b1fa67f0a1922b7fbd"
+      },
+      {
+        "macro": "three_dm_recursive_shared_migration_smoke.FCMacro",
+        "ok": true,
+        "checks": 26,
+        "artifact": "H:\\FreeCAD-src\\build\\om9-publish-20261008\\build\\three_dm_recursive_shared_migration_smoke-1\\b1020f0e9a9744de99cc64b5910e268f",
+        "report_sha256": "7fdc49a69f0d69ee977d3fdd5271dabd5cc6457c11eaaeaac5dbbdca240d3955"
+      },
+      {
+        "macro": "three_dm_recursive_namespace_migration_smoke.FCMacro",
+        "ok": true,
+        "checks": 25,
+        "artifact": "H:\\FreeCAD-src\\build\\om9-publish-20261008\\build\\three_dm_recursive_namespace_migration_smoke-1\\7d02378f2d104b3fb5f4f6dbce762830",
+        "report_sha256": "ee72a85e60239285648594dfbcc7d8265d482431c385954d01ca2a43458832dd"
+      },
+      {
+        "macro": "three_dm_source_signature_smoke.FCMacro",
+        "ok": true,
+        "checks": 14,
+        "artifact": "H:\\FreeCAD-src\\build\\om9-publish-20261008\\build\\three_dm_source_signature_smoke-1\\0cc42833140944f181a02827fc6f0bbf",
+        "report_sha256": "90a1b2ec252081e694ab5c3802204138b621c1e4aa1e34f90a94c8f96bb1c077"
+      },
+      {
+        "macro": "three_dm_exchange_menu_smoke.FCMacro",
+        "ok": true,
+        "checks": 18,
+        "artifact": "H:\\FreeCAD-src\\build\\om9-publish-20261008\\build\\three_dm_exchange_menu_smoke-1\\90e16886c57d4ba6b866db39e815d7e5",
+        "report_sha256": "e779d4bcc2392cf33dce8691c6c6d0343ddb34d0b02c8f2e13f8c6989a34b8e1"
+      },
+      {
+        "macro": "three_dm_native_action_crash_smoke.FCMacro",
+        "ok": true,
+        "checks": 8,
+        "artifact": "H:\\FreeCAD-src\\build\\om9-publish-20261008\\build\\three_dm_native_action_crash_smoke-1\\f1d3b8663d4b452cadc3250a8251cd9b",
+        "report_sha256": "f31b7ab2dc194ef2ce3091f54f79059e24ce0282b33034597ad1942e6829ca26"
+      },
+      {
+        "macro": "three_dm_import_performance_smoke.FCMacro",
+        "ok": true,
+        "checks": 9,
+        "artifact": "H:\\FreeCAD-src\\build\\om9-publish-20261008\\build\\three_dm_import_performance_smoke-1\\c90ae1f9c5e94fb698a589aeb49f310c",
+        "report_sha256": "3ecee81f1841a7cfe0ca047f7a608f0f856a59959a0c413a8dce6e4f0bfde252"
+      }
+    ]
+  },
+  "public_audit": {
+    "icon_bindings": 510,
+    "errors": 0,
+    "source_files": 1127
+  },
+  "review": "Additive legacy migration and cache ownership reviewed; destructive legacy replacement removed. Actual alias rollback/Undo and automatic recompute migration passed.",
+  "full_opennurbs": false,
+  "remaining_full_exchange_packages": 7,
+  "rhino5_new_application_run": false,
+  "rust": {
+    "passed": 107,
+    "suites": 26
+  },
+  "native": {
+    "passed_suites": [
+      "OM9-FILE-012.Merge",
+      "OM9-FILE-012.HatchLoops",
+      "OM9-FILE-012.HatchLoopEdit"
+    ],
+    "build": "MSVC build/3dm-preserve-native from synchronized development source",
+    "fixture_directory": "H:/FreeCAD-src/build/3dm-preservation-sdk/test-temp"
+  }
+}

@@ -11,7 +11,7 @@ def run():
         Gui.activateWorkbench('OpenMatrix9Workbench')
         import ThreeDm,ThreeDmArchiveState as state,OpenMatrix9Gui as native
         for filename in ['Oval-twist-ring.3dm','Oval-twist-ring-fixed.3dm']:
-            source=Path(__file__).parent/'fixtures/3dm'/filename
+            source=Path(os.environ.get('OM9_RING_FIXTURE_DIR',str(Path(__file__).parent/'fixtures/3dm')))/filename
             manifest=json.loads(native.inspect3dm(str(source)))
             doc=App.newDocument('PreservedRing')
             objects=ThreeDm.import_file(str(source),doc,mode='preserve')

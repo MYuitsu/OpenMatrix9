@@ -1204,6 +1204,8 @@ class _AffinePreviewObserver:
 
 _preview_observer=None
 def ensure_preview_observer():
+    from ThreeDmStorage import ensure_observer
+    ensure_observer()
     global _preview_observer
     if _preview_observer is None:
         import FreeCAD as App
@@ -1310,7 +1312,8 @@ def load_archive_state(container):
         raise RuntimeError('Invalid source archive schema or manifest size')
     manifest = json.loads(text)
     validate_manifest(manifest)
-    snapshot = container.OM9SourceArchive
+    from ThreeDmStorage import path
+    snapshot = path(container, 'OM9SourceArchive', MAX_ARCHIVE)
     if manifest.get('schema_version') != 1 or _hash(snapshot) != container.OM9ArchiveHash or manifest.get('archive_sha256') != container.OM9ArchiveHash:
         raise RuntimeError('Source archive integrity check failed')
     return dict(manifest=manifest, snapshot=snapshot)
@@ -1321,12 +1324,17 @@ def bind_archive(document, prepared):
     manifest = prepared['manifest']
     text = validate_manifest(manifest)
     validate_prepared(prepared)
+    with open(prepared['snapshot'], 'rb') as stream:
+        payload = stream.read(MAX_ARCHIVE + 1)
+    if len(payload)>MAX_ARCHIVE or hashlib.sha256(payload).hexdigest()!=manifest['archive_sha256']:
+        raise RuntimeError('Source snapshot changed before binding')
     namespace = str(uuid.uuid4())
     container = document.addObject('App::FeaturePython', 'RhinoSourceArchive')
     container.Label = 'Rhino source archive (storage only)'
     _property(container, 'Integer', 'OM9ArchiveSchema', 1)
     _property(container, 'String', 'OM9ImportNamespace', namespace)
-    _property(container, 'FileIncluded', 'OM9SourceArchive', prepared['snapshot'])
+    from ThreeDmStorage import bind
+    bind(container, 'OM9SourceArchive', payload, MAX_ARCHIVE)
     _property(container, 'String', 'OM9ArchiveManifest', text)
     _property(container, 'String', 'OM9ArchiveHash', manifest['archive_sha256'])
     _property(container, 'Integer', 'OM9ArchiveMode', 1)

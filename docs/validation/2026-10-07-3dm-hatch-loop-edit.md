@@ -30,7 +30,10 @@ performance or hostile-input audit; extremes and other representations remain op
 `ThreeDmHatch.loops(obj)` returns a detached current payload;
 `update_loops(obj, payload)` runs native clone/topology preflight before any host
 property change. Call it inside a document transaction to group Undo/Redo.
-OM9HatchLoopFile is FileIncluded, with host schema and SHA256 checks for the
+Historical storage dependency below is superseded by
+[plugin-owned storage on stock core](2026-10-08-plugin-payload-storage.md).
+
+OM9HatchLoopFile was FileIncluded, with host schema and SHA256 checks for the
 current file and native baseline. A fresh temporary file is assigned on every
 accepted update. Old documents without a typed baseline retain their scalar
 adapter. A user-facing typed loop editor is still pending; this API is not a

@@ -32,7 +32,8 @@ def migrate_archive(owner, rebuild_previews=False, origins=None, targets=None, f
     try:old=json.loads(owner.OM9ArchiveManifest)
     except (ValueError,AttributeError):raise RuntimeError('Legacy archive has no valid manifest')
     state.validate_manifest(old)
-    snapshot=owner.OM9SourceArchive;digest=state._hash(snapshot)
+    from ThreeDmStorage import path
+    snapshot=path(owner,'OM9SourceArchive',state.MAX_ARCHIVE);digest=state._hash(snapshot)
     if digest!=old['archive_sha256'] or getattr(owner,'OM9ArchiveHash',digest)!=digest:raise RuntimeError('Legacy source snapshot integrity check failed')
     scale=old.get('scale_mm')
     if not isinstance(scale,(int,float)) or isinstance(scale,bool) or not math.isfinite(scale) or scale<=0:raise RuntimeError('Legacy archive has no verified unit scale')

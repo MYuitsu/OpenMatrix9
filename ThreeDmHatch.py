@@ -56,7 +56,8 @@ def loops(obj,record=None):
     if hashlib.sha256(_encoded(baseline)).hexdigest()!=obj.OM9HatchLoopBaselineHash:
         raise RuntimeError('Hatch loop baseline differs from native source record')
     try:
-        with open(obj.OM9HatchLoopFile,'rb') as stream:raw=stream.read(MAX_LOOPS+1)
+        from ThreeDmStorage import read
+        raw=read(obj,'OM9HatchLoopFile',MAX_LOOPS)
         if len(raw)>MAX_LOOPS:raise RuntimeError('Hatch loop file exceeds 32 MiB')
         if hashlib.sha256(raw).hexdigest()!=obj.OM9HatchLoopHash:raise RuntimeError('Hatch loop file digest differs')
         data=json.loads(raw)
@@ -68,16 +69,9 @@ def loops(obj,record=None):
     return data
 
 def _store_loops(obj,raw):
-    # Included files copy into the document and move previous versions for undo.
-    # Never overwrite an existing file: copied objects may share its old content.
-    path=None
-    try:
-        with tempfile.NamedTemporaryFile(prefix='om9-hatch-loops-',suffix='.json',delete=False) as stream:
-            path=stream.name;stream.write(raw)
-        obj.OM9HatchLoopFile=path
-        obj.OM9HatchLoopHash=hashlib.sha256(raw).hexdigest()
-    finally:
-        if path and os.path.exists(path):os.unlink(path)
+    from ThreeDmStorage import write
+    write(obj,'OM9HatchLoopFile',raw,MAX_LOOPS)
+    obj.OM9HatchLoopHash=hashlib.sha256(raw).hexdigest()
 
 def update_loops(obj,data):
     raw=_encoded(data);current=fields(obj);current['loops']=data
@@ -133,7 +127,8 @@ def bind(obj,record,choices):
         raw=_encoded(record['hatch_loop_current'])
         _property(obj,'Integer','OM9HatchLoopSchema',1)
         _property(obj,'String','OM9HatchLoopBaselineHash',hashlib.sha256(raw).hexdigest())
-        _property(obj,'FileIncluded','OM9HatchLoopFile','')
+        from ThreeDmStorage import bind
+        bind(obj,'OM9HatchLoopFile',raw,MAX_LOOPS)
         _property(obj,'String','OM9HatchLoopHash','')
         _store_loops(obj,raw)
     obj.ViewObject.Proxy=ViewProvider(obj.ViewObject)
