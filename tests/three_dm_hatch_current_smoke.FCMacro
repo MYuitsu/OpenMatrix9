@@ -1,0 +1,54 @@
+import FreeCAD as App,FreeCADGui as Gui
+import json,os,tempfile,traceback,math
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import ThreeDm,OpenMatrix9Gui as native,ThreeDmHatch as adapter
+        for unit,mm in [('mm',1),('cm',10)]:
+            source=Path(tempfile.gettempdir())/('om9-hatch-current-'+unit+'.3dm');immutable=source.read_bytes();external=out/(unit+'-source.3dm');external.write_bytes(immutable)
+            doc=App.newDocument('CurrentHatch'+unit);doc.UndoMode=1;obj=ThreeDm.import_file(str(external),doc,mode='preserve')[0];record=json.loads(obj.OM9SourceRecord);baseline=record['hatch_current'];target=out/(unit+'.3dm')
+            def export(objects):
+                ThreeDm.export_file(str(target),objects);return json.loads(native.inspect3dm(str(target)))
+            def hatch(report):return next(r for r in report['records'] if r['class_name']=='ON_Hatch')
+            check(unit+' adapter uses native normalized doubles',adapter.fields(obj,record)==baseline and baseline['scale']==2.5*mm and obj.OM9HatchOrigin==App.Vector(10*mm,20*mm,30*mm))
+            unchanged=hatch(export([obj]));check(unit+' no edits retain exact normalized native payload',unchanged['hatch_current']==baseline and unchanged['hatch']['loops'][0]['class_name']=='ON_NurbsCurve')
+            doc.openTransaction('Edit native Hatch fields');obj.OM9HatchOrigin=App.Vector(40,50,60);obj.OM9HatchXAxis=App.Vector(0,1,0);obj.OM9HatchYAxis=App.Vector(0,0,1);obj.OM9HatchBasePoint=App.Vector(3.125,4.25,0);obj.OM9HatchRotation=-26.172;obj.OM9HatchScale=0.0000123456789
+            choices=json.loads(obj.OM9HatchPatternChoices);obj.OM9HatchPattern=next(c['label'] for c in choices if c['label']=='Native solid [3DM]');doc.recompute();doc.commitTransaction();fields=adapter.fields(obj,record);current=hatch(export([obj]))
+            check(unit+' plane base rotation tiny scale and chosen pattern apply exactly',current['hatch_current']==fields and fields['scale']==0.0000123456789)
+            check(unit+' field edits retain source native rational loop and userdata',current['hatch']['loops']==unchanged['hatch']['loops'] and current['user_strings']==record['user_strings'])
+            preview=adapter.boundary(obj);check(unit+' derived current boundary is valid and correctly placed',preview.isValid() and len(preview.Edges)==1 and (preview.CenterOfGravity-App.Vector(40,50,60)).Length<1e-6)
+            check(unit+' normalized rational boundary has correct native radius',abs(preview.BoundBox.YLength-10*mm)<1e-7 and abs(preview.BoundBox.ZLength-10*mm)<1e-7)
+            check(unit+' current boundary display reconstructs derived Coin nodes',obj.ViewObject.Proxy.root.getNumChildren()==3 and not hasattr(obj,'Shape'))
+            parent=doc.addObject('App::Part','PhysicalParent');parent.addObject(obj);parent.Placement.Base=App.Vector(100,200,300);obj.OM9BlockMemberPlacement.Base=App.Vector(5,6,7);doc.recompute();placed=hatch(export([obj]));check(unit+' physical parent and own placement apply once after current fields',placed['hatch_current']['plane'][:3]==[145,256,367] and placed['hatch_current']['base_point']==fields['base_point'])
+            parent.removeObject(obj);obj.OM9BlockMemberPlacement=App.Placement();doc.recompute();obj.OM9HatchPattern='Grid60 [Rhino]';doc.recompute();system=hatch(export([obj]));check(unit+' native builtin selection closes an exact materialized pattern',system['hatch_current']['pattern_uuid']==adapter.fields(obj)['pattern_uuid'] and len(system['dependencies'])>=1)
+            doc.undo();doc.recompute();check(unit+' Undo restores complete persistent current fields',adapter.fields(obj)==baseline)
+            doc.redo();doc.recompute();check(unit+' Redo restores current fields',adapter.fields(obj)['plane'][:3]==[40,50,60] and adapter.fields(obj)['scale']==fields['scale'])
+            copy=doc.copyObject(obj,False);copy.OM9HatchOrigin=App.Vector(70,80,90);doc.recompute();copied=hatch(export([copy]));check(unit+' independent source copy exports its own native current fields',copied['hatch_current']['plane'][:3]==[70,80,90] and obj.OM9HatchOrigin==App.Vector(40,50,60))
+            definition=ThreeDm.create_definition(doc,[obj],'Current Hatch family');instance=ThreeDm.create_instance(definition);row=hatch(export([instance]));check(unit+' promoted current Hatch retains editable native fields',row['role']=='definition-member' and row['hatch_current']['plane'][:3]==[40,50,60])
+            family=ThreeDm.copy_definition(definition,'Independent current Hatch family');member=family.Group[0];member.OM9HatchOrigin=App.Vector(11,12,13);placedFamily=ThreeDm.create_instance(family);doc.recompute();row=hatch(export([placedFamily]));check(unit+' copied family has independent current fields',row['hatch_current']['plane'][:3]==[11,12,13] and obj.OM9HatchOrigin==App.Vector(40,50,60))
+            saved=out/(unit+'.FCStd');names=[o.Name for o in (obj,copy,placedFamily,member)];doc.saveAs(str(saved));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(saved));obj,copy,placedFamily,member=[doc.getObject(n) for n in names];doc.recompute();row=hatch(export([placedFamily]));check(unit+' FCStd restores current fields after external source deletion',not external.exists() and row['hatch_current']['plane'][:3]==[11,12,13])
+            check(unit+' restored boundary rebuilds from embedded native archive',adapter.boundary(member).isValid() and len(adapter.boundary(member).Edges)==1)
+            member.ViewObject.Proxy.update();check(unit+' restored ViewProvider displays current embedded boundary',member.ViewObject.Proxy.root.getNumChildren()==3)
+            def reject(name,prop,value):
+                previous=getattr(member,prop);sentinel=target.read_bytes();setattr(member,prop,value);doc.recompute();failed=False
+                try:export([placedFamily])
+                except RuntimeError:failed=True
+                setattr(member,prop,previous);doc.recompute();check(unit+' '+name,failed and target.read_bytes()==sentinel)
+            reject('zero scale rejects atomically','OM9HatchScale',0)
+            reject('nonorthogonal axes reject atomically','OM9HatchXAxis',App.Vector(1,1,0))
+            reject('base point nonzero z rejects atomically','OM9HatchBasePoint',App.Vector(1,2,3))
+            reject('unknown schema rejects atomically','OM9HatchSchema',2)
+            reject('tampered hidden baseline rejects atomically','OM9HatchBaseline','{}')
+            reject('tampered native pattern choices reject atomically','OM9HatchPatternChoices','[]')
+            check(unit+' source archive is immutable',source.read_bytes()==immutable);App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

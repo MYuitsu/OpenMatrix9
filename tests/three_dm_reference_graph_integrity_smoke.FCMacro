@@ -1,0 +1,45 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        root=Path('H:/FreeCAD-src/build/3dm-preserve-native/reference-graph-integrity-evidence')
+        paths=[('shared-owner.3dm',3),('nested-owner.3dm',4)]+[('edge-consistent-1-reversed-%d.3dm'%r,1) for r in (0,1)]
+        for index,(name,count) in enumerate(paths):
+            source=root/name;immutable=source.read_bytes();external=out/name;external.write_bytes(immutable);inventory=json.loads(native.inspect3dm(str(external)));rows={r['source_uuid']:r for r in inventory['records'] if r['class_name']=='ON_CurveOnSurface'}
+            check(name+' complete linked native analysis',len(rows)==count and not inventory['issues'] and all(r['native_reference_analysis']['status']=='linked' for r in rows.values()))
+            doc=App.newDocument('GraphIntegrity%d'%index);objects=ThreeDm.import_file(str(external),doc,mode='preserve');curves=[o for o in objects if o.OM9SourceClass=='ON_CurveOnSurface']
+            check(name+' retained host without false editable shapes',len(curves)==count and all(o.OM9Capability=='retained' and not hasattr(o,'Shape') for o in curves))
+            check(name+' source record fields and mapped references exact',all(json.loads(o.OM9SourceRecord)==rows[json.loads(o.OM9SourceRecord)['source_uuid']] for o in curves))
+            sentinel=out/(source.stem+'-destination.3dm');sentinel.write_bytes(b'keep existing target');before=len(doc.Objects);error=''
+            try:ThreeDm.export_file(str(sentinel),curves)
+            except Exception as e:error=str(e)
+            check(name+' pending export gate atomic','CurveOnSurface' in error and sentinel.read_bytes()==b'keep existing target' and len(doc.Objects)==before)
+            names=[o.Name for o in curves];save=out/(source.stem+'.FCStd');doc.recompute();doc.saveAs(str(save));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(save));curves=[doc.getObject(n) for n in names]
+            check(name+' FCStd records reopen exact',all(json.loads(o.OM9SourceRecord)==rows[json.loads(o.OM9SourceRecord)['source_uuid']] for o in curves))
+            snapshot=Path(curves[0].OM9ArchiveOwner.OM9SourceArchive)
+            check(name+' embedded native graph source survives deletion',not external.exists() and snapshot.read_bytes()==immutable)
+            second=json.loads(native.inspect3dm(str(snapshot)));reread={r['source_uuid']:r for r in second['records'] if r['class_name']=='ON_CurveOnSurface'}
+            check(name+' graphs reconstructed with exact native semantics',reread==rows and not second['issues'])
+            check(name+' original fixture immutable',source.read_bytes()==immutable);App.closeDocument(doc.Name)
+        for reversed in (0,1):
+            source=root/('edge-consistent-0-reversed-%d.3dm'%reversed);inventory=json.loads(native.inspect3dm(str(source)));row=next(r for r in inventory['records'] if r['class_name']=='ON_CurveOnSurface')
+            check(source.stem+' inconsistent edge domains diagnosed',row['native_reference_analysis']['status']=='invalid' and 'parameter' in row['native_reference_analysis']['message'])
+            check(source.stem+' structured invalid reference issue',any(i.get('code')=='invalid_native_reference' for i in inventory['issues']))
+            doc=App.newDocument('InconsistentEdge%d'%reversed);before=len(doc.Objects);error=''
+            try:ThreeDm.import_file(str(source),doc,mode='preserve')
+            except Exception as e:error=str(e)
+            check(source.stem+' refusal before document mutation','dependencies' in error and len(doc.Objects)==before);App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

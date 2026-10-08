@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenMatrix9 Workspace Contract"
+  short_description: "Matrix grid, Command and viewport business rules"
+  default_prompt: "Use $openmatrix9-workspace-contract to implement or review the approved Matrix workspace behavior."

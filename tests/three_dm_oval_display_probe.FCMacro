@@ -1,0 +1,61 @@
+"""Read-only source visual/geometry diagnosis; independent FreeCAD process."""
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets
+from pathlib import Path
+import os,json,traceback,hashlib
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+source=Path('C:/Users/nguye/Downloads/nhan oval 11.91x8.37x4.97.3dm')
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(350,loop.quit);loop.exec()
+def run():
+    try:
+        import OpenMatrix9Gui as native,ThreeDm
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        digest=hashlib.sha256(source.read_bytes()).hexdigest()
+        inventory=json.loads(native.inspect3dm(str(source)));(out/'inventory.json').write_text(json.dumps(inventory,indent=2))
+        doc=App.newDocument('OvalDisplay');objects=ThreeDm.import_file(str(source),doc,mode='preserve');doc.recompute()
+        rows=[]
+        for obj in doc.Objects:
+            row=dict(name=obj.Name,label=obj.Label,type=obj.TypeId,uuid=getattr(obj,'OM9SourceUUID',''),source_class=getattr(obj,'OM9SourceClass',''),visible=bool(obj.ViewObject.Visibility),parents=[o.Name for o in obj.InList])
+            if hasattr(obj,'Shape') and not obj.Shape.isNull():
+                b=obj.Shape.BoundBox
+                row.update(bounds=[b.XMin,b.YMin,b.ZMin,b.XMax,b.YMax,b.ZMax],area=obj.Shape.Area,volume=obj.Shape.Volume,edges=len(obj.Shape.Edges),faces=len(obj.Shape.Faces),valid=obj.Shape.isValid(),display_mode=obj.ViewObject.DisplayMode,deviation=getattr(obj.ViewObject,'Deviation',None),angle=getattr(obj.ViewObject,'AngularDeflection',None),color=list(getattr(obj.ViewObject,'LineColor',(0,0,0))))
+                if b.XLength>8 or b.YLength>8 or b.ZLength>14:
+                    row['edge_samples']=[[[p.x,p.y,p.z] for p in e.discretize(Number=201)] for e in obj.Shape.Edges]
+                    obj.Shape.exportBrep(str(out/(obj.Name+'.brep')))
+            rows.append(row)
+        (out/'objects.json').write_text(json.dumps(rows,indent=2,default=lambda v:float(v.Value)))
+        view=Gui.activeDocument().activeView();Gui.getMainWindow().resize(1200,1000);Gui.getMainWindow().show()
+        for style in ['Wireframe','Flat Lines']:
+            for obj in doc.Objects:
+                if style in obj.ViewObject.listDisplayModes():obj.ViewObject.DisplayMode=style
+            for name,method in [('front',view.viewFront),('iso',view.viewAxonometric)]:
+                method();view.fitAll();Gui.updateGui();view.saveImage(str(out/(style.replace(' ','-')+'-'+name+'.png')),1100,900,'Current')
+        for obj in doc.Objects:
+            if hasattr(obj.ViewObject,'Deviation'):obj.ViewObject.Deviation=0.05
+            if hasattr(obj.ViewObject,'AngularDeflection'):obj.ViewObject.AngularDeflection=5
+            if 'Wireframe' in obj.ViewObject.listDisplayModes():obj.ViewObject.DisplayMode='Wireframe'
+        view.viewFront();view.fitAll();Gui.updateGui();view.saveImage(str(out/'fine-wireframe-front.png'),1100,900,'Current')
+        settle()
+        area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
+        menu=area.activeSubWindow().widget().findChild(QtWidgets.QMenu,'OM9ViewportMenu')
+        next(a for a in menu.actions() if a.text()=='Shaded').trigger();settle()
+        view.viewAxonometric();view.fitAll();settle();view.saveImage(str(out/'om9-shaded-iso.png'),1100,900,'Current')
+        # Native CAD wireframe on the same unchanged model isolates render mode.
+        before={o.Name:o.Shape.hashCode() for o in doc.Objects if o.isDerivedFrom('Part::Feature')}
+        Gui.activateWorkbench('PartWorkbench');settle()
+        for obj in doc.Objects:
+            if 'Wireframe' in obj.ViewObject.listDisplayModes():obj.ViewObject.DisplayMode='Wireframe'
+            if hasattr(obj.ViewObject,'LineColor') and hasattr(obj.ViewObject,'ShapeColor'):obj.ViewObject.LineColor=obj.ViewObject.ShapeColor
+        view.viewAxonometric();view.fitAll();settle();view.saveImage(str(out/'native-cad-wireframe-iso.png'),1100,900,'Current')
+        check('display switch does not change shape hash',before=={o.Name:o.Shape.hashCode() for o in doc.Objects if o.isDerivedFrom('Part::Feature')})
+        check('source hash unchanged',hashlib.sha256(source.read_bytes()).hexdigest()==digest)
+        result.update(ok=True,source_sha256=digest,module=native.__file__,source_records=len(inventory['records']),top_level_imported=len(objects),shape_count=sum('valid' in o for o in rows))
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

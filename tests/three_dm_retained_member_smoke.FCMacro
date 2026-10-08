@@ -1,0 +1,39 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, OpenMatrix9Gui as native
+        doc=App.newDocument('RetainedMembers');source=Path(tempfile.gettempdir())/'om9-retained-block-members.3dm';original=source.read_bytes()
+        root=ThreeDm.import_file(str(source),doc,mode='preserve')[0]
+        definition=state._instance_definition(root,json.loads(root.OM9SourceRecord))
+        member=next(o for o in definition.Group if o.OM9SourceClass=='ON_TextDot')
+        check('retained definition member binds without invented Placement',not hasattr(member,'Placement') and state.source_signature(member)==member.OM9SourceSignature)
+        target=out/'retained.3dm';ThreeDm.export_preserved(str(target),[root]);report=json.loads(native.inspect3dm(str(target)))
+        originalReport=json.loads(native.inspect3dm(str(source)))
+        before=next(r for r in originalReport['records'] if r['class_name']=='ON_TextDot');after=next(r for r in report['records'] if r['class_name']=='ON_TextDot')
+        check('unchanged TextDot member retains native UUID and payload',len(report['records'])==3 and after['source_uuid']==before['source_uuid'] and after['geometry_crc']==before['geometry_crc'] and after['role']=='definition-member')
+        rootName=root.Name;memberName=member.Name;doc.saveAs(str(out/'retained.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'retained.FCStd'));root=doc.getObject(rootName);member=doc.getObject(memberName)
+        check('retained member signature survives FCStd',state.source_signature(member)==member.OM9SourceSignature)
+        member.Label='Tên TextDot giữ nguyên';ThreeDm.export_preserved(str(target),[root]);report=json.loads(native.inspect3dm(str(target)))
+        after=next(r for r in report['records'] if r['class_name']=='ON_TextDot')
+        check('retained member name edit keeps native text payload',after['geometry_crc']==before['geometry_crc'] and after['name']==member.Label)
+        saved=target.read_bytes();record=json.loads(member.OM9SourceRecord);record['geometry_crc']='invalid';member.OM9SourceRecord=json.dumps(record,sort_keys=True)
+        failed=False
+        try:ThreeDm.export_preserved(str(target),[root])
+        except RuntimeError:failed=True
+        check('modified retained native payload signature rejects atomically',failed and target.read_bytes()==saved)
+        check('source snapshot remains immutable',source.read_bytes()==original)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

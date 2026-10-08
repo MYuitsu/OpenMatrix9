@@ -3,6 +3,9 @@
 
 extern "C"
 {
+bool om9_3dm_overlay_allowed(unsigned int capability,unsigned int action,bool knownReferences,bool isInstance);
+std::ptrdiff_t om9_3dm_dependency_closure(std::size_t nodeCount,const std::size_t* offsets,const std::size_t* edges,std::size_t edgeCount,const std::size_t* selected,std::size_t selectedCount,std::size_t* output,std::size_t capacity);
+std::ptrdiff_t om9_3dm_copy_budget(std::size_t bytes,std::size_t copies,std::size_t total);
 bool om9_3dm_archive_mode_valid(unsigned int mode);
 bool om9_3dm_archive_capability_valid(unsigned int capability);
 bool om9_3dm_archive_legacy_export_allowed(unsigned int mode);

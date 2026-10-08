@@ -1,0 +1,99 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, Mesh, OpenMatrix9Gui as native
+        doc=App.newDocument('NewGeometry')
+        source=Path(tempfile.gettempdir())/'om9-merge-source.3dm';original=source.read_bytes()
+        imported=ThreeDm.import_file(str(source),doc,mode='preserve')
+        block=next(o for o in imported if o.isDerivedFrom('App::Link'))
+        parent=doc.addObject('App::Part','NewParent');parent.Placement.Base=App.Vector(100,200,300)
+        cad=doc.addObject('Part::Feature','NewCAD');cad.Shape=Part.makeBox(2,3,4);cad.Placement.Base=App.Vector(5,6,7)
+        cad.Label='Nhẫn CAD mới';cad.addProperty('App::PropertyString','OM9LayerPath');cad.OM9LayerPath='Jewelry::New CAD';parent.addObject(cad)
+        mesh=doc.addObject('Mesh::Feature','NewMesh');mesh.Mesh=Mesh.Mesh([[(0,0,0),(2,0,0),(0,3,0)]])
+        mesh.Placement.Base=App.Vector(10,20,30);parent.addObject(mesh);doc.recompute()
+        target=out/'new.3dm';ThreeDm.export_preserved(str(target),[block,cad,mesh])
+        report=json.loads(native.inspect3dm(str(target)));read=json.loads(native.read3dm(str(target),str(out)))
+        check('mixed new/source export retains one selected block graph',len(report['records'])==4 and sum(r['class_name']=='ON_InstanceRef' for r in report['records'])==1)
+        shape=Part.Shape();shape.read(next(i for i in read['items'] if 'brep' in i and i['name']=='Nhẫn CAD mới')['brep'])
+        check('new CAD has parent and own world placement exactly once',abs(shape.Volume-24)<1e-7 and abs(shape.BoundBox.XMin-105)<1e-7 and abs(shape.BoundBox.ZMin-307)<1e-7)
+        meshData=next(i for i in read['items'] if 'vertices' in i)
+        check('new mesh has parent and own world placement exactly once',any((App.Vector(*p)-App.Vector(110,220,330)).Length<1e-7 for p in meshData['vertices']))
+        check('new Unicode layer metadata preserved',next(i for i in read['items'] if i['name']=='Nhẫn CAD mới')['layer']=='Jewelry::New CAD')
+        check('source bytes remain immutable',source.read_bytes()==original)
+        check('export does not attach source provenance to new geometry',not hasattr(cad,'OM9SourceUUID') and not hasattr(mesh,'OM9ArchiveOwner'))
+        ThreeDm.export_preserved(str(target),[cad,mesh]);report=json.loads(native.inspect3dm(str(target)))
+        check('new-only export creates mm Rhino5 geometry document',len(report['records'])==2 and all(r['class_name'] in ('ON_Brep','ON_Mesh') for r in report['records']) and report['scale_mm']==1)
+        returned=ThreeDm.import_file(str(target),doc,mode='preserve')
+        check('new-only native archive reimports with provenance',len(returned)==2 and all(state.archive_identity(o) for o in returned))
+        old=target.read_bytes();rejected=False
+        try:ThreeDm.export_preserved(str(target),[parent])
+        except RuntimeError:rejected=True
+        check('unsupported new container rejects atomically',rejected and target.read_bytes()==old)
+        second=ThreeDm.import_file(str(source),doc,mode='preserve');otherBlock=next(o for o in second if o.isDerivedFrom('App::Link'))
+        ThreeDm.export_preserved(str(target),[block,otherBlock,cad,mesh]);report=json.loads(native.inspect3dm(str(target)))
+        check('two import namespaces and new geometry merge without UUID collisions',len(report['records'])==6 and len({r['source_uuid'] for r in report['records']})==6)
+        old=target.read_bytes();savedOwner=block.OM9ArchiveOwner;block.OM9ArchiveOwner=None;rejected=False
+        try:ThreeDm.export_preserved(str(target),[block])
+        except RuntimeError:rejected=True
+        block.OM9ArchiveOwner=savedOwner
+        check('broken source ownership never becomes new geometry',rejected and target.read_bytes()==old)
+        invalidCAD=doc.addObject('Part::Feature','NullCAD');rejected=False
+        try:ThreeDm.export_preserved(str(target),[invalidCAD])
+        except RuntimeError:rejected=True
+        check('null new CAD rejects atomically',rejected and target.read_bytes()==old)
+        definitions=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-definition-overlays.3dm'),doc,mode='preserve')
+        links=[o for o in definitions if o.isDerivedFrom('App::Link')];definition=links[0].LinkedObject
+        member=doc.addObject('Part::Feature','NewMember');member.Shape=Part.makeBox(2,3,4);member.Placement.Base=App.Vector(7,8,9);member.Label='Mới trong block'
+        newMesh=doc.addObject('Mesh::Feature','NewMemberMesh');newMesh.Mesh=Mesh.Mesh([[(0,0,0),(2,0,0),(0,3,0)]]);newMesh.Placement.Base=App.Vector(2,4,6)
+        definition.Group=[definition.Group[0],member,newMesh];doc.recompute()
+        ThreeDm.export_preserved(str(target),links);report=json.loads(native.inspect3dm(str(target)));read=json.loads(native.read3dm(str(target),str(out)))
+        check('new members stay inside one shared native definition',len(report['records'])==5 and sum(r['role']=='definition-member' for r in report['records'])==3 and len(read['items'])==6)
+        boxes=[]
+        for item in read['items']:
+            if item['name'].endswith('/Mới trong block'):
+                shape=Part.Shape();shape.read(item['brep']);boxes.append(shape)
+        result['member_geometry']=dict(items=[dict(name=i['name'],brep=i.get('brep')) for i in read['items']],boxes=[dict(volume=s.Volume,x=s.BoundBox.XMin,z=s.BoundBox.ZMin) for s in boxes],host=list(member.Placement.toMatrix().A))
+        check('new member placement remains local before both instances',len(boxes)==2 and all(abs(s.Volume-24)<1e-7 for s in boxes) and sorted(round(s.BoundBox.XMin) for s in boxes)==[17,107] and sorted(round(s.BoundBox.ZMin) for s in boxes)==[39,309])
+        names=[o.Name for o in links];memberName=member.Name;doc.saveAs(str(out/'new.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'new.FCStd'));links=[doc.getObject(n) for n in names]
+        member=doc.getObject(memberName);placement=member.Placement;member.Shape=Part.makeBox(3,4,5);member.Placement=placement;doc.recompute()
+        ThreeDm.export_preserved(str(target),links);read=json.loads(native.read3dm(str(target),str(out)));volumes=[]
+        for item in read['items']:
+            if item['name'].endswith('/Mới trong block'):
+                shape=Part.Shape();shape.read(item['brep']);volumes.append(shape.Volume)
+        check('new member and subsequent geometry edits survive FCStd',len(volumes)==2 and all(abs(v-60)<1e-7 for v in volumes))
+        doc.openTransaction('Edit new block member');placement=member.Placement;member.Shape=Part.makeBox(4,5,6);member.Placement=placement;doc.recompute();doc.commitTransaction()
+        doc.undo();doc.recompute();ThreeDm.export_preserved(str(target),links);read=json.loads(native.read3dm(str(target),str(out)));volumes=[]
+        for item in read['items']:
+            if item['name'].endswith('/Mới trong block'):
+                shape=Part.Shape();shape.read(item['brep']);volumes.append(shape.Volume)
+        check('new member edit Undo exports reverted geometry',len(volumes)==2 and all(abs(v-60)<1e-7 for v in volumes))
+        doc.redo();doc.recompute();ThreeDm.export_preserved(str(target),links);read=json.loads(native.read3dm(str(target),str(out)));volumes=[]
+        for item in read['items']:
+            if item['name'].endswith('/Mới trong block'):
+                shape=Part.Shape();shape.read(item['brep']);volumes.append(shape.Volume)
+        check('new member edit Redo exports current geometry',len(volumes)==2 and all(abs(v-120)<1e-7 for v in volumes))
+        affine=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm'),doc,mode='preserve')[0];owner=affine.OM9ArchiveOwner
+        definition=next(o for o in doc.Objects if getattr(o,'OM9DefinitionUUID','')==json.loads(affine.OM9SourceRecord)['instance_definition_uuid'] and getattr(o,'OM9ArchiveOwner',None)==owner)
+        added=doc.addObject('Part::Feature','AffineNewMember');added.Shape=Part.makeBox(3,4,5);definition.addObject(added);doc.recompute()
+        check('affine preview automatically includes unsourced new member',affine.OM9PreviewStatus=='Current canonical members' and any(o.isDerivedFrom('Part::Feature') and abs(o.Shape.Volume-60)<1e-7 for o in affine.Group))
+        added.Shape=Part.makeBox(2,3,4);doc.recompute()
+        check('affine preview follows subsequent new member edits',any(o.isDerivedFrom('Part::Feature') and abs(o.Shape.Volume-24)<1e-7 for o in affine.Group) and state.preview_signature(affine)==affine.OM9PreviewSignature)
+        ThreeDm.export_preserved(str(target),[affine]);report=json.loads(native.inspect3dm(str(target)))
+        check('affine export uses current new canonical geometry',sum(r['role']=='definition-member' for r in report['records'])==3 and len(json.loads(native.read3dm(str(target),str(out)))['items'])==3)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

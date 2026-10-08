@@ -1,0 +1,57 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, OpenMatrix9Gui as native, Part
+        doc=App.newDocument('MixedShear')
+        objects=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm'),doc,mode='preserve')
+        block=next(o for o in objects if getattr(o,'OM9SourceClass','')=='ON_InstanceRef')
+        result['block']=dict(type=block.TypeId,properties=block.PropertiesList,children=[o.TypeId for o in getattr(block,'Group',[])],reason=getattr(block,'OM9PreviewUnavailableReason',''))
+        check('mixed preview is structural container',block.isDerivedFrom('App::Part') and len(block.Group)==2)
+        mesh=next(o for o in block.Group if o.isDerivedFrom('Mesh::Feature'))
+        brep=next(o for o in block.Group if o.isDerivedFrom('Part::Feature'))
+        check('sheared box volume preserved',abs(brep.Shape.Volume-24)<1e-7)
+        check('sheared mesh coordinates',any((p-App.Vector(11.5,23,30)).Length<1e-7 for p in mesh.Mesh.Topology[0]))
+        baseline=state.preview_signature(block)
+        check('initial preview baseline',baseline==block.OM9PreviewSignature)
+        block.Placement=App.Placement(App.Vector(40,50,60),App.Rotation(App.Vector(0,0,1),90));doc.recompute()
+        check('rigid delta leaves mixed preview contents intact',state.preview_signature(block)==block.OM9PreviewSignature and abs(brep.Shape.Volume-24)<1e-7 and any((p-App.Vector(11.5,23,30)).Length<1e-7 for p in mesh.Mesh.Topology[0]))
+        target=out/'mixed-shear.3dm'
+        ThreeDm.export_preserved(str(target),[block])
+        inventory=json.loads(native.inspect3dm(str(target)))
+        records=inventory['records']
+        check('native block and both members retained',sum(r.get('class_name')=='ON_InstanceRef' for r in records)==1 and sum(r.get('class_name')=='ON_Brep' for r in records)==1 and sum(r.get('class_name')=='ON_Mesh' for r in records)==1)
+        model=json.loads(native.read3dm(str(target),str(out)))
+        item=next(i for i in model['items'] if 'brep' in i);shape=Part.Shape();shape.read(item['brep'])
+        check('exported box delta world bounds',abs(shape.BoundBox.XMin-17)<1e-7 and abs(shape.BoundBox.YMin-60)<1e-7 and abs(shape.BoundBox.ZMin-90)<1e-7)
+        name=block.Name;doc.saveAs(str(out/'mixed.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'mixed.FCStd'));block=doc.getObject(name)
+        check('mixed preview survives FCStd',state.preview_signature(block)==block.OM9PreviewSignature)
+        ThreeDm.export_preserved(str(target),[block]);old=target.read_bytes()
+        mesh=next(o for o in block.Group if o.isDerivedFrom('Mesh::Feature'))
+        changed=mesh.Mesh.copy();changed.translate(1,0,0);mesh.Mesh=changed;rejected=False
+        try:ThreeDm.export_preserved(str(target),[block])
+        except RuntimeError:rejected=True
+        check('edited mesh preview rejects atomically',rejected and target.read_bytes()==old)
+        block.Placement.Base=App.Vector(70,80,90);doc.recompute();rejected=False
+        try:ThreeDm.export_preserved(str(target),[block])
+        except RuntimeError:rejected=True
+        check('rigid move cannot legitimize an already edited preview',rejected and target.read_bytes()==old)
+        fresh=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm'),doc,mode='preserve');freshBlock=next(o for o in fresh if getattr(o,'OM9SourceClass','')=='ON_InstanceRef');freshMesh=next(o for o in freshBlock.Group if o.isDerivedFrom('Mesh::Feature'))
+        freshBlock.Placement.Base=App.Vector(40,50,60);changed=freshMesh.Mesh.copy();changed.translate(1,0,0);freshMesh.Mesh=changed;doc.recompute();rejected=False
+        try:ThreeDm.export_preserved(str(target),[freshBlock])
+        except RuntimeError:rejected=True
+        check('preview edit after a verified rigid move invalidates the witness',rejected and target.read_bytes()==old)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

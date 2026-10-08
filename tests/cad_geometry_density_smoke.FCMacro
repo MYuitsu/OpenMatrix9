@@ -1,0 +1,22 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        for density in [-1,0,1,3,33]:
+            doc=App.newDocument('Density');source=Path('H:/FreeCAD-src/build/cad-density-fixtures')/('density-'+str(density)+'.3dm')
+            objects=ThreeDm.import_file(str(source),doc)
+            passed=len(objects)==1 and getattr(objects[0].ViewObject,'OM9IsoCurveDensity',None)==density
+            result['checks'].append(dict(name='default geometry import retains density '+str(density),passed=passed))
+            if not passed:raise AssertionError('Geometry density lost: '+str(density))
+            App.closeDocument(doc.Name)
+        result.update(ok=True,module=native.__file__)
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

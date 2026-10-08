@@ -1,0 +1,48 @@
+import FreeCAD as App,FreeCADGui as Gui
+import copy,json,os,tempfile,traceback,subprocess
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+reader=Path('H:/FreeCAD-src/build/3dm-rhino5-reader/Rhino5HatchReader.exe')
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def change(node):
+    if node['class_name']=='ON_NurbsCurve':
+        for cv in node['cvs']:cv[0]*=1.2
+    elif node['class_name']=='ON_ArcCurve':node['radius']*=1.2
+    elif node['class_name'] in ('ON_LineCurve','ON_PolylineCurve'):
+        for point in node['points']:point[0]*=1.2
+    elif node['class_name']=='ON_PolyCurve':
+        for child in node['segments']:change(child)
+def graph(report):
+    return {r['source_uuid']:{k:r[k] for k in ('class_name','member_uuids','instance_definition_uuid','instance_matrix') if k in r}
+            for r in report['records']+report['components'] if r['class_name'] in ('ON_Hatch','ON_InstanceDefinition','ON_InstanceRef')}
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import ThreeDm,ThreeDmHatch as adapter,OpenMatrix9Gui as native
+        for unit in ('mm','cm'):
+            source=Path(tempfile.gettempdir())/('om9-hatch-loops-'+unit+'.3dm');immutable=source.read_bytes();doc=App.newDocument('LegacyTypedLoops'+unit);objects=ThreeDm.import_file(str(source),doc,mode='preserve')
+            def verify(label,values):
+                target=out/(unit+'-'+label+'.3dm');old=out/(unit+'-'+label+'-old.3dm');report=out/(unit+'-'+label+'.json');ThreeDm.export_file(str(target),values);before=json.loads(native.inspect3dm(str(target)));sentinel=target.read_bytes()
+                process=subprocess.run([str(reader),str(target),str(old),str(report)],capture_output=True,text=True,timeout=30)
+                check(unit+' '+label+' independent legacy process',process.returncode==0 and report.exists())
+                decoded=json.loads(report.read_text());after=json.loads(native.inspect3dm(str(old)));rows={r['source_uuid']:r for r in before['records'] if r['class_name']=='ON_Hatch'};oldRows={r['source_uuid']:r for r in after['records'] if r['class_name']=='ON_Hatch'};direct={r['uuid']:r for r in decoded['hatches']}
+                check(unit+' '+label+' raw legacy loops and child metadata exact',set(rows)==set(direct) and all(r['hatch_loop_native']==direct[i]['native_loops'] for i,r in rows.items()))
+                check(unit+' '+label+' raw legacy current fields exact',all({k:direct[i][k] for k in r['hatch_current']}==r['hatch_current'] for i,r in rows.items()))
+                check(unit+' '+label+' legacy reencode typed loops and current fields exact',set(rows)==set(oldRows) and all(r['hatch_loop_native']==oldRows[i]['hatch_loop_native'] and r['hatch_current']==oldRows[i]['hatch_current'] and r['user_strings']==oldRows[i]['user_strings'] and r['attribute_user_strings']==oldRows[i]['attribute_user_strings'] for i,r in rows.items()))
+                check(unit+' '+label+' legacy native graph exact',graph(before)==graph(after))
+                check(unit+' '+label+' version5 and immutable source',decoded['sdk_version']==201307115 and decoded['source_version']==50 and decoded['gradient_api_available'] is False and after['source_version']==50 and target.read_bytes()==sentinel and source.read_bytes()==immutable)
+            for index,obj in enumerate(objects):
+                edit=copy.deepcopy(adapter.loops(obj));change(edit['loops'][0]['curve']);adapter.update_loops(obj,edit);obj.OM9HatchBasePoint=App.Vector(3.125,4.25,0);obj.OM9HatchOrigin=App.Vector(20,30,40);obj.OM9BlockMemberPlacement.Base=App.Vector(5,6,7);doc.recompute();verify('current-'+str(index),[obj])
+            for obj in objects:obj.OM9HatchBasePoint=App.Vector(0,0,0)
+            doc.recompute();verify('zero-base-all-native-types',objects)
+            first=objects[0];data=adapter.loops(first);data['loops'].append(dict(type=1,source_index=None,curve=dict(class_name='ON_ArcCurve',dimension=2,source_index=None,domain=[0,6.283185307179586],angle_domain=[0,6.283185307179586],radius=.5,plane=[0,0,0,1,0,0,0,1,0,0,0,1,0,0,1,0])));adapter.update_loops(first,data)
+            definition=ThreeDm.create_definition(doc,objects,'All typed native loops');placed=ThreeDm.create_instance(definition,App.Placement(App.Vector(100,200,300),App.Rotation()));doc.recompute();verify('native-block-with-hole',[placed])
+            family=ThreeDm.copy_definition(definition,'Independent typed native loops');member=family.Group[-1];data=adapter.loops(member);change(data['loops'][0]['curve']);adapter.update_loops(member,data);instance=ThreeDm.create_instance(family);doc.recompute();verify('independent-copy',[instance]);App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

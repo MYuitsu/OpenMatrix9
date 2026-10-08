@@ -1,0 +1,42 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, Mesh, OpenMatrix9Gui as native
+        doc=App.newDocument('SourceMemberGeometry');source=Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm';original=source.read_bytes()
+        imported=ThreeDm.import_file(str(source),doc,mode='preserve')[0];old=state._instance_definition(imported,json.loads(imported.OM9SourceRecord))
+        cad=next(o for o in old.Group if o.isDerivedFrom('Part::Feature'));mesh=next(o for o in old.Group if o.isDerivedFrom('Mesh::Feature'))
+        originalPoints=list(mesh.Mesh.Topology[0]);old.Placement.Base=App.Vector(7,8,9);doc.recompute()
+        definition=ThreeDm.create_definition(doc,[cad,mesh],'Source BRep and mesh');root=ThreeDm.create_instance(definition,App.Placement(App.Vector(20,30,40),App.Rotation()));root.ScaleVector=App.Vector(-2,3,4);doc.recompute();path=out/'source-geometry.3dm'
+        def export():
+            ThreeDm.export_preserved(str(path),[root]);report=json.loads(native.inspect3dm(str(path)));folder=out/('read-'+str(len(list(out.glob('read-*')))));folder.mkdir();geometry=json.loads(native.read3dm(str(path),str(folder)))['items'];return report,geometry
+        report,geometry=export();solid=Part.Shape();solid.read(next(g['brep'] for g in geometry if 'brep' in g));vertices=next(g['vertices'] for g in geometry if 'vertices' in g)
+        matrix=root.Placement.toMatrix()*App.Matrix(-2,0,0,0,0,3,0,0,0,0,4,0,0,0,0,1)*definition.Placement.toMatrix()*mesh.Placement.toMatrix()
+        check('native source BRep and mesh remain native definition members',len(report['records'])==3 and {r['class_name'] for r in report['records']}=={'ON_Brep','ON_Mesh','ON_InstanceRef'} and len(next(r for r in report['components'] if r['class_name']=='ON_InstanceDefinition')['member_uuids'])==2)
+        result['initial_native_volume']=solid.Volume
+        result['initial_native_bounds']=[solid.BoundBox.XMin,solid.BoundBox.YMin,solid.BoundBox.ZMin]
+        # Native +2 source winding is outward: volume24, determinant(-2*3*4).
+        # Preserve its reflected sign rather than the former outward fallback.
+        check('source BRep member retains resolved unknown-direction signed volume and transformed world bounds',abs(solid.Volume-24*(-2*3*4))<1e-6 and all(abs(a-b)<1e-6 for a,b in zip((solid.BoundBox.XMin,solid.BoundBox.YMin,solid.BoundBox.ZMin),(2,54,76))))
+        check('source mesh member preserves current parent placement and reflected scale',len(vertices)==len(originalPoints) and all(any((matrix.multVec(p)-App.Vector(*v)).Length<1e-6 for v in vertices) for p in originalPoints))
+        cad.Shape=Part.makeBox(4,5,6);cad.Placement.Base=App.Vector(1,2,3);mesh.Mesh=Mesh.Mesh([[(0,0,0),(2,0,0),(0,3,0)]]);mesh.Placement.Base=App.Vector(5,6,7);doc.recompute();report,geometry=export();solid=Part.Shape();solid.read(next(g['brep'] for g in geometry if 'brep' in g));vertices=next(g['vertices'] for g in geometry if 'vertices' in g)
+        check('edited promoted BRep exports reflected signed volume current geometry and placement',abs(solid.Volume+2880)<1e-6 and all(abs(a-b)<1e-6 for a,b in zip((solid.BoundBox.XMin,solid.BoundBox.YMin,solid.BoundBox.ZMin),(10,36,52))))
+        check('edited promoted mesh exports current local topology and placement',len(vertices)==3 and all(any((App.Vector(*p)-App.Vector(*v)).Length<1e-6 for v in vertices) for p in ((10,48,68),(6,48,68),(10,57,68))))
+        copied=doc.copyObject(mesh,False);copied.Placement.Base=App.Vector(10,20,30);definition.addObject(copied);doc.recompute();report,geometry=export();ids={r['source_uuid'] for r in report['records']}
+        check('copied promoted source mesh receives separate stable native identity',len(report['records'])==4 and state._new_identity(mesh,'Member')!=state._new_identity(copied,'Member') and state._new_identity(copied,'Member') in ids and ids=={r['source_uuid'] for r in export()[0]['records']})
+        rootName=root.Name;doc.saveAs(str(out/'source-geometry.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'source-geometry.FCStd'));root=doc.getObject(rootName);report,geometry=export()
+        check('promoted source BRep mesh edits and copied IDs survive FCStd',ids=={r['source_uuid'] for r in report['records']} and len(geometry)==3)
+        check('source mixed geometry archive remains immutable',source.read_bytes()==original)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

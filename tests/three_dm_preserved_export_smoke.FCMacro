@@ -1,0 +1,69 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('PreservedExport')
+        objects=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-merge-source.3dm'),doc,mode='preserve')
+        obj=next(o for o in objects if o.isDerivedFrom('Part::Feature'))
+        target=out/'preserved.3dm'
+        ThreeDm.export_preserved(str(target),[obj])
+        records=json.loads(native.inspect3dm(str(target)))['records']
+        check('unchanged source UUID exported',len(records)==1 and records[0]['source_uuid']==obj.OM9SourceUUID)
+        obj.Shape=Part.makeBox(2,3,4)
+        obj.Label='Tên nhẫn thử'
+        ThreeDm.export_preserved(str(target),[obj])
+        model=json.loads(native.read3dm(str(target),str(out)))
+        shape=Part.Shape();shape.read(model['items'][0]['brep'])
+        check('edited BRep replaces source geometry',abs(shape.Volume-24)<1e-8)
+        check('Unicode name overlay preserved',json.loads(native.inspect3dm(str(target)))['records'][0]['name']==obj.Label)
+        obj.ViewObject.ShapeColor=(1.0,0.0,0.0);obj.ViewObject.Visibility=False;obj.OM9Locked=True
+        ThreeDm.export_preserved(str(target),[obj]);metadata=json.loads(native.read3dm(str(target),str(out)))['items'][0]
+        result['exported_metadata']=metadata
+        check('edited color visibility and lock preserved',metadata['color']==[255,0,0] and not metadata['visible'] and metadata['locked'])
+        geometryCopy=doc.copyObject(obj,False);geometryCopy.Shape=Part.makeBox(5,6,7)
+        ThreeDm.export_preserved(str(target),[obj,geometryCopy]);model=json.loads(native.read3dm(str(target),str(out)));volumes=[]
+        for item in model['items']:
+            shape.read(item['brep']);volumes.append(shape.Volume)
+        check('edited BRep copy has independent geometry',len(volumes)==2 and abs(min(volumes)-24)<1e-8 and abs(max(volumes)-210)<1e-8)
+        links=[o for o in objects if o.isDerivedFrom('App::Link')]
+        link=links[0];link.Placement.Base=App.Vector(40,50,60)
+        ThreeDm.export_preserved(str(target),[link]);model=json.loads(native.read3dm(str(target),str(out)));shape.read(model['items'][0]['brep'])
+        check('edited instance keeps structural definition',(shape.Vertexes[0].Point-App.Vector(41,52,63)).Length<1e-8 and any(r['class_name']=='ON_InstanceRef' for r in json.loads(native.inspect3dm(str(target)))['records']))
+        original=links[1];copy=doc.copyObject(original,False);copy.Label=original.Label
+        import ThreeDmArchiveState as state
+        result['copy_metadata']=[dict(name=o.Name,current=state.source_metadata(o),baseline=json.loads(o.OM9SourceMetadata)) for o in (original,copy)]
+        ThreeDm.export_preserved(str(target),[original,copy]);records=json.loads(native.inspect3dm(str(target)))['records'];ids=[r['source_uuid'] for r in records if r['class_name']=='ON_InstanceRef']
+        check('host copy exports distinct UUID with shared member',len(records)==3 and len(set(ids))==2 and original.OM9SourceUUID in ids)
+        check('copied host label exported',any(r['name']==copy.Label for r in records if r['source_uuid']!=original.OM9SourceUUID))
+        copy.Placement.Base=App.Vector(70,80,90)
+        ThreeDm.export_preserved(str(target),[original,copy]);model=json.loads(native.read3dm(str(target),str(out)));points=[]
+        for item in model['items']:
+            shape.read(item['brep']);points.append(shape.Vertexes[0].Point)
+        check('edited copy keeps independent placement',any((p-App.Vector(71,82,93)).Length<1e-8 for p in points) and any((p-App.Vector(101,202,303)).Length<1e-8 for p in points))
+        sourceId=original.OM9SourceUUID;doc.removeObject(original.Name)
+        ThreeDm.export_preserved(str(target),[copy]);records=json.loads(native.inspect3dm(str(target)))['records']
+        check('deleted original is not resurrected by copy export',len(records)==2 and all(r['source_uuid']!=sourceId for r in records))
+        linkName=link.Name;copyName=copy.Name;doc.saveAs(str(out/'export-source.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'export-source.FCStd'));link=doc.getObject(linkName);copy=doc.getObject(copyName)
+        ThreeDm.export_preserved(str(target),[copy]);records=json.loads(native.inspect3dm(str(target)))['records']
+        check('preservation export works after FCStd reload',len(records)==2 and all(r['source_uuid']!=sourceId for r in records))
+        member=link.LinkedObject.Group[0];member.Shape=Part.Vertex(App.Vector(9,9,9))
+        ThreeDm.export_preserved(str(target),[link]);records=json.loads(native.inspect3dm(str(target)))['records']
+        check('edited definition member exports with source UUID',any(r['source_uuid']==member.OM9SourceUUID and r['role']=='definition-member' for r in records))
+        removedId=member.OM9SourceUUID;doc.removeObject(member.Name)
+        ThreeDm.export_preserved(str(target),[link]);records=json.loads(native.inspect3dm(str(target)))['records']
+        check('deleted definition member is not restored',all(r['source_uuid']!=removedId for r in records))
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

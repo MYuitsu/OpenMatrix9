@@ -1,0 +1,86 @@
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import hashlib, json, os, traceback
+
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+result={'checks':[]}
+
+
+def check(name, value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:
+        raise AssertionError(name)
+
+
+def run():
+    try:
+        import ThreeDm, OpenMatrix9Gui as native
+        root=Path('H:/FreeCAD-src/build/om9-dev/docs/validation/rhino5-coherent-reference-20261007')
+        proof=json.loads((root/'native-results.json').read_text())
+        for index, row in enumerate(proof['cases']):
+            source=root/row['fixture']
+            immutable=source.read_bytes()
+            check(source.stem+' original bound to actual Rhino5 proof',hashlib.sha256(immutable).hexdigest()==row['source_sha256'])
+            external=out/source.name
+            external.write_bytes(immutable)
+            doc=App.newDocument('SurfaceCurve'+str(index))
+            objects=ThreeDm.import_file(str(external),doc,mode='preserve')
+            curve=next(obj for obj in objects if obj.OM9SourceClass=='ON_CurveOnSurface')
+            check(source.stem+' exact retained source with native placement',curve.OM9Capability=='retained' and not hasattr(curve,'Shape') and 'OM9BlockMemberPlacement' in curve.PropertiesList)
+            record=json.loads(curve.OM9SourceRecord)
+            name=curve.Name
+            saved=out/(source.stem+'.FCStd')
+            doc.recompute()
+            doc.saveAs(str(saved))
+            external.unlink()
+            App.closeDocument(doc.Name)
+            doc=App.openDocument(str(saved))
+            curve=doc.getObject(name)
+            check(source.stem+' exact native record and snapshot after FCStd reopen',json.loads(curve.OM9SourceRecord)==record and Path(curve.OM9ArchiveOwner.OM9SourceArchive).read_bytes()==immutable)
+            target=out/(source.stem+'-export.3dm')
+            target.write_bytes(b'keep existing target')
+            if index:
+                before=len(doc.Objects)
+                error=''
+                try:
+                    ThreeDm.export_file(str(target),[curve])
+                except Exception as exc:
+                    error=str(exc)
+                check(source.stem+' measured Rhino5 m_c3 incompatibility rejects atomically','Rhino 5' in error and 'm_c3' in error and target.read_bytes()==b'keep existing target' and len(doc.Objects)==before)
+            else:
+                ThreeDm.export_file(str(target),[curve])
+                inventory=json.loads(native.inspect3dm(str(target)))
+                check(source.stem+' exact supported native class payload in selected V5',inventory['source_version'] in (5,50) and not inventory['issues'] and len(inventory['records'])==1 and inventory['records'][0]==record)
+                doc.openTransaction('Move retained native surface curve')
+                curve.OM9BlockMemberPlacement=App.Placement(App.Vector(5,6,7),App.Rotation())
+                doc.recompute()
+                doc.commitTransaction()
+                moved=out/'coherent-reference-moved.3dm'
+                ThreeDm.export_file(str(moved),[curve])
+                edited=json.loads(native.inspect3dm(str(moved)))['records'][0]
+                plane=edited['curve_on_surface_native']['surface']['plane']
+                check('native placement keeps UV and optional absence',edited['curve_on_surface_native']['parameter']==record['curve_on_surface_native']['parameter'] and edited['curve_on_surface_native']['approximation'] is None and plane[:3]==[5,6,7])
+                doc.undo()
+                ThreeDm.export_file(str(target),[curve])
+                check('Undo recovers exact source payload',json.loads(native.inspect3dm(str(target)))['records'][0]==record)
+                doc.redo()
+                copy=doc.copyObject(curve,False)
+                copied=out/'coherent-reference-copy.3dm'
+                ThreeDm.export_file(str(copied),[curve,copy])
+                rows=json.loads(native.inspect3dm(str(copied)))['records']
+                check('live copy has independent UUID and native plane placement',len(rows)==2 and len({r['source_uuid'] for r in rows})==2 and all(r['class_name']=='ON_CurveOnSurface' and r['curve_on_surface_native']['surface']['plane'][:3]==[5,6,7] for r in rows))
+            check(source.stem+' immutable actual Rhino source evidence',source.read_bytes()==immutable)
+            App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:
+        result['ok']=False
+        result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):
+        App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+
+
+QtCore.QTimer.singleShot(1000,run)

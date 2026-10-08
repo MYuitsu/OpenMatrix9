@@ -45,6 +45,7 @@ class RustCommand final:public Gui::Command {
 public:
     RustCommand(std::size_t i,const char* id):Gui::Command(id),index(i) {
         sAppModule="OpenMatrix9";sGroup="OpenMatrix9";sMenuText=om9_command_menu_text(i);sToolTipText=om9_command_tooltip(i);sStatusTip=sToolTipText;sWhatsThis=sToolTipText;sPixmap="";
+        if(const auto exchange=om9_3dm_operation(i))sPixmap=exchange==1?"Std_Import":"Std_Export";
         for(std::size_t key=0;key<om9_keyboard_count();++key)if(std::string(id)==om9_keyboard_target(key)){accelerator=om9_keyboard_key(key);sAccel=accelerator.c_str();break;}
         const auto permissions=om9_command_permissions(i);
         // The dispatched host command owns its transaction, including Undo/Redo.

@@ -35,5 +35,12 @@ class PublicSourceAuditTests(unittest.TestCase):
             with (root/'Resources/menu/icons.ini').open('w') as stream:ini.write(stream)
             self.assertTrue(any('Escaping binding' in e for e in audit(root)['errors']))
 
+    def test_reference_screenshot_in_skill_assets_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);self.make(root)
+            file=root/'skills/example/assets/reference.png';file.parent.mkdir(parents=True)
+            file.write_bytes(b'private reference screenshot')
+            self.assertIn('Unreviewed raster artifact: skills/example/assets/reference.png',audit(root)['errors'])
+
 
 if __name__=='__main__':unittest.main()

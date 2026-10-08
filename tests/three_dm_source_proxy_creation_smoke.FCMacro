@@ -1,0 +1,164 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('SourceProxyCreation');doc.UndoMode=1
+        source=Path(tempfile.gettempdir())/'om9-shared-block-members.3dm';original=source.read_bytes()
+        objects=ThreeDm.import_file(str(source),doc,mode='preserve');owner=objects[0].OM9ArchiveOwner
+        canonical=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Point' and o.OM9ArchiveOwner==owner)
+        proxy=next(o for o in doc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject==canonical)
+        originalDefinition=next(p for p in proxy.InList if p.isDerivedFrom('App::Part') and proxy in p.Group)
+        canonical.Shape=Part.Vertex(App.Vector(2,3,4));canonical.Placement.Base=App.Vector(5,6,7)
+        proxy.Placement.Base=App.Vector(7,8,9);proxy.ScaleVector=App.Vector(-2,3,4);proxy.Label='Shared jewelry point';doc.recompute()
+        definition=ThreeDm.create_definition(doc,[proxy],'Promoted shared member');definitionName=definition.Name
+        check('new definition accepts a verified shared member without moving canonical',proxy in definition.Group and proxy.LinkedObject==canonical and not any(canonical in p.Group for p in canonical.InList if p.isDerivedFrom('App::Part')))
+        memberUUID=proxy.OM9NewMemberUUID
+        doc.undo();doc.recompute();check('proxy promotion Undo restores original membership',doc.getObject(definitionName) is None and proxy in originalDefinition.Group and 'OM9NewMemberUUID' not in proxy.PropertiesList)
+        doc.redo();doc.recompute();definition=doc.getObject(definitionName);proxy=definition.Group[0]
+        check('proxy promotion Redo restores persistent independent identity',proxy.OM9NewMemberUUID==memberUUID and proxy.LinkedObject==canonical)
+        placed=ThreeDm.create_instance(definition,App.Placement(App.Vector(10,20,30),App.Rotation()))
+        target=out/'proxy-created.3dm'
+        def points(roots):
+            ThreeDm.export_preserved(str(target),roots)
+            read=json.loads(native.read3dm(str(target),str(out)));answer=[]
+            for item in read['items']:
+                shape=Part.Shape();shape.read(item['brep']);answer.extend(v.Point for v in shape.Vertexes)
+            return answer
+        def near(actual,expected):return len(actual)==len(expected) and all(any((p-App.Vector(*q)).Length<1e-7 for p in actual) for q in expected)
+        check('new native proxy block applies canonical placement and reflected scale once',near(points([placed]),[(3,55,83)]))
+        report=json.loads(native.inspect3dm(str(target)))
+        check('new proxy member has fresh native identity and current name',len(report['records'])==2 and any(r['name']=='Shared jewelry point' and r['source_uuid']!=canonical.OM9SourceUUID for r in report['records']))
+        proxy.LinkTransform=False;doc.recompute()
+        check('new proxy override strips canonical placement once',near(points([placed]),[(13,37,55)]))
+        copied=ThreeDm.copy_definition(definition,'Independent proxy family');copiedProxy=copied.Group[0];copiedCanonical=copiedProxy.LinkedObject
+        check('family copy owns an independent canonical payload and fresh proxy UUID',copiedCanonical!=canonical and copiedProxy!=proxy and copiedProxy.OM9NewMemberUUID!=proxy.OM9NewMemberUUID and copiedProxy.OM9DefinitionMemberProxy)
+        copiedPlaced=ThreeDm.create_instance(copied,App.Placement(App.Vector(100,200,300),App.Rotation()))
+        copiedCanonical.Shape=Part.Vertex(App.Vector(10,20,30));doc.recompute()
+        check('copied proxy edits export independently of original geometry',near(points([placed,copiedPlaced]),[(13,37,55),(87,268,429)]) and (canonical.Shape.Vertexes[0].Point-App.Vector(7,9,11)).Length<1e-7)
+        ids=(definition.OM9NewDefinitionUUID,proxy.OM9NewMemberUUID,copied.OM9NewDefinitionUUID,copiedProxy.OM9NewMemberUUID)
+        names=[placed.Name,copiedPlaced.Name,proxy.Name,copiedProxy.Name,copiedCanonical.Name]
+        doc.saveAs(str(out/'proxy-created.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'proxy-created.FCStd'))
+        placed,copiedPlaced,proxy,copiedProxy,copiedCanonical=[doc.getObject(n) for n in names]
+        check('FCStd preserves proxy links independent geometry and persistent identities',ids==(placed.LinkedObject.OM9NewDefinitionUUID,proxy.OM9NewMemberUUID,copiedPlaced.LinkedObject.OM9NewDefinitionUUID,copiedProxy.OM9NewMemberUUID) and near(points([placed,copiedPlaced]),[(13,37,55),(87,268,429)]))
+        doc.openTransaction('Edit copied proxy');copiedProxy.Placement.Base=App.Vector(1,2,3);doc.recompute();doc.commitTransaction()
+        check('copied proxy edit exports current local placement',near(points([copiedPlaced]),[(81,262,423)]))
+        doc.undo();doc.recompute();check('copied proxy edit Undo restores native coordinates',near(points([copiedPlaced]),[(87,268,429)]))
+        doc.redo();doc.recompute();check('copied proxy edit Redo restores native coordinates',near(points([copiedPlaced]),[(81,262,423)]))
+        before=target.read_bytes();copiedProxy.ScaleVector=App.Vector(0,1,1);doc.recompute();rejected=False
+        try:ThreeDm.export_preserved(str(target),[copiedPlaced])
+        except RuntimeError:rejected=True
+        check('singular new proxy export preserves destination',rejected and target.read_bytes()==before)
+        check('proxy creation and copy keep the source immutable',source.read_bytes()==original)
+        sharedDoc=App.newDocument('SharedProxyFamily')
+        sharedRoots=ThreeDm.import_file(str(source),sharedDoc,mode='preserve');sharedOwner=sharedRoots[0].OM9ArchiveOwner
+        sharedCanonical=next(o for o in sharedDoc.Objects if getattr(o,'OM9SourceClass','')=='ON_Point' and o.OM9ArchiveOwner==sharedOwner)
+        sharedProxies=[o for o in sharedDoc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject==sharedCanonical]
+        sharedDefinition=ThreeDm.create_definition(sharedDoc,sharedProxies,'Two shared members')
+        sharedCopy=ThreeDm.copy_definition(sharedDefinition,'Two independent shared members')
+        check('copied shared proxies reuse one independent canonical payload',len(sharedCopy.Group)==2 and sharedCopy.Group[0].LinkedObject==sharedCopy.Group[1].LinkedObject and sharedCopy.Group[0].LinkedObject!=sharedCanonical)
+        sharedCopy.Group[0].LinkedObject.Shape=Part.Vertex(App.Vector(10,20,30));sharedDoc.recompute()
+        sharedPlaced=ThreeDm.create_instance(sharedCopy)
+        check('one copied canonical edit updates every copied shared use',near(points([sharedPlaced]),[(10,20,30),(10,20,30)]))
+        report=json.loads(native.inspect3dm(str(target)))
+        check('copied shared uses have distinct native identities and exclude source canonical',len(report['records'])==3 and all(r['source_uuid']!=sharedCanonical.OM9SourceUUID for r in report['records']) and len({p.OM9NewMemberUUID for p in sharedCopy.Group})==2)
+        for p in sharedCopy.Group:p.ScaleVector=App.Vector(1e-6,1e-6,1e-6)
+        sharedDoc.recompute();smallCopy=ThreeDm.copy_definition(sharedCopy,'Microscopic shared members')
+        smallPlaced=ThreeDm.create_instance(smallCopy)
+        check('small finite invertible proxy transforms remain supported',near(points([smallPlaced]),[(1e-5,2e-5,3e-5),(1e-5,2e-5,3e-5)]))
+        guarded=smallCopy.Group[0];baseline=guarded.OM9ProxyMetadata;guarded.removeProperty('OM9ProxyMetadata');count=len(sharedDoc.Objects);rejected=False
+        try:ThreeDm.copy_definition(smallCopy,'Unverified proxy family')
+        except RuntimeError:rejected=True
+        check('missing proxy baseline refuses copy before mutation',rejected and len(sharedDoc.Objects)==count)
+        state._property(guarded,'String','OM9ProxyMetadata',baseline)
+        foreignRoots=ThreeDm.import_file(str(source),sharedDoc,mode='preserve');foreignOwner=foreignRoots[0].OM9ArchiveOwner
+        foreignProxy=next(o for o in sharedDoc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject.OM9ArchiveOwner==foreignOwner)
+        count=len(sharedDoc.Objects);rejected=False
+        try:ThreeDm.create_definition(sharedDoc,[guarded,foreignProxy],'Foreign proxy members')
+        except RuntimeError:rejected=True
+        check('mixed source namespace proxies refuse creation before mutation',rejected and len(sharedDoc.Objects)==count and guarded in smallCopy.Group)
+        guardedPayload=guarded.LinkedObject;savedShape=guardedPayload.Shape.copy();guardedPayload.Shape=Part.Shape();sharedDoc.recompute();count=len(sharedDoc.Objects);rejected=False
+        try:ThreeDm.create_definition(sharedDoc,[guarded],'Invalid proxy CAD')
+        except RuntimeError:rejected=True
+        check('invalid canonical proxy CAD refuses creation before mutation',rejected and len(sharedDoc.Objects)==count and guarded in smallCopy.Group)
+        guardedPayload.Shape=savedShape;sharedDoc.recompute()
+        importedDefinition=next(p for p in foreignProxy.InList if p.isDerivedFrom('App::Part') and foreignProxy in p.Group)
+        importedCopy=ThreeDm.copy_definition(importedDefinition,'Copied imported proxy definition');importedCopy.Group[0].LinkedObject.Shape=Part.Vertex(App.Vector(7,8,9))
+        importedPlaced=ThreeDm.create_instance(importedCopy);sharedDoc.recompute()
+        check('imported definition family copies its shared source member independently',near(points([importedPlaced]),[(7,8,9)]) and importedCopy.OM9CopiedDefinitionSourceUUID==importedDefinition.OM9DefinitionUUID and importedCopy.Group[0].LinkedObject!=foreignProxy.LinkedObject)
+        curveDoc=App.newDocument('NativeProxyCurve');curveSource=Path(tempfile.gettempdir())/'om9-shared-rational-curve.3dm';curveBytes=curveSource.read_bytes()
+        curveRoots=ThreeDm.import_file(str(curveSource),curveDoc,mode='preserve')
+        curveProxy=next(o for o in curveDoc.Objects if getattr(o,'OM9DefinitionMemberProxy',False));curveCanonical=curveProxy.LinkedObject
+        curveRecord=json.loads(curveCanonical.OM9SourceRecord)
+        curveDefinition=ThreeDm.create_definition(curveDoc,[curveProxy],'Native rational proxy');curvePlaced=ThreeDm.create_instance(curveDefinition)
+        ThreeDm.export_preserved(str(target),[curvePlaced]);curveReport=json.loads(native.inspect3dm(str(target)));curveOutput=next(r for r in curveReport['records'] if r['role']=='definition-member')
+        check('unchanged rational proxy preserves native class knots weights and payload checksum',curveOutput['class_name']=='ON_NurbsCurve' and curveOutput['geometry_crc']==curveRecord['geometry_crc'])
+        curveCopy=ThreeDm.copy_definition(curveDefinition,'Native rational proxy copy');curveCopyPlaced=ThreeDm.create_instance(curveCopy)
+        ThreeDm.export_preserved(str(target),[curveCopyPlaced]);curveReport=json.loads(native.inspect3dm(str(target)));curveOutput=next(r for r in curveReport['records'] if r['role']=='definition-member')
+        check('copied unchanged rational proxy retains original native payload',curveOutput['class_name']=='ON_NurbsCurve' and curveOutput['geometry_crc']==curveRecord['geometry_crc'] and curveSource.read_bytes()==curveBytes)
+        curveName=curveCopyPlaced.Name;curveDoc.saveAs(str(out/'native-curve.FCStd'));App.closeDocument(curveDoc.Name);curveDoc=App.openDocument(str(out/'native-curve.FCStd'));curveCopyPlaced=curveDoc.getObject(curveName)
+        ThreeDm.export_preserved(str(target),[curveCopyPlaced]);curveReport=json.loads(native.inspect3dm(str(target)));curveOutput=next(r for r in curveReport['records'] if r['role']=='definition-member')
+        check('FCStd retains native two dimensional rational curve payload',curveOutput['class_name']=='ON_NurbsCurve' and curveOutput['geometry_crc']==curveRecord['geometry_crc'])
+        mixedDoc=App.newDocument('ProxyMixedGeometry');mixedSource=Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm';mixedBytes=mixedSource.read_bytes()
+        mixedRoot=ThreeDm.import_file(str(mixedSource),mixedDoc,mode='preserve')[0]
+        mixedDefinition=state._instance_definition(mixedRoot,json.loads(mixedRoot.OM9SourceRecord))
+        cad=next(o for o in mixedDefinition.Group if o.isDerivedFrom('Part::Feature'));mesh=next(o for o in mixedDefinition.Group if o.isDerivedFrom('Mesh::Feature'))
+        cad.Shape=Part.makeBox(4,5,6);cad.Placement.Base=App.Vector(5,0,0);mesh.Placement.Base=App.Vector(5,0,0)
+        mixedProxies=[]
+        for payload in (cad,mesh):
+            p=mixedDoc.addObject('App::Link','MixedSourceProxy');p.setLink(payload);p.LinkTransform=True
+            state._property(p,'Bool','OM9DefinitionMemberProxy',True);state._property(p,'String','OM9ProxyMetadata',json.dumps(state.source_metadata(p),sort_keys=True))
+            p.Placement.Base=App.Vector(7,8,9);p.ScaleVector=App.Vector(-2,3,4);mixedProxies.append(p)
+        mixedNew=ThreeDm.create_definition(mixedDoc,mixedProxies,'New mixed proxy definition')
+        mixedRoot.OM9DefinitionTargetUUID=mixedNew.OM9NewDefinitionUUID;mixedDoc.recompute()
+        sentinel=target.read_bytes();refused=False
+        try:ThreeDm.export_preserved(str(target),[mixedRoot])
+        except RuntimeError as error:refused='inward solid' in str(error)
+        check('promoted inward CAD proxy preservation refuses atomically',refused and target.read_bytes()==sentinel)
+        def mixed_stage(objects):
+            with tempfile.TemporaryDirectory(prefix='om9-proxy-graph-') as directory:native.writeGeometryStaging3dm(json.dumps(state.preservation_request(objects,directory)),str(target))
+            if json.loads(native.inspect3dm(str(target)))['source_version']!=80:raise AssertionError('Internal staging must be SDK80')
+        safe=out/'promoted-proxy-geometry-rhino5.3dm';ThreeDm.export_file(str(safe),[mixedRoot],geometry_only=True);safe_read=json.loads(native.read3dm(str(safe),str(out)));safe_shape=Part.Shape();safe_shape.read(next(i['brep'] for i in safe_read['items'] if 'brep' in i))
+        check('promoted proxy Geometry-only Rhino5 retains signed volume and native mesh',json.loads(native.inspect3dm(str(safe)))['source_version'] in (5,50) and abs(safe_shape.Volume+2880)<1e-6 and len(safe_read['items'])==2 and any('vertices' in i for i in safe_read['items']))
+        mixed_stage([mixedRoot]);mixedRead=json.loads(native.read3dm(str(target),str(out)));mixedReport=json.loads(native.inspect3dm(str(target)))
+        def volumes(read):
+            answer=[]
+            for item in read['items']:
+                if 'brep' in item:
+                    shape=Part.Shape();shape.read(item['brep']);answer.append(abs(shape.Volume))
+            return answer
+        check('promoted mixed proxy exports current reflected CAD and mesh',len(mixedRead['items'])==2 and len(volumes(mixedRead))==1 and abs(volumes(mixedRead)[0]-2880)<1e-6 and any('vertices' in i for i in mixedRead['items']))
+        check('source affine preview follows a new definition containing proxies',mixedRoot.OM9PreviewStatus=='Current canonical members' and abs(abs(next(o for o in mixedRoot.Group if o.isDerivedFrom('Part::Feature')).Shape.Volume)-2880)<1e-6)
+        check('new mixed proxy graph excludes original canonical geometry',len(mixedReport['records'])==3 and all(r['source_uuid'] not in (cad.OM9SourceUUID,mesh.OM9SourceUUID) for r in mixedReport['records']))
+        mixedCopy=ThreeDm.copy_definition(mixedNew,'Copied mixed proxy definition');copiedCAD=next(p.LinkedObject for p in mixedCopy.Group if p.LinkedObject.isDerivedFrom('Part::Feature'));copiedMesh=next(p.LinkedObject for p in mixedCopy.Group if p.LinkedObject.isDerivedFrom('Mesh::Feature'))
+        copiedCAD.Shape=Part.makeBox(1,2,3);copiedMesh.Placement.Base=App.Vector(1,2,3);mixedCopyPlaced=ThreeDm.create_instance(mixedCopy,App.Placement(App.Vector(100,200,300),App.Rotation()));mixedDoc.recompute()
+        mixed_stage([mixedCopyPlaced]);copiedRead=json.loads(native.read3dm(str(target),str(out)))
+        check('copied CAD proxy exports independent geometry under reflected scale',len(volumes(copiedRead))==1 and abs(volumes(copiedRead)[0]-144)<1e-6 and abs(cad.Shape.Volume-120)<1e-7)
+        copiedVertices=next(i['vertices'] for i in copiedRead['items'] if 'vertices' in i)
+        check('copied mesh proxy exports independent canonical placement once',near([App.Vector(*p) for p in copiedVertices],[(105,214,321),(101,214,321),(105,223,321)]) and (mesh.Placement.Base-App.Vector(5,0,0)).Length<1e-7)
+        check('mixed proxy creation and copy leave native source immutable',mixedSource.read_bytes()==mixedBytes)
+        nestedDoc=App.newDocument('ProxyNestedReference');nestedSource=Path(tempfile.gettempdir())/'om9-merge-depth2-2.3dm';nestedBytes=nestedSource.read_bytes()
+        nestedRoot=ThreeDm.import_file(str(nestedSource),nestedDoc,mode='preserve')[0]
+        nestedMember=next(o for o in nestedDoc.Objects if getattr(o,'OM9SourceClass','')=='ON_InstanceRef' and json.loads(o.OM9SourceRecord)['role']=='definition-member')
+        nestedProxy=nestedDoc.addObject('App::Link','NestedMemberProxy');nestedProxy.setLink(nestedMember);nestedProxy.LinkTransform=True
+        state._property(nestedProxy,'Bool','OM9DefinitionMemberProxy',True);state._property(nestedProxy,'String','OM9ProxyMetadata',json.dumps(state.source_metadata(nestedProxy),sort_keys=True))
+        nestedProxy.Placement.Base=App.Vector(7,8,9);nestedProxy.ScaleVector=App.Vector(-2,3,4)
+        nestedDefinition=ThreeDm.create_definition(nestedDoc,[nestedProxy],'New nested proxy');nestedPlaced=ThreeDm.create_instance(nestedDefinition,App.Placement(App.Vector(10,20,30),App.Rotation()))
+        check('new instance-reference proxy preserves nested native target and matrix',near(points([nestedPlaced]),[(15,34,51)]))
+        nestedCopy=ThreeDm.copy_definition(nestedDefinition,'Copied nested proxy');nestedCopiedReference=nestedCopy.Group[0].LinkedObject;nestedCopiedLeaf=nestedCopiedReference.LinkedObject
+        nestedCopiedLeaf.Group[0].Shape=Part.Vertex(App.Vector(7,8,9));nestedCopyPlaced=ThreeDm.create_instance(nestedCopy,App.Placement(App.Vector(100,200,300),App.Rotation()));nestedDoc.recompute()
+        check('proxy family deep copy independently retargets nested source reference',near(points([nestedCopyPlaced]),[(93,232,345)]) and nestedCopiedLeaf!=nestedMember.LinkedObject and 'OM9NewDefinitionUUID' in nestedCopiedLeaf.PropertiesList)
+        check('nested proxy operations retain source archive unchanged',nestedSource.read_bytes()==nestedBytes)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

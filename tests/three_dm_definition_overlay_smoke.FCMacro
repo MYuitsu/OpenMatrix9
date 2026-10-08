@@ -1,0 +1,42 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('DefinitionOverlays')
+        source=Path(tempfile.gettempdir())/'om9-definition-overlays.3dm';original=source.read_bytes()
+        objects=ThreeDm.import_file(str(source),doc,mode='preserve');links=[o for o in objects if o.isDerivedFrom('App::Link')]
+        definition=links[0].LinkedObject;removed=definition.Group[0];kept=definition.Group[1]
+        definition.removeObject(removed);definition.Label='Definition Nhẫn'
+        target=out/'definitions.3dm';ThreeDm.export_preserved(str(target),links)
+        report=json.loads(native.inspect3dm(str(target)))
+        check('removed member omitted from shared block export',len(report['records'])==3 and all(r['source_uuid']!=removed.OM9SourceUUID for r in report['records']))
+        check('definition name and identity preserved',any(r['source_uuid']==definition.OM9DefinitionUUID and r['name']=='Definition Nhẫn' for r in report['components']))
+        available=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Point' and o.OM9ArchiveOwner==links[0].OM9ArchiveOwner and abs(o.Shape.Vertexes[0].Point.z-3)<1e-7)
+        definition.addObject(available);definition.Group=[available,kept];ThreeDm.export_preserved(str(target),links)
+        report=json.loads(native.inspect3dm(str(target)))
+        check('added source member order retained',next(r for r in report['components'] if r['source_uuid']==definition.OM9DefinitionUUID)['member_uuids']==[available.OM9SourceUUID,kept.OM9SourceUUID])
+        check('source snapshot unchanged',source.read_bytes()==original)
+        names=[o.Name for o in links];doc.saveAs(str(out/'definition.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'definition.FCStd'));links=[doc.getObject(n) for n in names];definition=links[0].LinkedObject
+        ThreeDm.export_preserved(str(target),links);check('membership persists through FCStd',len(json.loads(native.inspect3dm(str(target)))['records'])==4)
+        for member in list(definition.Group):definition.removeObject(member)
+        ThreeDm.export_preserved(str(target),links);report=json.loads(native.inspect3dm(str(target)))
+        check('empty block keeps both structural placements',len(report['records'])==2 and all(r['class_name']=='ON_InstanceRef' for r in report['records']))
+        reimported=ThreeDm.import_file(str(target),doc,mode='preserve')
+        check('empty block reimport remains structural',len(reimported)==2 and all(o.isDerivedFrom('App::Link') and not o.LinkedObject.Group for o in reimported))
+        definition.Placement.Base=App.Vector(1,0,0);ThreeDm.export_preserved(str(target),links)
+        check('empty links export with definition placement',len(json.loads(native.inspect3dm(str(target)))['records'])==2)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -1,0 +1,35 @@
+import FreeCAD as App,FreeCADGui as Gui
+import json,os,tempfile,traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import ThreeDm,OpenMatrix9Gui as native,ThreeDmHatch as adapter
+        for unit in ('mm','cm'):
+            source=Path(tempfile.gettempdir())/('om9-hatch-shared-'+unit+'.3dm');immutable=source.read_bytes();external=out/(unit+'-source.3dm');external.write_bytes(immutable);doc=App.newDocument('SharedCurrent'+unit)
+            ThreeDm.import_file(str(external),doc,mode='preserve');canonical=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Hatch');proxy,sibling=[o for o in doc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject==canonical]
+            canonical.OM9HatchOrigin=App.Vector(20,30,40);canonical.OM9HatchBasePoint=App.Vector(3,4,0);canonical.OM9HatchScale=0.00001;canonical.OM9HatchPattern='Grid60 [Rhino]';canonical.OM9BlockMemberPlacement.Base=App.Vector(1,2,3);proxy.Placement.Base=App.Vector(7,8,9);proxy.ScaleVector=App.Vector(-2,3,4);doc.recompute();target=out/(unit+'.3dm')
+            def export(objects):
+                ThreeDm.export_file(str(target),objects);report=json.loads(native.inspect3dm(str(target)));return next(r for r in report['records'] if r['class_name']=='ON_Hatch')
+            row=export([proxy]);check(unit+' reflected shared proxy applies edited current plane before affine',row['hatch_current']['plane'][:3]==[-35,104,181] and row['hatch']['loops'][0]['class_name']=='ON_NurbsCurve')
+            row=export([sibling]);check(unit+' sibling shares edited canonical fields with independent placement',row['hatch_current']['plane'][:3]==[21,32,43] and row['hatch_current']['base_point']==[3,4] and row['hatch_current']['scale']==0.00001)
+            definition=ThreeDm.create_definition(doc,[proxy],'Shared edited Hatch');placed=ThreeDm.create_instance(definition,App.Placement(App.Vector(100,200,300),App.Rotation()));row=export([placed]);check(unit+' promoted edited shared proxy retains native local fields',row['role']=='definition-member' and row['hatch_current']['plane'][:3]==[-35,104,181])
+            copied=ThreeDm.copy_definition(definition,'Independent edited Hatch');copiedCanonical=copied.Group[0].LinkedObject;copiedCanonical.OM9HatchOrigin=App.Vector(70,80,90);copiedPlaced=ThreeDm.create_instance(copied);doc.recompute();row=export([copiedPlaced]);check(unit+' copied shared family uses its independent native current plane',row['hatch_current']['plane'][:3]==[-135,254,381] and copiedCanonical!=canonical)
+            check(unit+' shared family edits preserve sibling source and immutable bytes',canonical.OM9HatchOrigin==App.Vector(20,30,40) and source.read_bytes()==immutable and export([placed])['hatch_current']['plane'][:3]==[-35,104,181])
+            name=copiedPlaced.Name;saved=out/(unit+'.FCStd');doc.saveAs(str(saved));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(saved));row=export([doc.getObject(name)]);check(unit+' shared current fields survive FCStd without source path',not external.exists() and row['hatch_current']['plane'][:3]==[-135,254,381]);App.closeDocument(doc.Name)
+            doc=App.newDocument('GradientCurrent'+unit);gradientSource=Path(tempfile.gettempdir())/('om9-hatch-current-gradient-'+unit+'.3dm');roots=ThreeDm.import_file(str(gradientSource),doc,mode='preserve');gradient=next(o for o in roots if json.loads(o.OM9SourceRecord)['hatch']['gradient_type']!=0)
+            check(unit+' unverified gradient imports retained without ordinary field adapter',not adapter.is_adapter(gradient) and 'hatch_current_unavailable' in json.loads(gradient.OM9SourceRecord))
+            sentinel=target.read_bytes();failed=False
+            try:ThreeDm.export_file(str(target),[gradient])
+            except RuntimeError:failed=True
+            check(unit+' gradient Rhino5 output refuses before replacement',failed and target.read_bytes()==sentinel);App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

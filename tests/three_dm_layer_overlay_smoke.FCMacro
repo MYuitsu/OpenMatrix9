@@ -1,0 +1,46 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def set_layer(obj,path):
+    if not hasattr(obj,'OM9LayerPath'):obj.addProperty('App::PropertyString','OM9LayerPath')
+    obj.OM9LayerPath=path
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, OpenMatrix9Gui as native
+        doc=App.newDocument('LayerOverlays')
+        objects=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-nested-blocks.3dm'),doc,mode='preserve')
+        for obj in objects:set_layer(obj,'Jewelry::Nhẫn')
+        target=out/'layers.3dm';ThreeDm.export_preserved(str(target),objects)
+        report=json.loads(native.inspect3dm(str(target)));layers=[r for r in report['components'] if r['class_name']=='ON_Layer']
+        check('shared Unicode hierarchy created once',len(layers)==3 and sum(r['name']=='Nhẫn' for r in layers)==1)
+        imported=ThreeDm.import_file(str(target),doc,mode='preserve')
+        check('hierarchy survives preservation import',all(o.OM9LayerPath=='Jewelry::Nhẫn' for o in imported))
+        import ThreeDmArchiveState as state
+        check('retained block color and lock bound',all(state.source_metadata(o)['color']==[11,22,33] and o.OM9Locked for o in imported))
+        for obj in objects:set_layer(obj,'Blocks')
+        ThreeDm.export_preserved(str(target),objects);report=json.loads(native.inspect3dm(str(target)))
+        check('existing layer reused',sum(r['class_name']=='ON_Layer' for r in report['components'])==1)
+        member=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Point' and o.OM9ArchiveOwner==objects[0].OM9ArchiveOwner)
+        set_layer(member,'Jewelry::Members');ThreeDm.export_preserved(str(target),objects)
+        report=json.loads(native.inspect3dm(str(target)))
+        check('member layer dependency included',any(r['class_name']=='ON_Layer' and r['name']=='Members' for r in report['components']) and not report['issues'])
+        names=[o.Name for o in objects];doc.saveAs(str(out/'layers.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'layers.FCStd'));objects=[doc.getObject(n) for n in names]
+        ThreeDm.export_preserved(str(target),objects)
+        check('layer edits survive FCStd',not json.loads(native.inspect3dm(str(target)))['issues'])
+        old=target.read_bytes();set_layer(objects[0],'Jewelry::::Invalid');rejected=False
+        try:ThreeDm.export_preserved(str(target),objects)
+        except RuntimeError:rejected=True
+        check('invalid hierarchy rejects atomically',rejected and target.read_bytes()==old)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

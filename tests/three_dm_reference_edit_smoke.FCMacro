@@ -1,0 +1,63 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('ReferenceEdit');source=Path(tempfile.gettempdir())/'om9-reference-edit.3dm';original=source.read_bytes();roots=ThreeDm.import_file(str(source),doc,mode='preserve')
+        rigid=next(o for o in roots if o.Label=='Rigid reference');affine=next(o for o in roots if o.Label.startswith('Affine reference'));nested=next(o for o in roots if o.Label=='Nested reference');owner=rigid.OM9ArchiveOwner
+        target=next(o for o in doc.Objects if hasattr(o,'OM9DefinitionUUID') and o.Label=='Reference B');oldId=rigid.LinkedObject.OM9DefinitionUUID;rootId=rigid.OM9SourceUUID
+        rigid.setLink(target);doc.recompute();destination=out/'reference.3dm';ThreeDm.export_preserved(str(destination),[rigid]);report=json.loads(native.inspect3dm(str(destination)))
+        rootRecord=next(r for r in report['records'] if r['source_uuid']==rootId)
+        check('rigid reference target changes with original instance UUID',rootRecord['instance_definition_uuid']==target.OM9DefinitionUUID and len(report['records'])==3)
+        check('obsolete definition omitted from selected closure',all(c['source_uuid']!=oldId for c in report['components']))
+        def read():return json.loads(native.read3dm(str(destination),str(out)))['items']
+        def box(items):
+            item=next(i for i in items if i['class_name']=='ON_Brep');shape=Part.Shape();shape.read(item['brep']);return shape
+        check('retargeted BRep matches live FreeCAD world geometry',abs(box(read()).Volume-Part.getShape(rigid,'',needSubElement=False,transform=True).Volume)<1e-7 and abs(box(read()).BoundBox.XMin-10)<1e-7)
+        target.Placement.Base=App.Vector(7,8,9);rigid.LinkTransform=True;rigid.ScaleVector=App.Vector(-2,3,4);doc.recompute();ThreeDm.export_preserved(str(destination),[rigid])
+        live=Part.getShape(rigid,'',needSubElement=False,transform=True);exported=box(read());check('new target placement and reflected scale compose once',abs(abs(exported.Volume)-abs(live.Volume))<1e-6 and abs(exported.BoundBox.XMin-live.BoundBox.XMin)<1e-6 and abs(exported.BoundBox.ZMax-live.BoundBox.ZMax)<1e-6)
+        affine.OM9PreviewSignature=state.preview_signature(affine,legacy=True);ThreeDm.export_preserved(str(destination),[affine]);check('verified legacy preview fingerprint remains accepted',state._preview_matches(affine))
+        affine.OM9DefinitionTargetUUID=target.OM9DefinitionUUID;doc.recompute();ThreeDm.export_preserved(str(destination),[affine]);items=read();report=json.loads(native.inspect3dm(str(destination)))
+        check('affine target changes without editing native source matrix',any(r['source_uuid']==affine.OM9SourceUUID and r['instance_definition_uuid']==target.OM9DefinitionUUID for r in report['records']) and affine.OM9PreviewStatus=='Current canonical members')
+        result['affine_metrics']=dict(items=len(items),volume=affine.Shape.Volume,solid_volumes=[s.Volume for s in affine.Shape.Solids],preview_min=affine.Shape.BoundBox.XMin,export_min=box(items).BoundBox.XMin)
+        check('affine preview follows mixed CAD mesh target',len(items)==2 and len(affine.Shape.Solids)==1 and abs(affine.Shape.Solids[0].Volume-24)<1e-6 and abs(affine.Shape.BoundBox.XMin-111)<1e-6 and abs(box(items).BoundBox.XMin-111)<1e-6)
+        canonical=nested.LinkedObject.Group[0];canonical.setLink(target);doc.recompute();ThreeDm.export_preserved(str(destination),[nested]);report=json.loads(native.inspect3dm(str(destination)))
+        check('nested reference overlay follows current target graph',any(r['source_uuid']==canonical.OM9SourceUUID and r['instance_definition_uuid']==target.OM9DefinitionUUID for r in report['records']) and all(c['source_uuid']!=oldId for c in report['components']))
+        originalDefinition=next(o for o in doc.Objects if o.isDerivedFrom('App::Part') and getattr(o,'OM9DefinitionUUID','')==oldId);copied=doc.copyObject(canonical,False);copied.setLink(originalDefinition);nested.LinkedObject.addObject(copied);doc.recompute();ThreeDm.export_preserved(str(destination),[nested]);report=json.loads(native.inspect3dm(str(destination)))
+        check('independent copied reference keeps its separate definition target',any(r.get('instance_definition_uuid')==oldId and r['source_uuid'] not in (canonical.OM9SourceUUID,nested.OM9SourceUUID) for r in report['records']) and canonical.LinkedObject==target)
+        points=[i for i in read() if i['class_name']=='ON_Point'];point=Part.Shape();point.read(points[0]['brep']);check('copied retargeted reference exports its own world point',len(points)==1 and (point.Vertexes[0].Point-App.Vector(26,38,50)).Length<1e-7)
+        names=[o.Name for o in (rigid,affine,nested,target)];before=Part.Shape(affine.Shape);before.Placement=App.Placement();(out/'preview-before.brep').write_text(before.copy().exportBrepToString());result['signature_before']=state.preview_signature(affine);result['signature_baseline']=affine.OM9PreviewSignature
+        doc.saveAs(str(out/'reference.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'reference.FCStd'));rigid,affine,nested,target=[doc.getObject(n) for n in names]
+        after=Part.Shape(affine.Shape);after.Placement=App.Placement();(out/'preview-after.brep').write_text(after.copy().exportBrepToString());result['signature_after']=state.preview_signature(affine)
+        ThreeDm.export_preserved(str(destination),[rigid,affine,nested]);report=json.loads(native.inspect3dm(str(destination)));check('reference targets persist through FCStd',sum(r.get('instance_definition_uuid')==target.OM9DefinitionUUID for r in report['records'])==3)
+        originalDefinition=next(o for o in doc.Objects if o.isDerivedFrom('App::Part') and getattr(o,'OM9DefinitionUUID','')==oldId);doc.openTransaction('Retarget block');rigid.setLink(originalDefinition);doc.recompute();doc.commitTransaction();ThreeDm.export_preserved(str(destination),[rigid]);report=json.loads(native.inspect3dm(str(destination)))
+        check('later reference edit exports actual target',next(r for r in report['records'] if r['source_uuid']==rootId)['instance_definition_uuid']==oldId)
+        doc.undo();doc.recompute();ThreeDm.export_preserved(str(destination),[rigid]);report=json.loads(native.inspect3dm(str(destination)));check('reference Undo restores prior native target',next(r for r in report['records'] if r['source_uuid']==rootId)['instance_definition_uuid']==target.OM9DefinitionUUID)
+        doc.redo();doc.recompute();ThreeDm.export_preserved(str(destination),[rigid]);report=json.loads(native.inspect3dm(str(destination)));check('reference Redo restores changed native target',next(r for r in report['records'] if r['source_uuid']==rootId)['instance_definition_uuid']==oldId)
+        second=ThreeDm.import_file(str(source),doc,mode='preserve');foreign=next(o for o in doc.Objects if hasattr(o,'OM9DefinitionUUID') and o.Label.startswith('Reference B') and o.OM9ArchiveOwner!=rigid.OM9ArchiveOwner);saved=destination.read_bytes();rigid.setLink(foreign);doc.recompute();failed=False
+        try:ThreeDm.export_preserved(str(destination),[rigid])
+        except RuntimeError:failed=True
+        check('foreign namespace target rejects atomically',failed and destination.read_bytes()==saved)
+        rigid.setLink(originalDefinition);affine.OM9DefinitionTargetUUID='00000000-0000-0000-0000-000000000000';doc.recompute();failed=False
+        try:ThreeDm.export_preserved(str(destination),[affine])
+        except RuntimeError:failed=True
+        check('missing affine target rejects atomically',failed and destination.read_bytes()==saved)
+        affine.OM9DefinitionTargetUUID=target.OM9DefinitionUUID;doc.recompute();affine.Shape=Part.makeBox(99,98,97);doc.recompute();failed=False
+        try:ThreeDm.export_preserved(str(destination),[affine])
+        except RuntimeError:failed=True
+        check('actual preview geometry edit still rejects atomically after reopen',failed and destination.read_bytes()==saved)
+        check('source fixture remains immutable',source.read_bytes()==original)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

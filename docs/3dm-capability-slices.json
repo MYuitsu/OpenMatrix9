@@ -1,0 +1,450 @@
+{
+  "schema_version": 1,
+  "slices": [
+    {
+      "class_name": "ON_CurveOnSurface",
+      "scope": "No-m_c3 UV Line/Arc/Nurbs/Polyline/PolyCurve on Nurbs/Plane/Rev/Sum/Extrusion surfaces; thirty coherent native child profiles",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "edit": "verified",
+        "write": "verified",
+        "rhino5_write": "verified",
+        "display": "preserved_only"
+      },
+      "evidence_kind": "actual_rhino5_api_gui_and_decoded_native_reimport",
+      "evidence": [
+        "docs/validation/rhino5-exchange-profiles-20261007/matrix30/oracle.json",
+        "docs/validation/rhino5-exchange-profiles-20261007/matrix30/rhino5-exchange-profile-results.json",
+        "docs/validation/rhino5-gui-exchange-profiles-20261007/rhino5-gui-profile-results.json",
+        "docs/validation/opennurbs-current-proofs-20261007/three_dm_rhino5_profiles_smoke.json",
+        "docs/validation/opennurbs-current-proofs-20261007/surface-curve-v5-evidence-native-results.json"
+      ],
+      "limitations": [
+        "Editing covers coupled native placement, Undo/Redo, copy/delete; no general UV editor",
+        "Nested CurveOnSurface children and opaque userdata remain refused",
+        "Some shear/reflection transforms require an explicit type/UV adapter",
+        "GUI SaveAs adds opaque plugin user tables; preserved in FCStd but selected export refuses unknown closure",
+        "Modal warning absence was not confirmed by the user's True-only reply"
+      ]
+    },
+    {
+      "class_name": "ON_CurveOnSurface",
+      "scope": "Coherent optional m_c3 children: exact source preservation with observed Rhino5 reader omission",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "rhino5_write": "incompatible"
+      },
+      "evidence_kind": "actual_rhino5_reader_incompatibility",
+      "evidence": [
+        "docs/validation/rhino5-coherent-reference-20261007/rhino5-coherent-reference-results.json",
+        "docs/validation/opennurbs-current-proofs-20261007/three_dm_surface_curve_v5_smoke.json"
+      ],
+      "limitations": [
+        "Reader incompatibility in Rhino5.14; V5 archive format can encode the source",
+        "No automatic m_c3 removal or native class conversion"
+      ]
+    },
+    {
+      "class_name": "ON_PolyEdgeSegment",
+      "scope": "Nonlinear/reversed native trim correspondence and native/type2 closed-disk seam endpoints",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified"
+      },
+      "evidence_kind": "native_and_freecad_scoped_mapping",
+      "evidence": [
+        "docs/validation/opennurbs-current-proofs-20261007/native-regression.log",
+        "docs/validation/opennurbs-current-proofs-20261007/three_dm_trim_domains_smoke.json"
+      ],
+      "limitations": [
+        "Finite samples with independent physical evaluation; no certified global correspondence for arbitrary singular surfaces",
+        "Actual Rhino5 reference-owner lifecycle remains separate"
+      ]
+    },
+    {
+      "class_name": "ON_Brep",
+      "scope": "Outward disjoint shells, cavity and island-in-cavity analytical fixtures",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "display": "verified",
+        "edit": "verified",
+        "write": "verified",
+        "rhino5_write": "verified"
+      },
+      "evidence_kind": "actual_rhino5_api_gui_and_decoded_native_reimport",
+      "evidence": [
+        "docs/validation/rhino5-exchange-profiles-20261007/profiles5/rhino5-exchange-profile-results.json",
+        "docs/validation/rhino5-gui-exchange-profiles-20261007/rhino5-gui-profile-results.json",
+        "docs/validation/opennurbs-current-proofs-20261007/three_dm_multishell_smoke.json",
+        "docs/validation/opennurbs-current-proofs-20261007/three_dm_rhino5_profiles_smoke.json"
+      ],
+      "limitations": [
+        "Scoped box shell fixtures with complete native graph CRC, topology and signed volume",
+        "Touching/intersecting cases and wider curved-shell coverage remain open",
+        "GUI-added opaque plugin tables remain preserved with atomic refusal of unsafe selected export"
+      ]
+    },
+    {
+      "class_name": "ON_Brep",
+      "scope": "Independent disjoint cylinders and cylindrical/spherical/toroidal cavities, two shells each; native SDK +2 source",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "display": "verified",
+        "edit": "verified",
+        "write": "verified",
+        "rhino5_write": "verified"
+      },
+      "evidence_kind": "actual_rhino5_gui_with_separate_precise_measurement_and_freecad_reimport",
+      "evidence": [
+        "docs/validation/opennurbs-current-proofs-20261007/curved-shell-evidence-native-results.json",
+        "docs/validation/opennurbs-current-proofs-20261007/three_dm_curved_shells_smoke.json",
+        "docs/validation/rhino5-curved-shells-20261007/rhino5-gui-profile-results.json",
+        "docs/validation/rhino5-curved-shells-20261007/freecad-reimport-results.json",
+        "docs/validation/rhino5-curved-shells-20261007/rhino5-curved-precision-results.json",
+        "docs/validation/rhino5-curved-shells-20261007/combined-acceptance.json"
+      ],
+      "limitations": [
+        "Original GUI default-volume comparison remains failed1/4; separate actual Rhino5 read-only precise measurement passes8/8, hash-bound to the same source/saved files; corrected GUI measurement adapter has not been rerun in Rhino",
+        "All four actual Rhino saved BReps keep source UUID and native graph CRC, pass independent precise FreeCAD analytical volume and source-deleted FCStd preservation",
+        "Pole degenerate edges and shared seam pcurves tested on these four analytical fixtures only",
+        "Strict adaptive volume threshold remains 1e-6 mm3; default FreeCAD Shape.Volume has separately recorded quadrature discrepancy",
+        "Exact persisted CAD baseline prevents false replacement after FCStd restore; older projects keep their legacy signature contract",
+        "Small coordinate edit, Undo/Redo and edited FCStd reopen verified on the disjoint cylinder fixture; no general editor claim",
+        "Opaque plugin tables added by Rhino GUI remain preserved; unsafe selected export still refused"
+      ]
+    },
+    {
+      "class_name": "ON_Brep",
+      "scope": "Valid native inward cavity unavailable as an equivalent editable OCCT solid; homogeneous +2 winding classification",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "display": "preserved_only",
+        "edit": "preserved_only",
+        "rhino5_write": "incompatible"
+      },
+      "evidence_kind": "native_and_freecad_scoped_retention",
+      "evidence": [
+        "docs/validation/opennurbs-current-proofs-20261007/multishell-evidence-native-results.json",
+        "docs/validation/opennurbs-current-proofs-20261007/three_dm_multishell_smoke.json",
+        "docs/validation/opennurbs-current-proofs-20261007/three_dm_native_only_members_smoke.json"
+      ],
+      "limitations": [
+        "No editable CAD preview is claimed",
+        "Canonical/selected member, independent copy and promoted proxy compose native placement without changing immutable source capability; Undo/Redo, payload tamper refusal and source-deleted FCStd verified",
+        "Independent real definition-member fixture is V5; reflected internal SDK80 staging and explicit Geometry only V5 output decode as two valid CAD cavities with exact bounds, volume and separate copy UUIDs. Not actual Rhino5 application proof for this member profile",
+        "Existing target sign-reversal guard still refuses inward V5 preservation",
+        "Reflection and +2 direction tested independently in native fixtures"
+      ]
+    },
+    {
+      "class_name": "ON_CurveOnSurface",
+      "scope": "One owning nested no-C3 UV CurveOnSurface: LineCurve on non-rational axis-aligned bilinear 2D unit-domain NURBS inside outer domains; six model-surface controls",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "edit": "verified",
+        "display": "preserved_only",
+        "write": "verified",
+        "rhino5_write": "verified"
+      },
+      "evidence_kind": "actual_rhino5_api_and_gui_decoded_native_and_freecad_nested_lifecycle",
+      "evidence": [
+        "docs/validation/rhino5-nested-profiles-20261007/oracle.json",
+        "docs/validation/opennurbs-current-proofs-20261007/three_dm_nested_surface_curve_smoke.json",
+        "docs/validation/rhino5-nested-profiles-20261007/rhino5-exchange-profile-results.json",
+        "docs/validation/rhino5-nested-profiles-20261007/freecad-reimport-results.json",
+        "docs/validation/2026-10-08-opennurbs-nested-uv-profile.md",
+        "docs/validation/rhino5-nested-writer-20261008/rhino5-gui-profile-results.json",
+        "docs/validation/rhino5-nested-writer-20261008/freecad-results.json"
+      ],
+      "limitations": [
+        "Actual Rhino5 API six source controls and GUI12 unchanged/moved OM9 writer controls verified; full native child fields/UUID/dependencies/CRC retained after SaveAs. Modal warnings not established by log.",
+        "Placement, independent copy/delete, stable copy UUID, Undo/Redo and source-deleted FCStd with export after reopening verified on six controls",
+        "Different child classes, optional C3, rational/sheared/higher-order UV maps, deeper nesting and other nesting locations remain refused",
+        "No general UV editor, CAD preview or certified global mapping claim",
+        "GUI-added opaque plugin tables are preserved in FCStd; selected export still refuses until safe dependency closure is understood"
+      ]
+    },
+    {
+      "class_name": "ON_CurveOnSurface",
+      "scope": "90 owning nested UV controls: single-span unit-domain2x2 positive-weight rational/nonrational or4x4 nonrational UV NURBS with bounded monotone CV grid; positive-weight Line/Arc/Nurbs/Polyline/PolyCurve parameters inside inner domains; six outer surface controls",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "display": "preserved_only",
+        "edit": "verified",
+        "write": "verified",
+        "rhino5_write": "verified"
+      },
+      "evidence_kind": "actual_rhino5_api_and_gui_exact_decoded_native_and_freecad_public_v5_lifecycle",
+      "evidence": [
+        "docs/validation/rhino5-expanded-nested-20261008/oracle.json",
+        "docs/validation/rhino5-expanded-nested-20261008/freecad-results.json",
+        "docs/validation/2026-10-08-opennurbs-expanded-nested-uv.md",
+        "docs/validation/rhino5-expanded-nested-20261008/rhino5-exchange-profile-results.json",
+        "docs/validation/rhino5-expanded-nested-20261008/freecad-api-reimport-results.json",
+        "docs/validation/rhino5-expanded-nested-20261008/freecad-v5-lifecycle-results.json",
+        "docs/validation/2026-10-08-opennurbs-expanded-v5-admission.md",
+        "docs/validation/rhino5-expanded-writer-20261008/rhino5-gui-profile-results.json",
+        "docs/validation/rhino5-expanded-writer-20261008/freecad-results.json",
+        "docs/validation/2026-10-08-opennurbs-expanded-gui-polyedge.md"
+      ],
+      "limitations": [
+        "Actual Rhino5 API90 and exact decoded-tree reimport361 verified; GUI180 unchanged/moved OM9 writer files pass Open/SaveAs/reopen with zero bad objects, full native reimport1081 and FreeCAD900 lifecycle verified. Modal warning absence is not established by the True-only user reply.",
+        "No optional C3, negative weights, quadratic/rational bicubic maps, multiple spans, reversed/nonmonotone UV control grids, deeper nests or parameters outside inner domains admitted",
+        "Placement/copy/delete/Undo/Redo and source-deleted FCStd verified; no UV editor, CAD preview, invertibility or global mapping certification",
+        "Opaque GUI plugin tables remain preserved and unsafe selected export remains atomically refused"
+      ]
+    },
+    {
+      "class_name": "ON_PolyEdgeCurve",
+      "scope": "Standalone reference roots to line/BRep edge/BRep trim owners, proxy subdomains and both directions; six independent controls per root class",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "display": "preserved_only",
+        "edit": "preserved_only",
+        "write": "incompatible",
+        "rhino5_write": "incompatible"
+      },
+      "evidence_kind": "actual_rhino5_invalid_root_and_decoded_loss_with_native_graph_and_freecad_retention",
+      "evidence": [
+        "docs/validation/rhino5-standalone-reference-20261008/oracle.json",
+        "docs/validation/rhino5-standalone-reference-20261008/rhino5-gui-profile-results.json",
+        "docs/validation/rhino5-standalone-reference-20261008/standalone-reference-results.json",
+        "docs/validation/rhino5-standalone-reference-20261008/standalone-reference-results.json.decoded.json",
+        "docs/validation/rhino5-standalone-reference-20261008/freecad-results.json",
+        "docs/validation/2026-10-08-opennurbs-standalone-reference-support.md"
+      ],
+      "limitations": [
+        "Actual Rhino5 roots invalid/Unset with one bad curve each; common writer refuses atomically while exact source remains inside FCStd",
+        "Rhino flattens six single-segment PolyEdgeCurve roots and loses six reversal flags; no target success or original-shape equivalence claim",
+        "No independent editable CAD preview or arbitrary copy/remap/current-edit claim",
+        "General multi-segment and other owner/singular/seam cases remain outside this scoped evidence"
+      ]
+    },
+    {
+      "class_name": "ON_PolyEdgeSegment",
+      "scope": "Standalone reference roots to line/BRep edge/BRep trim owners, proxy subdomains and both directions; six independent controls per root class",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "display": "preserved_only",
+        "edit": "preserved_only",
+        "write": "incompatible",
+        "rhino5_write": "incompatible"
+      },
+      "evidence_kind": "actual_rhino5_invalid_root_and_decoded_loss_with_native_graph_and_freecad_retention",
+      "evidence": [
+        "docs/validation/rhino5-standalone-reference-20261008/oracle.json",
+        "docs/validation/rhino5-standalone-reference-20261008/rhino5-gui-profile-results.json",
+        "docs/validation/rhino5-standalone-reference-20261008/standalone-reference-results.json",
+        "docs/validation/rhino5-standalone-reference-20261008/standalone-reference-results.json.decoded.json",
+        "docs/validation/rhino5-standalone-reference-20261008/freecad-results.json",
+        "docs/validation/2026-10-08-opennurbs-standalone-reference-support.md"
+      ],
+      "limitations": [
+        "Actual Rhino5 roots invalid/Unset with one bad curve each; common writer refuses atomically while exact source remains inside FCStd",
+        "Rhino flattens six single-segment PolyEdgeCurve roots and loses six reversal flags; no target success or original-shape equivalence claim",
+        "No independent editable CAD preview or arbitrary copy/remap/current-edit claim",
+        "General multi-segment and other owner/singular/seam cases remain outside this scoped evidence"
+      ]
+    },
+    {
+      "class_name": "ON_PolyCurve",
+      "scope": "Six ordinary owning PolyCurve roots containing a one-segment PolyEdgeCurve reference child plus owned LineCurve; line/BRep edge/BRep trim owners and both directions",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "display": "preserved_only",
+        "edit": "preserved_only",
+        "write": "incompatible",
+        "rhino5_write": "incompatible"
+      },
+      "evidence_kind": "actual_rhino5_invalid_parent_and_decoded_child_loss_with_native_and_freecad_retention",
+      "evidence": [
+        "docs/validation/rhino5-mixed-reference-20261008/oracle.json",
+        "docs/validation/rhino5-mixed-reference-20261008/rhino5-gui-profile-results.json",
+        "docs/validation/rhino5-mixed-reference-20261008/mixed-reference-results.json",
+        "docs/validation/rhino5-mixed-reference-20261008/mixed-reference-results.json.decoded.json",
+        "docs/validation/rhino5-mixed-reference-20261008/freecad-results.json",
+        "docs/validation/2026-10-08-opennurbs-mixed-reference-support.md"
+      ],
+      "limitations": [
+        "Actual Rhino6/6 roots invalid/Unset; common writer refuses atomically while immutable source stays in FCStd",
+        "SaveAs flattens6 reference children, drops their wrapper metadata and loses3 reversal flags; those3 saved parents are disconnected and host import refuses atomically",
+        "Native original17-point geometry/lifetime verified; no target-success or saved reversed equivalence claim",
+        "Ordinary owned PolyCurve positive writer/geometry reader remains available",
+        "No general CAD editor/copy/remap/other-owner or singular/seam claim"
+      ]
+    },
+    {
+      "class_name": "ON_PolyEdgeCurve",
+      "scope": "Frozen standalone/mixed references: repeated same-archive namespaces and root copies; line/BRep-edge/BRep-trim owners, both directions; internal SDK80 staging",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "display": "preserved_only",
+        "edit": "preserved_only",
+        "write": "incompatible",
+        "rhino5_write": "incompatible"
+      },
+      "evidence_kind": "native_exact_identity_remap_and_actual_freecad_lifecycle_with_earlier_rhino5_incompatibility",
+      "evidence": [
+        "docs/validation/2026-10-08-native-reference-remap.md",
+        "docs/validation/native-reference-remap-20261008/native-results.json",
+        "docs/validation/native-reference-remap-20261008/freecad-results.json",
+        "docs/validation/native-reference-remap-20261008/binding.json"
+      ],
+      "limitations": [
+        "Public V5 target incompatibility unchanged; no new actual Rhino success claim",
+        "Current owner geometry edits refused until verified topology/domain adapter",
+        "Does not close full seam/singular or global correspondence applicability"
+      ]
+    },
+    {
+      "class_name": "ON_PolyEdgeSegment",
+      "scope": "Frozen standalone/mixed references: repeated same-archive namespaces and root copies; line/BRep-edge/BRep-trim owners, both directions; internal SDK80 staging",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "display": "preserved_only",
+        "edit": "preserved_only",
+        "write": "incompatible",
+        "rhino5_write": "incompatible"
+      },
+      "evidence_kind": "native_exact_identity_remap_and_actual_freecad_lifecycle_with_earlier_rhino5_incompatibility",
+      "evidence": [
+        "docs/validation/2026-10-08-native-reference-remap.md",
+        "docs/validation/native-reference-remap-20261008/native-results.json",
+        "docs/validation/native-reference-remap-20261008/freecad-results.json",
+        "docs/validation/native-reference-remap-20261008/binding.json"
+      ],
+      "limitations": [
+        "Public V5 target incompatibility unchanged; no new actual Rhino success claim",
+        "Current owner geometry edits refused until verified topology/domain adapter",
+        "Does not close full seam/singular or global correspondence applicability"
+      ]
+    },
+    {
+      "class_name": "ON_PolyCurve",
+      "scope": "Frozen standalone/mixed references: repeated same-archive namespaces and root copies; line/BRep-edge/BRep-trim owners, both directions; internal SDK80 staging",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "display": "preserved_only",
+        "edit": "preserved_only",
+        "write": "incompatible",
+        "rhino5_write": "incompatible"
+      },
+      "evidence_kind": "native_exact_identity_remap_and_actual_freecad_lifecycle_with_earlier_rhino5_incompatibility",
+      "evidence": [
+        "docs/validation/2026-10-08-native-reference-remap.md",
+        "docs/validation/native-reference-remap-20261008/native-results.json",
+        "docs/validation/native-reference-remap-20261008/freecad-results.json",
+        "docs/validation/native-reference-remap-20261008/binding.json"
+      ],
+      "limitations": [
+        "Public V5 target incompatibility unchanged; no new actual Rhino success claim",
+        "Current owner geometry edits refused until verified topology/domain adapter",
+        "Does not close full seam/singular or global correspondence applicability"
+      ]
+    },
+    {
+      "class_name": "ON_CurveOnSurface",
+      "scope": "Eight no-C3 RevSurface profiles: sphere left/right seam meridians with pole endpoints, sphere equator and cylinder full-circle periodic curves; both directions",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "display": "preserved_only",
+        "edit": "preserved_only",
+        "write": "verified",
+        "rhino5_write": "verified"
+      },
+      "evidence_kind": "actual_rhino5_gui_with_complete_native_decode_and_installed_reimport",
+      "evidence": [
+        "docs/validation/2026-10-08-seam-profiles-preparation.md",
+        "docs/validation/seam-profiles-20261008/oracle.json",
+        "docs/validation/seam-profiles-20261008/freecad-results.json",
+        "docs/validation/seam-profiles-20261008/preparation.json",
+        "docs/validation/seam-profiles-20261008/current-source-binding.json",
+        "docs/validation/2026-10-08-seam-profiles-complete.md",
+        "docs/validation/seam-profiles-20261008/rhino5-gui-profile-results.json",
+        "docs/validation/seam-profiles-20261008/native-rhino-results.json",
+        "docs/validation/seam-profiles-20261008/freecad-rhino-results.json",
+        "docs/validation/seam-profiles-20261008/actual-source-binding.json"
+      ],
+      "limitations": [
+        "No singular PolyEdge trim or arbitrary/global correspondence claim",
+        "No independent CAD editor claim",
+        "Actual GUI plugin payload selected export still refuses if dependencies cannot be established safely"
+      ]
+    },
+    {
+      "class_name": "ON_CurveOnSurface",
+      "scope": "Eight C2 UV references to independent2D line/quadratic owners; bare segment or one-segment wrapper; both directions; repeated imports/root copies in internalSDK80 current graph",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "display": "preserved_only",
+        "edit": "preserved_only",
+        "write": "incompatible",
+        "rhino5_write": "incompatible"
+      },
+      "evidence_kind": "actual_rhino5_invalid_reference_uv_with_native_retention_and_atomic_refusal",
+      "evidence": [
+        "docs/validation/2026-10-08-uv-reference-remap.md",
+        "docs/validation/uv-reference-remap-20261008/oracle.json",
+        "docs/validation/uv-reference-remap-20261008/native-final-results.json",
+        "docs/validation/uv-reference-remap-20261008/freecad-final-results.json",
+        "docs/validation/uv-reference-remap-20261008/current-source-binding.json",
+        "docs/validation/2026-10-08-uv-reference-rhino5.md",
+        "docs/validation/uv-reference-remap-20261008/rhino5-gui-profile-results.json",
+        "docs/validation/uv-reference-remap-20261008/native-rhino-results.json",
+        "docs/validation/uv-reference-remap-20261008/actual-source-binding.json"
+      ],
+      "limitations": [
+        "Current owner geometry edits refused until topology/domain-preserving adapter is verified",
+        "No arbitrary singular trim or global correspondence claim",
+        "Actual8 roots invalid/Unset,8 SaveAs failures; no saved-output reimport exists",
+        "Scoped line/quadratic owner controls only, not every possible UV-reference profile"
+      ]
+    },
+    {
+      "class_name": "ON_Brep",
+      "scope": "Native sphere/capped cylinder BRep seam/singular applicability and actual FreeCAD edited V5 exports; no general PolyEdge reference claim",
+      "axes": {
+        "read": "verified",
+        "preserve": "verified",
+        "display": "verified",
+        "edit": "verified",
+        "write": "verified",
+        "rhino5_write": "verified"
+      },
+      "evidence_kind": "actual_rhino5_gui_with_decoded_topology_common_uv_basis_and_installed_reimport",
+      "evidence": [
+        "docs/validation/2026-10-08-seam-trim-preparation.md",
+        "docs/validation/seam-trim-20261008/native-results.json",
+        "docs/validation/seam-trim-20261008/freecad-final-results.json",
+        "docs/validation/seam-trim-20261008/preparation.json",
+        "docs/validation/2026-10-08-seam-trim-complete.md",
+        "docs/validation/seam-trim-20261008/rhino5-gui-profile-results.json",
+        "docs/validation/seam-trim-20261008/native-rhino-results.json",
+        "docs/validation/seam-trim-20261008/freecad-rhino-results.json",
+        "docs/validation/seam-trim-20261008/actual-source-binding.json"
+      ],
+      "limitations": [
+        "Only two analytic owner geometries and four exchange profiles",
+        "Projected seam samples do not prove arbitrary global trim correspondence",
+        "No generic PolyEdge component owner-edit or singular3D-edge claim",
+        "Rhino inserts exact-equivalent C2 knots in edited cylinder; raw UV payload identity not claimed",
+        "Opaque GUI plugin table selected export guarded; complete saved archive retained in FCStd"
+      ]
+    }
+  ]
+}

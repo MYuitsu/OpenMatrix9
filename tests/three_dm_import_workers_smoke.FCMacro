@@ -1,0 +1,61 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,traceback,hashlib,tempfile,subprocess,shutil,time
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm,ThreeDmArchiveState as state,OpenMatrix9Gui as native
+        fixture=Path('H:/FreeCAD-src/build/import-worker-fixture.3dm');source_hash=hashlib.sha256(fixture.read_bytes()).hexdigest()
+        reports=[]
+        for workers in [1,4]:
+            os.environ['OM9_3DM_WORKERS']=str(workers)
+            with tempfile.TemporaryDirectory() as stage:
+                value=json.loads(native.prepare3dmArchive(str(fixture),stage,0,1))
+                rows=value['prepared_geometry']+value['retained_records']+value['definition_geometry']+value['definition_retained']
+                for row in rows:
+                    row.pop('brep',None)
+                reports.append((value['manifest'],rows))
+        (out/'comparison.json').write_text(json.dumps(reports,indent=2))
+        check('parallel matches serial source records/order/attributes/tolerance',reports[0]==reports[1])
+        check('mixed source contains eight roots/eight members and retained SubD/light/block',len(reports[0][1])==19 and sum(r['capability']=='retained' for r in reports[0][1])==3)
+        doc=App.newDocument('MixedWorkers');objects=ThreeDm.import_file(str(fixture),doc,mode='preserve')
+        check('mixed import retains every source object',len(objects)==11)
+        archive=out/'mixed.FCStd';doc.saveAs(str(archive));App.closeDocument(doc.Name);doc=App.openDocument(str(archive))
+        container=next(o for o in doc.Objects if hasattr(o,'OM9SourceArchive'))
+        check('FCStd embeds unchanged mixed source',hashlib.sha256(Path(container.OM9SourceArchive).read_bytes()).hexdigest()==source_hash)
+        App.closeDocument(doc.Name)
+        # Missing helper is rejected before the FreeCAD transaction; restore it
+        # before any subsequent test or interactive launch.
+        worker=Path(native.__file__).parent/'OM9ThreeDmImportWorker.exe';hidden=worker.with_suffix('.test-disabled')
+        doc=App.newDocument('WorkerFailure');sentinel=doc.addObject('Part::Feature','Sentinel');before=[o.Name for o in doc.Objects]
+        failed=False;worker.rename(hidden)
+        try:
+            try:ThreeDm.import_file(str(fixture),doc,mode='preserve')
+            except RuntimeError as error:failed='worker is missing' in str(error)
+        finally:hidden.rename(worker)
+        check('missing helper leaves existing document unchanged',failed and before==[o.Name for o in doc.Objects])
+        failed=False;worker.rename(hidden);start=time.perf_counter()
+        try:
+            shutil.copyfile('H:/FreeCAD-src/build/3dm-preserve-native/ThreeDmImportFailureWorker.exe',worker)
+            try:ThreeDm.import_file(str(fixture),doc,mode='preserve')
+            except RuntimeError as error:failed='conversion worker failed' in str(error)
+        finally:worker.unlink();hidden.rename(worker)
+        check('nonzero helper exit kills siblings before returning and leaves document unchanged',failed and time.perf_counter()-start<15 and before==[o.Name for o in doc.Objects])
+        # Exercise a real child-process failure, rather than just missing binary.
+        request=out/'invalid-request.json';request.write_text(json.dumps(dict(source=str(out/'missing.3dm'),staging=str(out),scale=0,members=False,ids=['00000000-0000-0000-0000-000000000001'])))
+        target=out/'invalid-result.json';result=subprocess.run([str(worker),str(request),str(target)],capture_output=True,timeout=30)
+        check('worker conversion error exits without successful result',result.returncode!=0 and not target.exists())
+        check('all workers have exited after successful/failed preparation',not subprocess.run(['tasklist','/FI','IMAGENAME eq OM9ThreeDmImportWorker.exe','/FO','CSV'],capture_output=True,text=True).stdout.count('"OM9ThreeDmImportWorker.exe"'))
+        check('source bytes unchanged',hashlib.sha256(fixture.read_bytes()).hexdigest()==source_hash)
+        report['ok']=True
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    os.environ.pop('OM9_3DM_WORKERS',None)
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

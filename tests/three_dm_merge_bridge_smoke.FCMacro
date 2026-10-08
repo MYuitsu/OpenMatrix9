@@ -1,0 +1,46 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback, hashlib
+from pathlib import Path
+from PySide6 import QtCore
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+result = {'checks': []}
+def check(name, passed):
+    result['checks'].append({'name': name, 'passed': bool(passed)})
+    if not passed: raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui as native
+        source = Path(tempfile.gettempdir()) / 'om9-merge-source.3dm'
+        manifest = json.loads(native.inspect3dm(str(source)))
+        namespace = '12345678-1234-1234-1234-123456789abc'
+        record = next(r for r in manifest['records'] if r['class_name'] == 'ON_InstanceRef' and r['role'] == 'top-level')
+        request = {'schema_version': 1, 'sources': [{'namespace': namespace, 'snapshot': str(source), 'archive_sha256': manifest['archive_sha256'], 'scale_mm': manifest['scale_mm']}], 'selected': [{'host_id': 'block', 'namespace': namespace, 'source_uuid': record['source_uuid'], 'action': 'unchanged'}]}
+        before = hashlib.sha256(source.read_bytes()).hexdigest()
+        target = out / 'selected.3dm'
+        native.writePreserved3dm(json.dumps(request), str(target))
+        written = json.loads(native.inspect3dm(str(target)))
+        check('selected native block graph', len(written['records']) == 2 and not written['issues'])
+        check('native structural instance retained', any(r['class_name'] == 'ON_InstanceRef' for r in written['records']))
+        request['selected'][0]['action'] = 'instance'
+        request['selected'][0]['instance_matrix'] = [1,0,0,40,0,1,0,50,0,0,1,60,0,0,0,1]
+        native.writePreserved3dm(json.dumps(request), str(target))
+        import Part
+        prepared = json.loads(native.read3dm(str(target), str(out)))
+        shape = Part.Shape()
+        shape.read(prepared['items'][0]['brep'])
+        check('instance overlay world geometry', len(shape.Vertexes) == 1 and (shape.Vertexes[0].Point-App.Vector(41,52,63)).Length < 1e-8)
+        check('immutable native source', hashlib.sha256(source.read_bytes()).hexdigest() == before)
+        old = target.read_bytes()
+        for bad in ('[]', '{', json.dumps(dict(request, schema_version=2)), ' '*(32*1024*1024+1)):
+            rejected = False
+            try: native.writePreserved3dm(bad, str(target))
+            except RuntimeError: rejected = True
+            check('invalid request preserves target', rejected and target.read_bytes() == old)
+        result['ok'] = True
+    except Exception:
+        result['ok'] = False
+        result['error'] = traceback.format_exc()
+    (out / 'results.json').write_text(json.dumps(result, indent=2))
+    QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000, run)

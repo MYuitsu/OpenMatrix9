@@ -1,0 +1,76 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json,os,tempfile,traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def near(actual,expected):return len(actual)==len(expected) and all(abs(a-b)<1e-10 for a,b in zip(actual,expected))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm,ThreeDmArchiveState as state,ThreeDmPointCloud as adapter,OpenMatrix9Gui as native
+        source=Path(tempfile.gettempdir())/'om9-native-point-cloud-mm.3dm';original=source.read_bytes();external=out/'source.3dm';external.write_bytes(original)
+        doc=App.newDocument('NativePointCloud');doc.UndoMode=1;roots=ThreeDm.import_file(str(external),doc,mode='preserve');cloud=next(o for o in roots if o.OM9SourceClass=='ON_PointCloud' and not o.OM9CloudValues);intensity=next(o for o in roots if o.OM9SourceClass=='ON_PointCloud' and o.OM9CloudValues);member=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_PointCloud' and o not in roots);block=next(o for o in roots if o.OM9SourceClass=='ON_InstanceRef')
+        check('native PointCloud uses persistent double properties without Shape or float kernel',adapter.is_adapter(cloud) and adapter.is_adapter(member) and not hasattr(cloud,'Shape') and cloud.getTypeIdOfProperty('OM9CloudPoints')=='App::PropertyVectorList' and cloud.getTypeIdOfProperty('OM9CloudNormals')=='App::PropertyVectorList')
+        check('all native optional arrays and ordered plane fields are bound',near(cloud.OM9CloudPoints[0],[1.123456789012345,2,3]) and near(cloud.OM9CloudNormals[0],[2,0,0]) and cloud.OM9CloudRGBA==[17,31,47,53,101,151,201,0] and cloud.OM9CloudOrdered and cloud.OM9CloudHasPlane and len(cloud.OM9CloudPlane)==16)
+        check('native intensity values import in double properties',near(intensity.OM9CloudValues,[0.123456789012345,-4.234567890123456]))
+        check('native colored PointSet display is attached',cloud.ViewObject.Proxy.__class__.__module__=='ThreeDmPointCloud' and cloud.ViewObject.Proxy.points.numPoints.getValue()==2 and abs(cloud.ViewObject.Proxy.material.transparency.getValues()[0]-53/255)<1e-7)
+        target=out/'point-cloud.3dm';counter=[0]
+        def export(objects):ThreeDm.export_file(str(target),objects);return json.loads(native.inspect3dm(str(target)))
+        def record(report,identity=None):return next(r for r in report['records'] if r['class_name']=='ON_PointCloud' and (identity is None or r['source_uuid']==identity))
+        def payload(identity):
+            counter[0]+=1;staging=out/('oracle-'+str(counter[0]));staging.mkdir();prepared=json.loads(native.prepare3dmArchive(str(target),str(staging),0,1));item=prepared['point_cloud_data'][identity];return adapter.read_data(item['file'],item['sha256'])
+        def current(objects):report=export(objects);row=record(report);return row,payload(row['source_uuid'])
+        baseline=export([cloud]);baseRecord=record(baseline);baseFields=payload(cloud.OM9SourceUUID);signature=cloud.OM9SourceSignature
+        check('unchanged cloud preserves exact native per-array hashes and flags',baseRecord['point_cloud']==json.loads(cloud.OM9SourceRecord)['point_cloud'] and baseFields==adapter.fields(cloud))
+        doc.openTransaction('Edit native PointCloud');cloud.OM9CloudPoints=[App.Vector(4.123456789012345,5,6),App.Vector(7,8.234567890123456,9)];cloud.OM9CloudNormals=[App.Vector(0,2,0),App.Vector()];cloud.OM9CloudRGBA=[3,7,11,97,113,127,139,0];cloud.OM9CloudOrdered=False;cloud.OM9BlockMemberPlacement=App.Placement(App.Vector(10,20,30),App.Rotation(App.Vector(0,0,1),90));doc.recompute();doc.commitTransaction();editedRecord,edited=current([cloud])
+        check('edited double point arrays and native delta compose once',near(edited['points'][0],[5,24.123456789012345,36]) and near(edited['points'][1],[1.765432109876544,27,39]))
+        check('current native normal arrays rotate without changing zero or magnitude',near(edited['normals'][0],[-2,0,0]) and edited['normals'][1]==[0,0,0])
+        check('current RGBA bytes ordered and full plane export',edited['colors']==cloud.OM9CloudRGBA and not edited['ordered'] and near(edited['plane'][:3],[-10,30,60]))
+        check('native and attribute user text and immutable baseline survive current edits',editedRecord['user_strings']==baseRecord['user_strings'] and editedRecord['attribute_user_strings']==baseRecord['attribute_user_strings'] and cloud.OM9SourceSignature==signature)
+        doc.undo();doc.recompute();check('Undo restores complete current cloud fields',current([cloud])[1]==baseFields)
+        doc.redo();doc.recompute();check('Redo restores complete current cloud fields',current([cloud])[1]==edited)
+        cloud.ViewObject.OM9HiddenPoints=[True,False];cloud.ViewObject.PointSize=9;doc.recompute();check('local hiding changes only PointSet display',cloud.ViewObject.Proxy.points.numPoints.getValue()==1 and current([cloud])[1]==edited)
+        parent=doc.addObject('App::Part','Parent');parent.addObject(cloud);parent.Placement.Base=App.Vector(100,200,300);doc.recompute();check('physical parent and native double current arrays compose once',near(current([cloud])[1]['points'][0],[105,224.123456789012345,336]))
+        copy=doc.copyObject(cloud,False);copy.OM9CloudPoints=[App.Vector(11.123456789012345,12,13),App.Vector(14,15,16)];copy.OM9BlockMemberPlacement=App.Placement();doc.recompute();copyRecord,copyFields=current([copy]);check('independent source copy exports own current double arrays and identity',copyRecord['source_uuid']!=cloud.OM9SourceUUID and near(copyFields['points'][0],[11.123456789012345,12,13]))
+        member.OM9CloudPoints=[App.Vector(7.123456789012345,8,9),App.Vector(10,11,12)];member.OM9CloudRGBA=[2,4,6,8,10,12,14,16];member.OM9BlockMemberPlacement.Base=App.Vector(1,2,3);doc.recompute();memberReport=export([block]);memberRecord=record(memberReport,member.OM9SourceUUID);memberFields=payload(member.OM9SourceUUID)
+        check('canonical cloud member uses definition-local current arrays',memberRecord['role']=='definition-member' and near(memberFields['points'][0],[8.123456789012345,10,12]) and memberFields['colors']==member.OM9CloudRGBA)
+        selected,selectedFields=current([member]);check('selected cloud member becomes independent root without ancestors',selected['role']=='top-level' and selected['source_uuid']!=member.OM9SourceUUID and selectedFields==memberFields and len(json.loads(native.inspect3dm(str(target)))['records'])==1)
+        check('selected current member repeat UUID is stable',current([member])[0]['source_uuid']==selected['source_uuid'])
+        definition=next(o for o in doc.Objects if hasattr(o,'OM9DefinitionUUID'));own=state.copy_definition(definition,'Copied cloud definition');ownMember=own.Group[0];ownMember.OM9CloudRGBA=[19,23,29,31,37,41,43,47];ownInstance=state.create_instance(own);doc.recompute();ownReport=export([ownInstance]);ownRecord=record(ownReport);ownFields=payload(ownRecord['source_uuid']);check('copied definition retains independent current RGBA arrays',ownFields['colors']==ownMember.OM9CloudRGBA and member.OM9CloudRGBA!=ownMember.OM9CloudRGBA)
+        check('copied definition native delta is applied once',near(ownFields['points'][0],[8.123456789012345,10,12]))
+        proxy=doc.addObject('App::Link','SharedPointCloud');proxy.setLink(member);proxy.Placement.Base=App.Vector(50,60,70);proxy.ScaleVector=App.Vector(-2,3,4);state._property(proxy,'Bool','OM9DefinitionMemberProxy',True);state._property(proxy,'String','OM9ProxyMetadata',json.dumps(state.source_metadata(proxy),sort_keys=True));proxyDefinition=state.create_definition(doc,[proxy],'Shared cloud definition');doc.recompute();proxyRecord,proxyFields=current([proxy]);check('selected physical proxy maps current points under reflected nonuniform scale',near(proxyFields['points'][0],[33.75308642197531,90,118]) and proxyFields['colors']==member.OM9CloudRGBA)
+        check('physical proxy native normals preserve magnitude and zero',near(proxyFields['normals'][0],[-2,0,0]) and proxyFields['normals'][1]==[0,0,0])
+        proxyInstance=state.create_instance(proxyDefinition);doc.recompute();proxyReport=export([proxyInstance]);check('shared definition exports current native fields once',payload(record(proxyReport)['source_uuid'])==proxyFields)
+        second=ThreeDm.import_file(str(source),doc,mode='preserve');secondCloud=next(o for o in second if o.OM9SourceClass=='ON_PointCloud' and not o.OM9CloudValues);secondCloud.OM9CloudPoints=[App.Vector(2,3,4),App.Vector(5,6,7)];doc.recompute();merged=export([cloud,secondCloud]);mergedRows=[r for r in merged['records'] if r['class_name']=='ON_PointCloud'];check('same-source namespaces preserve distinct current points and native identities',len(mergedRows)==2 and len({r['source_uuid'] for r in mergedRows})==2 and sorted(round(payload(r['source_uuid'])['points'][0][0],10) for r in mergedRows)==[2,105])
+        intensity.OM9CloudValues=[1.987654321098765,2.345678901234567];external.unlink();names=[o.Name for o in (cloud,member,block,copy,ownInstance,intensity)];saved=out/'point-cloud.FCStd';doc.saveAs(str(saved));App.closeDocument(doc.Name);doc=App.openDocument(str(saved));cloud,member,block,copy,ownInstance,intensity=[doc.getObject(n) for n in names]
+        check('current double point arrays persist after source removal and FCStd reopen',not external.exists() and list(cloud.OM9CloudPoints[0])==[4.123456789012345,5,6] and near(current([cloud])[1]['points'][0],[105,224.123456789012345,336]))
+        check('intensity double current values persist independently in FCStd',intensity.OM9CloudValues==[1.987654321098765,2.345678901234567])
+        result['reopened_display']=dict(module=cloud.ViewObject.Proxy.__class__.__module__,hidden=list(cloud.ViewObject.OM9HiddenPoints),size=cloud.ViewObject.PointSize,count=cloud.ViewObject.Proxy.points.numPoints.getValue())
+        check('PointSet display local hiding and size are reconstructed',cloud.ViewObject.Proxy.__class__.__module__=='ThreeDmPointCloud' and list(cloud.ViewObject.OM9HiddenPoints)==[True,False] and cloud.ViewObject.PointSize==9 and cloud.ViewObject.Proxy.points.numPoints.getValue()==1)
+        ownReport=export([ownInstance]);check('definition copy retains independent RGBA after reopen',payload(record(ownReport)['source_uuid'])['colors']==[19,23,29,31,37,41,43,47] and member.OM9CloudRGBA==[2,4,6,8,10,12,14,16])
+        def rejected(objects):
+            sentinel=target.read_bytes();failed=False
+            try:export(objects)
+            except Exception:failed=True
+            return failed and target.read_bytes()==sentinel
+        check('unverified Rhino5 intensity compatibility rejects atomically',rejected([intensity]))
+        intensity.OM9CloudValues=[];doc.recompute();check('explicit current intensity clearing exports without changing included source',current([intensity])[1]['values']==[] and state._hash(intensity.OM9ArchiveOwner.OM9SourceArchive)==intensity.OM9ArchiveOwner.OM9ArchiveHash)
+        for prop,value in [('OM9CloudPoints',[]),('OM9CloudNormals',[App.Vector(1,2,3)]),('OM9CloudRGBA',[256]),('OM9CloudValues',[1]),('OM9CloudPlane',[0]*16),('OM9PointCloudSchema',2)]:
+            old=getattr(cloud,prop);setattr(cloud,prop,value);check(prop+' invalid current fields reject atomically',rejected([cloud]));setattr(cloud,prop,old)
+        stored=cloud.OM9SourceRecord;bad=json.loads(stored);bad['point_cloud']['points_sha256']='tampered';cloud.OM9SourceRecord=json.dumps(bad,sort_keys=True);check('verified source record tampering rejects atomically',rejected([cloud]));cloud.OM9SourceRecord=stored
+        cloud.addProperty('App::PropertyInteger','OM9TextDotSchema');cloud.OM9TextDotSchema=1;check('ambiguous native adapter markers reject atomically',rejected([cloud]));cloud.removeProperty('OM9TextDotSchema')
+        old=cloud.OM9SourceSignature;cloud.OM9SourceSignature='';check('missing native edit baseline rejects atomically',rejected([cloud]));cloud.OM9SourceSignature=old
+        proxy=doc.getObject('SharedPointCloud');proxy.ScaleVector=App.Vector(0,3,4);check('singular selected native proxy rejects atomically',rejected([proxy]));proxy.ScaleVector=App.Vector(-2,3,4)
+        cm=Path(tempfile.gettempdir())/'om9-native-point-cloud-cm.3dm';cmOriginal=cm.read_bytes();cmDoc=App.newDocument('CentimeterPointCloud');cmCloud=next(o for o in ThreeDm.import_file(str(cm),cmDoc,mode='preserve') if o.OM9SourceClass=='ON_PointCloud' and not o.OM9CloudValues);check('centimeter native points and active plane normalize to millimeters',near(cmCloud.OM9CloudPoints[0],[11.23456789012345,20,30]) and near(cmCloud.OM9CloudPlane[:3],[100,200,300]) and near(cmCloud.OM9CloudNormals[0],[2,0,0]))
+        cmCloud.OM9CloudPoints=[App.Vector(1.123456789012345,2,3),App.Vector(4,5,6)];cmCloud.OM9BlockMemberPlacement.Base=App.Vector(4,5,6);cmDoc.recompute();check('edited centimeter cloud current points remain millimeters',near(current([cmCloud])[1]['points'][0],[5.123456789012345,7,9]))
+        cmCloud.OM9CloudNormals=[];cmCloud.OM9CloudRGBA=[];cmCloud.OM9CloudHasPlane=False;cmDoc.recompute();optional=current([cmCloud])[1];check('optional native arrays may be explicitly cleared without point loss',optional['normals']==[] and optional['colors']==[] and not optional['has_plane'] and len(optional['points'])==2)
+        check('native fixtures and included provenance stay immutable',source.read_bytes()==original and cm.read_bytes()==cmOriginal and state._hash(cloud.OM9ArchiveOwner.OM9SourceArchive)==cloud.OM9ArchiveOwner.OM9ArchiveHash)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

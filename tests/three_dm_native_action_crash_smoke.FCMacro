@@ -1,0 +1,83 @@
+"""Real queued Qt action entry: no surrounding Python Gui.runCommand call."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets
+from pathlib import Path
+import os,json,hashlib,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+source=Path('C:/Users/nguye/Downloads/nhan oval 11.91x8.37x4.97.3dm')
+result={'checks':[],'source':str(source),'phase':'startup'}
+source_hash=hashlib.sha256(source.read_bytes()).hexdigest()
+QtWidgets.QApplication.setAttribute(QtCore.Qt.ApplicationAttribute.AA_DontUseNativeDialogs,True)
+App.ParamGet('User parameter:BaseApp/Preferences/Dialog').SetBool('DontUseNativeDialog',True)
+def save():
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)));save()
+    if not value:raise AssertionError(name)
+def finish(error=None):
+    result.update(ok=error is None,module=native.__file__,source_sha256=source_hash)
+    if error:result['error']=error
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+def queue(action):
+    check('native QAction queued without Gui.runCommand',QtCore.QMetaObject.invokeMethod(action,'trigger',QtCore.Qt.ConnectionType.QueuedConnection))
+    QtCore.QTimer.singleShot(150,answer)
+def answer():
+    try:
+        if result.get('ok') is not None:return
+        alerts=[w for w in QtWidgets.QApplication.topLevelWidgets() if w.isVisible() and isinstance(w,QtWidgets.QMessageBox)]
+        if alerts:
+            result['native_alert']=dict(title=alerts[0].windowTitle(),text=alerts[0].text());save();alerts[0].reject()
+            finish('Native QAction raised a host exception: '+result['native_alert']['text']);return
+        files=[w for w in QtWidgets.QApplication.topLevelWidgets() if w.isVisible() and isinstance(w,QtWidgets.QFileDialog)]
+        modes=[w for w in QtWidgets.QApplication.topLevelWidgets() if w.isVisible() and isinstance(w,QtWidgets.QInputDialog)]
+        if files:
+            path=source if result['phase']=='native-import' else out/'native-action-export.3dm'
+            result['dialogs']=result.get('dialogs',[])+[result['phase']+'-file'];save()
+            files[0].setDirectory(str(path.parent));files[0].selectFile(path.name)
+            edit=files[0].findChild(QtWidgets.QLineEdit,'fileNameEdit')
+            if edit:edit.setText(path.name)
+            files[0].accept()
+        elif modes:
+            result['dialogs']=result.get('dialogs',[])+['preserve-mode'];save();modes[0].accept()
+        QtCore.QTimer.singleShot(150,answer)
+    except Exception:finish(traceback.format_exc())
+def completed(checked=False):
+    try:
+        if result.get('native_alert') or result.get('ok') is not None:return
+        if result['phase']=='native-import':
+            check('native menu imports same geometry count as API',len([o for o in doc.Objects if hasattr(o,'Shape') and not o.Shape.isNull()])==api_count)
+            check('native menu imported CAD valid',all(o.Shape.isValid() for o in doc.Objects if hasattr(o,'Shape') and not o.Shape.isNull()))
+            result['imported_geometry_count']=api_count;save()
+            import Part
+            export_doc=App.newDocument('NativeMenuExport')
+            box=export_doc.addObject('PartDesign::Feature','Box');box.Shape=Part.makeBox(2,3,4);export_doc.recompute()
+            Gui.Selection.clearSelection();Gui.Selection.addSelection(box)
+            result['phase']='native-export';save();QtCore.QTimer.singleShot(350,lambda:queue(export_action));return
+        elif result['phase']=='native-export':
+            exported=out/'native-action-export.3dm';check('native export file written',exported.is_file())
+            data=json.loads(native.inspect3dm(str(exported)))
+            check('native export target Rhino5 valid',data['source_version']==50 and not data['issues'])
+            check('source remains unchanged',hashlib.sha256(source.read_bytes()).hexdigest()==source_hash)
+            finish();return
+    except Exception:finish(traceback.format_exc())
+def start():
+    global native,doc,api_count,export_action
+    try:
+        import OpenMatrix9Gui as native,ThreeDm
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        result['phase']='inspect';save();data=json.loads(native.inspect3dm(str(source)))
+        result['inventory']={'source_version':data['source_version'],'issues':data['issues'],'record_count':len(data['records'])};save()
+        api=App.newDocument('APIImport');result['phase']='api-import';save()
+        imported=ThreeDm.import_file(str(source),api,mode='preserve')
+        api_count=len([o for o in api.Objects if hasattr(o,'Shape') and not o.Shape.isNull()])
+        result['api_geometry_count']=api_count;save()
+        check('same user source imports through Python API',len(imported)>0 and api_count>0)
+        App.closeDocument(api.Name);doc=App.newDocument('NativeMenuImport')
+        menu=next(a.menu() for a in Gui.getMainWindow().menuBar().actions() if a.text().replace('&','')=='OpenMatrix9')
+        import_action,export_action=[a for a in menu.actions() if not a.isSeparator()][:2]
+        import_action.triggered.connect(completed);export_action.triggered.connect(completed)
+        result['phase']='native-import';save();queue(import_action)
+    except Exception:finish(traceback.format_exc())
+QtCore.QTimer.singleShot(1200,start)

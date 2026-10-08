@@ -1,0 +1,64 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('NewMemberInstance');source=Path(tempfile.gettempdir())/'om9-reference-edit.3dm';original=source.read_bytes();roots=ThreeDm.import_file(str(source),doc,mode='preserve')
+        rigid=next(o for o in roots if o.Label=='Rigid reference');affine=next(o for o in roots if o.Label.startswith('Affine reference'));definition=rigid.LinkedObject
+        cad=doc.addObject('Part::Feature','NestedNewCAD');cad.Shape=Part.makeBox(2,3,4);cad.Placement.Base=App.Vector(1,2,3)
+        leaf=ThreeDm.create_definition(doc,[cad],'New member leaf');leaf.Placement.Base=App.Vector(5,6,7)
+        member=ThreeDm.create_instance(leaf,App.Placement(App.Vector(10,20,30),App.Rotation()),'New nested member');member.ScaleVector=App.Vector(-2,3,4);definition.addObject(member);doc.recompute()
+        path=out/'new-member.3dm'
+        def export(objects):
+            ThreeDm.export_preserved(str(path),objects);return json.loads(native.inspect3dm(str(path)))
+        def read():return json.loads(native.read3dm(str(path),str(out)))['items']
+        def box():
+            shape=Part.Shape();shape.read(next(i['brep'] for i in read() if i['class_name']=='ON_Brep'));return shape
+        report=export([rigid]);newId=state._new_identity(member,'Instance');leafId=state._new_identity(leaf,'Definition')
+        check('imported definition includes new native nested reference',len(report['records'])==4 and next(c for c in report['components'] if c['source_uuid']==definition.OM9DefinitionUUID)['member_uuids']==[definition.Group[0].OM9SourceUUID,newId] and any(r['source_uuid']==newId and r['instance_definition_uuid']==leafId and r['role']=='definition-member' for r in report['records']))
+        live=Part.getShape(rigid,'',needSubElement=False,transform=True)
+        check('new member affine matrix composes target placement once',abs(abs(box().Volume)-576)<1e-6 and abs(box().BoundBox.XMin-live.BoundBox.XMin)<1e-6 and abs(box().BoundBox.ZMax-live.BoundBox.ZMax)<1e-6)
+        report=export([affine]);check('source affine preview traverses new definition graph',len(affine.Shape.Solids)==1 and abs(abs(affine.Shape.Solids[0].Volume)-576)<1e-6 and abs(affine.Shape.Solids[0].BoundBox.XMin-box().BoundBox.XMin)<1e-6 and affine.OM9PreviewStatus=='Current canonical members')
+        cad.Shape=Part.makeBox(3,4,5);doc.recompute();export([affine]);check('new nested CAD edit regenerates imported affine preview',abs(abs(box().Volume)-1440)<1e-6 and abs(abs(affine.Shape.Solids[0].Volume)-1440)<1e-6)
+        member.Placement.Base=App.Vector(40,50,60);doc.recompute();export([affine]);check('new nested Placement edit updates native and display bounds',abs(box().BoundBox.XMin-affine.Shape.Solids[0].BoundBox.XMin)<1e-6)
+        leaf.Placement.Base=App.Vector(7,8,9);member.LinkTransform=False;doc.recompute();export([rigid]);live=Part.getShape(rigid,'',needSubElement=False,transform=True).Solids[0];check('new member LinkTransform false ignores definition placement',abs(box().BoundBox.XMin-live.BoundBox.XMin)<1e-6 and abs(box().BoundBox.ZMax-live.BoundBox.ZMax)<1e-6)
+        member.LinkTransform=True;copied=doc.copyObject(member,False);copied.Placement.Base=App.Vector(70,80,90);definition.addObject(copied);doc.recompute();report=export([rigid]);check('copied new member has separate stable UUID and shared target',len(report['records'])==5 and len({r['source_uuid'] for r in report['records']})==5 and sum(r.get('instance_definition_uuid')==leafId for r in report['records'])==2 and {r['source_uuid'] for r in report['records']}=={r['source_uuid'] for r in export([rigid])['records']})
+        other=next(o for o in doc.Objects if o.isDerivedFrom('App::Part') and getattr(o,'OM9DefinitionUUID','') and o.Label=='Reference B');sourceMember=ThreeDm.create_instance(other,App.Placement(App.Vector(100,200,300),App.Rotation()),'New member source target');definition.addObject(sourceMember);doc.recompute();report=export([rigid]);check('new member may target another verified imported definition',any(r['source_uuid']==state._new_identity(sourceMember,'Instance') and r['instance_definition_uuid']==other.OM9DefinitionUUID for r in report['records']) and len(read())==5)
+        member.setLink(other);doc.recompute();report=export([rigid]);check('new unsourced member can retarget an imported definition',next(r for r in report['records'] if r['source_uuid']==newId)['instance_definition_uuid']==other.OM9DefinitionUUID)
+        member.setLink(leaf);doc.recompute();discovered=ThreeDm.create_instance(leaf,App.Placement(App.Vector(10,20,30),App.Rotation()),'Callback discovered member');other.addObject(discovered);doc.recompute();report=export([rigid]);check('source target callback discovers further new member references',any(r['source_uuid']==state._new_identity(discovered,'Instance') and r['instance_definition_uuid']==leafId for r in report['records']) and len(read())==6)
+        boundRoot=ThreeDm.create_instance(other,App.Placement(App.Vector(10,20,30),App.Rotation()),'Bound new root');boundRoot.setLink(leaf);doc.recompute();report=export([boundRoot]);check('new source-bound root may retarget an unsourced definition',len(report['records'])==2 and next(r for r in report['records'] if r['role']=='top-level')['instance_definition_uuid']==leafId and any(c['source_uuid']==leafId for c in report['components']))
+        report=export([rigid])
+        names=[o.Name for o in (rigid,affine,definition,member,leaf,cad,copied,sourceMember)];ids={r['source_uuid'] for r in report['records']};doc.saveAs(str(out/'new-member.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'new-member.FCStd'));rigid,affine,definition,member,leaf,cad,copied,sourceMember=[doc.getObject(n) for n in names];report=export([rigid]);check('new imported membership and identities survive FCStd',ids=={r['source_uuid'] for r in report['records']})
+        doc.openTransaction('Remove newly added instance');definition.removeObject(copied);doc.recompute();doc.commitTransaction();report=export([rigid]);check('removed new instance is excluded from native closure',not any(r['source_uuid']==state._new_identity(copied,'Instance') for r in report['records']))
+        doc.undo();doc.recompute();report=export([rigid]);check('membership Undo restores exact new instance UUID',ids=={r['source_uuid'] for r in report['records']})
+        doc.redo();doc.recompute();export([rigid]);check('membership Redo excludes removed instance again',not any(r['source_uuid']==state._new_identity(copied,'Instance') for r in json.loads(native.inspect3dm(str(path)))['records']))
+        sentinel=path.read_bytes();failed=False
+        try:export([rigid,member])
+        except RuntimeError:failed=True
+        check('new reference cannot be top-level and definition member',failed and path.read_bytes()==sentinel)
+        saved=member.LinkedObject;failed=False
+        try:member.setLink(definition);doc.recompute();export([rigid])
+        except RuntimeError:failed=True
+        check('source new membership cycle rejects atomically',failed and path.read_bytes()==sentinel and member.LinkedObject==saved)
+        member.setLink(saved);doc.recompute();second=ThreeDm.import_file(str(source),doc,mode='preserve');foreign=next(o for o in second if o.Label.startswith('Rigid reference')).LinkedObject;member.setLink(foreign);doc.recompute();failed=False
+        try:export([rigid])
+        except RuntimeError:failed=True
+        check('foreign namespace new member target rejects atomically',failed and path.read_bytes()==sentinel)
+        member.setLink(saved);doc.recompute();export([affine]);affine.Shape=Part.makeBox(1,1,1);cad.Shape=Part.makeBox(4,5,6);doc.recompute();sentinel=path.read_bytes();failed=False
+        try:export([affine])
+        except RuntimeError:failed=True
+        check('manual preview edit is not overwritten by new member refresh',failed and path.read_bytes()==sentinel and abs(affine.Shape.Volume-1)<1e-7)
+        check('source archive remains immutable',source.read_bytes()==original)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

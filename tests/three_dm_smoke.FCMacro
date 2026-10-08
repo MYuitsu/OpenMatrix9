@@ -1,4 +1,3 @@
-import tempfile
 import FreeCAD as App, FreeCADGui as Gui, Part
 import os, json, traceback
 from pathlib import Path
@@ -38,7 +37,7 @@ def run():
         try:ThreeDm.export_file(target,[doc.addObject('App::FeaturePython','Unsupported')])
         except Exception:pass
         check('failed export preserves target',target.read_bytes()==before)
-        fixtures=Path(tempfile.gettempdir())/'om9-3dm-native'
+        fixtures=Path(os.environ.get('TEMP','C:/Users/nguye/AppData/Local/Temp'))/'om9-3dm-native'
         line=ThreeDm.import_file(fixtures/'inch.3dm',doc)[0]
         check('inch units normalize to mm',abs(line.Shape.Length-25.4)<1e-7)
         count=len(doc.Objects)

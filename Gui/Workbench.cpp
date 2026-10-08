@@ -85,6 +85,7 @@ Gui::MenuItem* Workbench::setupMenuBar() const
     openMatrixMenu->setCommand(
         "&OpenMatrix9"
     );
+    *openMatrixMenu << "Import3dm" << "Export3dm" << "Separator";
     auto* workspaceMenu=new Gui::MenuItem();workspaceMenu->setCommand("Workspace");
     for(std::size_t i=0;i<om9_workspace_command_count();++i)
         *workspaceMenu << om9_command_id(om9_workspace_command(i));
@@ -146,8 +147,12 @@ Gui::MenuItem* Workbench::setupMenuBar() const
 
 Gui::ToolBarItem* Workbench::setupToolBars() const
 {
-    // The eleven quick positions belong to the sidebar.
-    return Gui::StdWorkbench::setupToolBars();
+    // Exchange is visible without opening the sidebar's File group.
+    auto* root=Gui::StdWorkbench::setupToolBars();
+    auto* exchange=new Gui::ToolBarItem(root);
+    exchange->setCommand("3DM");
+    *exchange << "Import3dm" << "Export3dm";
+    return root;
 }
 
 

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "scope": "Pre-push verification of the publication source; not full openNURBS acceptance",
+  "base_commit": "52e887ab706dcd5d80e23979fb1f1b62d8d869b0",
+  "branch": "codex/3dm-preservation-fast-import",
+  "checks": {
+    "rust": {"passed": 75, "failed": 0},
+    "python": {"passed": 29, "skipped": 1, "failed": 0, "skip_reason": "Optional real SDK/runtime/raw property evidence is not distributed"},
+    "authored_icon_bindings": 510,
+    "source_audit_errors": 0,
+    "native_sdk_build": "MSVC x64 RelWithDebInfo; OpenMatrix9Gui and OM9ThreeDmImportWorker built and linked",
+    "freecad_decoded_serial_parallel_comparison": {"checks": 9, "passed": 9, "source": "Privately supplied ring; geometry/records/signatures compared to the verified serial golden"},
+    "freecad_native_qt_import_export_final_binary": {"checks": 8, "passed": 8, "process_exit": 0},
+    "publication_review": "All four findings addressed; no remaining findings",
+    "core_patch_reverse_check": "Passed against the verified FreeCAD core"
+  },
+  "measured_seconds": {"serial_import": 23.669002, "parallel_import": 11.935489, "serial_first_ready": 26.521885, "parallel_first_ready": 14.716514},
+  "new_rhino_test_batches": 0,
+  "prepared_pending_rhino_batches": 0,
+  "unclosed_full_exchange_packages": 7,
+  "remaining_total_test_batches": null,
+  "private_inputs_and_raw_reports_distributed": false,
+  "full_opennurbs_complete": false
+}

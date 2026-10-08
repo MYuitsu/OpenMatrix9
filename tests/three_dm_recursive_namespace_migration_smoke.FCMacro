@@ -1,0 +1,85 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('RecursiveNamespaceMigration');doc.UndoMode=1
+        source=Path(tempfile.gettempdir())/'om9-merge-depth2-2.3dm';original=source.read_bytes()
+        root=ThreeDm.import_file(str(source),doc,mode='preserve')[0];owner=root.OM9ArchiveOwner;oldNamespace=owner.OM9ImportNamespace
+        definition=state._instance_definition(root,json.loads(root.OM9SourceRecord));member=definition.Group[0];leaf=member.LinkedObject;point=leaf.Group[0]
+        wrapper=doc.addObject('App::DocumentObjectGroup','WholeNativeImport');wrapper.Group=[owner,root,definition]
+        copied=doc.copyObject(wrapper,True);copiedOwner=next(o for o in copied.Group if 'OM9SourceArchive' in o.PropertiesList);copiedRoot=next(o for o in copied.Group if getattr(o,'OM9SourceClass','')=='ON_InstanceRef');copiedDefinition=next(o for o in copied.Group if o.isDerivedFrom('App::Part') and 'OM9DefinitionUUID' in o.PropertiesList);copiedMember=copiedDefinition.Group[0];copiedLeaf=copiedMember.LinkedObject;copiedPoint=copiedLeaf.Group[0]
+        check('actual whole-group recursive copy clones owner and complete nested payload graph',copiedOwner!=owner and copiedRoot.OM9ArchiveOwner==copiedOwner and copiedMember.OM9ArchiveOwner==copiedOwner and copiedPoint.OM9ArchiveOwner==copiedOwner and copiedLeaf!=leaf and copiedPoint!=point and copiedOwner.OM9ImportNamespace==oldNamespace)
+        copiedRoot.Placement.Base=App.Vector(100,200,300);copiedDefinition.Placement.Base=App.Vector(1,2,3);copiedMember.Placement.Base=App.Vector(2,3,4);copiedMember.ScaleVector=App.Vector(-2,3,4);copiedMember.LinkTransform=True;copiedLeaf.Placement.Base=App.Vector(5,6,7);copiedPoint.Shape=Part.Vertex(App.Vector(7,8,9));copiedPoint.Placement.Base=App.Vector(3,4,5);doc.recompute()
+        unsafe=out/'ambiguous-owner.3dm';sentinel=b'Existing destination must survive ambiguous source ownership';unsafe.write_bytes(sentinel);failed=False
+        try:ThreeDm.export_preserved(str(unsafe),[root,copiedRoot])
+        except RuntimeError:failed=True
+        check('export refuses different archive owners sharing one namespace atomically',failed and unsafe.read_bytes()==sentinel)
+        count=len(doc.Objects);failed=False
+        try:ThreeDm.migrate_archive(copiedOwner)
+        except RuntimeError:failed=True
+        check('duplicated owner namespace refuses default migration without mutation',failed and copiedOwner.OM9ImportNamespace==oldNamespace and len(doc.Objects)==count)
+        def refuses(name,**kwargs):
+            fields=('OM9ImportNamespace','OM9SourceHostID','OM9SourceSignature','OM9NamespaceOrigin','OM9NamespaceHostID')
+            def snapshot():return sorted((o.Name,list(o.PropertiesList),[getattr(o,f,None) for f in fields],[m.Name for m in getattr(o,'Group',[])],list(o.Placement.toMatrix().A) if hasattr(o,'Placement') else None,state.preview_signature(o) if o.isDerivedFrom('Part::Feature') or o.isDerivedFrom('Mesh::Feature') else None) for o in doc.Objects)
+            before=snapshot();documents=set(App.listDocuments());failed=False
+            try:ThreeDm.migrate_archive(copiedOwner,rebuild_previews=True,**kwargs)
+            except RuntimeError:failed=True
+            check(name,failed and snapshot()==before and App.ActiveDocument==doc and set(App.listDocuments())==documents and not doc.HasPendingTransaction and not state._preview_observer.busy)
+        refuses('namespace fork policy rejects nonboolean input',fork_namespace=1)
+        state._property(copiedOwner,'Integer','OM9NamespaceOrigin',9)
+        refuses('namespace origin property type rejects before mutation',fork_namespace=True);copiedOwner.removeProperty('OM9NamespaceOrigin')
+        state._property(copiedOwner,'String','OM9NamespaceHostID',copiedOwner.Name)
+        refuses('incomplete original fork witness rejects before mutation',fork_namespace=True);copiedOwner.removeProperty('OM9NamespaceHostID')
+        copiedPoint.OM9ImportNamespace='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+        refuses('forked owner rejects conflicting member namespaces before mutation',fork_namespace=True);copiedPoint.OM9ImportNamespace=oldNamespace
+        copiedMember.setLink(leaf)
+        refuses('forked source reference cannot retain foreign original definition target',fork_namespace=True);copiedMember.setLink(copiedLeaf)
+        foreignProxy=doc.addObject('App::Link','ForeignSourceProxy');foreignProxy.setLink(point);state._property(foreignProxy,'Bool','OM9DefinitionMemberProxy',True);copiedLeaf.addObject(foreignProxy)
+        refuses('forked definition cannot retain foreign original source members',fork_namespace=True);copiedLeaf.removeObject(foreignProxy);doc.removeObject(foreignProxy.Name);doc.recompute()
+        copiedLeaf.addObject(copiedRoot)
+        refuses('failed fork graph rebuild restores owner namespace markers host bindings geometry and groups',fork_namespace=True)
+        copiedLeaf.removeObject(copiedRoot);doc.recompute()
+        migrated=ThreeDm.migrate_archive(copiedOwner,fork_namespace=True,rebuild_previews=True)
+        namespace=copiedOwner.OM9ImportNamespace
+        check('explicit recursive owner migration allocates a separate persistent namespace',namespace!=oldNamespace and migrated['forked_namespace'] and migrated['namespace']==namespace and copiedOwner.OM9NamespaceOrigin==oldNamespace and copiedOwner.OM9NamespaceHostID==copiedOwner.Name)
+        check('forked graph receives canonical host bindings without modifying original namespace',all(o.OM9ImportNamespace==namespace and o.OM9SourceHostID==o.Name for o in (copiedRoot,copiedMember,copiedPoint)) and all(o.OM9ImportNamespace==oldNamespace for o in (root,member,point,owner)))
+        check('namespace fork retains native UUID provenance and current physical target sharing',copiedPoint.OM9SourceUUID==point.OM9SourceUUID and copiedDefinition.OM9DefinitionUUID==definition.OM9DefinitionUUID and copiedLeaf.OM9DefinitionUUID==leaf.OM9DefinitionUUID and copiedMember.LinkedObject==copiedLeaf and 'OM9NewDefinitionUUID' not in copiedDefinition.PropertiesList)
+        path=out/'recursive-namespaces.3dm'
+        def exported(selected):
+            ThreeDm.export_preserved(str(path),selected);report=json.loads(native.inspect3dm(str(path)));read=json.loads(native.read3dm(str(path),str(out)));points=[]
+            for item in read['items']:
+                shape=Part.Shape();shape.read(item['brep']);points.extend(v.Point for v in shape.Vertexes)
+            return report,points
+        def near(points,expected):return len(points)==len(expected) and all(any((p-App.Vector(*q)).Length<1e-7 for p in points) for q in expected)
+        report,points=exported([root,copiedRoot])
+        check('original and forked recursive graphs export independent edited native coordinates',near(points,[(-2,6,12),(154,377,664)]) and (point.Shape.Vertexes[0].Point-App.Vector(1,2,3)).Length<1e-7)
+        check('merged namespace graph remaps colliding native identities and keeps structural definitions',len(report['records'])==6 and len({r['source_uuid'] for r in report['records']})==6 and len([r for r in report['components'] if r['class_name']=='ON_InstanceDefinition'])==4 and not report['issues'])
+        ids={r['source_uuid'] for r in report['records']};report,_=exported([root,copiedRoot]);check('forked merged native IDs are stable across repeated exports',ids=={r['source_uuid'] for r in report['records']})
+        doc.undo();doc.recompute();check('namespace migration Undo restores duplicated owner scope and host witnesses while retaining edits',copiedOwner.OM9ImportNamespace==oldNamespace and copiedPoint.OM9SourceHostID==point.Name and 'OM9NamespaceOrigin' not in copiedOwner.PropertiesList and (copiedPoint.Shape.Vertexes[0].Point-App.Vector(10,12,14)).Length<1e-7)
+        doc.redo();doc.recompute();report,points=exported([root,copiedRoot]);check('namespace migration Redo restores the same namespace and merged geometry',copiedOwner.OM9ImportNamespace==namespace and near(points,[(-2,6,12),(154,377,664)]))
+        names=[o.Name for o in (root,owner,copiedRoot,copiedOwner,copiedPoint,copiedMember,copied)];doc.saveAs(str(out/'recursive-namespace.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'recursive-namespace.FCStd'));root,owner,copiedRoot,copiedOwner,copiedPoint,copiedMember,copied=[doc.getObject(n) for n in names]
+        report,points=exported([root,copiedRoot]);check('forked namespace source archive and nested graph persist through FCStd',copiedOwner.OM9ImportNamespace==namespace and near(points,[(-2,6,12),(154,377,664)]) and copiedOwner.OM9NamespaceHostID==copiedOwner.Name)
+        repeated=ThreeDm.migrate_archive(copiedOwner,fork_namespace=True,rebuild_previews=True);check('repeated explicit fork on original migrated host keeps its namespace stable',copiedOwner.OM9ImportNamespace==namespace and not repeated['forked_namespace'])
+        report,points=exported([copiedRoot]);check('copy-only selection excludes original namespace dependencies',len(report['records'])==3 and near(points,[(154,377,664)]))
+        check('recursive namespace migration retains immutable external source and included hashes',source.read_bytes()==original and state._hash(copiedOwner.OM9SourceArchive)==copiedOwner.OM9ArchiveHash==owner.OM9ArchiveHash)
+        doc.removeObject(owner.Name);doc.recompute();report,points=exported([copiedRoot]);check('forked included archive remains usable after original owner deletion',near(points,[(154,377,664)]) and state._hash(copiedOwner.OM9SourceArchive)==copiedOwner.OM9ArchiveHash)
+        second=doc.copyObject(copied,True);secondOwner=next(o for o in second.Group if 'OM9SourceArchive' in o.PropertiesList);secondRoot=next(o for o in second.Group if getattr(o,'OM9SourceClass','')=='ON_InstanceRef')
+        ThreeDm.migrate_archive(secondOwner,fork_namespace=True,rebuild_previews=True);report,points=exported([copiedRoot,secondRoot])
+        check('copying an already forked owner allocates another scope without inheriting original-host witness',secondOwner.OM9ImportNamespace!=namespace and secondOwner.OM9NamespaceOrigin==namespace and secondOwner.OM9NamespaceHostID==secondOwner.Name and near(points,[(154,377,664),(154,377,664)]) and len(report['records'])==6)
+        pristine=App.newDocument('PristineNamespaceFork');pristineRoot=ThreeDm.import_file(str(source),pristine,mode='preserve')[0];pristineDefinition=state._instance_definition(pristineRoot,json.loads(pristineRoot.OM9SourceRecord));container=pristine.addObject('App::DocumentObjectGroup','PristineGroup');container.Group=[pristineRoot.OM9ArchiveOwner,pristineRoot,pristineDefinition];pristineCopy=pristine.copyObject(container,True);pristineOwner=next(o for o in pristineCopy.Group if 'OM9SourceArchive' in o.PropertiesList);pristineCopiedRoot=next(o for o in pristineCopy.Group if getattr(o,'OM9SourceClass','')=='ON_InstanceRef');pristine.recompute()
+        ThreeDm.migrate_archive(pristineOwner,fork_namespace=True);ThreeDm.export_preserved(str(path),[pristineCopiedRoot]);pristineRead=json.loads(native.read3dm(str(path),str(out)));shape=Part.Shape();shape.read(pristineRead['items'][0]['brep'])
+        check('pristine recursive namespace fork verifies native preview without explicit replacement',pristineCopiedRoot.OM9PreviewStatus=='Current canonical members' and (shape.Vertexes[0].Point-App.Vector(-2,6,12)).Length<1e-7)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -1,0 +1,90 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('SourceMembers');fixture=Path(tempfile.gettempdir())/'om9-merge-source.3dm';original=fixture.read_bytes();source=out/'source-copy.3dm';source.write_bytes(original)
+        roots=ThreeDm.import_file(str(source),doc,mode='preserve')
+        result['modules']=dict(native=getattr(native,'__file__',''),three_dm=ThreeDm.__file__,state=state.__file__)
+        point=next(o for o in roots if o.OM9SourceClass=='ON_Point');dot=next(o for o in roots if o.OM9SourceClass=='ON_TextDot');instance=next(o for o in roots if o.isDerivedFrom('App::Link'));oldDefinition=instance.LinkedObject
+        sourceIds={o.Name:o.OM9SourceUUID for o in (point,dot,instance)};records={r['source_uuid']:r for r in json.loads(native.inspect3dm(str(source)))['records']}
+        definition=ThreeDm.create_definition(doc,[point,dot,instance],'Block from native source');root=ThreeDm.create_instance(definition,App.Placement(App.Vector(100,200,300),App.Rotation()),'Placed source members');doc.recompute();path=out/'source-members.3dm'
+        def export(objects):
+            ThreeDm.export_preserved(str(path),objects);return json.loads(native.inspect3dm(str(path)))
+        def read():
+            # Geometry-only read intentionally rejects retained TextDot. Read
+            # native structure/local payloads and expand only the known points
+            # for this oracle; inspect3dm separately verifies retained content.
+            folder=out/('read-'+str(len(list(out.glob('read-*')))));folder.mkdir()
+            prepared=json.loads(native.prepare3dmArchive(str(path),str(folder),0,1));manifest=prepared['manifest'];rows={r['source_uuid']:r for r in manifest['records']};definitions={r['source_uuid']:r for r in manifest['components'] if r['class_name']=='ON_InstanceDefinition'}
+            geometry={g['source_uuid']:g for g in prepared['prepared_geometry']+prepared['definition_geometry']};items=[]
+            def visit(identity,matrix):
+                record=rows[identity]
+                if record['class_name']=='ON_InstanceRef':
+                    combined=matrix*App.Matrix(*record['instance_matrix'])
+                    for child in definitions[record['instance_definition_uuid']]['member_uuids']:visit(child,combined)
+                elif identity in geometry:
+                    shape=Part.Shape();shape.read(geometry[identity]['brep']);shape=shape.transformGeometry(matrix);filename=folder/(str(len(items))+'.world.brep');shape.exportBrep(str(filename));items.append(dict(brep=str(filename)))
+            for record in rows.values():
+                if record['role']=='top-level':visit(record['source_uuid'],App.Matrix())
+            return items
+        report=export([root]);memberIds={state._new_identity(o,'Member') for o in (point,dot,instance)}
+        check('source top-level geometry becomes native new definition members',len(report['records'])==5 and all(next(r for r in report['records'] if r['source_uuid']==identity)['role']=='definition-member' for identity in memberIds))
+        check('source identity provenance is not reclassified',all(o.OM9SourceUUID==sourceIds[o.Name] and json.loads(o.OM9SourceRecord)==records[o.OM9SourceUUID] for o in (point,dot,instance)))
+        dotRecord=next(r for r in report['records'] if r['class_name']=='ON_TextDot');check('unchanged retained native text payload and attributes remain intact',dotRecord['geometry_crc']==records[dot.OM9SourceUUID]['geometry_crc'] and dotRecord['attribute_user_strings']==records[dot.OM9SourceUUID]['attribute_user_strings'] and dotRecord['name']==records[dot.OM9SourceUUID]['name'])
+        check('unchanged editable geometry uses original native payload',next(r for r in report['records'] if r['source_uuid']==state._new_identity(point,'Member'))['geometry_crc']==records[point.OM9SourceUUID]['geometry_crc'])
+        values=[]
+        for item in read():
+            shape=Part.Shape();shape.read(item['brep']);values.append(shape.Vertexes[0].Point)
+        check('source geometry and nested source instance preserve world placement',len(values)==2 and any((v-App.Vector(107,208,309)).Length<1e-7 for v in values) and any((v-App.Vector(111,222,333)).Length<1e-7 for v in values))
+        ids={r['source_uuid'] for r in report['records']};check('new source-member IDs stable across repeated export',ids=={r['source_uuid'] for r in export([root])['records']})
+        definition.Placement.Base=App.Vector(10,20,30);point.Placement.Base=App.Vector(1,2,3);doc.recompute();report=export([root,point]);values=[]
+        for item in read():shape=Part.Shape();shape.read(item['brep']);values.append(shape.Vertexes[0].Point)
+        check('selected original and promoted baseline payload do not transform twice',len(values)==3 and any((v-App.Vector(18,30,42)).Length<1e-7 for v in values) and any((v-App.Vector(118,230,342)).Length<1e-7 for v in values))
+        point.Shape=Part.Vertex(20,30,40);point.Placement.Base=App.Vector(1,2,3);dot.Label='Native text renamed';doc.recompute();report=export([root]);values=[]
+        for item in read():shape=Part.Shape();shape.read(item['brep']);values.append(shape.Vertexes[0].Point)
+        check('edited source CAD member stages current local geometry',any((v-App.Vector(131,252,373)).Length<1e-7 for v in values))
+        check('retained member name edit preserves text payload',next(r for r in report['records'] if r['class_name']=='ON_TextDot')['name']==dot.Label and next(r for r in report['records'] if r['class_name']=='ON_TextDot')['geometry_crc']==records[dot.OM9SourceUUID]['geometry_crc'])
+        dot.OM9BlockMemberPlacement.Base=App.Vector(10,20,30);doc.recompute();report=export([root]);check('retained member has explicit native transform without invented source Placement',not hasattr(dot,'Placement') and next(r for r in report['records'] if r['class_name']=='ON_TextDot')['geometry_crc']!=records[dot.OM9SourceUUID]['geometry_crc'])
+        direct=export([dot]);directDot=next(r for r in direct['records'] if r['class_name']=='ON_TextDot')
+        check('transformed retained source selection exports its current native world point',len(direct['records'])==1 and all(abs(a-b)<1e-7 for a,b in zip(directDot['text_dot']['point'],(25,46,67))))
+        doc.openTransaction('Source member placement');point.Placement.Base=App.Vector(5,6,7);doc.recompute();doc.commitTransaction();export([root]);doc.undo();doc.recompute();report=export([root]);values=[]
+        for item in read():shape=Part.Shape();shape.read(item['brep']);values.append(shape.Vertexes[0].Point)
+        check('source new-member placement Undo restores exported world geometry',any((v-App.Vector(131,252,373)).Length<1e-7 for v in values))
+        extra=doc.addObject('Part::Feature','RetargetSourceMember');extra.Shape=Part.Vertex(9,8,7);targetDefinition=ThreeDm.create_definition(doc,[extra],'New source member target');instance.setLink(targetDefinition);doc.recompute();report=export([root]);values=[]
+        for item in read():shape=Part.Shape();shape.read(item['brep']);values.append(shape.Vertexes[0].Point)
+        check('promoted source instance discovers new definition target without stale closure',any((v-App.Vector(129,248,367)).Length<1e-7 for v in values) and not any(r['source_uuid']==oldDefinition.Group[0].OM9SourceUUID for r in report['records']))
+        instanceCopy=doc.copyObject(instance,False);definition.addObject(instanceCopy);doc.recompute();report=export([root]);copyIds={r['source_uuid'] for r in report['records']}
+        check('copied promoted source instances retain separate stable native reference IDs',state._new_identity(instanceCopy,'Member')!=state._new_identity(instance,'Member') and state._new_identity(instanceCopy,'Member') in copyIds and len([r for r in report['records'] if r['class_name']=='ON_InstanceRef'])==3 and copyIds=={r['source_uuid'] for r in export([root])['records']})
+        definition.removeObject(instanceCopy);instance.setLink(oldDefinition);doc.recompute()
+        copied=doc.copyObject(point,False);definition.addObject(copied);doc.recompute();report=export([root]);check('copied promoted source member has fresh stable identity',len(report['records'])==6 and len({r['source_uuid'] for r in report['records']})==6 and any(r['source_uuid']==state._new_identity(copied,'Member') for r in report['records']) and {r['source_uuid'] for r in report['records']}=={r['source_uuid'] for r in export([root])['records']})
+        names=[o.Name for o in (root,point,dot,instance,definition,copied)];ids={r['source_uuid'] for r in report['records']};doc.saveAs(str(out/'source-members.FCStd'));App.closeDocument(doc.Name);source.unlink();doc=App.openDocument(str(out/'source-members.FCStd'));root,point,dot,instance,definition,copied=[doc.getObject(n) for n in names];report=export([root]);check('source-member graph and creation IDs survive FCStd with source removed',ids=={r['source_uuid'] for r in report['records']})
+        owner=instance.OM9ArchiveOwner;oldDefinition=instance.LinkedObject;oldMember=oldDefinition.Group[0];oldDefinition.Placement.Base=App.Vector(1000,2000,3000);doc.recompute();worldBefore=oldMember.getGlobalPlacement();secondDefinition=ThreeDm.create_definition(doc,[oldMember],'Moved original definition member');secondRoot=ThreeDm.create_instance(secondDefinition);doc.recompute();report=export([secondRoot]);shape=Part.Shape();shape.read(read()[0]['brep']);check('moving original source definition member preserves its parent world placement',(shape.Vertexes[0].Point-App.Vector(1001,2002,3003)).Length<1e-7)
+        report=export([root]);check('source definition removal does not resurrect moved original member',not any(r['source_uuid']==oldMember.OM9SourceUUID for r in report['records']))
+        secondDefinition.removeObject(oldMember);doc.recompute();report=export([secondRoot]);check('empty promoted source definition retains verified namespace context',len(report['records'])==1 and next(r for r in report['components'] if r['class_name']=='ON_InstanceDefinition')['member_uuids']==[])
+        invalid=doc.addObject('Part::Feature','InvalidCAD');before={o.Name for o in doc.Objects};failed=False
+        try:ThreeDm.create_definition(doc,[invalid],'Invalid source block')
+        except RuntimeError:failed=True
+        check('invalid source/new creation preflight leaves document unchanged',failed and before=={o.Name for o in doc.Objects})
+        foreignRoots=ThreeDm.import_file(str(fixture),doc,mode='preserve');foreignPoint=next(o for o in foreignRoots if o.OM9SourceClass=='ON_Point');before={o.Name for o in doc.Objects};failed=False
+        try:ThreeDm.create_definition(doc,[point,foreignPoint],'Mixed foreign source members')
+        except RuntimeError:failed=True
+        check('different archive namespaces cannot be silently combined in one new definition',failed and before=={o.Name for o in doc.Objects})
+        sentinel=path.read_bytes();dot.OM9SourceRecord='{}';failed=False
+        try:export([root])
+        except RuntimeError:failed=True
+        check('retained source record tampering rejects atomically',failed and path.read_bytes()==sentinel)
+        check('immutable source fixture unchanged',fixture.read_bytes()==original)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

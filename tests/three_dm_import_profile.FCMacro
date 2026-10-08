@@ -1,0 +1,48 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,time,traceback,cProfile,pstats,io,hashlib
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'cases':[]}
+source=Path('C:/Users/nguye/Downloads/nhan oval 11.91x8.37x4.97.3dm')
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        report['module']=native.__file__;report['source_sha256']=hashlib.sha256(source.read_bytes()).hexdigest()
+        for workbench in ['PartWorkbench','OpenMatrix9Workbench']:
+            Gui.activateWorkbench(workbench);doc=App.newDocument('ProfileRing');Gui.updateGui()
+            calls=[];saved={}
+            for name in ['prepare3dmArchive','commit3dm']:
+                original=getattr(native,name);saved[name]=original
+                def wrapped(*args,_original=original,_name=name,**kwargs):
+                    start=time.perf_counter()
+                    try:
+                        value=_original(*args,**kwargs)
+                        if _name=='prepare3dmArchive':
+                            decoded_native=json.loads(value)
+                            calls.append(dict(stage='native_substages',seconds=decoded_native.get('_performance_seconds',{}),objects=[dict(uuid=r['source_uuid'],name=r['name'],class_name=r['class_name'],seconds=r.get('_conversion_seconds',0)) for r in decoded_native['prepared_geometry']]))
+                        return value
+                    finally:calls.append(dict(stage=_name,seconds=time.perf_counter()-start))
+                setattr(native,name,wrapped)
+            os.environ['OM9_3DM_PROFILE']='1'
+            profiler=cProfile.Profile();start=time.perf_counter();profiler.enable()
+            try:objects=ThreeDm.import_file(str(source),doc,mode='preserve')
+            finally:
+                profiler.disable()
+                for name,original in saved.items():setattr(native,name,original)
+            imported=time.perf_counter()-start
+            start=time.perf_counter();Gui.updateGui();Gui.activeDocument().activeView().viewAxonometric();Gui.activeDocument().activeView().fitAll();Gui.activeDocument().activeView().saveImage(str(out/(workbench+'.png')),900,900,'Current');Gui.updateGui();rendered=time.perf_counter()-start
+            text=io.StringIO();pstats.Stats(profiler,stream=text).sort_stats('cumulative').print_stats(45)
+            (out/(workbench+'-profile.txt')).write_text(text.getvalue())
+            shape_objects=[o for o in doc.Objects if o.isDerivedFrom('Part::Feature')]
+            import ThreeDmArchiveState as state
+            decoded={o.OM9SourceUUID:dict(record=json.loads(o.OM9SourceRecord),signature=o.OM9SourceSignature,geometry=state._cad_fingerprint(o.Shape) if o.isDerivedFrom('Part::Feature') else None) for o in doc.Objects if hasattr(o,'OM9SourceUUID')}
+            report['cases'].append(dict(workbench=workbench,import_seconds=imported,first_display_seconds=rendered,stages=calls,top_level=len(objects),shape_objects=len(shape_objects),valid=all(o.Shape.isValid() for o in shape_objects),decoded=decoded))
+            (out/'partial-profile.json').write_text(json.dumps(report,indent=2))
+            App.closeDocument(doc.Name);Gui.updateGui()
+        report['checks']=[dict(name='both imports valid and preserve source',passed=all(r['valid'] and r['top_level']==29 for r in report['cases']) and hashlib.sha256(source.read_bytes()).hexdigest()==report['source_sha256'])]
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

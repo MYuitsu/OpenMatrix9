@@ -1,0 +1,42 @@
+import FreeCAD as App,FreeCADGui as Gui
+import json,os,tempfile,traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import ThreeDm,OpenMatrix9Gui as native,ThreeDmHatch as adapter
+        for unit,mm in [('mm',1),('cm',10)]:
+            source=Path(tempfile.gettempdir())/('om9-hatch-loops-'+unit+'.3dm');immutable=source.read_bytes();external=out/(unit+'-source.3dm');external.write_bytes(immutable)
+            doc=App.newDocument('NativeLoopTypes'+unit);doc.UndoMode=1;objects=ThreeDm.import_file(str(external),doc,mode='preserve');target=out/(unit+'.3dm')
+            def export(values):
+                ThreeDm.export_file(str(target),values);return json.loads(native.inspect3dm(str(target)))
+            def only(report):return next(r for r in report['records'] if r['class_name']=='ON_Hatch')
+            check(unit+' four exact native loop root types imported',len(objects)==4 and {json.loads(o.OM9SourceRecord)['hatch']['loops'][0]['class_name'] for o in objects}=={'ON_NurbsCurve','ON_ArcCurve','ON_PolylineCurve','ON_PolyCurve'})
+            for obj in objects:
+                record=json.loads(obj.OM9SourceRecord);kind=record['hatch']['loops'][0]['class_name'];baseline=only(export([obj]));data=baseline['hatch_loop_native']
+                check(unit+' '+kind+' recursive native inventory retained',data[0]['curve']['class_name']==kind and data[0]['curve']['dimension']==2 and bool(data[0]['curve']['user_strings']))
+                check(unit+' '+kind+' normalized native fields unchanged',baseline['hatch_current']==adapter.fields(obj) and baseline['hatch_current']['scale']==2*mm)
+                doc.openTransaction('Native loop scalar edit');obj.OM9HatchOrigin=App.Vector(40,50,60);obj.OM9HatchBasePoint=App.Vector(3,4,0);doc.recompute();doc.commitTransaction();obj.OM9BlockMemberPlacement.Base=App.Vector(5,6,7);doc.recompute();current=only(export([obj]))
+                check(unit+' '+kind+' plane and own placement applied once',current['hatch_current']['plane'][:3]==[45,56,67] and current['hatch_current']['base_point']==[3,4])
+                check(unit+' '+kind+' native children and parameters preserved',current['hatch_loop_native']==data)
+                boundary=adapter.boundary(obj);check(unit+' '+kind+' current native boundary derived',boundary.isValid() and len(boundary.Edges)>0)
+            poly=next(o for o in objects if json.loads(o.OM9SourceRecord)['hatch']['loops'][0]['class_name']=='ON_PolyCurve');copy=doc.copyObject(poly,False);copy.OM9HatchOrigin=App.Vector(70,80,90);doc.recompute();copied=only(export([copy]));check(unit+' nested native copy remains independent',copied['hatch_current']['plane'][:3]==[75,86,97] and poly.OM9HatchOrigin==App.Vector(40,50,60))
+            definition=ThreeDm.create_definition(doc,[poly],'Native nested loop family');family=ThreeDm.copy_definition(definition,'Copied native nested loop family');member=family.Group[0];member.OM9HatchOrigin=App.Vector(11,12,13);instance=ThreeDm.create_instance(family);doc.recompute();familyRow=only(export([instance]));check(unit+' nested native copied family exports its current member',familyRow['role']=='definition-member' and familyRow['hatch_loop_native'][0]['curve']['class_name']=='ON_PolyCurve')
+            saved=out/(unit+'.FCStd');name=instance.Name;doc.saveAs(str(saved));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(saved));instance=doc.getObject(name);doc.recompute();restored=only(export([instance]));check(unit+' nested native FCStd survives external deletion',not external.exists() and restored['hatch_loop_native']==familyRow['hatch_loop_native'] and restored['hatch_current']==familyRow['hatch_current'])
+            unsafePath=Path(tempfile.gettempdir())/('om9-hatch-loops-unsafe-'+unit+'.3dm');unsafeBytes=unsafePath.read_bytes();unsafe=ThreeDm.import_file(str(unsafePath),doc,mode='preserve');opaque=next(o for o in unsafe if 'hatch_current_unavailable' in json.loads(o.OM9SourceRecord));record=json.loads(opaque.OM9SourceRecord)
+            check(unit+' opaque child userdata snapshot retained without current adapter',not hasattr(opaque,'OM9HatchSchema') and record['hatch_loop_native'][0]['curve']['segments'][2]['userdata'])
+            sentinel=target.read_bytes();rejected=False
+            try:export([opaque])
+            except RuntimeError:rejected=True
+            check(unit+' opaque child userdata export rejects atomically',rejected and target.read_bytes()==sentinel)
+            check(unit+' original loop fixtures immutable',source.read_bytes()==immutable and unsafePath.read_bytes()==unsafeBytes);App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

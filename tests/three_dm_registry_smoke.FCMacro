@@ -1,0 +1,40 @@
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json, os, hashlib, traceback
+
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+result={'checks':[]}
+
+
+def check(name, value):
+    result['checks'].append({'name':name, 'passed':bool(value)})
+    if not value:
+        raise AssertionError(name)
+
+
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        linked=json.loads(native.inspect3dmRegistry())
+        standalone=json.loads(Path('H:/FreeCAD-src/build/3dm-preserve-native/coverage-runtime.json').read_text())
+        expected={row['class_name']:row for row in standalone['classes']}
+        actual={row['class_name']:row for row in linked['classes']}
+        check('installed application registry agrees with all standalone classes', linked['ok'] and actual==expected)
+        check('actual linked count and lookup identities', linked['runtime_count']==len(actual)==128 and all(r['uuid_lookup_class']==r['class_name'] for r in actual.values()))
+        check('legacy CircleCurve factory upgrades to ArcCurve', actual['ON__OBSOLETE__CircleCurve']['factory_class']=='ON_ArcCurve')
+        linked.update(scope='actual isolated FreeCAD loaded OpenMatrix9Gui registry',
+                      probe_sha256=hashlib.sha256(Path(native.__file__).read_bytes()).hexdigest(),
+                      probe_binary=str(Path(native.__file__).resolve()),
+                      freecad_binary_sha256=hashlib.sha256(Path(QtCore.QCoreApplication.applicationFilePath()).read_bytes()).hexdigest(),
+                      standalone_report_sha256=hashlib.sha256(Path('H:/FreeCAD-src/build/3dm-preserve-native/coverage-runtime.json').read_bytes()).hexdigest())
+        (out/'installed-registry.json').write_text(json.dumps(linked,indent=2))
+        result['ok']=True
+    except Exception:
+        result['ok']=False
+        result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+
+
+QtCore.QTimer.singleShot(1000,run)

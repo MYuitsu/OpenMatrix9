@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-06",
+  "updated_at": "2026-10-08",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
-  "active_item": null,
+  "active_item": "verified-3dm-fast-import",
   "items": [
     {
       "key": "public-source-snapshot",
@@ -32,9 +32,18 @@
         "Local history reset to one root commit at the owner's explicit request; final history scan is documented in public-source-checks.json."
       ],
       "tests": [
-        {"command": "python -m unittest discover -s tools/tests", "result": "23 passed"},
-        {"command": "cargo test --manifest-path rust/Cargo.toml", "result": "68 passed"},
-        {"command": "tests/run_menu_smoke.ps1 -Macro public_icons_smoke.FCMacro", "result": "3093/3093 passed in isolated runtime"}
+        {
+          "command": "python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "cargo test --manifest-path rust/Cargo.toml",
+          "result": "68 passed"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro public_icons_smoke.FCMacro",
+          "result": "3093/3093 passed in isolated runtime"
+        }
       ],
       "uncertainties": [
         "Technical audit does not establish copyright clearance or complete command implementation.",
@@ -43,6 +52,25 @@
       ],
       "next_document": "docs/public-source-review.md",
       "next_action": "Review provenance limits and choose a publication destination. Do not publish an unchanged old remote."
+    },
+    {
+      "key": "verified-3dm-fast-import",
+      "stage": "build-validation",
+      "status": "validated_scoped_development_source",
+      "outputs": [
+        "Gui/ThreeDmImportJobs.cpp",
+        "Gui/CadPresentation.cpp",
+        "ThreeDmArchiveState.py"
+      ],
+      "evidence": [
+        "docs/public-update-2026-10-08.md",
+        "docs/validation/2026-10-08-fast-3dm-import.md"
+      ],
+      "historical_runtime_checks": 151,
+      "historical_runtime_reports": 12,
+      "native_targeted_suites": 7,
+      "full_opennurbs_complete": false,
+      "next_action": "Validate published source build;continue remaining packages2–8."
     }
   ]
 }

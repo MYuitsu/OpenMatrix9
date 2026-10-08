@@ -1,0 +1,46 @@
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+from pivy import coin
+from pathlib import Path
+import json,os,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def nodes(node):
+    yield node
+    if node.isOfType(coin.SoGroup.getClassTypeId()):
+        for child in node.getChildren():yield from nodes(child)
+def switches():return [n.whichChild.getValue() for n in nodes(shape.ViewObject.RootNode) if n.isOfType(coin.SoSwitch.getClassTypeId())]
+def finish():
+    try:
+        check('foreign container child receives isocurves',any(str(n.getName())=='OM9CadIsocurves' for n in nodes(shape.ViewObject.RootNode)))
+        check('nested external link contains isocurves',any(str(n.getName())=='OM9CadIsocurves' for n in nodes(link.ViewObject.RootNode)))
+        check('foreign model geometry unchanged',shape.Shape.hashCode()==before)
+        Gui.activeDocument().activeView().viewAxonometric();Gui.activeDocument().activeView().fitAll();Gui.activeDocument().activeView().saveImage(str(out/'nested-external-wire.png'),800,800,'Current')
+        Gui.activateWorkbench('PartWorkbench')
+        result['switches_before']=override;result['switches_after']=switches()
+        check('container and forwarding links restore source override',switches()==override)
+        check('all foreign transient nodes removed',not any(str(n.getName()).startswith('OM9Cad') for n in nodes(container.ViewObject.RootNode)))
+        result['ok']=True
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in reversed(list(App.listDocuments())):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+def start():
+    global shape,link,before,override,container
+    try:
+        Gui.activateWorkbench('PartWorkbench');source=App.newDocument('AForeignSource')
+        container=source.addObject('App::Part','Container')
+        shape=source.addObject('Part::Feature','CurvedChild');shape.Shape=Part.makeCylinder(5,10);container.addObject(shape)
+        inner=source.addObject('App::Link','InternalLink');inner.setLink(shape);container.addObject(inner);inner.Placement.Base=App.Vector(14,0,0)
+        source.recompute();before=shape.Shape.hashCode();source.saveAs(str(out/'source.FCStd'))
+        middle=App.newDocument('BMiddle');middle.saveAs(str(out/'middle.FCStd'));bridge=middle.addObject('App::Link','Bridge');bridge.setLink(container);middle.recompute();middle.save()
+        target=App.newDocument('CTarget');target.saveAs(str(out/'target.FCStd'));link=target.addObject('App::Link','NestedLink');link.setLink(bridge);link.LinkTransform=True;link.ScaleVector=App.Vector(-1,1,1);target.recompute()
+        App.setActiveDocument(source.Name);Gui.runCommand('Std_DrawStyle',5);override=switches()
+        App.setActiveDocument(target.Name);Gui.activateWorkbench('OpenMatrix9Workbench');QtCore.QTimer.singleShot(1200,finish)
+    except Exception:
+        result.update(ok=False,error=traceback.format_exc());(out/'results.json').write_text(json.dumps(result,indent=2))
+        for name in reversed(list(App.listDocuments())):App.closeDocument(name)
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1000,start)

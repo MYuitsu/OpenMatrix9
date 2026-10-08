@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.24)
+project(OM9CurveOnSurfaceLegacy LANGUAGES C CXX)
+# Separate build only: keep the original independent reader/library untouched.
+add_subdirectory(../rhino5_reader original-sdk-build EXCLUDE_FROM_ALL)
+include(../../../cmake/CurveOnSurfaceArchive.cmake)
+om9_repair_curve_on_surface_read(OM9LegacyNurbs "${OM9_LEGACY_NURBS_SOURCE}" "b9f1152909c0e6a71af17fcd49a5f1548fbc9357fd2f440cb3ca3f9a3b3fdf20")
+add_executable(CurveOnSurfaceLegacyReader curve_on_surface_reader.cpp)
+target_link_libraries(CurveOnSurfaceLegacyReader PRIVATE OM9LegacyNurbs)
+target_compile_features(CurveOnSurfaceLegacyReader PRIVATE cxx_std_17)
+if(WIN32)
+    target_link_libraries(CurveOnSurfaceLegacyReader PRIVATE rpcrt4)
+endif()

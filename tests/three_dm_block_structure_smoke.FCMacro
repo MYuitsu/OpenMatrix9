@@ -1,0 +1,91 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, Part
+        doc=App.newDocument('StructuralBlocks')
+        objects=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-merge-source.3dm'),doc,mode='preserve')
+        import OpenMatrix9Gui as native
+        result['native_module']=native.__file__
+        links=[o for o in objects if o.isDerivedFrom('App::Link')]
+        result['initial_objects']=[dict(name=o.Name,type=o.TypeId,source=getattr(o,'OM9SourceClass','')) for o in objects]
+        check('two native host placements',len(links)==2)
+        check('shared host definition',links[0].LinkedObject==links[1].LinkedObject)
+        check('single native definition member',len(links[0].LinkedObject.Group)==1)
+        points=[]
+        for link in links:
+            shape=Part.getShape(link,'',needSubElement=False,transform=True)
+            check('block link has valid geometry',shape is not None and not shape.isNull())
+            points.append(shape.Vertexes[0].Point)
+        check('both world placements',any((p-App.Vector(11,22,33)).Length<1e-8 for p in points) and any((p-App.Vector(101,202,303)).Length<1e-8 for p in points))
+        target=out/'blocks.FCStd';doc.saveAs(str(target));names=[o.Name for o in links];App.closeDocument(doc.Name);doc=App.openDocument(str(target));links=[doc.getObject(name) for name in names]
+        check('shared definition survives FCStd',links[0].LinkedObject==links[1].LinkedObject)
+        check('native matrices survive FCStd',all(len(o.OM9InstanceMatrix)==16 for o in links))
+        before=len(doc.Objects);rejected=False
+        try:ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-cycle-block.3dm'),doc,mode='preserve')
+        except RuntimeError as error:rejected='Cyclic block' in str(error)
+        check('cyclic block rejected before host changes',rejected and len(doc.Objects)==before)
+        nested=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-nested-blocks.3dm'),doc,mode='preserve')
+        affine=next(o for o in nested if getattr(o,'OM9SourceClass','')=='ON_InstanceRef' and not o.isDerivedFrom('App::Link'))
+        check('affine block has native preview',affine.isDerivedFrom('Part::Feature') and not affine.Shape.isNull())
+        check('reflected nonuniform preview world position',(affine.Shape.Vertexes[0].Point-App.Vector(-22,6,12)).Length<1e-8)
+        rigid=next(o for o in nested if o.isDerivedFrom('App::Link'))
+        shape=Part.getShape(rigid,'',needSubElement=False,transform=True)
+        check('nested rigid link world position',(shape.Vertexes[0].Point-App.Vector(11,22,3)).Length<1e-8)
+        shared=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-shared-block-members.3dm'),doc,mode='preserve')
+        points=[]
+        for obj in shared:
+            if getattr(obj,'OM9SourceClass','')!='ON_InstanceRef':continue
+            shape=Part.getShape(obj,'',needSubElement=False,transform=True)
+            check('shared member definition retains geometry',shape is not None and not shape.isNull())
+            points.append(shape.Vertexes[0].Point)
+        check('shared member placements coexist',all(any((p-target).Length<1e-8 for p in points) for target in (App.Vector(11,22,3),App.Vector(-22,6,12),App.Vector(31,2,3))))
+        import ThreeDmArchiveState as state
+        affineName=affine.Name;signature=state.source_signature(affine);sharedNames=[o.Name for o in shared if getattr(o,'OM9SourceClass','')=='ON_InstanceRef']
+        check('affine preview baseline matches',signature==affine.OM9SourceSignature)
+        (out/'before.brep').write_text(affine.Shape.exportBrepToString())
+        for o in doc.Objects:
+            if getattr(o,'OM9SourceClass','')=='ON_Point':(out/(o.Name+'-before.brep')).write_text(o.Shape.exportBrepToString())
+        (out/'before-metadata.json').write_text(json.dumps(dict(metadata=state.source_metadata(affine),placement=state.source_placement(affine),matrix=list(affine.OM9InstanceMatrix))))
+        doc.saveAs(str(out/'affine-shared.FCStd'));name=doc.Name;App.closeDocument(name);doc=App.openDocument(str(out/'affine-shared.FCStd'));affine=doc.getObject(affineName)
+        (out/'after.brep').write_text(affine.Shape.exportBrepToString())
+        for o in doc.Objects:
+            if getattr(o,'OM9SourceClass','')=='ON_Point':(out/(o.Name+'-after.brep')).write_text(o.Shape.exportBrepToString())
+        (out/'after-metadata.json').write_text(json.dumps(dict(metadata=state.source_metadata(affine),placement=state.source_placement(affine),matrix=list(affine.OM9InstanceMatrix))))
+        check('affine geometry and baseline survive FCStd',state.source_signature(affine)==signature and (affine.Shape.Vertexes[0].Point-App.Vector(-22,6,12)).Length<1e-8)
+        check('shared member links survive FCStd',all(not Part.getShape(doc.getObject(name),'',needSubElement=False,transform=True).isNull() for name in sharedNames))
+        result['preview_before']=[affine.OM9PreviewSignature,state.preview_signature(affine)]
+        affine.Placement.Base=App.Vector(40,50,60)
+        result['preview_after']=state.preview_signature(affine)
+        result['changed_dependencies']=[dict(name=o.Name,source=o.OM9SourceClass,baseline=o.OM9SourceSignature,current=state.source_signature(o),metadata=state.source_metadata(o),old_metadata=json.loads(o.OM9SourceMetadata),placement=state.source_placement(o),old_placement=json.loads(o.OM9SourcePlacement)) for o in doc.Objects if state.archive_identity(o) and o.OM9ImportNamespace==affine.OM9ImportNamespace and state.source_signature(o)!=o.OM9SourceSignature]
+        ThreeDm.export_preserved(str(out/'affine-edited.3dm'),[affine])
+        import OpenMatrix9Gui as native
+        model=json.loads(native.read3dm(str(out/'affine-edited.3dm'),str(out)))
+        shape=Part.Shape();shape.read(model['items'][0]['brep'])
+        check('affine rigid delta preserves native linear transform',(shape.Vertexes[0].Point-App.Vector(18,56,72)).Length<1e-8)
+        affine.Placement=App.Placement(App.Vector(40,50,60),App.Rotation(App.Vector(0,0,1),90))
+        ThreeDm.export_preserved(str(out/'affine-edited.3dm'),[affine]);model=json.loads(native.read3dm(str(out/'affine-edited.3dm'),str(out)));shape.read(model['items'][0]['brep'])
+        check('affine rotation composes before native scale',(shape.Vertexes[0].Point-App.Vector(34,28,72)).Length<1e-8)
+        copy=doc.copyObject(affine,False);copy.Placement=App.Placement()
+        ThreeDm.export_preserved(str(out/'affine-edited.3dm'),[affine,copy]);model=json.loads(native.read3dm(str(out/'affine-edited.3dm'),str(out)));points=[]
+        for item in model['items']:
+            shape.read(item['brep']);points.append(shape.Vertexes[0].Point)
+        check('affine copy keeps independent native placement',len(points)==2 and any((p-App.Vector(-22,6,12)).Length<1e-8 for p in points) and any((p-App.Vector(34,28,72)).Length<1e-8 for p in points))
+        old=(out/'affine-edited.3dm').read_bytes();affine.Shape=Part.makeBox(2,3,4);rejected=False
+        try:ThreeDm.export_preserved(str(out/'affine-edited.3dm'),[affine])
+        except RuntimeError:rejected=True
+        check('affine preview edits reject atomically',rejected and (out/'affine-edited.3dm').read_bytes()==old)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

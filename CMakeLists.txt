@@ -13,6 +13,12 @@ set(OpenMatrix9_Scripts
     Init.py
     ThreeDm.py
     ThreeDmArchiveState.py
+    ThreeDmTextDot.py
+    ThreeDmPointCloud.py
+    ThreeDmHatch.py
+    ThreeDmNativeFields.py
+    ThreeDmMigration.py
+    ThreeDmUpgrade.py
 )
 
 if(BUILD_GUI)

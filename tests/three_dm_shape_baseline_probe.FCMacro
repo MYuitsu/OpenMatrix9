@@ -1,0 +1,39 @@
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore
+from pathlib import Path
+import json, os, traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+def fingerprint(shape):
+    import re
+    shape=shape.copy()
+    shape.isValid()
+    # Exact IEEE zero equivalence, no rounding of nonzero values.
+    brep=re.sub(r'(?<!\S)-0(?!\S)','0',shape.exportBrepToString())
+    header,topology=brep.split('TShapes ',1)
+    topology=re.sub(r'^([01]{2})[01]([01]{4})$',r'\g<1>0\g<2>',topology,flags=re.MULTILINE)
+    return header+'TShapes '+topology
+def run():
+    result={'cases':[]}
+    try:
+        proof=json.loads(Path('H:/FreeCAD-src/build/3dm-preserve-native/curved-shell-evidence/native-results.json').read_text())
+        import ThreeDm
+        for i,row in enumerate(proof['cases']):
+            doc=App.newDocument('BaselineProbe'+str(i))
+            obj=ThreeDm.import_file('H:/FreeCAD-src/build/3dm-preserve-native/curved-shell-evidence/'+row['fixture'],doc,mode='preserve')[0]
+            obj.addProperty('Part::PropertyPartShape','ComparisonShape')
+            obj.ComparisonShape=obj.Shape.copy()
+            before=fingerprint(obj.Shape)==fingerprint(obj.ComparisonShape)
+            name=obj.Name; path=out/('case'+str(i)+'.FCStd')
+            doc.saveAs(str(path));App.closeDocument(doc.Name)
+            doc=App.openDocument(str(path));obj=doc.getObject(name)
+            after=fingerprint(obj.Shape)==fingerprint(obj.ComparisonShape)
+            (out/('current'+str(i)+'.brep')).write_text(obj.Shape.copy().exportBrepToString())
+            (out/('baseline'+str(i)+'.brep')).write_text(obj.ComparisonShape.copy().exportBrepToString())
+            result['cases'].append(dict(fixture=row['fixture'],before=before,after=after))
+            App.closeDocument(doc.Name)
+        result['ok']=all(c['before'] and c['after'] for c in result['cases'])
+    except Exception:
+        result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

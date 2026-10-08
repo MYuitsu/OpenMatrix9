@@ -1,0 +1,50 @@
+# Native source field/reference schema and retained FreeCAD lifecycle.
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        root=Path('H:/FreeCAD-src/build/3dm-preserve-native/curve-on-surface-schema-evidence')
+        paths=[root/('surface-%d-optional-%d.3dm'%(k,o)) for k in range(5) for o in (0,1)]
+        paths += [root/('reference-child-%d-present-1-reversed-%d.3dm'%(c,r)) for c in (0,1) for r in (0,1)]
+        for index,source in enumerate(paths):
+            label=source.stem;immutable=source.read_bytes();external=out/source.name;external.write_bytes(immutable)
+            inventory=json.loads(native.inspect3dm(str(external)));row=next(r for r in inventory['records'] if r['class_name']=='ON_CurveOnSurface');fields=row['curve_on_surface_native']
+            check(label+' schema identity/source fields',fields['schema_version']==1 and fields['class_name']=='ON_CurveOnSurface' and len(fields['surface']['domains'])==2 and row['capability']=='retained')
+            doc=App.newDocument('SurfaceSchema%d'%index);objects=ThreeDm.import_file(str(external),doc,mode='preserve');obj=next(o for o in objects if o.OM9SourceClass=='ON_CurveOnSurface')
+            check(label+' retained host has no false CAD shape',obj.OM9Capability=='retained' and not hasattr(obj,'Shape'))
+            check(label+' source record native schema exact',json.loads(obj.OM9SourceRecord)['curve_on_surface_native']==fields)
+            sentinel=out/(label+'-destination.3dm');sentinel.write_bytes(b'keep existing target');before=len(doc.Objects);error=''
+            try:ThreeDm.export_file(str(sentinel),[obj])
+            except Exception as e:error=str(e)
+            check(label+' pending writer refusal is atomic','CurveOnSurface' in error and sentinel.read_bytes()==b'keep existing target' and len(doc.Objects)==before)
+            name=obj.Name;save=out/(label+'.FCStd');doc.recompute();doc.saveAs(str(save));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(save));obj=doc.getObject(name)
+            check(label+' reopen source record exact',json.loads(obj.OM9SourceRecord)['curve_on_surface_native']==fields)
+            snapshot=Path(obj.OM9ArchiveOwner.OM9SourceArchive)
+            check(label+' embedded source survives external deletion',not external.exists() and snapshot.read_bytes()==immutable)
+            reread=json.loads(native.inspect3dm(str(snapshot)));second=next(r for r in reread['records'] if r['source_uuid']==row['source_uuid'])
+            check(label+' snapshot schema/dependencies exact',second['curve_on_surface_native']==fields and second['dependencies']==row['dependencies'])
+            check(label+' original fixture bytes immutable',source.read_bytes()==immutable)
+            App.closeDocument(doc.Name)
+        for child in (0,1):
+            for reversed in (0,1):
+                source=root/('reference-child-%d-present-0-reversed-%d.3dm'%(child,reversed));inventory=json.loads(native.inspect3dm(str(source)));row=inventory['records'][0]
+                check(source.stem+' missing target diagnosed',any(i.get('code')=='missing_dependency' for i in inventory['issues']))
+                doc=App.newDocument('MissingReference%d%d'%(child,reversed));before=len(doc.Objects);error=''
+                try:ThreeDm.import_file(str(source),doc,mode='preserve')
+                except Exception as e:error=str(e)
+                check(source.stem+' invalid dependency refuses before host mutation','dependencies' in error and len(doc.Objects)==before)
+                App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

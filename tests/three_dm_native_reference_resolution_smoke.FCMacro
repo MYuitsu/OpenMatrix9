@@ -1,0 +1,47 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        root=Path('H:/FreeCAD-src/build/3dm-preserve-native/native-reference-resolution-evidence')
+        paths=[root/('curve-child-%d-reversed-%d.3dm'%(c,r)) for c in (0,1) for r in (0,1)]
+        paths += [root/('brep-trim-%d-reversed-%d.3dm'%(c,r)) for c in (0,1) for r in (0,1)]
+        for index,source in enumerate(paths):
+            label=source.stem;immutable=source.read_bytes();external=out/source.name;external.write_bytes(immutable)
+            inventory=json.loads(native.inspect3dm(str(external)));row=next(r for r in inventory['records'] if r['class_name']=='ON_CurveOnSurface');analysis=row['native_reference_analysis']
+            check(label+' linked diagnostic with exact native source',analysis['status']=='linked' and analysis['native_valid'] and len(analysis['references'])==1 and len(analysis['references'][0]['samples'])==5 and not inventory['issues'])
+            doc=App.newDocument('LinkedReference%d'%index);objects=ThreeDm.import_file(str(external),doc,mode='preserve');obj=next(o for o in objects if o.OM9SourceClass=='ON_CurveOnSurface')
+            check(label+' retained host has no false editable geometry',obj.OM9Capability=='retained' and not hasattr(obj,'Shape'))
+            check(label+' native source and analysis in host record',json.loads(obj.OM9SourceRecord)==row)
+            sentinel=out/(label+'-destination.3dm');sentinel.write_bytes(b'keep existing target');before=len(doc.Objects);error=''
+            try:ThreeDm.export_file(str(sentinel),[obj])
+            except Exception as e:error=str(e)
+            check(label+' unverified selected adapter gate remains atomic','CurveOnSurface' in error and sentinel.read_bytes()==b'keep existing target' and len(doc.Objects)==before)
+            name=obj.Name;save=out/(label+'.FCStd');doc.recompute();doc.saveAs(str(save));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(save));obj=doc.getObject(name)
+            check(label+' FCStd reopens exact linked analysis',json.loads(obj.OM9SourceRecord)['native_reference_analysis']==analysis)
+            snapshot=Path(obj.OM9ArchiveOwner.OM9SourceArchive)
+            check(label+' original native archive embedded',snapshot.read_bytes()==immutable and not external.exists())
+            reread=json.loads(native.inspect3dm(str(snapshot)));second=next(r for r in reread['records'] if r['source_uuid']==row['source_uuid'])
+            check(label+' recreated graph semantics from embedded source',second['native_reference_analysis']==analysis and second['curve_on_surface_native']==row['curve_on_surface_native'])
+            check(label+' original fixture immutable',source.read_bytes()==immutable);App.closeDocument(doc.Name)
+        for kind in range(8):
+            source=root/('invalid-%d.3dm'%kind);inventory=json.loads(native.inspect3dm(str(source)));row=next(r for r in inventory['records'] if r['class_name']=='ON_CurveOnSurface')
+            check(source.stem+' invalid reference precise diagnostic',row['native_reference_analysis']['status']=='invalid' and bool(row['native_reference_analysis']['message']))
+            check(source.stem+' native preflight issue',any(i.get('code')=='invalid_native_reference' and i.get('source_uuid')==row['source_uuid'] for i in inventory['issues']))
+            doc=App.newDocument('InvalidReference%d'%kind);before=len(doc.Objects);error=''
+            try:ThreeDm.import_file(str(source),doc,mode='preserve')
+            except Exception as e:error=str(e)
+            check(source.stem+' refuses before host mutation','dependencies' in error and len(doc.Objects)==before);App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -14,7 +14,7 @@ inline void traceCameraChange(int slot,float angle) {
     if(!library)return;
     static auto initialize=reinterpret_cast<decltype(&SymInitialize)>(GetProcAddress(library,"SymInitialize"));
     static auto fromAddress=reinterpret_cast<decltype(&SymFromAddr)>(GetProcAddress(library,"SymFromAddr"));
-    static bool ready=initialize&&initialize(GetCurrentProcess(),nullptr,TRUE);
+    static bool ready=initialize&&initialize(GetCurrentProcess(),"D:\\FreeCAD-src\\build\\relWithDebInfo\\bin",TRUE);
     if(!ready||!fromAddress)return;
     void* frames[32];const auto count=CaptureStackBackTrace(0,32,frames,nullptr);
     for(USHORT i=0;i<count;++i){alignas(SYMBOL_INFO) char bytes[sizeof(SYMBOL_INFO)+1024]={};auto* symbol=reinterpret_cast<SYMBOL_INFO*>(bytes);symbol->SizeOfStruct=sizeof(SYMBOL_INFO);symbol->MaxNameLen=1023;DWORD64 displacement=0;

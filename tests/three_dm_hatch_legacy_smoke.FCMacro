@@ -1,0 +1,34 @@
+import FreeCAD as App,FreeCADGui as Gui
+import json,os,tempfile,traceback,subprocess,hashlib
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+reader=Path('H:/FreeCAD-src/build/3dm-rhino5-reader/Rhino5HatchReader.exe')
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def graph(report):
+    return {r['source_uuid']:{k:r[k] for k in ('class_name','member_uuids','instance_definition_uuid','instance_matrix') if k in r}
+            for r in report['records']+report['components'] if r['class_name'] in ('ON_Hatch','ON_InstanceDefinition','ON_InstanceRef')}
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import ThreeDm,OpenMatrix9Gui as native
+        for unit in ('mm','cm'):
+            source=Path(tempfile.gettempdir())/('om9-hatch-shared-'+unit+'.3dm');immutable=source.read_bytes();doc=App.newDocument('LegacyHatch'+unit);ThreeDm.import_file(str(source),doc,mode='preserve');canonical=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Hatch');proxy,sibling=[o for o in doc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject==canonical]
+            canonical.Label='Vòng Hatch — mẫu "Rhino"';canonical.OM9HatchOrigin=App.Vector(20,30,40);canonical.OM9HatchBasePoint=App.Vector(3,4,0);canonical.OM9HatchScale=0.00001;canonical.OM9HatchPattern='Grid60 [Rhino]';canonical.OM9BlockMemberPlacement.Base=App.Vector(1,2,3);proxy.Placement.Base=App.Vector(7,8,9);proxy.ScaleVector=App.Vector(-2,3,4);doc.recompute()
+            def verify(label,objects):
+                target=out/(unit+'-'+label+'.3dm');legacy=out/(unit+'-'+label+'-legacy.3dm');proof=out/(unit+'-'+label+'.json');ThreeDm.export_file(str(target),objects);before=json.loads(native.inspect3dm(str(target)));unchanged=target.read_bytes();process=subprocess.run([str(reader),str(target),str(legacy),str(proof)],capture_output=True,text=True,timeout=30);check(unit+' '+label+' independent SDK2013 process',process.returncode==0 and json.loads(proof.read_text())['sdk_version']==201307115)
+                decoded=json.loads(proof.read_text());after=json.loads(native.inspect3dm(str(legacy)));a={r['source_uuid']:r for r in before['records'] if r['class_name']=='ON_Hatch'};b={r['source_uuid']:r for r in after['records'] if r['class_name']=='ON_Hatch'};patterns={r['source_uuid']:r for r in before['components'] if r['class_name']=='ON_HatchPattern'};lp={r['uuid']:r for r in decoded['patterns']};patternAfter={r['source_uuid']:r for r in after['components'] if r['class_name']=='ON_HatchPattern'}
+                valid=set(a)==set(b) and graph(before)==graph(after)
+                for identity,row in a.items():
+                    direct=next(h for h in decoded['hatches'] if h['uuid']==identity);valid=valid and {k:direct[k] for k in row['hatch_current']}==row['hatch_current'] and direct['name']==row['name'] and direct['user_strings']==row['user_strings'] and direct['attribute_user_strings']==row['attribute_user_strings'] and row['hatch']==b[identity]['hatch'] and row['hatch_current']==b[identity]['hatch_current']
+                for identity,row in patterns.items():valid=valid and identity in lp and {k:lp[identity][k] for k in row['hatch_pattern']}==row['hatch_pattern'] and row['hatch_pattern']==patternAfter[identity]['hatch_pattern']
+                check(unit+' '+label+' exact decoded native fields pattern rational loops and block graph',valid)
+                check(unit+' '+label+' native/source inputs stay immutable and legacy write is version5',target.read_bytes()==unchanged and source.read_bytes()==immutable and after['source_version']==50 and decoded['gradient_api_available'] is False)
+            verify('reflected-current',[proxy]);verify('sibling-current',[sibling]);definition=ThreeDm.create_definition(doc,[proxy],'Legacy current Hatch family');placed=ThreeDm.create_instance(definition,App.Placement(App.Vector(100,200,300),App.Rotation()));verify('promoted-current',[placed]);copied=ThreeDm.copy_definition(definition,'Legacy independent family');copied.Group[0].LinkedObject.OM9HatchOrigin=App.Vector(70,80,90);copiedPlaced=ThreeDm.create_instance(copied);doc.recompute();verify('copied-current',[copiedPlaced]);App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

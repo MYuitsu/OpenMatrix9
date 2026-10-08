@@ -1,0 +1,72 @@
+"""Current CurveOnSurface graph with independently owned2D UV references."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,uuid,traceback,hashlib,tempfile
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[],'cases':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,ThreeDmArchiveState as state,OpenMatrix9Gui as native
+        fixtures=Path('H:/FreeCAD-src/build/om9-dev/docs/validation')
+        for folder in ['uv-reference-remap-20261008']:
+            root=fixtures/folder;oracle=json.loads((root/'oracle.json').read_text())
+            for wanted in oracle['cases']:
+                source=root/wanted['fixture'];external=out/source.name;external.write_bytes(source.read_bytes());doc=App.newDocument('Remap');doc.UndoMode=1
+                owner_id,root_id=[o['uuid'] for o in wanted['objects']];groups=[]
+                for i in range(2):
+                    objects=ThreeDm.import_file(str(external),doc,mode='preserve');by_id={o.OM9SourceUUID:o for o in objects};obj=by_id[root_id];copy=doc.copyObject(obj,False)
+                    groups.append((obj,copy,by_id[owner_id]))
+                names=[(a.Name,b.Name,c.Name) for a,b,c in groups];baseline=groups[0][0].OM9SourceRecord
+                check(source.name+' oracle-bound two imports have independent namespaces and copied source roots',hashlib.sha256(source.read_bytes()).hexdigest()==wanted['source_sha256'] and len({a.OM9ImportNamespace for a,b,c in groups})==2 and all(a.OM9SourceUUID==b.OM9SourceUUID and b.Name!=b.OM9SourceHostID for a,b,c in groups))
+                def measure(label):
+                    selected=[o for a,b,c in groups for o in (a,b)]
+                    with tempfile.TemporaryDirectory(dir=str(out)) as staging:
+                        request=state.preservation_request(selected,staging);target=out/'current.3dm';native.writeGeometryStaging3dm(json.dumps(request),str(target));inventory=json.loads(native.inspect3dm(str(target)))
+                    check(source.name+label+' complete staged native graph',not inventory['issues'] and len(inventory['records'])==6)
+                    first_namespace=request['sources'][0]['namespace']
+                    for a,b,c in groups:
+                        ns=a.OM9ImportNamespace;owner=owner_id if ns==first_namespace else str(uuid.uuid5(uuid.UUID(ns),'OpenMatrix9.3dm.merge:'+owner_id+':0'))
+                        for host in (a,b):
+                            identity=root_id if host==a else str(uuid.uuid5(uuid.UUID(ns),'OpenMatrix9.3dm.source-copy:'+root_id+':'+host.Name))
+                            if ns!=first_namespace and host==a:identity=str(uuid.uuid5(uuid.UUID(ns),'OpenMatrix9.3dm.merge:'+root_id+':0'))
+                            row=next(r for r in inventory['records'] if r['source_uuid']==identity)
+                            check(source.name+label+host.Name+' exact namespace owner binding',row['curve_on_surface_native']['object_references']==[owner] and owner in row['dependencies'] and row['native_reference_analysis']['status']=='linked')
+                        expected_name=json.loads(c.OM9SourceRecord)['name'] if c.Label==json.loads(c.OM9SourceMetadata)['name'] else c.Label
+                        check(source.name+label+c.Name+' current owner metadata preserved',next(r for r in inventory['records'] if r['source_uuid']==owner)['name']==expected_name)
+                    return selected
+                selected=measure(' imported/copy')
+                owner=groups[1][2];doc.openTransaction('Delete referenced owner');doc.removeObject(owner.Name);doc.commitTransaction();error=''
+                with tempfile.TemporaryDirectory(dir=str(out)) as staging:
+                    try:state.preservation_request(selected,staging)
+                    except Exception as exc:error=str(exc)
+                check(source.name+' deleted current owner is rejected before restoring snapshot', 'Deleted native reference owner' in error)
+                doc.undo();doc.recompute();groups=[tuple(doc.getObject(n) for n in row) for row in names];measure(' undo owner delete')
+                doc.redo();error=''
+                with tempfile.TemporaryDirectory(dir=str(out)) as staging:
+                    try:state.preservation_request([o for a,b,c in groups for o in (a,b)],staging)
+                    except Exception as exc:error=str(exc)
+                check(source.name+' redo owner delete remains rejected','Deleted native reference owner' in error)
+                doc.undo();doc.recompute();groups=[tuple(doc.getObject(n) for n in row) for row in names]
+                owner=groups[1][2];old=owner.Placement;owner.Placement=App.Placement(App.Vector(1,2,3),App.Rotation()).multiply(old);error=''
+                with tempfile.TemporaryDirectory(dir=str(out)) as staging:
+                    try:state.preservation_request([o for a,b,c in groups for o in (a,b)],staging)
+                    except Exception as exc:error=str(exc)
+                check(source.name+' changed current owner cannot silently use immutable snapshot','Changed native reference owner' in error);owner.Placement=old
+                old_label=owner.Label;owner.Label='Current owner metadata';measure(' current owner metadata');owner.Label=old_label
+                project=out/(source.name+'.FCStd');doc.saveAs(str(project));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(project));groups=[tuple(doc.getObject(n) for n in row) for row in names];selected=measure(' reopened without source')
+                check(source.name+' immutable source and typed native record survive reopen',groups[0][0].OM9SourceRecord==baseline and Path(groups[0][0].OM9ArchiveOwner.OM9SourceArchive).read_bytes()==source.read_bytes())
+                protected=out/'public-v5.3dm';protected.write_bytes(b'keep-target');error=''
+                try:ThreeDm.export_file(str(protected),selected)
+                except Exception as exc:error=str(exc)
+                check(source.name+' unverified public V5 profile remains guarded atomically',bool(error) and protected.read_bytes()==b'keep-target')
+                result['cases'].append(dict(fixture=source.name,source_sha256=wanted['source_sha256'],passed=True));App.closeDocument(doc.Name)
+        result.update(ok=True,full_exchange_complete=False,scope='internal SDK80 UV-reference graph; owner deletion/edit refusal; public V5 compatibility unverified and guarded')
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

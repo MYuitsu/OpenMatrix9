@@ -1,0 +1,41 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,time,traceback,hashlib
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'cases':[]}
+source=Path('C:/Users/nguye/Downloads/nhan oval 11.91x8.37x4.97.3dm')
+golden=Path('H:/FreeCAD-src/build/om9-dev/build/three_dm_import_profile-1/9940d2263c73401c91fbd719026927e0/results.json')
+def check(name,value):
+    report['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,ThreeDmArchiveState as state,OpenMatrix9Gui as native
+        report['module']=native.__file__;before=hashlib.sha256(source.read_bytes()).hexdigest()
+        expected=json.loads(golden.read_text())['cases'][1]['decoded']
+        for workers in [1,4]:
+            os.environ['OM9_3DM_WORKERS']=str(workers)
+            Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('PerformanceRing');Gui.updateGui()
+            calls=[0];original=state._cad_fingerprint
+            def fingerprint(shape):calls[0]+=1;return original(shape)
+            state._cad_fingerprint=fingerprint;start=time.perf_counter()
+            try:objects=ThreeDm.import_file(str(source),doc,mode='preserve')
+            finally:state._cad_fingerprint=original
+            import_seconds=time.perf_counter()-start;start=time.perf_counter();Gui.updateGui();Gui.activeDocument().activeView().viewAxonometric();Gui.activeDocument().activeView().fitAll();Gui.activeDocument().activeView().saveImage(str(out/('wire-workers-'+str(workers)+'.png')),900,900,'Current');Gui.updateGui();display_seconds=time.perf_counter()-start
+            rows=[o for o in doc.Objects if hasattr(o,'OM9SourceUUID')]
+            decoded={o.OM9SourceUUID:dict(record=json.loads(o.OM9SourceRecord),signature=o.OM9SourceSignature,geometry=original(o.Shape) if o.isDerivedFrom('Part::Feature') else None) for o in rows}
+            report['cases'].append(dict(workers=workers,import_seconds=import_seconds,display_seconds=display_seconds,first_ready_seconds=import_seconds+display_seconds,fingerprint_calls=calls[0],decoded=decoded))
+            check('decoded records/signatures/CAD equal serial baseline workers'+str(workers),decoded==expected)
+            check('top-level object count unchanged workers'+str(workers),len(objects)==29)
+            check('all imported CAD valid workers'+str(workers),all(o.Shape.isValid() for o in rows if o.isDerivedFrom('Part::Feature')))
+            canonical=sum('OM9SourceShapeBaseline' in o.PropertiesList for o in rows)
+            check('import serializes each canonical CAD value at most three times workers'+str(workers),calls[0]<=3*canonical)
+            App.closeDocument(doc.Name);Gui.updateGui()
+        check('source archive remains unchanged',hashlib.sha256(source.read_bytes()).hexdigest()==before)
+        report['ok']=True
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for key in ['OM9_3DM_WORKERS']:os.environ.pop(key,None)
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

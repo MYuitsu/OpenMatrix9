@@ -1,0 +1,58 @@
+import FreeCAD as App,FreeCADGui as Gui
+import json,os,tempfile,traceback,math
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def center(row):
+    b=row['hatch']['bounds'];return App.Vector(*[(b[i]+b[i+3])/2 for i in range(3)])
+def points(row,pattern):
+    h=row['hatch'];p=h['plane'];origin=App.Vector(*p[:3]);x=App.Vector(*p[3:6]);y=App.Vector(*p[6:9]);base=h['base_point'];values=[]
+    for line in pattern['hatch_pattern']['lines']:
+        angle=h['rotation']+line['angle'];cs,sn=math.cos(angle),math.sin(angle);along=0
+        for dash in [None]+line['dashes']:
+            if dash is not None:along+=abs(dash)
+            for repeat in range(-2,3):
+                u=line['base'][0]+repeat*line['offset'][0]+along;v=line['base'][1]+repeat*line['offset'][1]
+                values.append(origin+x*(base[0]+h['scale']*(cs*u-sn*v))+y*(base[1]+h['scale']*(sn*u+cs*v)))
+    return values
+def agrees(before,source,after,pattern,matrix):
+    a=[matrix.multVec(p) for p in points(before,source)];b=points(after,pattern)
+    return len(a)==len(b) and all((x-y).Length<1e-7 for x,y in zip(a,b))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import ThreeDm,OpenMatrix9Gui as native
+        for unit,mm in [('mm',1),('cm',10)]:
+            source=Path(tempfile.gettempdir())/('om9-hatch-shared-'+unit+'.3dm');original=source.read_bytes();external=out/(unit+'-source.3dm');external.write_bytes(original)
+            doc=App.newDocument('AffineHatch'+unit);doc.UndoMode=1;roots=ThreeDm.import_file(str(external),doc,mode='preserve');canonical=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Hatch');proxies=[o for o in doc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject==canonical];proxy,sibling=proxies;before=json.loads(canonical.OM9SourceRecord);manifest=json.loads(canonical.OM9ArchiveOwner.OM9ArchiveManifest);sourcePattern=next(r for r in manifest['components'] if r['class_name']=='ON_HatchPattern');sourceId=sourcePattern['source_uuid'];target=out/(unit+'-affine.3dm')
+            check(unit+' native shared hatch imports as one canonical and two genuine proxies',len(roots)==2 and len(proxies)==2 and all(o.LinkedObject==canonical for o in proxies))
+            def export(objects):
+                ThreeDm.export_file(str(target),objects);report=json.loads(native.inspect3dm(str(target)));hatches=[r for r in report['records'] if r['class_name']=='ON_Hatch'];patterns={r['source_uuid']:r for r in report['components'] if r['class_name']=='ON_HatchPattern'}
+                return report,[(h,next(patterns[i] for i in h['dependencies'] if i in patterns)) for h in hatches]
+            def matrix(local=(1,2,3),scale=(-2,3,4),move=(7,8,9)):
+                return App.Matrix(scale[0]*mm,0,0,move[0]+scale[0]*local[0],0,scale[1]*mm,0,move[1]+scale[1]*local[1],0,0,scale[2]*mm,move[2]+scale[2]*local[2],0,0,0,1)
+            canonical.OM9BlockMemberPlacement.Base=App.Vector(1,2,3);proxy.Placement.Base=App.Vector(7,8,9);proxy.ScaleVector=App.Vector(-2,3,4);doc.recompute();report,rows=export([proxy]);row,pattern=rows[0]
+            check(unit+' selected reflected anisotropic proxy transforms native pattern and bounds',len(rows)==1 and agrees(before,sourcePattern,row,pattern,matrix()) and (center(row)-matrix().multVec(App.Vector(10,20,30))).Length<1e-7)
+            ids={r['source_uuid'] for r in report['components']+report['records']};again,_=export([proxy]);check(unit+' repeated proxy export keeps generated pattern and geometry identities',ids=={r['source_uuid'] for r in again['components']+again['records']})
+            _,rows=export([sibling]);row,pattern=rows[0];check(unit+' sibling retains original shared pattern and independent placement',pattern['source_uuid']==sourceId and agrees(before,sourcePattern,row,pattern,matrix(scale=(1,1,1),move=(0,0,0))))
+            definition=ThreeDm.create_definition(doc,[proxy],'Affine hatch family');placed=ThreeDm.create_instance(definition,App.Placement(App.Vector(100,200,300),App.Rotation()));report,rows=export([placed]);row,pattern=rows[0]
+            check(unit+' promoted source proxy keeps affine hatch local payload and block placement separate',row['role']=='definition-member' and agrees(before,sourcePattern,row,pattern,matrix()) and next(r for r in report['records'] if r['class_name']=='ON_InstanceRef')['instance_matrix'][3:12:4]==[100,200,300])
+            copied=ThreeDm.copy_definition(definition,'Independent affine hatch family');copiedProxy=copied.Group[0];copiedCanonical=copiedProxy.LinkedObject;copiedPlaced=ThreeDm.create_instance(copied);copiedCanonical.OM9BlockMemberPlacement.Base=App.Vector(4,5,6);doc.recompute();_,rows=export([copiedPlaced]);row,pattern=rows[0]
+            check(unit+' copied family owns independent hatch placement and affine pattern',copiedCanonical!=canonical and agrees(before,sourcePattern,row,pattern,matrix(local=(4,5,6))) and canonical.OM9BlockMemberPlacement.Base==App.Vector(1,2,3))
+            _,rows=export([placed]);check(unit+' copied family edits leave original affine hatch unchanged',agrees(before,sourcePattern,rows[0][0],rows[0][1],matrix()))
+            doc.openTransaction('Scale copied native hatch');copiedProxy.ScaleVector=App.Vector(-4,2,3);doc.recompute();doc.commitTransaction();_,rows=export([copiedPlaced]);check(unit+' current copied proxy scale changes pattern endpoints',agrees(before,sourcePattern,rows[0][0],rows[0][1],matrix(local=(4,5,6),scale=(-4,2,3))))
+            doc.undo();doc.recompute();_,rows=export([copiedPlaced]);check(unit+' Undo restores complete native affine pattern',agrees(before,sourcePattern,rows[0][0],rows[0][1],matrix(local=(4,5,6))))
+            doc.redo();doc.recompute();_,rows=export([copiedPlaced]);check(unit+' Redo restores current native affine pattern',agrees(before,sourcePattern,rows[0][0],rows[0][1],matrix(local=(4,5,6),scale=(-4,2,3))))
+            names=[o.Name for o in (placed,copiedPlaced,copiedProxy,canonical)];saved=out/(unit+'.FCStd');doc.saveAs(str(saved));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(saved));placed,copiedPlaced,copiedProxy,canonical=[doc.getObject(n) for n in names];_,rows=export([copiedPlaced]);check(unit+' FCStd embeds affine hatch and pattern after external deletion',not external.exists() and agrees(before,sourcePattern,rows[0][0],rows[0][1],matrix(local=(4,5,6),scale=(-4,2,3))))
+            sentinel=target.read_bytes();copiedProxy.ScaleVector=App.Vector(0,2,3);doc.recompute();failed=False
+            try:export([copiedPlaced])
+            except RuntimeError:failed=True
+            check(unit+' singular hatch proxy refuses atomically and source bytes remain immutable',failed and target.read_bytes()==sentinel and source.read_bytes()==original);App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

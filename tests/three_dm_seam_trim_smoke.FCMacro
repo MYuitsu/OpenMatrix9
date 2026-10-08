@@ -1,0 +1,64 @@
+"""Editable BRep seams/poles, copy/edit and source-independent FCStd exchange."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,uuid,hashlib,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[],'cases':[],'host_metrics':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native,ThreeDmArchiveState
+        root=Path('H:/FreeCAD-src/build/3dm-preserve-native/seam-trim-evidence')
+        oracle=json.loads((root/'native-results.json').read_text())
+        check('two independently specified analytic BRep fixtures',oracle['ok'] and len(oracle['cases'])==2)
+        for expected in oracle['cases']:
+            source=root/expected['fixture'];data=source.read_bytes();external=out/source.name;external.write_bytes(data)
+            check(source.name+' source bound to decoded topology oracle',hashlib.sha256(data).hexdigest()==expected['source_sha256'])
+            doc=App.newDocument('SeamTrim');objects=ThreeDm.import_file(str(external),doc,mode='preserve')
+            check(source.name+' one editable analytic BRep',len(objects)==1 and objects[0].OM9Capability=='editable')
+            obj=objects[0];copy=doc.copyObject(obj,False);names=(obj.Name,copy.Name);baseline=obj.OM9SourceRecord
+            volume=expected['objects'][0]['volume_mm3'];faces=expected['objects'][0]['faces']
+            def measure(item,label,wanted):
+                check(source.name+label+' valid closed single solid with all faces',item.Shape.isValid() and item.Shape.isClosed() and len(item.Shape.Solids)==1 and len(item.Shape.Shells)==1 and len(item.Shape.Faces)==faces)
+                brep=out/(source.stem+'-'+label.replace(' ','-')+'.brep');item.Shape.exportBrep(str(brep));before=brep.read_bytes()
+                mass=native.measure3dmBrep(str(brep),1e-13);result['host_metrics'].append(dict(fixture=source.name,label=label,expected_volume=wanted,adaptive_metrics=mass))
+                check(source.name+label+' strict independent signed analytic volume',mass['volume']>0 and abs(mass['volume']-wanted)<=1e-6 and brep.read_bytes()==before)
+            measure(obj,' initial',volume);measure(copy,' copy',volume)
+            target=out/('host-'+source.name)
+            def export_pair(label):
+                ThreeDm.export_file(str(target),[obj,copy]);inventory=json.loads(native.inspect3dm(str(target)))
+                copy_id=str(uuid.uuid5(uuid.UUID(obj.OM9ImportNamespace),'OpenMatrix9.3dm.source-copy:'+obj.OM9SourceUUID+':'+copy.Name))
+                record=json.loads(baseline)
+                check(source.name+label+' V5 UUID and full native geometry preserved',inventory['source_version']==50 and not inventory['issues'] and len(inventory['records'])==2 and {r['source_uuid'] for r in inventory['records']}=={obj.OM9SourceUUID,copy_id} and all(r['class_name']=='ON_Brep' and r['geometry_crc']==record['geometry_crc'] for r in inventory['records']))
+                second=App.newDocument('SeamAgain');again=ThreeDm.import_file(str(target),second,mode='preserve')
+                check(source.name+label+' both exported roots reimport',len(again)==2)
+                for index,item in enumerate(again):measure(item,label+' reimport '+str(index),volume)
+                App.closeDocument(second.Name)
+            export_pair(' initial export')
+            project=out/(source.name+'.FCStd');doc.saveAs(str(project));external.unlink();App.closeDocument(doc.Name)
+            doc=App.openDocument(str(project));obj,copy=[doc.getObject(n) for n in names]
+            check(source.name+' source-deleted FCStd restores exact archive and record',obj.OM9SourceRecord==baseline and Path(obj.OM9ArchiveOwner.OM9SourceArchive).read_bytes()==data)
+            measure(obj,' reopened',volume);export_pair(' reopened export')
+            doc.openTransaction('Scale analytic seam BRep');matrix=App.Matrix();matrix.A11=matrix.A22=matrix.A33=1.1
+            obj.Shape=obj.Shape.transformGeometry(matrix);doc.recompute();doc.commitTransaction()
+            check(source.name+' real CAD edit stages replacement',ThreeDmArchiveState.preservation_request([obj],str(out))['selected'][0]['action']=='replace')
+            measure(obj,' scaled',volume*1.331)
+            edited=out/('edited-'+source.name);ThreeDm.export_file(str(edited),[obj]);decoded=json.loads(native.inspect3dm(str(edited)))
+            check(source.name+' edited V5 preserves identity and changes native geometry',not decoded['issues'] and len(decoded['records'])==1 and decoded['records'][0]['source_uuid']==obj.OM9SourceUUID and decoded['records'][0]['geometry_crc']!=json.loads(baseline)['geometry_crc'])
+            second=App.newDocument('EditedAgain');edited_obj=ThreeDm.import_file(str(edited),second,mode='preserve')[0];measure(edited_obj,' edited reimport',volume*1.331);App.closeDocument(second.Name)
+            doc.undo();check(source.name+' Undo restores exact source export route',ThreeDmArchiveState.preservation_request([obj],str(out))['selected'][0]['action']=='unchanged')
+            doc.redo();check(source.name+' Redo restores edited export route',ThreeDmArchiveState.preservation_request([obj],str(out))['selected'][0]['action']=='replace')
+            doc.undo();doc.openTransaction('Delete copy');doc.removeObject(copy.Name);doc.recompute();doc.commitTransaction()
+            check(source.name+' delete copy retains original',doc.getObject(names[1]) is None and doc.getObject(names[0]) is not None)
+            doc.undo();copy=doc.getObject(names[1]);check(source.name+' Undo restores copy source association',copy is not None and copy.OM9SourceUUID==obj.OM9SourceUUID)
+            check(source.name+' native regression source remains immutable',source.read_bytes()==data)
+            result['cases'].append(dict(fixture=source.name,source_sha256=expected['source_sha256'],passed=True));App.closeDocument(doc.Name)
+        result.update(ok=True,actual_rhino5_verified=False,full_exchange_complete=False)
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

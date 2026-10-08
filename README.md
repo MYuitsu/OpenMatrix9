@@ -705,51 +705,85 @@ Kiểm tra theo nhóm: [workspace](tests/workspace_smoke.FCMacro),
 [snap tools](tests/core_snap_point_tools_smoke.FCMacro),
 [keyboard](tests/core_keyboard_smoke.FCMacro), [notes](tests/core_notes_smoke.FCMacro).
 
-## Tiến độ tương thích openNURBS / Rhino 3DM
 
-**Chưa full openNURBS và chưa tương đương Rhino SDK.** Thư viện được tải từ
-upstream public tại commit cố định trong [OpenNURBS.cmake](cmake/OpenNURBS.cmake).
-Đọc được, giữ nguyên dữ liệu nguồn và chỉnh sửa được là các mức hỗ trợ khác nhau.
+## Trao đổi 3DM và openNURBS
 
-| Dữ liệu / chức năng | Source public hiện tại | Phần còn thiếu |
+Tiến độ openNURBS trong bản phát triển, cập nhật 2026-10-08. ✅ là phạm vi đã kiểm chứng; ⬜ là chức năng chưa hoàn thành. Code mới có trong nhánh này; checkout đang làm việc của người dùng được giữ nguyên.
+
+Import 3DM trong bản phát triển đã được tăng tốc bằng tiến trình native riêng, giữ chữ ký và archive nguồn. [Số liệu và cách mở bản nhanh](docs/validation/2026-10-08-fast-3dm-import.md).
+
+|Chức năng|Ý nghĩa và phạm vi|Tiến độ|
 |---|---|---|
-| ✅ Points và curves | Point, line/polyline, arc/circle và rational NURBS qua native CAD conversion. | Không suy ra mọi lớp curve hoặc mọi trường hợp suy biến đều đã tương thích. |
-| ✅ Surfaces / BRep | Conversion surface/BRep được hỗ trợ, trim loops, holes, shells, solids và extrusion. | Kiểm chứng toàn bộ biến thể topology/dung sai và lớp native còn lại. |
-| ✅ Mesh | Triangle/quad mesh; geometry export có cơ chế giữ quad nguồn khi mesh không đổi. | Full mesh attributes và mọi dữ liệu đi kèm chưa được cam kết. |
-| 🟡 Block / `ON_InstanceRef` | Geometry-only import mở rộng embedded blocks thành CAD/mesh, áp dụng transform lồng nhau, scale không đều và reflection. | Source public chưa có structural block preservation writer; geometry-only export không giữ graph definition/reference. |
-| ✅ Metadata hình học cơ bản | Name, nested layer path, color, visibility, lock và chuyển đơn vị trong phạm vi geometry exchange. | Full layer/material/document dependency remapping. |
-| 🟡 Preserve source data | Snapshot nguồn bất biến, hash, namespace/UUID và file đính kèm trong FCStd; giữ record chưa chỉnh sửa được. | Giữ trong snapshot không đồng nghĩa render/edit/export lại đầy đủ. [Preservation checks](tests/three_dm_preservation_smoke.FCMacro). |
-| 🟡 Annotation / lights / native classes khác | Có thể giữ dữ liệu trong snapshot và record retained; geometry-only không hỗ trợ mọi lớp. | Editable/display conversion cho dimensions, leaders, hatches, point clouds, clipping objects và lớp chưa có converter. |
-| ⬜ Materials / textures / render settings | Snapshot có thể giữ nguồn; geometry-only export không bảo toàn đầy đủ. | Dependency closure, tài nguyên và appearance roundtrip. |
-| ⬜ History / plugin userdata | Chưa có reconstruction của Rhino history hoặc Matrix builders. | Unknown reference-bearing/plugin payload cần chính sách bảo toàn và test; không chạy plugin Rhino. |
-| 🟡 Rhino 5 export | Writer geometry nhắm archive version5; có native/host test. | Chưa kiểm thử trực tiếp bằng ứng dụng Rhino5; không tuyên bố hỗ trợ đầy đủ các phiên bản mới hơn. |
+|Import 3dm nhanh (Preserve)|Tối đa4 tiến trình native; giữ dữ liệu/UUID, kiểm tra lỗi trước transaction; đã đo nhẫn cụ thể, còn Geometry only tuần tự.|✅|
+|Migrate 3dm copy origins|Khôi phục provenance của block copy bằng UUID → object gốc; giữ geometry, target, Undo/Redo và FCStd.|✅|
+|Native rational proxy copy|Giữ payload NURBS rational 2D nguyên bản khi migration và export.|✅|
+|Migrate affine targets|Chỉ rõ definition đích cho reference affine; giữ ma trận native, geometry và Undo/Redo/FCStd, rollback graph lỗi.|✅|
+|Fork archive namespace|Tách scope cho archive copy đệ quy; giữ geometry, block native, Undo/Redo và FCStd.|✅|
+|Recursive shared CAD/mesh và NURBS|Copy graph dùng chung geometry; giữ biến đổi affine, mesh native và CRC NURBS rational.|✅|
+|Stable source copy IDs|Giữ UUID đối tượng copy, member và proxy khi export lặp lại và lưu/mở FCStd trong cùng scope/host; từ chối UUID trùng geometry/layer.|✅|
+|File Export / Export3dm|File Export, menu và CMD bảo toàn graph native; Geometry only là lựa chọn bỏ dữ liệu có ghi rõ.|✅|
+|Migrate legacy hosts|Nâng cấp CAD/mesh/instance legacy có provenance; giữ UUID, geometry, liên kết và Undo/Redo/FCStd.|✅|
+|Transform native TextDot / PointCloud|Di chuyển, xoay đối tượng và member block; giữ tọa độ, normal, màu, Undo/Redo và FCStd trong phạm vi đã test.|✅|
+|Export riêng member block|Xuất các member/proxy đã test; giữ UUID và tọa độ. Khối hướng âm trong nhánh giữ nguồn bị chặn; Geometry only giữ dấu qua block phản chiếu, gồm toàn bộ block có proxy đã test.|✅|
+|Giữ nguồn với khối hướng âm, gồm member block|Còn bảo toàn đầy đủ UUID/history/plugin graph qua Rhino5; hiện từ chối trước khi ghi để tránh đảo hướng.|⬜|
+|Hướng solid chưa xác định (+2)|BRep chuyển được thành một solid OCCT: giữ winding và dấu qua biến đổi; block lồng đã kiểm chứng trong Rhino5 và nhập ngược FreeCAD.|✅|
+|BRep +2 nhiều shell, khoang rỗng và đảo chiều|Giữ shell/face, dấu và khoang rỗng trong phạm vi đã test; giữ native khi OCCT chưa có solid chỉnh sửa hợp lệ. Còn nghiệm thu toàn ma trận.|✅|
+|BRep shell cong và khoang rỗng|Bốn mẫu trụ/cầu/torus qua native, FreeCAD và Rhino5 Open/SaveAs; graph/UUID giữ nguyên. Phép đo Rhino chính xác đạt8/8 với ngưỡng giữ nguyên; báo cáo mặc định1/4 giữ riêng. Còn shell tiếp xúc/giao nhau tổng quát.|✅|
+|BRep giữ nguồn sau FCStd|Mốc CAD riêng đi qua cùng bộ lưu FreeCAD; không nhận nhầm làm tròn khi lưu là sửa hình học. Giữ kiểm tra sửa thật và Undo/Redo; project cũ cần migration riêng.|✅|
+|NURBS 2D ra ngoài mặt phẳng|Giữ tọa độ Z khi transform bằng biểu diễn 3D; giữ weight và knot nguyên bản.|✅|
+|TextDot native|Hiển thị chữ, sửa điểm neo, Unicode, font/cỡ chữ và cờ; giữ dữ liệu native khi export, copy block và mở lại FCStd. Preview còn giới hạn.|✅|
+|PointCloud native|Sửa điểm/normal double, màu RGBA và plane; giữ dữ liệu khi copy block, Undo/Redo và mở lại FCStd; hiển thị điểm màu.|✅|
+|PointCloud geometry-only|Import/export điểm double cùng CAD/mesh; làm phẳng block lồng nhau, giữ normal/RGBA/plane và FCStd.|✅|
+|Preview PointCloud affine|Hiển thị native cloud trong block hỗn hợp; tự cập nhật từ member và kiểm tra dữ liệu trước export.|✅|
+|Bảo vệ intensity khi xuất Rhino 5|SDK Rhino5 đời2013 làm mất intensity; giữ trong FCStd và chặn export trừ khi người dùng chủ động xóa.|✅|
+|Kiểm chứng bằng ứng dụng Rhino 5|10/10 mở/lưu/mở lại; nhập ngược33/33. Kiểm chứng hình học bổ sung50/50 ở ngưỡng0,001 mm; bbox Rhino cũ49/50 được giữ riêng.|✅|
+|RDK3 cho Rhino5|Ghi XML UTF-8 đúng layout v3 khi không có tài nguyên nhúng; reader SDK2013 đọc đủ Unicode. Resource chưa tương thích được chặn trước export.|✅|
+|Mặt tròn xoay và chiều solid|Giữ UV/trim gốc và vùng trim khi đảo U/V; giữ dấu thể tích qua block phản chiếu và export/reimport trong phạm vi đã test.|✅|
+|Hatch/HatchPattern native|Giữ pattern, loop NURBS rational và vị trí khi export riêng; đúng spacing mm/cm, Undo/Redo, copy và FCStd trong phạm vi đã test.|✅|
+|Hatch affine native|Biến đổi loop/pattern theo ma trận shear, scale không đều và phản chiếu; copy/block/proxy mm/cm trong phạm vi test; còn kiểm chứng hiển thị Rhino5.|✅|
+|Hatch current fields|Sửa origin/trục/base point/góc/tỷ lệ/pattern; giữ native loop khi copy/block, Undo/Redo và FCStd.|✅|
+|Hatch boundary preview|Hiển thị đường biên từ native NURBS; dựng lại từ FCStd, độc lập dữ liệu export.|✅|
+|Hatch loop native và dữ liệu con|Giữ NURBS/Arc/Polyline/PolyCurve lồng nhau; kiểm tra userdata/reference và gradient None còn dữ liệu.|✅|
+|Hatch typed loop edits (API)|Sửa CV/weight/knot/radius/điểm/đường ghép, thêm/xóa biên; Undo/Redo, copy/block và FCStd trong phạm vi test; cần bản sửa core FileIncluded.|✅|
+|Hatch loop editor: numeric controls|Double-click/menu sửa trường số của5 kiểu curve, role/thêm circle/xóa loop; Undo/Redo, copy và FCStd trong phạm vi đã test.|✅|
+|Hatch loop editor: structural rows|Nhân đôi/xóa CV, knot, point, parameter và segment; kiểm tra native, Undo/Redo và FCStd trong phạm vi test.|✅|
+|Hatch loop/pattern/render đầy đủ|Còn tạo/đổi kiểu native, curve tham chiếu/surface, nội dung pattern và fill/dash; kiểm chứng Rhino5 thực tế.|⬜|
+|Hatch qua SDK Rhino5 độc lập|Reader2013 kiểm tra5 kiểu curve, loop đã sửa/base0 và block mm/cm;32 ca archive native; chưa kiểm chứng renderer Rhino5.|✅|
+|Gradient khi xuất Rhino5|Đã xác nhận mất dữ liệu ở định dạng v5; giữ snapshot và chặn export.|✅|
+|CurveOnSurface archive recovery|Đọc đủ curve tham số, approximation tùy chọn và surface; giữ archive gốc trong FCStd; reader có bản sửa được công bố.|✅|
+|CurveOnSurface native transform (kernel)|159 ca NURBS/Plane/Rev/Sum/Extrusion: đổi surface và approximation cùng nhau, giữ UV và dữ liệu native; còn các mapping tham chiếu/UV khác.|✅|
+|CurveOnSurface schema native|Dữ liệu source của curve con/surface, metadata và tham chiếu PolyEdge; lưu lại đúng trong FCStd, phát hiện đích tham chiếu bị thiếu.|✅|
+|PolyEdge: liên kết model nguồn|Graph native riêng giữ đúng curve/Brep edge/trim, domain và chiều đảo trong các ca đã kiểm tra; báo lỗi tham chiếu sai trước import.|✅|
+|PolyEdge: chia sẻ và kiểm tra tham số|Dùng chung target native; giữ closure và lifetime; giới hạn công việc giữa các root; kiểm tra domain edge/proxy trên Brep box.|✅|
+|PolyEdge: kiểm tra trim cong|Kiểm tra đầu cuối và15 điểm nội miền bằng phép chiếu vật lý rồi đo lại native; thêm seam khép kín và tham số Arc/type2. Giữ riêng giới hạn phép đo.|✅|
+|CurveOnSurface: xuất profile không có C3|30 profile UV Line/Arc/Nurbs/Polyline/PolyCurve trên Nurbs/Plane/Rev/Sum/Extrusion qua API và Open/SaveAs Rhino5; nhập ngược đúng trường native; placement, Undo/Redo, copy/xóa và FCStd đã test.|✅|
+|CurveOnSurface: UV lồng nhau đã kiểm chứng|6 mẫu Line trên UV NURBS 2D bilinear, không rational, hình chữ nhật trong miền: Rhino5 API giữ đủ dữ liệu, nhập ngược đúng trường native; OM9 xuất V5, di chuyển, copy/xóa, Undo/Redo và FCStd đã test; 12 file OM9 xuất qua Open/SaveAs Rhino5, nhập ngược đúng dữ liệu native.|✅|
+|CurveOnSurface: UV shear/rational/bậc cao đã kiểm chứng|90 mẫu UV single-span2x2 không rational/rational dương và4x4 không rational, CV trong miền; 5 kiểu curve con qua API Rhino5 và nhập ngược đủ trường native. OM9 V5/lifecycle đã test; Open/SaveAs180 file OM9 xuất và nhập ngược1.081 kiểm tra đạt.|✅|
+|CurveOnSurface: UV lồng nhau tổng quát|Còn rational bicubic, bậc/span khác, UV đảo chiều, lồng sâu và các kiểu con khác; các trường chưa được kiểm chứng vẫn bị chặn khi xuất V5.|⬜|
+|Dữ liệu plugin do Rhino5 SaveAs thêm|Giữ đủ archive trong FCStd; chặn xuất chọn lọc khi chưa biết đủ dependency của bảng plugin. Chưa có adapter đầy đủ.|⬜|
+|CurveOnSurface: bảo vệ dữ liệu C3|Rhino5 thực tế bỏ đối tượng có m_c3 trong ba mẫu khớp hình học; OM9 giữ nguồn và từ chối xuất trước khi thay file đích.|✅|
+|CurveOnSurface đầy đủ|Còn edit/display, giải quyết/remap tham chiếu, các mapping UV/type, export và kiểm chứng trên Rhino5.|⬜|
+|Full openNURBS|Còn references/UV, multi-shell, annotation, geometry, resources/document/version và integration. [Danh sách còn thiếu](docs/validation/2026-10-07-full-opennurbs-gap-audit.md).|⬜|
 
-### Bản phát triển đang chờ tích hợp vào public
+Lần Rhino5 trước khi sửa RDK:8 file, FreeCAD reimport25/25; đối chiếu nguồn/export40/41, chưa đạt toàn bộ. [Kết quả và vấn đề RDK](docs/validation/2026-10-07-rhino5-application-test.md).
 
-Các phần sau đã có kết quả test ở workspace phát triển riêng nhưng **chưa có
-trong source public này**, nên clone repo hiện tại chưa nhận các chức năng đó:
+Kiểm tra: native35/35, GUI1910/1910, nhẫn894/894; Rhino5 10/10 vòng mở/lưu/mở lại, nhập ngược33/33. Kiểm chứng hình học bổ sung50/50 ở ngưỡng0,001 mm; bbox Rhino5 cũ49/50 được giữ riêng vì bỏ sót điểm thật. Hướng+2 trong phạm vi một solid đã kiểm chứng; full openNURBS vẫn đang hoàn thiện. Xem [báo cáo](docs/validation/2026-10-07-rhino5-ring-bounds.md).
 
-| Phần phát triển | Kết quả đã kiểm tra | Còn trước khi hoàn thành |
-|---|---|---|
-| Selected preservation writer | Giữ native UUID và dependency closure; selected block giữ definition/member/reference thay vì flatten. | Review, tích hợp và nối standard/menu/CMD export. |
-| Geometry/metadata overlays | Thay BRep/mesh được hỗ trợ; name Unicode, color, visibility, lock. | Layer/dependency/member edits và CAD mới chưa có source. |
-| Copy/delete và FCStd | UUID mới cho copy, geometry/placement độc lập, không hồi sinh đối tượng bị bỏ khỏi selection. | Tài liệu cũ thiếu verified baseline và merge từ archive khác nhau. |
-| Structural / affine blocks | Shared/nested definitions, rigid instances, preview scale/reflection; export rigid delta ghép với ma trận native. | Mixed mesh/shear host acceptance và chỉnh member definition đầy đủ. |
+Full regression trước đó: FreeCAD1901/1901; native30/30. Rust không đổi, giữ bằng chứng75/75. [Bằng chứng và giới hạn](docs/validation/2026-10-07-trim-domain-correspondence.md).
 
-Kết quả phát triển đã ghi nhận: **8 bộ native**, **23 kiểm tra structural block**,
-**14 signature**, **12 preserved export**, **19 preservation regression** pass.
-Đây là bằng chứng từ workspace phát triển, không phải kết quả tái chạy trên
-public snapshot. Hai mẫu nhẫn riêng đã dùng để test geometry; preservation export
-của chúng còn bị chặn bởi plugin payload chưa hiểu. Mẫu riêng không được đưa vào repo.
+Chỉnh Hatch loop qua API cần FreeCAD có bản sửa `PropertyFileIncluded` để file của bản sao độc lập. Build chỉ OpenMatrix9 trên bản cài FreeCAD cũ chưa được xác nhận cho chức năng này; xem báo cáo kiểm chứng phía trên.
 
-Public snapshot có bằng chứng audit giao diện **3093/3093 checks** và **68 Rust
-tests** trong [progress ledger](docs/openmatrix9-progress.json) và
-[publication checks](docs/public-source-checks.json); audit icon không chứng minh
-hoàn thành toàn bộ chức năng CAD. Hướng kiểm tra và yêu cầu fixture:
-[build and validation](docs/build.md).
+Giao diện trường số Hatch loop qua104 kiểm tra, thao tác hàng CV/knot/point/segment qua103; full regression1479/1479. Còn tạo/đổi kiểu native và rationality, surface/reference/plugin, pattern/render và Rhino5 thực tế. [Phạm vi và bằng chứng](docs/validation/2026-10-07-3dm-hatch-loop-rows.md).
 
-See [build and checks](docs/build.md), [publication audit](docs/public-source-review.md)
-and [third-party notices](THIRD_PARTY_NOTICES.md).
+CurveOnSurface giữ nguyên nguồn trong FCStd. 30 profile không có C3 đã qua Rhino5 thực tế và giữ đúng trường native khi nhập ngược; những loại con chưa kiểm chứng vẫn bị chặn. Bản sửa SDK chỉ thay hàm Read trong file build sinh ra, nguồn SDK gốc vẫn nguyên vẹn. Mất đối tượng có C3 là tương thích reader Rhino5 đã quan sát, không phải kết luận rằng định dạng V5 không chứa được C3.
 
-The project follows its existing **LGPL-2.1-or-later** declaration; the license
-text is in [LICENSE](LICENSE). Separate dependency notices remain applicable.
+### Rhino5 bounds follow-up
+
+10/10 mở/lưu/mở lại; nhập ngược33/33. Kiểm chứng hình học bổ sung50/50 ở ngưỡng0,001 mm; bbox Rhino cũ49/50 được giữ riêng. [Báo cáo và giới hạn phép đo](docs/validation/2026-10-07-rhino5-ring-bounds.md). Full openNURBS vẫn đang hoàn thiện.
+
+### Kiểm toán full openNURBS — 2026-10-07
+
+Danh mục chuẩn hóa có131 khai báo nguồn,128 lớp runtime đã đối chiếu trong FreeCAD; phân loại abstract/helper/obsolete/concrete riêng. Năm dòng comment và ba lớp obsolete không được SDK build đã được ghi rõ. Báo cáo cũ128/123 giữ nguyên làm lịch sử, không còn là inventory đầy đủ. Không dùng số lớp hay số assertions để tính phần trăm hoàn thành. Regression hiện tại42/42 native; Rhino5 GUI35/35 profile, nhập ngược API/GUI qua484 kiểm tra FreeCAD. Bốn mẫu shell cong qua46 kiểm tra FreeCAD và29 kiểm tra nhập ngược file Rhino đã lưu; phép đo Rhino chính xác8/8 giữ ngưỡng1e-6 mm³, báo cáo mặc định1/4 giữ riêng; `Shape.Volume` mặc định còn sai số tích phân được ghi riêng, kiểm chứng dùng tích phân thích nghi với ngưỡng thể tích giữ nguyên. [Capability từng trục](docs/3dm-capabilities.json) · [Capability từng thuộc tính](docs/3dm-capability-slices.json) · [Audit hiện tại](docs/3dm-current-support-audit.json) · [Phạm vi đã kiểm chứng và phần còn thiếu](docs/validation/2026-10-07-opennurbs-packages-1-3.md).
+
+
+Xem [phạm vi nhánh mới và cách kiểm tra](docs/public-update-2026-10-08.md).

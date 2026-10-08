@@ -1,0 +1,71 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, Mesh, OpenMatrix9Gui as native
+        doc=App.newDocument('SourceNewTarget');source=Path(tempfile.gettempdir())/'om9-reference-edit.3dm';original=source.read_bytes();roots=ThreeDm.import_file(str(source),doc,mode='preserve')
+        rigid=next(o for o in roots if o.Label=='Rigid reference');affine=next(o for o in roots if o.Label.startswith('Affine reference'));nested=next(o for o in roots if o.Label=='Nested reference');old=rigid.LinkedObject;oldId=old.OM9DefinitionUUID;rootId=rigid.OM9SourceUUID
+        cad=doc.addObject('Part::Feature','NewTargetCAD');cad.Shape=Part.makeBox(2,3,4);cad.Placement.Base=App.Vector(1,2,3)
+        mesh=doc.addObject('Mesh::Feature','NewTargetMesh');mesh.Mesh=Mesh.Mesh([[(0,0,0),(2,0,0),(0,3,0)]]);mesh.Placement.Base=App.Vector(4,5,6)
+        target=ThreeDm.create_definition(doc,[cad,mesh],'New source target');targetId=state._new_identity(target,'Definition');rigid.setLink(target);doc.recompute();path=out/'source-new-target.3dm'
+        def export(objects):
+            ThreeDm.export_preserved(str(path),objects);return json.loads(native.inspect3dm(str(path)))
+        def read():return json.loads(native.read3dm(str(path),str(out)))['items']
+        def box():
+            shape=Part.Shape();shape.read(next(i['brep'] for i in read() if i['class_name']=='ON_Brep'));return shape
+        report=export([rigid]);check('existing source instance targets new native definition with retained UUID',len(report['records'])==3 and next(r for r in report['records'] if r['source_uuid']==rootId)['instance_definition_uuid']==targetId)
+        check('obsolete source definition and geometry excluded',all(c['source_uuid']!=oldId for c in report['components']) and not any(r['class_name']=='ON_Point' for r in report['records']))
+        live=Part.getShape(rigid,'',needSubElement=False,transform=True).Solids[0];check('new target rigid world bounds match live CAD',abs(box().Volume-24)<1e-7 and abs(box().BoundBox.XMin-live.BoundBox.XMin)<1e-7 and abs(box().BoundBox.ZMax-live.BoundBox.ZMax)<1e-7)
+        ids={r['source_uuid'] for r in report['records']};check('source instance and new member IDs stable across export',ids=={r['source_uuid'] for r in export([rigid])['records']})
+        target.Placement.Base=App.Vector(7,8,9);rigid.LinkTransform=True;rigid.ScaleVector=App.Vector(-2,3,4);doc.recompute();export([rigid]);live=Part.getShape(rigid,'',needSubElement=False,transform=True).Solids[0];check('source link scale and new definition placement compose once',abs(abs(box().Volume)-576)<1e-6 and abs(box().BoundBox.XMin-live.BoundBox.XMin)<1e-6 and abs(box().BoundBox.ZMax-live.BoundBox.ZMax)<1e-6)
+        rigid.LinkTransform=False;doc.recompute();export([rigid]);live=Part.getShape(rigid,'',needSubElement=False,transform=True).Solids[0];check('source link LinkTransform false ignores new definition placement',abs(box().BoundBox.XMin-live.BoundBox.XMin)<1e-6)
+        raw=list(affine.OM9InstanceMatrix);affine.OM9DefinitionTargetUUID=targetId;doc.recompute();report=export([affine]);check('source affine reference accepts new target and keeps native matrix',list(affine.OM9InstanceMatrix)==raw and next(r for r in report['records'] if r['source_uuid']==affine.OM9SourceUUID)['instance_definition_uuid']==targetId and affine.OM9PreviewStatus=='Current canonical members')
+        check('affine preview follows new CAD mesh graph',len(read())==2 and len(affine.Shape.Solids)==1 and abs(affine.Shape.Solids[0].Volume-24)<1e-6 and abs(affine.Shape.Solids[0].BoundBox.XMin-box().BoundBox.XMin)<1e-6)
+        cad.Shape=Part.makeBox(3,4,5);doc.recompute();export([affine]);check('new target edit refreshes source affine preview',abs(box().Volume-60)<1e-6 and abs(affine.Shape.Solids[0].Volume-60)<1e-6)
+        canonical=nested.LinkedObject.Group[0];canonical.setLink(target);doc.recompute();report=export([nested]);check('existing nested source reference can target new definition',any(r['source_uuid']==canonical.OM9SourceUUID and r['instance_definition_uuid']==targetId for r in report['records']) and all(c['source_uuid']!=oldId for c in report['components']))
+        copied=doc.copyObject(canonical,False);copied.setLink(old);nested.LinkedObject.addObject(copied);doc.recompute();report=export([nested]);check('copied source member can keep original target beside new canonical target',any(r['class_name']=='ON_Point' for r in report['records']) and any(r.get('instance_definition_uuid')==targetId for r in report['records']) and any(r.get('instance_definition_uuid')==oldId for r in report['records']))
+        copied.setLink(target);copied.Placement.Base=App.Vector(30,40,50);doc.recompute();report=export([nested]);check('independent source reference copy can target new definition',sum(r.get('instance_definition_uuid')==targetId for r in report['records'])==2 and all(c['source_uuid']!=oldId for c in report['components']) and len(read())==4)
+        importedTarget=next(o for o in doc.Objects if o.isDerivedFrom('App::Part') and o.Label=='Reference B');newNested=ThreeDm.create_instance(importedTarget,App.Placement(App.Vector(10,20,30),App.Rotation()),'New imported nested target');wrapper=ThreeDm.create_definition(doc,[newNested],'Owned new source target wrapper');wrapperId=state._new_identity(wrapper,'Definition');rigid.setLink(wrapper);doc.recompute();report=export([rigid]);check('source new target can include imported dependency graph',len(report['records'])==4 and next(r for r in report['records'] if r['source_uuid']==rootId)['instance_definition_uuid']==wrapperId and any(r.get('instance_definition_uuid')==importedTarget.OM9DefinitionUUID for r in report['records']))
+        affine.OM9DefinitionTargetUUID=wrapperId;doc.recompute();export([affine]);check('source affine traverses new wrapper and imported dependencies',len(read())==2 and len(affine.Shape.Solids)==1 and abs(affine.Shape.Solids[0].BoundBox.XMin-box().BoundBox.XMin)<1e-6 and affine.OM9PreviewStatus=='Current canonical members')
+        rigid.setLink(target);affine.OM9DefinitionTargetUUID=targetId;doc.recompute()
+        placedCopy=doc.copyObject(rigid,False);placedCopy.Placement.Base=App.Vector(100,200,300);doc.recompute();report=export([rigid,placedCopy]);check('top-level source instance copy shares new definition with fresh output UUID',len(report['records'])==4 and len({r['source_uuid'] for r in report['records']})==4 and sum(r.get('instance_definition_uuid')==targetId for r in report['records'])==2)
+        names=[o.Name for o in (rigid,affine,nested,target,cad)];doc.saveAs(str(out/'source-new-target.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'source-new-target.FCStd'));rigid,affine,nested,target,cad=[doc.getObject(n) for n in names];report=export([rigid,affine,nested]);check('existing source-to-new targets survive FCStd',sum(r.get('instance_definition_uuid')==targetId for r in report['records'])==4 and state._preview_matches(affine))
+        old=next(o for o in doc.Objects if o.isDerivedFrom('App::Part') and getattr(o,'OM9DefinitionUUID','')==oldId);doc.openTransaction('Source target change');rigid.setLink(old);doc.recompute();doc.commitTransaction();report=export([rigid]);check('later source target edit restores original graph',next(r for r in report['records'] if r['source_uuid']==rootId)['instance_definition_uuid']==oldId and any(r['class_name']=='ON_Point' for r in report['records']))
+        doc.undo();doc.recompute();report=export([rigid]);check('source target Undo restores new native definition',next(r for r in report['records'] if r['source_uuid']==rootId)['instance_definition_uuid']==targetId)
+        doc.redo();doc.recompute();report=export([rigid]);check('source target Redo restores original native definition',next(r for r in report['records'] if r['source_uuid']==rootId)['instance_definition_uuid']==oldId)
+        rigid.setLink(target);second=ThreeDm.import_file(str(source),doc,mode='preserve');otherRoot=next(o for o in second if o.Label.startswith('Rigid reference'));otherRoot.setLink(target);doc.recompute();report=export([rigid,otherRoot]);check('unowned new target remaps separately in two source namespaces',len(report['records'])==6 and len({r['source_uuid'] for r in report['records']})==6 and len({r['instance_definition_uuid'] for r in report['records'] if r['class_name']=='ON_InstanceRef'})==2 and len(read())==4)
+        centimeterSource=Path(tempfile.gettempdir())/'om9-merge-depth1-3.3dm';cmOriginal=centimeterSource.read_bytes();cmRoot=ThreeDm.import_file(str(centimeterSource),doc,mode='preserve')[0];cmRoot.OM9DefinitionTargetUUID=targetId;cmRoot.Placement.Base=App.Vector(100,200,300);doc.recompute();report=export([cmRoot]);live=Part.getShape(cmRoot,'',needSubElement=False,transform=True).Solids[0];check('centimeter affine source retarget exports new mm geometry without rescaling',abs(abs(box().Volume)-1440)<1e-6 and abs(box().BoundBox.XMin-live.BoundBox.XMin)<1e-6 and abs(box().BoundBox.ZMax-live.BoundBox.ZMax)<1e-6 and centimeterSource.read_bytes()==cmOriginal)
+        foreign=ThreeDm.create_instance(next(o for o in second if o.Label.startswith('Nested reference')).LinkedObject);wrapper=ThreeDm.create_definition(doc,[foreign],'Foreign new wrapper');saved=path.read_bytes();rigid.setLink(wrapper);doc.recompute();failed=False
+        try:export([rigid])
+        except RuntimeError:failed=True
+        check('source reference to foreign-owned new definition rejects atomically',failed and path.read_bytes()==saved)
+        rigid.setLink(target);affine.OM9DefinitionTargetUUID='00000000-0000-0000-0000-000000000000';doc.recompute();failed=False
+        try:export([affine])
+        except RuntimeError:failed=True
+        check('missing source affine new target rejects atomically',failed and path.read_bytes()==saved)
+        affine.OM9DefinitionTargetUUID=targetId;doc.recompute();ambiguous=doc.copyObject(target,False);ambiguous.OM9NewDefinitionHostID=ambiguous.Name;ambiguous.OM9NewDefinitionUUID=targetId;doc.recompute();failed=False
+        try:export([affine])
+        except RuntimeError:failed=True
+        check('ambiguous explicit new target identity rejects atomically',failed and path.read_bytes()==saved)
+        doc.removeObject(ambiguous.Name);doc.recompute();target.OM9NewDefinitionUUID=oldId;failed=False
+        try:export([rigid])
+        except RuntimeError:failed=True
+        check('new target UUID cannot collide with source namespace identity',failed and path.read_bytes()==saved)
+        target.OM9NewDefinitionUUID=targetId;doc.recompute();export([affine]);saved=path.read_bytes();affine.Shape=Part.makeBox(1,1,1);cad.Shape=Part.makeBox(4,5,6);doc.recompute();failed=False
+        try:export([affine])
+        except RuntimeError:failed=True
+        check('source affine new target cannot overwrite manual preview edit',failed and path.read_bytes()==saved and abs(affine.Shape.Volume-1)<1e-7)
+        check('source archive immutable',source.read_bytes()==original)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

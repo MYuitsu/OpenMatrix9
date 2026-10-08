@@ -1,0 +1,52 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+result={'checks':[]}
+def check(name,passed):
+    result['checks'].append(dict(name=name,passed=bool(passed)))
+    if not passed:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part
+        doc=App.newDocument('SignatureTest')
+        objects=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-merge-source.3dm'),doc,mode='preserve')
+        obj=next(o for o in objects if o.isDerivedFrom('Part::Feature'))
+        original=state.source_signature(obj)
+        check('actual baseline signature',original==obj.OM9SourceSignature)
+        check('archive owner identity',obj.OM9ArchiveOwner.OM9ImportNamespace==obj.OM9ImportNamespace)
+        check('persistent source record',json.loads(obj.OM9SourceRecord)['source_uuid']==obj.OM9SourceUUID)
+        check('signature deterministic',original==state.source_signature(obj))
+        placement=obj.Placement
+        obj.Placement.Base=App.Vector(100,200,300)
+        check('placement edit detected',state.source_signature(obj)!=original)
+        obj.Placement=placement
+        label=obj.Label;obj.Label='Edited source label'
+        check('metadata edit detected',state.source_signature(obj)!=original)
+        obj.Label=label
+        check('reverted edits restore signature',state.source_signature(obj)==original)
+        shape=obj.Shape
+        obj.Shape=Part.Vertex(App.Vector(99,88,77))
+        check('actual geometry edit detected',state.source_signature(obj)!=original)
+        obj.Shape=shape
+        color=obj.ViewObject.ShapeColor
+        obj.ViewObject.ShapeColor=(0.1,0.2,0.3)
+        check('display color edit detected',state.source_signature(obj)!=original)
+        obj.ViewObject.ShapeColor=color
+        check('geometry and metadata revert signature',state.source_signature(obj)==original)
+        copy=doc.copyObject(obj,False)
+        check('copy retains archive ownership',copy.OM9ArchiveOwner==obj.OM9ArchiveOwner and copy.OM9SourceUUID==obj.OM9SourceUUID)
+        check('copy has independent host identity',copy.Name!=obj.Name)
+        path=out/'signature.FCStd';doc.saveAs(str(path));name=doc.Name;objectName=obj.Name;App.closeDocument(name)
+        doc=App.openDocument(str(path));obj=doc.getObject(objectName)
+        check('signature survives FCStd reload',state.source_signature(obj)==original==obj.OM9SourceSignature)
+        check('owner survives FCStd reload',obj.OM9ArchiveOwner is not None and json.loads(obj.OM9SourceRecord)['source_uuid']==obj.OM9SourceUUID)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

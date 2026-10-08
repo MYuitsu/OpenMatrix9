@@ -1,0 +1,28 @@
+import FreeCAD as App,FreeCADGui as Gui
+import json,os,tempfile,traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import ThreeDm,ThreeDmHatch as adapter
+        for unit in ('mm','cm'):
+            doc=App.newDocument('LoopBaseline'+unit);obj=ThreeDm.import_file(str(Path(tempfile.gettempdir())/('om9-hatch-loops-'+unit+'.3dm')),doc,mode='preserve')[0]
+            data=adapter.loops(obj);record=json.loads(obj.OM9SourceRecord);record['unexpected_host_record']=True;obj.OM9SourceRecord=json.dumps(record)
+            rejected=False
+            try:adapter.boundary(obj)
+            except RuntimeError:rejected=True
+            check(unit+' boundary verifies source record against owner manifest',rejected)
+            before=(obj.OM9HatchLoopFile,obj.OM9HatchLoopHash);rejected=False
+            try:adapter.update_loops(obj,data)
+            except RuntimeError:rejected=True
+            check(unit+' loop edit rejects mismatched host source before file change',rejected and before==(obj.OM9HatchLoopFile,obj.OM9HatchLoopHash));App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

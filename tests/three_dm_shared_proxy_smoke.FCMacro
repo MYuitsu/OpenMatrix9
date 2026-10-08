@@ -1,0 +1,57 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('SharedProxies');source=Path(tempfile.gettempdir())/'om9-shared-block-members.3dm';original=source.read_bytes()
+        objects=ThreeDm.import_file(str(source),doc,mode='preserve');owner=objects[0].OM9ArchiveOwner
+        canonical=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Point' and o.OM9ArchiveOwner==owner)
+        proxies=[o for o in doc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject==canonical]
+        canonical.Shape=Part.Vertex(App.Vector(2,3,4));canonical.Placement.Base=App.Vector(5,6,7);doc.recompute()
+        rigid=[Part.getShape(o,'',needSubElement=False,transform=True).Vertexes[0].Point for o in objects if o.isDerivedFrom('App::Link')]
+        check('shared proxy display follows canonical local placement',all(any((p-q).Length<1e-7 for p in rigid) for q in (App.Vector(17,29,11),App.Vector(37,9,11))))
+        proxy=next(p for p in proxies if any(getattr(parent,'Label','')=='Inner' for parent in p.InList))
+        proxy.Placement=App.Placement(App.Vector(7,8,9),App.Rotation(App.Vector(0,0,1),90));proxy.ScaleVector=App.Vector(-2,3,4);proxy.Label='Proxy Nhẫn';doc.recompute()
+        target=out/'proxy.3dm';ThreeDm.export_preserved(str(target),objects)
+        def output_points():
+            read=json.loads(native.read3dm(str(target),str(out)));points=[]
+            for item in read['items']:
+                shape=Part.Shape();shape.read(item['brep']);points.append(shape.Vertexes[0].Point)
+            return points
+        points=output_points();expected=[Part.getShape(o,'',needSubElement=False,transform=True).Vertexes[0].Point for o in objects]
+        result['transformed']=dict(actual=[list(p) for p in points],expected=[list(p) for p in expected],proxy_matrix=list(proxy.Placement.toMatrix().A),scale=list(proxy.ScaleVector),canonical_point=list(canonical.Shape.Vertexes[0].Point),statuses=[getattr(o,'OM9PreviewStatus','') for o in objects])
+        check('reflected transformed proxy matches live rigid and affine blocks',len(points)==3 and all(any((p-q).Length<1e-7 for p in points) for q in expected))
+        report=json.loads(native.inspect3dm(str(target)));members=[r for r in report['records'] if r['class_name']=='ON_Point']
+        check('transformed branch gets fresh UUID while other branch keeps canonical',len(members)==2 and any(r['source_uuid']==canonical.OM9SourceUUID for r in members) and any(r['name']=='Proxy Nhẫn' and r['source_uuid']!=canonical.OM9SourceUUID for r in members))
+        proxy.LinkTransform=False;doc.recompute();ThreeDm.export_preserved(str(target),objects);points=output_points();expected=[Part.getShape(o,'',needSubElement=False,transform=True).Vertexes[0].Point for o in objects]
+        check('proxy override strips canonical placement exactly once',all(any((p-q).Length<1e-7 for p in points) for q in expected))
+        check('unmodified shared branch remains unchanged',any((p-App.Vector(37,9,11)).Length<1e-7 for p in points))
+        name=proxy.Name;names=[o.Name for o in objects];canonicalName=canonical.Name;doc.saveAs(str(out/'proxy.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'proxy.FCStd'));objects=[doc.getObject(n) for n in names];proxy=doc.getObject(name);canonical=doc.getObject(canonicalName)
+        ThreeDm.export_preserved(str(target),objects);points=output_points();expected=[Part.getShape(o,'',needSubElement=False,transform=True).Vertexes[0].Point for o in objects]
+        check('proxy transforms and provenance persist through FCStd',all(any((p-q).Length<1e-7 for p in points) for q in expected))
+        selected=[o for o in objects if o.isDerivedFrom('App::Link') and o.LinkedObject.Label=='Outer'];ThreeDm.export_preserved(str(target),selected);report=json.loads(native.inspect3dm(str(target)))
+        check('selected copied branch omits canonical original geometry',sum(r['class_name']=='ON_Point' for r in report['records'])==1 and all(r['source_uuid']!=canonical.OM9SourceUUID for r in report['records']))
+        check('source snapshot remains immutable',source.read_bytes()==original)
+        old=target.read_bytes();proxy.ScaleVector=App.Vector(0,1,1);doc.recompute();rejected=False
+        try:ThreeDm.export_preserved(str(target),selected)
+        except RuntimeError:rejected=True
+        check('singular proxy rejects atomically',rejected and target.read_bytes()==old)
+        proxy.ScaleVector=App.Vector(1,1,1);proxy.Placement=App.Placement();proxy.LinkTransform=True;doc.recompute()
+        originalDefinition=selected[0].LinkedObject;copied=doc.copyObject(canonical,False);copied.Shape=Part.Vertex(App.Vector(100,200,300));copied.ViewObject.Visibility=True;originalDefinition.addObject(copied);doc.recompute()
+        ThreeDm.export_preserved(str(target),selected);points=output_points();expected=[v.Point for v in Part.getShape(selected[0],'',needSubElement=False,transform=True).Vertexes]
+        result['independent_points']=dict(actual=[list(p) for p in points],expected=[list(p) for p in expected],copy=list(copied.Placement.toMatrix().A))
+        check('copied source member exports independent live geometry',len(points)==len(expected)==2 and all(any((p-q).Length<1e-7 for p in points) for q in expected))
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

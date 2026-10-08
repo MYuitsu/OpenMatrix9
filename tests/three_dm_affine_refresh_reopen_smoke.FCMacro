@@ -1,0 +1,26 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import Part
+        doc=App.openDocument(str(out.parents[1]/'affine-refresh-reopen-fixture'/'refresh.FCStd'))
+        affine=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_InstanceRef')
+        brep=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Brep' and o.OM9ArchiveOwner==affine.OM9ArchiveOwner)
+        brep.Shape=Part.makeBox(5,6,7);doc.recompute()
+        child=next(o for o in affine.Group if o.isDerivedFrom('Part::Feature'))
+        check('fresh process refreshes opened FCStd without another import',abs(child.Shape.Volume-210)<1e-7)
+        check('fresh process keeps root placement',(affine.Placement.Base-App.Vector(40,50,60)).Length<1e-7)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

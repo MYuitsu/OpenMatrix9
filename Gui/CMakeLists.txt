@@ -96,6 +96,7 @@ add_library(
 
 
 
+
 set_target_properties(
     OpenMatrix9RustLib
     PROPERTIES
@@ -121,6 +122,10 @@ set(
 
     AppOpenMatrix9Gui.cpp
     ThreeDmPython.cpp
+    ThreeDmHatchDialog.cpp
+    ThreeDmHatchDialog.h
+    ThreeDmMerge.cpp
+    ThreeDmMerge.h
     CoreThreeDm.cpp
     CoreThreeDm.h
 
@@ -134,6 +139,8 @@ set(
     CommandConsole.h
     CoreWorkspace.cpp
     CoreWorkspace.h
+    CadPresentation.cpp
+    CadPresentation.h
     CoreViewControls.cpp
     CoreViewControls.h
     CoreNotes.cpp
@@ -198,6 +205,8 @@ target_link_libraries(
     PRIVATE
 
     FreeCADGui
+    Part
+    TKOffset
     OM9ThreeDm
     libfastsignals
 
@@ -229,6 +238,13 @@ endif()
 SET_BIN_DIR(
     OpenMatrix9Gui
 )
+
+add_executable(OM9ThreeDmImportWorker ThreeDmImportWorker.cpp)
+target_link_libraries(OM9ThreeDmImportWorker PRIVATE OM9ThreeDm)
+SET_BIN_DIR(OM9ThreeDmImportWorker)
+set_target_properties(OM9ThreeDmImportWorker PROPERTIES DEBUG_OUTPUT_NAME OM9ThreeDmImportWorker)
+add_dependencies(OpenMatrix9Gui OM9ThreeDmImportWorker)
+install(TARGETS OM9ThreeDmImportWorker RUNTIME DESTINATION bin)
 
 
 SET_PYTHON_PREFIX_SUFFIX(

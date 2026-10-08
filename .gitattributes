@@ -6,3 +6,9 @@
 *.md text eol=lf
 *.json text eol=lf
 *.ini text eol=lf
+*.inc text eol=lf
+*.cmake text eol=lf
+CMakeLists.txt text eol=lf
+*.ps1 text eol=lf
+*.FCMacro text eol=lf
+.gitattributes text eol=lf

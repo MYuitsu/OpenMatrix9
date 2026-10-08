@@ -1,0 +1,22 @@
+#include "ThreeDmArchive.h"
+#include "ThreeDmInventory.h"
+#include "ThreeDmPointCloud.h"
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QProcess>
+#include <QFile>
+#include <QTemporaryDir>
+#include <iostream>
+using namespace OpenMatrix9Gui::ThreeDm;
+static void require(bool value,const char* error){if(!value)throw ExchangeError(error);}
+static QString uuid(ON_UUID value){char text[37]{};ON_UuidToString(value,text);return QString::fromLatin1(text);}
+static QByteArray bytes(const std::filesystem::path& path){QFile file(QString::fromStdWString(path.wstring()));require(file.open(QIODevice::ReadOnly),"read legacy exchange bytes");return file.readAll();}
+int main(){try{
+    ON::Begin();QTemporaryDir staging;require(staging.isValid(),"legacy reader staging");
+    for(auto units:{ON::LengthUnitSystem::Millimeters,ON::LengthUnitSystem::Centimeters}){
+        ON_PointCloud cloud;cloud.m_P.Append(ON_3dPoint(1.123456789012345,2,3));cloud.m_P.Append(ON_3dPoint(4,5.234567890123456,6));cloud.m_N.Append(ON_3dVector(2,0,0));cloud.m_N.Append(ON_3dVector());ON_Color color(17,31,47);color.SetAlpha(53);cloud.m_C.Append(color);cloud.m_C.Append(ON_Color(101,151,201));cloud.m_flags=259;cloud.SetPlane(ON_Plane(ON_3dPoint(10,20,30),ON_3dVector(0,0,1)));cloud.SetUserString(L"Legacy proof",L"Retain native text");ONX_Model model;model.m_settings.m_ModelUnitsAndTolerances.m_unit_system=ON_UnitSystem(units);ON_Layer layer;layer.SetName(L"Legacy5 cloud");model.AddModelComponent(layer);ON_3dmObjectAttributes attributes;attributes.m_name=L"No intensity";attributes.SetUserString(L"Attribute proof",L"Retain native attribute");auto original=model.AddModelGeometryComponent(&cloud,&attributes);cloud.m_V.Append(0.123456789012345);cloud.m_V.Append(-4.234567890123456);attributes.m_name=L"Intensity";auto intensity=model.AddModelGeometryComponent(&cloud,&attributes);auto input=std::filesystem::path(staging.path().toStdWString())/L"input.3dm",output=input.parent_path()/L"legacy.3dm",report=input.parent_path()/L"report.json";require(model.Write(input.c_str(),5,nullptr),"modern legacy-target source write");auto source=bytes(input);QProcess process;process.start(QString::fromUtf8(OM9_LEGACY_READER_EXE),QStringList{QString::fromStdWString(input.wstring()),QString::fromStdWString(output.wstring()),QString::fromStdWString(report.wstring())});require(process.waitForStarted(10000)&&process.waitForFinished(30000)&&process.exitStatus()==QProcess::NormalExit&&process.exitCode()==0,"independent legacy executable must finish successfully");auto proof=QJsonDocument::fromJson(bytes(report)).object();require(proof["sdk_version"]==201307115&&proof["intensity_member_available"]==false&&proof["objects"].toArray().size()==2,"independent legacy report version and native intensity absence");
+        auto before=inspectArchive(input),after=inspectArchive(output);require(after.document["source_version"]==50&&after.document["scale_mm"]==before.document["scale_mm"],"legacy output version and native units");
+        for(auto ref:{original,intensity}){auto id=ref.ModelComponent()->Id();auto sourceNative=ON_PointCloud::Cast(ON_ModelGeometryComponent::Cast(before.nativeModel->ComponentFromId(ON_ModelComponent::Type::ModelGeometry,id).ModelComponent())->Geometry(nullptr));auto targetNative=ON_PointCloud::Cast(ON_ModelGeometryComponent::Cast(after.nativeModel->ComponentFromId(ON_ModelComponent::Type::ModelGeometry,id).ModelComponent())->Geometry(nullptr));require(sourceNative&&targetNative,"legacy cloud native identity retained");auto expected=pointCloudFields(*sourceNative);expected["values"]=QJsonArray{};require(pointCloudFields(*targetNative)==expected&&targetNative->m_flags==sourceNative->m_flags,"legacy5 exact native points normals RGBA plane flags; intensity is lost");ON_wString text;require(targetNative->GetUserString(L"Legacy proof",text)&&text==L"Retain native text","legacy native user text retained");auto component=ON_ModelGeometryComponent::Cast(after.nativeModel->ComponentFromId(ON_ModelComponent::Type::ModelGeometry,id).ModelComponent());require(component->Attributes(nullptr)->GetUserString(L"Attribute proof",text)&&text==L"Retain native attribute","legacy native attribute text retained");}
+        require(bytes(input)==source,"legacy source remains immutable");std::cout<<"SDK201307115 "<<(units==ON::LengthUnitSystem::Millimeters?"mm":"cm")<<": exact native cloud fields; intensity lost on legacy roundtrip\n";
+    }return 0;
+}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

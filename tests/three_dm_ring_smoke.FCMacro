@@ -1,0 +1,80 @@
+"""User ring fixture: actual native import -> Rhino 5 export -> import."""
+import FreeCAD as App, FreeCADGui as Gui, Part
+import os, json, traceback, hashlib, time
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+fixture=os.environ.get('OM9_RING_FIXTURE','Oval-twist-ring-fixed.3dm')
+source=Path(__file__).parent/'fixtures/3dm'/fixture
+fixture_hashes={
+    'Oval-twist-ring-fixed.3dm':'9f3ec02ddd0002e89b94ffc48dd64f3782b27be7bbb6d39ace4dc2b3d82f8e65',
+    'Oval-twist-ring.3dm':'2ca463b90bf449e57bd53356ce1f357be77e56cdffbdf87d7a312dcc35d879fb',
+}
+result={'checks':[], 'source':str(source)}
+def check(name, condition):
+    result['checks'].append({'name':name,'passed':bool(condition)})
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not condition:raise AssertionError(name)
+def bounds(shape):
+    box=shape.optimalBoundingBox(False,False)
+    return [box.XMin,box.YMin,box.ZMin,box.XMax,box.YMax,box.ZMax]
+def metrics(objects):
+    import OpenMatrix9Gui as native
+    values=[]
+    for i,o in enumerate(objects):
+        if hasattr(o,'Shape'):
+            staged=out/('measure-'+str(i)+'.brep');o.Shape.exportBrep(str(staged))
+            measured=native.measure3dmBrep(str(staged))
+            values.append(dict(name=o.Label,layer=getattr(o,'OM9LayerPath',''),visible=o.ViewObject.Visibility,
+                 locked=getattr(o,'OM9Locked',False),color=list(o.ViewObject.ShapeColor[:3]),
+                 valid=o.Shape.isValid(),faces=len(o.Shape.Faces),solids=len(o.Shape.Solids),
+                 volume=measured['volume'],area=measured['area'],length=o.Shape.Length,
+                 volume_error=measured['volume_error'],area_error=measured['area_error'],
+                 bounds=bounds(o.Shape)))
+        else:values.append(dict(name=o.Label,vertices=o.Mesh.CountPoints,faces=o.Mesh.CountFacets))
+    return values
+
+def run():
+    started=time.monotonic()
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm
+        check('fixture bytes unchanged',hashlib.sha256(source.read_bytes()).hexdigest()==fixture_hashes[fixture])
+        doc=App.newDocument('RingImport');doc.UndoMode=1
+        existing=doc.addObject('Part::Feature','Existing');existing.Shape=Part.makeBox(1,1,1);doc.recompute()
+        imported=ThreeDm.import_file(source,doc)
+        before=metrics(imported);result['imported']=before
+        check('ring imports into populated project',len(imported)>0 and existing in doc.Objects)
+        check('all imported BReps valid',all(m.get('valid',True) for m in before))
+        target=out/(source.stem+'-roundtrip-rhino5.3dm')
+        # Includes imported layer groups and their members, like a Select All operation.
+        ThreeDm.export_file(target,[o for o in doc.Objects if o!=existing])
+        check('output is Rhino 5',b'5' in target.read_bytes()[:32])
+        copy_doc=App.newDocument('RingRoundtrip');copy_doc.UndoMode=1
+        copied=ThreeDm.import_file(target,copy_doc);after=metrics(copied);result['roundtrip']=after
+        check('same object count',len(before)==len(after))
+        for i,(a,b) in enumerate(zip(before,after)):
+            check('object %d metadata'%i,all(a.get(k)==b.get(k) for k in ('name','layer','visible','locked','color')))
+            if 'valid' in a:
+                check('object %d valid topology'%i,b['valid'] and a['faces']==b['faces'] and a['solids']==b['solids'])
+                check('object %d bounds'%i,all(abs(x-y)<1e-3 for x,y in zip(a['bounds'],b['bounds'])))
+                check('object %d volume and area'%i,all(abs(a[k]-b[k])<max(1e-3,abs(a[k])*1e-4) for k in ('volume','area')))
+            else:check('object %d mesh counts'%i,a['vertices']==b['vertices'] and a['faces']==b['faces'])
+        saved=out/(source.stem+'-roundtrip.FCStd')
+        copy_doc.saveAs(str(saved));App.closeDocument(copy_doc.Name)
+        reopened=App.openDocument(str(saved))
+        geometry=[o for o in reopened.Objects if o.isDerivedFrom('Part::Feature') or o.isDerivedFrom('Mesh::Feature')]
+        result['reopened_geometry_count']=len(geometry)
+        result['reopened_objects']=[dict(name=o.Name,type=o.TypeId) for o in reopened.Objects]
+        check('FCStd reopen retains geometry count',len(geometry)==len(after))
+        check('FCStd reopen retains valid CAD',all(o.Shape.isValid() for o in geometry if hasattr(o,'Shape')))
+        Gui.activeDocument().activeView().viewAxonometric();Gui.activeDocument().activeView().fitAll()
+        Gui.activeDocument().activeView().saveImage(str(out/'ring.png'),1000,800,'Current')
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        result['elapsed_seconds']=time.monotonic()-started
+        (out/'results.json').write_text(json.dumps(result,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

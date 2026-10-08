@@ -1,0 +1,90 @@
+import FreeCAD as App,FreeCADGui as Gui
+import copy,json,os,tempfile,traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def deform(node):
+    kind=node['class_name']
+    if kind=='ON_NurbsCurve':
+        for cv in node['cvs']:cv[0]*=1.5;cv[1]*=.75
+        if node['rational']:node['cvs'][1]=[v*2 for v in node['cvs'][1]]
+        node['knots']=[11+v*3 for v in node['knots']];node['domain']=[11+v*3 for v in node['domain']]
+    elif kind=='ON_ArcCurve':node['radius']*=1.25;node['domain']=[17,39]
+    elif kind in ('ON_LineCurve','ON_PolylineCurve'):
+        for pt in node['points']:pt[0]*=1.5;pt[1]*=.75
+    elif kind=='ON_PolyCurve':
+        for child in node['segments']:deform(child)
+def metadata(node):
+    return dict(strings=node['user_strings'],data=node['userdata'],children=[metadata(v) for v in node.get('segments',[])])
+def hole(mm,x=0):
+    return dict(type=1,source_index=None,curve=dict(source_index=None,class_name='ON_ArcCurve',dimension=2,
+                domain=[0,6.283185307179586],angle_domain=[0,6.283185307179586],radius=.5*mm,
+                plane=[x,0,0,1,0,0,0,1,0,0,0,1,0,0,1,0]))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import ThreeDm,OpenMatrix9Gui as native,ThreeDmHatch as adapter
+        for unit in ('mm','cm'):
+            source=Path(tempfile.gettempdir())/('om9-hatch-loops-'+unit+'.3dm');immutable=source.read_bytes();external=out/(unit+'-source.3dm');external.write_bytes(immutable)
+            doc=App.newDocument('LoopEdit'+unit);doc.UndoMode=1;objects=ThreeDm.import_file(str(external),doc,mode='preserve');target=out/(unit+'.3dm')
+            def export(values):
+                ThreeDm.export_file(str(target),values)
+                return next(r for r in json.loads(native.inspect3dm(str(target)))['records'] if r['class_name']=='ON_Hatch')
+            for obj in objects:
+                record=json.loads(obj.OM9SourceRecord);kind=record['hatch_loop_current']['loops'][0]['curve']['class_name'];label=unit+' '+kind
+                check(label+' embedded editable loop file',hasattr(obj,'OM9HatchLoopFile') and Path(obj.OM9HatchLoopFile).is_file())
+                baseline=adapter.loops(obj,record);check(label+' native millimetre baseline',baseline==record['hatch_loop_current'])
+                initial=export([obj]);edit=copy.deepcopy(baseline);deform(edit['loops'][0]['curve'])
+                doc.openTransaction('Edit native Hatch loops');adapter.update_loops(obj,edit);doc.recompute();doc.commitTransaction()
+                check(label+' current loop fields',adapter.loops(obj,record)==edit and adapter.fields(obj,record)['loops']==edit)
+                after=export([obj]);check(label+' native export exact typed fields',after['hatch_loop_current']==edit)
+                check(label+' nested metadata retained',metadata(after['hatch_loop_native'][0]['curve'])==metadata(initial['hatch_loop_native'][0]['curve']))
+                check(label+' valid derived boundary',adapter.boundary(obj).isValid())
+                doc.undo();check(label+' undo restores included file',adapter.loops(obj,record)==baseline and 'loops' not in adapter.fields(obj,record))
+                doc.redo();check(label+' redo restores included file',adapter.loops(obj,record)==edit)
+                prior=adapter.loops(obj,record);bad=copy.deepcopy(edit);bad['schema_version']=2;rejected=False
+                try:adapter.update_loops(obj,bad)
+                except RuntimeError:rejected=True
+                check(label+' invalid edit leaves document unchanged',rejected and adapter.loops(obj,record)==prior)
+                obj.OM9BlockMemberPlacement.Base=App.Vector(5,6,7);doc.recompute();placed=export([obj]);check(label+' placement once after loop edit',placed['hatch_loop_current']==edit and placed['hatch_current']['plane'][:3]==[5,6,7])
+                sentinel=target.read_bytes();digest=obj.OM9HatchLoopHash;obj.OM9HatchLoopHash='0'*64;rejected=False
+                try:export([obj])
+                except RuntimeError:rejected=True
+                check(label+' file digest mismatch rejects atomically',rejected and target.read_bytes()==sentinel);obj.OM9HatchLoopHash=digest
+                schema=obj.OM9HatchLoopSchema;obj.OM9HatchLoopSchema=2;rejected=False
+                try:export([obj])
+                except RuntimeError:rejected=True
+                check(label+' host schema mismatch rejects atomically',rejected and target.read_bytes()==sentinel);obj.OM9HatchLoopSchema=schema
+                baselineHash=obj.OM9HatchLoopBaselineHash;obj.OM9HatchLoopBaselineHash='0'*64;rejected=False
+                try:export([obj])
+                except RuntimeError:rejected=True
+                check(label+' native baseline mismatch rejects atomically',rejected and target.read_bytes()==sentinel);obj.OM9HatchLoopBaselineHash=baselineHash
+            nurbs=objects[0];prior=adapter.loops(nurbs);withHole=copy.deepcopy(prior);withHole['loops'].append(hole(1 if unit=='mm' else 10));adapter.update_loops(nurbs,withHole);doc.recompute()
+            row=export([nurbs]);check(unit+' new native inner Arc retains existing NURBS',len(row['hatch_loop_current']['loops'])==2 and row['hatch_loop_current']['loops'][1]['curve']['class_name']=='ON_ArcCurve')
+            sentinel=target.read_bytes();outside=copy.deepcopy(prior);outside['loops'].append(hole(1,1000));rejected=False
+            try:adapter.update_loops(nurbs,outside)
+            except RuntimeError:rejected=True
+            check(unit+' invalid hole leaves current loops and output unchanged',rejected and adapter.loops(nurbs)==withHole and target.read_bytes()==sentinel)
+            nonfinite=copy.deepcopy(prior);nonfinite['loops'][0]['curve']['cvs'][0][0]=float('nan');rejected=False
+            try:adapter.update_loops(nurbs,nonfinite)
+            except RuntimeError:rejected=True
+            check(unit+' nonfinite loop edit rejects before file mutation',rejected and adapter.loops(nurbs)==withHole)
+            adapter.update_loops(nurbs,prior);doc.recompute();check(unit+' inner loop removal exports exactly',export([nurbs])['hatch_loop_current']==prior)
+            poly=next(o for o in objects if json.loads(o.OM9SourceRecord)['hatch_loop_current']['loops'][0]['curve']['class_name']=='ON_PolyCurve')
+            original=adapter.loops(poly);copied=doc.copyObject(poly,False);new=copy.deepcopy(original);deform(new['loops'][0]['curve']);adapter.update_loops(copied,new);doc.recompute()
+            check(unit+' copied object loop file independent',adapter.loops(poly)==original and adapter.loops(copied)==new)
+            check(unit+' copied object exports current loops',export([copied])['hatch_loop_current']==new)
+            definition=ThreeDm.create_definition(doc,[poly],'Native edited loop family');family=ThreeDm.copy_definition(definition,'Independent edited loop family');member=family.Group[0];adapter.update_loops(member,new);instance=ThreeDm.create_instance(family);doc.recompute()
+            check(unit+' copied family loops independent',adapter.loops(poly)==original and export([instance])['hatch_loop_current']==new)
+            names=[o.Name for o in objects]+[copied.Name,instance.Name];expected={name:export([doc.getObject(name)]) for name in names};saved=out/(unit+'.FCStd');doc.saveAs(str(saved));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(saved));doc.recompute()
+            for name in names:
+                restored=doc.getObject(name);row=export([restored]);check(unit+' FCStd embedded current loops '+name,row['hatch_loop_current']==expected[name]['hatch_loop_current'] and row['hatch_current']==expected[name]['hatch_current'] and row['hatch_loop_native']==expected[name]['hatch_loop_native'] and not external.exists())
+            check(unit+' original fixture immutable',source.read_bytes()==immutable);App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

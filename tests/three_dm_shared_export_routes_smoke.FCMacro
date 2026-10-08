@@ -1,0 +1,136 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore, QtWidgets, QtGui, QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('SharedExportRoutes');doc.UndoMode=1
+        fixture=Path(tempfile.gettempdir())/'om9-merge-source.3dm';original=fixture.read_bytes();source=out/'source-input.3dm';source.write_bytes(original)
+        roots=ThreeDm.import_file(str(source),doc,mode='preserve');root=next(o for o in roots if o.isDerivedFrom('App::Link'));root.Placement.Base=App.Vector(40,50,60);doc.recompute()
+        target=out/'shared-routes.3dm'
+        def inventory():return json.loads(native.inspect3dm(str(target)))
+        def structural(name,call):
+            call();report=inventory();read=json.loads(native.read3dm(str(target),str(out)));shape=Part.Shape();shape.read(read['items'][0]['brep'])
+            check(name,len(report['records'])==2 and any(r['class_name']=='ON_InstanceRef' and r['source_uuid']==root.OM9SourceUUID for r in report['records']) and not report['issues'] and (shape.Vertexes[0].Point-App.Vector(41,52,63)).Length<1e-7)
+        structural('default export_file preserves selected native block closure and current world placement',lambda:ThreeDm.export_file(str(target),[root]))
+        structural('registered File Export uses structural preservation',lambda:ThreeDm.export([root],str(target)))
+        structural('named export uses the same preservation route',lambda:ThreeDm.export_named(str(target),doc.Name,[root.Name]))
+        structural('native programmatic exporter uses the same preservation route',lambda:native.export3dm(str(target),doc.Name,[root.Name]))
+        layer=doc.addObject('App::DocumentObjectGroup','SelectedBlockLayer');layer.Group=[root]
+        structural('plain layer group plus selected root deduplicates without flattening native block',lambda:ThreeDm.export_file(str(target),[layer,root]))
+        before=target.read_bytes();failed=False
+        try:ThreeDm.export_file(str(target),[root.OM9ArchiveOwner])
+        except RuntimeError:failed=True
+        check('archive owner selection is not implicit whole-archive export',failed and target.read_bytes()==before)
+        failed=False
+        try:ThreeDm.export_file(str(target),[root],geometry_only=1)
+        except RuntimeError:failed=True
+        check('export mode must be an explicit boolean',failed and target.read_bytes()==before)
+        ThreeDm.export_file(str(target),[root],geometry_only=True);report=inventory();read=json.loads(native.read3dm(str(target),str(out)));shape=Part.Shape();shape.read(read['items'][0]['brep'])
+        check('explicit geometry-only block export flattens current native geometry once',len(report['records'])==1 and not any(r['class_name']=='ON_InstanceRef' for r in report['records']) and (shape.Vertexes[0].Point-App.Vector(41,52,63)).Length<1e-7)
+        curveRoots=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-shared-rational-curve.3dm'),doc,mode='preserve');curve=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_NurbsCurve');record=json.loads(curve.OM9SourceRecord)
+        ThreeDm.export_file(str(target),[curveRoots[0]]);report=inventory();writtenCurve=next(r for r in report['records'] if r['class_name']=='ON_NurbsCurve')
+        check('default source block export retains native rational NURBS payload',len(report['records'])==2 and writtenCurve['geometry_crc']==record['geometry_crc'])
+        sourceGeometry=next(o for o in roots if o.isDerivedFrom('Part::Feature'));ThreeDm.export_file(str(target),[sourceGeometry]);report=inventory()
+        check('default top-level source geometry export keeps its native UUID and payload',len(report['records'])==1 and report['records'][0]['source_uuid']==sourceGeometry.OM9SourceUUID and report['records'][0]['geometry_crc']==json.loads(sourceGeometry.OM9SourceRecord)['geometry_crc'])
+        retained=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-preservation.3dm'),doc,mode='preserve');dot=next(o for o in retained if o.OM9SourceClass=='ON_TextDot');ThreeDm.export([dot],str(target));report=inventory()
+        check('registered export retains supported noneditable native TextDot',len(report['records'])==1 and report['records'][0]['class_name']=='ON_TextDot' and report['records'][0]['geometry_crc']==json.loads(dot.OM9SourceRecord)['geometry_crc'])
+        before=target.read_bytes();failed=False
+        try:ThreeDm.export_file(str(target),[dot],geometry_only=True)
+        except RuntimeError:failed=True
+        check('geometry-only retained source refuses without replacing destination',failed and target.read_bytes()==before)
+        box=doc.addObject('Part::Feature','UnsourcedBox');box.Shape=Part.makeBox(2,3,4);doc.recompute();ThreeDm.export([box],str(target));read=json.loads(native.read3dm(str(target),str(out)));shape.read(read['items'][0]['brep'])
+        check('ordinary unsourced CAD export retains existing behavior',abs(shape.Volume-24)<1e-7)
+        mixedRoots=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm'),doc,mode='preserve');mixed=mixedRoots[0];mixed.Placement.Base=App.Vector(100,200,300);doc.recompute()
+        ThreeDm.export_file(str(target),[mixed],geometry_only=True);report=inventory();read=json.loads(native.read3dm(str(target),str(out)));mesh=next(i for i in read['items'] if 'vertices' in i)
+        check('explicit mixed block geometry-only export keeps native mesh type and affine coordinates',len(report['records'])==2 and sum(r['class_name']=='ON_Mesh' for r in report['records'])==1 and not any(r['class_name']=='ON_InstanceRef' for r in report['records']) and any((App.Vector(*p)-App.Vector(111.5,223,330)).Length<1e-7 for p in mesh['vertices']))
+        before=target.read_bytes();preview=next(o for o in mixed.Group if o.isDerivedFrom('Part::Feature'));savedShape=preview.Shape.copy();preview.Shape=Part.makeBox(1,1,1)
+        for mode in (False,True):
+            failed=False
+            try:ThreeDm.export_file(str(target),[mixed],geometry_only=mode)
+            except RuntimeError:failed=True
+            check('edited affine display refuses atomically in '+('geometry-only' if mode else 'preservation')+' mode',failed and target.read_bytes()==before)
+        preview.Shape=savedShape
+        foreign=App.newDocument('ForeignExportProject');failed=False
+        try:ThreeDm.export_file(str(target),[root])
+        except RuntimeError:failed=True
+        finally:App.closeDocument(foreign.Name);App.setActiveDocument(doc.Name)
+        check('shared route refuses objects outside active project before target mutation',failed and target.read_bytes()==before)
+        member=doc.addObject('Part::Feature','NewBlockMember');member.Shape=Part.makeBox(3,4,5);definition=ThreeDm.create_definition(doc,[member],'New exported block');instance=ThreeDm.create_instance(definition,App.Placement(App.Vector(10,20,30),App.Rotation()));doc.recompute()
+        ThreeDm.export([instance],str(target));report=inventory()
+        check('registered export preserves newly created native definition and instance',len(report['records'])==2 and any(r['class_name']=='ON_InstanceRef' for r in report['records']) and len([r for r in report['components'] if r['class_name']=='ON_InstanceDefinition'])==1)
+        class RestrictedTask:
+            def __init__(self):self.form=QtWidgets.QWidget()
+            def isAllowedAlterDocument(self):return False
+            def isAllowedAlterSelection(self):return False
+            def isAllowedAlterView(self):return True
+        Gui.Control.showDialog(RestrictedTask());QtWidgets.QApplication.processEvents();before=target.read_bytes();failed=False
+        try:ThreeDm.export([root],str(target))
+        except RuntimeError:failed=True
+        finally:Gui.Control.closeDialog()
+        check('shared preservation route respects active task guard',failed and target.read_bytes()==before)
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(root,'Vertex1');failed=False
+        try:ThreeDm.export_selection(str(target))
+        except RuntimeError:failed=True
+        check('shared selection route rejects subelements atomically',failed and target.read_bytes()==before)
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(root)
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_DontUseNativeDialogs,True)
+        # Std_Export chooses Win32 directly unless this isolated profile opts
+        # into Qt; the global Qt attribute alone cannot automate that backend.
+        dialogPrefs=App.ParamGet('User parameter:BaseApp/Preferences/Dialog');dialogPrefs.SetBool('DontUseNativeDialog',True);dialogPrefs.SetBool('ShowFilterPatterns',True)
+        def choose(path,geometry_only=False,standard=False):
+            dialog=QtWidgets.QApplication.activeModalWidget()
+            if not isinstance(dialog,QtWidgets.QFileDialog):QtCore.QTimer.singleShot(50,lambda:choose(path,geometry_only,standard));return
+            if standard:
+                filters=dialog.nameFilters();result['standard_filters']=filters;(out/'standard-modal.json').write_text(json.dumps(dict(filters=filters)))
+                dialog.selectNameFilter(next(f for f in filters if '*.3dm' in f))
+            choice=dialog.findChild(QtWidgets.QCheckBox,'OM9GeometryOnlyExport')
+            dialog.grab().save(str(out/'export-dialog.png'))
+            result.setdefault('dialog_modes',[]).append(dict(exists=choice is not None,default=choice.isChecked() if choice else None,text=choice.text() if choice else '',filename_width=dialog.findChild(QtWidgets.QLineEdit,'fileNameEdit').width(),dialog_width=dialog.width()))
+            if choice:choice.setChecked(geometry_only)
+            if path is None:dialog.reject();return
+            dialog.setDirectory(str(path.parent))
+            def enter():
+                dialog.findChild(QtWidgets.QLineEdit,'fileNameEdit').setText(path.name)
+                QtCore.QTimer.singleShot(150,lambda:dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Save).click())
+            QtCore.QTimer.singleShot(150,enter)
+        menu=out/'menu-preserved.3dm';QtCore.QTimer.singleShot(100,lambda:choose(menu));Gui.runCommand('Export3dm');target=menu
+        check('menu export offers preservation default and explicit omission control',result['dialog_modes'][-1]['exists'] and not result['dialog_modes'][-1]['default'] and 'omit' in result['dialog_modes'][-1]['text'].lower())
+        check('export mode control keeps filename entry wide enough for usable paths',result['dialog_modes'][-1]['filename_width']>0.4*result['dialog_modes'][-1]['dialog_width'])
+        check('actual menu command writes selected native block graph',len(inventory()['records'])==2 and any(r['class_name']=='ON_InstanceRef' for r in inventory()['records']))
+        cmd=out/'cmd-preserved.3dm';QtCore.QTimer.singleShot(100,lambda:choose(cmd));field=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript');field.setFocus();cursor=field.textCursor();cursor.setPosition(int(field.property('om9InputStart')));cursor.movePosition(QtGui.QTextCursor.End,QtGui.QTextCursor.KeepAnchor);cursor.insertText('Export3dm');field.setTextCursor(cursor);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);target=cmd
+        check('actual CMD command writes the same selected native block graph',len(inventory()['records'])==2 and any(r['source_uuid']==root.OM9SourceUUID for r in inventory()['records']))
+        standard=out/'standard-dialog.3dm';QtCore.QTimer.singleShot(100,lambda:choose(standard,standard=True));Gui.runCommand('Std_Export');target=standard
+        check('actual standard FreeCAD export dialog uses registered preservation handler',len(inventory()['records'])==2 and any(r['class_name']=='ON_InstanceRef' and r['source_uuid']==root.OM9SourceUUID for r in inventory()['records']))
+        flat=out/'menu-flat.3dm';QtCore.QTimer.singleShot(100,lambda:choose(flat,True));Gui.runCommand('Export3dm');target=flat
+        check('menu explicit geometry-only choice omits native block structure',len(inventory()['records'])==1 and not any(r['class_name']=='ON_InstanceRef' for r in inventory()['records']))
+        def history():return [b.property('om9Command') for b in Gui.getMainWindow().findChildren(QtWidgets.QToolButton) if b.objectName().startswith('OM9History')]
+        # The sidebar refreshes committed command history every350ms. Await the
+        # three successful OM9 exports before taking the cancel snapshot; a
+        # fixed250ms pause can otherwise compare stale widgets with current UI.
+        elapsed=QtCore.QElapsedTimer();elapsed.start()
+        while len(history())!=3 and elapsed.elapsed()<2000:
+            loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(20,loop.quit);loop.exec()
+        check('successful export history is visible before cancel snapshot',len(history())==3)
+        previous=history();beforeCount=len(doc.Objects);previousBytes=flat.read_bytes()
+        QtCore.QTimer.singleShot(100,lambda:choose(None));Gui.runCommand('Export3dm')
+        result['cancel_observation']=dict(before_count=beforeCount,after_count=len(doc.Objects),destination_unchanged=flat.read_bytes()==previousBytes,previous_history=previous,current_history=history())
+        check('cancelled shared export leaves document destination and successful history unchanged',len(doc.Objects)==beforeCount and flat.read_bytes()==previousBytes and history()==previous)
+        sourceCount=len(doc.Objects);nativeIds=sorted((o.Name,getattr(o,'OM9SourceUUID',''),getattr(o,'OM9SourceHostID','')) for o in doc.Objects);rootName=root.Name;doc.saveAs(str(out/'routes.FCStd'));App.closeDocument(doc.Name);source.unlink();doc=App.openDocument(str(out/'routes.FCStd'));root=doc.getObject(rootName);target=out/'reopened-route.3dm'
+        structural('standard preservation export works after FCStd reload without source file access',lambda:ThreeDm.export([root],str(target)))
+        check('all shared routes leave native source provenance immutable',fixture.read_bytes()==original and not source.exists() and nativeIds==sorted((o.Name,getattr(o,'OM9SourceUUID',''),getattr(o,'OM9SourceHostID','')) for o in doc.Objects) and len(doc.Objects)==sourceCount)
+        Gui.getMainWindow().grab().save(str(out/'shared-export-runtime.png'))
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

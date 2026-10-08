@@ -1,0 +1,70 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json,os,tempfile,traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def near(a,b):return len(a)==len(b) and all(abs(x-y)<1e-9 for x,y in zip(a,b))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm,ThreeDmPointCloud as cloud,ThreeDmArchiveState as state,OpenMatrix9Gui as native
+        target=out/'geometry.3dm';serial=[0]
+        def payloads():
+            serial[0]+=1;stage=out/('oracle-'+str(serial[0]));stage.mkdir();model=json.loads(native.read3dm(str(target),str(stage)))
+            return [cloud.read_data(row['point_cloud_fields'],row['point_cloud_sha256']) for row in model['items'] if 'point_cloud_fields' in row],model
+        for unit,scale in [('mm',1),('cm',10)]:
+            source=Path(tempfile.gettempdir())/('om9-cloud-geometry-'+unit+'.3dm');original=source.read_bytes();doc=App.newDocument('CloudGeometry'+unit)
+            objects=ThreeDm.import_file(str(source),doc,mode='geometry');points=[o for o in objects if cloud.is_adapter(o)];plain=next(o for o in points if not o.OM9CloudValues);intensity=next(o for o in points if o.OM9CloudValues)
+            check(unit+' geometry import keeps two native double adapters and mixed CAD mesh',len(points)==2 and len(objects)==4 and any(o.isDerivedFrom('Mesh::Feature') for o in objects) and any(o.isDerivedFrom('Part::Feature') for o in objects))
+            check(unit+' native fields and colored PointSet remain independent of preview precision',near(plain.OM9CloudPoints[0],[88.75308642197531*scale,266*scale,432*scale]) and plain.OM9CloudRGBA==[17,31,47,53,101,151,201,0] and plain.ViewObject.Proxy.points.numPoints.getValue()==2 and not hasattr(plain,'OM9SourceUUID'))
+            check(unit+' import preserves intensity rather than silently omitting it',intensity.OM9CloudValues==[0.123456789012345,-4.234567890123456])
+            plain.OM9CloudPoints=[App.Vector(1.123456789012345,2,3),App.Vector(4,5,6)];plain.OM9BlockMemberPlacement.Base=App.Vector(10,20,30);parent=doc.addObject('App::Part','CloudParent');parent.addObject(plain);parent.Placement.Base=App.Vector(100,200,300);doc.recompute();plain.ViewObject.OM9HiddenPoints=[True,False]
+            ThreeDm.export_file(str(target),[plain]);data,_=payloads();check(unit+' independent cloud current doubles and physical placement export once',near(data[0]['points'][0],[111.123456789012345,222,333]) and data[0]['colors']==plain.OM9CloudRGBA and len(data[0]['points'])==2)
+            others=[o for o in objects if o not in points];ThreeDm.export_file(str(target),[plain]+others);data,model=payloads();check(unit+' mixed CAD mesh native cloud export preserves types',len(model['items'])==3 and len(data)==1 and data[0]['points'][0]==[111.12345678901235,222,333])
+            sentinel=target.read_bytes();failed=False
+            try:ThreeDm.export_file(str(target),[intensity])
+            except Exception as error:failed='intensity' in str(error)
+            check(unit+' incompatible intensity export leaves destination unchanged',failed and target.read_bytes()==sentinel)
+            saved=out/(unit+'.FCStd');name=plain.Name;doc.saveAs(str(saved));App.closeDocument(doc.Name);doc=App.openDocument(str(saved));plain=doc.getObject(name);ThreeDm.export_file(str(target),[plain]);data,_=payloads();check(unit+' geometry-only adapter placement display and doubles persist in FCStd',near(data[0]['points'][0],[111.123456789012345,222,333]) and list(plain.ViewObject.OM9HiddenPoints)==[True,False] and plain.ViewObject.Proxy.points.numPoints.getValue()==1)
+            App.closeDocument(doc.Name);doc=App.newDocument('PreservedCloud'+unit);roots=ThreeDm.import_file(str(source),doc,mode='preserve');block=next(o for o in roots if o.OM9SourceClass=='ON_InstanceRef');member=next(o for o in doc.Objects if cloud.is_adapter(o) and hasattr(o,'OM9SourceRecord') and json.loads(o.OM9SourceRecord)['role']=='definition-member')
+            check(unit+' affine block derives a typed native cloud preview alongside CAD mesh',block.isDerivedFrom('App::Part') and len(block.Group)==3 and any(cloud.is_adapter(o) for o in block.Group) and state._preview_matches(block))
+            member.OM9CloudPoints=[App.Vector(2.123456789012345,3,4),App.Vector(5,6,7)];member.OM9BlockMemberPlacement.Base=App.Vector(1,2,3);member.OM9CloudRGBA=[3,7,11,13,17,19,23,29];doc.recompute();preview=next(o for o in block.Group if cloud.is_adapter(o));expected=[(-2*(3.123456789012345+10*scale)+0.5*(5+20*scale)+100*scale),(5+20*scale)*3+200*scale,(7+30*scale)*4+300*scale]
+            check(unit+' current canonical cloud refresh follows native affine and member placement',near(preview.OM9CloudPoints[0],expected) and state._preview_matches(block) and block.OM9PreviewStatus=='Current canonical members')
+            ThreeDm.export_file(str(target),[block],geometry_only=True);data,model=payloads();check(unit+' geometry-only block uses current native graph and drops structure userdata',len(model['items'])==3 and near(data[0]['points'][0],expected) and all(r['class_name']!='ON_InstanceRef' and not r['user_strings'] for r in json.loads(native.inspect3dm(str(target)))['records']))
+            check(unit+' complete derived native preview fields match verified current export',data[0]==cloud.fields(preview) and data[0]['colors']==member.OM9CloudRGBA)
+            ThreeDm.export_file(str(target),[member],geometry_only=True);data,_=payloads();check(unit+' selected retained member geometry-only exports own local current arrays',near(data[0]['points'][0],[3.123456789012345,5,7]))
+            block.Placement.Base=App.Vector(7,8,9);doc.recompute();ThreeDm.export_file(str(target),[block],geometry_only=True);data,_=payloads();check(unit+' affine root rigid delta composes once without editing derived cloud coordinates',near(data[0]['points'][0],[expected[i]+[7,8,9][i] for i in range(3)]) and near(preview.OM9CloudPoints[0],expected) and state._preview_matches(block))
+            saved=out/('preserved-'+unit+'.FCStd');names=[o.Name for o in (block,member)];doc.saveAs(str(saved));App.closeDocument(doc.Name);doc=App.openDocument(str(saved));block,member=[doc.getObject(n) for n in names];preview=next(o for o in block.Group if cloud.is_adapter(o));ThreeDm.export_file(str(target),[block],geometry_only=True);data,_=payloads();check(unit+' affine mixed cloud preview and current graph survive FCStd',state._preview_matches(block) and preview.ViewObject.Proxy.points.numPoints.getValue()==2 and near(data[0]['points'][0],[expected[i]+[7,8,9][i] for i in range(3)]))
+            copied=doc.copyObject(block,True);doc.recompute();sentinel=target.read_bytes();failed=False
+            try:ThreeDm.export_file(str(target),[copied],geometry_only=True)
+            except Exception:failed=True
+            check(unit+' generic recursive copy with changed preview labels requires explicit verified rebuild',not state._preview_matches(copied) and failed and target.read_bytes()==sentinel)
+            definition=next(o for o in doc.Objects if getattr(o,'OM9DefinitionUUID','')==block.OM9DefinitionTargetUUID);own=ThreeDm.copy_definition(definition,'Copied cloud graph');placed=ThreeDm.create_instance(own,App.Placement(App.Vector(100*scale,200*scale,300*scale),App.Rotation()));placed.ScaleVector=App.Vector(-2,3,4);doc.recompute();ThreeDm.export_file(str(target),[placed],geometry_only=True);data,_=payloads();copiedExpected=[-2*(3.123456789012345+10*scale)+100*scale,(5+20*scale)*3+200*scale,(7+30*scale)*4+300*scale]
+            check(unit+' verified copied definition graph exports current native cloud under nonuniform reflection',len(data)==1 and near(data[0]['points'][0],copiedExpected) and data[0]['colors']==member.OM9CloudRGBA)
+            sentinel=target.read_bytes();failed=False
+            try:ThreeDm.export_file(str(target),[preview],geometry_only=True)
+            except Exception:failed=True
+            check(unit+' derived cloud child cannot be exported as an independent source',failed and target.read_bytes()==sentinel)
+            old=preview.OM9CloudPoints;preview.OM9CloudPoints=[App.Vector(999,0,0),App.Vector()];sentinel=target.read_bytes();failed=False
+            try:ThreeDm.export_file(str(target),[block],geometry_only=True)
+            except Exception:failed=True
+            check(unit+' edited derived cloud preview rejects without becoming export authority',failed and target.read_bytes()==sentinel);preview.OM9CloudPoints=old
+            with tempfile.TemporaryDirectory() as staging:
+                row=cloud.stage(preview,None,staging,0);row.update(name='Malformed',layer='Cloud geometry');base=dict(row)
+                for label,changes in [('hash',dict(point_cloud_sha256='0'*64)),('singular',dict(point_cloud_transform=[0]*16)),('projective',dict(point_cloud_transform=[1,0,0,0,0,1,0,0,0,0,1,0,1,0,0,1])),('ambiguous',dict(vertices=[],faces=[])),('missing hash',dict(point_cloud_sha256=None)),('malformed color',dict(color=[1,2]))]:
+                    (out/'running-case.txt').write_text(unit+' '+label)
+                    bad=dict(base,**changes);sentinel=target.read_bytes();failed=False
+                    try:native.write3dm(json.dumps(dict(items=[bad])),str(target))
+                    except Exception:failed=True
+                    check(unit+' native cloud '+label+' manifest rejects before destination mutation',failed and target.read_bytes()==sentinel)
+            check(unit+' geometry and preserve routes leave native source immutable',source.read_bytes()==original);App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

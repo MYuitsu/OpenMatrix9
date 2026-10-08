@@ -1,0 +1,30 @@
+import FreeCAD as App,FreeCADGui as Gui
+import json,os,tempfile,traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        doc=App.newDocument('IncludedFileCopies');doc.UndoMode=1
+        source=out/'original.json';source.write_bytes(b'original native loop data');edit=out/'edited.json';edit.write_bytes(b'edited native loop data')
+        obj=doc.addObject('App::FeaturePython','Original');obj.addProperty('App::PropertyFileIncluded','Data');obj.Data=str(source)
+        copied=doc.copyObject(obj,False)
+        check('same document copy owns an independent included file',obj.Data!=copied.Data and Path(obj.Data).read_bytes()==Path(copied.Data).read_bytes())
+        doc.openTransaction('Edit copy');copied.Data=str(edit);doc.commitTransaction()
+        check('editing copied included file preserves original',Path(obj.Data).read_bytes()==source.read_bytes() and Path(copied.Data).read_bytes()==edit.read_bytes())
+        doc.undo();check('copied included file undo',Path(copied.Data).read_bytes()==source.read_bytes() and Path(obj.Data).read_bytes()==source.read_bytes())
+        doc.redo();check('copied included file redo',Path(copied.Data).read_bytes()==edit.read_bytes() and Path(obj.Data).read_bytes()==source.read_bytes())
+        other=App.newDocument('OtherIncludedFile');cross=other.copyObject(obj,False);check('cross document file copy independent',cross.Data!=obj.Data and Path(cross.Data).read_bytes()==source.read_bytes());App.closeDocument(other.Name)
+        check('closing other document preserves original file',Path(obj.Data).read_bytes()==source.read_bytes())
+        another=doc.copyObject(obj,False);doc.removeObject(another.Name);check('deleting copied included file preserves original',Path(obj.Data).read_bytes()==source.read_bytes())
+        saved=out/'files.FCStd';doc.saveAs(str(saved));names=(obj.Name,copied.Name);App.closeDocument(doc.Name);source.unlink();edit.unlink();doc=App.openDocument(str(saved))
+        check('independent included file FCStd values',Path(doc.getObject(names[0]).Data).read_bytes()==b'original native loop data' and Path(doc.getObject(names[1]).Data).read_bytes()==b'edited native loop data')
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

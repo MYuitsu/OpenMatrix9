@@ -5,8 +5,7 @@ out=Path(os.environ['OM9_SMOKE_OUTPUT'])
 def run():
     try:
         Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as native
-        source=os.environ['OM9_3DM_FIXTURE']
-        if not Path(source).is_file():raise ValueError('Provide an existing user-supplied OM9_3DM_FIXTURE')
+        source=str(Path(__file__).parent/'fixtures/3dm/Oval-twist-ring.3dm')
         first=json.loads(native.inspect3dm(source));second=json.loads(native.inspect3dm(source))
         (out/'first.json').write_text(json.dumps(first,indent=2));(out/'second.json').write_text(json.dumps(second,indent=2))
         (out/'results.json').write_text(json.dumps(dict(ok=first==second,checks=[dict(name='inventory deterministic',passed=first==second)],different_keys=[k for k in first if first[k]!=second[k]])))

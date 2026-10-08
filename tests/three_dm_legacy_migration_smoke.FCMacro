@@ -1,0 +1,156 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('LegacyArchiveMigration');doc.UndoMode=1
+        source=Path(tempfile.gettempdir())/'om9-merge-source.3dm';sourceBytes=source.read_bytes()
+        working=out/'external-legacy-source.3dm';working.write_bytes(sourceBytes)
+        imported=ThreeDm.import_file(str(working),doc,mode='preserve');owner=imported[0].OM9ArchiveOwner;working.unlink()
+        block=next(o for o in imported if o.isDerivedFrom('App::Link'))
+        topPoint=next(o for o in imported if getattr(o,'OM9SourceClass','')=='ON_Point')
+        dot=next(o for o in imported if getattr(o,'OM9SourceClass','')=='ON_TextDot')
+        member=block.LinkedObject.Group[0];member.Shape=Part.Vertex(App.Vector(10,20,30));topPoint.Shape=Part.Vertex(App.Vector(100,200,300));dot.Label='Migrated note';block.Label='Migrated block';doc.recompute()
+        members=[o for o in doc.Objects if state.archive_identity(o)]
+        originalBaselines={o.Name:o.OM9SourceSignature for o in members}
+        for o in members:
+            for prop in ('OM9ArchiveOwner','OM9SourceSignature','OM9SourceMetadata','OM9SourcePlacement','OM9SourceRecord','OM9SourceHostID','OM9SourceClass','OM9Capability'):
+                o.removeProperty(prop)
+        for o in doc.Objects:
+            if 'OM9DefinitionUUID' in o.PropertiesList:
+                o.removeProperty('OM9ArchiveOwner');o.removeProperty('OM9DefinitionSignature')
+        owner.removeProperty('OM9ArchiveHash');owner.removeProperty('OM9ArchiveSchema')
+        objectCount=len(doc.Objects);documentNames=set(App.listDocuments());ownerNamespace=owner.OM9ImportNamespace
+        migrated=ThreeDm.migrate_archive(owner)
+        check('migration restores source ownership and original verified baselines',all(o.OM9ArchiveOwner==owner and o.OM9SourceSignature==originalBaselines[o.Name] for o in members) and owner.OM9ArchiveSchema==1)
+        check('migration does not baseline current edited source geometry',state.source_signature(member)!=member.OM9SourceSignature and state.source_signature(topPoint)!=topPoint.OM9SourceSignature)
+        check('migration retains namespace objects active project and closes reference document',owner.OM9ImportNamespace==ownerNamespace and len(doc.Objects)==objectCount and set(App.listDocuments())==documentNames and App.ActiveDocument==doc)
+        check('migration restores provenance using embedded archive after external source removal',not working.exists() and state.load_archive_state(owner)['manifest']['archive_sha256']==owner.OM9ArchiveHash)
+        target=out/'legacy.3dm'
+        def points(roots):
+            ThreeDm.export_preserved(str(target),roots);read=json.loads(native.read3dm(str(target),str(out)));answer=[]
+            for item in read['items']:
+                shape=Part.Shape();shape.read(item['brep']);answer.extend(v.Point for v in shape.Vertexes)
+            return answer
+        def near(actual,expected):return len(actual)==len(expected) and all(any((p-App.Vector(*q)).Length<1e-7 for p in actual) for q in expected)
+        check('migrated native block and selected geometry export current edits',near(points([block,topPoint]),[(20,40,60),(100,200,300)]))
+        ThreeDm.export_preserved(str(target),[dot]);dotReport=json.loads(native.inspect3dm(str(target)))
+        check('migrated retained object keeps native user text and current metadata',len(dotReport['records'])==1 and dotReport['records'][0]['class_name']=='ON_TextDot' and dotReport['records'][0]['name']=='Migrated note' and dotReport['records'][0]['attribute_user_strings']==[{'key':'UserText','value':'retain me'}])
+        doc.undo();doc.recompute()
+        check('one migration Undo restores legacy fields without reverting geometry',all('OM9SourceSignature' not in o.PropertiesList and 'OM9ArchiveOwner' not in o.PropertiesList for o in members) and 'OM9ArchiveSchema' not in owner.PropertiesList and (topPoint.Shape.Vertexes[0].Point-App.Vector(100,200,300)).Length<1e-7)
+        doc.redo();doc.recompute();check('migration Redo restores working verified export',near(points([block,topPoint]),[(20,40,60),(100,200,300)]))
+        names=[block.Name,topPoint.Name,owner.Name];doc.saveAs(str(out/'migrated.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'migrated.FCStd'));block,topPoint,owner=[doc.getObject(n) for n in names]
+        check('migrated provenance and edits persist in FCStd',near(points([block,topPoint]),[(20,40,60),(100,200,300)]))
+        check('migration keeps original source archive immutable',source.read_bytes()==sourceBytes)
+        namespace=owner.OM9ImportNamespace;owner.removeProperty('OM9ImportNamespace');ThreeDm.migrate_archive(owner)
+        check('missing owner namespace recovers from unambiguous existing source links',owner.OM9ImportNamespace==namespace and near(points([block,topPoint]),[(20,40,60),(100,200,300)]))
+        doc.openTransaction('User pending edit');topPoint.Label='User pending edit';documentNames=set(App.listDocuments());rejected=False
+        try:ThreeDm.migrate_archive(owner)
+        except RuntimeError:rejected=True
+        check('migration rejects a pending user transaction without closing it',rejected and doc.HasPendingTransaction and topPoint.Label=='User pending edit' and set(App.listDocuments())==documentNames);doc.abortTransaction()
+        digest=owner.OM9ArchiveHash;owner.OM9ArchiveHash='0'*64;signature=topPoint.OM9SourceSignature;count=len(doc.Objects);rejected=False
+        try:ThreeDm.migrate_archive(owner)
+        except RuntimeError:rejected=True
+        check('invalid archive hash rejects without field or object mutation',rejected and owner.OM9ArchiveHash=='0'*64 and topPoint.OM9SourceSignature==signature and len(doc.Objects)==count and set(App.listDocuments())==documentNames);owner.OM9ArchiveHash=digest
+        stored=topPoint.OM9SourceRecord;corrupt=json.loads(stored);corrupt['geometry_crc']='invalid native checksum';topPoint.OM9SourceRecord=json.dumps(corrupt);rejected=False
+        try:ThreeDm.migrate_archive(owner)
+        except RuntimeError:rejected=True
+        check('mismatched existing native record refuses partial migration and closes reference',rejected and topPoint.OM9SourceRecord==json.dumps(corrupt) and topPoint.OM9SourceSignature==signature and len(doc.Objects)==count and App.ActiveDocument==doc and set(App.listDocuments())==documentNames);topPoint.OM9SourceRecord=stored
+        topPoint.removeProperty('OM9SourceSignature');state._property(topPoint,'Integer','OM9SourceSignature',999);rejected=False
+        try:ThreeDm.migrate_archive(owner)
+        except RuntimeError:rejected=True
+        check('incompatible legacy property type rejects atomically',rejected and topPoint.OM9SourceSignature==999 and len(doc.Objects)==count and set(App.listDocuments())==documentNames)
+        topPoint.removeProperty('OM9SourceSignature');state._property(topPoint,'String','OM9SourceSignature',signature)
+        duplicate=doc.copyObject(topPoint,False);duplicate.removeProperty('OM9SourceHostID');topPoint.removeProperty('OM9SourceHostID');count=len(doc.Objects);rejected=False
+        try:ThreeDm.migrate_archive(owner)
+        except RuntimeError:rejected=True
+        check('ambiguous copied source identity refuses guessing original baseline',rejected and len(doc.Objects)==count and 'OM9SourceHostID' not in topPoint.PropertiesList and 'OM9SourceHostID' not in duplicate.PropertiesList)
+        doc.removeObject(duplicate.Name);state._property(topPoint,'String','OM9SourceHostID',topPoint.Name)
+        mixedDoc=App.newDocument('LegacyMixedMigration');mixedDoc.UndoMode=1;mixedSource=Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm';mixedBytes=mixedSource.read_bytes()
+        mixedRoot=ThreeDm.import_file(str(mixedSource),mixedDoc,mode='preserve')[0];mixedOwner=mixedRoot.OM9ArchiveOwner;originalCapability=mixedRoot.OM9Capability
+        mixedDefinition=state._instance_definition(mixedRoot,json.loads(mixedRoot.OM9SourceRecord));cad=next(o for o in mixedDefinition.Group if o.isDerivedFrom('Part::Feature'));mesh=next(o for o in mixedDefinition.Group if o.isDerivedFrom('Mesh::Feature'))
+        cad.Shape=Part.makeBox(4,5,6);mesh.Placement.Base=App.Vector(5,0,0);mixedRoot.Placement.Base=App.Vector(6,7,8);mixedDoc.recompute()
+        mixedSources=[o for o in mixedDoc.Objects if state.archive_identity(o) and not getattr(o,'OM9DefinitionMemberProxy',False)]
+        for o in mixedSources:
+            for prop in ('OM9ArchiveOwner','OM9SourceSignature','OM9SourceMetadata','OM9SourcePlacement','OM9SourceRecord','OM9SourceHostID','OM9SourceClass','OM9Capability'):
+                o.removeProperty(prop)
+        mixedRoot.removeProperty('OM9PreviewSignature');mixedDefinition.removeProperty('OM9ArchiveOwner');mixedDefinition.removeProperty('OM9DefinitionSignature')
+        count=len(mixedDoc.Objects);names=set(App.listDocuments());oldChildren=[o.Name for o in mixedRoot.Group];rejected=False
+        try:ThreeDm.migrate_archive(mixedOwner)
+        except RuntimeError:rejected=True
+        check('unverified legacy preview requires explicit rebuild before source mutation',rejected and len(mixedDoc.Objects)==count and all('OM9SourceSignature' not in o.PropertiesList for o in mixedSources) and [o.Name for o in mixedRoot.Group]==oldChildren and set(App.listDocuments())==names and App.ActiveDocument==mixedDoc)
+        state._property(mixedRoot,'Integer','OM9PreviewSignature',999);rejected=False
+        try:ThreeDm.migrate_archive(mixedOwner,rebuild_previews=True)
+        except RuntimeError:rejected=True
+        check('incompatible preview baseline type refuses migration without mutation',rejected and mixedRoot.OM9PreviewSignature==999 and all('OM9SourceSignature' not in o.PropertiesList for o in mixedSources) and [o.Name for o in mixedRoot.Group]==oldChildren and len(mixedDoc.Objects)==count)
+        mixedRoot.removeProperty('OM9PreviewSignature')
+        originalTarget=mixedRoot.OM9DefinitionTargetUUID;mixedRoot.OM9DefinitionTargetUUID='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';rejected=False
+        try:ThreeDm.migrate_archive(mixedOwner,rebuild_previews=True)
+        except RuntimeError:rejected=True
+        check('failed current graph rebuild rolls back source fields preview replacement and new objects',rejected and all('OM9SourceSignature' not in o.PropertiesList for o in mixedSources) and [o.Name for o in mixedRoot.Group]==oldChildren and len(mixedDoc.Objects)==count and 'OM9PreviewSignature' not in mixedRoot.PropertiesList and set(App.listDocuments())==names and App.ActiveDocument==mixedDoc and not state._preview_observer.busy)
+        mixedRoot.OM9DefinitionTargetUUID=originalTarget
+        ThreeDm.migrate_archive(mixedOwner,rebuild_previews=True)
+        check('migration restores original display capability independently of native record capability',mixedRoot.OM9Capability==originalCapability)
+        check('explicit rebuild preserves current canonical edits and rigid placement delta',abs(cad.Shape.Volume-120)<1e-7 and (mesh.Placement.Base-App.Vector(5,0,0)).Length<1e-7 and (mixedRoot.Placement.Base-App.Vector(6,7,8)).Length<1e-7 and mixedRoot.OM9PreviewStatus=='Current canonical members')
+        ThreeDm.export_preserved(str(target),[mixedRoot]);mixedRead=json.loads(native.read3dm(str(target),str(out)));shape=Part.Shape();shape.read(next(i['brep'] for i in mixedRead['items'] if 'brep' in i))
+        check('rebuilt migrated affine CAD exports current geometry and native matrix',abs(abs(shape.Volume)-120)<1e-7 and all(abs(a-b)<1e-7 for a,b in zip((shape.BoundBox.XMin,shape.BoundBox.XMax,shape.BoundBox.YMin,shape.BoundBox.YMax,shape.BoundBox.ZMin,shape.BoundBox.ZMax),(16,22.5,27,32,38,44))))
+        vertices=next(i['vertices'] for i in mixedRead['items'] if 'vertices' in i)
+        check('rebuilt migrated mesh exports canonical placement and native affine transform once',near([App.Vector(*p) for p in vertices],[(21,27,38),(23,27,38),(22.5,30,38)]))
+        check('rebuilt previews use verified derived data and retain immutable archive',state._preview_matches(mixedRoot) and mixedSource.read_bytes()==mixedBytes)
+        mixedDoc.undo();mixedDoc.recompute()
+        check('preview rebuild migration Undo restores legacy fields and original cache objects',all('OM9SourceSignature' not in o.PropertiesList for o in mixedSources) and [o.Name for o in mixedRoot.Group]==oldChildren and 'OM9PreviewSignature' not in mixedRoot.PropertiesList)
+        mixedDoc.redo();mixedDoc.recompute();ThreeDm.export_preserved(str(target),[mixedRoot]);mixedRead=json.loads(native.read3dm(str(target),str(out)))
+        check('preview rebuild migration Redo restores functioning native export',len(mixedRead['items'])==2 and mixedRoot.OM9PreviewStatus=='Current canonical members')
+        mixedName=mixedRoot.Name;mixedDoc.saveAs(str(out/'rebuilt-migration.FCStd'));App.closeDocument(mixedDoc.Name);mixedDoc=App.openDocument(str(out/'rebuilt-migration.FCStd'));mixedRoot=mixedDoc.getObject(mixedName)
+        ThreeDm.export_preserved(str(target),[mixedRoot]);mixedRead=json.loads(native.read3dm(str(target),str(out)))
+        check('rebuilt migration cache baseline persists through FCStd',len(mixedRead['items'])==2 and state._preview_matches(mixedRoot))
+        proxyDoc=App.newDocument('LegacyProxyMigration');proxyDoc.UndoMode=1;proxySource=Path(tempfile.gettempdir())/'om9-shared-block-members.3dm';proxyBytes=proxySource.read_bytes()
+        proxyRoots=ThreeDm.import_file(str(proxySource),proxyDoc,mode='preserve');proxyOwner=proxyRoots[0].OM9ArchiveOwner
+        proxySources=[o for o in proxyDoc.Objects if state.archive_identity(o) and not getattr(o,'OM9DefinitionMemberProxy',False)]
+        originalProxySignatures={o.Name:o.OM9SourceSignature for o in proxySources}
+        canonical=next(o for o in proxySources if o.OM9SourceClass=='ON_Point');canonical.Shape=Part.Vertex(App.Vector(2,3,4));canonical.Placement.Base=App.Vector(5,6,7)
+        proxies=[o for o in proxyDoc.Objects if getattr(o,'OM9DefinitionMemberProxy',False)]
+        proxy=next(p for p in proxies if any(getattr(parent,'Label','')=='Inner' for parent in p.InList))
+        proxy.Placement.Base=App.Vector(7,8,9);proxy.ScaleVector=App.Vector(-2,3,4);proxy.Label='Migrated source proxy';proxyDoc.recompute()
+        for o in proxySources:
+            for prop in ('OM9ArchiveOwner','OM9SourceSignature','OM9SourceMetadata','OM9SourcePlacement','OM9SourceRecord','OM9SourceHostID','OM9SourceClass','OM9Capability'):
+                o.removeProperty(prop)
+            if 'OM9PreviewSignature' in o.PropertiesList:o.removeProperty('OM9PreviewSignature')
+        for o in proxyDoc.Objects:
+            if 'OM9DefinitionUUID' in o.PropertiesList:o.removeProperty('OM9ArchiveOwner');o.removeProperty('OM9DefinitionSignature')
+        for p in proxies:p.removeProperty('OM9ProxyMetadata')
+        ThreeDm.migrate_archive(proxyOwner,rebuild_previews=True)
+        check('legacy shared proxy migration restores source baselines rather than edited canonical geometry',all(o.OM9SourceSignature==originalProxySignatures[o.Name] for o in proxySources) and all('OM9ProxyMetadata' in p.PropertiesList for p in proxies) and json.loads(proxy.OM9ProxyMetadata)['name']!=proxy.Label)
+        check('migrated shared proxies export canonical placement reflected scale and original graph',near(points(proxyRoots),[(3,55,53),(-6,105,212),(37,9,11)]))
+        proxyDoc.undo();proxyDoc.recompute()
+        check('shared proxy migration Undo restores missing baselines while retaining edits',all('OM9ProxyMetadata' not in p.PropertiesList for p in proxies) and all('OM9SourceSignature' not in o.PropertiesList for o in proxySources) and (canonical.Shape.Vertexes[0].Point-App.Vector(7,9,11)).Length<1e-7)
+        proxyDoc.redo();proxyDoc.recompute();check('shared proxy migration Redo restores native exchange',near(points(proxyRoots),[(3,55,53),(-6,105,212),(37,9,11)]))
+        rootNames=[o.Name for o in proxyRoots];proxyName=proxy.Name;proxyDoc.saveAs(str(out/'proxy-migration.FCStd'));App.closeDocument(proxyDoc.Name);proxyDoc=App.openDocument(str(out/'proxy-migration.FCStd'));proxyRoots=[proxyDoc.getObject(n) for n in rootNames];proxy=proxyDoc.getObject(proxyName)
+        check('migrated proxy provenance persists in FCStd',near(points(proxyRoots),[(3,55,53),(-6,105,212),(37,9,11)]) and proxySource.read_bytes()==proxyBytes)
+        promoted=ThreeDm.create_definition(proxyDoc,[proxy],'Migrated reusable proxy');promotedRoot=ThreeDm.create_instance(promoted,App.Placement(App.Vector(100,200,300),App.Rotation()))
+        check('migrated legacy proxy can create a new native reusable definition',near(points([promotedRoot]),[(93,235,353)]))
+        pristineDoc=App.newDocument('PristineLegacyPreview');pristineRoot=ThreeDm.import_file(str(mixedSource),pristineDoc,mode='preserve')[0];pristineOwner=pristineRoot.OM9ArchiveOwner
+        pristineChildren=[o.Name for o in pristineRoot.Group];pristineRoot.removeProperty('OM9PreviewSignature');pristineRoot.removeProperty('OM9SourceSignature')
+        ThreeDm.migrate_archive(pristineOwner)
+        check('unmodified legacy affine preview verifies against native snapshot without replacement',state._preview_matches(pristineRoot) and [o.Name for o in pristineRoot.Group]==pristineChildren and pristineRoot.OM9PreviewStatus=='Current canonical members')
+        rationalDoc=App.newDocument('PristineLegacyRational');rationalSource=Path(tempfile.gettempdir())/'om9-shared-rational-curve.3dm';rationalRoots=ThreeDm.import_file(str(rationalSource),rationalDoc,mode='preserve');rationalOwner=rationalRoots[0].OM9ArchiveOwner
+        rationalCanonical=next(o.LinkedObject for o in rationalDoc.Objects if getattr(o,'OM9DefinitionMemberProxy',False));rationalRecord=json.loads(rationalCanonical.OM9SourceRecord)
+        for o in rationalDoc.Objects:
+            if state.archive_identity(o) and not getattr(o,'OM9DefinitionMemberProxy',False):
+                o.removeProperty('OM9SourceSignature');o.removeProperty('OM9SourceMetadata');o.removeProperty('OM9SourceRecord')
+            if getattr(o,'OM9DefinitionMemberProxy',False):o.removeProperty('OM9ProxyMetadata')
+        ThreeDm.migrate_archive(rationalOwner);ThreeDm.export_preserved(str(target),[rationalRoots[0]]);rationalReport=json.loads(native.inspect3dm(str(target)));rationalOutput=next(r for r in rationalReport['records'] if r['role']=='definition-member')
+        check('unmodified migrated rational NURBS retains native dimension knots weights and checksum',rationalOutput['class_name']=='ON_NurbsCurve' and rationalOutput['geometry_crc']==rationalRecord['geometry_crc'])
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

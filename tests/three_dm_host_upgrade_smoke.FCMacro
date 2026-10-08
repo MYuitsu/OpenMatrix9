@@ -1,0 +1,188 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, OpenMatrix9Gui as native
+        source=Path(tempfile.gettempdir())/'om9-merge-source.3dm';original=source.read_bytes()
+        doc=App.newDocument('LegacyHostUpgrade');doc.UndoMode=1
+        roots=ThreeDm.import_file(str(source),doc,mode='preserve');owner=roots[0].OM9ArchiveOwner
+        root=next(o for o in roots if o.isDerivedFrom('App::Link'));definition=root.LinkedObject
+        point=next(o for o in roots if o.OM9SourceClass=='ON_Point')
+        baseline=root.OM9SourceSignature;uuid=root.OM9SourceUUID;matrix=list(root.OM9InstanceMatrix)
+        rootName=root.Name;pointName=point.Name;definitionName=definition.Name
+        # Synthesize the old flattened CAD holder while keeping verified provenance.
+        def legacy(obj,kind,geometry=None):
+            name=obj.Name;label=obj.Label
+            props=[(p,obj.getTypeIdOfProperty(p),getattr(obj,p)) for p in obj.PropertiesList if p.startswith('OM9')]
+            doc.removeObject(name);new=doc.addObject(kind,name);new.Label=label
+            for p,t,v in props:new.addProperty(t,p,'Rhino source');setattr(new,p,v)
+            if geometry is not None:
+                if 'Shape' not in new.PropertiesList:new.addProperty('Part::PropertyPartShape','Shape')
+                new.Shape=geometry
+            return new
+        root=legacy(root,'Part::Feature',Part.Vertex(11,22,33));root.Placement.Base=App.Vector(5,6,7)
+        root.Label='Legacy selected instance';root.ViewObject.ShapeColor=(0.2,0.4,0.6)
+        point=legacy(point,'App::FeaturePython',Part.Vertex(100,200,300))
+        point.addProperty('App::PropertyString','UserNote','Custom data','Preserve user documentation');point.UserNote='Keep custom note';point.setEditorMode('UserNote',1)
+        result['custom_status']=point.getPropertyStatus('UserNote')
+        definition.Group[0].Shape=Part.Vertex(2,3,4)
+        alias=doc.addObject('App::Link','IncomingAlias');alias.setLink(root)
+        group=doc.addObject('App::DocumentObjectGroup','OrderedGroup');group.Group=[point,root,alias]
+        holder=doc.addObject('App::FeaturePython','DependencyHolder');holder.addProperty('App::PropertyLink','Target');holder.Target=root
+        holder.addProperty('App::PropertyLinkList','Targets');holder.Targets=[point,root]
+        doc.recompute();doc.commitTransaction();count=len(doc.Objects);names=set(App.listDocuments())
+        result['alias_properties']=dict(source_own='OM9SourceUUID' in alias.PropertiesList,source_forwarded=getattr(alias,'OM9SourceUUID',''))
+        result['active_transaction_before']=str(App.getActiveTransaction())
+        doc.openTransaction('Finish legacy fixture');doc.commitTransaction();App.closeActiveTransaction();result['pending_before']=doc.HasPendingTransaction
+        opts={rootName:{'type':'App::Link','placement_mode':'delta'},pointName:{'type':'Part::Feature'}}
+        rejected=False
+        try:ThreeDm.migrate_archive(owner)
+        except RuntimeError as e:result['implicit_rejection']=str(e);rejected='explicit object upgrade' in str(e)
+        check('type mismatch requires explicit upgrade without document mutation',rejected and len(doc.Objects)==count and doc.getObject(rootName).TypeId=='Part::Feature')
+        upgraded=ThreeDm.migrate_archive(owner,rebuild_previews=True,upgrades=opts)
+        root=doc.getObject(rootName);point=doc.getObject(pointName)
+        check('explicit upgrade restores native host types with stable internal names',root.TypeId=='App::Link' and point.TypeId=='Part::Feature' and upgraded['upgrades']==2)
+        check('upgrade retains UUID native baseline immutable matrix and definition target',root.OM9SourceUUID==uuid and root.OM9SourceSignature==baseline and list(root.OM9InstanceMatrix)==matrix and root.LinkedObject.Name==definitionName)
+        check('delta policy composes native placement exactly once',(root.Placement.Base-App.Vector(15,26,37)).Length<1e-7)
+        check('current editable geometry and custom properties survive replacement',(point.Shape.Vertexes[0].Point-App.Vector(100,200,300)).Length<1e-7 and point.UserNote=='Keep custom note')
+        check('custom property documentation group and editor policy survive replacement',point.getGroupOfProperty('UserNote')=='Custom data' and point.getDocumentationOfProperty('UserNote')=='Preserve user documentation' and point.getEditorMode('UserNote')==['ReadOnly'])
+        result['incoming_after']=dict(group=[o.Name for o in group.Group],alias=alias.LinkedObject.Name if alias.LinkedObject else None,target=holder.Target.Name if holder.Target else None,targets=[o.Name for o in holder.Targets])
+        check('ordered groups incoming links and custom dependencies point to new hosts',group.Group==[point,root,alias] and alias.LinkedObject==root and holder.Target==root and holder.Targets==[point,root])
+        check('current label color active document and object count survive migration',root.Label=='Legacy selected instance' and state.source_metadata(root)['color']==[51,102,153] and len(doc.Objects)==count and App.ActiveDocument==doc and set(App.listDocuments())==names)
+        target=out/'upgraded.3dm'
+        def output():
+            ThreeDm.export_preserved(str(target),[doc.getObject(rootName),doc.getObject(pointName)])
+            read=json.loads(native.read3dm(str(target),str(out)));points=[]
+            for row in read['items']:
+                shape=Part.Shape();shape.read(row['brep']);points.extend(v.Point for v in shape.Vertexes)
+            return points
+        def near(points,expected):return len(points)==len(expected) and all(any((p-App.Vector(*q)).Length<1e-7 for p in points) for q in expected)
+        check('native structural export keeps edited member geometry and composed placement',near(output(),[(17,29,41),(100,200,300)]))
+        report=json.loads(native.inspect3dm(str(target)));row=next(r for r in report['records'] if r['source_uuid']==uuid)
+        check('native export retains current instance name',row['name']=='Legacy selected instance')
+        check('upgraded physical view retains an explicit color override',root.ViewObject.OverrideMaterial and all(abs(a-b)<1e-6 for a,b in zip(root.ViewObject.ShapeAppearance[0].DiffuseColor[:3],(0.2,0.4,0.6))))
+        second=ThreeDm.migrate_archive(owner,rebuild_previews=True,upgrades=opts)
+        check('repeated explicit upgrade is idempotent and does not double transform',second['upgrades']==0 and near(output(),[(17,29,41),(100,200,300)]))
+        doc.undo();doc.undo();doc.recompute();root=doc.getObject(rootName);point=doc.getObject(pointName)
+        check('one upgrade Undo restores legacy types geometry and incoming graph',root.TypeId=='Part::Feature' and point.TypeId=='App::FeaturePython' and alias.LinkedObject==root and holder.Target==root and group.Group==[point,root,alias] and len(doc.Objects)==count)
+        doc.redo();doc.recompute();root=doc.getObject(rootName);point=doc.getObject(pointName)
+        check('upgrade Redo restores native graph and working export',root.TypeId=='App::Link' and holder.Target==root and near(output(),[(17,29,41),(100,200,300)]))
+        ownerName=owner.Name;doc.saveAs(str(out/'upgraded.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'upgraded.FCStd'));owner=doc.getObject(ownerName)
+        check('FCStd reopen retains upgraded graph geometry provenance and export',near(output(),[(17,29,41),(100,200,300)]) and doc.getObject('IncomingAlias').LinkedObject==doc.getObject(rootName))
+        # A late error must undo physical replacement and every rewritten dependency.
+        doc2=App.newDocument('UpgradeRollback');doc2.UndoMode=1
+        oldDoc=doc;doc=doc2;roots2=ThreeDm.import_file(str(source),doc,mode='preserve');owner2=roots2[0].OM9ArchiveOwner
+        root2=next(o for o in roots2 if o.isDerivedFrom('App::Link'));name2=root2.Name
+        root2=legacy(root2,'Part::Feature',Part.Vertex(9,8,7));root2.Placement.Base=App.Vector(3,4,5)
+        link2=doc.addObject('App::Link','RollbackLink');link2.setLink(root2);doc.recompute();doc.openTransaction('Finish rollback fixture');doc.commitTransaction();App.closeActiveTransaction()
+        count2=len(doc.Objects);names2=set(App.listDocuments());before=state._preview_observer.busy
+        originalRefresh=state.refresh_affine_previews
+        def failRefresh(document,owner):
+            if document==doc2:raise RuntimeError('Injected late upgrade failure')
+            return originalRefresh(document,owner)
+        state.refresh_affine_previews=failRefresh;rejected=False
+        try:ThreeDm.migrate_archive(owner2,rebuild_previews=True,upgrades={name2:{'type':'App::Link','placement_mode':'delta'}})
+        except RuntimeError as e:rejected='Injected late upgrade failure' in str(e)
+        finally:state.refresh_affine_previews=originalRefresh
+        restored=doc2.getObject(name2)
+        check('late failure rolls back host replacement dependencies geometry and observer',rejected and restored.TypeId=='Part::Feature' and link2.LinkedObject==restored and len(doc2.Objects)==count2 and (restored.Placement.Base-App.Vector(3,4,5)).Length<1e-7 and not doc2.HasPendingTransaction and state._preview_observer.busy==before and set(App.listDocuments())==names2)
+        for label,options in [
+            ('wrong verified host type',{name2:{'type':'Mesh::Feature','placement_mode':'delta'}}),
+            ('missing explicit instance placement mode',{name2:{'type':'App::Link'}}),
+            ('unknown policy option',{name2:{'type':'App::Link','placement_mode':'delta','guess':True}}),
+            ('absent source host',{'AbsentHost':{'type':'Part::Feature'}}),
+            ('unsupported policy map',[]),
+            ('missing explicit target',{name2:{'type':'App::Link','placement_mode':'delta','target':'AbsentDefinition'}})]:
+            rejected=False
+            try:ThreeDm.migrate_archive(owner2,rebuild_previews=True,upgrades=options)
+            except RuntimeError:rejected=True
+            check(label+' rejects before host or graph mutation',rejected and doc2.getObject(name2).TypeId=='Part::Feature' and link2.LinkedObject==doc2.getObject(name2) and len(doc2.Objects)==count2 and not doc2.HasPendingTransaction and set(App.listDocuments())==names2)
+        rejected=False
+        try:ThreeDm.migrate_archive(owner2,upgrades={name2:{'type':'App::Link','placement_mode':'delta'}})
+        except RuntimeError as e:rejected='explicit derived preview rebuild' in str(e)
+        check('flattened instance upgrade requires explicit preview rebuild',rejected and doc2.getObject(name2).TypeId=='Part::Feature')
+        sub=doc2.addObject('App::FeaturePython','UnsupportedSubelementDependency');sub.addProperty('App::PropertyLinkSub','FaceTarget');sub.FaceTarget=(doc2.getObject(name2),['Vertex1'])
+        doc2.openTransaction('Finish subelement fixture');doc2.commitTransaction();rejected=False
+        try:ThreeDm.migrate_archive(owner2,rebuild_previews=True,upgrades={name2:{'type':'App::Link','placement_mode':'delta'}})
+        except RuntimeError as e:rejected='dependency' in str(e)
+        check('subelement dependency rejects without deleting legacy host',rejected and doc2.getObject(name2).TypeId=='Part::Feature' and sub.FaceTarget[0]==doc2.getObject(name2));doc2.removeObject(sub.Name)
+        expression=doc2.addObject('App::FeaturePython','ExpressionDependency');expression.addProperty('App::PropertyFloat','Value');expression.setExpression('Value','1+2')
+        doc2.recompute();doc2.openTransaction('Finish expression fixture');doc2.commitTransaction();rejected=False
+        try:ThreeDm.migrate_archive(owner2,rebuild_previews=True,upgrades={name2:{'type':'App::Link','placement_mode':'delta'}})
+        except RuntimeError as e:rejected='expression' in str(e)
+        check('expression dependency refuses unsupported rewiring before mutation',rejected and doc2.getObject(name2).TypeId=='Part::Feature' and expression.Value==3);doc2.removeObject(expression.Name)
+        resource=doc2.getObject(name2);resource.addProperty('App::PropertyPythonObject','CustomPayload');resource.CustomPayload={'unsupported':'preserve rather than drop'}
+        doc2.openTransaction('Finish custom payload fixture');doc2.commitTransaction();rejected=False
+        try:ThreeDm.migrate_archive(owner2,rebuild_previews=True,upgrades={name2:{'type':'App::Link','placement_mode':'delta'}})
+        except RuntimeError as e:rejected='unsupported custom property' in str(e)
+        check('unknown custom payload refuses instead of being silently discarded',rejected and resource.CustomPayload=={'unsupported':'preserve rather than drop'} and resource.TypeId=='Part::Feature');resource.removeProperty('CustomPayload')
+        point2=next(o for o in roots2 if o.Name!=name2 and getattr(o,'OM9SourceClass','')=='ON_Point');point2Name=point2.Name
+        point2=legacy(point2,'App::FeaturePython');doc2.recompute();owner2Name=owner2.Name
+        doc2.saveAs(str(out/'empty-legacy-fixture.FCStd'));App.closeDocument(doc2.Name);doc2=App.openDocument(str(out/'empty-legacy-fixture.FCStd'));doc=doc2;doc2.UndoMode=1
+        owner2=doc2.getObject(owner2Name);point2=doc2.getObject(point2Name);rejected=False
+        result['restored_proxies']=[dict(name=o.Name,proxy=repr(getattr(o,'Proxy',None)),proxy_type=type(getattr(o,'Proxy',None)).__name__,view_proxy=repr(getattr(o.ViewObject,'Proxy',None)),expressions=repr(getattr(o,'ExpressionEngine',[]))) for o in (point2,doc2.getObject(name2))]
+        try:ThreeDm.migrate_archive(owner2,rebuild_previews=True,upgrades={name2:{'type':'App::Link','placement_mode':'delta'},point2Name:{'type':'Part::Feature'}})
+        except RuntimeError as e:result['empty_geometry_rejection']=str(e);rejected='valid current CAD payload' in str(e)
+        check('missing current geometry refuses implicit replacement from native snapshot',rejected and doc2.getObject(point2Name).TypeId=='App::FeaturePython' and doc2.getObject(name2).TypeId=='Part::Feature')
+        doc2.openTransaction('Restore fixture payload')
+        point2.addProperty('Part::PropertyPartShape','Shape');point2.Shape=Part.Vertex(100,200,300)
+        newGeometry=doc2.addObject('Part::Feature','RetargetedBox');newGeometry.Shape=Part.makeBox(2,3,4)
+        doc2.recompute();doc2.commitTransaction()
+        target2=ThreeDm.create_definition(doc2,[newGeometry],'Upgraded target')
+        # A legacy complete physical placement must not receive the native A twice.
+        doc2.getObject(name2).Placement.Base=App.Vector(15,26,37)
+        doc2.openTransaction('Finish instance fixture');doc2.commitTransaction()
+        ThreeDm.migrate_archive(owner2,rebuild_previews=True,upgrades={name2:{'type':'App::Link','placement_mode':'instance','target':target2.Name},point2Name:{'type':'Part::Feature'}})
+        check('instance placement policy retains complete current physical placement',(doc2.getObject(name2).Placement.Base-App.Vector(15,26,37)).Length<1e-7)
+        check('explicit physical upgrade target keeps new definition ownership and identity',doc2.getObject(name2).LinkedObject==target2 and state._new_identity(target2,'Definition')==target2.OM9NewDefinitionUUID)
+        ThreeDm.export_preserved(str(target),[doc2.getObject(name2)]);retargeted=json.loads(native.read3dm(str(target),str(out)));targetShape=Part.Shape();targetShape.read(retargeted['items'][0]['brep'])
+        check('upgraded retargeted graph exports actual new geometry and world coordinates',len(retargeted['items'])==1 and abs(targetShape.Volume-24)<1e-7 and all(abs(a-b)<1e-7 for a,b in zip((targetShape.BoundBox.XMin,targetShape.BoundBox.YMin,targetShape.BoundBox.ZMin),(15,26,37))))
+        mixed=Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm';mixedBytes=mixed.read_bytes()
+        doc=App.newDocument('AffineHostUpgrade');doc.UndoMode=1
+        affine=ThreeDm.import_file(str(mixed),doc,mode='preserve')[0];affineOwner=affine.OM9ArchiveOwner;affineName=affine.Name
+        state._preview_observer.busy=True
+        definition=state._instance_definition(affine,json.loads(affine.OM9SourceRecord));cad=next(o for o in definition.Group if o.isDerivedFrom('Part::Feature'));cad.Shape=Part.makeBox(4,5,6)
+        mesh=next(o for o in definition.Group if o.isDerivedFrom('Mesh::Feature'));meshName=mesh.Name;meshPayload=mesh.Mesh.copy();meshPayload.transform(App.Placement(App.Vector(5,0,0),App.Rotation()).toMatrix())
+        mesh=legacy(mesh,'App::FeaturePython');mesh.addProperty('Mesh::PropertyMeshKernel','Mesh');mesh.Mesh=meshPayload;definition.Group=[cad,mesh]
+        # Remove the previous derived cache before synthesizing the historical holder.
+        previous=list(affine.Group);nativeMatrix=list(affine.OM9InstanceMatrix)
+        affine=legacy(affine,'Part::Feature',Part.Vertex(0,0,0))
+        for child in previous:
+            if not child.InList:doc.removeObject(child.Name)
+        affine.Placement.Base=App.Vector(6,7,8);alias3=doc.addObject('App::Link','AffineAlias');alias3.setLink(affine)
+        doc.recompute();doc.openTransaction('Finish affine fixture');doc.commitTransaction();App.closeActiveTransaction();affineCount=len(doc.Objects)
+        state._preview_observer.busy=False
+        # A whole-instance rigid matrix cannot undo the native shear implicitly.
+        rejected=False
+        try:ThreeDm.migrate_archive(affineOwner,rebuild_previews=True,upgrades={affineName:{'type':'App::Part','placement_mode':'instance'},meshName:{'type':'Mesh::Feature'}})
+        except RuntimeError as e:rejected='rigid delta' in str(e)
+        check('ambiguous affine whole-instance placement refuses before replacement',rejected and doc.getObject(affineName).TypeId=='Part::Feature' and doc.getObject(meshName).TypeId=='App::FeaturePython' and len(doc.Objects)==affineCount)
+        ThreeDm.migrate_archive(affineOwner,rebuild_previews=True,upgrades={affineName:{'type':'App::Part','placement_mode':'delta'},meshName:{'type':'Mesh::Feature'}})
+        affine=doc.getObject(affineName)
+        check('mixed affine upgrade rebuilds native CAD and mesh previews from current canonical graph',affine.TypeId=='App::Part' and len(affine.Group)==2 and affine.OM9PreviewStatus=='Current canonical members' and state._preview_matches(affine) and alias3.LinkedObject==affine)
+        check('mixed affine upgrade keeps native shear immutable and current rigid delta',list(affine.OM9InstanceMatrix)==nativeMatrix and (affine.Placement.Base-App.Vector(6,7,8)).Length<1e-7 and abs(cad.Shape.Volume-120)<1e-7)
+        ThreeDm.export_preserved(str(target),[affine]);read=json.loads(native.read3dm(str(target),str(out)));shape=Part.Shape();shape.read(next(row['brep'] for row in read['items'] if 'brep' in row))
+        check('upgraded affine export has independently checked world bounds and volume',abs(abs(shape.Volume)-120)<1e-7 and all(abs(a-b)<1e-7 for a,b in zip((shape.BoundBox.XMin,shape.BoundBox.XMax,shape.BoundBox.YMin,shape.BoundBox.YMax,shape.BoundBox.ZMin,shape.BoundBox.ZMax),(16,22.5,27,32,38,44))))
+        vertices=next(row['vertices'] for row in read['items'] if 'vertices' in row)
+        check('upgraded mesh holder preserves edited vertices and native affine world transform',doc.getObject(meshName).TypeId=='Mesh::Feature' and near([App.Vector(*p) for p in vertices],[(21,27,38),(23,27,38),(22.5,30,38)]))
+        doc.undo();doc.recompute()
+        check('affine replacement Undo removes new preview and origin helpers and restores links',doc.getObject(affineName).TypeId=='Part::Feature' and doc.getObject(meshName).TypeId=='App::FeaturePython' and alias3.LinkedObject==doc.getObject(affineName) and len(doc.Objects)==affineCount)
+        doc.redo();doc.recompute();affine=doc.getObject(affineName)
+        check('affine replacement Redo restores preview and structural export',affine.TypeId=='App::Part' and alias3.LinkedObject==affine and state._preview_matches(affine))
+        affineOwnerName=affineOwner.Name;doc.saveAs(str(out/'affine-upgraded.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'affine-upgraded.FCStd'));affine=doc.getObject(affineName)
+        ThreeDm.export_preserved(str(target),[affine])
+        check('mixed affine upgraded host persists through FCStd with immutable source',state._preview_matches(affine) and mixed.read_bytes()==mixedBytes and doc.getObject('AffineAlias').LinkedObject==affine)
+        check('all upgraded exchange keeps original source bytes immutable',source.read_bytes()==original)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

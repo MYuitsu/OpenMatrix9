@@ -1,0 +1,134 @@
+# OM9-FILE-012: structural row edits must change real native export, atomically.
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets
+from pathlib import Path
+import copy,json,os,tempfile,traceback,subprocess
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def drive(action):
+    def run():
+        dialog=QtWidgets.QApplication.activeModalWidget()
+        try:
+            assert dialog and dialog.objectName()=='OM9HatchLoopEditor'
+            action(dialog)
+        except Exception:
+            result['driver_error']=traceback.format_exc()
+            if dialog:dialog.reject()
+    QtCore.QTimer.singleShot(100,run)
+def field(dialog,path):
+    tree=dialog.findChild(QtWidgets.QTreeWidget,'loopFields');model=tree.model()
+    def find(parent):
+        for i in range(model.rowCount(parent)):
+            index=model.index(i,0,parent)
+            if model.data(index,QtCore.Qt.UserRole)==path:return index
+            child=find(index)
+            if child is not None:return child
+    index=find(QtCore.QModelIndex());assert index is not None,path
+    return tree,model,index
+def set_number(dialog,path,value):
+    _,model,index=field(dialog,path)
+    assert model.setData(index.siblingAtColumn(1),format(value,'.17g'),QtCore.Qt.EditRole)
+def row_action(dialog,path,action):
+    tree,_,index=field(dialog,path);tree.setCurrentIndex(index)
+    button=dialog.findChild(QtWidgets.QPushButton,action)
+    check('native row operation '+action+' available',button is not None)
+    button.click()
+def confirm(dialog,which=QtWidgets.QDialogButtonBox.Ok):
+    dialog.findChild(QtWidgets.QDialogButtonBox).button(which).click()
+def run():
+    try:
+        import OpenMatrix9Gui as native,ThreeDm,ThreeDmHatch as hatch
+        for unit in ('mm','cm'):
+            source=Path(tempfile.gettempdir())/('om9-hatch-loops-'+unit+'.3dm');immutable=source.read_bytes()
+            external=out/(unit+'-source.3dm');external.write_bytes(immutable)
+            doc=App.newDocument('HatchRows'+unit);doc.UndoMode=1
+            objects=ThreeDm.import_file(str(external),doc,mode='preserve')
+            polyline=next(o for o in objects if hatch.loops(o)['loops'][0]['curve']['class_name']=='ON_PolylineCurve')
+            initial=hatch.loops(polyline);expected=copy.deepcopy(initial);curve=expected['loops'][0]['curve']
+            a,b=curve['points'][:2];mid=[(a[0]+b[0])/2,(a[1]+b[1])/2,0]
+            parameter=(curve['parameters'][0]+curve['parameters'][1])/2
+            curve['points'].insert(1,mid);curve['parameters'].insert(1,parameter)
+            def split_polyline(d):
+                row_action(d,'/loops/0/curve/points/0','duplicateLoopRow')
+                row_action(d,'/loops/0/curve/parameters/0','duplicateLoopRow')
+                for i,value in enumerate(mid):set_number(d,'/loops/0/curve/points/1/'+str(i),value)
+                set_number(d,'/loops/0/curve/parameters/1',parameter);confirm(d)
+            drive(split_polyline)
+            check(unit+' polyline insertion commits exact paired rows',hatch.edit_loops_ui(polyline) is True and hatch.loops(polyline)==expected)
+            doc.undo();check(unit+' row insertion is one undo',hatch.loops(polyline)==initial)
+            doc.redo();check(unit+' row insertion redo restores fields',hatch.loops(polyline)==expected)
+            def cancel_remove(d):row_action(d,'/loops/0/curve/points/1','removeLoopRow');confirm(d,QtWidgets.QDialogButtonBox.Cancel)
+            drive(cancel_remove);check(unit+' cancellation preserves structural payload',hatch.edit_loops_ui(polyline) is False and hatch.loops(polyline)==expected)
+            def invalid_remove(d):
+                row_action(d,'/loops/0/curve/points/1','removeLoopRow')
+                def rejected(reopened):
+                    check(unit+' unmatched point parameter edit stays open',bool(reopened.findChild(QtWidgets.QLabel,'loopError').text()))
+                    confirm(reopened,QtWidgets.QDialogButtonBox.Cancel)
+                drive(rejected);confirm(d)
+            drive(invalid_remove);check(unit+' native cardinality rejection is atomic',hatch.edit_loops_ui(polyline) is False and hatch.loops(polyline)==expected)
+            target=out/(unit+'-rows.3dm')
+            def geometry(value):
+                # Archive reread assigns new local inventory indices. Provenance
+                # indices remain verified on the original host payload above.
+                if isinstance(value,list):return [geometry(v) for v in value]
+                if isinstance(value,dict):return {k:geometry(v) for k,v in value.items() if k!='source_index'}
+                return value
+            def exported(obj,want):
+                target=out/(unit+'-rows-'+str(len(result['checks']))+'.3dm')
+                ThreeDm.export_file(str(target),[obj]);row=next(r for r in json.loads(native.inspect3dm(str(target)))['records'] if r['class_name']=='ON_Hatch')
+                check(unit+' exact native structural reread '+want['loops'][0]['curve']['class_name'],geometry(row['hatch_loop_current'])==geometry(want))
+                old=target.with_name(target.stem+'-old.3dm');report=target.with_suffix('.json');sentinel=target.read_bytes()
+                process=subprocess.run(['H:/FreeCAD-src/build/3dm-rhino5-reader/Rhino5HatchReader.exe',str(target),str(old),str(report)],capture_output=True,text=True,timeout=30,creationflags=subprocess.CREATE_NO_WINDOW)
+                check(unit+' structural independent SDK2013 reader process',process.returncode==0 and report.exists())
+                decoded=json.loads(report.read_text());after=next(r for r in json.loads(native.inspect3dm(str(old)))['records'] if r['class_name']=='ON_Hatch')
+                check(unit+' independent structural native child classes fields metadata exact',decoded['hatches'][0]['native_loops']==row['hatch_loop_native'] and after['hatch_loop_native']==row['hatch_loop_native'])
+                check(unit+' structural legacy5 export bytes immutable',decoded['source_version']==50 and target.read_bytes()==sentinel)
+                return row
+            exported(polyline,expected)
+            nurbs=next(o for o in objects if hatch.loops(o)['loops'][0]['curve']['class_name']=='ON_NurbsCurve')
+            square=hatch.loops(nurbs);n=square['loops'][0]['curve'];n.update(order=2,rational=False,cvs=[[-5,-5],[5,-5],[5,5],[-5,5],[-5,-5]],knots=[0,1,2,3,4],domain=[0,4])
+            hatch.update_loops(nurbs,square);n_expected=copy.deepcopy(square);n=n_expected['loops'][0]['curve'];n['cvs'].insert(1,[0,-5]);n['knots'].insert(1,0.5)
+            def split_nurbs(d):
+                row_action(d,'/loops/0/curve/cvs/0','duplicateLoopRow');row_action(d,'/loops/0/curve/knots/0','duplicateLoopRow')
+                set_number(d,'/loops/0/curve/cvs/1/0',0);set_number(d,'/loops/0/curve/knots/1',0.5);confirm(d)
+            drive(split_nurbs);check(unit+' NURBS CV and knot insertion retains native class',hatch.edit_loops_ui(nurbs) is True and hatch.loops(nurbs)==n_expected)
+            exported(nurbs,n_expected)
+            def unsplit_nurbs(d):
+                row_action(d,'/loops/0/curve/cvs/1','removeLoopRow');row_action(d,'/loops/0/curve/knots/1','removeLoopRow');confirm(d)
+            drive(unsplit_nurbs);check(unit+' paired CV knot removal restores exact square',hatch.edit_loops_ui(nurbs) is True and hatch.loops(nurbs)==square)
+            mixed=next(o for o in objects if hatch.loops(o)['loops'][0]['curve']['class_name']=='ON_PolyCurve')
+            original=hatch.loops(mixed);m_expected=copy.deepcopy(original);m=m_expected['loops'][0]['curve'];line=copy.deepcopy(m['segments'][0]);a,b=line['points'];mid=[(a[0]+b[0])/2,(a[1]+b[1])/2,0]
+            m['segments'][0]['points'][1]=mid;line['points'][0]=mid;m['segments'].insert(1,line)
+            parameter=(m['parameters'][0]+m['parameters'][1])/2;m['parameters'].insert(1,parameter)
+            def split_mixed(d):
+                row_action(d,'/loops/0/curve/segments/0','duplicateLoopRow');row_action(d,'/loops/0/curve/parameters/0','duplicateLoopRow')
+                for i,value in enumerate(mid):
+                    set_number(d,'/loops/0/curve/segments/0/points/1/'+str(i),value)
+                    set_number(d,'/loops/0/curve/segments/1/points/0/'+str(i),value)
+                set_number(d,'/loops/0/curve/parameters/1',parameter);confirm(d)
+            drive(split_mixed);check(unit+' PolyCurve segment insertion preserves source identities and child domains',hatch.edit_loops_ui(mixed) is True and hatch.loops(mixed)==m_expected)
+            row=exported(mixed,m_expected)
+            children=row['hatch_loop_native'][0]['curve']['segments']
+            check(unit+' duplicated native child metadata retained',children[0]['user_strings']==children[1]['user_strings'] and bool(children[0]['user_strings']))
+            def fixed_array(d):
+                row_action(d,'/loops/0/curve/segments/0/points/0','duplicateLoopRow')
+                check(unit+' Line endpoint cardinality cannot be edited as rows',bool(d.findChild(QtWidgets.QLabel,'loopError').text()))
+                confirm(d,QtWidgets.QDialogButtonBox.Cancel)
+            drive(fixed_array);check(unit+' fixed native array refusal leaves file intact',hatch.edit_loops_ui(mixed) is False and hatch.loops(mixed)==m_expected)
+            names=[polyline.Name,nurbs.Name,mixed.Name];values=[expected,square,m_expected]
+            save=out/(unit+'.FCStd');doc.saveAs(str(save));external.unlink();App.closeDocument(doc.Name)
+            doc=App.openDocument(str(save));doc.recompute()
+            for name,want in zip(names,values):
+                obj=doc.getObject(name);check(unit+' persisted structural fields '+name,hatch.loops(obj)==want)
+                exported(obj,want)
+            check(unit+' original fixture unchanged',source.read_bytes()==immutable)
+            App.closeDocument(doc.Name)
+        check('all structural UI callbacks complete',not result.get('driver_error'));result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -1,0 +1,101 @@
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import hashlib, json, os, traceback
+
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+result={'checks':[],'host_metrics':[]}
+
+def check(name,value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:
+        raise AssertionError(name)
+
+def run():
+    try:
+        import ThreeDm, OpenMatrix9Gui as native
+        root=Path('H:/FreeCAD-src/build/3dm-preserve-native/curved-shell-evidence')
+        proof=json.loads((root/'native-results.json').read_text())
+        check('four independent analytical curved shell fixtures',proof['ok'] and len(proof['cases'])==4)
+        for index,row in enumerate(proof['cases']):
+            source=root/row['fixture']
+            data=source.read_bytes()
+            check(source.stem+' bound native source',hashlib.sha256(data).hexdigest()==row['source_sha256'])
+            external=out/source.name
+            external.write_bytes(data)
+            doc=App.newDocument('CurvedShell'+str(index))
+            objects=ThreeDm.import_file(str(external),doc,mode='preserve')
+            check(source.stem+' one valid editable complete BRep',len(objects)==1 and objects[0].OM9Capability=='editable' and objects[0].Shape.isValid() and objects[0].Shape.isClosed() and len(objects[0].Shape.Shells)==2 and len(objects[0].Shape.Faces)==row['objects'][0]['faces'])
+            obj=objects[0]
+            expected=row['objects'][0]['volume_mm3']
+            # Shape.Volume uses fixed default integration. Independently read
+            # the actual current host BRep with stricter adaptive quadrature.
+            measured_brep=out/(source.stem+'-host.brep')
+            obj.Shape.exportBrep(str(measured_brep))
+            measured_bytes=measured_brep.read_bytes()
+            mass=native.measure3dmBrep(str(measured_brep),1e-13)
+            result['host_metrics'].append(dict(fixture=source.name,default_volume=obj.Shape.Volume,adaptive_metrics=mass,analytical_volume=expected))
+            check(source.stem+' independent precise host BRep volume within original analytical threshold',mass['volume']>0 and abs(mass['volume']-expected)<1e-6 and measured_brep.read_bytes()==measured_bytes)
+            for epsilon in [0,-1,float('nan'),1]:
+                rejected=False
+                try:
+                    native.measure3dmBrep(str(measured_brep),epsilon)
+                except Exception:
+                    rejected=True
+                check(source.stem+' invalid integration precision refuses read-only',rejected and measured_brep.read_bytes()==measured_bytes)
+            record=json.loads(obj.OM9SourceRecord)
+            (out/(source.stem+'-before-host.brep')).write_text(obj.Shape.copy().exportBrepToString())
+            name=obj.Name
+            archive=out/(source.stem+'.FCStd')
+            doc.saveAs(str(archive))
+            external.unlink()
+            App.closeDocument(doc.Name)
+            doc=App.openDocument(str(archive))
+            obj=doc.getObject(name)
+            (out/(source.stem+'-reopened-host.brep')).write_text(obj.Shape.copy().exportBrepToString())
+            check(source.stem+' source and exact record survive FCStd external deletion',Path(obj.OM9ArchiveOwner.OM9SourceArchive).read_bytes()==data and json.loads(obj.OM9SourceRecord)==record and obj.Shape.isValid())
+            target=out/(source.stem+'-selected.3dm')
+            ThreeDm.export_file(str(target),[obj])
+            decoded=json.loads(native.inspect3dm(str(target)))
+            import ThreeDmArchiveState
+            result['export_request']=ThreeDmArchiveState.preservation_request([obj],str(out))
+            result['original_crc']=record['geometry_crc']
+            result['exported_crc']=decoded['records'][0]['geometry_crc']
+            check(source.stem+' native graph UUID and geometry CRC stay exact',not decoded['issues'] and len(decoded['records'])==1 and decoded['records'][0]['source_uuid']==row['objects'][0]['uuid'] and decoded['records'][0]['geometry_crc']==record['geometry_crc'])
+            second=App.newDocument('CurvedAgain'+str(index))
+            again=ThreeDm.import_file(str(target),second,mode='preserve')[0]
+            check(source.stem+' selected V5 geometry remains closed with both shells',again.Shape.isValid() and again.Shape.isClosed() and len(again.Shape.Shells)==2 and abs(again.Shape.Volume-obj.Shape.Volume)<1e-6)
+            App.closeDocument(second.Name)
+            if index==0:
+                # A real small coordinate edit must not be absorbed into the
+                # baseline on Save/Reopen. No coordinate rounding is allowed.
+                doc.openTransaction('Small coordinate edit')
+                matrix=App.Matrix();matrix.A11=1+1e-9
+                obj.Shape=obj.Shape.transformGeometry(matrix)
+                doc.recompute();doc.commitTransaction()
+                request=ThreeDmArchiveState.preservation_request([obj],str(out))
+                check('small CAD edit stages replacement',request['selected'][0]['action']=='replace')
+                doc.undo()
+                check('Undo restores exact native source route',ThreeDmArchiveState.preservation_request([obj],str(out))['selected'][0]['action']=='unchanged')
+                doc.redo()
+                edited=out/'edited-curved.FCStd';doc.saveAs(str(edited));App.closeDocument(doc.Name)
+                doc=App.openDocument(str(edited));obj=doc.getObject(name)
+                check('real CAD edit remains replacement after FCStd reopen',ThreeDmArchiveState.preservation_request([obj],str(out))['selected'][0]['action']=='replace')
+                edited_target=out/'edited-curved.3dm'
+                ThreeDm.export_file(str(edited_target),[obj])
+                edited_record=json.loads(native.inspect3dm(str(edited_target)))['records'][0]
+                check('real edit exports changed graph with original UUID',edited_record['source_uuid']==record['source_uuid'] and edited_record['geometry_crc']!=record['geometry_crc'])
+                obj.Shape=obj.OM9SourceShapeBaseline.copy();doc.recompute()
+                check('explicit restore recovers native unchanged route',ThreeDmArchiveState.preservation_request([obj],str(out))['selected'][0]['action']=='unchanged')
+            App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:
+        result['ok']=False
+        result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):
+        App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1000,run)

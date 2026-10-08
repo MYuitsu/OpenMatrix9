@@ -65,7 +65,7 @@ def run():
         try:
             failed=False
             try:ThreeDm.import_file(str(copy),doc,mode='preserve')
-            except RuntimeError:failed=True
+            except RuntimeError as error:failed='injected binding failure' in str(error)
             check('binding failure rolled back',failed and len(doc.Objects)==before)
         finally:state.bind_archive=original_bind
         first=ThreeDm.import_file(str(copy),doc,mode='preserve')
@@ -91,10 +91,8 @@ def run():
         except RuntimeError:rejected=True
         check('preserve export blocked atomically',rejected and destination.read_bytes()==b'unchanged')
         cad=[o for o in doc.Objects if o.isDerivedFrom('Part::Feature')]
-        rejected=False
-        try:ThreeDm.export_file(str(destination),cad)
-        except RuntimeError:rejected=True
-        check('source geometry needs explicit omission choice',rejected and destination.read_bytes()==b'unchanged')
+        ThreeDm.export_file(str(destination),cad);written=json.loads(native.inspect3dm(str(destination)))
+        check('default source geometry export preserves selected native records',len(written['records'])==len(cad) and all(r['class_name']=='ON_Point' for r in written['records']))
         ThreeDm.export_file(str(out/'geometry-only.3dm'),cad,geometry_only=True)
         check('explicit geometry export', (out/'geometry-only.3dm').stat().st_size>32)
         result['ok']=True

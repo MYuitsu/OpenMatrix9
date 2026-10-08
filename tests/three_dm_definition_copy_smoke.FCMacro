@@ -1,0 +1,83 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, Mesh, OpenMatrix9Gui as native
+        doc=App.newDocument('DefinitionCopies');cad=doc.addObject('Part::Feature','FamilyCAD');cad.Shape=Part.makeBox(2,3,4);cad.Placement.Base=App.Vector(1,2,3)
+        mesh=doc.addObject('Mesh::Feature','FamilyMesh');mesh.Mesh=Mesh.Mesh([[(0,0,0),(2,0,0),(0,3,0)]]);mesh.Placement.Base=App.Vector(4,5,6)
+        leaf=ThreeDm.create_definition(doc,[cad,mesh],'Family leaf');leaf.Placement.Base=App.Vector(7,8,9)
+        nested=ThreeDm.create_instance(leaf,App.Placement(App.Vector(10,20,30),App.Rotation()));nested.ScaleVector=App.Vector(-2,3,4)
+        outer=ThreeDm.create_definition(doc,[nested],'Family outer');outer.Placement.Base=App.Vector(40,50,60)
+        root=ThreeDm.create_instance(outer,App.Placement(App.Vector(100,200,300),App.Rotation()))
+        copied=doc.copyObject(outer,True);copied.Label='Copied family outer';copiedNested=copied.Group[0];copiedLeaf=copiedNested.LinkedObject
+        result['copy_graph']=dict(original=outer.Name,copied=copied.Name,original_leaf=leaf.Name,copied_leaf=copiedLeaf.Name,children=[o.Name for o in copiedLeaf.Group])
+        check('recursive new definition copy duplicates owned nested family',copiedNested!=nested and copiedLeaf!=leaf and all(o not in leaf.Group for o in copiedLeaf.Group))
+        copiedRoot=ThreeDm.create_instance(copied,App.Placement(App.Vector(400,500,600),App.Rotation()));doc.recompute();path=out/'families.3dm'
+        def export(objects):
+            ThreeDm.export_preserved(str(path),objects);return json.loads(native.inspect3dm(str(path)))
+        def read():
+            folder=out/('read-'+str(len(list(out.glob('read-*')))));folder.mkdir();return json.loads(native.read3dm(str(path),str(folder)))['items']
+        report=export([root,copiedRoot]);defs=[r for r in report['components'] if r['class_name']=='ON_InstanceDefinition'];ids={r['source_uuid'] for r in report['records']+defs}
+        check('copied new definition family gets distinct stable native graph identities',len(report['records'])==8 and len(defs)==4 and len(ids)==12 and ids=={r['source_uuid'] for r in export([root,copiedRoot])['records']+export([root,copiedRoot])['components'] if r['component_type'] in ('InstanceDefinition','ModelGeometry')})
+        copiedCAD=next(o for o in copiedLeaf.Group if o.isDerivedFrom('Part::Feature'));placement=App.Placement(copiedCAD.Placement.toMatrix());copiedCAD.Shape=Part.makeBox(4,5,6);copiedCAD.Placement=placement;doc.recompute();report=export([root,copiedRoot]);volumes=[]
+        for item in read():
+            if 'brep' in item:shape=Part.Shape();shape.read(item['brep']);volumes.append(abs(shape.Volume))
+        check('copied family geometry edits leave original native graph intact',len(volumes)==2 and abs(min(volumes)-576)<1e-6 and abs(max(volumes)-2880)<1e-6)
+        sharedA=ThreeDm.create_instance(leaf,App.Placement(App.Vector(10,20,30),App.Rotation()));sharedB=ThreeDm.create_instance(leaf,App.Placement(App.Vector(40,50,60),App.Rotation()));sharedOuter=ThreeDm.create_definition(doc,[sharedA,sharedB],'Shared family');doc.recompute();before={o.Name for o in doc.Objects}
+        deepCopy=ThreeDm.copy_definition(sharedOuter,'Deep shared family');newNames={o.Name for o in doc.Objects}-before;deepName=deepCopy.Name;deepId=deepCopy.OM9NewDefinitionUUID;doc.undo();doc.recompute();check('whole family copy is one Undo transaction with original graph intact',all(doc.getObject(n) is None for n in newNames) and {o.Name for o in doc.Objects}==before);doc.redo();doc.recompute();deepCopy=doc.getObject(deepName)
+        check('copy creation Redo restores family identities and nested target sharing',deepCopy.OM9NewDefinitionUUID==deepId and deepCopy.Group[0].LinkedObject==deepCopy.Group[1].LinkedObject and deepCopy.Group[0].LinkedObject!=leaf)
+        shallowCopy=ThreeDm.copy_definition(sharedOuter,'Shared target copy',copy_targets=False);check('copy targets false keeps shared target while copying reference identities',all(o.LinkedObject==leaf for o in shallowCopy.Group) and all(o not in sharedOuter.Group for o in shallowCopy.Group))
+        deepRoot=ThreeDm.create_instance(deepCopy);shallowRoot=ThreeDm.create_instance(shallowCopy);doc.recompute();report=export([deepRoot,shallowRoot]);definitions=[r for r in report['components'] if r['class_name']=='ON_InstanceDefinition'];check('deep and shared family copy policies retain distinct native graph closures',len(definitions)==4 and len(report['records'])==10 and len(read())==8)
+        names=[o.Name for o in (root,copiedRoot,copiedCAD,copiedLeaf)];doc.saveAs(str(out/'families.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'families.FCStd'));root,copiedRoot,copiedCAD,copiedLeaf=[doc.getObject(n) for n in names];report=export([root,copiedRoot]);defs=[r for r in report['components'] if r['class_name']=='ON_InstanceDefinition']
+        check('copied whole new family IDs survive FCStd',ids=={r['source_uuid'] for r in report['records']+defs})
+        doc.openTransaction('Move copied family member');copiedCAD.Placement.Base=App.Vector(50,60,70);doc.recompute();doc.commitTransaction();export([copiedRoot]);shape=Part.Shape();shape.read(next(i['brep'] for i in read() if 'brep' in i));moved=shape.BoundBox.XMin;doc.undo();doc.recompute();export([copiedRoot]);shape.read(next(i['brep'] for i in read() if 'brep' in i));restored=shape.BoundBox.XMin
+        check('copied family member placement Undo restores independent native coordinates',abs(moved-restored)>1)
+        fixture=Path(tempfile.gettempdir())/'om9-merge-source.3dm';original=fixture.read_bytes();source=out/'source-family.3dm';source.write_bytes(original);imported=ThreeDm.import_file(str(source),doc,mode='preserve');sourceRoot=next(o for o in imported if o.isDerivedFrom('App::Link'));sourceRoot.LinkTransform=True;sourceDefinition=sourceRoot.LinkedObject;sourceDefinition.Placement.Base=App.Vector(7,8,9);doc.recompute()
+        sourceCopy=ThreeDm.copy_definition(sourceDefinition,'Copied native family',copy_targets=True);sourceCopyRoot=ThreeDm.create_instance(sourceCopy,App.Placement(App.Vector(400,500,600),App.Rotation()));doc.recompute();report=export([sourceRoot,sourceCopyRoot]);definitions=[r for r in report['components'] if r['class_name']=='ON_InstanceDefinition']
+        check('copied imported definition gets fresh native definition and member identities',len(report['records'])==4 and len(definitions)==2 and state._definition_identity(sourceCopy)!=sourceDefinition.OM9DefinitionUUID and state._new_identity(sourceCopy.Group[0],'Member')!=sourceDefinition.Group[0].OM9SourceUUID)
+        copiedNative=next(r for r in definitions if r['source_uuid']==state._definition_identity(sourceCopy));originalNative=next(r for r in definitions if r['source_uuid']==sourceDefinition.OM9DefinitionUUID)
+        check('copied source definition retains native description URL and user text',copiedNative['definition_description']==originalNative['definition_description']=='Native reusable block metadata' and copiedNative['definition_url']==originalNative['definition_url'] and copiedNative['definition_url_tag']==originalNative['definition_url_tag'] and copiedNative['user_strings']==originalNative['user_strings'])
+        copiedMember=sourceCopy.Group[0];copiedMember.Shape=Part.Vertex(9,8,7);doc.recompute();report=export([sourceRoot,sourceCopyRoot]);values=[]
+        for item in read():shape=Part.Shape();shape.read(item['brep']);values.append(shape.Vertexes[0].Point)
+        check('source definition copy edits remain independent of original selected source',len(values)==2 and any((v-App.Vector(18,30,42)).Length<1e-7 for v in values) and any((v-App.Vector(416,516,616)).Length<1e-7 for v in values))
+        names=[o.Name for o in (sourceRoot,sourceCopyRoot,sourceCopy)];ids={r['source_uuid'] for r in report['records']+definitions};doc.saveAs(str(out/'source-family.FCStd'));App.closeDocument(doc.Name);source.unlink();doc=App.openDocument(str(out/'source-family.FCStd'));sourceRoot,sourceCopyRoot,sourceCopy=[doc.getObject(n) for n in names];report=export([sourceRoot,sourceCopyRoot]);definitions=[r for r in report['components'] if r['class_name']=='ON_InstanceDefinition']
+        check('copied imported family IDs and native metadata survive FCStd without external source',ids=={r['source_uuid'] for r in report['records']+definitions} and next(r for r in definitions if r['source_uuid']==state._definition_identity(sourceCopy))['definition_description']=='Native reusable block metadata')
+        nestedFixture=Path(tempfile.gettempdir())/'om9-merge-depth2-2.3dm';nestedOriginal=nestedFixture.read_bytes();affine=ThreeDm.import_file(str(nestedFixture),doc,mode='preserve')[0];check('nested source fixture contains native affine root',not affine.isDerivedFrom('App::Link') and hasattr(affine,'OM9PreviewSignature'))
+        wrapper=ThreeDm.create_definition(doc,[affine],'Affine source family');wrapperCopy=ThreeDm.copy_definition(wrapper,'Copied affine source family');copiedAffine=wrapperCopy.Group[0];doc.recompute()
+        check('affine member copy owns verified independent host preview',copiedAffine!=affine and state._preview_matches(copiedAffine))
+        affineRoot=ThreeDm.create_instance(wrapperCopy,App.Placement(App.Vector(100,200,300),App.Rotation()));doc.recompute();report=export([affineRoot]);shape=Part.Shape();shape.read(read()[0]['brep']);check('copied affine source member and deep native targets preserve raw matrix world geometry',(shape.Vertexes[0].Point-App.Vector(98,206,312)).Length<1e-7 and len([r for r in report['components'] if r['class_name']=='ON_InstanceDefinition'])==3)
+        copyAgain=ThreeDm.copy_definition(wrapperCopy,'Copied again affine family');againRoot=ThreeDm.create_instance(copyAgain);doc.recompute();report=export([againRoot]);shape.read(read()[0]['brep']);check('copy of copied source family follows verified original native provenance',(shape.Vertexes[0].Point-App.Vector(-2,6,12)).Length<1e-7 and len({r['source_uuid'] for r in report['records']})==4)
+        importedAgain=ThreeDm.import_file(str(fixture),doc,mode='preserve');dot=next(o for o in importedAgain if o.OM9SourceClass=='ON_TextDot');retainedDefinition=ThreeDm.create_definition(doc,[dot],'Retained native family');dot.OM9BlockMemberPlacement.Base=App.Vector(10,20,30);retainedCopy=ThreeDm.copy_definition(retainedDefinition,'Retained native copy');retainedRoot=ThreeDm.create_instance(retainedCopy);doc.recompute();report=export([retainedRoot]);check('retained TextDot family copy preserves native payload attributes and explicit local placement',len(report['records'])==2 and next(r for r in report['records'] if r['class_name']=='ON_TextDot')['attribute_user_strings']==json.loads(dot.OM9SourceRecord)['attribute_user_strings'] and list(retainedCopy.Group[0].OM9BlockMemberPlacement.toMatrix().A)==list(dot.OM9BlockMemberPlacement.toMatrix().A))
+        mixedFixture=Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm';mixedOriginal=mixedFixture.read_bytes();mixed=ThreeDm.import_file(str(mixedFixture),doc,mode='preserve')[0];mixedWrapper=ThreeDm.create_definition(doc,[mixed],'Mixed affine family');oldChildren=[o.Name for o in mixed.Group];mixedCopy=ThreeDm.copy_definition(mixedWrapper,'Copied mixed affine family');copiedMixed=mixedCopy.Group[0];doc.recompute()
+        result['mixed_copy_diagnostic']=dict(original_before=oldChildren,original_after=[o.Name for o in mixed.Group],copied_children=[o.Name for o in copiedMixed.Group],baseline=copiedMixed.OM9PreviewSignature,actual=state.preview_signature(copiedMixed),status=copiedMixed.OM9PreviewStatus,original_child_metadata=[state.source_metadata(o) for o in mixed.Group],copied_child_metadata=[state.source_metadata(o) for o in copiedMixed.Group])
+        check('copied mixed affine cache children are owned independently and original is unchanged',[o.Name for o in mixed.Group]==oldChildren and all(o not in mixed.Group for o in copiedMixed.Group) and state._preview_matches(copiedMixed))
+        mixedRoot=ThreeDm.create_instance(mixedCopy,App.Placement(App.Vector(100,200,300),App.Rotation()));doc.recompute();report=export([mixedRoot]);items=read();shape=Part.Shape();shape.read(next(i['brep'] for i in items if 'brep' in i));check('mixed affine copied member exports native BRep mesh and shear once',len(items)==2 and abs(shape.Volume-24)<1e-7 and all(abs(a-b)<1e-7 for a,b in zip((shape.BoundBox.XMin,shape.BoundBox.YMin,shape.BoundBox.ZMin),(110,220,330))) and mixedFixture.read_bytes()==mixedOriginal)
+        copiedTarget=state._instance_definition(copiedMixed,json.loads(copiedMixed.OM9SourceRecord));copiedSolid=next(o for o in copiedTarget.Group if o.isDerivedFrom('Part::Feature'));copiedSolid.Shape=Part.makeBox(4,5,6);doc.recompute();report=export([mixedRoot]);shape.read(next(i['brep'] for i in read() if 'brep' in i));check('copied affine family preview and export follow independent member edits',abs(shape.Volume-120)<1e-7 and abs(next(o for o in copiedMixed.Group if o.isDerivedFrom('Part::Feature')).Shape.Volume-120)<1e-7 and abs(next(o for o in mixed.Group if o.isDerivedFrom('Part::Feature')).Shape.Volume-24)<1e-7)
+        previewMesh=next(o for o in copiedMixed.Group if o.isDerivedFrom('Mesh::Feature'));savedMesh=previewMesh.Mesh.copy();previewMesh.Mesh=Mesh.Mesh([[(0,0,0),(9,0,0),(0,9,0)]]);doc.recompute();sentinel=path.read_bytes();failed=False
+        try:export([mixedRoot])
+        except RuntimeError:failed=True
+        check('edited copied affine cache refuses export atomically',failed and path.read_bytes()==sentinel)
+        before={o.Name for o in doc.Objects};failed=False
+        try:ThreeDm.copy_definition(mixedCopy,'Invalid edited cache copy')
+        except RuntimeError:failed=True
+        check('family copy cannot invent a new baseline for an edited original cache',failed and before=={o.Name for o in doc.Objects})
+        previewMesh.Mesh=savedMesh;doc.recompute();report=export([mixedRoot]);mixedName=mixedRoot.Name;ids={r['source_uuid'] for r in report['records']};doc.saveAs(str(out/'mixed-family.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'mixed-family.FCStd'));mixedRoot=doc.getObject(mixedName);report=export([mixedRoot]);shape.read(next(i['brep'] for i in read() if 'brep' in i));check('mixed affine copied graph cache and edited payload survive FCStd',ids=={r['source_uuid'] for r in report['records']} and abs(shape.Volume-120)<1e-7)
+        check('nested source fixture stays immutable',nestedFixture.read_bytes()==nestedOriginal)
+        before={o.Name for o in doc.Objects};failed=False
+        try:ThreeDm.copy_definition(mixedRoot.LinkedObject,'Invalid copy',copy_targets='yes')
+        except RuntimeError:failed=True
+        check('invalid family copy policy rejects before document mutation',failed and before=={o.Name for o in doc.Objects})
+        check('original native source fixture remains immutable',fixture.read_bytes()==original)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

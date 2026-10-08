@@ -1,0 +1,138 @@
+import FreeCAD as App,FreeCADGui as Gui
+import copy,json,os,re,tempfile,traceback
+from pathlib import Path
+from PySide6 import QtCore,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def drive(action):
+    def run():
+        dialog=QtWidgets.QApplication.activeModalWidget()
+        try:
+            assert dialog and dialog.objectName()=='OM9HatchLoopEditor'
+            action(dialog)
+        except Exception:
+            result['driver_error']=traceback.format_exc()
+            if dialog:dialog.reject()
+    QtCore.QTimer.singleShot(100,run)
+def leaves(dialog):
+    tree=dialog.findChild(QtWidgets.QTreeWidget,'loopFields');items=[]
+    model=tree.model()
+    # Native-created QTreeWidgetItem wrappers have fragile ownership in the
+    # installed binding. Exercise the actual item model without wrapping items.
+    class Field:
+        def __init__(self,index):self.index=index
+        def data(self,column,role):return model.data(self.index.siblingAtColumn(column),role)
+        def text(self,column):return model.data(self.index.siblingAtColumn(column),QtCore.Qt.DisplayRole) or ''
+        def setText(self,column,value):return model.setData(self.index.siblingAtColumn(column),value,QtCore.Qt.EditRole)
+        def flags(self):return model.flags(self.index.siblingAtColumn(1))
+    def visit(index):
+        items.append(Field(index))
+        for i in range(model.rowCount(index)):visit(model.index(i,0,index))
+    for i in range(model.rowCount()):visit(model.index(i,0))
+    return tree,items
+def click(dialog,which):
+    dialog.findChild(QtWidgets.QDialogButtonBox).button(which).click()
+def run():
+    try:
+        import OpenMatrix9Gui as native,ThreeDm,ThreeDmHatch as hatch
+        real_boundary=hatch._boundary
+        def trace_boundary(obj,current):
+            with (out/'boundary_calls.jsonl').open('a') as f:f.write(json.dumps(dict(phase='begin',object=obj.Name,current=current))+'\n')
+            try:value=real_boundary(obj,current)
+            except Exception as error:
+                with (out/'boundary_calls.jsonl').open('a') as f:f.write(json.dumps(dict(phase='error',object=obj.Name,error=str(error)))+'\n')
+                raise
+            with (out/'boundary_calls.jsonl').open('a') as f:f.write(json.dumps(dict(phase='end',object=obj.Name))+'\n')
+            return value
+        hatch._boundary=trace_boundary
+        check('OM9-FILE-012 native typed Hatch editor available',hasattr(native,'editHatchLoops3dm'))
+        Gui.activeDocument() # Workbench and host are real; no mocked archive/geometry.
+        for unit in ('mm','cm'):
+            source=Path(tempfile.gettempdir())/('om9-hatch-loops-'+unit+'.3dm');immutable=source.read_bytes()
+            external=out/(unit+'-source.3dm');external.write_bytes(immutable)
+            doc=App.newDocument('LoopUI'+unit);doc.UndoMode=1
+            objects=ThreeDm.import_file(str(external),doc,mode='preserve');target=out/(unit+'.3dm')
+            for obj in objects:
+                initial=hatch.loops(obj);kind=initial['loops'][0]['curve']['class_name'];label=unit+' '+kind
+                drive(lambda d:click(d,QtWidgets.QDialogButtonBox.Cancel))
+                (out/'stage.txt').write_text(label+' opening cancel dialog')
+                check(label+' cancel has no document mutation',hatch.edit_loops_ui(obj) is False and hatch.loops(obj)==initial)
+                expected=copy.deepcopy(initial)
+                def deform(node):
+                    if node['class_name']=='ON_ArcCurve':node['radius']*=1.125
+                    for key in ('cvs','points'):
+                        for p in node.get(key,[]):p[0]*=1.125
+                    for child in node.get('segments',[]):deform(child)
+                deform(expected['loops'][0]['curve'])
+                def edit(d):
+                    _,items=leaves(d);edited=0
+                    for item in items:
+                        path=item.data(0,QtCore.Qt.UserRole)
+                        if path and (path.endswith('/radius') or re.search(r'/(cvs|points)/\d+/0$',path)):
+                            item.setText(1,format(float(item.text(1))*1.125,'.17g'));edited+=1
+                    assert edited
+                    click(d,QtWidgets.QDialogButtonBox.Ok)
+                drive(edit);check(label+' editor commits native values',hatch.edit_loops_ui(obj) is True and hatch.loops(obj)==expected)
+                check(label+' driver completed',not result.get('driver_error'))
+                ThreeDm.export_file(str(target),[obj]);row=next(r for r in json.loads(native.inspect3dm(str(target)))['records'] if r['class_name']=='ON_Hatch')
+                check(label+' native reread exact current loops',row['hatch_loop_current']==expected)
+                check(label+' native child user strings retained',row['hatch_loop_native'][0]['curve']['user_strings']==json.loads(obj.OM9SourceRecord)['hatch_loop_native'][0]['curve']['user_strings'])
+                doc.undo();check(label+' single undo restores baseline',hatch.loops(obj)==initial)
+                doc.redo();check(label+' redo restores edited loops',hatch.loops(obj)==expected)
+                def invalid(d):
+                    _,items=leaves(d);item=next(i for i in items if i.flags() & QtCore.Qt.ItemIsEditable)
+                    item.setText(1,'nan');click(d,QtWidgets.QDialogButtonBox.Ok)
+                    check(label+' nonfinite entry keeps editor open',d.isVisible() and bool(d.findChild(QtWidgets.QLabel,'loopError').text()))
+                    click(d,QtWidgets.QDialogButtonBox.Cancel)
+                drive(invalid);check(label+' invalid canceled edit preserves current file',hatch.edit_loops_ui(obj) is False and hatch.loops(obj)==expected)
+            arc=next(o for o in objects if hatch.loops(o)['loops'][0]['curve']['class_name']=='ON_ArcCurve');before=hatch.loops(arc)
+            def invalid_native(d):
+                _,items=leaves(d);next(i for i in items if i.data(0,QtCore.Qt.UserRole)=='/loops/0/curve/radius').setText(1,'-1')
+                def rejected(reopened):
+                    check(unit+' native geometry preflight keeps dialog open',reopened.isVisible() and bool(reopened.findChild(QtWidgets.QLabel,'loopError').text()))
+                    click(reopened,QtWidgets.QDialogButtonBox.Cancel)
+                drive(rejected)
+                click(d,QtWidgets.QDialogButtonBox.Ok)
+            drive(invalid_native);check(unit+' invalid native editor leaves file unchanged',hatch.edit_loops_ui(arc) is False and hatch.loops(arc)==before)
+            def add(d):d.findChild(QtWidgets.QPushButton,'addCircle').click();click(d,QtWidgets.QDialogButtonBox.Ok)
+            drive(add);check(unit+' adds inner native Arc',hatch.edit_loops_ui(arc) is True and len(hatch.loops(arc)['loops'])==2 and hatch.loops(arc)['loops'][1]['type']==1)
+            def remove(d):
+                tree,_=leaves(d);tree.setCurrentIndex(tree.model().index(1,0));d.findChild(QtWidgets.QPushButton,'removeLoop').click();click(d,QtWidgets.QDialogButtonBox.Ok)
+            drive(remove);check(unit+' removes selected loop with provenance unchanged',hatch.edit_loops_ui(arc) is True and hatch.loops(arc)==before)
+            drive(lambda d:click(d,QtWidgets.QDialogButtonBox.Ok));check(unit+' unchanged confirmation keeps exact values',hatch.edit_loops_ui(arc) is False and hatch.loops(arc)==before)
+            drive(lambda d:click(d,QtWidgets.QDialogButtonBox.Cancel))
+            check(unit+' double click routes to native editor',arc.ViewObject.Proxy.doubleClicked(arc.ViewObject) is True and hatch.loops(arc)==before)
+            menu=QtWidgets.QMenu();arc.ViewObject.Proxy.setupContextMenu(arc.ViewObject,menu)
+            drive(lambda d:click(d,QtWidgets.QDialogButtonBox.Cancel));menu.actions()[0].trigger()
+            check(unit+' context menu cancel preserves loops',hatch.loops(arc)==before)
+            newer=copy.deepcopy(before);newer['loops'][0]['curve']['radius']*=1.01
+            def stale(d):
+                hatch.update_loops(arc,newer)
+                def rejected(reopened):
+                    check(unit+' stale baseline reported in editor',reopened.isVisible() and 'changed while' in reopened.findChild(QtWidgets.QLabel,'loopError').text())
+                    click(reopened,QtWidgets.QDialogButtonBox.Cancel)
+                drive(rejected);click(d,QtWidgets.QDialogButtonBox.Ok)
+            drive(stale);check(unit+' stale confirmation retains newer native edit',hatch.edit_loops_ui(arc) is False and hatch.loops(arc)==newer)
+            copied=doc.copyObject(arc,False);copy_expected=copy.deepcopy(newer);copy_expected['loops'][0]['curve']['radius']*=1.25
+            def edit_copy(d):
+                _,items=leaves(d);next(i for i in items if i.data(0,QtCore.Qt.UserRole)=='/loops/0/curve/radius').setText(1,format(copy_expected['loops'][0]['curve']['radius'],'.17g'))
+                click(d,QtWidgets.QDialogButtonBox.Ok)
+            drive(edit_copy);check(unit+' UI edits copied native object independently',hatch.edit_loops_ui(copied) is True and hatch.loops(copied)==copy_expected and hatch.loops(arc)==newer)
+            ThreeDm.export_file(str(target),[copied]);row=next(r for r in json.loads(native.inspect3dm(str(target)))['records'] if r['class_name']=='ON_Hatch')
+            check(unit+' copied native edit exports exactly',row['hatch_loop_current']==copy_expected)
+            name=copied.Name;save=out/(unit+'.FCStd');doc.saveAs(str(save));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(save));doc.recompute();copied=doc.getObject(name)
+            check(unit+' UI edited file survives FCStd without external source',hatch.loops(copied)==copy_expected and not external.exists())
+            drive(lambda d:click(d,QtWidgets.QDialogButtonBox.Ok));check(unit+' reopened UI verifies persisted native baseline',hatch.edit_loops_ui(copied) is False and hatch.loops(copied)==copy_expected)
+            ThreeDm.export_file(str(target),[copied]);row=next(r for r in json.loads(native.inspect3dm(str(target)))['records'] if r['class_name']=='ON_Hatch')
+            check(unit+' reopened UI native export retains exact fields',row['hatch_loop_current']==copy_expected)
+            check(unit+' original source immutable',source.read_bytes()==immutable)
+            App.closeDocument(doc.Name)
+        check('all UI callbacks complete',not result.get('driver_error'));result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

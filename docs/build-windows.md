@@ -1,6 +1,6 @@
 # Build FreeCAD và OpenMatrix9 trên Windows
 
-Cập nhật: 2026-10-06. Hướng dẫn theo source public hiện tại, **Windows x64,
+Cập nhật: 2026-10-08. Hướng dẫn theo nhánh `codex/3dm-preservation-fast-import`, **Windows x64,
 MSVC và Qt6**. Standalone SDK CMake hiện dùng tên thư viện Windows;
 Linux/macOS chưa được kiểm chứng cho module này.
 
@@ -53,7 +53,7 @@ git clone --recurse-submodules https://github.com/MYuitsu/FreeCAD.git FreeCAD-sr
 Set-Location C:\CAD\FreeCAD-src
 git checkout 0205a6b3b5eb9546760a2aa39391354504f20194
 git submodule update --init --recursive
-git clone https://github.com/MYuitsu/OpenMatrix9.git Mod/OpenMatrix9
+git clone --branch codex/3dm-preservation-fast-import https://github.com/MYuitsu/OpenMatrix9.git Mod/OpenMatrix9
 git -C Mod/OpenMatrix9 rev-parse HEAD
 ```
 
@@ -62,6 +62,18 @@ commit OM9 để tái lập. Nếu dùng main FreeCAD mới hơn, cần build/te
 Nếu đã clone module thì dùng thư mục đó, không clone đè.
 
 ### 2. Tích hợp CMake
+
+Trước khi build FreeCAD, áp dụng bản sửa copy file nhúng đã dùng để kiểm chứng
+FCStd/copy trong OM9:
+
+```powershell
+git apply --check Mod/OpenMatrix9/patches/freecad-property-file-included-copy.patch
+git apply Mod/OpenMatrix9/patches/freecad-property-file-included-copy.patch
+```
+
+Nếu patch đã có, kiểm tra bằng `git apply --reverse --check` và không apply lại.
+Nếu source khác khiến patch không khớp, cần đối chiếu core trước khi công bố
+copy/FCStd đã được kiểm chứng trên SDK đó.
 
 Từ `FreeCAD-src`, nếu chưa có `BUILD_OPENMATRIX9`:
 
@@ -108,6 +120,7 @@ Chọn workbench **OpenMatrix9**. Build tree có cấu trúc:
 build/relWithDebInfo/
   bin/FreeCAD.exe
   bin/OpenMatrix9Gui.pyd
+  bin/OM9ThreeDmImportWorker.exe
   Mod/OpenMatrix9/
     Init.py
     InitGui.py
@@ -136,7 +149,7 @@ Ví dụ source/SDK ở `C:\CAD\FreeCAD-src`, module ở `C:\CAD\OpenMatrix9`:
 
 ```powershell
 Set-Location C:\CAD
-git clone https://github.com/MYuitsu/OpenMatrix9.git OpenMatrix9
+git clone --branch codex/3dm-preservation-fast-import https://github.com/MYuitsu/OpenMatrix9.git OpenMatrix9
 Set-Location C:\CAD\FreeCAD-src
 pixi shell
 ```
@@ -166,6 +179,7 @@ Kết quả build được đặt trực tiếp tại:
 
 ```text
 <FREECAD_SDK_BUILD>/bin/OpenMatrix9Gui.pyd
+<FREECAD_SDK_BUILD>/bin/OM9ThreeDmImportWorker.exe
 <FREECAD_SDK_BUILD>/Mod/OpenMatrix9/{Python scripts, Resources}
 ```
 
@@ -215,6 +229,7 @@ mục `Mod` của FreeCAD đích đã có sẵn:
 ```powershell
 Copy-Item -LiteralPath C:\CAD\FreeCAD-src\build\relWithDebInfo\Mod\OpenMatrix9 -Destination C:\CAD\FreeCAD-OM9\Mod -Recurse
 Copy-Item -LiteralPath C:\CAD\FreeCAD-src\build\relWithDebInfo\bin\OpenMatrix9Gui.pyd -Destination C:\CAD\FreeCAD-OM9\bin\OpenMatrix9Gui.pyd
+Copy-Item -LiteralPath C:\CAD\FreeCAD-src\build\relWithDebInfo\bin\OM9ThreeDmImportWorker.exe -Destination C:\CAD\FreeCAD-OM9\bin\OM9ThreeDmImportWorker.exe
 ```
 
 Nếu đã có OM9, sao lưu toàn bộ module và `.pyd`, rồi thay đúng package đã build.
@@ -271,7 +286,8 @@ cho chức năng đã sửa. Một số 3DM/native test cần fixture tự cung 
 | Không có icon/context menu | Kiểm tra resources tại FreeCAD home, resource cũ và source audit. |
 | Patch không khớp/đã apply | Kiểm tra `BUILD_OPENMATRIX9`; không apply lần hai hoặc ép patch vào source khác. |
 | Hết RAM | Giảm `--parallel`, giữ build type/toolchain nhất quán. |
-| 3DM export từ chối retained data | Public chưa có full preservation writer; xem [README tiến độ](../README.md). |
+| `3DM import worker is missing` | Copy/build `OM9ThreeDmImportWorker.exe` cạnh `FreeCAD.exe` cùng `.pyd`; `OM9_3DM_WORKERS=1` dùng kiểm tra tuần tự. |
+| 3DM export từ chối retained data | Kiểm tra dependency, trường chưa hỗ trợ hoặc dữ liệu không tương thích V5; xem [README tiến độ](../README.md). |
 
 Build source không tự tạo bộ cài Windows. Đóng gói bản phân phối phải theo
 quy trình packaging của đúng FreeCAD checkout, kèm runtime dependencies,

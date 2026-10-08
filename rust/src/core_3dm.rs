@@ -10,8 +10,8 @@ pub fn command(icon: &str) -> Option<&'static str> {
 }
 pub fn caption(icon: &str) -> Option<&'static str> {
     match icon {
-        "FileImport3dm" => Some("Import Rhino 5 (.3dm)"),
-        "FileExport3dm" => Some("Export Selected Rhino 5 (.3dm)"),
+        "FileImport3dm" => Some("Import 3DM..."),
+        "FileExport3dm" => Some("Export Selected 3DM..."),
         _ => None,
     }
 }

@@ -1,0 +1,65 @@
+#include "ThreeDmInventory.h"
+#include "ThreeDmMerge.h"
+#include "ThreeDmHatch.h"
+#include <QJsonArray>
+#include <QFile>
+#include <QJsonDocument>
+#include <cmath>
+#include <iostream>
+#include <memory>
+using namespace OpenMatrix9Gui::ThreeDm;
+static void require(bool ok,const char* message){if(!ok)throw ExchangeError(message);}
+static QString id(ON_UUID value){char text[37]{};ON_UuidToString(value,text);return QString::fromLatin1(text);}
+static const ON_Hatch* hatch(const ArchiveInventory& archive,ON_UUID uuid){auto component=ON_ModelGeometryComponent::Cast(archive.nativeModel->ComponentFromId(ON_ModelComponent::Type::ModelGeometry,uuid).ModelComponent());return component?ON_Hatch::Cast(component->Geometry(nullptr)):nullptr;}
+static const ON_HatchPattern* pattern(const ArchiveInventory& archive,const ON_Hatch& value){return ON_HatchPattern::Cast(archive.nativeModel->ComponentFromIndex(ON_ModelComponent::Type::HatchPattern,value.PatternIndex()).ModelComponent());}
+// Independent world-coordinate oracle using the documented native line frame.
+static ON_3dPoint linePoint(const ON_Hatch& value,const ON_HatchLine& line,int repeat,double along){
+    const double a=value.PatternRotation()+line.AngleRadians(),s=value.PatternScale();
+    const auto base=line.Base();const auto offset=line.Offset();
+    const double x=base.x+repeat*offset.x+along,y=base.y+repeat*offset.y;
+    const auto anchor=value.BasePoint2d();
+    return value.Plane().PointAt(anchor.x+s*(std::cos(a)*x-std::sin(a)*y),anchor.y+s*(std::sin(a)*x+std::cos(a)*y));
+}
+static void verify(const ON_Hatch& before,const ON_HatchPattern& source,const ON_Hatch& after,const ON_HatchPattern& result,const ON_Xform& map){
+    require(after.LoopCount()==before.LoopCount(),"affine hatch retains loop count");
+    for(int i=0;i<before.LoopCount();++i){require(after.Loop(i)->Type()==before.Loop(i)->Type(),"affine hatch retains exact loop type");std::unique_ptr<ON_Curve> a(before.LoopCurve3d(i)),b(after.LoopCurve3d(i));require(a&&b,"world loop curves");auto domain=a->Domain();for(int j=0;j<=32;++j){double t=domain.ParameterAt(j/32.0);require((map*a->PointAt(t)).DistanceTo(b->PointAt(t))<1e-8,"affine hatch loop world point differs from analytical map");}require(ON_NurbsCurve::Cast(after.Loop(i)->Curve())->IsRational(),"affine hatch retains rational native representation");}
+    require(result.HatchLineCount()==source.HatchLineCount(),"affine pattern retains every line");
+    for(int i=0;i<source.HatchLineCount();++i){auto a=source.HatchLine(i),b=result.HatchLine(i);require(a&&b&&a->DashCount()==b->DashCount(),"affine pattern retains complete dash arrays");double oldAlong=0,newAlong=0;for(int j=0;j<=a->DashCount();++j){for(int repeat=-3;repeat<=3;++repeat)require((map*linePoint(before,*a,repeat,oldAlong)).DistanceTo(linePoint(after,*b,repeat,newAlong))<1e-8,"affine pattern line origin/repeat/dash endpoint differs from analytical map");if(j<a->DashCount()){require((a->Dash(j)>0)==(b->Dash(j)>0)&&(a->Dash(j)<0)==(b->Dash(j)<0),"affine dash sign/dot changes");oldAlong+=std::abs(a->Dash(j));newAlong+=std::abs(b->Dash(j));}}
+    }
+    ON_wString text,expected;if(before.GetUserString(L"Hatch",expected))require(after.GetUserString(L"Hatch",text)&&text==expected,"hatch user text survives affine map");if(source.GetUserString(L"Pattern",expected))require(result.GetUserString(L"Pattern",text)&&text==expected,"pattern user text survives affine map");
+}
+int main(){try{ON::Begin();for(int tilted=0;tilted<2;++tilted)for(auto units:{ON::LengthUnitSystem::Millimeters,ON::LengthUnitSystem::Centimeters}){
+    ONX_Model model;model.m_settings.m_ModelUnitsAndTolerances.m_unit_system=ON_UnitSystem(units);ON_Layer layer;layer.SetName(L"Affine hatches");model.AddModelComponent(layer);
+    // A complete explicit style avoids SDK reader repair assigning a fresh
+    // default style UUID on every read of an intentionally empty style table.
+    ON_DimStyle style;style.SetName(L"Explicit affine fixture style");auto styleRef=model.AddModelComponent(style);model.m_settings.SetCurrentDimensionStyleId(styleRef.ModelComponent()->Id());
+    ON_HatchPattern original;original.SetName(L"Shared affine lines");original.SetDescription(L"Complete native pattern");original.SetFillType(ON_HatchPattern::HatchFillType::Lines);original.SetUserString(L"Pattern",L"Shared pattern");
+    for(int i=0;i<2;++i){ON_SimpleArray<double> dashes;dashes.Append(3.25);dashes.Append(-1.75);dashes.Append(0);original.AddHatchLine(ON_HatchLine(i?1.234567891:0.345678912,ON_2dPoint(0.375,0.625),ON_2dVector(0.5,1.25),dashes));}
+    auto p=model.AddModelComponent(original);auto nativePattern=ON_HatchPattern::Cast(p.ModelComponent());require(nativePattern,"native pattern create");
+    ON_NurbsCurve outer,inner;require(ON_Circle(ON_xy_plane,10).GetNurbForm(outer)&&ON_Circle(ON_xy_plane,2).GetNurbForm(inner),"rational loops");outer.ChangeDimension(2);inner.ChangeDimension(2);ON_SimpleArray<const ON_Curve*> loops;loops.Append(&outer);loops.Append(&inner);
+    ON_Hatch native;require(native.Create(ON_Plane(ON_3dPoint(10,20,30),tilted?ON_3dVector(1,2,3):ON_3dVector(0,0,1)),loops,nativePattern->Index(),0.456789123,2.345678912),"native hatch");native.SetBasePoint(ON_2dPoint(1.25,2.75));native.SetUserString(L"Hatch",L"Native affine");ON_3dmObjectAttributes attr;attr.m_name=L"Transformed hatch";auto first=model.AddModelGeometryComponent(&native,&attr);attr.m_name=L"Unchanged sibling";auto second=model.AddModelGeometryComponent(&native,&attr);auto a=first.ModelComponent()->Id(),b=second.ModelComponent()->Id();
+    auto path=std::filesystem::temp_directory_path()/("om9-hatch-affine-"+std::to_string(tilted)+"-"+std::to_string(static_cast<int>(units))+".3dm");require(model.Write(path.c_str(),5,nullptr),"affine fixture write");QFile sourceBytes(QString::fromStdWString(path.wstring()));require(sourceBytes.open(QIODevice::ReadOnly),"immutable input read");auto immutable=sourceBytes.readAll();sourceBytes.close();auto source=inspectArchive(path);auto before=hatch(source,a);auto sourcePattern=pattern(source,*before);require(before&&sourcePattern,"source native facts");
+    for(int kind=0;kind<5;++kind){ON_Xform matrix=ON_Xform::IdentityTransformation;if(kind==0)matrix[0][1]=0.5;else if(kind==1){matrix[0][0]=matrix[1][1]=2;matrix[2][2]=0.25;}else if(kind==2)matrix[0][0]=-1;else if(kind==3){matrix[0][0]=3;matrix[1][1]=0.5;matrix[2][2]=2;}else{matrix[0][1]=0.3;matrix[1][2]=0.7;matrix[2][0]=-0.2;}matrix[0][3]=5;matrix[1][3]=6;matrix[2][3]=7;QJsonArray values;for(int i=0;i<16;++i)values.append(matrix[i/4][i%4]);QString ns="00000000-0000-4000-8000-000000000088";
+    QJsonObject edit{{"namespace",ns},{"source_uuid",id(a)},{"host_id","affine"},{"action","transform"},{"geometry_matrix",values}},sibling{{"namespace",ns},{"source_uuid",id(b)},{"host_id","sibling"},{"action","unchanged"}};
+    QJsonObject request{{"schema_version",1},{"sources",QJsonArray{QJsonObject{{"namespace",ns},{"snapshot",QString::fromStdWString(path.wstring())},{"archive_sha256",source.document["archive_sha256"]},{"scale_mm",source.document["scale_mm"]}}}},{"selected",QJsonArray{edit,sibling}}};auto output=path.parent_path()/"om9-hatch-affine-output.3dm";writePreservedArchive(request,output);auto checked=inspectArchive(output);auto result=hatch(checked,a),untouched=hatch(checked,b);require(result&&untouched,"affine and sibling output");auto resultPattern=pattern(checked,*result),siblingPattern=pattern(checked,*untouched);require(resultPattern&&siblingPattern,"affine and sibling pattern references resolve");double mm=source.document["scale_mm"].toDouble();auto scaling=ON_Xform::DiagonalTransformation(mm);verify(*before,*sourcePattern,*result,*resultPattern,matrix*scaling);verify(*before,*sourcePattern,*untouched,*siblingPattern,scaling);require(siblingPattern->Id()==sourcePattern->Id()&&hatchPatternFacts(*siblingPattern)==hatchPatternFacts(*sourcePattern),"shared source pattern cannot be mutated by another hatch transform");
+    auto previous=checked.document;writePreservedArchive(request,output);auto repeated=inspectArchive(output);for(auto key:{"records","components"}){auto aa=previous[key].toArray(),bb=repeated.document[key].toArray();for(int j=0;j<std::min(aa.size(),bb.size());++j)if(aa[j]!=bb[j])std::cerr<<key<<" differs: "<<QJsonDocument(aa[j].toObject()).toJson(QJsonDocument::Compact).constData()<<" vs "<<QJsonDocument(bb[j].toObject()).toJson(QJsonDocument::Compact).constData()<<'\n';}require(previous["records"]==repeated.document["records"]&&previous["components"]==repeated.document["components"],"affine pattern identities and fields remain stable across repeated export");
+    if(kind==0){
+        QFile sentinel(QString::fromStdWString(output.wstring()));require(sentinel.open(QIODevice::ReadOnly),"atomic sentinel read");auto unchanged=sentinel.readAll();sentinel.close();auto bad=edit;auto singular=values;singular[0]=0;singular[1]=0;bad["geometry_matrix"]=singular;auto invalid=request;invalid["selected"]=QJsonArray{bad};bool rejected=false;try{writePreservedArchive(invalid,output);}catch(const ExchangeError&){rejected=true;}require(rejected&&sentinel.open(QIODevice::ReadOnly)&&sentinel.readAll()==unchanged,"invalid affine hatch export preserves destination bytes atomically");sentinel.close();
+        for(bool follow:{false,true}){
+            ON_UUID memberId,definitionId,instanceId;ON_CreateUuid(memberId);ON_CreateUuid(definitionId);ON_CreateUuid(instanceId);
+            QJsonObject copy{{"namespace",ns},{"source_uuid",id(a)},{"output_uuid",id(memberId)},{"host_id","affine-member"},{"member_matrix",values},{"follow_canonical",follow}};
+            QJsonObject definition{{"namespace",ns},{"source_uuid",id(definitionId)},{"host_id","affine-definition"},{"name","Affine hatch definition"},{"member_uuids",QJsonArray{id(memberId)}}};
+            QJsonObject instance{{"namespace",ns},{"source_uuid",id(instanceId)},{"host_id","affine-instance"},{"role","top-level"},{"instance_definition_uuid",id(definitionId)},{"instance_matrix",QJsonArray{1,0,0,100,0,1,0,200,0,0,1,300,0,0,0,1}}};
+            auto copied=request;copied["selected"]=QJsonArray{};copied["member_copies"]=QJsonArray{copy};copied["new_definitions"]=QJsonArray{definition};copied["new_instances"]=QJsonArray{instance};writePreservedArchive(copied,output);auto archive=inspectArchive(output);auto member=hatch(archive,memberId);require(member,"native copied affine hatch member");verify(*before,*sourcePattern,*member,*pattern(archive,*member),matrix*scaling);require(archive.document["records"].toArray().size()==2&&archive.nativeModel->ActiveComponentCount(ON_ModelComponent::Type::HatchPattern)==1,"copied member closure retains only the required transformed pattern");
+        }
+    }
+    std::cout<<"tilt"<<tilted<<" unit"<<mm<<" affine"<<kind<<" exact world loops/pattern/sibling/stable IDs PASS\n";
+    }
+    require(sourceBytes.open(QIODevice::ReadOnly)&&sourceBytes.readAll()==immutable,"original source bytes remain immutable");
+    if(!tilted){
+        ONX_Model blocks;blocks.m_settings.m_ModelUnitsAndTolerances.m_unit_system=ON_UnitSystem(units);blocks.AddModelComponent(layer);auto blockStyle=blocks.AddModelComponent(style);blocks.m_settings.SetCurrentDimensionStyleId(blockStyle.ModelComponent()->Id());auto blockPattern=ON_HatchPattern::Cast(blocks.AddModelComponent(original).ModelComponent());auto member=native;member.SetPatternIndex(blockPattern->Index());ON_3dmObjectAttributes attributes;attributes.SetMode(ON::idef_object);auto shared=blocks.AddModelGeometryComponent(&member,&attributes);
+        for(int i=0;i<2;++i){ON_InstanceDefinition definition;definition.SetName(i?L"Shared hatch B":L"Shared hatch A");definition.AddInstanceGeometryId(shared.ModelComponent()->Id());definition.SetBoundingBox(member.BoundingBox());auto target=blocks.AddModelComponent(definition);ON_InstanceRef instance;instance.m_instance_definition_uuid=target.ModelComponent()->Id();instance.m_xform=ON_Xform::TranslationTransformation(ON_3dVector(100+i*400,200+i*400,300+i*400));instance.m_bbox=member.BoundingBox();instance.m_bbox.Transform(instance.m_xform);attributes.SetMode(ON::normal_object);blocks.AddModelGeometryComponent(&instance,&attributes);}
+        auto blockPath=path.parent_path()/(units==ON::LengthUnitSystem::Millimeters?"om9-hatch-shared-mm.3dm":"om9-hatch-shared-cm.3dm");require(blocks.Write(blockPath.c_str(),5,nullptr),"native shared hatch fixture");
+    }
+    for(auto builtin:{&ON_HatchPattern::Grid60,&ON_HatchPattern::HatchDash,&ON_HatchPattern::Solid}){auto built=native;built.SetPatternIndex(builtin->Index());ON_Xform shear=ON_Xform::IdentityTransformation;shear[0][1]=0.5;auto beforeBuiltin=built;transformHatchNative(built,shear,&model);auto resulting=built.PatternIndex()<0?builtin:ON_HatchPattern::Cast(model.ComponentFromIndex(ON_ModelComponent::Type::HatchPattern,built.PatternIndex()).ModelComponent());require(resulting,"built-in affine pattern resolves");verify(beforeBuiltin,*builtin,built,*resulting,shear);}
+}return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

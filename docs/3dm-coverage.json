@@ -1,0 +1,3815 @@
+{
+  "schema_version": 1,
+  "pinned_revision": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+  "scope": "Class registrations are discovery evidence, not full support. Alias/obsolete compatibility registrations require additional audit.",
+  "classes": [
+    {
+      "class_name": "ON_3dmObjectAttributes",
+      "base_class": "ON_Object",
+      "class_uuid": "a828c015-09f5-477c-8665-f0482f5d6996",
+      "registration": {
+        "file": "opennurbs_3dm_attributes.cpp",
+        "line": 105,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_3dmRenderSettings",
+      "base_class": "ON_Object",
+      "class_uuid": "58a5953a-57c5-4fd3-84f5-7d4240478d15",
+      "registration": {
+        "file": "opennurbs_3dm_settings.cpp",
+        "line": 943,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Annotation",
+      "base_class": "ON_Geometry",
+      "class_uuid": "b5802e0c-5b16-43c9-bd43-a3e0ac18203b",
+      "registration": {
+        "file": "opennurbs_annotationbase.cpp",
+        "line": 25,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "abstract": true,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "abstract"
+    },
+    {
+      "class_name": "ON_ArcCurve",
+      "base_class": "ON_Curve",
+      "class_uuid": "cf33be2a-09b4-11d4-bffb-0010830122f0",
+      "registration": {
+        "file": "opennurbs_arccurve.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+        "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Curve",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native typed loop editing, named topology and persistent mm/cm host script adapter",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 typed loop decode/reencode, current edits/zero-base/native block copies mm/cm",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_OBSOLETE_CCustomMeshUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "69f27695-3011-4fba-82c1-e529f25b5fd9",
+      "registration": {
+        "file": "opennurbs_archive.cpp",
+        "line": 15674,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_Extrusion",
+      "base_class": "ON_Surface",
+      "class_uuid": "36f53175-72b8-4d47-bf1f-b4e6fc24f4b9",
+      "registration": {
+        "file": "opennurbs_beam.cpp",
+        "line": 1161,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Surface",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Owned CurveOnSurface coupled native transform fixture paths; scoped native parameter/class-preserving operations only",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_V5ExtrusionDisplayMeshCache",
+      "base_class": "ON_UserData",
+      "class_uuid": "a8130a3e-e4f3-4cb0-bb8a-f10a473912d0",
+      "registration": {
+        "file": "opennurbs_beam.cpp",
+        "line": 4775,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Bitmap",
+      "base_class": "ON_Object",
+      "class_uuid": "390465e9-3721-11d4-800b-0010830122f0",
+      "registration": {
+        "file": "opennurbs_bitmap.cpp",
+        "line": 24,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "abstract": true,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_Object"
+      ],
+      "classification": "abstract"
+    },
+    {
+      "class_name": "ON_WindowsBitmap",
+      "base_class": "ON_Bitmap",
+      "class_uuid": "390465eb-3721-11d4-800b-0010830122f0",
+      "registration": {
+        "file": "opennurbs_bitmap.cpp",
+        "line": 26,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_Bitmap",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_EmbeddedBitmap",
+      "base_class": "ON_Bitmap",
+      "class_uuid": "772e6fc1-b17b-4fc4-8f54-5fda511d76d2",
+      "registration": {
+        "file": "opennurbs_bitmap.cpp",
+        "line": 28,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_Bitmap",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_WindowsBitmapEx",
+      "base_class": "ON_WindowsBitmap",
+      "class_uuid": "203afc17-bcc9-44fb-a07b-7f5c31bd5ed9",
+      "registration": {
+        "file": "opennurbs_bitmap.cpp",
+        "line": 30,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_WindowsBitmap",
+        "ON_Bitmap",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Brep",
+      "base_class": "ON_Geometry",
+      "class_uuid": "60b5dbc5-e660-11d3-bfe4-0010830122f0",
+      "registration": {
+        "file": "opennurbs_brep.cpp",
+        "line": 1313,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "validated",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp",
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_V5_BrepRegionTopologyUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "7fe23d63-e536-43f1-98e2-c807a2625aff",
+      "registration": {
+        "file": "opennurbs_brep_region.cpp",
+        "line": 58,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Curve",
+      "base_class": "ON_Geometry",
+      "class_uuid": "4ed7d4d7-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_curve.cpp",
+        "line": 24,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "abstract": true,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "abstract"
+    },
+    {
+      "class_name": "ON_CurveOnSurface",
+      "base_class": "ON_Curve",
+      "class_uuid": "4ed7d4d8-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_curveonsurface.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-curve-on-surface-archive-recovery.md",
+        "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+        "docs/validation/2026-10-07-curve-on-surface-native-schema.md",
+        "docs/validation/2026-10-07-native-reference-resolution.md",
+        "docs/validation/2026-10-07-reference-graph-integrity.md",
+        "docs/validation/2026-10-07-trim-domain-correspondence.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Curve",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Audited Read-only SDK child recovery12 native cases117 malformed2 deferred references4 independent repaired legacy cases; retained host32 checks",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-archive-recovery.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Coupled native159 transforms32 atomic refusals across NURBS/Plane/Rev/Sum/Extrusion, retained source host regression",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Source-unit native tree10 direct/model paths,8 deferred references,7 refusals,120 retained-host lifecycle checks",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-native-schema.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Detached owning-model curve/box Brep edge/trim reference graph8 native paths8 invalid2 lifetime cases88 host checks",
+          "evidence": "docs/validation/2026-10-07-native-reference-resolution.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Shared owner and nested closure lifetime,6 aggregate quota cases,4 straight box edge parameter consistency cases,38 host checks",
+          "evidence": "docs/validation/2026-10-07-reference-graph-integrity.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "32 curved trim domain/reversal/lifetime cases,5 tolerance cases,176 host checks; interior map unverified",
+          "evidence": "docs/validation/2026-10-07-trim-domain-correspondence.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {
+        "archive_recovery_verified": true,
+        "archive_recovery_scope": "Arc parameter/optional Arc approximation and NURBS surface fixtures; archive5/6/7 exact fields, source retained FCStd, staged ownership refusal",
+        "deferred_reference_archive_recovery_verified": true,
+        "deferred_reference_semantics_verified": false,
+        "source_retained_host_verified": true,
+        "source_retained_host_scope": "four2D/3D optional-child fixtures and exact embedded source bytes",
+        "display_verified": false,
+        "editable_verified": false,
+        "coupled_transform_verified": false,
+        "selected_export_verified": false,
+        "selected_export_atomic_refusal_verified": true,
+        "class_wide_rhino5_compatibility": false,
+        "compiled_sdk_read_repair": "Generated application-owned ON_CurveOnSurface::Read replacement; original SDK sources unchanged",
+        "coupled_native_transform_slice_verified": true,
+        "coupled_native_transform_slice_scope": "Rational/nonrational degree1/3 NURBS2D/3D; Plane orthogonal transformed axes; Rev similarity3D generatrix; Sum supported native children; Extrusion proper similarity. Native child/reference/plugin/UV mapping and host editing remain pending.",
+        "host_coupled_transform_verified": false,
+        "source_native_schema_slice_verified": true,
+        "deferred_reference_inventory_slice_verified": true,
+        "owning_model_reference_resolution_slice_verified": true,
+        "shared_owner_closure_slice_verified": true,
+        "aggregate_sdk_accounted_clone_budget_slice_verified": true,
+        "affine_box_edge_parameter_consistency_slice_verified": true,
+        "curved_trim_endpoint_correspondence_slice_verified": true,
+        "trim_interior_parameter_mapping_verified": false
+      },
+      "in_progress_slices": [
+        {
+          "name": "Full CurveOnSurface and reference/surface adapter",
+          "status": "in_progress",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-native-schema.md",
+          "acceptance": "Complete owning-model child/surface/reference/plugin resolution/remapping, current host fields/edit/display and selected export; full parameter/type mappings and independent target/actual Rhino5 verification",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_CurveProxy",
+      "base_class": "ON_Curve",
+      "class_uuid": "4ed7d4d9-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_curveproxy.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Curve",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_DetailView",
+      "base_class": "ON_Geometry",
+      "class_uuid": "c8c66efa-b3cb-4e00-9440-2ad66203379e",
+      "registration": {
+        "file": "opennurbs_detail.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Dimension",
+      "base_class": "ON_Annotation",
+      "class_uuid": "ee6571fe-1596-4d5b-bd6d-7072b0643986",
+      "registration": {
+        "file": "opennurbs_dimension.cpp",
+        "line": 26,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "abstract": true,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "abstract"
+    },
+    {
+      "class_name": "ON_DimLinear",
+      "base_class": "ON_Dimension",
+      "class_uuid": "e550882b-f44d-4154-a1ef-6e50cbbbf543",
+      "registration": {
+        "file": "opennurbs_dimension.cpp",
+        "line": 27,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Dimension",
+        "ON_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_DimAngular",
+      "base_class": "ON_Dimension",
+      "class_uuid": "d417786b-f6cd-4f12-9e1f-063f414dbeb6",
+      "registration": {
+        "file": "opennurbs_dimension.cpp",
+        "line": 28,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Dimension",
+        "ON_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_DimRadial",
+      "base_class": "ON_Dimension",
+      "class_uuid": "fc749c2f-4c00-41fd-9840-26d94f047ad3",
+      "registration": {
+        "file": "opennurbs_dimension.cpp",
+        "line": 29,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Dimension",
+        "ON_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_DimOrdinate",
+      "base_class": "ON_Dimension",
+      "class_uuid": "03124828-4c9b-4d28-9a82-664ddde7a14f",
+      "registration": {
+        "file": "opennurbs_dimension.cpp",
+        "line": 30,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Dimension",
+        "ON_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Centermark",
+      "base_class": "ON_Dimension",
+      "class_uuid": "d46767ba-7e8f-4d9d-9a92-66050219a5b9",
+      "registration": {
+        "file": "opennurbs_dimension.cpp",
+        "line": 31,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Dimension",
+        "ON_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_DimStyle",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "67aa51a5-791d-4bec-8aed-d23b462b6f87",
+      "registration": {
+        "file": "opennurbs_dimensionstyle.cpp",
+        "line": 1070,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_EmbeddedFile",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "e3bbe02e-f3d5-490d-9719-e21d8bf982ef",
+      "registration": {
+        "file": "opennurbs_embedded_file.cpp",
+        "line": 140,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Font_Windows_LFTM_UserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "452ada1a-49f0-4faf-8e14-73dabe21fc5c",
+      "registration": {
+        "file": "opennurbs_font.cpp",
+        "line": 1425,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Font",
+      "base_class": "ON_Object",
+      "class_uuid": "5f7476d1-798a-4953-b359-4a37699cd6f4",
+      "registration": {
+        "file": "opennurbs_font.cpp",
+        "line": 2614,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Geometry",
+      "base_class": "ON_Object",
+      "class_uuid": "4ed7d4da-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_geometry.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Group",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "721d9f97-3645-44c4-8be6-b2cf697d25ce",
+      "registration": {
+        "file": "opennurbs_group.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_HatchExtra",
+      "base_class": "ON_UserData",
+      "class_uuid": "3ff7007c-3d04-463f-84e3-132aceb91062",
+      "registration": {
+        "file": "opennurbs_hatch.cpp",
+        "line": 78,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_HatchPattern",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "064e7c91-35f6-4734-a446-79ff7cd659e1",
+      "registration": {
+        "file": "opennurbs_hatch.cpp",
+        "line": 596,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-native.md",
+        "tests/native/three_dm_hatch.cpp",
+        "tests/three_dm_hatch_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-affine.md",
+        "tests/native/three_dm_hatch_affine.cpp",
+        "tests/three_dm_hatch_affine_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-current.md",
+        "tests/native/three_dm_hatch_current.cpp",
+        "tests/three_dm_hatch_current_smoke.FCMacro",
+        "tests/three_dm_hatch_shared_current_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-legacy5.md",
+        "tests/native/three_dm_legacy_hatch.cpp",
+        "tests/native/rhino5_reader/hatch_reader.cpp",
+        "tests/three_dm_hatch_legacy_smoke.FCMacro"
+      ],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Selected native custom line hatch pattern references and mm/cm rational loops",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-native.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native affine plane loops and isolated line patterns with host shared/copy block routes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-affine.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native Hatch current fields/reference selection and derived rational boundary",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-current.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 Hatch native fields and block decode-reencode",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy5.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {
+        "native_retention": true,
+        "affine_pattern_math": true,
+        "current_payload_editing": false,
+        "display": false,
+        "class_wide_rhino5_compatibility": false,
+        "tested": [
+          "custom multi-line pattern analytical affine endpoints and native rational loops",
+          "shear determinant-one scale reflections anisotropic tilted planes mm/cm",
+          "isolated pattern references and unchanged siblings",
+          "native canonical/baseline member copies and selected closure",
+          "FreeCAD reflected shared proxy selected/promoted/copied families",
+          "Undo/Redo FCStd stable generated identities atomic errors",
+          "standalone Grid60/HatchDash/Solid math",
+          "complete native plane/base/rotation/tiny positive scale fields and exact chosen UUID",
+          "materialized native Grid60 line fields and solid selection",
+          "current standalone/promoted/copied/shared reflected proxy routes mm/cm",
+          "derived rational boundary BRep and Coin outline FCStd restoration",
+          "gradient ordinary-field gate, schema/baseline/choice/invalid-field atomic rejection",
+          "independent SDK201307115 plane/base/rotation/tiny scale exact decode-reencode",
+          "native rational CVs/weights/knots and signed line patterns",
+          "Solid/Grid60/HatchDash selection and shared/copied block UUID graph",
+          "typed legacy HatchExtra movable-base conversion",
+          "raw attribute owner loss and public MemoryRelocate repair proof",
+          "enabled gradient data lost at modern version5 boundary and atomic refusal"
+        ],
+        "limits": [
+          "actual Rhino5 rendering and line-base contract oracle pending",
+          "built-in-wide solid gradient legacy and child-loop userdata/reference compatibility pending",
+          "incomplete source native reader repairs and missing pattern reference audit pending",
+          "extreme numeric ranges large-data memory/performance pending",
+          "remaining full geometry annotation resources components document history version requirements",
+          "native loop editing/pattern-line editing and full fill/dash rendering pending",
+          "native loop editing/pattern-line editing and full fill/dash rendering pending"
+        ],
+        "boundary_display": false,
+        "pattern_reference_selection": true,
+        "pattern_line_editing": false,
+        "full_pattern_rendering": false,
+        "legacy5_semantic_roundtrip": true
+      }
+    },
+    {
+      "class_name": "ON_Hatch",
+      "base_class": "ON_Geometry",
+      "class_uuid": "0559733b-5332-49d1-a936-0532ac76ade5",
+      "registration": {
+        "file": "opennurbs_hatch.cpp",
+        "line": 1256,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-native.md",
+        "tests/native/three_dm_hatch.cpp",
+        "tests/three_dm_hatch_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-affine.md",
+        "tests/native/three_dm_hatch_affine.cpp",
+        "tests/three_dm_hatch_affine_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-current.md",
+        "tests/native/three_dm_hatch_current.cpp",
+        "tests/three_dm_hatch_current_smoke.FCMacro",
+        "tests/three_dm_hatch_shared_current_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-legacy5.md",
+        "tests/native/three_dm_legacy_hatch.cpp",
+        "tests/native/rhino5_reader/hatch_reader.cpp",
+        "tests/three_dm_hatch_legacy_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+        "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-ui.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-rows.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Selected native custom line hatch pattern references and mm/cm rational loops",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-native.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native affine plane loops and isolated line patterns with host shared/copy block routes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-affine.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native Hatch current fields/reference selection and derived rational boundary",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-current.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 Hatch native fields and block decode-reencode",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy5.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native typed loop editing, named topology and persistent mm/cm host script adapter",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 typed loop decode/reencode, current edits/zero-base/native block copies mm/cm",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Ordinary existing-five-class numeric controls, role/circle addition/removal, native/Undo/copy/FCStd UI104",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-ui.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Raw structural UI rows103: nonrational degree1 NURBS CV/knot, Polyline point/parameter and PolyCurve Line split; lifecycle and12 independent legacy archives",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-rows.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {
+        "native_retention": true,
+        "affine_pattern_math": true,
+        "current_payload_editing": true,
+        "display": true,
+        "class_wide_rhino5_compatibility": false,
+        "tested": [
+          "custom multi-line pattern analytical affine endpoints and native rational loops",
+          "shear determinant-one scale reflections anisotropic tilted planes mm/cm",
+          "isolated pattern references and unchanged siblings",
+          "native canonical/baseline member copies and selected closure",
+          "FreeCAD reflected shared proxy selected/promoted/copied families",
+          "Undo/Redo FCStd stable generated identities atomic errors",
+          "standalone Grid60/HatchDash/Solid math",
+          "complete native plane/base/rotation/tiny positive scale fields and exact chosen UUID",
+          "materialized native Grid60 line fields and solid selection",
+          "current standalone/promoted/copied/shared reflected proxy routes mm/cm",
+          "derived rational boundary BRep and Coin outline FCStd restoration",
+          "gradient ordinary-field gate, schema/baseline/choice/invalid-field atomic rejection",
+          "independent SDK201307115 plane/base/rotation/tiny scale exact decode-reencode",
+          "native rational CVs/weights/knots and signed line patterns",
+          "Solid/Grid60/HatchDash selection and shared/copied block UUID graph",
+          "typed legacy HatchExtra movable-base conversion",
+          "raw attribute owner loss and public MemoryRelocate repair proof",
+          "enabled gradient data lost at modern version5 boundary and atomic refusal"
+        ],
+        "limits": [
+          "actual Rhino5 rendering and line-base contract oracle pending",
+          "built-in-wide solid gradient legacy and child-loop userdata/reference compatibility pending",
+          "incomplete source native reader repairs and missing pattern reference audit pending",
+          "extreme numeric ranges large-data memory/performance pending",
+          "remaining full geometry annotation resources components document history version requirements",
+          "native loop editing/pattern-line editing and full fill/dash rendering pending",
+          "native loop editing/pattern-line editing and full fill/dash rendering pending"
+        ],
+        "boundary_display": true,
+        "pattern_reference_selection": true,
+        "pattern_line_editing": false,
+        "full_pattern_rendering": false,
+        "legacy5_semantic_roundtrip": true,
+        "native_loop_inventory": true,
+        "recursive_child_userdata_guard": true,
+        "inactive_gradient_guard": true,
+        "native_loop_editing": false,
+        "native_typed_loop_editing": true,
+        "loop_script_adapter": true,
+        "loop_editor_ui": false,
+        "independent_legacy_native_loop_types": true,
+        "legacy_zero_base_verified": true,
+        "ordinary_loop_ui_verified": true,
+        "ordinary_loop_ui_scope": "existing five-class numeric fields, roles/circle and existing native raw array rows; new native class/rationality/complete child/reference controls remain pending",
+        "structural_loop_ui_verified": true,
+        "structural_loop_ui_scope": "explicit duplicate/remove of raw CV/knot/point/parameter/segment arrays; named nonrational NURBS/Polyline/PolyCurve fixtures only"
+      },
+      "in_progress_slices": [
+        {
+          "name": "Ordinary typed Hatch loop editor",
+          "status": "in_progress",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-rows.md",
+          "acceptance": "Numeric UI104 and raw row UI103 verified; new native class/rationality/complete child/reference controls pending",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_GradientColorData",
+      "base_class": "ON_UserData",
+      "class_uuid": "0c1ad613-4efa-4f47-a147-4d79d77fcb0c",
+      "registration": {
+        "file": "opennurbs_hatch.cpp",
+        "line": 2111,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_InstanceDefinition",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "26f8bff6-2618-417f-a158-153d64a94989",
+      "registration": {
+        "file": "opennurbs_instance.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_InstanceRef",
+      "base_class": "ON_Geometry",
+      "class_uuid": "f9cfb638-b9d4-4340-87e3-c56e7865d96a",
+      "registration": {
+        "file": "opennurbs_instance.cpp",
+        "line": 1741,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "validated",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp",
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_OBSOLETE_IDefAlternativePathUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "f42d9671-21eb-4692-9b9a-bc3507ff28f5",
+      "registration": {
+        "file": "opennurbs_instance.cpp",
+        "line": 2170,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_TextExtra",
+      "base_class": "ON_UserData",
+      "class_uuid": "d90490a5-db86-49f8-bda1-9080b1f4e976",
+      "registration": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 33,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_DimExtra",
+      "base_class": "ON_UserData",
+      "class_uuid": "8ad5b9fc-0d5c-47fb-adfd-74c28b6f661e",
+      "registration": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 208,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_Annotation",
+      "base_class": "ON_Geometry",
+      "class_uuid": "8d820224-bc6c-46b4-9066-bf39cc13aefb",
+      "registration": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 547,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "abstract": true,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_DimLinear",
+      "base_class": "ON_OBSOLETE_V5_Annotation",
+      "class_uuid": "bd57f33b-a1b2-46e9-9c6e-af09d30ffdde",
+      "registration": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 548,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_OBSOLETE_V5_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_DimRadial",
+      "base_class": "ON_OBSOLETE_V5_Annotation",
+      "class_uuid": "b2b683fc-7964-4e96-b1f9-9b356a76b08b",
+      "registration": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 549,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_OBSOLETE_V5_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_DimAngular",
+      "base_class": "ON_OBSOLETE_V5_Annotation",
+      "class_uuid": "841bc40b-a971-4a8e-94e5-bba26d67348e",
+      "registration": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 550,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_OBSOLETE_V5_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_TextObject",
+      "base_class": "ON_OBSOLETE_V5_Annotation",
+      "class_uuid": "46f75541-f46b-48be-aa7e-b353bbe068a7",
+      "registration": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 551,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_OBSOLETE_V5_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_Leader",
+      "base_class": "ON_OBSOLETE_V5_Annotation",
+      "class_uuid": "14922b7a-5b65-4f11-8345-d415a9637129",
+      "registration": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 552,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_OBSOLETE_V5_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_TextDot",
+      "base_class": "ON_Geometry",
+      "class_uuid": "74198302-cdf4-4f95-9609-6d684f22ab37",
+      "registration": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 553,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "validated",
+      "preservation": "validated",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp",
+        "tests/three_dm_preservation_smoke.FCMacro",
+        "tests/native/three_dm_native_transform.cpp",
+        "tests/three_dm_retained_transform_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-retained-transforms.md",
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md",
+        "docs/validation/2026-10-07-3dm-text-dot.md",
+        "tests/three_dm_text_dot_smoke.FCMacro",
+        "tests/native/three_dm_text_dot.cpp"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "validation_scope": {
+        "source_version": 5,
+        "units": [
+          "mm",
+          "cm"
+        ],
+        "native_transform": true,
+        "payload_editing": false,
+        "class_wide_rhino5_compatibility": false,
+        "fields": [
+          "source point",
+          "primary text",
+          "Rhino5 source secondary text",
+          "user strings",
+          "attributes"
+        ],
+        "limits": [
+          "Rhino6 nonempty secondary text protected by source-version rejection",
+          "native display/text editing unverified"
+        ]
+      },
+      "tested_slices": [
+        {
+          "name": "Rhino5 native retained transform roundtrip",
+          "evidence": "docs/validation/2026-10-07-3dm-retained-transforms.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native TextDot current-field editing and screen-text preview",
+          "evidence": "docs/validation/2026-10-07-3dm-text-dot.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_DimOrdinate",
+      "base_class": "ON_OBSOLETE_V5_Annotation",
+      "class_uuid": "c8288d69-5bd8-4f50-9baf-525a0086b0c3",
+      "registration": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 554,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_OBSOLETE_V5_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_AngularDimension2Extra",
+      "base_class": "ON_UserData",
+      "class_uuid": "a68b151f-c778-4a6e-bcb4-23ddd1835677",
+      "registration": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 3185,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_AnnotationTextFormula",
+      "base_class": "ON_UserData",
+      "class_uuid": "699fcc42-62d4-488c-9109-f1b7a37ce926",
+      "registration": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 7006,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_Annotation",
+      "base_class": "ON_Geometry",
+      "class_uuid": "abaf5873-4145-11d4-800f-0010830122f0",
+      "registration": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 28,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "abstract": true,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_DimLinear",
+      "base_class": "ON_OBSOLETE_V2_Annotation",
+      "class_uuid": "5de6b20d-486b-11d4-8014-0010830122f0",
+      "registration": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 29,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_OBSOLETE_V2_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_DimRadial",
+      "base_class": "ON_OBSOLETE_V2_Annotation",
+      "class_uuid": "5de6b20e-486b-11d4-8014-0010830122f0",
+      "registration": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 30,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_OBSOLETE_V2_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_DimAngular",
+      "base_class": "ON_OBSOLETE_V2_Annotation",
+      "class_uuid": "5de6b20f-486b-11d4-8014-0010830122f0",
+      "registration": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 31,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_OBSOLETE_V2_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_TextObject",
+      "base_class": "ON_OBSOLETE_V2_Annotation",
+      "class_uuid": "5de6b210-486b-11d4-8014-0010830122f0",
+      "registration": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 32,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_OBSOLETE_V2_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_Leader",
+      "base_class": "ON_OBSOLETE_V2_Annotation",
+      "class_uuid": "5de6b211-486b-11d4-8014-0010830122f0",
+      "registration": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 33,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_OBSOLETE_V2_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_TextDot",
+      "base_class": "ON_Point",
+      "class_uuid": "8bd94e19-59e1-11d4-8018-0010830122f0",
+      "registration": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 579,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Point",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_AnnotationArrow",
+      "base_class": "ON_Geometry",
+      "class_uuid": "8bd94e1a-59e1-11d4-8018-0010830122f0",
+      "registration": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 644,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_DimStyleExtra",
+      "base_class": "ON_UserData",
+      "class_uuid": "513fde53-7284-4065-8601-06cea8b28d6f",
+      "registration": {
+        "file": "opennurbs_internal_V5_dimstyle.cpp",
+        "line": 203,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_V5x_DimStyle",
+      "base_class": "ON_Object",
+      "class_uuid": "81bd83d5-7120-41c4-9a57-c449336ff12c",
+      "registration": {
+        "file": "opennurbs_internal_V5_dimstyle.cpp",
+        "line": 658,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Layer",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "95809813-e985-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_layer.cpp",
+        "line": 78,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON__LayerExtensions",
+      "base_class": "ON_UserData",
+      "class_uuid": "3e4904e6-e930-4fbc-aa42-ebd407aefe3b",
+      "registration": {
+        "file": "opennurbs_layer.cpp",
+        "line": 1520,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Leader",
+      "base_class": "ON_Annotation",
+      "class_uuid": "945bf594-6ff9-4f5c-bfc0-b3af528f29d2",
+      "registration": {
+        "file": "opennurbs_leader.cpp",
+        "line": 23,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Light",
+      "base_class": "ON_Geometry",
+      "class_uuid": "85a08513-f383-11d3-bfe7-0010830122f0",
+      "registration": {
+        "file": "opennurbs_light.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_LineCurve",
+      "base_class": "ON_Curve",
+      "class_uuid": "4ed7d4db-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_linecurve.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+        "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Curve",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native typed loop editing, named topology and persistent mm/cm host script adapter",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 typed loop decode/reencode, current edits/zero-base/native block copies mm/cm",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_Linetype",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "26f10a24-7d13-4f05-8fda-8e364daf8ea6",
+      "registration": {
+        "file": "opennurbs_linetype.cpp",
+        "line": 98,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Material",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "60b5dbbc-e660-11d3-bfe4-0010830122f0",
+      "registration": {
+        "file": "opennurbs_material.cpp",
+        "line": 29,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Texture",
+      "base_class": "ON_Object",
+      "class_uuid": "d6ff106d-329b-4f29-97e2-fd282a618020",
+      "registration": {
+        "file": "opennurbs_material.cpp",
+        "line": 2074,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_TextureMapping",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "32ec997a-c3bf-4ae5-ab19-fd572b8ad554",
+      "registration": {
+        "file": "opennurbs_material.cpp",
+        "line": 2654,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "CTtMappingMeshInfoUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "1706adc5-52bf-4be2-8402-4501eb2ae675",
+      "registration": {
+        "file": "opennurbs_material.cpp",
+        "line": 4019,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "CTtRenderMeshInfoUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "4960a046-8201-4f0f-8f22-fcb6f91c765d",
+      "registration": {
+        "file": "opennurbs_material.cpp",
+        "line": 4125,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "MappingCRCCache",
+      "base_class": "ON_UserData",
+      "class_uuid": "5a4971f3-aa73-493c-a385-2f7eb4288989",
+      "registration": {
+        "file": "opennurbs_material.cpp",
+        "line": 5380,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_PhysicallyBasedMaterialUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "5694e1ac-40e6-44f4-9ca9-3b6d0e8c4440",
+      "registration": {
+        "file": "opennurbs_material.cpp",
+        "line": 8858,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Mesh",
+      "base_class": "ON_Geometry",
+      "class_uuid": "4ed7d4e4-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 127,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_MeshVertexRef",
+      "base_class": "ON_Geometry",
+      "class_uuid": "c547b4bd-bdcd-49b6-a983-0c4a7f02e31a",
+      "registration": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 11936,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_MeshEdgeRef",
+      "base_class": "ON_Geometry",
+      "class_uuid": "ed727872-463a-4424-851f-9ec02cb0f155",
+      "registration": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 11938,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_MeshFaceRef",
+      "base_class": "ON_Geometry",
+      "class_uuid": "4f529aa5-ef8d-4c25-bcbb-162d510aa280",
+      "registration": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 11940,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_MeshComponentRef",
+      "base_class": "ON_Geometry",
+      "class_uuid": "1fd2f2be-3346-4d7a-ae94-73c0b326d8f4",
+      "registration": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 11942,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_V5_MeshDoubleVertices",
+      "base_class": "ON_UserData",
+      "class_uuid": "17f24e75-21be-4a7b-9f3d-7f85225247e3",
+      "registration": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 13655,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_PerObjectMeshParameters",
+      "base_class": "ON_UserData",
+      "class_uuid": "b5628ca9-82c4-4cae-9883-487b3e4ab28b",
+      "registration": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 14179,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_DisplacementUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "b8c04604-b4ef-43b7-8c26-1afb8f1c54eb",
+      "registration": {
+        "file": "opennurbs_mesh_modifiers.cpp",
+        "line": 80,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_EdgeSofteningUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "cb5eb395-bf1b-4112-8f2f-f728fce8169c",
+      "registration": {
+        "file": "opennurbs_mesh_modifiers.cpp",
+        "line": 701,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_ThickeningUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "aa03d9c3-4ccf-4431-a06e-25f38cf3913f",
+      "registration": {
+        "file": "opennurbs_mesh_modifiers.cpp",
+        "line": 896,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_CurvePipingUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "2d5afea9-f458-4079-992f-c2d405d9383b",
+      "registration": {
+        "file": "opennurbs_mesh_modifiers.cpp",
+        "line": 1082,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_ShutLiningUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "429dcd06-5643-4254-bde8-c0557f8fd083",
+      "registration": {
+        "file": "opennurbs_mesh_modifiers.cpp",
+        "line": 1310,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_V4V5_MeshNgonUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "31f55aa3-71fb-49f5-a975-757584d937ff",
+      "registration": {
+        "file": "opennurbs_mesh_ngon.cpp",
+        "line": 2332,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_ModelComponent",
+      "base_class": "ON_Object",
+      "class_uuid": "cf37cfb5-8e6f-435f-98fe-d20fa9e7db6f",
+      "registration": {
+        "file": "opennurbs_model_component.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_ModelGeometryComponent",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "29d1b827-41ce-45c1-b265-0686aa391dae",
+      "registration": {
+        "file": "opennurbs_model_geometry.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_NurbsCurve",
+      "base_class": "ON_Curve",
+      "class_uuid": "4ed7d4dd-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_nurbscurve.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md",
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+        "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Curve",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native typed loop editing, named topology and persistent mm/cm host script adapter",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 typed loop decode/reencode, current edits/zero-base/native block copies mm/cm",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_NurbsSurface",
+      "base_class": "ON_Surface",
+      "class_uuid": "4ed7d4de-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_nurbssurface.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Surface",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Owned CurveOnSurface coupled native transform fixture paths; scoped native parameter/class-preserving operations only",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_NurbsCage",
+      "base_class": "ON_Geometry",
+      "class_uuid": "06936afb-3d3c-41ac-bf70-c9319fa480a1",
+      "registration": {
+        "file": "opennurbs_nurbsvolume.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_MorphControl",
+      "base_class": "ON_Geometry",
+      "class_uuid": "d379e6d8-7c31-4407-a913-e3b7040d034a",
+      "registration": {
+        "file": "opennurbs_nurbsvolume.cpp",
+        "line": 26,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Object",
+      "base_class": "0",
+      "class_uuid": "60b5dbbd-e660-11d3-bfe4-0010830122f0",
+      "registration": {
+        "file": "opennurbs_object.cpp",
+        "line": 1249,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "abstract": true,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [],
+      "classification": "abstract"
+    },
+    {
+      "class_name": "ON_HistoryRecord",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "ecd0fd2f-2088-49dc-9641-9cf7a28ffa6b",
+      "registration": {
+        "file": "opennurbs_object_history.cpp",
+        "line": 1653,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_OffsetSurface",
+      "base_class": "ON_SurfaceProxy",
+      "class_uuid": "00c61749-d430-4ecc-83a8-29130a20cf9c",
+      "registration": {
+        "file": "opennurbs_offsetsurface.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_SurfaceProxy",
+        "ON_Surface",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_PlaneSurface",
+      "base_class": "ON_Surface",
+      "class_uuid": "4ed7d4df-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_planesurface.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Surface",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Owned CurveOnSurface coupled native transform fixture paths; scoped native parameter/class-preserving operations only",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_ClippingPlaneSurface",
+      "base_class": "ON_PlaneSurface",
+      "class_uuid": "dbc5a584-ce3f-4170-98a8-497069ca5c36",
+      "registration": {
+        "file": "opennurbs_planesurface.cpp",
+        "line": 25,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_PlaneSurface",
+        "ON_Surface",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_PointCloud",
+      "base_class": "ON_Geometry",
+      "class_uuid": "2488f347-f8fa-11d3-bfec-0010830122f0",
+      "registration": {
+        "file": "opennurbs_pointcloud.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "validated",
+      "preservation": "validated",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp",
+        "tests/native/three_dm_native_transform.cpp",
+        "tests/three_dm_retained_transform_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-retained-transforms.md",
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md",
+        "docs/validation/2026-10-07-3dm-point-cloud.md",
+        "tests/three_dm_point_cloud_smoke.FCMacro",
+        "tests/native/three_dm_point_cloud.cpp",
+        "docs/validation/2026-10-07-3dm-cloud-geometry-legacy5.md",
+        "tests/native/three_dm_cloud_geometry.cpp",
+        "tests/native/three_dm_legacy_cloud.cpp",
+        "tests/native/rhino5_reader/point_cloud_reader.cpp",
+        "tests/three_dm_cloud_geometry_smoke.FCMacro"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "validation_scope": {
+        "source_version": 5,
+        "units": [
+          "mm",
+          "cm"
+        ],
+        "native_transform": true,
+        "payload_editing": true,
+        "class_wide_rhino5_compatibility": false,
+        "fields": [
+          "double points",
+          "inverse-transpose normal directions and original lengths",
+          "exact RGBA bytes",
+          "current intensity import/edit/FCStd",
+          "ordered/active and valid dormant plane",
+          "reserved source flag bits",
+          "user strings",
+          "attributes"
+        ],
+        "limits": [
+          "nonempty intensity is rejected for SDK201307115 baseline; every later Rhino5 service release not established",
+          "local hidden flags are FreeCAD display only",
+          "large-data memory/performance and streaming unverified",
+          "generic recursive preview copies need verified rebuild; arbitrary legacy cloud upgrades pending",
+          "actual Rhino5 application acceptance and exact appearance unverified",
+          "FeaturePython viewport locking behavior unverified"
+        ],
+        "geometry_only_current_fields": true,
+        "affine_native_cloud_preview": true,
+        "independent_legacy_reader": {
+          "sdk": 201307115,
+          "source_sha256": "5cb9ff879c94c63145526a188f9ddc8c522f35cd82d8726ad49ed64a63d6e05a",
+          "intensity": "documented rejection; native reader loses values",
+          "actual_application_acceptance": false
+        }
+      },
+      "tested_slices": [
+        {
+          "name": "Rhino5 native retained transform roundtrip",
+          "evidence": "docs/validation/2026-10-07-3dm-retained-transforms.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native PointCloud current per-point fields and colored PointSet",
+          "evidence": "docs/validation/2026-10-07-3dm-point-cloud.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native geometry-only and mixed affine PointCloud; independent SDK201307115 target gate",
+          "evidence": "docs/validation/2026-10-07-3dm-cloud-geometry-legacy5.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_Point",
+      "base_class": "ON_Geometry",
+      "class_uuid": "c3101a1d-f157-11d3-bfe7-0010830122f0",
+      "registration": {
+        "file": "opennurbs_pointgeometry.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "validated",
+      "preservation": "validated",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp",
+        "tests/three_dm_preservation_smoke.FCMacro",
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_PointGrid",
+      "base_class": "ON_Geometry",
+      "class_uuid": "4ed7d4e5-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_pointgrid.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_PolyCurve",
+      "base_class": "ON_Curve",
+      "class_uuid": "4ed7d4e0-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_polycurve.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+        "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Curve",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native typed loop editing, named topology and persistent mm/cm host script adapter",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 typed loop decode/reencode, current edits/zero-base/native block copies mm/cm",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_PolyEdgeSegment",
+      "base_class": "ON_CurveProxy",
+      "class_uuid": "42f47a87-5b1b-4e31-ab87-4639d78325d6",
+      "registration": {
+        "file": "opennurbs_polyedgecurve.cpp",
+        "line": 13,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_CurveProxy",
+        "ON_Curve",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_PolyEdgeCurve",
+      "base_class": "ON_PolyCurve",
+      "class_uuid": "39ff3dd3-fe0f-4807-9d59-185f0d73c0e4",
+      "registration": {
+        "file": "opennurbs_polyedgecurve.cpp",
+        "line": 237,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-curve-on-surface-native-schema.md",
+        "docs/validation/2026-10-07-native-reference-resolution.md",
+        "docs/validation/2026-10-07-reference-graph-integrity.md",
+        "docs/validation/2026-10-07-trim-domain-correspondence.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_PolyCurve",
+        "ON_Curve",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Deferred native CurveOnSurface child fields and source UUID dependencies only; modern Read reversal repair",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-native-schema.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Detached owning-model curve/box Brep edge/trim reference graph8 native paths8 invalid2 lifetime cases88 host checks",
+          "evidence": "docs/validation/2026-10-07-native-reference-resolution.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Shared owner and nested closure lifetime,6 aggregate quota cases,4 straight box edge parameter consistency cases,38 host checks",
+          "evidence": "docs/validation/2026-10-07-reference-graph-integrity.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "32 curved trim domain/reversal/lifetime cases,5 tolerance cases,176 host checks; interior map unverified",
+          "evidence": "docs/validation/2026-10-07-trim-domain-correspondence.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_PolylineCurve",
+      "base_class": "ON_Curve",
+      "class_uuid": "4ed7d4e6-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_polylinecurve.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+        "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Curve",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native typed loop editing, named topology and persistent mm/cm host script adapter",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 typed loop decode/reencode, current edits/zero-base/native block copies mm/cm",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_Environment",
+      "base_class": "ON_Object",
+      "class_uuid": "94bca4d5-0fc7-435e-95f9-22f3927f9b2e",
+      "registration": {
+        "file": "opennurbs_render_content.cpp",
+        "line": 25,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_RenderContent",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "a98dedda-e4fa-4e1e-9bd3-2a0695c6d4e9",
+      "registration": {
+        "file": "opennurbs_render_content.cpp",
+        "line": 707,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "abstract": true,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "abstract"
+    },
+    {
+      "class_name": "ON_RenderMaterial",
+      "base_class": "ON_RenderContent",
+      "class_uuid": "493e6601-f95b-4a5d-bb6f-2f6633076907",
+      "registration": {
+        "file": "opennurbs_render_content.cpp",
+        "line": 1174,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_RenderContent",
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_RenderEnvironment",
+      "base_class": "ON_RenderContent",
+      "class_uuid": "a0ab8ef9-5fd4-4320-bbda-a1200d1846e4",
+      "registration": {
+        "file": "opennurbs_render_content.cpp",
+        "line": 1506,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_RenderContent",
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_RenderTexture",
+      "base_class": "ON_RenderContent",
+      "class_uuid": "677d9905-cc8c-41e6-a7ad-2409dde68ed0",
+      "registration": {
+        "file": "opennurbs_render_content.cpp",
+        "line": 1577,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_RenderContent",
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_RevSurface",
+      "base_class": "ON_Surface",
+      "class_uuid": "a16220d3-163b-11d4-8000-0010830122f0",
+      "registration": {
+        "file": "opennurbs_revsurface.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Surface",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Owned CurveOnSurface coupled native transform fixture paths; scoped native parameter/class-preserving operations only",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_SectionStyle",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "6d0de8b6-598b-4784-b2ca-a42beb77b521",
+      "registration": {
+        "file": "opennurbs_sectionstyle.cpp",
+        "line": 79,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_SubD",
+      "base_class": "ON_Geometry",
+      "class_uuid": "f09ba4d9-455b-42c3-ba3b-e6ccacef853b",
+      "registration": {
+        "file": "opennurbs_subd.cpp",
+        "line": 8141,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_SubDMeshProxyUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "2868b9cd-28ae-4ea7-8073-bd390b3e97c8",
+      "registration": {
+        "file": "opennurbs_subd_archive.cpp",
+        "line": 2055,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_SubDComponentRef",
+      "base_class": "ON_Geometry",
+      "class_uuid": "c221fc6d-36b7-47e8-90aa-ac8ec784e3dd",
+      "registration": {
+        "file": "opennurbs_subd_ref.cpp",
+        "line": 156,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_SumSurface",
+      "base_class": "ON_Surface",
+      "class_uuid": "c4cd5359-446d-4690-9ff5-29059732472b",
+      "registration": {
+        "file": "opennurbs_sumsurface.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md"
+      ],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Surface",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete",
+      "tested_slices": [
+        {
+          "name": "Owned CurveOnSurface coupled native transform fixture paths; scoped native parameter/class-preserving operations only",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+          "class_wide_completion": false
+        }
+      ]
+    },
+    {
+      "class_name": "ON_Surface",
+      "base_class": "ON_Geometry",
+      "class_uuid": "4ed7d4e1-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_surface.cpp",
+        "line": 24,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "abstract": true,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "abstract"
+    },
+    {
+      "class_name": "ON_SurfaceProxy",
+      "base_class": "ON_Surface",
+      "class_uuid": "4ed7d4e2-e947-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_surfaceproxy.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Surface",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_TextContent",
+      "base_class": "ON_Geometry",
+      "class_uuid": "4f0f51fb-35d0-9998-4865-9721d6d2c6a9",
+      "registration": {
+        "file": "opennurbs_text.cpp",
+        "line": 25,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_TextStyle",
+      "base_class": "ON_ModelComponent",
+      "class_uuid": "4f0f51fb-35d0-4865-9998-6d2c6a99721d",
+      "registration": {
+        "file": "opennurbs_text_style.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_ModelComponent",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Text",
+      "base_class": "ON_Annotation",
+      "class_uuid": "57376349-62a9-4a16-b411-a46bcd544790",
+      "registration": {
+        "file": "opennurbs_textobject.cpp",
+        "line": 23,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Annotation",
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_UserData",
+      "base_class": "ON_Object",
+      "class_uuid": "850324a7-050e-11d4-bffa-0010830122f0",
+      "registration": {
+        "file": "opennurbs_userdata.cpp",
+        "line": 24,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "abstract": true,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_Object"
+      ],
+      "classification": "abstract"
+    },
+    {
+      "class_name": "ON_ObsoleteUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "7c9305e5-947a-4e46-b102-8016849fabb1",
+      "registration": {
+        "file": "opennurbs_userdata.cpp",
+        "line": 236,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_UnknownUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "850324a8-050e-11d4-bffa-0010830122f0",
+      "registration": {
+        "file": "opennurbs_userdata.cpp",
+        "line": 266,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_UserStringList",
+      "base_class": "ON_UserData",
+      "class_uuid": "ce28de29-f4c5-4faa-a50a-c3a6849b6329",
+      "registration": {
+        "file": "opennurbs_userdata.cpp",
+        "line": 699,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_DocumentUserStringList",
+      "base_class": "ON_Object",
+      "class_uuid": "06f3218e-f5ec-4f6c-b74c-14583f0ed7bc",
+      "registration": {
+        "file": "opennurbs_userdata.cpp",
+        "line": 1190,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_Internal_ObsoleteUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "eda27090-1ddd-4e4d-ab0c-75ccf0216565",
+      "registration": {
+        "file": "opennurbs_userdata_obsolete.cpp",
+        "line": 98,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_OBSOLETE_IDefLayerSettingsUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "11ee2c1f-f90d-4c6a-a7cd-ec8532e1e32d",
+      "registration": {
+        "file": "opennurbs_userdata_obsolete.cpp",
+        "line": 139,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_OBSOLETE_LayerSettingsUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "bfb63c09-4bc7-4727-89bb-7cc754118200",
+      "registration": {
+        "file": "opennurbs_userdata_obsolete.cpp",
+        "line": 176,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "obsolete-compatibility"
+    },
+    {
+      "class_name": "ON_Viewport",
+      "base_class": "ON_Geometry",
+      "class_uuid": "d66e5ccf-ea39-11d3-bfe5-0010830122f0",
+      "registration": {
+        "file": "opennurbs_viewport.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": true,
+      "inheritance": [
+        "ON_Geometry",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    },
+    {
+      "class_name": "ON_RdkUserData",
+      "base_class": "ON_UserData",
+      "class_uuid": "afa82772-1525-43dd-a63c-c84ac5806911",
+      "registration": {
+        "file": "opennurbs_xml.cpp",
+        "line": 4586,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "abstract": false,
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "display": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [],
+      "geometry_class": false,
+      "inheritance": [
+        "ON_UserData",
+        "ON_Object"
+      ],
+      "classification": "concrete"
+    }
+  ],
+  "component_categories": [
+    {
+      "name": "Image",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "TextureMapping",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "Material",
+      "inventory": "validated",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp"
+      ]
+    },
+    {
+      "name": "LinePattern",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "Layer",
+      "inventory": "validated",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp"
+      ]
+    },
+    {
+      "name": "Group",
+      "inventory": "validated",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp"
+      ]
+    },
+    {
+      "name": "TextStyle",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "DimStyle",
+      "inventory": "validated",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp"
+      ]
+    },
+    {
+      "name": "RenderLight",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "HatchPattern",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "InstanceDefinition",
+      "inventory": "validated",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp"
+      ]
+    },
+    {
+      "name": "ModelGeometry",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "HistoryRecord",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "RenderContent",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "EmbeddedFile",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "SectionStyle",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    }
+  ],
+  "document_categories": [
+    {
+      "name": "properties",
+      "status": "unverified"
+    },
+    {
+      "name": "settings",
+      "status": "unverified"
+    },
+    {
+      "name": "views",
+      "status": "unverified"
+    },
+    {
+      "name": "named_views",
+      "status": "unverified"
+    },
+    {
+      "name": "plugin_userdata",
+      "status": "unverified"
+    },
+    {
+      "name": "external_resources",
+      "status": "unverified"
+    }
+  ]
+}

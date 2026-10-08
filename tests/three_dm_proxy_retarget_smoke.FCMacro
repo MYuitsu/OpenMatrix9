@@ -1,0 +1,36 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('ProxyRetarget');doc.UndoMode=1
+        source=Path(tempfile.gettempdir())/'om9-shared-rational-curve.3dm';sourceBytes=source.read_bytes()
+        roots=ThreeDm.import_file(str(source),doc,mode='preserve');root=roots[0]
+        proxy=root.LinkedObject.Group[0];original=proxy.LinkedObject
+        alternative=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Point')
+        doc.openTransaction('Retarget shared proxy');proxy.setLink(alternative);doc.recompute();doc.commitTransaction()
+        target=out/'retarget.3dm';ThreeDm.export_preserved(str(target),[root]);report=json.loads(native.inspect3dm(str(target)))
+        check('retargeted original proxy exports current native member instead of snapshot member',len(report['records'])==2 and any(r['class_name']=='ON_Point' and r['source_uuid']==alternative.OM9SourceUUID for r in report['records']) and all(r['source_uuid']!=original.OM9SourceUUID for r in report['records']))
+        read=json.loads(native.read3dm(str(target),str(out)));shape=Part.Shape();shape.read(read['items'][0]['brep'])
+        check('retargeted proxy exports current target native world coordinates',len(shape.Vertexes)==1 and (shape.Vertexes[0].Point-App.Vector(9,8,7)).Length<1e-7)
+        doc.undo();doc.recompute();ThreeDm.export_preserved(str(target),[root]);report=json.loads(native.inspect3dm(str(target)))
+        check('proxy retarget Undo restores native curve membership',any(r['class_name']=='ON_NurbsCurve' and r['source_uuid']==original.OM9SourceUUID for r in report['records']))
+        doc.redo();doc.recompute();ThreeDm.export_preserved(str(target),[root]);report=json.loads(native.inspect3dm(str(target)))
+        check('proxy retarget Redo restores point membership',any(r['class_name']=='ON_Point' and r['source_uuid']==alternative.OM9SourceUUID for r in report['records']))
+        names=[root.Name,proxy.Name,alternative.Name];doc.saveAs(str(out/'retarget.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'retarget.FCStd'));root,proxy,alternative=[doc.getObject(n) for n in names]
+        ThreeDm.export_preserved(str(target),[root]);report=json.loads(native.inspect3dm(str(target)))
+        check('retargeted membership persists through FCStd',proxy.LinkedObject==alternative and any(r['source_uuid']==alternative.OM9SourceUUID for r in report['records']))
+        check('proxy retarget leaves original source archive immutable',source.read_bytes()==sourceBytes)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

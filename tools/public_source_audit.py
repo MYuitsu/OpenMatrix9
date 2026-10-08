@@ -11,6 +11,8 @@ FORBIDDEN_ROOTS={'ref','analysis'}
 FORBIDDEN_SUFFIXES={'.dll','.exe','.pyd','.pdb','.lib','.obj','.pdf','.chm','.frx',
                    '.frm','.vbp','.vbw','.ocx','.tlb','.bin','.3dm','.ghidra'}
 EXCLUDED_DIRS={'.git','build','target','__pycache__','.vs','.idea'}
+ALLOWED_RASTERS={'Resources/branding/introduction.png','Resources/branding/workbench.png',
+                 'docs/images/donate/momo-qr.png'}
 
 
 def audit(root):
@@ -27,6 +29,8 @@ def audit(root):
                 if file.name not in EXCLUDED_DIRS:stack.append(file)
                 continue
             files.append(file)
+            if file.suffix.lower() in {'.png','.jpg','.jpeg','.bmp','.gif','.webp'} and relative not in ALLOWED_RASTERS:
+                errors.append('Unreviewed raster artifact: '+relative)
             if file.suffix.lower() in FORBIDDEN_SUFFIXES:errors.append('Private/binary artifact: '+relative)
             if file.name=='.env' or file.name.startswith('.env.') and file.name!='.env.example':errors.append('Credential file: '+relative)
             if file.suffix.lower() in {'.pem','.key','.p12','.pfx'}:errors.append('Key material: '+relative)

@@ -1,0 +1,85 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('CopyOriginMigration');doc.UndoMode=1
+        source=Path(tempfile.gettempdir())/'om9-merge-source.3dm';original=source.read_bytes()
+        roots=ThreeDm.import_file(str(source),doc,mode='preserve');root=next(o for o in roots if o.isDerivedFrom('App::Link'));owner=root.OM9ArchiveOwner;definition=root.LinkedObject;member=definition.Group[0]
+        copiedMember=doc.copyObject(member,False);copiedMember.Shape=Part.Vertex(App.Vector(10,20,30));copiedMember.Placement.Base=App.Vector(5,6,7)
+        copied=doc.addObject('App::Part','LegacyCopiedDefinition');copied.Label='Legacy copied block';copied.Placement.Base=App.Vector(4,5,6)
+        for kind,name,value in [('String','OM9DefinitionUUID',definition.OM9DefinitionUUID),('LinkHidden','OM9ArchiveOwner',owner),('String','OM9DefinitionSignature',definition.OM9DefinitionSignature)]:state._property(copied,kind,name,value)
+        copied.addObject(copiedMember);copied.ViewObject.Visibility=False
+        copiedRoot=doc.copyObject(root,False);copiedRoot.setLink(copied);copiedRoot.LinkTransform=True;copiedRoot.Placement.Base=App.Vector(100,200,300);doc.recompute()
+        beforeCount=len(doc.Objects);beforeDocs=set(App.listDocuments());rejected=False
+        try:ThreeDm.migrate_archive(owner)
+        except RuntimeError:rejected=True
+        check('legacy copied definition refuses implicit origin guessing',rejected and 'OM9NewDefinitionUUID' not in copied.PropertiesList and len(doc.Objects)==beforeCount and set(App.listDocuments())==beforeDocs)
+        def refuses(name,origins):
+            snapshot=[(o.Name,list(o.PropertiesList),getattr(o,'OM9SourceSignature','')) for o in doc.Objects];failed=False
+            try:ThreeDm.migrate_archive(owner,origins=origins)
+            except RuntimeError:failed=True
+            check(name,failed and snapshot==[(o.Name,list(o.PropertiesList),getattr(o,'OM9SourceSignature','')) for o in doc.Objects] and set(App.listDocuments())==beforeDocs and App.ActiveDocument==doc and not doc.HasPendingTransaction)
+        refuses('invalid origin policy rejects before mutation',[(definition.OM9DefinitionUUID,definition.Name)])
+        refuses('unknown native origin UUID rejects atomically',{'00000000-0000-0000-0000-000000000000':definition.Name})
+        refuses('origin host must match its native identity group',{definition.OM9DefinitionUUID:member.Name})
+        refuses('source origin cannot contradict existing original host witness',{member.OM9SourceUUID:copiedMember.Name,definition.OM9DefinitionUUID:definition.Name})
+        member.removeProperty('OM9SourceHostID');copiedMember.removeProperty('OM9SourceHostID')
+        refuses('ambiguous source copies require their own explicit origin',{definition.OM9DefinitionUUID:definition.Name})
+        origins={definition.OM9DefinitionUUID:definition.Name,member.OM9SourceUUID:member.Name}
+        copiedMember.addProperty('App::PropertyInteger','OM9BlockMemberGeometrySignature');copiedMember.OM9BlockMemberGeometrySignature=17
+        refuses('invalid copied member baseline type rejects entire migration',origins)
+        copiedMember.removeProperty('OM9BlockMemberGeometrySignature')
+        migrated=ThreeDm.migrate_archive(owner,origins=origins)
+        check('explicit origin creates independent persistent native definition identity',copied.OM9NewDefinitionUUID!=definition.OM9DefinitionUUID and copied.OM9CopiedDefinitionSourceUUID==definition.OM9DefinitionUUID and 'OM9NewDefinitionUUID' not in definition.PropertiesList)
+        check('copied member receives fresh identity while retaining original source provenance',copiedMember.OM9NewMemberUUID!=member.OM9SourceUUID and copiedMember.OM9SourceUUID==member.OM9SourceUUID and copiedMember.OM9SourceHostID==member.Name)
+        check('migration preserves current copied geometry and reference target object',copiedRoot.LinkedObject==copied and (copiedMember.Shape.Vertexes[0].Point-App.Vector(15,26,37)).Length<1e-7 and (member.Shape.Vertexes[0].Point-App.Vector(1,2,3)).Length<1e-7)
+        target=out/'migrated-copy.3dm'
+        def points(selected):
+            ThreeDm.export_preserved(str(target),selected);read=json.loads(native.read3dm(str(target),str(out)));answer=[]
+            for item in read['items']:
+                shape=Part.Shape();shape.read(item['brep']);answer.extend(v.Point for v in shape.Vertexes)
+            return answer
+        def near(actual,expected):return len(actual)==len(expected) and all(any((p-App.Vector(*q)).Length<1e-7 for p in actual) for q in expected)
+        check('migrated original and copied blocks export independent current world geometry',near(points([root,copiedRoot]),[(11,22,33),(119,231,343)]))
+        report=json.loads(native.inspect3dm(str(target)));copiedRecord=next(r for r in report['components'] if r['class_name']=='ON_InstanceDefinition' and r['name']=='Legacy copied block')
+        check('migrated copy retains original native definition description URL and safe user text',copiedRecord['definition_description']=='Native reusable block metadata' and copiedRecord['definition_url']=='https://example.invalid/block' and copiedRecord['user_strings']==[{'key':'Purpose','value':'Jewelry block'}])
+        ids=(copied.OM9NewDefinitionUUID,copiedMember.OM9NewMemberUUID)
+        doc.undo();doc.recompute();check('copy migration Undo restores ambiguous legacy identity without reverting edits','OM9NewDefinitionUUID' not in copied.PropertiesList and 'OM9NewMemberUUID' not in copiedMember.PropertiesList and (copiedMember.Shape.Vertexes[0].Point-App.Vector(15,26,37)).Length<1e-7)
+        doc.redo();doc.recompute();check('copy migration Redo restores stable IDs and export',ids==(copied.OM9NewDefinitionUUID,copiedMember.OM9NewMemberUUID) and near(points([root,copiedRoot]),[(11,22,33),(119,231,343)]))
+        names=[root.Name,copiedRoot.Name,copied.Name,copiedMember.Name,owner.Name];doc.saveAs(str(out/'copy-migration.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'copy-migration.FCStd'));root,copiedRoot,copied,copiedMember,owner=[doc.getObject(n) for n in names]
+        check('copy migration IDs provenance and geometry persist through FCStd',ids==(copied.OM9NewDefinitionUUID,copiedMember.OM9NewMemberUUID) and near(points([root,copiedRoot]),[(11,22,33),(119,231,343)]))
+        ThreeDm.migrate_archive(owner);check('repeated migration retains assigned copy identities',ids==(copied.OM9NewDefinitionUUID,copiedMember.OM9NewMemberUUID) and near(points([copiedRoot]),[(119,231,343)]))
+        check('copy origin migration keeps source archive immutable',source.read_bytes()==original)
+        curveDoc=App.newDocument('CopyOriginNativeProxy');curveDoc.UndoMode=1
+        curveSource=Path(tempfile.gettempdir())/'om9-shared-rational-curve.3dm';curveBytes=curveSource.read_bytes()
+        curveRoots=ThreeDm.import_file(str(curveSource),curveDoc,mode='preserve');curveRoot=curveRoots[0];curveOwner=curveRoot.OM9ArchiveOwner;curveOriginal=curveRoot.LinkedObject;curveProxy=curveOriginal.Group[0];curveCanonical=curveProxy.LinkedObject;curveRecord=json.loads(curveCanonical.OM9SourceRecord)
+        originalCurveLabel=curveOriginal.Label
+        curveCopy=curveDoc.addObject('App::Part','LegacyCopiedCurve');curveCopy.Label=curveOriginal.Label
+        for kind,name,value in [('String','OM9DefinitionUUID',curveOriginal.OM9DefinitionUUID),('LinkHidden','OM9ArchiveOwner',curveOwner)]:state._property(curveCopy,kind,name,value)
+        proxyCopy=curveDoc.copyObject(curveProxy,False);proxyCopy.removeProperty('OM9ProxyMetadata');curveCopy.addObject(proxyCopy);curveCopy.ViewObject.Visibility=False
+        curvePlaced=curveDoc.copyObject(curveRoot,False);curvePlaced.setLink(curveCopy);curveDoc.recompute()
+        ThreeDm.migrate_archive(curveOwner,origins={curveOriginal.OM9DefinitionUUID:curveOriginal.Name})
+        check('legacy copied shared proxy keeps canonical sharing with fresh member identity',proxyCopy.LinkedObject==curveCanonical and 'OM9NewMemberUUID' in proxyCopy.PropertiesList and 'OM9NewMemberUUID' not in curveProxy.PropertiesList and 'OM9ProxyMetadata' in proxyCopy.PropertiesList)
+        check('copied block name remains distinct and editable while original name stays intact',curveCopy.Label.casefold()!=curveOriginal.Label.casefold() and curveOriginal.Label==originalCurveLabel and not curveCopy.getEditorMode('Label'))
+        def exact_curve():
+            ThreeDm.export_preserved(str(target),[curvePlaced]);inventory=json.loads(native.inspect3dm(str(target)));record=next(r for r in inventory['records'] if r['role']=='definition-member')
+            return record['class_name']=='ON_NurbsCurve' and record['geometry_crc']==curveRecord['geometry_crc']
+        check('migrated legacy proxy copy retains exact native rational NURBS payload',exact_curve())
+        curveIDs=(curveCopy.OM9NewDefinitionUUID,proxyCopy.OM9NewMemberUUID);curveNames=[curvePlaced.Name,curveCopy.Name,proxyCopy.Name]
+        curveDoc.saveAs(str(out/'copy-origin-curve.FCStd'));App.closeDocument(curveDoc.Name);curveDoc=App.openDocument(str(out/'copy-origin-curve.FCStd'));curvePlaced,curveCopy,proxyCopy=[curveDoc.getObject(n) for n in curveNames]
+        check('copied rational proxy identities and native payload persist through FCStd',curveIDs==(curveCopy.OM9NewDefinitionUUID,proxyCopy.OM9NewMemberUUID) and exact_curve())
+        check('legacy rational proxy migration keeps original native archive immutable',curveSource.read_bytes()==curveBytes)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

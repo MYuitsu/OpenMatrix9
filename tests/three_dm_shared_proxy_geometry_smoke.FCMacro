@@ -1,0 +1,74 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('ProxyGeometry');source=Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm';original=source.read_bytes()
+        root=ThreeDm.import_file(str(source),doc,mode='preserve')[0];owner=root.OM9ArchiveOwner
+        definition=state._instance_definition(root,json.loads(root.OM9SourceRecord))
+        cad=next(o for o in definition.Group if o.isDerivedFrom('Part::Feature'));mesh=next(o for o in definition.Group if o.isDerivedFrom('Mesh::Feature'))
+        proxies=[]
+        for canonical in (cad,mesh):
+            proxy=doc.addObject('App::Link','TestSharedProxy');proxy.setLink(canonical);proxy.LinkTransform=True
+            state._property(proxy,'Bool','OM9DefinitionMemberProxy',True);definition.addObject(proxy)
+            state._property(proxy,'String','OM9ProxyMetadata',json.dumps(state.source_metadata(proxy),sort_keys=True));proxies.append(proxy)
+        cad.Shape=Part.makeBox(4,5,6);mesh.Placement.Base=App.Vector(5,0,0)
+        for proxy,label in zip(proxies,('CAD proxy','Mesh proxy')):proxy.Placement.Base=App.Vector(7,8,9);proxy.ScaleVector=App.Vector(-2,3,4);proxy.Label=label
+        doc.recompute();target=out/'geometry-proxy-staging.3dm'
+        target.write_bytes(b'unchanged target');refused=False
+        try:ThreeDm.export_preserved(str(target),[root])
+        except RuntimeError as error:refused='inward solid' in str(error)
+        check('inward definition member preservation refuses atomically',refused and target.read_bytes()==b'unchanged target')
+        def stage_current():
+            with tempfile.TemporaryDirectory(prefix='om9-test-graph-') as directory:
+                native.writeGeometryStaging3dm(json.dumps(state.preservation_request([root],directory)),str(target))
+            check_version=json.loads(native.inspect3dm(str(target)))['source_version']
+            if check_version!=80:raise AssertionError('Internal geometry staging must be SDK80')
+        stage_current()
+        report=json.loads(native.inspect3dm(str(target)));read=json.loads(native.read3dm(str(target),str(out)))
+        check('CAD and mesh proxies allocate separate native members',len(report['records'])==5 and sum(r['class_name']=='ON_Brep' for r in report['records'])==2 and sum(r['class_name']=='ON_Mesh' for r in report['records'])==2)
+        volumes=[]
+        for item in read['items']:
+            if 'brep' in item:
+                shape=Part.Shape();shape.read(item['brep']);volumes.append(shape.Volume)
+        check('native copies retain canonical and reflected signed BRep volumes',len(volumes)==2 and abs(max(volumes)-120)<1e-7 and abs(min(volumes)+2880)<1e-6)
+        safe=out/'rhino5-geometry-inward-member.3dm';ThreeDm.export_file(str(safe),[root],geometry_only=True)
+        safe_read=json.loads(native.read3dm(str(safe),str(out)));safe_volumes=[]
+        for item in safe_read['items']:
+            if 'brep' in item:
+                shape=Part.Shape();shape.read(item['brep']);safe_volumes.append(shape.Volume)
+        check('placed block geometry-only retains signed canonical and reflected volumes',len(safe_read['items'])==4 and len(safe_volumes)==2 and abs(max(safe_volumes)-120)<1e-7 and abs(min(safe_volumes)+2880)<1e-6)
+        safe_report=json.loads(native.inspect3dm(str(safe)))
+        check('geometry-only Rhino5 output encodes inward placement as an instance',safe_report['source_version'] in (5,50) and sum(r['class_name']=='ON_InstanceRef' for r in safe_report['records'])==1 and sum(r['class_name']=='ON_Brep' for r in safe_report['records'])==2)
+        renderedVolumes=[abs(o.Shape.Volume) for o in root.Group if o.isDerivedFrom('Part::Feature')]
+        check('affine preview follows BRep proxy geometry',len(renderedVolumes)==2 and abs(max(renderedVolumes)-2880)<1e-6)
+        renderedMeshes=[o.Mesh.Topology[0] for o in root.Group if o.isDerivedFrom('Mesh::Feature')]
+        nativeMeshes=[item['vertices'] for item in read['items'] if 'vertices' in item]
+        result['meshes']=dict(native=nativeMeshes,preview=[[list(p) for p in points] for points in renderedMeshes],canonical=[list(p) for p in mesh.Mesh.Topology[0]],placement=list(mesh.Placement.toMatrix().A))
+        check('mesh proxy preview and native coordinates agree',len(renderedMeshes)==2 and len(nativeMeshes)==2 and all(any(len(points)==len(vertices) and all(any((App.Vector(*p)-q).Length<1e-6 for p in vertices) for q in points) for vertices in nativeMeshes) for points in renderedMeshes))
+        definition.removeObject(cad);definition.removeObject(mesh);doc.recompute();stage_current();report=json.loads(native.inspect3dm(str(target)))
+        check('copy-only CAD/mesh branch excludes original canonical UUIDs',len(report['records'])==3 and all(r['source_uuid'] not in (cad.OM9SourceUUID,mesh.OM9SourceUUID) for r in report['records']))
+        check('source archive stays immutable',source.read_bytes()==original)
+        rootName=root.Name;proxyNames=[p.Name for p in proxies];doc.saveAs(str(out/'geometry.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'geometry.FCStd'));root=doc.getObject(rootName);proxy=doc.getObject(proxyNames[0])
+        def cad_bounds():
+            read=json.loads(native.read3dm(str(target),str(out)));shape=Part.Shape();shape.read(next(i['brep'] for i in read['items'] if i['name'].endswith('/CAD proxy')))
+            return (shape.BoundBox.XMin,shape.BoundBox.YMin,shape.BoundBox.ZMin)
+        doc.openTransaction('Move proxy');proxy.Placement.Base=App.Vector(20,30,40);doc.recompute();doc.commitTransaction();stage_current();changed=cad_bounds()
+        doc.undo();doc.recompute();stage_current();restored=cad_bounds()
+        check('proxy edit Undo survives FCStd and restores world bounds',all(abs(a-b)<1e-6 for a,b in zip(changed,(37,50,70))) and all(abs(a-b)<1e-6 for a,b in zip(restored,(13,28,39))) and root.OM9PreviewStatus=='Current canonical members')
+        doc.redo();doc.recompute();stage_current();redone=cad_bounds()
+        check('proxy edit Redo restores transformed CAD geometry',all(abs(a-b)<1e-6 for a,b in zip(redone,(37,50,70))))
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

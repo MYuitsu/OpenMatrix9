@@ -1,0 +1,92 @@
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import hashlib, json, os, traceback
+
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+result={'checks':[]}
+
+def check(name, value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:
+        raise AssertionError(name)
+
+def run():
+    try:
+        import ThreeDm, OpenMatrix9Gui as native
+        cases=[]
+        for folder,count in [('opennurbs-profile-acceptance-20261007',5),('opennurbs-cos-matrix-acceptance-20261007',30),('opennurbs-gui-profiles-acceptance-20261007',35)]:
+            root=Path('H:/FreeCAD-src/build')/folder
+            oracle=json.loads((root/'oracle.json').read_text())
+            report_path=max(root.glob('gui-output-*/rhino5-gui-profile-results.json'),key=lambda p:p.stat().st_mtime) if 'gui-profiles' in folder else root/'rhino5-exchange-profile-results.json'
+            proof=json.loads(report_path.read_text())
+            check(folder+' actual Rhino5 proof bound to complete native oracle',proof['ok'] and len(proof['cases'])==len(oracle['cases'])==count and proof['oracle_sha256']==hashlib.sha256((root/'oracle.json').read_bytes()).hexdigest())
+            cases.extend((root,expected,row) for expected,row in zip(oracle['cases'],proof['cases']))
+        for index,(root,expected,row) in enumerate(cases):
+            source=root/row['fixture']
+            saved=root/row['saved_fixture']
+            source_bytes, saved_bytes=source.read_bytes(), saved.read_bytes()
+            check(source.stem+' immutable source and Rhino saved evidence hashes',expected['fixture']==row['fixture'] and hashlib.sha256(source_bytes).hexdigest()==row['source_sha256']==expected['source_sha256'] and hashlib.sha256(saved_bytes).hexdigest()==row['saved_sha256'])
+            before=json.loads(native.inspect3dm(str(source)))
+            after=json.loads(native.inspect3dm(str(saved)))
+            check(source.stem+' V5 decoded record UUID and class closure',after['source_version'] in (5,50) and not after['issues'] and len(after['records'])==len(before['records'])==1 and after['records'][0]['source_uuid']==before['records'][0]['source_uuid']==expected['objects'][0]['uuid'] and after['records'][0]['class_name']==before['records'][0]['class_name'])
+            doc=App.newDocument('RhinoProfile'+str(index))
+            obj=ThreeDm.import_file(str(saved),doc,mode='preserve')[0]
+            if 'gui-profiles' in root.name and 'samples' in expected['objects'][0]:
+                check(source.stem+' GUI SaveAs retains exact native curve children',after['records'][0]['curve_on_surface_native']==before['records'][0]['curve_on_surface_native'] and obj.OM9Capability=='retained' and not hasattr(obj,'Shape'))
+            elif 'samples' in expected['objects'][0]:
+                check(source.stem+' exact native curve children after Rhino save',after['records'][0]['curve_on_surface_native']==before['records'][0]['curve_on_surface_native'] and obj.OM9Capability=='retained' and not hasattr(obj,'Shape'))
+                exported=out/(source.stem+'-selected.3dm')
+                ThreeDm.export_file(str(exported),[obj])
+                check(source.stem+' selected export keeps every decoded child field',json.loads(native.inspect3dm(str(exported)))['records'][0]['curve_on_surface_native']==after['records'][0]['curve_on_surface_native'])
+                doc.openTransaction('Move native CurveOnSurface')
+                obj.OM9BlockMemberPlacement=App.Placement(App.Vector(5,6,7),App.Rotation())
+                doc.commitTransaction()
+                ThreeDm.export_file(str(exported),[obj])
+                moved=json.loads(native.inspect3dm(str(exported)))['records'][0]
+                check(source.stem+' native coupled placement retains exact UV child',moved['curve_on_surface_native']['parameter']==after['records'][0]['curve_on_surface_native']['parameter'] and moved['curve_on_surface_native']['approximation'] is None)
+                doc.undo()
+                ThreeDm.export_file(str(exported),[obj])
+                check(source.stem+' Undo restores exact native geometry',json.loads(native.inspect3dm(str(exported)))['records'][0]['curve_on_surface_native']==after['records'][0]['curve_on_surface_native'])
+                doc.redo()
+                copy=doc.copyObject(obj,False)
+                ThreeDm.export_file(str(exported),[obj,copy])
+                copied=json.loads(native.inspect3dm(str(exported)))['records']
+                check(source.stem+' independent copy UUID and full native children',len(copied)==2 and len({r['source_uuid'] for r in copied})==2 and all(r['curve_on_surface_native']==moved['curve_on_surface_native'] for r in copied))
+                doc.removeObject(obj.Name)
+                ThreeDm.export_file(str(exported),[copy])
+                check(source.stem+' deleting original leaves copy payload valid',len(json.loads(native.inspect3dm(str(exported)))['records'])==1)
+                obj=copy
+            else:
+                check(source.stem+' complete BRep graph CRC after Rhino save',after['records'][0]['geometry_crc']==before['records'][0]['geometry_crc'])
+                check(source.stem+' valid editable topology and signed volume after Rhino save',obj.OM9Capability=='editable' and obj.Shape.isValid() and len(obj.Shape.Faces)==expected['objects'][0]['faces'] and abs(obj.Shape.Volume-expected['objects'][0]['volume_mm3'])<=1e-6)
+            if 'gui-profiles' in root.name:
+                result.setdefault('gui_plugin_tables',{})[source.name]=after['settings']['plugin_userdata']
+                protected=out/(source.stem+'-plugin-protected.3dm')
+                protected.write_bytes(b'keep destination')
+                count=len(doc.Objects)
+                error=''
+                try:
+                    ThreeDm.export_file(str(protected),[obj])
+                except Exception as exc:
+                    error=str(exc)
+                check(source.stem+' opaque GUI plugin table refusal preserves source project and destination','Opaque plugin table dependencies' in error and protected.read_bytes()==b'keep destination' and len(doc.Objects)==count)
+            archive=out/(source.stem+'.FCStd')
+            name=obj.Name
+            doc.saveAs(str(archive))
+            App.closeDocument(doc.Name)
+            doc=App.openDocument(str(archive))
+            obj=doc.getObject(name)
+            check(source.stem+' Rhino saved archive survives FCStd reopen',Path(obj.OM9ArchiveOwner.OM9SourceArchive).read_bytes()==saved_bytes and json.loads(obj.OM9SourceRecord)==after['records'][0])
+            App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:
+        result['ok']=False
+        result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):
+        App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1000,run)

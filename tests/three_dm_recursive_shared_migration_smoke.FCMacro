@@ -1,0 +1,152 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, Mesh, OpenMatrix9Gui as native
+        path=out/'recursive-shared.3dm'
+        def family(filename,name):
+            doc=App.newDocument(name);doc.UndoMode=1;source=Path(tempfile.gettempdir())/filename;original=source.read_bytes()
+            roots=ThreeDm.import_file(str(source),doc,mode='preserve');owner=roots[0].OM9ArchiveOwner
+            definitions=[o for o in doc.Objects if o.isDerivedFrom('App::Part') and getattr(o,'OM9ArchiveOwner',None)==owner and 'OM9DefinitionUUID' in o.PropertiesList]
+            group=doc.addObject('App::DocumentObjectGroup','WholeSharedArchive');group.Group=[owner]+roots+definitions
+            copied=doc.copyObject(group,True);copiedOwner=next(o for o in copied.Group if 'OM9SourceArchive' in o.PropertiesList)
+            copiedRoots=[o for o in copied.Group if getattr(o,'OM9SourceClass','')=='ON_InstanceRef' and json.loads(o.OM9SourceRecord)['role']=='top-level']
+            return doc,source,original,roots,owner,copied,copiedOwner,copiedRoots
+        def exported(roots,staging=False):
+            if staging:
+                with tempfile.TemporaryDirectory(prefix='om9-graph-') as directory:native.writeGeometryStaging3dm(json.dumps(state.preservation_request(roots,directory)),str(path))
+                if json.loads(native.inspect3dm(str(path)))['source_version']!=80:raise AssertionError('Internal staging must be SDK80')
+            else:ThreeDm.export_preserved(str(path),roots)
+            return json.loads(native.inspect3dm(str(path))),json.loads(native.read3dm(str(path),str(out)))
+        def vertices(read):
+            answer=[]
+            for item in read['items']:
+                if 'brep' in item:
+                    shape=Part.Shape();shape.read(item['brep']);answer.extend(v.Point for v in shape.Vertexes)
+            return answer
+        def near(actual,expected):
+            remaining=list(actual)
+            for q in expected:
+                index=next((i for i,p in enumerate(remaining) if (p-App.Vector(*q)).Length<1e-6),None)
+                if index is None:return False
+                remaining.pop(index)
+            return not remaining
+        doc,source,original,roots,owner,copied,copiedOwner,copiedRoots=family('om9-shared-block-members.3dm','RecursiveSharedPoint')
+        canonical=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Point' and o.OM9ArchiveOwner==owner)
+        copiedCanonical=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Point' and o.OM9ArchiveOwner==copiedOwner and not getattr(o,'OM9DefinitionMemberProxy',False))
+        proxies=[o for o in doc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject==copiedCanonical]
+        check('actual shared family recursive copy clones one canonical payload reused by both definitions',len(proxies)==2 and copiedCanonical!=canonical and len(copiedRoots)==3)
+        copiedCanonical.Shape=Part.Vertex(App.Vector(2,3,4));copiedCanonical.Placement.Base=App.Vector(5,6,7)
+        for proxy in proxies:proxy.removeProperty('OM9ProxyMetadata')
+        doc.recompute();ThreeDm.migrate_archive(copiedOwner,fork_namespace=True,rebuild_previews=True)
+        check('shared fork restores both original membership baselines without splitting current canonical sharing',all(p.LinkedObject==copiedCanonical and 'OM9ProxyMetadata' in p.PropertiesList for p in proxies) and copiedCanonical.OM9ImportNamespace==copiedOwner.OM9ImportNamespace)
+        report,read=exported(copiedRoots)
+        check('forked shared point graph exports independent analytic rigid and reflected affine placements',near(vertices(read),[(17,29,11),(-34,27,44),(37,9,11)]))
+        report,read=exported(roots+copiedRoots)
+        check('original shared point graph remains unchanged alongside forked edits',near(vertices(read),[(11,22,3),(-22,6,12),(31,2,3),(17,29,11),(-34,27,44),(37,9,11)]))
+        check('shared point merge retains one canonical point record per namespace',sum(r['class_name']=='ON_Point' for r in report['records'])==2 and not report['issues'])
+        namespace=copiedOwner.OM9ImportNamespace;names=[o.Name for o in copiedRoots]+[copiedOwner.Name,copiedCanonical.Name]
+        doc.saveAs(str(out/'shared-point.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'shared-point.FCStd'));copiedRoots=[doc.getObject(n) for n in names[:3]];copiedOwner,copiedCanonical=[doc.getObject(n) for n in names[3:]]
+        report,read=exported(copiedRoots)
+        check('shared payload graph and namespace survive FCStd',copiedOwner.OM9ImportNamespace==namespace and near(vertices(read),[(17,29,11),(-34,27,44),(37,9,11)]) and len([o for o in doc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject==copiedCanonical])==2)
+        check('shared source archive and included snapshot remain immutable',source.read_bytes()==original and state._hash(copiedOwner.OM9SourceArchive)==copiedOwner.OM9ArchiveHash)
+        App.closeDocument(doc.Name)
+
+        doc,source,original,roots,owner,copied,copiedOwner,copiedRoots=family('om9-shared-mixed-shear-block.3dm','RecursiveSharedMixed')
+        cad=next(o for o in doc.Objects if o.isDerivedFrom('Part::Feature') and getattr(o,'OM9SourceClass','')=='ON_Brep' and o.OM9ArchiveOwner==copiedOwner)
+        mesh=next(o for o in doc.Objects if o.isDerivedFrom('Mesh::Feature') and getattr(o,'OM9SourceClass','')=='ON_Mesh' and o.OM9ArchiveOwner==copiedOwner)
+        proxies=[o for o in doc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject in (cad,mesh)]
+        check('actual mixed recursive copy preserves two shared canonical payloads and four native member proxies',len(proxies)==4 and len(copiedRoots)==2 and all(o.isDerivedFrom('App::Part') for o in copiedRoots))
+        cad.Shape=Part.makeBox(4,5,6);cad.Placement.Base=App.Vector(3,4,5)
+        mesh.Mesh=Mesh.Mesh([[(0,0,0),(4,0,0),(0,5,0)]]);mesh.Placement.Base=App.Vector(3,4,5)
+        for root in copiedRoots:root.Placement.Base=App.Vector(100,200,300)
+        shearRoot=next(o for o in copiedRoots if abs(o.OM9InstanceMatrix[1]-0.5)<1e-9)
+        shearDefinitionUUID=json.loads(shearRoot.OM9SourceRecord)['instance_definition_uuid']
+        for proxy in proxies:
+            if any(getattr(parent,'OM9DefinitionUUID','')==shearDefinitionUUID for parent in proxy.InList):
+                proxy.Placement.Base=App.Vector(7,8,9);proxy.ScaleVector=App.Vector(-1,2,3);proxy.LinkTransform=True
+            proxy.removeProperty('OM9ProxyMetadata')
+        doc.recompute();ThreeDm.migrate_archive(copiedOwner,fork_namespace=True,rebuild_previews=True);namespace=copiedOwner.OM9ImportNamespace
+        sentinel=path.read_bytes();refused=False
+        try:ThreeDm.export_preserved(str(path),roots+copiedRoots)
+        except RuntimeError as error:refused='inward solid' in str(error)
+        check('recursive mixed inward member preservation refuses atomically',refused and path.read_bytes()==sentinel)
+        safe=out/'recursive-mixed-geometry-rhino5.3dm';ThreeDm.export_file(str(safe),roots+copiedRoots,geometry_only=True);safe_read=json.loads(native.read3dm(str(safe),str(out)));signed=[]
+        for item in safe_read['items']:
+            if 'brep' in item:
+                shape=Part.Shape();shape.read(item['brep']);signed.append(shape.Volume)
+        result['mixed_signed_geometry']=dict(volumes=signed,roots=[dict(name=o.Name,current=list(o.OM9InstanceMatrix),placement=list(o.Placement.toMatrix().A)) for o in roots+copiedRoots],proxies=[dict(name=p.Name,matrix=state._proxy_matrix(p),canonical_volume=p.LinkedObject.Shape.Volume if p.LinkedObject.isDerivedFrom('Part::Feature') else None) for p in proxies])
+        # Independent native +2 source winding and determinant parity require
+        # original -576 as well as the edited CAD signs -720 and -2880.
+        check('recursive Geometry-only Rhino5 retains all declared and unknown SDK solid signs',json.loads(native.inspect3dm(str(safe)))['source_version'] in (5,50) and len(signed)==4 and all(abs(a-b)<1e-5 for a,b in zip(sorted(signed),[-2880,-720,-576,24])))
+        report,read=exported(roots+copiedRoots,staging=True)
+        volumes=[]
+        for item in read['items']:
+            if 'brep' in item:
+                shape=Part.Shape();shape.read(item['brep']);volumes.append(abs(shape.Volume))
+        result['mixed_volumes']=volumes
+        check('mixed namespace export uses current shared CAD with independent shear and reflected scale',len(volumes)==4 and all(abs(a-b)<1e-5 for a,b in zip(sorted(volumes),[24,576,720,2880])))
+        meshes=[item['vertices'] for item in read['items'] if 'vertices' in item]
+        expected=[[(10,20,30),(12,20,30),(11.5,23,30)],[(40,50,60),(36,50,60),(40,59,60)],[(122,236,354),(118,236,354),(127,246,354)],[(134,262,380),(126,262,380),(134,277,380)]]
+        result['mixed_meshes']=meshes
+        check('mixed shared mesh native coordinates match independent analytic affine composition',len(meshes)==4 and all(any(near([App.Vector(*p) for p in m],q) for m in meshes) for q in expected))
+        check('mixed fork retains native mesh and BRep types and complete definition closure',sum(r['class_name']=='ON_Mesh' for r in report['records'])==3 and sum(r['class_name']=='ON_Brep' for r in report['records'])==3 and sum(r['class_name']=='ON_InstanceRef' for r in report['records'])==4 and len([r for r in report['components'] if r['class_name']=='ON_InstanceDefinition'])==4 and not report['issues'])
+        check('mixed canonical edits remain independent from original graph',abs(next(o.Shape.Volume for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Brep' and o.OM9ArchiveOwner==owner)-24)<1e-6 and all(p.LinkedObject in (cad,mesh) for p in proxies))
+        doc.undo();doc.recompute()
+        check('mixed fork Undo restores namespace and legacy metadata without reverting geometry edits',copiedOwner.OM9ImportNamespace==owner.OM9ImportNamespace and all('OM9ProxyMetadata' not in p.PropertiesList for p in proxies) and abs(cad.Shape.Volume-120)<1e-6)
+        doc.redo();doc.recompute();report,read=exported(copiedRoots,staging=True)
+        check('mixed fork Redo restores namespace sharing and both current native member types',copiedOwner.OM9ImportNamespace==namespace and len(read['items'])==4 and sum(r['class_name']=='ON_Mesh' for r in report['records'])==2)
+        ids={r['source_uuid'] for r in report['records']};names=[o.Name for o in copiedRoots]+[copiedOwner.Name,cad.Name,mesh.Name]
+        report,read=exported(copiedRoots,staging=True)
+        check('transformed source proxy member UUIDs stay stable across repeated exports',ids=={r['source_uuid'] for r in report['records']})
+        doc.saveAs(str(out/'shared-mixed.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'shared-mixed.FCStd'));copiedRoots=[doc.getObject(n) for n in names[:2]];copiedOwner,cad,mesh=[doc.getObject(n) for n in names[2:]]
+        report,read=exported(copiedRoots,staging=True)
+        check('mixed shared graph identities and native payloads persist through FCStd',ids=={r['source_uuid'] for r in report['records']} and len(read['items'])==4 and copiedOwner.OM9ImportNamespace==namespace and len([o for o in doc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject in (cad,mesh)])==4)
+        beforeCount=len(doc.Objects);failed=False
+        try:ThreeDm.migrate_archive(copiedOwner,fork_namespace=True)
+        except RuntimeError:failed=True
+        check('edited mixed cache still requires explicit rebuilding during repeated migration',failed and len(doc.Objects)==beforeCount and copiedOwner.OM9ImportNamespace==namespace)
+        ThreeDm.migrate_archive(copiedOwner,fork_namespace=True,rebuild_previews=True)
+        check('mixed fork repeated explicit rebuilding retains namespace and immutable archive',copiedOwner.OM9ImportNamespace==namespace and source.read_bytes()==original and state._hash(copiedOwner.OM9SourceArchive)==copiedOwner.OM9ArchiveHash)
+        independent=doc.copyObject(cad,False);independent.Shape=Part.makeBox(2,2,2)
+        cadProxies=[o for o in doc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject==cad]
+        for proxy in cadProxies:proxy.setLink(independent)
+        doc.recompute();report,read=exported(copiedRoots,staging=True);copiedIds=[r['source_uuid'] for r in report['records'] if r['class_name']=='ON_Brep'];independentVolumes=[]
+        for item in read['items']:
+            if 'brep' in item:
+                shape=Part.Shape();shape.read(item['brep']);independentVolumes.append(abs(shape.Volume))
+        check('two source proxies of one independently copied canonical payload export distinct current member identities',len(set(copiedIds))==2 and all(abs(a-b)<1e-6 for a,b in zip(sorted(independentVolumes),[48,192])) and len(independentVolumes)==2 and abs(cad.Shape.Volume-120)<1e-6)
+        report,read=exported(copiedRoots,staging=True)
+        check('independent canonical proxy member identities remain stable on repeated export',set(copiedIds)=={r['source_uuid'] for r in report['records'] if r['class_name']=='ON_Brep'})
+        direct=doc.copyObject(independent,False);direct.Shape=Part.makeBox(1,2,3)
+        directDefinition=next(o for o in doc.Objects if getattr(o,'OM9DefinitionUUID','')==shearDefinitionUUID and getattr(o,'OM9ArchiveOwner',None)==copiedOwner);directDefinition.addObject(direct);doc.recompute()
+        report,read=exported(copiedRoots,staging=True);directIds={r['source_uuid'] for r in report['records'] if r['class_name']=='ON_Brep'};directVolumes=[]
+        for item in read['items']:
+            if 'brep' in item:
+                shape=Part.Shape();shape.read(item['brep']);directVolumes.append(abs(shape.Volume))
+        check('direct copied source member coexists with shared independent canonical proxies',len(directIds)==3 and len(directVolumes)==3 and all(abs(a-b)<1e-6 for a,b in zip(sorted(directVolumes),[6,48,192])))
+        report,read=exported(copiedRoots,staging=True)
+        check('direct copied source member output identity is stable alongside two proxy copies',directIds=={r['source_uuid'] for r in report['records'] if r['class_name']=='ON_Brep'})
+        App.closeDocument(doc.Name)
+
+        doc,source,original,roots,owner,copied,copiedOwner,copiedRoots=family('om9-shared-rational-curve.3dm','RecursiveSharedNurbs')
+        canonical=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_NurbsCurve' and o.OM9ArchiveOwner==copiedOwner and not getattr(o,'OM9DefinitionMemberProxy',False));record=json.loads(canonical.OM9SourceRecord)
+        ThreeDm.migrate_archive(copiedOwner,fork_namespace=True)
+        report,read=exported(roots+copiedRoots);curves=[r for r in report['records'] if r['class_name']=='ON_NurbsCurve']
+        check('recursive rational NURBS namespace fork keeps two exact native payloads and shared uses',len(curves)==2 and all(r['geometry_crc']==record['geometry_crc'] for r in curves) and len([o for o in doc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject==canonical])==2)
+        check('recursive rational curve fork retains independent namespace and included archive',copiedOwner.OM9ImportNamespace!=owner.OM9ImportNamespace and source.read_bytes()==original and state._hash(copiedOwner.OM9SourceArchive)==copiedOwner.OM9ArchiveHash)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

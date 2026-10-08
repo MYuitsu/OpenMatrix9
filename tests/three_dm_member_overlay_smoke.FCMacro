@@ -1,0 +1,72 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('MemberOverlays')
+        source=Path(tempfile.gettempdir())/'om9-merge-source.3dm';original=source.read_bytes()
+        objects=ThreeDm.import_file(str(source),doc,mode='preserve')
+        links=[o for o in objects if o.isDerivedFrom('App::Link')]
+        member=links[0].LinkedObject.Group[0];identity=member.OM9SourceUUID
+        member.Shape=Part.Vertex(App.Vector(7,8,9));doc.recompute()
+        target=out/'members.3dm';ThreeDm.export_preserved(str(target),links)
+        def points():
+            model=json.loads(native.read3dm(str(target),str(out)));values=[]
+            for item in model['items']:
+                shape=Part.Shape();shape.read(item['brep']);values.append(shape.Vertexes[0].Point)
+            return values
+        values=points()
+        check('member edit updates both shared instances',len(values)==2 and all(any((p-v).Length<1e-7 for p in values) for v in [App.Vector(17,28,39),App.Vector(107,208,309)]))
+        records=json.loads(native.inspect3dm(str(target)))['records']
+        check('member UUID and role retained',any(r['source_uuid']==identity and r['role']=='definition-member' for r in records))
+        check('immutable source preserved',source.read_bytes()==original)
+        member.Placement.Base=App.Vector(2,3,4);member.Label='Member edited';doc.recompute()
+        ThreeDm.export_preserved(str(target),[links[0]]);values=points()
+        check('local member placement composed once',(values[0]-App.Vector(19,31,43)).Length<1e-7)
+        records=json.loads(native.inspect3dm(str(target)))['records']
+        check('member label overlay retained',any(r['source_uuid']==identity and r['name']=='Member edited' for r in records))
+        names=[o.Name for o in links];doc.saveAs(str(out/'members.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'members.FCStd'));links=[doc.getObject(n) for n in names]
+        ThreeDm.export_preserved(str(target),[links[0]])
+        check('member overlay after FCStd reload',(points()[0]-App.Vector(19,31,43)).Length<1e-7)
+        member=links[0].LinkedObject.Group[0];removedId=member.OM9SourceUUID;doc.removeObject(member.Name)
+        ThreeDm.export_preserved(str(target),[links[0]])
+        check('deleted member removed from native definition',all(r['source_uuid']!=removedId for r in json.loads(native.inspect3dm(str(target)))['records']))
+        nested=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-nested-blocks.3dm'),doc,mode='preserve')
+        rigid=next(o for o in nested if o.isDerivedFrom('App::Link'))
+        nestedMember=rigid.LinkedObject.Group[0];nestedMember.Placement.Base=App.Vector(20,0,0)
+        ThreeDm.export_preserved(str(target),nested);values=points()
+        check('nested instance member updates both native transforms',len(values)==2 and all(any((p-v).Length<1e-7 for p in values) for v in [App.Vector(21,22,3),App.Vector(-42,6,12)]))
+        mixed=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm'),doc,mode='preserve')
+        affine=next(o for o in mixed if getattr(o,'OM9SourceClass','')=='ON_InstanceRef')
+        meshMember=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Mesh' and o.OM9ArchiveOwner==affine.OM9ArchiveOwner)
+        changed=meshMember.Mesh.copy();changed.translate(5,0,0);meshMember.Mesh=changed
+        brepMember=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Brep' and o.OM9ArchiveOwner==affine.OM9ArchiveOwner)
+        brepMember.Shape=Part.makeBox(4,5,6);doc.recompute()
+        ThreeDm.export_preserved(str(target),[affine]);model=json.loads(native.read3dm(str(target),str(out)))
+        meshItem=next(i for i in model['items'] if 'vertices' in i)
+        check('mesh member exported in local coordinates',any((App.Vector(*p)-App.Vector(16.5,23,30)).Length<1e-7 for p in meshItem['vertices']))
+        shape=Part.Shape();shape.read(next(i for i in model['items'] if 'brep' in i)['brep'])
+        check('BRep member edit retains sheared block volume',abs(shape.Volume-120)<1e-7)
+        definition=next(o for o in doc.Objects if hasattr(o,'OM9DefinitionUUID') and o.OM9ArchiveOwner==affine.OM9ArchiveOwner);definition.Placement.Base=App.Vector(1,0,0);doc.recompute()
+        ThreeDm.export_preserved(str(target),[affine]);model=json.loads(native.read3dm(str(target),str(out)));meshItem=next(i for i in model['items'] if 'vertices' in i)
+        check('definition placement composes once after member edit',any((App.Vector(*p)-App.Vector(17.5,23,30)).Length<1e-7 for p in meshItem['vertices']))
+        first=ThreeDm.import_file(str(source),doc,mode='preserve');second=ThreeDm.import_file(str(source),doc,mode='preserve')
+        firstLink=next(o for o in first if o.isDerivedFrom('App::Link'));secondLink=next(o for o in second if o.isDerivedFrom('App::Link'))
+        firstLink.LinkedObject.Group[0].Shape=Part.Vertex(App.Vector(10,10,10))
+        secondLink.LinkedObject.Group[0].Shape=Part.Vertex(App.Vector(20,20,20))
+        ThreeDm.export_preserved(str(target),[firstLink,secondLink]);values=points()
+        check('separate imported namespaces keep independent member edits',len(values)==2 and all(any((p-v).Length<1e-7 for p in values) for v in [App.Vector(20,30,40),App.Vector(30,40,50)]))
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

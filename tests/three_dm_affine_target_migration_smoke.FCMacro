@@ -1,0 +1,118 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('AffineTargetMigration');doc.UndoMode=1
+        source=Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm';original=source.read_bytes()
+        root=ThreeDm.import_file(str(source),doc,mode='preserve')[0];owner=root.OM9ArchiveOwner
+        definition=state._instance_definition(root,json.loads(root.OM9SourceRecord))
+        cad=next(o for o in definition.Group if o.isDerivedFrom('Part::Feature'));mesh=next(o for o in definition.Group if o.isDerivedFrom('Mesh::Feature'))
+        copied=doc.addObject('App::Part','LegacyAffineTarget');copied.Label='Legacy affine target';copied.Placement.Base=App.Vector(7,8,9)
+        for kind,name,value in [('String','OM9DefinitionUUID',definition.OM9DefinitionUUID),('LinkHidden','OM9ArchiveOwner',owner)]:state._property(copied,kind,name,value)
+        copiedCAD=doc.copyObject(cad,False);copiedCAD.Shape=Part.makeBox(4,5,6);copiedCAD.Placement.Base=App.Vector(2,3,4)
+        copiedMesh=doc.copyObject(mesh,False);copiedMesh.Placement.Base=App.Vector(5,0,0)
+        copied.Group=[copiedCAD,copiedMesh];copied.ViewObject.Visibility=False
+        copiedRoot=doc.copyObject(root,False);children=[]
+        for child in root.Group:
+            copy=doc.copyObject(child,False);copy.Label=child.Label;children.append(copy)
+        copiedRoot.Group=children;copiedRoot.Placement.Base=App.Vector(100,200,300);doc.recompute()
+        raw=list(copiedRoot.OM9InstanceMatrix);record=copiedRoot.OM9SourceRecord;sourceTarget=copiedRoot.OM9DefinitionTargetUUID
+        check('legacy affine copy retains original serialized target before explicit mapping',sourceTarget==definition.OM9DefinitionUUID and 'OM9NewDefinitionUUID' not in copied.PropertiesList)
+        origins={definition.OM9DefinitionUUID:definition.Name};targets={copiedRoot.Name:copied.Name}
+        def snapshot():
+            fields=('OM9SourceSignature','OM9SourceRecord','OM9SourceMetadata','OM9SourcePlacement','OM9SourceHostID','OM9DefinitionSignature','OM9DefinitionHostID','OM9DefinitionTargetUUID','OM9NewDefinitionUUID','OM9NewMemberUUID','OM9PreviewSignature','OM9PreviewStatus')
+            return sorted((o.Name,list(o.PropertiesList),[getattr(o,n,None) for n in fields],[m.Name for m in getattr(o,'Group',[])],list(o.Placement.toMatrix().A) if hasattr(o,'Placement') else None,state.preview_signature(o) if o.isDerivedFrom('Part::Feature') or o.isDerivedFrom('Mesh::Feature') else None) for o in doc.Objects)
+        def refuses(name,mapping,rebuild=False):
+            before=snapshot();documents=set(App.listDocuments());target_before=copiedRoot.OM9DefinitionTargetUUID;failed=False
+            try:ThreeDm.migrate_archive(owner,rebuild_previews=rebuild,origins=origins,targets=mapping)
+            except RuntimeError as error:failed=True;result['last_rejection']=str(error)
+            after=snapshot()
+            valid=failed and before==after and App.ActiveDocument==doc and set(App.listDocuments())==documents and not doc.HasPendingTransaction and not state._preview_observer.busy and copiedRoot.OM9DefinitionTargetUUID==target_before
+            if not valid:result['rollback_debug']=dict(failed=failed,before_names=[x[0] for x in before],after_names=[x[0] for x in after],changed=[x[0] for x in after if x not in before],active=App.ActiveDocument==doc,documents_equal=set(App.listDocuments())==documents,pending=doc.HasPendingTransaction,busy=state._preview_observer.busy,target=copiedRoot.OM9DefinitionTargetUUID,expected_target=sourceTarget)
+            check(name,valid)
+        refuses('malformed affine target mapping rejects before mutation',[(copiedRoot.Name,copied.Name)])
+        refuses('missing affine source host rejects before mutation',{'MissingReference':copied.Name})
+        refuses('geometry host cannot act as mapped affine source',{cad.Name:copied.Name})
+        refuses('missing affine target host rejects before mutation',{copiedRoot.Name:'MissingDefinition'})
+        refuses('geometry host cannot act as mapped definition target',{copiedRoot.Name:copiedCAD.Name})
+        otherRoots=ThreeDm.import_file(str(source),doc,mode='preserve');other=otherRoots[0];otherDefinition=state._instance_definition(other,json.loads(other.OM9SourceRecord))
+        refuses('foreign namespace affine target rejects before mutation',{copiedRoot.Name:otherDefinition.Name})
+        refuses('foreign namespace affine source rejects before mutation',{other.Name:copied.Name})
+        copiedRoot.removeProperty('OM9DefinitionTargetUUID');state._property(copiedRoot,'Integer','OM9DefinitionTargetUUID',17)
+        before=[(o.Name,list(o.PropertiesList)) for o in doc.Objects];failed=False
+        try:ThreeDm.migrate_archive(owner,origins=origins,targets=targets)
+        except RuntimeError:failed=True
+        check('incompatible affine target property refuses migration without mutation',failed and copiedRoot.OM9DefinitionTargetUUID==17 and before==[(o.Name,list(o.PropertiesList)) for o in doc.Objects] and 'OM9NewDefinitionUUID' not in copied.PropertiesList)
+        copiedRoot.removeProperty('OM9DefinitionTargetUUID');state._property(copiedRoot,'String','OM9DefinitionTargetUUID',sourceTarget)
+        busy=state._preview_observer.busy;state._preview_observer.busy=True;members=list(copied.Group);copied.Group=members+[copiedRoot];state._preview_observer.busy=busy
+        refuses('cyclic mapped graph rolls back new identities source fields and preview objects',targets,True)
+        check('cyclic target rejection identifies the actual graph failure','Cyclic' in result['last_rejection'])
+        state._preview_observer.busy=True;copied.Group=members;state._preview_observer.busy=busy;doc.recompute()
+        cachedShape=copiedRoot.Group[0].Shape.copy();copiedRoot.Group[0].Shape=Part.makeBox(1,1,1);doc.recompute()
+        refuses('manual affine display edit requires explicit rebuild for target migration',targets)
+        copiedRoot.Group[0].Shape=cachedShape;doc.recompute()
+        status=copiedRoot.OM9PreviewStatus;copiedRoot.removeProperty('OM9PreviewStatus');state._property(copiedRoot,'Integer','OM9PreviewStatus',73)
+        refuses('invalid affine preview status type refuses migration before mutation',targets)
+        copiedRoot.removeProperty('OM9PreviewStatus');state._property(copiedRoot,'String','OM9PreviewStatus',status)
+        migrated=ThreeDm.migrate_archive(owner,origins=origins,targets=targets)
+        check('explicit affine mapping assigns the newly migrated copy target UUID',migrated['targets']==1 and copiedRoot.OM9DefinitionTargetUUID==copied.OM9NewDefinitionUUID and root.OM9DefinitionTargetUUID==sourceTarget)
+        check('affine mapping leaves immutable native matrix record and current placements intact',list(copiedRoot.OM9InstanceMatrix)==raw and copiedRoot.OM9SourceRecord==record and (copiedRoot.Placement.Base-App.Vector(100,200,300)).Length<1e-7 and (copied.Placement.Base-App.Vector(7,8,9)).Length<1e-7)
+        path=out/'migrated-affine-target.3dm'
+        def exported():
+            ThreeDm.export_preserved(str(path),[copiedRoot]);inventory=json.loads(native.inspect3dm(str(path)));read=json.loads(native.read3dm(str(path),str(out)))
+            shape=Part.Shape();shape.read(next(i['brep'] for i in read['items'] if 'brep' in i));vertices=next(i['vertices'] for i in read['items'] if 'vertices' in i)
+            return inventory,shape,vertices
+        def near(actual,expected):return len(actual)==len(expected) and all(any((App.Vector(*p)-App.Vector(*q)).Length<1e-7 for p in actual) for q in expected)
+        inventory,shape,vertices=exported()
+        check('migrated affine copy exports edited CAD with definition placement and shear once',abs(abs(shape.Volume)-120)<1e-7 and all(abs(a-b)<1e-7 for a,b in zip((shape.BoundBox.XMin,shape.BoundBox.XMax,shape.BoundBox.YMin,shape.BoundBox.YMax,shape.BoundBox.ZMin,shape.BoundBox.ZMax),(124.5,131,231,236,343,349))))
+        check('migrated affine copy exports edited mesh placement and shear once',near(vertices,[(126,228,339),(128,228,339),(127.5,231,339)]))
+        check('native copied reference points to copied definition and excludes original members',next(r for r in inventory['records'] if r['class_name']=='ON_InstanceRef')['instance_definition_uuid']==copied.OM9NewDefinitionUUID and all(r['source_uuid'] not in (cad.OM9SourceUUID,mesh.OM9SourceUUID) for r in inventory['records']))
+        check('copied affine preview follows current mixed native graph independently',copiedRoot.OM9PreviewStatus=='Current canonical members' and state._preview_matches(copiedRoot) and root.OM9DefinitionTargetUUID==sourceTarget and abs(cad.Shape.Volume-120)>1e-7)
+        ids=(copied.OM9NewDefinitionUUID,copiedCAD.OM9NewMemberUUID,copiedMesh.OM9NewMemberUUID)
+        doc.undo();doc.recompute()
+        check('target mapping Undo restores legacy target copy identities and original display children',copiedRoot.OM9DefinitionTargetUUID==sourceTarget and 'OM9NewDefinitionUUID' not in copied.PropertiesList and 'OM9NewMemberUUID' not in copiedCAD.PropertiesList and [o.Name for o in copiedRoot.Group]==[o.Name for o in children] and abs(copiedCAD.Shape.Volume-120)<1e-7)
+        doc.redo();doc.recompute();inventory,shape,vertices=exported()
+        check('target mapping Redo restores persistent IDs current target and geometry',ids==(copied.OM9NewDefinitionUUID,copiedCAD.OM9NewMemberUUID,copiedMesh.OM9NewMemberUUID) and copiedRoot.OM9DefinitionTargetUUID==ids[0] and abs(abs(shape.Volume)-120)<1e-7)
+        names=[o.Name for o in (root,copiedRoot,copied,copiedCAD,copiedMesh,owner,definition,cad,mesh)];doc.saveAs(str(out/'affine-target-migration.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'affine-target-migration.FCStd'));root,copiedRoot,copied,copiedCAD,copiedMesh,owner,definition,cad,mesh=[doc.getObject(n) for n in names]
+        inventory,shape,vertices=exported()
+        check('affine target mapping geometry and IDs persist through FCStd',ids==(copied.OM9NewDefinitionUUID,copiedCAD.OM9NewMemberUUID,copiedMesh.OM9NewMemberUUID) and copiedRoot.OM9DefinitionTargetUUID==ids[0] and near(vertices,[(126,228,339),(128,228,339),(127.5,231,339)]) and state._preview_matches(copiedRoot))
+        ThreeDm.migrate_archive(owner,rebuild_previews=True,targets={copiedRoot.Name:copied.Name});exported()
+        check('repeated explicit mapping preserves creation IDs',ids==(copied.OM9NewDefinitionUUID,copiedCAD.OM9NewMemberUUID,copiedMesh.OM9NewMemberUUID))
+        newPoint=doc.addObject('Part::Feature','MigrationTargetPoint');newPoint.Shape=Part.Vertex(App.Vector(8,9,10));newDefinition=ThreeDm.create_definition(doc,[newPoint],'New migration target');newUUID=newDefinition.OM9NewDefinitionUUID
+        duplicate=doc.copyObject(newDefinition,False);duplicate.OM9NewDefinitionHostID=duplicate.Name
+        refuses('ambiguous existing new target UUID refuses explicit mapping',{copiedRoot.Name:newDefinition.Name},True)
+        doc.removeObject(duplicate.Name);doc.recompute()
+        newDefinition.OM9NewDefinitionUUID=cad.OM9SourceUUID
+        refuses('new target UUID cannot collide with source geometry identity',{copiedRoot.Name:newDefinition.Name},True)
+        nativeLayer=next(r['source_uuid'] for r in json.loads(owner.OM9ArchiveManifest)['components'] if r['class_name']=='ON_Layer');newDefinition.OM9NewDefinitionUUID=nativeLayer
+        refuses('new target UUID cannot collide with native component identity',{copiedRoot.Name:newDefinition.Name},True)
+        newDefinition.OM9NewDefinitionUUID=newUUID
+        ThreeDm.migrate_archive(owner,rebuild_previews=True,targets={copiedRoot.Name:newDefinition.Name});ThreeDm.export_preserved(str(path),[copiedRoot]);inventory=json.loads(native.inspect3dm(str(path)));items=json.loads(native.read3dm(str(path),str(out)))['items'];shape=Part.Shape();shape.read(items[0]['brep'])
+        check('explicit affine migration accepts existing new unowned definition in this namespace',next(r for r in inventory['records'] if r['class_name']=='ON_InstanceRef')['instance_definition_uuid']==newUUID and (shape.Vertexes[0].Point-App.Vector(122.5,229,340)).Length<1e-7 and ids==(copied.OM9NewDefinitionUUID,copiedCAD.OM9NewMemberUUID,copiedMesh.OM9NewMemberUUID))
+        ThreeDm.migrate_archive(owner,rebuild_previews=True,targets={copiedRoot.Name:definition.Name});ThreeDm.export_preserved(str(path),[copiedRoot]);inventory=json.loads(native.inspect3dm(str(path)))
+        check('explicit affine migration accepts original definition and preserves native source matrix',next(r for r in inventory['records'] if r['class_name']=='ON_InstanceRef')['instance_definition_uuid']==sourceTarget and list(copiedRoot.OM9InstanceMatrix)==raw)
+        check('affine target migration leaves original archive immutable',source.read_bytes()==original)
+        rigidDoc=App.newDocument('PhysicalLinkMappingGuard');rigidSource=Path(tempfile.gettempdir())/'om9-reference-edit.3dm';rigidRoots=ThreeDm.import_file(str(rigidSource),rigidDoc,mode='preserve');rigid=next(o for o in rigidRoots if o.isDerivedFrom('App::Link'));rigidOwner=rigid.OM9ArchiveOwner;rigidTarget=rigid.LinkedObject;count=len(rigidDoc.Objects);failed=False
+        try:ThreeDm.migrate_archive(rigidOwner,targets={rigid.Name:rigidTarget.Name})
+        except RuntimeError:failed=True
+        check('serialized target mapping refuses physical AppLink references without relinking',failed and rigid.LinkedObject==rigidTarget and len(rigidDoc.Objects)==count and App.ActiveDocument==rigidDoc and not rigidDoc.HasPendingTransaction)
+        affine=next(o for o in rigidRoots if o.Label.startswith('Affine reference'));importedTarget=next(o for o in rigidDoc.Objects if o.isDerivedFrom('App::Part') and o.Label=='Reference B');affineMatrix=list(affine.OM9InstanceMatrix)
+        ThreeDm.migrate_archive(rigidOwner,targets={affine.Name:importedTarget.Name});ThreeDm.export_preserved(str(path),[affine]);inventory=json.loads(native.inspect3dm(str(path)));read=json.loads(native.read3dm(str(path),str(out)))['items'];shape=Part.Shape();shape.read(next(i['brep'] for i in read if i['class_name']=='ON_Brep'))
+        check('PartFeature affine migration preserves native CAD and mesh types with new imported target',any(r['class_name']=='ON_Brep' for r in inventory['records']) and any(r['class_name']=='ON_Mesh' for r in inventory['records']) and affine.OM9PreviewStatus=='Current canonical members' and list(affine.OM9InstanceMatrix)==affineMatrix)
+        check('PartFeature affine preview CAD bounds agree with native target output',abs(abs(shape.Volume)-abs(affine.Shape.Solids[0].Volume))<1e-6 and abs(shape.BoundBox.XMin-affine.Shape.Solids[0].BoundBox.XMin)<1e-6 and abs(shape.BoundBox.ZMax-affine.Shape.Solids[0].BoundBox.ZMax)<1e-6)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

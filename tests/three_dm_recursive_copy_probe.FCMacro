@@ -1,0 +1,26 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state
+        doc=App.newDocument('RecursiveCopyProbe')
+        root=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-merge-depth2-2.3dm'),doc,mode='preserve')[0]
+        definition=state._instance_definition(root,json.loads(root.OM9SourceRecord))
+        wrapper=doc.addObject('App::DocumentObjectGroup','FullImportGroup');wrapper.Group=[root.OM9ArchiveOwner,root,definition]
+        before={o.Name for o in doc.Objects};copied=doc.copyObject(wrapper,True);doc.recompute()
+        rows=[]
+        for o in doc.Objects:
+            rows.append(dict(name=o.Name,type=o.TypeId,copied=o.Name not in before,source=getattr(o,'OM9SourceUUID',''),namespace=getattr(o,'OM9ImportNamespace',''),owner=getattr(getattr(o,'OM9ArchiveOwner',None),'Name',None),definition=getattr(o,'OM9DefinitionUUID',''),group=[m.Name for m in getattr(o,'Group',[])],linked=getattr(getattr(o,'LinkedObject',None),'Name',None),host=getattr(o,'OM9SourceHostID',''),archive='OM9SourceArchive' in o.PropertiesList))
+        (out/'graph.json').write_text(json.dumps(dict(original=root.Name,copy=copied.Name,rows=rows),indent=2))
+        try:ThreeDm.export_preserved(str(out/'recursive.3dm'),[copied]);result['export']='success'
+        except Exception as error:result['export']=str(error)
+        result['checks']=[dict(name='actual recursive copy graph captured',passed=any(r['copied'] for r in rows))];result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

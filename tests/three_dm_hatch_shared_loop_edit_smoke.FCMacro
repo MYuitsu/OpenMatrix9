@@ -1,0 +1,35 @@
+import FreeCAD as App,FreeCADGui as Gui
+import copy,json,os,tempfile,traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import ThreeDm,OpenMatrix9Gui as native,ThreeDmHatch as adapter
+        for unit in ('mm','cm'):
+            # The scalar shared fixture contains two definition-member proxies.
+            source=Path(tempfile.gettempdir())/('om9-hatch-shared-'+unit+'.3dm');immutable=source.read_bytes();external=out/(unit+'-source.3dm');external.write_bytes(immutable)
+            doc=App.newDocument('SharedLoopEdit'+unit);doc.UndoMode=1;ThreeDm.import_file(str(external),doc,mode='preserve')
+            canonical=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Hatch');proxy,sibling=[o for o in doc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject==canonical]
+            edit=copy.deepcopy(adapter.loops(canonical));origin=adapter.fields(canonical)['plane'][:3]
+            for cv in edit['loops'][0]['curve']['cvs']:cv[0]*=1.5;cv[1]*=.75
+            adapter.update_loops(canonical,edit);canonical.OM9BlockMemberPlacement.Base=App.Vector(1,2,3);proxy.Placement.Base=App.Vector(7,8,9);doc.recompute();target=out/(unit+'.3dm')
+            def export(values):
+                ThreeDm.export_file(str(target),values);return next(r for r in json.loads(native.inspect3dm(str(target)))['records'] if r['class_name']=='ON_Hatch')
+            row=export([proxy]);check(unit+' selected shared proxy exports canonical loop edits once',row['hatch_loop_current']==edit and row['hatch_current']['plane'][:3]==[v+d for v,d in zip(origin,[8,10,12])])
+            check(unit+' sibling shares loops with independent placement',export([sibling])['hatch_loop_current']==edit and export([sibling])['hatch_current']['plane'][:3]==[v+d for v,d in zip(origin,[1,2,3])])
+            definition=ThreeDm.create_definition(doc,[proxy],'Shared current loops');placed=ThreeDm.create_instance(definition);doc.recompute();check(unit+' promoted proxy family uses native current loops',export([placed])['hatch_loop_current']==edit)
+            family=ThreeDm.copy_definition(definition,'Independent shared current loops');member=family.Group[0].LinkedObject;independent=copy.deepcopy(edit)
+            for cv in independent['loops'][0]['curve']['cvs']:cv[0]*=1.25
+            adapter.update_loops(member,independent);instance=ThreeDm.create_instance(family);doc.recompute();check(unit+' copied shared family current loops independent',member!=canonical and adapter.loops(canonical)==edit and export([instance])['hatch_loop_current']==independent)
+            saved=out/(unit+'.FCStd');name=instance.Name;expected=export([instance]);doc.saveAs(str(saved));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(saved));row=export([doc.getObject(name)]);check(unit+' shared loop FCStd without external source',row['hatch_loop_current']==expected['hatch_loop_current'] and row['hatch_current']==expected['hatch_current'] and not external.exists())
+            check(unit+' shared source immutable',source.read_bytes()==immutable);App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

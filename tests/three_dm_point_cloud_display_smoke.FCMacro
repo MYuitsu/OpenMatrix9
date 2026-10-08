@@ -1,0 +1,25 @@
+import FreeCAD as App,FreeCADGui as Gui
+import json,os,tempfile,traceback
+from pathlib import Path
+from PySide6 import QtCore
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm
+        doc=App.newDocument('PointCloudViewport');roots=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-native-point-cloud-mm.3dm'),doc,mode='preserve');cloud=next(o for o in roots if o.OM9SourceClass=='ON_PointCloud' and not o.OM9CloudValues)
+        for obj in doc.Objects:obj.ViewObject.Visibility=False
+        cloud.OM9CloudPoints=[App.Vector(-1,-1,0),App.Vector(1,1,0),App.Vector(-1,1,0),App.Vector(1,-1,0)];cloud.OM9CloudNormals=[];cloud.OM9CloudRGBA=[255,0,0,0,0,170,0,0,0,0,255,0,0,0,0,0];cloud.ViewObject.PointSize=18;cloud.ViewObject.Visibility=True;doc.recompute()
+        view=Gui.activeDocument().activeView();view.viewTop();view.fitAll();Gui.updateGui();search=coin.SoSearchAction();search.setNode(cloud.ViewObject.Proxy.points);search.setSearchingAll(False);search.apply(view.getSceneGraph())
+        check('current native PointSet belongs to active viewport',search.getPath() is not None and cloud.ViewObject.Proxy.points.numPoints.getValue()==4)
+        image=out/'native-point-cloud.png';view.saveImage(str(image),640,480,'White');check('current colored PointCloud viewport image renders',image.is_file() and image.stat().st_size>1000)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

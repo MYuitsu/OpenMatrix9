@@ -1,0 +1,75 @@
+"""User-visible 3DM menu/toolbar exercise with real file dialogs and exchange."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets
+from pathlib import Path
+import os,json,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+QtWidgets.QApplication.setAttribute(QtCore.Qt.ApplicationAttribute.AA_DontUseNativeDialogs,True)
+App.ParamGet('User parameter:BaseApp/Preferences/Dialog').SetBool('DontUseNativeDialog',True)
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(350,loop.quit);loop.exec()
+def dialog(command,path=None):
+    phases=[];active=[True]
+    def answer():
+        if not active[0]:return
+        widgets=[w for w in QtWidgets.QApplication.topLevelWidgets() if w.isVisible()]
+        files=[w for w in widgets if isinstance(w,QtWidgets.QFileDialog)]
+        modes=[w for w in widgets if isinstance(w,QtWidgets.QInputDialog)]
+        if files:
+            phases.append('file')
+            if path is None:files[0].reject()
+            else:
+                files[0].setDirectory(str(path.parent));files[0].selectFile(path.name)
+                edit=files[0].findChild(QtWidgets.QLineEdit,'fileNameEdit')
+                if edit:edit.setText(path.name)
+                choice=files[0].findChild(QtWidgets.QCheckBox,'OM9GeometryOnlyExport')
+                if choice:check('export defaults to preserving source data',not choice.isChecked())
+                files[0].accept()
+        elif modes:
+            phases.append('mode');modes[0].accept()
+        QtCore.QTimer.singleShot(50,answer)
+    QtCore.QTimer.singleShot(100,answer)
+    try:Gui.runCommand(command)
+    finally:active[0]=False
+    settle();check(command+' actual user file dialog shown',bool(phases));return phases
+def run():
+    try:
+        import Part,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');settle();window=Gui.getMainWindow()
+        top=next(a for a in window.menuBar().actions() if a.text().replace('&','')=='OpenMatrix9');menu=top.menu()
+        actions=[a for a in menu.actions() if not a.isSeparator()]
+        result['top_menu_actions']=[a.text() for a in actions]
+        check('import and export visible directly at top of OpenMatrix9 menu',[a.text().replace('&','') for a in actions[:2]]==['Import 3DM...','Export Selected 3DM...'])
+        bars=[w for w in window.findChildren(QtWidgets.QToolBar) if w.windowTitle()=='3DM']
+        check('one visible 3DM toolbar with named import/export actions',len(bars)==1 and bars[0].isVisible() and [a.text().replace('&','') for a in bars[0].actions()]==['Import 3DM...','Export Selected 3DM...'])
+        check('both toolbar icons present',all(not a.icon().isNull() for a in bars[0].actions()))
+        doc=App.newDocument('MenuExchange');settle();Gui.Selection.clearSelection();settle()
+        check('active empty project allows import and disables export',Gui.isCommandActive('Import3dm') and not Gui.isCommandActive('Export3dm'))
+        before=len(doc.Objects);dialog('Import3dm');check('cancel import leaves document unchanged',len(doc.Objects)==before)
+        box=doc.addObject('PartDesign::Feature','Box');box.Shape=Part.makeBox(2,3,4);doc.recompute();Gui.Selection.addSelection(box);settle()
+        check('whole-object selection enables export',Gui.isCommandActive('Export3dm'))
+        dialog('Export3dm');check('cancel export leaves geometry unchanged',len(doc.Objects)==1 and abs(box.Shape.Volume-24)<1e-12)
+        target=out/'menu-export.3dm';dialog('Export3dm',target)
+        data=json.loads(native.inspect3dm(str(target)))
+        check('menu export writes a valid Rhino5 BRep file',data['source_version']==50 and not data['issues'] and len(data['records'])==1 and data['records'][0]['class_name']=='ON_Brep')
+        second=App.newDocument('MenuImport');settle();phases=dialog('Import3dm',target)
+        check('menu import exposes preserve mode and creates editable geometry','mode' in phases and any(hasattr(o,'Shape') and o.Shape.isValid() and abs(o.Shape.Volume-24)<1e-6 and o.OM9Capability=='editable' for o in second.Objects))
+        Gui.activeDocument().activeView().viewAxonometric();Gui.activeDocument().activeView().fitAll()
+        for _ in range(3):Gui.activateWorkbench('PartWorkbench');settle();Gui.activateWorkbench('OpenMatrix9Workbench');settle()
+        check('workbench switches keep one 3DM toolbar',len([w for w in window.findChildren(QtWidgets.QToolBar) if w.windowTitle()=='3DM'])==1)
+        window.resize(1440,1000);window.show();settle()
+        top=next(a for a in window.menuBar().actions() if a.text().replace('&','')=='OpenMatrix9')
+        top.menu().popup(window.menuBar().mapToGlobal(window.menuBar().actionGeometry(top).bottomLeft()));settle()
+        check('actual exchange menu screenshot saved',window.grab().save(str(out/'3dm-menu.png')))
+        check('readable native menu screenshot saved',top.menu().grab().save(str(out/'3dm-menu-popup.png')))
+        check('readable native toolbar screenshot saved',bars[0].grab().save(str(out/'3dm-toolbar.png')))
+        top.menu().hide();result.update(ok=True,module=native.__file__,exported_file=str(target))
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

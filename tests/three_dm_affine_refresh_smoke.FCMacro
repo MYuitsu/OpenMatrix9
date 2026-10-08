@@ -1,0 +1,53 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('AffineRefresh')
+        objects=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm'),doc,mode='preserve')
+        affine=objects[0];owner=affine.OM9ArchiveOwner
+        brep=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Brep' and o.OM9ArchiveOwner==owner)
+        mesh=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Mesh' and o.OM9ArchiveOwner==owner)
+        affine.Placement.Base=App.Vector(40,50,60)
+        brep.Shape=Part.makeBox(4,5,6);changed=mesh.Mesh.copy();changed.translate(5,0,0);mesh.Mesh=changed;doc.recompute()
+        displayed=next(o for o in affine.Group if o.isDerivedFrom('Part::Feature'))
+        check('BRep preview automatically follows member edit',abs(displayed.Shape.Volume-120)<1e-7)
+        displayedMesh=next(o for o in affine.Group if o.isDerivedFrom('Mesh::Feature'))
+        check('mesh preview follows native shear',any((p-App.Vector(16.5,23,30)).Length<1e-7 for p in displayedMesh.Mesh.Topology[0]))
+        check('root placement retained during refresh',(affine.Placement.Base-App.Vector(40,50,60)).Length<1e-7)
+        check('new preview integrity baseline',state.preview_signature(affine)==affine.OM9PreviewSignature)
+        target=out/'refreshed.3dm';ThreeDm.export_preserved(str(target),[affine])
+        model=json.loads(native.read3dm(str(target),str(out)));shape=Part.Shape();shape.read(next(i for i in model['items'] if 'brep' in i)['brep'])
+        check('refreshed preview export has new volume and placement',abs(shape.Volume-120)<1e-7 and abs(shape.BoundBox.ZMin-90)<1e-7)
+        name=affine.Name;doc.saveAs(str(out/'refresh.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'refresh.FCStd'));affine=doc.getObject(name);owner=affine.OM9ArchiveOwner
+        brep=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Brep' and o.OM9ArchiveOwner==owner);brep.Shape=Part.makeBox(2,3,4);doc.recompute()
+        check('automatic refresh survives FCStd reopen',abs(next(o for o in affine.Group if o.isDerivedFrom('Part::Feature')).Shape.Volume-24)<1e-7)
+        fixture=out.parents[1]/'affine-refresh-reopen-fixture';fixture.mkdir(exist_ok=True)
+        doc.saveAs(str(fixture/'refresh.FCStd'))
+        child=next(o for o in affine.Group if o.isDerivedFrom('Part::Feature'));child.Shape=Part.makeBox(1,1,1);doc.recompute();old=target.read_bytes();rejected=False
+        try:ThreeDm.export_preserved(str(target),[affine])
+        except RuntimeError:rejected=True
+        check('manual preview edit remains an atomic rejection',rejected and target.read_bytes()==old)
+        empty=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-empty-affine-block.3dm'),doc,mode='preserve')
+        emptyAffine=next(o for o in empty if getattr(o,'OM9SourceClass','')=='ON_InstanceRef' and not o.isDerivedFrom('App::Link'))
+        check('empty affine instance is stable preview container',emptyAffine.isDerivedFrom('App::Part') and not emptyAffine.Group)
+        definition=next(o for o in doc.Objects if getattr(o,'OM9DefinitionUUID','')==json.loads(emptyAffine.OM9SourceRecord)['instance_definition_uuid'] and o.OM9ArchiveOwner==emptyAffine.OM9ArchiveOwner)
+        available=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Point' and o.OM9ArchiveOwner==emptyAffine.OM9ArchiveOwner and abs(o.Shape.Vertexes[0].Point.z-3)<1e-7)
+        definition.addObject(available);doc.recompute()
+        result['empty_preview']=dict(status=getattr(emptyAffine,'OM9PreviewStatus',''),matrix=list(emptyAffine.OM9InstanceMatrix),members=[o.Name for o in definition.Group],children=[dict(type=o.TypeId,points=[list(v.Point) for v in o.Shape.Vertexes] if hasattr(o,'Shape') else []) for o in emptyAffine.Group])
+        check('empty affine preview gains new member',len(emptyAffine.Group)==1 and (emptyAffine.Group[0].Shape.Vertexes[0].Point-App.Vector(10,20,33)).Length<1e-7)
+        ThreeDm.export_preserved(str(target),[emptyAffine]);check('empty-to-populated block exports structurally',len(json.loads(native.inspect3dm(str(target)))['records'])==2)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

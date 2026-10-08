@@ -1,0 +1,98 @@
+"""Actual Rhino 5 SaveAs outputs -> OM9 import -> FCStd save/reopen."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os, json, traceback, hashlib
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+base = Path('H:/FreeCAD-src/build/rhino5-manual-20261007-120314')
+report_path = Path(os.environ['OM9_RHINO5_APPLICATION_REPORT'])
+result = {'checks': [], 'rhino_report': str(report_path), 'cases': [], 'ok': False}
+
+def check(name, value):
+    result['checks'].append({'name': name, 'passed': bool(value)})
+    (out / 'progress.json').write_text(json.dumps(result, indent=2))
+    if not value:
+        raise AssertionError(name)
+
+def metrics(objects):
+    values = []
+    for obj in objects:
+        row = dict(name=obj.Label, layer=getattr(obj, 'OM9LayerPath', ''),
+                   visible=obj.ViewObject.Visibility, locked=getattr(obj, 'OM9Locked', False))
+        if hasattr(obj, 'Shape'):
+            box = obj.Shape.optimalBoundingBox(False, False)
+            row.update(kind='CAD', valid=obj.Shape.isValid(), faces=len(obj.Shape.Faces),
+                       solids=len(obj.Shape.Solids), volume=obj.Shape.Volume, area=obj.Shape.Area,
+                       length=obj.Shape.Length, color=list(obj.ViewObject.ShapeColor[:3]),
+                       bounds=[box.XMin, box.YMin, box.ZMin, box.XMax, box.YMax, box.ZMax])
+        elif hasattr(obj, 'Mesh'):
+            box = obj.Mesh.BoundBox
+            row.update(kind='Mesh', vertices=obj.Mesh.CountPoints, faces=obj.Mesh.CountFacets,
+                       bounds=[box.XMin, box.YMin, box.ZMin, box.XMax, box.YMax, box.ZMax])
+        else:
+            raise RuntimeError('Unexpected non-geometry import object: ' + obj.Name)
+        values.append(row)
+    return sorted(values, key=lambda row: (row['name'], row['layer'], row['kind'], tuple(row['bounds'])))
+
+def equivalent(a, b):
+    if len(a) != len(b):
+        return False
+    for x, y in zip(a, b):
+        for key in ('kind', 'name', 'layer', 'visible', 'locked', 'faces', 'solids', 'vertices', 'color'):
+            if x.get(key) != y.get(key):
+                return False
+        if y.get('valid', True) is not True:
+            return False
+        if any(abs(v-w) >= 1e-3 for v, w in zip(x['bounds'], y['bounds'])):
+            return False
+        for key in ('volume', 'area', 'length'):
+            if key in x and abs(x[key]-y[key]) >= max(1e-3, abs(x[key])*1e-4):
+                return False
+    return True
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm
+        proof = json.loads(report_path.read_text(encoding='utf-8'))
+        check('Rhino 5 application completed all eight file lifecycles',
+              proof['ok'] and len(proof['cases']) == 8 and all(c['ok'] for c in proof['cases'])
+              and proof['rhino_version'].startswith('5.'))
+        for index in (1, 3, 4, 5, 6, 7):
+            case = proof['cases'][index]
+            source = base / case['file']
+            saved = Path(case['resaved'])
+            label = source.stem
+            check(label + ' Rhino output SHA and version 5 header',
+                  hashlib.sha256(saved.read_bytes()).hexdigest() == case['resaved_sha256']
+                  and saved.read_bytes()[:32] == b'3D Geometry File Format       50')
+            original_doc = App.newDocument('BeforeRhino')
+            before = metrics(ThreeDm.import_file(source, original_doc))
+            App.closeDocument(original_doc.Name)
+            doc = App.newDocument('AfterRhino')
+            imported = ThreeDm.import_file(saved, doc)
+            after = metrics(imported)
+            result['cases'].append(dict(file=case['file'], saved=str(saved), before=before, after=after))
+            check(label + ' reimport count and measured geometry/metadata', equivalent(before, after))
+            destination = out / (label + '-rhino5.FCStd')
+            names = [obj.Name for obj in imported]
+            doc.saveAs(str(destination))
+            App.closeDocument(doc.Name)
+            reopened = App.openDocument(str(destination))
+            check(label + ' FCStd reopen geometry/metadata',
+                  equivalent(after, metrics([reopened.getObject(n) for n in names])))
+            App.closeDocument(reopened.Name)
+            check(label + ' input and Rhino output remain immutable',
+                  hashlib.sha256(source.read_bytes()).hexdigest() == case['input_sha256']
+                  and hashlib.sha256(saved.read_bytes()).hexdigest() == case['resaved_sha256'])
+        result['ok'] = True
+    except Exception:
+        result['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(result, indent=2))
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1800, run)

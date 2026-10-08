@@ -1,0 +1,27 @@
+import FreeCAD as App,FreeCADGui as Gui
+import json,os,tempfile,traceback
+from pathlib import Path
+from PySide6 import QtCore
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm
+        doc=App.newDocument('TextDotViewport');roots=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-native-text-dot-mm.3dm'),doc,mode='preserve');dot=next(obj for obj in roots if obj.OM9SourceClass=='ON_TextDot')
+        for obj in doc.Objects:
+            if obj!=dot:obj.ViewObject.Visibility=False
+        dot.OM9TextDotPoint=App.Vector();dot.OM9TextDotText='OpenMatrix9 • Rhino 5\nNative TextDot';dot.OM9TextDotHeight=24;dot.OM9Color=[0.1,0.2,0.8];dot.ViewObject.Visibility=True;doc.recompute()
+        view=Gui.activeDocument().activeView();view.viewTop();view.fitAll();Gui.updateGui()
+        search=coin.SoSearchAction();search.setNode(dot.ViewObject.Proxy.text);search.setSearchingAll(False);search.apply(view.getSceneGraph())
+        check('current native TextDot node belongs to the active viewport display',search.getPath() is not None and dot.ViewObject.Proxy.text.string.getValues()==['OpenMatrix9 • Rhino 5','Native TextDot'])
+        snapshot=out/'native-text-dot.png';view.saveImage(str(snapshot),640,480,'White');check('native viewport renders the current TextDot preview',snapshot.is_file() and snapshot.stat().st_size>1000)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

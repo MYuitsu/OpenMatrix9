@@ -1,0 +1,3826 @@
+{
+  "recorded_at": "2026-10-07T17:12:42+07:00",
+  "pinned_revision": "eb92af3ba1806b0a34a99aba0d3bda83e3d46083",
+  "coverage_sha256": "e3b9475d763c6d62e5d57dc447e794bc4f9ea854499c437ba5c81936705fa8ac",
+  "scope": "Static source/evidence audit for comprehensive pinned openNURBS 3dm exchange with Rhino5 target; no new runtime tests.",
+  "catalog_rows": 128,
+  "noncomment_registered_names": 123,
+  "commented_registration_rows": 5,
+  "normalized_classification": {
+    "concrete": 93,
+    "abstract": 8,
+    "obsolete-compatibility": 22
+  },
+  "classes_with_scoped_test_entries": 22,
+  "class_status_counts": {
+    "inventory": {
+      "unverified": 118,
+      "validated": 5
+    },
+    "preservation": {
+      "unverified": 120,
+      "validated": 3
+    },
+    "display": {
+      "unverified": 123
+    },
+    "editable": {
+      "unverified": 123
+    },
+    "rhino5_write": {
+      "unverified": 123
+    }
+  },
+  "component_categories": [
+    {
+      "name": "Image",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "TextureMapping",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "Material",
+      "inventory": "validated",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp"
+      ]
+    },
+    {
+      "name": "LinePattern",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "Layer",
+      "inventory": "validated",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp"
+      ]
+    },
+    {
+      "name": "Group",
+      "inventory": "validated",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp"
+      ]
+    },
+    {
+      "name": "TextStyle",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "DimStyle",
+      "inventory": "validated",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp"
+      ]
+    },
+    {
+      "name": "RenderLight",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "HatchPattern",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "InstanceDefinition",
+      "inventory": "validated",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp"
+      ]
+    },
+    {
+      "name": "ModelGeometry",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "HistoryRecord",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "RenderContent",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "EmbeddedFile",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    },
+    {
+      "name": "SectionStyle",
+      "inventory": "unverified",
+      "preservation": "unverified",
+      "editable": "unverified",
+      "rhino5_write": "unverified",
+      "evidence": []
+    }
+  ],
+  "document_categories": [
+    {
+      "name": "properties",
+      "status": "unverified"
+    },
+    {
+      "name": "settings",
+      "status": "unverified"
+    },
+    {
+      "name": "views",
+      "status": "unverified"
+    },
+    {
+      "name": "named_views",
+      "status": "unverified"
+    },
+    {
+      "name": "plugin_userdata",
+      "status": "unverified"
+    },
+    {
+      "name": "external_resources",
+      "status": "unverified"
+    }
+  ],
+  "class_rows": [
+    {
+      "class_name": "ON_3dmObjectAttributes",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_3dm_attributes.cpp",
+        "line": 105,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_3dmObjectAttributes, ON_Object, \"A828C015-09F5-477c-8665-F0482F5D6996\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_3dmRenderSettings",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_3dm_settings.cpp",
+        "line": 943,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_3dmRenderSettings, ON_Object, \"58A5953A-57C5-4FD3-84F5-7D4240478D15\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Annotation",
+      "classification": "abstract",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_annotationbase.cpp",
+        "line": 25,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_VIRTUAL_OBJECT_IMPLEMENT(ON_Annotation, ON_Geometry, \"B5802E0C-5B16-43C9-BD43-A3E0AC18203B\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_ArcCurve",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_arccurve.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_ArcCurve,ON_Curve,\"CF33BE2A-09B4-11d4-BFFB-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native typed loop editing, named topology and persistent mm/cm host script adapter",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 typed loop decode/reencode, current edits/zero-base/native block copies mm/cm",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+        "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_CCustomMeshUserData",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_archive.cpp",
+        "line": 15674,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_OBSOLETE_CCustomMeshUserData, ON_UserData, \"69F27695-3011-4FBA-82C1-E529F25B5FD9\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Extrusion",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_beam.cpp",
+        "line": 1161,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_Extrusion,ON_Surface,\"36F53175-72B8-4d47-BF1F-B4E6FC24F4B9\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Owned CurveOnSurface coupled native transform fixture paths; scoped native parameter/class-preserving operations only",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_V5ExtrusionDisplayMeshCache",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_beam.cpp",
+        "line": 4775,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_V5ExtrusionDisplayMeshCache,ON_UserData,\"A8130A3E-E4F3-4CB0-BB8A-F10A473912D0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Bitmap",
+      "classification": "abstract",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_bitmap.cpp",
+        "line": 24,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_VIRTUAL_OBJECT_IMPLEMENT( ON_Bitmap, ON_Object, \"390465E9-3721-11d4-800B-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_WindowsBitmap",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_bitmap.cpp",
+        "line": 26,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_WindowsBitmap, ON_Bitmap,  \"390465EB-3721-11d4-800B-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_EmbeddedBitmap",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_bitmap.cpp",
+        "line": 28,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_EmbeddedBitmap, ON_Bitmap, \"772E6FC1-B17B-4fc4-8F54-5FDA511D76D2\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_WindowsBitmapEx",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_bitmap.cpp",
+        "line": 30,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_WindowsBitmapEx, ON_WindowsBitmap,  \"203AFC17-BCC9-44fb-A07B-7F5C31BD5ED9\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Brep",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_brep.cpp",
+        "line": 1313,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_Brep,ON_Geometry,\"60B5DBC5-E660-11d3-BFE4-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "validated",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp",
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_V5_BrepRegionTopologyUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_brep_region.cpp",
+        "line": 58,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_V5_BrepRegionTopologyUserData,ON_UserData,\"7FE23D63-E536-43f1-98E2-C807A2625AFF\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Curve",
+      "classification": "abstract",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_curve.cpp",
+        "line": 24,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_VIRTUAL_OBJECT_IMPLEMENT(ON_Curve,ON_Geometry,\"4ED7D4D7-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_CurveOnSurface",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_curveonsurface.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_CurveOnSurface,ON_Curve,\"4ED7D4D8-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Audited Read-only SDK child recovery12 native cases117 malformed2 deferred references4 independent repaired legacy cases; retained host32 checks",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-archive-recovery.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Coupled native159 transforms32 atomic refusals across NURBS/Plane/Rev/Sum/Extrusion, retained source host regression",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Source-unit native tree10 direct/model paths,8 deferred references,7 refusals,120 retained-host lifecycle checks",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-native-schema.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Detached owning-model curve/box Brep edge/trim reference graph8 native paths8 invalid2 lifetime cases88 host checks",
+          "evidence": "docs/validation/2026-10-07-native-reference-resolution.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Shared owner and nested closure lifetime,6 aggregate quota cases,4 straight box edge parameter consistency cases,38 host checks",
+          "evidence": "docs/validation/2026-10-07-reference-graph-integrity.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "32 curved trim domain/reversal/lifetime cases,5 tolerance cases,176 host checks; interior map unverified",
+          "evidence": "docs/validation/2026-10-07-trim-domain-correspondence.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {
+        "archive_recovery_verified": true,
+        "archive_recovery_scope": "Arc parameter/optional Arc approximation and NURBS surface fixtures; archive5/6/7 exact fields, source retained FCStd, staged ownership refusal",
+        "deferred_reference_archive_recovery_verified": true,
+        "deferred_reference_semantics_verified": false,
+        "source_retained_host_verified": true,
+        "source_retained_host_scope": "four2D/3D optional-child fixtures and exact embedded source bytes",
+        "display_verified": false,
+        "editable_verified": false,
+        "coupled_transform_verified": false,
+        "selected_export_verified": false,
+        "selected_export_atomic_refusal_verified": true,
+        "class_wide_rhino5_compatibility": false,
+        "compiled_sdk_read_repair": "Generated application-owned ON_CurveOnSurface::Read replacement; original SDK sources unchanged",
+        "coupled_native_transform_slice_verified": true,
+        "coupled_native_transform_slice_scope": "Rational/nonrational degree1/3 NURBS2D/3D; Plane orthogonal transformed axes; Rev similarity3D generatrix; Sum supported native children; Extrusion proper similarity. Native child/reference/plugin/UV mapping and host editing remain pending.",
+        "host_coupled_transform_verified": false,
+        "source_native_schema_slice_verified": true,
+        "deferred_reference_inventory_slice_verified": true,
+        "owning_model_reference_resolution_slice_verified": true,
+        "shared_owner_closure_slice_verified": true,
+        "aggregate_sdk_accounted_clone_budget_slice_verified": true,
+        "affine_box_edge_parameter_consistency_slice_verified": true,
+        "curved_trim_endpoint_correspondence_slice_verified": true,
+        "trim_interior_parameter_mapping_verified": false
+      },
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-curve-on-surface-archive-recovery.md",
+        "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+        "docs/validation/2026-10-07-curve-on-surface-native-schema.md",
+        "docs/validation/2026-10-07-native-reference-resolution.md",
+        "docs/validation/2026-10-07-reference-graph-integrity.md",
+        "docs/validation/2026-10-07-trim-domain-correspondence.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_CurveProxy",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_curveproxy.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_CurveProxy,ON_Curve,\"4ED7D4D9-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_DetailView",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_detail.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_DetailView,ON_Geometry,\"C8C66EFA-B3CB-4e00-9440-2AD66203379E\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Dimension",
+      "classification": "abstract",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_dimension.cpp",
+        "line": 26,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_VIRTUAL_OBJECT_IMPLEMENT(ON_Dimension, ON_Annotation, \"EE6571FE-1596-4D5B-BD6D-7072B0643986\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_DimLinear",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_dimension.cpp",
+        "line": 27,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_DimLinear, ON_Dimension, \"E550882B-F44D-4154-A1EF-6E50CBBBF543\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_DimAngular",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_dimension.cpp",
+        "line": 28,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_DimAngular, ON_Dimension, \"D417786B-F6CD-4F12-9E1F-063F414DBEB6\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_DimRadial",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_dimension.cpp",
+        "line": 29,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_DimRadial, ON_Dimension, \"FC749C2F-4C00-41FD-9840-26D94F047AD3\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_DimOrdinate",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_dimension.cpp",
+        "line": 30,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_DimOrdinate, ON_Dimension, \"03124828-4C9B-4D28-9A82-664DDDE7A14F\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Centermark",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_dimension.cpp",
+        "line": 31,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_Centermark, ON_Dimension, \"D46767BA-7E8F-4D9D-9A92-66050219A5B9\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_DimStyle",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_dimensionstyle.cpp",
+        "line": 1070,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_DimStyle, ON_ModelComponent, \"67AA51A5-791D-4BEC-8AED-D23B462B6F87\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_EmbeddedFile",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_embedded_file.cpp",
+        "line": 140,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_EmbeddedFile, ON_ModelComponent, \"E3BBE02E-F3D5-490D-9719-E21D8BF982EF\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Font_Windows_LFTM_UserData",
+      "classification": "concrete",
+      "noncomment_registration": false,
+      "source": {
+        "file": "opennurbs_font.cpp",
+        "line": 1425,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "////ON_OBJECT_IMPLEMENT(ON_Font_Windows_LFTM_UserData, ON_UserData, \"452ADA1A-49F0-4FAF-8E14-73DABE21FC5C\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Font",
+      "classification": "concrete",
+      "noncomment_registration": false,
+      "source": {
+        "file": "opennurbs_font.cpp",
+        "line": 2614,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "//ON_OBJECT_IMPLEMENT( ON_Font, ON_Object, \"5F7476D1-798A-4953-B359-4A37699CD6F4\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Geometry",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_geometry.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_Geometry,ON_Object,\"4ED7D4DA-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Group",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_group.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_Group, ON_ModelComponent, \"721D9F97-3645-44c4-8BE6-B2CF697D25CE\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_HatchExtra",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_hatch.cpp",
+        "line": 78,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_OBSOLETE_V5_HatchExtra,ON_UserData,\"3FF7007C-3D04-463f-84E3-132ACEB91062\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_HatchPattern",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_hatch.cpp",
+        "line": 596,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_HatchPattern, ON_ModelComponent, \"064E7C91-35F6-4734-A446-79FF7CD659E1\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Selected native custom line hatch pattern references and mm/cm rational loops",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-native.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native affine plane loops and isolated line patterns with host shared/copy block routes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-affine.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native Hatch current fields/reference selection and derived rational boundary",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-current.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 Hatch native fields and block decode-reencode",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy5.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {
+        "native_retention": true,
+        "affine_pattern_math": true,
+        "current_payload_editing": false,
+        "display": false,
+        "class_wide_rhino5_compatibility": false,
+        "tested": [
+          "custom multi-line pattern analytical affine endpoints and native rational loops",
+          "shear determinant-one scale reflections anisotropic tilted planes mm/cm",
+          "isolated pattern references and unchanged siblings",
+          "native canonical/baseline member copies and selected closure",
+          "FreeCAD reflected shared proxy selected/promoted/copied families",
+          "Undo/Redo FCStd stable generated identities atomic errors",
+          "standalone Grid60/HatchDash/Solid math",
+          "complete native plane/base/rotation/tiny positive scale fields and exact chosen UUID",
+          "materialized native Grid60 line fields and solid selection",
+          "current standalone/promoted/copied/shared reflected proxy routes mm/cm",
+          "derived rational boundary BRep and Coin outline FCStd restoration",
+          "gradient ordinary-field gate, schema/baseline/choice/invalid-field atomic rejection",
+          "independent SDK201307115 plane/base/rotation/tiny scale exact decode-reencode",
+          "native rational CVs/weights/knots and signed line patterns",
+          "Solid/Grid60/HatchDash selection and shared/copied block UUID graph",
+          "typed legacy HatchExtra movable-base conversion",
+          "raw attribute owner loss and public MemoryRelocate repair proof",
+          "enabled gradient data lost at modern version5 boundary and atomic refusal"
+        ],
+        "limits": [
+          "actual Rhino5 rendering and line-base contract oracle pending",
+          "built-in-wide solid gradient legacy and child-loop userdata/reference compatibility pending",
+          "incomplete source native reader repairs and missing pattern reference audit pending",
+          "extreme numeric ranges large-data memory/performance pending",
+          "remaining full geometry annotation resources components document history version requirements",
+          "native loop editing/pattern-line editing and full fill/dash rendering pending",
+          "native loop editing/pattern-line editing and full fill/dash rendering pending"
+        ],
+        "boundary_display": false,
+        "pattern_reference_selection": true,
+        "pattern_line_editing": false,
+        "full_pattern_rendering": false,
+        "legacy5_semantic_roundtrip": true
+      },
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-native.md",
+        "tests/native/three_dm_hatch.cpp",
+        "tests/three_dm_hatch_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-affine.md",
+        "tests/native/three_dm_hatch_affine.cpp",
+        "tests/three_dm_hatch_affine_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-current.md",
+        "tests/native/three_dm_hatch_current.cpp",
+        "tests/three_dm_hatch_current_smoke.FCMacro",
+        "tests/three_dm_hatch_shared_current_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-legacy5.md",
+        "tests/native/three_dm_legacy_hatch.cpp",
+        "tests/native/rhino5_reader/hatch_reader.cpp",
+        "tests/three_dm_hatch_legacy_smoke.FCMacro"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Hatch",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_hatch.cpp",
+        "line": 1256,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_Hatch, ON_Geometry, \"0559733B-5332-49d1-A936-0532AC76ADE5\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Selected native custom line hatch pattern references and mm/cm rational loops",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-native.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native affine plane loops and isolated line patterns with host shared/copy block routes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-affine.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native Hatch current fields/reference selection and derived rational boundary",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-current.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 Hatch native fields and block decode-reencode",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy5.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native typed loop editing, named topology and persistent mm/cm host script adapter",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 typed loop decode/reencode, current edits/zero-base/native block copies mm/cm",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Ordinary existing-five-class numeric controls, role/circle addition/removal, native/Undo/copy/FCStd UI104",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-ui.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Raw structural UI rows103: nonrational degree1 NURBS CV/knot, Polyline point/parameter and PolyCurve Line split; lifecycle and12 independent legacy archives",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-rows.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {
+        "native_retention": true,
+        "affine_pattern_math": true,
+        "current_payload_editing": true,
+        "display": true,
+        "class_wide_rhino5_compatibility": false,
+        "tested": [
+          "custom multi-line pattern analytical affine endpoints and native rational loops",
+          "shear determinant-one scale reflections anisotropic tilted planes mm/cm",
+          "isolated pattern references and unchanged siblings",
+          "native canonical/baseline member copies and selected closure",
+          "FreeCAD reflected shared proxy selected/promoted/copied families",
+          "Undo/Redo FCStd stable generated identities atomic errors",
+          "standalone Grid60/HatchDash/Solid math",
+          "complete native plane/base/rotation/tiny positive scale fields and exact chosen UUID",
+          "materialized native Grid60 line fields and solid selection",
+          "current standalone/promoted/copied/shared reflected proxy routes mm/cm",
+          "derived rational boundary BRep and Coin outline FCStd restoration",
+          "gradient ordinary-field gate, schema/baseline/choice/invalid-field atomic rejection",
+          "independent SDK201307115 plane/base/rotation/tiny scale exact decode-reencode",
+          "native rational CVs/weights/knots and signed line patterns",
+          "Solid/Grid60/HatchDash selection and shared/copied block UUID graph",
+          "typed legacy HatchExtra movable-base conversion",
+          "raw attribute owner loss and public MemoryRelocate repair proof",
+          "enabled gradient data lost at modern version5 boundary and atomic refusal"
+        ],
+        "limits": [
+          "actual Rhino5 rendering and line-base contract oracle pending",
+          "built-in-wide solid gradient legacy and child-loop userdata/reference compatibility pending",
+          "incomplete source native reader repairs and missing pattern reference audit pending",
+          "extreme numeric ranges large-data memory/performance pending",
+          "remaining full geometry annotation resources components document history version requirements",
+          "native loop editing/pattern-line editing and full fill/dash rendering pending",
+          "native loop editing/pattern-line editing and full fill/dash rendering pending"
+        ],
+        "boundary_display": true,
+        "pattern_reference_selection": true,
+        "pattern_line_editing": false,
+        "full_pattern_rendering": false,
+        "legacy5_semantic_roundtrip": true,
+        "native_loop_inventory": true,
+        "recursive_child_userdata_guard": true,
+        "inactive_gradient_guard": true,
+        "native_loop_editing": false,
+        "native_typed_loop_editing": true,
+        "loop_script_adapter": true,
+        "loop_editor_ui": false,
+        "independent_legacy_native_loop_types": true,
+        "legacy_zero_base_verified": true,
+        "ordinary_loop_ui_verified": true,
+        "ordinary_loop_ui_scope": "existing five-class numeric fields, roles/circle and existing native raw array rows; new native class/rationality/complete child/reference controls remain pending",
+        "structural_loop_ui_verified": true,
+        "structural_loop_ui_scope": "explicit duplicate/remove of raw CV/knot/point/parameter/segment arrays; named nonrational NURBS/Polyline/PolyCurve fixtures only"
+      },
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-native.md",
+        "tests/native/three_dm_hatch.cpp",
+        "tests/three_dm_hatch_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-affine.md",
+        "tests/native/three_dm_hatch_affine.cpp",
+        "tests/three_dm_hatch_affine_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-current.md",
+        "tests/native/three_dm_hatch_current.cpp",
+        "tests/three_dm_hatch_current_smoke.FCMacro",
+        "tests/three_dm_hatch_shared_current_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-legacy5.md",
+        "tests/native/three_dm_legacy_hatch.cpp",
+        "tests/native/rhino5_reader/hatch_reader.cpp",
+        "tests/three_dm_hatch_legacy_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+        "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-ui.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-rows.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_GradientColorData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_hatch.cpp",
+        "line": 2111,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_GradientColorData, ON_UserData, \"0C1AD613-4EFA-4F47-A147-4D79D77FCB0C\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_InstanceDefinition",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_instance.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_InstanceDefinition, ON_ModelComponent, \"26F8BFF6-2618-417f-A158-153D64A94989\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_InstanceRef",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_instance.cpp",
+        "line": 1741,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_InstanceRef, ON_Geometry, \"F9CFB638-B9D4-4340-87E3-C56E7865D96A\" );",
+      "legacy_status": {
+        "inventory": "validated",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp",
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_IDefAlternativePathUserData",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_instance.cpp",
+        "line": 2170,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_OBSOLETE_IDefAlternativePathUserData,ON_UserData,\"F42D9671-21EB-4692-9B9A-BC3507FF28F5\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_TextExtra",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 33,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_OBSOLETE_V5_TextExtra,ON_UserData,\"D90490A5-DB86-49f8-BDA1-9080B1F4E976\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_DimExtra",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 208,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_OBSOLETE_V5_DimExtra,ON_UserData,\"8AD5B9FC-0D5C-47fb-ADFD-74C28B6F661E\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_Annotation",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 547,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_VIRTUAL_OBJECT_IMPLEMENT( ON_OBSOLETE_V5_Annotation,       ON_Geometry,    \"8D820224-BC6C-46b4-9066-BF39CC13AEFB\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_DimLinear",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 548,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_OBSOLETE_V5_DimLinear,  ON_OBSOLETE_V5_Annotation, \"BD57F33B-A1B2-46e9-9C6E-AF09D30FFDDE\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_DimRadial",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 549,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_OBSOLETE_V5_DimRadial,  ON_OBSOLETE_V5_Annotation, \"B2B683FC-7964-4e96-B1F9-9B356A76B08B\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_DimAngular",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 550,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_OBSOLETE_V5_DimAngular, ON_OBSOLETE_V5_Annotation, \"841BC40B-A971-4a8e-94E5-BBA26D67348E\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_TextObject",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 551,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_OBSOLETE_V5_TextObject,       ON_OBSOLETE_V5_Annotation, \"46F75541-F46B-48be-AA7E-B353BBE068A7\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_Leader",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 552,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_OBSOLETE_V5_Leader,           ON_OBSOLETE_V5_Annotation, \"14922B7A-5B65-4f11-8345-D415A9637129\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_TextDot",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 553,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_TextDot,           ON_Geometry,    \"74198302-CDF4-4f95-9609-6D684F22AB37\");",
+      "legacy_status": {
+        "inventory": "validated",
+        "preservation": "validated",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Rhino5 native retained transform roundtrip",
+          "evidence": "docs/validation/2026-10-07-3dm-retained-transforms.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native TextDot current-field editing and screen-text preview",
+          "evidence": "docs/validation/2026-10-07-3dm-text-dot.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {
+        "source_version": 5,
+        "units": [
+          "mm",
+          "cm"
+        ],
+        "native_transform": true,
+        "payload_editing": false,
+        "class_wide_rhino5_compatibility": false,
+        "fields": [
+          "source point",
+          "primary text",
+          "Rhino5 source secondary text",
+          "user strings",
+          "attributes"
+        ],
+        "limits": [
+          "Rhino6 nonempty secondary text protected by source-version rejection",
+          "native display/text editing unverified"
+        ]
+      },
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp",
+        "tests/three_dm_preservation_smoke.FCMacro",
+        "tests/native/three_dm_native_transform.cpp",
+        "tests/three_dm_retained_transform_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-retained-transforms.md",
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md",
+        "docs/validation/2026-10-07-3dm-text-dot.md",
+        "tests/three_dm_text_dot_smoke.FCMacro",
+        "tests/native/three_dm_text_dot.cpp"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V5_DimOrdinate",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 554,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_OBSOLETE_V5_DimOrdinate,ON_OBSOLETE_V5_Annotation, \"C8288D69-5BD8-4f50-9BAF-525A0086B0C3\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_AngularDimension2Extra",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 3185,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_AngularDimension2Extra,ON_UserData,\"A68B151F-C778-4a6e-BCB4-23DDD1835677\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_AnnotationTextFormula",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V2_annotation.cpp",
+        "line": 7006,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_AnnotationTextFormula,ON_UserData,\"699FCC42-62D4-488c-9109-F1B7A37CE926\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_Annotation",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 28,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_VIRTUAL_OBJECT_IMPLEMENT( ON_OBSOLETE_V2_Annotation,       ON_Geometry,   \"ABAF5873-4145-11d4-800F-0010830122F0\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_DimLinear",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 29,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_OBSOLETE_V2_DimLinear,  ON_OBSOLETE_V2_Annotation, \"5DE6B20D-486B-11d4-8014-0010830122F0\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_DimRadial",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 30,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_OBSOLETE_V2_DimRadial,  ON_OBSOLETE_V2_Annotation, \"5DE6B20E-486B-11d4-8014-0010830122F0\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_DimAngular",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 31,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_OBSOLETE_V2_DimAngular, ON_OBSOLETE_V2_Annotation, \"5DE6B20F-486B-11d4-8014-0010830122F0\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_TextObject",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 32,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_OBSOLETE_V2_TextObject,       ON_OBSOLETE_V2_Annotation, \"5DE6B210-486B-11d4-8014-0010830122F0\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_Leader",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 33,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_OBSOLETE_V2_Leader,           ON_OBSOLETE_V2_Annotation, \"5DE6B211-486B-11d4-8014-0010830122F0\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_TextDot",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 579,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_OBSOLETE_V2_TextDot,ON_Point,\"8BD94E19-59E1-11d4-8018-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_V2_AnnotationArrow",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V5_annotation.cpp",
+        "line": 644,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_OBSOLETE_V2_AnnotationArrow,ON_Geometry,\"8BD94E1A-59E1-11d4-8018-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_DimStyleExtra",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V5_dimstyle.cpp",
+        "line": 203,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_DimStyleExtra,ON_UserData,\"513FDE53-7284-4065-8601-06CEA8B28D6F\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_V5x_DimStyle",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_internal_V5_dimstyle.cpp",
+        "line": 658,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_V5x_DimStyle, ON_Object, \"81BD83D5-7120-41c4-9A57-C449336FF12C\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Layer",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_layer.cpp",
+        "line": 78,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_Layer,ON_ModelComponent,\"95809813-E985-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON__LayerExtensions",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_layer.cpp",
+        "line": 1520,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON__LayerExtensions,ON_UserData,\"3E4904E6-E930-4fbc-AA42-EBD407AEFE3B\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Leader",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_leader.cpp",
+        "line": 23,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_Leader, ON_Annotation, \"945BF594-6FF9-4F5C-BFC0-B3AF528F29D2\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Light",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_light.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_Light,ON_Geometry,\"85A08513-F383-11d3-BFE7-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_LineCurve",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_linecurve.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_LineCurve,ON_Curve,\"4ED7D4DB-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native typed loop editing, named topology and persistent mm/cm host script adapter",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 typed loop decode/reencode, current edits/zero-base/native block copies mm/cm",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+        "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Linetype",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_linetype.cpp",
+        "line": 98,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_Linetype, ON_ModelComponent, \"26F10A24-7D13-4f05-8FDA-8E364DAF8EA6\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Material",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_material.cpp",
+        "line": 29,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_Material,ON_ModelComponent,\"60B5DBBC-E660-11d3-BFE4-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Texture",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_material.cpp",
+        "line": 2074,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_Texture,ON_Object,\"D6FF106D-329B-4f29-97E2-FD282A618020\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_TextureMapping",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_material.cpp",
+        "line": 2654,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_TextureMapping,ON_ModelComponent,\"32EC997A-C3BF-4ae5-AB19-FD572B8AD554\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "CTtMappingMeshInfoUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_material.cpp",
+        "line": 4019,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(CTtMappingMeshInfoUserData, ON_UserData, \"1706ADC5-52BF-4BE2-8402-4501EB2AE675\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "CTtRenderMeshInfoUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_material.cpp",
+        "line": 4125,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(CTtRenderMeshInfoUserData, ON_UserData, \"4960A046-8201-4F0F-8F22-FCB6F91C765D\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "MappingCRCCache",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_material.cpp",
+        "line": 5380,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(MappingCRCCache, ON_UserData, \"5A4971F3-AA73-493C-A385-2F7EB4288989\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_PhysicallyBasedMaterialUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_material.cpp",
+        "line": 8858,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_PhysicallyBasedMaterialUserData, ON_UserData, \"5694E1AC-40E6-44F4-9CA9-3B6D0E8C4440\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Mesh",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 127,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_Mesh,ON_Geometry,\"4ED7D4E4-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_MeshVertexRef",
+      "classification": "concrete",
+      "noncomment_registration": false,
+      "source": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 11936,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "//ON_OBJECT_IMPLEMENT(ON_MeshVertexRef,ON_Geometry,\"C547B4BD-BDCD-49b6-A983-0C4A7F02E31A\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_MeshEdgeRef",
+      "classification": "concrete",
+      "noncomment_registration": false,
+      "source": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 11938,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "//ON_OBJECT_IMPLEMENT(ON_MeshEdgeRef,ON_Geometry,\"ED727872-463A-4424-851F-9EC02CB0F155\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_MeshFaceRef",
+      "classification": "concrete",
+      "noncomment_registration": false,
+      "source": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 11940,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "//ON_OBJECT_IMPLEMENT(ON_MeshFaceRef,ON_Geometry,\"4F529AA5-EF8D-4c25-BCBB-162D510AA280\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_MeshComponentRef",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 11942,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_MeshComponentRef,ON_Geometry,\"1FD2F2BE-3346-4D7A-AE94-73C0B326D8F4\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_V5_MeshDoubleVertices",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 13655,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_V5_MeshDoubleVertices,ON_UserData,\"17F24E75-21BE-4a7b-9F3D-7F85225247E3\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_PerObjectMeshParameters",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_mesh.cpp",
+        "line": 14179,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_PerObjectMeshParameters,ON_UserData,\"B5628CA9-82C4-4CAE-9883-487B3E4AB28B\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_DisplacementUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_mesh_modifiers.cpp",
+        "line": 80,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_DisplacementUserData, ON_UserData, \"B8C04604-B4EF-43b7-8C26-1AFB8F1C54EB\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_EdgeSofteningUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_mesh_modifiers.cpp",
+        "line": 701,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_EdgeSofteningUserData, ON_UserData, \"CB5EB395-BF1B-4112-8F2F-F728FCE8169C\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_ThickeningUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_mesh_modifiers.cpp",
+        "line": 896,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_ThickeningUserData, ON_UserData, \"AA03D9C3-4CCF-4431-A06E-25F38CF3913F\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_CurvePipingUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_mesh_modifiers.cpp",
+        "line": 1082,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_CurvePipingUserData, ON_UserData, \"2D5AFEA9-F458-4079-992F-C2D405D9383B\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_ShutLiningUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_mesh_modifiers.cpp",
+        "line": 1310,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_ShutLiningUserData, ON_UserData, \"429DCD06-5643-4254-BDE8-C0557F8FD083\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_V4V5_MeshNgonUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_mesh_ngon.cpp",
+        "line": 2332,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_V4V5_MeshNgonUserData,ON_UserData,\"31F55AA3-71FB-49f5-A975-757584D937FF\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_ModelComponent",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_model_component.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_ModelComponent,ON_Object,\"CF37CFB5-8E6F-435F-98FE-D20FA9E7DB6F\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_ModelGeometryComponent",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_model_geometry.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_ModelGeometryComponent,ON_ModelComponent,\"29D1B827-41CE-45C1-B265-0686AA391DAE\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_NurbsCurve",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_nurbscurve.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_NurbsCurve,ON_Curve,\"4ED7D4DD-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native typed loop editing, named topology and persistent mm/cm host script adapter",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 typed loop decode/reencode, current edits/zero-base/native block copies mm/cm",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md",
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+        "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_NurbsSurface",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_nurbssurface.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_NurbsSurface,ON_Surface,\"4ED7D4DE-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Owned CurveOnSurface coupled native transform fixture paths; scoped native parameter/class-preserving operations only",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_NurbsCage",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_nurbsvolume.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_NurbsCage,ON_Geometry,\"06936AFB-3D3C-41ac-BF70-C9319FA480A1\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_MorphControl",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_nurbsvolume.cpp",
+        "line": 26,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_MorphControl,ON_Geometry,\"D379E6D8-7C31-4407-A913-E3B7040D034A\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Object",
+      "classification": "abstract",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_object.cpp",
+        "line": 1249,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_VIRTUAL_OBJECT_IMPLEMENT(ON_Object,0,\"60B5DBBD-E660-11d3-BFE4-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_HistoryRecord",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_object_history.cpp",
+        "line": 1653,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_HistoryRecord,ON_ModelComponent,\"ECD0FD2F-2088-49dc-9641-9CF7A28FFA6B\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OffsetSurface",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_offsetsurface.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_OffsetSurface,ON_SurfaceProxy,\"00C61749-D430-4ecc-83A8-29130A20CF9C\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_PlaneSurface",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_planesurface.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_PlaneSurface,ON_Surface,\"4ED7D4DF-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Owned CurveOnSurface coupled native transform fixture paths; scoped native parameter/class-preserving operations only",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_ClippingPlaneSurface",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_planesurface.cpp",
+        "line": 25,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_ClippingPlaneSurface,ON_PlaneSurface,\"DBC5A584-CE3F-4170-98A8-497069CA5C36\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_PointCloud",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_pointcloud.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_PointCloud, ON_Geometry, \"2488F347-F8FA-11d3-BFEC-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "validated",
+        "preservation": "validated",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Rhino5 native retained transform roundtrip",
+          "evidence": "docs/validation/2026-10-07-3dm-retained-transforms.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native PointCloud current per-point fields and colored PointSet",
+          "evidence": "docs/validation/2026-10-07-3dm-point-cloud.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native geometry-only and mixed affine PointCloud; independent SDK201307115 target gate",
+          "evidence": "docs/validation/2026-10-07-3dm-cloud-geometry-legacy5.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {
+        "source_version": 5,
+        "units": [
+          "mm",
+          "cm"
+        ],
+        "native_transform": true,
+        "payload_editing": true,
+        "class_wide_rhino5_compatibility": false,
+        "fields": [
+          "double points",
+          "inverse-transpose normal directions and original lengths",
+          "exact RGBA bytes",
+          "current intensity import/edit/FCStd",
+          "ordered/active and valid dormant plane",
+          "reserved source flag bits",
+          "user strings",
+          "attributes"
+        ],
+        "limits": [
+          "nonempty intensity is rejected for SDK201307115 baseline; every later Rhino5 service release not established",
+          "local hidden flags are FreeCAD display only",
+          "large-data memory/performance and streaming unverified",
+          "generic recursive preview copies need verified rebuild; arbitrary legacy cloud upgrades pending",
+          "actual Rhino5 application acceptance and exact appearance unverified",
+          "FeaturePython viewport locking behavior unverified"
+        ],
+        "geometry_only_current_fields": true,
+        "affine_native_cloud_preview": true,
+        "independent_legacy_reader": {
+          "sdk": 201307115,
+          "source_sha256": "5cb9ff879c94c63145526a188f9ddc8c522f35cd82d8726ad49ed64a63d6e05a",
+          "intensity": "documented rejection; native reader loses values",
+          "actual_application_acceptance": false
+        }
+      },
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp",
+        "tests/native/three_dm_native_transform.cpp",
+        "tests/three_dm_retained_transform_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-retained-transforms.md",
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md",
+        "docs/validation/2026-10-07-3dm-point-cloud.md",
+        "tests/three_dm_point_cloud_smoke.FCMacro",
+        "tests/native/three_dm_point_cloud.cpp",
+        "docs/validation/2026-10-07-3dm-cloud-geometry-legacy5.md",
+        "tests/native/three_dm_cloud_geometry.cpp",
+        "tests/native/three_dm_legacy_cloud.cpp",
+        "tests/native/rhino5_reader/point_cloud_reader.cpp",
+        "tests/three_dm_cloud_geometry_smoke.FCMacro"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Point",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_pointgeometry.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_Point, ON_Geometry, \"C3101A1D-F157-11d3-BFE7-0010830122F0\" );",
+      "legacy_status": {
+        "inventory": "validated",
+        "preservation": "validated",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Scoped independent selected definition member/proxy",
+          "evidence": "docs/validation/2026-10-07-3dm-selected-members.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "tests/native/three_dm_inventory.cpp",
+        "tests/three_dm_preservation_smoke.FCMacro",
+        "tests/three_dm_selected_member_smoke.FCMacro",
+        "docs/validation/2026-10-07-3dm-selected-members.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_PointGrid",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_pointgrid.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_PointGrid,ON_Geometry,\"4ED7D4E5-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_PolyCurve",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_polycurve.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_PolyCurve,ON_Curve,\"4ED7D4E0-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native typed loop editing, named topology and persistent mm/cm host script adapter",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 typed loop decode/reencode, current edits/zero-base/native block copies mm/cm",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+        "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_PolyEdgeSegment",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_polyedgecurve.cpp",
+        "line": 13,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_PolyEdgeSegment,ON_CurveProxy,\"42F47A87-5B1B-4e31-AB87-4639D78325D6\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_PolyEdgeCurve",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_polyedgecurve.cpp",
+        "line": 237,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_PolyEdgeCurve,ON_PolyCurve,\"39FF3DD3-FE0F-4807-9D59-185F0D73C0E4\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Deferred native CurveOnSurface child fields and source UUID dependencies only; modern Read reversal repair",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-native-schema.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Detached owning-model curve/box Brep edge/trim reference graph8 native paths8 invalid2 lifetime cases88 host checks",
+          "evidence": "docs/validation/2026-10-07-native-reference-resolution.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Shared owner and nested closure lifetime,6 aggregate quota cases,4 straight box edge parameter consistency cases,38 host checks",
+          "evidence": "docs/validation/2026-10-07-reference-graph-integrity.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "32 curved trim domain/reversal/lifetime cases,5 tolerance cases,176 host checks; interior map unverified",
+          "evidence": "docs/validation/2026-10-07-trim-domain-correspondence.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-curve-on-surface-native-schema.md",
+        "docs/validation/2026-10-07-native-reference-resolution.md",
+        "docs/validation/2026-10-07-reference-graph-integrity.md",
+        "docs/validation/2026-10-07-trim-domain-correspondence.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_PolylineCurve",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_polylinecurve.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_PolylineCurve, ON_Curve, \"4ED7D4E6-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Hatch loop subtype inventory, recursive child safety and SDK applicability probes",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loops.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Native typed loop editing, named topology and persistent mm/cm host script adapter",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+          "class_wide_completion": false
+        },
+        {
+          "name": "Independent SDK2013 typed loop decode/reencode, current edits/zero-base/native block copies mm/cm",
+          "evidence": "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "docs/validation/2026-10-07-3dm-hatch-loops.md",
+        "docs/validation/2026-10-07-3dm-hatch-loop-edit.md",
+        "docs/validation/2026-10-07-3dm-hatch-legacy-loops.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Environment",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_render_content.cpp",
+        "line": 25,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_Environment, ON_Object, \"94BCA4D5-0FC7-435E-95F9-22F3927F9B2E\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_RenderContent",
+      "classification": "abstract",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_render_content.cpp",
+        "line": 707,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_VIRTUAL_OBJECT_IMPLEMENT(ON_RenderContent, ON_ModelComponent, \"A98DEDDA-E4FA-4E1E-9BD3-2A0695C6D4E9\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_RenderMaterial",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_render_content.cpp",
+        "line": 1174,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_RenderMaterial, ON_RenderContent, \"493E6601-F95B-4A5D-BB6F-2F6633076907\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_RenderEnvironment",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_render_content.cpp",
+        "line": 1506,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_RenderEnvironment, ON_RenderContent, \"A0AB8EF9-5FD4-4320-BBDA-A1200D1846E4\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_RenderTexture",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_render_content.cpp",
+        "line": 1577,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_RenderTexture, ON_RenderContent, \"677D9905-CC8C-41E6-A7AD-2409DDE68ED0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_RevSurface",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_revsurface.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_RevSurface, ON_Surface, \"A16220D3-163B-11d4-8000-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Owned CurveOnSurface coupled native transform fixture paths; scoped native parameter/class-preserving operations only",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_SectionStyle",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_sectionstyle.cpp",
+        "line": 79,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_SectionStyle, ON_ModelComponent, \"6D0DE8B6-598B-4784-B2CA-A42BEB77B521\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_SubD",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_subd.cpp",
+        "line": 8141,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_SubD,ON_Geometry,\"F09BA4D9-455B-42C3-BA3B-E6CCACEF853B\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_SubDMeshProxyUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_subd_archive.cpp",
+        "line": 2055,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_SubDMeshProxyUserData,ON_UserData,\"2868B9CD-28AE-4EA7-8073-BD390B3E97C8\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_SubDComponentRef",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_subd_ref.cpp",
+        "line": 156,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_SubDComponentRef,ON_Geometry,\"C221FC6D-36B7-47E8-90AA-AC8EC784E3DD\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_SumSurface",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_sumsurface.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_SumSurface, ON_Surface, \"C4CD5359-446D-4690-9FF5-29059732472B\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [
+        {
+          "name": "Owned CurveOnSurface coupled native transform fixture paths; scoped native parameter/class-preserving operations only",
+          "evidence": "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md",
+          "class_wide_completion": false
+        }
+      ],
+      "validation_scope": {},
+      "evidence": [
+        "docs/validation/2026-10-07-curve-on-surface-coupled-transforms.md"
+      ],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Surface",
+      "classification": "abstract",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_surface.cpp",
+        "line": 24,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_VIRTUAL_OBJECT_IMPLEMENT(ON_Surface,ON_Geometry,\"4ED7D4E1-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_SurfaceProxy",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_surfaceproxy.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_SurfaceProxy,ON_Surface,\"4ED7D4E2-E947-11d3-BFE5-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_TextContent",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_text.cpp",
+        "line": 25,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_TextContent, ON_Geometry, \"4F0F51FB-35D0-9998-4865-9721D6D2C6A9\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_TextStyle",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_text_style.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_TextStyle, ON_ModelComponent, \"4F0F51FB-35D0-4865-9998-6D2C6A99721D\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Text",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_textobject.cpp",
+        "line": 23,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_Text, ON_Annotation, \"57376349-62A9-4A16-B411-A46BCD544790\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_UserData",
+      "classification": "abstract",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_userdata.cpp",
+        "line": 24,
+        "macro": "ON_VIRTUAL_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_VIRTUAL_OBJECT_IMPLEMENT(ON_UserData,ON_Object,\"850324A7-050E-11d4-BFFA-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_ObsoleteUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_userdata.cpp",
+        "line": 236,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_ObsoleteUserData, ON_UserData, \"7C9305E5-947A-4E46-B102-8016849FABB1\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_UnknownUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_userdata.cpp",
+        "line": 266,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_UnknownUserData,ON_UserData,\"850324A8-050E-11d4-BFFA-0010830122F0\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_UserStringList",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_userdata.cpp",
+        "line": 699,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_UserStringList,ON_UserData,\"CE28DE29-F4C5-4faa-A50A-C3A6849B6329\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_DocumentUserStringList",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_userdata.cpp",
+        "line": 1190,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_DocumentUserStringList,ON_Object,\"06F3218E-F5EC-4f6c-B74C-14583F0ED7BC\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Internal_ObsoleteUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_userdata_obsolete.cpp",
+        "line": 98,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_Internal_ObsoleteUserData,ON_UserData,\"EDA27090-1DDD-4E4D-AB0C-75CCF0216565\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_IDefLayerSettingsUserData",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_userdata_obsolete.cpp",
+        "line": 139,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_OBSOLETE_IDefLayerSettingsUserData,ON_UserData,\"11EE2C1F-F90D-4C6A-A7CD-EC8532E1E32D\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_OBSOLETE_LayerSettingsUserData",
+      "classification": "obsolete-compatibility",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_userdata_obsolete.cpp",
+        "line": 176,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_OBSOLETE_LayerSettingsUserData,ON_UserData,\"BFB63C09-4BC7-4727-89BB-7CC754118200\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_Viewport",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_viewport.cpp",
+        "line": 24,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT( ON_Viewport, ON_Geometry, \"D66E5CCF-EA39-11d3-BFE5-0010830122F0\" );",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    },
+    {
+      "class_name": "ON_RdkUserData",
+      "classification": "concrete",
+      "noncomment_registration": true,
+      "source": {
+        "file": "opennurbs_xml.cpp",
+        "line": 4586,
+        "macro": "ON_OBJECT_IMPLEMENT"
+      },
+      "source_line": "ON_OBJECT_IMPLEMENT(ON_RdkUserData, ON_UserData, \"AFA82772-1525-43dd-A63C-C84AC5806911\");",
+      "legacy_status": {
+        "inventory": "unverified",
+        "preservation": "unverified",
+        "display": "unverified",
+        "editable": "unverified",
+        "rhino5_write": "unverified"
+      },
+      "tested_slices": [],
+      "validation_scope": {},
+      "evidence": [],
+      "completion": "No class-wide completion established by this audit; abstract/non-archive applicability needs explicit classification."
+    }
+  ],
+  "code_gaps": [
+    {
+      "path": "Gui/ThreeDmBrep.cpp",
+      "sha256": "e0991b928c75d5b09423bd75aaeb955d1f342fd0ca57334900fdbf9465a73a9e",
+      "lines": [
+        65
+      ],
+      "needle": "Solid BRep did not produce one connected shell"
+    },
+    {
+      "path": "Gui/ThreeDmArchive.cpp",
+      "sha256": "861de4f771fa92640a6766d8435ec2c199f405f66e29190fcd30204f06d29147",
+      "lines": [
+        27
+      ],
+      "needle": "Rhino 5 would reverse an inward solid"
+    },
+    {
+      "path": "Gui/ThreeDmArchive.cpp",
+      "sha256": "861de4f771fa92640a6766d8435ec2c199f405f66e29190fcd30204f06d29147",
+      "lines": [
+        96
+      ],
+      "needle": "external linked blocks require embedded geometry"
+    },
+    {
+      "path": "Gui/ThreeDmArchive.cpp",
+      "sha256": "861de4f771fa92640a6766d8435ec2c199f405f66e29190fcd30204f06d29147",
+      "lines": [
+        131
+      ],
+      "needle": "annotations and plugin objects are not converted"
+    },
+    {
+      "path": "Gui/ThreeDmMerge.cpp",
+      "sha256": "69eddfbfa41758e70f9fc7a08ec099819029787792f18de3c2236fc9e004bc5c",
+      "lines": [
+        503
+      ],
+      "needle": "Object rendering/mapping dependencies are not implemented yet"
+    },
+    {
+      "path": "Gui/ThreeDmMerge.cpp",
+      "sha256": "69eddfbfa41758e70f9fc7a08ec099819029787792f18de3c2236fc9e004bc5c",
+      "lines": [
+        92
+      ],
+      "needle": "RDK content dependencies are not implemented yet"
+    },
+    {
+      "path": "Gui/ThreeDmMerge.cpp",
+      "sha256": "69eddfbfa41758e70f9fc7a08ec099819029787792f18de3c2236fc9e004bc5c",
+      "lines": [
+        122
+      ],
+      "needle": "Different source document metadata requires an explicit document merge policy"
+    },
+    {
+      "path": "Gui/ThreeDmMerge.cpp",
+      "sha256": "69eddfbfa41758e70f9fc7a08ec099819029787792f18de3c2236fc9e004bc5c",
+      "lines": [
+        222
+      ],
+      "needle": "View unit normalization requires verified viewport handling"
+    },
+    {
+      "path": "Gui/ThreeDmMerge.cpp",
+      "sha256": "69eddfbfa41758e70f9fc7a08ec099819029787792f18de3c2236fc9e004bc5c",
+      "lines": [
+        283
+      ],
+      "needle": "Copied linked definition resource semantics are not implemented yet"
+    },
+    {
+      "path": "Gui/ThreeDmMerge.cpp",
+      "sha256": "69eddfbfa41758e70f9fc7a08ec099819029787792f18de3c2236fc9e004bc5c",
+      "lines": [
+        81
+      ],
+      "needle": "Unsafe opaque userdata dependency"
+    },
+    {
+      "path": "Gui/ThreeDmNativeReferences.cpp",
+      "sha256": "47706f0598b353b9243429b51a0133d9649005341bdb92f8e72ae479c79be374",
+      "lines": [
+        51
+      ],
+      "needle": "\"interior_mapping\",\"unverified\""
+    }
+  ],
+  "sdk_source_sha256": {
+    "opennurbs_3dm_attributes.cpp": "b885f3f62495370d1e1c85961c7d9e4664411bba8a7db4464832826ddc0c3ec7",
+    "opennurbs_3dm_settings.cpp": "5809745da0b69b4492d34aa160aac14acf335a4801e7daa340f4a961db86ecf5",
+    "opennurbs_annotationbase.cpp": "0e350bf8ae6954c3f20f35c782c026e31048684e9aed010e8e9820ab3f56b504",
+    "opennurbs_arccurve.cpp": "ea18d42332c4c401b5a962c8512a8929222313b823ae6471248e63fe4cd15156",
+    "opennurbs_archive.cpp": "0b642e8825775c1df2ac56e8ea17fe7cb3e67a49892b32db3efea56951b5ae39",
+    "opennurbs_beam.cpp": "252d9a40c74ba8dd816c3fd2636e1180dbabc7cdda2ea2466983fe7a40c69915",
+    "opennurbs_bitmap.cpp": "3cb624770772144e49decdb7a284e30b96337887dae78ca5cfd20026c25e4b13",
+    "opennurbs_brep.cpp": "8ee65cd75d241a8d56b5309b202ee9861d675d0e860f5dcfbf8d811399d2a156",
+    "opennurbs_brep_region.cpp": "64154a1b2e775ff794004367ddcaad988d494eeea778f92e8a3e41b44264e12f",
+    "opennurbs_curve.cpp": "f693a69d22611aec31b2cd3ffd3dbfcd491cf4584a4786bf8a083b76d1a43025",
+    "opennurbs_curveonsurface.cpp": "5cd15048daf3114a0b37be52bbbf1d6f18353fa834a42aaa3805a308db2390d5",
+    "opennurbs_curveproxy.cpp": "02e779e7eab3f395a645cd75511e1617706f26e1c6c2a94a8b367af78de96d26",
+    "opennurbs_detail.cpp": "7762c059f6430d5404d818634fbc5c5bb9c8808365417d686d3ac8336684bce7",
+    "opennurbs_dimension.cpp": "e272d1f56882f996b2ad0f7103eebd885a71a28f6b106454264302ce52754971",
+    "opennurbs_dimensionstyle.cpp": "2ae91a79d206629ca43a31f26dabb7b38afe0ed83017b97429c3937084771487",
+    "opennurbs_embedded_file.cpp": "f2f3765ceda3c51504f8ebe87e882d47cbcd816d093c72f4b648c7b7d5fb8607",
+    "opennurbs_geometry.cpp": "d4f64a2c732f3ace34ddb327097907556c737209fef68939537f0b7f81890129",
+    "opennurbs_group.cpp": "852d1bd1cd73c462c317f8e331def2d3a17147582e7e05074fcc960f1befff92",
+    "opennurbs_hatch.cpp": "263690e26b10585e19505c679269da70c4128cbe52ecb8e93192ec450bdeb9d6",
+    "opennurbs_instance.cpp": "14af48919efc60b1f1dbe23a584b5adce6e4edd1c235084643550127d4fa2d00",
+    "opennurbs_internal_V2_annotation.cpp": "31636814126ddb98bb3306c247f5d6cf5f6eeba0133af2e5fbacd4dd0a0b679c",
+    "opennurbs_internal_V5_annotation.cpp": "7cd2d4f0ca775fa1a3c9eaa73f90935f37cccb3acfd1cac94bfe350a39f98c11",
+    "opennurbs_internal_V5_dimstyle.cpp": "6029ce752780b1b3fd44e4015c2b381d374f74ab25e8faee63ecf25a7edb4211",
+    "opennurbs_layer.cpp": "cf30c9f98b65574755485b2c7b4c2abe59e26283315141d7f93fac0719c06545",
+    "opennurbs_leader.cpp": "667a12040c13e85d2b9d9da998d462e1e2f6aa778bf12ae10ca7cc5de4417a58",
+    "opennurbs_light.cpp": "8521dc969a53702bf3b0d74993f07eb7ec1e16d0756c6cce191784b3b2e823a7",
+    "opennurbs_linecurve.cpp": "6010731b258fb4949465c2111b968e44e60cac01d4979b60407920f4c36ff8a8",
+    "opennurbs_linetype.cpp": "19af563c19e7e4b601be4f79378b6488ef966e743f85b9fc0cc2cce0d86d1197",
+    "opennurbs_material.cpp": "fd85ecade4d1e40531078709f17c0fb2a3067a1608c8a073bd450dc0946b084c",
+    "opennurbs_mesh.cpp": "cf582db28c05f9e57d1f481fc741d75b345e9bc703e2d6cb2466483003894019",
+    "opennurbs_mesh_modifiers.cpp": "aa73d189544fe374497b8b1e1af2a08d57d96447e46d735409f14901c4507c72",
+    "opennurbs_mesh_ngon.cpp": "247583d2633ee7339a51c4b02b7d338f4b3033679d83dbbdc2707c04fd532713",
+    "opennurbs_model_component.cpp": "dd307f5edb9617d00adda433e1dddd46755e12dbfef2d21d2fdfec68961ebf1e",
+    "opennurbs_model_geometry.cpp": "c4d0ede9e6860fb49fad9af7c0012ff571be0d7c30718207bdf9d6e7369650c6",
+    "opennurbs_nurbscurve.cpp": "749eab99fbf16a7d8f1c48cb6c8bf57857a9199279e2ffea700e11c7fee58348",
+    "opennurbs_nurbssurface.cpp": "a433a8d8079a7b8cc64cc6610d637f7b585f1bcea47b3abab13dac2db43e1658",
+    "opennurbs_nurbsvolume.cpp": "5c0edcdfcc5470bb32bbf479b5e785d9b2ddb7f02f6b8f65fa4cd91b988e4274",
+    "opennurbs_object.cpp": "21460a35f0a101f4f1cf95599bf351aa6804ea5a69da29326d8dfe900bf98cb1",
+    "opennurbs_object_history.cpp": "831d3dd1d1e620b5cd12250b87cf6fda16bc56193837c170cae1db2cb10c76b3",
+    "opennurbs_offsetsurface.cpp": "3a6d9a1c49b3ad2fad0b6834e99275d76f3ae1a16a56b5b3b7d74e742f73656b",
+    "opennurbs_planesurface.cpp": "4d033619b34de4db7b8efe9728bad4390d10186a6b547f6f66c0ab4d4c47138a",
+    "opennurbs_pointcloud.cpp": "9ee2157cbdeb3ddef526ecd4a014c55e50b6e5f9aa2594c9be7d4a67a9b8ba1b",
+    "opennurbs_pointgeometry.cpp": "6ca11198d25fb18be10170e2d40e1d09e1afcc2144109d3f889522a295876bd6",
+    "opennurbs_pointgrid.cpp": "3651bfd0680e562430320c8e1246a3774a5513ae29c655f47865221becefc14c",
+    "opennurbs_polycurve.cpp": "065bec33404df29de6c28dc1ff1a9012f05a5a09c3ffeafd0991a7c44c2d7793",
+    "opennurbs_polyedgecurve.cpp": "7570beee4402309f0ecf8b0f4b19b8cd9c06479bb9d144fdc30934a52f6264dd",
+    "opennurbs_polylinecurve.cpp": "56f7d9656c9782fab3f196cfc3ee56dac939459b74a95e00b6cd1d1ec4b59668",
+    "opennurbs_render_content.cpp": "4f8eded0718191de36c1efe1caca74e104dd667464ffeebe3eabd278959783a8",
+    "opennurbs_revsurface.cpp": "5034a3f8b66b65eedc8a5c743b9b90a9a8041e0aef51c9ecc508ff934610c38f",
+    "opennurbs_sectionstyle.cpp": "28ab5b966331d74c8e81dbe0c520eae4f4d72a6f9d577d3ccd774249ab8a4226",
+    "opennurbs_subd.cpp": "4383dd696aa661e88213b0f17baa13940236a7ec263c2b57e716cfae471701d8",
+    "opennurbs_subd_archive.cpp": "34cf95e2750ff96fc9afcdddea47395d21e7b41fe440dd341cd6d3b0b586275a",
+    "opennurbs_subd_ref.cpp": "a1dfcf4eef98877fd07cfd8339108c9140134212936d8860766aa29b973b87a5",
+    "opennurbs_sumsurface.cpp": "a745c22cba3c25a6c65c3fce56f4e3e47ff171e82b57ecd2bad7e51655ac5d8d",
+    "opennurbs_surface.cpp": "0db79900cbde27b434f793400615baad7a83cac63213ccab6526720e28d3c80d",
+    "opennurbs_surfaceproxy.cpp": "9ac33f01f3c716c5504e74f3b7d200d964e6e0d56e5f8aecbbc75b82107a842f",
+    "opennurbs_text.cpp": "0cd80604d9e9eed58aa1c004995676dcf0bcb24f2d892f966cc830b0786bba39",
+    "opennurbs_text_style.cpp": "b14239706824c9abc0201c49c5791355cc5a03a8d11015ab0fcad138432eeb2e",
+    "opennurbs_textobject.cpp": "48850cf0744d1c50894a7c339ffdc2107ccfe7dccbc1e5b14f1d372727d01d75",
+    "opennurbs_userdata.cpp": "a61a45650a4d4dcd33cf1c96e3dea1eda6d712f6d7360599f89002787e2e545e",
+    "opennurbs_userdata_obsolete.cpp": "a3efb6d214865a231afa2ac2e3d060eeb2094fd34dac35387bd967afa2405a64",
+    "opennurbs_viewport.cpp": "5102031cf79058135442aacf8629d8b608186a947d217e1a251a178ac8cb67c8",
+    "opennurbs_xml.cpp": "a223870eeb3c91ce7c24e93e97c618f27354859a068c0093a01dfb53bbbeabdf"
+  },
+  "primary_alignment": [
+    {
+      "path": "ThreeDm.py",
+      "exists": true,
+      "same": false
+    },
+    {
+      "path": "Gui/ThreeDmArchive.cpp",
+      "exists": true,
+      "same": false
+    },
+    {
+      "path": "Gui/ThreeDmBrep.cpp",
+      "exists": true,
+      "same": false
+    },
+    {
+      "path": "Gui/ThreeDmMerge.cpp",
+      "exists": false,
+      "same": false
+    },
+    {
+      "path": "docs/3dm-coverage.json",
+      "exists": false,
+      "same": false
+    }
+  ],
+  "full_support_proven": false,
+  "completion_percentage": null,
+  "cautions": [
+    "Noncomment macros are static source discovery, not proof of build/runtime coverage.",
+    "Scope/test entries do not prove complete support for every field or every version.",
+    "Do not count commented registrations or require all abstract/helper types to be editable.",
+    "Legacy aggregate status and validation_scope fields have stale negatives; scoped reports/code take precedence.",
+    "No generic percentage follows from test assertion counts."
+  ]
+}

@@ -1,0 +1,45 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        root=Path('H:/FreeCAD-src/build/3dm-preserve-native/trim-domain-evidence')
+        proof=json.loads((root/'results.json').read_text());assert proof['ok'] and len(proof['cases'])==32
+        for row in [c for c in proof['cases'] if not c['consistent']]:
+            source=root/row['fixture'];before_bytes=source.read_bytes();inventory=json.loads(native.inspect3dm(str(source)));record=next(r for r in inventory['records'] if r['class_name']=='ON_CurveOnSurface')
+            check(source.stem+' wrong trim portion diagnosed',record['native_reference_analysis']['status']=='invalid' and 'trim' in record['native_reference_analysis']['message'])
+            check(source.stem+' structured invalid reference issue',any(i.get('code')=='invalid_native_reference' and i.get('source_uuid')==record['source_uuid'] for i in inventory['issues']))
+            doc=App.newDocument('InvalidTrim');before=len(doc.Objects);error=''
+            try:ThreeDm.import_file(str(source),doc,mode='preserve')
+            except Exception as e:error=str(e)
+            check(source.stem+' failure atomic and source immutable','dependencies' in error and len(doc.Objects)==before and source.read_bytes()==before_bytes);App.closeDocument(doc.Name)
+        for index,row in enumerate(c for c in proof['cases'] if c['consistent']):
+            source=root/row['fixture'];immutable=source.read_bytes();external=out/source.name;external.write_bytes(immutable);inventory=json.loads(native.inspect3dm(str(external)));record=next(r for r in inventory['records'] if r['class_name']=='ON_CurveOnSurface');analysis=record['native_reference_analysis'];binding=analysis['references'][0]['trim_domain_analysis']
+            check(source.stem+' native endpoints and bounded interior proof',not inventory['issues'] and analysis['status']=='linked' and binding['status']=='endpoints_and_interior_samples_verified' and binding['interior_mapping']=='projected_samples_verified' and len(binding['interior_samples'])==15 and binding['maximum_interior_sample_deviation']<1e-12 and binding['trim_reversed_3d']==row['trim_reversed'] and binding['maximum_endpoint_deviation']<1e-12 and binding['source_tolerance']==1e-7)
+            doc=App.newDocument('CurvedTrim%d'%index);objects=ThreeDm.import_file(str(external),doc,mode='preserve');curves=[o for o in objects if o.OM9SourceClass=='ON_CurveOnSurface'];curve=curves[0]
+            check(source.stem+' retained without false editable Shape',len(curves)==1 and curve.OM9Capability=='retained' and not hasattr(curve,'Shape'))
+            check(source.stem+' exact independent reference domains persisted',json.loads(curve.OM9SourceRecord)==record)
+            sentinel=out/(source.stem+'-destination.3dm');sentinel.write_bytes(b'keep existing target');before=len(doc.Objects);error=''
+            try:ThreeDm.export_file(str(sentinel),curves)
+            except Exception as e:error=str(e)
+            check(source.stem+' pending selected export atomic','CurveOnSurface' in error and sentinel.read_bytes()==b'keep existing target' and len(doc.Objects)==before)
+            name=curve.Name;save=out/(source.stem+'.FCStd');doc.recompute();doc.saveAs(str(save));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(save));curve=doc.getObject(name)
+            check(source.stem+' FCStd endpoint proof unchanged',json.loads(curve.OM9SourceRecord)==record)
+            snapshot=Path(curve.OM9ArchiveOwner.OM9SourceArchive)
+            check(source.stem+' source embedded after external deletion',not external.exists() and snapshot.read_bytes()==immutable)
+            second=json.loads(native.inspect3dm(str(snapshot)));reread=next(r for r in second['records'] if r['class_name']=='ON_CurveOnSurface')
+            check(source.stem+' reconstructed source native semantics exact',reread==record and not second['issues'])
+            check(source.stem+' original fixture immutable',source.read_bytes()==immutable);App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

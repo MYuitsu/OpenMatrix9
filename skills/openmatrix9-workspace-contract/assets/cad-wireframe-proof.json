@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-08",
+  "scope": "CAD wireframe and targeted FreeCAD regressions",
+  "full_exchange_complete": false,
+  "runtime_reports": 8,
+  "checks": 105,
+  "reports": [
+    {
+      "suite": "cad_wireframe_smoke",
+      "checks": 25,
+      "passed": true,
+      "evidence": "cad_wireframe_smoke/results.json",
+      "original_artifacts": "H:\\FreeCAD-src\\build\\om9-dev\\build\\cad_wireframe_smoke-1\\bdc2788d11a34e33b60047412e5977c3"
+    },
+    {
+      "suite": "viewport_title_smoke",
+      "checks": 45,
+      "passed": true,
+      "evidence": "viewport_title_smoke/results.json",
+      "original_artifacts": "H:\\FreeCAD-src\\build\\om9-dev\\build\\viewport_title_smoke-1\\7b06bc5c1e2e4fb9bdd3300ad6dc30d7"
+    },
+    {
+      "suite": "three_dm_preservation_ring_smoke",
+      "checks": 10,
+      "passed": true,
+      "evidence": "three_dm_preservation_ring_smoke/results.json",
+      "original_artifacts": "H:\\FreeCAD-src\\build\\om9-dev\\build\\three_dm_preservation_ring_smoke-1\\cfd03843400c403b9523287904a38c0c"
+    },
+    {
+      "suite": "three_dm_native_action_crash_smoke",
+      "checks": 8,
+      "passed": true,
+      "evidence": "three_dm_native_action_crash_smoke/results.json",
+      "original_artifacts": "H:\\FreeCAD-src\\build\\om9-dev\\build\\three_dm_native_action_crash_smoke-1\\aa1b382955ff40d1a38721470a90c9b8"
+    },
+    {
+      "suite": "core_workspace_lifecycle_smoke",
+      "checks": 2,
+      "passed": true,
+      "evidence": "core_workspace_lifecycle_smoke/results.json",
+      "original_artifacts": "H:\\FreeCAD-src\\build\\om9-dev\\build\\core_workspace_lifecycle_smoke-1\\256ea6290c934f52aac0bc48f12674e8"
+    },
+    {
+      "suite": "cad_external_link_smoke",
+      "checks": 5,
+      "passed": true,
+      "evidence": "cad_external_link_smoke/results.json",
+      "original_artifacts": "H:\\FreeCAD-src\\build\\om9-dev\\build\\cad_external_link_smoke-1\\2efa659dc9e946a6a67880b74fcc464a"
+    },
+    {
+      "suite": "cad_geometry_density_smoke",
+      "checks": 5,
+      "passed": true,
+      "evidence": "cad_geometry_density_smoke/results.json",
+      "original_artifacts": "H:\\FreeCAD-src\\build\\om9-dev\\build\\cad_geometry_density_smoke-1\\80b3403130164ba6af7c8e5f2436c90d"
+    },
+    {
+      "suite": "cad_nested_external_link_smoke",
+      "checks": 5,
+      "passed": true,
+      "evidence": "cad_nested_external_link_smoke/results.json",
+      "original_artifacts": "H:\\FreeCAD-src\\build\\om9-dev\\build\\cad_nested_external_link_smoke-1\\6ada6a8facd64849ab448e5c959186d5"
+    }
+  ],
+  "binary": {
+    "path": "H:\\FreeCAD-src\\build\\om9-cad-wire-sdk\\bin\\OpenMatrix9Gui.pyd",
+    "bytes": 10961920,
+    "sha256": "197e16e425b73587ad7e8cf3fa0ca63b9c54199099d0a29343332c366464127b"
+  },
+  "repository_evidence": "docs/validation/2026-10-08-cad-wireframe.md",
+  "consent": "User approved this Wireframe skill update on2026-10-08."
+}

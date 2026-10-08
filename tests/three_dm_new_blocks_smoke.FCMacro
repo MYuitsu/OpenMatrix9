@@ -1,0 +1,77 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, Part, Mesh, OpenMatrix9Gui as native
+        doc=App.newDocument('NewBlocks');cad=doc.addObject('Part::Feature','NewBlockCAD');cad.Shape=Part.makeBox(2,3,4);cad.Placement.Base=App.Vector(1,2,3)
+        mesh=doc.addObject('Mesh::Feature','NewBlockMesh');mesh.Mesh=Mesh.Mesh([[(0,0,0),(2,0,0),(0,3,0)]]);mesh.Placement.Base=App.Vector(4,5,6)
+        leaf=ThreeDm.create_definition(doc,[cad,mesh],'Leaf Nhẫn');leaf.Placement.Base=App.Vector(7,8,9)
+        nested=ThreeDm.create_instance(leaf,App.Placement(App.Vector(10,20,30),App.Rotation()),'Nested leaf');nested.ScaleVector=App.Vector(-2,3,4)
+        outer=ThreeDm.create_definition(doc,[nested],'Outer');outer.Placement.Base=App.Vector(40,50,60)
+        root=ThreeDm.create_instance(outer,App.Placement(App.Vector(100,200,300),App.Rotation()),'Placed outer');second=ThreeDm.create_instance(outer,App.Placement(App.Vector(400,500,600),App.Rotation()),'Second outer');doc.recompute()
+        path=out/'new-blocks.3dm'
+        def export(objects):
+            ThreeDm.export_preserved(str(path),objects);return json.loads(native.inspect3dm(str(path)))
+        def read():return json.loads(native.read3dm(str(path),str(out)))['items']
+        report=export([root,second]);ids={r['source_uuid'] for r in report['records']};defs=[r for r in report['components'] if r['class_name']=='ON_InstanceDefinition']
+        check('new block creation exports native shared nested structure',len(report['records'])==5 and len(defs)==2 and sum(r['class_name']=='ON_InstanceRef' for r in report['records'])==3 and sum(r['role']=='definition-member' for r in report['records'])==3)
+        items=read();check('new blocks expand two placements without duplicate originals',len(items)==4)
+        boxes=[]
+        for item in items:
+            if item['class_name']=='ON_Brep':shape=Part.Shape();shape.read(item['brep']);boxes.append(shape)
+        live=Part.getShape(root,'',needSubElement=False,transform=True)
+        check('nested new link placements and reflected scale match live solid',all(abs(abs(s.Volume)-576)<1e-6 for s in boxes) and abs(min(s.BoundBox.XMin for s in boxes)-live.BoundBox.XMin)<1e-6 and abs(min(s.BoundBox.ZMin for s in boxes)-live.BoundBox.ZMin)<1e-6)
+        firstMesh=next(i for i in items if i['class_name']=='ON_Mesh');check('new nested mesh placement composes once',any((App.Vector(*p)-App.Vector(128,309,450)).Length<1e-6 for p in firstMesh['vertices']))
+        report=export([root,second]);check('created native UUID graph remains stable across export',ids=={r['source_uuid'] for r in report['records']} and {d['source_uuid'] for d in defs}=={d['source_uuid'] for d in report['components'] if d['class_name']=='ON_InstanceDefinition'})
+        nativeDefinitionIds={d['source_uuid'] for d in defs};result['roundtrip_identity_diagnostic']=dict(native_definitions=sorted(nativeDefinitionIds),created_definitions=sorted([leaf.OM9NewDefinitionUUID,outer.OM9NewDefinitionUUID]))
+        returned=ThreeDm.import_file(str(path),doc,mode='preserve');check('created native block graph reimports structurally',len(returned)==2 and all(o.isDerivedFrom('App::Link') for o in returned));report=export(returned);check('reimported new blocks preserve native graph on second export',len(report['records'])==5 and len(read())==4)
+        check('creation keeps new geometry separate from source provenance',not hasattr(cad,'OM9SourceUUID') and not hasattr(leaf,'OM9DefinitionUUID') and hasattr(cad,'OM9NewGeometryUUID'))
+        ThreeDm.export_file(str(path),[root]);defaultReport=json.loads(native.inspect3dm(str(path)))
+        check('default exporter preserves selected new native block structure',len(defaultReport['records'])==4 and sum(r['class_name']=='ON_InstanceRef' for r in defaultReport['records'])==2 and len([r for r in defaultReport['components'] if r['class_name']=='ON_InstanceDefinition'])==2)
+        report=export([root]);check('selection excludes the other new placement',len(report['records'])==4 and len(read())==2)
+        names=[o.Name for o in (root,second,cad,leaf,nested,outer)];doc.saveAs(str(out/'new-blocks.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'new-blocks.FCStd'));root,second,cad,leaf,nested,outer=[doc.getObject(n) for n in names]
+        report=export([root,second]);check('new graph identities survive FCStd',ids=={r['source_uuid'] for r in report['records']})
+        doc.openTransaction('Edit new member');placement=cad.Placement;cad.Shape=Part.makeBox(3,4,5);cad.Placement=placement;doc.recompute();doc.commitTransaction();export([root]);shape=Part.Shape();shape.read(next(i['brep'] for i in read() if i['class_name']=='ON_Brep'));check('new member edit replaces current native payload',abs(abs(shape.Volume)-1440)<1e-6)
+        doc.undo();doc.recompute();export([root]);shape.read(next(i['brep'] for i in read() if i['class_name']=='ON_Brep'));check('new member Undo restores native geometry',abs(abs(shape.Volume)-576)<1e-6)
+        doc.redo();doc.recompute();export([root]);shape.read(next(i['brep'] for i in read() if i['class_name']=='ON_Brep'));check('new member Redo restores native geometry',abs(abs(shape.Volume)-1440)<1e-6)
+        fixture=Path(tempfile.gettempdir())/'om9-reference-edit.3dm';original=fixture.read_bytes();source=out/'included-source.3dm';source.write_bytes(original);imported=ThreeDm.import_file(str(source),doc,mode='preserve');importedRoot=next(o for o in imported if o.Label=='Rigid reference');sourceDefinition=importedRoot.LinkedObject
+        newSourceReference=ThreeDm.create_instance(sourceDefinition,App.Placement(App.Vector(30,40,50),App.Rotation()),'New source reference');doc.recompute();report=export([newSourceReference]);check('new instance can reuse imported native definition graph',len(report['records'])==2 and len(read())==1 and any(r['instance_definition_uuid']==sourceDefinition.OM9DefinitionUUID for r in report['records'] if r['class_name']=='ON_InstanceRef'))
+        point=Part.Shape();point.read(read()[0]['brep']);check('new source-backed target has current world placement',(point.Vertexes[0].Point-App.Vector(31,42,53)).Length<1e-7 and source.read_bytes()==original)
+        sourceMember=sourceDefinition.Group[0];sourceMember.Shape=Part.Vertex(7,8,9);sourceDefinition.Placement.Base=App.Vector(3,4,5);doc.recompute();export([newSourceReference]);point.read(read()[0]['brep']);check('new reference follows current imported member and definition placement',(point.Vertexes[0].Point-App.Vector(40,52,64)).Length<1e-7 and source.read_bytes()==original)
+        sourceWrapper=ThreeDm.create_definition(doc,[newSourceReference],'New wrapper of imported block');wrapperRoot=ThreeDm.create_instance(sourceWrapper,App.Placement(App.Vector(100,200,300),App.Rotation()),'Placed source wrapper');doc.recompute();report=export([wrapperRoot]);point.read(read()[0]['brep']);check('new nested graph can include verified imported definition dependencies',len(report['records'])==3 and (point.Vertexes[0].Point-App.Vector(140,252,364)).Length<1e-7)
+        report=export([importedRoot,root]);check('new block graph merges with selected source graph',len(report['records'])==6 and len(read())==3)
+        copied=doc.copyObject(root,False);copied.Placement.Base=App.Vector(700,800,900);doc.recompute();report=export([root,copied]);copiedIds={r['source_uuid'] for r in report['records']};check('copied new instance gets distinct stable native identity',len(report['records'])==5 and len(copiedIds)==5 and copiedIds=={r['source_uuid'] for r in export([root,copied])['records']})
+        createdObjects={o.Name for o in doc.Objects};failed=False
+        try:ThreeDm.create_definition(doc,[cad,cad],'Invalid duplicate members')
+        except RuntimeError:failed=True
+        check('duplicate creation preflight leaves document unchanged',failed and createdObjects=={o.Name for o in doc.Objects})
+        nullMember=doc.addObject('Part::Feature','NullNewMember');createdObjects={o.Name for o in doc.Objects};failed=False
+        try:ThreeDm.create_definition(doc,[nullMember],'Invalid empty CAD member')
+        except RuntimeError:failed=True
+        check('invalid CAD creation preflight leaves document unchanged',failed and createdObjects=={o.Name for o in doc.Objects})
+        undoDefinition=ThreeDm.create_definition(doc,[],'Undo definition');undoName=undoDefinition.Name;undoId=undoDefinition.OM9NewDefinitionUUID;doc.undo();doc.recompute();check('new definition creation is one Undo transaction',doc.getObject(undoName) is None);doc.redo();doc.recompute();check('creation Redo restores original definition identity',doc.getObject(undoName).OM9NewDefinitionUUID==undoId)
+        parent=doc.addObject('App::Part','ExistingParent');parent.Placement.Base=App.Vector(1000,2000,3000);parentCAD=doc.addObject('Part::Feature','ParentCAD');parentCAD.Shape=Part.makeBox(2,3,4);parentCAD.Placement.Base=App.Vector(5,6,7);parent.addObject(parentCAD);doc.recompute();parentDefinition=ThreeDm.create_definition(doc,[parentCAD],'Preserved parent placement');parentRoot=ThreeDm.create_instance(parentDefinition);doc.recompute();export([parentRoot]);shape=Part.Shape();shape.read(read()[0]['brep']);check('definition creation preserves member world placement when regrouping',abs(shape.BoundBox.XMin-1005)<1e-6 and abs(shape.BoundBox.YMin-2006)<1e-6 and abs(shape.BoundBox.ZMin-3007)<1e-6)
+        empty=ThreeDm.create_definition(doc,[],'Empty new block');emptyRoot=ThreeDm.create_instance(empty);doc.recompute();report=export([emptyRoot]);check('empty new definition remains a structural native instance',len(report['records'])==1 and len(read())==0)
+        sentinel=path.read_bytes();root.ScaleVector=App.Vector(0,1,1);doc.recompute();failed=False
+        try:export([root])
+        except RuntimeError:failed=True
+        check('singular new instance rejects without replacing destination',failed and path.read_bytes()==sentinel)
+        root.ScaleVector=App.Vector(1,1,1);failed=False
+        try:export([leaf])
+        except RuntimeError:failed=True
+        check('definition container is not an implicit whole-graph selection',failed and path.read_bytes()==sentinel)
+        before=export([wrapperRoot]);wrapperName=wrapperRoot.Name;doc.saveAs(str(out/'included-source.FCStd'));App.closeDocument(doc.Name);source.unlink();doc=App.openDocument(str(out/'included-source.FCStd'));wrapperRoot=doc.getObject(wrapperName);after=export([wrapperRoot]);point.read(read()[0]['brep']);check('new and imported nested graph survives FCStd without external source',{r['source_uuid'] for r in before['records']}=={r['source_uuid'] for r in after['records']} and (point.Vertexes[0].Point-App.Vector(140,252,364)).Length<1e-7 and fixture.read_bytes()==original)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

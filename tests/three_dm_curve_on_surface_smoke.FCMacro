@@ -1,0 +1,45 @@
+# OM9-FILE-012 archive recovery/source retention; full field/export adapter pending.
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,traceback,subprocess
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        root=Path('H:/FreeCAD-src/build/3dm-preserve-native/curve-on-surface-recovery-evidence')
+        for dimension in (2,3):
+            for optional in (0,1):
+                label='d%d c3%d'%(dimension,optional);source=root/('d%d-c3%d-v50.3dm'%(dimension,optional));immutable=source.read_bytes()
+                external=out/(label.replace(' ','-')+'.3dm');external.write_bytes(immutable)
+                inventory=json.loads(native.inspect3dm(str(external)));row=inventory['records'][0]
+                check(label+' recovered native class is retained',row['class_name']=='ON_CurveOnSurface' and row['capability']=='retained')
+                old=external.with_name(external.stem+'-legacy.3dm');report=external.with_suffix('.json')
+                process=subprocess.run(['H:/FreeCAD-src/build/3dm-cos-legacy-reader/CurveOnSurfaceLegacyReader.exe',str(external),str(old),str(report)],capture_output=True,text=True,timeout=30,creationflags=subprocess.CREATE_NO_WINDOW)
+                check(label+' separate repaired SDK2013 reads and reencodes',process.returncode==0)
+                decoded=json.loads(report.read_text())['curves'][0]
+                check(label+' independent optional child presence and identity',decoded['uuid']==row['source_uuid'] and (decoded['approximation'] is not None)==bool(optional) and decoded['dimension']==dimension)
+                doc=App.newDocument('SurfaceCurve%d%d'%(dimension,optional));objects=ThreeDm.import_file(str(external),doc,mode='preserve');obj=objects[0]
+                check(label+' host source retained with no false CAD geometry',len(objects)==1 and obj.OM9SourceClass=='ON_CurveOnSurface' and obj.OM9Capability=='retained' and not hasattr(obj,'Shape'))
+                sentinel=out/(external.stem+'-destination.3dm');sentinel.write_bytes(b'keep existing target');before=len(doc.Objects);error=''
+                try:ThreeDm.export_file(str(sentinel),[obj])
+                except Exception as e:error=str(e)
+                result[label+' export_observation']=dict(error=error,destination_unchanged=sentinel.read_bytes()==b'keep existing target',object_count_before=before,object_count_after=len(doc.Objects))
+                check(label+' unfinished child adapter rejects before target/document mutation',bool(error) and 'CurveOnSurface' in error and sentinel.read_bytes()==b'keep existing target' and len(doc.Objects)==before)
+                name=obj.Name;save=external.with_suffix('.FCStd');doc.saveAs(str(save));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(save));obj=doc.getObject(name)
+                snapshot=Path(obj.OM9ArchiveOwner.OM9SourceArchive)
+                check(label+' embedded archive survives external deletion',not external.exists() and snapshot.read_bytes()==immutable)
+                recovered=json.loads(native.inspect3dm(str(snapshot)))
+                check(label+' recovered snapshot retains native identity',recovered['records']==inventory['records'] and obj.OM9Capability=='retained')
+                check(label+' original fixture bytes immutable',source.read_bytes()==immutable)
+                App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

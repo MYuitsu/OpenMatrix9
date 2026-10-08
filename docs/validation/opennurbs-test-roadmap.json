@@ -1,0 +1,257 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-08",
+  "full_exchange_complete": false,
+  "approved_plan": "docs/superpowers/plans/2026-10-07-full-opennurbs-completion.md",
+  "counting_rule": "A named fixture matrix is one test batch. Fixtures, assertions, execution attempts and package milestones are separate counts. A retry does not create a new planned batch.",
+  "remaining_total_test_batches": null,
+  "remaining_total_explanation": "Only the prepared queue is countable now; remaining geometry/property/interaction matrices have not all been enumerated. New failure cases can add regression batches.",
+  "packages": [
+    {
+      "id": 1,
+      "name": "Coverage",
+      "status": "complete"
+    },
+    {
+      "id": 2,
+      "name": "CurveOnSurface / PolyEdge",
+      "status": "in_progress",
+      "remaining": "Complete per-property applicability for component references/current owner edits and global correspondence; existing line/BRep/UV target incompatibilities and scoped copy/remap/seam/pole exchange evidenced"
+    },
+    {
+      "id": 3,
+      "name": "BRep / solid",
+      "status": "in_progress",
+      "remaining": "Complete multi-shell/winding/reflection/+2 applicability and native graph preservation acceptance"
+    },
+    {
+      "id": 4,
+      "name": "Remaining geometry",
+      "status": "open",
+      "remaining": "Complete per-type/property adapters or verified preservation and V5 incompatibility evidence"
+    },
+    {
+      "id": 5,
+      "name": "Annotation / styles / layout",
+      "status": "open",
+      "remaining": "Content, Unicode, positioning, units, dependencies and native/Rhino5 roundtrip"
+    },
+    {
+      "id": 6,
+      "name": "Resources / linked blocks",
+      "status": "open",
+      "remaining": "Reference closure, resource bytes, FCStd portability and missing-resource failures"
+    },
+    {
+      "id": 7,
+      "name": "Document / merge / payload",
+      "status": "open",
+      "remaining": "All component/document groups, settings policy, collisions/units, userdata and history validity"
+    },
+    {
+      "id": 8,
+      "name": "Final acceptance / integration",
+      "status": "open",
+      "remaining": "Whole matrix, final review, primary integration, build/install and actual applications"
+    }
+  ],
+  "prepared_pending_batches": [],
+  "report_after_each_measurement": [
+    "Batch name and package; fixture count; completed/passed/failed cases and whether the probe itself stopped",
+    "What the measurement proves and what remains unverified; exact evidence path",
+    "Prepared pending batch count/list; unclosed package count; total remaining batches or explicit unknown",
+    "Next batch/action; explain any newly added regression and why the queue grew"
+  ],
+  "completed_batches": [
+    {
+      "id": "standalone-polyedge-v5-12",
+      "package": 2,
+      "fixtures": 12,
+      "status": "measured_target_failure",
+      "completed_cases": 12,
+      "passed": 0,
+      "failed": 12,
+      "evidence": "docs/validation/2026-10-08-opennurbs-standalone-reference-support.md"
+    },
+    {
+      "id": "standalone-native-owner-retention",
+      "package": 2,
+      "checks": 825,
+      "status": "passed"
+    },
+    {
+      "id": "standalone-freecad-retention-24",
+      "package": 2,
+      "imports": 24,
+      "checks": 121,
+      "status": "passed"
+    },
+    {
+      "id": "post-standalone-installed-regression",
+      "package": 2,
+      "status": "passed",
+      "native_suites": 43,
+      "runtime_reports": 32,
+      "runtime_checks": 4667,
+      "evidence": "docs/validation/opennurbs-current-proofs-20261007/summary.json"
+    },
+    {
+      "id": "mixed-polycurve-reference-v5-6",
+      "package": 2,
+      "fixtures": 6,
+      "status": "measured_target_failure",
+      "completed_cases": 6,
+      "passed": 0,
+      "failed": 6,
+      "evidence": "docs/validation/2026-10-08-opennurbs-mixed-reference-support.md"
+    },
+    {
+      "id": "mixed-native-owner-retention",
+      "package": 2,
+      "checks": 363,
+      "status": "passed"
+    },
+    {
+      "id": "mixed-freecad-retention-12",
+      "package": 2,
+      "imports": 12,
+      "checks": 64,
+      "status": "passed"
+    },
+    {
+      "id": "post-mixed-installed-regression",
+      "package": 2,
+      "status": "passed",
+      "native_suites": 44,
+      "runtime_reports": 33,
+      "runtime_checks": 4731,
+      "evidence": "docs/validation/opennurbs-current-proofs-20261007/summary.json"
+    },
+    {
+      "id": "native-reference-copy-remap-18",
+      "package": 2,
+      "fixtures": 18,
+      "native_cases": 36,
+      "native_passed": 36,
+      "native_failed": 0,
+      "host_cases": 18,
+      "host_passed": 18,
+      "host_failed": 0,
+      "status": "passed",
+      "evidence": "docs/validation/2026-10-08-native-reference-remap.md"
+    },
+    {
+      "id": "seam-poles-periodic-v5-8",
+      "package": 2,
+      "fixtures": 8,
+      "status": "passed",
+      "native_checks": 229,
+      "fixture_host_checks": 32,
+      "rhino_completed": 8,
+      "rhino_passed": 8,
+      "rhino_failed": 0,
+      "native_saved_checks": 200,
+      "host_reimport_checks": 49,
+      "evidence": "docs/validation/2026-10-08-seam-profiles-complete.md"
+    },
+    {
+      "id": "uv-reference-copy-remap-8",
+      "package": 2,
+      "fixtures": 8,
+      "status": "scoped_target_incompatibility_preservation_verified",
+      "native_checks": 895,
+      "host_checks": 272,
+      "rhino_read_completed": 8,
+      "rhino_passed": 0,
+      "rhino_failed": 8,
+      "saveas_failures": 8,
+      "rhino_roundtrip_completed": 0,
+      "saved_reimport_count": 0,
+      "actual_acceptance_native_checks": 507,
+      "evidence": "docs/validation/2026-10-08-uv-reference-rhino5.md"
+    },
+    {
+      "id": "brep-seam-singular-and-edits-4",
+      "package": 2,
+      "also_package": 3,
+      "fixtures": 4,
+      "status": "passed",
+      "native_fixture_checks": 211,
+      "host_fixture_checks": 65,
+      "rhino_completed": 4,
+      "rhino_passed": 4,
+      "rhino_failed": 0,
+      "native_saved_checks": 1800,
+      "host_reimport_checks": 45,
+      "uv_knot_refinement_cases": 1,
+      "evidence": "docs/validation/2026-10-08-seam-trim-complete.md"
+    },
+    {
+      "id": "native-qt-exchange-user-ring-crash",
+      "package": 8,
+      "fixtures": 2,
+      "fixture_description": "One supplied oval ring for native menu Import; one independent box for native menu Export. UI smoke repeats box separately.",
+      "status": "passed_scoped_crash_regression",
+      "native_action_checks": 8,
+      "ui_regression_checks": 18,
+      "user_source_records": 31,
+      "user_host_geometry": 52,
+      "evidence": "docs/validation/2026-10-08-native-menu-gil-fix.md"
+    },
+    {
+      "id": "oval-wireframe-display-diagnosis",
+      "package": 8,
+      "fixtures": 1,
+      "status": "measured_display_limitation",
+      "curves_sampled": 11,
+      "surfaces_sampled": 312,
+      "max_sample_deviation_mm": 1.112884370092863e-14,
+      "geometry_and_source_unchanged": true,
+      "evidence": "docs/validation/2026-10-08-oval-display-diagnostic.md"
+    },
+    {
+      "id": "cad-wireframe-and-targeted-regressions",
+      "package": 8,
+      "fixtures_cad_matrix": 13,
+      "status": "passed_scoped_display_regression",
+      "runtime_reports": 8,
+      "runtime_checks": 105,
+      "rhino_new_cases": 0,
+      "evidence": "docs/validation/2026-10-08-cad-wireframe.md"
+    },
+    {
+      "id": "fast-preservation-import-and-regressions",
+      "package": 8,
+      "fixtures_performance": 1,
+      "fixtures_worker_matrix": 1,
+      "worker_source_records": 19,
+      "status": "passed_scoped_performance_regression",
+      "runtime_reports": 12,
+      "runtime_checks": 151,
+      "rhino_new_cases": 0,
+      "evidence": "docs/validation/2026-10-08-fast-3dm-import.md"
+    }
+  ],
+  "current_checkpoint": {
+    "native_suites": 51,
+    "runtime_reports": 39,
+    "runtime_checks": 5806,
+    "unclosed_packages": 7,
+    "evidence": "docs/validation/opennurbs-current-proofs-20261007/summary.json"
+  },
+  "current_display_checkpoint": {
+    "runtime_reports": 8,
+    "runtime_checks": 105,
+    "binary": "H:/FreeCAD-src/build/om9-cad-wire-sdk/bin/OpenMatrix9Gui.pyd",
+    "evidence": "docs/validation/cad-wireframe-20261008/summary.json",
+    "older_geometry_checkpoint_not_rerun": true
+  },
+  "current_performance_checkpoint": {
+    "runtime_reports": 12,
+    "runtime_checks": 151,
+    "binary": "H:/FreeCAD-src/build/om9-import-fast-sdk/bin/OpenMatrix9Gui.pyd",
+    "evidence": "docs/validation/import-fast-20261008/summary.json",
+    "whole_geometry_matrix_not_rerun": true,
+    "native_targeted_suites": 7
+  }
+}

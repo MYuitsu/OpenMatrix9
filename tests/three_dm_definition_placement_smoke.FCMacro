@@ -1,0 +1,80 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, OpenMatrix9Gui as native
+        doc=App.newDocument('DefinitionPlacement')
+        objects=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-merge-source.3dm'),doc,mode='preserve');links=[o for o in objects if o.isDerivedFrom('App::Link')];definition=links[0].LinkedObject
+        member=definition.Group[0];initialSignature=state.source_signature(member)
+        definition.Placement=App.Placement(App.Vector(5,6,7),App.Rotation(App.Vector(0,0,1),90));doc.recompute()
+        expected=[Part.getShape(o,'',needSubElement=False,transform=True).Vertexes[0].Point for o in links]
+        result['host']=dict(definition=list(definition.Placement.toMatrix().A),member_signature_equal=state.source_signature(member)==initialSignature,links=[dict(matrix=list(o.Placement.toMatrix().A),linktransform=o.LinkTransform,point=list(point)) for o,point in zip(links,expected)])
+        links[0].LinkTransform=True;doc.recompute()
+        result['true_link']=dict(matrix=list(links[0].Placement.toMatrix().A),linkmatrix=list(links[0].LinkPlacement.toMatrix().A),point=list(Part.getShape(links[0],'',needSubElement=False,transform=True).Vertexes[0].Point))
+        expected=[Part.getShape(o,'',needSubElement=False,transform=True).Vertexes[0].Point for o in links]
+        target=out/'placement.3dm';ThreeDm.export_preserved(str(target),links)
+        read=json.loads(native.read3dm(str(target),str(out)));points=[]
+        for item in read['items']:
+            shape=Part.Shape();shape.read(item['brep']);points.append(shape.Vertexes[0].Point)
+        check('definition placement export matches both live FreeCAD links',len(points)==2 and all(any((p-q).Length<1e-7 for p in points) for q in expected))
+        check('definition placement does not change local canonical signature',state.source_signature(member)==initialSignature)
+        report=json.loads(native.inspect3dm(str(target)))
+        check('canonical member keeps native UUID and geometry payload',next(r for r in report['records'] if r['source_uuid']==member.OM9SourceUUID)['geometry_crc']==json.loads(member.OM9SourceRecord)['geometry_crc'])
+        links[0].ScaleVector=App.Vector(-2,3,4);doc.recompute();expected=Part.getShape(links[0],'',needSubElement=False,transform=True).Vertexes[0].Point
+        ThreeDm.export_preserved(str(target),[links[0]]);read=json.loads(native.read3dm(str(target),str(out)));shape=Part.Shape();shape.read(read['items'][0]['brep'])
+        check('nonuniform reflected link scale composes before definition placement',(shape.Vertexes[0].Point-expected).Length<1e-7)
+        names=[o.Name for o in links];doc.saveAs(str(out/'placement.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'placement.FCStd'));links=[doc.getObject(n) for n in names]
+        ThreeDm.export_preserved(str(target),[links[0]]);read=json.loads(native.read3dm(str(target),str(out)));shape.read(read['items'][0]['brep'])
+        check('definition placement and link scale survive FCStd',(shape.Vertexes[0].Point-expected).Length<1e-7)
+        old=target.read_bytes();links[0].ScaleVector=App.Vector(0,1,1);doc.recompute();rejected=False
+        try:ThreeDm.export_preserved(str(target),[links[0]])
+        except RuntimeError:rejected=True
+        check('singular link scale rejects atomically',rejected and target.read_bytes()==old)
+        affine=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm'),doc,mode='preserve')[0]
+        record=json.loads(affine.OM9SourceRecord);definition=state._instance_definition(affine,record)
+        definition.Placement=App.Placement(App.Vector(5,6,7),App.Rotation(App.Vector(0,0,1),90));doc.recompute()
+        expectedShape=next(o.Shape for o in affine.Group if o.isDerivedFrom('Part::Feature'))
+        expectedMesh=next(o.Mesh.Topology[0] for o in affine.Group if o.isDerivedFrom('Mesh::Feature'))
+        check('affine preview refreshes after definition placement',affine.OM9PreviewStatus=='Current canonical members' and any((v.Point-App.Vector(18,26,37)).Length<1e-7 for v in expectedShape.Vertexes))
+        ThreeDm.export_preserved(str(target),[affine]);read=json.loads(native.read3dm(str(target),str(out)));shape.read(next(i['brep'] for i in read['items'] if 'brep' in i));actualMesh=next(i['vertices'] for i in read['items'] if 'vertices' in i)
+        check('affine CAD export matches refreshed preview',abs(shape.Volume-expectedShape.Volume)<1e-7 and all(any((v.Point-w.Point).Length<1e-7 for v in shape.Vertexes) for w in expectedShape.Vertexes))
+        check('affine mesh export matches refreshed preview',len(actualMesh)==len(expectedMesh) and all(any((App.Vector(*p)-q).Length<1e-7 for p in actualMesh) for q in expectedMesh))
+        nested=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-nested-blocks.3dm'),doc,mode='preserve');owner=nested[0].OM9ArchiveOwner
+        nestedMember=next(o for o in doc.Objects if getattr(o,'OM9ArchiveOwner',None)==owner and getattr(o,'OM9SourceClass','')=='ON_InstanceRef' and json.loads(o.OM9SourceRecord)['role']=='definition-member')
+        nestedMember.LinkTransform=True;nestedMember.ScaleVector=App.Vector(-2,3,4)
+        nestedMember.LinkedObject.Placement=App.Placement(App.Vector(5,6,7),App.Rotation(App.Vector(0,0,1),30));doc.recompute()
+        expected=[Part.getShape(o,'',needSubElement=False,transform=True).Vertexes[0].Point for o in nested]
+        ThreeDm.export_preserved(str(target),nested);read=json.loads(native.read3dm(str(target),str(out)));points=[]
+        for item in read['items']:
+            shape.read(item['brep']);points.append(shape.Vertexes[0].Point)
+        check('nested definition placement and reflected member scale match live instances',len(points)==len(expected) and all(any((p-q).Length<1e-7 for p in points) for q in expected))
+        old=target.read_bytes();previous=nestedMember.LinkedObject
+        nestedMember.setLink(next(o for o in doc.Objects if hasattr(o,'OM9DefinitionUUID') and o.OM9ArchiveOwner!=owner));rejected=False
+        try:ThreeDm.export_preserved(str(target),nested)
+        except RuntimeError:rejected=True
+        nestedMember.setLink(previous)
+        check('retargeted nested source reference rejects atomically',rejected and target.read_bytes()==old)
+        shared=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-shared-block-members.3dm'),doc,mode='preserve')
+        sharedLink=next(o for o in shared if o.isDerivedFrom('App::Link'));sharedLink.LinkTransform=True
+        sharedLink.LinkedObject.Placement=App.Placement(App.Vector(5,6,7),App.Rotation(App.Vector(0,0,1),90));doc.recompute()
+        expected=[Part.getShape(o,'',needSubElement=False,transform=True).Vertexes[0].Point for o in shared]
+        ThreeDm.export_preserved(str(target),shared);read=json.loads(native.read3dm(str(target),str(out)));points=[]
+        for item in read['items']:
+            shape.read(item['brep']);points.append(shape.Vertexes[0].Point)
+        check('definition placement keeps shared canonical member valid across definitions',len(points)==len(expected) and all(any((p-q).Length<1e-7 for p in points) for q in expected) and sum(r['class_name']=='ON_Point' for r in json.loads(native.inspect3dm(str(target)))['records'])==1)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

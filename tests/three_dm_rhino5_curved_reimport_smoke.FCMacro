@@ -1,0 +1,52 @@
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import hashlib, json, os, traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+result={'checks':[],'measurements':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm, OpenMatrix9Gui as native
+        root=Path('H:/FreeCAD-src/build/opennurbs-curved-shell-acceptance-20261007')
+        oracle_path=root/'oracle.json'
+        oracle=json.loads(oracle_path.read_text())
+        report_path=root/'gui-output-20261007-223723/rhino5-gui-profile-results.json'
+        report=json.loads(report_path.read_text())
+        check('actual four-file failed strict-volume report is bound to original oracle',len(report['cases'])==len(oracle['cases'])==4 and not report['ok'] and report['oracle_sha256']==hashlib.sha256(oracle_path.read_bytes()).hexdigest())
+        result['gui_report_sha256']=hashlib.sha256(report_path.read_bytes()).hexdigest()
+        for i,(expected,row) in enumerate(zip(oracle['cases'],report['cases'])):
+            source=root/expected['fixture'];saved=Path(row['saved_fixture'])
+            source_bytes,saved_bytes=source.read_bytes(),saved.read_bytes()
+            check(source.stem+' source and actual saved hashes',row['fixture']==expected['fixture'] and hashlib.sha256(source_bytes).hexdigest()==row['source_sha256']==expected['source_sha256'] and hashlib.sha256(saved_bytes).hexdigest()==row['saved_sha256'])
+            check(source.stem+' actual Rhino shape valid with unchanged default volume across SaveAs',row['bad_objects']==0 and row['first_read']['objects']==row['reread']['objects'] and row['first_read']['objects'][0]['valid'] and row['first_read']['objects'][0]['solid'] and row['first_read']['objects'][0]['orientation']=='Outward')
+            before=json.loads(native.inspect3dm(str(source)))
+            after=json.loads(native.inspect3dm(str(saved)))
+            a,b=before['records'][0],after['records'][0]
+            check(source.stem+' complete native BRep UUID and graph CRC after Rhino SaveAs',not before['issues'] and not after['issues'] and len(before['records'])==len(after['records'])==1 and b['class_name']==a['class_name']=='ON_Brep' and b['source_uuid']==a['source_uuid']==expected['objects'][0]['uuid'] and b['geometry_crc']==a['geometry_crc'])
+            doc=App.newDocument('RhinoCurved'+str(i))
+            external=out/(source.stem+'-external.3dm');external.write_bytes(saved_bytes)
+            obj=ThreeDm.import_file(str(external),doc,mode='preserve')[0]
+            check(source.stem+' editable valid closed two-shell CAD',obj.OM9Capability=='editable' and obj.Shape.isValid() and obj.Shape.isClosed() and len(obj.Shape.Shells)==2 and len(obj.Shape.Faces)==expected['objects'][0]['faces'])
+            staged=out/(source.stem+'-host.brep');obj.Shape.exportBrep(str(staged))
+            mass=native.measure3dmBrep(str(staged),1e-13)
+            result['measurements'].append(dict(fixture=source.name,analytical_volume=expected['objects'][0]['volume_mm3'],default_freecad_volume=obj.Shape.Volume,adaptive_volume=mass['volume'],default_rhino_volume=row['first_read']['objects'][0]['volume_mm3']))
+            check(source.stem+' independent precise host volume keeps original analytical threshold',abs(mass['volume']-expected['objects'][0]['volume_mm3'])<=1e-6)
+            name=obj.Name;archive=out/(source.stem+'.FCStd');doc.saveAs(str(archive));external.unlink();App.closeDocument(doc.Name)
+            doc=App.openDocument(str(archive));obj=doc.getObject(name)
+            check(source.stem+' source-deleted FCStd preserves complete actual Rhino archive and decoded record',Path(obj.OM9ArchiveOwner.OM9SourceArchive).read_bytes()==saved_bytes and json.loads(obj.OM9SourceRecord)==b and obj.Shape.isValid() and len(obj.Shape.Shells)==2)
+            target=out/(source.stem+'-protected.3dm');target.write_bytes(b'keep target');count=len(doc.Objects);error=''
+            try:ThreeDm.export_file(str(target),[obj])
+            except Exception as exc:error=str(exc)
+            check(source.stem+' GUI opaque plugin tables retain atomic selected-export guard','Opaque plugin table dependencies' in error and target.read_bytes()==b'keep target' and len(doc.Objects)==count)
+            App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:
+        result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

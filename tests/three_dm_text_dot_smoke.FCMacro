@@ -1,0 +1,68 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json,os,tempfile,traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def near(actual,expected):return len(actual)==len(expected) and all(abs(a-b)<1e-10 for a,b in zip(actual,expected))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm,ThreeDmArchiveState as state,ThreeDmTextDot as adapter,OpenMatrix9Gui as native
+        source=Path(tempfile.gettempdir())/'om9-native-text-dot-mm.3dm';original=source.read_bytes();external=out/'source.3dm';external.write_bytes(original)
+        doc=App.newDocument('NativeTextDot');doc.UndoMode=1;roots=ThreeDm.import_file(str(external),doc,mode='preserve');dot=next(o for o in roots if o.OM9SourceClass=='ON_TextDot');member=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_TextDot' and o!=dot);block=next(o for o in roots if o.OM9SourceClass=='ON_InstanceRef')
+        check('native TextDot has persistent class-specific current fields',adapter.is_adapter(dot) and adapter.is_adapter(member) and not hasattr(dot,'Shape'))
+        check('native screen-text provider is attached',dot.ViewObject.Proxy.__class__.__module__=='ThreeDmTextDot' and dot.ViewObject.Proxy.text.string.getValues()==['Original native'])
+        check('native double anchor and source styles are bound',near(dot.OM9TextDotPoint,[1.123456789012345,2,3]) and dot.OM9TextDotHeight==19 and dot.OM9TextDotBold and dot.OM9TextDotItalic and dot.OM9TextDotAlwaysOnTop and dot.OM9TextDotTransparent)
+        target=out/'text-dot.3dm'
+        def export(objects):ThreeDm.export_file(str(target),objects);return json.loads(native.inspect3dm(str(target)))
+        def record(report,identity=None):return next(r for r in report['records'] if r['class_name']=='ON_TextDot' and (identity is None or r['source_uuid']==identity))
+        baseline=export([dot]);signature=dot.OM9SourceSignature
+        check('unchanged native TextDot preserves native CRC and identity',record(baseline)['geometry_crc']==json.loads(dot.OM9SourceRecord)['geometry_crc'] and record(baseline)['source_uuid']==dot.OM9SourceUUID)
+        doc.openTransaction('Edit native TextDot');dot.OM9TextDotPoint=App.Vector(4.123456789012345,5,6);dot.OM9TextDotText='Duy ♥\nRhino 5';dot.OM9TextDotFont='Tahoma';dot.OM9TextDotHeight=23;dot.OM9TextDotBold=False;dot.OM9TextDotAlwaysOnTop=False;dot.OM9TextDotTransparent=False;dot.OM9BlockMemberPlacement=App.Placement(App.Vector(10,20,30),App.Rotation(App.Vector(0,0,1),90));doc.recompute();doc.commitTransaction();edited=record(export([dot]))
+        check('edited native double anchor follows current delta once',near(edited['text_dot']['point'],[5,24.123456789012345,36]))
+        check('Unicode multiline native TextDot content exports',edited['text_dot']['primary_text']=='Duy ♥\nRhino 5' and dot.ViewObject.Proxy.text.string.getValues()==['Duy ♥','Rhino 5'])
+        check('native font height and display flags export',edited['text_dot']['font_face']=='Tahoma' and edited['text_dot']['height_in_points']==23 and not edited['text_dot']['bold'] and edited['text_dot']['italic'] and not edited['text_dot']['always_on_top'] and not edited['text_dot']['transparent'])
+        check('TextDot userdata attribute text and immutable baseline remain',edited['user_strings']==record(baseline)['user_strings'] and edited['attribute_user_strings']==record(baseline)['attribute_user_strings'] and dot.OM9SourceSignature==signature)
+        doc.undo();doc.recompute();check('Undo restores current native payload',record(export([dot]))['text_dot']==record(baseline)['text_dot'])
+        doc.redo();doc.recompute();check('Redo restores current native payload',record(export([dot]))['text_dot']==edited['text_dot'])
+        parent=doc.addObject('App::Part','Parent');parent.addObject(dot);parent.Placement.Base=App.Vector(100,200,300);doc.recompute();check('parent and native anchor delta compose once',near(record(export([dot]))['text_dot']['point'],[105,224.123456789012345,336]))
+        copy=doc.copyObject(dot,False);copy.OM9TextDotText='Independent note';copy.OM9BlockMemberPlacement=App.Placement();doc.recompute();copied=record(export([copy]));check('copied TextDot exports independent live text and native identity',copied['source_uuid']!=dot.OM9SourceUUID and copied['text_dot']['primary_text']=='Independent note' and near(copied['text_dot']['point'],[4.123456789012345,5,6]))
+        member.OM9TextDotText='Current definition note';member.OM9TextDotPoint=App.Vector(7.123456789012345,8,9);member.OM9BlockMemberPlacement.Base=App.Vector(1,2,3);doc.recompute();memberOutput=record(export([block]),member.OM9SourceUUID)
+        check('canonical TextDot member uses current definition-local fields',memberOutput['role']=='definition-member' and memberOutput['text_dot']['primary_text']=='Current definition note' and near(memberOutput['text_dot']['point'],[8.123456789012345,10,12]))
+        selected=record(export([member]));check('selected current TextDot member becomes independent native root',selected['role']=='top-level' and selected['source_uuid']!=member.OM9SourceUUID and selected['text_dot']==memberOutput['text_dot'])
+        repeated=record(export([member]));check('selected member keeps repeat UUID without mutating source',repeated['source_uuid']==selected['source_uuid'] and member.OM9SourceUUID==memberOutput['source_uuid'])
+        definition=next(o for o in doc.Objects if hasattr(o,'OM9DefinitionUUID'));own=state.copy_definition(definition,'Copied text definition');ownMember=own.Group[0];ownMember.OM9TextDotText='Copied definition note';ownInstance=state.create_instance(own);doc.recompute();ownOutput=record(export([ownInstance]));check('copied definition TextDot retains independent current fields',ownOutput['text_dot']['primary_text']=='Copied definition note' and member.OM9TextDotText=='Current definition note')
+        check('copied definition TextDot placement and current anchor compose once',near(ownOutput['text_dot']['point'],[8.123456789012345,10,12]))
+        proxy=doc.addObject('App::Link','SharedTextDot');proxy.setLink(member);proxy.Placement.Base=App.Vector(50,60,70);proxy.ScaleVector=App.Vector(-2,3,4);state._property(proxy,'Bool','OM9DefinitionMemberProxy',True);state._property(proxy,'String','OM9ProxyMetadata',json.dumps(state.source_metadata(proxy),sort_keys=True));proxyDefinition=state.create_definition(doc,[proxy],'Shared TextDot definition');doc.recompute();proxyOutput=record(export([proxy]));check('selected shared TextDot proxy preserves native content and affine anchor',proxyOutput['text_dot']['primary_text']=='Current definition note' and near(proxyOutput['text_dot']['point'],[33.75308642197531,90,118]))
+        proxyInstance=state.create_instance(proxyDefinition);doc.recompute();proxyBlockOutput=record(export([proxyInstance]));check('new shared definition uses current canonical TextDot fields',proxyBlockOutput['text_dot']['primary_text']=='Current definition note' and near(proxyBlockOutput['text_dot']['point'],[33.75308642197531,90,118]))
+        second=ThreeDm.import_file(str(source),doc,mode='preserve');secondDot=next(o for o in second if o.OM9SourceClass=='ON_TextDot');secondDot.OM9TextDotText='Second namespace';secondDot.OM9TextDotPoint=App.Vector(2,3,4);doc.recompute();merged=export([dot,secondDot]);check('same source namespaces preserve distinct current TextDot fields',len(merged['records'])==2 and {r['text_dot']['primary_text'] for r in merged['records']}=={'Duy ♥\nRhino 5','Second namespace'} and len({r['source_uuid'] for r in merged['records']})==2)
+        external.unlink();names=[dot.Name,member.Name,block.Name,copy.Name,ownInstance.Name];saved=out/'text-dot.FCStd';doc.saveAs(str(saved));App.closeDocument(doc.Name);doc=App.openDocument(str(saved));dot,member,block,copy,ownInstance=[doc.getObject(n) for n in names]
+        check('TextDot current fields survive source removal and FCStd reopen',not external.exists() and record(export([dot]))['text_dot']['primary_text']=='Duy ♥\nRhino 5' and near(record(export([dot]))['text_dot']['point'],[105,224.123456789012345,336]))
+        check('TextDot preview is reconstructed after FCStd reopen',dot.ViewObject.Proxy.__class__.__module__=='ThreeDmTextDot' and dot.ViewObject.Proxy.text.string.getValues()==['Duy ♥','Rhino 5'])
+        check('definition copy and canonical member remain independent after reopen',record(export([ownInstance]))['text_dot']['primary_text']=='Copied definition note' and record(export([block]),member.OM9SourceUUID)['text_dot']['primary_text']=='Current definition note')
+        for prop,value in [('OM9TextDotSecondaryText','Rhino 6 only'),('OM9TextDotText',' Silently trimmed '),('OM9TextDotFont',' Tahoma '),('OM9TextDotHeight',2)]:
+            sentinel=target.read_bytes();old=getattr(dot,prop);setattr(dot,prop,value);failed=False
+            try:export([dot])
+            except RuntimeError:failed=True
+            check(prop+' rejects atomically without implicit conversion',failed and target.read_bytes()==sentinel);setattr(dot,prop,old)
+        sentinel=target.read_bytes();stored=dot.OM9SourceRecord;bad=json.loads(stored);bad['text_dot']['primary_text']='Tampered source';dot.OM9SourceRecord=json.dumps(bad,sort_keys=True);failed=False
+        try:export([dot])
+        except RuntimeError:failed=True
+        check('native source tampering rejects even with a valid current TextDot',failed and target.read_bytes()==sentinel);dot.OM9SourceRecord=stored
+        cm=Path(tempfile.gettempdir())/'om9-native-text-dot-cm.3dm';cmOriginal=cm.read_bytes();cmDoc=App.newDocument('CentimeterTextDot');cmDot=next(o for o in ThreeDm.import_file(str(cm),cmDoc,mode='preserve') if o.OM9SourceClass=='ON_TextDot');check('centimeter source anchor is exposed in native millimeters',near(cmDot.OM9TextDotPoint,[11.23456789012345,20,30]));cmDot.OM9TextDotPoint=App.Vector(1.123456789012345,2,3);cmDot.OM9TextDotText='Current mm';cmDot.OM9BlockMemberPlacement.Base=App.Vector(4,5,6);cmDoc.recompute();check('edited centimeter TextDot current anchor stays millimeters',near(record(export([cmDot]))['text_dot']['point'],[5.123456789012345,7,9]))
+        check('TextDot fixtures and included provenance remain immutable',source.read_bytes()==original and cm.read_bytes()==cmOriginal and state._hash(dot.OM9ArchiveOwner.OM9SourceArchive)==dot.OM9ArchiveOwner.OM9ArchiveHash)
+        newerSource=Path(tempfile.gettempdir())/'om9-native-retained-transform-v6.3dm';newerDoc=App.newDocument('NewerTextDot');newerRoots=ThreeDm.import_file(str(newerSource),newerDoc,mode='preserve');newerDot=next(o for o in newerRoots if o.OM9SourceClass=='ON_TextDot');check('newer TextDot with secondary content still imports for native retention',newerDot.OM9TextDotSecondaryText=='Native secondary' and newerDot.ViewObject.Proxy.text.string.getValues()==['Native primary'])
+        newerName=newerDot.Name;newerSaved=out/'newer-text-dot.FCStd';newerDoc.saveAs(str(newerSaved));App.closeDocument(newerDoc.Name);newerDoc=App.openDocument(str(newerSaved));newerDot=newerDoc.getObject(newerName);check('newer TextDot secondary content persists independently in FCStd',newerDot.OM9TextDotSecondaryText=='Native secondary' and json.loads(newerDot.OM9SourceRecord)['text_dot']['secondary_text']=='Native secondary' and state._hash(newerDot.OM9ArchiveOwner.OM9SourceArchive)==newerDot.OM9ArchiveOwner.OM9ArchiveHash)
+        sentinel=target.read_bytes();failed=False
+        try:export([newerDot])
+        except RuntimeError:failed=True
+        check('newer incompatible TextDot export refuses without replacing Rhino5 target',failed and target.read_bytes()==sentinel)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

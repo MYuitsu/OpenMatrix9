@@ -1,4 +1,5 @@
 #include "CoreWorkspace.h"
+#include "CadPresentation.h"
 #include "RustBridge.h"
 #include "CameraState.h"
 #include "CameraTrace.h"
@@ -60,14 +61,14 @@ protected:
 };
 QMdiSubWindow* subWindow(Gui::View3DInventor* view){return qobject_cast<QMdiSubWindow*>(view?view->parentWidget():nullptr);}
 constexpr const char* titles[]={"Looking Down","Perspective","Side View","Through Finger"};
-SoDrawStyle* presentation(Gui::View3DInventor* view,bool create=false){
+OpenMatrix9Gui::CadPresentation* presentation(Gui::View3DInventor* view,bool create=false){
     auto* root=dynamic_cast<SoSeparator*>(view->getViewer()->getSceneGraph());if(!root)return nullptr;
     SoSearchAction search;search.setName("OM9ViewportPresentation");search.setInterest(SoSearchAction::FIRST);search.apply(root);
-    if(auto* path=search.getPath())return dynamic_cast<SoDrawStyle*>(path->getTail());
+    if(auto* path=search.getPath())return dynamic_cast<OpenMatrix9Gui::CadPresentation*>(path->getTail());
     if(!create)return nullptr;
     // Each view owns its selection root; shared document providers remain untouched.
     for(int i=0;i<root->getNumChildren();++i)if(auto* owner=dynamic_cast<Gui::SoFCUnifiedSelection*>(root->getChild(i))){
-        auto* style=new SoDrawStyle;style->setName("OM9ViewportPresentation");style->pointSize.setIgnored(true);style->lineWidth.setIgnored(true);style->linePattern.setIgnored(true);style->setOverride(true);owner->insertChild(style,0);return style;
+        OpenMatrix9Gui::CadPresentation::initClass();auto* style=new OpenMatrix9Gui::CadPresentation;style->setName("OM9ViewportPresentation");owner->insertChild(style,0);return style;
     }
     return nullptr;
 }
@@ -160,6 +161,7 @@ void CoreWorkspace::deactivate(){
         if(auto* node=grid(view)){view->setProperty("om9GridHidden",node->whichChild.getValue()==SO_SWITCH_NONE);node->whichChild=SO_SWITCH_NONE;}
         auto* viewer=view->getViewer();if(viewer->property("om9PreviousBackground").isValid()){viewer->setBackgroundColor(viewer->property("om9PreviousBackground").value<QColor>());viewer->setGradientBackground(Gui::View3DInventorViewer::Background(viewer->property("om9PreviousGradient").toInt()));viewer->setProperty("om9PreviousBackground",QVariant());}
     }
+    restoreCadProviders();
     previousDisplay.clear();
     if(auto* area=Gui::getMainWindow()->findChild<QMdiArea*>()) {
         QSignalBlocker block(area);
@@ -185,6 +187,8 @@ void CoreWorkspace::ensure(bool restore) {
         if(!viewer||!viewer->getSoRenderManager()->getCamera()){pendingEnsure=true;return;}
     }
     if(!previousDisplay.contains(doc->getDocument()->getName()))previousDisplay.emplace(doc->getDocument()->getName(),previousView->getViewer()->getOverrideMode());
+    // Creating another native view can forward its override through external links.
+    adaptCadProviders(doc,previousDisplay);
     for(int i=0;i<4;++i) {
         bool fresh=!views[i];
         if(fresh) {
@@ -216,8 +220,9 @@ void CoreWorkspace::ensure(bool restore) {
         }
     }
     // Keep faces and native edges available for rendering and Wireframe edge picking.
+    adaptCadProviders(doc,previousDisplay);
     views[0]->getViewer()->setOverrideMode("Flat Lines");
-    for(auto* view:views)if(view){auto* viewer=view->getViewer();const bool shaded=view->property("om9ViewportMode").toString()=="Shaded";viewer->updateOverrideMode(shaded?"Shaded":"Wireframe");viewer->getSoRenderManager()->setRenderMode(shaded?SoRenderManager::AS_IS:SoRenderManager::WIREFRAME);if(auto* style=presentation(view,true))style->style=shaded?SoDrawStyle::FILLED:SoDrawStyle::LINES;}
+    for(auto* view:views)if(view){auto* viewer=view->getViewer();const bool shaded=view->property("om9ViewportMode").toString()=="Shaded";viewer->updateOverrideMode(shaded?"Shaded":"Wireframe");viewer->getSoRenderManager()->setRenderMode(SoRenderManager::AS_IS);if(auto* style=presentation(view,true))style->mode=shaded?2:1;}
     if(created||restore||layoutDocument!=doc->getDocument()->getName()) {
         layout(restore);Gui::getMainWindow()->setActiveWindow(previousView);
     }
@@ -292,13 +297,14 @@ void CoreWorkspace::reconcileDisplay(){
         if(native=="Wireframe")view->setProperty("om9ViewportMode","Wireframe");
         else if(native=="Shaded")view->setProperty("om9ViewportMode","Shaded");
         else {view->setProperty("om9ViewportMode",QString::fromStdString(native));basic=false;}
-        if(auto* style=presentation(view)){style->style.setIgnored(native!="Wireframe"&&native!="Shaded");style->style=view->property("om9ViewportMode").toString()=="Wireframe"?SoDrawStyle::LINES:SoDrawStyle::FILLED;}
+        if(auto* style=presentation(view))style->mode=native=="Wireframe"?1:(native=="Shaded"?2:0);
     }
     if(basic){
         // Native attachment applies each viewer's override to the shared provider.
         // Repair newly added geometry too, retaining native pickable edge topology.
+        adaptCadProviders(doc,previousDisplay);
         for(auto* provider:doc->getViewProvidersOfType(Gui::ViewProvider::getClassTypeId()))if(provider->getOverrideMode()!="Flat Lines")provider->setOverrideMode("Flat Lines");
-        for(auto* view:views)if(view){auto* viewer=view->getViewer();const bool wire=view->property("om9ViewportMode").toString()=="Wireframe";const auto mode=wire?SoRenderManager::WIREFRAME:SoRenderManager::AS_IS;if(viewer->getSoRenderManager()->getRenderMode()!=mode)viewer->getSoRenderManager()->setRenderMode(mode);}
+        for(auto* view:views)if(view){auto* manager=view->getViewer()->getSoRenderManager();if(manager->getRenderMode()!=SoRenderManager::AS_IS)manager->setRenderMode(SoRenderManager::AS_IS);}
     }
 }
 bool CoreWorkspace::selectTitle(Gui::View3DInventor* view){
@@ -313,7 +319,7 @@ bool CoreWorkspace::toggleTitle(Gui::View3DInventor* view){
 }
 bool CoreWorkspace::displayTitle(Gui::View3DInventor* view,std::size_t mode){
     const int native=om9_viewport_native_mode(mode);if(native<0||!selectTitle(view))return false;
-    auto* viewer=view->getViewer();viewer->setOverrideMode("Flat Lines");viewer->updateOverrideMode(native==1?"Wireframe":"Shaded");viewer->getSoRenderManager()->setRenderMode(native==1?SoRenderManager::WIREFRAME:SoRenderManager::AS_IS);if(auto* style=presentation(view,true)){style->style.setIgnored(false);style->style=native==1?SoDrawStyle::LINES:SoDrawStyle::FILLED;}
+    auto* viewer=view->getViewer();adaptCadProviders(view->getGuiDocument(),previousDisplay);viewer->setOverrideMode("Flat Lines");viewer->updateOverrideMode(native==1?"Wireframe":"Shaded");viewer->getSoRenderManager()->setRenderMode(SoRenderManager::AS_IS);if(auto* style=presentation(view,true))style->mode=native==1?1:2;
     view->setProperty("om9ViewportMode",QString::fromUtf8(om9_viewport_mode_name(mode)));viewer->getSoRenderManager()->scheduleRedraw();updateTitle(view);return true;
 }
 void CoreWorkspace::ensureTitle(Gui::View3DInventor* view){

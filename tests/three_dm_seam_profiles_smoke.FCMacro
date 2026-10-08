@@ -1,0 +1,33 @@
+"""Native seam/pole source preservation in the installed FreeCAD module."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,uuid,hashlib,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[],'cases':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        root=Path('H:/FreeCAD-src/build/3dm-preserve-native/seam-profiles-evidence');oracle=json.loads((root/'native-results.json').read_text())
+        for expected in oracle['cases']:
+            source=root/expected['fixture'];external=out/source.name;external.write_bytes(source.read_bytes());doc=App.newDocument('SeamProfile')
+            objects=ThreeDm.import_file(str(external),doc,mode='preserve');obj=objects[0];copy=doc.copyObject(obj,False);names=(obj.Name,copy.Name);baseline=obj.OM9SourceRecord
+            check(source.name+' oracle-bound native profile retained with exact UV/surface fields',hashlib.sha256(source.read_bytes()).hexdigest()==expected['source_sha256'] and len(objects)==1 and obj.OM9Capability=='retained' and json.loads(baseline)['curve_on_surface_native']==expected['native_fields'])
+            target=out/('host-'+source.name)
+            def measure(label):
+                ThreeDm.export_file(str(target),[obj,copy]);inventory=json.loads(native.inspect3dm(str(target)));copy_id=str(uuid.uuid5(uuid.UUID(obj.OM9ImportNamespace),'OpenMatrix9.3dm.source-copy:'+obj.OM9SourceUUID+':'+copy.Name))
+                check(source.name+label+' source/copy UUID and complete native payload preserved',inventory['source_version']==50 and not inventory['issues'] and {r['source_uuid'] for r in inventory['records']}=={obj.OM9SourceUUID,copy_id} and all(r['class_name']=='ON_CurveOnSurface' and r['curve_on_surface_native']==expected['native_fields'] for r in inventory['records']))
+            measure(' initial V5 export')
+            project=out/(source.name+'.FCStd');doc.saveAs(str(project));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(project));obj,copy=[doc.getObject(n) for n in names]
+            check(source.name+' source-deleted FCStd restores exact archive bytes and native fields',obj.OM9SourceRecord==baseline and Path(obj.OM9ArchiveOwner.OM9SourceArchive).read_bytes()==source.read_bytes())
+            measure(' reopened V5 export')
+            result['cases'].append(dict(fixture=source.name,source_sha256=expected['source_sha256'],passed=True));App.closeDocument(doc.Name)
+        result.update(ok=True,actual_rhino5_verified=False,full_exchange_complete=False)
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

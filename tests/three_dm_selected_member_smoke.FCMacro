@@ -1,0 +1,136 @@
+import FreeCAD as App,FreeCADGui as Gui
+import json,os,tempfile,traceback
+import math
+from pathlib import Path
+from PySide6 import QtCore,QtWidgets,QtGui,QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def near(actual,expected):return len(actual)==len(expected) and all(abs(a-b)<1e-7 for a,b in zip(actual,expected))
+def integrated_length(shape):
+    value=error=0.0
+    for edge in shape.Edges:
+        curve=edge.Curve;a=edge.FirstParameter;b=edge.LastParameter
+        breaks=sorted(set([a,b]+[k for k in curve.getKnots() if a<k<b]))
+        def speed(u):return curve.getDN(u,1).Length
+        def integrate(a,b,fa,fm,fb,whole,tolerance,depth):
+            m=(a+b)/2;fl=speed((a+m)/2);fr=speed((m+b)/2);left=(m-a)*(fa+4*fl+fm)/6;right=(b-m)*(fm+4*fr+fb)/6;delta=left+right-whole
+            if abs(delta)<=15*tolerance:return left+right+delta/15,abs(delta)/15
+            if depth==0:raise RuntimeError('Curve length integration did not converge')
+            lv,le=integrate(a,m,fa,fl,fm,left,tolerance/2,depth-1);rv,re=integrate(m,b,fm,fr,fb,right,tolerance/2,depth-1);return lv+rv,le+re
+        for a,b in zip(breaks,breaks[1:]):
+            fa=speed(a);fm=speed((a+b)/2);fb=speed(b);v,e=integrate(a,b,fa,fm,fb,(b-a)*(fa+4*fm+fb)/6,1e-9/(len(breaks)-1),24);value+=v;error+=e
+    if not math.isfinite(value) or not math.isfinite(error):raise RuntimeError('Nonfinite integrated curve length')
+    return value,error
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm,ThreeDmArchiveState as state,Part,Mesh,OpenMatrix9Gui as native
+        target=out/'selected-member.3dm'
+        def export(objects):
+            ThreeDm.export_file(str(target),objects);return json.loads(native.inspect3dm(str(target)))
+        def points():
+            data=json.loads(native.read3dm(str(target),str(out)));values=[]
+            for item in data['items']:
+                shape=Part.Shape();shape.read(item['brep']);values.append(list(shape.Vertexes[0].Point))
+            return values
+        def import_fixture(name,document):
+            source=Path(tempfile.gettempdir())/name;doc=App.newDocument(document);doc.UndoMode=1;roots=ThreeDm.import_file(str(source),doc,mode='preserve');return source,doc,roots
+        source,doc,roots=import_fixture('om9-retained-block-members.3dm','SelectedCanonicalMembers');sourceBytes=source.read_bytes()
+        point=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_Point');dot=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_TextDot');definition=next(p for p in point.InList if p.isDerivedFrom('App::Part') and point in p.Group)
+        baseline=(dot.OM9SourceUUID,dot.OM9SourceSignature,dot.OM9SourceRecord,point.OM9SourceUUID);objectCount=len(doc.Objects)
+        first=export([point]);pointOutput=first['records'][0]['source_uuid']
+        check('selecting canonical point exports an independent native top-level member',len(first['records'])==1 and first['records'][0]['role']=='top-level' and pointOutput!=point.OM9SourceUUID and near(points()[0],[1,2,3]))
+        check('direct member export omits ancestor definitions and placed instances',not any(r['class_name']=='ON_InstanceDefinition' for r in first['components']) and not any(r['class_name']=='ON_InstanceRef' for r in first['records']))
+        check('repeat selected member export has stable identity and does not mutate document',export([point])['records'][0]['source_uuid']==pointOutput and len(doc.Objects)==objectCount)
+        definition.Placement.Base=App.Vector(100,200,300);doc.recompute()
+        check('unchanged canonical CAD selection composes definition world placement once',near((export([point]) and points()[0]),[101,202,303]))
+        point.Shape=Part.Vertex(App.Vector(2,3,4));point.Placement.Base=App.Vector(5,6,7);doc.recompute();edited=export([point])
+        check('selected edited CAD member exports its actual current geometry and placement',near(points()[0],[107,209,311]) and edited['records'][0]['source_uuid']==pointOutput)
+        dot.OM9BlockMemberPlacement=App.Placement(App.Vector(10,20,30),App.Rotation(App.Vector(0,0,1),90));dot.Label='Selected native note';doc.recompute();dotOutput=export([dot]);dotUUID=dotOutput['records'][0]['source_uuid']
+        check('selected retained definition member preserves native text and current world point',len(dotOutput['records'])==1 and dotOutput['records'][0]['class_name']=='ON_TextDot' and dotOutput['records'][0]['role']=='top-level' and dotOutput['records'][0]['name']==dot.Label and near(dotOutput['records'][0]['text_dot']['point'],[105,224,336]) and dotOutput['records'][0]['text_dot']['primary_text']=='Native retained member')
+        combined=export(roots+[dot]);dots=[r for r in combined['records'] if r['class_name']=='ON_TextDot']
+        check('mixed block and member selection keeps separate canonical and independent identities',len(dots)==2 and {r['source_uuid'] for r in dots}=={dot.OM9SourceUUID,dotUUID} and {r['role'] for r in dots}=={'top-level','definition-member'})
+        check('mixed selection keeps local member delta separate from selected world delta',all(near(r['text_dot']['point'],[5,24,36] if r['role']=='definition-member' else [105,224,336]) for r in dots))
+        doc.openTransaction('Move selected member');dot.OM9BlockMemberPlacement=App.Placement(App.Vector(20,30,40),App.Rotation());doc.recompute();doc.commitTransaction();export([dot]);check('selected member current placement exports under one stable output UUID',near(json.loads(native.inspect3dm(str(target)))['records'][0]['text_dot']['point'],[124,235,346]))
+        doc.undo();doc.recompute();check('selected retained member Undo restores output geometry',near(export([dot])['records'][0]['text_dot']['point'],[105,224,336]))
+        doc.redo();doc.recompute();check('selected retained member Redo restores output geometry',near(export([dot])['records'][0]['text_dot']['point'],[124,235,346]))
+        dotName=dot.Name;pointName=point.Name;doc.saveAs(str(out/'selected-members.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'selected-members.FCStd'));dot=doc.getObject(dotName);point=doc.getObject(pointName)
+        reopened=export([dot,point]);check('FCStd preserves selected-member identities and source provenance',{r['source_uuid'] for r in reopened['records']}=={dotUUID,pointOutput} and (dot.OM9SourceUUID,dot.OM9SourceSignature,dot.OM9SourceRecord,point.OM9SourceUUID)==baseline and source.read_bytes()==sourceBytes)
+        sentinel=target.read_bytes();record=dot.OM9SourceRecord;bad=json.loads(record);bad['text_dot']['primary_text']='Unsupported payload edit';dot.OM9SourceRecord=json.dumps(bad);failed=False
+        try:export([dot])
+        except RuntimeError:failed=True
+        check('unsupported selected retained payload edits reject atomically',failed and target.read_bytes()==sentinel);dot.OM9SourceRecord=record
+        sourceCurve,curveDoc,curveRoots=import_fixture('om9-shared-rational-curve.3dm','SelectedRationalMembers');curve=next(o for o in curveDoc.Objects if getattr(o,'OM9SourceClass','')=='ON_NurbsCurve');curveOwner=curve.OM9ArchiveOwner
+        curveResult=export([curve]);check('unchanged selected rational member retains original native class and checksum',len(curveResult['records'])==1 and curveResult['records'][0]['class_name']=='ON_NurbsCurve' and curveResult['records'][0]['geometry_crc']==json.loads(curve.OM9SourceRecord)['geometry_crc'])
+        proxy=next(o for o in curveDoc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject==curve);proxy.Placement=App.Placement(App.Vector(7,8,9),App.Rotation(App.Vector(0,0,1),90));proxy.ScaleVector=App.Vector(-2,3,4);proxy.Label='Selected rational proxy';curveDoc.recompute();proxyResult=export([proxy])
+        proxyUUID=proxyResult['records'][0]['source_uuid'];check('shared rational proxy selected alone gets its own native top-level identity',len(proxyResult['records'])==1 and proxyResult['records'][0]['class_name']=='ON_NurbsCurve' and proxyUUID!=curveResult['records'][0]['source_uuid'] and proxyResult['records'][0]['name']==proxy.Label)
+        nativeRead=json.loads(native.read3dm(str(target),str(out)));nativeCurve=Part.Shape();nativeCurve.read(nativeRead['items'][0]['brep']);expected=Part.getShape(proxy,'',needSubElement=False,transform=True)
+        result['curve_geometry']=dict(actual_length=nativeCurve.Length,expected_length=expected.Length,actual_bounds=[getattr(nativeCurve.BoundBox,n) for n in ('XMin','XMax','YMin','YMax','ZMin','ZMax')],expected_bounds=[getattr(expected.BoundBox,n) for n in ('XMin','XMax','YMin','YMax','ZMin','ZMax')])
+        actualLength,actualError=integrated_length(nativeCurve);expectedLength,expectedError=integrated_length(expected);result['curve_geometry'].update(integrated_actual=actualLength,integrated_expected=expectedLength,integration_error=actualError+expectedError)
+        check('selected rational affine proxy geometry agrees with the live host curve',actualError+expectedError<1e-8 and abs(actualLength-expectedLength)<2e-8 and all(abs(getattr(nativeCurve.BoundBox,n)-getattr(expected.BoundBox,n))<1e-6 for n in ('XMin','XMax','YMin','YMax','ZMin','ZMax')))
+        sentinel=target.read_bytes();proxy.ScaleVector=App.Vector(0,1,1);curveDoc.recompute();failed=False
+        try:export([proxy])
+        except RuntimeError:failed=True
+        check('singular selected shared proxy refuses without target replacement',failed and target.read_bytes()==sentinel)
+        _,mixedDoc,mixedRoots=import_fixture('om9-shared-mixed-shear-block.3dm','SelectedMixedMembers');box=next(o for o in mixedDoc.Objects if getattr(o,'OM9SourceClass','')=='ON_Brep');mesh=next(o for o in mixedDoc.Objects if getattr(o,'OM9SourceClass','')=='ON_Mesh')
+        box.Shape=Part.makeBox(4,5,6);box.Placement.Base=App.Vector(2,3,4);mesh.Placement.Base=App.Vector(5,6,7);mixedDoc.recompute();mixed=export([box,mesh]);check('selected CAD and mesh members preserve distinct native geometry classes',len(mixed['records'])==2 and {r['class_name'] for r in mixed['records']}=={'ON_Brep','ON_Mesh'} and all(r['role']=='top-level' for r in mixed['records']))
+        nativeRead=json.loads(native.read3dm(str(target),str(out)));boxItem=next(i for i in nativeRead['items'] if 'brep' in i);actualBox=Part.Shape();actualBox.read(boxItem['brep']);meshItem=next(i for i in nativeRead['items'] if 'vertices' in i)
+        check('selected edited box and mesh have analytic volume and translated vertices',abs(actualBox.Volume-120)<1e-6 and near(meshItem['vertices'][0],[5,6,7]) and near(meshItem['vertices'][1],[7,6,7]) and near(meshItem['vertices'][2],[5,9,7]))
+        boxProxy=next(o for o in mixedDoc.Objects if getattr(o,'OM9DefinitionMemberProxy',False) and o.LinkedObject==box);boxProxy.Placement=App.Placement(App.Vector(10,20,30),App.Rotation());boxProxy.ScaleVector=App.Vector(-2,3,4);boxProxy.LinkTransform=False;mixedDoc.recompute();sentinel=target.read_bytes();failed=False
+        try:export([boxProxy])
+        except RuntimeError as error:failed='inward solid' in str(error)
+        refused=failed and target.read_bytes()==sentinel
+        ThreeDm.export_file(str(target),[boxProxy],geometry_only=True);nativeRead=json.loads(native.read3dm(str(target),str(out)));actualBox.read(nativeRead['items'][0]['brep']);expectedBox=Part.getShape(boxProxy,'',needSubElement=False,transform=True)
+        result['inward_proxy_geometry']=dict(preservation_refused=refused,actual_volume=actualBox.Volume,expected_live_volume=expectedBox.Volume,actual_bounds=[getattr(actualBox.BoundBox,n) for n in ('XMin','XMax','YMin','YMax','ZMin','ZMax')],expected_bounds=[getattr(expectedBox.BoundBox,n) for n in ('XMin','XMax','YMin','YMax','ZMin','ZMax')])
+        check('selected inward proxy refuses unsafe preservation atomically; explicit geometry export retains signed physical placement',refused and abs(actualBox.Volume+2880)<1e-5 and all(abs(getattr(actualBox.BoundBox,n)-getattr(expectedBox.BoundBox,n))<1e-6 for n in ('XMin','XMax','YMin','YMax','ZMin','ZMax')))
+        geometry_cases=[];savedShape=box.Shape.copy()
+        for inward,scale in ((False,(-2,-3,4)),(True,(-2,3,4)),(True,(2,3,4))):
+            box.Shape=savedShape.reversed() if inward else savedShape.copy();boxProxy.ScaleVector=App.Vector(*scale);mixedDoc.recompute();ThreeDm.export_file(str(target),[boxProxy],geometry_only=True);nativeRead=json.loads(native.read3dm(str(target),str(out)));actualBox.read(nativeRead['items'][0]['brep']);expectedBox=Part.getShape(boxProxy,'',needSubElement=False,transform=True)
+            expectedVolume=box.Shape.Volume*scale[0]*scale[1]*scale[2];geometry_cases.append(dict(inward=inward,scale=scale,expected_volume=expectedVolume,actual_volume=actualBox.Volume,bounds_pass=all(abs(getattr(actualBox.BoundBox,n)-getattr(expectedBox.BoundBox,n))<1e-6 for n in ('XMin','XMax','YMin','YMax','ZMin','ZMax'))))
+        box.Shape=savedShape;boxProxy.ScaleVector=App.Vector(-2,3,4);physicalParent=next(p for p in boxProxy.InList if p.isDerivedFrom('App::Part') and boxProxy in p.Group);originalPlacement=physicalParent.Placement;physicalParent.Placement.Base=App.Vector(100,200,300);mixedDoc.recompute();ThreeDm.export_file(str(target),[boxProxy],geometry_only=True);nativeRead=json.loads(native.read3dm(str(target),str(out)));actualBox.read(nativeRead['items'][0]['brep']);localBox=Part.getShape(boxProxy,'',needSubElement=False,transform=True)
+        geometry_cases.append(dict(physical_parent_translation=[100,200,300],expected_volume=-2880,actual_volume=actualBox.Volume,bounds_pass=all(abs(getattr(actualBox.BoundBox,n)-getattr(localBox.BoundBox,n)-offset)<1e-6 for n,offset in (('XMin',100),('XMax',100),('YMin',200),('YMax',200),('ZMin',300),('ZMax',300)))))
+        physicalParent.Placement=originalPlacement;mixedDoc.recompute()
+        sentinel=target.read_bytes();boxProxy.ElementCount=2;mixedDoc.recompute();arrayRefused=False
+        try:ThreeDm.export_file(str(target),[boxProxy],geometry_only=True)
+        except RuntimeError as error:arrayRefused='link arrays' in str(error)
+        boxProxy.ElementCount=0;mixedDoc.recompute();arrayRefused=arrayRefused and target.read_bytes()==sentinel
+        result['inward_proxy_geometry_cases']=geometry_cases
+        check('geometry-only CAD proxy carries determinant parity and physical parent placement; unsupported arrays refuse atomically',arrayRefused and all(abs(row['actual_volume']-row['expected_volume'])<1e-5 and row['bounds_pass'] for row in geometry_cases))
+        _,refDoc,refRoots=import_fixture('om9-reference-edit.3dm','SelectedNestedReference');memberRef=next(o for o in refDoc.Objects if getattr(o,'OM9SourceClass','')=='ON_InstanceRef' and json.loads(o.OM9SourceRecord)['role']=='definition-member');memberRef.Placement.Base=App.Vector(100,200,300);refDoc.recompute();refResult=export([memberRef]);check('selected nested reference retains only its required native target closure',len(refResult['records'])==2 and sum(r['class_name']=='ON_InstanceDefinition' for r in refResult['components'])==1 and any(r['class_name']=='ON_InstanceRef' and r['role']=='top-level' and r['source_uuid']!=memberRef.OM9SourceUUID for r in refResult['records']) and near(points()[0],[101,202,303]))
+        refBox=refDoc.addObject('Part::Feature','SelectedReferenceNewBox');refBox.Shape=Part.makeBox(2,3,4);newRefTarget=ThreeDm.create_definition(refDoc,[refBox],name='New selected reference target');memberRef.setLink(newRefTarget);memberRef.LinkTransform=True;refDoc.recompute();retargeted=export([memberRef]);nativeRead=json.loads(native.read3dm(str(target),str(out)));actualBox=Part.Shape();actualBox.read(nativeRead['items'][0]['brep'])
+        check('selected nested reference can target a current new native definition',len(retargeted['records'])==2 and any(r.get('instance_definition_uuid')==newRefTarget.OM9NewDefinitionUUID for r in retargeted['records']) and abs(actualBox.Volume-24)<1e-6 and abs(actualBox.BoundBox.XMin-100)<1e-7)
+        newDoc=App.newDocument('SelectedNewMembers');newBox=newDoc.addObject('Part::Feature','NewMemberBox');newBox.Shape=Part.makeBox(2,3,4);newDef=ThreeDm.create_definition(newDoc,[newBox],name='Local new member');newDef.Placement.Base=App.Vector(10,20,30);newDoc.recompute();newResult=export([newBox]);nativeRead=json.loads(native.read3dm(str(target),str(out)));actualBox.read(nativeRead['items'][0]['brep'])
+        check('selected new unsourced definition member exports actual world CAD without its block',len(newResult['records'])==1 and newResult['records'][0]['role']=='top-level' and abs(actualBox.Volume-24)<1e-6 and abs(actualBox.BoundBox.XMin-10)<1e-7)
+        newUUID=newResult['records'][0]['source_uuid'];newAgain=export([newBox]);check('selected new member UUID is stable without an imported namespace',newAgain['records'][0]['source_uuid']==newUUID)
+        newRoot=ThreeDm.create_instance(newDef);combinedNew=export([newRoot,newBox]);check('new block and its selected CAD member export separate native identities',len(combinedNew['records'])==3 and sum(r['class_name']=='ON_Brep' for r in combinedNew['records'])==2 and any(r['source_uuid']==newUUID and r['role']=='top-level' for r in combinedNew['records']))
+        for suffix,expectedBounds in [('mm',[105,221,333,108,224,336]),('cm',[60,230,360,90,260,390])]:
+            _,cloudDoc,cloudRoots=import_fixture('om9-native-selected-members-'+suffix+'.3dm','SelectedCloud'+suffix);cloud=next(o for o in cloudDoc.Objects if getattr(o,'OM9SourceClass','')=='ON_PointCloud');cloudDef=next(p for p in cloud.InList if p.isDerivedFrom('App::Part') and cloud in p.Group);cloudDef.Placement.Base=App.Vector(100,200,300);cloud.OM9BlockMemberPlacement=App.Placement(App.Vector(10,20,30),App.Rotation(App.Vector(0,0,1),90));cloudDoc.recompute();cloudResult=export([cloud])
+            check('selected '+suffix+' cloud member keeps native counts and analytic world bounds',len(cloudResult['records'])==1 and cloudResult['records'][0]['class_name']=='ON_PointCloud' and cloudResult['records'][0]['point_cloud']['normal_count']==2 and cloudResult['records'][0]['point_cloud']['color_count']==2 and near(cloudResult['records'][0]['point_cloud']['bounds'],expectedBounds))
+        multi=App.newDocument('SelectedMemberNamespaces');firstRoots=ThreeDm.import_file(str(source),multi,mode='preserve');secondRoots=ThreeDm.import_file(str(source),multi,mode='preserve');firstPoint=next(o for o in multi.Objects if getattr(o,'OM9SourceClass','')=='ON_Point' and o.OM9ArchiveOwner==firstRoots[0].OM9ArchiveOwner);secondPoint=next(o for o in multi.Objects if getattr(o,'OM9SourceClass','')=='ON_Point' and o.OM9ArchiveOwner==secondRoots[0].OM9ArchiveOwner);secondPoint.Shape=Part.Vertex(App.Vector(30,40,50));multi.recompute();multiResult=export([firstPoint,secondPoint]);multiUUIDs={r['source_uuid'] for r in multiResult['records']}
+        check('selected members from two namespaces retain distinct current native points',len(multiResult['records'])==2 and len(multiUUIDs)==2 and all(any(near(p,e) for p in points()) for e in ([1,2,3],[30,40,50])))
+        check('multi-source selected member IDs remain stable across repeated export',{r['source_uuid'] for r in export([firstPoint,secondPoint])['records']}==multiUUIDs)
+        single=export([firstPoint]);singleUUID=single['records'][0]['source_uuid'];native.export3dm(str(target),multi.Name,[firstPoint.Name]);nativeRoute=json.loads(native.inspect3dm(str(target)))
+        check('native named exporter uses selected member promotion with the same identity',len(nativeRoute['records'])==1 and nativeRoute['records'][0]['source_uuid']==singleUUID and near(points()[0],[1,2,3]))
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(firstPoint);QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_DontUseNativeDialogs,True);prefs=App.ParamGet('User parameter:BaseApp/Preferences/Dialog');prefs.SetBool('DontUseNativeDialog',True)
+        def choose(path,standard=False):
+            dialog=QtWidgets.QApplication.activeModalWidget()
+            if not isinstance(dialog,QtWidgets.QFileDialog):QtCore.QTimer.singleShot(50,lambda:choose(path,standard));return
+            if standard:dialog.selectNameFilter(next(f for f in dialog.nameFilters() if '*.3dm' in f))
+            dialog.setDirectory(str(path.parent))
+            def enter():
+                dialog.findChild(QtWidgets.QLineEdit,'fileNameEdit').setText(path.name);QtCore.QTimer.singleShot(150,lambda:dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Save).click())
+            QtCore.QTimer.singleShot(150,enter)
+        target=out/'selected-menu.3dm';QtCore.QTimer.singleShot(100,lambda:choose(target));Gui.runCommand('Export3dm');menuResult=json.loads(native.inspect3dm(str(target)))
+        check('actual menu export writes independent selected member world geometry',len(menuResult['records'])==1 and menuResult['records'][0]['source_uuid']==singleUUID and near(points()[0],[1,2,3]))
+        target=out/'selected-cmd.3dm';QtCore.QTimer.singleShot(100,lambda:choose(target));field=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript');field.setFocus();cursor=field.textCursor();cursor.setPosition(int(field.property('om9InputStart')));cursor.movePosition(QtGui.QTextCursor.End,QtGui.QTextCursor.KeepAnchor);cursor.insertText('Export3dm');field.setTextCursor(cursor);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);cmdResult=json.loads(native.inspect3dm(str(target)))
+        check('actual CMD export matches selected-member menu UUID and geometry',len(cmdResult['records'])==1 and cmdResult['records'][0]['source_uuid']==singleUUID and near(points()[0],[1,2,3]))
+        target=out/'selected-standard.3dm';QtCore.QTimer.singleShot(100,lambda:choose(target,True));Gui.runCommand('Std_Export');standardResult=json.loads(native.inspect3dm(str(target)))
+        check('actual standard FreeCAD export dialog promotes selected member through shared handler',len(standardResult['records'])==1 and standardResult['records'][0]['source_uuid']==singleUUID and near(points()[0],[1,2,3]))
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

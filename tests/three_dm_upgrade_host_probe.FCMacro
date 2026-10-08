@@ -1,0 +1,22 @@
+import FreeCAD as App, FreeCADGui as Gui, Part
+import json,os,traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def run():
+    try:
+        doc=App.newDocument('UpgradeHostProbe');doc.UndoMode=1
+        old=doc.addObject('Part::Feature','OriginalHost');old.Shape=Part.Vertex(1,2,3)
+        link=doc.addObject('App::Link','IncomingLink');link.setLink(old)
+        group=doc.addObject('App::DocumentObjectGroup','IncomingGroup');group.Group=[old,link]
+        oldName=old.Name;linkName=link.Name;groupName=group.Name;doc.openTransaction('Upgrade host probe')
+        doc.removeObject(oldName);new=doc.addObject('App::Part',oldName);link.setLink(new);group.Group=[new,link];doc.commitTransaction()
+        result['created']=dict(requested=oldName,actual=new.Name,link=link.LinkedObject.Name,group=[o.Name for o in group.Group],count=len(doc.Objects))
+        doc.undo();doc.recompute();result['undo']=dict(type=doc.getObject(oldName).TypeId,link=link.LinkedObject.Name,group=[o.Name for o in group.Group],count=len(doc.Objects))
+        doc.redo();doc.recompute();result['redo']=dict(type=doc.getObject(oldName).TypeId,link=link.LinkedObject.Name,group=[o.Name for o in group.Group],count=len(doc.Objects))
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for n in list(App.listDocuments()):App.closeDocument(n)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -1,0 +1,83 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json, os, tempfile, traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm, ThreeDmArchiveState as state, Part, Mesh, OpenMatrix9Gui as native
+        doc=App.newDocument('IndependentMembers');fixture=Path(tempfile.gettempdir())/'om9-mixed-shear-block.3dm';original=fixture.read_bytes();source=out/'source.3dm';source.write_bytes(original)
+        root=ThreeDm.import_file(str(source),doc,mode='preserve')[0];definition=state._instance_definition(root,json.loads(root.OM9SourceRecord))
+        cad=next(o for o in definition.Group if o.isDerivedFrom('Part::Feature'));mesh=next(o for o in definition.Group if o.isDerivedFrom('Mesh::Feature'))
+        first=doc.copyObject(cad,False);first.Shape=Part.makeBox(4,5,6);first.Placement.Base=App.Vector(7,8,9);first.Label='Copy CAD riêng';first.OM9LayerPath='Copies::CAD';first.ViewObject.ShapeColor=(1.0,0.0,0.0);definition.addObject(first)
+        second=doc.copyObject(cad,False);second.Shape=Part.makeBox(2,2,2);second.Placement.Base=App.Vector(20,30,40);second.Label='Second CAD';definition.addObject(second)
+        meshCopy=doc.copyObject(mesh,False);meshCopy.Mesh=Mesh.Mesh([((0,0,0),(2,0,0),(0,4,0))]);meshCopy.Placement.Base=App.Vector(11,12,13);meshCopy.Label='Copy mesh riêng';definition.addObject(meshCopy)
+        cad.Shape=Part.makeBox(1,1,1);mesh.Placement.Base=App.Vector(5,0,0);doc.recompute();target=out/'independent.3dm'
+        def read():return json.loads(native.read3dm(str(target),str(out)))['items']
+        def volumes(items):
+            values=[]
+            for item in items:
+                if 'brep' in item:
+                    shape=Part.Shape();shape.read(item['brep']);values.append(shape.Volume)
+            return sorted(values)
+        def same_volumes(items,expected):
+            values=volumes(items)
+            return len(values)==len(expected) and all(abs(a-b)<1e-7 for a,b in zip(values,expected))
+        ThreeDm.export_preserved(str(target),[root]);items=read();report=json.loads(native.inspect3dm(str(target)))
+        check('three independent CAD payloads retain their own geometry',same_volumes(items,[1,8,120]))
+        check('copies sharing source UUID receive separate native identities',len(report['records'])==6 and len({r['source_uuid'] for r in report['records']})==6 and sum(r['source_uuid']==cad.OM9SourceUUID for r in report['records'])==1)
+        copied=next(i for i in items if i['name'].endswith('/Copy CAD riêng'))
+        result['copy_metadata']=dict(host=state.source_metadata(first),native=copied)
+        check('copy has independent Unicode layer and color',copied['layer']=='Copies::CAD' and copied['color']==[255,0,0])
+        nativeMeshes=[i['vertices'] for i in items if 'vertices' in i];previewMeshes=[o.Mesh.Topology[0] for o in root.Group if o.isDerivedFrom('Mesh::Feature')]
+        check('independent mesh preview matches exported world coordinates',len(nativeMeshes)==2 and len(previewMeshes)==2 and all(any(len(points)==len(vertices) and all(any((App.Vector(*p)-q).Length<1e-6 for p in vertices) for q in points) for vertices in nativeMeshes) for points in previewMeshes))
+        check('affine preview includes current independent CAD copies',sorted(round(abs(o.Shape.Volume),7) for o in root.Group if o.isDerivedFrom('Part::Feature'))==[1,8,120] and root.OM9PreviewStatus=='Current canonical members')
+        names=[o.Name for o in (root,first,second,meshCopy,cad)];doc.saveAs(str(out/'independent.FCStd'));source.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(out/'independent.FCStd'));root,first,second,meshCopy,cad=[doc.getObject(n) for n in names]
+        ThreeDm.export_preserved(str(target),[root]);check('independent copies export after FCStd without external source',same_volumes(read(),[1,8,120]))
+        doc.openTransaction('Edit copy');first.Shape=Part.makeBox(2,3,4);doc.recompute();doc.commitTransaction();ThreeDm.export_preserved(str(target),[root]);check('subsequent copy edit exports current own geometry',same_volumes(read(),[1,8,24]))
+        check('observer refreshes edited copied-member preview',sorted(round(abs(o.Shape.Volume),7) for o in root.Group if o.isDerivedFrom('Part::Feature'))==[1,8,24])
+        doc.undo();doc.recompute();ThreeDm.export_preserved(str(target),[root]);check('copy Undo restores independent geometry',same_volumes(read(),[1,8,120]))
+        check('observer refreshes copied-member preview after Undo',sorted(round(abs(o.Shape.Volume),7) for o in root.Group if o.isDerivedFrom('Part::Feature'))==[1,8,120])
+        doc.redo();doc.recompute();ThreeDm.export_preserved(str(target),[root]);check('copy Redo restores edited geometry',same_volumes(read(),[1,8,24]))
+        saved=target.read_bytes();shape=second.Shape.copy();second.Shape=Part.Shape();doc.recompute();failed=False
+        try:ThreeDm.export_preserved(str(target),[root])
+        except RuntimeError:failed=True
+        check('invalid independent copy rejects atomically',failed and target.read_bytes()==saved);second.Shape=shape
+        canonicalId=cad.OM9SourceUUID;doc.removeObject(cad.Name);doc.recompute();ThreeDm.export_preserved(str(target),[root]);report=json.loads(native.inspect3dm(str(target)))
+        check('deleted canonical is omitted while independent copies survive',all(r['source_uuid']!=canonicalId for r in report['records']) and same_volumes(read(),[8,24]))
+        proxy=doc.addObject('App::Link','IndependentCopyProxy');proxy.setLink(first);proxy.LinkTransform=True;state._property(proxy,'Bool','OM9DefinitionMemberProxy',True);definition=state._instance_definition(root,json.loads(root.OM9SourceRecord));definition.addObject(proxy)
+        state._property(proxy,'String','OM9ProxyMetadata',json.dumps(state.source_metadata(proxy),sort_keys=True));proxy.Label='Proxy of independent copy';proxy.ScaleVector=App.Vector(-2,3,4);proxy.Placement.Base=App.Vector(3,4,5);doc.recompute();sentinel=target.read_bytes();refused=False
+        try:ThreeDm.export_preserved(str(target),[root])
+        except RuntimeError as error:refused='inward solid' in str(error)
+        check('independent copied inward proxy preservation refuses atomically',refused and target.read_bytes()==sentinel)
+        ThreeDm.export_file(str(target),[root],geometry_only=True);proxyItems=read()
+        check('reflected proxy of copied member retains signed independent geometry after canonical deletion',same_volumes(proxyItems,[-576,8,24]))
+        def bounds(shape):
+            b=shape.BoundBox;return (b.XMin,b.YMin,b.ZMin,b.XMax,b.YMax,b.ZMax)
+        exportedBounds=[]
+        for item in proxyItems:
+            if 'brep' in item:
+                shape=Part.Shape();shape.read(item['brep']);exportedBounds.append(bounds(shape))
+        previewBounds=[bounds(o.Shape) for o in root.Group if o.isDerivedFrom('Part::Feature')]
+        result['proxy_bounds']=dict(native=exportedBounds,preview=previewBounds,status=root.OM9PreviewStatus,canonical=list(first.Placement.toMatrix().A),proxy=state._proxy_matrix(proxy),second=list(second.Placement.toMatrix().A),second_shape=list(second.Shape.Placement.toMatrix().A),second_bounds=bounds(second.Shape))
+        check('proxy of copied member preview matches native transformed bounds',len(exportedBounds)==len(previewBounds)==3 and all(any(all(abs(a-b)<1e-6 for a,b in zip(nativeBounds,previewBoundsItem)) for nativeBounds in exportedBounds) for previewBoundsItem in previewBounds))
+        check('source fixture and copied provenance remain unchanged',fixture.read_bytes()==original and first.OM9SourceUUID==canonicalId and second.OM9SourceUUID==canonicalId)
+        nested=App.newDocument('IndependentNested');roots=ThreeDm.import_file(str(Path(tempfile.gettempdir())/'om9-nested-blocks.3dm'),nested,mode='preserve');rigid=next(o for o in roots if o.isDerivedFrom('App::Link'));outer=rigid.LinkedObject;canonical=outer.Group[0];nestedCopy=nested.copyObject(canonical,False);nestedCopy.Placement.Base=App.Vector(100,200,300);nestedCopy.ScaleVector=App.Vector(2,3,-4);nestedCopy.LinkTransform=True;outer.addObject(nestedCopy);nested.recompute()
+        ThreeDm.export_preserved(str(target),[rigid]);points=[]
+        for item in read():
+            shape=Part.Shape();shape.read(item['brep']);points.extend(v.Point for v in shape.Vertexes)
+        expected=[v.Point for v in Part.getShape(rigid,'',needSubElement=False,transform=True).Vertexes]
+        check('independent nested-instance copy matches live reflected scale',len(points)==len(expected)==2 and all(any((p-q).Length<1e-7 for p in points) for q in expected))
+        canonicalId=canonical.OM9SourceUUID;nested.removeObject(canonical.Name);nested.recompute();ThreeDm.export_preserved(str(target),[rigid]);report=json.loads(native.inspect3dm(str(target)))
+        check('copied nested instance retains deep definition after canonical deletion',len(report['records'])==3 and sum(r['class_name']=='ON_InstanceRef' for r in report['records'])==2 and all(r['source_uuid']!=canonicalId for r in report['records']))
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -1,0 +1,113 @@
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import hashlib, json, os, traceback
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+result = {'checks': []}
+
+
+def check(name, value):
+    result['checks'].append({'name': name, 'passed': bool(value)})
+    (out/'progress.json').write_text(json.dumps(result, indent=2))
+    if not value:
+        raise AssertionError(name)
+
+
+def run():
+    try:
+        import ThreeDm, OpenMatrix9Gui as native
+        root = Path('H:/FreeCAD-src/build/3dm-preserve-native/multishell-evidence')
+        proof = json.loads((root/'native-results.json').read_text())
+        check('six independent multi-shell native fixtures', proof['ok'] and len(proof['cases']) == 6)
+        for index, row in enumerate(proof['cases']):
+            source = root/row['fixture']
+            immutable = source.read_bytes()
+            check(source.stem+' source bound to native proof', hashlib.sha256(immutable).hexdigest() == row['source_sha256'])
+            external = out/source.name
+            external.write_bytes(immutable)
+            doc = App.newDocument('MultiShell'+str(index))
+            objects = ThreeDm.import_file(str(external), doc, mode='preserve')
+            check(source.stem+' one native BRep record', len(objects) == 1 and objects[0].OM9SourceClass == 'ON_Brep')
+            obj = objects[0]
+            record = json.loads(obj.OM9SourceRecord)
+            if row['editable']:
+                check(source.stem+' valid editable topology and signed volume',
+                      obj.OM9Capability == 'editable' and obj.Shape.isValid()
+                      and len(obj.Shape.Faces) == row['faces']
+                      and abs(obj.Shape.Volume-row['volume_mm3']) <= 1e-6)
+            else:
+                check(source.stem+' native-only representation explicitly retained',
+                      obj.OM9Capability == 'retained' and not hasattr(obj, 'Shape')
+                      and 'Inward multi-shell cavity' in obj.OM9RepresentationIssue)
+                check(source.stem+' native-only BRep exposes explicit native placement', 'OM9BlockMemberPlacement' in obj.PropertiesList)
+                import ThreeDmArchiveState
+                original_record=obj.OM9SourceRecord
+                doc.openTransaction('Move native-only BRep')
+                obj.OM9BlockMemberPlacement=App.Placement(App.Vector(5,6,7),App.Rotation())
+                doc.commitTransaction()
+                request=ThreeDmArchiveState.preservation_request([obj],str(out))
+                check(source.stem+' native-only placement stages native transform without rewriting source applicability',request['selected'][0]['action']=='transform' and request['selected'][0]['geometry_matrix'][3:12:4]==[5,6,7] and obj.OM9SourceRecord==original_record and json.loads(original_record)['capability']=='editable')
+                doc.undo()
+                rejected = False
+                before = len(doc.Objects)
+                try:
+                    ThreeDm.import_file(str(external), doc, mode='geometry')
+                except Exception:
+                    rejected = True
+                check(source.stem+' geometry-only rejection keeps document', rejected and len(doc.Objects) == before)
+            name = obj.Name
+            saved = out/(source.stem+'.FCStd')
+            doc.recompute()
+            doc.saveAs(str(saved))
+            external.unlink()
+            App.closeDocument(doc.Name)
+            doc = App.openDocument(str(saved))
+            obj = doc.getObject(name)
+            check(source.stem+' authoritative FCStd source survives external deletion',
+                  Path(obj.OM9ArchiveOwner.OM9SourceArchive).read_bytes() == immutable
+                  and json.loads(obj.OM9SourceRecord) == record)
+            target = out/(source.stem+'-roundtrip.3dm')
+            if row['direction'] < 0:
+                target.write_bytes(b'keep existing destination')
+                error = ''
+                try:
+                    ThreeDm.export_file(str(target), [obj])
+                except Exception as exc:
+                    error = str(exc)
+                check(source.stem+' inward V5 sign reversal refuses atomically',
+                      ('inward' in error or 'solid orientation' in error)
+                      and target.read_bytes() == b'keep existing destination')
+                check(source.stem+' original fixture remains immutable', source.read_bytes() == immutable)
+                App.closeDocument(doc.Name)
+                continue
+            ThreeDm.export_file(str(target), [obj])
+            inventory = json.loads(native.inspect3dm(str(target)))
+            check(source.stem+' complete native source UUID and graph in V5 export',
+                  inventory['source_version'] in (5, 50) and not inventory['issues']
+                  and len(inventory['records']) == 1 and inventory['records'][0]['source_uuid'] == row['uuid']
+                  and inventory['records'][0]['geometry_crc'] == record['geometry_crc'])
+            second = App.newDocument('Reread'+str(index))
+            again = ThreeDm.import_file(str(target), second, mode='preserve')[0]
+            if row['editable']:
+                check(source.stem+' V5 reread signed volume and topology',
+                      again.Shape.isValid() and len(again.Shape.Faces) == row['faces']
+                      and abs(again.Shape.Volume-row['volume_mm3']) <= 1e-6)
+            else:
+                check(source.stem+' V5 reread remains native-only with reason',
+                      again.OM9Capability == 'retained' and not hasattr(again, 'Shape')
+                      and bool(again.OM9RepresentationIssue))
+            check(source.stem+' original fixture remains immutable', source.read_bytes() == immutable)
+            App.closeDocument(second.Name)
+            App.closeDocument(doc.Name)
+        result['ok'] = True
+    except Exception:
+        result['ok'] = False
+        result['error'] = traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result, indent=2))
+    for name in list(App.listDocuments()):
+        App.closeDocument(name)
+    QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+
+QtCore.QTimer.singleShot(1000, run)

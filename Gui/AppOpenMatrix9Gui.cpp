@@ -10,6 +10,7 @@
 
 void CreateOpenMatrix9Commands();
 void AddThreeDmMethods(PyObject*);
+void AddThreeDmRegistryMethods(PyObject*);
 
 
 namespace OpenMatrix9Gui
@@ -59,6 +60,7 @@ PyMOD_INIT_FUNC(OpenMatrix9Gui)
     PyObject* module =
         OpenMatrix9Gui::initModule();
     AddThreeDmMethods(module);
+    AddThreeDmRegistryMethods(module);
 
     Base::Console().message(
         "Loading OpenMatrix9 GUI...\n"

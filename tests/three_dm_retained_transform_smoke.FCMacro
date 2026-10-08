@@ -1,0 +1,75 @@
+import FreeCAD as App, FreeCADGui as Gui
+import json,os,tempfile,traceback
+from pathlib import Path
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def near(actual,expected):return len(actual)==len(expected) and all(abs(a-b)<1e-7 for a,b in zip(actual,expected))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import ThreeDm,ThreeDmArchiveState as state,OpenMatrix9Gui as native
+        source=Path(tempfile.gettempdir())/'om9-native-retained-transform-mm.3dm';original=source.read_bytes()
+        external=out/'working-retained.3dm';external.write_bytes(original)
+        doc=App.newDocument('RetainedNativeTransforms');doc.UndoMode=1
+        roots=ThreeDm.import_file(str(external),doc,mode='preserve');dot=next(o for o in roots if o.OM9SourceClass=='ON_TextDot');cloud=next(o for o in roots if o.OM9SourceClass=='ON_PointCloud');owner=dot.OM9ArchiveOwner
+        check('retained records expose an explicit editable native placement without fake CAD',all('OM9BlockMemberPlacement' in o.PropertiesList and o.getEditorMode('OM9BlockMemberPlacement')==[] and not hasattr(o,'Shape') and not hasattr(o,'Placement') for o in (dot,cloud)))
+        target=out/'retained-transform.3dm'
+        def export(objects):
+            ThreeDm.export_file(str(target),objects);return json.loads(native.inspect3dm(str(target)))
+        def row(report,name):return next(r for r in report['records'] if r['class_name']==name)
+        baseline=export(roots);uuids={r['source_uuid'] for r in baseline['records']}
+        check('unchanged native retained selections preserve both classes and UUIDs',len(baseline['records'])==2 and {dot.OM9SourceUUID,cloud.OM9SourceUUID}==uuids)
+        check('native semantic inventory reports source points counts colors and normals',near(row(baseline,'ON_TextDot')['text_dot']['point'],[5,6,7]) and row(baseline,'ON_PointCloud')['point_cloud']['point_count']==2 and row(baseline,'ON_PointCloud')['point_cloud']['normal_count']==2 and row(baseline,'ON_PointCloud')['point_cloud']['color_count']==2)
+        originalSignature={o.Name:o.OM9SourceSignature for o in roots};move=App.Placement(App.Vector(10,20,30),App.Rotation(App.Vector(0,0,1),90))
+        dot.OM9BlockMemberPlacement=move;cloud.OM9BlockMemberPlacement=move;dot.Label='Moved native note';doc.recompute()
+        moved=export(roots)
+        check('selected retained TextDot follows native rotation and translation once',near(row(moved,'ON_TextDot')['text_dot']['point'],[4,25,37]))
+        check('selected retained point cloud follows analytic world bounds',near(row(moved,'ON_PointCloud')['point_cloud']['bounds'],[5,21,33,8,24,36]))
+        check('native move keeps point color normal counts and text content',row(moved,'ON_PointCloud')['point_cloud']['normal_count']==2 and row(moved,'ON_PointCloud')['point_cloud']['color_count']==2 and row(moved,'ON_TextDot')['text_dot']['primary_text']=='Native primary' and row(moved,'ON_TextDot')['text_dot']['secondary_text']==row(baseline,'ON_TextDot')['text_dot']['secondary_text'])
+        check('current metadata changes without rewriting native UUID or original baselines',row(moved,'ON_TextDot')['name']==dot.Label and {r['source_uuid'] for r in moved['records']}==uuids and all(o.OM9SourceSignature==originalSignature[o.Name] for o in roots))
+        one=export([dot]);check('retained selection excludes unrelated moved cloud',len(one['records'])==1 and near(one['records'][0]['text_dot']['point'],[4,25,37]))
+        parent=doc.addObject('App::Part','RetainedParent');parent.Group=roots;parent.Placement.Base=App.Vector(100,200,300);doc.recompute()
+        parented=export(roots)
+        check('retained parent and child native placement compose exactly once',near(row(parented,'ON_TextDot')['text_dot']['point'],[104,225,337]) and near(row(parented,'ON_PointCloud')['point_cloud']['bounds'],[105,221,333,108,224,336]))
+        repeated=export(roots);check('repeated native export does not accumulate transforms',row(repeated,'ON_TextDot')['text_dot']==row(parented,'ON_TextDot')['text_dot'] and row(repeated,'ON_PointCloud')['point_cloud']==row(parented,'ON_PointCloud')['point_cloud'])
+        doc.openTransaction('Move retained native geometry');dot.OM9BlockMemberPlacement=App.Placement(App.Vector(20,30,40),App.Rotation());doc.recompute();doc.commitTransaction()
+        check('retained native placement edit exports current geometry',near(row(export([dot]),'ON_TextDot')['text_dot']['point'],[125,236,347]))
+        doc.undo();doc.recompute();check('retained placement Undo restores native output',near(row(export([dot]),'ON_TextDot')['text_dot']['point'],[104,225,337]))
+        doc.redo();doc.recompute();check('retained placement Redo restores native output',near(row(export([dot]),'ON_TextDot')['text_dot']['point'],[125,236,347]))
+        rootNames=[o.Name for o in roots];ownerName=owner.Name;external.unlink();doc.saveAs(str(out/'retained-native.FCStd'));App.closeDocument(doc.Name);doc=App.openDocument(str(out/'retained-native.FCStd'));roots=[doc.getObject(n) for n in rootNames];dot,cloud=[next(o for o in roots if o.OM9SourceClass==kind) for kind in ('ON_TextDot','ON_PointCloud')];owner=doc.getObject(ownerName)
+        saved=export(roots)
+        check('FCStd retains native transforms graph and included source after external input removal',not external.exists() and near(row(saved,'ON_TextDot')['text_dot']['point'],[125,236,347]) and near(row(saved,'ON_PointCloud')['point_cloud']['bounds'],[105,221,333,108,224,336]) and owner.OM9ArchiveHash==state._hash(owner.OM9SourceArchive))
+        copy=doc.copyObject(dot,False);copy.OM9BlockMemberPlacement=App.Placement(App.Vector(-10,0,0),App.Rotation());copy.Label='Independent native note';doc.recompute();copied=export([copy])
+        check('duplicate retained transform exports a distinct native identity and current placement',len(copied['records'])==1 and copied['records'][0]['source_uuid']!=dot.OM9SourceUUID and copied['records'][0]['name']==copy.Label and near(copied['records'][0]['text_dot']['point'],[-5,6,7]))
+        sentinel=target.read_bytes();stored=dot.OM9SourceRecord;modified=json.loads(stored);modified['text_dot']['primary_text']='Changed opaque payload';dot.OM9SourceRecord=json.dumps(modified,sort_keys=True);failed=False
+        try:export([dot])
+        except RuntimeError:failed=True
+        check('changing retained native text payload rejects without target replacement',failed and target.read_bytes()==sentinel);dot.OM9SourceRecord=stored
+        blockSource=Path(tempfile.gettempdir())/'om9-retained-block-members.3dm';blockBytes=blockSource.read_bytes();blockDoc=App.newDocument('RetainedDefinitionTransforms');blockDoc.UndoMode=1
+        blockRoots=ThreeDm.import_file(str(blockSource),blockDoc,mode='preserve');blockDot=next(o for o in blockDoc.Objects if getattr(o,'OM9SourceClass','')=='ON_TextDot');blockUUID=blockDot.OM9SourceUUID
+        blockDot.OM9BlockMemberPlacement=move;blockDoc.recompute();blockOutput=export(blockRoots)
+        check('retained canonical definition member exports its local native delta',near(row(blockOutput,'ON_TextDot')['text_dot']['point'],[5,24,36]) and row(blockOutput,'ON_TextDot')['source_uuid']==blockUUID and row(blockOutput,'ON_TextDot')['role']=='definition-member')
+        check('member transform keeps root instance placement separate and native text intact',near(row(blockOutput,'ON_InstanceRef')['instance_matrix'],[1,0,0,10,0,1,0,20,0,0,1,30,0,0,0,1]) and row(blockOutput,'ON_TextDot')['text_dot']['primary_text']=='Native retained member')
+        blockDoc.openTransaction('Move native definition member');blockDot.OM9BlockMemberPlacement=App.Placement(App.Vector(20,30,40),App.Rotation());blockDoc.recompute();blockDoc.commitTransaction()
+        check('retained definition member exports current local geometry',near(row(export(blockRoots),'ON_TextDot')['text_dot']['point'],[24,35,46]))
+        blockDoc.undo();blockDoc.recompute();check('retained definition member Undo restores native local transform',near(row(export(blockRoots),'ON_TextDot')['text_dot']['point'],[5,24,36]))
+        blockDoc.redo();blockDoc.recompute();check('retained definition member Redo restores native local transform',near(row(export(blockRoots),'ON_TextDot')['text_dot']['point'],[24,35,46]))
+        blockNames=[o.Name for o in blockRoots];blockDoc.saveAs(str(out/'retained-block.FCStd'));App.closeDocument(blockDoc.Name);blockDoc=App.openDocument(str(out/'retained-block.FCStd'));blockRoots=[blockDoc.getObject(n) for n in blockNames];blockDot=next(o for o in blockDoc.Objects if getattr(o,'OM9SourceClass','')=='ON_TextDot')
+        check('retained definition member local transform survives FCStd reopen',near(row(export(blockRoots),'ON_TextDot')['text_dot']['point'],[24,35,46]))
+        sentinel=target.read_bytes();stored=blockDot.OM9SourceRecord;modified=json.loads(stored);modified['text_dot']['primary_text']='Changed native member';blockDot.OM9SourceRecord=json.dumps(modified,sort_keys=True);failed=False
+        try:export(blockRoots)
+        except RuntimeError:failed=True
+        check('changed retained member payload rejects atomically and leaves source intact',failed and target.read_bytes()==sentinel and blockSource.read_bytes()==blockBytes);blockDot.OM9SourceRecord=stored
+        # Unit normalization precedes the explicit mm placement, not vice versa.
+        cm=Path(tempfile.gettempdir())/'om9-native-retained-transform-cm.3dm';cmBytes=cm.read_bytes();cmDoc=App.newDocument('RetainedCentimeterTransforms');cmRoots=ThreeDm.import_file(str(cm),cmDoc,mode='preserve');cmDot=next(o for o in cmRoots if o.OM9SourceClass=='ON_TextDot');cmCloud=next(o for o in cmRoots if o.OM9SourceClass=='ON_PointCloud');cmDot.OM9BlockMemberPlacement=move;cmCloud.OM9BlockMemberPlacement=move;cmDoc.recompute();converted=export(cmRoots)
+        check('centimeter source and millimeter native delta transform only once',near(row(converted,'ON_TextDot')['text_dot']['point'],[-50,70,100]) and near(row(converted,'ON_PointCloud')['point_cloud']['bounds'],[-40,30,60,-10,60,90]))
+        check('all transformed retained fixtures and embedded provenance stay immutable',source.read_bytes()==original and cm.read_bytes()==cmBytes)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)
