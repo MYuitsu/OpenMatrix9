@@ -18,6 +18,7 @@ mod curve_ffi;
 pub mod ffi;
 pub mod edit;
 pub mod menu;
+pub mod modeling_exchange;
 pub mod state;
 pub mod surface;
 pub mod solid;

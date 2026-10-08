@@ -122,6 +122,8 @@ set(
 
     AppOpenMatrix9Gui.cpp
     ThreeDmPython.cpp
+    ThreeDmModeling.cpp
+    ThreeDmModeling.h
     ThreeDmHatchDialog.cpp
     ThreeDmHatchDialog.h
     ThreeDmMerge.cpp

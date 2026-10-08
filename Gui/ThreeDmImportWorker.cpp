@@ -13,11 +13,11 @@ int main(int argc,char** argv){
         if(error.error!=QJsonParseError::NoError||!json.isObject())throw ExchangeError("Invalid worker request JSON");
         auto row=json.object();std::set<std::string> subset;
         for(auto value:row["ids"].toArray()){auto id=value.toString();if(id.size()!=36||!subset.insert(id.toStdString()).second)throw ExchangeError("Invalid worker subset");}
-        auto model=readArchiveSubset(std::filesystem::path(row["source"].toString().toStdWString()),row["scale"].toDouble(),row["members"].toBool(),subset);
+        auto model=readArchiveSubset(std::filesystem::path(row["source"].toString().toStdWString()),row["scale"].toDouble(),row["members"].toBool(),subset,!row["working"].toBool());
         QJsonArray rows;int index=0;auto staging=std::filesystem::path(row["staging"].toString().toStdWString());
         for(auto& item:model.items){auto value=encodeExchangeItem(item,staging,index++);value["tolerance"]=model.tolerance;rows.append(value);}
-        if(rows.size()!=subset.size())throw ExchangeError("Worker subset count changed");
-        auto bytes=QJsonDocument(QJsonObject{{"rows",rows}}).toJson(QJsonDocument::Compact);
+        if(!row["working"].toBool()&&rows.size()!=subset.size())throw ExchangeError("Worker subset count changed");
+        auto bytes=QJsonDocument(QJsonObject{{"rows",rows},{"roots",row["ids"]}}).toJson(QJsonDocument::Compact);
         QFile output(app.arguments()[2]);if(!output.open(QIODevice::WriteOnly|QIODevice::NewOnly)||output.write(bytes)!=bytes.size())throw ExchangeError("Cannot write worker result");
         output.close();return 0;
     }catch(const Standard_Failure& error){fprintf(stderr,"%s\n",error.GetMessageString());}

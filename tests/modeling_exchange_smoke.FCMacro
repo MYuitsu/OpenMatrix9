@@ -1,0 +1,105 @@
+"""Working 3DM exchange against actual FreeCAD/OCC/openNURBS, no mocks."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,traceback,math,time,hashlib,tempfile
+out=Path(os.environ['OM9_SMOKE_OUTPUT']); report={'checks':[],'timings':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    (out/'progress.json').write_text(json.dumps(report,indent=2))
+    if not value: raise AssertionError(name)
+def rejected(name,call):
+    try: call()
+    except RuntimeError: check(name,True)
+    else: check(name,False)
+def on_circle(shape,center,radius):
+    return all(abs((point-center).Length-radius)<1e-7 for point in shape.Edges[0].discretize(Number=33))
+def run():
+    try:
+        import ThreeDm,Part,Mesh,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('ModelingSource');doc.UndoMode=1
+        line=doc.addObject('Part::Feature','SourceLine');line.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0));line.Label='Original curve'
+        box=doc.addObject('Part::Feature','SourceBox');box.Shape=Part.makeBox(2,3,4)
+        mesh=doc.addObject('Mesh::Feature','SourceMesh');mesh.Mesh=Mesh.Mesh([[(0,0,0),(1,0,0),(0,1,0)]])
+        doc.recompute();source=out/'working-source.3dm'
+        ThreeDm.export_file(str(source),[line,box,mesh])
+        with tempfile.TemporaryDirectory() as staging:
+            prepared=json.loads(native.prepareModeling3dm(str(source),staging))
+            check('modeling manifest carries finite positive tolerance',isinstance(prepared['tolerance'],(int,float)) and prepared['tolerance']>0)
+        work=App.newDocument('ModelingWork');work.UndoMode=1
+        start=time.perf_counter();objects=ThreeDm.import_file(str(source),work,mode='modeling')
+        report['timings'].append({'case':'small-modeling-import','seconds':time.perf_counter()-start})
+        check('working import includes curve BRep and native mesh',len(objects)==3)
+        check('new identity has no strict source archive dependency',all(hasattr(o,'OM9WorkingUUID') and not hasattr(o,'OM9SourceUUID') for o in objects))
+        check('CAD kind independent of display tessellation',[(o.OM9GeometryKind,o.OM9Representation) for o in objects]==[(2,'native-cad'),(3,'native-cad'),(4,'native-mesh')])
+        check('cloud and mesh vertex snap disabled by shared Rust policy',not json.loads(native.modelingCapabilities3dm(4))['snap']['allowed'] and not json.loads(native.modelingCapabilities3dm(5))['snap']['allowed'])
+        work.undo();check('import Undo removes all imported geometry and layers',len(work.Objects)==0)
+        work.redo();objects=[o for o in work.Objects if hasattr(o,'OM9WorkingUUID')];check('import Redo restores working objects',len(objects)==3)
+        curve=next(o for o in objects if o.OM9GeometryKind==2);solid=next(o for o in objects if o.OM9GeometryKind==3)
+        curve.Placement.Base=App.Vector(20,0,0);work.removeObject(solid.Name)
+        circle=work.addObject('Part::Feature','NewCircle');circle.Shape=Part.makeCircle(3,App.Vector(0,7,0))
+        work.recompute();target=out/'edited-and-new.3dm'
+        ThreeDm.export_file(str(target),[curve,circle],modeling=True)
+        with tempfile.TemporaryDirectory() as staging:
+            decoded=json.loads(native.read3dm(str(target),staging));shapes=[]
+            for row in decoded['items']:
+                shape=Part.Shape();shape.read(row['brep']);shapes.append(shape)
+            check('selected output contains only edited curve and new circle',len(shapes)==2)
+            check('current placement exported instead of stale source',abs(shapes[0].BoundBox.XMin-20)<1e-7 and abs(shapes[0].BoundBox.XMax-30)<1e-7)
+            check('new exact rational circle radius preserved',on_circle(shapes[1],App.Vector(0,7,0),3) and abs(shapes[1].Length-6*math.pi)<1e-7)
+        check('selected output is V5',json.loads(native.inspect3dm(str(target)))['source_version']==50)
+        protected=out/'protected.3dm';protected.write_bytes(b'Existing destination')
+        empty=work.addObject('Part::Feature','Invalid')
+        rejected('invalid geometry preflight refuses export',lambda:ThreeDm.export_file(str(protected),[curve,empty],modeling=True))
+        check('failed export leaves target bytes unchanged',protected.read_bytes()==b'Existing destination')
+        work.removeObject(empty.Name)
+        group=work.addObject('App::DocumentObjectGroup','SelectionGroup');group.addObject(curve)
+        rejected('container plus member overlap is rejected',lambda:ThreeDm.export_file(str(protected),[group,curve],modeling=True))
+        rejected('duplicate object selection is rejected',lambda:ThreeDm.export_file(str(protected),[curve,curve],modeling=True))
+        saved=out/'source-independent.FCStd';work.saveAs(str(saved));name=work.Name;App.closeDocument(name);source.unlink()
+        reopened=App.openDocument(str(saved));check('FCStd works after deleting source file',any(hasattr(o,'OM9WorkingUUID') for o in reopened.Objects))
+        c=next(o for o in reopened.Objects if getattr(o,'OM9GeometryKind',0)==2)
+        ThreeDm.export_file(str(out/'reopened.3dm'),[c,reopened.getObject('NewCircle')],modeling=True)
+        check('reopened geometry exports with no source archive',len(json.loads(native.inspect3dm(str(out/'reopened.3dm')))['records'])==2)
+        fixtures=Path(os.environ.get('OM9_MODELING_FIXTURES','H:/FreeCAD-src/build/3dm-preserve-native/modeling-fixtures'))
+        for unit,factor in [('mm',1),('cm',10)]:
+            current=App.newDocument('Units'+unit)
+            rows=ThreeDm.import_file(str(fixtures/(unit+'.3dm')),current,mode='modeling')
+            by_name={o.Label:o for o in rows}
+            check(unit+' arc radius scaled once',on_circle(by_name['Arc'].Shape,App.Vector(0,0,0),2*factor))
+            check(unit+' NURBS pole scaled once',abs(by_name['Nurbs'].Shape.Edges[0].Curve.getPole(2).y-3*factor)<1e-7)
+            check(unit+' BRep trims and volume remain valid',by_name['Box'].Shape.isValid() and abs(by_name['Box'].Shape.Volume-24*factor**3)<1e-6)
+            check(unit+' point cloud stays native-points',by_name['Cloud'].OM9Representation=='native-points' and by_name['Cloud'].OM9GeometryKind==5)
+        before=len(current.Objects)
+        rejected('opaque geometry preflight rejects entire archive',lambda:ThreeDm.import_file(str(fixtures/'opaque.3dm'),current,mode='modeling'))
+        check('failed import leaves document unchanged',len(current.Objects)==before)
+        original_insert=ThreeDm._insert_prepared
+        def fail_binding(name,prepared):
+            App.getDocument(name).addObject('Part::Feature','MustRollBack')
+            raise RuntimeError('Injected binder failure')
+        ThreeDm._insert_prepared=fail_binding
+        try:rejected('native transaction propagates binder failure',lambda:native.commit3dm(current.Name,[]))
+        finally:ThreeDm._insert_prepared=original_insert
+        check('binder failure aborts created objects',len(current.Objects)==before and current.getObject('MustRollBack') is None)
+        cloud=by_name['Cloud'];cloud.OM9BlockMemberPlacement.Base=App.Vector(20,0,0)
+        cloud.OM9CloudPoints=[App.Vector(12,23,34),App.Vector(15,26,37)]
+        cloud_path=out/'edited-cloud.3dm';ThreeDm.export_file(str(cloud_path),[cloud],modeling=True)
+        cloud_doc=App.newDocument('EditedCloud');cloud_rows=ThreeDm.import_file(str(cloud_path),cloud_doc,mode='modeling')
+        check('edited cloud current fields and placement exported',len(cloud_rows)==1 and (cloud_rows[0].OM9CloudPoints[0]-App.Vector(32,23,34)).Length<1e-9)
+        part=cloud_doc.addObject('App::Part','PlacedContainer');part.Placement.Base=App.Vector(100,5,0)
+        child=cloud_doc.addObject('Part::Feature','PlacedCurve');child.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0));child.Placement.Base=App.Vector(20,0,0);part.addObject(child);cloud_doc.recompute()
+        placed=out/'placed-cad.3dm';ThreeDm.export_file(str(placed),[child],modeling=True)
+        with tempfile.TemporaryDirectory() as staging:
+            row=json.loads(native.read3dm(str(placed),staging))['items'][0];shape=Part.Shape();shape.read(row['brep'])
+            check('physical parent and local placement scaled once',abs(shape.BoundBox.XMin-120)<1e-7 and abs(shape.BoundBox.YMin-5)<1e-7)
+        link=cloud_doc.addObject('App::Link','CurveCopy');link.setLink(child);link.Placement.Base=App.Vector(200,0,0)
+        cloud_doc.recompute();copies=out/'source-and-link.3dm'
+        ThreeDm.export_file(str(copies),[child,link],modeling=True)
+        check('source and independently placed link are both exportable',len(json.loads(native.inspect3dm(str(copies)))['records'])==2)
+        report.update(ok=True,module=native.__file__,python_module=ThreeDm.__file__)
+    except Exception: report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()): App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

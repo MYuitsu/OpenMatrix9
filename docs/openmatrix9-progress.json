@@ -498,6 +498,29 @@
         "7 full-exchange packages remain open; future test batch count not yet enumerated."
       ],
       "next_action": "Continue the scoped openNURBS exchange plan; validate additional target types/resources/document payloads separately."
+    },
+    {
+      "id": "independent-modeling-public-integration",
+      "stage": "build-validation",
+      "status": "validated_scoped_rhino5_pending",
+      "feature_ids": [
+        "OM9-FILE-012"
+      ],
+      "outputs": [
+        "ThreeDmModeling.py",
+        "Gui/ThreeDmModeling.cpp",
+        "rust/src/modeling_exchange.rs",
+        "docs/validation/2026-10-08-modeling-public-integration.md"
+      ],
+      "evidence": [
+        "15 FreeCAD suites/464 checks;8 native suites;110 Rust tests;42 Python tests with1 optional skip",
+        "AppPart mixed selection actual RED→GREEN8; reviewer blocker resolved"
+      ],
+      "remaining": [
+        "Rhino5 generated4-file/7-object application batch pending",
+        "7 full-exchange packages remain open; future total test batches unknown"
+      ],
+      "next_action": "Read actual Rhino5 generated-model results; continue full-exchange roadmap separately."
     }
   ]
 }

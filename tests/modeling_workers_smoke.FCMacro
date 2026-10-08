@@ -1,0 +1,53 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,traceback,hashlib,tempfile,subprocess,shutil,time
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,Part,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        fixtures=Path(os.environ.get('OM9_MODELING_FIXTURES','H:/FreeCAD-src/build/3dm-preserve-native/modeling-fixtures'))
+        source=fixtures/'blocks.3dm';cases=[]
+        for workers in [1,4]:
+            os.environ['OM9_3DM_WORKERS']=str(workers);doc=App.newDocument('WorkingBlocks')
+            objects=ThreeDm.import_file(str(source),doc,mode='modeling');rows=[]
+            for obj in objects:
+                row={'name':obj.Label,'kind':obj.OM9GeometryKind,'layer':obj.OM9LayerPath}
+                if obj.isDerivedFrom('Part::Feature'):
+                    b=obj.Shape.BoundBox;row.update(bounds=[b.XMin,b.YMin,b.ZMin,b.XMax,b.YMax,b.ZMax],volume=obj.Shape.Volume,area=obj.Shape.Area,valid=obj.Shape.isValid())
+                else:row['points']=[list(p) for p in obj.OM9CloudPoints]
+                rows.append(row)
+            cases.append(rows);check('all repeated nested affine members imported workers'+str(workers),len(objects)==18 and all(r.get('valid',True) for r in rows))
+            App.closeDocument(doc.Name)
+        check('worker expansion matches serial geometry and root/member order',cases[0]==cases[1])
+        check('cm nested affine transform scales exactly once',abs(cases[0][1]['points'][0][0]-22)<1e-8 and abs(cases[0][1]['points'][0][1]-52)<1e-8)
+        for workers in [1,4]:
+            os.environ['OM9_3DM_WORKERS']=str(workers);layout_doc=App.newDocument('LayoutsOmitted')
+            objects=ThreeDm.import_file(str(source.parent/'layout-omitted.3dm'),layout_doc,mode='modeling')
+            check('modeling excludes page curves and annotations workers'+str(workers),len(objects)==9 and all(o.Label.startswith('Model') for o in objects))
+            App.closeDocument(layout_doc.Name)
+        doc=App.newDocument('WorkingFailure');sentinel=doc.addObject('Part::Feature','Sentinel');sentinel.Shape=Part.makeBox(1,2,3);before=[o.Name for o in doc.Objects]
+        worker=Path(native.__file__).parent/'OM9ThreeDmImportWorker.exe';hidden=worker.with_suffix('.modeling-test-disabled')
+        def failure_case(replace=False):
+            failed=False;worker.rename(hidden);start=time.perf_counter()
+            try:
+                if replace:shutil.copyfile(os.environ.get('OM9_MODELING_FAILURE_WORKER',str(fixtures.parent/'ThreeDmImportFailureWorker.exe')),worker)
+                try:ThreeDm.import_file(str(source),doc,mode='modeling')
+                except RuntimeError:failed=True
+            finally:
+                if replace and worker.exists():worker.unlink()
+                hidden.rename(worker)
+            check(('nonzero' if replace else 'missing')+' worker rolls back before document mutation',failed and [o.Name for o in doc.Objects]==before and abs(sentinel.Shape.Volume-6)<1e-9 and time.perf_counter()-start<15)
+        failure_case();failure_case(True)
+        check('failed workers joined before return',not subprocess.run(['tasklist','/FI','IMAGENAME eq OM9ThreeDmImportWorker.exe','/FO','CSV'],capture_output=True,text=True).stdout.count('"OM9ThreeDmImportWorker.exe"'))
+        report.update(ok=True,module=native.__file__,cases=cases)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    os.environ.pop('OM9_3DM_WORKERS',None)
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

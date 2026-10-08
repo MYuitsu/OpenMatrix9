@@ -5,6 +5,7 @@
 #include <Base/Interpreter.h>
 #include <memory>
 #include <cmath>
+extern "C" unsigned om9_modeling_capabilities(unsigned kind);
 namespace {
 using PyRef=std::unique_ptr<PyObject,decltype(&Py_DecRef)>;
 PyRef attr(PyObject* object,const char* name){return PyRef(PyObject_GetAttrString(object,name),&Py_DecRef);}
@@ -14,6 +15,7 @@ static std::vector<Base::Vector3d> candidates(const App::DocumentObject* object,
     const bool midpoint=mode==4;
     std::vector<Base::Vector3d> result;
     if(!object)return result;
+    if(auto* kind=object->getPropertyByName<App::PropertyInteger>("OM9GeometryKind"))if(!(om9_modeling_capabilities(kind->getValue())&2u))return result;
     Base::PyGILStateLocker lock;
     PyObject* raw=nullptr;
     Base::Matrix4D transform;

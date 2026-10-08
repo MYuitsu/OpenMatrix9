@@ -58,7 +58,7 @@ static void addGeometryForRhinoDocument(ONX_Model& model,ON_Geometry& geometry,c
     ON_InstanceRef instance;instance.m_instance_definition_uuid=added.ModelComponent()->Id();instance.m_xform=reflection;instance.m_bbox=worldBounds;
     auto placementAttributes=attributes;placementAttributes.SetUserString(signedSolidTag,L"1");if(model.AddModelGeometryComponent(&instance,&placementAttributes).IsEmpty())throw ExchangeError("Cannot add signed-solid placement");
 }
-static ExchangeModel readArchiveImpl(const std::filesystem::path& path,double custom,bool preserve,bool definitionMembersOnly,const std::string& sourceRoot,const std::set<std::string>& subset){
+static ExchangeModel readArchiveImpl(const std::filesystem::path& path,double custom,bool preserve,bool definitionMembersOnly,const std::string& sourceRoot,const std::set<std::string>& subset,bool modelSpaceOnly){
     if(std::filesystem::file_size(path)>512ULL*1024*1024)throw ExchangeError("3DM archive exceeds the 512 MiB import limit");
     initialize();ONX_Model model;ON_wString log;ON_TextLog errors(log);if(!model.Read(path.c_str(),&errors))throw ExchangeError("Cannot read 3DM archive: "+utf8(log));
     ExchangeModel result;const auto units=model.m_settings.m_ModelUnitsAndTolerances.m_unit_system.UnitSystem();
@@ -79,6 +79,7 @@ static ExchangeModel readArchiveImpl(const std::filesystem::path& path,double cu
     auto definitionMember=[&](const ON_UUID& id){for(auto d:definitions){auto& ids=d->InstanceGeometryIdList();for(int i=0;i<ids.Count();++i)if(ids[i]==id)return true;}return false;};
     std::vector<ON_UUID> ancestry;
     bool emptyEmbeddedBlock=false;
+    std::string rootUuid;std::set<std::string> matchedRoots;
     std::function<void(const ON_ModelGeometryComponent*,const ON_Xform&,const ExchangeItem*,bool)> expand;
     expand=[&](const ON_ModelGeometryComponent* component,const ON_Xform& transform,const ExchangeItem* parent,bool signedMember){
         auto started=std::chrono::steady_clock::now();
@@ -89,7 +90,7 @@ static ExchangeModel readArchiveImpl(const std::filesystem::path& path,double cu
         for(const ON_Layer* ancestor=layer;ancestor;){item.visible=item.visible&&ancestor->IsVisible();item.locked=item.locked||ancestor->IsLocked();const auto parent=ancestor->ParentId();ancestor=nullptr;if(parent!=ON_nil_uuid)for(auto [i,p]:layers)if(p->Id()==parent){ancestor=p;break;}}
         ON_wString lockedMetadata; if(a->GetUserString(L"OpenMatrix9.Locked",lockedMetadata)&&lockedMetadata==L"1")item.locked=true;
 
-        char sourceId[37]{};ON_UuidToString(component->Id(),sourceId);item.sourceUuid=sourceId;item.sourceClass=geometryType;
+        char sourceId[37]{};ON_UuidToString(component->Id(),sourceId);item.sourceUuid=sourceId;item.sourceClass=geometryType;item.sourceRootUuid=rootUuid;
         if(preserve&&(ON_InstanceRef::Cast(g)||ON_CurveOnSurface::Cast(g)||!(ON_Point::Cast(g)||ON_Curve::Cast(g)||ON_Brep::Cast(g)||ON_Mesh::Cast(g)||ON_Surface::Cast(g)))){
             item.retained=true;result.items.push_back(std::move(item));return;
         }
@@ -154,6 +155,7 @@ static ExchangeModel readArchiveImpl(const std::filesystem::path& path,double cu
         result.items.push_back(std::move(item));if(result.items.size()>1000000)throw ExchangeError("3DM object limit exceeded");
     };
     auto selected=[&](const ON_ModelGeometryComponent* object){auto attributes=object->Attributes(nullptr);if(!attributes)throw ExchangeError("Missing object attributes");
+        if(modelSpaceOnly&&attributes->m_space==ON::page_space)return false;
         bool member=attributes->IsInstanceDefinitionObject()||definitionMember(object->Id());
         char uuid[37]{};ON_UuidToString(object->Id(),uuid);
         if(!subset.empty()&&!subset.contains(uuid))return false;
@@ -161,16 +163,18 @@ static ExchangeModel readArchiveImpl(const std::filesystem::path& path,double cu
         return definitionMembersOnly?member:!member;
     };
     for(auto object:objects){if(!selected(object))continue;
+        char id[37]{};ON_UuidToString(object->Id(),id);rootUuid=id;matchedRoots.insert(rootUuid);
         expand(object,ON_Xform::IdentityTransformation,nullptr,false);
     }
+    if(!subset.empty()&&matchedRoots!=subset)throw ExchangeError("Missing selected conversion root");
     if(result.items.empty()&&!preserve&&!emptyEmbeddedBlock)throw ExchangeError("3DM archive has no supported geometry");return result;
 }
-ExchangeModel readArchive(const std::filesystem::path& path,double custom,bool preserve,bool definitionMembersOnly,const std::string& sourceRoot){
-    return readArchiveImpl(path,custom,preserve,definitionMembersOnly,sourceRoot,{});
+ExchangeModel readArchive(const std::filesystem::path& path,double custom,bool preserve,bool definitionMembersOnly,const std::string& sourceRoot,bool modelSpaceOnly){
+    return readArchiveImpl(path,custom,preserve,definitionMembersOnly,sourceRoot,{},modelSpaceOnly);
 }
-ExchangeModel readArchiveSubset(const std::filesystem::path& path,double custom,bool members,const std::set<std::string>& subset){
+ExchangeModel readArchiveSubset(const std::filesystem::path& path,double custom,bool members,const std::set<std::string>& subset,bool preserve){
     if(subset.empty())throw ExchangeError("Empty conversion subset");
-    return readArchiveImpl(path,custom,true,members,"",subset);
+    return readArchiveImpl(path,custom,preserve,members,"",subset,!preserve);
 }
 void writeArchive5(const ExchangeModel& source,const std::filesystem::path& path){
     for(const auto& item:source.items)if(item.retained)throw ExchangeError("Legacy geometry export cannot preserve source-retained records");

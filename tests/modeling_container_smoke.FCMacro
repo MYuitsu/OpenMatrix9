@@ -1,0 +1,48 @@
+"""Mixed App::Part export must retain every working member and placement."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,traceback,tempfile
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,ThreeDmModeling,ThreeDmPointCloud,Part,Mesh,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('MixedWorkingContainer')
+        part=doc.addObject('App::Part','Container');part.Placement.Base=App.Vector(100,5,0)
+        curve=doc.addObject('Part::Feature','Curve');curve.Shape=Part.makeLine(App.Vector(),App.Vector(10,0,0));curve.Placement.Base=App.Vector(20,0,0);part.addObject(curve)
+        mesh=doc.addObject('Mesh::Feature','Mesh');mesh.Mesh=Mesh.Mesh([[(0,0,0),(1,0,0),(0,1,0)]]);part.addObject(mesh)
+        source=out/'cloud-source.3dm'
+        fixture=Path(os.environ.get('OM9_MODELING_FIXTURES','H:/FreeCAD-src/build/3dm-preserve-native/modeling-fixtures'))/'mm.3dm'
+        objects=ThreeDm.import_file(str(fixture),doc,mode='modeling');cloud=next(o for o in objects if o.OM9GeometryKind==5);part.addObject(cloud)
+        doc.recompute()
+        expanded=ThreeDmModeling.working_selection([part])
+        check('App Part expands every CAD mesh and cloud member',expanded==[curve,mesh,cloud])
+        target=out/'mixed.3dm';ThreeDm.export_file(str(target),[part],modeling=True)
+        with tempfile.TemporaryDirectory() as staging:
+            rows=json.loads(native.read3dm(str(target),staging))['items']
+            check('mixed selected container exports three records',len(rows)==3)
+            cad=next(row for row in rows if 'brep' in row);shape=Part.Shape();shape.read(cad['brep'])
+            check('CAD parent transform applied once',abs(shape.BoundBox.XMin-120)<1e-7 and abs(shape.BoundBox.YMin-5)<1e-7)
+            mesh_row=next(row for row in rows if 'vertices' in row)
+            check('mesh parent transform applied once',all(p[0]>=100 and p[1]>=5 for p in mesh_row['vertices']))
+        verify=App.newDocument('MixedDecoded');imported=ThreeDm.import_file(str(target),verify,mode='modeling')
+        received=next(o for o in imported if o.OM9GeometryKind==5)
+        check('cloud parent transform applied once',(received.OM9CloudPoints[0]-App.Vector(101,7,3)).Length<1e-9)
+        App.setActiveDocument(doc.Name)
+        curve.addProperty('App::PropertyString','OM9Capability');curve.OM9Capability='retained'
+        protected=out/'protected.3dm';protected.write_bytes(b'unchanged')
+        try:ThreeDm.export_file(str(protected),[part],modeling=True)
+        except RuntimeError:check('retained child refuses whole selected container',True)
+        else:check('retained child refuses whole selected container',False)
+        check('preflight refusal preserves target bytes',protected.read_bytes()==b'unchanged')
+        body=doc.addObject('PartDesign::Body','Body');feature=doc.addObject('PartDesign::Feature','Feature');feature.Shape=Part.makeBox(1,2,3);body.addObject(feature);doc.recompute()
+        check('Body remains one final result',ThreeDmModeling.working_selection([body])==[body])
+        report.update(ok=True,module=native.__file__,python_module=ThreeDmModeling.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

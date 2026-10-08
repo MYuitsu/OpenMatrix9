@@ -17,12 +17,12 @@ bool executeThreeDm(std::size_t operation){
     if(!ready())return false;
     const auto name=std::string(App::GetApplication().getActiveDocument()->getName());
     QString path;
-    bool geometryOnly=false;
+    bool geometryOnly=false,modeling=false;
     if(operation==1)path=QFileDialog::getOpenFileName(nullptr,"Import Rhino 3DM",{},"Rhino (*.3dm)");
-    else {QFileDialog dialog(nullptr,"Export Selected Rhino 5 3DM");dialog.setOption(QFileDialog::DontUseNativeDialog);dialog.setAcceptMode(QFileDialog::AcceptSave);dialog.setNameFilter("Rhino 5 (*.3dm)");dialog.setDefaultSuffix("3dm");auto* choice=new QCheckBox("Geometry only (omit native blocks, source tables, retained records, history and userdata)",&dialog);choice->setObjectName("OM9GeometryOnlyExport");if(auto* grid=qobject_cast<QGridLayout*>(dialog.layout()))grid->addWidget(choice,grid->rowCount(),0,1,grid->columnCount());else dialog.layout()->addWidget(choice);if(dialog.exec()!=QDialog::Accepted)return false;geometryOnly=choice->isChecked();const auto files=dialog.selectedFiles();if(!files.isEmpty())path=files.front();}
+    else {QFileDialog dialog(nullptr,"Export Selected Rhino 5 3DM");dialog.setOption(QFileDialog::DontUseNativeDialog);dialog.setAcceptMode(QFileDialog::AcceptSave);dialog.setNameFilter("Rhino 5 (*.3dm)");dialog.setDefaultSuffix("3dm");auto* choice=new QCheckBox("Geometry only (omit native blocks, source tables, retained records, history and userdata)",&dialog);choice->setObjectName("OM9GeometryOnlyExport");if(auto* grid=qobject_cast<QGridLayout*>(dialog.layout()))grid->addWidget(choice,grid->rowCount(),0,1,grid->columnCount());else dialog.layout()->addWidget(choice);auto* working=new QCheckBox("Working geometry (continue modeling)",&dialog);working->setObjectName("OM9ModelingExport");dialog.layout()->addWidget(working);QObject::connect(working,&QCheckBox::toggled,choice,[choice](bool checked){if(checked)choice->setChecked(false);});QObject::connect(choice,&QCheckBox::toggled,working,[working](bool checked){if(checked)working->setChecked(false);});if(dialog.exec()!=QDialog::Accepted)return false;geometryOnly=choice->isChecked();modeling=working->isChecked();const auto files=dialog.selectedFiles();if(!files.isEmpty())path=files.front();}
     if(path.isEmpty())return false;
     QString importMode="geometry";
-    if(operation==1){bool accepted=false;auto choice=QInputDialog::getItem(nullptr,"3DM import mode","Preserve source data stores native records in FCStd for structural export of supported selections.",{"Preserve source data","Geometry only"},0,false,&accepted);if(!accepted)return false;importMode=choice=="Geometry only"?"geometry":"preserve";}
+    if(operation==1){bool accepted=false;auto choice=QInputDialog::getItem(nullptr,"3DM import mode","Choose how to use the imported geometry.",{"Preserve source data","Geometry only","Working geometry (continue modeling)"},0,false,&accepted);if(!accepted)return false;importMode=choice=="Working geometry (continue modeling)"?"modeling":choice=="Geometry only"?"geometry":"preserve";}
     if(!ready()||name!=App::GetApplication().getActiveDocument()->getName())return false;
     // Native menu/toolbar activation does not hold Python's GIL. Keep it for
     // every Python C API call, including error handling and reference cleanup.
@@ -38,6 +38,6 @@ bool executeThreeDm(std::size_t operation){
                 if(accepted&&ready()&&name==App::GetApplication().getActiveDocument()->getName())result=PyObject_CallMethod(module,"import_file","sOds",bytes.constData(),Py_None,scale,importMode.toUtf8().constData());
             }else PyErr_Restore(type,value,trace);
         }
-    }else result=PyObject_CallMethod(module,"export_selection","sO",bytes.constData(),geometryOnly?Py_True:Py_False);
+    }else result=PyObject_CallMethod(module,"export_selection","sOO",bytes.constData(),geometryOnly?Py_True:Py_False,modeling?Py_True:Py_False);
     Py_DECREF(module);if(!result){if(PyErr_Occurred())PyErr_Print();return false;}Py_DECREF(result);return true;
 }

@@ -55,7 +55,17 @@
       "remaining": "Whole matrix, final review, primary integration, build/install and actual applications"
     }
   ],
-  "prepared_pending_batches": [],
+  "prepared_pending_batches": [
+    {
+      "id": "modeling-public-rhino5-generated-exchange",
+      "package": 8,
+      "fixtures": 4,
+      "objects": 7,
+      "status": "awaiting_user_rhino5",
+      "reason": "New current-geometry workflow and AppPart mixed-container regression require independent target application evidence.",
+      "script": "H:/FreeCAD-src/build/rhino5-modeling-publish-20261008/rhino5-modeling-exchange.py"
+    }
+  ],
   "report_after_each_measurement": [
     "Batch name and package; fixture count; completed/passed/failed cases and whether the probe itself stopped",
     "What the measurement proves and what remains unverified; exact evidence path",
@@ -230,6 +240,16 @@
       "runtime_checks": 151,
       "rhino_new_cases": 0,
       "evidence": "docs/validation/2026-10-08-fast-3dm-import.md"
+    },
+    {
+      "id": "modeling-public-integration-regressions",
+      "package": 8,
+      "status": "passed_native_and_freecad_scoped",
+      "fixtures_modeling_generator": 7,
+      "native_suites": 8,
+      "runtime_reports": 15,
+      "runtime_checks": 464,
+      "evidence": "docs/validation/2026-10-08-modeling-public-integration.md"
     }
   ],
   "current_checkpoint": {

@@ -12,6 +12,7 @@ endif()
 set(OpenMatrix9_Scripts
     Init.py
     ThreeDm.py
+    ThreeDmModeling.py
     ThreeDmArchiveState.py
     ThreeDmStorage.py
     ThreeDmTextDot.py

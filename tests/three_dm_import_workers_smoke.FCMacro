@@ -10,7 +10,7 @@ def run():
     try:
         Gui.activateWorkbench('OpenMatrix9Workbench')
         import ThreeDm,ThreeDmArchiveState as state,OpenMatrix9Gui as native
-        fixture=Path('H:/FreeCAD-src/build/import-worker-fixture.3dm');source_hash=hashlib.sha256(fixture.read_bytes()).hexdigest()
+        fixture=Path(os.environ.get('OM9_IMPORT_WORKER_FIXTURE','H:/FreeCAD-src/build/import-worker-fixture.3dm'));source_hash=hashlib.sha256(fixture.read_bytes()).hexdigest()
         reports=[]
         for workers in [1,4]:
             os.environ['OM9_3DM_WORKERS']=str(workers)
@@ -41,7 +41,7 @@ def run():
         check('missing helper leaves existing document unchanged',failed and before==[o.Name for o in doc.Objects])
         failed=False;worker.rename(hidden);start=time.perf_counter()
         try:
-            shutil.copyfile('H:/FreeCAD-src/build/3dm-preserve-native/ThreeDmImportFailureWorker.exe',worker)
+            shutil.copyfile(os.environ.get('OM9_MODELING_FAILURE_WORKER','H:/FreeCAD-src/build/3dm-preserve-native/ThreeDmImportFailureWorker.exe'),worker)
             try:ThreeDm.import_file(str(fixture),doc,mode='preserve')
             except RuntimeError as error:failed='conversion worker failed' in str(error)
         finally:worker.unlink();hidden.rename(worker)

@@ -1,0 +1,48 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets
+from pathlib import Path
+import os,json,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def dialog(command,path):
+    active=[True];seen=[]
+    def answer():
+        if not active[0]:return
+        for widget in QtWidgets.QApplication.topLevelWidgets():
+            if not widget.isVisible():continue
+            if isinstance(widget,QtWidgets.QFileDialog):
+                seen.append('file');widget.setDirectory(str(path.parent));widget.selectFile(path.name)
+                edit=widget.findChild(QtWidgets.QLineEdit,'fileNameEdit')
+                if edit:edit.setText(path.name)
+                if command=='Export3dm':
+                    working=widget.findChild(QtWidgets.QCheckBox,'OM9ModelingExport');check('working export choice visible',working is not None);working.setChecked(True)
+                widget.accept()
+            elif isinstance(widget,QtWidgets.QInputDialog):
+                seen.append('mode');widget.setTextValue('Working geometry (continue modeling)');widget.accept()
+        QtCore.QTimer.singleShot(50,answer)
+    QtCore.QTimer.singleShot(100,answer)
+    try:Gui.runCommand(command)
+    finally:active[0]=False
+    check(command+' opens actual dialog',bool(seen))
+def run():
+    try:
+        import ThreeDm,Part,OpenMatrix9Gui as native
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.ApplicationAttribute.AA_DontUseNativeDialogs,True)
+        App.ParamGet('User parameter:BaseApp/Preferences/Dialog').SetBool('DontUseNativeDialog',True)
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('WorkingMenuSource')
+        obj=doc.addObject('Part::Feature','Curve');obj.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0));doc.recompute();source=out/'source.3dm';ThreeDm.export_file(str(source),[obj])
+        work=App.newDocument('WorkingMenuImport');dialog('Import3dm',source)
+        objects=[o for o in work.Objects if hasattr(o,'OM9WorkingUUID')];check('native menu imports independent working identity',len(objects)==1)
+        obj=objects[0];obj.Placement.Base=App.Vector(20,0,0);new=work.addObject('Part::Feature','New');new.Shape=Part.makeCircle(2);work.recompute()
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(obj);Gui.Selection.addSelection(new)
+        target=out/'current.3dm';dialog('Export3dm',target)
+        check('native menu exports current and new selection as V5',len(json.loads(native.inspect3dm(str(target)))['records'])==2)
+        Gui.activeDocument().activeView().viewAxonometric();Gui.activeDocument().activeView().fitAll();Gui.updateGui();check('working workflow screenshot',Gui.getMainWindow().grab().save(str(out/'working-3dm.png')))
+        report.update(ok=True,module=native.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

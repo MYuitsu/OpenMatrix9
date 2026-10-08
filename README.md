@@ -712,9 +712,21 @@ Tiến độ openNURBS trong bản phát triển, cập nhật 2026-10-08. ✅ l
 
 Import 3DM trong bản phát triển đã được tăng tốc bằng tiến trình native riêng, giữ chữ ký và archive nguồn. [Số liệu và cách mở bản nhanh](docs/validation/2026-10-08-fast-3dm-import.md).
 
+Menu **Import3dm → Working geometry (continue modeling)** tạo đối tượng CAD,
+mesh và point cloud độc lập để tiếp tục thiết kế. **Export3dm → Working geometry**
+xuất hình học hiện tại của phần chọn, gồm đối tượng đã sửa và đối tượng mới, sang
+Rhino 5/V5. Nhóm `App::Part` được mở rộng đủ các thành viên; `PartDesign::Body`
+xuất hình dạng kết quả cuối. Dữ liệu không được hỗ trợ bị từ chối trước khi sửa
+document hoặc thay file đích.
+
+Chế độ Working geometry chủ động bỏ history, render, material, texture, light,
+layout và userdata. Chọn **Preserve source data** khi cần giữ các dữ liệu này.
+Phạm vi và kiểm chứng bản gộp: [báo cáo modeling exchange](docs/validation/2026-10-08-modeling-public-integration.md).
+
 |Chức năng|Ý nghĩa và phạm vi|Tiến độ|
 |---|---|---|
 |Import 3dm nhanh (Preserve)|Tối đa4 tiến trình native; giữ dữ liệu/UUID, kiểm tra lỗi trước transaction; đã đo nhẫn cụ thể, còn Geometry only tuần tự.|✅|
+|Working geometry import/export|CAD/mesh/point cloud độc lập; import qua worker, export hình học hiện tại và đối tượng mới. Không giữ dữ liệu phụ của chế độ Preserve; kiểm chứng Rhino5 của bản gộp được ghi riêng.|✅|
 |Migrate 3dm copy origins|Khôi phục provenance của block copy bằng UUID → object gốc; giữ geometry, target, Undo/Redo và FCStd.|✅|
 |Native rational proxy copy|Giữ payload NURBS rational 2D nguyên bản khi migration và export.|✅|
 |Migrate affine targets|Chỉ rõ definition đích cho reference affine; giữ ma trận native, geometry và Undo/Redo/FCStd, rollback graph lỗi.|✅|

@@ -1,0 +1,52 @@
+"""Same-runtime comparison; geometry equality is required, timings reported."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,time,hashlib,traceback,statistics,importlib.util,tempfile
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'ring':[],'mesh':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def decode(path):
+    import OpenMatrix9Gui as native
+    with tempfile.TemporaryDirectory() as staging:
+        data=json.loads(native.read3dm(str(path),staging));return [{'vertices':r['vertices'],'faces':r['faces']} for r in data['items']]
+def run():
+    try:
+        import ThreeDm,Part,Mesh,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        baseline=Path('H:/FreeCAD-src/build/modeling-source-backup-20261008/ThreeDm.py')
+        spec=importlib.util.spec_from_file_location('om9_phase1_baseline',baseline);old=importlib.util.module_from_spec(spec);spec.loader.exec_module(old)
+        doc=App.newDocument('MeshPerformance')
+        mesh=doc.addObject('Mesh::Feature','Mesh');facets=[]
+        for i in range(20000):
+            x=i%200;y=i//200
+            facets.append([(x,y,0),(x+0.8,y,0),(x,y+0.8,0)])
+        mesh.Mesh=Mesh.Mesh(facets);doc.recompute();expected=None
+        for name,module in [('baseline',old),('current',ThreeDm),('current',ThreeDm),('baseline',old)]:
+            path=out/(name+'-'+str(len(report['mesh']))+'.3dm');start=time.perf_counter();module.export_file(str(path),[mesh]);elapsed=time.perf_counter()-start
+            received=decode(path)
+            if expected is None:expected=received
+            check('mesh vertices/faces equal baseline '+str(len(report['mesh'])),received==expected)
+            report['mesh'].append({'mode':name,'seconds':elapsed,'triangles':20000})
+        App.closeDocument(doc.Name)
+        source=Path('C:/Users/nguye/Downloads/nhan oval 11.91x8.37x4.97.3dm');digest=hashlib.sha256(source.read_bytes()).hexdigest()
+        expected=None
+        for mode in ['geometry','modeling','preserve','modeling']:
+            doc=App.newDocument('RingPerformance');doc.UndoMode=1;start=time.perf_counter();objects=ThreeDm.import_file(str(source),doc,mode=mode);elapsed=time.perf_counter()-start
+            if mode in ('geometry','modeling'):
+                decoded=[]
+                for obj in objects:
+                    box=obj.Shape.BoundBox
+                    decoded.append({'name':obj.Label,'bounds':[box.XMin,box.YMin,box.ZMin,box.XMax,box.YMax,box.ZMax],'area':obj.Shape.Area,'volume':obj.Shape.Volume,'valid':obj.Shape.isValid(),'faces':len(obj.Shape.Faces),'edges':len(obj.Shape.Edges)})
+                if expected is None:expected=decoded
+                check('working ring geometry equals strict serial geometry '+str(len(report['ring'])),decoded==expected and all(r['valid'] for r in decoded))
+            report['ring'].append({'mode':mode,'seconds':elapsed,'top_level_objects':len(objects)})
+            App.closeDocument(doc.Name);Gui.updateGui()
+        check('user source file unchanged',hashlib.sha256(source.read_bytes()).hexdigest()==digest)
+        report.update(ok=True,module=native.__file__,ring_source_sha256=digest,mesh_baseline_sha256=hashlib.sha256(baseline.read_bytes()).hexdigest())
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

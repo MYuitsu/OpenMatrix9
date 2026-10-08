@@ -17,17 +17,22 @@ def import_file(path, document=None, scale=0, mode='geometry'):
         objects = native.commit3dm(doc.Name, prepared)
         if mode == 'preserve':
             App.Console.PrintMessage('3DM: %d editable objects, %d source-retained records. Source archive stored in FCStd; use structural preservation export.\n' % (len(prepared['host_geometry']), len(prepared['retained_records'])))
+        elif mode == 'modeling':
+            App.Console.PrintMessage('3DM: %d independent working objects. History, render data, materials, textures, lights, layouts and userdata omitted.\n' % len(objects))
         return objects
 
 
 def _prepare_import(path, staging, scale, mode):
     """Convert verified source data without mutating a user document."""
     import OpenMatrix9Gui as native, Part, Mesh
-    if mode not in ('geometry', 'preserve'):raise RuntimeError('Invalid 3DM import mode')
+    if mode not in ('geometry', 'preserve', 'modeling'):raise RuntimeError('Invalid 3DM import mode')
     archive = None
     if mode == 'preserve':
         archive = json.loads(native.prepare3dmArchive(os.fspath(path), staging, scale, 1))
         model = dict(items=archive['prepared_geometry'] + archive.get('definition_geometry', []))
+    elif mode == 'modeling':
+        from ThreeDmModeling import prepare_modeling
+        model = prepare_modeling(path, staging, scale)
     else:model = json.loads(native.read3dm(os.fspath(path), staging, scale))
     # Bound all staged native clouds before constructing host properties.
     cloud_rows=[row for row in model['items'] if 'point_cloud_fields' in row]
@@ -123,6 +128,9 @@ def _insert_prepared(name, prepared):
             obj.ViewObject.addProperty('App::PropertyInteger','OM9IsoCurveDensity','Rhino display','Display-only Rhino isocurve density (-1: boundary only)')
             obj.ViewObject.OM9IsoCurveDensity=int(item.get('wire_density',1))
         obj.ViewObject.Visibility = item["visible"]
+        if item.get('working_mode'):
+            from ThreeDmModeling import bind_working_metadata
+            bind_working_metadata(obj,item)
         if hasattr(obj.ViewObject,'Selectable'):obj.ViewObject.Selectable = not item["locked"]
         parent = None
         path_parts = item["layer"].split("::") if item["layer"] else []
@@ -142,10 +150,14 @@ def _insert_prepared(name, prepared):
     return objects
 
 
-def export_file(path, objects, geometry_only=False):
+def export_file(path, objects, geometry_only=False, modeling=False):
     import OpenMatrix9Gui as native
     import Part
     if type(geometry_only) is not bool:raise RuntimeError('Geometry-only export policy must be boolean')
+    if type(modeling) is not bool:raise RuntimeError('Modeling export policy must be boolean')
+    if modeling:
+        from ThreeDmModeling import export_file as export_working
+        return export_working(path,objects)
     def geometric_selection(selected):
         for obj in selected:
             if obj.isDerivedFrom("App::DocumentObjectGroup") and not any(hasattr(obj,field) for field in ('OM9ArchiveMode','OM9DefinitionUUID','OM9NewDefinitionUUID','OM9SourceUUID')):
@@ -183,58 +195,64 @@ def export_file(path, objects, geometry_only=False):
                 return _write_geometry_atomic(native,prepared,path)
         if any(hasattr(obj,'OM9ArchiveMode') or hasattr(obj,'OM9DefinitionUUID') or hasattr(obj,'OM9NewDefinitionUUID') or getattr(obj,'OM9Capability','') in ('retained','display-retained','incompatible') for obj in objects):
             raise RuntimeError('Geometry-only export requires editable geometry or a supported placed block')
-    target = os.path.abspath(os.fspath(path))
     with tempfile.TemporaryDirectory(prefix="om9-3dm-") as staging:
-        items = []
-        tolerance = 1e-6
-        for index, obj in enumerate(objects):
-            color = getattr(obj.ViewObject, "ShapeColor", getattr(obj, "OM9Color", (0.7, 0.7, 0.7)))
-            item = dict(name=obj.Label, layer=getattr(obj, "OM9LayerPath", "Default"),
-                        color=[round(c * 255) for c in color[:3]],
-                        visible=obj.ViewObject.Visibility, locked=getattr(obj, "OM9Locked", False))
-            import ThreeDmPointCloud
-            if ThreeDmPointCloud.is_adapter(obj):
-                if getattr(obj,'OM9Capability','')=='display-retained':raise RuntimeError('Derived PointCloud preview is not an independent export source')
-                item.update(ThreeDmPointCloud.stage(obj,None,staging,index))
-                item['point_cloud_transform']=ThreeDmPointCloud.placement_matrix(obj)
-            elif obj.isDerivedFrom("Mesh::Feature"):
-                points, triangles = obj.Mesh.Topology
-                matrix = (obj.getGlobalPlacement() * obj.Placement.inverse()).toMatrix()
-                signature = hashlib.sha256(repr(obj.Mesh.Topology).encode()).hexdigest()
-                if getattr(obj, "OM9MeshSignature", "") == signature:
-                    original = json.loads(obj.OM9MeshArchive)
-                    item["vertices"] = [list(matrix.multVec(App.Vector(*p))) for p in original["vertices"]]
-                    item["faces"] = original["faces"]
-                else:
-                    item["vertices"] = [list(matrix.multVec(p)) for p in points]
-                    item["faces"] = [[a, b, c, c] for a, b, c in triangles]
+        return _write_geometry_atomic(native,_stage_current_geometry(objects,staging),path)
+
+
+def _stage_current_geometry(objects,staging):
+    import Part
+    items = []
+    tolerance = 1e-6
+    for index, obj in enumerate(objects):
+        color = getattr(obj.ViewObject, "ShapeColor", getattr(obj, "OM9Color", (0.7, 0.7, 0.7)))
+        item = dict(name=obj.Label, layer=getattr(obj, "OM9LayerPath", "Default"),
+                    color=[round(c * 255) for c in color[:3]],
+                    visible=obj.ViewObject.Visibility, locked=getattr(obj, "OM9Locked", False))
+        import ThreeDmPointCloud
+        if ThreeDmPointCloud.is_adapter(obj):
+            if getattr(obj,'OM9Capability','')=='display-retained':raise RuntimeError('Derived PointCloud preview is not an independent export source')
+            item.update(ThreeDmPointCloud.stage(obj,None,staging,index))
+            item['point_cloud_transform']=ThreeDmPointCloud.placement_matrix(obj)
+        elif obj.isDerivedFrom("Mesh::Feature"):
+            topology = obj.Mesh.Topology
+            points, triangles = topology
+            matrix = (obj.getGlobalPlacement() * obj.Placement.inverse()).toMatrix()
+            stored_signature = getattr(obj, "OM9MeshSignature", "")
+            signature = hashlib.sha256(repr(topology).encode()).hexdigest() if stored_signature else None
+            if stored_signature and stored_signature == signature:
+                original = json.loads(obj.OM9MeshArchive)
+                item["vertices"] = [list(matrix.multVec(App.Vector(*p))) for p in original["vertices"]]
+                item["faces"] = original["faces"]
             else:
-                if getattr(obj,'OM9DefinitionMemberProxy',False) and obj.isDerivedFrom('App::Link') and getattr(obj,'ElementCount',0)!=0:
-                    raise RuntimeError('Geometry-only signed CAD proxy does not support link arrays')
-                shape = Part.getShape(obj, "", needSubElement=False, transform=True)
-                if shape is None or shape.isNull():
-                    raise RuntimeError("Unsupported selected object: " + obj.Label)
-                if getattr(obj,'OM9DefinitionMemberProxy',False) and obj.isDerivedFrom('App::Link'):
-                    member=obj.LinkedObject
-                    if member is None or not member.isDerivedFrom('Part::Feature'):
-                        raise RuntimeError('Geometry-only CAD proxy requires an editable CAD member')
-                    # OCC's rendered reflected solid retains the member's
-                    # original orientation. Native signed placement also carries
-                    # the determinant parity; reverse topology, not just a cache.
-                    if member.Shape.Solids and obj.ScaleVector.x*obj.ScaleVector.y*obj.ScaleVector.z<0:
-                        shape.reverse()
-                # App::Link exposes Placement but not getGlobalPlacement.
-                # Reuse the verified physical-parent placement resolver; the
-                # shape already includes the link's own scale and placement.
-                from ThreeDmArchiveState import source_placement
-                parent_matrix = App.Matrix(*source_placement(obj)) * obj.Placement.inverse().toMatrix()
-                shape.transformShape(parent_matrix, False)
-                tolerance = max(tolerance, getattr(obj, "OM9Tolerance", 0.0), shape.getTolerance(1))
-                filename = os.path.join(staging, str(index) + ".brep")
-                shape.exportBrep(filename)
-                item["brep"] = filename
-            items.append(item)
-        return _write_geometry_atomic(native,dict(items=items,tolerance=tolerance),target)
+                item["vertices"] = [list(matrix.multVec(p)) for p in points]
+                item["faces"] = [[a, b, c, c] for a, b, c in triangles]
+        else:
+            if getattr(obj,'OM9DefinitionMemberProxy',False) and obj.isDerivedFrom('App::Link') and getattr(obj,'ElementCount',0)!=0:
+                raise RuntimeError('Geometry-only signed CAD proxy does not support link arrays')
+            shape = Part.getShape(obj, "", needSubElement=False, transform=True)
+            if shape is None or shape.isNull():
+                raise RuntimeError("Unsupported selected object: " + obj.Label)
+            if getattr(obj,'OM9DefinitionMemberProxy',False) and obj.isDerivedFrom('App::Link'):
+                member=obj.LinkedObject
+                if member is None or not member.isDerivedFrom('Part::Feature'):
+                    raise RuntimeError('Geometry-only CAD proxy requires an editable CAD member')
+                # OCC's rendered reflected solid retains the member's
+                # original orientation. Native signed placement also carries
+                # the determinant parity; reverse topology, not just a cache.
+                if member.Shape.Solids and obj.ScaleVector.x*obj.ScaleVector.y*obj.ScaleVector.z<0:
+                    shape.reverse()
+            # App::Link exposes Placement but not getGlobalPlacement.
+            # Reuse the verified physical-parent placement resolver; the
+            # shape already includes the link's own scale and placement.
+            from ThreeDmArchiveState import source_placement
+            parent_matrix = App.Matrix(*source_placement(obj)) * obj.Placement.inverse().toMatrix()
+            shape.transformShape(parent_matrix, False)
+            tolerance = max(tolerance, getattr(obj, "OM9Tolerance", 0.0), shape.getTolerance(1))
+            filename = os.path.join(staging, str(index) + ".brep")
+            shape.exportBrep(filename)
+            item["brep"] = filename
+        items.append(item)
+    return dict(items=items,tolerance=tolerance)
 
 
 def _write_geometry_atomic(native,prepared,path):
@@ -278,19 +296,19 @@ def export_preserved(path, objects):
         request=preservation_request(objects,staging)
         native.writePreserved3dm(json.dumps(request),os.path.abspath(os.fspath(path)))
 
-def export_selection(path, geometry_only=False):
+def export_selection(path, geometry_only=False, modeling=False):
     selected = Gui.Selection.getSelectionEx()
     if any(s.SubElementNames for s in selected):
         raise RuntimeError("Select whole objects, without subelements")
-    export_file(path, [s.Object for s in selected],geometry_only=geometry_only)
+    export_file(path, [s.Object for s in selected],geometry_only=geometry_only,modeling=modeling)
 
 
-def export_named(path, document_name, names, geometry_only=False):
+def export_named(path, document_name, names, geometry_only=False, modeling=False):
     doc = App.getDocument(document_name)
     objects = [doc.getObject(name) for name in names]
     if any(obj is None for obj in objects):
         raise RuntimeError("An export object no longer exists")
-    export_file(path, objects,geometry_only=geometry_only)
+    export_file(path, objects,geometry_only=geometry_only,modeling=modeling)
 
 
 def insert(filename, document_name):

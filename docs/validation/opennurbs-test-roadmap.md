@@ -1,3 +1,16 @@
+## Latest integration checkpoint — 2026-10-08
+
+Working geometry public merge: **15 FreeCAD suites/464 checks and8 native suites
+passed**. Typed native generator:7 fixtures. AppPart mixed-member regression:
+RED before fix, GREEN8 after fix. These are integration checks, not a completion
+percentage. [Evidence](2026-10-08-modeling-public-integration.md).
+
+**1 prepared batch pending:** actual Rhino5 Open/SaveAs for4 generated files/
+7 objects. Added because the new current-geometry workflow and mixed container
+need target-application evidence. **7 full-exchange packages remain open; total
+future batches unknown.** Historical checkpoints below retain their original
+counts and results.
+
 Checkpoint hiện tại: **51/51 suite native,39 báo cáo FreeCAD/5.806 kiểm tra**.
 Hai file nhẫn giữ bounds0,001mm và area/volume cũ;tools42/42 đạt.
 

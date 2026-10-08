@@ -1,0 +1,20 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,hashlib,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def run():
+    try:
+        import OpenMatrix9Gui as native,ThreeDm,ThreeDmModeling
+        manifest=Path(os.environ['OM9_MODELING_MANIFEST']);data=json.loads(manifest.read_text());runtime=manifest.parent
+        for name,module in [('bin/OpenMatrix9Gui.pyd',native),('Mod/OpenMatrix9/ThreeDm.py',ThreeDm),('Mod/OpenMatrix9/ThreeDmModeling.py',ThreeDmModeling)]:
+            matched=Path(module.__file__).resolve()==(runtime/name).resolve() and hashlib.sha256(Path(module.__file__).read_bytes()).hexdigest()==data['runtime_sha256'][name]
+            report['checks'].append({'name':'loaded exact matching '+name,'passed':matched})
+            if not matched:raise RuntimeError('Runtime module mismatch: '+name)
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('ModelingBaseline');doc.UndoMode=1
+        report.update(ok=True,module=native.__file__,manifest=str(manifest))
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)
