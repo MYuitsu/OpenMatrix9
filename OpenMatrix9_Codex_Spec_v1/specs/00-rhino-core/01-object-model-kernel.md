@@ -10,6 +10,14 @@ evidence_scope: initial_source_audit_2026-10-09
 
 # RCORE-01 — Kiểu đối tượng và ranh giới kernel
 
+<!-- rhino-core-delayed-publication:start -->
+Đã nghiệm thu fixture T08 cho native Rebuild: kết quả được giữ qua lượt giao,
+source/session/options hết hiệu lực bị chặn trước Coin/transaction;36 envelope
+và36 tham chiếu Shape giải phóng đủ.173 kiểm tra fixture và72 hồi quy đạt.
+Solver vẫn đồng bộ, delivery ở GUI queue; lifetime mọi worker vẫn còn mở.
+**Toàn bộ P0 vẫn đang triển khai.** [Bằng chứng và giới hạn](../../../docs/validation/2026-10-10-rhino-core-delayed-publication.md).
+<!-- rhino-core-delayed-publication:end -->
+
 <!-- rhino-core-subobject-ownership:start -->
 Đã nghiệm thu fixture T11: sửa wrapper Curve/Surface sở hữu riêng, publish qua
 native deep copy, giữ source/sibling, đúng Undo/Redo và phân biệt lifetime của

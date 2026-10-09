@@ -34,6 +34,20 @@
 #include <set>
 #include <cmath>
 #include <algorithm>
+#include <deque>
+#include <cstdint>
+#include <QThread>
+namespace {
+// Rust-owned value policy; the caller retains exclusive GUI-thread storage.
+struct ResultGate {std::uint64_t next=1,current=0,slots[16]{};};
+static_assert(sizeof(ResultGate)==144);
+extern "C" {
+std::uint64_t om9_result_issue(ResultGate*);
+void om9_result_invalidate(ResultGate*);
+bool om9_result_claim(ResultGate*,std::uint64_t,bool);
+bool om9_result_retire(ResultGate*,std::uint64_t);
+}
+}
 namespace OpenMatrix9Gui {
 struct CoreRebuild::State {
     struct Input {
@@ -54,14 +68,59 @@ struct CoreRebuild::State {
     QCheckBox* remove=nullptr;
     QLabel *deviation=nullptr,*error=nullptr;
     std::vector<std::pair<SoSeparator*,SoSeparator*>> previews;
+    struct Lease {
+        ResultGate gate;
+        std::uint64_t created=0,released=0,shapesCreated=0,shapesReleased=0,retireFailures=0;
+    };
+    std::shared_ptr<Lease> lease=std::make_shared<Lease>();
+    QObject* deliveryContext=nullptr;
+    bool holdDelivery=false;
+    std::deque<std::shared_ptr<Result>> held;
+    std::uint64_t lastTicket=0;
+    std::string lastOutcome,lastReason;
+    std::vector<std::string> lastShapeBytes;
     fastsignals::scoped_connection documentChanged,documentDeleted;
+};
+// Deferred envelopes retain neither source wrappers nor document/view pointers.
+// All production, delivery and destruction occur on the GUI thread.
+struct CoreRebuild::Result {
+    // This value-only lease outlives State when Qt discards queued functors
+    // after the derived QObject has started destruction. No State cycle.
+    std::shared_ptr<State::Lease> owner;
+    std::uint64_t ticket;
+    std::string documentName;
+    std::vector<ObjectSnapshot> guards;
+    std::vector<CurvePyRef> outputs;
+    std::size_t command=0;
+    bool commit=false,remove=false;
+    double maximum=0;
+    Result(State& s,std::uint64_t t):owner(s.lease),ticket(t){++owner->created;}
+    ~Result(){
+        Base::PyGILStateLocker lock;
+        owner->shapesReleased+=outputs.size();outputs.clear();
+        if(!om9_result_retire(&owner->gate,ticket))++owner->retireFailures;
+        ++owner->released;
+    }
 };
 CoreRebuild& CoreRebuild::instance(){static auto* tool=new CoreRebuild;return *tool;}
 CoreRebuild::CoreRebuild():QObject(qApp),state(std::make_unique<State>()) {
+    state->deliveryContext=new QObject(this);
+    connect(qApp,&QCoreApplication::aboutToQuit,this,[this]{shutdownDelivery();});
     qApp->installEventFilter(this);
     state->documentChanged=App::GetApplication().signalActiveDocument.connect([this](const App::Document& doc){if(active()&&state->document!=&doc)cancel();});
     state->documentDeleted=App::GetApplication().signalDeleteDocument.connect([this](const App::Document& doc){if(state->document==&doc)cancel();});
     auto* timer=new QTimer(this);timer->setInterval(100);connect(timer,&QTimer::timeout,this,[this]{if(active()&&!valid())cancel();});timer->start();
+}
+CoreRebuild::~CoreRebuild(){
+    state->documentChanged.disconnect();state->documentDeleted.disconnect();
+    shutdownDelivery();
+}
+void CoreRebuild::shutdownDelivery(){
+    cancel();
+    // Discard queued native owners while the application/interpreter is alive.
+    // Also safe when invoked again by the controller destructor.
+    auto* context=state->deliveryContext;state->deliveryContext=nullptr;delete context;
+    Base::PyGILStateLocker lock;state->held.clear();
 }
 bool CoreRebuild::handles(std::size_t index){auto* id=om9_command_id(index);return id&&std::string(id)=="Rebuild";}
 bool CoreRebuild::active()const{return state->selecting||state->dialog;}
@@ -71,6 +130,7 @@ bool CoreRebuild::valid()const {
 }
 void CoreRebuild::clearPreview(){for(auto [root,node]:state->previews){if(root->findChild(node)>=0)root->removeChild(node);root->unref();}state->previews.clear();}
 void CoreRebuild::cancel(){
+    om9_result_invalidate(&state->lease->gate);
     clearPreview();state->selecting=false;state->document=nullptr;
     if(state->dialog){auto* d=state->dialog.data();state->dialog=nullptr;d->setObjectName({});d->hide();d->deleteLater();}
     Base::PyGILStateLocker lock;state->inputs.clear();
@@ -152,20 +212,27 @@ void CoreRebuild::options(){
         auto* buttons=new QDialogButtonBox(dialog);auto* ok=buttons->addButton(QDialogButtonBox::Ok);ok->setObjectName("OM9RebuildOK");auto* no=buttons->addButton(QDialogButtonBox::Cancel);no->setObjectName("OM9RebuildCancel");auto* preview=buttons->addButton("Preview",QDialogButtonBox::ActionRole);preview->setObjectName("OM9RebuildPreview");layout->addRow(buttons);
         connect(preview,&QPushButton::clicked,this,[this]{calculate(false);});connect(ok,&QPushButton::clicked,this,[this]{calculate(true);});connect(no,&QPushButton::clicked,this,[this]{cancel();CurveController::instance().setPrompt("Command: ");});
         connect(dialog,&QDialog::rejected,this,[this]{cancel();CurveController::instance().setPrompt("Command: ");});
-        auto stale=[this]{clearPreview();if(state->dialog){state->deviation->setText("Maximum deviation: click Preview");state->error->clear();}};
-        connect(state->count,&QSpinBox::valueChanged,this,stale);connect(state->degree,&QSpinBox::valueChanged,this,stale);
+        auto stale=[this]{om9_result_invalidate(&state->lease->gate);clearPreview();if(state->dialog){state->deviation->setText("Maximum deviation: click Preview");state->error->clear();}};
+        connect(state->count,&QSpinBox::valueChanged,this,stale);connect(state->degree,&QSpinBox::valueChanged,this,stale);connect(state->remove,&QCheckBox::toggled,this,stale);
         CurveController::instance().setPrompt("Rebuild: Adjust options, Preview, then OK; Cancel discards the preview.");dialog->show();
     }catch(const std::exception& e){cancel();CurveController::instance().setPrompt(QString::fromUtf8(e.what()));CurveController::instance().logMessage(QString::fromUtf8(e.what()));}
 }
 void CoreRebuild::calculate(bool commit){
-    if(!valid()||!state->dialog){cancel();return;}
+    if(!valid()||!state->dialog||!state->deliveryContext){cancel();return;}
     Base::PyGILStateLocker lock;clearPreview();
+    om9_result_invalidate(&state->lease->gate);
     try {
         const auto poles=std::size_t(state->count->value()),degree=std::size_t(state->degree->value());
         if(!om9_spline_options(poles,degree))throw std::runtime_error("PointCount must exceed Degree (1 to 11)");
+        const auto ticket=om9_result_issue(&state->lease->gate);
+        if(!ticket)throw std::runtime_error("Too many pending Rebuild results or request IDs exhausted");
+        std::shared_ptr<Result> result;
+        try {result=std::make_shared<Result>(*state,ticket);}catch(...){om9_result_retire(&state->lease->gate,ticket);throw;}
+        result->documentName=state->document->getName();result->command=state->command;
+        result->commit=commit;result->remove=state->remove->isChecked();
         CurvePyRef doc(state->document->getPyObject()),part(PyImport_ImportModule("Part")),app(PyImport_ImportModule("FreeCAD"));
         CurvePyRef vertex(PyObject_GetAttrString(part.value,"Vertex")),vector(PyObject_GetAttrString(app.value,"Vector"));
-        std::vector<CurvePyRef> outputs;double maximum=0;
+        auto& outputs=result->outputs;double maximum=0;
         for(const auto& input:state->inputs){
             verifyObject(*state->document,input->guard);
             CurvePyRef current(PyObject_CallMethod(doc.value,"getObject","s",input->name.c_str()));
@@ -179,6 +246,7 @@ void CoreRebuild::calculate(bool commit){
             std::vector<double> xyz;xyz.reserve(n*3);for(const auto& p:samples)xyz.insert(xyz.end(),p.begin(),p.end());
             if(!om9_spline_rebuild(xyz.data(),n,poles,degree,input->closed)){char message[1024]={};om9_spline_message(message,sizeof(message));throw std::runtime_error(message);}
             outputs.push_back(publishedSplineShape());
+            ++state->lease->shapesCreated;result->guards.push_back(input->guard);
             if(!commit){
                 // Bidirectional sampled geometric distance, explicitly an estimate.
                 for(auto pair:{std::pair{input->edge.value,outputs.back().value},std::pair{outputs.back().value,input->edge.value}}){
@@ -190,20 +258,54 @@ void CoreRebuild::calculate(bool commit){
                 }
             }
         }
-        if(commit){
-            for(const auto& input:state->inputs)verifyObject(*state->document,input->guard);
-            state->document->openTransaction("Rebuild Curve");
+        result->maximum=maximum;
+        if(commit){publish(result);return;}
+        if(state->holdDelivery)state->held.push_back(std::move(result));
+        else QTimer::singleShot(0,state->deliveryContext,[this,result]{publish(result);});
+    }catch(const std::exception& e){clearPreview();if(state->dialog){state->error->setText(QString::fromUtf8(e.what()));state->deviation->setText("Maximum deviation: unavailable");}}
+}
+void CoreRebuild::publish(const std::shared_ptr<Result>& result){
+    Base::PyGILStateLocker lock;
+    state->lastTicket=result->ticket;state->lastOutcome="rejected";state->lastReason.clear();
+    bool attaching=false;
+    try {
+        // Fixture diagnostics retain only serialized values, never shape owners.
+        if(!qgetenv("OM9_TEST_NATIVE_DIR").isEmpty()){
+            state->lastShapeBytes.clear();
+            for(const auto& output:result->outputs){
+                CurvePyRef bytes(PyObject_CallMethod(output.value,"exportBrepToString",nullptr));
+                const char* text=PyUnicode_AsUTF8(bytes.value);
+                if(!text)throw std::runtime_error("Cannot serialize native result diagnostics");
+                state->lastShapeBytes.emplace_back(text);
+            }
+        }
+        auto* document=App::GetApplication().getDocument(result->documentName.c_str());
+        // Resolve by name only after delivery. Copied session/source/context
+        // guards distinguish a recreated document even when names/bytes match.
+        bool contextValid=document&&valid()&&document==state->document&&state->dialog;
+        std::string staleReason="Rebuild result request is canceled or superseded";
+        if(contextValid){
+            try {for(const auto& guard:result->guards)verifyObject(*document,guard);}
+            catch(const std::exception& e){contextValid=false;staleReason=e.what();}
+        }
+        if(!om9_result_claim(&state->lease->gate,result->ticket,contextValid))
+            throw std::runtime_error(staleReason);
+        const auto& outputs=result->outputs;
+        if(result->commit){
+            document->openTransaction("Rebuild Curve");
             try{
                 for(std::size_t i=0;i<outputs.size();++i){
-                    auto object=createCurveFeature(*state->document,outputs[i].value,"Rebuild");
-                    CurvePyRef oldView(PyObject_GetAttrString(state->inputs[i]->object.value,"ViewObject")),newView(PyObject_GetAttrString(object.value,"ViewObject"));
+                    auto object=createCurveFeature(*document,outputs[i].value,"Rebuild");
+                    CurvePyRef source(document->getObject(result->guards[i].objectName.c_str())->getPyObject());
+                    CurvePyRef oldView(PyObject_GetAttrString(source.value,"ViewObject")),newView(PyObject_GetAttrString(object.value,"ViewObject"));
                     for(const char* attr:{"LineColor","PointColor","LineWidth"}){CurvePyRef property(PyObject_GetAttrString(oldView.value,attr));if(PyObject_SetAttrString(newView.value,attr,property.value)<0)throw std::runtime_error("Cannot copy curve appearance");}
                 }
-                if(state->remove->isChecked())for(const auto& input:state->inputs)state->document->removeObject(input->name.c_str());
-                state->document->recompute();state->document->commitTransaction();
-            }catch(...){state->document->abortTransaction();throw;}
-            const auto command=state->command;cancel();om9_sidebar_record_execution(command,true);CurveController::instance().setPrompt("Command: ");CurveController::instance().logMessage("Rebuild completed");return;
+                if(result->remove)for(const auto& guard:result->guards)document->removeObject(guard.objectName.c_str());
+                document->recompute();document->commitTransaction();
+            }catch(...){document->abortTransaction();throw;}
+            state->lastOutcome="committed";const auto command=result->command;cancel();om9_sidebar_record_execution(command,true);CurveController::instance().setPrompt("Command: ");CurveController::instance().logMessage("Rebuild completed");return;
         }
+        attaching=true;
         for(const auto& output:outputs){
             const auto sampled=sampleCurve(output.value,257);std::vector<SbVec3f> points;for(auto p:sampled)points.emplace_back(float(p[0]),float(p[1]),float(p[2]));
             for(auto* base:Gui::Application::Instance->activeDocument()->getMDIViews())if(auto* view=dynamic_cast<Gui::View3DInventor*>(base)){
@@ -212,7 +314,52 @@ void CoreRebuild::calculate(bool commit){
                 auto* coords=new SoCoordinate3;coords->point.setValues(0,int(points.size()),points.data());node->addChild(coords);auto* line=new SoLineSet;line->numVertices.set1Value(0,int(points.size()));node->addChild(line);view->getViewer()->redraw();
             }
         }
-        state->error->clear();state->deviation->setText(QString("Maximum deviation (sampled): %1 mm").arg(maximum,0,'g',8));
-    }catch(const std::exception& e){clearPreview();if(state->dialog){state->error->setText(QString::fromUtf8(e.what()));state->deviation->setText("Maximum deviation: unavailable");}}
+        state->lastOutcome="previewed";
+        state->error->clear();state->deviation->setText(QString("Maximum deviation (sampled): %1 mm").arg(result->maximum,0,'g',8));
+    }catch(const std::exception& e){
+        state->lastReason=e.what();
+        if(attaching)clearPreview();
+        // A late old result must not remove a newer preview or overwrite its UI.
+        CurveController::instance().logMessage(QString::fromUtf8(e.what()));
+        if(result->commit&&state->dialog&&valid())state->error->setText(QString::fromUtf8(e.what()));
+    }
+}
+PyObject* CoreRebuild::deliveryTest(const char* action){
+    if(QThread::currentThread()!=qApp->thread())throw std::runtime_error("Rebuild delivery fixture requires GUI thread");
+    const std::string operation(action);
+    if(!state->deliveryContext&&(operation=="hold"||operation=="normal"))throw std::runtime_error("Rebuild delivery is shut down");
+    if(operation=="hold")state->holdDelivery=true;
+    else if(operation=="shutdown")shutdownDelivery();
+    else if(operation=="normal"){
+        state->holdDelivery=false;
+        while(!state->held.empty()){auto result=std::move(state->held.front());state->held.pop_front();QTimer::singleShot(0,state->deliveryContext,[this,result]{publish(result);});}
+    }else if(operation=="oldest"||operation=="newest"){
+        if(state->held.empty())throw std::runtime_error("No held native Rebuild result");
+        auto result=operation=="oldest"?std::move(state->held.front()):std::move(state->held.back());
+        if(operation=="oldest")state->held.pop_front();else state->held.pop_back();
+        publish(result);result.reset();
+    }else if(operation!="stats")throw std::runtime_error("Unknown Rebuild delivery fixture action");
+    CurvePyRef report(Py_BuildValue("{s:K,s:K,s:K,s:K,s:K,s:K,s:K,s:K,s:K,s:s,s:s}",
+        "created",state->lease->created,"released",state->lease->released,"shapes_created",state->lease->shapesCreated,"shapes_released",state->lease->shapesReleased,
+        "live_envelopes",state->lease->created-state->lease->released,"held",static_cast<std::uint64_t>(state->held.size()),
+        "preview_nodes",static_cast<std::uint64_t>(state->previews.size()),"last_ticket",state->lastTicket,
+        "retire_failures",state->lease->retireFailures,"last_outcome",state->lastOutcome.c_str(),"last_reason",state->lastReason.c_str()));
+    CurvePyRef held(PyList_New(0)),last(PyList_New(0));
+    for(const auto& result:state->held){
+        CurvePyRef row(Py_BuildValue("{s:K,s:s,s:K}","ticket",result->ticket,"document_name",result->documentName.c_str(),"source_count",static_cast<std::uint64_t>(result->guards.size()))),breps(PyList_New(0));
+        for(const auto& output:result->outputs){CurvePyRef bytes(PyObject_CallMethod(output.value,"exportBrepToString",nullptr));if(PyList_Append(breps.value,bytes.value)<0)throw std::runtime_error("Cannot append result diagnostics");}
+        if(PyDict_SetItemString(row.value,"breps",breps.value)<0||PyList_Append(held.value,row.value)<0)throw std::runtime_error("Cannot append held diagnostics");
+    }
+    for(const auto& bytes:state->lastShapeBytes){CurvePyRef text(PyUnicode_FromStringAndSize(bytes.data(),Py_ssize_t(bytes.size())));if(PyList_Append(last.value,text.value)<0)throw std::runtime_error("Cannot append delivered diagnostics");}
+    if(PyDict_SetItemString(report.value,"held_results",held.value)<0||PyDict_SetItemString(report.value,"last_breps",last.value)<0)throw std::runtime_error("Cannot publish result diagnostics");
+    return Py_NewRef(report.value);
+}
+void CoreRebuild::addDeliveryTestMethods(PyObject* module){
+    if(qgetenv("OM9_TEST_NATIVE_DIR").isEmpty())return;
+    static PyMethodDef methods[]={{"rebuildDeliveryTest",[](PyObject*,PyObject* args)->PyObject*{
+        const char* action=nullptr;if(!PyArg_ParseTuple(args,"s",&action))return nullptr;
+        try{return instance().deliveryTest(action);}catch(const std::exception& e){PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}
+    },METH_VARARGS,"Native fixture-only hold/release of real solved Rebuild envelopes."},{nullptr,nullptr,0,nullptr}};
+    if(PyModule_AddFunctions(module,methods)<0)throw std::runtime_error("Cannot register Rebuild delivery fixture API");
 }
 }

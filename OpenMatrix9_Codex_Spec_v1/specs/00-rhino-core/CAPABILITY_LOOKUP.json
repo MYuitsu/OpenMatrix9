@@ -33,7 +33,8 @@
         "../../../docs/validation/2026-10-10-rhino-core-instance-isolation.md",
         "../../../docs/validation/2026-10-10-rhino-core-hatch-input-gate.md",
         "../../../docs/validation/2026-10-10-rhino-core-periodic-persistence.md",
-        "../../../docs/validation/2026-10-10-rhino-core-subobject-ownership.md"
+        "../../../docs/validation/2026-10-10-rhino-core-subobject-ownership.md",
+        "../../../docs/validation/2026-10-10-rhino-core-delayed-publication.md"
       ]
     },
     {
@@ -1732,6 +1733,16 @@
       ],
       "evidence": "../../../docs/validation/2026-10-10-rhino-core-subobject-ownership.md",
       "scope": "Authored RCORE-01.T11 detached native support mutation owners, explicit deep-copy publication and guarded subobject lifecycle; complete P0 stays open."
+    },
+    {
+      "id": "rhino-core-delayed-publication",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-delayed-publication.md",
+      "scope": "Authored RCORE-01.T08 actual Rebuild result-publication boundary, owned outputs/source guards, GUI queue cancellation/close/options/newer request and shutdown discard; broader worker lifecycle/P0 stays open."
     }
   ]
 }

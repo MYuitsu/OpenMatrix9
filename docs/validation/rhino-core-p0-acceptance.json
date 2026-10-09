@@ -116,8 +116,11 @@
           "id": "RCORE-01.T08",
           "spec_requirement": "RCORE-01.T08 | Preview solver, sửa source hoặc đóng document trước completion | Kết quả stale bị loại; không crash/UAF; preview và handles được giải phóng",
           "priority": "P0",
-          "status": "not_fully_verified",
-          "complete_evidence": []
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-delayed-publication-evidence.json"
+          ],
+          "verification_scope": "Authored Rebuild existing synchronous fitter produces nativeownedShape, completiondelivery delayedonGUIqueue. RealheldsameBRep/ticket,postsolve source/session/UID/units/ancestors/world/Undo guards and one-shotRust request claim beforeCoin/transaction; edit/restore/replacement/options/newer/cancel/switch/close-recreate stale rejection. Nativeownedrefs/counters exact36,actualCoin4viewsclear,productionshutdownreceiverdiscard/exhaustion/capacity recovery. BroaderC11 workers/thread/sanitizer/allcontrollers/allocation proof remainsopen."
         },
         {
           "id": "RCORE-01.T09",
@@ -1134,5 +1137,5 @@
       ]
     }
   ],
-  "updated_at": "2026-10-10T04:09:01+07:00"
+  "updated_at": "2026-10-10T04:36:59+07:00"
 }

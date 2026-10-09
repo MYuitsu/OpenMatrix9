@@ -6,6 +6,7 @@
 #include "CageFeature.h"
 #include "CoreUnits.h"
 #include "CoreObjects.h"
+#include "CoreRebuild.h"
 #include "CoreGeometryContract.h"
 #include "CoreCPlanes.h"
 
@@ -84,6 +85,7 @@ PyMOD_INIT_FUNC(OpenMatrix9Gui)
     OpenMatrix9Gui::initializeUnitTypes();
     OpenMatrix9Gui::addUnitMethods(module);
     OpenMatrix9Gui::addObjectSnapshotMethods(module);
+    OpenMatrix9Gui::CoreRebuild::addDeliveryTestMethods(module);
     OpenMatrix9Gui::addGeometryContractMethods(module);
     OpenMatrix9Gui::addCPlaneMethods(module);
     OpenMatrix9Gui::initializeEditSpecialTypes();
