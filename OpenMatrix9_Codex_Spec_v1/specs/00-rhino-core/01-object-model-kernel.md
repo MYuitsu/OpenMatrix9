@@ -10,6 +10,14 @@ evidence_scope: initial_source_audit_2026-10-09
 
 # RCORE-01 — Kiểu đối tượng và ranh giới kernel
 
+<!-- rhino-core-polycurve-partition:start -->
+Dùng lại wire, đảo hướng và FCStd của FreeCAD; sửa bước working 3DM để polycurve
+giữ từng đoạn thay vì gộp thành một cạnh. Rust kiểm tra thứ tự, miền và điểm nối;
+báo cáo có trước commit. T05 đã nghiệm thu với 403 kiểm tra native, 382 kiểm tra
+FreeCAD và 523 Rust tests. **Toàn bộ P0 vẫn đang triển khai.**
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-10-rhino-core-polycurve-partition.md).
+<!-- rhino-core-polycurve-partition:end -->
+
 <!-- rhino-core-curve-parameters:start -->
 Dùng lại openNURBS/OCCT cho báo cáo query tham số toàn miền: giữ native form1/2,
 chặn output lỗi trước khi tính điểm và giữ basis/report độc lập. 502 Rust tests;

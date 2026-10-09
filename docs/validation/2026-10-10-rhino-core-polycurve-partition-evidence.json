@@ -1,0 +1,2718 @@
+{
+  "schema_version": 1,
+  "checkpoint": "rhino-core-polycurve-partition",
+  "date": "2026-10-10T02:43:11+07:00",
+  "parent_commit": "04d64cc",
+  "p0_status": "in_progress",
+  "native_module": {
+    "path": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+    "sha256": "61708e51c37e9dc150d355b968a5be9ab29886858ae9ce0cea108fc2b87e5e09"
+  },
+  "native_polycurve_report": {
+    "cases": [
+      {
+        "attributes_preserved": null,
+        "closed": false,
+        "closing_residuals": null,
+        "frame": "native-conversion-local",
+        "global_deviation": null,
+        "joint_policy": "preserve-segment-curves-no-heal",
+        "length_tolerance": 1e-07,
+        "length_unit": null,
+        "locus_preserved": null,
+        "method": "flat-owned-segments-to-native-wire",
+        "parameter_map": null,
+        "parameter_tolerance": 1e-12,
+        "parameterization_preserved": null,
+        "parent_domain": [
+          2,
+          7
+        ],
+        "schema_version": 1,
+        "segment_count": 2,
+        "segments": [
+          {
+            "child_domain": [
+              0,
+              5
+            ],
+            "endpoint_and_joint_residuals": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "native_direction": 1,
+            "native_end": [
+              0,
+              0,
+              0
+            ],
+            "native_start": [
+              -5,
+              0,
+              0
+            ],
+            "ordinal": 0,
+            "parent_domain": [
+              2,
+              3
+            ],
+            "shared_previous": null,
+            "source_end": [
+              0,
+              0,
+              0
+            ],
+            "source_family": 1,
+            "source_start": [
+              -5,
+              0,
+              0
+            ]
+          },
+          {
+            "child_domain": [
+              11,
+              19
+            ],
+            "endpoint_and_joint_residuals": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "native_direction": 1,
+            "native_end": [
+              10,
+              10,
+              0
+            ],
+            "native_start": [
+              0,
+              0,
+              0
+            ],
+            "ordinal": 1,
+            "parent_domain": [
+              3,
+              7
+            ],
+            "shared_previous": true,
+            "source_end": [
+              10,
+              10,
+              0
+            ],
+            "source_family": 3,
+            "source_start": [
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "source_identity": null,
+        "topology_preserved": null
+      },
+      {
+        "attributes_preserved": null,
+        "closed": false,
+        "closing_residuals": null,
+        "frame": "native-conversion-local",
+        "global_deviation": null,
+        "joint_policy": "preserve-segment-curves-no-heal",
+        "length_tolerance": 1e-07,
+        "length_unit": null,
+        "locus_preserved": null,
+        "method": "flat-owned-segments-to-native-wire",
+        "parameter_map": null,
+        "parameter_tolerance": 1e-12,
+        "parameterization_preserved": null,
+        "parent_domain": [
+          -19,
+          -6
+        ],
+        "schema_version": 1,
+        "segment_count": 2,
+        "segments": [
+          {
+            "child_domain": [
+              -19,
+              -11
+            ],
+            "endpoint_and_joint_residuals": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "native_direction": 1,
+            "native_end": [
+              0,
+              0,
+              0
+            ],
+            "native_start": [
+              10,
+              10,
+              0
+            ],
+            "ordinal": 0,
+            "parent_domain": [
+              -19,
+              -11
+            ],
+            "shared_previous": null,
+            "source_end": [
+              0,
+              0,
+              0
+            ],
+            "source_family": 3,
+            "source_start": [
+              10,
+              10,
+              0
+            ]
+          },
+          {
+            "child_domain": [
+              -5,
+              0
+            ],
+            "endpoint_and_joint_residuals": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "native_direction": 1,
+            "native_end": [
+              -5,
+              0,
+              0
+            ],
+            "native_start": [
+              0,
+              0,
+              0
+            ],
+            "ordinal": 1,
+            "parent_domain": [
+              -11,
+              -6
+            ],
+            "shared_previous": true,
+            "source_end": [
+              -5,
+              0,
+              0
+            ],
+            "source_family": 3,
+            "source_start": [
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "source_identity": null,
+        "topology_preserved": null
+      },
+      {
+        "attributes_preserved": null,
+        "closed": false,
+        "closing_residuals": null,
+        "frame": "native-conversion-local",
+        "global_deviation": null,
+        "joint_policy": "preserve-segment-curves-no-heal",
+        "length_tolerance": 1e-07,
+        "length_unit": "source-file-unit",
+        "locus_preserved": null,
+        "method": "flat-owned-segments-to-native-wire",
+        "observed_before_unit_scale": true,
+        "parameter_map": null,
+        "parameter_tolerance": 1e-10,
+        "parameterization_preserved": null,
+        "parent_domain": [
+          -19,
+          -6
+        ],
+        "scale_to_mm": 1,
+        "schema_version": 1,
+        "segment_count": 2,
+        "segments": [
+          {
+            "child_domain": [
+              -19,
+              -11
+            ],
+            "endpoint_and_joint_residuals": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "native_direction": 1,
+            "native_end": [
+              0,
+              0,
+              0
+            ],
+            "native_start": [
+              10,
+              10,
+              0
+            ],
+            "ordinal": 0,
+            "parent_domain": [
+              -19,
+              -11
+            ],
+            "shared_previous": null,
+            "source_end": [
+              0,
+              0,
+              0
+            ],
+            "source_family": 3,
+            "source_start": [
+              10,
+              10,
+              0
+            ]
+          },
+          {
+            "child_domain": [
+              -5,
+              0
+            ],
+            "endpoint_and_joint_residuals": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "native_direction": 1,
+            "native_end": [
+              -5,
+              0,
+              0
+            ],
+            "native_start": [
+              0,
+              0,
+              0
+            ],
+            "ordinal": 1,
+            "parent_domain": [
+              -11,
+              -6
+            ],
+            "shared_previous": true,
+            "source_end": [
+              -5,
+              0,
+              0
+            ],
+            "source_family": 3,
+            "source_start": [
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "source_identity": "cf4c9019-b2de-4005-9ce4-5a54bd778a7b",
+        "topology_preserved": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "source append succeeds",
+        "passed": true
+      },
+      {
+        "name": "source append succeeds",
+        "passed": true
+      },
+      {
+        "name": "independent parent parameterization",
+        "passed": true
+      },
+      {
+        "name": "source append succeeds",
+        "passed": true
+      },
+      {
+        "name": "over-budget raw child rejected through polycurve entry",
+        "passed": true
+      },
+      {
+        "name": "over-budget child rejected before Domain or parent CRC traversal",
+        "passed": true
+      },
+      {
+        "name": "null raw child CV buffer rejected through polycurve entry",
+        "passed": true
+      },
+      {
+        "name": "null child buffer rejected before Domain or parent CRC traversal",
+        "passed": true
+      },
+      {
+        "name": "source append succeeds",
+        "passed": true
+      },
+      {
+        "name": "source append succeeds",
+        "passed": true
+      },
+      {
+        "name": "independent parent parameterization",
+        "passed": true
+      },
+      {
+        "name": "polycurve remains a wire",
+        "passed": true
+      },
+      {
+        "name": "native wire is valid",
+        "passed": true
+      },
+      {
+        "name": "two copied ordered segment rows",
+        "passed": true
+      },
+      {
+        "name": "child domains remain distinct from parent spans",
+        "passed": true
+      },
+      {
+        "name": "source parent span retained",
+        "passed": true
+      },
+      {
+        "name": "actual joint shares native vertex",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sampled line bound",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sampled rational R10 arc bound",
+        "passed": true
+      },
+      {
+        "name": "rational quadratic partition basis retained",
+        "passed": true
+      },
+      {
+        "name": "nonunit middle weight retained",
+        "passed": true
+      },
+      {
+        "name": "actual native traversal has two occurrences",
+        "passed": true
+      },
+      {
+        "name": "export preserves two children",
+        "passed": true
+      },
+      {
+        "name": "roundtrip retains partition",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sampled line bound",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sampled rational R10 arc bound",
+        "passed": true
+      },
+      {
+        "name": "rational quadratic partition basis retained",
+        "passed": true
+      },
+      {
+        "name": "nonunit middle weight retained",
+        "passed": true
+      },
+      {
+        "name": "source and sibling unchanged",
+        "passed": true
+      },
+      {
+        "name": "uninspected global preservation unknown",
+        "passed": true
+      },
+      {
+        "name": "reversed native traversal retains oriented endpoints",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sampled rational R10 arc bound",
+        "passed": true
+      },
+      {
+        "name": "rational quadratic partition basis retained",
+        "passed": true
+      },
+      {
+        "name": "nonunit middle weight retained",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sampled line bound",
+        "passed": true
+      },
+      {
+        "name": "source polycurve native reversal succeeds",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sampled rational R10 arc bound",
+        "passed": true
+      },
+      {
+        "name": "rational quadratic partition basis retained",
+        "passed": true
+      },
+      {
+        "name": "nonunit middle weight retained",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sampled line bound",
+        "passed": true
+      },
+      {
+        "name": "reversed parent parameter intervals retained separately",
+        "passed": true
+      },
+      {
+        "name": "shifted source fixture",
+        "passed": true
+      },
+      {
+        "name": "nonzero joint domain preflight does not inspect fabricated geometry",
+        "passed": true
+      },
+      {
+        "name": "gap fixture authored without parent healing",
+        "passed": true
+      },
+      {
+        "name": "source gap rejected without midpoint repair",
+        "passed": true
+      },
+      {
+        "name": "gapped rejection leaves source unchanged",
+        "passed": true
+      },
+      {
+        "name": "empty source rejected before Domain",
+        "passed": true
+      },
+      {
+        "name": "incomplete parent container rejected",
+        "passed": true
+      },
+      {
+        "name": "source append succeeds",
+        "passed": true
+      },
+      {
+        "name": "source append succeeds",
+        "passed": true
+      },
+      {
+        "name": "independent parent parameterization",
+        "passed": true
+      },
+      {
+        "name": "source append succeeds",
+        "passed": true
+      },
+      {
+        "name": "nested source explicitly unsupported instead of flattening",
+        "passed": true
+      },
+      {
+        "name": "branch or uncovered occurrence rejected instead of partial export",
+        "passed": true
+      },
+      {
+        "name": "actual V5 reread one object",
+        "passed": true
+      },
+      {
+        "name": "archive dispatch keeps actual polycurve wire",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sampled rational R10 arc bound",
+        "passed": true
+      },
+      {
+        "name": "rational quadratic partition basis retained",
+        "passed": true
+      },
+      {
+        "name": "nonunit middle weight retained",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sample remains planar",
+        "passed": true
+      },
+      {
+        "name": "sampled line bound",
+        "passed": true
+      },
+      {
+        "name": "copied segment facts staged before host commit",
+        "passed": true
+      },
+      {
+        "name": "archive report explicitly declares source unit frame",
+        "passed": true
+      },
+      {
+        "name": "source append succeeds",
+        "passed": true
+      },
+      {
+        "name": "source append succeeds",
+        "passed": true
+      },
+      {
+        "name": "existing all-line polycurve control retains two occurrences",
+        "passed": true
+      },
+      {
+        "name": "all-line export retains partition",
+        "passed": true
+      },
+      {
+        "name": "nested archive fixture owns copied geometry",
+        "passed": true
+      },
+      {
+        "name": "nested source archive write",
+        "passed": true
+      },
+      {
+        "name": "nested ordinary archive explicitly retained with reason",
+        "passed": true
+      },
+      {
+        "name": "working nested archive rejects instead of flattening or publishing output",
+        "passed": true
+      },
+      {
+        "name": "negative export destination fixture",
+        "passed": true
+      },
+      {
+        "name": "branch export rejects before output file write",
+        "passed": true
+      },
+      {
+        "name": "rejected branch export leaves destination bytes unchanged",
+        "passed": true
+      }
+    ],
+    "error": "",
+    "fixture_length_unit": "mm",
+    "schema": 1
+  },
+  "native_polycurve_report_sha256": "676c2f28583ad3ab08533013d427c91a32ed5841e8c7dc9aaec861cf6bbb9af9",
+  "native": {
+    "polycurve_checks": 403,
+    "query_checks": 159,
+    "kernel_checks": 59,
+    "regression_suites": [
+      "NativeBasisGate",
+      "Geometry",
+      "TrimInteriorMapping",
+      "MultiShellSolid",
+      "ModelingExchange",
+      "Merge",
+      "HatchLoopEdit"
+    ],
+    "build_exit": 0,
+    "run_exit": 0,
+    "ctest_exit": 0,
+    "executable": {
+      "path": "H:\\FreeCAD-src\\build\\rcore-native\\ThreeDmPolycurveTests.exe",
+      "sha256": "9010c1a2bce891f3c17daf98902f05f1b04864c34bde561ac3c59ba74e280db8"
+    }
+  },
+  "build": {
+    "build_exit": 0,
+    "configure_exit": 0,
+    "stage": "final-unlocked"
+  },
+  "rust": {
+    "tests_passed": 523,
+    "test_exit": 0,
+    "clippy_exit": 0,
+    "existing_warnings": true,
+    "new_polycurve_warnings": false
+  },
+  "python": {
+    "run": 50,
+    "passed": 49,
+    "skipped": 1,
+    "exit": 0
+  },
+  "accepted_runs": [
+    {
+      "suite": "polycurve-warm",
+      "count": 69,
+      "process_exit": 0,
+      "path": "build/merge_replay-1/b0866f4b6a5e469db65b7e7519216fa2/results.json",
+      "result_sha256": "33b09d6a67f6271934fcecde58730b29ac5bec82f2a55915d0e9fde663d1d1a8",
+      "module_proof": "build/merge_replay-1/b0866f4b6a5e469db65b7e7519216fa2/merge-native-module.json",
+      "module_proof_sha256": "ab4b4af7b95a2d611015823c2e404dc63bcba748a50c7858e6028b6ed40ff743",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b0866f4b6a5e469db65b7e7519216fa2\\imported-polycurve.FCStd",
+          "sha256": "31abb753591059a9873ef4addbfc328bd23bf61961dd92996c4ac32e06fed5e0"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b0866f4b6a5e469db65b7e7519216fa2\\merge-native-module.json",
+          "sha256": "ab4b4af7b95a2d611015823c2e404dc63bcba748a50c7858e6028b6ed40ff743"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b0866f4b6a5e469db65b7e7519216fa2\\mixed-polycurve.FCStd",
+          "sha256": "ffbe1ce7b12c0f2e9c5f9de0438c7dd101bf18594d537ca6efe5009803ba3a1f"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b0866f4b6a5e469db65b7e7519216fa2\\native-baseline.json",
+          "sha256": "d745204a8b79d2f883cca3df7544338589b632d20d5cfc63161a9ab75a1adf9c"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b0866f4b6a5e469db65b7e7519216fa2\\progress.json",
+          "sha256": "d745204a8b79d2f883cca3df7544338589b632d20d5cfc63161a9ab75a1adf9c"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b0866f4b6a5e469db65b7e7519216fa2\\results.json",
+          "sha256": "33b09d6a67f6271934fcecde58730b29ac5bec82f2a55915d0e9fde663d1d1a8"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b0866f4b6a5e469db65b7e7519216fa2\\reversed-polycurve.3dm",
+          "sha256": "ff800aaed899f43b15e858829af238fe1fe10af39a26f85e5ab93fbce0006a69"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b0866f4b6a5e469db65b7e7519216fa2\\working-prepared.brep",
+          "sha256": "b0ff579a2efb6430a84924f3b190c99b858879f77d10ee322ef4611225765735"
+        }
+      ],
+      "macro": "rhino_core_polycurve_smoke.FCMacro",
+      "macro_sha256": "80831233ab8fecedb9b16e91481fecb9243c5cdba5b3ac1dc6876038b52e0096",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "61708e51c37e9dc150d355b968a5be9ab29886858ae9ce0cea108fc2b87e5e09"
+    },
+    {
+      "suite": "polycurve-cold",
+      "count": 37,
+      "process_exit": 0,
+      "path": "build/merge_replay-1/154e7694cf9042ea9532869efe50a6f3/results.json",
+      "result_sha256": "ab67b19137a12fb6a148c1dafa759a0b06afb804a0714527ca74ef4bd2509777",
+      "module_proof": "build/merge_replay-1/154e7694cf9042ea9532869efe50a6f3/merge-native-module.json",
+      "module_proof_sha256": "ab4b4af7b95a2d611015823c2e404dc63bcba748a50c7858e6028b6ed40ff743",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\154e7694cf9042ea9532869efe50a6f3\\merge-native-module.json",
+          "sha256": "ab4b4af7b95a2d611015823c2e404dc63bcba748a50c7858e6028b6ed40ff743"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\154e7694cf9042ea9532869efe50a6f3\\progress.json",
+          "sha256": "067078242fc1168a9ba2c5183b73555bd930716671122d2d186cc09792bd57a1"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\154e7694cf9042ea9532869efe50a6f3\\results.json",
+          "sha256": "ab67b19137a12fb6a148c1dafa759a0b06afb804a0714527ca74ef4bd2509777"
+        }
+      ],
+      "macro": "rhino_core_polycurve_smoke.FCMacro",
+      "macro_sha256": "80831233ab8fecedb9b16e91481fecb9243c5cdba5b3ac1dc6876038b52e0096",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "61708e51c37e9dc150d355b968a5be9ab29886858ae9ce0cea108fc2b87e5e09"
+    },
+    {
+      "suite": "modeling-exchange",
+      "count": 32,
+      "process_exit": 0,
+      "path": "build/merge_replay-1/148ef6d764b1400f853f8226ea2f7412/results.json",
+      "result_sha256": "22f4d21fd360bc1a9b621bdcb93fedb736dc9221713da83384ccab887f297a8e",
+      "module_proof": "build/merge_replay-1/148ef6d764b1400f853f8226ea2f7412/merge-native-module.json",
+      "module_proof_sha256": "29428cd82b811c9f26a9d7c271e89795be54463868f9929fc046af9f42241d38",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\148ef6d764b1400f853f8226ea2f7412\\edited-and-new.3dm",
+          "sha256": "6486bc09ade36ad2c4fad720674f85365e49e72a8c5577fbfec4930698a4c1ca"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\148ef6d764b1400f853f8226ea2f7412\\edited-cloud.3dm",
+          "sha256": "f0d53a323a6c7190fe6c62546ed9fa1081b921f498bad18326b35d5a1c77f69b"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\148ef6d764b1400f853f8226ea2f7412\\merge-native-module.json",
+          "sha256": "29428cd82b811c9f26a9d7c271e89795be54463868f9929fc046af9f42241d38"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\148ef6d764b1400f853f8226ea2f7412\\placed-cad.3dm",
+          "sha256": "8f7c31e0608555c6e77039ebb97a3907623181670d23ed2b2cb99963cc714bab"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\148ef6d764b1400f853f8226ea2f7412\\progress.json",
+          "sha256": "f6fb41cca3eb26c56160bd70f50812486c36494391bc17ec214adf5dbfa10967"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\148ef6d764b1400f853f8226ea2f7412\\protected.3dm",
+          "sha256": "2bb7616c9c314949d18f21db82bbb139fc14fadac355966a11c505fa30f4884e"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\148ef6d764b1400f853f8226ea2f7412\\reopened.3dm",
+          "sha256": "824616938e66605a6058b72824591e64460865d9fafea67bf41c2254826eec24"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\148ef6d764b1400f853f8226ea2f7412\\results.json",
+          "sha256": "22f4d21fd360bc1a9b621bdcb93fedb736dc9221713da83384ccab887f297a8e"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\148ef6d764b1400f853f8226ea2f7412\\source-and-link.3dm",
+          "sha256": "f8bebaadc83ea37786969623387c45b02c474f482a4990b9530c2d30cf0746ab"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\148ef6d764b1400f853f8226ea2f7412\\source-independent.FCStd",
+          "sha256": "b4099d34625d13b898a3abb9ef36e3b5af7feefa16413a5c7725feb6c9cda0ae"
+        }
+      ],
+      "macro": "modeling_exchange_smoke.FCMacro",
+      "macro_sha256": "53c8e706e1bf648f24d4a809b8364e310124d1a2ef5c77a7ef4e6f050d7bef68",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "61708e51c37e9dc150d355b968a5be9ab29886858ae9ce0cea108fc2b87e5e09"
+    },
+    {
+      "suite": "line-polyline",
+      "count": 27,
+      "process_exit": 0,
+      "path": "build/merge_replay-1/cb505aff19204c0fb674dfdf8aa89f80/results.json",
+      "result_sha256": "bcc51b82056ffd545d5524f342a3d9de8b23b2126ae68924e2ba6076d798ee35",
+      "module_proof": "build/merge_replay-1/cb505aff19204c0fb674dfdf8aa89f80/merge-native-module.json",
+      "module_proof_sha256": "8aef94b15f3afb1f7b5c30170891511cbc73dd4ecb2655e473516dbce63090ee",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\cb505aff19204c0fb674dfdf8aa89f80\\curve.FCStd",
+          "sha256": "2c2bfa190b3edf6277f237f9cd415db66bed7dbabafdcd690960262262b530ec"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\cb505aff19204c0fb674dfdf8aa89f80\\merge-native-module.json",
+          "sha256": "8aef94b15f3afb1f7b5c30170891511cbc73dd4ecb2655e473516dbce63090ee"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\cb505aff19204c0fb674dfdf8aa89f80\\results.json",
+          "sha256": "bcc51b82056ffd545d5524f342a3d9de8b23b2126ae68924e2ba6076d798ee35"
+        }
+      ],
+      "macro": "curve_smoke.FCMacro",
+      "macro_sha256": "e0fc50ad9196eea477c9925aba62d4c65fc8ca4029ff0b3374477d7d2e6ebd86",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "61708e51c37e9dc150d355b968a5be9ab29886858ae9ce0cea108fc2b87e5e09"
+    },
+    {
+      "suite": "spline",
+      "count": 41,
+      "process_exit": 0,
+      "path": "build/merge_replay-1/44e1ae6b0bd746c3846951dea10d465a/results.json",
+      "result_sha256": "ac40ea28799f29a61ffe3d6da76b4105c35455675ec6d60762c573b8f0662197",
+      "module_proof": "build/merge_replay-1/44e1ae6b0bd746c3846951dea10d465a/merge-native-module.json",
+      "module_proof_sha256": "d19fe0d00707fde044ad108b64beae113c28ed068cff782a53bbba20344575bb",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\44e1ae6b0bd746c3846951dea10d465a\\merge-native-module.json",
+          "sha256": "d19fe0d00707fde044ad108b64beae113c28ed068cff782a53bbba20344575bb"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\44e1ae6b0bd746c3846951dea10d465a\\results.json",
+          "sha256": "ac40ea28799f29a61ffe3d6da76b4105c35455675ec6d60762c573b8f0662197"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\44e1ae6b0bd746c3846951dea10d465a\\splines.FCStd",
+          "sha256": "7de5d024fe4d2fe2b4819a3d99729333897a73490152cb43346f5a890ae731bc"
+        }
+      ],
+      "macro": "curve_spline_smoke.FCMacro",
+      "macro_sha256": "b74c0e86b4133aee06854e3f88206e87632dea2b94cf68c55344e8d1326b6c66",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "61708e51c37e9dc150d355b968a5be9ab29886858ae9ce0cea108fc2b87e5e09"
+    },
+    {
+      "suite": "trim-domains",
+      "count": 176,
+      "process_exit": 0,
+      "path": "build/merge_replay-1/1d60177187f742c6910e1c08bb3d3693/results.json",
+      "result_sha256": "c0a806e8c8e6b6fa2c8063becba047e89de2b3ffc6c5663e663979d87d508b1d",
+      "module_proof": "build/merge_replay-1/1d60177187f742c6910e1c08bb3d3693/merge-native-module.json",
+      "module_proof_sha256": "73e54a13d9e6d4e4152b500c41ee26a7985c2a19d8f0f5b15bca7fa87cfcf7fe",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\merge-native-module.json",
+          "sha256": "73e54a13d9e6d4e4152b500c41ee26a7985c2a19d8f0f5b15bca7fa87cfcf7fe"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\progress.json",
+          "sha256": "054402a6f75ce0b551f0cac6a01335f05365fd8eff705020c6add4693e3d1397"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\results.json",
+          "sha256": "c0a806e8c8e6b6fa2c8063becba047e89de2b3ffc6c5663e663979d87d508b1d"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-0-trim-0-segment-0-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-0-trim-0-segment-0-consistent-1.FCStd",
+          "sha256": "0242cfa94b6438733f571e221f43a7c963c8f63b33209dd91f723027c1ae70fd"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-0-trim-0-segment-1-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-0-trim-0-segment-1-consistent-1.FCStd",
+          "sha256": "57fdc248515f1a85715e63f43ad21a179207df63a693c1cd4713dcd047fb6e31"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-0-trim-1-segment-0-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-0-trim-1-segment-0-consistent-1.FCStd",
+          "sha256": "9368fe911e0402675bcd9b9ef6ca74623ad3874d66a417deab12d5e37b1cf5dd"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-0-trim-1-segment-1-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-0-trim-1-segment-1-consistent-1.FCStd",
+          "sha256": "5c2b75e17a3232661fc47e2f862da5677502ac7d6f64b09351a0c469ff7b01c7"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-1-trim-0-segment-0-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-1-trim-0-segment-0-consistent-1.FCStd",
+          "sha256": "095aac8b4f10e528b0930876356c0dda69edbce813577f8666f5be513c5e1479"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-1-trim-0-segment-1-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-1-trim-0-segment-1-consistent-1.FCStd",
+          "sha256": "a2ac8391f30ad340598f7d2146585a04785cc8ba17d6b31755186bf8e9f9b35f"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-1-trim-1-segment-0-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-1-trim-1-segment-0-consistent-1.FCStd",
+          "sha256": "ce2088c5f0b23f8661a3af85f6c40272d61703e137162db4a175aeab8888a9a3"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-1-trim-1-segment-1-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-0-edge-1-trim-1-segment-1-consistent-1.FCStd",
+          "sha256": "736e469969ad30c706cd17ee6889bd6bd272e600de612aa01b9feacf0ab87904"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-0-trim-0-segment-0-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-0-trim-0-segment-0-consistent-1.FCStd",
+          "sha256": "0a8b821707f6eceaaa4e9104bef3669c6af67d654f80fc2a83cbd8a0c3ef7aa5"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-0-trim-0-segment-1-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-0-trim-0-segment-1-consistent-1.FCStd",
+          "sha256": "c37c4f184b4954e88196ce5ce03748d21da950559abe4c1fb8449ac3c3257020"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-0-trim-1-segment-0-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-0-trim-1-segment-0-consistent-1.FCStd",
+          "sha256": "992cfb72654b5e2463651a0d54bcfe06f59f331b2f9dd67fe7baf66e6a3584a9"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-0-trim-1-segment-1-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-0-trim-1-segment-1-consistent-1.FCStd",
+          "sha256": "83a355458054608a3e15df980d69889cf8d1c82c1186f71c8494abd679a041d6"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-1-trim-0-segment-0-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-1-trim-0-segment-0-consistent-1.FCStd",
+          "sha256": "a9b1400ab8d7de0c9e7794de80ae326e36d85520dabf89ed0dc4d4149dec76ff"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-1-trim-0-segment-1-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-1-trim-0-segment-1-consistent-1.FCStd",
+          "sha256": "35d4b605efceadb252257fad376fcdce600a2457bc0b36c39104ed027b0a1777"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-1-trim-1-segment-0-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-1-trim-1-segment-0-consistent-1.FCStd",
+          "sha256": "ebf90133282a488a969a8837c71255cf509996d9d635c52bfdf88a1588e4d201"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-1-trim-1-segment-1-consistent-1-destination.3dm",
+          "sha256": "66aab7908d02d4b3e5986016e047a800087e78b8b10b9d959330f1ba3846ba8a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\1d60177187f742c6910e1c08bb3d3693\\shape-1-edge-1-trim-1-segment-1-consistent-1.FCStd",
+          "sha256": "bfc9f053f8eff5fea762172a65edd468a6528340d08f28f255fc82cb766f7a44"
+        }
+      ],
+      "macro": "three_dm_trim_domains_smoke.FCMacro",
+      "macro_sha256": "a8a5493d91bd1e93bb7c5e4f9d17124de3f25a39fe6a6ee46387ec0bdf97515f",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "61708e51c37e9dc150d355b968a5be9ab29886858ae9ce0cea108fc2b87e5e09"
+    }
+  ],
+  "application_assertions": 382,
+  "complete_fixtures": [
+    "RCORE-01.T05"
+  ],
+  "partial_fixtures": [
+    "RCORE-01.T07"
+  ],
+  "source_files": [
+    {
+      "path": "rust/src/polycurve_contract.rs",
+      "sha256": "8c802cdcf983c13cea4820ec93f0c22fe968a7348998d7e1cbdd0f6a9fb67571"
+    },
+    {
+      "path": "rust/src/polycurve_contract_ffi.rs",
+      "sha256": "7b67905b52acb742ae565dfcd2dc9d7241c10f0f2bf95704ea9f54d2ac5c52ea"
+    },
+    {
+      "path": "rust/tests/polycurve_contract.rs",
+      "sha256": "95f5bc5f003225de16342ae0c996bb76ff9a1586f02b58e005b656b5c9117300"
+    },
+    {
+      "path": "rust/tests/polycurve_contract_ffi.rs",
+      "sha256": "7cacb4b51547558bff675f068277b5a3cb7441ad037e9951e81eb1dfbfd19307"
+    },
+    {
+      "path": "rust/src/lib.rs",
+      "sha256": "880d51c45a86264692e2558cbe31f6431d260a9b55126572cfb685731d41aabe"
+    },
+    {
+      "path": "Gui/PolycurveContract.h",
+      "sha256": "7717c9c89e0d95920eb7883b9a295178eeea179688d4a1c9c105a4c90dfa84ba"
+    },
+    {
+      "path": "Gui/PolycurveContract.cpp",
+      "sha256": "6cfda52fd00700686059d87baf244412017eb895fe1c7479c945fb132e879a00"
+    },
+    {
+      "path": "Gui/ThreeDmArchive.h",
+      "sha256": "e4f2c2eea43cdbb0443421e34623f9fc08c397d81ac05795a48abc8bb9b3d78f"
+    },
+    {
+      "path": "Gui/ThreeDmArchive.cpp",
+      "sha256": "5c18f465c7141847a2337a41fc7d940714601c99ed3d8c393fa189f5224ebcd0"
+    },
+    {
+      "path": "Gui/ThreeDmMerge.cpp",
+      "sha256": "8690af306b4f3d0c9e07e432328f803fe2dc088a779859130fb7325e33b14d83"
+    },
+    {
+      "path": "Gui/ThreeDmStaging.cpp",
+      "sha256": "70457375be4ba1cbb7dd1b23466b1237df1e1a828232e2ccf46a506f4f55903d"
+    },
+    {
+      "path": "cmake/OpenNURBS.cmake",
+      "sha256": "bec4936dee0e990372a0b246360f4807f3f0255a557677f1d5b64a46f4eb6b33"
+    },
+    {
+      "path": "tests/native/CMakeLists.txt",
+      "sha256": "e0ee4689438ab5fca63ef175444541d8a9108ad1796d8cbbe10e88fdfb6e036b"
+    },
+    {
+      "path": "tests/native/rhino_core_polycurve_partition.cpp",
+      "sha256": "f3b5fe1bae21965088dc2d4b72868c0f8949b0798391b8f682e1c3e79a0c411a"
+    },
+    {
+      "path": "tests/rhino_core_polycurve_smoke.FCMacro",
+      "sha256": "80831233ab8fecedb9b16e91481fecb9243c5cdba5b3ac1dc6876038b52e0096"
+    }
+  ],
+  "source_reviews": [
+    {
+      "path": "docs/reviews/2026-10-10-polycurve-rust-review.md",
+      "sha256": "766ddfb218464841549e17b2a303cf64bb1369e1b351c794a9381824d811a3a5"
+    },
+    {
+      "path": "docs/reviews/2026-10-10-polycurve-native-review.md",
+      "sha256": "3e1c47a18f38bd46513ec6b7ead3d70cb6a5642aa3fe342f9f6d92465e7575a0"
+    }
+  ],
+  "reuse_audit": {
+    "path": "H:\\FreeCAD-src\\build\\p0-next-polycurve-reuse.md",
+    "sha256": "acffa3c2d5f8167c3c7b65f3a1fe819f5ba80664d680626c8f1f8e5b784552a7"
+  },
+  "artifacts": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-checks-exits.json",
+      "sha256": "4a832aa24c53c39e2e6a69488a54e40a68d2d8cde24b6f5395dd6865b5c89c95"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-clippy.log",
+      "sha256": "039c54f81b4cea0c42392529fee179bec94f049292b280e05596f31e598600ea"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-cold-differences.json",
+      "sha256": "ced8e98060cc4a772ba1252c9348ce22a8f4b81a2b69f037a6c3d24406297160"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-ffi-green-exit.json",
+      "sha256": "e4b39fa87bf976f1e9cf0705839446689048ecbd16b08163e79f7a16b8eea0cc"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-ffi-green.log",
+      "sha256": "35535ceed926bf71b864d7b624e1a287a1fefa7a0d118a2520ab5426c09e5ed3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-ffi-red-exit.json",
+      "sha256": "0c76c7187353a6e207705af6ba334795e0a181509d56daca50e12e0406c50063"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-ffi-red.log",
+      "sha256": "b20e79c2d64890db80a4a3b7209b60b4fbdc5a3ed6b0ec22a4f10f424bb38460"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-kernel-results.json",
+      "sha256": "f14f1b625aec416aace94ff52bd6d43efc4b4de8862280d3baf2169b5468a9c9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-acceptance-build.log",
+      "sha256": "622f4fb27186d749faa4935c6274901bddf40ee3fa7fbcfa6b612c8cfa294559"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-acceptance-exit.json",
+      "sha256": "cbd8089cc5388c22276b9080028a53fbea00a9d493ea5fd834a8eb30ba562a2c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-acceptance-results.json",
+      "sha256": "676c2f28583ad3ab08533013d427c91a32ed5841e8c7dc9aaec861cf6bbb9af9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-acceptance-run.log",
+      "sha256": "9539220b372ac6810899b41a60c767f3e8b9c9336623825c9f39a91b1dc127c2"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-compile-green-build.log",
+      "sha256": "e434baaac5e09f7a0621d859f86a5e45ee6e95513b5673b108e71f7a556db8c1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-compile-green-exit.json",
+      "sha256": "974c7faadcfb1f4b55e824c6de3180598c762f2f54e8d7781af5a50e22d0bf8d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-compile-green-results.json",
+      "sha256": "d1830f514906b6f55cc211a7a327db5b3fc92c44277be4ad28b22d39cabc1edb"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-compile-green-run.log",
+      "sha256": "c90fa0ee57c458715a55a6a0b40b9040b92dec01b6eb5d73f283fe2847a0253a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-final-build.log",
+      "sha256": "363fd5a1fe06407e62a71c654145c512a59b4e43cd15df54202ab25de12c9365"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-final-exit.json",
+      "sha256": "bb681ba24aa1cd6142843b5be7594c8629cf092b3edd794ecef60e3d912c4205"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-final-results.json",
+      "sha256": "fd2c982a3c70070f3c4f3b396c9962de21937548eb65a2b52fbffc0f15609dcc"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-final-run.log",
+      "sha256": "dc7bf988dfc9feb98b3a9caa84a502f0efee5f2d6d934fd959cb26923f9b82d5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-final-traps-build.log",
+      "sha256": "622f4fb27186d749faa4935c6274901bddf40ee3fa7fbcfa6b612c8cfa294559"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-final-traps-exit.json",
+      "sha256": "d02a3403fe7eb37d16f4790039ca3ee4b4b521e8a66dc46aba96944eb18fd938"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-final-traps-results.json",
+      "sha256": "8f75ccbbdf075f8b2c183d11d0978d8700e059c195bf24655148cb664cb2f57b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-final-traps-run.log",
+      "sha256": "38b16aba416a17a3fd0dc2a4e4753b56496f27f99c5b21be5dd0b681e16a643a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-green-build.log",
+      "sha256": "3dde9920fb3e90eae5bf7bb0a11c046755565420323f0f12279a922d075b1d6e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-green-exit.json",
+      "sha256": "1fd74eb1355b52d1b019c601d7173d91fb3012059098936ba5cb1a79c5342e83"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-raw-gates-build.log",
+      "sha256": "622f4fb27186d749faa4935c6274901bddf40ee3fa7fbcfa6b612c8cfa294559"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-raw-gates-exit.json",
+      "sha256": "afcc0cf4394109e6067207753e5b8f1be5aa23e56c092e311b4e0ff2e39e430c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-raw-gates-results.json",
+      "sha256": "ef569384db7c3cb5947f3c191a0f0fb30e7ea0f7aaea117c36b17d126edc7331"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-raw-gates-run.log",
+      "sha256": "38b16aba416a17a3fd0dc2a4e4753b56496f27f99c5b21be5dd0b681e16a643a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-red-build.log",
+      "sha256": "9621812492b3edf1cb21d78c4939c5f32e3d2388796617bb5cf257ad2b65eed1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-red-exit.json",
+      "sha256": "3313dc32f71ff3daaeeccd3d668b14e63a386ee597cfdb3874ec7d2ebdbba686"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-red-results.json",
+      "sha256": "d2534ff739b93620d020ec4436a380608ecb978118e99c6ca381eeec87521ded"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-red-run.log",
+      "sha256": "47d3ae3e546b23cbd2bbfa4ee49d2f05a1c9e0e08dd4f972714429d1f0b28caf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-regressions-build.log",
+      "sha256": "99130809167f577e72b20289f48550a3eb17cbc87d2337ed976df3561c827f5d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-regressions-ctest.log",
+      "sha256": "260d160416c944719b847f02efa7a4cff0e3dfdec293e55bce2998f089910db2"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-regressions-exits.json",
+      "sha256": "b1f4b5bf3f37f79adb80121de12766847d6d323bb92f613fe5cf5d143745019b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-regressions-kernel.log",
+      "sha256": "0d7e289c50f5f4d88b7d9d3f92087282deb6de9a83afee2bfe804878770a25b3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-regressions-query.log",
+      "sha256": "5e029d95ff501ddb2c9c4ea737cca71f72532953ea8e60197a244b90f972d7f7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-routed-green-build.log",
+      "sha256": "9df40ff6e9a5940a97869188850b28ae10aa61ec881debd945392e1bc023935e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-routed-green-exit.json",
+      "sha256": "1de032b045a6ebe90af86530cdebcf0b0731d558b07c48e3cb17f1aaabfe970b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-routed-green-results.json",
+      "sha256": "8d077fa3c1ffb81adb72b29dde9e002b7ffe754824b422afe399a40e1937334e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-native-routed-green-run.log",
+      "sha256": "dc7bf988dfc9feb98b3a9caa84a502f0efee5f2d6d934fd959cb26923f9b82d5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-parameters-results.json",
+      "sha256": "e26fe3b7a29800f15144411bfe360da197549aa937b048b5ddb86688f191d471"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-python.log",
+      "sha256": "8fe63b76b82bb24fc14530cfc2ac2f36467a08402c7341479992f2f31523d807"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-rust-formatted-green-exit.json",
+      "sha256": "8e77e8ac63cffd37b77b67849b063c6885c773b688327243a84fef7cd0e151e4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-rust-formatted-green.log",
+      "sha256": "25d7d1039a5ea788849e561af5082368674b94cab55c30e1ad2cdd1f7095be6b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-rust-full.log",
+      "sha256": "e5169346acc637522a583ad167c702889473480d0fb82c4a672825eda83b073b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-rust-green-exit.json",
+      "sha256": "e4b39fa87bf976f1e9cf0705839446689048ecbd16b08163e79f7a16b8eea0cc"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-rust-green.log",
+      "sha256": "980cd547424dd9e26ba5ce1b30e5927b9918f085c7d5c2a58c5f19098589fddf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-rust-red-exit.json",
+      "sha256": "0c76c7187353a6e207705af6ba334795e0a181509d56daca50e12e0406c50063"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-rust-red.log",
+      "sha256": "90341dc64b4ed9c4c70cfaaf1dd2625479c868ddc6dc1782589a3877510b36f4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-rust-rerun-red-exit.json",
+      "sha256": "acdbf280bbf0a2ac75ed0b1805a67c6a440311946ebf90e51ca7acbffdb7f79d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-rust-rerun-red.log",
+      "sha256": "148c5d6b68eee5656009813a358c7ff56a4dbb38017f1c2f42c89bfcbaba7b7d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-sdk-final-build.log",
+      "sha256": "6c4a494e77ae6e1f4159bdc3fd5e3a2297e20d773bbf88ddc139460d1624d288"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-sdk-final-configure.log",
+      "sha256": "9befe6aeed5862ed73c18bdb6a4cf887d4ac43db76b21128eef09caed4a14e49"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-sdk-final-exits.json",
+      "sha256": "c54b3578569ccfd063718e588d880ee5ed76913e91a8a09df015decc1e4cd8d7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-sdk-final-unlocked-build.log",
+      "sha256": "d892502eb3850475d3241dd512d523dd3ad8a0c57605f95466d0136a1ef9a221"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-sdk-final-unlocked-configure.log",
+      "sha256": "bf8204e0f9e39a0c1d7eac951e1a45de0fcf3faa780a592ff3f117f1e08392ab"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-sdk-final-unlocked-exits.json",
+      "sha256": "ccb53b82a54cba7f912c89f4925b328dec9ae78688c67e8be66e9cef7f99fe30"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-sdk-routed-green-build.log",
+      "sha256": "651852433c096ef0734a101f4a0421a5a6833d66512f13602cb7cd961814ec52"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-sdk-routed-green-configure.log",
+      "sha256": "9befe6aeed5862ed73c18bdb6a4cf887d4ac43db76b21128eef09caed4a14e49"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-polycurve-sdk-routed-green-exits.json",
+      "sha256": "dfd547279444e22280917d451bf914bc093463ad4420e65ac1023666d8622102"
+    }
+  ],
+  "excluded_runs": [
+    {
+      "artifact": "p0-polycurve-rust-red.log",
+      "reason": "Test compile error using absent ConversionReport.attributes; excluded. Genuine rerunRED13fail retained."
+    },
+    {
+      "artifact": "p0-polycurve-native-green-build.log",
+      "reason": "Fixture/adapter used wrong pinned native member name; compiler failure is not acceptance. Corrected to m_pline."
+    },
+    {
+      "path": "build/merge_replay-1/61cf4b4ee48e4f6586728715288d93f8",
+      "reason": "Fixture called absent Shape.write; exact staged bytes copied in correctedRED."
+    },
+    {
+      "path": "build/merge_replay-1/2d435d9436004b88974cf1151292588f",
+      "reason": "Exact float ledger identity was overstrict; measured max8.15e-17/no categorical change; explicit1e-12 serialization bound rerun passed."
+    },
+    {
+      "path": "build/merge_replay-1/ea34e9b522414700bc136501a022a5c3",
+      "reason": "Misspelled nonexistent modeling macro; no report, identified ownPID70856 stopped. Correct modeling_exchange_smoke passed32."
+    },
+    {
+      "artifact": "p0-polycurve-sdk-final-exits.json",
+      "reason": "Own missing-fixture process kept module locked: LNK1168. Final-unlocked rebuild succeeded; failed attempt not accepted."
+    }
+  ],
+  "spec_package": {
+    "manifest_entries": 664,
+    "manifest_sha256": "ba9846028e304ad2d98b0a4721cf9396821ac9abce63d4a3986c6bf38eea3d9c",
+    "json_yaml_equal": true,
+    "catalog_status_changes": [],
+    "command_capability_changes": []
+  },
+  "limits": [
+    "Flat ordinary owned Line/Arc/NURBS/Polyline children only; nested/reference/unknown children retained or rejected explicitly.",
+    "Global locus/topology/parameter map/attributes/History remain unknown; sampled1e-7mm fixture oracle, not continuous deviation proof.",
+    "Parent and child domains are distinct copied observations. No global or export parameter correspondence claim.",
+    "Native live immutable owners remain a caller requirement; container envelopes do not certify arbitrary pointers, aliased owners, archive deserialization or prior instance-copy/transform allocations.",
+    "Rust4096segments/1MiB limits count logical owned report data, not native copies or aggregate worker budgets. Raw child early-gates are partial T07 evidence only.",
+    "Authored open two-segment T05 is verified; arbitrary closed/nested/polyedge graphs and preserve-mode History are outside this acceptance slice."
+  ],
+  "public_source_audit": {
+    "exit": 0,
+    "raw_log": "H:\\FreeCAD-src\\build\\p0-polycurve-public-audit.log",
+    "raw_log_sha256": "f06ac621ca334496abdbe8b888700ee72c12d460075876a8e32231768c8c1cdd",
+    "result": {
+      "source_files": 2122,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    }
+  }
+}

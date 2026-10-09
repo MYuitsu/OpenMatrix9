@@ -28,7 +28,8 @@
       "implementation_followup_evidence": [
         "../../../docs/validation/2026-10-09-rhino-core-object-foundations.md",
         "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md",
-        "../../../docs/validation/2026-10-10-rhino-core-curve-parameters.md"
+        "../../../docs/validation/2026-10-10-rhino-core-curve-parameters.md",
+        "../../../docs/validation/2026-10-10-rhino-core-polycurve-partition.md"
       ]
     },
     {
@@ -1677,6 +1678,16 @@
       ],
       "evidence": "../../../docs/validation/2026-10-10-rhino-core-curve-parameters.md",
       "scope": "Finite full-domain native curve parameter queries and T01 sampled fixture; broader T10/History and all P0 remain open."
+    },
+    {
+      "id": "rhino-core-polycurve-partition",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-polycurve-partition.md",
+      "scope": "Authored T05 open line/rational-arc wire, reversal, working V5 partition, precommit copied report, Undo/Redo and fresh FCStd; all P0 remains open."
     }
   ]
 }

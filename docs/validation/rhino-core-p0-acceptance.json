@@ -71,8 +71,11 @@
           "id": "RCORE-01.T05",
           "spec_requirement": "RCORE-01.T05 | Polycurve line + rational arc, đảo hướng rồi save/reload | Thứ tự/hướng đoạn, endpoint và joint policy còn; nếu merge phải báo conversion trước commit",
           "priority": "P0",
-          "status": "not_fully_verified",
-          "complete_evidence": []
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-polycurve-partition-evidence.json"
+          ],
+          "verification_scope": "Authored open line+rational R10 quarter-arc wire; independent endpoints/radial samples, reversed order/direction/joint, nonunit weights/basis, native FCStd and actual working V5 partition, copied report before commit, importUndoRedo+fresh importedFCStd. No merge/heal is performed."
         },
         {
           "id": "RCORE-01.T06",
@@ -95,6 +98,10 @@
             {
               "report": "docs/validation/2026-10-10-rhino-core-curve-parameters.md",
               "scope": "Direct raw NURBS early storage preflight and finite standalone exact-lineage point queries; full allocation/host/History assertions remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-polycurve-partition.md",
+              "scope": "Raw NURBS child count/null-storage rejected through ordinary polycurve entry before Domain/CRC; full allocation/host/path coverage remains open."
             }
           ]
         },
@@ -1114,5 +1121,5 @@
       ]
     }
   ],
-  "updated_at": "2026-10-10T01:50:39+07:00"
+  "updated_at": "2026-10-10T02:43:11+07:00"
 }

@@ -4,6 +4,7 @@
 #include "ThreeDmHatch.h"
 #include "ThreeDmNativeReferences.h"
 #include "ThreeDmCurveOnSurface.h"
+#include "PolycurveContract.h"
 #include "RustBridge.h"
 #include <QFile>
 #include <QJsonDocument>
@@ -168,7 +169,7 @@ static std::unique_ptr<ON_Geometry> replacementGeometry(const QJsonObject& selec
             TopoDS_Shape shape;BRep_Builder builder;if(!BRepTools::Read(shape,file.string().c_str(),builder)||shape.IsNull()||!BRepCheck_Analyzer(shape).IsValid())throw ExchangeError("Invalid replacement BRep");
             if(shape.ShapeType()==TopAbs_VERTEX){auto point=BRep_Tool::Pnt(TopoDS::Vertex(shape));mesh=std::make_unique<ON_Point>(point.X(),point.Y(),point.Z());}
             else if(shape.ShapeType()==TopAbs_EDGE)mesh=exportCurve(TopoDS::Edge(shape),1e-6);
-            else if(shape.ShapeType()==TopAbs_WIRE){auto poly=std::make_unique<ON_PolyCurve>();for(BRepTools_WireExplorer edges(TopoDS::Wire(shape));edges.More();edges.Next()){auto curve=exportCurve(edges.Current(),1e-6);if(!poly->Append(curve.release()))throw ExchangeError("Cannot append replacement wire curve");}mesh=std::move(poly);}
+            else if(shape.ShapeType()==TopAbs_WIRE)mesh=Polycurve::exportWireChecked(TopoDS::Wire(shape),{1e-6,1e-10});
             else mesh=exportBrep(shape,1e-6);
             if(!mesh||!mesh->IsValid())throw ExchangeError("Cannot convert replacement BRep");
         }else{

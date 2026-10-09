@@ -29,6 +29,8 @@ pub mod geometry_contract;
 pub mod geometry_contract_ffi;
 pub mod curve_conversion;
 pub mod curve_conversion_ffi;
+pub mod polycurve_contract;
+pub mod polycurve_contract_ffi;
 pub mod spline_ffi;
 pub mod ellipse;
 mod curve_ffi;
