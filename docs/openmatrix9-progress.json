@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-10T03:32:43+07:00",
+  "updated_at": "2026-10-10T03:51:55+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -1548,7 +1548,7 @@
       ],
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/02-units-tolerances.md",
       "next_action": "Continue operation-specific effective tolerance and capability/permission coverage; shared runtime guards now cover Edit/Boolean, Rebuild and interactive Surface only. Durable History and remaining P0 contracts stay open.",
-      "updated_at": "2026-10-10T03:32:43+07:00",
+      "updated_at": "2026-10-10T03:51:55+07:00",
       "scope": "Partial P0 foundations from pre-merge snapshot 5011bab; historical 321 Rust, 23 Python and 657 native GUI assertions do not validate the merged revision or complete P0.",
       "followup_evidence": [
         "docs/validation/2026-10-09-rhino-core-object-foundations.md",
@@ -1559,7 +1559,8 @@
         "docs/validation/2026-10-10-rhino-core-curve-parameters.md",
         "docs/validation/2026-10-10-rhino-core-polycurve-partition.md",
         "docs/validation/2026-10-10-rhino-core-instance-isolation.md",
-        "docs/validation/2026-10-10-rhino-core-hatch-input-gate.md"
+        "docs/validation/2026-10-10-rhino-core-hatch-input-gate.md",
+        "docs/validation/2026-10-10-rhino-core-periodic-persistence.md"
       ]
     },
     {
@@ -2148,6 +2149,50 @@
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
       "next_action": "Complete T09 using existing FCStd persistence and authored true periodic curve plus existing seam/hole faces; continue all P0.",
       "updated_at": "2026-10-10T03:32:43+07:00"
+    },
+    {
+      "key": "rhino-core-periodic-persistence",
+      "stage": "feature-port",
+      "feature_ids": [],
+      "status": "validated_bounded_increment",
+      "scope": "Fixture-only reuse proof; authored RCORE-01.T09 complete.",
+      "outputs": [
+        "tests/rhino_core_periodic_persistence_smoke.FCMacro",
+        "tests/rhino_core_kernel_contract_smoke.FCMacro",
+        "tests/run_menu_smoke.ps1",
+        "Gui/CoreObjects.cpp",
+        "docs/validation/2026-10-10-rhino-core-periodic-persistence.md",
+        "docs/validation/2026-10-10-rhino-core-periodic-persistence-evidence.json"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-10-rhino-core-periodic-persistence-evidence.json",
+        "docs/reviews/2026-10-10-periodic-persistence-review.md"
+      ],
+      "tests": [
+        {
+          "command": "fresh periodic warm +cold FreeCAD",
+          "result": "204+102=306checks;2processes0"
+        },
+        {
+          "command": "unchanged existing kernel warm+cold",
+          "result": "142+79=221checks;2processes0"
+        },
+        {
+          "command": "parent product/native source+module reuse",
+          "result": "matching8b03c899;541Rust/SDK/native proofs reused, not rerun"
+        }
+      ],
+      "uncertainties": [
+        "Authored compact periodic curve and existing rational circle/seam/hole faces only; all-family persistence and semantic subelement remapping remain open.",
+        "775point witnesses per stage prove declared sampled deviation only, not global continuous maximum or parameter map.",
+        "BBox numerical padding1e-7+64ULP(10mm) is separate from1e-7mm locus bound and1e-12 persistence equality.",
+        "Exact source copy control starts after target-document initialization; prior source circle root Free flag transition is retained, not normalized.",
+        "Same-name identity guard rejection does not prove delayed-worker handle release/UAF, full T08 or T11.",
+        "No arbitrary periodic3DM, source layer/attribute copying or new adaptive area certificate."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
+      "next_action": "Complete explicit subobject mutation owner/standalone-versus-subobject lifecycle T11 using audited native deep-copy wrappers; continue all P0 and T08/T10.",
+      "updated_at": "2026-10-10T03:51:55+07:00"
     }
   ],
   "merge_context": {

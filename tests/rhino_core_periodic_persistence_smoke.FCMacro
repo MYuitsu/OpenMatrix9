@@ -1,0 +1,337 @@
+"""RCORE-01.T09: true periodic curve and retained seam/hole FCStd in fresh processes.
+
+The legacy kernel predicates below are copied unchanged from
+rhino_core_kernel_contract_smoke.FCMacro (source SHA 5032a961fb9870a916e46faec6d7caf95c63d0a349d2a7ac341c4a22ee34e4d9).
+No production command or serializer is replaced. Each run retains raw artifacts.
+"""
+import hashlib,json,math,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);output.mkdir(parents=True,exist_ok=True)
+TOL=1e-7
+NAMES={'CircleR10','Square20HoleR3','OpenCylinderR4H7'}
+ALL_NAMES=NAMES|{'PeriodicQ2'}
+report={'schema_version':1,'units':'mm','length_bound_mm':TOL,'checks':[],'snapshots':{},
+        'sampled_only':True,'kernel_predicate_source_sha256':'5032a961fb9870a916e46faec6d7caf95c63d0a349d2a7ac341c4a22ee34e4d9'}
+
+def check(clause, condition):
+    report['checks'].append({'name': clause, 'passed': bool(condition)})
+    if not condition:
+        raise AssertionError(clause)
+
+def digest(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+def shape_digest(shape):
+    data = shape.exportBrepToString()
+    if isinstance(data, str):
+        data = data.encode('utf-8')
+    return hashlib.sha256(data).hexdigest()
+
+def xyz(point):
+    return [point.x, point.y, point.z]
+
+def curve_basis(edge):
+    c = edge.Curve
+    data = {'native_class': type(c).__name__, 'edge_domain': [edge.FirstParameter, edge.LastParameter],
+            'orientation': str(edge.Orientation), 'periodic': c.isPeriodic(), 'closed': c.isClosed()}
+    if isinstance(c, Part.BSplineCurve):
+        data.update(degree=c.Degree, poles_xyz=[xyz(p) for p in c.getPoles()],
+                    weights=c.getWeights(), knots=c.getKnots(), multiplicities=c.getMultiplicities(),
+                    rational=c.isRational())
+    return data
+
+def surface_basis(face):
+    s = face.Surface
+    data = {'native_class': type(s).__name__, 'face_domain': list(face.ParameterRange),
+            'u_periodic': s.isUPeriodic(), 'v_periodic': s.isVPeriodic(),
+            'u_closed': s.isUClosed(), 'v_closed': s.isVClosed(), 'orientation': str(face.Orientation)}
+    if isinstance(s, Part.BSplineSurface):
+        data.update(u_degree=s.UDegree, v_degree=s.VDegree,
+                    poles_u_major=[[xyz(p) for p in row] for row in s.getPoles()],
+                    weights_u_major=s.getWeights(), u_knots=s.getUKnots(), v_knots=s.getVKnots(),
+                    u_multiplicities=s.getUMultiplicities(), v_multiplicities=s.getVMultiplicities())
+    return data
+
+def topology(face):
+    # Edges is UNIQUE topology. OrderedEdges is wire USE occurrence order.
+    unique = face.Edges
+    counts = [0] * len(unique)
+    loops = []
+    for wi, wire in enumerate(face.Wires):
+        uses = []
+        for order, edge in enumerate(wire.OrderedEdges):
+            identity = next((i for i, item in enumerate(unique) if edge.isSame(item)), None)
+            check('edge occurrence resolves a unique edge', identity is not None)
+            counts[identity] += 1
+            pc = face.curveOnSurface(edge)
+            check('edge occurrence has a pcurve', pc is not None and len(pc) == 3)
+            uses.append({'edge_identity': identity + 1, 'use_order': order,
+                         'orientation': str(edge.Orientation), 'seam': edge.isSeam(face),
+                         'pcurve_class': type(pc[0]).__name__, 'pcurve_domain': [pc[1], pc[2]]})
+        loops.append({'role': 'outer' if wire.isSame(face.OuterWire) else 'inner',
+                      'loop_index': wi, 'ordered_edge_uses': uses})
+    edges = [{'edge_identity': i + 1, 'uses': n, 'seam': edge.isSeam(face)}
+             for i, (edge, n) in enumerate(zip(unique, counts))]
+    free = [edge for edge, n in zip(unique, counts) if n == 1]
+    return {'unique_edges': len(unique), 'edge_use_count': sum(counts), 'edges': edges, 'loops': loops}, free
+
+def boundary_components(edges):
+    # Connectivity is topology identity; do not join by approximate XYZ.
+    groups, unseen = [], list(range(len(edges)))
+    while unseen:
+        group = [unseen.pop(0)]
+        cursor = 0
+        while cursor < len(group):
+            edge = edges[group[cursor]]
+            adjacent = [j for j in unseen if any(a.isSame(b) for a in edge.Vertexes for b in edges[j].Vertexes)]
+            for j in adjacent:
+                unseen.remove(j)
+                group.append(j)
+            cursor += 1
+        points = [p for j in group for p in edges[j].discretize(129)]
+        groups.append({'edge_segments': len(group), 'length': sum(edges[j].Length for j in group),
+                       'radial_sample_max': max(abs(math.hypot(p.x, p.y) - 4) for p in points),
+                       'z_min': min(p.z for p in points), 'z_max': max(p.z for p in points)})
+    return sorted(groups, key=lambda row: row['z_min'])
+
+def snapshot(objects, stage):
+    rows = {obj.Label: obj for obj in objects}
+    check(stage + ' exact fixture object names/count', len(objects) == 3 and set(rows) == NAMES)
+    data = {}
+    for name, obj in rows.items():
+        shape = obj.Shape
+        # Default bounds follow display triangulation, which can change on cold
+        # reload. Query native geometry bounds without display triangulation or
+        # additional shape-tolerance enlargement; OCCT numerical tolerance remains.
+        box = shape.optimalBoundingBox(False,False)
+        data[name] = {'shape_type': shape.ShapeType, 'shape_sha256': shape_digest(shape),
+                      'valid': shape.isValid(), 'closed': shape.isClosed(),
+                      'face_count': len(shape.Faces), 'solid_count': len(shape.Solids),
+                      'world_bounds_identity_placement': [box.XMin, box.YMin, box.ZMin, box.XMax, box.YMax, box.ZMax],
+                      'placement_base': xyz(obj.Placement.Base), 'placement_rotation_quaternion': list(obj.Placement.Rotation.Q),
+                      'curve_bases': [curve_basis(e) for e in shape.Edges],
+                      'surface_bases': [surface_basis(f) for f in shape.Faces]}
+        check(stage + ' ' + name + ' stays native CAD', obj.isDerivedFrom('Part::Feature') and not obj.isDerivedFrom('Mesh::Feature'))
+        check(stage + ' ' + name + ' geometry is valid', shape.isValid())
+        check(stage + ' ' + name + ' uses explicit identity placement',
+              obj.Placement.Base.Length <= TOL and abs(obj.Placement.Rotation.Angle) <= TOL)
+    circle = rows['CircleR10'].Shape.Edges[0]
+    check(stage + ' T01 full circle remains rational NURBS', isinstance(circle.Curve, Part.BSplineCurve) and circle.Curve.isRational())
+    weights = circle.Curve.getWeights()
+    check(stage + ' T01 positive weights not all one', min(weights) > 0 and max(weights) - min(weights) > 1e-12)
+    samples = circle.discretize(1025)
+    data['CircleR10']['radius_sample_max'] = max(abs(math.hypot(p.x, p.y) - 10) for p in samples)
+    check(stage + ' T01 declared sampled radial/plane bound',
+          data['CircleR10']['radius_sample_max'] <= TOL and max(abs(p.z) for p in samples) <= TOL)
+    check(stage + ' T01 analytic circumference', abs(circle.Length - 20 * math.pi) <= TOL)
+
+    square = rows['Square20HoleR3'].Shape
+    check(stage + ' T02 one face/no solid', len(square.Faces) == 1 and len(square.Solids) == 0)
+    face = square.Faces[0]
+    topo, free = topology(face)
+    data['Square20HoleR3']['topology'] = topo
+    check(stage + ' T02 one outer loop/one inner loop', sorted(x['role'] for x in topo['loops']) == ['inner', 'outer'])
+    uv = face.Surface.parameter(App.Vector(0, 0, 0))
+    check(stage + ' T02 hole center excluded in UV trim classifier', not face.isPartOfDomain(*uv))
+    check(stage + ' T02 hole center-to-face distance R3', abs(square.distToShape(Part.Vertex(App.Vector()))[0] - 3) <= TOL)
+    uv_inside = face.Surface.parameter(App.Vector(5, 0, 0))
+    check(stage + ' T02 retained point belongs to face', face.isPartOfDomain(*uv_inside))
+    bb = square.BoundBox
+    check(stage + ' T02 square 20x20 bounds', abs(bb.XLength - 20) <= TOL and abs(bb.YLength - 20) <= TOL and bb.ZLength <= TOL)
+    data['Square20HoleR3']['default_area_observation'] = square.Area
+    data['Square20HoleR3']['analytic_area_expected'] = 400 - 9 * math.pi
+    data['Square20HoleR3']['area_certificate'] = 'requires matching native adaptive-area candidate; not inferred from Shape.Area'
+
+    cylinder = rows['OpenCylinderR4H7'].Shape
+    check(stage + ' T03 one face/no solid/open shape', len(cylinder.Faces) == 1 and len(cylinder.Solids) == 0 and not cylinder.isClosed())
+    face = cylinder.Faces[0]
+    topo, free = topology(face)
+    data['OpenCylinderR4H7']['topology'] = topo
+    paired = [e for e in topo['edges'] if e['seam'] and e['uses'] == 2]
+    check(stage + ' T03 seam identity has two edge uses', len(paired) >= 1)
+    check(stage + ' T03 occurrence count differs from unique edge count', topo['edge_use_count'] > topo['unique_edges'])
+    components = boundary_components(free)
+    data['OpenCylinderR4H7']['free_boundary_components'] = components
+    check(stage + ' T03 exactly two circular open boundaries', len(components) == 2)
+    for i, component in enumerate(components):
+        check(stage + ' T03 free boundary circle and end plane ' + str(i),
+              component['radial_sample_max'] <= TOL and abs(component['length'] - 8 * math.pi) <= TOL and
+              component['z_max'] - component['z_min'] <= TOL and abs(component['z_min'] - (0 if i == 0 else 7)) <= TOL)
+    u0, u1, v0, v1 = face.ParameterRange
+    points = [face.valueAt(u0 + (u1-u0)*i/64, v0 + (v1-v0)*j/8) for i in range(65) for j in range(9)]
+    check(stage + ' T03 sampled cylinder R4 and height7', max(abs(math.hypot(p.x,p.y)-4) for p in points) <= TOL and
+          abs(min(p.z for p in points)) <= TOL and abs(max(p.z for p in points)-7) <= TOL)
+    # Converted periodicity is recorded, never required to equal analytic source.
+    report['snapshots'][stage] = data
+    return data
+
+def close_numeric_tree(left, right, bound=1e-12):
+    if isinstance(left, bool) or isinstance(right, bool):
+        return left == right
+    if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+        return math.isfinite(left) and math.isfinite(right) and abs(left-right) <= bound
+    if isinstance(left, list) and isinstance(right, list):
+        return len(left) == len(right) and all(close_numeric_tree(a,b,bound) for a,b in zip(left,right))
+    if isinstance(left, dict) and isinstance(right, dict):
+        return left.keys() == right.keys() and all(close_numeric_tree(left[k],right[k],bound) for k in left)
+    return left == right
+
+def inventory(doc):
+    return {'object_count':len(doc.Objects),'undo_count':doc.UndoCount,
+            'objects':sorted([{'name':o.Name,'type':o.TypeId,'properties':sorted(o.PropertiesList)} for o in doc.Objects],key=lambda x:x['name'])}
+
+def periodic_snapshot(obj,stage):
+    # Reset the COPIED shape location for the local compact native basis.
+    local=obj.Shape.copy(copyGeom=True,copyMesh=False);local.Placement=App.Placement()
+    world=Part.getShape(obj,'',needSubElement=False,transform=True).copy(copyGeom=True,copyMesh=False)
+    row={'shape_type':local.ShapeType,'valid':local.isValid(),'closed':local.isClosed(),
+         'edge_count':len(local.Edges),'vertex_count':len(local.Vertexes),
+         'local_curve_bases':[curve_basis(e) for e in local.Edges],
+         'world_curve_bases':[curve_basis(e) for e in world.Edges],
+         'placement_base':xyz(obj.Placement.Base),'placement_rotation_quaternion':list(obj.Placement.Rotation.Q),
+         'local_shape_sha256':shape_digest(local),'world_shape_sha256':shape_digest(world)}
+    box=world.optimalBoundingBox(False,False)
+    row['world_bounds']=[box.XMin,box.YMin,box.ZMin,box.XMax,box.YMax,box.ZMax]
+    local.exportBrep(str(output/(stage.replace(' ','-')+'-periodic-local.brep')))
+    world.exportBrep(str(output/(stage.replace(' ','-')+'-periodic-world.brep')))
+    report['snapshots'].setdefault(stage,{})['PeriodicQ2']=row
+    # Persist observations before numerical/topological assertions.
+    (output/'progress.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+    check(stage+' periodic one closed native edge',local.ShapeType=='Edge' and local.isValid() and local.isClosed() and len(local.Edges)==1)
+    c=local.Edges[0].Curve
+    check(stage+' true periodic compact quadratic basis',isinstance(c,Part.BSplineCurve) and c.isPeriodic() and c.Degree==2 and
+          close_numeric_tree(c.getKnots(),[0,1,2,3]) and c.getMultiplicities()==[1,1,1,1] and
+          close_numeric_tree([xyz(p) for p in c.getPoles()],[[0,0,0],[1,2,0],[2,0,0]]) and
+          close_numeric_tree(c.getWeights(),[1,1,1]) and not c.isRational())
+    check(stage+' periodic support full domain',close_numeric_tree([local.Edges[0].FirstParameter,local.Edges[0].LastParameter],[0,3]))
+    check(stage+' periodic rigid placement retained',close_numeric_tree(xyz(obj.Placement.Base),[7,-5,2]) and abs(obj.Placement.Rotation.Angle)<=1e-12)
+    poles=[(0.,0.,0.),(1.,2.,0.),(2.,0.,0.)]
+    points=[]
+    # Independent cyclic quadratic locus; no assumed OCCT starting span ordinal.
+    for i in range(3):
+        for j in range(257):
+            s=j/256.;weights=[(1-s)**2/2,-s*s+s+0.5,s*s/2]
+            points.append(tuple(sum(weights[k]*poles[(i+k)%3][axis] for k in range(3)) for axis in range(3)))
+    points.extend([(1/3,4/9,0),(5/3,4/9,0),(1,1.5,0),(1,0,0)])
+    residuals=[world.distToShape(Part.Vertex(App.Vector(p[0]+7,p[1]-5,p[2]+2)))[0] for p in points]
+    row.update(oracle_local_points=points,world_point_to_curve_residuals=residuals,
+               sampled_deviation_max_mm=max(residuals),sample_count=len(points),oracle='three cyclic quadratic spans257each plus4 analytic extrema')
+    check(stage+' periodic independent world locus witnesses',all(math.isfinite(v) and v<=TOL for v in residuals))
+    expected=[22/3,-5,2,26/3,-3.5,2]
+    # AddOptimal still has OCCT numerical padding; keep it separate from the
+    # point-to-locus bound. Authored coordinate scale is bounded by10mm.
+    row.update(expected_world_bounds=expected,bbox_numerical_allowance_mm=1e-7+64*math.ulp(10.))
+    check(stage+' periodic independent extrema bounds',all(abs(a-b)<=row['bbox_numerical_allowance_mm'] for a,b in zip(row['world_bounds'],expected)))
+    return row
+
+def snapshot_four(doc,stage):
+    before=inventory(doc);before_brep={o.Name:shape_digest(o.Shape) for o in doc.Objects}
+    report.setdefault('inventories',{})[stage]=before
+    check(stage+' exactly four intended objects',len(doc.Objects)==4 and {o.Label for o in doc.Objects}==ALL_NAMES)
+    legacy=snapshot([o for o in doc.Objects if o.Label in NAMES],stage)
+    periodic=periodic_snapshot(next(o for o in doc.Objects if o.Label=='PeriodicQ2'),stage)
+    legacy['PeriodicQ2']=periodic
+    for obj in doc.Objects:obj.Shape.exportBrep(str(output/(stage.replace(' ','-')+'-'+obj.Name+'.brep')))
+    check(stage+' inspection creates no object property Undo or CAD change',before==inventory(doc) and before_brep=={o.Name:shape_digest(o.Shape) for o in doc.Objects})
+    return legacy
+
+def compare_snapshots(expected,current,prefix):
+    for name in NAMES:
+        for key in ['shape_type','valid','closed','face_count','solid_count','world_bounds_identity_placement',
+                    'placement_base','placement_rotation_quaternion','curve_bases','surface_bases']:
+            check(prefix+' preserves '+name+' '+key,close_numeric_tree(expected[name][key],current[name][key]))
+        if 'topology' in expected[name]:check(prefix+' preserves '+name+' ordered loop/use topology',close_numeric_tree(expected[name]['topology'],current[name]['topology']))
+    for key in ['shape_type','valid','closed','edge_count','vertex_count','local_curve_bases','world_curve_bases',
+                'placement_base','placement_rotation_quaternion','world_bounds']:
+        check(prefix+' preserves periodic '+key,close_numeric_tree(expected['PeriodicQ2'][key],current['PeriodicQ2'][key]))
+
+def run():
+    opened=[]
+    try:
+        import OpenMatrix9Gui as OM
+        report['native_module']=str(OM.__file__);report['native_sha256']=digest(OM.__file__)
+        cold_baseline=os.environ.get('OM9_PERIODIC_COLD_BASELINE')
+        if cold_baseline:
+            baseline=json.loads(Path(cold_baseline).read_text(encoding='utf-8'))
+            path=baseline['cold_restore_file']
+            check('cold matching native module',baseline['native_sha256']==report['native_sha256'])
+            check('cold exact original saved FCStd',digest(path)==baseline['fcstd_sha256'])
+            doc=App.openDocument(path);opened.append(doc.Name)
+            current=snapshot_four(doc,'cold FCStd')
+            compare_snapshots(baseline['snapshots']['before FCStd save'],current,'cold FCStd')
+            check('cold preserves exact object/property inventory and zero Undo',baseline['inventories']['before FCStd save']==inventory(doc))
+            for obj in doc.Objects:
+                guard=OM.objectSnapshot(doc.Name,obj.Name)
+                check('cold fresh identity guard '+obj.Name,OM.validateObjectSnapshot(doc.Name,guard['token']))
+            report['cold_restore_file']=path;report['fcstd_sha256']=digest(path);report['cold_baseline_sha256']=digest(cold_baseline)
+        else:
+            Gui.activateWorkbench('OpenMatrix9Workbench')
+            legacy_path=os.environ.get('OM9_PERIODIC_LEGACY_BASELINE')
+            if not legacy_path:raise RuntimeError('Warm fixture needs explicit existing kernel baseline')
+            baseline=json.loads(Path(legacy_path).read_text(encoding='utf-8'))
+            check('reused kernel baseline matching module',baseline['ok'] and baseline['native_sha256']==report['native_sha256'])
+            source_path=baseline['cold_restore_file']
+            check('reused kernel baseline exact FCStd',digest(source_path)==baseline['fcstd_sha256'])
+            source=App.openDocument(source_path);opened.append(source.Name)
+            before_text={o.Name:o.Shape.exportBrepToString() for o in source.Objects}
+            before_source={name:hashlib.sha256(value.encode('utf-8')).hexdigest() for name,value in before_text.items()};source_inventory=inventory(source)
+            for name,value in before_text.items():(output/('source-pre-target-'+name+'.brep')).write_text(value,encoding='utf-8')
+            doc=App.newDocument('PeriodicKernel');doc.UndoMode=1;opened.append(doc.Name)
+            # Target document initialization changes the circle root's native
+            # Free flag BEFORE any shape copy, as the retained diagnostics show.
+            # Keep those exact raw bytes, then baseline the actual copy operation.
+            report['source_document_activation']={'before':before_source,'after':{o.Name:shape_digest(o.Shape) for o in source.Objects},'inventory_unchanged':source_inventory==inventory(source)}
+            before_text={o.Name:o.Shape.exportBrepToString() for o in source.Objects}
+            before_source={name:hashlib.sha256(value.encode('utf-8')).hexdigest() for name,value in before_text.items()};source_inventory=inventory(source)
+            for name,value in before_text.items():(output/('source-before-'+name+'.brep')).write_text(value,encoding='utf-8')
+            report['copy_stages']={'before_copy':before_source}
+            for obj in source.Objects:
+                if obj.Label in NAMES:
+                    copied=doc.addObject('Part::Feature',obj.Name);copied.Label=obj.Label
+                    owned=obj.Shape.copy(copyGeom=True,copyMesh=False)
+                    report['copy_stages']['after_copy_'+obj.Name]={o.Name:shape_digest(o.Shape) for o in source.Objects}
+                    copied.Shape=owned
+                    report['copy_stages']['after_assignment_'+obj.Name]={o.Name:shape_digest(o.Shape) for o in source.Objects}
+            c=Part.BSplineCurve()
+            c.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(1,2,0),App.Vector(2,0,0)],[1,1,1,1],[0.,1.,2.,3.],True,2,[1.,1.,1.])
+            periodic=doc.addObject('Part::Feature','PeriodicQ2');periodic.Shape=c.toShape();periodic.Placement.Base=App.Vector(7,-5,2)
+            doc.recompute()
+            report['copy_stages']['after_recompute']={o.Name:shape_digest(o.Shape) for o in source.Objects}
+            before=snapshot_four(doc,'before FCStd save')
+            after_text={o.Name:o.Shape.exportBrepToString() for o in source.Objects}
+            after_source={name:hashlib.sha256(value.encode('utf-8')).hexdigest() for name,value in after_text.items()}
+            report['source_copy_control']={'before_inventory':source_inventory,'after_inventory':inventory(source),'before_shape_sha256':before_source,'after_shape_sha256':after_source}
+            for name,value in after_text.items():(output/('source-after-'+name+'.brep')).write_text(value,encoding='utf-8')
+            check('cloning native fixture leaves source exact',source_inventory==inventory(source) and before_source==after_source)
+            compare_snapshots({**baseline['snapshots']['before FCStd save'],'PeriodicQ2':before['PeriodicQ2']},before,'reused baseline')
+            source_name=source.Name;App.closeDocument(source_name);opened.remove(source_name)
+            guards=[OM.objectSnapshot(doc.Name,obj.Name) for obj in doc.Objects]
+            report['warm_guard_metadata']=[{k:v for k,v in g.items() if k!='token'} for g in guards]
+            check('all warm identity guards initially valid',all(OM.validateObjectSnapshot(doc.Name,g['token']) for g in guards))
+            saved=output/'PeriodicKernel.FCStd';doc.saveAs(str(saved))
+            report.update(cold_restore_file=str(saved),fcstd_sha256=digest(saved),legacy_baseline_sha256=digest(legacy_path),legacy_source_fcstd_sha256=digest(source_path))
+            old_name=doc.Name;App.closeDocument(old_name);opened.remove(old_name)
+            restored=App.openDocument(str(saved));opened.append(restored.Name)
+            check('warm restore uses same document name',restored.Name==old_name)
+            current=snapshot_four(restored,'warm FCStd')
+            compare_snapshots(before,current,'warm FCStd')
+            check('warm preserves exact object/property inventory and zero Undo',report['inventories']['before FCStd save']==inventory(restored))
+            for g in guards:
+                rejected=False
+                try:OM.validateObjectSnapshot(restored.Name,g['token'])
+                except Exception:rejected=True
+                check('warm old-session guard rejects '+g['object_name'],rejected)
+            for obj in restored.Objects:
+                fresh=OM.objectSnapshot(restored.Name,obj.Name)
+                check('warm fresh guard accepts '+obj.Name,OM.validateObjectSnapshot(restored.Name,fresh['token']))
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in reversed(opened):
+            if name in App.listDocuments():App.closeDocument(name)
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(500,run)

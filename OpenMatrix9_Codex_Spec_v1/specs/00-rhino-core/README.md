@@ -1,5 +1,12 @@
 # 00 - Nền tảng Rhino và khả năng tái sử dụng FreeCAD
 
+<!-- rhino-core-periodic-persistence:start -->
+Đã nghiệm thu T09 bằng curve periodic thật và các face có seam/lỗ; dùng lại
+serializer FCStd hiện có.204 kiểm tra warm +102 kiểm tra cold đạt, cùng221 kiểm
+tra đối chứng kernel. Type/topology/basis/tọa độ và inventory giữ nguyên.
+**Toàn bộ P0 vẫn đang triển khai.** [Bằng chứng và giới hạn](../../../docs/validation/2026-10-10-rhino-core-periodic-persistence.md).
+<!-- rhino-core-periodic-persistence:end -->
+
 <!-- rhino-core-hatch-input-gate:start -->
 Đã bổ sung gate Rust cho dữ liệu NURBS của vòng Hatch trước đọc nguồn/copy/dựng
 native; dùng lại editor và exporter hiện có.541 kiểm tra Rust,27 kiểm tra native,

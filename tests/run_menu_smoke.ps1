@@ -23,9 +23,17 @@ try {
     $env:QT_SCALE_FACTOR=$Scale.ToString([System.Globalization.CultureInfo]::InvariantCulture)
     $arguments=@('-u',"`"$(Join-Path $outputRoot 'user.cfg')`"",'-s',"`"$(Join-Path $outputRoot 'system.cfg')`"","`"$(Join-Path $PSScriptRoot $Macro)`"")
     if($NativeModuleDirectory){$arguments=@('-P',"`"$NativeModuleDirectory`"")+$arguments}
+    $launchUtc=[DateTime]::UtcNow.ToString('o')
     $process=Start-Process -FilePath $FreeCADExe -ArgumentList $arguments -WindowStyle Hidden -PassThru
     if(-not $KeepOpen) {
-        if(-not $process.WaitForExit($TimeoutSeconds*1000)){throw "Smoke process $($process.Id) did not finish within $TimeoutSeconds seconds; inspect its logs/window."}
+        $finished=$process.WaitForExit($TimeoutSeconds*1000)
+        [pscustomobject]@{
+            schema_version=1;process_id=$process.Id;started_utc=$launchUtc
+            observed_utc=[DateTime]::UtcNow.ToString('o');wait_completed=$finished
+            exit_code=$(if($finished){$process.ExitCode}else{$null})
+            executable=$FreeCADExe;macro=$Macro
+        } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputRoot 'process.json') -Encoding UTF8
+        if(-not $finished){throw "Smoke process $($process.Id) did not finish within $TimeoutSeconds seconds; inspect its logs/window."}
         $file=Join-Path $outputRoot 'results.json'
         if(-not(Test-Path -LiteralPath $file)){throw "No smoke report. Process exit: $($process.ExitCode)"}
         $result=Get-Content -LiteralPath $file -Raw | ConvertFrom-Json

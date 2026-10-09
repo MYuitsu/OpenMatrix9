@@ -123,14 +123,17 @@
           "id": "RCORE-01.T09",
           "spec_requirement": "RCORE-01.T09 | Lưu/reload FCStd của curve periodic và face có seam/lỗ | So type, topology, basis, world bounds và deviation; không dùng ảnh shaded làm bằng chứng duy nhất",
           "priority": "P0",
-          "status": "not_fully_verified",
-          "complete_evidence": [],
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-periodic-persistence-evidence.json"
+          ],
           "partial_evidence": [
             {
               "report": "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
               "scope": "Scoped basis/type/topology/ownership/parameter-policy observations only; all specified assertions not yet established."
             }
-          ]
+          ],
+          "verification_scope": "Authored native compact degree2 true-periodic curve with translated world775point cyclic quadratic/extrema oracle; existing rational circle and seam/hole faces. Exact FCStd/module and fresh-process type/topology/full available basis/placement/bounds/inventory/zeroUndo, warm old-session rejection/fresh guards. Sampled1e-7mm only; all-family persistence and delayed-worker lifetime unclaimed."
         },
         {
           "id": "RCORE-01.T10",
@@ -1128,5 +1131,5 @@
       ]
     }
   ],
-  "updated_at": "2026-10-10T03:32:43+07:00"
+  "updated_at": "2026-10-10T03:51:55+07:00"
 }
