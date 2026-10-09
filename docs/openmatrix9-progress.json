@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-09T23:46:12+07:00",
+  "updated_at": "2026-10-10T01:12:57+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -1548,13 +1548,14 @@
       ],
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/02-units-tolerances.md",
       "next_action": "Continue operation-specific effective tolerance and capability/permission coverage; shared runtime guards now cover Edit/Boolean, Rebuild and interactive Surface only. Durable History and remaining P0 contracts stay open.",
-      "updated_at": "2026-10-09T23:46:12+07:00",
+      "updated_at": "2026-10-10T01:12:57+07:00",
       "scope": "Partial P0 foundations from pre-merge snapshot 5011bab; historical 321 Rust, 23 Python and 657 native GUI assertions do not validate the merged revision or complete P0.",
       "followup_evidence": [
         "docs/validation/2026-10-09-rhino-core-object-foundations.md",
         "docs/validation/2026-10-09-rhino-core-tolerance-workers.md",
         "docs/validation/2026-10-09-rhino-core-point-consumers.md",
-        "docs/validation/2026-10-09-rhino-core-extended-input.md"
+        "docs/validation/2026-10-09-rhino-core-extended-input.md",
+        "docs/validation/2026-10-10-rhino-core-kernel-contract.md"
       ]
     },
     {
@@ -1852,6 +1853,85 @@
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/04-command-engine.md",
       "next_action": "Continue common typed command sessions and remaining all-P0 contracts using existing host services.",
       "updated_at": "2026-10-09T23:46:12+07:00"
+    },
+    {
+      "key": "rhino-core-kernel-contract",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-CURVE-003",
+        "OM9-CURVE-009"
+      ],
+      "procedure_va": null,
+      "status": "validated_bounded_increment",
+      "scope": "Shared basis validator, read-only descriptor and selected inspection/working V5 exchange policy; all P0 remains open.",
+      "outputs": [
+        "Gui/AppOpenMatrix9Gui.cpp",
+        "Gui/CMakeLists.txt",
+        "Gui/ThreeDmCurves.cpp",
+        "Gui/ThreeDmSurfaces.cpp",
+        "Gui/ThreeDmModeling.cpp",
+        "Gui/ThreeDmPython.cpp",
+        "Gui/NurbsBasisAdapter.h",
+        "Gui/NurbsBasisAdapter.cpp",
+        "Gui/CoreGeometryContract.h",
+        "Gui/CoreGeometryContract.cpp",
+        "cmake/OpenNURBS.cmake",
+        "rust/src/lib.rs",
+        "rust/src/spline.rs",
+        "rust/src/nurbs_basis.rs",
+        "rust/src/nurbs_basis_ffi.rs",
+        "rust/src/geometry_contract.rs",
+        "rust/src/geometry_contract_ffi.rs",
+        "rust/tests/nurbs_basis.rs",
+        "rust/tests/nurbs_basis_ffi.rs",
+        "rust/tests/geometry_contract.rs",
+        "rust/tests/geometry_contract_ffi.rs",
+        "tests/native/CMakeLists.txt",
+        "tests/native/nurbs_basis_adapter.cpp",
+        "tests/native/rhino_core_kernel_contract.cpp",
+        "tests/rhino_core_kernel_contract_smoke.FCMacro",
+        "tests/rhino_core_geometry_descriptor_smoke.FCMacro",
+        "tests/modeling_workers_smoke.FCMacro",
+        "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+        "docs/validation/2026-10-10-rhino-core-kernel-contract-evidence.json",
+        "docs/features/RCORE-01.md"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-10-rhino-core-kernel-contract-evidence.json",
+        "docs/reviews/2026-10-09-kernel-oracle-review.md",
+        "docs/reviews/2026-10-10-basis-contract-review.md",
+        "docs/reviews/2026-10-10-geometry-contract-review.md",
+        "docs/reviews/2026-10-10-native-basis-gate-review.md",
+        "docs/reviews/2026-10-10-geometry-companion-review.md"
+      ],
+      "tests": [
+        {
+          "command": "Full Rust / Clippy",
+          "result": "480 passed; Clippy exit0"
+        },
+        {
+          "command": "Python tooling",
+          "result": "49 passed,1 skipped"
+        },
+        {
+          "command": "SDK/native/application",
+          "result": "59 native fixture checks, basis PASS,3 native suites; 504 application assertions/8processes"
+        }
+      ],
+      "uncertainties": [
+        "All P0 remains in progress. The shared registry currently gates inspection and supported working V5 exchange only; Boolean/edit/other command families do not become universally routed or enabled.",
+        "A descriptor owns observations, not a geometry certificate or mutation permission. Supporting closed/periodic facts are separate from edge/face restriction domains; edge closure is native topological endpoint identity. Face restriction closure/periodicity, manifold, orientation, full trim graph and attributes remain unknown.",
+        "World placement and native support location are copied separately. Coordinates and local_to_world composition remain unknown; no general once-only nested/mirrored/nonuniform transform certificate.",
+        "Curve/surface count/value gates cover selected native converter branches. Archive parsing, GetNurbForm, native copies, proxy/member consumers, downstream pcurves and aggregate allocator/worker memory are not all prevalidated. Literal full T07 remains open.",
+        "Generated spline limits remain degree 1..11, poles 256 and coordinates ±1e9. Native direct basis policy allows degree 25, poles/knots 1e6, logical 64 MiB and coordinates ±1e150; the read-only companion has its own 8192-pole/16384-knot budget with explicit uninspected output.",
+        "Circle locus deviation is sampled, not a certified global maximum. ConversionReport/ParameterMap are owned typed contracts with unknown facts until evidenced; no general conversion mapping/query result or dependent History propagation is implemented here.",
+        "Periodic source/sibling export, source-read immutability and cold reopen are selected proofs. All borrowed/subobject mutation ownership, delayed solver cancellation/UAF and complete T09/T11 remain open.",
+        "Release panic=abort and native allocator/exceptions remain separate lifetime boundaries. Rust C ABI pointer preconditions require live initialized readable allocations; scalar pointer checks cannot prove foreign allocation validity.",
+        "Rhino5 startup still crashes before scripts; no new Rhino runtime semantic parity is claimed."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
+      "next_action": "Continue conversion mapping/query reports and common ownership/command contracts using existing converters.",
+      "updated_at": "2026-10-10T01:12:57+07:00"
     }
   ],
   "merge_context": {

@@ -21,13 +21,13 @@
   },
   {
     "path": "FEATURES.json",
-    "bytes": 1812013,
-    "sha256": "b7a06266ca8c9cfeb10d4fadabccaf0100c6eac794d617057cd2fa3ee411e64c"
+    "bytes": 1812679,
+    "sha256": "bd2f7992b91a6a7823b63517c2a5c1587683ab24ebbeec3a47a80b57b3bdff91"
   },
   {
     "path": "FEATURES.yaml",
-    "bytes": 1450212,
-    "sha256": "9d13e67645fbb4165b69718451c97079aa8b35db99d10d6f489941d71a199181"
+    "bytes": 1450816,
+    "sha256": "3077a074319d1ec10f2bf94da98d19043e0ecf47511c7b996a440f3a83107707"
   },
   {
     "path": "FEATURE_LOOKUP.json",
@@ -46,8 +46,8 @@
   },
   {
     "path": "IMPLEMENTATION_STATUS.md",
-    "bytes": 19777,
-    "sha256": "051128405d175af49fb8e99789c4eb4b3da0eb44fa79ef4f0bbe96fd7188beee"
+    "bytes": 20255,
+    "sha256": "71efd73abb65c1fbfcacc40d92ed147fedf73662d6e95d699a00f3b083772d63"
   },
   {
     "path": "INDEX.md",
@@ -111,8 +111,8 @@
   },
   {
     "path": "specs/00-rhino-core/01-object-model-kernel.md",
-    "bytes": 22720,
-    "sha256": "5ce3a341ac35660af2ffec764660d0573b6b7a2fb3beb799e7174a8d6ead3835"
+    "bytes": 23413,
+    "sha256": "32c386223b27cbbccc9ab50bffd4197fe9dedb70797d24cf25cb34fb07d4c1d0"
   },
   {
     "path": "specs/00-rhino-core/02-units-tolerances.md",
@@ -141,8 +141,8 @@
   },
   {
     "path": "specs/00-rhino-core/07-nurbs-editing-modeling.md",
-    "bytes": 30778,
-    "sha256": "92971dd63398490a409af672f23af8e28ea7cdbdd436f5b626c2770344f170c1"
+    "bytes": 31471,
+    "sha256": "f5837443c6c299126104584821081f370adb81d1d9bdbe919116848518d621fb"
   },
   {
     "path": "specs/00-rhino-core/08-analysis-repair.md",
@@ -156,8 +156,8 @@
   },
   {
     "path": "specs/00-rhino-core/10-persistence-3dm-clipboard.md",
-    "bytes": 21111,
-    "sha256": "d15a57bfb06bbc59951a1b5f31e12522865848c779ff2468b6a718f8c42c5567"
+    "bytes": 21804,
+    "sha256": "121b0ae7e083ed611c81f2ec9422cde5985c74c016aa99a4ace662de94b76e4e"
   },
   {
     "path": "specs/00-rhino-core/11-annotation-layout-print.md",
@@ -171,8 +171,8 @@
   },
   {
     "path": "specs/00-rhino-core/CAPABILITY_LOOKUP.json",
-    "bytes": 73674,
-    "sha256": "7c7d0d603bd5fe7edf69e4c565f76a1a3b04649e2e38904e3bbb22e44c019fa9"
+    "bytes": 74456,
+    "sha256": "980b197c7d7537f630b46f12639c474bfd3cc2a7506beaf503f4612275d21085"
   },
   {
     "path": "specs/00-rhino-core/DECOMPILE_AUDIT.md",
@@ -181,8 +181,8 @@
   },
   {
     "path": "specs/00-rhino-core/README.md",
-    "bytes": 19622,
-    "sha256": "62f835155cb9a822155c4ece960688f502402f91fe7d53f599a8b60ee1242cdf"
+    "bytes": 20106,
+    "sha256": "20ea294fe88d21bdfbeb5f53bbe5fa9ca0436b15ac1542db27e9bd4e1e5607ef"
   },
   {
     "path": "specs/00-rhino-core/SOURCE_BASELINE.json",
@@ -866,8 +866,8 @@
   },
   {
     "path": "specs/02-curve/om9-curve-003-interp-curve.md",
-    "bytes": 13337,
-    "sha256": "d34e2cb8448c09c6c12547a06a90f882beb10fbf3d9514836547908c8ed3777c"
+    "bytes": 13661,
+    "sha256": "273cfda504ef1ca1b7aadef653c9019bbd493bfb62069c2fc0667b977545570e"
   },
   {
     "path": "specs/02-curve/om9-curve-004-rectangle.md",
@@ -896,8 +896,8 @@
   },
   {
     "path": "specs/02-curve/om9-curve-009-rebuild.md",
-    "bytes": 12970,
-    "sha256": "87347ab2f57871f94a5f05fa962b34b18d324cb1284b4d03f1dfb3c2f0f44d56"
+    "bytes": 13294,
+    "sha256": "d73b7de8a232a1f359342fbfa82c68511cb509c7ced576de75157946363991db"
   },
   {
     "path": "specs/02-curve/om9-curve-010-refit-to-tolerance.md",

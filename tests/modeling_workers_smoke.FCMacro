@@ -10,6 +10,14 @@ def run():
     try:
         import ThreeDm,Part,OpenMatrix9Gui as native
         Gui.activateWorkbench('OpenMatrix9Workbench')
+        # Production resolves workers beside the host executable. An isolated
+        # extension module can live in a different directory; exercise the actual
+        # executable, including failure injection, and require matching bytes.
+        worker=Path(QtCore.QCoreApplication.applicationDirPath())/'OM9ThreeDmImportWorker.exe'
+        built_worker=Path(native.__file__).parent/'OM9ThreeDmImportWorker.exe'
+        worker_sha256=hashlib.sha256(worker.read_bytes()).hexdigest()
+        report['worker']={'path':str(worker),'sha256':worker_sha256,'built_path':str(built_worker)}
+        check('host worker matches isolated native build',worker_sha256==hashlib.sha256(built_worker.read_bytes()).hexdigest())
         fixtures=Path(os.environ.get('OM9_MODELING_FIXTURES','H:/FreeCAD-src/build/3dm-preserve-native/modeling-fixtures'))
         source=fixtures/'blocks.3dm';cases=[]
         for workers in [1,4]:
@@ -31,7 +39,7 @@ def run():
             check('modeling excludes page curves and annotations workers'+str(workers),len(objects)==9 and all(o.Label.startswith('Model') for o in objects))
             App.closeDocument(layout_doc.Name)
         doc=App.newDocument('WorkingFailure');sentinel=doc.addObject('Part::Feature','Sentinel');sentinel.Shape=Part.makeBox(1,2,3);before=[o.Name for o in doc.Objects]
-        worker=Path(native.__file__).parent/'OM9ThreeDmImportWorker.exe';hidden=worker.with_suffix('.modeling-test-disabled')
+        hidden=worker.with_suffix('.modeling-test-disabled')
         def failure_case(replace=False):
             failed=False;worker.rename(hidden);start=time.perf_counter()
             try:

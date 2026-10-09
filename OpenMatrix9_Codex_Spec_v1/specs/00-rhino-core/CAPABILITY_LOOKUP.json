@@ -26,7 +26,8 @@
       "runtime_validation": "partial_native_validation",
       "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
       "implementation_followup_evidence": [
-        "../../../docs/validation/2026-10-09-rhino-core-object-foundations.md"
+        "../../../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+        "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md"
       ]
     },
     {
@@ -168,7 +169,10 @@
         "RCORE-07.T14"
       ],
       "runtime_validation": "partial_native_validation",
-      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
+      "implementation_followup_evidence": [
+        "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md"
+      ]
     },
     {
       "id": "RCORE-08",
@@ -231,7 +235,10 @@
         "RCORE-10.T12"
       ],
       "runtime_validation": "partial_native_validation",
-      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
+      "implementation_followup_evidence": [
+        "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md"
+      ]
     },
     {
       "id": "RCORE-11",
@@ -1647,6 +1654,18 @@
       ],
       "evidence": "../../../docs/validation/2026-10-09-rhino-core-object-foundations.md",
       "scope": "Shared runtime object sessions/generations/revisions and stale selection guards in Edit, Rebuild and interactive Surface. No full chapter or original fixture completion; durable subelement mapping, all-family permissions/capabilities and worker cancellation remain open."
+    },
+    {
+      "id": "rhino-core-kernel-contract",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01",
+        "RCORE-07",
+        "RCORE-10"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+      "scope": "Selected shared basis/descriptor/working-exchange gates and exact fixtures; no complete chapter or all-P0 closure."
     }
   ]
 }

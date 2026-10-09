@@ -10,6 +10,18 @@ evidence_scope: initial_source_audit_2026-10-09
 
 # RCORE-07 — NURBS editing và modeling
 
+<!-- rhino-core-kernel-contract:start -->
+Dùng lại bộ chuyển đổi FreeCAD/OCCT/openNURBS; bổ sung validator basis Rust,
+descriptor chỉ đọc và policy cho inspection/working 3DM. 480 Rust tests;
+504 kiểm tra ứng dụng / 8 lần chạy, gồm mở FCStd trong tiến trình mới.
+**P0 toàn bộ vẫn đang triển khai.** [Bằng chứng và phạm vi](../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md).
+
+Selected shared gates/observations are verified; all-family capability, ownership,
+parameterization and complete chapter acceptance remain open. Historical baseline
+claims below retain their original scope.
+
+<!-- rhino-core-kernel-contract:end -->
+
 ## Cập nhật triển khai P0 — 2026-10-09
 
 Metadata/source observations bên dưới là baseline audit ban đầu. Rust kiểm basis

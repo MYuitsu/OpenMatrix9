@@ -129,6 +129,8 @@ set(
     CoreUnits.h
     CoreObjects.cpp
     CoreObjects.h
+    CoreGeometryContract.cpp
+    CoreGeometryContract.h
     CoreTolerance.cpp
     CoreTolerance.h
     CoreCoordinates.cpp

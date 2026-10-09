@@ -1,4 +1,5 @@
 #include "ThreeDmGeometry.h"
+#include "NurbsBasisAdapter.h"
 #include <Geom_BSplineCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom_TrimmedCurve.hxx>
@@ -13,7 +14,13 @@
 #include <TColStd_Array1OfInteger.hxx>
 #include <cmath>
 namespace OpenMatrix9Gui::ThreeDm {
-static ON_NurbsCurve nurbs(const ON_Curve& c){ON_NurbsCurve n;if(!c.IsValid()||!c.GetNurbForm(n))throw ExchangeError("Invalid or unsupported curve");if(!n.ClampEnd(2))throw ExchangeError("Cannot clamp NURBS curve");return n;}
+static ON_NurbsCurve nurbs(const ON_Curve& c){
+    if(auto raw=ON_NurbsCurve::Cast(&c))BasisContract::checkedBasis(*raw);
+    ON_NurbsCurve n;if(!c.IsValid()||!c.GetNurbForm(n))throw ExchangeError("Invalid or unsupported curve");
+    BasisContract::checkedBasis(n);
+    if(!n.ClampEnd(2))throw ExchangeError("Cannot clamp NURBS curve");
+    BasisContract::checkedBasis(n);return n;
+}
 static void knots(const ON_NurbsCurve& n,std::vector<double>& k,std::vector<int>& m){
     auto append=[&](double v){if(!std::isfinite(v))throw ExchangeError("Nonfinite knot");if(k.empty()||v!=k.back()){k.push_back(v);m.push_back(1);}else ++m.back();};
     append(n.Knot(0));for(int i=0;i<n.KnotCount();++i)append(n.Knot(i));append(n.Knot(n.KnotCount()-1));
@@ -34,6 +41,7 @@ Handle(Geom2d_Curve) curve2d(const ON_Curve& c){
 }
 TopoDS_Shape importCurve(const ON_Curve& c,double){auto n=curve3d(c);auto d=c.Domain();BRepBuilderAPI_MakeEdge edge(n,d.Min(),d.Max());if(!edge.IsDone())throw ExchangeError("Curve edge construction failed");return edge.Edge();}
 template<class Curve> static std::unique_ptr<ON_Curve> toON(const Curve& n,int dimension){
+    BasisContract::checkedBasis(n);
     auto out=std::make_unique<ON_NurbsCurve>(dimension,n->IsRational(),n->Degree()+1,n->NbPoles());
     for(int i=1;i<=n->NbPoles();++i){auto p=n->Pole(i);double w=n->Weight(i);double z=0;if constexpr(requires{p.Z();})z=p.Z();out->SetCV(i-1,ON_4dPoint(p.X()*w,p.Y()*w,z*w,w));}
     std::vector<double> flat;for(int i=1;i<=n->NbKnots();++i)for(int j=0;j<n->Multiplicity(i);++j)flat.push_back(n->Knot(i));
@@ -41,17 +49,19 @@ template<class Curve> static std::unique_ptr<ON_Curve> toON(const Curve& n,int d
     for(int i=0;i<out->KnotCount();++i)out->SetKnot(i,flat[i+1]);ON_wString log;ON_TextLog errors(log);if(!out->IsValid(&errors))throw ExchangeError(std::string("Exported NURBS curve invalid: ")+ON_String(log).Array());return out;
 }
 std::unique_ptr<ON_Curve> curveON(const Handle(Geom_Curve)& c,double a,double b){
-    auto n=GeomConvert::CurveToBSplineCurve(new Geom_TrimmedCurve(c,a,b));if(n->IsPeriodic())n->SetNotPeriodic();return toON(n,3);
+    if(auto raw=Handle(Geom_BSplineCurve)::DownCast(c);!raw.IsNull())BasisContract::checkedBasis(raw);
+    auto n=GeomConvert::CurveToBSplineCurve(new Geom_TrimmedCurve(c,a,b));BasisContract::checkedBasis(n);if(n->IsPeriodic())n->SetNotPeriodic();return toON(n,3);
 }
 std::unique_ptr<ON_Curve> curveON(const Handle(Geom2d_Curve)& c,double a,double b){
     auto spline=Handle(Geom2d_BSplineCurve)::DownCast(c);
     Handle(Geom2d_BSplineCurve) n;
     if(!spline.IsNull()){
+        BasisContract::checkedBasis(spline);
         n=Handle(Geom2d_BSplineCurve)::DownCast(spline->Copy());
         const double parameterTolerance=1e-10*std::max({1.0,std::abs(a),std::abs(b)});
         if(std::abs(a-n->FirstParameter())>parameterTolerance||std::abs(b-n->LastParameter())>parameterTolerance)n->Segment(a,b);
     }else n=Geom2dConvert::CurveToBSplineCurve(new Geom2d_TrimmedCurve(c,a,b));
-    if(n->IsPeriodic())n->SetNotPeriodic();return toON(n,2);
+    BasisContract::checkedBasis(n);if(n->IsPeriodic())n->SetNotPeriodic();return toON(n,2);
 }
 std::unique_ptr<ON_Curve> exportCurve(const TopoDS_Edge& e,double){double a,b;TopLoc_Location loc;auto c=BRep_Tool::Curve(e,loc,a,b);if(c.IsNull())throw ExchangeError("Edge has no 3D curve");c=Handle(Geom_Curve)::DownCast(c->Transformed(loc.Transformation()));auto out=curveON(c,a,b);if(e.Orientation()==TopAbs_REVERSED)out->Reverse();return out;}
 }

@@ -1,5 +1,12 @@
 # Implementation status — 2026-10-09
 
+<!-- rhino-core-kernel-contract:start -->
+Dùng lại bộ chuyển đổi FreeCAD/OCCT/openNURBS; bổ sung validator basis Rust,
+descriptor chỉ đọc và policy cho inspection/working 3DM. 480 Rust tests;
+504 kiểm tra ứng dụng / 8 lần chạy, gồm mở FCStd trong tiến trình mới.
+**P0 toàn bộ vẫn đang triển khai.** [Bằng chứng và phạm vi](../docs/validation/2026-10-10-rhino-core-kernel-contract.md).
+<!-- rhino-core-kernel-contract:end -->
+
 <!-- rhino-core-extended-input:start -->
 Bổ sung nhập polar/spherical/surveyor, fraction/feet-inch và góc DMS bằng Rust,
 dùng lại bộ dựng hình FreeCAD/OM9 hiện có. Sửa mốc tương đối và Undo của Circle/Sphere.

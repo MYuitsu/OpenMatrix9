@@ -1,0 +1,500 @@
+"""Read-only owned geometry companion acceptance; run with run_menu_smoke.ps1.
+
+These observations do not certify solver parity, complete topology extraction,
+native worker lifetime, a global deviation bound or a conversion parameter map.
+"""
+import copy, difflib, hashlib, json, math, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part, Mesh
+from PySide6 import QtCore, QtWidgets
+
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0, os.environ['OM9_TEST_NATIVE_DIR'])
+output = Path(os.environ['OM9_SMOKE_OUTPUT'])
+output.mkdir(parents=True, exist_ok=True)
+owned_docs = []
+report = {'schema_version': 1, 'checks': [], 'descriptors': {}, 'required_external_oracles': [],
+          'source_tessellation_failure_reference': {
+              'run_directory': 'H:/FreeCAD-src/Mod/OpenMatrix9/build/merge_replay-1/fbd3f12a999a446aaf5af91c0a793492',
+              'failure_check': 'Sphere CAD/radius/revision unchanged in Wireframe',
+              'trigger': 'explicit source Shape.tessellate(0.8)',
+              'serialized_change': 'face TShape Checked: false -> true; 0101000 -> 0111000',
+              'before_file': 'sphere-wireframe-before-display.brep',
+              'after_file': 'sphere-wireframe-after-explicit-tessellation.brep',
+              'display_events_changed_source_brep': False},
+          'native_density_sampling_diagnosis': {
+              'failed_run_directory': 'H:/FreeCAD-src/Mod/OpenMatrix9/build/merge_replay-1/488686c9d8a54167b7a61b3cdb110862',
+              'failed_results_file': 'results.json',
+              'failed_samples': [{'linear_tolerance': 0.8, 'vertices': 4002, 'facets': 8000},
+                                 {'linear_tolerance': 0.05, 'vertices': 4002, 'facets': 8000}],
+              'native_default_angular_expression': 'min(0.1, linear_tolerance * 5 + 0.005)',
+              'evidence': 'src/Mod/Part/App/TopoShape.cpp defaultAngularDeflection passed to BRepMesh_IncrementalMesh',
+              'diagnosis': 'Both prior linear tolerances request the same 0.1 radian angular limit',
+              'adjustment': 'Fine linear tolerance 0.01 requests native default angular deflection 0.055 radians'},
+          'native_volume_integration_diagnosis': {
+              'failed_run_directory': 'H:/FreeCAD-src/Mod/OpenMatrix9/build/merge_replay-1/4155baaea984422fb836fb86f1e9f3b1',
+              'failed_results_file': 'results.json',
+              'default_volume': 113.04787279841815, 'expected_volume': 113.09733552923255,
+              'absolute_error': 0.04946273081439756, 'required_absolute_tolerance': 1e-5,
+              'local_getter': 'src/Mod/Part/App/TopoShapePyImp.cpp getVolume calls BRepGProp::VolumeProperties(shape, props)',
+              'occt_overload': 'bool-default overload uses nonadaptive integration, Eps=1.0; UseTriangulation=false',
+              'accuracy_oracle': 'standalone native adaptive BRepGProp::VolumeProperties at Eps 1e-14 and 1e-16 on exact imported BRep',
+              'accuracy_status': 'pending_external_execution'},
+          'unfulfilled': ['No complete trim/seam graph, manifold/solid orientation or attribute preservation inspection',
+                          'Coordinates/local_to_world stay unknown; placement and native support location are provenance',
+                          'No solver/Rhino parity, all-consumer ownership or certified conversion parameter mapping']}
+
+def check(name, condition):
+    report['checks'].append({'name': name, 'passed': bool(condition)})
+    if not condition:
+        raise AssertionError(name)
+
+def shape_hash(obj):
+    raw = obj.Shape.exportBrepToString()
+    return hashlib.sha256(raw.encode('utf-8') if isinstance(raw, str) else raw).hexdigest()
+
+def observed_attribute(obj, name):
+    try:
+        value = getattr(obj, name)
+        if isinstance(value, (str, bool, int, float)) or value is None:
+            return {'available': True, 'value': value}
+        if isinstance(value, (tuple, list)) and all(isinstance(item, (bool, int, float)) for item in value):
+            return {'available': True, 'value': list(value)}
+        return {'available': False, 'reason': 'Python attribute is not a scalar observation'}
+    except Exception as error:
+        return {'available': False, 'reason': type(error).__name__ + ': ' + str(error)}
+
+def native_flags(shape):
+    # Probe exposed value getters only; never call a topology setter or repair.
+    # SameParameter/Range and TShape flags are explicitly unavailable if this
+    # Python binding does not expose them. Raw BRep is retained for comparison.
+    return {name: observed_attribute(shape, name) for name in
+            ['Closed', 'Degenerated', 'SameParameter', 'SameRange', 'Checked',
+             'Modified', 'Orientable', 'Infinite', 'Convex']}
+
+def write_brep(obj, label):
+    raw = getattr(obj, 'Shape', obj).exportBrepToString()
+    data = raw.encode('utf-8') if isinstance(raw, str) else raw
+    path = output / (label + '.brep')
+    path.write_bytes(data)
+    return {'path': str(path), 'sha256': hashlib.sha256(data).hexdigest(), 'bytes': len(data)}
+
+def native_diagnostic(obj, label):
+    before_reads = write_brep(obj, label)
+    shape = getattr(obj, 'Shape', obj)
+    edges, vertices, faces = shape.Edges, shape.Vertexes, shape.Faces
+    values = {'shape_type': shape.ShapeType, 'orientation': str(shape.Orientation),
+              'vertex_count': len(vertices), 'edge_count': len(edges), 'face_count': len(faces),
+              'wire_count': len(shape.Wires), 'shell_count': len(shape.Shells), 'solid_count': len(shape.Solids),
+              'topology_flags': native_flags(shape),
+              'numeric_shape_properties': {key: observed_attribute(shape, key) for key in ['Length', 'Area', 'Volume']},
+              'vertices': [{'index': index + 1, 'tolerance': vertex.Tolerance,
+                            'point': [vertex.Point.x, vertex.Point.y, vertex.Point.z],
+                            'orientation': str(vertex.Orientation), 'flags': native_flags(vertex)}
+                           for index, vertex in enumerate(vertices)],
+              'edges': [{'index': index + 1, 'tolerance': edge.Tolerance,
+                         'domain': [edge.FirstParameter, edge.LastParameter],
+                         'length': observed_attribute(edge, 'Length'),
+                         'orientation': str(edge.Orientation), 'flags': native_flags(edge)}
+                        for index, edge in enumerate(edges)],
+              'faces': [{'index': index + 1, 'domain': list(face.ParameterRange),
+                         'tolerance': observed_attribute(face, 'Tolerance'),
+                         'orientation': str(face.Orientation), 'flags': native_flags(face)}
+                        for index, face in enumerate(faces)]}
+    # This extra checkpoint distinguishes meshing effects from observation effects.
+    after_reads = write_brep(obj, label + '-after-observation-reads')
+    return {'brep': before_reads, 'native_values': values,
+            'brep_after_observation_reads': after_reads,
+            'observation_reads_changed_brep': before_reads['sha256'] != after_reads['sha256']}
+
+def brep_delta(before, after):
+    old, new = Path(before['brep']['path']), Path(after['brep']['path'])
+    return ''.join(difflib.unified_diff(old.read_text().splitlines(True), new.read_text().splitlines(True),
+                                        fromfile=old.name, tofile=new.name))
+
+def plain_values(value):
+    if value is None or isinstance(value, (str, bool, int, float)):
+        return True
+    if isinstance(value, list):
+        return all(plain_values(item) for item in value)
+    if isinstance(value, dict):
+        return all(isinstance(key, str) and plain_values(item) for key, item in value.items())
+    return False
+
+def rejected(name, operation):
+    try:
+        operation()
+    except (ValueError, RuntimeError):
+        check(name, True)
+    else:
+        check(name, False)
+
+def run():
+    try:
+        import OpenMatrix9Gui as OM
+        import ThreeDm
+        report['native_module'] = str(OM.__file__)
+        report['native_sha256'] = hashlib.sha256(Path(OM.__file__).read_bytes()).hexdigest()
+        # The old-module RED must fail here before production companion code lands.
+        check('Native module exposes read-only geometryDescriptor', callable(getattr(OM, 'geometryDescriptor', None)))
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc = App.newDocument('GeometryDescriptorContract')
+        owned_docs.append(doc.Name)
+        doc.UndoMode = 1
+        def add(name, shape):
+            obj = doc.addObject('Part::Feature', name)
+            obj.Shape = shape
+            return obj
+        circle = add('CircleR10', Part.makeCircle(10).toNurbs())
+        arc = add('AnalyticHalfCircleR10', Part.makeCircle(10, App.Vector(0, 0, 0), App.Vector(0, 0, 1), 0, 180))
+        lateral = next(face for face in Part.makeCylinder(4, 7).Faces if isinstance(face.Surface, Part.Cylinder))
+        cylinder = add('OpenCylinderR4H7', lateral)
+        partial_lateral = next(face for face in Part.makeCylinder(4, 7, App.Vector(0, 0, 0), App.Vector(0, 0, 1), 180).Faces
+                               if isinstance(face.Surface, Part.Cylinder))
+        partial_cylinder = add('PartialCylinderR4H7', partial_lateral)
+        nurbs_face = add('NurbsCylinderFace', lateral.toNurbs())
+        sphere = add('SolidSphere', Part.makeSphere(3))
+        mesh = doc.addObject('Mesh::Feature', 'IndependentMesh')
+        # Native tessellate changes Checked on the TShape passed to it. Give it
+        # duplicate topology and geometry, without a shared triangulation cache.
+        initial_source_before = write_brep(sphere, 'sphere-before-independent-mesh-sampling')
+        initial_sample = sphere.Shape.copy(copyGeom=True, copyMesh=False)
+        initial_copy_before = native_diagnostic(initial_sample, 'independent-mesh-sampling-copy-before')
+        mesh.Mesh = Mesh.Mesh(initial_sample.tessellate(0.3))
+        initial_copy_after = native_diagnostic(initial_sample, 'independent-mesh-sampling-copy-after')
+        initial_source_after = write_brep(sphere, 'sphere-after-independent-mesh-sampling')
+        report['independent_mesh_sampling'] = {
+            'sampling_scope': 'independent_geometry_copy', 'copy_geom': True, 'copy_mesh': False,
+            'source_before': initial_source_before, 'source_after': initial_source_after,
+            'sampling_copy_before': initial_copy_before, 'sampling_copy_after': initial_copy_after,
+            'sampling_copy_brep_diff': brep_delta(initial_copy_before, initial_copy_after)}
+        check('Independent mesh sampling leaves source BRep unchanged',
+              initial_source_before['sha256'] == initial_source_after['sha256'])
+        unsupported = doc.addObject('App::FeaturePython', 'UnknownSource')
+        # Independent native input above the companion cap proves no silent truncation.
+        count = 8193
+        large = Part.BSplineCurve()
+        large.buildFromPolesMultsKnots([App.Vector(i, 0, 0) for i in range(count)],
+                                      [2] + [1] * (count - 2) + [2], list(range(count)), False, 1)
+        limited = add('AboveCompanionPoleLimit', large.toShape())
+        OM.setUnitContext(doc.Name, 1.0, 1.0, 0.001, 0.01, 0.01)
+        sphere.ViewObject.Deviation = 0.4
+        doc.recompute()
+        cad = [circle, arc, cylinder, partial_cylinder, nurbs_face, sphere, limited]
+        guards = {obj.Name: OM.objectSnapshot(doc.Name, obj.Name) for obj in cad + [mesh, unsupported]}
+        hashes = {obj.Name: shape_hash(obj) for obj in cad}
+        before = (len(doc.Objects), doc.UndoCount, {obj.Name: list(obj.PropertiesList) for obj in doc.Objects})
+        def describe(obj, subelement=''):
+            raw = OM.geometryDescriptor(doc.Name, obj.Name, subelement)
+            check(obj.Name + ' companion is Unicode JSON', isinstance(raw, str))
+            result = json.loads(raw)
+            check(obj.Name + ' companion contains only independent values', plain_values(result))
+            return result
+        descriptors = {obj.Name: describe(obj) for obj in cad + [mesh, unsupported]}
+        report['descriptors'] = descriptors
+        for obj in cad + [mesh, unsupported]:
+            descriptor, guard = descriptors[obj.Name], guards[obj.Name]
+            check(obj.Name + ' schema and source provenance', descriptor['schema_version'] == 1 and
+                  descriptor['object_name'] == obj.Name and descriptor['document_uid'] == guard['document_uid'] and
+                  descriptor['subelement'] == '')
+            check(obj.Name + ' exact existing stamp', all(descriptor['stamp'][field] == str(guard[key]) for field, key in
+                  [('document', 'document_session'), ('object', 'object_id'), ('generation', 'generation'),
+                   ('revision', 'geometry_revision'), ('epoch', 'document_epoch')]))
+            check(obj.Name + ' unit context is copied', descriptor['unit_context_snapshot'] == OM.unitContext(doc.Name)['snapshot'])
+            check(obj.Name + ' world placement provenance is finite', len(descriptor['world_placement_provenance']) == 4 and
+                  all(len(row) == 4 and all(math.isfinite(v) for v in row) for row in descriptor['world_placement_provenance']))
+            check(obj.Name + ' transforms remain unclaimed', descriptor['coordinates'] is None and descriptor['local_to_world'] is None)
+            check(obj.Name + ' uninspected topology remains unknown', all(descriptor['topology'][key] is None for key in
+                  ['closed', 'manifold', 'solid_orientation', 'faces', 'free_boundary_components']))
+        data = descriptors[circle.Name]
+        basis = data['basis']
+        check('CircleR10 is CAD curve with retained NURBS form and domain', data['legacy_kind'] == 2 and
+              data['representation'] == 'curve' and data['form'] == 'nurbs' and len(data['domains']) == 1 and
+              data['domain_scope'] == 'edge_restriction' and data['domains'][0][0] < data['domains'][0][1])
+        check('CircleR10 retains rational weights and full supporting basis', basis['kind'] == 'nurbs_curve' and
+              basis['rational'] is True and len(basis['weights']) == len(basis['poles_xyz']) and
+              any(abs(weight - 1.0) > 1e-12 for weight in basis['weights']) and len(basis['axis']['full_domain']) == 2)
+        check('CircleR10 basis stays native local with separate location', data['basis_frame'] == 'native_local' and
+              len(data['brep_tool_location']) == 4)
+        arc_data = descriptors[arc.Name]
+        check('Half-circle analytic supporting facts are distinct from edge restriction',
+              arc_data['representation'] == 'curve' and arc_data['form'] == 'analytic' and
+              arc_data['facts_scope'] == 'supporting_geometry' and arc_data['facts']['closed'] is True and
+              arc_data['facts']['periodic'] is True and arc_data['domain_scope'] == 'edge_restriction' and
+              len(arc_data['domains']) == 1 and
+              abs((arc_data['domains'][0][1] - arc_data['domains'][0][0]) - math.pi) <= 1e-12)
+        check('Half-circle restriction is open by native endpoints and periodicity stays unknown',
+              arc_data['restriction_facts']['closed'] is False and
+              arc_data['restriction_facts']['closed_evidence'] == 'native_topology_endpoints' and
+              arc_data['restriction_facts']['periodic'] is None and arc_data['basis'] is None)
+        surface = descriptors[cylinder.Name]
+        check('Open cylinder face stays trimmed_face and never solid', surface['representation'] == 'trimmed_face' and
+              surface['topology']['solid'] is False and surface['facts']['periodic'] == [True, False])
+        check('Cylinder analytic form and trimmed UV domain retained', surface['form'] == 'analytic' and
+              len(surface['domains']) == 2 and surface['domain_scope'] == 'face_uv_restriction' and surface['basis'] is None)
+        partial_data = descriptors[partial_cylinder.Name]
+        check('Partial-cylinder face retains periodic supporting surface and restricted UV domain',
+              partial_data['representation'] == 'trimmed_face' and partial_data['form'] == 'analytic' and
+              partial_data['topology']['solid'] is False and partial_data['facts_scope'] == 'supporting_geometry' and
+              partial_data['facts']['closed'] == [True, False] and partial_data['facts']['periodic'] == [True, False] and
+              partial_data['domain_scope'] == 'face_uv_restriction' and len(partial_data['domains']) == 2 and
+              abs((partial_data['domains'][0][1] - partial_data['domains'][0][0]) - math.pi) <= 1e-12 and
+              abs((partial_data['domains'][1][1] - partial_data['domains'][1][0]) - 7.0) <= 1e-12)
+        check('Partial-cylinder restriction direction facts remain unknown',
+              partial_data['restriction_facts']['closed'] == [None, None] and
+              partial_data['restriction_facts']['periodic'] == [None, None] and partial_data['basis'] is None)
+        sb = descriptors[nurbs_face.Name]['basis']
+        support = nurbs_face.Shape.Faces[0].Surface
+        poles = support.getPoles()
+        check('NURBS surface form retained with U-major copied grid', descriptors[nurbs_face.Name]['form'] == 'nurbs' and
+              sb['kind'] == 'nurbs_surface' and sb['pole_layout'] == 'u_major' and
+              len(sb['poles_xyz']) == sb['u_count'] * sb['v_count'] and
+              all(sb['poles_xyz'][u * sb['v_count'] + v] == [poles[u][v].x, poles[u][v].y, poles[u][v].z]
+                  for u in range(sb['u_count']) for v in range(sb['v_count'])))
+        check('Native solid sphere classification survives display tessellation', descriptors[sphere.Name]['representation'] == 'solid' and
+              descriptors[sphere.Name]['legacy_kind'] == 3 and descriptors[sphere.Name]['topology']['solid'] is True)
+        check('Independent mesh stays mesh despite sharing CAD display samples', descriptors[mesh.Name]['representation'] == 'mesh' and
+              descriptors[mesh.Name]['legacy_kind'] == 4 and descriptors[mesh.Name]['basis'] is None)
+        supported_modes = list(sphere.ViewObject.listDisplayModes())
+        report['sphere_display_modes_supported'] = supported_modes
+        check('Native sphere offers exact Wireframe and Shaded modes', all(mode in supported_modes for mode in ['Wireframe', 'Shaded']))
+        display_observations = []
+        # Persist each observation before predicates can abort the fixture.
+        report['sphere_display_observations'] = display_observations
+        # 0.8 and 0.05 both reach FreeCAD's 0.1 radian angular ceiling.
+        # 0.01 requests a finer 0.055 radian limit as well as lower linear error.
+        for mode, deviation, tolerance in [('Wireframe', 0.4, 0.8), ('Shaded', 0.05, 0.01)]:
+            label = 'sphere-' + mode.lower()
+            before_display = native_diagnostic(sphere, label + '-before-display')
+            sphere.ViewObject.Deviation = deviation
+            sphere.ViewObject.DisplayMode = mode
+            QtWidgets.QApplication.processEvents()
+            after_display = native_diagnostic(sphere, label + '-after-display-events')
+            sample = sphere.Shape.copy(copyGeom=True, copyMesh=False)
+            copy_before = native_diagnostic(sample, label + '-sampling-copy-before-tessellation')
+            vertices, facets = sample.tessellate(tolerance)
+            copy_after = native_diagnostic(sample, label + '-sampling-copy-after-tessellation')
+            after_tessellation = native_diagnostic(sphere, label + '-after-explicit-tessellation')
+            current = describe(sphere)
+            radius = sphere.Shape.Faces[0].Surface.Radius
+            current_hash = shape_hash(sphere)
+            guard_valid, guard_error = False, None
+            try:
+                guard_valid = bool(OM.validateObjectSnapshot(doc.Name, guards[sphere.Name]['token']))
+            except Exception:
+                guard_error = traceback.format_exc()
+            observation = {'requested_mode': mode, 'mode': sphere.ViewObject.DisplayMode,
+                           'requested_deviation': deviation, 'deviation_property': sphere.ViewObject.Deviation,
+                           'tessellation_tolerance': tolerance,
+                            'default_angular_deflection_derived_from_native_source': min(0.1, tolerance * 5 + 0.005),
+                            'sampling_scope': 'independent_geometry_copy', 'copy_geom': True, 'copy_mesh': False,
+                           'vertices': len(vertices), 'facets': len(facets),
+                           'expected_analytic_radius': 3.0, 'analytic_radius': radius,
+                           'radius_absolute_error': abs(radius - 3.0),
+                           'expected_stamp': descriptors[sphere.Name]['stamp'], 'stamp': current['stamp'],
+                           'expected_cad_brep_sha256': hashes[sphere.Name], 'cad_brep_sha256': current_hash,
+                           'guard_valid': guard_valid, 'guard_error': guard_error,
+                           'before_display': before_display,
+                           'after_display_events': after_display,
+                           'after_explicit_tessellation': after_tessellation,
+                            'sampling_copy_before': copy_before,
+                            'sampling_copy_after': copy_after,
+                            'sampling_copy_brep_diff': brep_delta(copy_before, copy_after),
+                           'predicate_results': {
+                               'cad_hash_unchanged': current_hash == hashes[sphere.Name],
+                               'radius_unchanged': abs(radius - 3.0) <= 1e-12,
+                               'stamp_unchanged': current['stamp'] == descriptors[sphere.Name]['stamp'],
+                               'guard_valid': guard_valid}}
+            display_observations.append(observation)
+            check('Sphere remains native CAD solid in ' + mode, current['representation'] == 'solid' and
+                  current['legacy_kind'] == 3 and current['topology']['solid'] is True)
+            check('Sphere CAD/radius/revision unchanged in ' + mode, all(observation['predicate_results'].values()))
+            # Exercise the existing native CAD working route in each display
+            # state; the independent display samples never become export input.
+            route = {'export_policy': 'modeling', 'import_mode': 'modeling', 'workers': 1,
+                     'archive_path': str(output / (label + '-working-cad.3dm')),
+                     'source_kind': current['legacy_kind'], 'stage': 'exporting'}
+            observation['modeling_round_trip'] = route
+            previous_workers = os.environ.get('OM9_3DM_WORKERS')
+            previous_active = App.ActiveDocument.Name if App.ActiveDocument else None
+            imported_doc_name = None
+            try:
+                os.environ['OM9_3DM_WORKERS'] = '1'
+                App.setActiveDocument(doc.Name)
+                archive = Path(route['archive_path'])
+                ThreeDm.export_file(str(archive), [sphere], modeling=True)
+                route['archive_sha256'] = hashlib.sha256(archive.read_bytes()).hexdigest()
+                route['archive_bytes'] = archive.stat().st_size
+                route['source_after_export'] = native_diagnostic(sphere, label + '-after-working-export')
+                exported_source = describe(sphere)
+                exported_radius = sphere.Shape.Faces[0].Surface.Radius
+                exported_hash = shape_hash(sphere)
+                exported_guard_valid, exported_guard_error = False, None
+                try:
+                    exported_guard_valid = bool(OM.validateObjectSnapshot(doc.Name, guards[sphere.Name]['token']))
+                except Exception:
+                    exported_guard_error = traceback.format_exc()
+                route['source_after_export_stamp'] = exported_source['stamp']
+                route['source_after_export_analytic_radius'] = exported_radius
+                route['source_after_export_guard_error'] = exported_guard_error
+                route['source_predicate_results'] = {
+                    'cad_hash_unchanged': exported_hash == hashes[sphere.Name],
+                    'radius_unchanged': abs(exported_radius - 3.0) <= 1e-12,
+                    'stamp_unchanged': exported_source['stamp'] == descriptors[sphere.Name]['stamp'],
+                    'guard_valid': exported_guard_valid}
+                check('Working CAD export leaves source BRep/radius/stamp/guard unchanged in ' + mode,
+                      all(route['source_predicate_results'].values()))
+                route['stage'] = 'importing'
+                imported_doc = App.newDocument('GeometryDescriptor' + mode + 'RoundTrip')
+                imported_doc_name = imported_doc.Name
+                owned_docs.append(imported_doc_name)
+                imported = ThreeDm.import_file(str(archive), imported_doc, mode='modeling')
+                imported_doc.recompute()
+                route['imported_document'] = imported_doc_name
+                route['returned_objects'] = len(imported)
+                route['document_object_types'] = [obj.TypeId for obj in imported_doc.Objects]
+                check('Working sphere round trip returns one CAD object without mesh fallback in ' + mode,
+                      len(imported) == 1 and imported[0].isDerivedFrom('Part::Feature') and
+                      not any(obj.isDerivedFrom('Mesh::Feature') for obj in imported_doc.Objects))
+                restored = imported[0]
+                restored_shape = restored.Shape
+                imported_descriptor = json.loads(OM.geometryDescriptor(imported_doc_name, restored.Name))
+                route['imported_descriptor'] = imported_descriptor
+                route['imported_shape_type'] = restored_shape.ShapeType
+                route['imported_solid_count'] = len(restored_shape.Solids)
+                route['imported_working_kind'] = restored.OM9GeometryKind
+                route['imported_working_representation'] = restored.OM9Representation
+                route['native_cad_capabilities'] = json.loads(OM.modelingCapabilities3dm(restored.OM9GeometryKind))
+                route['imported_brep'] = write_brep(restored, label + '-working-import')
+                check('Working sphere retains native CAD solid route in ' + mode,
+                      restored_shape.ShapeType == 'Solid' and len(restored_shape.Solids) == 1 and
+                      restored.OM9GeometryKind == 3 and restored.OM9Representation == 'native-cad' and
+                      imported_descriptor['representation'] == 'solid' and imported_descriptor['legacy_kind'] == 3 and
+                      imported_descriptor['topology']['solid'] is True)
+                volume_tolerance = 1e-5
+                default_volume = restored_shape.Volume
+                route['volume_observation'] = {'expected': 36.0 * math.pi, 'actual': default_volume,
+                                               'absolute_tolerance': volume_tolerance,
+                                               'absolute_error': abs(default_volume - 36.0 * math.pi),
+                                               'method': 'FreeCAD_Shape_Volume_default_nonadaptive',
+                                               'role': 'diagnostic_only',
+                                               'accuracy_status': 'pending_standalone_native_adaptive_oracle',
+                                               'reason': 'Default bool overload has no tolerance-controlled adaptive integration'}
+                report['required_external_oracles'].append({
+                    'case': label + '-working-import-volume', 'brep': route['imported_brep'],
+                    'method': 'standalone_native_adaptive_BRepGProp_VolumeProperties',
+                    'precision_sequence': [1e-14, 1e-16], 'expected_volume': 36.0 * math.pi,
+                    'absolute_tolerance': volume_tolerance, 'require_convergence': True,
+                    'status': 'pending_external_execution'})
+                faces = restored_shape.Faces
+                check('Working sphere has bounded face count for radius sampling in ' + mode, 0 < len(faces) <= 16)
+                if all(isinstance(face.Surface, Part.Sphere) for face in faces):
+                    radii = [face.Surface.Radius for face in faces]
+                    route['radius_observation'] = {'method': 'native_analytic_sphere_radius', 'radii': radii,
+                                                   'expected_radius': 3.0, 'absolute_tolerance': 1e-7,
+                                                   'maximum_absolute_error': max(abs(radius - 3.0) for radius in radii)}
+                else:
+                    # A finite grid checks the imported locus independently of
+                    # poles/weights; it is not a global conversion error bound.
+                    radial_errors = []
+                    domain_samples = []
+                    for face in faces:
+                        u0, u1, v0, v1 = face.ParameterRange
+                        check('Working sphere sampling domain is finite and ordered in ' + mode,
+                              all(math.isfinite(value) for value in [u0, u1, v0, v1]) and u0 < u1 and v0 < v1)
+                        domain_samples.append([u0, u1, v0, v1])
+                        for u_index in range(17):
+                            for v_index in range(9):
+                                point = face.valueAt(u0 + (u1-u0) * u_index / 16.0,
+                                                     v0 + (v1-v0) * v_index / 8.0)
+                                radial_errors.append(abs(point.Length - 3.0))
+                    route['radius_observation'] = {'method': 'finite_face_uv_grid_radial_residual',
+                                                   'scope': 'observed_samples_only', 'sample_grid_per_face': [17, 9],
+                                                   'domains': domain_samples, 'samples': len(radial_errors),
+                                                   'expected_center': [0.0, 0.0, 0.0], 'expected_radius': 3.0,
+                                                   'absolute_tolerance': 1e-6,
+                                                   'maximum_absolute_error': max(radial_errors),
+                                                   'all_samples_finite': all(math.isfinite(error) for error in radial_errors)}
+                radius_observation = route['radius_observation']
+                check('Working sphere independent radius evidence passes in ' + mode,
+                      radius_observation.get('all_samples_finite', True) and
+                      math.isfinite(radius_observation['maximum_absolute_error']) and
+                      radius_observation['maximum_absolute_error'] <= radius_observation['absolute_tolerance'])
+                check('Working sphere default volume diagnostic is finite in ' + mode, math.isfinite(default_volume))
+                route['stage'] = 'host_route_verified_adaptive_volume_pending'
+            finally:
+                if previous_workers is None:
+                    os.environ.pop('OM9_3DM_WORKERS', None)
+                else:
+                    os.environ['OM9_3DM_WORKERS'] = previous_workers
+                if imported_doc_name and imported_doc_name in App.listDocuments():
+                    App.closeDocument(imported_doc_name)
+                if previous_active and previous_active in App.listDocuments():
+                    App.setActiveDocument(previous_active)
+            check('Working-route worker setting is restored in ' + mode,
+                  os.environ.get('OM9_3DM_WORKERS') == previous_workers)
+            check('Imported descriptor survives its native document close in ' + mode, plain_values(route['imported_descriptor']))
+        check('Finer native sphere tessellation actually refines facets', display_observations[1]['facets'] > display_observations[0]['facets'])
+        check('Unsupported source is explicitly uninspected', descriptors[unsupported.Name]['representation'] == 'unknown' and
+              descriptors[unsupported.Name]['form'] is None and descriptors[unsupported.Name]['basis'] is None)
+        check('Companion pole limit is explicit with no partial arrays', descriptors[limited.Name]['basis'] is None and
+              descriptors[limited.Name]['basis_status']['reason'] == 'companion_limit')
+        edge = describe(circle, 'Edge1')
+        check('Edge1 subelement resolves without changing object identity', edge['subelement'] == 'Edge1' and
+              edge['representation'] == 'curve' and edge['stamp'] == descriptors[circle.Name]['stamp'])
+        independent = copy.deepcopy(descriptors[circle.Name])
+        independent['basis']['poles_xyz'][0][0] += 500
+        check('Mutating copied companion cannot mutate source or future captures', describe(circle)['basis'] == descriptors[circle.Name]['basis'] and
+              shape_hash(circle) == hashes[circle.Name])
+        rejected('Missing source rejects', lambda: OM.geometryDescriptor(doc.Name, 'MissingObject'))
+        rejected('Missing document rejects', lambda: OM.geometryDescriptor('MissingDescriptorDocument', circle.Name))
+        rejected('Invalid native subelement rejects', lambda: OM.geometryDescriptor(doc.Name, circle.Name, 'Edge999999'))
+        check('All descriptor reads/rejections leave source BRep/object count/properties/Undo unchanged',
+              hashes == {obj.Name: shape_hash(obj) for obj in cad} and before ==
+              (len(doc.Objects), doc.UndoCount, {obj.Name: list(obj.PropertiesList) for obj in doc.Objects}))
+        check('All pre-read source guards remain valid', all(OM.validateObjectSnapshot(doc.Name, guard['token']) for guard in guards.values()))
+        saved = output / 'geometry-descriptor.FCStd'
+        doc.saveAs(str(saved))
+        report['fcstd_sha256'] = hashlib.sha256(saved.read_bytes()).hexdigest()
+        saved_name = circle.Name
+        restricted_names = [arc.Name, partial_cylinder.Name]
+        old = descriptors[circle.Name]
+        App.closeDocument(doc.Name)
+        check('Owned copied companions remain plain values after document closes',
+              all(plain_values(descriptor) for descriptor in descriptors.values()) and
+              arc_data['restriction_facts']['closed'] is False and
+              partial_data['restriction_facts']['periodic'] == [None, None])
+        doc = App.openDocument(str(saved))
+        owned_docs.append(doc.Name)
+        fresh = json.loads(OM.geometryDescriptor(doc.Name, saved_name))
+        report['reopened_descriptor'] = fresh
+        check('Reopen preserves native provenance and gets a fresh session', fresh['document_uid'] == old['document_uid'] and
+              fresh['stamp']['object'] == old['stamp']['object'] and fresh['stamp']['document'] != old['stamp']['document'])
+        check('Copied descriptor remains usable after native document closes', old['basis']['kind'] == 'nurbs_curve' and plain_values(old))
+        rejected('Old guard rejects after close/reopen', lambda: OM.validateObjectSnapshot(doc.Name, guards[saved_name]['token']))
+        for obj_name in restricted_names:
+            old_restricted = descriptors[obj_name]
+            fresh_restricted = json.loads(OM.geometryDescriptor(doc.Name, obj_name))
+            report['descriptors'][obj_name + '_reopened'] = fresh_restricted
+            check(obj_name + ' restriction and supporting facts survive reopen',
+                  all(fresh_restricted[key] == old_restricted[key] for key in
+                      ['representation', 'form', 'facts', 'facts_scope', 'domains', 'domain_scope', 'restriction_facts']))
+            rejected(obj_name + ' old guard rejects after close/reopen',
+                     lambda obj_name=obj_name: OM.validateObjectSnapshot(doc.Name, guards[obj_name]['token']))
+            current_guard = OM.objectSnapshot(doc.Name, obj_name)
+            check(obj_name + ' reopened source has a valid current guard',
+                  OM.validateObjectSnapshot(doc.Name, current_guard['token']))
+        fresh_guard = OM.objectSnapshot(doc.Name, saved_name)
+        check('Reopened source has a valid current guard', OM.validateObjectSnapshot(doc.Name, fresh_guard['token']))
+        report['ok'] = True
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        for name in reversed(owned_docs):
+            if name in App.listDocuments():
+                App.closeDocument(name)
+        (output / 'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(500, run)

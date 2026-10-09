@@ -29,28 +29,40 @@
           "spec_requirement": "RCORE-01.T01 | Circle rational bán kính 10 mm, chuyển analytic → NURBS → native | Bán kính/độ lệch nằm trong tolerance công bố; weights không bị thay bằng toàn 1; lưu basis và report",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+              "scope": "Scoped basis/type/topology/ownership/parameter-policy observations only; all specified assertions not yet established."
+            }
+          ]
         },
         {
           "id": "RCORE-01.T02",
           "spec_requirement": "RCORE-01.T02 | Face phẳng 20 × 20 mm có lỗ tròn bán kính 3 mm | Trim hole còn; điểm giữa lỗ không thuộc face; area gần `400 − 9π` mm² theo bound kiểm tra",
           "priority": "P0",
-          "status": "not_fully_verified",
-          "complete_evidence": []
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-kernel-contract-evidence.json"
+          ]
         },
         {
           "id": "RCORE-01.T03",
           "spec_requirement": "RCORE-01.T03 | Mặt trụ periodic U, chưa cap | Không được gắn loại solid chỉ từ periodic/closed U; hai biên tròn hở được nhận diện",
           "priority": "P0",
-          "status": "not_fully_verified",
-          "complete_evidence": []
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-kernel-contract-evidence.json"
+          ]
         },
         {
           "id": "RCORE-01.T04",
           "spec_requirement": "RCORE-01.T04 | BRep sphere có display mesh, đổi mesh density và display mode | Type, CAD hash/revision và radius không đổi; routing vẫn CAD",
           "priority": "P0",
-          "status": "not_fully_verified",
-          "complete_evidence": []
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-kernel-contract-evidence.json"
+          ]
         },
         {
           "id": "RCORE-01.T05",
@@ -71,7 +83,13 @@
           "spec_requirement": "RCORE-01.T07 | NURBS chứa NaN, weights sai hoặc knot vector không hợp lệ | Từ chối trước native allocation/commit; không object/undo entry thừa",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+              "scope": "Scoped basis/type/topology/ownership/parameter-policy observations only; all specified assertions not yet established."
+            }
+          ]
         },
         {
           "id": "RCORE-01.T08",
@@ -85,21 +103,39 @@
           "spec_requirement": "RCORE-01.T09 | Lưu/reload FCStd của curve periodic và face có seam/lỗ | So type, topology, basis, world bounds và deviation; không dùng ảnh shaded làm bằng chứng duy nhất",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+              "scope": "Scoped basis/type/topology/ownership/parameter-policy observations only; all specified assertions not yet established."
+            }
+          ]
         },
         {
           "id": "RCORE-01.T10",
           "spec_requirement": "RCORE-01.T10 | Analytic curve chuyển sang NURBS, dependency lấy điểm theo tham số gốc | Đo locus riêng với parameter mapping; không reuse raw parameter khi conversion chưa chứng minh tương ứng; lưu kết quả query và mapping",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+              "scope": "Scoped basis/type/topology/ownership/parameter-policy observations only; all specified assertions not yet established."
+            }
+          ]
         },
         {
           "id": "RCORE-01.T11",
           "spec_requirement": "RCORE-01.T11 | Clone/shallow snapshot rồi sửa subcurve hoặc face, giữ source và sibling instance | Xác định owner mutation trước thao tác; source/sibling chỉ đổi khi contract yêu cầu; báo lifecycle khác nhau của standalone và subobject",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+              "scope": "Scoped basis/type/topology/ownership/parameter-policy observations only; all specified assertions not yet established."
+            }
+          ]
         }
       ]
     },
@@ -1067,5 +1103,5 @@
       ]
     }
   ],
-  "updated_at": "2026-10-09T23:46:12+07:00"
+  "updated_at": "2026-10-10T01:12:57+07:00"
 }

@@ -8276,6 +8276,11 @@
       "report": "../docs/validation/2026-10-09-rhino-core-extended-input.md",
       "scope": "Extended typed point input through existing native geometry; no all-option or all-P0 completion.",
       "verified_at": "2026-10-09"
+    },
+    "implementation_kernel_contract_evidence": {
+      "report": "../docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+      "scope": "Existing generated spline geometry/limits preserved while Basis.validate delegates to the shared Rust validator; native regression replay passed.",
+      "verified_at": "2026-10-10"
     }
   },
   {
@@ -8940,6 +8945,11 @@
       "date": "2026-10-09",
       "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
       "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
+    },
+    "implementation_kernel_contract_evidence": {
+      "report": "../docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+      "scope": "Existing generated spline geometry/limits preserved while Basis.validate delegates to the shared Rust validator; native regression replay passed.",
+      "verified_at": "2026-10-10"
     }
   },
   {

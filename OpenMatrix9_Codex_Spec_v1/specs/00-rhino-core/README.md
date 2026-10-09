@@ -1,5 +1,12 @@
 # 00 - Nền tảng Rhino và khả năng tái sử dụng FreeCAD
 
+<!-- rhino-core-kernel-contract:start -->
+Dùng lại bộ chuyển đổi FreeCAD/OCCT/openNURBS; bổ sung validator basis Rust,
+descriptor chỉ đọc và policy cho inspection/working 3DM. 480 Rust tests;
+504 kiểm tra ứng dụng / 8 lần chạy, gồm mở FCStd trong tiến trình mới.
+**P0 toàn bộ vẫn đang triển khai.** [Bằng chứng và phạm vi](../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md).
+<!-- rhino-core-kernel-contract:end -->
+
 <!-- rhino-core-object-foundations:start -->
 ## Tiếp tục P0: object identity và stale selection — 2026-10-09
 

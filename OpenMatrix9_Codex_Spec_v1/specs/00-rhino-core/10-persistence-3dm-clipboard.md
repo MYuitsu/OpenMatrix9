@@ -12,6 +12,18 @@ openmatrix9_commit: 52e887ab706dcd5d80e23979fb1f1b62d8d869b0
 
 # RCORE-10 — FCStd, trao đổi 3DM và clipboard
 
+<!-- rhino-core-kernel-contract:start -->
+Dùng lại bộ chuyển đổi FreeCAD/OCCT/openNURBS; bổ sung validator basis Rust,
+descriptor chỉ đọc và policy cho inspection/working 3DM. 480 Rust tests;
+504 kiểm tra ứng dụng / 8 lần chạy, gồm mở FCStd trong tiến trình mới.
+**P0 toàn bộ vẫn đang triển khai.** [Bằng chứng và phạm vi](../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md).
+
+Selected shared gates/observations are verified; all-family capability, ownership,
+parameterization and complete chapter acceptance remain open. Historical baseline
+claims below retain their original scope.
+
+<!-- rhino-core-kernel-contract:end -->
+
 <!-- rhino-core-tolerance-workers:start -->
 ## Bổ sung đã kiểm chứng — 2026-10-09
 

@@ -35,58 +35,31 @@ pub struct Basis<'a> {
 impl Basis<'_> {
     pub fn validate(&self) -> Result<(), String> {
         rebuild_options(self.poles.len(), self.degree)?;
-        if self.poles.iter().flatten().any(|v| !v.is_finite() || v.abs() > 1e9) {
-            return Err("Spline poles must be finite within supported coordinates".into());
-        }
-        if let Some(weights) = self.weights {
-            if weights.len() != self.poles.len()
-                || weights.iter().zip(self.poles).any(|(&w, p)| {
-                    !w.is_finite() || w <= 0. || p.iter().any(|v| !(v * w).is_finite())
-                })
-            {
-                return Err("Spline weights must match poles, be positive, and not overflow".into());
-            }
-        }
-        if self.knots.len() < 2 || self.knots.len() != self.multiplicities.len()
-            || self.knots.iter().any(|u| !u.is_finite())
-            || self.knots.windows(2).any(|u| u[0] >= u[1] || !(u[1] - u[0]).is_finite())
-        {
-            return Err("Spline knots must be finite, strictly increasing, and match multiplicities".into());
-        }
-        let last = self.knots.len() - 1;
-        let total = self.multiplicities.iter().enumerate().try_fold(0usize, |sum, (i, &m)| {
-            let limit = self.degree + usize::from(!self.periodic && (i == 0 || i == last));
-            if m == 0 || m > limit { return None; }
-            sum.checked_add(m)
-        }).ok_or("Invalid spline knot multiplicity")?;
-        let (minimum, maximum) = if self.periodic {
-            if self.multiplicities[0] != self.multiplicities[last]
-                || total.checked_sub(self.multiplicities[last]) != Some(self.poles.len())
-            {
-                return Err("Periodic spline seam multiplicities or pole count do not match".into());
-            }
-            (self.knots[0], self.knots[last])
-        } else {
-            if total != self.poles.len() + self.degree + 1 {
-                return Err("Spline pole count does not match degree and knot multiplicities".into());
-            }
-            let at = |index: usize| {
-                let mut end = 0;
-                self.knots.iter().zip(self.multiplicities).find_map(|(&u, &m)| {
-                    end += m;
-                    (index < end).then_some(u)
-                }).unwrap_or(f64::NAN)
-            };
-            (at(self.degree), at(self.poles.len()))
-        };
-        if self.domain.iter().any(|u| !u.is_finite())
-            || self.domain[0] >= self.domain[1]
-            || !(self.domain[1] - self.domain[0]).is_finite()
-            || self.domain[0] < minimum || self.domain[1] > maximum
-        {
-            return Err("Spline domain must be finite, increasing, and inside the active knot interval".into());
-        }
-        Ok(())
+        use crate::nurbs_basis::{Axis, BasisError, BasisPolicy, CurveBasis};
+        CurveBasis {
+            poles: self.poles,
+            weights: self.weights,
+            axis: Axis { degree: self.degree, knots: self.knots,
+                multiplicities: self.multiplicities, periodic: self.periodic, domain: self.domain },
+        }.validate(BasisPolicy {
+            max_degree: 11, max_poles: MAX_POLES, max_knots: usize::MAX,
+            max_bytes: usize::MAX, max_coordinate: 1e9,
+        }).map_err(|error| match error {
+            BasisError::Poles => "Spline poles must be finite within supported coordinates",
+            BasisError::Weights => "Spline weights must match poles, be positive, and not overflow",
+            BasisError::Knots | BasisError::KnotLimit =>
+                "Spline knots must be finite, strictly increasing, and match multiplicities",
+            BasisError::Multiplicity | BasisError::CountOverflow | BasisError::ByteLimit =>
+                "Invalid spline knot multiplicity",
+            BasisError::PeriodicCardinality =>
+                "Periodic spline seam multiplicities or pole count do not match",
+            BasisError::Cardinality => "Spline pole count does not match degree and knot multiplicities",
+            BasisError::Domain =>
+                "Spline domain must be finite, increasing, and inside the active knot interval",
+            BasisError::InvalidPolicy | BasisError::Degree | BasisError::PoleCount | BasisError::PoleLimit
+                | BasisError::GridDimensions | BasisError::GridCountMismatch =>
+                "Degree must be 1 to 11; PointCount must exceed Degree and be at most 256",
+        }.into())
     }
 }
 pub fn distance(a: [f64; 3], b: [f64; 3]) -> f64 {

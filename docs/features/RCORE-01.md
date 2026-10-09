@@ -1,0 +1,28 @@
+# RCORE-01 shared basis and geometry contracts
+
+Implementation target: Safe Rust owns structural validation, explicit limits,
+representation/operation policy, count budgets and copied facts. Native C++ owns
+FreeCAD object resolution, OCCT/openNURBS storage envelopes and value extraction;
+Python files are host acceptance fixtures. Existing solvers are reused.
+
+The descriptor API is read-only schema1 JSON with existing identity guards, units
+and separate native/world provenance. Supporting facts and restriction domains
+are explicitly scoped. Native shape-type solidity is not manifold/orientation
+validation. Uninspected facts and over-budget arrays stay null with reasons.
+
+Borrowed basis ABI requires live initialized immutable aligned readable arrays
+for the call; no pointers are retained. Count/byte/degree gates run before value
+inspection. Native exceptions remain native and Python catches inspection errors.
+Each side owns/frees its own storage. Release panic=abort remains a limitation.
+
+Generated spline limits and broader native/companion policies remain separate.
+Registry branches are Inspect/ImportWorkingV5/ExportWorkingV5 only, with unsupported
+options rejected. Legacy command IDs/capabilities are preserved. Conversion facts
+are not fabricated from permission or successful construction.
+
+No descriptor read creates objects/properties/transactions. Existing exchange
+transactions and Undo/Redo are reused; exact geometry FCStd cold reload is tested.
+Generic all-consumer ownership, mappings, async cancellation, permissions and
+full rational input allocation safety remain open.
+
+[Verification and remaining clauses](../validation/2026-10-10-rhino-core-kernel-contract.md).

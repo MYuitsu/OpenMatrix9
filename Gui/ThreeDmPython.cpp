@@ -157,6 +157,7 @@ static PyObject* hatchBoundary3dm(PyObject*,PyObject* args){const char *json,*di
         if(!BRepCheck_Analyzer(shape).IsValid())throw ExchangeError("Invalid derived Hatch BRep boundary");ExchangeItem item;item.geometry=TopoDS_Shape(shape);auto result=QJsonDocument(encodeExchangeItem(item,std::filesystem::u8path(dir),0)).toJson(QJsonDocument::Compact);return PyUnicode_DecodeUTF8(result.constData(),result.size(),"strict");
     }catch(const Standard_Failure& e){PyErr_SetString(PyExc_RuntimeError,e.GetMessageString());}catch(const std::exception& e){PyErr_SetString(PyExc_RuntimeError,e.what());}return nullptr;
 }
+extern "C" unsigned om9_geometry_operation(unsigned operation,unsigned kind,unsigned archiveVersion,unsigned options);
 static PyObject* write3dm(PyObject*,PyObject* args){const char *json,*path;
     if(!PyArg_ParseTuple(args,"ss",&json,&path))return nullptr;
     try{if(!om9_3dm_export_manifest_valid(reinterpret_cast<const unsigned char*>(json),std::strlen(json)))throw ExchangeError("Invalid geometry-only export manifest: check tuple sizes, mesh indices, types, tolerance and byte budget");
@@ -164,6 +165,8 @@ static PyObject* write3dm(PyObject*,PyObject* args){const char *json,*path;
         ExchangeModel model;model.tolerance=doc.object()["tolerance"].toDouble(1e-6);if(!std::isfinite(model.tolerance)||model.tolerance<=0)throw ExchangeError("Invalid export tolerance");
         quint64 cloudBytes=0;for(auto value:doc.object()["items"].toArray()){auto row=value.toObject();if(row.contains("point_cloud_fields")){QFile file(row["point_cloud_fields"].toString());if(!file.exists()||file.size()<=0)throw ExchangeError("Missing PointCloud current-field file");cloudBytes+=static_cast<quint64>(file.size());if(cloudBytes>512ULL*1024*1024)throw ExchangeError("Combined PointCloud current fields exceed512MiB");}}
         for(auto value:doc.object()["items"].toArray()){auto o=value.toObject();ExchangeItem item;
+            const unsigned kind=o.contains("point_cloud_fields")?5:o.contains("brep")?3:4;
+            if(om9_geometry_operation(3,kind,5,1)>=100)throw ExchangeError("Unsupported working geometry export contract");
             item.name=o["name"].toString().toStdString();item.layer=o["layer"].toString().toStdString();item.visible=o["visible"].toBool(true);item.locked=o["locked"].toBool();
             if(o.contains("color")){auto color=o["color"].toArray();if(!o["color"].isArray()||color.size()!=3)throw ExchangeError("Export color requires3 integer RGB bytes");for(int i=0;i<3;++i){auto value=color[i];double channel=value.toDouble(-1);if(!value.isDouble()||!std::isfinite(channel)||channel<0||channel>255||channel!=std::floor(channel))throw ExchangeError("Invalid export RGB byte");item.color[i]=static_cast<int>(channel);}}
             if(o.contains("point_cloud_fields")||o.contains("point_cloud_sha256")||o.contains("point_cloud_transform")){
