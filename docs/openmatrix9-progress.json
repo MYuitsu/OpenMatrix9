@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-10T03:51:55+07:00",
+  "updated_at": "2026-10-10T04:09:01+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -1548,7 +1548,7 @@
       ],
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/02-units-tolerances.md",
       "next_action": "Continue operation-specific effective tolerance and capability/permission coverage; shared runtime guards now cover Edit/Boolean, Rebuild and interactive Surface only. Durable History and remaining P0 contracts stay open.",
-      "updated_at": "2026-10-10T03:51:55+07:00",
+      "updated_at": "2026-10-10T04:09:01+07:00",
       "scope": "Partial P0 foundations from pre-merge snapshot 5011bab; historical 321 Rust, 23 Python and 657 native GUI assertions do not validate the merged revision or complete P0.",
       "followup_evidence": [
         "docs/validation/2026-10-09-rhino-core-object-foundations.md",
@@ -1560,7 +1560,8 @@
         "docs/validation/2026-10-10-rhino-core-polycurve-partition.md",
         "docs/validation/2026-10-10-rhino-core-instance-isolation.md",
         "docs/validation/2026-10-10-rhino-core-hatch-input-gate.md",
-        "docs/validation/2026-10-10-rhino-core-periodic-persistence.md"
+        "docs/validation/2026-10-10-rhino-core-periodic-persistence.md",
+        "docs/validation/2026-10-10-rhino-core-subobject-ownership.md"
       ]
     },
     {
@@ -2193,6 +2194,48 @@
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
       "next_action": "Complete explicit subobject mutation owner/standalone-versus-subobject lifecycle T11 using audited native deep-copy wrappers; continue all P0 and T08/T10.",
       "updated_at": "2026-10-10T03:51:55+07:00"
+    },
+    {
+      "key": "rhino-core-subobject-ownership",
+      "stage": "feature-port",
+      "feature_ids": [],
+      "status": "validated_bounded_increment",
+      "scope": "Fixture-only reuse proof; authored RCORE-01.T11 complete.",
+      "outputs": [
+        "tests/rhino_core_subobject_ownership_smoke.FCMacro",
+        "Gui/CoreObjects.cpp",
+        "Gui/CoreObjects.h",
+        "docs/validation/2026-10-10-rhino-core-subobject-ownership.md",
+        "docs/validation/2026-10-10-rhino-core-subobject-ownership-evidence.json"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-10-rhino-core-subobject-ownership-evidence.json",
+        "docs/reviews/2026-10-10-subobject-ownership-review.md"
+      ],
+      "tests": [
+        {
+          "command": "fresh native FreeCAD ownership fixture",
+          "result": "35checks pass; persistedprocess exit0; matching8b03c899"
+        },
+        {
+          "command": "native toShape alias boundary RED→existing deep-copy GREEN",
+          "result": "14pass1fail; explicitcopy fixesfixture; finalbasis/rawmidpoint35pass"
+        },
+        {
+          "command": "parent product/native source+module reuse",
+          "result": "541Rust/native27/5Ctests/SDK proofs reused, not rerun"
+        }
+      ],
+      "uncertainties": [
+        "Authored Line/quadratic Wire and untrimmed tensor Face only; no all-family edit or raw borrowed mutator coverage.",
+        "Strong shallow native Shape aliases retain handles and are not borrowed raw pointers; no global owner-release/UAF/sanitizer claim.",
+        "toShape shares support; explicit native deep copy needed for isolated output owner while wrapper remains mutable.",
+        "Recreated geometrySignature is exact for these authored supports, not arbitrary trim/topology equivalence; raw TopLoc/Free owner metadata can differ.",
+        "Full T07 allocation, T08 delayed result publication and T10 guarded host query plus all remaining P0 clauses stay open."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
+      "next_action": "Implement guarded delayed native result publication T08 using existing solvers/owned buffers; continue T10 and remaining P0.",
+      "updated_at": "2026-10-10T04:09:01+07:00"
     }
   ],
   "merge_context": {

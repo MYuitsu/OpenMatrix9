@@ -32,7 +32,8 @@
         "../../../docs/validation/2026-10-10-rhino-core-polycurve-partition.md",
         "../../../docs/validation/2026-10-10-rhino-core-instance-isolation.md",
         "../../../docs/validation/2026-10-10-rhino-core-hatch-input-gate.md",
-        "../../../docs/validation/2026-10-10-rhino-core-periodic-persistence.md"
+        "../../../docs/validation/2026-10-10-rhino-core-periodic-persistence.md",
+        "../../../docs/validation/2026-10-10-rhino-core-subobject-ownership.md"
       ]
     },
     {
@@ -1721,6 +1722,16 @@
       ],
       "evidence": "../../../docs/validation/2026-10-10-rhino-core-periodic-persistence.md",
       "scope": "Authored RCORE-01.T09 true periodic curve plus seam/hole FCStd fixture verified; all P0 remains in progress."
+    },
+    {
+      "id": "rhino-core-subobject-ownership",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-subobject-ownership.md",
+      "scope": "Authored RCORE-01.T11 detached native support mutation owners, explicit deep-copy publication and guarded subobject lifecycle; complete P0 stays open."
     }
   ]
 }

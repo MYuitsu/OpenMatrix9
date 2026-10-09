@@ -1,0 +1,151 @@
+"""RCORE-01.T11 native detached mutation owners versus guarded subobject requests."""
+import hashlib,json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'schema_version':1,'checks':[],'owners':[],'snapshots':{}}
+
+def check(name,ok):
+    report['checks'].append({'name':name,'passed':bool(ok)})
+    (out/'progress.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+    if not ok:raise AssertionError(name)
+
+def xyz(p):return [p.x,p.y,p.z]
+def raw(shape):return shape.exportBrepToString().encode('utf-8')
+def sha(shape):return hashlib.sha256(raw(shape)).hexdigest()
+def near(a,b):return (a-App.Vector(*b)).Length<=1e-7
+def inventory(doc):return (len(doc.Objects),doc.UndoCount,tuple((o.Name,o.TypeId,tuple(sorted(o.PropertiesList))) for o in doc.Objects))
+def curve_basis(c):return {'degree':c.Degree,'poles':[xyz(p) for p in c.getPoles()],'weights':c.getWeights(),'knots':c.getKnots(),'mults':c.getMultiplicities()}
+def surface_basis(s):return {'degrees':[s.UDegree,s.VDegree],'poles':[[xyz(p) for p in row] for row in s.getPoles()],'weights':s.getWeights(),'uknots':s.getUKnots(),'vknots':s.getVKnots(),'umults':s.getUMultiplicities(),'vmults':s.getVMultiplicities()}
+def geometry_signature(shape):
+    # A new native topological owner can have different Free/location records;
+    # compare actual geometry, domains, basis and ordered uses without rewriting
+    # the retained raw BReps or weakening source/sibling exact-byte checks.
+    return {'type':shape.ShapeType,'placement':list(shape.Placement.toMatrix().A),
+            'vertices':[xyz(v.Point) for v in shape.Vertexes],
+            'edges':[{'class':type(e.Curve).__name__,'domain':[e.FirstParameter,e.LastParameter],
+                      'orientation':str(e.Orientation),'endpoints':[xyz(e.valueAt(e.FirstParameter)),xyz(e.valueAt(e.LastParameter))],
+                      'basis':curve_basis(e.Curve) if isinstance(e.Curve,Part.BSplineCurve) else None} for e in shape.Edges],
+            'wires':[[str(e.Orientation) for e in w.OrderedEdges] for w in shape.Wires],
+            'faces':[{'orientation':str(f.Orientation),'domain':list(f.ParameterRange),'basis':surface_basis(f.Surface)} for f in shape.Faces]}
+def stamps(wire,face,definition,links):
+    return {'wire':sha(wire.Shape),'face':sha(face.Shape),'definition_members':[o.Name for o in definition.Group],
+            'links':[{'name':o.Name,'definition':o.LinkedObject.Name,'placement':list(o.Placement.toMatrix().A),
+                      'world_shape':sha(Part.getShape(o,'',needSubElement=False,transform=True).copy(copyGeom=True,copyMesh=False))} for o in links]}
+def reject(native,name,guard):
+    error=None
+    try:native.validateObjectSnapshot(name,guard['token'])
+    except Exception as exc:error=str(exc)
+    report.setdefault('rejections',[]).append({'object':guard['object_name'],'subelement':guard['subelement'],'error':error})
+    return error is not None and error.startswith('Source object changed or was replaced:')
+
+def run():
+    doc=None;replacement=None
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as native
+        report['native_module']=native.__file__;report['native_sha256']=hashlib.sha256(Path(native.__file__).read_bytes()).hexdigest()
+        doc=App.newDocument('SubobjectOwner');doc.UndoMode=1
+        definition=doc.addObject('App::Part','Definition')
+        c=Part.BSplineCurve();c.buildFromPolesMultsKnots([App.Vector(1,0,0),App.Vector(2,2,0),App.Vector(3,0,0)],[3,3],[0.,1.],False,2,[1.,1.,1.])
+        wire=doc.addObject('Part::Feature','CanonicalWire');wire.Shape=Part.Wire([Part.makeLine(App.Vector(0,0,0),App.Vector(1,0,0)),c.toShape()]);definition.addObject(wire)
+        s=Part.BSplineSurface();s.buildFromPolesMultsKnots([[App.Vector(i,j,0) for j in range(3)] for i in range(3)],[3,3],[3,3],[0.,1.],[0.,1.],False,False,2,2,[[1.]*3 for _ in range(3)])
+        face=doc.addObject('Part::Feature','CanonicalFace');face.Shape=s.toShape();definition.addObject(face)
+        links=[]
+        for name,base in [('InstanceA',(10,0,0)),('InstanceB',(0,20,0))]:
+            link=doc.addObject('App::Link',name);link.setLink(definition);link.LinkTransform=True;link.Placement.Base=App.Vector(*base);links.append(link)
+        doc.recompute();QtWidgets.QApplication.processEvents()
+        check('two instances share exact source definition',all(o.LinkedObject==definition for o in links))
+        shallow=wire.Shape;deep=wire.Shape.copy(copyGeom=True,copyMesh=False)
+        face_shallow=face.Shape;face_deep=face.Shape.copy(copyGeom=True,copyMesh=False)
+        check('shallow native snapshots share topology identity',shallow.isSame(wire.Shape) and face_shallow.isSame(face.Shape))
+        check('explicit deep copies have separate topology identity',not deep.isSame(wire.Shape) and not face_deep.isSame(face.Shape))
+        # Prime native world reads before the mutation baseline; no normalization.
+        stamps(wire,face,definition,links)
+        before=stamps(wire,face,definition,links);before_inventory=inventory(doc)
+        retained=[sha(x) for x in [shallow,deep,face_shallow,face_deep]]
+        index=next(i for i,e in enumerate(wire.Shape.Edges) if isinstance(e.Curve,Part.BSplineCurve))
+        curve_guard=native.objectSnapshot(doc.Name,wire.Name,'Edge'+str(index+1));face_guard=native.objectSnapshot(doc.Name,face.Name,'Face1')
+        owned_curve=wire.Shape.Edges[index].Curve;owned_surface=face.Shape.Faces[0].Surface
+        report['snapshots']['before']={'sources':before,'curve':curve_basis(owned_curve),'surface':surface_basis(owned_surface),'retained_shapes':retained}
+        for o in [wire,face]:(out/('source-before-'+o.Name+'.brep')).write_bytes(raw(o.Shape))
+        report['owners'].append({'operation':'curve.setPole','mutation_owner':'detached copied Part.BSplineCurve returned by Edge.Curve','source_owner':wire.Name})
+        owned_curve.setPole(2,App.Vector(2,2,2))
+        report['owners'].append({'operation':'surface.setPole','mutation_owner':'detached copied Part.BSplineSurface returned by Face.Surface','source_owner':face.Name})
+        owned_surface.setPole(2,2,App.Vector(1,1,4))
+        check('detached curve independent quadratic midpoint',near(owned_curve.value(0.5),(2,1,1)))
+        check('detached surface independent tensor midpoint',near(owned_surface.value(0.5,0.5),(1,1,1)))
+        check('source subcurve remains original midpoint',near(wire.Shape.Edges[index].Curve.value(0.5),(2,1,0)))
+        check('source face remains original midpoint',near(face.Shape.Faces[0].Surface.value(0.5,0.5),(1,1,0)))
+        after=stamps(wire,face,definition,links)
+        report['snapshots']['after_detached_edits']={'sources':after,'curve':curve_basis(owned_curve),'surface':surface_basis(owned_surface),'retained_shapes':[sha(x) for x in [shallow,deep,face_shallow,face_deep]]}
+        check('detached edits keep source definition and both siblings exact',before==after)
+        check('detached edits keep shallow and deep native snapshots exact',retained==[sha(x) for x in [shallow,deep,face_shallow,face_deep]])
+        check('detached edits add no document property object Undo',before_inventory==inventory(doc))
+        check('source subobject requests remain valid after detached edits',native.validateObjectSnapshot(doc.Name,curve_guard['token']) and native.validateObjectSnapshot(doc.Name,face_guard['token']))
+        for o in [wire,face]:(out/('source-after-'+o.Name+'.brep')).write_bytes(raw(o.Shape))
+        report['owners'].append({'operation':'publish','mutation_owner':'two new standalone Part::Feature outputs','source_owner':'unchanged canonical definition'})
+        doc.openTransaction('Publish owned subobjects')
+        try:
+            output_curve=doc.addObject('Part::Feature','OwnedCurve');output_curve.Shape=owned_curve.toShape().copy(copyGeom=True,copyMesh=False)
+            output_face=doc.addObject('Part::Feature','OwnedFace');output_face.Shape=owned_surface.toShape().copy(copyGeom=True,copyMesh=False)
+            doc.recompute();doc.commitTransaction()
+        except Exception:doc.abortTransaction();raise
+        output_names=[output_curve.Name,output_face.Name];output_hashes=[sha(output_curve.Shape),sha(output_face.Shape)]
+        check('publication creates only two standalone outputs in one Undo',len(doc.Objects)==before_inventory[0]+2 and doc.UndoCount==before_inventory[1]+1)
+        check('published geometry has independent exact midpoint values',near(output_curve.Shape.Edges[0].Curve.value(0.5),(2,1,1)) and near(output_face.Shape.Faces[0].Surface.value(0.5,0.5),(1,1,1)))
+        for o in [output_curve,output_face]:(out/('output-before-reedit-'+o.Name+'.brep')).write_bytes(raw(o.Shape))
+        owned_curve.setPole(2,App.Vector(2,2,6));owned_surface.setPole(2,2,App.Vector(1,1,12))
+        report['publication_mutable_alias_control']={'output_before':output_hashes,'output_after':[sha(output_curve.Shape),sha(output_face.Shape)],
+                                                   'curve_midpoint':xyz(output_curve.Shape.Edges[0].Curve.value(0.5)),'surface_midpoint':xyz(output_face.Shape.Faces[0].Surface.value(0.5,0.5))}
+        check('retained support owners accept independent later edits',near(owned_curve.value(0.5),(2,1,3)) and near(owned_surface.value(0.5,0.5),(1,1,3)))
+        check('published owners are isolated from retained mutable supports',output_hashes==[sha(output_curve.Shape),sha(output_face.Shape)])
+        for o in [output_curve,output_face]:(out/('output-after-reedit-'+o.Name+'.brep')).write_bytes(raw(o.Shape))
+        check('published native basis and midpoint remain before re-edit',curve_basis(output_curve.Shape.Edges[0].Curve)==report['snapshots']['after_detached_edits']['curve'] and
+              surface_basis(output_face.Shape.Faces[0].Surface)==report['snapshots']['after_detached_edits']['surface'] and
+              near(output_curve.Shape.Edges[0].Curve.value(0.5),(2,1,1)) and near(output_face.Shape.Faces[0].Surface.value(0.5,0.5),(1,1,1)))
+        owned_curve.setPole(2,App.Vector(2,2,2));owned_surface.setPole(2,2,App.Vector(1,1,4))
+        check('publication preserves source and sibling geometry',stamps(wire,face,definition,links)==before)
+        doc.undo();doc.recompute();check('one Undo removes both owned outputs only',all(doc.getObject(n) is None for n in output_names) and len(doc.Objects)==before_inventory[0] and stamps(wire,face,definition,links)==before)
+        doc.redo();doc.recompute();check('Redo restores both owned output geometries',output_hashes==[sha(doc.getObject(n).Shape) for n in output_names] and stamps(wire,face,definition,links)==before)
+        curve_guard=native.objectSnapshot(doc.Name,wire.Name,'Edge'+str(index+1));face_guard=native.objectSnapshot(doc.Name,face.Name,'Face1')
+        report['owners'].append({'operation':'source replacement','mutation_owner':'canonical Wire Shape property; shared definition instances intentionally follow','source_owner':wire.Name})
+        doc.openTransaction('Explicit canonical source edit');wire.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(5,0,0));doc.recompute();doc.commitTransaction()
+        changed=stamps(wire,face,definition,links);report['snapshots']['explicit_source_edit']=changed
+        check('explicit source owner edit changes both shared instances',changed['wire']!=before['wire'] and all(a['world_shape']!=b['world_shape'] for a,b in zip(changed['links'],before['links'])))
+        check('explicit Wire owner edit keeps Face and standalone outputs exact',changed['face']==before['face'] and output_hashes==[sha(doc.getObject(n).Shape) for n in output_names])
+        check('edited source subcurve request rejects before resolution',reject(native,doc.Name,curve_guard))
+        check('independent Face request still valid',native.validateObjectSnapshot(doc.Name,face_guard['token']))
+        check('detached curve remains usable across source replacement',near(owned_curve.value(0.5),(2,1,1)))
+        doc.undo();doc.recompute();check('source Undo restores original and both siblings',stamps(wire,face,definition,links)==before)
+        check('Undo epoch stales previous Face request',reject(native,doc.Name,face_guard))
+        close_guards=[native.objectSnapshot(doc.Name,wire.Name,'Edge'+str(index+1)),native.objectSnapshot(doc.Name,face.Name,'Face1')]
+        saved=out/'SubobjectOwner.FCStd';doc.saveAs(str(saved));report['saved_fcstd_sha256']=hashlib.sha256(saved.read_bytes()).hexdigest()
+        name=doc.Name;source_names=[wire.Name,face.Name];App.closeDocument(name);doc=None
+        replacement=App.newDocument(name);replacement.UndoMode=1
+        check('empty same-name document rejects old subobject requests',all(reject(native,name,g) for g in close_guards))
+        check('detached support owners live after source document close',near(owned_curve.value(0.5),(2,1,1)) and near(owned_surface.value(0.5,0.5),(1,1,1)))
+        check('strong shallow and deep native shape snapshots live after close',all(not x.isNull() for x in [shallow,deep,face_shallow,face_deep]) and retained==[sha(x) for x in [shallow,deep,face_shallow,face_deep]])
+        check('stale requests and standalone evaluation create no replacement objects Undo',len(replacement.Objects)==0 and replacement.UndoCount==0)
+        # Recreate the same source names and exact geometry in a new document
+        # session. Old tokens must reject even when lookup can find both names.
+        for source_name,shape in zip(source_names,[shallow,face_shallow]):
+            recreated=replacement.addObject('Part::Feature',source_name);recreated.Shape=shape.copy(copyGeom=True,copyMesh=False)
+        replacement.recompute();replacement_before=inventory(replacement)
+        for source_name,original in zip(source_names,[shallow,face_shallow]):
+            (out/('recreated-'+source_name+'.brep')).write_bytes(raw(replacement.getObject(source_name).Shape))
+            (out/('retained-'+source_name+'.brep')).write_bytes(raw(original))
+        report['recreated_source_hashes']=[sha(replacement.getObject(n).Shape) for n in source_names]
+        report['recreated_geometry']={'expected':[geometry_signature(x) for x in [shallow,face_shallow]],'actual':[geometry_signature(replacement.getObject(n).Shape) for n in source_names]}
+        check('same-name recreated source geometry matches original snapshots',report['recreated_geometry']['actual']==report['recreated_geometry']['expected'])
+        check('same-name recreated sources reject old document-session requests',all(reject(native,name,g) for g in close_guards))
+        check('fresh subcurve request resolves in replacement session',native.validateObjectSnapshot(name,native.objectSnapshot(name,source_names[0],'Edge'+str(index+1))['token']))
+        check('fresh face request resolves in replacement session',native.validateObjectSnapshot(name,native.objectSnapshot(name,source_names[1],'Face1')['token']))
+        check('request validation leaves recreated inventory and zero Undo unchanged',inventory(replacement)==replacement_before and replacement.UndoCount==0)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for d in [doc,replacement]:
+            if d:App.closeDocument(d.Name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(800,run)

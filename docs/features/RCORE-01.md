@@ -1,5 +1,12 @@
 # RCORE-01 shared basis and geometry contracts
 
+<!-- rhino-core-subobject-ownership:start -->
+Đã nghiệm thu fixture T11: sửa wrapper Curve/Surface sở hữu riêng, publish qua
+native deep copy, giữ source/sibling, đúng Undo/Redo và phân biệt lifetime của
+snapshot mạnh với request subobject.35 kiểm tra FreeCAD đạt; không viết lại editor.
+**Toàn bộ P0 vẫn đang triển khai.** [Bằng chứng và giới hạn](../validation/2026-10-10-rhino-core-subobject-ownership.md).
+<!-- rhino-core-subobject-ownership:end -->
+
 <!-- rhino-core-periodic-persistence:start -->
 Đã nghiệm thu T09 bằng curve periodic thật và các face có seam/lỗ; dùng lại
 serializer FCStd hiện có.204 kiểm tra warm +102 kiểm tra cold đạt, cùng221 kiểm

@@ -1,0 +1,2855 @@
+{
+  "schema_version": 1,
+  "checkpoint": "rhino-core-subobject-ownership",
+  "date": "2026-10-10T04:09:01+07:00",
+  "parent_commit": "422098b",
+  "p0_status": "in_progress",
+  "production_changes": false,
+  "complete_fixtures": [
+    "RCORE-01.T11"
+  ],
+  "native_module": {
+    "path": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+    "sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+  },
+  "application_assertions": 35,
+  "accepted_runs": [
+    {
+      "suite": "subobject-ownership",
+      "count": 35,
+      "path": "build/merge_replay-1/7612fd53179f4117b25f0599366c59dd/results.json",
+      "result_sha256": "46ae2aa00ec17b2c73993d2dcb2ddb3aeb6cebcc719f1ad0d88e6016c9e88834",
+      "process": {
+        "schema_version": 1,
+        "process_id": 50796,
+        "started_utc": "2026-10-09T21:05:01.6628607Z",
+        "observed_utc": "2026-10-09T21:05:05.9421857Z",
+        "wait_completed": true,
+        "exit_code": 0,
+        "executable": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+        "macro": "merge_replay.FCMacro"
+      },
+      "process_proof": "build/merge_replay-1/7612fd53179f4117b25f0599366c59dd/process.json",
+      "process_proof_sha256": "80fbe34c4298ccd3b1a18f3deddbe3990f3745b76d35ed32d982f461cd056390",
+      "module_proof": "build/merge_replay-1/7612fd53179f4117b25f0599366c59dd/merge-native-module.json",
+      "module_proof_sha256": "cbc2e84e70bbdedeb9b0451aa58ad4be5caa8d9083c963cdef72ad62f0fc3eea",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\merge-native-module.json",
+          "sha256": "cbc2e84e70bbdedeb9b0451aa58ad4be5caa8d9083c963cdef72ad62f0fc3eea"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\output-after-reedit-OwnedCurve.brep",
+          "sha256": "2243bc8f0d41211738e6e466ff584dfaaa48690ac2ce15c5aac11cae4e3d813e"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\output-after-reedit-OwnedFace.brep",
+          "sha256": "572295360a2ef8a9e4ef2801a9bc289c56aac878347616591309ead1b5af71dd"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\output-before-reedit-OwnedCurve.brep",
+          "sha256": "2243bc8f0d41211738e6e466ff584dfaaa48690ac2ce15c5aac11cae4e3d813e"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\output-before-reedit-OwnedFace.brep",
+          "sha256": "572295360a2ef8a9e4ef2801a9bc289c56aac878347616591309ead1b5af71dd"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\process.json",
+          "sha256": "80fbe34c4298ccd3b1a18f3deddbe3990f3745b76d35ed32d982f461cd056390"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\progress.json",
+          "sha256": "4a2cffa7393ac4b5ee82615b30c3551278150e1014d777d4337a8ec88ad2eb56"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\recreated-CanonicalFace.brep",
+          "sha256": "d19497c192db980df191d8acadb9f31d02cc7d8b22b878bf8eb1975c0d65704f"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\recreated-CanonicalWire.brep",
+          "sha256": "07a2d7ea1e980c9cb044aeee000834839d73e2e1952cdc21919fd18f098a20ae"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\results.json",
+          "sha256": "46ae2aa00ec17b2c73993d2dcb2ddb3aeb6cebcc719f1ad0d88e6016c9e88834"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\retained-CanonicalFace.brep",
+          "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\retained-CanonicalWire.brep",
+          "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\source-after-CanonicalFace.brep",
+          "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\source-after-CanonicalWire.brep",
+          "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\source-before-CanonicalFace.brep",
+          "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\source-before-CanonicalWire.brep",
+          "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\SubobjectOwner.FCStd",
+          "sha256": "b1de2f638bdfed4c70fe1aeee7cb6eb3e513137cfb4c806647bca6c1be89570f"
+        }
+      ],
+      "macro": "rhino_core_subobject_ownership_smoke.FCMacro",
+      "macro_sha256": "aee66cb542276a3c9a521011c608865dd6d2b867066f8a1e21964f834e9a9a5c",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+    }
+  ],
+  "native_report": {
+    "schema_version": 1,
+    "checks": [
+      {
+        "name": "two instances share exact source definition",
+        "passed": true
+      },
+      {
+        "name": "shallow native snapshots share topology identity",
+        "passed": true
+      },
+      {
+        "name": "explicit deep copies have separate topology identity",
+        "passed": true
+      },
+      {
+        "name": "detached curve independent quadratic midpoint",
+        "passed": true
+      },
+      {
+        "name": "detached surface independent tensor midpoint",
+        "passed": true
+      },
+      {
+        "name": "source subcurve remains original midpoint",
+        "passed": true
+      },
+      {
+        "name": "source face remains original midpoint",
+        "passed": true
+      },
+      {
+        "name": "detached edits keep source definition and both siblings exact",
+        "passed": true
+      },
+      {
+        "name": "detached edits keep shallow and deep native snapshots exact",
+        "passed": true
+      },
+      {
+        "name": "detached edits add no document property object Undo",
+        "passed": true
+      },
+      {
+        "name": "source subobject requests remain valid after detached edits",
+        "passed": true
+      },
+      {
+        "name": "publication creates only two standalone outputs in one Undo",
+        "passed": true
+      },
+      {
+        "name": "published geometry has independent exact midpoint values",
+        "passed": true
+      },
+      {
+        "name": "retained support owners accept independent later edits",
+        "passed": true
+      },
+      {
+        "name": "published owners are isolated from retained mutable supports",
+        "passed": true
+      },
+      {
+        "name": "published native basis and midpoint remain before re-edit",
+        "passed": true
+      },
+      {
+        "name": "publication preserves source and sibling geometry",
+        "passed": true
+      },
+      {
+        "name": "one Undo removes both owned outputs only",
+        "passed": true
+      },
+      {
+        "name": "Redo restores both owned output geometries",
+        "passed": true
+      },
+      {
+        "name": "explicit source owner edit changes both shared instances",
+        "passed": true
+      },
+      {
+        "name": "explicit Wire owner edit keeps Face and standalone outputs exact",
+        "passed": true
+      },
+      {
+        "name": "edited source subcurve request rejects before resolution",
+        "passed": true
+      },
+      {
+        "name": "independent Face request still valid",
+        "passed": true
+      },
+      {
+        "name": "detached curve remains usable across source replacement",
+        "passed": true
+      },
+      {
+        "name": "source Undo restores original and both siblings",
+        "passed": true
+      },
+      {
+        "name": "Undo epoch stales previous Face request",
+        "passed": true
+      },
+      {
+        "name": "empty same-name document rejects old subobject requests",
+        "passed": true
+      },
+      {
+        "name": "detached support owners live after source document close",
+        "passed": true
+      },
+      {
+        "name": "strong shallow and deep native shape snapshots live after close",
+        "passed": true
+      },
+      {
+        "name": "stale requests and standalone evaluation create no replacement objects Undo",
+        "passed": true
+      },
+      {
+        "name": "same-name recreated source geometry matches original snapshots",
+        "passed": true
+      },
+      {
+        "name": "same-name recreated sources reject old document-session requests",
+        "passed": true
+      },
+      {
+        "name": "fresh subcurve request resolves in replacement session",
+        "passed": true
+      },
+      {
+        "name": "fresh face request resolves in replacement session",
+        "passed": true
+      },
+      {
+        "name": "request validation leaves recreated inventory and zero Undo unchanged",
+        "passed": true
+      }
+    ],
+    "owners": [
+      {
+        "operation": "curve.setPole",
+        "mutation_owner": "detached copied Part.BSplineCurve returned by Edge.Curve",
+        "source_owner": "CanonicalWire"
+      },
+      {
+        "operation": "surface.setPole",
+        "mutation_owner": "detached copied Part.BSplineSurface returned by Face.Surface",
+        "source_owner": "CanonicalFace"
+      },
+      {
+        "operation": "publish",
+        "mutation_owner": "two new standalone Part::Feature outputs",
+        "source_owner": "unchanged canonical definition"
+      },
+      {
+        "operation": "source replacement",
+        "mutation_owner": "canonical Wire Shape property; shared definition instances intentionally follow",
+        "source_owner": "CanonicalWire"
+      }
+    ],
+    "snapshots": {
+      "before": {
+        "sources": {
+          "wire": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec",
+          "face": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd",
+          "definition_members": [
+            "CanonicalWire",
+            "CanonicalFace"
+          ],
+          "links": [
+            {
+              "name": "InstanceA",
+              "definition": "Definition",
+              "placement": [
+                1.0,
+                0.0,
+                0.0,
+                10.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "world_shape": "e1476ecc40adfca39564839375b3184ca5cd577933396cdacf06271dcbee6879"
+            },
+            {
+              "name": "InstanceB",
+              "definition": "Definition",
+              "placement": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                20.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "world_shape": "a0d1ed91813e07e064be2b628936b73fabbffbde82e85c5d7347e7ee99bf44eb"
+            }
+          ]
+        },
+        "curve": {
+          "degree": 2,
+          "poles": [
+            [
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              2.0,
+              2.0,
+              0.0
+            ],
+            [
+              3.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "weights": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "knots": [
+            0.0,
+            1.0
+          ],
+          "mults": [
+            3,
+            3
+          ]
+        },
+        "surface": {
+          "degrees": [
+            2,
+            2
+          ],
+          "poles": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                2.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                1.0,
+                0.0
+              ],
+              [
+                1.0,
+                2.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                2.0,
+                0.0,
+                0.0
+              ],
+              [
+                2.0,
+                1.0,
+                0.0
+              ],
+              [
+                2.0,
+                2.0,
+                0.0
+              ]
+            ]
+          ],
+          "weights": [
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ]
+          ],
+          "uknots": [
+            0.0,
+            1.0
+          ],
+          "vknots": [
+            0.0,
+            1.0
+          ],
+          "umults": [
+            3,
+            3
+          ],
+          "vmults": [
+            3,
+            3
+          ]
+        },
+        "retained_shapes": [
+          "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec",
+          "831b1895ca1d1914ecfe475bf6804bae3ad0eb8cd4d9099d96684279e78fcc0f",
+          "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd",
+          "697ae9fd781c9532c724b46bd4f1d004e4a55ecdc13586316da5f2321729f3ff"
+        ]
+      },
+      "after_detached_edits": {
+        "sources": {
+          "wire": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec",
+          "face": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd",
+          "definition_members": [
+            "CanonicalWire",
+            "CanonicalFace"
+          ],
+          "links": [
+            {
+              "name": "InstanceA",
+              "definition": "Definition",
+              "placement": [
+                1.0,
+                0.0,
+                0.0,
+                10.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "world_shape": "e1476ecc40adfca39564839375b3184ca5cd577933396cdacf06271dcbee6879"
+            },
+            {
+              "name": "InstanceB",
+              "definition": "Definition",
+              "placement": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                20.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "world_shape": "a0d1ed91813e07e064be2b628936b73fabbffbde82e85c5d7347e7ee99bf44eb"
+            }
+          ]
+        },
+        "curve": {
+          "degree": 2,
+          "poles": [
+            [
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              2.0,
+              2.0,
+              2.0
+            ],
+            [
+              3.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "weights": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "knots": [
+            0.0,
+            1.0
+          ],
+          "mults": [
+            3,
+            3
+          ]
+        },
+        "surface": {
+          "degrees": [
+            2,
+            2
+          ],
+          "poles": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                2.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                1.0,
+                4.0
+              ],
+              [
+                1.0,
+                2.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                2.0,
+                0.0,
+                0.0
+              ],
+              [
+                2.0,
+                1.0,
+                0.0
+              ],
+              [
+                2.0,
+                2.0,
+                0.0
+              ]
+            ]
+          ],
+          "weights": [
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0,
+              1.0
+            ]
+          ],
+          "uknots": [
+            0.0,
+            1.0
+          ],
+          "vknots": [
+            0.0,
+            1.0
+          ],
+          "umults": [
+            3,
+            3
+          ],
+          "vmults": [
+            3,
+            3
+          ]
+        },
+        "retained_shapes": [
+          "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec",
+          "831b1895ca1d1914ecfe475bf6804bae3ad0eb8cd4d9099d96684279e78fcc0f",
+          "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd",
+          "697ae9fd781c9532c724b46bd4f1d004e4a55ecdc13586316da5f2321729f3ff"
+        ]
+      },
+      "explicit_source_edit": {
+        "wire": "ac568da74f80aaf8049eddb380a2e90d747dd28c492eba90e1ed75d84be41671",
+        "face": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd",
+        "definition_members": [
+          "CanonicalWire",
+          "CanonicalFace"
+        ],
+        "links": [
+          {
+            "name": "InstanceA",
+            "definition": "Definition",
+            "placement": [
+              1.0,
+              0.0,
+              0.0,
+              10.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "world_shape": "0c6a5bbb4197c15ac12c749068e424bd7c42d0ac0cc54146c122405fed467c3c"
+          },
+          {
+            "name": "InstanceB",
+            "definition": "Definition",
+            "placement": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              20.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "world_shape": "bb8e9f2eac4d05af6957217e185a482bff728503561f126afbe06a2560146023"
+          }
+        ]
+      }
+    },
+    "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+    "native_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598",
+    "publication_mutable_alias_control": {
+      "output_before": [
+        "2243bc8f0d41211738e6e466ff584dfaaa48690ac2ce15c5aac11cae4e3d813e",
+        "572295360a2ef8a9e4ef2801a9bc289c56aac878347616591309ead1b5af71dd"
+      ],
+      "output_after": [
+        "2243bc8f0d41211738e6e466ff584dfaaa48690ac2ce15c5aac11cae4e3d813e",
+        "572295360a2ef8a9e4ef2801a9bc289c56aac878347616591309ead1b5af71dd"
+      ],
+      "curve_midpoint": [
+        2.0,
+        1.0,
+        1.0
+      ],
+      "surface_midpoint": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "rejections": [
+      {
+        "object": "CanonicalWire",
+        "subelement": "Edge2",
+        "error": "Source object changed or was replaced: CanonicalWire; cancel and reselect before accepting"
+      },
+      {
+        "object": "CanonicalFace",
+        "subelement": "Face1",
+        "error": "Source object changed or was replaced: CanonicalFace; cancel and reselect before accepting"
+      },
+      {
+        "object": "CanonicalWire",
+        "subelement": "Edge2",
+        "error": "Source object changed or was replaced: CanonicalWire; cancel and reselect before accepting"
+      },
+      {
+        "object": "CanonicalFace",
+        "subelement": "Face1",
+        "error": "Source object changed or was replaced: CanonicalFace; cancel and reselect before accepting"
+      },
+      {
+        "object": "CanonicalWire",
+        "subelement": "Edge2",
+        "error": "Source object changed or was replaced: CanonicalWire; cancel and reselect before accepting"
+      },
+      {
+        "object": "CanonicalFace",
+        "subelement": "Face1",
+        "error": "Source object changed or was replaced: CanonicalFace; cancel and reselect before accepting"
+      }
+    ],
+    "saved_fcstd_sha256": "b1de2f638bdfed4c70fe1aeee7cb6eb3e513137cfb4c806647bca6c1be89570f",
+    "recreated_source_hashes": [
+      "07a2d7ea1e980c9cb044aeee000834839d73e2e1952cdc21919fd18f098a20ae",
+      "d19497c192db980df191d8acadb9f31d02cc7d8b22b878bf8eb1975c0d65704f"
+    ],
+    "recreated_geometry": {
+      "expected": [
+        {
+          "type": "Wire",
+          "placement": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "vertices": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              3.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "edges": [
+            {
+              "class": "Line",
+              "domain": [
+                0.0,
+                1.0
+              ],
+              "orientation": "Forward",
+              "endpoints": [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              ],
+              "basis": null
+            },
+            {
+              "class": "BSplineCurve",
+              "domain": [
+                0.0,
+                1.0
+              ],
+              "orientation": "Forward",
+              "endpoints": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  3.0,
+                  0.0,
+                  0.0
+                ]
+              ],
+              "basis": {
+                "degree": 2,
+                "poles": [
+                  [
+                    1.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    2.0,
+                    2.0,
+                    0.0
+                  ],
+                  [
+                    3.0,
+                    0.0,
+                    0.0
+                  ]
+                ],
+                "weights": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "knots": [
+                  0.0,
+                  1.0
+                ],
+                "mults": [
+                  3,
+                  3
+                ]
+              }
+            }
+          ],
+          "wires": [
+            [
+              "Forward",
+              "Forward"
+            ]
+          ],
+          "faces": []
+        },
+        {
+          "type": "Face",
+          "placement": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "vertices": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              2.0,
+              0.0
+            ],
+            [
+              2.0,
+              0.0,
+              0.0
+            ],
+            [
+              2.0,
+              2.0,
+              0.0
+            ]
+          ],
+          "edges": [
+            {
+              "class": "BSplineCurve",
+              "domain": [
+                0.0,
+                1.0
+              ],
+              "orientation": "Reversed",
+              "endpoints": [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0,
+                  0.0
+                ]
+              ],
+              "basis": {
+                "degree": 2,
+                "poles": [
+                  [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    1.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    2.0,
+                    0.0
+                  ]
+                ],
+                "weights": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "knots": [
+                  0.0,
+                  1.0
+                ],
+                "mults": [
+                  3,
+                  3
+                ]
+              }
+            },
+            {
+              "class": "BSplineCurve",
+              "domain": [
+                0.0,
+                1.0
+              ],
+              "orientation": "Forward",
+              "endpoints": [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  0.0,
+                  0.0
+                ]
+              ],
+              "basis": {
+                "degree": 2,
+                "poles": [
+                  [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    1.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    2.0,
+                    0.0,
+                    0.0
+                  ]
+                ],
+                "weights": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "knots": [
+                  0.0,
+                  1.0
+                ],
+                "mults": [
+                  3,
+                  3
+                ]
+              }
+            },
+            {
+              "class": "BSplineCurve",
+              "domain": [
+                0.0,
+                1.0
+              ],
+              "orientation": "Forward",
+              "endpoints": [
+                [
+                  2.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  2.0,
+                  0.0
+                ]
+              ],
+              "basis": {
+                "degree": 2,
+                "poles": [
+                  [
+                    2.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    2.0,
+                    1.0,
+                    0.0
+                  ],
+                  [
+                    2.0,
+                    2.0,
+                    0.0
+                  ]
+                ],
+                "weights": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "knots": [
+                  0.0,
+                  1.0
+                ],
+                "mults": [
+                  3,
+                  3
+                ]
+              }
+            },
+            {
+              "class": "BSplineCurve",
+              "domain": [
+                0.0,
+                1.0
+              ],
+              "orientation": "Reversed",
+              "endpoints": [
+                [
+                  0.0,
+                  2.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  2.0,
+                  0.0
+                ]
+              ],
+              "basis": {
+                "degree": 2,
+                "poles": [
+                  [
+                    0.0,
+                    2.0,
+                    0.0
+                  ],
+                  [
+                    1.0,
+                    2.0,
+                    0.0
+                  ],
+                  [
+                    2.0,
+                    2.0,
+                    0.0
+                  ]
+                ],
+                "weights": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "knots": [
+                  0.0,
+                  1.0
+                ],
+                "mults": [
+                  3,
+                  3
+                ]
+              }
+            }
+          ],
+          "wires": [
+            [
+              "Reversed",
+              "Forward",
+              "Forward",
+              "Reversed"
+            ]
+          ],
+          "faces": [
+            {
+              "orientation": "Forward",
+              "domain": [
+                0.0,
+                1.0,
+                0.0,
+                1.0
+              ],
+              "basis": {
+                "degrees": [
+                  2,
+                  2
+                ],
+                "poles": [
+                  [
+                    [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      2.0,
+                      0.0
+                    ]
+                  ],
+                  [
+                    [
+                      1.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      1.0,
+                      1.0,
+                      0.0
+                    ],
+                    [
+                      1.0,
+                      2.0,
+                      0.0
+                    ]
+                  ],
+                  [
+                    [
+                      2.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      2.0,
+                      1.0,
+                      0.0
+                    ],
+                    [
+                      2.0,
+                      2.0,
+                      0.0
+                    ]
+                  ]
+                ],
+                "weights": [
+                  [
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  [
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  [
+                    1.0,
+                    1.0,
+                    1.0
+                  ]
+                ],
+                "uknots": [
+                  0.0,
+                  1.0
+                ],
+                "vknots": [
+                  0.0,
+                  1.0
+                ],
+                "umults": [
+                  3,
+                  3
+                ],
+                "vmults": [
+                  3,
+                  3
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "actual": [
+        {
+          "type": "Wire",
+          "placement": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "vertices": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              3.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "edges": [
+            {
+              "class": "Line",
+              "domain": [
+                0.0,
+                1.0
+              ],
+              "orientation": "Forward",
+              "endpoints": [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ]
+              ],
+              "basis": null
+            },
+            {
+              "class": "BSplineCurve",
+              "domain": [
+                0.0,
+                1.0
+              ],
+              "orientation": "Forward",
+              "endpoints": [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  3.0,
+                  0.0,
+                  0.0
+                ]
+              ],
+              "basis": {
+                "degree": 2,
+                "poles": [
+                  [
+                    1.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    2.0,
+                    2.0,
+                    0.0
+                  ],
+                  [
+                    3.0,
+                    0.0,
+                    0.0
+                  ]
+                ],
+                "weights": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "knots": [
+                  0.0,
+                  1.0
+                ],
+                "mults": [
+                  3,
+                  3
+                ]
+              }
+            }
+          ],
+          "wires": [
+            [
+              "Forward",
+              "Forward"
+            ]
+          ],
+          "faces": []
+        },
+        {
+          "type": "Face",
+          "placement": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "vertices": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              2.0,
+              0.0
+            ],
+            [
+              2.0,
+              0.0,
+              0.0
+            ],
+            [
+              2.0,
+              2.0,
+              0.0
+            ]
+          ],
+          "edges": [
+            {
+              "class": "BSplineCurve",
+              "domain": [
+                0.0,
+                1.0
+              ],
+              "orientation": "Reversed",
+              "endpoints": [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0,
+                  0.0
+                ]
+              ],
+              "basis": {
+                "degree": 2,
+                "poles": [
+                  [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    1.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    2.0,
+                    0.0
+                  ]
+                ],
+                "weights": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "knots": [
+                  0.0,
+                  1.0
+                ],
+                "mults": [
+                  3,
+                  3
+                ]
+              }
+            },
+            {
+              "class": "BSplineCurve",
+              "domain": [
+                0.0,
+                1.0
+              ],
+              "orientation": "Forward",
+              "endpoints": [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  0.0,
+                  0.0
+                ]
+              ],
+              "basis": {
+                "degree": 2,
+                "poles": [
+                  [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    1.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    2.0,
+                    0.0,
+                    0.0
+                  ]
+                ],
+                "weights": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "knots": [
+                  0.0,
+                  1.0
+                ],
+                "mults": [
+                  3,
+                  3
+                ]
+              }
+            },
+            {
+              "class": "BSplineCurve",
+              "domain": [
+                0.0,
+                1.0
+              ],
+              "orientation": "Forward",
+              "endpoints": [
+                [
+                  2.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  2.0,
+                  0.0
+                ]
+              ],
+              "basis": {
+                "degree": 2,
+                "poles": [
+                  [
+                    2.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    2.0,
+                    1.0,
+                    0.0
+                  ],
+                  [
+                    2.0,
+                    2.0,
+                    0.0
+                  ]
+                ],
+                "weights": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "knots": [
+                  0.0,
+                  1.0
+                ],
+                "mults": [
+                  3,
+                  3
+                ]
+              }
+            },
+            {
+              "class": "BSplineCurve",
+              "domain": [
+                0.0,
+                1.0
+              ],
+              "orientation": "Reversed",
+              "endpoints": [
+                [
+                  0.0,
+                  2.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  2.0,
+                  0.0
+                ]
+              ],
+              "basis": {
+                "degree": 2,
+                "poles": [
+                  [
+                    0.0,
+                    2.0,
+                    0.0
+                  ],
+                  [
+                    1.0,
+                    2.0,
+                    0.0
+                  ],
+                  [
+                    2.0,
+                    2.0,
+                    0.0
+                  ]
+                ],
+                "weights": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "knots": [
+                  0.0,
+                  1.0
+                ],
+                "mults": [
+                  3,
+                  3
+                ]
+              }
+            }
+          ],
+          "wires": [
+            [
+              "Reversed",
+              "Forward",
+              "Forward",
+              "Reversed"
+            ]
+          ],
+          "faces": [
+            {
+              "orientation": "Forward",
+              "domain": [
+                0.0,
+                1.0,
+                0.0,
+                1.0
+              ],
+              "basis": {
+                "degrees": [
+                  2,
+                  2
+                ],
+                "poles": [
+                  [
+                    [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      2.0,
+                      0.0
+                    ]
+                  ],
+                  [
+                    [
+                      1.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      1.0,
+                      1.0,
+                      0.0
+                    ],
+                    [
+                      1.0,
+                      2.0,
+                      0.0
+                    ]
+                  ],
+                  [
+                    [
+                      2.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      2.0,
+                      1.0,
+                      0.0
+                    ],
+                    [
+                      2.0,
+                      2.0,
+                      0.0
+                    ]
+                  ]
+                ],
+                "weights": [
+                  [
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  [
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  [
+                    1.0,
+                    1.0,
+                    1.0
+                  ]
+                ],
+                "uknots": [
+                  0.0,
+                  1.0
+                ],
+                "vknots": [
+                  0.0,
+                  1.0
+                ],
+                "umults": [
+                  3,
+                  3
+                ],
+                "vmults": [
+                  3,
+                  3
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "ok": true
+  },
+  "source_files": [
+    {
+      "path": "tests/rhino_core_subobject_ownership_smoke.FCMacro",
+      "sha256": "aee66cb542276a3c9a521011c608865dd6d2b867066f8a1e21964f834e9a9a5c"
+    },
+    {
+      "path": "Gui/CoreObjects.cpp",
+      "sha256": "fedbdfba5593f89d5b4bf2f6148aabd58112e4f2c7bb5cc43e105d3c8acaa98e"
+    },
+    {
+      "path": "Gui/CoreObjects.h",
+      "sha256": "3800b6922ad57be6bd4bb2a93a7ba8c034f8ee16a610637bf955a80c496feb03"
+    }
+  ],
+  "source_reviews": [
+    {
+      "path": "docs/reviews/2026-10-10-subobject-ownership-review.md",
+      "sha256": "44c2b479f59f8956b32679abad163d7703a09e426ebfd3daebff6cafe1172207"
+    }
+  ],
+  "reviewed_files": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_subobject_ownership_smoke.FCMacro",
+      "reviewed_sha256": "aee66cb542276a3c9a521011c608865dd6d2b867066f8a1e21964f834e9a9a5c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\superpowers\\plans\\2026-10-10-rhino-core-subobject-ownership.md",
+      "reviewed_sha256": "d67b25222ec8fb770ee9cace31f2a44ef31e5cd5ff23f867c51f0e9c23a21c61"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreObjects.cpp",
+      "reviewed_sha256": "fedbdfba5593f89d5b4bf2f6148aabd58112e4f2c7bb5cc43e105d3c8acaa98e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreObjects.h",
+      "reviewed_sha256": "3800b6922ad57be6bd4bb2a93a7ba8c034f8ee16a610637bf955a80c496feb03"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\TopoShapeEdgePyImp.cpp",
+      "reviewed_sha256": "8d005d88c40011ad7d366426b00e217b03e9e6f3199fd86c97474045c923f0c9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\TopoShapeFacePyImp.cpp",
+      "reviewed_sha256": "324ed0b8642b0261ff6fc981997fa8523589eac647827ca5aab85dfdc3faa0f2"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\Geometry.cpp",
+      "reviewed_sha256": "6f739f21a06fac39937b77b55071df46b64261500c49f907d4ff166bb551afa9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\GeometryCurvePyImp.cpp",
+      "reviewed_sha256": "93218013d9250e8d9d0bdcff53884e3c8a304bfa92d270ceaf76dbea3294abf8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\GeometrySurfacePyImp.cpp",
+      "reviewed_sha256": "3c925d1c1cf91d93e50fffece55196d42f95b9de1e7047ed80e664081876fa45"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\BSplineCurvePyImp.cpp",
+      "reviewed_sha256": "cbfb4984dbce3418a9b41bd6509aa5e2eab1210d39316ef87d2c8dccd5f80657"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\BSplineSurfacePyImp.cpp",
+      "reviewed_sha256": "fb13e31d9b095a55bae499c28f6d724edeaa7315ea163e82114a7ab7eb4d9a95"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\TopoShapePyImp.cpp",
+      "reviewed_sha256": "db0f1f3fb0fb55e13017c64466d1f916821340810057259a203053c37d4eab0e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\TopoShapeExpansion.cpp",
+      "reviewed_sha256": "ddbe6e24ffe6fc80927016851ad026de3ad2976be7bbc1fc003d9746a8d5d945"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\TopoShape.cpp",
+      "reviewed_sha256": "2f7de58f556e3ce2cb0877ebdb1a83536d1e73be2d8a2b9243056083f0619e5e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\TopoShape.h",
+      "reviewed_sha256": "cf0354bb7fc9c37e82dc37b5fde187860e69b6170c3fe9688482c69cbe2731b4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\PropertyTopoShape.cpp",
+      "reviewed_sha256": "da3e5682155e33872c742adeaf6798c376d328239065abe9d16663a191c52ee7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\TopoDS_Shape.hxx",
+      "reviewed_sha256": "9535f666d49437f72151a484daf9f60d065ac59d0dc765866211427e94085f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\src\\Mod\\Part\\App\\GeometryPy.cpp",
+      "reviewed_sha256": "9304a2b9837fe9562af1d41c2b155fc73e72f91edaf92711ac2bf6a624dbe0ae"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\src\\Mod\\Part\\App\\BSplineCurvePy.cpp",
+      "reviewed_sha256": "de6368ebfad12e73672c7e79ccc1323d4e9d1e1edbbe0699f18e6d34f46fe7a6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\src\\Mod\\Part\\App\\BSplineSurfacePy.cpp",
+      "reviewed_sha256": "7fa0ce5a2def346097a73b57cd874d1a1872e89c21c9f735c5ddbd08a5af8ff8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\src\\App\\ComplexGeoDataPy.cpp",
+      "reviewed_sha256": "3bc6d2cdd1e29829c0b9ae25dfabcfd64e158c95c5565944d87d9aba219921cb"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "reviewed_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\merge-native-module.json",
+      "reviewed_sha256": "cbc2e84e70bbdedeb9b0451aa58ad4be5caa8d9083c963cdef72ad62f0fc3eea"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\process.json",
+      "reviewed_sha256": "80fbe34c4298ccd3b1a18f3deddbe3990f3745b76d35ed32d982f461cd056390"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\results.json",
+      "reviewed_sha256": "46ae2aa00ec17b2c73993d2dcb2ddb3aeb6cebcc719f1ad0d88e6016c9e88834"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\source-before-CanonicalWire.brep",
+      "reviewed_sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\source-after-CanonicalWire.brep",
+      "reviewed_sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\source-before-CanonicalFace.brep",
+      "reviewed_sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\source-after-CanonicalFace.brep",
+      "reviewed_sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\recreated-CanonicalWire.brep",
+      "reviewed_sha256": "07a2d7ea1e980c9cb044aeee000834839d73e2e1952cdc21919fd18f098a20ae"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\retained-CanonicalWire.brep",
+      "reviewed_sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\recreated-CanonicalFace.brep",
+      "reviewed_sha256": "d19497c192db980df191d8acadb9f31d02cc7d8b22b878bf8eb1975c0d65704f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\retained-CanonicalFace.brep",
+      "reviewed_sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\SubobjectOwner.FCStd",
+      "reviewed_sha256": "b1de2f638bdfed4c70fe1aeee7cb6eb3e513137cfb4c806647bca6c1be89570f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\output-before-reedit-OwnedCurve.brep",
+      "reviewed_sha256": "2243bc8f0d41211738e6e466ff584dfaaa48690ac2ce15c5aac11cae4e3d813e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\output-after-reedit-OwnedCurve.brep",
+      "reviewed_sha256": "2243bc8f0d41211738e6e466ff584dfaaa48690ac2ce15c5aac11cae4e3d813e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\output-before-reedit-OwnedFace.brep",
+      "reviewed_sha256": "572295360a2ef8a9e4ef2801a9bc289c56aac878347616591309ead1b5af71dd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7612fd53179f4117b25f0599366c59dd\\output-after-reedit-OwnedFace.brep",
+      "reviewed_sha256": "572295360a2ef8a9e4ef2801a9bc289c56aac878347616591309ead1b5af71dd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ed038e2218414ca3b91ca1c8a217b990\\results.json",
+      "reviewed_sha256": "2efabdc93ae1d6d46a8ebe7ed6f1b447f17a377661c4c3c7484e16831657f901"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ed038e2218414ca3b91ca1c8a217b990\\process.json",
+      "reviewed_sha256": "dab56eed815ede5bdce47010db1d9e218f70d46f0001e4ac500a9cb1c3a0b80b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ed038e2218414ca3b91ca1c8a217b990\\merge-native-module.json",
+      "reviewed_sha256": "5f9a38901741011ce09c1c0a56c2fcd0db1b3cbf838f0d58db2b26c11afcc160"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\results.json",
+      "reviewed_sha256": "30c848e64a1ea8e7ff4b0112196ba9cff2e83e8718f6595ed752974fb161f422"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\process.json",
+      "reviewed_sha256": "ac04c6fbdb71f901401e10ac402e96f51611e3ad334c2c3e031c2c976acf8151"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\merge-native-module.json",
+      "reviewed_sha256": "cac27d11d6677b2b82b449a6709514685696df383b4711d4989c971f609d34b8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\retained-CanonicalWire.brep",
+      "reviewed_sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\recreated-CanonicalWire.brep",
+      "reviewed_sha256": "07a2d7ea1e980c9cb044aeee000834839d73e2e1952cdc21919fd18f098a20ae"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\retained-CanonicalFace.brep",
+      "reviewed_sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\recreated-CanonicalFace.brep",
+      "reviewed_sha256": "d19497c192db980df191d8acadb9f31d02cc7d8b22b878bf8eb1975c0d65704f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b92d935448a04199ad61de445759ce71\\results.json",
+      "reviewed_sha256": "d25cfd0618648bd2020e25f2a5b7a88d217e73af931085e189292c83e9fd6a30"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b92d935448a04199ad61de445759ce71\\process.json",
+      "reviewed_sha256": "36e3be2c9e548a41a5d42411032c23ff17ecaf9aaa53ba5021ffbb337210e757"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b92d935448a04199ad61de445759ce71\\merge-native-module.json",
+      "reviewed_sha256": "0a0edb104bac3baf5ed667fd90a23ecb08c8a6230224d8a0e758205a78992284"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\results.json",
+      "reviewed_sha256": "85919e55e7e9b255984b186f70226dfc55d578bdcf50b051218bbb02a91e1d80"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\process.json",
+      "reviewed_sha256": "70f365f1cbd66dc01f21b5368827b0ed861daf3f72a47d0e8e28c77d41224d8e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\merge-native-module.json",
+      "reviewed_sha256": "1bf303e2e68d6e011fc984f71a572f6ce5dccd704406b79ba09a7f0c382c472d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\merge-native-module.json",
+      "reviewed_sha256": "b7a453f7af4033ddabea7c74831b0ed8be34b5aa947db330cbb318504fa33e10"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\process.json",
+      "reviewed_sha256": "05de56185a6fc6f69cf965284503a94e87a6c159851145d0d2909e07c6cad45d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\results.json",
+      "reviewed_sha256": "b66da9e9d47f0f7e03b3e42a46505f7393dfb3775a353c6d8c646056fc4d6343"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4315b76011404021bc171cc29a0c663a\\results.json",
+      "reviewed_sha256": "27ec61c24d749025a4505e99d253498bc0a7e22886fcea55408aaa1d8770f288"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4315b76011404021bc171cc29a0c663a\\process.json",
+      "reviewed_sha256": "4cca7b2d2cd281062d5ddfdf5f0c2c968669dddc19762ef91895fd4aff7b0b46"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4315b76011404021bc171cc29a0c663a\\merge-native-module.json",
+      "reviewed_sha256": "e3e105622967258a8ca8eac92d31d90a2fc98f55ee8ef520e712968caf513646"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\results.json",
+      "reviewed_sha256": "13003b62f43415b0d5759b4561ec03c389c5aeb396f87a24871d9808d8f352f5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\process.json",
+      "reviewed_sha256": "2c9f6e6c19c01c2a93e6a509dcc082a4d66147e316aad42d45fb34684e77d449"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\merge-native-module.json",
+      "reviewed_sha256": "1493efea325afe78a7c77f9c8f2964cf33fc06d9b3d79ee4a48e7754c0381e03"
+    }
+  ],
+  "review_fingerprints": 63,
+  "publication_red": {
+    "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4315b76011404021bc171cc29a0c663a",
+    "result": {
+      "schema_version": 1,
+      "checks": [
+        {
+          "name": "two instances share exact source definition",
+          "passed": true
+        },
+        {
+          "name": "shallow native snapshots share topology identity",
+          "passed": true
+        },
+        {
+          "name": "explicit deep copies have separate topology identity",
+          "passed": true
+        },
+        {
+          "name": "detached curve independent quadratic midpoint",
+          "passed": true
+        },
+        {
+          "name": "detached surface independent tensor midpoint",
+          "passed": true
+        },
+        {
+          "name": "source subcurve remains original midpoint",
+          "passed": true
+        },
+        {
+          "name": "source face remains original midpoint",
+          "passed": true
+        },
+        {
+          "name": "detached edits keep source definition and both siblings exact",
+          "passed": true
+        },
+        {
+          "name": "detached edits keep shallow and deep native snapshots exact",
+          "passed": true
+        },
+        {
+          "name": "detached edits add no document property object Undo",
+          "passed": true
+        },
+        {
+          "name": "source subobject requests remain valid after detached edits",
+          "passed": true
+        },
+        {
+          "name": "publication creates only two standalone outputs in one Undo",
+          "passed": true
+        },
+        {
+          "name": "published geometry has independent exact midpoint values",
+          "passed": true
+        },
+        {
+          "name": "retained support owners accept independent later edits",
+          "passed": true
+        },
+        {
+          "name": "published owners are isolated from retained mutable supports",
+          "passed": false
+        }
+      ],
+      "owners": [
+        {
+          "operation": "curve.setPole",
+          "mutation_owner": "detached copied Part.BSplineCurve returned by Edge.Curve",
+          "source_owner": "CanonicalWire"
+        },
+        {
+          "operation": "surface.setPole",
+          "mutation_owner": "detached copied Part.BSplineSurface returned by Face.Surface",
+          "source_owner": "CanonicalFace"
+        },
+        {
+          "operation": "publish",
+          "mutation_owner": "two new standalone Part::Feature outputs",
+          "source_owner": "unchanged canonical definition"
+        }
+      ],
+      "snapshots": {
+        "before": {
+          "sources": {
+            "wire": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec",
+            "face": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd",
+            "definition_members": [
+              "CanonicalWire",
+              "CanonicalFace"
+            ],
+            "links": [
+              {
+                "name": "InstanceA",
+                "definition": "Definition",
+                "placement": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  10.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "world_shape": "e1476ecc40adfca39564839375b3184ca5cd577933396cdacf06271dcbee6879"
+              },
+              {
+                "name": "InstanceB",
+                "definition": "Definition",
+                "placement": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  20.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "world_shape": "a0d1ed91813e07e064be2b628936b73fabbffbde82e85c5d7347e7ee99bf44eb"
+              }
+            ]
+          },
+          "curve": {
+            "degree": 2,
+            "poles": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                2.0,
+                2.0,
+                0.0
+              ],
+              [
+                3.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "weights": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "knots": [
+              0.0,
+              1.0
+            ],
+            "mults": [
+              3,
+              3
+            ]
+          },
+          "surface": {
+            "degrees": [
+              2,
+              2
+            ],
+            "poles": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0,
+                  0.0
+                ]
+              ],
+              [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  1.0,
+                  2.0,
+                  0.0
+                ]
+              ],
+              [
+                [
+                  2.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  2.0,
+                  0.0
+                ]
+              ]
+            ],
+            "weights": [
+              [
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0
+              ]
+            ],
+            "uknots": [
+              0.0,
+              1.0
+            ],
+            "vknots": [
+              0.0,
+              1.0
+            ],
+            "umults": [
+              3,
+              3
+            ],
+            "vmults": [
+              3,
+              3
+            ]
+          },
+          "retained_shapes": [
+            "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec",
+            "831b1895ca1d1914ecfe475bf6804bae3ad0eb8cd4d9099d96684279e78fcc0f",
+            "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd",
+            "697ae9fd781c9532c724b46bd4f1d004e4a55ecdc13586316da5f2321729f3ff"
+          ]
+        },
+        "after_detached_edits": {
+          "sources": {
+            "wire": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec",
+            "face": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd",
+            "definition_members": [
+              "CanonicalWire",
+              "CanonicalFace"
+            ],
+            "links": [
+              {
+                "name": "InstanceA",
+                "definition": "Definition",
+                "placement": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  10.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "world_shape": "e1476ecc40adfca39564839375b3184ca5cd577933396cdacf06271dcbee6879"
+              },
+              {
+                "name": "InstanceB",
+                "definition": "Definition",
+                "placement": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  20.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "world_shape": "a0d1ed91813e07e064be2b628936b73fabbffbde82e85c5d7347e7ee99bf44eb"
+              }
+            ]
+          },
+          "curve": {
+            "degree": 2,
+            "poles": [
+              [
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                2.0,
+                2.0,
+                2.0
+              ],
+              [
+                3.0,
+                0.0,
+                0.0
+              ]
+            ],
+            "weights": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "knots": [
+              0.0,
+              1.0
+            ],
+            "mults": [
+              3,
+              3
+            ]
+          },
+          "surface": {
+            "degrees": [
+              2,
+              2
+            ],
+            "poles": [
+              [
+                [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0,
+                  0.0
+                ]
+              ],
+              [
+                [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  1.0,
+                  1.0,
+                  4.0
+                ],
+                [
+                  1.0,
+                  2.0,
+                  0.0
+                ]
+              ],
+              [
+                [
+                  2.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  2.0,
+                  0.0
+                ]
+              ]
+            ],
+            "weights": [
+              [
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0,
+                1.0
+              ]
+            ],
+            "uknots": [
+              0.0,
+              1.0
+            ],
+            "vknots": [
+              0.0,
+              1.0
+            ],
+            "umults": [
+              3,
+              3
+            ],
+            "vmults": [
+              3,
+              3
+            ]
+          },
+          "retained_shapes": [
+            "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec",
+            "831b1895ca1d1914ecfe475bf6804bae3ad0eb8cd4d9099d96684279e78fcc0f",
+            "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd",
+            "697ae9fd781c9532c724b46bd4f1d004e4a55ecdc13586316da5f2321729f3ff"
+          ]
+        }
+      },
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598",
+      "publication_mutable_alias_control": {
+        "output_before": [
+          "2243bc8f0d41211738e6e466ff584dfaaa48690ac2ce15c5aac11cae4e3d813e",
+          "572295360a2ef8a9e4ef2801a9bc289c56aac878347616591309ead1b5af71dd"
+        ],
+        "output_after": [
+          "d230639f8a7c824e7830184ca1b432019e9146f5905069f9faf4b6507db9ee39",
+          "ea1ed20bbe7d760f227212efbcd6fb527d30f4a769f206e16177ca454c8c8a5d"
+        ],
+        "curve_midpoint": [
+          2.0,
+          1.0,
+          3.0
+        ],
+        "surface_midpoint": [
+          1.0,
+          1.0,
+          3.0
+        ]
+      },
+      "ok": false,
+      "error": "Traceback (most recent call last):\n  File \"H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_subobject_ownership_smoke.FCMacro\", line 101, in run\n    check('published owners are isolated from retained mutable supports',output_hashes==[sha(output_curve.Shape),sha(output_face.Shape)])\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_subobject_ownership_smoke.FCMacro\", line 12, in check\n    if not ok:raise AssertionError(name)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: published owners are isolated from retained mutable supports\n"
+    },
+    "artifacts": [
+      {
+        "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4315b76011404021bc171cc29a0c663a\\merge-native-module.json",
+        "sha256": "e3e105622967258a8ca8eac92d31d90a2fc98f55ee8ef520e712968caf513646"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4315b76011404021bc171cc29a0c663a\\process.json",
+        "sha256": "4cca7b2d2cd281062d5ddfdf5f0c2c968669dddc19762ef91895fd4aff7b0b46"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4315b76011404021bc171cc29a0c663a\\progress.json",
+        "sha256": "b8efce4c376dd7bf42e897cd9fe0d45f7ca650d925f84370924124fbb83492b5"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4315b76011404021bc171cc29a0c663a\\results.json",
+        "sha256": "27ec61c24d749025a4505e99d253498bc0a7e22886fcea55408aaa1d8770f288"
+      }
+    ]
+  },
+  "excluded_runs": [
+    {
+      "path": "build/merge_replay-1/b92d935448a04199ad61de445759ce71",
+      "reason": "27PASS lacks equivalent-source recreation and post-publication retained-wrapper mutation controls."
+    },
+    {
+      "path": "build/merge_replay-1/ed038e2218414ca3b91ca1c8a217b990",
+      "reason": "27pass +new-owner rawBRep equality fails on native metadata/location representation."
+    },
+    {
+      "path": "build/merge_replay-1/800eb173160541f0afc093f8159ac2f2",
+      "reason": "Same predicate issue, retained exact rawdiagnostics isolate identityTopLoc/Free changes."
+    },
+    {
+      "path": "build/merge_replay-1/af0fcccc519746258284a9063cfe6b98",
+      "reason": "32PASS superseded concrete stale reason and publicationalias control."
+    },
+    {
+      "path": "build/merge_replay-1/ae66bd14b32f4714b740b0c8119fa176",
+      "reason": "32PASS stale reason hardened, lacks post-publication mutable support check."
+    },
+    {
+      "path": "build/merge_replay-1/e6ecd78aa5964bb1a8d6970900cc9f0b",
+      "reason": "34PASS explicitcopyGREEN superseded added exact rawfiles/basis/midpoint witness."
+    }
+  ],
+  "excluded_artifacts": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b92d935448a04199ad61de445759ce71\\merge-native-module.json",
+      "sha256": "0a0edb104bac3baf5ed667fd90a23ecb08c8a6230224d8a0e758205a78992284"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b92d935448a04199ad61de445759ce71\\process.json",
+      "sha256": "36e3be2c9e548a41a5d42411032c23ff17ecaf9aaa53ba5021ffbb337210e757"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b92d935448a04199ad61de445759ce71\\progress.json",
+      "sha256": "1a05e5763c50e3d406d950a04a44e6898760e8285e9a68dfe15afd1b56f4b70b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b92d935448a04199ad61de445759ce71\\results.json",
+      "sha256": "d25cfd0618648bd2020e25f2a5b7a88d217e73af931085e189292c83e9fd6a30"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b92d935448a04199ad61de445759ce71\\source-after-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b92d935448a04199ad61de445759ce71\\source-after-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b92d935448a04199ad61de445759ce71\\source-before-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b92d935448a04199ad61de445759ce71\\source-before-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ed038e2218414ca3b91ca1c8a217b990\\merge-native-module.json",
+      "sha256": "5f9a38901741011ce09c1c0a56c2fcd0db1b3cbf838f0d58db2b26c11afcc160"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ed038e2218414ca3b91ca1c8a217b990\\process.json",
+      "sha256": "dab56eed815ede5bdce47010db1d9e218f70d46f0001e4ac500a9cb1c3a0b80b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ed038e2218414ca3b91ca1c8a217b990\\progress.json",
+      "sha256": "2ff9949f42b9b957cddbd0b2aad04dee1b4f592297c401c3fe61abf7d28504f3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ed038e2218414ca3b91ca1c8a217b990\\results.json",
+      "sha256": "2efabdc93ae1d6d46a8ebe7ed6f1b447f17a377661c4c3c7484e16831657f901"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ed038e2218414ca3b91ca1c8a217b990\\source-after-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ed038e2218414ca3b91ca1c8a217b990\\source-after-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ed038e2218414ca3b91ca1c8a217b990\\source-before-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ed038e2218414ca3b91ca1c8a217b990\\source-before-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\merge-native-module.json",
+      "sha256": "cac27d11d6677b2b82b449a6709514685696df383b4711d4989c971f609d34b8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\process.json",
+      "sha256": "ac04c6fbdb71f901401e10ac402e96f51611e3ad334c2c3e031c2c976acf8151"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\progress.json",
+      "sha256": "6f193894d5927abfdf4dc680b7484c5c0a2cab1b28fc0c7da6ad6b429feeadb7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\recreated-CanonicalFace.brep",
+      "sha256": "d19497c192db980df191d8acadb9f31d02cc7d8b22b878bf8eb1975c0d65704f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\recreated-CanonicalWire.brep",
+      "sha256": "07a2d7ea1e980c9cb044aeee000834839d73e2e1952cdc21919fd18f098a20ae"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\results.json",
+      "sha256": "30c848e64a1ea8e7ff4b0112196ba9cff2e83e8718f6595ed752974fb161f422"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\retained-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\retained-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\source-after-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\source-after-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\source-before-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\800eb173160541f0afc093f8159ac2f2\\source-before-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\merge-native-module.json",
+      "sha256": "1bf303e2e68d6e011fc984f71a572f6ce5dccd704406b79ba09a7f0c382c472d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\process.json",
+      "sha256": "70f365f1cbd66dc01f21b5368827b0ed861daf3f72a47d0e8e28c77d41224d8e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\progress.json",
+      "sha256": "c1c56778cd411a4f65dd1f484fb7dc88bbe0713e08c4caa1e9bec54b2a0f2af8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\recreated-CanonicalFace.brep",
+      "sha256": "d19497c192db980df191d8acadb9f31d02cc7d8b22b878bf8eb1975c0d65704f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\recreated-CanonicalWire.brep",
+      "sha256": "07a2d7ea1e980c9cb044aeee000834839d73e2e1952cdc21919fd18f098a20ae"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\results.json",
+      "sha256": "85919e55e7e9b255984b186f70226dfc55d578bdcf50b051218bbb02a91e1d80"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\retained-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\retained-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\source-after-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\source-after-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\source-before-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\af0fcccc519746258284a9063cfe6b98\\source-before-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\merge-native-module.json",
+      "sha256": "b7a453f7af4033ddabea7c74831b0ed8be34b5aa947db330cbb318504fa33e10"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\process.json",
+      "sha256": "05de56185a6fc6f69cf965284503a94e87a6c159851145d0d2909e07c6cad45d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\progress.json",
+      "sha256": "1d611f6a8a0f10e94db914f58f2a5b89f5126858ef5b6fd78d86c01ec63fa7c8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\recreated-CanonicalFace.brep",
+      "sha256": "d19497c192db980df191d8acadb9f31d02cc7d8b22b878bf8eb1975c0d65704f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\recreated-CanonicalWire.brep",
+      "sha256": "07a2d7ea1e980c9cb044aeee000834839d73e2e1952cdc21919fd18f098a20ae"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\results.json",
+      "sha256": "b66da9e9d47f0f7e03b3e42a46505f7393dfb3775a353c6d8c646056fc4d6343"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\retained-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\retained-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\source-after-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\source-after-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\source-before-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\ae66bd14b32f4714b740b0c8119fa176\\source-before-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\merge-native-module.json",
+      "sha256": "1493efea325afe78a7c77f9c8f2964cf33fc06d9b3d79ee4a48e7754c0381e03"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\process.json",
+      "sha256": "2c9f6e6c19c01c2a93e6a509dcc082a4d66147e316aad42d45fb34684e77d449"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\progress.json",
+      "sha256": "5b2b0ca6fa668df4bb8e4f95486d34c563e3612897c395856aa7e08ec0c40cf6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\recreated-CanonicalFace.brep",
+      "sha256": "d19497c192db980df191d8acadb9f31d02cc7d8b22b878bf8eb1975c0d65704f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\recreated-CanonicalWire.brep",
+      "sha256": "07a2d7ea1e980c9cb044aeee000834839d73e2e1952cdc21919fd18f098a20ae"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\results.json",
+      "sha256": "13003b62f43415b0d5759b4561ec03c389c5aeb396f87a24871d9808d8f352f5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\retained-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\retained-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\source-after-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\source-after-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\source-before-CanonicalFace.brep",
+      "sha256": "38c59852032cd783b35ccb1802c57e78dbf84c5241708d57cbd0e1c8d504bebd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\e6ecd78aa5964bb1a8d6970900cc9f0b\\source-before-CanonicalWire.brep",
+      "sha256": "0078f2910b0507139b7e4e9817eeb36c1ac2e3de78efbbbcc11c9d4228cb5dec"
+    }
+  ],
+  "prior_reused_proof": {
+    "path": "docs/validation/2026-10-10-rhino-core-hatch-input-gate-evidence.json",
+    "sha256": "49f92810cdcd7a64ec7d166ea0abd271b8177cfe0e01df1b5781df03105322c0",
+    "rust541_native27_5ctests_sdk0_not_rerun": true
+  },
+  "spec_package": {
+    "manifest_entries": 664,
+    "manifest_sha256": "58b38cf8777677a15cae005c48aa3fd4ba7181318bc60c772ae36ff992e52e9e",
+    "json_yaml_equal": true,
+    "catalog_status_changes": [],
+    "command_capability_changes": []
+  },
+  "public_source_audit": {
+    "exit": 0,
+    "raw_log": "H:\\FreeCAD-src\\build\\p0-subobject-public-audit.log",
+    "raw_log_sha256": "97debf029561bf04e3f132cc1b19b08ad5d7d9fd9685e57560f76dfde186e6b0",
+    "result": {
+      "source_files": 2152,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    }
+  },
+  "limits": [
+    "Authored Line/quadratic Wire and untrimmed tensor Face only; no all-family edit or raw borrowed mutator coverage.",
+    "Strong shallow native Shape aliases retain handles and are not borrowed raw pointers; no global owner-release/UAF/sanitizer claim.",
+    "toShape shares support; explicit native deep copy needed for isolated output owner while wrapper remains mutable.",
+    "Recreated geometrySignature is exact for these authored supports, not arbitrary trim/topology equivalence; raw TopLoc/Free owner metadata can differ.",
+    "Full T07 allocation, T08 delayed result publication and T10 guarded host query plus all remaining P0 clauses stay open."
+  ]
+}

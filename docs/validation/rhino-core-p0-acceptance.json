@@ -156,14 +156,17 @@
           "id": "RCORE-01.T11",
           "spec_requirement": "RCORE-01.T11 | Clone/shallow snapshot rồi sửa subcurve hoặc face, giữ source và sibling instance | Xác định owner mutation trước thao tác; source/sibling chỉ đổi khi contract yêu cầu; báo lifecycle khác nhau của standalone và subobject",
           "priority": "P0",
-          "status": "not_fully_verified",
-          "complete_evidence": [],
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-subobject-ownership-evidence.json"
+          ],
           "partial_evidence": [
             {
               "report": "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
               "scope": "Scoped basis/type/topology/ownership/parameter-policy observations only; all specified assertions not yet established."
             }
-          ]
+          ],
+          "verification_scope": "Authored native Wire subcurve/untrimmed tensor Face, strong shallow alias vs native deep copy, detached support owner mutations with independent midpoint witnesses, strict source/sibling/snapshot bytes; realtoShapealiasRED/explicitdeep-copy publicationGREEN, singleUndoRedo. Intentional canonical edit follows bothinstances, stale revision/Undo/session guards reject, sameName+equivalent-source recreation rejects oldrequests/freshvalid while standalone owners surviveclose. No general raw borrowed-pointer/worker/all-family certificate."
         }
       ]
     },
@@ -1131,5 +1134,5 @@
       ]
     }
   ],
-  "updated_at": "2026-10-10T03:51:55+07:00"
+  "updated_at": "2026-10-10T04:09:01+07:00"
 }
