@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-09T20:43:23+07:00",
+  "updated_at": "2026-10-09T21:17:06+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -1548,10 +1548,11 @@
       ],
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/02-units-tolerances.md",
       "next_action": "Continue operation-specific effective tolerance and capability/permission coverage; shared runtime guards now cover Edit/Boolean, Rebuild and interactive Surface only. Durable History and remaining P0 contracts stay open.",
-      "updated_at": "2026-10-09T20:43:23+07:00",
+      "updated_at": "2026-10-09T21:17:06+07:00",
       "scope": "Partial P0 foundations from pre-merge snapshot 5011bab; historical 321 Rust, 23 Python and 657 native GUI assertions do not validate the merged revision or complete P0.",
       "followup_evidence": [
-        "docs/validation/2026-10-09-rhino-core-object-foundations.md"
+        "docs/validation/2026-10-09-rhino-core-object-foundations.md",
+        "docs/validation/2026-10-09-rhino-core-tolerance-workers.md"
       ]
     },
     {
@@ -1649,6 +1650,64 @@
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/02-units-tolerances.md",
       "next_action": "Continue operation-specific effective tolerance and capability/permission coverage; shared runtime guards now cover Edit/Boolean, Rebuild and interactive Surface only. Durable History and remaining P0 contracts stay open.",
       "updated_at": "2026-10-09T20:43:23+07:00"
+    },
+    {
+      "key": "rhino-core-tolerance-workers",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-TOP11-008",
+        "OM9-FILE-012"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "scope": "Ordinary Join effective tolerance/provenance and 3DM Rust process-count policy only.",
+      "outputs": [
+        "rust/src/tolerances.rs",
+        "rust/tests/tolerances.rs",
+        "rust/src/worker_budget.rs",
+        "rust/tests/worker_budget.rs",
+        "rust/src/lib.rs",
+        "Gui/CoreTolerance.cpp",
+        "Gui/CoreTolerance.h",
+        "Gui/EditController.cpp",
+        "Gui/EditController.h",
+        "Gui/EditGeometry.cpp",
+        "Gui/EditGeometry.h",
+        "Gui/ThreeDmImportJobs.cpp",
+        "Gui/ThreeDmImportJobs.h",
+        "Gui/CMakeLists.txt",
+        "tests/native/CMakeLists.txt",
+        "tests/rhino_core_tolerance_smoke.FCMacro",
+        "tests/three_dm_import_workers_smoke.FCMacro",
+        "docs/validation/2026-10-09-rhino-core-tolerance-workers.md",
+        "docs/validation/2026-10-09-rhino-core-tolerance-workers-evidence.json"
+      ],
+      "evidence": [
+        "Matching source/module hashes and native results in docs/validation/2026-10-09-rhino-core-tolerance-workers-evidence.json"
+      ],
+      "tests": [
+        {
+          "command": "Full Rust / Clippy",
+          "result": "347 tests passed; Clippy exit 0 with existing warnings"
+        },
+        {
+          "command": "Python tooling",
+          "result": "49 passed, 1 skipped"
+        },
+        {
+          "command": "SDK build / native GUI",
+          "result": "444 assertions in 8 exit-0 processes; standalone geometry passed"
+        }
+      ],
+      "uncertainties": [
+        "Only ordinary curve/surface Join uses the new effective resolver; other solvers and associative History migration remain open.",
+        "Worker count is not an aggregate CPU/RAM scheduler. Existing <8 roots and >16 MiB serial heuristics remain; cancellation and late-result rejection remain open.",
+        "Native FreeCAD/Qt/OCCT/openNURBS ownership remains outside safe Rust guarantees; release panic=abort cannot recover from panic/OOM.",
+        "No new Rhino application roundtrip was performed for this increment; all-P0 and all-command parity remain unverified."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/03-coordinates-cplanes.md",
+      "next_action": "Continue shared parser adoption and remaining all-P0 requirements.",
+      "updated_at": "2026-10-09T21:17:06+07:00"
     }
   ],
   "merge_context": {

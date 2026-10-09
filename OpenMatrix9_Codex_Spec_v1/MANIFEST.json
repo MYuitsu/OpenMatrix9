@@ -21,13 +21,13 @@
   },
   {
     "path": "FEATURES.json",
-    "bytes": 1806109,
-    "sha256": "dc9ba0fbc5f4d6985c77f5ba060560a8c136c6dffeb05ddd6e33b8c02c2c602d"
+    "bytes": 1806526,
+    "sha256": "c1457579c3652ad42a2e5f313c0e8584ca9a83fc88abe1e070a0c48f75b3ecb3"
   },
   {
     "path": "FEATURES.yaml",
-    "bytes": 1444814,
-    "sha256": "4aab5eaabbbc2a6b3150e688593c5e7d1956603267f20c9ae7726a6c19f4fa9d"
+    "bytes": 1445201,
+    "sha256": "b82d18b6e6a20da34270b4c0b52397cb7caa0992e9c245ec9bf8365620d386c1"
   },
   {
     "path": "FEATURE_LOOKUP.json",
@@ -46,8 +46,8 @@
   },
   {
     "path": "IMPLEMENTATION_STATUS.md",
-    "bytes": 18206,
-    "sha256": "c60bdce0a22a1f0cde9e9f49405e42d0d8d2ffca040720f8eaf0d5f3fb7e538f"
+    "bytes": 18805,
+    "sha256": "f56dc9c8b9c692a9b3e2b16b45227ff0100c2f08ae1aa3b4410e1554aec53a04"
   },
   {
     "path": "INDEX.md",
@@ -116,8 +116,8 @@
   },
   {
     "path": "specs/00-rhino-core/02-units-tolerances.md",
-    "bytes": 23023,
-    "sha256": "ff5ce94953cb88cd7ad0ef62c3557810d87c5d426286d48183dabb1d8c2918ae"
+    "bytes": 23958,
+    "sha256": "3ee0aa5b2f7d642092b069f11aac31305936f33b845949c9b38ae10f7145c1ab"
   },
   {
     "path": "specs/00-rhino-core/03-coordinates-cplanes.md",
@@ -156,8 +156,8 @@
   },
   {
     "path": "specs/00-rhino-core/10-persistence-3dm-clipboard.md",
-    "bytes": 19961,
-    "sha256": "d2bbce036154bd6bd86af67858a2d8dcb796aa01ebf36777518436f1c02ba238"
+    "bytes": 21111,
+    "sha256": "d15a57bfb06bbc59951a1b5f31e12522865848c779ff2468b6a718f8c42c5567"
   },
   {
     "path": "specs/00-rhino-core/11-annotation-layout-print.md",
@@ -651,8 +651,8 @@
   },
   {
     "path": "specs/01-core/om9-top11-008-join.md",
-    "bytes": 8935,
-    "sha256": "69983e096203d1dea3cbe55340c70794069d8f3669d0143875b5f7df9e61c154"
+    "bytes": 9607,
+    "sha256": "795089eff0f7a85c2d9da3c77f459349cfba429ea1ed31937954729a861d6717"
   },
   {
     "path": "specs/01-core/om9-top11-009-split.md",

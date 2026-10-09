@@ -3113,11 +3113,16 @@
   implementation_status: "partially_implemented"
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
-  implementation_scope: "Curve endpoint midpoint snapping with explicit bounded tolerance and sewn surface shells; disconnected/mixed/ambiguous inputs rejected. Document-tolerance compatibility and rich History remain unverified."
+  implementation_scope: "Curve endpoint midpoint snapping and sewn surface shells with Rust-resolved document/explicit/legacy cutoff, backend floor rejection and persisted actual tolerance/context. Full topology and rich History remain unverified."
   implementation_followup_evidence:
     date: '2026-10-09'
     report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
     scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
+  implementation_tolerance_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-tolerance-workers.md
+    scope: Curve endpoint midpoint snapping and sewn surface shells with Rust-resolved document/explicit/legacy cutoff, backend floor rejection and persisted actual tolerance/context. Full topology and rich History remain unverified.
+
 - id: OM9-TOP11-009
   name: Split
   command: Split

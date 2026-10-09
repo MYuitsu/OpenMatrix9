@@ -1,5 +1,14 @@
 # OpenMatrix9
 
+<!-- rhino-core-tolerance-workers:start -->
+Rust đã nối dung sai document/override vào Join curve và surface, lưu cutoff thực tế
+và provenance cùng kết quả; backend không được tự nâng dung sai. Worker nhập 3DM
+dùng 60% logical CPUs, bỏ trần cố định 4, kiểm override trước mutation.
+**444 native checks / 8 runs; 347 Rust tests; 49 Python pass, 1 skip.**
+P0 toàn bộ vẫn đang triển khai; [báo cáo và giới hạn](docs/validation/2026-10-09-rhino-core-tolerance-workers.md) ghi phạm vi chính xác.
+
+<!-- rhino-core-tolerance-workers:end -->
+
 <!-- rhino-core-object-foundations:start -->
 Nền tảng P0 tiếp theo — **object identity và stale selection**: Rust registry
 đã được nối vào Edit/Boolean, Rebuild và Surface tương tác. Lựa chọn bị thay thế

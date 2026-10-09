@@ -2,6 +2,7 @@
 #pragma once
 #include "CurveGeometry.h"
 #include "CoreObjects.h"
+#include "CoreTolerance.h"
 #include <memory>
 #include <string>
 #include <set>
@@ -17,6 +18,7 @@ EditInput editInput(App::Document&,const std::string&,unsigned kind,bool allowBl
 // Native BRep snapshot in world placement, without an Edit command's type policy.
 EditInput nativeShapeInput(App::Document&,const std::string&);
 void verifyEditInputs(App::Document&,const std::vector<EditInput>&);
+ToleranceSnapshot editJoinTolerance(const std::string& context,const std::vector<EditInput>&,const std::optional<double>& overrideMm);
 EditShapes buildEdit(const std::vector<EditInput>&,unsigned kind,std::size_t first,unsigned mode,double tolerance=1e-7);
 EditShape joinEditCurves(PyObject* edges,double tolerance);
 std::vector<EditShapes> splitEditCurves(const std::vector<EditInput>&,bool extendLines=false);
@@ -29,5 +31,5 @@ EditShape meshEditSolid(PyObject*);
 EditShape meshEditResult(PyObject*);
 std::size_t pickedEditSegment(const EditShapes&,const std::set<std::size_t>&,const std::array<double,3>&);
 void verifyEditPickBoundary(const EditShapes&,const std::set<std::size_t>&,std::size_t,const std::array<double,3>&,double pixelUncertainty);
-void commitEdit(App::Document&,const std::vector<EditInput>&,const EditShapes&,unsigned kind,bool remove,unsigned mode,std::size_t first,const EditProjection* projection=nullptr);
+void commitEdit(App::Document&,const std::vector<EditInput>&,const EditShapes&,unsigned kind,bool remove,unsigned mode,std::size_t first,const EditProjection* projection=nullptr,const ToleranceSnapshot* toleranceContext=nullptr);
 }

@@ -13,6 +13,17 @@ sample_status: compiled_and_validation_tests_passed
 
 # OM9-TOP11-008 — Join
 
+<!-- rhino-core-tolerance-workers:start -->
+## Bổ sung đã kiểm chứng — 2026-10-09
+
+Rust đã nối dung sai document/override vào Join curve và surface, lưu cutoff thực tế
+và provenance cùng kết quả; backend không được tự nâng dung sai. Worker nhập 3DM
+dùng 60% logical CPUs, bỏ trần cố định 4, kiểm override trước mutation.
+**444 native checks / 8 runs; 347 Rust tests; 49 Python pass, 1 skip.**
+P0 toàn bộ vẫn đang triển khai; [báo cáo và giới hạn](../../../docs/validation/2026-10-09-rhino-core-tolerance-workers.md) ghi phạm vi chính xác.
+
+<!-- rhino-core-tolerance-workers:end -->
+
 <!-- rhino-core-object-foundations:start -->
 ## Bổ sung guard input dùng chung — 2026-10-09
 
@@ -94,7 +105,7 @@ Các ca trên là yêu cầu kiểm thử geometry/state của feature; kết qu
 
 **Verified:** 2026-10-09. **Status:** partially implemented; supported slice validated.
 
-**Scope:** Curve endpoint midpoint snapping with explicit bounded tolerance and sewn surface shells; disconnected/mixed/ambiguous inputs rejected. Document-tolerance compatibility and rich History remain unverified.
+**Scope:** Curve endpoint midpoint snapping and sewn surface shells with Rust-resolved document/explicit/legacy cutoff, backend floor rejection and persisted actual tolerance/context. Full topology and rich History remain unverified.
 
 Menu/F6 ID: `OM9_TopIconJoin`. CMD: `Join`. Matrix 8 Book 1 PDF pp.85–86
 re-read through command continuation on 2026-10-09. This evidence is separate

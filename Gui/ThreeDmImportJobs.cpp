@@ -1,4 +1,5 @@
 #include "ThreeDmStaging.h"
+#include "ThreeDmImportJobs.h"
 #include <QCoreApplication>
 #include <QProcess>
 #include <QFile>
@@ -25,9 +26,12 @@ QJsonArray stagePreservedArchive(const std::filesystem::path& source,const std::
         }
     }
     if(roots.size()>1000000)throw ExchangeError("3DM object limit exceeded");
-    int workers=std::clamp(QThread::idealThreadCount(),1,4);
-    bool valid=false;int requested=qEnvironmentVariableIntValue("OM9_3DM_WORKERS",&valid);if(valid&&requested>=1&&requested<=4)workers=std::min(workers,requested);
-    if(roots.size()<8||std::filesystem::file_size(source)>16ULL*1024*1024)workers=1;
+    const bool overridePresent=qEnvironmentVariableIsSet("OM9_3DM_WORKERS");
+    bool parsed=false;const auto requested=qgetenv("OM9_3DM_WORKERS").toLongLong(&parsed);
+    const auto planned=om9_3dm_import_worker_count(QThread::idealThreadCount(),roots.size(),
+        std::filesystem::file_size(source),overridePresent,parsed?requested:-1);
+    if(!planned)throw ExchangeError("OM9_3DM_WORKERS must be a positive integer no greater than 2147483647");
+    const int workers=static_cast<int>(planned);
     auto base=staging/(members?"definitions":"geometry");std::filesystem::create_directory(base);
     if(workers==1){auto model=readArchive(source,scale,!working,members,"",working);QJsonArray rows;int index=0;for(auto& item:model.items){auto row=encodeExchangeItem(item,base,index++);row["tolerance"]=model.tolerance;rows.append(row);}return rows;}
     QString executable=QCoreApplication::applicationDirPath()+"/OM9ThreeDmImportWorker";

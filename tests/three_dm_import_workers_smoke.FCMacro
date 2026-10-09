@@ -3,6 +3,7 @@ from PySide6 import QtCore
 from pathlib import Path
 import json,os,traceback,hashlib,tempfile,subprocess,shutil,time
 out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+previous_workers=os.environ.get('OM9_3DM_WORKERS')
 def check(name,value):
     report['checks'].append(dict(name=name,passed=bool(value)))
     if not value:raise AssertionError(name)
@@ -11,18 +12,50 @@ def run():
         Gui.activateWorkbench('OpenMatrix9Workbench')
         import ThreeDm,ThreeDmArchiveState as state,OpenMatrix9Gui as native
         fixture=Path(os.environ.get('OM9_IMPORT_WORKER_FIXTURE','H:/FreeCAD-src/build/import-worker-fixture.3dm'));source_hash=hashlib.sha256(fixture.read_bytes()).hexdigest()
-        reports=[]
-        for workers in [1,4]:
-            os.environ['OM9_3DM_WORKERS']=str(workers)
+        reports=[];logical_cpus=QtCore.QThread.idealThreadCount()
+        default_workers=max(1,max(1,logical_cpus)*3//5)
+        source_bytes=fixture.stat().st_size
+        report['worker_policy']=dict(logical_cpus=logical_cpus,default_workers=default_workers,
+            source_bytes=source_bytes,above_four_exercised=False,runs=[])
+        check('worker fixture fits the existing parallel file-size threshold',source_bytes<=16*1024*1024)
+        for label,workers in [('serial',1),('four',4),('above_four',64),('default',None)]:
+            if workers is None:os.environ.pop('OM9_3DM_WORKERS',None)
+            else:os.environ['OM9_3DM_WORKERS']=str(workers)
             with tempfile.TemporaryDirectory() as stage:
                 value=json.loads(native.prepare3dmArchive(str(fixture),stage,0,1))
+                observation=dict(label=label,override=workers,groups=[])
+                # Read actual worker requests while staging still exists. A serial
+                # host conversion creates no request files; process count is not
+                # inferred from successful geometry conversion or the override.
+                for group,role in [('geometry','top-level'),('definitions','definition-member')]:
+                    identities={row['source_uuid'] for row in value['manifest']['records'] if row['role']==role}
+                    expected=min(default_workers,len(identities),workers if workers is not None else default_workers)
+                    if len(identities)<8 or source_bytes>16*1024*1024:expected=1
+                    requests=[json.loads(path.read_text()) for path in (Path(stage)/group).glob('*/request.json')]
+                    partitions=[request['ids'] for request in requests]
+                    observation['groups'].append(dict(group=group,independent_roots=len(identities),
+                        expected_workers=expected,observed_requests=len(requests),partition_sizes=[len(ids) for ids in partitions]))
+                    check(label+' '+group+' actual process partitions follow the CPU task and override limits',
+                        len(requests)==(expected if expected>1 else 0))
+                    check(label+' '+group+' never starts an empty worker partition',all(partitions))
+                    if requests:
+                        assigned=[identity for ids in partitions for identity in ids]
+                        check(label+' '+group+' partitions cover each current source identity exactly once',
+                            len(assigned)==len(identities) and set(assigned)==identities
+                            and all(request['members']==(group=='definitions') for request in requests))
+                    if label in ('above_four','default') and len(requests)>4:
+                        report['worker_policy']['above_four_exercised']=True
+                report['worker_policy']['runs'].append(observation)
                 rows=value['prepared_geometry']+value['retained_records']+value['definition_geometry']+value['definition_retained']
                 for row in rows:
                     row.pop('brep',None)
                 reports.append((value['manifest'],rows))
         (out/'comparison.json').write_text(json.dumps(reports,indent=2))
-        check('parallel matches serial source records/order/attributes/tolerance',reports[0]==reports[1])
+        check('four above-four and default modes match serial source records/order/attributes/tolerance',all(value==reports[0] for value in reports[1:]))
         check('mixed source contains eight roots/eight members and retained SubD/light/block',len(reports[0][1])==19 and sum(r['capability']=='retained' for r in reports[0][1])==3)
+        if default_workers>4:
+            check('available CPU budget starts more than four processes without empty partitions',report['worker_policy']['above_four_exercised'])
+        else:report['worker_policy']['above_four_limit']='Host CPU budget does not exceed four; larger CPU-count policy is covered by Rust tests.'
         doc=App.newDocument('MixedWorkers');objects=ThreeDm.import_file(str(fixture),doc,mode='preserve')
         check('mixed import retains every source object',len(objects)==11)
         archive=out/'mixed.FCStd';doc.saveAs(str(archive));App.closeDocument(doc.Name);doc=App.openDocument(str(archive))
@@ -31,8 +64,20 @@ def run():
         App.closeDocument(doc.Name)
         # Missing helper is rejected before the FreeCAD transaction; restore it
         # before any subsequent test or interactive launch.
-        worker=Path(native.__file__).parent/'OM9ThreeDmImportWorker.exe';hidden=worker.with_suffix('.test-disabled')
-        doc=App.newDocument('WorkerFailure');sentinel=doc.addObject('Part::Feature','Sentinel');before=[o.Name for o in doc.Objects]
+        worker=Path(QtCore.QCoreApplication.applicationDirPath())/'OM9ThreeDmImportWorker.exe';hidden=worker.with_suffix('.test-disabled')
+        doc=App.newDocument('WorkerFailure');doc.UndoMode=1;sentinel=doc.addObject('Part::Feature','Sentinel')
+        doc.saveAs(str(out/'worker-failure-baseline.FCStd'))
+        before=[o.Name for o in doc.Objects]
+        before_undo=doc.UndoCount;before_modified=Gui.activeDocument().Modified
+        for invalid in ['invalid','0','-1','2147483648','9223372036854775808']:
+            os.environ['OM9_3DM_WORKERS']=invalid;rejected=False
+            try:ThreeDm.import_file(str(fixture),doc,mode='preserve')
+            except RuntimeError as error:rejected='OM9_3DM_WORKERS' in str(error)
+            check('invalid worker override '+invalid+' rejects before document or Undo mutation',
+                rejected and before==[o.Name for o in doc.Objects]
+                and doc.UndoCount==before_undo and Gui.activeDocument().Modified==before_modified)
+        os.environ['OM9_3DM_WORKERS']='4'
+        check('worker failure cleanup fixture has a parallel host budget',default_workers>1)
         failed=False;worker.rename(hidden)
         try:
             try:ThreeDm.import_file(str(fixture),doc,mode='preserve')
@@ -54,7 +99,9 @@ def run():
         check('source bytes unchanged',hashlib.sha256(fixture.read_bytes()).hexdigest()==source_hash)
         report['ok']=True
     except Exception:report.update(ok=False,error=traceback.format_exc())
-    os.environ.pop('OM9_3DM_WORKERS',None)
+    finally:
+        if previous_workers is None:os.environ.pop('OM9_3DM_WORKERS',None)
+        else:os.environ['OM9_3DM_WORKERS']=previous_workers
     (out/'results.json').write_text(json.dumps(report,indent=2))
     for name in list(App.listDocuments()):App.closeDocument(name)
     QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)

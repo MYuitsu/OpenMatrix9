@@ -110,6 +110,13 @@ add_dependencies(
     OpenMatrix9Rust
 )
 
+# The native import adapter calls the Rust worker-count policy. Propagate it to
+# the import helper and standalone consumers as well as the GUI module.
+target_link_libraries(OM9ThreeDm PUBLIC OpenMatrix9RustLib)
+if(WIN32)
+    target_link_libraries(OM9ThreeDm PUBLIC ws2_32 userenv ntdll bcrypt)
+endif()
+
 
 
 # ============================================================
@@ -122,6 +129,8 @@ set(
     CoreUnits.h
     CoreObjects.cpp
     CoreObjects.h
+    CoreTolerance.cpp
+    CoreTolerance.h
     CoreCPlanes.cpp
     CoreCPlanes.h
 

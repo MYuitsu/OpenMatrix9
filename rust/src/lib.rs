@@ -4,6 +4,7 @@ pub mod circle_tangent;
 pub mod coordinates;
 pub mod cplanes;
 pub mod units;
+pub mod tolerances;
 pub mod layers;
 pub mod command_completion;
 pub mod core_3dm;
@@ -39,5 +40,6 @@ pub mod solid;
 pub mod rectangle;
 pub mod surface_refit;
 pub mod workspace;
+pub mod worker_budget;
 
 pub mod viewport_title;

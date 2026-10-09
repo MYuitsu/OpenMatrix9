@@ -1,0 +1,382 @@
+{
+  "schema_version": 1,
+  "checkpoint": "rhino-core-tolerance-workers",
+  "date": "2026-10-09T21:17:06+07:00",
+  "parent_commit": "22fecb23661515d4c446aa83e1e2c37500e5381a",
+  "p0_status": "in_progress",
+  "native_module": {
+    "path": "H:/FreeCAD-src/build/reusable-history-runtime/bin/OpenMatrix9Gui.pyd",
+    "sha256": "ea12455c1a6d4065dc02d29c5923a8148818b51e051b989bcc75037028f40e1d"
+  },
+  "worker": {
+    "path": "H:/FreeCAD-src/build/reusable-history-runtime/bin/OM9ThreeDmImportWorker.exe",
+    "sha256": "649116200f2acb4aeeada8f5432019a9af0e4cf8b38e1c41cf7d63a04bc0535d",
+    "observed": {
+      "logical_cpus": 24,
+      "default_workers": 14,
+      "source_bytes": 15489,
+      "above_four_exercised": true,
+      "runs": [
+        {
+          "label": "serial",
+          "override": 1,
+          "groups": [
+            {
+              "group": "geometry",
+              "independent_roots": 11,
+              "expected_workers": 1,
+              "observed_requests": 0,
+              "partition_sizes": []
+            },
+            {
+              "group": "definitions",
+              "independent_roots": 8,
+              "expected_workers": 1,
+              "observed_requests": 0,
+              "partition_sizes": []
+            }
+          ]
+        },
+        {
+          "label": "four",
+          "override": 4,
+          "groups": [
+            {
+              "group": "geometry",
+              "independent_roots": 11,
+              "expected_workers": 4,
+              "observed_requests": 4,
+              "partition_sizes": [
+                3,
+                3,
+                3,
+                2
+              ]
+            },
+            {
+              "group": "definitions",
+              "independent_roots": 8,
+              "expected_workers": 4,
+              "observed_requests": 4,
+              "partition_sizes": [
+                2,
+                2,
+                2,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "label": "above_four",
+          "override": 64,
+          "groups": [
+            {
+              "group": "geometry",
+              "independent_roots": 11,
+              "expected_workers": 11,
+              "observed_requests": 11,
+              "partition_sizes": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ]
+            },
+            {
+              "group": "definitions",
+              "independent_roots": 8,
+              "expected_workers": 8,
+              "observed_requests": 8,
+              "partition_sizes": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "label": "default",
+          "override": null,
+          "groups": [
+            {
+              "group": "geometry",
+              "independent_roots": 11,
+              "expected_workers": 11,
+              "observed_requests": 11,
+              "partition_sizes": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ]
+            },
+            {
+              "group": "definitions",
+              "independent_roots": 8,
+              "expected_workers": 8,
+              "observed_requests": 8,
+              "partition_sizes": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "build": {
+    "gui_exit": 0,
+    "gui_session": 35714,
+    "standalone_geometry_exit": 0,
+    "standalone_session": 37907
+  },
+  "rust": {
+    "tests_passed": 347,
+    "test_exit": 0,
+    "clippy_exit": 0,
+    "warning_scope": "Existing warning diagnostics remain; no diagnostics in the two new modules."
+  },
+  "python": {
+    "run": 50,
+    "passed": 49,
+    "skipped": 1,
+    "exit": 0
+  },
+  "accepted_runs": [
+    {
+      "suite": "tolerance",
+      "path": "build/merge_replay-1/dde13a0e4de2408f88a4e0da1aef7713/results.json",
+      "count": 29,
+      "process_exit": 0,
+      "result_sha256": "0f046186e3b23bc4514db08998a6f12cb4003c58926389e713e2121ce7b9a09c",
+      "module_proof": "build/merge_replay-1/dde13a0e4de2408f88a4e0da1aef7713/merge-native-module.json",
+      "macro": "rhino_core_tolerance_smoke.FCMacro",
+      "macro_sha256": "b7e0dade6aeab5944260a6e807a4433ce65c265f9f88c603c2467d30abf0f47a",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "ea12455c1a6d4065dc02d29c5923a8148818b51e051b989bcc75037028f40e1d"
+    },
+    {
+      "suite": "tolerance-cold",
+      "path": "build/merge_replay-1/4e7d7c12fc30466c8b3c4fa4a4974243/results.json",
+      "count": 4,
+      "process_exit": 0,
+      "result_sha256": "4758ef357a7f7ee9d32aab79c899a5584d38ae753d998331e5cc55e100d7e627",
+      "module_proof": "build/merge_replay-1/4e7d7c12fc30466c8b3c4fa4a4974243/merge-native-module.json",
+      "macro": "rhino_core_tolerance_smoke.FCMacro",
+      "macro_sha256": "b7e0dade6aeab5944260a6e807a4433ce65c265f9f88c603c2467d30abf0f47a",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "ea12455c1a6d4065dc02d29c5923a8148818b51e051b989bcc75037028f40e1d"
+    },
+    {
+      "suite": "edit",
+      "path": "build/merge_replay-1/6f89e136f98249c8af312619954c2d70/results.json",
+      "count": 115,
+      "process_exit": 0,
+      "result_sha256": "a569de81ff658cb175491487a4bbb32bd70b1a230d12c887e417f86f8a2d7c4c",
+      "module_proof": "build/merge_replay-1/6f89e136f98249c8af312619954c2d70/merge-native-module.json",
+      "macro": "edit_commands_smoke.FCMacro",
+      "macro_sha256": "4ab90521116651e7b879bf33df5804f8d7ebf49a8e66b012038c653beefe800b",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "ea12455c1a6d4065dc02d29c5923a8148818b51e051b989bcc75037028f40e1d"
+    },
+    {
+      "suite": "edit-options",
+      "path": "build/merge_replay-1/23daded1d0b64807ac6055f427677a9d/results.json",
+      "count": 57,
+      "process_exit": 0,
+      "result_sha256": "ccbfd2d951aeec12085b66817e64444ffaedf09122351490f02474c3c62d8873",
+      "module_proof": "build/merge_replay-1/23daded1d0b64807ac6055f427677a9d/merge-native-module.json",
+      "macro": "edit_options_smoke.FCMacro",
+      "macro_sha256": "6f560804cee5fd7cac109b237bc57501d4f9e1c8eaba57b19c32d8695678cee3",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "ea12455c1a6d4065dc02d29c5923a8148818b51e051b989bcc75037028f40e1d"
+    },
+    {
+      "suite": "history",
+      "path": "build/merge_replay-1/8adfbb8717774dbc8c639512b3ab1ae1/results.json",
+      "count": 83,
+      "process_exit": 0,
+      "result_sha256": "819b78a0632e02ad40de31a3e7dd03527ea86e911b6a44aeb95319d16d47e7be",
+      "module_proof": "build/merge_replay-1/8adfbb8717774dbc8c639512b3ab1ae1/merge-native-module.json",
+      "macro": "history_smoke.FCMacro",
+      "macro_sha256": "fbe0de2b3fd041563c892b8408ea5bc46e9d4bdadf78e42b3d13f898a6b65c6f",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "ea12455c1a6d4065dc02d29c5923a8148818b51e051b989bcc75037028f40e1d"
+    },
+    {
+      "suite": "surface",
+      "path": "build/merge_replay-1/f78d25d73905410da9ec7c905f7d9a86/results.json",
+      "count": 97,
+      "process_exit": 0,
+      "result_sha256": "ceaec0798ec8174f4b8624882c369f0f25e5c2f1705d06bb46093c47d4d478f1",
+      "module_proof": "build/merge_replay-1/f78d25d73905410da9ec7c905f7d9a86/merge-native-module.json",
+      "macro": "surface_commands_smoke.FCMacro",
+      "macro_sha256": "386e0ac64e5a8dc96a1ecb2517ba00c4f3b5b29f5a5904eaea18d897a837533a",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "ea12455c1a6d4065dc02d29c5923a8148818b51e051b989bcc75037028f40e1d"
+    },
+    {
+      "suite": "units",
+      "path": "build/merge_replay-1/0b0d0c7afd0a418f92b3f0d358b88c24/results.json",
+      "count": 20,
+      "process_exit": 0,
+      "result_sha256": "76a4a19f5535e04442b565d3be20ddaf563a1a636ff86e6539aaabbfab8a3d78",
+      "module_proof": "build/merge_replay-1/0b0d0c7afd0a418f92b3f0d358b88c24/merge-native-module.json",
+      "macro": "rhino_core_units_smoke.FCMacro",
+      "macro_sha256": "f5b4a914e2df9a1955bcaf38b5a05887b621364effbb2bbcc3ba81149292723c",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "ea12455c1a6d4065dc02d29c5923a8148818b51e051b989bcc75037028f40e1d"
+    },
+    {
+      "suite": "workers",
+      "path": "build/merge_replay-1/891ce9994810495686b5cc27a40ded01/results.json",
+      "count": 39,
+      "process_exit": 0,
+      "result_sha256": "b0d5152a3c3576f1abda20ea255041a4df228914e4fbd30012703ca06afb8a69",
+      "module_proof": "build/merge_replay-1/891ce9994810495686b5cc27a40ded01/merge-native-module.json",
+      "macro": "three_dm_import_workers_smoke.FCMacro",
+      "macro_sha256": "17db586a200a94ae9ec6eb7d68071ac4df13739a82619084061e323236fa2791",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "ea12455c1a6d4065dc02d29c5923a8148818b51e051b989bcc75037028f40e1d"
+    }
+  ],
+  "native_assertions": 444,
+  "excluded_failed_runs": [
+    {
+      "path": "build/merge_replay-1/244ac570324f49809fa22fba96af0678/results.json",
+      "sha256": "cf4e8b0f9508dd8ae1179ab09f9bfa6252d01eb4cf815c6e9e91ce157f97d013",
+      "reason": "Old module rejected document curve gap .005 at tau .01."
+    },
+    {
+      "path": "build/merge_replay-1/9661eee942ac44fc93804ae47f2ab2ad/results.json",
+      "sha256": "c8176fa214a5a04572b15718397585b8e943b02f7443b5a66ba2c7f2bee97c61",
+      "reason": "Before native backend check, surface Join silently accepted a cutoff below OCCT resolution."
+    },
+    {
+      "path": "build/merge_replay-1/53373d3c5aae4df7a551cc8abf5a52fd/results.json",
+      "sha256": "13b7deaf32cf294f6bbb4c7bdd2933eb4835305974d6c0b52e010a6b06511681",
+      "reason": "Test environment lacked worker beside SDK FreeCAD executable; staged matching built helper temporarily for final run."
+    }
+  ],
+  "source_files": [
+    {
+      "path": "rust/src/tolerances.rs",
+      "sha256": "f3fa758c1aa511d5de0701fa7dbbed351c4f7255d08b9565e566fc2d4399f9b1"
+    },
+    {
+      "path": "rust/tests/tolerances.rs",
+      "sha256": "e7e21c8ab95896a6d7cbc12678fd6cbd5e990be6a1dc19166af8fc8cfb90e19b"
+    },
+    {
+      "path": "rust/src/worker_budget.rs",
+      "sha256": "ca52b3994b700ccda0ae2dfe34107e6e80ea20a668739d40e8693325c71d20a2"
+    },
+    {
+      "path": "rust/tests/worker_budget.rs",
+      "sha256": "29f03e4d6ee806fd29b0d3afea3264a0062418848ca25db46ee4362a22e9eb13"
+    },
+    {
+      "path": "rust/src/lib.rs",
+      "sha256": "315c25a84326fc6701c5017431bc10a6a20ad997d9f143dbc61b7744801a7d6b"
+    },
+    {
+      "path": "Gui/CoreTolerance.cpp",
+      "sha256": "289aead99d2af57c3025eeb3ed17e07e110fb823547c704e18e6b4042f639e13"
+    },
+    {
+      "path": "Gui/CoreTolerance.h",
+      "sha256": "d258195dc48954a7a559c439de4873cad6e8d5c1ff238f6be7de4cab2bb806fe"
+    },
+    {
+      "path": "Gui/EditController.cpp",
+      "sha256": "10aae98b26d2f6ca3480caf8ee12664dd67dcf77a1ee97c4a79a1517ecad5dd1"
+    },
+    {
+      "path": "Gui/EditController.h",
+      "sha256": "9cdc05790b49332143b2313fcc21c932abc52f9197e885f248109b03b10e9588"
+    },
+    {
+      "path": "Gui/EditGeometry.cpp",
+      "sha256": "fa9767a9d6de99156fbf8891e93c5f140c8eba7b72450824840fb170baab9452"
+    },
+    {
+      "path": "Gui/EditGeometry.h",
+      "sha256": "187d55ecafdde2c57f6919cc3e25bc77e6f139c52f5aceddf50f8c1cf4628e2f"
+    },
+    {
+      "path": "Gui/ThreeDmImportJobs.cpp",
+      "sha256": "ee47e8f7bcc47ca71e9bec3edfb2f074ed6f076b1290afae21f13e9232f32f0f"
+    },
+    {
+      "path": "Gui/ThreeDmImportJobs.h",
+      "sha256": "4369fb6c78aaf1309197c8ea5408fe7016d17640402c028b5a8401d028ef9d8d"
+    },
+    {
+      "path": "Gui/CMakeLists.txt",
+      "sha256": "349c43f82fdad01e3f69e55fecac04a19fc5bd1443a9fa307f509f92c0cda20c"
+    },
+    {
+      "path": "tests/native/CMakeLists.txt",
+      "sha256": "376ed54b2876ebc927be1cb4bd493c9d72ee0301ef9e91bdde3bac440637aa0d"
+    },
+    {
+      "path": "tests/rhino_core_tolerance_smoke.FCMacro",
+      "sha256": "b7e0dade6aeab5944260a6e807a4433ce65c265f9f88c603c2467d30abf0f47a"
+    },
+    {
+      "path": "tests/three_dm_import_workers_smoke.FCMacro",
+      "sha256": "17db586a200a94ae9ec6eb7d68071ac4df13739a82619084061e323236fa2791"
+    }
+  ],
+  "limits": [
+    "Only ordinary curve/surface Join uses the new effective resolver; other solvers and associative History migration remain open.",
+    "Worker count is not an aggregate CPU/RAM scheduler. Existing <8 roots and >16 MiB serial heuristics remain; cancellation and late-result rejection remain open.",
+    "Native FreeCAD/Qt/OCCT/openNURBS ownership remains outside safe Rust guarantees; release panic=abort cannot recover from panic/OOM.",
+    "No new Rhino application roundtrip was performed for this increment; all-P0 and all-command parity remain unverified."
+  ],
+  "spec_package": {
+    "manifest_entries": 664,
+    "json_yaml_equal": true,
+    "feature_status_unchanged": true,
+    "manifest_sha256": "305f6b00362fb513cf120cb332a7f883f9705e20d7d7d6ad90190679bfaffa40"
+  },
+  "public_source_audit": {
+    "source_files": 2040,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  },
+  "source_review": {
+    "path": "docs/reviews/2026-10-09-tolerance-workers-review.md",
+    "sha256": "1f4098fec2850ebb46d014ded0730d5d02c0d7f3deff52ee2d84ecc3a35db2a5",
+    "result": "No remaining actionable defects in the bounded tolerance/worker increments; all-P0 remains open."
+  }
+}

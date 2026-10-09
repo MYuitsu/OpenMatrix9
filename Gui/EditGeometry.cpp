@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "EditGeometry.h"
+#include "CoreUnits.h"
+#include <Mod/Part/App/TopoShape.h>
+#include <Mod/Part/App/TopoShapePy.h>
+#include <BRepBuilderAPI_Sewing.hxx>
 #include "RustBridge.h"
 #include "EditSpecialTypes.h"
 #include "HistoryFeature.h"
@@ -56,6 +60,19 @@ EditInput editInput(App::Document& doc,const std::string& name,unsigned kind,boo
 }
 EditInput nativeShapeInput(App::Document& doc,const std::string& name){return editInput(doc,name,0);}
 void verifyEditInputs(App::Document& doc,const std::vector<EditInput>& inputs){for(const auto& i:inputs){verifyObject(doc,i.guard);auto* o=doc.getObject(i.name.c_str());if(!o)throw std::runtime_error("An edit input was deleted; cancel and reselect");Ref object(o->getPyObject());if(signature(object.value)!=i.signature)throw std::runtime_error("An edit input changed; cancel and reselect");}}
+ToleranceSnapshot editJoinTolerance(const std::string& context,const std::vector<EditInput>& inputs,const std::optional<double>& overrideMm){
+    if(inputs.empty())throw std::runtime_error("Select Join inputs before resolving tolerance");
+    const bool surfaces=count(inputs.front().shape->value,"Faces")!=0;double bound=0;
+    for(const auto& input:inputs){
+        Ref box(PyObject_GetAttrString(input.shape->value,"BoundBox"));
+        for(const char* key:{"XMin","XMax","YMin","YMax","ZMin","ZMax"}){
+            Ref value(PyObject_GetAttrString(box.value,key));const double coordinate=PyFloat_AsDouble(value.value);
+            if(PyErr_Occurred()||!std::isfinite(coordinate))throw std::runtime_error("Invalid Join input bounds");
+            bound=std::max(bound,std::abs(coordinate));
+        }
+    }
+    return resolveTolerance(context,surfaces?2U:1U,overrideMm,bound);
+}
 EditShapes buildEdit(const std::vector<EditInput>& inputs,unsigned kind,std::size_t first,unsigned mode,double tolerance){
     // Spec: OM9-TOP11-005/008; OM9-SOLID-001..004. No interpreted command text.
     if(inputs.empty()||kind<1||kind>7)throw std::runtime_error("Select input objects");
@@ -66,7 +83,20 @@ EditShapes buildEdit(const std::vector<EditInput>& inputs,unsigned kind,std::siz
         bool curves=count(inputs[0].shape->value,"Faces")==0;Ref list(PyList_New(0));
         for(const auto& i:inputs){if((count(i.shape->value,"Faces")==0)!=curves)throw std::runtime_error("Join curves and surfaces separately");for(auto& e:elements(i.shape->value,curves?"Edges":"Faces"))append(list.value,e->value);}
         if(curves)output.push_back(joinEditCurves(list.value,tolerance));
-        else{auto shell=owned(PyObject_CallMethod(part.value,"makeShell","O",list.value));Ref sew(PyObject_CallMethod(shell->value,"sewShape",nullptr));if(attr(shell->value,"ShapeType")!="Shell"||count(shell->value,"Shells")!=1||count(shell->value,"Faces")!=PySequence_Size(list.value))throw std::runtime_error("Surfaces must share compatible edges to form one shell");output.push_back(shell);}
+        else{
+            if(!std::isfinite(tolerance)||tolerance<=0)throw std::runtime_error("Surface Join requires a positive finite tolerance");
+            BRepBuilderAPI_Sewing sewing(tolerance);
+            // OCCT may clamp small requests to its own resolution. Never report
+            // a cutoff smaller than the one the backend will actually use.
+            if(sewing.Tolerance()!=tolerance)throw std::runtime_error("Surface Join tolerance is below the kernel resolution; choose an explicit supported tolerance");
+            for(Py_ssize_t index=0;index<PyList_Size(list.value);++index){
+                auto* face=PyList_GetItem(list.value,index);
+                if(!PyObject_TypeCheck(face,&Part::TopoShapePy::Type))throw std::runtime_error("Surface Join requires native faces");
+                sewing.Add(static_cast<Part::TopoShapePy*>(face)->getTopoShapePtr()->getShape());
+            }
+            sewing.Perform();auto shell=owned(new Part::TopoShapePy(new Part::TopoShape(sewing.SewedShape())));
+            if(attr(shell->value,"ShapeType")!="Shell"||count(shell->value,"Shells")!=1||count(shell->value,"Faces")!=PySequence_Size(list.value))throw std::runtime_error("Surfaces must share compatible edges within the effective Join tolerance");output.push_back(shell);
+        }
     }else if(kind==2){for(const auto& i:inputs){EditShapes pieces;if(!i.components.empty())pieces=i.components;else if(i.mesh){Ref list(PyObject_CallMethod(i.shape->value,"getSeparateComponents",nullptr));for(Py_ssize_t j=0;j<PySequence_Size(list.value);++j)pieces.push_back(owned(PySequence_GetItem(list.value,j)));}else{const auto type=attr(i.shape->value,"ShapeType");if(type=="Compound"||type=="CompSolid"){Ref list(PyObject_CallMethod(i.shape->value,"childShapes",nullptr));for(Py_ssize_t j=0;j<PySequence_Size(list.value);++j)pieces.push_back(owned(PySequence_GetItem(list.value,j)));}else pieces=elements(i.shape->value,count(i.shape->value,"Faces")?"Faces":"Edges");}if(pieces.empty()||(i.components.empty()&&pieces.size()<2))throw std::runtime_error("Explode input needs separable components");output.insert(output.end(),pieces.begin(),pieces.end());}}
     else if(kind>=4){EditShape shape;const bool surfaces=surfaceOnly(inputs[0].shape->value);for(const auto& i:inputs)if(surfaceOnly(i.shape->value)!=surfaces)throw std::runtime_error("Select solid-only or surface-only Boolean sets");
         if(kind==6)shape=combined(inputs,0,inputs.size());
@@ -114,8 +144,9 @@ void verifyEditPickBoundary(const EditShapes& shapes,const std::set<std::size_t>
             if(shared)throw std::runtime_error("Pick inside a region, away from shared split boundaries");}
     }
 }
-void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const EditShapes& shapes,unsigned kind,bool remove,unsigned mode,std::size_t first,const EditProjection* projection){
-    const double tolerance=om9_edit_tolerance();
+void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const EditShapes& shapes,unsigned kind,bool remove,unsigned mode,std::size_t first,const EditProjection* projection,const ToleranceSnapshot* toleranceContext){
+    const double tolerance=toleranceContext?toleranceContext->values.effectiveMm:om9_edit_tolerance();
+    if(toleranceContext&&unitContextSnapshot(doc)!=toleranceContext->context)throw std::runtime_error("Join unit/tolerance context changed; cancel and reselect");
     verifyEditInputs(doc,inputs);for(const auto& s:shapes)if(isExplodedText(s->value))continue;else if(isEditMesh(s->value))validateEditMesh(s->value,kind>=4);else valid(s->value);
     // Deleting dependent/parametric inputs would sever unrelated models. Retain them instead.
     std::vector<std::string> deleting;for(std::size_t index=0;index<inputs.size();++index)if(remove||(kind==4&&index<first))deleting.push_back(inputs[index].name);
@@ -132,7 +163,10 @@ void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const Ed
                 for(auto& group:groups)if(PyObject_HasAttrString(group->value,"getGlobalPlacement")){Ref frame(PyObject_CallMethod(group->value,"getGlobalPlacement",nullptr)),inverse(PyObject_CallMethod(frame.value,"inverse",nullptr)),matrix(PyObject_CallMethod(inverse.value,"toMatrix",nullptr));shape=owned(textOutput?PyDict_Copy(shape->value):PyObject_CallMethod(shape->value,"copy",nullptr));if(textOutput){transformExplodedText(shape->value,matrix.value);}else if(mesh){Ref old(PyObject_GetAttrString(shape->value,"Placement")),local(PyNumber_Multiply(inverse.value,old.value));set(shape->value,"Placement",local.value);}else{Ref transformed(PyObject_CallMethod(shape->value,"transformShape","OO",matrix.value,Py_False));}break;}
             }
             Ref o(textOutput?createExplodedText(pyDoc.value,shape->value):Ref(PyObject_CallMethod(pyDoc.value,"addObject","ss",mesh?"Mesh::Feature":"Part::Feature",name(kind))));if(!textOutput)set(o.value,mesh?"Mesh":"Shape",shape->value);property(o.value,"App::PropertyString","OM9FeatureId",id.value);property(o.value,"App::PropertyString","OM9Command",command.value);property(o.value,"App::PropertyStringList","SourceNames",sources.value);Ref m(PyLong_FromUnsignedLong(mode));property(o.value,"App::PropertyInteger","BooleanMode",m.value);
-            if(kind==1){Ref t(PyFloat_FromDouble(tolerance));property(o.value,"App::PropertyFloat","JoinTolerance",t.value);}
+            if(kind==1){Ref t(PyFloat_FromDouble(tolerance));property(o.value,"App::PropertyFloat","JoinTolerance",t.value);
+                if(toleranceContext){Ref report(PyUnicode_FromString(toleranceContext->report.c_str()));property(o.value,"App::PropertyString","OM9ToleranceReport",report.value);
+                    auto* native=doc.getObject(attr(o.value,"Name").c_str());if(!native)throw std::runtime_error("Cannot resolve Join output for provenance");addUnitContextProvenance(*native,toleranceContext->context);}
+            }
             if(kind==3){property(o.value,"App::PropertyBool","TrimExtendLines",om9_edit_option(1)?Py_True:Py_False);property(o.value,"App::PropertyBool","TrimApparentIntersections",om9_edit_option(2)?Py_True:Py_False);
                 if(projection){Ref frame(PyList_New(0));for(const auto& row:{projection->eye,projection->right,projection->up,projection->forward})for(double value:row){Ref v(PyFloat_FromDouble(value));append(frame.value,v.value);}property(o.value,"App::PropertyFloatList","TrimProjectionFrame",frame.value);property(o.value,"App::PropertyBool","TrimPerspectiveProjection",projection->perspective?Py_True:Py_False);}}
             if(kind==2){Ref sv(PyObject_GetAttrString(source.value,"ViewObject")),ov(PyObject_GetAttrString(o.value,"ViewObject"));for(const char* key:{"ShapeColor","LineColor","PointColor","Transparency","LineWidth","PointSize","DisplayMode","TextColor"})if(PyObject_HasAttrString(sv.value,key)&&PyObject_HasAttrString(ov.value,key)){Ref style(PyObject_GetAttrString(sv.value,key));if(std::string(key)=="DisplayMode"){Ref modes(PyObject_CallMethod(ov.value,"listDisplayModes",nullptr));if(PySequence_Contains(modes.value,style.value)!=1)continue;}set(ov.value,key,style.value);}for(auto& group:groups){Ref added(PyObject_CallMethod(group->value,"addObject","O",o.value));}applyExplodeMetadata(o.value,shapes[index]);}
