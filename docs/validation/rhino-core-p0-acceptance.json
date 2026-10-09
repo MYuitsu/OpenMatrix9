@@ -105,6 +105,10 @@
             {
               "report": "docs/validation/2026-10-10-rhino-core-polycurve-partition.md",
               "scope": "Raw NURBS child count/null-storage rejected through ordinary polycurve entry before Domain/CRC; full allocation/host/path coverage remains open."
+            },
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-hatch-input-gate.md",
+              "scope": "Whole owned current Hatch NURBS tree gate before covered source archive/copy/construction entries; early malformed basis, atomic sentinel/Undo controls, existing native and host editors retained. Full allocation/archive/wrapper coverage open."
             }
           ]
         },
@@ -1124,5 +1128,5 @@
       ]
     }
   ],
-  "updated_at": "2026-10-10T03:10:51+07:00"
+  "updated_at": "2026-10-10T03:32:43+07:00"
 }

@@ -267,7 +267,7 @@ pub fn validate_export_manifest(raw: &str) -> Result<(), &'static str> {
         for key in ["visible", "locked"] {
             if item
                 .get(key)
-                .is_some_and(|value| !matches!(value, Json::Boolean))
+                .is_some_and(|value| !matches!(value, Json::Boolean(_)))
             {
                 return Err("export visibility and lock must be boolean");
             }

@@ -31,6 +31,7 @@ pub mod curve_conversion;
 pub mod curve_conversion_ffi;
 pub mod polycurve_contract;
 pub mod polycurve_contract_ffi;
+pub mod hatch_loop_input;
 pub mod spline_ffi;
 pub mod ellipse;
 mod curve_ffi;

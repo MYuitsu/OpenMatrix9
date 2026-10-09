@@ -30,7 +30,8 @@
         "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md",
         "../../../docs/validation/2026-10-10-rhino-core-curve-parameters.md",
         "../../../docs/validation/2026-10-10-rhino-core-polycurve-partition.md",
-        "../../../docs/validation/2026-10-10-rhino-core-instance-isolation.md"
+        "../../../docs/validation/2026-10-10-rhino-core-instance-isolation.md",
+        "../../../docs/validation/2026-10-10-rhino-core-hatch-input-gate.md"
       ]
     },
     {
@@ -1699,6 +1700,16 @@
       ],
       "evidence": "../../../docs/validation/2026-10-10-rhino-core-instance-isolation.md",
       "scope": "Authored T06 shared definition, mirror/nonuniform affine coordinates, B-only isolation and named atomic transform rejections; all P0 remains open."
+    },
+    {
+      "id": "rhino-core-hatch-input-gate",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-hatch-input-gate.md",
+      "scope": "Owned current Hatch NURBS preflight before covered source/copy/construction entries; full T07 and P0 remain open."
     }
   ]
 }

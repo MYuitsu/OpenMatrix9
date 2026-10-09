@@ -2,6 +2,9 @@
 #include <cstddef>
 #include <cstdint>
 extern "C" {
+// Synchronous immutable UTF8 bytes; Rust retains no pointer. Status0 accepts
+// bounded current-loop NURBS input, not native ownership or topology.
+unsigned int om9_hatch_loop_input(const unsigned char* bytes,std::size_t length);
 bool om9_curve_input_units(double);
 std::size_t om9_command_repeat_candidate();
 bool om9_command_repeatable(std::size_t);

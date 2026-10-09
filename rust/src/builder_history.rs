@@ -79,7 +79,7 @@ pub(crate) enum Json {
     Array(Vec<Json>),
     String(String),
     Number(f64),
-    Boolean,
+    Boolean(bool),
     Other,
 }
 struct Parser<'a> {
@@ -227,7 +227,7 @@ impl Parser<'_> {
                     return Err("literal");
                 }
                 self.i += word.len();
-                Ok(if word == "null" { Json::Other } else { Json::Boolean })
+                Ok(if word == "null" { Json::Other } else { Json::Boolean(word == "true") })
             }
             _ => {
                 let start = self.i;
@@ -309,7 +309,7 @@ pub(crate) fn parse_document(
 ) -> Result<Json, &'static str> {
     parse_document_at_depth(raw, max_bytes, max_nodes, 64)
 }
-fn parse_document_at_depth(
+pub(crate) fn parse_document_at_depth(
     raw: &str,
     max_bytes: usize,
     max_nodes: usize,

@@ -10,6 +10,13 @@ evidence_scope: initial_source_audit_2026-10-09
 
 # RCORE-01 — Kiểu đối tượng và ranh giới kernel
 
+<!-- rhino-core-hatch-input-gate:start -->
+Đã bổ sung gate Rust cho dữ liệu NURBS của vòng Hatch trước đọc nguồn/copy/dựng
+native; dùng lại editor và exporter hiện có.541 kiểm tra Rust,27 kiểm tra native,
+5 bộ hồi quy native và269 kiểm tra FreeCAD đạt. Đây là một phần T07;
+**toàn bộ P0 vẫn đang triển khai**. [Bằng chứng và giới hạn](../../../docs/validation/2026-10-10-rhino-core-hatch-input-gate.md).
+<!-- rhino-core-hatch-input-gate:end -->
+
 <!-- rhino-core-instance-isolation:start -->
 Dùng lại App::Link, mirror/scale không đều và các exporter hiện có; thêm fixture
 kiểm đúng tọa độ, giữ nguyên member/definition/instance A khi chỉ sửa B.

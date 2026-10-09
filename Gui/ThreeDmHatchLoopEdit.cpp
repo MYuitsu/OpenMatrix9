@@ -1,4 +1,5 @@
 #include "ThreeDmHatch.h"
+#include "RustBridge.h"
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <cmath>
@@ -107,7 +108,14 @@ std::unique_ptr<ON_Curve> decode(const QJsonValue& value,const ON_Curve* source,
 }
 }
 QJsonObject hatchLoopFields(const ON_Hatch& hatch){validateHatchRhino5Data(hatch);auto loops=hatchLoopInventory(hatch);for(int i=0;i<loops.size();++i){auto o=loops[i].toObject();o["source_index"]=i;o["curve"]=numeric(o["curve"].toObject(),i);loops[i]=o;}return {{"schema_version",1},{"loops",loops}};}
+void preflightHatchLoopFields(const QJsonValue& value){
+    if(!value.isObject())throw ExchangeError("Invalid Hatch loop basis input: expected object");
+    const auto raw=QJsonDocument(value.toObject()).toJson(QJsonDocument::Compact);
+    const auto status=om9_hatch_loop_input(reinterpret_cast<const unsigned char*>(raw.constData()),static_cast<std::size_t>(raw.size()));
+    if(status!=0){const char* reason=status==2?"malformed or oversized input":status==3?"invalid schema or unsupported curve":status==4?"invalid control points, weights, knots or domain":"invalid input bytes";throw ExchangeError(std::string("Invalid Hatch loop basis input: ")+reason);}
+}
 void applyHatchLoopFields(ON_Hatch& hatch,const QJsonValue& value){
+    preflightHatchLoopFields(value);
     validateHatchRhino5Data(hatch);if(!value.isObject()||QJsonDocument(value.toObject()).toJson(QJsonDocument::Compact).size()>32ULL*1024*1024)throw ExchangeError("Invalid/oversized native Hatch loop payload");auto fields=value.toObject();keys(fields,{"schema_version","loops"});integer(fields["schema_version"],1,1);auto values=array(fields["loops"],1,16384);Budget budget;std::vector<std::unique_ptr<ON_HatchLoop>> loops;
     for(auto v:values){if(!v.isObject())throw ExchangeError("Native Hatch loop row must be an object");auto o=v.toObject();keys(o,{"type","source_index","curve"});auto index=o["source_index"];const ON_Curve* source=index.isNull()?nullptr:hatch.Loop(integer(index,0,hatch.LoopCount()-1))->Curve();if(!o["curve"].isObject()||o["curve"].toObject()["source_index"]!=index)throw ExchangeError("Native Hatch loop and curve source index differ");auto curve=decode(o["curve"],source,0,budget);if(!curve->IsClosed())throw ExchangeError("Native Hatch loop edit must be closed");auto type=static_cast<ON_HatchLoop::eLoopType>(integer(o["type"],0,1));loops.push_back(std::make_unique<ON_HatchLoop>(curve.release(),type));}
     ON_Hatch staged(hatch);while(staged.LoopCount())if(!staged.RemoveLoop(staged.LoopCount()-1))throw ExchangeError("Cannot stage native Hatch loop replacement");for(auto& loop:loops)staged.AddLoop(loop.release());validateHatchRhino5Data(staged);topology(staged);

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-10T03:10:51+07:00",
+  "updated_at": "2026-10-10T03:32:43+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -1548,7 +1548,7 @@
       ],
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/02-units-tolerances.md",
       "next_action": "Continue operation-specific effective tolerance and capability/permission coverage; shared runtime guards now cover Edit/Boolean, Rebuild and interactive Surface only. Durable History and remaining P0 contracts stay open.",
-      "updated_at": "2026-10-10T03:10:51+07:00",
+      "updated_at": "2026-10-10T03:32:43+07:00",
       "scope": "Partial P0 foundations from pre-merge snapshot 5011bab; historical 321 Rust, 23 Python and 657 native GUI assertions do not validate the merged revision or complete P0.",
       "followup_evidence": [
         "docs/validation/2026-10-09-rhino-core-object-foundations.md",
@@ -1558,7 +1558,8 @@
         "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
         "docs/validation/2026-10-10-rhino-core-curve-parameters.md",
         "docs/validation/2026-10-10-rhino-core-polycurve-partition.md",
-        "docs/validation/2026-10-10-rhino-core-instance-isolation.md"
+        "docs/validation/2026-10-10-rhino-core-instance-isolation.md",
+        "docs/validation/2026-10-10-rhino-core-hatch-input-gate.md"
       ]
     },
     {
@@ -2092,6 +2093,61 @@
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
       "next_action": "Complete exact T07 input rejection and T08 stale-preview lifecycle using audited existing gates; continue all P0.",
       "updated_at": "2026-10-10T03:10:51+07:00"
+    },
+    {
+      "key": "rhino-core-hatch-input-gate",
+      "stage": "feature-port",
+      "feature_ids": [],
+      "status": "validated_bounded_increment",
+      "scope": "Owned Hatch loop NURBS gate; partial RCORE-01.T07.",
+      "outputs": [
+        "Gui/RustBridge.h",
+        "Gui/ThreeDmHatch.cpp",
+        "Gui/ThreeDmHatch.h",
+        "Gui/ThreeDmHatchLoopEdit.cpp",
+        "Gui/ThreeDmMerge.cpp",
+        "Gui/ThreeDmPython.cpp",
+        "rust/src/builder_history.rs",
+        "rust/src/core_3dm_archive.rs",
+        "rust/src/hatch_loop_input.rs",
+        "rust/src/lib.rs",
+        "rust/tests/hatch_loop_input.rs",
+        "tests/native/CMakeLists.txt",
+        "tests/native/rhino_core_hatch_input_gate.cpp",
+        "tests/rhino_core_hatch_input_gate_smoke.FCMacro",
+        "docs/validation/2026-10-10-rhino-core-hatch-input-gate.md",
+        "docs/validation/2026-10-10-rhino-core-hatch-input-gate-evidence.json"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-10-rhino-core-hatch-input-gate-evidence.json",
+        "docs/reviews/2026-10-10-hatch-input-rust-review.md",
+        "docs/reviews/2026-10-10-hatch-input-native-review.md"
+      ],
+      "tests": [
+        {
+          "command": "Rust full/Clippy + Python tools",
+          "result": "541 Rust pass,Clippy0,49 Python pass1skip"
+        },
+        {
+          "command": "native Hatch input gate + existing regressions",
+          "result": "27checks +5 CTests pass; build/run0"
+        },
+        {
+          "command": "SDK and fresh FreeCAD controls",
+          "result": "configure/build0;269checks,5 processes0, matching8b03c899 module"
+        }
+      ],
+      "uncertainties": [
+        "Partial T07 only: raw archive parser, proxy/member/trim wrappers, all native allocation boundaries and other factories remain open.",
+        "Owned JSON/count/logical byte limits are not aggregate native/process/worker budgets.",
+        "Native caller supplies live initialized immutable readable allocation; no pointer retained; ABI guards cannot establish accessibility.",
+        "Existing native non-NURBS numeric/class/source/topology validation is retained; gate certifies only bounded current NURBS admission.",
+        "Expanded ghost-pole positive control and compact periodic preservation are not certified.",
+        "T08 delayed completion/release, T09 true periodic FCStd, T10 durable host query and T11 explicit mutation-owner lifecycle remain open."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
+      "next_action": "Complete T09 using existing FCStd persistence and authored true periodic curve plus existing seam/hole faces; continue all P0.",
+      "updated_at": "2026-10-10T03:32:43+07:00"
     }
   ],
   "merge_context": {
