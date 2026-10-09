@@ -1,0 +1,117 @@
+# OM9-CURVE-005 advanced native geometry, references and lifecycle.
+import json,math,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh,Points
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(150,loop.quit);loop.exec()
+def enter(text):
+    field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def circle(*args):
+    before=len(doc.Objects);enter('Circle')
+    for text in args:enter(text)
+    check('Circle commits exactly one object: '+str(args[:3]),len(doc.Objects)==before+1)
+    return doc.Objects[-1]
+def exact(obj,r,center):
+    c=obj.Shape.Edges[0].Curve
+    return obj.Shape.isValid() and obj.Shape.isClosed() and len(obj.Shape.Edges)==1 and isinstance(c,Part.Circle) and abs(c.Radius-r)<1e-6 and (c.Center-App.Vector(*center)).Length<1e-6
+def feature(name,shape):
+    obj=doc.addObject('Part::Feature',name);obj.Shape=shape;doc.recompute();return obj
+def screen(p):
+    viewer=next(w for w in window.findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible());target=viewer.viewport();pixel=Gui.activeDocument().activeView().getPointOnScreen(App.Vector(*p));ratio=viewer.devicePixelRatioF()
+    return target,QtCore.QPoint(round(pixel[0]/ratio),round(target.height()-(pixel[1]+1)/ratio))
+def run():
+    global doc,field,window
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__
+        check('Selected new native module loaded',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        window=Gui.getMainWindow();window.resize(1400,950);field=command_input(window);doc=App.newDocument('CircleAdvanced');doc.UndoMode=1
+        view=Gui.activeDocument().activeView();view.setAnimationEnabled(False);view.viewTop();settle()
+        obj=circle('3Point','-3,0','3,0','Radius=5','0,10');check('3Point Radius and positive center side',exact(obj,5,[0,4,0]))
+        obj=circle('3Point','-3,0','3,0','Radius','5','0,-10');check('3Point Radius and opposite center side',exact(obj,5,[0,-4,0]))
+        obj=circle('3Point','-3,0','3,0','Radius','3,5','0,10');check('Radius location measures from second circumference point',exact(obj,5,[0,4,0]))
+        count=len(doc.Objects);enter('Circle');enter('3Point');enter('-3,0');enter('3,0');enter('Radius=2')
+        check('Impossible chord Radius stays active',len(doc.Objects)==count and 'smaller than' in command_prompt(window).text());enter('Radius=3');enter('0,5')
+        check('Diameter-limit Radius recovers and keeps chord endpoints',len(doc.Objects)==count+1 and exact(doc.Objects[-1],3,[0,0,0]))
+        obj=circle('FitPoints','1,2,6','5,2,2','1,2,-2','-3,2,2','');check('Spatial FitPoints produces exact best-plane circle',exact(obj,4,[1,2,2]) and obj.CircleFitDeviation.Value<1e-7)
+        cloud=doc.addObject('Points::Feature','Cloud');cloud.Points=Points.Points([App.Vector(4,0,0),App.Vector(0,4,0),App.Vector(-4,0,0),App.Vector(0,-4,0)]);cloud.Placement.Base=App.Vector(10,20,30);doc.recompute();Gui.Selection.clearSelection();Gui.Selection.addSelection(cloud)
+        obj=circle('FitPoints','');check('FitPoints selected cloud preserves own Placement',exact(obj,4,[10,20,30]))
+        mesh=doc.addObject('Mesh::Feature','MeshFixture');mesh.Mesh=Mesh.Mesh([(App.Vector(-3,0,0),App.Vector(3,0,0),App.Vector(0,3,0))]);mesh.Placement.Base=App.Vector(10,20,30);doc.recompute();Gui.Selection.clearSelection();Gui.Selection.addSelection(mesh)
+        obj=circle('FitPoints','Selection','');check('FitPoints mesh vertices preserve own Placement',exact(obj,3,[10,20,30]))
+        poles=[App.Vector(4,0,0),App.Vector(0,4,0),App.Vector(-4,0,0),App.Vector(0,-4,0)];curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots(poles,[4,4],[0.,1.],False,3);source=feature('Poles',curve.toShape());source.Placement.Base=App.Vector(10,20,30);doc.recompute();Gui.Selection.clearSelection();Gui.Selection.addSelection(source)
+        obj=circle('FitPoints','');check('FitPoints curve control poles preserve Placement',exact(obj,4,[10,20,30]))
+        surface=Part.BSplineSurface();surface.buildFromPolesMultsKnots([[App.Vector(-1,-1,0),App.Vector(-1,1,0)],[App.Vector(1,-1,0),App.Vector(1,1,0)]],[2,2],[2,2],[0.,1.],[0.,1.],False,False,1,1)
+        face=feature('SurfacePoles',surface.toShape());face.Placement.Base=App.Vector(10,20,30);doc.recompute();Gui.Selection.clearSelection();Gui.Selection.addSelection(face,'Face1')
+        obj=circle('FitPoints','');check('FitPoints surface control poles preserve Placement',exact(obj,math.sqrt(2),[10,20,30]))
+        Gui.Selection.clearSelection();count=len(doc.Objects);enter('Circle');enter('FitPoints');enter('0,0');enter('1,0');enter('2,0');enter('')
+        check('Collinear fit fails without object',len(doc.Objects)==count and 'collinear' in command_prompt(window).text());enter('Undo');enter('0,1');enter('');check('FitPoints Undo recovers',len(doc.Objects)==count+1)
+        obj=circle('Deformable=Yes','Degree=3','PointCount=12','0,0','5');c=obj.Shape.Edges[0].Curve
+        check('Deformable native periodic nonrational NURBS exact options',isinstance(c,Part.BSplineCurve) and c.Degree==3 and c.NbPoles==12 and c.isPeriodic() and not c.isRational() and obj.Shape.isClosed() and obj.CircleDeformable)
+        deviation=max(abs(c.value(c.FirstParameter+(c.LastParameter-c.FirstParameter)*i/512).Length-5) for i in range(513));check('Deformable sampled approximation error recorded',deviation<0.01 and abs(obj.CircleApproxDeviation.Value-deviation)<1e-5)
+        obj=circle('Deformable=Yes','Degree=2','PointCount=10','0,0','5');check('Even degree periodic approximation preserves requested degree',obj.Shape.Edges[0].Curve.Degree==2 and obj.Shape.Edges[0].Curve.NbPoles==10)
+        obj=circle('Deformable=Yes','0,0','0.00001');check('Tiny Deformable Circle remains valid closed wire',obj.Shape.isValid() and obj.Shape.isClosed() and obj.CircleApproxDeviation.Value<1e-7)
+        path=feature('SpatialPath',Part.makeLine(App.Vector(1,2,3),App.Vector(11,2,3)))
+        obj=circle('AroundCurve','Curve=SpatialPath.Edge1','OnCurve=0.25','Diameter=8');check('AroundCurve uses exact center and tangent normal',exact(obj,4,[3.5,2,3]) and abs(obj.Shape.Edges[0].Curve.Axis.x)>0.999999)
+        curved=feature('RoundPath',Part.makeCircle(10));obj=circle('AroundCurve','Curve=RoundPath.Edge1','OnCurve=0.25','3');cc=obj.Shape.Edges[0].Curve
+        expected=curved.Shape.Edges[0].valueAt(math.pi/2);tangent=curved.Shape.Edges[0].tangentAt(math.pi/2)
+        check('AroundCurve curved edge follows exact local tangent',(cc.Center-expected).Length<1e-6 and abs(cc.Axis.dot(tangent))>0.999999)
+        count=len(doc.Objects);enter('Circle');enter('AroundCurve');enter('Curve=SpatialPath.Edge1');enter('OnCurve=2')
+        check('OnCurve range error is recoverable',len(doc.Objects)==count and '0..1' in command_prompt(window).text());enter('OnCurve=0.5');enter('2');check('AroundCurve recovers after range error',len(doc.Objects)==count+1 and exact(doc.Objects[-1],2,[6,2,3]))
+        count=len(doc.Objects);enter('Circle');enter('AroundCurve');enter('Curve=SpatialPath.Edge1');path.Placement.Base=App.Vector(2,0,0);doc.recompute();enter('OnCurve=0.5')
+        check('Changed reference blocked without partial commit',len(doc.Objects)==count and 'changed' in command_prompt(window).text().lower());enter('Cancel');check('Typed Cancel clears stale reference session',command_prompt(window).text().startswith('Command:') and len(doc.Objects)==count)
+        obj=circle('0,0','2');check('New Circle after stale Cancel has clean options',exact(obj,2,[0,0,0]) and not obj.CircleDeformable)
+        vertical=feature('VerticalLine',Part.makeLine(App.Vector(0,-20,0),App.Vector(0,20,0)));horizontal=feature('HorizontalLine',Part.makeLine(App.Vector(-20,0,0),App.Vector(20,0,0)))
+        obj=circle('Tangent','Radius=4','Curve=VerticalLine.Edge1@0,4,0','Curve=HorizontalLine.Edge1@4,0,0');check('Radius tangent to two bounded lines',exact(obj,4,[4,4,0]))
+        obj=circle('Tangent','Radius=4','Curve=HorizontalLine.Edge1@4,0,0','Point','4,8,0');check('Point permits a free non-tangent constraint',exact(obj,4,[4,4,0]))
+        obj=circle('Tangent','Radius=4','FromFirstPoint=Yes','Curve=HorizontalLine.Edge1@4,0,0','Curve=VerticalLine.Edge1@0,4,0');check('FromFirstPoint locks exact first contact',exact(obj,4,[4,4,0]))
+        count=len(doc.Objects);enter('Circle');enter('Tangent');enter('Radius=4');enter('FromFirstPoint=Yes');enter('Curve=HorizontalLine.Edge1@3,0,0');enter('Curve=VerticalLine.Edge1@0,4,0')
+        check('Locked first contact rejects sliding solution',len(doc.Objects)==count and 'No valid tangent' in command_prompt(window).text());enter('Undo');enter('FromFirstPoint=No');enter('Curve=VerticalLine.Edge1@0,4,0')
+        check('Undo and unlocked first point recover tangent construction',len(doc.Objects)==count+1 and exact(doc.Objects[-1],4,[4,4,0]))
+        diag=feature('DiagonalLine',Part.makeLine(App.Vector(-8,20,0),App.Vector(20,-8,0)));r=12/(2+math.sqrt(2))
+        obj=circle('Tangent',f'Curve=VerticalLine.Edge1@0,{r},0',f'Curve=HorizontalLine.Edge1@{r},0,0','Curve=DiagonalLine.Edge1@6,6,0');check('Three-curve native tangent incircle',exact(obj,r,[r,r,0]))
+        left=feature('LeftCircle',Part.makeCircle(6,App.Vector(-10,0,0)));right=feature('RightCircle',Part.makeCircle(6,App.Vector(10,0,0)))
+        obj=circle('Tangent','Radius=4','Curve=LeftCircle.Edge1@-4,0,0','Curve=RightCircle.Edge1@4,0,0');check('Native tangent to two exact circular curves',exact(obj,4,[0,0,0]))
+        nurbs=Part.BSplineCurve();nurbs.buildFromPolesMultsKnots([App.Vector(0,-20,0),App.Vector(0,-8,0),App.Vector(0,8,0),App.Vector(0,20,0)],[4,4],[0.,1.],False,3);feature('NurbsLine',nurbs.toShape())
+        obj=circle('Tangent','Radius=4','Curve=NurbsLine.Edge1@0,4,0','Curve=HorizontalLine.Edge1@4,0,0');check('Native bounded NURBS tangent reference',exact(obj,4,[4,4,0]))
+        count=len(doc.Objects);enter('Circle');enter('Tangent');enter('Radius=4');enter('Curve=VerticalLine.Edge1@0,0,0');enter('Curve=HorizontalLine.Edge1@0,0,0')
+        check('Ambiguous tangent branches stay active',len(doc.Objects)==count and 'Ambiguous' in command_prompt(window).text());enter('Solution=1');check('Explicit Solution commits one validated branch',len(doc.Objects)==count+1 and abs(doc.Objects[-1].Shape.Edges[0].Curve.Radius-4)<1e-6)
+        # Isolated visible references exercise real mouse picking and contact cue.
+        pickpath=feature('MousePath',Part.makeLine(App.Vector(30,35,5),App.Vector(40,35,5)));count=len(doc.Objects);enter('Circle');enter('AroundCurve');view.viewTop();view.fitAll();settle();target,pos=screen((35,35,5))
+        QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=pos);settle();check('AroundCurve mouse selects native edge','OnCurve' in command_prompt(window).text())
+        QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=pos);settle();enter('2');cc=doc.Objects[-1].Shape.Edges[0].Curve
+        check('AroundCurve mouse center projects onto selected elevated edge',len(doc.Objects)==count+1 and abs(cc.Center.y-35)<1e-6 and abs(cc.Center.z-5)<1e-6 and abs(cc.Axis.x)>0.999999)
+        contactline=feature('MouseContact',Part.makeLine(App.Vector(30,-35,0),App.Vector(40,-35,0)));enter('Circle');enter('Tangent');target,pos=screen((35,-35,0));count=len(doc.Objects)
+        QtWidgets.QApplication.sendEvent(target,QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(pos),QtCore.QPointF(target.mapToGlobal(pos)),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.NoModifier));settle()
+        from pivy import coin
+        search=coin.SoSearchAction();search.setSearchingAll(True);search.setName('OM9CurvePreviewPoints');search.apply(view.getSceneGraph());path=search.getPath()
+        check('Tangent hover displays transient white contact cue',path is not None and path.getTail().point.getNum()==1 and len(doc.Objects)==count)
+        enter('Cancel');search.apply(view.getSceneGraph());check('Cancel clears tangent hover preview',search.getPath() is None)
+        enter('Circle');enter('Area');enter('Osnap Off');target,center_pos=screen((0,0,0));QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,center_pos);settle();target,pos=screen((4,0,0));count=len(doc.Objects)
+        QtWidgets.QApplication.sendEvent(target,QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(pos),QtCore.QPointF(target.mapToGlobal(pos)),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.NoModifier));settle()
+        check('Area hover displays live size measures without document object','Area=' in command_prompt(window).text() and 'mm2' in command_prompt(window).text() and len(doc.Objects)==count)
+        pos=center_pos;QtWidgets.QApplication.sendEvent(target,QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(pos),QtCore.QPointF(target.mapToGlobal(pos)),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.NoModifier));settle()
+        check('Invalid zero-radius hover clears previous size readout','click to commit' not in command_prompt(window).text());enter('Cancel')
+        # Sidebar right-click uses the original Circle 2Points shortcut.
+        dock=window.findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar');dock.findChild(QtWidgets.QToolButton,'OM9Group5').click();settle();button=next(b for b in dock.findChildren(QtWidgets.QToolButton) if b.property('om9IconKey')=='CurveCircleCenterRadius')
+        count=len(doc.Objects);QtTest.QTest.mouseClick(button,QtCore.Qt.RightButton);settle();enter('-3,0');enter('3,0');check('Original sidebar right-click starts 2Point Circle',len(doc.Objects)==count+1 and exact(doc.Objects[-1],3,[0,0,0]))
+        name=doc.Objects[-1].Name;doc.undo();check('One native Undo removes advanced Circle',doc.getObject(name) is None);doc.redo();check('Redo restores advanced Circle',exact(doc.getObject(name),3,[0,0,0]))
+        circles=[o for o in doc.Objects if 'OM9FeatureId' in o.PropertiesList and o.OM9FeatureId=='OM9-CURVE-005'];saved=[(o.Name,o.Shape.Length,o.CircleDeformable,o.CircleFitDeviation.Value,o.CircleApproxDeviation.Value) for o in circles]
+        file=out/'advanced-circles.FCStd';doc.saveAs(str(file));App.closeDocument(doc.Name);doc=App.openDocument(str(file));settle()
+        check('Save reload preserves geometry, output kind and deviation metadata',all(doc.getObject(n).OM9FeatureId=='OM9-CURVE-005' and abs(doc.getObject(n).Shape.Length-length)<1e-6 and doc.getObject(n).CircleDeformable==deform and abs(doc.getObject(n).CircleFitDeviation.Value-fit)<1e-9 and abs(doc.getObject(n).CircleApproxDeviation.Value-ap)<1e-9 for n,length,deform,fit,ap in saved))
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc();result['prompt']=command_prompt(window).text()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):
+            if name.startswith('CircleAdvanced'):App.closeDocument(name)
+        if os.environ.get('OM9_SMOKE_KEEP_OPEN')!='1':QtCore.QTimer.singleShot(0,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

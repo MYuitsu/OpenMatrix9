@@ -3,6 +3,7 @@ import json, os, sys, traceback
 from pathlib import Path
 import FreeCAD as App, FreeCADGui as Gui, Part
 from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
 sys.path.insert(0, str(Path(__file__).parent))
 from command_console_support import command_input, command_prompt
 out = Path(os.environ['OM9_SMOKE_OUTPUT'])
@@ -29,6 +30,9 @@ def run():
     global window, field
     try:
         Gui.activateWorkbench('OpenMatrix9Workbench'); window=Gui.getMainWindow()
+        import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__
+        if os.environ.get('OM9_TEST_NATIVE_DIR'):check('Selected native module loaded',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
         field=command_input(window)
         doc=App.newDocument('SplineTest'); doc.UndoMode=1
         Gui.activeDocument().activeView().viewTop(); settle()

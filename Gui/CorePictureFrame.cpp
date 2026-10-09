@@ -42,6 +42,7 @@
 #include <QRegularExpression>
 #include <QTimer>
 #include <cmath>
+#include <exception>
 namespace {
 Gui::View3DInventor* view(){auto* doc=Gui::Application::Instance->activeDocument();return doc?dynamic_cast<Gui::View3DInventor*>(doc->getActiveView()):nullptr;}
 }
@@ -86,7 +87,7 @@ void CorePictureFrame::preview(const double* p){
     for(int i=0;i<4;++i){double v[3];for(int j=0;j<3;++j)v[j]=p[j]+((i==1||i==2)?p[6+j]*p[15]:0)+(i>=2?p[9+j]*p[16]:0);coordinates->point.set1Value(i,float(v[0]),float(v[1]),float(v[2]));}
     content->addChild(coordinates);auto* face=new SoFaceSet;face->numVertices.setValue(4);content->addChild(face);native->getViewer()->redraw();
 }
-void CorePictureFrame::cancel(){clearPreview();running=false;hasCorner=false;document=nullptr;source.clear();image=QImage();}
+void CorePictureFrame::cancel(){if(running)CoreSnaps::clearTransient();clearPreview();running=false;hasCorner=false;document=nullptr;source.clear();image=QImage();}
 void CorePictureFrame::prompt(const QString& error) {
     CurveController::instance().setPrompt(error.isEmpty()?(hasCorner?"PictureFrame: Pick width reference or type length; Shift for Ortho; Esc cancels":"PictureFrame: Pick first corner or enter x,y,z; Esc cancels"):error);
     if(!error.isEmpty())CurveController::instance().logMessage(error);
@@ -94,7 +95,9 @@ void CorePictureFrame::prompt(const QString& error) {
 bool CorePictureFrame::start(std::size_t index) {
     if(!handles(index)||!available())return false;
     cancel();CoreDistance::instance().cancel();CurveController::instance().cancel();CoreViewControls::instance().cancel();
-    auto* identity=App::GetApplication().getActiveDocument();const auto construction=CoreWorkspace::instance().plane(view());
+    auto* identity=App::GetApplication().getActiveDocument();Base::Placement construction;
+    try {construction=CoreWorkspace::instance().plane(view());}
+    catch(const std::exception& error){cancel();CoreSnaps::clearTransient();prompt(QString::fromUtf8(error.what()));return false;}
     QFileDialog dialog(Gui::getMainWindow(),"PictureFrame: Select image");dialog.setObjectName("OM9PictureFrameImageDialog");dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.bmp *.gif *.tif *.tiff *.webp)");
     if(dialog.exec()!=QDialog::Accepted||dialog.selectedFiles().isEmpty())return false;
@@ -112,8 +115,8 @@ bool CorePictureFrame::plan(const Base::Vector3d* reference,double width,bool or
 void CorePictureFrame::point(const Base::Vector3d& value,bool ortho) {
     if(!valid()){cancel();return;}
     for(int i=0;i<3;++i)if(!std::isfinite(value[i])||std::abs(value[i])>1e9){prompt("PictureFrame: Point must be finite within supported coordinates");return;}
-    if(!hasCorner){corner=value;hasCorner=true;prompt();return;}
-    double placement[17];if(!plan(&value,0,ortho,placement)){prompt("PictureFrame: Choose a valid second reference point");return;}finish(placement);
+    if(!hasCorner){corner=value;hasCorner=true;CoreSnaps::acceptedPoint(true);prompt();return;}
+    double placement[17];if(!plan(&value,0,ortho,placement)){prompt("PictureFrame: Choose a valid second reference point");return;}CoreSnaps::acceptedPoint(true);finish(placement);
 }
 void CorePictureFrame::finish(const double* p) {
     if(!valid()){cancel();return;}

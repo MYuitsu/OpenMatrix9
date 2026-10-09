@@ -5,6 +5,8 @@ description: Create, replace or review minimal SVG menu icons for OpenMatrix9, p
 
 # OpenMatrix9 icons
 
+Rust là ưu tiên số 1 khi viết/chuyển code hỗ trợ OM9. Đọc [quy tắc Rust và ranh giới native](../openmatrix9-workflow/references/rust-first.md) trước khi chọn ngôn ngữ/FFI/worker. Logic sản phẩm và dữ liệu độc lập thuộc safe Rust; giữ generator/audit Python hiện hữu khi cần để kiểm chứng. Quy tắc này không chuyển SVG thành Rust, không đổi palette/ý nghĩa/lệnh và không coi native FFI là memory-safe.
+
 Build recognizable vector symbols from verified command meaning. Resolve the
 active OpenMatrix9 module root (the directory directly containing `Resources`
 and `tools`) from the workspace; do not assume an old D: or E: location.

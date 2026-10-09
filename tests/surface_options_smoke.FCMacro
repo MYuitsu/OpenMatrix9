@@ -1,0 +1,374 @@
+"""OM9-SURFACE-001/003/009: option geometry and native lifecycle evidence."""
+import json
+import math
+import os
+import sys
+from pathlib import Path
+import traceback
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+from PySide6 import QtCore, QtGui, QtWidgets
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+out.mkdir(parents=True, exist_ok=True)
+result = {'checks': []}
+
+def check(name, value):
+    result['checks'].append({'name': name, 'passed': bool(value)})
+    if not value:
+        raise AssertionError(name)
+
+def events():
+    QtWidgets.QApplication.processEvents()
+
+def enter(text=''):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_End, QtCore.Qt.ControlModifier))
+    if text:
+        QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+            QtCore.QEvent.KeyPress, 0, QtCore.Qt.NoModifier, text))
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_Return, QtCore.Qt.NoModifier))
+    events()
+
+def feature(doc, name, shape):
+    obj = doc.addObject('Part::Feature', name)
+    obj.Shape = shape
+    return obj
+
+def start(doc, command, objects):
+    Gui.Selection.clearSelection()
+    for obj in objects:
+        Gui.Selection.addSelection(doc.Name, obj.Name)
+    Gui.runCommand(command)
+    events()
+    enter()
+    d = next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog, 'OM9SurfaceOptions')
+              if d.isVisible()), None)
+    check(command + ': options open', d is not None)
+    return d
+
+def control(d, cls, name):
+    c = d.findChild(cls, name)
+    check('option available: ' + name, c is not None)
+    return c
+
+def accept(d):
+    buttons = d.findChild(QtWidgets.QDialogButtonBox)
+    status = d.findChild(QtWidgets.QLabel, 'OM9SurfaceStatus')
+    check('valid preview: ' + status.text(), buttons.button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+    buttons.button(QtWidgets.QDialogButtonBox.Ok).click()
+    events()
+
+def output(doc):
+    matches = [o for o in doc.Objects if hasattr(o, 'OM9FeatureId')]
+    check('one valid native output', len(matches) == 1 and matches[0].Shape.isValid()
+          and bool(matches[0].Shape.Faces) and not matches[0].Shape.Solids)
+    return matches[0]
+
+def persistence(doc, obj, label):
+    area, options, count = obj.Shape.Area, obj.SurfaceOptions, len(doc.Objects)
+    links=[(source.Name,tuple(subs),source.getGlobalPlacement().toMatrix().A) for source,subs in obj.SourceCurves]
+    doc.undo()
+    check(label + ': Undo', len(doc.Objects) == count - 1)
+    doc.redo()
+    check(label + ': Redo', len(doc.Objects) == count)
+    file = out / (label + '.FCStd')
+    doc.saveAs(str(file))
+    App.closeDocument(doc.Name)
+    reopened = App.openDocument(str(file))
+    restored = output(reopened)
+    check(label + ': FCStd options/geometry', restored.SurfaceOptions == options
+          and abs(restored.Shape.Area - area) < 1e-6)
+    restored_links=[(source.Name,tuple(subs),source.getGlobalPlacement().toMatrix().A) for source,subs in restored.SourceCurves]
+    check(label + ': FCStd sources and world placements',len(restored_links)==len(links)
+          and all(a[:2]==b[:2] and all(abs(x-y)<1e-9 for x,y in zip(a[2],b[2])) for a,b in zip(restored_links,links)))
+    App.closeDocument(reopened.Name)
+
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui
+        result['native_module'] = OpenMatrix9Gui.__file__
+        if os.environ.get('OM9_TEST_NATIVE_DIR'):
+            check('isolated native module loaded',Path(OpenMatrix9Gui.__file__).parent.resolve() == Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        events()
+        console = Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript')
+        check('native command console', console is not None)
+        # Width changes 5 -> 9; the arch starts with height 2.
+        for maintain in (True, False):
+            doc = App.newDocument('SweepHeight' + str(maintain))
+            doc.UndoMode = 1
+            a = feature(doc, 'RailA', Part.makeLine(App.Vector(0,0,0), App.Vector(0,0,10)))
+            b = feature(doc, 'RailB', Part.makeLine(App.Vector(5,0,0), App.Vector(9,0,10)))
+            arc = Part.Arc(App.Vector(0,0,0), App.Vector(2.5,2,0), App.Vector(5,0,0)).toShape()
+            section = feature(doc, 'Arch', arc)
+            doc.recompute()
+            d = start(doc, 'OM9_SurfaceSweepSweep2Rails', [a,b,section])
+            height = control(d, QtWidgets.QCheckBox, 'OM9MaintainHeight')
+            height.setChecked(maintain)
+            events()
+            dynamic = control(d, QtWidgets.QCheckBox, 'OM9SurfaceDynamicPreview')
+            dynamic.setChecked(False)
+            events()
+            check('hidden preview leaves document unchanged', len(doc.Objects) == 3)
+            preview_button = control(d, QtWidgets.QPushButton, 'OM9SurfacePreviewButton')
+            preview_button.click()
+            events()
+            check('manual preview leaves dynamic setting off', not dynamic.isChecked() and len(doc.Objects) == 3)
+            accept(d)
+            obj = output(doc)
+            # Contact at the two rail ends and independently measured arch crown.
+            crown = App.Vector(4.5, 2 if maintain else 3.6, 10)
+            distance = Part.Vertex(crown).distToShape(obj.Shape)[0]
+            check('OM9-SURFACE-003: crown height independent of width=' + str(maintain), distance < 1e-4)
+            for rail in (a,b):
+                check('both original rails retained geometrically', max(Part.Vertex(p).distToShape(obj.Shape)[0]
+                      for p in rail.Shape.discretize(17)) < 1e-4)
+            persistence(doc, obj, 'MaintainHeight' + str(maintain))
+        for style in ('Loose', 'Tight', 'Uniform', 'Developable'):
+            doc = App.newDocument('Loft' + style)
+            doc.UndoMode = 1
+            sections = [feature(doc, 'Section' + str(i), Part.makeLine(App.Vector(0,y,z), App.Vector(4,y,z)))
+                        for i,(y,z) in enumerate([(0,0),(2,1),(0,5)])]
+            doc.recompute()
+            d = start(doc, 'OM9_SurfaceLoft', sections)
+            combo = control(d, QtWidgets.QComboBox, 'OM9LoftStyle')
+            index = combo.findText(style)
+            check('Loft style exposed: ' + style, index >= 0)
+            combo.setCurrentIndex(index)
+            events()
+            accept(d)
+            obj = output(doc)
+            middle = Part.Vertex(App.Vector(2,2,1)).distToShape(obj.Shape)[0]
+            if style == 'Loose':
+                check('Loose pulls away from internal section', middle > 0.1)
+            else:
+                check(style + ': interpolates middle section', middle < 1e-4)
+            if style == 'Developable':
+                check('Developable creates a separate surface for each pair', len(obj.Shape.Faces) == 2)
+                check('Developable parallel lines have analytic area', abs(obj.Shape.Area - 4*(math.sqrt(5)+math.sqrt(20))) < 1e-5)
+            persistence(doc, obj, 'Loft' + style)
+        # Automatic aligns a rotated circle's seam; Natural restores the
+        # original parameter without changing the original document geometry.
+        doc = App.newDocument('SeamOptions')
+        a = feature(doc, 'A', Part.Wire([Part.makeCircle(3)]))
+        reversed_wire=Part.Wire([Part.makeCircle(3, App.Vector(0,0,5))])
+        reversed_wire.reverse()
+        b = feature(doc, 'B', reversed_wire)
+        b.Placement = App.Placement(App.Vector(), App.Rotation(App.Vector(0,0,1),90))
+        doc.recompute()
+        originals = [o.Shape.exportBrepToString() for o in (a,b)]
+        d = start(doc, 'OM9_SurfaceLoft', [a,b])
+        table = d.findChild(QtWidgets.QTableWidget, 'OM9SurfaceInputs')
+        control(d, QtWidgets.QPushButton, 'OM9SurfaceAutomaticSeams').click()
+        events()
+        seam = table.cellWidget(1,2)
+        check('Automatic aligns rotated closed profile seam', abs(seam.value()-.75) < .01)
+        enter('Natural')
+        check('CMD Natural restores original seam', seam.value() == 0)
+        enter('Automatic')
+        style=d.findChild(QtWidgets.QComboBox,'OM9LoftStyle')
+        style.setCurrentIndex(style.findText('Loose'))
+        events()
+        accept(d)
+        obj = output(doc)
+        check('Automatic preserves native circle radii', abs(obj.Shape.Area - 2*math.pi*3*5) < .05)
+        check('seam options preserve source BReps', originals == [o.Shape.exportBrepToString() for o in (a,b)])
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('JoinedSeams')
+        sections=[]
+        for z in (0,5):
+            sections.append(feature(doc,'Square',Part.makePolygon([App.Vector(x,y,z) for x,y in [(0,0),(4,0),(4,4),(0,4),(0,0)]])))
+        doc.recompute()
+        originals=[o.Shape.exportBrepToString() for o in sections]
+        d=start(doc,'OM9_SurfaceLoft',sections)
+        table=d.findChild(QtWidgets.QTableWidget,'OM9SurfaceInputs')
+        for row in range(2):table.cellWidget(row,2).setValue(.125)
+        events();accept(d);obj=output(doc)
+        check('multi-edge seam splitting preserves prism area',abs(obj.Shape.Area-80)<1e-4)
+        check('multi-edge seam preserves original wires',originals==[o.Shape.exportBrepToString() for o in sections])
+        App.closeDocument(doc.Name)
+        # Rebuild section curves with seven poles, retaining originals.
+        doc = App.newDocument('SectionRebuild')
+        doc.UndoMode = 1
+        sections = []
+        for z in (0,5):
+            curve = Part.BSplineCurve()
+            curve.interpolate([App.Vector(0,0,z),App.Vector(1,2,z),App.Vector(3,1,z),App.Vector(4,0,z)])
+            sections.append(feature(doc,'Section',curve.toShape()))
+        doc.recompute()
+        originals = [o.Shape.exportBrepToString() for o in sections]
+        d = start(doc, 'OM9_SurfaceLoft', sections)
+        control(d, QtWidgets.QSpinBox, 'OM9SectionPointCount').setValue(7)
+        control(d, QtWidgets.QComboBox, 'OM9SectionMode').setCurrentIndex(1)
+        events()
+        accept(d)
+        obj = output(doc)
+        check('Rebuild target saved', 'sectionMode=1' in obj.SurfaceOptions and 'pointCount=7' in obj.SurfaceOptions)
+        check('native loft contains rebuilt section poles', max(f.Surface.NbUPoles for f in obj.Shape.Faces) >= 7)
+        check('section Rebuild preserves originals', originals == [o.Shape.exportBrepToString() for o in sections])
+        persistence(doc,obj,'SectionRebuild')
+        # Uniform must have evenly spaced distinct knots, including six rows
+        # where ordinary averaged interpolation knots are not uniform.
+        doc=App.newDocument('UniformKnots')
+        sections=[feature(doc,'Section',Part.makeLine(App.Vector(0,i%3,i*i),App.Vector(4,i%3,i*i))) for i in range(6)]
+        doc.recompute()
+        d=start(doc,'OM9_SurfaceLoft',sections)
+        combo=control(d,QtWidgets.QComboBox,'OM9LoftStyle')
+        combo.setCurrentIndex(combo.findText('Uniform'));events();accept(d)
+        obj=output(doc)
+        surface=obj.Shape.Faces[0].Surface
+        for knots in (surface.getUKnots(),surface.getVKnots()):
+            step=knots[1]-knots[0]
+            check('Uniform distinct knot spacing',all(abs(b-a-step)<1e-9 for a,b in zip(knots,knots[1:])))
+        check('Uniform interpolates all six original sections',all(Part.Vertex(p).distToShape(obj.Shape)[0]<1e-4
+              for section in sections for p in section.Shape.discretize(9)))
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('ClosedRebuild')
+        doc.UndoMode=1
+        sections=[feature(doc,'Section',Part.makeCircle(3,App.Vector(0,0,z))) for z in (0,5)]
+        doc.recompute()
+        d=start(doc,'OM9_SurfaceLoft',sections)
+        control(d,QtWidgets.QSpinBox,'OM9SectionPointCount').setValue(12)
+        control(d,QtWidgets.QComboBox,'OM9SectionMode').setCurrentIndex(1);events();accept(d)
+        obj=output(doc)
+        check('periodic Rebuild produces closed profile boundaries',all(edge.isClosed() for edge in obj.Shape.Edges if edge.Length>10))
+        persistence(doc,obj,'ClosedRebuild')
+        doc=App.newDocument('UniformPeriodic')
+        sections=[feature(doc,'Section',Part.makeLine(App.Vector(0,3*math.cos(i*math.pi/3),3*math.sin(i*math.pi/3)),
+                  App.Vector(4,3*math.cos(i*math.pi/3),3*math.sin(i*math.pi/3)))) for i in range(6)]
+        doc.recompute()
+        d=start(doc,'OM9_SurfaceLoft',sections)
+        combo=d.findChild(QtWidgets.QComboBox,'OM9LoftStyle');combo.setCurrentIndex(combo.findText('Uniform'))
+        control(d,QtWidgets.QCheckBox,'OM9ClosedLoft').setChecked(True);events();accept(d)
+        obj=output(doc)
+        check('Uniform closed direction is periodic',obj.Shape.Faces[0].Surface.isVPeriodic())
+        check('Uniform periodic interpolates all sections',all(Part.Vertex(p).distToShape(obj.Shape)[0]<1e-4
+              for section in sections for p in section.Shape.discretize(9)))
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('UniformRecovery')
+        sections=[]
+        for z in (0,5):
+            curve=Part.BSplineCurve()
+            curve.buildFromPolesMultsKnots([App.Vector(i,i%2,z) for i in range(6)], [4,1,1,4],[0,.2,.8,1],False,3)
+            sections.append(feature(doc,'Section',curve.toShape()))
+        doc.recompute()
+        d=start(doc,'OM9_SurfaceLoft',sections)
+        combo=d.findChild(QtWidgets.QComboBox,'OM9LoftStyle');combo.setCurrentIndex(combo.findText('Uniform'));events()
+        ok=d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok)
+        check('Uniform rejects nonuniform U knots without output',not ok.isEnabled() and len(doc.Objects)==2)
+        control(d,QtWidgets.QComboBox,'OM9SectionMode').setCurrentIndex(1);events()
+        check('Uniform recovers through explicit Rebuild',ok.isEnabled());accept(d);output(doc)
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('UniformRational')
+        sections=[]
+        for z,weights in ((0,[1,.5,1,1]),(5,[1,1,.5,1])):
+            curve=Part.BSplineCurve()
+            curve.buildFromPolesMultsKnots([App.Vector(i,i%2,z) for i in range(4)],[4,4],[0,1],False,3,weights)
+            sections.append(feature(doc,'Rational',curve.toShape()))
+        doc.recompute()
+        d=start(doc,'OM9_SurfaceLoft',sections)
+        combo=d.findChild(QtWidgets.QComboBox,'OM9LoftStyle');combo.setCurrentIndex(combo.findText('Uniform'));events();accept(d)
+        obj=output(doc)
+        check('Uniform rational net interpolates weighted profiles',all(Part.Vertex(p).distToShape(obj.Shape)[0]<1e-4
+              for section in sections for p in section.Shape.discretize(17)))
+        App.closeDocument(doc.Name)
+        # A failing Developable pair must recover after another style is chosen.
+        doc = App.newDocument('InvalidDevelopable')
+        a=feature(doc,'A',Part.makeLine(App.Vector(0,0,0),App.Vector(4,0,0)))
+        b=feature(doc,'B',Part.makeLine(App.Vector(0,0,5),App.Vector(3,1,5)))
+        doc.recompute()
+        d=start(doc,'OM9_SurfaceLoft',[a,b])
+        style=d.findChild(QtWidgets.QComboBox,'OM9LoftStyle')
+        style.setCurrentIndex(style.findText('Developable'))
+        events()
+        ok=d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok)
+        check('nonparallel Developable rejected without output',not ok.isEnabled() and len(doc.Objects)==2)
+        style.setCurrentIndex(0)
+        events()
+        check('failed option recovers with valid Normal style',ok.isEnabled())
+        enter('Cancel')
+        check('Cancel after invalid option preserves inputs',len(doc.Objects)==2)
+        App.closeDocument(doc.Name)
+        # Chained straight rail pieces become one logical rail.
+        doc=App.newDocument('ChainEdges')
+        doc.UndoMode=1
+        a=feature(doc,'RailA',Part.makeLine(App.Vector(0,0,0),App.Vector(0,0,4)))
+        b=feature(doc,'RailB',Part.makeLine(App.Vector(0,0,4),App.Vector(0,0,10)))
+        bad=feature(doc,'Disconnected',Part.makeLine(App.Vector(10,0,10),App.Vector(10,0,12)))
+        section=feature(doc,'Section',Part.makeCircle(2))
+        group=doc.addObject('App::Part','Parent')
+        for child in (a,b,bad,section):group.addObject(child)
+        group.Placement=App.Placement(App.Vector(20,30,40),App.Rotation(App.Vector(0,0,1),37))
+        doc.recompute()
+        chain_start_count=len(doc.Objects)
+        Gui.Selection.clearSelection()
+        Gui.runCommand('OM9_SurfaceSweepSweep1Rail')
+        events()
+        enter('ChainEdges')
+        enter(a.Name)
+        enter(bad.Name)
+        enter()
+        enter('Undo')
+        check('disconnected chain remains editable', 'Chain Edges' in str(console.property('om9Prompt')) and len(doc.Objects)==chain_start_count)
+        enter(b.Name)
+        enter()
+        enter(section.Name)
+        enter()
+        d=next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9SurfaceOptions') if d.isVisible()),None)
+        check('chain followed by profile opens options',d is not None)
+        accept(d)
+        obj=output(doc)
+        check('chained rail sweep has analytic cylinder area',abs(obj.Shape.Area-2*math.pi*2*10)<1e-4)
+        check('chained rail uses parent world placement',Part.Vertex(group.Placement.multVec(App.Vector(2,0,5))).distToShape(obj.Shape)[0]<1e-4)
+        check('all chained edge sources persisted',len(obj.SourceCurves)==3)
+        persistence(doc,obj,'ChainedRail')
+        for kind in (1,2):
+            doc=App.newDocument('ClosedSweep'+str(kind))
+            doc.UndoMode=1
+            a=feature(doc,'RailA',Part.makeCircle(5))
+            if kind==1:
+                shape=Part.makeCircle(1,App.Vector(5,0,0),App.Vector(0,1,0))
+                first=feature(doc,'First',shape)
+                rotated=shape.copy();rotated.rotate(App.Vector(),App.Vector(0,0,1),180)
+                last=feature(doc,'Last',rotated)
+                sources=[a,first,last]
+                command='OM9_SurfaceSweepSweep1Rail'
+            else:
+                b=feature(doc,'RailB',Part.makeCircle(9))
+                first=feature(doc,'First',Part.makeLine(App.Vector(5,0,0),App.Vector(9,0,0)))
+                last=feature(doc,'Last',Part.makeLine(App.Vector(-5,0,0),App.Vector(-9,0,0)))
+                sources=[a,b,first,last]
+                command='OM9_SurfaceSweepSweep2Rails'
+            doc.recompute()
+            d=start(doc,command,sources)
+            closed=control(d,QtWidgets.QCheckBox,'OM9ClosedSweep')
+            check('Closed Sweep available after two sections on closed rails',closed.isEnabled())
+            closed.setChecked(True)
+            events()
+            accept(d)
+            obj=output(doc)
+            target=4*math.pi**2*5 if kind==1 else math.pi*(9**2-5**2)
+            check('closed Sweep analytic torus/annulus area',abs(obj.Shape.Area-target)<.05)
+            check('closed Sweep state persisted','closed=1' in obj.SurfaceOptions)
+            persistence(doc,obj,'ClosedSweep'+str(kind))
+        result['ok'] = True
+    except Exception:
+        result['ok'] = False
+        result['error'] = traceback.format_exc()
+        if 'console' in globals() and console:
+            result['prompt'] = str(console.property('om9Prompt'))
+            result['transcript'] = console.toPlainText()[-5000:]
+    finally:
+        (out / 'results.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        Gui.getMainWindow().close()
+
+QtCore.QTimer.singleShot(8000, run)

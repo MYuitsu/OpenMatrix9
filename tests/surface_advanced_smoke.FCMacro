@@ -1,0 +1,257 @@
+"""OM9-SURFACE-001/003/009: option geometry and native lifecycle evidence."""
+import json
+import math
+import os
+import sys
+from pathlib import Path
+import traceback
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+out.mkdir(parents=True, exist_ok=True)
+result = {'checks': []}
+
+def check(name, value):
+    result['checks'].append({'name': name, 'passed': bool(value)})
+    if not value:
+        raise AssertionError(name)
+
+def events():
+    QtWidgets.QApplication.processEvents()
+
+def enter(text=''):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_End, QtCore.Qt.ControlModifier))
+    if text:
+        QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+            QtCore.QEvent.KeyPress, 0, QtCore.Qt.NoModifier, text))
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_Return, QtCore.Qt.NoModifier))
+    events()
+
+def feature(doc, name, shape):
+    obj = doc.addObject('Part::Feature', name)
+    obj.Shape = shape
+    return obj
+
+def start(doc, command, objects):
+    Gui.Selection.clearSelection()
+    for obj in objects:
+        Gui.Selection.addSelection(doc.Name, obj.Name)
+    Gui.runCommand(command)
+    events()
+    enter()
+    d = next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog, 'OM9SurfaceOptions')
+              if d.isVisible()), None)
+    check(command + ': options open', d is not None)
+    result.setdefault('dialog_sizes',[]).append({'command':command,'size':[d.width(),d.height()],'screen':[d.screen().availableGeometry().width(),d.screen().availableGeometry().height()]})
+    return d
+
+def control(d, cls, name):
+    c = d.findChild(cls, name)
+    check('option available: ' + name, c is not None)
+    return c
+
+def accept(d):
+    buttons = d.findChild(QtWidgets.QDialogButtonBox)
+    status = d.findChild(QtWidgets.QLabel, 'OM9SurfaceStatus')
+    check('valid preview: ' + status.text(), buttons.button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+    buttons.button(QtWidgets.QDialogButtonBox.Ok).click()
+    events()
+
+def output(doc):
+    matches = [o for o in doc.Objects if hasattr(o, 'OM9FeatureId')]
+    check('one valid native output', len(matches) == 1 and matches[0].Shape.isValid()
+          and bool(matches[0].Shape.Faces) and not matches[0].Shape.Solids)
+    return matches[0]
+
+def persistence(doc, obj, label):
+    area, options, count = obj.Shape.Area, obj.SurfaceOptions, len(doc.Objects)
+    links=[(source.Name,tuple(subs),source.getGlobalPlacement().toMatrix().A) for source,subs in obj.SourceCurves]
+    doc.undo()
+    check(label + ': Undo', len(doc.Objects) == count - 1)
+    doc.redo()
+    check(label + ': Redo', len(doc.Objects) == count)
+    file = out / (label + '.FCStd')
+    doc.saveAs(str(file))
+    App.closeDocument(doc.Name)
+    reopened = App.openDocument(str(file))
+    restored = output(reopened)
+    check(label + ': FCStd options/geometry', restored.SurfaceOptions == options
+          and abs(restored.Shape.Area - area) < 1e-6)
+    restored_links=[(source.Name,tuple(subs),source.getGlobalPlacement().toMatrix().A) for source,subs in restored.SourceCurves]
+    check(label + ': FCStd sources and world placements',len(restored_links)==len(links)
+          and all(a[:2]==b[:2] and all(abs(x-y)<1e-9 for x,y in zip(a[2],b[2])) for a,b in zip(restored_links,links)))
+    App.closeDocument(reopened.Name)
+
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__
+        check('isolated native module loaded',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        doc=App.newDocument('SurfaceRefit')
+        doc.UndoMode=1
+        sections=[]
+        for z in (0,5):
+            curve=Part.BSplineCurve()
+            curve.interpolate([App.Vector(i,.3*math.sin(i),z) for i in range(9)])
+            sections.append(feature(doc,'Source',curve.toShape()))
+        doc.recompute()
+        original=[o.Shape.exportBrepToString() for o in sections]
+        d=start(doc,'OM9_SurfaceLoft',sections)
+        mode=control(d,QtWidgets.QComboBox,'OM9SectionMode')
+        index=mode.findText('Refit')
+        check('Refit is available',index>=0)
+        mode.setCurrentIndex(index)
+        tolerance=control(d,QtWidgets.QDoubleSpinBox,'OM9RefitTolerance')
+        tolerance.setValue(.03);events()
+        accept(d);obj=output(doc)
+        check('Refit options persisted','sectionMode=2' in obj.SurfaceOptions and 'tolerance=' in obj.SurfaceOptions)
+        check('Refit surface retains sections within tolerance',all(Part.Vertex(p).distToShape(obj.Shape)[0]<=.03
+              for s in sections for p in s.Shape.discretize(257)))
+        check('Refit source geometry unchanged',original==[o.Shape.exportBrepToString() for o in sections])
+        persistence(doc,obj,'RefitOpen')
+        doc=App.newDocument('RefitClosed')
+        sections=[feature(doc,'Circle',Part.makeCircle(3,App.Vector(0,0,z))) for z in (0,5)]
+        doc.recompute()
+        d=start(doc,'OM9_SurfaceLoft',sections)
+        mode=control(d,QtWidgets.QComboBox,'OM9SectionMode');mode.setCurrentIndex(mode.findText('Refit'))
+        control(d,QtWidgets.QDoubleSpinBox,'OM9RefitTolerance').setValue(.01);events();accept(d)
+        obj=output(doc)
+        check('Refit periodic original circle contact',all(Part.Vertex(p).distToShape(obj.Shape)[0]<=.01
+              for s in sections for p in s.Shape.discretize(257)))
+        App.closeDocument(doc.Name)
+        doc=App.newDocument('SlashFrames')
+        doc.UndoMode=1
+        a=feature(doc,'RailA',Part.makeLine(App.Vector(0,0,0),App.Vector(0,0,10)))
+        b=feature(doc,'RailB',Part.makeLine(App.Vector(5,0,0),App.Vector(5,0,10)))
+        profile=feature(doc,'Arch',Part.Arc(App.Vector(0,0,0),App.Vector(2.5,2,0),App.Vector(5,0,0)).toShape())
+        doc.recompute()
+        d=start(doc,'OM9_SurfaceSweepSweep2Rails',[a,b,profile])
+        enter('AddSlash=0.25,0.65')
+        table=control(d,QtWidgets.QTableWidget,'OM9SlashInputs')
+        check('CMD Add Slash stores a paired rail point',table.rowCount()==1)
+        enter('AddSlash=0.5,0.4')
+        check('crossing Slash rejected without losing valid pair',table.rowCount()==1)
+        accept(d);obj=output(doc)
+        check('Slash options persisted','slash=' in obj.SurfaceOptions)
+        # At station A(.25), section width goes to B(.65), changing the
+        # actual transported arch plane; test interior location away from
+        # both original rail boundaries.
+        t0=App.Vector(0,0,1);x=App.Vector(5,0,4);x.normalize()
+        normal=x.cross(t0);normal.normalize()
+        expected=App.Vector(0,0,2.5)+App.Vector(5,0,4)*.5+normal*(-2*math.sqrt(41)/5)
+        check('Slash changes actual surface section alignment',Part.Vertex(expected).distToShape(obj.Shape)[0]<1e-4)
+        check('Slash preserves both original rails',all(Part.Vertex(p).distToShape(obj.Shape)[0]<1e-4
+              for rail in (a,b) for p in rail.Shape.discretize(65)))
+        persistence(doc,obj,'SlashFrames')
+        doc=App.newDocument('SlashMouse')
+        QtTest.QTest.qWait(400)
+        a=feature(doc,'RailA',Part.makeLine(App.Vector(0,0,0),App.Vector(0,0,10)))
+        b=feature(doc,'RailB',Part.makeLine(App.Vector(5,0,0),App.Vector(5,0,10)))
+        profile=feature(doc,'Arch',Part.Arc(App.Vector(0,0,0),App.Vector(2.5,2,0),App.Vector(5,0,0)).toShape())
+        doc.recompute()
+        area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
+        front=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==3)
+        area.setActiveSubWindow(front);events()
+        view=Gui.activeDocument().activeView();view.fitAll();events()
+        d=start(doc,'OM9_SurfaceSweepSweep2Rails',[a,b,profile])
+        control(d,QtWidgets.QPushButton,'OM9AddSlash').click();events()
+        viewer=next(w for w in Gui.getMainWindow().findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible())
+        viewport=viewer.viewport();ratio=viewer.devicePixelRatioF()
+        result['mouse_probe']=[]
+        for p in (App.Vector(0,0,2.5),App.Vector(5,0,6.5)):
+            x,y=view.getPointOnScreen(p)
+            result['mouse_probe'].append({'world':list(p),'pixel':[x,y],'viewport':[viewport.width(),viewport.height()],'info':view.getObjectInfo((x,y)),'camera':view.getCamera()})
+            QtTest.QTest.mouseClick(viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,QtCore.QPoint(round(x/ratio),round((viewport.height()*ratio-1-y)/ratio)));events()
+        table=control(d,QtWidgets.QTableWidget,'OM9SlashInputs')
+        check('viewport Add Slash stores paired picks',table.rowCount()==1)
+        check('viewport Add Slash uses picked arc positions',abs(float(table.item(0,0).text())-.25)<.015 and abs(float(table.item(0,1).text())-.65)<.015)
+        enter();check('Enter finishes Slash picking without committing',d.isVisible() and not any(hasattr(o,'OM9FeatureId') for o in doc.Objects))
+        table.selectRow(0);control(d,QtWidgets.QPushButton,'OM9RemoveSlash').click();events()
+        check('selected Slash removed',table.rowCount()==0)
+        d.reject();events();App.closeDocument(doc.Name)
+        doc=App.newDocument('HistoryCheckbox');doc.UndoMode=1
+        sections=[feature(doc,'Section',Part.makeLine(App.Vector(0,0,z),App.Vector(3,0,z))) for z in (0,5)]
+        doc.recompute();d=start(doc,'OM9_SurfaceLoft',sections)
+        control(d,QtWidgets.QCheckBox,'OM9SurfaceHistory').setChecked(True);accept(d);obj=output(doc)
+        check('Loft checkbox creates native associative history',obj.TypeId=='OpenMatrix9Gui::SurfaceHistory' and obj.HistoryEnabled)
+        sections[1].Shape=Part.makeLine(App.Vector(0,0,8),App.Vector(3,0,8));doc.recompute()
+        check('UI History recomputes from changed profile',abs(obj.Shape.Area-24)<1e-5)
+        # Production commit, Undo/Redo, and restore keep native links alive.
+        persistence(doc,obj,'HistoryCheckbox')
+        for alias,feature_id in [('gvSweepHistory','OM9-SURFACE-002'),('gvSweep2History','OM9-SURFACE-004')]:
+            doc=App.newDocument('HistoryAlias');doc.UndoMode=1
+            a=feature(doc,'RailA',Part.makeLine(App.Vector(0,0,0),App.Vector(0,0,10)))
+            profile=feature(doc,'Profile',Part.makeLine(App.Vector(0,0,0),App.Vector(5,0,0)))
+            objects=[a,profile]
+            if alias=='gvSweep2History':
+                b=feature(doc,'RailB',Part.makeLine(App.Vector(5,0,0),App.Vector(5,0,10)));objects=[a,b,profile]
+            doc.recompute();Gui.Selection.clearSelection()
+            for source in objects:Gui.Selection.addSelection(doc.Name,source.Name)
+            enter(alias);enter()
+            d=next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9SurfaceOptions') if d.isVisible()),None)
+            check(alias+': CMD alias opens options',d is not None)
+            history=control(d,QtWidgets.QCheckBox,'OM9SurfaceHistory')
+            check(alias+': History forced on',history.isChecked() and not history.isEnabled())
+            if alias=='gvSweep2History':check(alias+': single-profile Maintain Height defaults Yes',control(d,QtWidgets.QCheckBox,'OM9MaintainHeight').isChecked())
+            accept(d);obj=output(doc)
+            check(alias+': exact history feature ID',obj.OM9FeatureId==feature_id and obj.TypeId=='OpenMatrix9Gui::SurfaceHistory')
+            profile.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(5,2,0)) if alias=='gvSweepHistory' else Part.Arc(App.Vector(0,0,0),App.Vector(2.5,2,0),App.Vector(5,0,0)).toShape()
+            doc.recompute();check(alias+': changed section recomputes',obj.isValid() and not obj.Shape.isNull() and obj.Shape.Area>50.1)
+            persistence(doc,obj,alias)
+        for kind,alias in [(1,'gvSweepHistory'),(2,'gvSweep2History')]:
+            doc=App.newDocument('ClosedHistory');doc.UndoMode=1
+            a=feature(doc,'RailA',Part.makeCircle(5))
+            if kind==1:
+                shape=Part.makeCircle(1,App.Vector(5,0,0),App.Vector(0,1,0))
+                first=feature(doc,'First',shape)
+                rotated=shape.copy();rotated.rotate(App.Vector(),App.Vector(0,0,1),180)
+                objects=[a,first,feature(doc,'Last',rotated)]
+            else:
+                b=feature(doc,'RailB',Part.makeCircle(9))
+                first=feature(doc,'First',Part.makeLine(App.Vector(5,0,0),App.Vector(9,0,0)))
+                last=feature(doc,'Last',Part.makeLine(App.Vector(-5,0,0),App.Vector(-9,0,0)))
+                objects=[a,b,first,last]
+            doc.recompute();Gui.Selection.clearSelection()
+            for source in objects:Gui.Selection.addSelection(doc.Name,source.Name)
+            enter(alias);enter()
+            d=next(d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9SurfaceOptions') if d.isVisible())
+            closed=control(d,QtWidgets.QCheckBox,'OM9ClosedSweep')
+            check(alias+': Closed defaults Yes with closed rail and two profiles',closed.isEnabled() and closed.isChecked())
+            accept(d);obj=output(doc)
+            target=4*math.pi**2*5 if kind==1 else math.pi*(9**2-5**2)
+            check(alias+': Closed History analytic area',abs(obj.Shape.Area-target)<.05)
+            check(alias+': Closed History options retained',json.loads(obj.SurfaceOptions)['closed'])
+            persistence(doc,obj,'ClosedHistory'+str(kind))
+        doc=App.newDocument('RefitLargeWorld')
+        sections=[feature(doc,'Circle',Part.makeCircle(3,App.Vector(1e8,0,z))) for z in (0,5)]
+        doc.recompute();d=start(doc,'OM9_SurfaceLoft',sections)
+        control(d,QtWidgets.QComboBox,'OM9SectionMode').setCurrentIndex(2)
+        control(d,QtWidgets.QDoubleSpinBox,'OM9RefitTolerance').setValue(1e-7);events()
+        check('Refit rejects tolerance below large-world numerical resolution',not d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).isEnabled() and not any(hasattr(o,'OM9FeatureId') for o in doc.Objects))
+        control(d,QtWidgets.QDoubleSpinBox,'OM9RefitTolerance').setValue(.01);events()
+        check('Refit recovers with resolvable large-world tolerance',d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+        d.reject();events();App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:
+        result['ok']=False
+        result['error']=traceback.format_exc()
+        if 'console' in globals():
+            result['prompt']=str(console.property('om9Prompt'))
+            result['transcript']=console.toPlainText()[-5000:]
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        Gui.getMainWindow().close()
+
+QtCore.QTimer.singleShot(8000,run)

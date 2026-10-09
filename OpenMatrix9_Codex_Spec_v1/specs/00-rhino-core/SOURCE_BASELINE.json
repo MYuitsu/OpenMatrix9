@@ -1,0 +1,1100 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-10-09",
+  "evidence_level": "source_inspected",
+  "runtime_validation": "not_run",
+  "freecad_root": "H:/FreeCAD-src",
+  "freecad_head": "21d36cfa1eb110a1d0667050ff31706298805bbd",
+  "freecad_version_metadata": {
+    "name": "FreeCAD",
+    "version_major": 27,
+    "version_minor": 1,
+    "version_patch": 0,
+    "version_patch_note": "number of patch release (e.g. 4 for the 0.18.4 release)",
+    "version_suffix": "dev",
+    "version_suffix_note": "either 'dev' for development snapshot, 'RC1' etc. for release candidate, or empty string for release",
+    "build_version": 0,
+    "build_version_note": "used when the same FreeCAD version is re-released (for example using an updated LibPack)"
+  },
+  "om9_head": "52e887ab706dcd5d80e23979fb1f1b62d8d869b0",
+  "working_tree_note": "Source files were inspected in the working trees; HEAD is not a clean-source certification. OM9 contains local changes.",
+  "source_files": [
+    {
+      "path_from_freecad_root": "cMake/FreeCAD_Helpers/CheckInterModuleDependencies.cmake",
+      "bytes": 2412,
+      "sha256": "e1188136df2345cdc55ab8f0922e7740b5092954cd0db7d5ddf8df62e7890430",
+      "referenced_by": [
+        "README.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "cMake/FreeCAD_Helpers/InitializeFreeCADBuildOptions.cmake",
+      "bytes": 16061,
+      "sha256": "41d0f75202f216333689d3d5bdcf67096cf32eb5ea6deb1883a66071153ad218",
+      "referenced_by": [
+        "README.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/docs/features/OM9-CURVE-005.md",
+      "bytes": 11975,
+      "sha256": "09961a6de143d0c7a21c2df497bee7417060338dd70f3e1fea96edbcf2a90ba2",
+      "referenced_by": [
+        "03-coordinates-cplanes.md",
+        "06-selection-organization-blocks.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/docs/reviews/2026-10-09-rhino-core-gap-audit.md",
+      "bytes": 15539,
+      "sha256": "32915366d8f43392628518ac6abf3fcca9036a4494b359e79fb17a20d8662717",
+      "referenced_by": [
+        "01-object-model-kernel.md",
+        "03-coordinates-cplanes.md",
+        "04-command-engine.md",
+        "05-picking-snapping.md",
+        "06-selection-organization-blocks.md",
+        "07-nurbs-editing-modeling.md",
+        "08-analysis-repair.md",
+        "10-persistence-3dm-clipboard.md",
+        "11-annotation-layout-print.md",
+        "12-display-render-resources.md",
+        "README.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/CircleHistory.h",
+      "bytes": 1976,
+      "sha256": "93ee2d8187ca30ad812cb8041bcbda205372e428a4b2763928e65ba1e7873306",
+      "referenced_by": [
+        "09-history-dependencies.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/Command.cpp",
+      "bytes": 10546,
+      "sha256": "ef86b377c3ca2a4b1fed698d115bd8addb2ee39eeda8e095a10d267d84ea492a",
+      "referenced_by": [
+        "04-command-engine.md",
+        "06-selection-organization-blocks.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/CommandConsole.cpp",
+      "bytes": 20159,
+      "sha256": "102816c2468e1ef8da9a92254e38c48657ef599c1f10375144e58c713823ba83",
+      "referenced_by": [
+        "04-command-engine.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/CorePictureFrame.cpp",
+      "bytes": 12718,
+      "sha256": "dc4fdfca8af2018b1f91d7eb602a9252908cacc105aea6a99ad74bf7d7ab6731",
+      "referenced_by": [
+        "11-annotation-layout-print.md",
+        "12-display-render-resources.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/CoreRebuild.cpp",
+      "bytes": 17576,
+      "sha256": "8a56b8d72008b25df4fd78ae80eb21d1340bfa34eb0d4d6dc291312cd046d2d3",
+      "referenced_by": [
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/CoreSnapGeometry.cpp",
+      "bytes": 5402,
+      "sha256": "f64cf7db236d3e28f874b04076344d1f47890e5f23ff485152435aa3adb7817e",
+      "referenced_by": [
+        "05-picking-snapping.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/CoreSnaps.cpp",
+      "bytes": 5793,
+      "sha256": "add406a2a313b036b89deeab7747dbfd784a8343cb56212233fbf0e478dc1666",
+      "referenced_by": [
+        "05-picking-snapping.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/CoreThreeDm.cpp",
+      "bytes": 2961,
+      "sha256": "6187529a07be75e29ce56562f9ea104fc741eda44673204d156c0419f563e374",
+      "referenced_by": [
+        "10-persistence-3dm-clipboard.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/CoreWorkspace.cpp",
+      "bytes": 33459,
+      "sha256": "febdb90c2a741b1589810a5255c09dccf07069ca97326fecc66ac0758cc78feb",
+      "referenced_by": [
+        "03-coordinates-cplanes.md",
+        "12-display-render-resources.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/CurveController.cpp",
+      "bytes": 32666,
+      "sha256": "558ad31d9d5a17f6f39bbac0907adbc04c45350637de351cb957cf39830d1cb8",
+      "referenced_by": [
+        "03-coordinates-cplanes.md",
+        "04-command-engine.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/CurveGeometry.cpp",
+      "bytes": 3505,
+      "sha256": "959cdbb209891cf6860f408ecd69865307742e7cf741b4539e499d7e50a38efc",
+      "referenced_by": [
+        "01-object-model-kernel.md",
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/HistoryController.cpp",
+      "bytes": 10742,
+      "sha256": "dad70b45dad202f1da222a0914332c9df057fad6201d6683c6da072685386931",
+      "referenced_by": [
+        "09-history-dependencies.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/HistoryFeature.h",
+      "bytes": 2322,
+      "sha256": "fceae30f2e1a1913494024ddb7a8efe825a0301f279a634b6cfb298118da608f",
+      "referenced_by": [
+        "09-history-dependencies.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/SurfaceController.cpp",
+      "bytes": 27063,
+      "sha256": "ff61666da372cd7cc16c7e5cb7f37bfc82dc8dcff319b20f3422a1c67b41121b",
+      "referenced_by": [
+        "02-units-tolerances.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/SurfaceGeometry.cpp",
+      "bytes": 21214,
+      "sha256": "f7e8d0893a9cc93c068e3c009548cc5033738b66999dd832bd073a107d6bb371",
+      "referenced_by": [
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/SurfaceHistory.h",
+      "bytes": 2209,
+      "sha256": "586c68b2d79a8acc0bbe68dc7919ac6902a0c94a955d6cdd00a6ea44dd466fd4",
+      "referenced_by": [
+        "09-history-dependencies.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/SurfaceRefit.cpp",
+      "bytes": 8364,
+      "sha256": "42d53fec410a0438fa83cf98167dc280381bdba6f7a72c5b5fdf91d959c6e1a3",
+      "referenced_by": [
+        "02-units-tolerances.md",
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/ThreeDmArchive.cpp",
+      "bytes": 13999,
+      "sha256": "fadd7a6c339e839cb7df80b0dd1617285a7b3334300a9671a65d4247b672e8fa",
+      "referenced_by": [
+        "10-persistence-3dm-clipboard.md",
+        "12-display-render-resources.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/ThreeDmExplode.cpp",
+      "bytes": 21188,
+      "sha256": "87bb11ef25c325ecd8c30d8bb1ecdcd1e2002da73e1ca771fdc7a1dfe93b0b73",
+      "referenced_by": [
+        "06-selection-organization-blocks.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/Gui/ThreeDmPython.cpp",
+      "bytes": 10694,
+      "sha256": "1637f0979fc43e514ecabd50cf78ce37a17b3f920603894c980741b5cfe3ab80",
+      "referenced_by": [
+        "10-persistence-3dm-clipboard.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/rust/src/command_completion.rs",
+      "bytes": 3052,
+      "sha256": "412f6c020af7ba21fd6d841009345f36c33b76ae93749762196ed00679d27148",
+      "referenced_by": [
+        "04-command-engine.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/rust/src/core_3dm.rs",
+      "bytes": 1366,
+      "sha256": "5bc7294610949d6f0099ff1c8c7e5059c23d35baf6293ee2a9016110ab483966",
+      "referenced_by": [
+        "02-units-tolerances.md",
+        "10-persistence-3dm-clipboard.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/rust/src/core_3dm_archive.rs",
+      "bytes": 1743,
+      "sha256": "cc787354e699fd5bca6a113c74fd0c31ec8c0d494dc1762e13df984da9916448",
+      "referenced_by": [
+        "10-persistence-3dm-clipboard.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/rust/src/core_keyboard.rs",
+      "bytes": 2760,
+      "sha256": "2fd3c10026d551caae8bb00042bb73585adaa47ae4f47ca2c4af5d78cbb7e720",
+      "referenced_by": [
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/rust/src/core_picture_frame.rs",
+      "bytes": 6354,
+      "sha256": "db2b43599f0744259f0a6216427f50e92817c8b144b5c34572805c02242d061a",
+      "referenced_by": [
+        "12-display-render-resources.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/rust/src/core_snaps.rs",
+      "bytes": 5128,
+      "sha256": "0b8d0e654fb4097b36e35bfdbe7127291cc9912a7555f01c594a44d66b76083c",
+      "referenced_by": [
+        "05-picking-snapping.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/rust/src/curve.rs",
+      "bytes": 44915,
+      "sha256": "65c7aa441e94dabf3d05c0cf48f967005312f2f96b9188f04237712877370c2d",
+      "referenced_by": [
+        "03-coordinates-cplanes.md",
+        "04-command-engine.md",
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/rust/src/surface.rs",
+      "bytes": 15790,
+      "sha256": "2aa9b4da0f8aa6b9a75c0af64adc92ff5603da7c626c9bc647973392fa99c193",
+      "referenced_by": [
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/rust/src/surface_refit.rs",
+      "bytes": 4222,
+      "sha256": "5ef5bf001234606da3cf8f164a5aec08efa5644ef62d9b53b34d43f3974e8b68",
+      "referenced_by": [
+        "02-units-tolerances.md",
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "Mod/OpenMatrix9/ThreeDm.py",
+      "bytes": 10278,
+      "sha256": "ac0e7f2622694ed5142837886a8d1f465fd5c38f15ebc1252fa8c6d36915cef5",
+      "referenced_by": [
+        "10-persistence-3dm-clipboard.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/App/Document.cpp",
+      "bytes": 145651,
+      "sha256": "eab191b4e5fea89e804670bb7ccac17d7f5393a5642289b428234a9d26613f94",
+      "referenced_by": [
+        "02-units-tolerances.md",
+        "09-history-dependencies.md",
+        "10-persistence-3dm-clipboard.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/App/Document.h",
+      "bytes": 56643,
+      "sha256": "e80203c5fd612e2ffea460e3edee48bad0666258af6e666b70e9fad42a8a6e4a",
+      "referenced_by": [
+        "02-units-tolerances.md",
+        "09-history-dependencies.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/App/DocumentObject.h",
+      "bytes": 57518,
+      "sha256": "12b7b5260b1a40e60817e7c02546a56e9132cdb94a1196080c39aaf1e5282b33",
+      "referenced_by": [
+        "09-history-dependencies.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/App/GeoFeature.h",
+      "bytes": 10398,
+      "sha256": "a063479da384c1117f5c8c9b6efca8e558436e83ba6dbdc921d7fef7a015ba3b",
+      "referenced_by": [
+        "01-object-model-kernel.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/App/GroupExtension.h",
+      "bytes": 8263,
+      "sha256": "b3e1ebea7a59ffd58afee3edb24bf13b48aab96e4745d2eafab7584e82d650c7",
+      "referenced_by": [
+        "06-selection-organization-blocks.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/App/Link.h",
+      "bytes": 56135,
+      "sha256": "f64bb90310624d8158aef1373550bde21401208d41f95bbbb653fe0c8a9e9f93",
+      "referenced_by": [
+        "01-object-model-kernel.md",
+        "06-selection-organization-blocks.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/App/PropertyLinks.h",
+      "bytes": 58951,
+      "sha256": "0576661d1645c13054052f4da0d230a8873d56e3be163dce0c529bafbe6709fc",
+      "referenced_by": [
+        "09-history-dependencies.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/App/PropertyUnits.cpp",
+      "bytes": 29067,
+      "sha256": "449291ccc08943dba99047f356f88bb9cf043719f7a53cdd2307b379f84e5bc1",
+      "referenced_by": [
+        "02-units-tolerances.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Base/Matrix.cpp",
+      "bytes": 33101,
+      "sha256": "d4e7d33d1ce63627f269d056068f45904ecd4d6ecc783da78232da3df6a7c804",
+      "referenced_by": [
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Base/Matrix.h",
+      "bytes": 14581,
+      "sha256": "bcc8f23c39e576a0e795518c19c12442aea3172985f1327b1054d73f187b9f9b",
+      "referenced_by": [
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Base/Quantity.cpp",
+      "bytes": 30258,
+      "sha256": "4b22fa897dedf1000994e7ed4770589e3018bbe0fd77491d42a8e7469f99efd1",
+      "referenced_by": [
+        "02-units-tolerances.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Base/Quantity.h",
+      "bytes": 11741,
+      "sha256": "f5f1f5b0c186cbe8931cddcbc06d7dad3668e487a75ca389dacc7f52dc7ecae2",
+      "referenced_by": [
+        "02-units-tolerances.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Base/Unit.h",
+      "bytes": 6540,
+      "sha256": "b98704b13362847265ca3d1abff1787667bc0a1939535ce74267351a00fb1cb3",
+      "referenced_by": [
+        "02-units-tolerances.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Base/UnitsApi.cpp",
+      "bytes": 7602,
+      "sha256": "5b93fddf77494d3d16b0ed0c5142f674a93543139ce5bde135bd285ccce1c802",
+      "referenced_by": [
+        "02-units-tolerances.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/Command.cpp",
+      "bytes": 70847,
+      "sha256": "0afeef9d926b2273af0d8f3365f5c11c62816d44d75c35e8dfae214f5dd3816a",
+      "referenced_by": [
+        "04-command-engine.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/CommandDoc.cpp",
+      "bytes": 86276,
+      "sha256": "89e438d8205dff0ed0fb761604ae434154849f84dd7b7cd91495ae2c2c2c1d0c",
+      "referenced_by": [
+        "09-history-dependencies.md",
+        "10-persistence-3dm-clipboard.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/CommandLink.cpp",
+      "bytes": 36293,
+      "sha256": "51f806f6d03c26db5073f663d2513c3277d123f87a760bbe2902705a6ac14566",
+      "referenced_by": [
+        "06-selection-organization-blocks.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/CommandView.cpp",
+      "bytes": 142408,
+      "sha256": "22d7e58cf78c8cbb9c47bb6b586b8909222b97672e0f10db12785b879a0fd158",
+      "referenced_by": [
+        "08-analysis-repair.md",
+        "12-display-render-resources.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/Document.cpp",
+      "bytes": 111693,
+      "sha256": "eeca1d0b637e23aae8e6376b1e1dba1fb7eb58fedc9ec17abb0c91bcdaf4a1ee",
+      "referenced_by": [
+        "10-persistence-3dm-clipboard.md",
+        "12-display-render-resources.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/MainWindow.cpp",
+      "bytes": 110071,
+      "sha256": "e830796b2066824906ffca483569892a59caa8e91f499a2402c4dfbc3404e945",
+      "referenced_by": [
+        "10-persistence-3dm-clipboard.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/propertyeditor/PropertyItem.cpp",
+      "bytes": 156218,
+      "sha256": "956e82bce0e87632cdb3a862cd9f007ab417716d8cdc7bc5bff2d99d8daf6aab",
+      "referenced_by": [
+        "12-display-render-resources.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/PythonConsole.cpp",
+      "bytes": 55621,
+      "sha256": "453b76d66b8b8f589df4215dd21c16e1ec207f47a5272f1d1da2e28e284afc6e",
+      "referenced_by": [
+        "04-command-engine.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/QuantitySpinBox.cpp",
+      "bytes": 34719,
+      "sha256": "5ad90270834cdb7de60da8213e82d58df476429ab17035f3304aec9b14f1b607",
+      "referenced_by": [
+        "02-units-tolerances.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/Selection/BoxSelection.cpp",
+      "bytes": 11302,
+      "sha256": "d95888046d2dda1f4f82003ea04cb3a6dd86866262548b822cbe77493e5e4340",
+      "referenced_by": [
+        "06-selection-organization-blocks.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/Selection/Selection.h",
+      "bytes": 35038,
+      "sha256": "8b8e68034b969b3acc33c24c36ff7c4d422f0d3456547770bef8455634b82291",
+      "referenced_by": [
+        "04-command-engine.md",
+        "06-selection-organization-blocks.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/TaskView/TaskAppearance.cpp",
+      "bytes": 12891,
+      "sha256": "85e4b28c3038ff517e4725134c23a65cfdf5a36540fa8dd9cbbb32101bb6b9fa",
+      "referenced_by": [
+        "12-display-render-resources.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/TextureMapping.cpp",
+      "bytes": 6695,
+      "sha256": "203f96d96974bdbe31fc58679da2ec90c0d5c6a29edc2b38c391ba3f6a11850c",
+      "referenced_by": [
+        "08-analysis-repair.md",
+        "12-display-render-resources.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/View3DInventorViewer.cpp",
+      "bytes": 184311,
+      "sha256": "47af93602b959744630ff6d7ba904536bb4c5608740143093e465423bb54b7f1",
+      "referenced_by": [
+        "12-display-render-resources.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/ViewProviderDocumentObject.h",
+      "bytes": 10116,
+      "sha256": "a0b81d0be77707f576bdd3d9cb1180e025080fe3ce8a729fdb33630652619a05",
+      "referenced_by": [
+        "06-selection-organization-blocks.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/ViewProviderGeometryObject.cpp",
+      "bytes": 15637,
+      "sha256": "3b738cf3676bd37fc3c36f5b4d56247f3caea25e811bc9b2aad07e9c948cafba",
+      "referenced_by": [
+        "12-display-render-resources.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Gui/ViewProviderGeometryObject.h",
+      "bytes": 4924,
+      "sha256": "f1e3104ae5a40caf136fc178852934254900751caf0e9d50e652e6964f0c0664",
+      "referenced_by": [
+        "06-selection-organization-blocks.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Draft/draftguitools/gui_annotationstyleeditor.py",
+      "bytes": 18925,
+      "sha256": "a90017afcdfbd09f6eed06e1ab0c23dcf668eecedc72886e9a316d57a836257e",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Draft/draftguitools/gui_dimensions.py",
+      "bytes": 30056,
+      "sha256": "59806c06e00ca30de180bed04e436c14b1c482e79899d2c4cdf75e1261830ab3",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Draft/draftguitools/gui_layers.py",
+      "bytes": 25764,
+      "sha256": "186c110ba7be056b8db8e114ffc534f3d6cbb06ea47450e33d7aae10459b462d",
+      "referenced_by": [
+        "06-selection-organization-blocks.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Draft/draftguitools/gui_selectplane.py",
+      "bytes": 12251,
+      "sha256": "c5f6fd7a5f439247d17d7e1e803cfec081cb14b040765034dadc2855bf807d7e",
+      "referenced_by": [
+        "03-coordinates-cplanes.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Draft/draftguitools/gui_snapper.py",
+      "bytes": 75918,
+      "sha256": "8d33d127fda118ce8819dc6f2a51a4ec14d7a467aa72fcc5a47b92ecf7eed1a4",
+      "referenced_by": [
+        "05-picking-snapping.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Draft/draftmake/make_dimension.py",
+      "bytes": 24168,
+      "sha256": "99ca761d26f04b3fd7c72af0b74dff5cdb820c59cad79589c77eac73c82d8d19",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Draft/draftmake/make_label.py",
+      "bytes": 16212,
+      "sha256": "a1ca2f70d16489fd24bb1e6fb8913bef4602298bbe467073449ebfb1f2221b06",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Draft/draftmake/make_text.py",
+      "bytes": 8395,
+      "sha256": "5daf980a1dbe0d188938460cc442fabc14f8de1ae5dd2b10046dfc07fbe59040",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Draft/draftobjects/layer.py",
+      "bytes": 8646,
+      "sha256": "a9705e218f66e6ab4ca5b2913ef92c3ac00537cbacf64ff091c08446af600650",
+      "referenced_by": [
+        "06-selection-organization-blocks.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Draft/draftobjects/wpproxy.py",
+      "bytes": 3722,
+      "sha256": "9fd13c847393aa0308c2e0859e14256eb359c0d0a6077aaed50eb14529dd1540",
+      "referenced_by": [
+        "03-coordinates-cplanes.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Draft/draftviewproviders/view_layer.py",
+      "bytes": 26146,
+      "sha256": "a2172a6bbce9f93378313997bd09d52d648a70d9f8b84b8e24b5b78c05b5eef0",
+      "referenced_by": [
+        "06-selection-organization-blocks.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Draft/WorkingPlane.py",
+      "bytes": 71815,
+      "sha256": "e885af398a5eec970a690a802a9a3b79d5885395a7f4e6576c6a2274164ae30f",
+      "referenced_by": [
+        "03-coordinates-cplanes.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Mesh/App/FeatureMeshCurvature.cpp",
+      "bytes": 3159,
+      "sha256": "9e659b97f3df60efcff844e0a4b24fabf6c989fe22694bf37dc700af1fe83d04",
+      "referenced_by": [
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Mesh/App/MeshFeature.h",
+      "bytes": 3208,
+      "sha256": "ac448492a37d0712e414d43f1a26a236635adc64d77264a772fca6fe92f295eb",
+      "referenced_by": [
+        "01-object-model-kernel.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Mesh/App/MeshPyImp.cpp",
+      "bytes": 66081,
+      "sha256": "86bc5911998919651d4ad91496083d1dfd11aea844ba66299a393d644bd591cc",
+      "referenced_by": [
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Mesh/Gui/Command.cpp",
+      "bytes": 64652,
+      "sha256": "229f1fd24a5f4dab0955fd9226efe71f3d898e516bf973f185bcbc0ee587e25f",
+      "referenced_by": [
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Mesh/Gui/DlgEvaluateMeshImp.cpp",
+      "bytes": 53700,
+      "sha256": "63e6ff476efa0600426288020c18318c7d2a5490ba9b7faf6c6f6f5024471b8b",
+      "referenced_by": [
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Mesh/Gui/ViewProviderCurvature.cpp",
+      "bytes": 23604,
+      "sha256": "cbfc95612ccbaf0ea88595a78b7377dd88e389570803ff781a70f9e36f30ef29",
+      "referenced_by": [
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/BSplineCurvePyImp.cpp",
+      "bytes": 52723,
+      "sha256": "cbfb4984dbce3418a9b41bd6509aa5e2eab1210d39316ef87d2c8dccd5f80657",
+      "referenced_by": [
+        "02-units-tolerances.md",
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/BSplineSurfacePyImp.cpp",
+      "bytes": 60533,
+      "sha256": "fb13e31d9b095a55bae499c28f6d724edeaa7315ea163e82114a7ab7eb4d9a95",
+      "referenced_by": [
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/FeatureExtrusion.cpp",
+      "bytes": 19205,
+      "sha256": "f3edcf4f5a998f004ff8ff4ac1c9f483636eb37c86d037255472ff17718cf62b",
+      "referenced_by": [
+        "01-object-model-kernel.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/FeatureProjectOnSurface.cpp",
+      "bytes": 16525,
+      "sha256": "7d5f6bc383571b0754d02170dc315bfd5a4f18e56d5880f76c4c650b68d3a99f",
+      "referenced_by": [
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/Geometry.cpp",
+      "bytes": 246393,
+      "sha256": "6f739f21a06fac39937b77b55071df46b64261500c49f907d4ff166bb551afa9",
+      "referenced_by": [
+        "01-object-model-kernel.md",
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/Geometry.h",
+      "bytes": 50288,
+      "sha256": "ae9a6f89a2aeffb42be68392763c6266ca86a1f797005cc4eaaf1e98998952f8",
+      "referenced_by": [
+        "01-object-model-kernel.md",
+        "02-units-tolerances.md",
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/GeometryCurvePyImp.cpp",
+      "bytes": 45612,
+      "sha256": "93218013d9250e8d9d0bdcff53884e3c8a304bfa92d270ceaf76dbea3294abf8",
+      "referenced_by": [
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/GeometrySurfacePyImp.cpp",
+      "bytes": 29903,
+      "sha256": "3c925d1c1cf91d93e50fffece55196d42f95b9de1e7047ed80e664081876fa45",
+      "referenced_by": [
+        "07-nurbs-editing-modeling.md",
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/ImportIges.cpp",
+      "bytes": 4798,
+      "sha256": "cf4a8517bbed85645ca6df5f24627dc35c8daf4bcd10dcca4f37ae1ac07dbc43",
+      "referenced_by": [
+        "10-persistence-3dm-clipboard.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/ImportStep.cpp",
+      "bytes": 8269,
+      "sha256": "d2a439d34fcce2eea9a9e8dc473e7961ca49acb754afeccba05d30d6cece8a59",
+      "referenced_by": [
+        "10-persistence-3dm-clipboard.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/PartFeature.h",
+      "bytes": 11722,
+      "sha256": "1645be1905e06c422d5dede6962dfaa4a7d38e142e8dbfbd5618a1f550c5011b",
+      "referenced_by": [
+        "01-object-model-kernel.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/TopoShape.cpp",
+      "bytes": 157707,
+      "sha256": "2f7de58f556e3ce2cb0877ebdb1a83536d1e73be2d8a2b9243056083f0619e5e",
+      "referenced_by": [
+        "01-object-model-kernel.md",
+        "02-units-tolerances.md",
+        "07-nurbs-editing-modeling.md",
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/TopoShape.h",
+      "bytes": 127354,
+      "sha256": "cf0354bb7fc9c37e82dc37b5fde187860e69b6170c3fe9688482c69cbe2731b4",
+      "referenced_by": [
+        "01-object-model-kernel.md",
+        "02-units-tolerances.md",
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/TopoShapeEdgePyImp.cpp",
+      "bytes": 39391,
+      "sha256": "8d005d88c40011ad7d366426b00e217b03e9e6f3199fd86c97474045c923f0c9",
+      "referenced_by": [
+        "01-object-model-kernel.md",
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/TopoShapeFacePyImp.cpp",
+      "bytes": 39029,
+      "sha256": "324ed0b8642b0261ff6fc981997fa8523589eac647827ca5aab85dfdc3faa0f2",
+      "referenced_by": [
+        "01-object-model-kernel.md",
+        "07-nurbs-editing-modeling.md",
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/App/TopoShapePyImp.cpp",
+      "bytes": 93062,
+      "sha256": "db0f1f3fb0fb55e13017c64466d1f916821340810057259a203053c37d4eab0e",
+      "referenced_by": [
+        "02-units-tolerances.md",
+        "07-nurbs-editing-modeling.md",
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/BOPTools/ToleranceFeatures.py",
+      "bytes": 9330,
+      "sha256": "68cd91d8c3e481b26c7bc581ca512fda1f89da31993cc3e2c9b0d4a9b12f2092",
+      "referenced_by": [
+        "02-units-tolerances.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/Gui/Command.cpp",
+      "bytes": 101251,
+      "sha256": "ceca0bc031c3c87fb2752003899bca044b980795da6a51424999539b055a7e74",
+      "referenced_by": [
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/Gui/TaskCheckGeometry.cpp",
+      "bytes": 66470,
+      "sha256": "6507083f7920bb55c9b92c6ac87a0aa18a9e8abe03556615a7c8df014cfd5a73",
+      "referenced_by": [
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Part/Gui/ViewProviderExt.cpp",
+      "bytes": 59294,
+      "sha256": "272c5258116bb1e5f26088198fedb89459766dece0d07b798efd4db197391722",
+      "referenced_by": [
+        "12-display-render-resources.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/PartDesign/App/FeatureDraft.cpp",
+      "bytes": 14352,
+      "sha256": "8f79d5c0338442fbf8794382e0a08c51a122a9a11c67d4f9018c3ef135a05b2c",
+      "referenced_by": [
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Points/App/PointsFeature.h",
+      "bytes": 3179,
+      "sha256": "8c15fc81f31e30aaa22f07448e968f7d7b308861d90a1a68f76377314b012902",
+      "referenced_by": [
+        "01-object-model-kernel.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Sketcher/Gui/CommandSketcherOverlay.cpp",
+      "bytes": 14051,
+      "sha256": "157c3c47a3e7c4c545abcaae5b5a135635dd7893a946580160e52c4d83679097",
+      "referenced_by": [
+        "07-nurbs-editing-modeling.md",
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Sketcher/Gui/EditModeInformationOverlayCoinConverter.cpp",
+      "bytes": 22880,
+      "sha256": "0c19d967afad1233e0fa56ae01f87e3967a2970b5dd863ac142a837fabde5d67",
+      "referenced_by": [
+        "08-analysis-repair.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Surface/App/FeatureFilling.cpp",
+      "bytes": 14858,
+      "sha256": "a9abc11f45315db3f5fe98c80c071499c30b4d4d174806ac98cfcc426e1fdd07",
+      "referenced_by": [
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Surface/App/FeatureGeomFillSurface.cpp",
+      "bytes": 14637,
+      "sha256": "ed4c8a322305736e7b8d8c7e643781d15f9b8edad076b50afb126fe58d59dfec",
+      "referenced_by": [
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/Surface/Gui/Command.cpp",
+      "bytes": 13459,
+      "sha256": "e138f33e47840696a9baa00b31804f0e381064264d0a0d3af40b2ad10b61c9f3",
+      "referenced_by": [
+        "07-nurbs-editing-modeling.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/TechDraw/App/DrawPage.cpp",
+      "bytes": 18513,
+      "sha256": "c98072d8b8a612519d91c96801acf5ab7d99a7d89f9478bf4e5abb938dadf2fa",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/TechDraw/App/DrawView.cpp",
+      "bytes": 26481,
+      "sha256": "4b7e4fba64e31e64f0375fca6b5a29c64f4fa4b6ed43781fa37d88138400b0ca",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/TechDraw/App/DrawViewDimension.cpp",
+      "bytes": 89256,
+      "sha256": "235e1f5d60fbaf243f77757f22a136bd554de796973a0e558973190fd35c6f9d",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/TechDraw/App/DrawViewPart.cpp",
+      "bytes": 65706,
+      "sha256": "bed7044615ce291a002f0f3a05c8872f6de29053c5db9d28a1b332b77c2e1216",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/TechDraw/App/GeometryObject.cpp",
+      "bytes": 28469,
+      "sha256": "87886f8464ccb4c99b7e0584b443143e7e284cdc551d1e54715a011f55677cb7",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/TechDraw/App/ProjectionAlgos.cpp",
+      "bytes": 10563,
+      "sha256": "03a162bd3f2704c031d3be8f614020a20d866cb25c21750ce103fe7ce5147bdd",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/TechDraw/Gui/Command.cpp",
+      "bytes": 84638,
+      "sha256": "5981d2248c86d489b926210ae4de2971997d8ff1f798cc9efa04bf532ec71a3e",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/TechDraw/Gui/CommandCreateDims.cpp",
+      "bytes": 93985,
+      "sha256": "e86d9aee620dce9bd98c993b2a3b600696241594391c48de22c6e7ed79e8b565",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/TechDraw/Gui/MDIViewPage.cpp",
+      "bytes": 50630,
+      "sha256": "9fcdfdbcfb50e4b790e93528c667ac4ad0c639f5cd588cb683ad50e8e13a0f17",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "src/Mod/TechDraw/Gui/PagePrinter.cpp",
+      "bytes": 19828,
+      "sha256": "93a8db11cd54169f036a54a4a94a3a21d8431c3143b1cd13fedf467f6c3e8c60",
+      "referenced_by": [
+        "11-annotation-layout-print.md"
+      ]
+    },
+    {
+      "path_from_freecad_root": "version.json",
+      "bytes": 479,
+      "sha256": "d879d5277b48c44acc00c75b043633bdb44d1b7611325f8cc490b030da04b86d",
+      "referenced_by": [
+        "README.md"
+      ]
+    }
+  ],
+  "catalog_observations": [
+    {
+      "path": "ALL_FEATURES.md",
+      "initial_sha256": "41d84317df678dfd66652af1283893b29dd013dfb55d02985a9058a689a5f06b",
+      "preserved_sha256": "41d84317df678dfd66652af1283893b29dd013dfb55d02985a9058a689a5f06b",
+      "changed_during_audit": false
+    },
+    {
+      "path": "FEATURES.json",
+      "initial_sha256": "e17f538f97888f869a2270fd0828aeaf382294a32931f82745e68c4440bb3cf3",
+      "preserved_sha256": "b2432ede62d1010fdef0248008a376b9e9a8d0e05cf2d060ba78a9980b6843a3",
+      "changed_during_audit": true
+    },
+    {
+      "path": "FEATURES.yaml",
+      "initial_sha256": "e349574f4bc1f764e388e359e4c255bfe98679ea48610617ffc221d738e71046",
+      "preserved_sha256": "d36d4654523cdf6992af665d22293476c31e6a8645dd6ff0c5c4a3e6e4b3f50b",
+      "changed_during_audit": true
+    },
+    {
+      "path": "FEATURE_LOOKUP.json",
+      "initial_sha256": "cd705369e3c21cd0f10cf08b9451bfec593366b6f7b9aa55a41b34044cddc175",
+      "preserved_sha256": "cd705369e3c21cd0f10cf08b9451bfec593366b6f7b9aa55a41b34044cddc175",
+      "changed_during_audit": false
+    },
+    {
+      "path": "IMPLEMENTATION_STATUS.md",
+      "initial_sha256": "86334bc14a88007b8d854f718548600ead46d97659908b0a6aeba07a6f32f98d",
+      "preserved_sha256": "62b820ae909d5f66b66979a688b3b8933f9e8c1357db4e2948bf47958b4f0872",
+      "changed_during_audit": true
+    },
+    {
+      "path": "stats.json",
+      "initial_sha256": "79e817a9a0a911bb7cf5246fa9cae793ae4f52836cbadbae6c4ef7563db0cf63",
+      "preserved_sha256": "6f60d95fec05a96e9cb7cc4c6aa04ca5b97c65eba4878db67e5443e6d05b3569",
+      "changed_during_audit": true
+    }
+  ],
+  "catalog_note": "Four catalog/status files were updated outside group00 edits during this audit and already matched the concurrent manifest. Preserve them; no rollback or native-status reassessment by this documentation task.",
+  "external_urls": [
+    "https://developer.rhino3d.com/guides/opennurbs/what-is-opennurbs/",
+    "https://docs.mcneel.com/rhino/5/help/en-us/commands/cplane.htm",
+    "https://docs.mcneel.com/rhino/5/help/en-us/commands/curvatureanalysis.htm",
+    "https://docs.mcneel.com/rhino/5/help/en-us/commands/detail.htm",
+    "https://docs.mcneel.com/rhino/5/help/en-us/commands/draftangleanalysis.htm",
+    "https://docs.mcneel.com/rhino/5/help/en-us/commands/history.htm",
+    "https://docs.mcneel.com/rhino/5/help/en-us/commands/make2d.htm",
+    "https://docs.mcneel.com/rhino/5/help/en-us/commands/pointson.htm",
+    "https://docs.mcneel.com/rhino/5/help/en-us/commands/rebuild.htm",
+    "https://docs.mcneel.com/rhino/5/help/en-us/commands/rebuildedges.htm",
+    "https://docs.mcneel.com/rhino/5/help/en-us/commands/zebra.htm",
+    "https://docs.mcneel.com/rhino/5/help/en-us/documentproperties/units.htm",
+    "https://docs.mcneel.com/rhino/5/help/en-us/user_interface/unit_systems.htm"
+  ],
+  "external_url_note": "Reference URLs collected from documents; collecting a URL is not an independent accessibility or runtime check.",
+  "rhino_reference_pdf": {
+    "path": "C:/Users/nguye/Downloads/Chữ Tin Ba mươi Năm (1)/windows_pdf_user_s_guide.pdf",
+    "bytes": 13533999,
+    "sha256": "f42df0ecced753d98afcf93c5442597fe842df75efb03b321170e11790fa84ce",
+    "copied_into_package": false,
+    "note": "Rhino 5 User Guide reference retained at original user-supplied path; see source audit for page mapping."
+  }
+}

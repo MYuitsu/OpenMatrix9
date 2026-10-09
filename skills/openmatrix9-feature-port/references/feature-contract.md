@@ -1,6 +1,6 @@
 # Normalize the selected feature
 
-Use the ID from `FEATURES.json` in the selected checkout. The spec package lives at `ref/matrix9/OpenMatrix9_Codex_Spec_v1/`. Read its `IMPLEMENTATION_RULES.md` and `SOURCES.md` before filling implementation decisions.
+Use the ID from `FEATURES.json` in the selected checkout. Resolve the package from its feature lookup/catalog: `OpenMatrix9_Codex_Spec_v1/` or the legacy `ref/matrix9/OpenMatrix9_Codex_Spec_v1/`, whichever exists and matches that checkout. Read `IMPLEMENTATION_RULES.md` and the package's available source/evidence guidance before filling implementation decisions; use `SOURCES.md` when that package provides it.
 
 Record the following in `docs/features/<ID>.md`, derived separately from the original package:
 

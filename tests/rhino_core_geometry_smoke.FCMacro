@@ -1,0 +1,184 @@
+"""Mixed CAD/mesh exchange plus preserved FCStd identity; no Rhino claim.
+
+Set OM9_RCORE_GEOMETRY_RESTORE_FILE for a separate cold restore invocation.
+"""
+import hashlib, json, math, os, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part, Mesh
+from PySide import QtCore
+
+output = Path(os.environ['OM9_SMOKE_OUTPUT'])
+output.mkdir(parents=True, exist_ok=True)
+report = {'checks': []}
+
+def check(name, condition):
+    report['checks'].append({'name': name, 'passed': bool(condition)})
+    if not condition:
+        raise AssertionError(name)
+
+def digest(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+def inspect_geometry(objects, prefix, source_labels=None):
+    # FreeCAD can uniquify display labels on a repeated import. Archive UUIDs,
+    # scoped by the import namespace, identify the original record reliably.
+    rows = {(source_labels[obj.OM9SourceUUID] if source_labels is not None else obj.Label): obj for obj in objects}
+    report.setdefault('object_labels',{})[prefix]=[(name,obj.Label,obj.Name) for name,obj in rows.items()]
+    check(prefix+' exact object count and source identities', len(objects)==6 and set(rows)=={'Point','RationalArc','TrimHole','OpenPeriodic','ClosedBox','MeshTriangle'})
+    point = rows['Point'].Shape
+    check(prefix+' point remains CAD vertex', len(point.Vertexes)==1 and (point.Vertexes[0].Point-App.Vector(1,2,3)).Length<1e-7)
+    arc = rows['RationalArc'].Shape.Edges[0]
+    check(prefix+' rational arc length and type', isinstance(arc.Curve,Part.BSplineCurve) and arc.Curve.isRational() and abs(arc.Length-4*math.pi)<1e-6)
+    check(prefix+' rational arc shape deviation', all(abs(p.Length-8)<1e-6 and abs(p.z)<1e-7 for p in arc.discretize(21)))
+    trim = rows['TrimHole'].Shape
+    report.setdefault('geometry_metrics',{})[prefix]={'trim_faces':len(trim.Faces),'trim_wires':len(trim.Faces[0].Wires) if trim.Faces else 0,'trim_solids':len(trim.Solids),'trim_area':trim.Area,'expected_trim_area':91*math.pi,'trim_valid':trim.isValid(),'trim_boundary_radii':[[min(p.Length for p in edge.discretize(101)),max(p.Length for p in edge.discretize(101))] for edge in trim.Edges],'trim_surface':str(trim.Faces[0].Surface)}
+    # Shape.Area uses nonadaptive BRepGProp integration and is inaccurate for
+    # rational trims. The native geometry fixture verifies adaptive area against
+    # 91*pi; here independently check the exact boundary and missing interior.
+    check(prefix+' trim hole survives as BRep topology', len(trim.Faces)==1 and len(trim.Faces[0].Wires)==2 and len(trim.Solids)==0 and trim.isValid())
+    radii=sorted([sorted([p.Length for p in edge.discretize(101)]) for edge in trim.Edges],key=lambda values:values[0])
+    check(prefix+' trim radii and planar boundary remain exact',len(radii)==2 and all(abs(value-radius)<1e-7 for values,radius in zip(radii,[3,10]) for value in values) and all(abs(p.z)<1e-7 for edge in trim.Edges for p in edge.discretize(101)))
+    check(prefix+' trim excludes hole and retains annular interior',abs(trim.distToShape(Part.Vertex(App.Vector()))[0]-3)<1e-7 and trim.distToShape(Part.Vertex(App.Vector(5,0,0)))[0]<1e-7)
+    periodic = rows['OpenPeriodic'].Shape
+    check(prefix+' periodic surface remains open CAD without a solid', len(periodic.Faces)==1 and len(periodic.Solids)==0 and not periodic.isClosed() and periodic.isValid())
+    face=periodic.Faces[0]
+    u0,u1,v0,v1=face.ParameterRange
+    samples=[face.valueAt(u0+(u1-u0)*i/20,v0+(v1-v0)*j/10) for i in range(21) for j in range(11)]
+    check(prefix+' periodic surface radial geometry and height remain exact',all(abs(math.hypot(p.x,p.y)-4)<1e-7 for p in samples) and abs(min(p.z for p in samples))<1e-7 and abs(max(p.z for p in samples)-7)<1e-7)
+    box = rows['ClosedBox'].Shape
+    check(prefix+' solid retains six faces and volume', len(box.Solids)==1 and len(box.Faces)==6 and box.isClosed() and abs(box.Volume-24)<1e-6)
+    mesh = rows['MeshTriangle']
+    check(prefix+' mesh stays separate from CAD', mesh.isDerivedFrom('Mesh::Feature') and not mesh.isDerivedFrom('Part::Feature') and mesh.Mesh.CountFacets==1)
+    check(prefix+' CAD display tessellation does not replace its representation', all(rows[name].isDerivedFrom('Part::Feature') and not rows[name].isDerivedFrom('Mesh::Feature') for name in ['Point','RationalArc','TrimHole','OpenPeriodic','ClosedBox']))
+
+def inspect_preserved(doc, prefix):
+    import ThreeDmArchiveState
+    containers = [obj for obj in doc.Objects if hasattr(obj,'OM9SourceArchive')]
+    check(prefix+' repeated import uses distinct namespaces', len(containers)==2 and len({obj.OM9ImportNamespace for obj in containers})==2)
+    source_sets = []
+    for container in containers:
+        state = ThreeDmArchiveState.load_archive_state(container)
+        check(prefix+' included archive digest and source units survive', state['manifest']['source_units']==2 and state['manifest']['scale_mm']==1 and digest(state['snapshot'])==container.OM9ArchiveHash)
+        objects = [obj for obj in doc.Objects if hasattr(obj,'OM9SourceUUID') and obj.OM9ImportNamespace==container.OM9ImportNamespace]
+        source_labels={row['source_uuid']:row['name'] for row in state['manifest']['records']}
+        inspect_geometry(objects, prefix+' '+container.Name, source_labels)
+        source_sets.append({obj.OM9SourceUUID for obj in objects})
+    check(prefix+' source provenance shared without host identity collision', source_sets[0]==source_sets[1] and len(source_sets[0])==6)
+
+import sys
+if os.environ.get('OM9_TEST_NATIVE_DIR'): sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+
+def run():
+    opened = []
+    try:
+        restore = os.environ.get('OM9_RCORE_GEOMETRY_RESTORE_FILE')
+        if restore:
+            doc = App.openDocument(restore)
+            opened.append(doc.Name)
+            inspect_preserved(doc,'cold FCStd')
+            report['restore_file_sha256']=digest(restore)
+            report['ok']=True
+            return
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui as OM, ThreeDm
+        source = App.newDocument('RCoreMixedSource')
+        opened.append(source.Name)
+        objects=[]
+        def add(name,shape):
+            obj=source.addObject('Part::Feature',name)
+            obj.Label=name
+            obj.Shape=shape
+            objects.append(obj)
+            return obj
+        add('Point',Part.Vertex(App.Vector(1,2,3)))
+        add('RationalArc',Part.makeCircle(8,App.Vector(),App.Vector(0,0,1),0,90).toNurbs())
+        outer=Part.Wire(Part.makeCircle(10))
+        inner=Part.Wire(Part.makeCircle(3))
+        inner.reverse()
+        add('TrimHole',Part.Face([outer,inner]))
+        cylinder=Part.makeCylinder(4,7)
+        lateral=next(face for face in cylinder.Faces if isinstance(face.Surface,Part.Cylinder))
+        add('OpenPeriodic',lateral)
+        solid=add('ClosedBox',Part.makeBox(2,3,4))
+        mesh=source.addObject('Mesh::Feature','MeshTriangle')
+        mesh.Label='MeshTriangle'
+        mesh.Mesh=Mesh.Mesh([(App.Vector(),App.Vector(1,0,0),App.Vector(0,1,0))])
+        objects.append(mesh)
+        source.recompute()
+        # Force display triangulation while the stored CAD remains a solid.
+        solid.Shape.tessellate(0.1)
+        inspect_geometry(objects,'source')
+        archive=output/'rhino-core-mixed.3dm'
+        ThreeDm.export_file(str(archive),objects)
+        report['archive_sha256']=digest(archive)
+        report['native_module']=str(getattr(OM,'__file__',''))
+        geometry=App.newDocument('RCoreGeometryImport')
+        opened.append(geometry.Name)
+        cyclic=os.environ.get('OM9_RCORE_CYCLIC_ARCHIVE')
+        if cyclic:
+            before=len(geometry.Objects)
+            rejected=False
+            try:
+                ThreeDm.import_file(cyclic,geometry,mode='preserve')
+            except Exception:
+                rejected=True
+            check('cyclic preserved archive rejects before document mutation',rejected and len(geometry.Objects)==before)
+        inspect_geometry(ThreeDm.import_file(str(archive),geometry,mode='geometry'),'geometry roundtrip')
+        preserved=App.newDocument('RCorePreservedImport')
+        preserved.UndoMode=1
+        opened.append(preserved.Name)
+        first=ThreeDm.import_file(str(archive),preserved,mode='preserve')
+        first_names=[obj.Name for obj in first]
+        baseline=len(preserved.Objects)
+        second=ThreeDm.import_file(str(archive),preserved,mode='preserve')
+        second_names=[obj.Name for obj in second]
+        check('repeat import creates distinct host object IDs', set(first_names).isdisjoint(second_names))
+        preserved.undo()
+        check('one Undo removes the whole second archive import', len(preserved.Objects)==baseline and all(preserved.getObject(name) is None for name in second_names))
+        preserved.redo()
+        check('Redo restores the same imported host IDs', all(preserved.getObject(name) is not None for name in second_names))
+        inspect_preserved(preserved,'preserve roundtrip')
+        save=output/'rhino-core-mixed-preserved.FCStd'
+        preserved.saveAs(str(save))
+        report['cold_restore_file']=str(save)
+        report['fcstd_sha256']=digest(save)
+        # Main's preservation writer supports current editable geometry. Verify
+        # that integration instead of retaining the old unsupported-path oracle.
+        first=next(preserved.getObject(name) for name in first_names
+                   if preserved.getObject(name).Label=='Point')
+        first.Placement.Base=App.Vector(9,18,27)
+        preserved.recompute()
+        target=output/'must-preserve-current-state-target.3dm'
+        ThreeDm.export_file(str(target),[first])
+        inventory=json.loads(OM.inspect3dm(str(target)))
+        check('current preservation export keeps selected source UUID',
+              not inventory['issues'] and len(inventory['records'])==1
+              and inventory['records'][0]['source_uuid']==first.OM9SourceUUID)
+        staging=output/'selected-current-staging'
+        staging.mkdir()
+        decoded=json.loads(OM.read3dm(str(target),str(staging)))
+        point=Part.Shape()
+        point.read(decoded['items'][0]['brep'])
+        check('current preservation export uses edited placement instead of source snapshot',
+              len(decoded['items'])==1 and len(point.Vertexes)==1
+              and (point.Vertexes[0].Point-App.Vector(10,20,30)).Length<1e-7)
+        sentinel=target.read_bytes()
+        first.Shape=Part.Shape()
+        rejected=False
+        try:
+            ThreeDm.export_file(str(target),[first])
+        except Exception:
+            rejected=True
+        check('invalid current preservation geometry leaves valid destination intact', rejected and target.read_bytes()==sentinel)
+        report['ok']=True
+    except Exception:
+        report['ok']=False
+        report['error']=traceback.format_exc()
+    finally:
+        for name in reversed(opened):
+            if name in App.listDocuments():
+                App.closeDocument(name)
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(500,run)

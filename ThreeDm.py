@@ -192,6 +192,14 @@ def export_file(path, objects, geometry_only=False, modeling=False):
                 native.writeGeometryStaging3dm(json.dumps(request),selected_archive)
                 prepared=json.loads(native.read3dm(selected_archive,staging))
                 if any(not ('brep' in row or 'point_cloud_fields' in row or ('vertices' in row and 'faces' in row)) for row in prepared['items']):raise RuntimeError('Geometry-only export cannot represent retained native records; select editable geometry')
+                # The native reader also returns source identity and display
+                # metadata. This explicit geometry-only route omits those
+                # fields; the Rust writer validates the remaining typed payload.
+                geometry_keys={'name','layer','visible','locked','color','brep','vertices','faces',
+                               'point_cloud_fields','point_cloud_sha256','point_cloud_transform'}
+                prepared=dict(tolerance=prepared['tolerance'],items=[
+                    {key:value for key,value in row.items() if key in geometry_keys}
+                    for row in prepared['items']])
                 return _write_geometry_atomic(native,prepared,path)
         if any(hasattr(obj,'OM9ArchiveMode') or hasattr(obj,'OM9DefinitionUUID') or hasattr(obj,'OM9NewDefinitionUUID') or getattr(obj,'OM9Capability','') in ('retained','display-retained','incompatible') for obj in objects):
             raise RuntimeError('Geometry-only export requires editable geometry or a supported placed block')

@@ -5,6 +5,8 @@ description: Use when compiling, linking, loading or verifying the Rust and C++/
 
 # Prove the native workbench works
 
+Rust là ưu tiên số 1 khi triển khai hoặc chuyển code OM9. Đọc [quy tắc Rust và ranh giới native](../openmatrix9-workflow/references/rust-first.md) trước khi chọn ngôn ngữ/FFI/worker. Safe Rust sở hữu logic, validation và dữ liệu độc lập; C++ chỉ là bridge cho API native bắt buộc, Python cho bootstrap/test/tool khi cần. Ghi rõ lý do và owner của mọi ngoại lệ; không coi native FFI là memory-safe hoặc skill update là migration hoàn tất.
+
 Resolve the OpenMatrix9 and FreeCAD source roots. Run openmatrix9-workflow `status` and `route build-validation`; inspect the actual Cargo/CMake/ABI and parent registration before choosing build commands. A FreeCAD executable or plan checkbox does not prove OpenMatrix9 was built.
 
 Use [validation-playbook.md](references/validation-playbook.md) for environment detection, commands and runtime cases. Recheck source/build/prefix paths on this machine. If an existing cache points to the old E: checkout, choose a fresh appropriate D: build rather than deleting or blindly reusing it. The route's machine-specific paths are candidates to verify, not portable constants.

@@ -1,6 +1,6 @@
 param(
-    [string]$FreeCADExe = 'D:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe',
-    [string]$DependencyPrefix = 'D:/FreeCAD-src/.pixi/envs/default/Library',
+    [Parameter(Mandatory=$true)][string]$FreeCADExe,
+    [Parameter(Mandatory=$true)][string]$DependencyPrefix,
     [double]$Scale = 1,
     [string]$Macro = 'public_icons_smoke.FCMacro',
     [string]$NativeModuleDirectory = '',
@@ -29,7 +29,12 @@ try {
         $file=Join-Path $outputRoot 'results.json'
         if(-not(Test-Path -LiteralPath $file)){throw "No smoke report. Process exit: $($process.ExitCode)"}
         $result=Get-Content -LiteralPath $file -Raw | ConvertFrom-Json
-        $result | ConvertTo-Json -Depth 5
+        [pscustomobject]@{
+            ok=$result.ok
+            checks=@($result.checks).Count
+            failed=@($result.checks | Where-Object { -not $_.passed } | ForEach-Object { $_.name })
+            error=$result.error
+        } | ConvertTo-Json -Depth 5
         Write-Output "Artifacts: $outputRoot"
         if(-not $result.ok){throw 'Runtime smoke failed'}
         if($process.ExitCode -ne 0){throw "Native process failed with exit code $($process.ExitCode); inspect startup and crash logs even if UI assertions passed."}

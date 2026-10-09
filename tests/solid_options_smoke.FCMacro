@@ -1,0 +1,155 @@
+"""OM9-SOLID-012 / OM9-SOLID-014: native extended construction fixtures."""
+import json,math,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+from pivy import coin
+if os.environ.get('OM9_TEST_NATIVE_DIR'): sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    if not value: raise AssertionError(name)
+def events(): QtWidgets.QApplication.processEvents()
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(150,loop.quit);loop.exec()
+def enter(text=''):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));events()
+    result.setdefault('input_trace',[]).append([text,str(console.property('om9Prompt'))])
+def new(name):
+    Gui.Selection.clearSelection();d=App.newDocument(name);d.UndoMode=1;events();return d
+def created(d,feature,mode):
+    objects=[o for o in d.Objects if getattr(o,'OM9FeatureId','')==feature]
+    check(mode+': exactly one output',len(objects)==1);o=objects[0]
+    check(mode+': one native valid closed solid',o.Shape.isValid() and o.Shape.isClosed() and len(o.Shape.Solids)==1)
+    check(mode+': mode metadata','mode='+mode+';' in o.SolidParameters);return o
+def ball(d,mode,center,radius):
+    o=created(d,'OM9-SOLID-014',mode);s=o.Shape.Faces[0].Surface
+    check(mode+': analytic center/radius',(s.Center-App.Vector(*center)).Length<1e-7 and abs(s.Radius-radius)<1e-7)
+    check(mode+': analytic volume',abs(o.Shape.Volume-4*math.pi*radius**3/3)<max(1e-7,radius**3*1e-7));return o
+def persist(d,o,mode):
+    n=o.Name;count=len(d.Objects);volume=o.Shape.Volume;params=o.SolidParameters
+    d.undo();events();check(mode+': Undo',len(d.Objects)==count-1)
+    d.redo();events();check(mode+': Redo',len(d.Objects)==count and abs(d.getObject(n).Shape.Volume-volume)<1e-7)
+    file=out/(d.Name+'.FCStd');d.recompute();d.saveAs(str(file));App.closeDocument(d.Name);d=App.openDocument(str(file));events()
+    o=d.getObject(n);check(mode+': native FCStd reload',o.Shape.isValid() and o.SolidParameters==params and abs(o.Shape.Volume-volume)<1e-7);App.closeDocument(d.Name)
+def preview_count():
+    s=coin.SoSearchAction();s.setName('OM9SolidPreview');s.setInterest(coin.SoSearchAction.ALL);s.apply(Gui.activeDocument().activeView().getSceneGraph());return s.getPaths().getLength()
+def curve(d,name,a,b):
+    o=d.addObject('Part::Feature',name);o.Shape=Part.makeLine(App.Vector(*a),App.Vector(*b));d.recompute();return o
+def viewer():
+    return next(w for w in Gui.getMainWindow().findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible())
+def screen(p):
+    v=viewer();target=v.viewport();pixel=Gui.activeDocument().activeView().getPointOnScreen(App.Vector(*p));ratio=v.devicePixelRatioF()
+    return target,QtCore.QPoint(round(pixel[0]/ratio),round(target.height()-(pixel[1]+1)/ratio))
+def click(p):
+    target,pos=screen(p);QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=pos);settle()
+    result.setdefault('input_trace',[]).append(['mouse '+str(p),str(console.property('om9Prompt'))])
+def hover(p):
+    target,pos=screen(p);QtWidgets.QApplication.sendEvent(target,QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(pos),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.NoModifier));settle()
+def projected(p,normal,origin=(0,0,0)):
+    target,pos=screen(p);ratio=viewer().devicePixelRatioF();a,b=Gui.activeDocument().activeView().projectPointToLine(round(pos.x()*ratio),round(target.height()*ratio)-round(pos.y()*ratio)-1)
+    d=b-a;n=App.Vector(*normal);o=App.Vector(*origin);return a+d*((o-a).dot(n)/d.dot(n))
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');events();import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__;result['kernel']=Part.OCC_VERSION
+        if os.environ.get('OM9_TEST_NATIVE_DIR'):check('correct isolated native module',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript');check('native CMD',console is not None)
+        d=new('SolidEdgeReference');source=d.addObject('Part::Feature','SourceBox');source.Shape=Part.makeBox(4,6,8);d.recompute();edge=source.Shape.Edges[0];mid=edge.valueAt((edge.FirstParameter+edge.LastParameter)/2)
+        enter('Sphere');enter('AroundCurve');enter('Path=SourceBox.Edge1');enter('OnCurve=.5');enter('2');ball(d,'AroundCurve',tuple(mid),2);App.closeDocument(d.Name)
+        d=new('PeriodicPath');source=d.addObject('Part::Feature','Arc');circle=Part.Circle(App.Vector(0,0,0),App.Vector(0,0,1),10);source.Shape=circle.toShape(5,7);d.recompute();p=circle.value(6.5)
+        Gui.activeDocument().activeView().viewTop();Gui.activeDocument().activeView().fitAll();settle();target,pos=screen(tuple(p));ratio=viewer().devicePixelRatioF();info=Gui.activeDocument().activeView().getObjectInfo((round(pos.x()*ratio),round(target.height()*ratio)-round(pos.y()*ratio)-1));seed=App.Vector(info['x'],info['y'],info['z']);expected=source.Shape.Edges[0].distToShape(Part.Vertex(seed))[1][0][0]
+        enter('Sphere');enter('AroundCurve');enter('Path=Arc.Edge1');click(tuple(p));enter('1');ball(d,'AroundCurve',tuple(expected),1);check('Periodic path center remains near seam pick',(expected-p).Length<.1);App.closeDocument(d.Name)
+        for mode,steps,bounds,volume in [
+            ('Center',['10,20,30','4','6','8'],(8,17,30,12,23,38),192),
+            ('Diagonal',['1,2,3','5,8,3','8'],(1,2,3,5,8,11),192),
+            ('Vertical',['0,0,0','4,0,0','4,0,3','0,-2,0'],(0,-2,0,4,0,3),24),
+            ('Cube',['0,0,0','3,3,3'],(0,0,0,3,3,3),27)]:
+            d=new('Box'+mode);enter('Box');enter('Mode='+mode)
+            for value in steps:enter(value)
+            o=created(d,'OM9-SOLID-012',mode);b=o.Shape.BoundBox
+            check(mode+': exact bounds',all(abs(a-e)<1e-7 for a,e in zip((b.XMin,b.YMin,b.ZMin,b.XMax,b.YMax,b.ZMax),bounds)))
+            check(mode+': analytic volume',abs(o.Shape.Volume-volume)<1e-7);persist(d,o,mode)
+        d=new('CubeOriented');enter('Box');enter('Diagonal');enter('Cube');enter('1,2,3');end=(1,2,3+math.sqrt(27));enter(','.join(map(str,end)))
+        o=created(d,'OM9-SOLID-012','Cube');vs=[v.Point for v in o.Shape.Vertexes]
+        check('Cube rotated diagonal reaches both corners',any((p-App.Vector(1,2,3)).Length<1e-7 for p in vs) and any((p-App.Vector(*end)).Length<1e-7 for p in vs))
+        check('Cube rotated equal edges',all(abs(e.Length-3)<1e-7 for e in o.Shape.Edges));persist(d,o,'Cube')
+        for mode,steps,center,r in [
+            ('2Point',['1,2,3','1,8,11'],(1,5,7),5),
+            ('3Point',['12,20,30','10,22,30','8,20,30'],(10,20,30),2),
+            ('3Point',['-2,0,0','2,0,0','Radius','3','0,1,1'],(0,math.sqrt(2.5),math.sqrt(2.5)),3),
+            ('4Point',['1,0,0','0,1,0','-1,0,0','0,0,2'],(0,0,.75),1.25),
+            ('4Point',['-2,0,0','2,0,0','Radius=3','0,1,0','0,1,4'],(0,math.sqrt(5),.875+(1-math.sqrt(5))**2/8),math.sqrt(9+(.875+(1-math.sqrt(5))**2/8)**2))]:
+            d=new('Sphere'+mode.replace('Point','P')+str(len(result['checks'])));enter('Sphere');enter(mode)
+            for value in steps:enter(value)
+            o=ball(d,mode,center,r);persist(d,o,mode)
+        d=new('SphereDiameter');enter('Sphere');enter('1,2,3');enter('Diameter=10');o=ball(d,'Center',(1,2,3),5);persist(d,o,'Diameter')
+        d=new('FitTyped');enter('Sphere');enter('FitPoints')
+        for p in ['13,20,30','7,20,30','10,23,30','10,17,30','10,20,33','10,20,27']:enter(p)
+        enter('100,200,300');enter('Undo');enter();o=ball(d,'FitPoints',(10,20,30),3);persist(d,o,'FitPoints')
+        d=new('FitVertices');group=d.addObject('App::Part','Group');group.Placement.Base=App.Vector(10,20,30)
+        for i,p in enumerate([(3,0,0),(-3,0,0),(0,3,0),(0,-3,0),(0,0,3),(0,0,-3)]):
+            o=d.addObject('Part::Feature','P'+str(i));o.Shape=Part.Vertex(App.Vector(*p));group.addObject(o);o.Placement.Base=App.Vector(5,6,7);Gui.Selection.addSelection(d.Name,o.Name)
+        d.recompute();enter('Sphere');enter('FitPoints');enter();o=ball(d,'FitPoints',(15,26,37),3)
+        check('FitPoints retains native source vertices',len(group.Group)==6);persist(d,o,'FitSelected')
+        d=new('FitMesh');import Mesh
+        vertices=[App.Vector(*p) for p in [(3,0,0),(-3,0,0),(0,3,0),(0,-3,0),(0,0,3),(0,0,-3)]]
+        obj=d.addObject('Mesh::Feature','Mesh');obj.Mesh=Mesh.Mesh([(vertices[a],vertices[b],vertices[c]) for a,b,c in [(0,2,4),(2,1,4),(1,3,4),(3,0,4),(2,0,5),(1,2,5),(3,1,5),(0,3,5)]])
+        group=d.addObject('App::Part','Group');group.Placement.Base=App.Vector(10,20,30);group.addObject(obj);obj.Placement.Base=App.Vector(5,6,7);d.recompute();Gui.Selection.addSelection(d.Name,obj.Name)
+        enter('Sphere');enter('FitPoints');enter();o=ball(d,'FitPoints',(15,26,37),3);persist(d,o,'FitMesh')
+        d=new('FitControlPoles');poles=[App.Vector(*p) for p in [(3,0,0),(-3,0,0),(0,3,0),(0,-3,0),(0,0,3),(0,0,-3)]]
+        spline=Part.BSplineCurve();spline.buildFromPoles(poles);source=d.addObject('Part::Feature','Spline');source.Shape=spline.toShape();group=d.addObject('App::Part','Group');group.Placement.Base=App.Vector(10,20,30);group.addObject(source);source.Placement.Base=App.Vector(5,6,7);d.recompute();Gui.Selection.addSelection(d.Name,source.Name)
+        enter('Sphere');enter('FitPoints');enter();o=ball(d,'FitPoints',(15,26,37),3);check('FitPoints preserves source control curve',source in d.Objects);persist(d,o,'FitControlPoles')
+        d=new('FitCloud');import Points
+        source=d.addObject('Points::Feature','Cloud');source.Points=Points.Points(poles);group=d.addObject('App::Part','Group');group.Placement.Base=App.Vector(10,20,30);group.addObject(source);source.Placement.Base=App.Vector(5,6,7);d.recompute();Gui.Selection.addSelection(d.Name,source.Name)
+        enter('Sphere');enter('FitPoints');enter();o=ball(d,'FitPoints',(15,26,37),3);persist(d,o,'FitCloud')
+        d=new('AroundCurve');path=curve(d,'Path',(0,0,0),(10,0,0));group=d.addObject('App::Part','Group');group.Placement.Base=App.Vector(10,20,30);group.addObject(path);path.Placement.Base=App.Vector(5,6,7);d.recompute()
+        enter('Sphere');enter('AroundCurve');enter('Path=Path.Edge1@15,26,37');enter('OnCurve=.25');enter('Radius=2');o=ball(d,'AroundCurve',(17.5,26,37),2)
+        check('AroundCurve retains source and path metadata',path in d.Objects and 'path=Path.Edge1' in o.SolidParameters);persist(d,o,'AroundCurve')
+        d=new('TangentLines');curve(d,'Left',(0,0,0),(0,10,0));curve(d,'Right',(10,0,0),(10,10,0));curve(d,'Bottom',(0,0,0),(10,0,0))
+        enter('Sphere');enter('Tangent');enter('Curve=Left.Edge1@0,5,0');enter('Curve=Right.Edge1@10,5,0');enter('Curve=Bottom.Edge1@5,0,0');o=ball(d,'Tangent',(5,5,0),5)
+        check('Tangent retains input curves',len(d.Objects)==4);persist(d,o,'TangentLines')
+        d=new('TangentPoint');curve(d,'Bottom',(-10,0,0),(10,0,0));enter('Sphere');enter('Tangent');enter('Curve=Bottom.Edge1@0,0,0');enter('Point');enter('-1,1,0');enter('Point');enter('1,1,0');o=ball(d,'Tangent',(0,1,0),1);persist(d,o,'TangentPoint')
+        d=new('TangentRadius');curve(d,'Left',(0,0,0),(0,10,0));curve(d,'Bottom',(0,0,0),(10,0,0));enter('Sphere');enter('Tangent');enter('Curve=Left.Edge1@0,2,0');enter('Curve=Bottom.Edge1@2,0,0');enter('Radius');enter('2');o=ball(d,'Tangent',(2,2,0),2);persist(d,o,'TangentRadius')
+        d=new('TangentSpline');spline=Part.BSplineCurve();spline.buildFromPolesMultsKnots([App.Vector(-2,1,0),App.Vector(0,-1,0),App.Vector(2,1,0)],[3,3],[0,1],False,2)
+        obj=d.addObject('Part::Feature','Parabola');obj.Shape=spline.toShape();d.recompute();enter('Sphere');enter('Tangent');enter('Curve=Parabola.Edge1@0,0,0');enter('Point');enter('-1,1,0');enter('Point');enter('1,1,0');o=ball(d,'Tangent',(0,1,0),1);persist(d,o,'TangentSpline')
+        d=new('TangentCircle');source=d.addObject('Part::Feature','Circle');source.Shape=Part.makeCircle(1,App.Vector(0,0,0));d.recompute();enter('Sphere');enter('Tangent');enter('Curve=Circle.Edge1@1,0,0');enter('Point');enter('3,1,0');enter('Point');enter('3,-1,0');o=ball(d,'Tangent',(2.25,0,0),1.25);persist(d,o,'TangentCircle')
+        d=new('TangentSolidEdge');source=d.addObject('Part::Feature','SourceBox');source.Shape=Part.makeBox(4,6,8);d.recompute();index=next(i for i,e in enumerate(source.Shape.Edges,1) if all(abs(v.Point.y)<1e-7 and abs(v.Point.z)<1e-7 for v in e.Vertexes))
+        enter('Sphere');enter('Tangent');enter('Curve=SourceBox.Edge'+str(index)+'@2,0,0');enter('Point');enter('1,1,0');enter('Point');enter('3,1,0');o=ball(d,'Tangent',(2,1,0),1);persist(d,o,'TangentSolidEdge')
+        d=new('TangentBranches');enter('Sphere');enter('Tangent');enter('Point');enter('-1,0,0');enter('Point');enter('1,0,0');enter('Radius=2')
+        check('Tangent equal branches require explicit choice',len(d.Objects)==0 and 'Ambiguous' in str(console.property('om9Prompt')));enter('Solution=1');o=created(d,'OM9-SOLID-014','Tangent');s=o.Shape.Faces[0].Surface
+        check('Tangent explicit branch satisfies both points',abs(s.Radius-2)<1e-7 and abs((s.Center-App.Vector(-1,0,0)).Length-2)<1e-7 and abs((s.Center-App.Vector(1,0,0)).Length-2)<1e-7);persist(d,o,'TangentBranches')
+        d=new('InvalidModes');enter('Box');enter('Diagonal');enter('0,0');enter('Length=2');check('Diagonal rejects side length',len(d.Objects)==0);enter('Cancel')
+        enter('Sphere');enter('3Point');enter('0,0');enter('1,0');enter('2,0');check('collinear 3Point rejected',len(d.Objects)==0);enter('Cancel')
+        enter('Sphere');enter('4Point');enter('1,0');enter('0,1');enter('-1,0');enter('0,-1');check('coplanar 4Point rejected',len(d.Objects)==0);enter('Cancel')
+        enter('Sphere');enter('FitPoints');enter('0,0');enter('1,0');enter('2,0');enter();check('degenerate FitPoints rejected',len(d.Objects)==0);enter('Cancel')
+        path=curve(d,'Path',(0,0,0),(10,0,0));enter('Sphere');enter('AroundCurve');enter('Path=Path.Edge1');path.Placement.Base=App.Vector(1,0,0);d.recompute();enter('OnCurve=.5');enter('Radius=2');check('stale AroundCurve blocked',len(d.Objects)==1);enter('Cancel')
+        curve(d,'High',(0,0,1),(10,0,1));enter('Sphere');enter('Tangent');enter('Curve=Path.Edge1');enter('Curve=High.Edge1');enter('Point');enter('1,1,0');check('noncoplanar Tangent blocked',len(d.Objects)==2);enter('Cancel')
+        App.closeDocument(d.Name)
+        d=new('VerticalMouse');window=Gui.getMainWindow();window.resize(1400,950);enter('Osnap Off');enter('Box');enter('Vertical');enter('0,0,0');enter('4');Gui.activeDocument().activeView().viewFront();settle()
+        width=projected((4,0,3),(0,-1,0)).z;click((4,0,3));enter('2');o=created(d,'OM9-SOLID-012','Vertical');check('Vertical mouse width uses perpendicular plane',abs(o.Shape.Volume-8*abs(width))<1e-5);App.closeDocument(d.Name)
+        d=new('FitPreview');enter('Sphere');enter('FitPoints');enter('2,0,0');enter('0,2,0');Gui.activeDocument().activeView().viewTop();settle();hover((-2,0,0))
+        check('FitPoints hover preview is scene-only',preview_count()==1 and len(d.Objects)==0);enter('Cancel');check('FitPoints cancel removes preview',preview_count()==0 and len(d.Objects)==0);App.closeDocument(d.Name)
+        d=new('SphereVerticalMouse');enter('Sphere');enter('Vertical');enter('0,0,0');Gui.activeDocument().activeView().viewFront();settle();p=projected((3,0,0),(0,-1,0));hover((3,0,0));check('Sphere Vertical radius hover preview',preview_count()==1 and len(d.Objects)==0);click((3,0,0));o=ball(d,'Vertical',(0,0,0),p.Length);persist(d,o,'SphereVertical')
+        d=new('AroundCurveMouse');source=curve(d,'Path',(0,0,10),(10,0,20));Gui.activeDocument().activeView().viewTop();Gui.activeDocument().activeView().fitAll();settle();enter('Sphere');enter('AroundCurve');click((2.5,0,12.5))
+        check('AroundCurve mouse picks bounded edge','OnCurve' in str(console.property('om9Prompt')));target,pos=screen((5,0,15));ratio=viewer().devicePixelRatioF();info=Gui.activeDocument().activeView().getObjectInfo((round(pos.x()*ratio),round(target.height()*ratio)-round(pos.y()*ratio)-1));seed=App.Vector(info['x'],info['y'],info['z']);p=source.Shape.Edges[0].distToShape(Part.Vertex(seed))[1][0][0];click((5,0,15));enter('2');ball(d,'AroundCurve',tuple(p),2);check('AroundCurve elevated mouse center stays near midpoint',abs(p.x-5)<.1 and abs(p.z-15)<.1);App.closeDocument(d.Name)
+        d=new('TangentMouse');curve(d,'Left',(0,0,0),(0,10,0));curve(d,'Right',(10,0,0),(10,10,0));curve(d,'Bottom',(0,0,0),(10,0,0));Gui.activeDocument().activeView().viewTop();Gui.activeDocument().activeView().fitAll();settle();enter('Sphere');enter('Tangent')
+        click((0,5,0));click((10,5,0));click((5,0,0));ball(d,'Tangent',(5,5,0),5);App.closeDocument(d.Name)
+        # Original Matrix icon right-click modes route through the same native controller.
+        d=new('RightClickModes');sidebar=Gui.getMainWindow().findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar')
+        group=next(b for b in sidebar.findChildren(QtWidgets.QToolButton) if b.objectName().startswith('OM9Group') and b.text()=='Solid');group.click();settle()
+        button=next(b for b in sidebar.findChildren(QtWidgets.QToolButton) if b.property('om9IconKey')=='SolidBoxCornertoCornerHeight' and b.isVisible());QtTest.QTest.mouseClick(button,QtCore.Qt.RightButton);events()
+        check('Box right-click selects 3Point','first edge' in str(console.property('om9Prompt')) or '3Point' in str(console.property('om9Prompt')));enter('0,0');enter('0,4');enter('2');enter('3');created(d,'OM9-SOLID-012','3Point')
+        settle();button=next(b for b in sidebar.findChildren(QtWidgets.QToolButton) if b.property('om9IconKey')=='SolidSphereCenterRadius' and b.isVisible());QtTest.QTest.mouseClick(button,QtCore.Qt.RightButton);events();enter('0,0');check('Sphere right-click selects 2Point','diameter' in str(console.property('om9Prompt')));enter('0,4');ball(d,'2Point',(0,2,0),2)
+        Gui.activeDocument().activeView().viewAxonometric();Gui.activeDocument().activeView().fitAll();settle();Gui.activeDocument().activeView().saveImage(str(out/'solid-options-viewport.png'),1000,700,'Current')
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1000,run)

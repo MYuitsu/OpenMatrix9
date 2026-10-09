@@ -24,6 +24,7 @@
 #include <QFile>
 #include <QCryptographicHash>
 #include <cmath>
+#include <cstring>
 #include <memory>
 #include <chrono>
 #include <cstdlib>
@@ -34,6 +35,8 @@
 #include <Gui/Document.h>
 #include <Gui/Control.h>
 using namespace OpenMatrix9Gui::ThreeDm;
+extern "C" bool om9_3dm_export_manifest_valid(const unsigned char*,std::size_t);
+extern "C" bool om9_retained_dependencies_valid(const unsigned char*,std::size_t);
 static PyObject* inspect3dmRegistry(PyObject*,PyObject*){
     try{const auto json=QJsonDocument(linkedClassRegistry()).toJson(QJsonDocument::Compact);return PyUnicode_DecodeUTF8(json.constData(),json.size(),"strict");}
     catch(const std::exception& e){PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}
@@ -59,6 +62,8 @@ static PyObject* prepare3dmArchive(PyObject*,PyObject* args){const char *path,*d
         auto manifest=inspectArchive(input,scale).document;
         mark("source_inventory");
         if(!manifest["issues"].toArray().isEmpty())throw ExchangeError("3DM archive has unresolved dependencies");
+        const auto manifestBytes=QJsonDocument(manifest).toJson(QJsonDocument::Compact);
+        if(!om9_retained_dependencies_valid(reinterpret_cast<const unsigned char*>(manifestBytes.constData()),manifestBytes.size()))throw ExchangeError("3DM archive has invalid, missing or cyclic source dependencies");
         std::filesystem::copy_file(input,snapshot);
         try{
             auto snapshotInventory=inspectArchive(snapshot,scale);auto snapshotManifest=snapshotInventory.document;
@@ -154,7 +159,8 @@ static PyObject* hatchBoundary3dm(PyObject*,PyObject* args){const char *json,*di
 }
 static PyObject* write3dm(PyObject*,PyObject* args){const char *json,*path;
     if(!PyArg_ParseTuple(args,"ss",&json,&path))return nullptr;
-    try{QJsonParseError error;auto doc=QJsonDocument::fromJson(QByteArray(json),&error);if(error.error!=QJsonParseError::NoError||!doc.isObject())throw ExchangeError("Invalid export manifest");
+    try{if(!om9_3dm_export_manifest_valid(reinterpret_cast<const unsigned char*>(json),std::strlen(json)))throw ExchangeError("Invalid geometry-only export manifest: check tuple sizes, mesh indices, types, tolerance and byte budget");
+        QJsonParseError error;auto doc=QJsonDocument::fromJson(QByteArray(json),&error);if(error.error!=QJsonParseError::NoError||!doc.isObject())throw ExchangeError("Invalid export manifest");
         ExchangeModel model;model.tolerance=doc.object()["tolerance"].toDouble(1e-6);if(!std::isfinite(model.tolerance)||model.tolerance<=0)throw ExchangeError("Invalid export tolerance");
         quint64 cloudBytes=0;for(auto value:doc.object()["items"].toArray()){auto row=value.toObject();if(row.contains("point_cloud_fields")){QFile file(row["point_cloud_fields"].toString());if(!file.exists()||file.size()<=0)throw ExchangeError("Missing PointCloud current-field file");cloudBytes+=static_cast<quint64>(file.size());if(cloudBytes>512ULL*1024*1024)throw ExchangeError("Combined PointCloud current fields exceed512MiB");}}
         for(auto value:doc.object()["items"].toArray()){auto o=value.toObject();ExchangeItem item;

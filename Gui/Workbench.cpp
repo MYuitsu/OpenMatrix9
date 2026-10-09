@@ -124,6 +124,7 @@ Gui::MenuItem* Workbench::setupMenuBar() const
 
         submenu->setCommand(title);
         if(std::string(title)=="File")*submenu << "Import3dm" << "Export3dm";
+        if(std::string(title)=="Transform")*submenu << "OM9_ReleaseFromCage";
 
         const std::size_t commandCount =
             om9_menu_group_command_count(

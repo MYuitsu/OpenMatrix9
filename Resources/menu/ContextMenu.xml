@@ -72,6 +72,10 @@
           <ActionCommand>Circle</ActionCommand>
         </ObjectContextMenuItem>
         <ObjectContextMenuItem>
+          <ActionName>Rectangle</ActionName>
+          <ActionCommand>Rectangle</ActionCommand>
+        </ObjectContextMenuItem>
+        <ObjectContextMenuItem>
           <ActionName>Control Points</ActionName>
           <ActionCommand>PointsOn</ActionCommand>
         </ObjectContextMenuItem>

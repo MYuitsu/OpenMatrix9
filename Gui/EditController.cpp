@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "EditController.h"
+#include "EditSpecialTypes.h"
 #include "RustBridge.h"
 #include "CurveController.h"
 #include "CoreDistance.h"
@@ -25,6 +26,7 @@
 #include <Inventor/SoRenderManager.h>
 #include <Inventor/actions/SoRayPickAction.h>
 #include <Inventor/nodes/SoCamera.h>
+#include <Inventor/nodes/SoPerspectiveCamera.h>
 #include <Inventor/nodes/SoSeparator.h>
 #include <Inventor/nodes/SoPickStyle.h>
 #include <Inventor/nodes/SoSwitch.h>
@@ -34,6 +36,8 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QCheckBox>
+#include <QDoubleSpinBox>
+#include <QSignalBlocker>
 #include <QVBoxLayout>
 #include <QKeyEvent>
 #include <QMouseEvent>
@@ -65,19 +69,30 @@ void EditController::refresh(){QString text=QString::fromUtf8(caption(kind))+": 
     case 3:text+="Preview; OK / Cancel";if(kind==7)text+="; click viewport or Next to cycle";break;
     case 4:text+="Click segments or surface regions to remove; Enter accepts / Undo / Cancel";break;
 }prompt(text);}
-bool EditController::start(std::size_t i){
+bool EditController::start(std::size_t i,bool fromCommand){
     if(!available(i))return false;CoreDistance::instance().cancel();CorePictureFrame::instance().cancel();CoreViewControls::instance().cancel();CurveController::instance().cancel();cancel();
-    kind=om9_edit_kind(om9_command_id(i));command=i;document=App::GetApplication().getActiveDocument();om9_edit_start(om9_command_id(i));qApp->installEventFilter(this);refresh();
+    kind=om9_edit_kind(om9_command_id(i));allowBlocks=fromCommand;command=i;document=App::GetApplication().getActiveDocument();om9_edit_start(om9_command_id(i));qApp->installEventFilter(this);refresh();
+    if(kind==3){auto* view=dynamic_cast<Gui::View3DInventor*>(Gui::Application::Instance->activeDocument()->getActiveView());auto* camera=view->getViewer()->getSoRenderManager()->getCamera();const auto eye=camera->position.getValue();SbVec3f right,up,forward;camera->orientation.getValue().multVec(SbVec3f(1,0,0),right);camera->orientation.getValue().multVec(SbVec3f(0,1,0),up);camera->orientation.getValue().multVec(SbVec3f(0,0,-1),forward);for(unsigned k=0;k<3;++k){projection.eye[k]=eye[k];projection.right[k]=right[k];projection.up[k]=up[k];projection.forward[k]=forward[k];}projection.perspective=camera->isOfType(SoPerspectiveCamera::getClassTypeId());}
     for(const auto& sel:Gui::Selection().getSelection(document->getName())){if(sel.SubName&&*sel.SubName){prompt("Edit operates on whole native objects; clear subelement selection and reselect");continue;}add(sel.FeatName);}return false;
 }
 void EditController::clearPreview(){for(auto [root,node]:previews){if(root->findChild(node)>=0)root->removeChild(node);root->unref();}previews.clear();trimPreviewSources.clear();for(auto [node,mode]:hidden){if(node->whichChild.getValue()==SO_SWITCH_NONE)node->whichChild=mode;node->unref();}hidden.clear();}
 void EditController::cancel(){om9_edit_cancel();document=nullptr;clearPreview();{Base::PyGILStateLocker lock;output.clear();inputs.clear();fragments.clear();}removed.clear();trimUndo.clear();if(dialog){auto* old=dialog.data();dialog=nullptr;old->disconnect(this);old->hide();old->deleteLater();}status=nullptr;buttons=nullptr;}
-void EditController::error(const std::exception& e){prompt(QString::fromUtf8(e.what()));if(status)status->setText(QString::fromUtf8(e.what()));if(buttons)buttons->button(QDialogButtonBox::Ok)->setEnabled(false);Base::Console().warning("OpenMatrix9 Edit: {}\n",e.what());}
-void EditController::add(const std::string& name){if(!active()||!valid()||om9_edit_phase()>2)return;try{Base::PyGILStateLocker lock;auto input=editInput(*document,name,kind);if(!om9_edit_add(name.c_str()))throw std::runtime_error("Input already selected or this step is full");inputs.push_back(std::move(input));refresh();}catch(const std::exception& e){error(e);}}
+void EditController::error(const std::exception& e){Base::PyGILStateLocker lock;if(PyErr_Occurred())PyErr_Clear();prompt(QString::fromUtf8(e.what()));if(status)status->setText(QString::fromUtf8(e.what()));if(buttons)buttons->button(QDialogButtonBox::Ok)->setEnabled(false);Base::Console().warning("OpenMatrix9 Edit: {}\n",e.what());}
+void EditController::add(const std::string& name){if(!active()||!valid()||om9_edit_phase()>2)return;try{Base::PyGILStateLocker lock;auto input=editInput(*document,name,kind,allowBlocks);if(!om9_edit_add(name.c_str()))throw std::runtime_error("Input already selected or this step is full");inputs.push_back(std::move(input));refresh();}catch(const std::exception& e){error(e);}}
 void EditController::submit(const QString& text){
     if(!active())return;if(!valid()){cancel();return;}const auto s=text.trimmed();
     if(s.compare("Cancel",Qt::CaseInsensitive)==0||s.compare("Esc",Qt::CaseInsensitive)==0){cancel();prompt("Edit cancelled. Command:");return;}
     try{Base::PyGILStateLocker lock;
+        const auto equal=s.indexOf('=');if(equal>0){auto key=s.left(equal).trimmed().toLower();key.remove(' ');auto v=s.mid(equal+1).trimmed();
+            if(key=="tolerance"){bool ok;double t=v.toDouble(&ok);if(!ok||!om9_edit_set_tolerance(t))throw std::runtime_error("Tolerance is a finite positive mm value for Join");if(dialog)if(auto* spin=dialog->findChild<QDoubleSpinBox*>("OM9EditTolerance")){QSignalBlocker block(spin);spin->setValue(t);}if(om9_edit_phase()==3)preview();else refresh();return;}
+            const unsigned option=key=="extendlines"?1:key=="apparentintersections"||key=="useapparentintersections"?2:0;
+            if(option||key=="deleteinput"){bool value;if(v.compare("Yes",Qt::CaseInsensitive)==0||v=="1")value=true;else if(v.compare("No",Qt::CaseInsensitive)==0||v=="0")value=false;else throw std::runtime_error("Option requires Yes or No");
+                if(option&&!om9_edit_set_option(option,value))throw std::runtime_error("Intersection options are available only for Trim");if(!option){if(kind<4)throw std::runtime_error("DeleteInput is available for Boolean commands");om9_edit_delete_input(value?1:0);}
+                if(dialog)if(auto* box=dialog->findChild<QCheckBox*>(option==1?"OM9EditExtendLines":option==2?"OM9EditApparentIntersections":"OM9EditDeleteInput")){QSignalBlocker block(box);box->setChecked(value);}
+                if(om9_edit_phase()==4)rebuildTrim();else if(om9_edit_phase()==3)preview();else refresh();return;
+            }
+            throw std::runtime_error("Unknown Edit option");
+        }
         if(s.compare("Undo",Qt::CaseInsensitive)==0){if(om9_edit_phase()==4){if(trimUndo.empty())throw std::runtime_error("No trimmed segment to undo");auto [i,j]=trimUndo.back();trimUndo.pop_back();removed[i].erase(j);preview();}else{const auto before=om9_edit_count(1)+om9_edit_count(2);if(!om9_edit_undo())throw std::runtime_error("No selected input to undo");if(om9_edit_count(1)+om9_edit_count(2)<before)inputs.pop_back();refresh();}return;}
         if(s.compare("Next",Qt::CaseInsensitive)==0){if(!om9_edit_cycle())throw std::runtime_error("Next is available in Boolean2Objects preview");preview();return;}
         if(s.isEmpty()||s.compare("OK",Qt::CaseInsensitive)==0){if(om9_edit_phase()==3||om9_edit_phase()==4){commit();return;}if(!om9_edit_finish())throw std::runtime_error("Select enough valid inputs before pressing Enter");if(om9_edit_phase()>=3)prepare();else refresh();return;}
@@ -87,38 +102,44 @@ void EditController::submit(const QString& text){
 }
 void EditController::prepare(){
     verifyEditInputs(*document,inputs);
-    if(kind==3){fragments=splitEditCurves(inputs);removed.resize(inputs.size());refresh();preview();return;}
     dialog=new QDialog(Gui::getMainWindow());dialog->setObjectName("OM9EditOptions");dialog->setWindowTitle(QString::fromUtf8(caption(kind)));dialog->setAttribute(Qt::WA_DeleteOnClose);auto* layout=new QVBoxLayout(dialog);
+    if(kind==3){for(unsigned option:{1U,2U}){auto* box=new QCheckBox(option==1?"Extend Lines":"Use Apparent Intersections (frozen view)",dialog);box->setObjectName(option==1?"OM9EditExtendLines":"OM9EditApparentIntersections");box->setChecked(om9_edit_option(option));layout->addWidget(box);connect(box,&QCheckBox::toggled,this,[this,option](bool b){om9_edit_set_option(option,b);rebuildTrim();});}}
+    if(kind==1){auto* spin=new QDoubleSpinBox(dialog);spin->setObjectName("OM9EditTolerance");spin->setDecimals(9);spin->setRange(1e-9,1e6);spin->setSuffix(" mm — Join tolerance");spin->setValue(om9_edit_tolerance());layout->addWidget(spin);connect(spin,&QDoubleSpinBox::valueChanged,this,[this](double t){om9_edit_set_tolerance(t);preview();});}
     if(kind>=4){auto* remove=new QCheckBox(kind==4?"DeleteInput (cutters)":"DeleteInput",dialog);remove->setObjectName("OM9EditDeleteInput");remove->setChecked(om9_edit_delete_input(-1));layout->addWidget(remove);connect(remove,&QCheckBox::toggled,this,[this](bool b){om9_edit_delete_input(b?1:0);preview();});}
     if(kind==7){auto* next=new QPushButton("Next Boolean result",dialog);next->setObjectName("OM9EditNext");layout->addWidget(next);connect(next,&QPushButton::clicked,this,[this]{om9_edit_cycle();preview();});}
     status=new QLabel(dialog);status->setObjectName("OM9EditStatus");status->setWordWrap(true);layout->addWidget(status);buttons=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel,dialog);layout->addWidget(buttons);
-    connect(buttons,&QDialogButtonBox::accepted,this,[this]{commit();});connect(buttons,&QDialogButtonBox::rejected,this,[this]{cancel();prompt("Edit cancelled. Command:");});connect(dialog,&QDialog::rejected,this,[this]{cancel();prompt("Edit cancelled. Command:");});refresh();preview();dialog->show();
+    connect(buttons,&QDialogButtonBox::accepted,this,[this]{commit();});connect(buttons,&QDialogButtonBox::rejected,this,[this]{cancel();prompt("Edit cancelled. Command:");});connect(dialog,&QDialog::rejected,this,[this]{cancel();prompt("Edit cancelled. Command:");});refresh();if(kind==3)rebuildTrim();else preview();dialog->show();
 }
+void EditController::rebuildTrim(){const bool reset=!trimUndo.empty();clearPreview();try{Base::PyGILStateLocker lock;verifyEditInputs(*document,inputs);fragments.clear();output.clear();removed.clear();trimUndo.clear();
+    fragments=om9_edit_option(2)?splitProjectedEditCurves(inputs,projection,om9_edit_option(1)):splitEditCurves(inputs,om9_edit_option(1));removed.resize(inputs.size());preview();
+    if(reset&&status)status->setText("Intersection options changed; previous removal picks were reset. Pick regions again.");
+    }catch(const std::exception& e){error(e);}}
 void EditController::preview(){
     clearPreview();try{Base::PyGILStateLocker lock;verifyEditInputs(*document,inputs);output.clear();
         if(kind==3){for(std::size_t i=0;i<fragments.size();++i)for(std::size_t j=0;j<fragments[i].size();++j)if(!removed[i].contains(j))output.push_back(fragments[i][j]);}
-        else output=buildEdit(inputs,kind,om9_edit_count(1),om9_edit_mode());
+        else output=buildEdit(inputs,kind,om9_edit_count(1),om9_edit_mode(),om9_edit_tolerance());
         CurvePyRef part(PyImport_ImportModule("Part"));auto* g=Gui::Application::Instance->activeDocument();
         // Transient Coin switches hide inputs without writing Visibility or adding objects.
         for(const auto& i:inputs)if(auto* provider=g->getViewProvider(document->getObject(i.name.c_str()))){auto* node=provider->getModeSwitch();const int mode=node->whichChild.getValue();node->ref();hidden.emplace_back(node,mode);node->whichChild=SO_SWITCH_NONE;}
         std::vector<std::tuple<EditShapes,std::size_t,std::size_t>> batches;
         if(kind==3){for(std::size_t i=0;i<fragments.size();++i)for(std::size_t j=0;j<fragments[i].size();++j)if(!removed[i].contains(j))batches.emplace_back(EditShapes{fragments[i][j]},i,j);}
+        else if(kind==2||(!output.empty()&&isEditMesh(output[0]->value))){for(const auto& shape:output)if(!isExplodedText(shape->value))batches.emplace_back(EditShapes{shape},0,0);}
         else batches.emplace_back(output,0,0);
         for(const auto& [shapes,source,fragment]:batches){CurvePyRef list(PyList_New(0));
             for(const auto& s:shapes)if(PyList_Append(list.value,s->value)<0)throw std::runtime_error("Cannot collect preview");
             if(PyList_Size(list.value)==0)continue;
-            CurvePyRef compound(PyObject_CallMethod(part.value,"makeCompound","O",list.value)),inventor(PyObject_CallMethod(compound.value,"writeInventor",nullptr));const char* text=PyUnicode_AsUTF8(inventor.value);if(!text)throw std::runtime_error("Cannot render edit preview");
+            CurvePyRef compound(isEditMesh(shapes[0]->value)?Py_NewRef(shapes[0]->value):PyObject_CallMethod(part.value,"makeCompound","O",list.value)),inventor(PyObject_CallMethod(compound.value,"writeInventor",nullptr));const char* text=PyUnicode_AsUTF8(inventor.value);if(!text)throw std::runtime_error("Cannot render edit preview");
             for(auto* mdi:g->getMDIViews()){auto* v=dynamic_cast<Gui::View3DInventor*>(mdi);if(!v)continue;auto* root=dynamic_cast<SoSeparator*>(v->getViewer()->getSceneGraph());if(!root)continue;SoInput input;input.setBuffer(text,std::strlen(text));auto* mesh=SoDB::readAll(&input);if(!mesh)throw std::runtime_error("Cannot load edit preview");auto* wrapper=new SoSeparator;wrapper->setName("OM9EditPreview");auto* skip=new SoPickStyle;skip->style=kind==3?SoPickStyle::SHAPE:SoPickStyle::UNPICKABLE;wrapper->addChild(skip);wrapper->addChild(mesh);root->ref();root->addChild(wrapper);previews.emplace_back(root,wrapper);if(kind==3)trimPreviewSources.emplace_back(wrapper,source,fragment);}
         }
         if(status){QString text="Valid native geometry. OK accepts; Cancel discards.";if(kind==7){const char* modes[]={"Union","A minus B","B minus A","Intersection","Inversion Intersection"};text=QString::fromUtf8(modes[om9_edit_mode()])+". "+text;}status->setText(text);}if(buttons)buttons->button(QDialogButtonBox::Ok)->setEnabled(true);refresh();
     }catch(const std::exception& e){Base::PyGILStateLocker lock;output.clear();clearPreview();error(e);}
 }
-void EditController::trim(const std::string& name,const std::array<double,3>& p){Base::PyGILStateLocker lock;verifyEditInputs(*document,inputs);for(std::size_t i=0;i<inputs.size();++i)if(inputs[i].name==name){auto j=pickedEditSegment(fragments[i],removed[i],p);removed[i].insert(j);trimUndo.emplace_back(i,j);preview();return;}throw std::runtime_error("Pick a selected input curve");}
+void EditController::trim(const std::string& name,const std::array<double,3>& p){Base::PyGILStateLocker lock;verifyEditInputs(*document,inputs);if(fragments.size()!=inputs.size())throw std::runtime_error("Set valid Trim intersection options before picking a region");for(std::size_t i=0;i<inputs.size();++i)if(inputs[i].name==name){auto j=pickedEditSegment(fragments[i],removed[i],p);removed[i].insert(j);trimUndo.emplace_back(i,j);preview();return;}throw std::runtime_error("Pick a selected input curve");}
 void EditController::commit(){
     if(!active()||!valid()){cancel();return;}try{Base::PyGILStateLocker lock;if(kind==3&&trimUndo.empty())throw std::runtime_error("Trim a segment before accepting");
-        if(kind!=3)output=buildEdit(inputs,kind,om9_edit_count(1),om9_edit_mode());
+        if(kind!=3)output=buildEdit(inputs,kind,om9_edit_count(1),om9_edit_mode(),om9_edit_tolerance());
         else{output.clear();for(std::size_t i=0;i<fragments.size();++i)for(std::size_t j=0;j<fragments[i].size();++j)if(!removed[i].contains(j))output.push_back(fragments[i][j]);}
-        commitEdit(*document,inputs,output,kind,om9_edit_delete_input(-1),om9_edit_mode(),om9_edit_count(1));om9_sidebar_record_execution(command,true);cancel();prompt("Edit completed. Command:");
+        commitEdit(*document,inputs,output,kind,om9_edit_delete_input(-1),om9_edit_mode(),om9_edit_count(1),kind==3?&projection:nullptr);om9_sidebar_record_execution(command,true);cancel();prompt("Edit completed. Command:");
     }catch(const std::exception& e){error(e);}
 }
 bool EditController::eventFilter(QObject* watched,QEvent* event){

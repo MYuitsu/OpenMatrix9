@@ -1,0 +1,27 @@
+"""Replay an existing acceptance macro using the explicitly selected native build."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import sys
+
+native_dir = Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve()
+sys.path.insert(0, str(native_dir))
+sys.path.insert(1, str(Path(__file__).parent))
+import OpenMatrix9Gui
+
+native_file = Path(OpenMatrix9Gui.__file__).resolve()
+if native_file.parent != native_dir:
+    raise RuntimeError('Merge replay loaded a different native module')
+macro = Path(__file__).parent / os.environ['OM9_MERGE_TEST_MACRO']
+if macro.parent.resolve() != Path(__file__).parent.resolve() or macro.suffix != '.FCMacro':
+    raise RuntimeError('Merge replay requires a macro from the tests directory')
+output = Path(os.environ['OM9_SMOKE_OUTPUT'])
+(output / 'merge-native-module.json').write_text(json.dumps({
+    'macro': macro.name,
+    'macro_sha256': hashlib.sha256(macro.read_bytes()).hexdigest(),
+    'native_module': str(native_file),
+    'native_sha256': hashlib.sha256(native_file.read_bytes()).hexdigest(),
+}, indent=2), encoding='utf-8')
+namespace = dict(globals(), __file__=str(macro))
+exec(compile(macro.read_bytes(), str(macro), 'exec'), namespace)

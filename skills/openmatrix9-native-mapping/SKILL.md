@@ -5,6 +5,8 @@ description: Use when interpreting Matrix90 VB6 exports or Ghidra pseudocode, ma
 
 # Matrix90 native evidence
 
+Rust là ưu tiên số 1 khi triển khai hoặc chuyển code OM9. Đọc [quy tắc Rust và ranh giới native](../openmatrix9-workflow/references/rust-first.md) trước khi chọn ngôn ngữ/FFI/worker. Safe Rust sở hữu logic, validation và dữ liệu độc lập; C++ chỉ là bridge cho API native bắt buộc, Python cho bootstrap/test/tool khi cần. Ghi rõ lý do và owner của mọi ngoại lệ; không coi native FFI là memory-safe hoặc skill update là migration hoàn tất.
+
 Use the recovered files to explain the selected behavior for Rust. Full VB6 reconstruction is a separate task requiring a user request.
 
 1. Resolve the checkout and run openmatrix9-workflow `route native-mapping`. Read the source-of-truth, address, mapping and confidence guides returned there.

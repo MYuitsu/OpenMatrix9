@@ -1,0 +1,79 @@
+# OM9-CURVE-005 bounded 3D contact solver with exact native NURBS evaluation.
+import json,math,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtTest
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)});(out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(100,loop.quit);loop.exec()
+def enter(text):
+    field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def value(i,v,r=5.):
+    a=i*math.tau/3;s,c=math.sin(a),math.cos(a)
+    return App.Vector(r*c-s*v+c*.3*v*v,r*s+c*v+s*.3*v*v,v*v+.4*v*v*v)
+def deriv(i,v):
+    a=i*math.tau/3;s,c=math.sin(a),math.cos(a)
+    return App.Vector(-s+.6*c*v,c+.6*s*v,2*v+1.2*v*v)
+def shape(i,r=5.):
+    curve=Part.BSplineCurve();p0=value(i,-1,r);p3=value(i,1,r)
+    curve.buildFromPolesMultsKnots([p0,p0+deriv(i,-1)*(2/3),p3-deriv(i,1)*(2/3),p3],[4,4],[0.,1.],False,3)
+    return curve.toShape()
+def seed(i,u=.55):
+    edge=curves[i].Shape.Edges[0];p=curves[i].getGlobalPlacement().multVec(edge.valueAt(u))
+    return 'Curve='+curves[i].Name+'.Edge1@'+','.join(str(v) for v in p)
+def circle(*args):
+    n=len(doc.Objects);enter('Circle')
+    for s in args:enter(s)
+    check('Circle creates one object: '+str(args[:2]),len(doc.Objects)==n+1)
+    return doc.Objects[-1]
+def exact(o,r=5.,center=App.Vector(),normal=App.Vector(0,0,1)):
+    if o.Shape.isNull():return False
+    c=o.Shape.Edges[0].Curve
+    return isinstance(c,Part.Circle) and o.Shape.isValid() and o.Shape.isClosed() and abs(c.Radius-r)<1e-5 and (c.Center-center).Length<1e-5 and abs(abs(c.Axis.dot(normal))-1)<1e-8
+def run():
+    global doc,field,curves
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__;check('Selected native module loaded',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        window=Gui.getMainWindow();field=command_input(window);doc=App.newDocument('CircleNonplanar');doc.UndoMode=1;settle()
+        curves=[]
+        for i in range(3):
+            o=doc.addObject('Part::Feature','Spatial'+str(i));o.Shape=shape(i);curves.append(o)
+            poles=o.Shape.Edges[0].Curve.getPoles();check('Fixture has noncoplanar poles '+str(i),abs((poles[1]-poles[0]).cross(poles[2]-poles[0]).dot(poles[3]-poles[0]))>1e-3)
+        doc.recompute()
+        o=circle('Tangent',seed(0),seed(1),seed(2));check('Three genuinely nonplanar NURBS tangent circle',exact(o))
+        o=circle('Tangent',seed(0),'Radius=5',seed(1));check('Two nonplanar curves respect fixed Radius',exact(o))
+        o=circle('Tangent','FromFirstPoint=Yes',seed(0,.5),seed(1,.54),seed(2,.54));check('Fixed exact spatial contact retained',exact(o))
+        for i in range(3):
+            edge=curves[i].Shape.Edges[0];p=edge.valueAt(.5);t=edge.tangentAt(.5);c=o.Shape.Edges[0].Curve
+            check('Exact OCCT contact and tangent '+str(i),abs((p-c.Center).Length-c.Radius)<1e-6 and abs((p-c.Center).dot(t))<1e-6 and abs(t.dot(c.Axis))<1e-8)
+        o=circle('Tangent','FromFirstPoint=Yes',seed(0,.5),'Radius=5','Point','-5,0,0');check('Spatial fixed radius plus free point',exact(o))
+        count=len(doc.Objects);enter('Circle');enter('Tangent');enter('FromFirstPoint=Yes');enter('Vertical=Yes');enter(seed(0,.5));enter(seed(1,.5));enter(seed(2,.5));check('Infeasible Vertical rejects without object',len(doc.Objects)==count);enter('Vertical=No');check('Rejected spatial solve recovers retained inputs',len(doc.Objects)==count+1 and exact(doc.Objects[-1]))
+        place=App.Placement(App.Vector(20,30,40),App.Rotation(App.Vector(0,1,0),90))
+        for c in curves:c.Placement=place
+        doc.recompute();o=circle('Tangent','Vertical=Yes',seed(0),seed(1),seed(2));check('Placed nonplanar curves support vertical spatial circle',exact(o,5,place.Base,place.Rotation.multVec(App.Vector(0,0,1))))
+        for c in curves:c.Placement=App.Placement()
+        doc.recompute();settings=doc.addObject('OpenMatrix9Gui::HistorySettings','HistorySettings');settings.BrokenHistoryWarning=False
+        h=circle('Tangent','History=Yes',seed(0,.5),seed(1,.5),seed(2,.5));check('Spatial Tangent History stores all curve inputs',h.Recorded and len(h.Sources)==3 and exact(h))
+        for i,c in enumerate(curves):c.Shape=shape(i,7.)
+        doc.recompute();check('Spatial History recomputes changed NURBS contacts',exact(h,7))
+        doc.openTransaction('Move spatial inputs')
+        for c in curves:c.Placement.Base=App.Vector(0,0,3)
+        doc.commitTransaction();doc.recompute();check('Spatial History updates source placements',exact(h,7,App.Vector(0,0,3)));doc.undo();doc.recompute();check('Spatial History placement Undo',exact(h,7));doc.redo();doc.recompute();check('Spatial History placement Redo',exact(h,7,App.Vector(0,0,3)))
+        d=circle('Tangent','Deformable=Yes',seed(0,.5),seed(1,.5),seed(2,.5));check('Spatial Tangent deformable periodic result',isinstance(d.Shape.Edges[0].Curve,Part.BSplineCurve) and d.Shape.isValid() and d.Shape.isClosed() and d.Shape.Edges[0].Curve.isPeriodic())
+        near=Part.BSplineCurve();near.buildFromPolesMultsKnots([App.Vector(-5,0,0),App.Vector(-2,0,3e-7),App.Vector(2,0,0),App.Vector(5,0,0)],[4,4],[0.,1.],False,3)
+        source=doc.addObject('Part::Feature','NearPlanar');source.Shape=near.toShape();doc.recompute()
+        precise=circle('Tangent','FromFirstPoint=Yes','Curve='+source.Name+'.Edge1@-5,0,0','Radius=4','Point','-1,4,0');c=precise.Shape.Edges[0].Curve;t=source.Shape.Edges[0].tangentAt(0.)
+        check('Near-planar projection cannot hide out-of-plane native tangent',abs(t.dot(c.Axis))<1e-8 and abs((App.Vector(-5,0,0)-c.Center).dot(t))<1e-7)
+        file=out/'spatial.FCStd';name=h.Name;doc.saveAs(str(file));App.closeDocument(doc.Name);doc=App.openDocument(str(file));h=doc.getObject(name);check('Spatial recipe survives save reopen',h.Recorded and exact(h,7,App.Vector(0,0,3)));result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2));App.Console.PrintMessage(json.dumps(result)+'\n')
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtWidgets.QApplication.quit()
+QtCore.QTimer.singleShot(700,run)

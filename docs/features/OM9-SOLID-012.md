@@ -1,34 +1,13 @@
 # OM9-SOLID-012 — Box
 
-Command `Box`, catalog/menu ID `OM9_SolidBoxCornertoCornerHeight`.
-Rust owns input state and placement/dimension normalization; the native host
-constructs and verifies one closed `Part::Feature` solid through Part/OpenCascade.
+Native Corners/Diagonal/3Point/Vertical/Center and oriented Cube Box; full dimensions, Enter defaults, signed extents, frozen CPlane, CMD/mouse, right-click shortcut, scene preview and persistence. Associative History/layer/Styles integration remains unverified.
 
-## Source evidence
+[Contract, options and limits](../../OpenMatrix9_Codex_Spec_v1/specs/04-solid/om9-solid-012-box.md).
 
-Matrix 8 Book 1, printed pp.222–223 / PDF pp.232–233, was extracted and
-visually inspected on 2026-10-06. Box continues onto p.223 and ends immediately
-before Sphere. Source describes two base corners or a typed length, Enter using
-length for width and width for height, and the 3Point workflow. Diagonal/Cube,
-Vertical and Center are documented but outside this implemented slice.
+[Native validation](../validation/2026-10-09-solid-box-sphere-options.md).
 
-Original source material remains in the owner's private reference archive.
-Public implementation evidence and remaining requirements are summarized in the
-[validation report](../validation/2026-10-06-solid-box-sphere.md).
+Rust owns ordered state and construction math; C++/Qt owns native references, Part/OCCT geometry, scene preview and one transaction. Snapshot results preserve input geometry and persist through native Undo/Redo and FCStd reload.
 
-## OpenMatrix9 decisions
+## Earlier source evidence
 
-Millimetres, finite coordinates bounded by 1e9 mm, nonzero dimensions of at least
-1e-7 mm, document-root ownership and standalone snapshot geometry. Negative
-extents shift the origin while preserving a right-handed coordinate frame.
-Mouse height uses the closest point between the ray and the frozen base normal;
-parallel rays require numeric input or a side/perspective view. Native geometry
-uses one transaction and the authored Solid purple color.
-
-Rust tests: `rust/tests/solid_session.rs`, `rust/tests/solid_commands.rs`.
-Native tests: `tests/solid_commands_smoke.FCMacro`.
-
-Full Matrix/Rhino compatibility remains unverified. Builder, associative
-History and active-layer integration are not claimed. The selected command
-does not take Boolean/Loft/Trim inputs; unrelated domain baseline requirements
-are not applicable.
+Matrix 8 Book 1, printed pp.222–223 / PDF pp.232–233, was extracted and visually checked in the 2026-10-06 core implementation. The current normalized spec engineering contract is preserved; host solver choices and remaining compatibility limits are separated in its implementation notes. Original reference inputs remain unchanged.

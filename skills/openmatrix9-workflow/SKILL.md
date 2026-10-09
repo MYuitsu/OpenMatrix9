@@ -5,6 +5,10 @@ description: Use when starting or resuming OpenMatrix9 work, checking implementa
 
 # OpenMatrix9 routing
 
+## Ưu tiên ngôn ngữ
+
+Rust là ưu tiên số 1 cho code OpenMatrix9 mới và chuyển code hiện hữu. Trước khi chọn ngôn ngữ hoặc thiết kế FFI/worker, đọc [Rust trước, native bridge tối thiểu](references/rust-first.md). Safe Rust sở hữu logic và dữ liệu độc lập; C++ dùng cho API native bắt buộc, Python cho bootstrap/test/tool khi cần. Không coi native FFI là memory-safe hoặc cập nhật skill là đã hoàn tất migration.
+
 Keep the user's Rust implementation goal. Guide documents describe VB6 recovery methods; they do not change that goal.
 
 Resolve the OpenMatrix9 checkout from the user's path or repository. This machine uses `D:/FreeCAD-src/Mod/OpenMatrix9`. All document paths in [stages.json](references/stages.json) are relative to that checkout.

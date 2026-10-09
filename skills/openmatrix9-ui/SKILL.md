@@ -5,6 +5,8 @@ description: Use when rebuilding the Matrix9 startup layout, MAIN MENU, sidebar,
 
 # Matrix9 interface in FreeCAD
 
+Rust là ưu tiên số 1 khi triển khai hoặc chuyển code OM9. Đọc [quy tắc Rust và ranh giới native](../openmatrix9-workflow/references/rust-first.md) trước khi chọn ngôn ngữ/FFI/worker. Safe Rust sở hữu logic, validation và dữ liệu độc lập; C++ chỉ là bridge cho API native bắt buộc, Python cho bootstrap/test/tool khi cần. Ghi rõ lý do và owner của mọi ngoại lệ; không coi native FFI là memory-safe hoặc skill update là migration hoàn tất.
+
 For the user-approved finite grid, pinned Command/completion and viewport title/menu contract, read `openmatrix9-workspace-contract` (repository `skills/openmatrix9-workspace-contract/SKILL.md`). Its packaged references supplement the earlier theme baseline below.
 
 Keep Rust responsible for catalog, state and behavior; C++/Qt hosts widgets and native FreeCAD views. Python registers the workbench.
@@ -17,7 +19,7 @@ Keep Rust responsible for catalog, state and behavior; C++/Qt hosts widgets and 
 
 Menu structure does not require reading the entire Ghidra export. If a specific event's behavior is unclear after metadata/spec reading, use openmatrix9-native-mapping for that event alone.
 
-Compare against the user's selected screenshot. For Command, construction grids and viewport colors, read [command-grid-theme.md](references/command-grid-theme.md) and its packaged reference image: Command belongs above the native views as one selectable text document containing history, live prompt and input; Polyline shows a picked-point chain before Enter commits it. The Command region is Matrix green, viewport canvases are black, and major grid cells contain minor subdivisions. These user choices supersede the earlier gradient preview.
+Compare against the user's selected screenshot. For Command, construction grids and viewport colors, read [command-grid-theme.md](references/command-grid-theme.md) and resolve its private reference image through the ignored local registry under the [private reference policy](../../docs/private-reference-policy.md): Command belongs above the native views as one selectable text document containing history, live prompt and input; Polyline shows a picked-point chain before Enter commits it. The Command region is Matrix green, viewport canvases are black, and major grid cells contain minor subdivisions. These user choices supersede the earlier gradient preview.
 
 If a selected reference is unavailable, report that visual gap while continuing from verified sources. MAIN MENU/ICON HISTORY and native four-view workspace are implemented slices with remaining functional gaps; other controls enable only proven commands. Reconcile the live ledger rather than assuming all features complete from matching appearance.
 

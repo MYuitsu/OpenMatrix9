@@ -2,11 +2,14 @@
 import json
 import math
 import os
+import sys
 from pathlib import Path
 import traceback
 import FreeCAD as App
 import FreeCADGui as Gui
 import Part
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
 from PySide6 import QtCore, QtGui, QtWidgets
 
 out = Path(os.environ['OM9_SMOKE_OUTPUT'])
@@ -94,6 +97,10 @@ def run():
     global console
     try:
         Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__
+        if os.environ.get('OM9_TEST_NATIVE_DIR'):
+            check('isolated native module loaded',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
         events()
         console = Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript')
         check('shared native command console', console is not None)

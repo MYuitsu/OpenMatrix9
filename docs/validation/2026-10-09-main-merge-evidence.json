@@ -1,0 +1,351 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-09T20:09:38+07:00",
+  "scope": "Post-merge integration checks; does not complete P0 or certify full Matrix/Rhino compatibility.",
+  "parents": {
+    "main": "c55af89db93bc710fdcb5456d1a278b1337049c2",
+    "cad_p0": "5011bab58b46a23ce240e579dc5514e4327798de"
+  },
+  "rust": {
+    "test_exit": 0,
+    "passed": 334,
+    "suites": 50,
+    "log": "H:/FreeCAD-src/build/merge-rust-tests.log",
+    "clippy_exit": 0,
+    "clippy_warning_diagnostics": 66,
+    "clippy_log": "H:/FreeCAD-src/build/merge-clippy.log",
+    "log_sha256": "a8c08d9762ef253f6eacee31a64f5451432afb194c6c06895eb9ea57de60e545",
+    "clippy_log_sha256": "46c34cc0455afc0c7a0842d439ead3f3af6b41e337f208d994fb4b9890235d22"
+  },
+  "python_tools": {
+    "command": "python -m unittest discover -s tools/tests",
+    "run": 50,
+    "passed": 49,
+    "skipped": 1,
+    "process_exit": 0,
+    "evidence": "Task terminal session 76116; 36.562 seconds; output not saved as a separate log."
+  },
+  "native_build": {
+    "target": "OpenMatrix9Gui",
+    "process_exit": 0,
+    "terminal_session": 70335,
+    "sdk": "H:/FreeCAD-src/build/relWithDebInfo",
+    "dependencies": "H:/FreeCAD-src/.pixi/envs/default/Library",
+    "module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+    "sha256": "53aa3d7bb14be52a473310442466a9184121ecb5ac5bb1abea4f385b02a32938"
+  },
+  "native_kernel_suites": [
+    {
+      "target": "ThreeDmGeometryTests",
+      "exit_code": 0,
+      "log": "H:\\FreeCAD-src\\build\\rcore-native\\ThreeDmGeometryTests-merge.log",
+      "log_sha256": "a3db333602acb0ef462fea84c9d85fb8ac5138d9902430e6258d006f3d2c1703"
+    },
+    {
+      "target": "ThreeDmArchiveTests",
+      "exit_code": 0,
+      "log": "H:\\FreeCAD-src\\build\\rcore-native\\ThreeDmArchiveTests-merge.log",
+      "log_sha256": "1a11f1e1f6f156a5154af5be3c2479ee166a3ea8129d69233708fc3d06730f73"
+    },
+    {
+      "target": "ThreeDmModelingExchangeTests",
+      "exit_code": 0,
+      "log": "H:\\FreeCAD-src\\build\\rcore-native\\ThreeDmModelingExchangeTests-merge.log",
+      "log_sha256": "516bd698c8e87ec2c6fe16bf51799488c1f2e61522a2cf97f76829cb3a02971c"
+    },
+    {
+      "target": "ThreeDmCloudGeometryTests",
+      "exit_code": 0,
+      "log": "H:\\FreeCAD-src\\build\\rcore-native\\ThreeDmCloudGeometryTests-merge.log",
+      "log_sha256": "7ede2c5668e82a46c3532da455397ad9c29d9697915c214d23720cb605566ef0"
+    },
+    {
+      "target": "ThreeDmMergeTests",
+      "exit_code": 0,
+      "log": "H:\\FreeCAD-src\\build\\rcore-native\\ThreeDmMergeTests-merge.log",
+      "log_sha256": "5693627cea34f0d2d5a01390e8b4961718ff07f732c06f88afc4a3b0f4438bc9"
+    },
+    {
+      "target": "ThreeDmBlockTests",
+      "exit_code": 0,
+      "log": "H:\\FreeCAD-src\\build\\rcore-native\\ThreeDmBlockTests-merge.log",
+      "log_sha256": "5263610a279e3663bd560c60a4947ddfa59f9af3a3d55e8de2f0fe422e542ef8"
+    },
+    {
+      "target": "ThreeDmInventoryTests",
+      "exit_code": 0,
+      "log": "H:\\FreeCAD-src\\build\\rcore-native\\ThreeDmInventoryTests-merge.log",
+      "log_sha256": "5916483350b90e8bdb4f61488bf46edba6f94420081c72bd79885907b2c94dda"
+    },
+    {
+      "target": "ThreeDmPreservationTests",
+      "exit_code": 0,
+      "log": "H:\\FreeCAD-src\\build\\rcore-native\\ThreeDmPreservationTests-merge.log",
+      "log_sha256": "b8434bd41c2ae4443b4d332c3c410a83673fdd5b6456b2f94950e140688f2365"
+    }
+  ],
+  "native_gui": {
+    "accepted_runs": 15,
+    "passed_assertions": 847,
+    "runs": [
+      {
+        "suite": "modeling_exchange_smoke.FCMacro",
+        "count": 32,
+        "path": "build/merge_replay-1/937df59378b84c08883b6af2ecc0d728/results.json",
+        "process_exit": 0,
+        "results_sha256": "7ca63d6da1f8780f098662488591dc49b68e93c47ca8eb78f058e03242e4f633",
+        "module_proof_sha256": "940dd8f9927bda5852be5224c04ddf60b63e937624c7801692269dde860a46bc",
+        "module_proof": {
+          "macro": "modeling_exchange_smoke.FCMacro",
+          "macro_sha256": "53c8e706e1bf648f24d4a809b8364e310124d1a2ef5c77a7ef4e6f050d7bef68",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "ac3a9a0f2d75c05afa9d8c6c04bb115ff284003fe97f547f7234d01f53a83bb6"
+        }
+      },
+      {
+        "suite": "rhino_core_units_smoke.FCMacro",
+        "count": 20,
+        "path": "build/merge_replay-1/c229a338adac41bd93bb0177ef5c345f/results.json",
+        "process_exit": 0,
+        "results_sha256": "c74d5c3763e17ea774c9283cd71af02c8d3fdfb14fda72e76d3fb049011f9828",
+        "module_proof_sha256": "66f8f59f177cf16016f9e69a4641df524938bb4ac53d55cacf7b66dfc5d05305",
+        "module_proof": {
+          "macro": "rhino_core_units_smoke.FCMacro",
+          "macro_sha256": "f5b4a914e2df9a1955bcaf38b5a05887b621364effbb2bbcc3ba81149292723c",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "ac3a9a0f2d75c05afa9d8c6c04bb115ff284003fe97f547f7234d01f53a83bb6"
+        }
+      },
+      {
+        "suite": "core_coordinates_smoke.FCMacro",
+        "count": 162,
+        "path": "build/merge_replay-1/0e85ccaf26754c96a5b522ed912b3c20/results.json",
+        "process_exit": 0,
+        "results_sha256": "e263de5e6432b2a37af6ea891b57d48cd007da29ad0e10f0f14b0230d591be85",
+        "module_proof_sha256": "e8af4d701ff80b6a618e28689c6d462aea42248a1a3b867998720d56e97f8148",
+        "module_proof": {
+          "macro": "core_coordinates_smoke.FCMacro",
+          "macro_sha256": "2b7cadc881da18e6a433f50c8e1f8b1d2fc8259dd90235913bc4e1b7d192a8ec",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "ac3a9a0f2d75c05afa9d8c6c04bb115ff284003fe97f547f7234d01f53a83bb6"
+        }
+      },
+      {
+        "suite": "core_snap_lifecycle_smoke.FCMacro",
+        "count": 10,
+        "path": "build/merge_replay-1/ff4b925d575c4af48f17b01c238eeb8a/results.json",
+        "process_exit": 0,
+        "results_sha256": "69728caa26c4dacdead3602b0c8a0691ddba0fdedb7b479387b04fbb36075a8e",
+        "module_proof_sha256": "45dec12312be6140da63cb1d9dcf4f3203c17aa009ed4e6ba173fa26ca0b9072",
+        "module_proof": {
+          "macro": "core_snap_lifecycle_smoke.FCMacro",
+          "macro_sha256": "9cca8748e057786212b433f52c368764e807f3c82cfd536c9449b2313371cdc0",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "ac3a9a0f2d75c05afa9d8c6c04bb115ff284003fe97f547f7234d01f53a83bb6"
+        }
+      },
+      {
+        "suite": "solid_commands_smoke.FCMacro",
+        "count": 70,
+        "path": "build/merge_replay-1/9110e33588c9429e894b53ba62f2eac0/results.json",
+        "process_exit": 0,
+        "results_sha256": "5454a9ddf66484850870fada85dff11fdb9151aa450e833cc173aacb869f3a98",
+        "module_proof_sha256": "09ee8aa2389d8ebe9aa9bd27985a201e477a8f7aa2bfa38aa030590de251e544",
+        "module_proof": {
+          "macro": "solid_commands_smoke.FCMacro",
+          "macro_sha256": "273902531613dcb19b5b14258525cc87819675b44bfdcd2fac68a318bd1fed1b",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "ac3a9a0f2d75c05afa9d8c6c04bb115ff284003fe97f547f7234d01f53a83bb6"
+        }
+      },
+      {
+        "suite": "surface_commands_smoke.FCMacro",
+        "count": 97,
+        "path": "build/merge_replay-1/b2487ae72c5e4357b69d6316d6db752c/results.json",
+        "process_exit": 0,
+        "results_sha256": "ceaec0798ec8174f4b8624882c369f0f25e5c2f1705d06bb46093c47d4d478f1",
+        "module_proof_sha256": "c34bca9c716c576174bff4f808b46a2bec7f4dbd4cb34b3924a463c571694334",
+        "module_proof": {
+          "macro": "surface_commands_smoke.FCMacro",
+          "macro_sha256": "386e0ac64e5a8dc96a1ecb2517ba00c4f3b5b29f5a5904eaea18d897a837533a",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "ac3a9a0f2d75c05afa9d8c6c04bb115ff284003fe97f547f7234d01f53a83bb6"
+        }
+      },
+      {
+        "suite": "history_smoke.FCMacro",
+        "count": 83,
+        "path": "build/merge_replay-1/df5d90d8799848689897183d84904953/results.json",
+        "process_exit": 0,
+        "results_sha256": "819b78a0632e02ad40de31a3e7dd03527ea86e911b6a44aeb95319d16d47e7be",
+        "module_proof_sha256": "c2c45fc153b81fc09e736871adca83d4ac7fdc6808f36f31c09cddc0706fc6d4",
+        "module_proof": {
+          "macro": "history_smoke.FCMacro",
+          "macro_sha256": "fbe0de2b3fd041563c892b8408ea5bc46e9d4bdadf78e42b3d13f898a6b65c6f",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "ac3a9a0f2d75c05afa9d8c6c04bb115ff284003fe97f547f7234d01f53a83bb6"
+        }
+      },
+      {
+        "suite": "rhino_core_history_io_smoke.FCMacro",
+        "count": 7,
+        "path": "build/merge_replay-1/42f034f2283544c08b453fbbaa318490/results.json",
+        "process_exit": 0,
+        "results_sha256": "17438d956789c4cd0e49c97dd9786d0b9de7d0e74c5ca48b1f44473d07fbfa5a",
+        "module_proof_sha256": "762e085a388a4a92ccfb30e4d5f8541221df5546711751371beb2ff18cd2dbcb",
+        "module_proof": {
+          "macro": "rhino_core_history_io_smoke.FCMacro",
+          "macro_sha256": "5472b0b88396931160fcd2304917de228ee1e6c471ac979adf830454d5aee448",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "ac3a9a0f2d75c05afa9d8c6c04bb115ff284003fe97f547f7234d01f53a83bb6"
+        }
+      },
+      {
+        "suite": "edit_3dm_special_smoke.FCMacro",
+        "count": 44,
+        "path": "build/merge_replay-1/3b80cc3915924f49b450270eeb6b756f/results.json",
+        "process_exit": 0,
+        "results_sha256": "2019c2d91e6e638ada10e8e4d86f71cabcdbaab260647bd9f4c46a96e7f190ce",
+        "module_proof_sha256": "fb28056742d26fcc745e852add52a38156abc23f3c37722f297a8ee00cbf31a5",
+        "module_proof": {
+          "macro": "edit_3dm_special_smoke.FCMacro",
+          "macro_sha256": "627789d22f97011ae590bef3af8ef792cdaea8a8bf7f730538ae1a8d1741cca9",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "0adc3d438ee7f689526bdb2c86df69104cc42943c80717ec3134a4020c42d9d7"
+        }
+      },
+      {
+        "suite": "three_dm_cloud_geometry_smoke.FCMacro",
+        "count": 50,
+        "path": "build/merge_replay-1/811cc307bcc442df9b8f288495680da6/results.json",
+        "process_exit": 0,
+        "results_sha256": "840b9d4f2be3d9eee018c5a690aecb6ff66ab99efa465bd2c600c14bd1a09c1a",
+        "module_proof_sha256": "d8bab0c9c961fee54c5a270a0cd3f52d793d500b82c78378a9b76431abd394ce",
+        "module_proof": {
+          "macro": "three_dm_cloud_geometry_smoke.FCMacro",
+          "macro_sha256": "94d8c96dbfb7316f6ffb3c1dbb90d6674b00b45bea5cfad25d731b005f0364df",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "53aa3d7bb14be52a473310442466a9184121ecb5ac5bb1abea4f385b02a32938"
+        }
+      },
+      {
+        "suite": "three_dm_shared_export_routes_smoke.FCMacro",
+        "count": 30,
+        "path": "build/merge_replay-1/c8ee43b27fbf446f9ad6dd71ae96620f/results.json",
+        "process_exit": 0,
+        "results_sha256": "a429621a03ff555e85735b2cd90eb242609adfb17df9ce87c531bf89ff118172",
+        "module_proof_sha256": "de86eef10ada709a56d361e8152dc4fbe85058d60b48365093068cd59e8e3a40",
+        "module_proof": {
+          "macro": "three_dm_shared_export_routes_smoke.FCMacro",
+          "macro_sha256": "1af46aeeba876298ea4bf4bd7723df50985996853cb08b23a9634d9e7c461925",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "53aa3d7bb14be52a473310442466a9184121ecb5ac5bb1abea4f385b02a32938"
+        }
+      },
+      {
+        "suite": "rhino_core_geometry_smoke.FCMacro",
+        "count": 58,
+        "path": "build/merge_replay-1/8bba1ed374244eb988d0d2b4c0b96e37/results.json",
+        "process_exit": 0,
+        "results_sha256": "d48f63a2f750252436bbf4ee8f696a6ff455ed8010d97bf1f255dd74e4b75e46",
+        "module_proof_sha256": "36d3b41527e0281b2d74eb7cb3e95c705fd41bd853d55f12d2ac93af355c9c15",
+        "module_proof": {
+          "macro": "rhino_core_geometry_smoke.FCMacro",
+          "macro_sha256": "e116ad295b255a1b34d99f3021f488459f4eaca1b4daddfa9afeba21184d6f96",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "53aa3d7bb14be52a473310442466a9184121ecb5ac5bb1abea4f385b02a32938"
+        }
+      },
+      {
+        "suite": "edit_commands_smoke.FCMacro",
+        "count": 115,
+        "path": "build/merge_replay-1/cae344c4eaec4ef3969a5f7e685e8041/results.json",
+        "process_exit": 0,
+        "results_sha256": "708d87ecd2286c2ed9ce2850e9e9ab0a7dec13cd8e56f13f5ab69d6e9628c190",
+        "module_proof_sha256": "a40f7b6acc1839b71b0ff5529348ec483c5beab64d4e5cb37624165fa48054a1",
+        "module_proof": {
+          "macro": "edit_commands_smoke.FCMacro",
+          "macro_sha256": "4ab90521116651e7b879bf33df5804f8d7ebf49a8e66b012038c653beefe800b",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "53aa3d7bb14be52a473310442466a9184121ecb5ac5bb1abea4f385b02a32938"
+        }
+      },
+      {
+        "suite": "curve_spline_smoke.FCMacro",
+        "count": 41,
+        "path": "build/merge_replay-1/b3fc6458d3664deaa15efc3ff571b6e6/results.json",
+        "process_exit": 0,
+        "results_sha256": "f568f7cfaf61eeec9861ad2fd3e92c22b8106deff57661539bffcab57a9f2781",
+        "module_proof_sha256": "60c16208c0caad29f99498ab5b68cccf76968bdca21f58850f9f0a8d83d5dc2c",
+        "module_proof": {
+          "macro": "curve_spline_smoke.FCMacro",
+          "macro_sha256": "b74c0e86b4133aee06854e3f88206e87632dea2b94cf68c55344e8d1326b6c66",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "53aa3d7bb14be52a473310442466a9184121ecb5ac5bb1abea4f385b02a32938"
+        }
+      },
+      {
+        "suite": "rhino_core_geometry_smoke.FCMacro (cold restore)",
+        "count": 28,
+        "path": "build/merge_replay-1/7e6a55e885724e6ebd1684b06c89b2c5/results.json",
+        "process_exit": 0,
+        "results_sha256": "2ca73461ba4f9836abe593fb56e8b6ab7f4222cf39a7b308a096107cd299a14e",
+        "module_proof_sha256": "36d3b41527e0281b2d74eb7cb3e95c705fd41bd853d55f12d2ac93af355c9c15",
+        "module_proof": {
+          "macro": "rhino_core_geometry_smoke.FCMacro",
+          "macro_sha256": "e116ad295b255a1b34d99f3021f488459f4eaca1b4daddfa9afeba21184d6f96",
+          "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "native_sha256": "53aa3d7bb14be52a473310442466a9184121ecb5ac5bb1abea4f385b02a32938"
+        }
+      }
+    ],
+    "scope_note": "Each run records its loaded module hash. Initial unaffected CAD runs predate the final retained-instance guard rebuild; the affected retained, geometry export, shared export, Edit and spline routes were checked after the final build."
+  },
+  "spec_manifest": {
+    "entries_verified": 664,
+    "sha256": "001e4bcbf03f083c7e7fe41f4bdbf74b4c85177a7836f16dc6badeb0b134adba",
+    "note": "Hashes reflect LF files after integrating main .gitattributes."
+  },
+  "source_sha256": {
+    "Gui/AppOpenMatrix9Gui.cpp": "42de19017d7bdb2d9c4f919939cd1d27daa90e1c9c79a4c6034f637d44796835",
+    "Gui/CMakeLists.txt": "22b5e3c051c182a2ad3dc49c4cecfeadf917e173cca4bd6a2971e2771c94936c",
+    "Gui/Command.cpp": "17694427f5ac73a7f741dbc084e9232a4951529c63c9013f1ba61cc811bda35f",
+    "Gui/RustBridge.h": "a0e3fc4c44e878d759648c6ae127b5cf961d9789fe966c67f019568006a51d95",
+    "Gui/RetainedArchive.cpp": "724f2fb5c148a9981734d9a66676015c2656a0944a1c5fb951dfcb6cacdbf61a",
+    "Gui/ThreeDmPython.cpp": "fbf95ca3f27dc05a22ded26f6b8737f067e946369b8c41f8bfca7d84909aeef2",
+    "ThreeDm.py": "348f514a53f62199c25ba9fc63d2bbb8fd9da27183b10b761b55000c0298c76d",
+    "rust/src/core_3dm_archive.rs": "86bed2afc534079903c8fc0547a8ff4e53a7646a9314f97e2ec217510f1eef62",
+    "rust/src/retained_archive.rs": "07706328875e826702ce7d7ef6f5d3261117effc1fbea52e81402ede45031373",
+    "rust/src/curve_ffi.rs": "62a9df11d1779ec5e6621b58bc92465b2228e3096052a51aed568505eeb3d793",
+    "rust/src/lib.rs": "fce856b22cd9d6236cdcc8b9dee576607ee9a07bc91f59176b7ee4ed55cca317",
+    "rust/src/ffi.rs": "9dbc613a04ab31cd03f0e1a2f93bd712c0f7dd0b4d1445b552ab4c03c10d0175",
+    "tests/rhino_core_geometry_smoke.FCMacro": "e116ad295b255a1b34d99f3021f488459f4eaca1b4daddfa9afeba21184d6f96",
+    "tests/edit_3dm_special_smoke.FCMacro": "627789d22f97011ae590bef3af8ef792cdaea8a8bf7f730538ae1a8d1741cca9",
+    "tests/merge_replay.FCMacro": "ef5b01dff0ac1ccc6d6fa853291ac306c3440226874ed8db5a888bb4819d554c",
+    "rust/tests/core_3dm_manifest.rs": "5557ed46a1ba991c0a202a7929e0d43e4891046d7beddb9c269d4f2d347771e9",
+    "rust/tests/retained_archive.rs": "ab4fec59dbff610e5bd6dbaff601bcc566da6430cd860d9c2008cf41f4e8e72d",
+    "cmake/OpenNURBS.cmake": "68f2dd69166b660fc74e0a43d92cdb1beed1977dd47eab76aca3f7fd9bdc92da"
+  },
+  "hash_scope": "Working-copy bytes; Git may normalize CRLF in test macros when staging.",
+  "excluded_attempts": [
+    {
+      "artifact": "build/merge_replay-1/6cef50e4c19c4c2a8969b3b31248cafe",
+      "reason": "Geometry-only export rejected read3dm metadata; fixed the host export adapter and reran 50 checks successfully."
+    },
+    {
+      "artifact": "build/merge_replay-1/e3498fde7fe143b8a2fe90066e0e4442",
+      "reason": "Old P0 oracle expected preservation export rejection. Replaced by current point geometry/UUID and invalid shape atomicity checks; rerun passed 58 checks."
+    }
+  ],
+  "private_assets": {
+    "count": 8,
+    "action": "Preserved outside the public nested repository with SHA256 verification; ignored local reference registry updated. No history rewrite.",
+    "manifest": "H:\\FreeCAD-src\\build\\merge-private-reference-backup\\manifest.json"
+  },
+  "public_source_audit": {
+    "source_files": 2014,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  }
+}

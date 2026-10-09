@@ -120,7 +120,8 @@ void CoreMouse::select(const QPoint& point,bool rectangle){
 }
 void CoreMouse::confirm(){
     if(pointTool()||CurveController::instance().pendingInput()){CurveController::instance().acceptInput();return;}
-    if(om9_sidebar_history_count()){const auto command=om9_sidebar_history_command(0);if(om9NativeCommandAvailable(command))om9_sidebar_record_execution(command,om9ExecuteNativeCommand(command));}
+    const auto command=om9_command_repeat_candidate();
+    if(command<om9_command_count()&&om9NativeCommandAvailable(command))om9ExecuteNativeCommand(command);
 }
 void CoreMouse::recent(){
     if(popup)delete popup.data();popup=new QMenu(Gui::getMainWindow());popup->setObjectName("OM9MouseHistory");

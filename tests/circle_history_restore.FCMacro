@@ -1,0 +1,22 @@
+# Cold restore must autoload the native CircleHistory type without workbench activation.
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def run():
+    try:
+        check('OpenMatrix9 not activated before cold restore',Gui.activeWorkbench().name()!='OpenMatrix9Workbench')
+        root=Path(__file__).parents[1]/'build/circle_spatial_history_smoke-1';files=sorted(root.glob('*/history.FCStd'),key=lambda p:p.stat().st_mtime,reverse=True);doc=App.openDocument(str(files[0]));import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__;check('Cold restore autoloads selected native module',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        h=next(o for o in doc.Objects if o.TypeId=='OpenMatrix9Gui::CircleHistory' and o.Recorded);p=h.Shape.Edges[0].Curve.Center;group=doc.getObject('HistoryParent');group.Placement.Base=group.Placement.Base+App.Vector(10,0,0);doc.recompute();check('Cold restored dependency recomputes without workbench',h.Shape.isValid() and (h.Shape.Edges[0].Curve.Center-p-App.Vector(10,0,0)).Length<1e-6 and h.OM9FeatureId=='OM9-CURVE-005');result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    result['closed_documents']=True;(out/'results.json').write_text(json.dumps(result,indent=2))
+    QtWidgets.QApplication.quit()
+QtCore.QTimer.singleShot(700,run)

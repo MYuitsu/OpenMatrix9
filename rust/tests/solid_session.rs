@@ -87,7 +87,7 @@ fn cplane_coordinates_and_relative_input_are_transformed_once() {
 fn sphere_rejects_zero_negative_nonfinite_and_cancelled_inputs() {
     let mut s = Session::new(Kind::Sphere);
     step(&mut s, "0,0");
-    for text in ["0", "-1", "NaN", "inf", "1e20", "Diameter=4"] {
+    for text in ["0", "-1", "NaN", "inf", "1e20", "Diameter=0"] {
         assert!(s.input(text).is_err());
         assert_eq!(s.phase(), 5);
     }

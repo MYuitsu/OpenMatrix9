@@ -29,6 +29,7 @@ private:
     QWidget* section(int index, const QString& title, QWidget* body);
     void populateGrid();
     void populateHistory();
+    void refreshLayers();
     void invoke(std::size_t command);
     std::size_t findCommand(const char* icon) const;
     QString tooltip(std::size_t command) const;

@@ -27,6 +27,7 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QTimer>
+#include <QToolButton>
 #include <cmath>
 #include <cstring>
 #include <stdexcept>
@@ -95,20 +96,54 @@ void SolidController::prompt(){char b[2048]={};om9_solid_message(b,sizeof(b));Cu
 bool SolidController::start(std::size_t i){
     if(!available(i))return false;
     CoreDistance::instance().cancel();CorePictureFrame::instance().cancel();CoreViewControls::instance().cancel();CurveController::instance().cancel();cancel();
+    try {
+    // Reject corrupt saved frame metadata before creating a Rust session.
+    CoreWorkspace::instance().plane(activeView());
     document=App::GetApplication().getActiveDocument();command=i;kind=om9_solid_kind(om9_command_id(i));
     if(!om9_solid_start(om9_command_id(i))){document=nullptr;return false;}
     frame(activeView());qApp->installEventFilter(this);CoreMouse::instance().prioritize();prompt();return false; // history on commit only
+    }catch(const std::exception& error){cancel();CoreSnaps::clearTransient();CurveController::instance().setPrompt(QString::fromUtf8(error.what()));return false;}
 }
 void SolidController::clearPreview(){for(const auto& [root,node]:previews){if(root->findChild(node)>=0)root->removeChild(node);root->unref();}previews.clear();}
-void SolidController::cancel(){clearPreview();om9_solid_cancel();document=nullptr;}
+void SolidController::cancel(){if(document)CoreSnaps::clearTransient();clearPreview();om9_solid_cancel();document=nullptr;Base::PyGILStateLocker lock;tangentReferences.clear();pathReference.reset();}
+void SolidController::reference(const QString& name,const SolidPoint& pick){
+    frame(activeView());Base::PyGILStateLocker lock;auto native=solidCurveReference(*document,name.toStdString());const unsigned mode=om9_solid_reference_mode();
+    if(mode==1){pathReference=std::move(native);result(om9_solid_reference(pick[0],pick[1],pick[2],0,0,1));}
+    else if(mode==3){const auto located=solidOnCurve(native,pick);const auto i=om9_solid_constraints(nullptr);tangentReferences[i]=std::move(native);result(om9_solid_reference(located.first[0],located.first[1],located.first[2],0,0,1));}
+    else throw std::runtime_error("No native curve selection is expected");
+}
+void SolidController::solveTangent(int solution){
+    Base::PyGILStateLocker lock;verifySolidReferences(*document,tangentReferences,pathReference);double b[12],frameData[12];const auto count=om9_solid_constraints(b);if(!om9_solid_reference_frame(frameData))throw std::runtime_error("Missing tangent construction plane");
+    const auto [center,radius]=solidTangentSphere(tangentReferences,b,count,frameData,om9_solid_tangent_radius(),solution);result(om9_solid_resolve(center[0],center[1],center[2],radius));
+}
 void SolidController::submit(const QString& text){
     if(!active())return;if(!valid()){cancel();return;}
     // Keep shared Osnap/Ortho controls usable during point entry.
     if(CoreSnaps::submit(text)||CoreKeyboard::instance().submit(text))return;
-    frame(activeView());result(om9_solid_input(text.toUtf8().constData()));
+    try {frame(activeView());}
+    catch(const std::exception& error){cancel();CurveController::instance().setPrompt(QString::fromUtf8(error.what()));return;}
+    try{
+        const auto t=text.trimmed();
+        if((om9_solid_reference_mode()==1&&t.startsWith("Path=",Qt::CaseInsensitive))||(om9_solid_reference_mode()==3&&t.startsWith("Curve=",Qt::CaseInsensitive))){
+            const auto value=t.section('=',1);const auto split=value.indexOf('@');const auto name=split<0?value:value.left(split);SolidPoint pick{0,0,0};
+            if(split>=0){const auto coords=value.mid(split+1).split(',');if(coords.size()!=3)throw std::runtime_error("Curve pick syntax: Curve=Object.EdgeN@worldX,worldY,worldZ");for(int i=0;i<3;++i){bool ok=false;pick[i]=coords[i].toDouble(&ok);if(!ok||!std::isfinite(pick[i]))throw std::runtime_error("Curve pick coordinates must be finite");}}
+            reference(name,pick);return;
+        }
+        if(om9_solid_reference_mode()==2&&t.startsWith("OnCurve=",Qt::CaseInsensitive)){if(!pathReference)throw std::runtime_error("Reselect the curve");bool ok=false;const auto fraction=t.section('=',1).toDouble(&ok);if(!ok)throw std::runtime_error("OnCurve requires a fraction within 0..1");Base::PyGILStateLocker lock;verifySolidReferences(*document,tangentReferences,pathReference);const auto [p,n]=solidOnCurve(*pathReference,{0,0,0},fraction);result(om9_solid_reference(p[0],p[1],p[2],n[0],n[1],n[2]));return;}
+        if(om9_solid_phase()==21&&t.startsWith("Solution=",Qt::CaseInsensitive)){bool ok=false;const auto value=t.section('=',1).toInt(&ok);if(!ok||value<1)throw std::runtime_error("Solution index starts at 1");solveTangent(value-1);return;}
+        if(om9_solid_reference_mode()==4 && ((t.isEmpty()&&om9_solid_point_count()==0)||t.compare("Selection",Qt::CaseInsensitive)==0)){
+            Base::PyGILStateLocker lock;const auto points=solidSelectedFitPoints(*document);std::vector<double> flat;for(const auto& p:points)flat.insert(flat.end(),p.begin(),p.end());if(!points.empty()&&om9_solid_fit_points(flat.data(),points.size())!=1)throw std::runtime_error("Invalid selected fit point batch");if(!t.isEmpty()){prompt();return;}
+        }
+        const auto previousPoints=om9_solid_point_count();
+        const auto effect=om9_solid_input(t.toUtf8().constData());
+        CoreSnaps::acceptedPoint(effect!=0&&effect!=3&&om9_solid_point_count()>previousPoints);
+        result(effect);
+        {Base::PyGILStateLocker lock;const auto count=om9_solid_constraints(nullptr);for(auto it=tangentReferences.begin();it!=tangentReferences.end();)if(it->first>=count)it=tangentReferences.erase(it);else ++it;if(om9_solid_phase()==16)pathReference.reset();}
+    }catch(const std::exception& error){clearPreview();CurveController::instance().setPrompt(QString::fromUtf8(error.what()));}
 }
 void SolidController::result(unsigned effect){
     clearPreview();
+    if(effect==1&&om9_solid_phase()==21){try{solveTangent();}catch(const std::exception& error){CurveController::instance().setPrompt(QString::fromUtf8(error.what()));}return;}
     if(effect==2){
         try{commit();om9_sidebar_record_execution(command,true);cancel();CurveController::instance().setPrompt("Solid created. Command:");}
         catch(const std::exception& error){cancel();CurveController::instance().setPrompt(QString::fromUtf8(error.what()));Base::Console().warning("OpenMatrix9 solid: %s\n",error.what());}
@@ -128,34 +163,65 @@ void SolidController::preview(const double* point,bool ortho){
 }
 void SolidController::commit(){
     if(!valid())throw std::runtime_error("Document is no longer editable");double b[15];if(!om9_solid_geometry(b,false,0,0,0,false))throw std::runtime_error("No solid output");
-    Base::PyGILStateLocker lock;Ref shape(buildSolid(kind,b));const char* name=kind==1?"Box":"Sphere";
+    Base::PyGILStateLocker lock;verifySolidReferences(*document,tangentReferences,pathReference);Ref shape(buildSolid(kind,b));const char* name=kind==1?"Box":"Sphere";
     document->openTransaction(name);
     try{
         Ref doc(document->getPyObject()),object(PyObject_CallMethod(doc.p,"addObject","ss","Part::Feature",name));set(object.p,"Shape",shape.p);
         addStringProperty(object.p,"OM9FeatureId",kind==1?"OM9-SOLID-012":"OM9-SOLID-014");addStringProperty(object.p,"OM9Command",name);
-        std::ostringstream settings;settings<<std::setprecision(17)<<"mm;origin="<<b[0]<<","<<b[1]<<","<<b[2]<<";dimensions="<<b[12]<<","<<b[13]<<","<<b[14];addStringProperty(object.p,"SolidParameters",settings.str().c_str());
+        std::ostringstream settings;settings<<std::setprecision(17)<<"mm;mode="<<om9_solid_mode_name()<<";origin="<<b[0]<<","<<b[1]<<","<<b[2]<<";dimensions="<<b[12]<<","<<b[13]<<","<<b[14]<<";axes=";for(unsigned i=3;i<12;++i)settings<<b[i]<<",";if(pathReference)settings<<";path="<<pathReference->input.name<<"."<<pathReference->sub;for(const auto& [i,ref]:tangentReferences)settings<<";tangent"<<i<<"="<<ref.input.name<<"."<<ref.sub;addStringProperty(object.p,"SolidParameters",settings.str().c_str());
         Ref view(PyObject_GetAttrString(object.p,"ViewObject")),color(Py_BuildValue("(ddd)",166./255.,104./255.,209./255.));set(view.p,"ShapeColor",color.p);set(view.p,"LineColor",color.p);
         document->recompute();document->commitTransaction();
     }catch(...){document->abortTransaction();throw;}
 }
 bool SolidController::eventFilter(QObject* watched,QEvent* event){
-    if(event->type()==QEvent::MouseButtonRelease&&releaseTarget==watched&&static_cast<QMouseEvent*>(event)->button()==Qt::LeftButton){releaseTarget=nullptr;return true;}
+    if(event->type()==QEvent::MouseButtonRelease&&releaseTarget==watched&&static_cast<QMouseEvent*>(event)->button()==releaseButton){releaseTarget=nullptr;return true;}
+    if(auto* button=qobject_cast<QToolButton*>(watched);button&&button->property("om9Command").isValid()){
+        const auto i=std::size_t(button->property("om9Command").toULongLong());
+        if(handles(i)&&event->type()==QEvent::ContextMenu)return true;
+        if(handles(i)&&event->type()==QEvent::MouseButtonPress&&static_cast<QMouseEvent*>(event)->button()==Qt::RightButton&&button->isEnabled()&&available(i)){
+            start(i);submit(kind==1?"3Point":"2Point");releaseTarget=watched;releaseButton=Qt::RightButton;return true;
+        }
+    }
     if(!active()||Gui::Application::Instance->isClosing())return false;if(!valid()){cancel();return false;}
     auto* view=containing(watched);
     if(event->type()==QEvent::KeyPress&&CoreKeyboard::inputContext(watched)){
         auto* key=static_cast<QKeyEvent*>(event);
         if(key->key()==Qt::Key_Escape){CurveController::instance().cancelInput();CurveController::instance().setPrompt("Solid command cancelled. Command:");return true;}
-        if(key->key()==Qt::Key_F4&&CoreKeyboard::pointKeyAllowed(watched,key)){frame(activeView());const auto p=CoreWorkspace::instance().plane(activeView()).getPosition();result(om9_solid_point(p.x,p.y,p.z,false));return true;}
+        if(key->key()==Qt::Key_F4&&CoreKeyboard::pointKeyAllowed(watched,key)){
+            try {frame(activeView());const auto p=CoreWorkspace::instance().plane(activeView()).getPosition();const auto effect=om9_solid_point(p.x,p.y,p.z,false);CoreSnaps::acceptedPoint(effect==1||effect==2);result(effect);}
+            catch(const std::exception& error){cancel();CurveController::instance().setPrompt(QString::fromUtf8(error.what()));}
+            return true;
+        }
         if(view&&(key->key()==Qt::Key_Return||key->key()==Qt::Key_Enter||key->key()==Qt::Key_Space)){CurveController::instance().acceptInput();return true;}
     }
     const bool hover=event->type()==QEvent::MouseMove;
     if(!view||(!hover&&event->type()!=QEvent::MouseButtonPress))return false;
     auto* mouse=static_cast<QMouseEvent*>(event);if(!hover&&mouse->button()!=Qt::LeftButton)return false;
     if(mouse->modifiers()&(Qt::ControlModifier|Qt::AltModifier|Qt::MetaModifier))return false;
-    if(!hover)releaseTarget=watched;
+    if(!hover){releaseTarget=watched;releaseButton=Qt::LeftButton;}
     auto* viewer=view->getViewer();auto* widget=qobject_cast<QWidget*>(watched);const auto pos=viewer->viewport()->mapFrom(widget,mouse->position().toPoint());
+    try {frame(view);}
+    catch(const std::exception& error){cancel();CurveController::instance().setPrompt(QString::fromUtf8(error.what()));return !hover;}
     try{
-        frame(view);Base::Vector3d p;const auto pixel=viewer->fromQPoint(pos);
+        if(!hover&&(om9_solid_reference_mode()==1||om9_solid_reference_mode()==3)){
+            Base::PyGILStateLocker lock;Ref viewObject(view->getPyObject());const auto pixel=viewer->fromQPoint(pos);Ref info(PyObject_CallMethod(viewObject.p,"getObjectInfo","((ii))",int(pixel[0]),int(pixel[1])));
+            if(!PyDict_Check(info.p))throw std::runtime_error("Pick a native curve edge");auto* object=PyDict_GetItemString(info.p,"Object");auto* component=PyDict_GetItemString(info.p,"Component");if(!object||!component)throw std::runtime_error("Pick a native curve edge");
+            const char* name=PyUnicode_AsUTF8(object);const char* edge=PyUnicode_AsUTF8(component);if(!name||!edge)throw std::runtime_error("Invalid native curve pick");SolidPoint pick;const char* axes[]={"x","y","z"};for(unsigned i=0;i<3;++i){auto* value=PyDict_GetItemString(info.p,axes[i]);if(!value)throw std::runtime_error("No world curve pick point");pick[i]=PyFloat_AsDouble(value);}reference(QString::fromUtf8(name)+"."+QString::fromUtf8(edge),pick);return true;
+        }
+        if(hover&&(om9_solid_reference_mode()==1||om9_solid_reference_mode()==3))return false;
+        if(om9_solid_reference_mode()==2){
+            if(hover)return false;
+            if(!pathReference)throw std::runtime_error("Reselect native curve");
+            Base::PyGILStateLocker lock;verifySolidReferences(*document,tangentReferences,pathReference);
+            Ref viewObject(view->getPyObject());const auto pixel=viewer->fromQPoint(pos);Ref picks(PyObject_CallMethod(viewObject.p,"getObjectsInfo","((ii))",int(pixel[0]),int(pixel[1])));
+            if(PyList_Check(picks.p))for(Py_ssize_t i=0;i<PyList_Size(picks.p);++i){auto* info=PyList_GetItem(picks.p,i);auto* object=PyDict_GetItemString(info,"Object");auto* component=PyDict_GetItemString(info,"Component");
+                if(!object||!component||pathReference->input.name!=PyUnicode_AsUTF8(object)||pathReference->sub!=PyUnicode_AsUTF8(component))continue;
+                SolidPoint seed;const char* keys[]={"x","y","z"};for(unsigned j=0;j<3;++j){auto* value=PyDict_GetItemString(info,keys[j]);if(!value)throw std::runtime_error("No world curve pick point");seed[j]=PyFloat_AsDouble(value);}
+                const auto [c,n]=solidOnCurve(*pathReference,seed);result(om9_solid_reference(c[0],c[1],c[2],n[0],n[1],n[2]));return true;
+            }
+            throw std::runtime_error("Pick a center on the selected path, or enter OnCurve=fraction");
+        }
+        Base::Vector3d p;const auto pixel=viewer->fromQPoint(pos);
         if(!CoreSnaps::pick(view,pos,p)){
             SbVec3f nearPoint,farPoint;viewer->projectPointToLine(pixel,nearPoint,farPoint);Base::Vector3d a(nearPoint[0],nearPoint[1],nearPoint[2]),d(farPoint[0]-nearPoint[0],farPoint[1]-nearPoint[1],farPoint[2]-nearPoint[2]);
             double axis[6];
@@ -165,13 +231,17 @@ bool SolidController::eventFilter(QObject* watched,QEvent* event){
                 if(std::abs(den)<1e-8*dd)throw std::runtime_error("Enter Height numerically or switch to a side/perspective view");
                 const double height=(dd*delta.Dot(n)-dn*delta.Dot(d))/den;p=origin+n*height;
             }else{
+                double special[6];
+                if(om9_solid_pick_plane(special)){const Base::Vector3d origin(special[0],special[1],special[2]),normal(special[3],special[4],special[5]);if(std::abs(d.Dot(normal))<=1e-6*d.Length())throw std::runtime_error("View is parallel to construction plane; switch view or enter coordinates");p=a+d*((origin-a).Dot(normal)/d.Dot(normal));}
+                else{
                 const auto plane=CoreWorkspace::instance().plane(view);const auto n=plane.getRotation().multVec(Base::Vector3d(0,0,1));
                 if(std::abs(d.Dot(n))<=1e-6*d.Length())throw std::runtime_error("View is parallel to CPlane; enter coordinates or switch view");
                 const auto hit=viewer->getPointOnXYPlaneOfPlacement(pixel,plane);p=Base::Vector3d(hit[0],hit[1],hit[2]);
+                }
             }
         }
         const bool ortho=om9_ortho_active(mouse->modifiers().testFlag(Qt::ShiftModifier));const double point[3]={p.x,p.y,p.z};
-        if(hover)preview(point,ortho);else result(om9_solid_point(p.x,p.y,p.z,ortho));
+        if(hover)preview(point,ortho);else {const auto effect=om9_solid_point(p.x,p.y,p.z,ortho);CoreSnaps::acceptedPoint(effect==1||effect==2);result(effect);}
     }catch(const std::exception& error){clearPreview();if(!hover)CurveController::instance().setPrompt(QString::fromUtf8(error.what()));}
     return !hover;
 }

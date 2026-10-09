@@ -1,0 +1,353 @@
+"""Native Sweep2 G1/G2 and Loft endpoint support continuity, measured independently."""
+import json
+import math
+import os
+import sys
+import traceback
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0, os.environ['OM9_TEST_NATIVE_DIR'])
+from PySide6 import QtCore, QtGui, QtWidgets
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+out.mkdir(parents=True, exist_ok=True)
+result = {'checks': []}
+
+def check(name, condition):
+    result['checks'].append({'name': name, 'passed': bool(condition)})
+    (out/'progress.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+    if not condition:
+        raise AssertionError(name)
+
+def events():
+    QtWidgets.QApplication.processEvents()
+
+def enter():
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_End, QtCore.Qt.ControlModifier))
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_Return, QtCore.Qt.NoModifier))
+    events()
+
+def feature(doc, name, shape):
+    obj = doc.addObject('Part::Feature', name)
+    obj.Shape = shape
+    return obj
+
+def world(obj):
+    shape = obj.Shape.copy()
+    shape.transformShape((obj.getGlobalPlacement() * obj.Placement.inverse()).toMatrix(), False)
+    return shape
+
+def parabola(a, b, fixed, along_x=True, rational=False):
+    # Exact quadratic Bezier written as a clamped polynomial BSpline.
+    zs = [.03*a*a, .03*a*a+.03*a*(b-a), .03*b*b]
+    coords = [a, (a+b)/2, b]
+    poles = [App.Vector(t, fixed, z) if along_x else App.Vector(fixed, t, z)
+             for t, z in zip(coords, zs)]
+    c = Part.BSplineCurve()
+    if rational:
+        c.buildFromPolesMultsKnots(poles, [3, 3], [0, 1], False, 2, [1, .8, 1])
+    else:
+        c.buildFromPolesMultsKnots(poles, [3, 3], [0, 1], False, 2)
+    return c.toShape()
+
+def support_patch(a, b, c, d, along_x=True, factor=.03):
+    # Nonzero transverse normal curvature: z=.03*x^2 (Sweep2),
+    # or z=.03*y^2 (Loft). The rail/profile itself is a straight line.
+    zs = [factor*a*a, factor*a*a+factor*a*(b-a), factor*b*b]
+    ts = [a, (a+b)/2, b]
+    poles = [[App.Vector(t, s, z) if along_x else App.Vector(s, t, z)
+              for s in (c, d)] for t, z in zip(ts, zs)]
+    surface = Part.BSplineSurface()
+    surface.buildFromPolesMultsKnots(poles, [3, 3], [2, 2], [0, 1], [0, 1], False, False, 2, 1)
+    return surface.toShape()
+
+def edge_at(obj, p, q):
+    for i, edge in enumerate(obj.Shape.Edges, 1):
+        ends = [v.Point for v in edge.Vertexes]
+        if len(ends) == 2 and min(ends[0].distanceToPoint(p)+ends[1].distanceToPoint(q),
+                                  ends[1].distanceToPoint(p)+ends[0].distanceToPoint(q)) < 1e-7:
+            return 'Edge' + str(i)
+    raise AssertionError('fixture edge not found')
+
+def start(doc, command, refs):
+    result['stage'] = doc.Name+' '+command
+    Gui.Selection.clearSelection()
+    for obj, sub in refs:
+        if sub:
+            Gui.Selection.addSelection(doc.Name, obj.Name, sub)
+        else:
+            Gui.Selection.addSelection(doc.Name, obj.Name)
+    Gui.runCommand(command)
+    events()
+    enter()
+    dialog = next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog, 'OM9SurfaceOptions')
+                   if d.isVisible()), None)
+    check('surface options open', dialog is not None)
+    table = dialog.findChild(QtWidgets.QTableWidget, 'OM9SurfaceInputs')
+    # Face boundary traversal may oppose the common rail/profile direction.
+    # Use the public input Reverse control, preserving the selected directions.
+    for i, (obj, sub) in enumerate(refs):
+        if sub and obj.Shape.getElement(sub).Orientation == 'Reversed':
+            table.cellWidget(i, 1).setChecked(True)
+            events()
+    return dialog
+
+def control(dialog, cls, name):
+    widget = dialog.findChild(cls, name)
+    check('option available: ' + name, widget is not None)
+    return widget
+
+def buttons(dialog):
+    return dialog.findChild(QtWidgets.QDialogButtonBox)
+
+def accept(dialog):
+    status = control(dialog, QtWidgets.QLabel, 'OM9SurfaceStatus')
+    check('native constraints produce valid preview: ' + status.text(),
+          buttons(dialog).button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+    buttons(dialog).button(QtWidgets.QDialogButtonBox.Ok).click()
+    events()
+
+def cancel(dialog):
+    buttons(dialog).button(QtWidgets.QDialogButtonBox.Cancel).click()
+    events()
+
+def outputs(doc):
+    return [o for o in doc.Objects if hasattr(o, 'OM9FeatureId')]
+
+def verify_contact(shape, curves):
+    check('all original rails/profiles retained geometrically',
+          max(Part.Vertex(p).distToShape(shape)[0]
+              for curve in curves for p in curve.discretize(41)) < 1e-4)
+
+def normal_curvatures(face, point, directions, common_normal):
+    u, v = face.Surface.parameter(point)
+    n = face.normalAt(u, v)
+    sign = 1 if n.dot(common_normal) >= 0 else -1
+    kmin, kmax = face.curvatureAt(u, v)
+    dmax, dmin = face.Surface.curvatureDirections(u, v)
+    return [sign*(kmax*d.dot(dmax)**2+kmin*d.dot(dmin)**2) for d in directions], n
+
+def verify_continuity(shape, reference, edge, order):
+    face = shape.Faces[0]
+    source = reference.Faces[0]
+    errors, curvature_errors, source_curvatures = [], [], []
+    for point in edge.discretize(33)[1:-1]:
+        u, v = source.Surface.parameter(point)
+        n = source.normalAt(u, v)
+        tangent = source.derivative1At(u, v)[0]
+        tangent.normalize()
+        across = n.cross(tangent)
+        across.normalize()
+        diagonal = tangent+across
+        diagonal.normalize()
+        directions = (tangent, across, diagonal)
+        expected, _ = normal_curvatures(source, point, directions, n)
+        measured, actual_normal = normal_curvatures(face, point, directions, n)
+        errors.append(math.acos(min(1, abs(n.dot(actual_normal)))))
+        curvature_errors.extend(abs(a-b) for a, b in zip(expected, measured))
+        source_curvatures.extend(abs(k) for k in expected)
+    check('G1 independent projected face normals', max(errors) < .002)
+    if order == 2:
+        check('G2 fixture has nonzero support normal curvature', max(source_curvatures) > .04)
+        check('G2 independent directional normal curvatures', max(curvature_errors) < .001)
+    result.setdefault('measurements', []).append({'order': order, 'max_normal_angle': max(errors),
+                                                'max_curvature_error': max(curvature_errors)})
+
+def sweep_fixture(name, rational=False):
+    doc = App.newDocument(name)
+    a = feature(doc, 'SupportA', support_patch(-2, 0, 0, 10))
+    b = feature(doc, 'SupportB', support_patch(6, 8, 0, 10))
+    ea = edge_at(a, App.Vector(0, 0, 0), App.Vector(0, 10, 0))
+    eb = edge_at(b, App.Vector(6, 0, 1.08), App.Vector(6, 10, 1.08))
+    sections = [feature(doc, 'Section'+str(i), parabola(0, 6, y, rational=rational))
+                for i, y in enumerate((0, 5, 10))]
+    # Imported-style surfaces in a rotated/translated parent coordinate frame.
+    group = doc.addObject('App::Part', 'SupportFrame')
+    for obj in [a, b]+sections:
+        group.addObject(obj)
+    group.Placement = App.Placement(App.Vector(12, -7, 3), App.Rotation(App.Vector(1, 2, 3), 17))
+    doc.recompute()
+    return doc, [(a, ea), (b, eb)]+[(s, '') for s in sections]
+
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui
+        result['native_module'] = OpenMatrix9Gui.__file__
+        if os.environ.get('OM9_TEST_NATIVE_DIR'):
+            check('isolated native module loaded', Path(OpenMatrix9Gui.__file__).parent.resolve()
+                  == Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        console = Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript')
+        check('native command console', console is not None)
+        for order in (1, 2):
+            doc, refs = sweep_fixture('ConstrainedSweep'+str(order))
+            snapshots = [obj.Shape.exportBrepToString() for obj, _ in refs]
+            d = start(doc, 'OM9_SurfaceSweepSweep2Rails', refs)
+            for name in ('OM9ContinuityA', 'OM9ContinuityB'):
+                c = control(d, QtWidgets.QComboBox, name)
+                check('surface-edge rail continuity available', c.isEnabled())
+                result['stage'] = 'Sweep order '+str(order)+' '+name
+                c.setCurrentIndex(order)
+                events()
+            accept(d)
+            check('exactly one valid constrained surface output', len(outputs(doc)) == 1
+                  and outputs(doc)[0].Shape.isValid())
+            shape = outputs(doc)[0].Shape
+            curves = [world(obj).getElement(sub) if sub else world(obj) for obj, sub in refs]
+            verify_contact(shape, curves)
+            for (obj, sub), curve in zip(refs[:2], curves[:2]):
+                verify_continuity(shape, world(obj), curve, order)
+            check('support faces and source curves remain unchanged',
+                  snapshots == [obj.Shape.exportBrepToString() for obj, _ in refs])
+            App.closeDocument(doc.Name)
+        doc = App.newDocument('MatchedLoft')
+        start_face = feature(doc, 'StartSupport', support_patch(-2, 0, 0, 6, False))
+        end_face = feature(doc, 'EndSupport', support_patch(10, 12, 0, 6, False))
+        middle = feature(doc, 'Middle', Part.makeLine(App.Vector(0, 5, .75), App.Vector(6, 5, .75)))
+        first = edge_at(start_face, App.Vector(0, 0, 0), App.Vector(6, 0, 0))
+        last = edge_at(end_face, App.Vector(0, 10, 3), App.Vector(6, 10, 3))
+        refs = [(start_face, first), (middle, ''), (end_face, last)]
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceLoft', refs)
+        for name in ('OM9MatchStartTangents', 'OM9MatchEndTangents'):
+            c = control(d, QtWidgets.QCheckBox, name)
+            check('Loft surface-edge endpoint matching available', c.isEnabled())
+            result['stage'] = 'Loft '+name
+            c.setChecked(True)
+            events()
+        accept(d)
+        check('one matched Loft output', len(outputs(doc)) == 1)
+        shape = outputs(doc)[0].Shape
+        verify_contact(shape, [world(obj).getElement(sub) if sub else world(obj) for obj, sub in refs])
+        for obj, sub in (refs[0], refs[-1]):
+            verify_continuity(shape, world(obj), world(obj).getElement(sub), 1)
+        App.closeDocument(doc.Name)
+        # Rational profiles are unsupported and cannot silently create an
+        # unconstrained output under requested G1/G2. Cancel removes previews.
+        doc, refs = sweep_fixture('RationalConstraints', True)
+        d = start(doc, 'OM9_SurfaceSweepSweep2Rails', refs)
+        c = control(d, QtWidgets.QComboBox, 'OM9ContinuityA')
+        check('rational profiles explicitly disable continuity', not c.isEnabled())
+        cancel(d)
+        check('rational Cancel creates no output', not outputs(doc))
+        App.closeDocument(doc.Name)
+        doc, refs = sweep_fixture('MissingSupport')
+        bare = feature(doc, 'BareRail', world(refs[0][0]).getElement(refs[0][1]))
+        refs[0] = (bare, '')
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceSweepSweep2Rails', refs)
+        c = control(d, QtWidgets.QComboBox, 'OM9ContinuityA')
+        check('curve-only rail explicitly disables continuity', not c.isEnabled())
+        cancel(d)
+        check('missing-support Cancel creates no output', not outputs(doc))
+        App.closeDocument(doc.Name)
+        doc, refs = sweep_fixture('AmbiguousSupport')
+        shared = feature(doc, 'SharedSolidEdge', Part.makeBox(2, 10, 2, App.Vector(-2, 0, 0)))
+        shared_edge = edge_at(shared, App.Vector(0, 0, 0), App.Vector(0, 10, 0))
+        doc.getObject('SupportFrame').addObject(shared)
+        refs[0] = (shared, shared_edge)
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceSweepSweep2Rails', refs)
+        c = control(d, QtWidgets.QComboBox, 'OM9ContinuityA')
+        check('two-face edge explicitly disables ambiguous continuity', not c.isEnabled())
+        cancel(d)
+        check('ambiguous-support Cancel creates no output', not outputs(doc))
+        App.closeDocument(doc.Name)
+        # Regression: this unrelated box edge previously reached PipeShell
+        # during the Reverse callback and crashed the native process. Every
+        # original profile must contact both rails before the kernel is called.
+        doc, refs = sweep_fixture('DisjointG0Rail')
+        displaced = feature(doc, 'DisjointBoxRail', Part.makeBox(2, 2, 2))
+        refs[0] = (displaced, 'Edge1')
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceSweepSweep2Rails', refs)
+        check('disjoint G0 rail rejects preview without crashing or creating output',
+              not buttons(d).button(QtWidgets.QDialogButtonBox.Ok).isEnabled() and not outputs(doc))
+        status = control(d, QtWidgets.QLabel, 'OM9SurfaceStatus')
+        check('disjoint G0 rail explains original profile contact failure',
+              'profile' in status.text().lower() and 'rail' in status.text().lower())
+        cancel(d)
+        check('disjoint G0 rail Cancel creates no output', not outputs(doc))
+        App.closeDocument(doc.Name)
+        doc = App.newDocument('LoftWithoutFaces')
+        lines = [feature(doc, 'Profile'+str(i), Part.makeLine(App.Vector(0, y, 0), App.Vector(6, y, 0)))
+                 for i, y in enumerate((0, 5, 10))]
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceLoft', [(line, '') for line in lines])
+        for name in ('OM9MatchStartTangents', 'OM9MatchEndTangents'):
+            check('curve-only Loft endpoint disables matching: '+name,
+                  not control(d, QtWidgets.QCheckBox, name).isEnabled())
+        cancel(d)
+        check('curve-only Loft Cancel creates no output', not outputs(doc))
+        App.closeDocument(doc.Name)
+        # The rail positions and tangent planes agree, but the left support's
+        # transverse curvature .10 disagrees with the profiles' .06. G1 must
+        # still work; a G2 request must reject this incompatible original data.
+        doc, refs = sweep_fixture('G2Conflict')
+        refs[0][0].Shape = support_patch(-2, 0, 0, 10, factor=.05)
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceSweepSweep2Rails', refs)
+        a = control(d, QtWidgets.QComboBox, 'OM9ContinuityA')
+        b = control(d, QtWidgets.QComboBox, 'OM9ContinuityB')
+        a.setCurrentIndex(1)
+        b.setCurrentIndex(1)
+        events()
+        check('G1 supports different transverse curvature',
+              buttons(d).button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+        a.setCurrentIndex(2)
+        events()
+        check('G2 rejects incompatible transverse support curvature without output',
+              not buttons(d).button(QtWidgets.QDialogButtonBox.Ok).isEnabled() and not outputs(doc))
+        a.setCurrentIndex(1)
+        events()
+        check('G2 conflict recovers when requested continuity is G1',
+              buttons(d).button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+        cancel(d)
+        check('G2 conflict Cancel creates no output', not outputs(doc))
+        App.closeDocument(doc.Name)
+        doc, refs = sweep_fixture('ConstraintRecovery')
+        d = start(doc, 'OM9_SurfaceSweepSweep2Rails', refs)
+        a = control(d, QtWidgets.QComboBox, 'OM9ContinuityA')
+        b = control(d, QtWidgets.QComboBox, 'OM9ContinuityB')
+        a.setCurrentIndex(2)
+        b.setCurrentIndex(2)
+        events()
+        middle = refs[3][0]
+        original = middle.Shape.copy()
+        middle.Shape = parabola(0, 6, 5)
+        displaced = middle.Shape.copy()
+        displaced.translate(App.Vector(0, 0, .4))
+        middle.Shape = displaced
+        doc.recompute()
+        a.setCurrentIndex(1)
+        events()
+        check('incompatible original profile rejects preview without output',
+              not buttons(d).button(QtWidgets.QDialogButtonBox.Ok).isEnabled() and not outputs(doc))
+        middle.Shape = original
+        doc.recompute()
+        a.setCurrentIndex(2)
+        events()
+        check('corrected profile recovers a valid constrained preview',
+              buttons(d).button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+        cancel(d)
+        check('valid constrained Cancel creates no output', not outputs(doc))
+        result['ok'] = True
+    except Exception:
+        result['ok'] = False
+        result['error'] = traceback.format_exc()
+        if 'console' in globals() and console:
+            result['transcript'] = console.toPlainText()[-5000:]
+    finally:
+        (out/'results.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        Gui.getMainWindow().close()
+
+QtCore.QTimer.singleShot(8000, run)

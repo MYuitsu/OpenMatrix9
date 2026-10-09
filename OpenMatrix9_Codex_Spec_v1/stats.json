@@ -1,0 +1,21 @@
+{
+  "feature_count": 607,
+  "module_count": 33,
+  "domain_count": 16,
+  "implementation_sync": {
+    "statuses": {
+      "not_started": 575,
+      "partially_implemented": 32
+    },
+    "note": "Ellipse native supported slice synchronized after matching SDK tests; unrelated feature records preserved.",
+    "updated_at": "2026-10-09"
+  },
+  "code_guidance": {
+    "updated_at": "2026-10-07",
+    "features_with_original_guidance": 607,
+    "compiled_samples": 607,
+    "sample_scope": "request_validation_and_operation_plan",
+    "roles": 870,
+    "parameters": 2984
+  }
+}

@@ -45,18 +45,16 @@ All contributions are voluntary. Thank you for supporting the project!
 <a id="completion-rules"></a>
 ## Completion rules
 
-Updated from development workspace progress documentation dated **2026-10-09**.
-These READMEs are published ahead of the corresponding code and acceptance
-documents. The table records scope validated in the workspace; it does not
-confirm that every change is available in a GitHub clone. The detailed table
-and ledger on GitHub may retain an earlier baseline until implementation changes
-are integrated.
+Updated for the combined source dated **2026-10-09**, including the CAD/P0
+work and the advanced 3DM work from main. Linked validation reports retain
+their original revision and test scope; earlier test counts do not certify
+the merged revision. P0 foundations and full Matrix9/Rhino compatibility
+remain incomplete.
 
 The table below summarizes
 the [detailed command table](README.md#tiến-độ-lệnh--command-progress), cross-checked
 against the [evidence ledger](docs/openmatrix9-progress.json) and
-Spec v1 implementation status (`OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md`,
-a workspace document awaiting publication).
+the [Spec v1 implementation status](OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md).
 
 - **Completed current scope:** a 🟢 entry in the detailed table, with execution
   and checks for its documented scope. Missing options remain documented per
@@ -68,12 +66,11 @@ a workspace document awaiting publication).
   Rate = completed current scope / group total × 100, rounded to one decimal place.
 
 The same identifier may occur in multiple groups. Do not add table rows to
-calculate overall project completion: the list contains **513 unique
-identifiers**, including **58 🟢, 2 🟡 and 453 🔴**. Editor shares
+calculate overall project completion: the list contains **514 unique identifiers**, including **64 🟢, 5 🟡 and 445 🔴**. Editor shares
 the Curve catalog; Custom and Reset are sidebar controls and do not add CAD groups.
 
 Spec v1 uses a different unit: **607 features**, currently recording
-**18 `partially_implemented`** and **589 `not_started`**.
+**32 `partially_implemented`** and **575 `not_started`**.
 A feature may have a validated supported slice while remaining partially
 implemented against its full specification.
 
@@ -90,14 +87,14 @@ supported scope and limitations.
 | 3 | [View](README.md#view) | **10/15** | 66.7% | 0 | 5 |
 | 4 | [Utilities](README.md#utilities) | **0/22** | 0.0% | 0 | 22 |
 | 5 | [Measure](README.md#measure) | **2/17** | 11.8% | 0 | 15 |
-| 6 | [Curve](README.md#curve) | **6/58** | 10.3% | 0 | 52 |
+| 6 | [Curve](README.md#curve) | **7/58** | 12.1% | 0 | 51 |
 | 7 | [Surface](README.md#surface) | **3/40** | 7.5% | 0 | 37 |
 | 8 | [Solid](README.md#solid) | **6/30** | 20.0% | 0 | 24 |
 | 9 | [Transform](README.md#transform) | **0/40** | 0.0% | 0 | 40 |
 | 10 | [Clayoo / SubD](README.md#clayoo--subd) | **0/58** | 0.0% | 0 | 58 |
 | 11 | [Emboss](README.md#emboss) | **0/7** | 0.0% | 0 | 7 |
 | 12 | [Builder](README.md#builder) | **0/16** | 0.0% | 0 | 16 |
-| 13 | [Jewelry tools](README.md#tools) | **0/31** | 0.0% | 0 | 31 |
+| 13 | [Jewelry tools](README.md#tools) | **1/31** | 3.2% | 0 | 30 |
 | 14 | [Gems](README.md#gems) | **0/35** | 0.0% | 0 | 35 |
 | 15 | [Gem settings and prongs](README.md#settings--ổ-đá-và-chấu) | **0/12** | 0.0% | 0 | 12 |
 | 16 | [Cutters](README.md#cutters) | **0/11** | 0.0% | 0 | 11 |
@@ -105,18 +102,21 @@ supported scope and limitations.
 | 18 | [Core / project / selection](README.md#core--project--selection) | **5/11** | 45.5% | 0 | 6 |
 | 19 | [Additional view and display controls](README.md#view-và-display-bổ-sung) | **10/22** | 45.5% | 0 | 12 |
 | 20 | [Snaps / constraints](README.md#snap--ràng-buộc) | **4/17** | 23.5% | 0 | 13 |
-| 21 | [Properties / history / settings / layers](README.md#properties--history--settings--layers) | **3/26** | 11.5% | 0 | 23 |
+| 21 | [Properties / history / settings / layers](README.md#properties--history--settings--layers) | **7/26** | 26.9% | 0 | 19 |
 | 22 | [Dedicated 3DM commands / keyboard](README.md#3dm-chuyên-biệt--keyboard) | **1/3** | 33.3% | 2 | 0 |
+
+
+Native Join/Surface History policy and special Explode adapters have validated supported SDK slices; see the [History](docs/features/history-native-contract.md) and [Edit](docs/features/edit-native-contract.md) contracts.
 
 <a id="supported-workflows"></a>
 ## Supported workflows
 
 - **Projects and UI:** New, Open, Save, Save As, Notes, Undo/Redo, object
   selection/deletion, four viewports, standard views, zoom, reference images and F6.
-- **Curves:** Line, Polyline, Interp Curve, Rebuild, Rectangle and Circle within
+- **Curves:** Line, Polyline, Interp Curve, Rebuild, Rectangle, Circle and Ellipse within
   their [documented feature scope](docs/features/).
 - **Surfaces and solids:** Sweep1, Sweep2, Loft, Box, Sphere and four Boolean
-  commands; see `OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md` (awaiting publication).
+  commands; see the [implementation status](OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md).
 - **Editing and measurement:** Trim, Join, Explode, Distance, Angle; End, Point
   and Midpoint snaps, plus Ortho constraints in supported tools.
 
@@ -133,9 +133,9 @@ snapshots in FCStd and geometry export targeting Rhino 5 archives.
 
 Snapshot retention does not establish full display, editing or export support.
 Structural block preservation, materials/textures, annotations and History/plugin
-userdata retain limitations. Work tested in a separate development workspace
-but awaiting integration is not counted as available in the current source.
-See the 3DM exchange section in the [detailed README](README.md) for the latest published status.
+userdata retain limitations. See the 3DM exchange section in the
+[detailed README](README.md) for the advanced supported slices, separate
+Rhino 5 application evidence and remaining gaps.
 
 <a id="build"></a>
 ## Build and installation
@@ -173,7 +173,7 @@ ledger before distribution.
 - [Detailed README](README.md): catalog identifiers, meanings, status and limits.
 - [Progress ledger](docs/openmatrix9-progress.json): evidence, test runs,
   unverified behavior and next actions.
-- `OpenMatrix9_Codex_Spec_v1/INDEX.md`: feature lookup by group and ID (awaiting publication).
+- [Spec v1 index](OpenMatrix9_Codex_Spec_v1/INDEX.md): feature lookup by group and ID.
 - [Native reports](docs/validation/): validated scope for implementation work.
 - [Windows build](docs/build-windows.md) and [build/validation](docs/build.md).
 

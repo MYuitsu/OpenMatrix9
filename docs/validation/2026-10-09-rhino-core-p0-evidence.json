@@ -1,0 +1,187 @@
+{
+  "updated_at": "2026-10-09T17:43:14+07:00",
+  "status": "partially_implemented",
+  "scope": "P0 foundation checkpoint; not complete P0 or Rhino parity",
+  "rust_tests": 321,
+  "rust_suites": 49,
+  "python_tests": 23,
+  "clippy": {
+    "exit_code": 0,
+    "warnings": 60
+  },
+  "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+  "native_sha256": "cb399486d7ef32fd410419a310c0abe338f02470884e0731a8696f1eb1d88269",
+  "native_runs": [
+    {
+      "suite": "Units/context",
+      "count": 20,
+      "path": "build/rhino_core_units_smoke-1/0a331755d9dd46068ecae126d57f06dc/results.json",
+      "result_sha256": "199b29cf6d08475b09a12c578fa8279fb2a5b3a78b00b7432f56fdbd1c89b7ac",
+      "process_exit": 0,
+      "native_sha256": "a1a7ea858090faef20c0d2b234d39d4e8ca5bc8e9c27af5136bc7cfa0e83d77e"
+    },
+    {
+      "suite": "Units separate-process restore",
+      "count": 3,
+      "path": "build/rhino_core_units_smoke-1/9a3be883f97548039b6adbc2dacfe438/results.json",
+      "result_sha256": "14ca6d798ebc4d979024a43279ab2414e02f2d747750f01f841586538ee5536f",
+      "process_exit": 0,
+      "native_sha256": "a1a7ea858090faef20c0d2b234d39d4e8ca5bc8e9c27af5136bc7cfa0e83d77e"
+    },
+    {
+      "suite": "Snap lifecycle/repeat",
+      "count": 10,
+      "path": "build/core_snap_lifecycle_smoke-1/847799c9157641dbbf4b57172c9c1049/results.json",
+      "result_sha256": "69728caa26c4dacdead3602b0c8a0691ddba0fdedb7b479387b04fbb36075a8e",
+      "process_exit": 0,
+      "native_sha256": null
+    },
+    {
+      "suite": "History/I/O guards",
+      "count": 7,
+      "path": "build/rhino_core_history_io_smoke-1/8a307e1207ad4b28bdb710a06dae57a7/results.json",
+      "result_sha256": "17438d956789c4cd0e49c97dd9786d0b9de7d0e74c5ca48b1f44473d07fbfa5a",
+      "process_exit": 0,
+      "native_sha256": null
+    },
+    {
+      "suite": "History regression",
+      "count": 83,
+      "path": "build/history_smoke-1/8a834e3b2dd44d0a9e3fa507a7de916a/results.json",
+      "result_sha256": "a59ad0d6b1e2a086c8db912626bd4093f19f9ae4e052e7ae8849545e03f99d4d",
+      "process_exit": 0,
+      "native_sha256": null
+    },
+    {
+      "suite": "Circle History regression",
+      "count": 89,
+      "path": "build/circle_history_more_smoke-1/76bac59c17c24f1087078935a8f5817b/results.json",
+      "result_sha256": "385981b5bc7a88f078817bdd81c9de2cdf92634259205278c1133995b3f39223",
+      "process_exit": 0,
+      "native_sha256": null
+    },
+    {
+      "suite": "Builder History regression",
+      "count": 43,
+      "path": "build/builder_history_smoke-1/75201823902c49468fb7248d685deb56/results.json",
+      "result_sha256": "ef2250f50c311c735f79b5a6f09739dee14b6cbd009c453437b0c21912791871",
+      "process_exit": 0,
+      "native_sha256": null
+    },
+    {
+      "suite": "Line/Polyline regression",
+      "count": 27,
+      "path": "build/curve_smoke-1/6f5929a5b5724818a1f24d9836ead482/results.json",
+      "result_sha256": "8d41c8ec34679cb1060d6413e998cd02418071ba6e439044002673c685400ea6",
+      "process_exit": 0,
+      "native_sha256": null
+    },
+    {
+      "suite": "Rectangle regression",
+      "count": 37,
+      "path": "build/rectangle_smoke-1/b112efe00a4d4cbf9ff9bf241f15b390/results.json",
+      "result_sha256": "39dd477c83e02745a83271ea416b03b842fe5199d4b6cbcb45bf8733ca5fa0f7",
+      "process_exit": 0,
+      "native_sha256": null
+    },
+    {
+      "suite": "Box/Sphere regression",
+      "count": 70,
+      "path": "build/solid_commands_smoke-1/980792f9d23c43e9883319fc5da85d97/results.json",
+      "result_sha256": "182bce41b01d4637da12d237b6beaa185868d25c79aa6c9032ec6f456ff61277",
+      "process_exit": 0,
+      "native_sha256": null
+    },
+    {
+      "suite": "Mixed geometry and retained 3DM/FCStd",
+      "count": 56,
+      "path": "build/rhino_core_geometry_smoke-1/5c33f4f4420d40559bd854fb3e03e5c5/results.json",
+      "result_sha256": "cc711ada2ea115fb844b9854dd0668d55661427dc4dba1f6e65ef6fb14ad3959",
+      "process_exit": 0,
+      "native_sha256": null
+    },
+    {
+      "suite": "Mixed retained geometry separate-process restore",
+      "count": 28,
+      "path": "build/rhino_core_geometry_smoke-1/592c582abb2140f79df26f36d6142a74/results.json",
+      "result_sha256": "2aae9359a5ccedf971181acd49cfd56a0e3aaba8d9a61093c2c7d7941f18e618",
+      "process_exit": 0,
+      "native_sha256": null
+    },
+    {
+      "suite": "Invalid CPlane command boundaries",
+      "count": 14,
+      "path": "build/core_invalid_cplane_tools_smoke-1/99da6f4a9526451c88ad39c7d386f892/results.json",
+      "result_sha256": "4ada81d4d3ead36a71cbde9225a7c7a308cd43d1140256b3abd3ca0ce821d079",
+      "process_exit": 0,
+      "native_sha256": "fcf8107265d87b306a54c33609bdc4494beaeb28471a79ec38b3fdf357a015ea"
+    },
+    {
+      "suite": "History stale-state separate-process restore",
+      "count": 2,
+      "path": "build/rhino_core_history_io_smoke-1/aa1c65cec56b4b64a5a75afd3fe5e065/results.json",
+      "result_sha256": "8e2dfa10be61d684104d6bb27c766ff6d6172d7d171dd42e09482d2809713388",
+      "process_exit": 0,
+      "native_sha256": null
+    },
+    {
+      "suite": "Coordinates/CPlane native menus and persistence",
+      "count": 162,
+      "path": "build/core_coordinates_smoke-1/1c4886e25e3d4e2aa39823a9f5e8d01c/results.json",
+      "result_sha256": "6cd5fb3363f1620fcca00ec8c3ecbc533b291546f0147e7bd9693fc87ae0b7e2",
+      "process_exit": 0,
+      "native_sha256": "cb399486d7ef32fd410419a310c0abe338f02470884e0731a8696f1eb1d88269"
+    },
+    {
+      "suite": "Coordinates/CPlane separate-process restore",
+      "count": 6,
+      "path": "build/core_coordinates_smoke-1/416fb28e1c044e9297d3c12417af6d18/results.json",
+      "result_sha256": "9fbeb7b5d07fa4b9aae67ddc09e5f8120639b5126fafb3f3451e2356092e2cdc",
+      "process_exit": 0,
+      "native_sha256": "cb399486d7ef32fd410419a310c0abe338f02470884e0731a8696f1eb1d88269"
+    }
+  ],
+  "native_assertions": 657,
+  "source_sha256": {
+    "rust/src/units.rs": "6ca2465a734e51995f5a436d5ee48763c73312f932952209cba90303f6764118",
+    "rust/src/coordinates.rs": "be255527596832e80acb424281dfad1cb6107729a7684591a3ca21f066e655a0",
+    "rust/src/cplanes.rs": "459fd4ff3794119736d37e06d3bc11da3c7931374e6c77efd59f04e9769f03d4",
+    "rust/src/curve.rs": "b60b2e9a4df0aadac63b66c3590b4b8e971967dc236f8315289471f470709f8d",
+    "rust/src/curve_ffi.rs": "62a9df11d1779ec5e6621b58bc92465b2228e3096052a51aed568505eeb3d793",
+    "rust/src/solid.rs": "76940f1d128be832e7277a81ffe24ecd0460a4f346735fe32d0a43f8c907723b",
+    "rust/src/core_snaps.rs": "26c5a1b7f7a06e9eb10570f5c0759b04c212deb52ac5c89483a2f9da3cb23b58",
+    "rust/src/state.rs": "226b97a02d12b84f5cdd0970562fd2ed692257b59e524aa75e13d75960e4f195",
+    "rust/src/ffi.rs": "9dbc613a04ab31cd03f0e1a2f93bd712c0f7dd0b4d1445b552ab4c03c10d0175",
+    "rust/src/history.rs": "f108c1756861aab0516c50be9dcacef93eceb24779d4ef4d4139658675b2d213",
+    "rust/src/retained_archive.rs": "e142649df718b3a7e4001ee08f1e18f14e968d43bb8e5b73df26aef3334f829d",
+    "rust/src/core_3dm_archive.rs": "6dd1640565b45f4a723de1db665419ad28ea78198de940f3d04e79841d44d78d",
+    "rust/src/spline.rs": "afcf985d7680a971472ab403259e308df3b0135b6e3371f31d9690d903864bdd",
+    "rust/src/spline_ffi.rs": "7b8bfb95c7d67dc09c6eaebfba0b553dc47bbea69ee53d9d62714113e7a2f99e",
+    "Gui/CoreUnits.cpp": "43aa730498e4e509c773e0e2eec33a59754e173e66a75a13707aad2f2185a101",
+    "Gui/CoreUnits.h": "bb5eb42328bc72796b671a9eadc4d4ed76141d7608070c7976e39cec57970e3a",
+    "Gui/CoreCPlanes.cpp": "513db25d5112220fa93b65c1ce47f8c346dca3260e6a86eec66259da63f723dc",
+    "Gui/CoreCPlanes.h": "050720d98b48fe12fc645ced197288a9cf5753c7b1281e848c05434fd6259d9e",
+    "Gui/CoreWorkspace.cpp": "a929aa135659de4c2c978a14718f3a628e15f15a7302beccb3af3ce47024245b",
+    "Gui/CurveController.cpp": "ec98fe60a980979b7fe725e9dc789103065115808d1b016dfa7467a06c4e4584",
+    "Gui/CurveController.h": "6f769c58c5a24a4eea2934ecc756778dc11ee5c78367f132ed5e48c235b84522",
+    "Gui/CurveEllipse.cpp": "26a15bc02c26ea9add47c3488dde131fcc85dfd26c796a7df04ebc8f1823e9ce",
+    "Gui/CoreDistance.cpp": "c684b6f761822afceb1d73b168e16c2d340c2b5fdfa8b8fd0f792361bfd1561b",
+    "Gui/CorePictureFrame.cpp": "202f8926266c2ca36b2b09b9205737ad83c67f5d9522a162e03c348b20e114eb",
+    "Gui/SolidController.cpp": "835b180413ddb3e53f42c0d86998573a11eadfddd40aaf67163fc5d642d3de38",
+    "Gui/CoreSnaps.cpp": "99c27a634cc8501a18ecfd4025dd21b9c49fc13e405d49c98fa0318d377a3bca",
+    "Gui/CoreSnaps.h": "94685d9743de3bc7c5dcaba0c00a22692a3c894d027394ca1e0d9d03f5e7ae89",
+    "Gui/CoreMouse.cpp": "4378ba4f46151b7f568d991bf8b91f3ff7916fa8b69a6b020541408a1557de30",
+    "Gui/HistoryFeature.cpp": "d6a4ba789cc4214dece5b374bf839bbf648e7a72c3b2b6c76e3a7be100e67ae7",
+    "Gui/ThreeDmPython.cpp": "f44706cce247f2cd6d3440dce9f5adddc3d119d00188d9c57b84938b2da0c6fd",
+    "Gui/RetainedArchive.cpp": "719c5de06135ef76482492dc49d25aaa1cb46d35fa0a5602c473c958ab65dbed",
+    "Gui/AppOpenMatrix9Gui.cpp": "b536dce23cb195705cca2045051bd13ec97d3b39a76f273235b51b238a98dedb",
+    "Gui/CMakeLists.txt": "1a2cb233fd1dcb1a41bae11f22a6f4a89bd6989480425c0cef2dc34133590d90",
+    "tests/native/three_dm_geometry.cpp": "95b271ce2e8a5a0a37624d937f408eabec5044e227dd23dc486d2f254fa0240a"
+  },
+  "source_audit": {
+    "source_files": 1676,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  }
+}

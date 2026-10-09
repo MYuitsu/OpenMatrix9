@@ -1,0 +1,101 @@
+# OM9-CURVE-004: actual Qt menu/CMD/mouse, native topology and lifecycle.
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input, command_prompt
+out=Path(os.environ['OM9_SMOKE_OUTPUT']); result={'checks':[]}
+def check(name,value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    if not value: raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(160,loop.quit);loop.exec()
+def enter(text):
+    field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def rectangle(*inputs):
+    enter('Rectangle')
+    for text in inputs: enter(text)
+    return App.activeDocument().Objects[-1]
+def sides(obj,wanted):
+    return obj.Shape.isValid() and obj.Shape.isClosed() and len(obj.Shape.Edges)==4 and all(abs(a-b)<1e-6 for a,b in zip(sorted(e.Length for e in obj.Shape.Edges),sorted(wanted)))
+def run():
+    global field,window
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');window=Gui.getMainWindow();window.resize(1400,950);field=command_input(window)
+        import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__
+        if os.environ.get('OM9_TEST_NATIVE_DIR'):check('Selected native module loaded',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        action=window.findChild(QtGui.QAction,'Rectangle');settle()
+        check('Rectangle disabled without document',action is not None and not action.isEnabled())
+        doc=App.newDocument('RectangleTest');doc.UndoMode=1;view=Gui.activeDocument().activeView();view.setAnimationEnabled(False);view.viewTop();settle()
+        check('OM9-CURVE-004 native menu enabled',action.isEnabled())
+        action.trigger();settle();enter('1,2,3');check('First point is preview only',not doc.Objects);enter('11,8,9')
+        obj=doc.Objects[-1];check('Opposite corners create closed 10x6 wire',sides(obj,[10,10,6,6]))
+        check('CPlane-parallel rectangle retains first corner height',all(abs(v.Point.z-3)<1e-7 for v in obj.Shape.Vertexes))
+        check('Rectangle stores exact feature ID',obj.OM9FeatureId=='OM9-CURVE-004')
+        check('Commit restores Command prompt',command_prompt(window).text().startswith('Command:'))
+        doc.undo();check('One Undo removes Rectangle',not doc.Objects);doc.redo();check('Redo restores whole wire',len(doc.Objects)==1 and sides(doc.Objects[0],[10,10,6,6]))
+        other=rectangle('1,2,3','11,8,9');check('CMD and menu geometry agree',sides(other,[10,10,6,6]) and other.Shape.BoundBox.XMin==1)
+        other=rectangle('0,0','10','6');check('Numeric Length Width workflow',sides(other,[10,10,6,6]))
+        other=rectangle('Center','5,5','Length=10','Width=-6');check('Center uses full signed dimensions',sides(other,[10,10,6,6]) and abs(other.Shape.BoundBox.XMin)<1e-7 and abs(other.Shape.BoundBox.YMin-2)<1e-7)
+        other=rectangle('3Point','0,0,0','3,0,4','6,2,8');check('3Point slanted rectangle has perpendicular sides',sides(other,[5,5,2,2]) and abs(Part.Face(other.Shape.Wires[0]).Area-10)<1e-7)
+        other=rectangle('3Point','0,0','4,0','Width=-3');check('3Point signed numeric width',sides(other,[4,4,3,3]) and abs(other.Shape.BoundBox.YMin+3)<1e-7)
+        other=rectangle('Vertical','0,0','5,0,8','-3');check('Vertical projects first edge and follows CPlane normal',sides(other,[5,5,3,3]) and abs(other.Shape.BoundBox.ZMin+3)<1e-7 and abs(other.Shape.BoundBox.YLength)<1e-7)
+        count=len(doc.Objects);enter('Rectangle');enter('0,0')
+        for text in ['0,6','Length=0','nan','Rounded','Corner=Conic','Width=inf']:
+            enter(text);check('Invalid input does not commit: '+text,len(doc.Objects)==count and 'Rectangle' in command_prompt(window).text())
+        enter('10,6');check('Valid input recovers after error',len(doc.Objects)==count+1 and sides(doc.Objects[-1],[10,10,6,6]))
+        count=len(doc.Objects);enter('Rectangle');enter('3Point');enter('0,0');enter('5,0');enter('Undo');enter('0,4');enter('3')
+        check('Session Undo replaces first edge',len(doc.Objects)==count+1 and sides(doc.Objects[-1],[4,4,3,3]))
+        enter('Rectangle');enter('0,0');count=len(doc.Objects);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle()
+        check('Esc restores idle with no object',len(doc.Objects)==count and command_prompt(window).text().startswith('Command:'))
+        Gui.Selection.clearSelection();QtWidgets.QApplication.sendEvent(window,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_F6,QtCore.Qt.NoModifier));settle()
+        popup=window.findChild(QtWidgets.QMenu,'OM9F6Menu');groups=[a.menu() for a in popup.actions() if a.menu()] if popup else []
+        context=next((a for g in groups for a in g.actions() if a.property('om9OriginalCommand')=='Rectangle'),None)
+        check('F6 Rectangle maps to enabled native handler',context is not None and context.isEnabled())
+        popup.close();context.trigger();settle();enter('0,0');enter('1cm,6mm')
+        check('F6 and explicit-unit coordinates create expected wire',len(doc.Objects)==count+1 and sides(doc.Objects[-1],[10,10,6,6]));count=len(doc.Objects)
+        dock=window.findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar');group=dock.findChild(QtWidgets.QToolButton,'OM9Group5');group.click();settle()
+        button=next(b for b in dock.findChildren(QtWidgets.QToolButton) if b.property('om9IconKey')=='CurveRectangleCornertoCorner')
+        check('Rectangle sidebar button enabled',button.isEnabled());button.click();settle()
+        viewer=next(w for w in window.findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible())
+        target=viewer.viewport();center=target.rect().center();first=center+QtCore.QPoint(-70,40);second=center+QtCore.QPoint(60,-30)
+        enter('Osnap Off');enter('Ortho')
+        QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=first);settle()
+        # Explicit Qt motion is deterministic even when the smoke window has no OS focus.
+        motion=QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(second),QtCore.QPointF(target.mapToGlobal(second)),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.ShiftModifier)
+        QtWidgets.QApplication.sendEvent(target,motion);settle()
+        from pivy import coin
+        search=coin.SoSearchAction();search.setSearchingAll(True);search.setName('OM9CurvePreviewLine');search.apply(Gui.activeDocument().activeView().getSceneGraph());path=search.getPath()
+        result['preview_debug']={'tracking':target.hasMouseTracking(),'visible':target.isVisible(),'found':path is not None,'vertices':path.getTail().point.getNum() if path else None,'objects':len(doc.Objects),'expected_objects':count,'prompt':command_prompt(window).text()}
+        check('Mouse hover draws five-point closed preview without document edits',path is not None and path.getTail().point.getNum()==5 and len(doc.Objects)==count)
+        preview=[App.Vector(*path.getTail().point[i].getValue()) for i in range(4)]
+        QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,QtCore.Qt.ShiftModifier,pos=second);settle()
+        other=doc.Objects[-1];lengths=[e.Length for e in other.Shape.Edges]
+        check('Mouse Shift produces square even when Ortho is enabled',len(doc.Objects)==count+1 and max(lengths)-min(lengths)<1e-6 and other.Shape.isClosed())
+        check('Native Shift preview agrees with committed corners',all(any((v.Point-p).Length<1e-5 for v in other.Shape.Vertexes) for p in preview))
+        search.apply(view.getSceneGraph());check('Commit clears transient preview',search.getPath() is None)
+        enter('Ortho');count=len(doc.Objects);enter('Rectangle');enter('Vertical');enter('0,0');enter('10,0');view.viewFront();settle()
+        QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=center+QtCore.QPoint(0,-60));settle()
+        check('Vertical mouse width intersects session plane',len(doc.Objects)==count+1 and doc.Objects[-1].Shape.BoundBox.ZLength>1e-4 and len(doc.Objects[-1].Shape.Edges)==4)
+        view.viewTop();settle();count=len(doc.Objects);enter('Rectangle');enter('3Point');enter('0,0');enter('Width=3')
+        QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,QtCore.Qt.ShiftModifier,pos=center+QtCore.QPoint(70,-30));settle()
+        lengths=[e.Length for e in doc.Objects[-1].Shape.Edges]
+        check('Shift overrides early Width during native edge completion',len(doc.Objects)==count+1 and max(lengths)-min(lengths)<1e-6)
+        view.viewTop();settle();count=len(doc.Objects);enter('Rectangle');enter('0,0');otherdoc=App.newDocument('RectangleOther');settle();enter('4,3')
+        check('Document switch cancels Rectangle',len(doc.Objects)==count and not otherdoc.Objects)
+        enter('Rectangle');enter('0,0');Gui.activateWorkbench('PartWorkbench');settle();Gui.activateWorkbench('OpenMatrix9Workbench');settle()
+        check('Workbench switch cancels Rectangle',not otherdoc.Objects and command_prompt(window).text().startswith('Command:'))
+        App.closeDocument(otherdoc.Name);Gui.setActiveDocument(doc.Name);settle();path=out/'rectangles.FCStd';doc.saveAs(str(path));saved=[o.Shape.Length for o in doc.Objects];App.closeDocument(doc.Name);doc=App.openDocument(str(path));settle()
+        check('Save reload preserves all rectangle geometry and IDs',len(doc.Objects)==len(saved) and all(abs(o.Shape.Length-v)<1e-7 and o.OM9FeatureId=='OM9-CURVE-004' for o,v in zip(doc.Objects,saved)))
+        window.grab().save(str(out/'rectangle-runtime.png'));result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc();result['prompt']=command_prompt(window).text()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):
+            if name.startswith('Rectangle'):App.closeDocument(name)
+        if os.environ.get('OM9_SMOKE_KEEP_OPEN')!='1':QtCore.QTimer.singleShot(0,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

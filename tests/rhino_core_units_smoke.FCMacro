@@ -1,0 +1,100 @@
+"""RCORE-02 explicit units: native document transaction, input and cold restore."""
+import hashlib, json, math, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore, QtWidgets, QtTest
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input
+
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value: raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop()
+    QtCore.QTimer.singleShot(180,loop.quit)
+    loop.exec()
+def cmd(text):
+    field=command_input(Gui.getMainWindow())
+    field.setText(text)
+    QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return)
+    settle()
+import sys
+if os.environ.get('OM9_TEST_NATIVE_DIR'): sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+
+def run():
+    try:
+        import OpenMatrix9Gui as OM
+        report['native_module']=str(OM.__file__)
+        report['native_sha256']=hashlib.sha256(Path(OM.__file__).read_bytes()).hexdigest()
+        expected=os.environ.get('OM9_TEST_NATIVE_DIR')
+        if expected: check('matching native module',Path(OM.__file__).resolve().parent==Path(expected).resolve())
+        restore=os.environ.get('OM9_RCORE_UNITS_RESTORE_FILE')
+        if restore:
+            doc=App.openDocument(restore)
+            context=OM.unitContext(doc.Name)
+            check('cold context loads before workbench activation',context['model_mm']==25.4 and context['absolute_mm']==0.001)
+            line=doc.getObject('Line')
+            check('cold native geometry and provenance retained',abs(line.Shape.Length-25.4)<1e-8 and line.OM9UnitContext==context['snapshot'])
+            report['ok']=True
+            return
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('RCoreUnits')
+        doc.UndoMode=1
+        settle()
+        check('legacy units have no invented tolerance',OM.unitContext(doc.Name) is None)
+        initial=OM.setUnitContext(doc.Name,25.4,1.0,0.001,0.01,0.01)
+        check('explicit context revision and angular units',initial['revision']==1 and initial['angular_rad']==0.01)
+        doc.undo()
+        check('Undo removes whole new unit context',OM.unitContext(doc.Name) is None)
+        doc.redo()
+        check('Redo restores identical context',OM.unitContext(doc.Name)==initial)
+        for bad in (float('nan'),float('inf'),-1.0,0.0):
+            before=len(doc.Objects)
+            rejected=False
+            try: OM.setUnitContext(doc.Name,bad,1.0,0.001,0.01,0.01)
+            except Exception: rejected=True
+            check('invalid units reject atomically '+str(bad),rejected and len(doc.Objects)==before and OM.unitContext(doc.Name)==initial)
+        cmd('Line');cmd('0,0,0');cmd('1,0,0')
+        line=doc.getObject('Line')
+        check('unitless point input uses captured inch context',line is not None and abs(line.Shape.Length-25.4)<1e-8)
+        check('geometry stores exact context provenance',line.OM9UnitContext==initial['snapshot'])
+        native_length=line.Shape.Length
+        next_context=OM.setUnitContext(doc.Name,1.0,1.0,0.001,0.01,0.01)
+        check('physical-size unit change keeps native geometry',line.Shape.Length==native_length and next_context['revision']==2)
+        doc.undo()
+        check('Undo restores context without scaling geometry',OM.unitContext(doc.Name)==initial and line.Shape.Length==native_length)
+        rejected=False
+        try: OM.setUnitContext(doc.Name,1.0,1.0,0.001,0.01,0.01,1)
+        except Exception: rejected=True
+        check('unsupported dimensional scale rejects before mutation',rejected and OM.unitContext(doc.Name)==initial and line.Shape.Length==native_length)
+        cmd('Line');cmd('0,0,0')
+        OM.setUnitContext(doc.Name,1.0,1.0,0.001,0.01,0.01)
+        settle()
+        cmd('1,0,0')
+        check('stale unit preview cannot create geometry',len([o for o in doc.Objects if hasattr(o,'Shape')])==1)
+        doc.undo()
+        check('context restored for save',OM.unitContext(doc.Name)==initial)
+        cmd('Circle');cmd('0,0,0');cmd('1')
+        circle=doc.getObject('Circle')
+        check('Circle radius uses inch context',circle is not None and abs(circle.Shape.Edges[0].Curve.Radius-25.4)<1e-8)
+        cmd('Circle');cmd('0mm,0mm,0mm');cmd('25.4mm')
+        circle_mm=doc.getObject('Circle001')
+        check('Explicit mm radius equals one inch',circle_mm is not None and abs(circle_mm.Shape.Length-circle.Shape.Length)<1e-8 and circle_mm.OM9UnitContext==initial['snapshot'])
+        extreme=OM.setUnitContext(doc.Name,1e-300,1e300,1e-300,1e300,math.pi)
+        check('Extreme finite unit context roundtrips in bounded schema',OM.unitContext(doc.Name)==extreme and len(extreme['snapshot'])<=512)
+        doc.undo()
+        check('Extreme context Undo restores original declaration',OM.unitContext(doc.Name)==initial)
+        save=out/'rhino-core-units.FCStd'
+        doc.saveAs(str(save))
+        report['saved_document']=str(save)
+        report['ok']=True
+    except Exception:
+        report['ok']=False
+        report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()): App.closeDocument(name)
+        QtCore.QTimer.singleShot(200,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(700,run)

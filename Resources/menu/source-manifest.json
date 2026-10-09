@@ -511,7 +511,8 @@
     "Dial_Working Shade",
     "Dial_Working Render",
     "Dial_Ghosted",
-    "Dial_Tech Shade"
+    "Dial_Tech Shade",
+    "ReleaseFromCage"
   ],
   "missing": {},
   "shifted_icons": {},
@@ -8495,6 +8496,21 @@
       ],
       "sha256": "5ec89679061924d0780e3069aefd1d11741b8683b9d0a50f3864e029267c7c06",
       "mapping": "authored-command-symbol"
+    },
+    "ReleaseFromCage": {
+      "symbol": "ReleaseFromCage",
+      "label": "Release From Cage",
+      "meaning": "Release selected captives while preserving geometry",
+      "style": "minimal-transform-v2-reviewed",
+      "mapping": "authored-command-symbol",
+      "sha256": "30fdf788e8c615942a226235b655b2bef769c3e4eca3a09677751b4199b49478",
+      "palette": [
+        "#FF5B05",
+        "#FFFFFF"
+      ],
+      "spec_id": "OM9-TRANSFORM-022",
+      "semantic_source": "local Transform spec",
+      "design_note": "Warp cage edges and captured object together; align all cage lines with the deformed outline"
     }
   },
   "curve_icon_style": {

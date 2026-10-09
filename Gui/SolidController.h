@@ -5,6 +5,7 @@
 #include <fastsignals/signal.h>
 #include <cstddef>
 #include <vector>
+#include "SolidReferences.h"
 class SoSeparator;
 namespace App {class Document;}
 namespace Gui {class View3DInventor;}
@@ -23,11 +24,16 @@ private:
     SolidController();
     bool valid()const;void frame(Gui::View3DInventor*);void prompt();void result(unsigned);
     void preview(const double*,bool);void clearPreview();void commit();
+    void reference(const QString&,const std::array<double,3>&);
+    void solveTangent(int solution=-1);
+    std::map<std::size_t,SolidCurveReference> tangentReferences;
+    std::optional<SolidCurveReference> pathReference;
     bool enabled=false;
     App::Document* document=nullptr;
     std::size_t command=0;
     unsigned kind=0;
     QPointer<QObject> releaseTarget;
+    Qt::MouseButton releaseButton=Qt::LeftButton;
     std::vector<std::pair<SoSeparator*,SoSeparator*>> previews;
     fastsignals::scoped_connection deleteConnection,activeConnection;
 };

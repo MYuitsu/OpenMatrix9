@@ -1,0 +1,430 @@
+# RCORE-03 native replay: shared point grammar, per-view CPlane and persistence.
+import hashlib, json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0, os.environ['OM9_TEST_NATIVE_DIR'])
+sys.path.insert(0, str(Path(__file__).parent))
+from command_console_support import command_input, command_prompt
+
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+result={'checks':[], 'fixtures':['RCORE-03.T01','RCORE-03.T02','RCORE-03.T03','RCORE-03.T04','RCORE-03.T05','RCORE-03.T06','RCORE-03.T08','RCORE-03.T09']}
+owned_names=set()
+fixture_popups=[]
+FRAME=(10.,20.,30.,0.,1.,0.,0.,0.,1.,1.,0.,0.)
+WORLD=(0.,0.,0.,1.,0.,0.,0.,1.,0.,0.,0.,1.)
+
+def checkpoint(stage):
+    result['progress']={'stage':stage,'utc':QtCore.QDateTime.currentDateTimeUtc().toString(QtCore.Qt.ISODateWithMs)}
+    pending=out/'progress.json.tmp'
+    pending.write_text(json.dumps(result,indent=2),encoding='utf-8')
+    pending.replace(out/'progress.json')
+
+def check(name, passed):
+    result['checks'].append({'name':name,'passed':bool(passed)})
+    checkpoint(name)
+    if not passed: raise AssertionError(name)
+
+def settle():
+    loop=QtCore.QEventLoop(); QtCore.QTimer.singleShot(160,loop.quit); loop.exec()
+
+def enter(text):
+    field.setFocus(); field.setText(text); QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return); settle()
+
+def near(point, expected):
+    return (point-App.Vector(*expected)).Length<1e-7
+
+def camera_view_states(cameras):
+    # FreeCAD recomputes near/far clipping from rendered scene bounds, including
+    # a moved construction grid. Every other serialized camera field is part of
+    # the unchanged-view contract; retain raw strings in the diagnostic output.
+    return ['\n'.join(line for line in camera.splitlines()
+                      if not line.strip().startswith(('nearDistance ','farDistance ')))
+            for camera in cameras]
+
+def line(first, second):
+    enter('Line'); enter(first); enter(second)
+    return App.activeDocument().Objects[-1]
+
+def menu_diagnostic(stage,menus):
+    popup=QtWidgets.QApplication.activePopupWidget()
+    cursor=QtGui.QCursor.pos()
+    state={'stage':stage,'active_popup':None if popup is None else
+           {'class':popup.metaObject().className(),'name':popup.objectName()},
+           'cursor_global':[cursor.x(),cursor.y()],'menus':[]}
+    for menu in menus:
+        active=menu.activeAction()
+        screen=menu.screen();available=screen.availableGeometry();handle=menu.windowHandle()
+        entry={'name':menu.objectName(),'visible':menu.isVisible(),
+               'geometry':[menu.x(),menu.y(),menu.width(),menu.height()],
+               'screen':screen.name(),'available_geometry':[available.x(),available.y(),available.width(),available.height()],
+               'exposed':handle is not None and handle.isExposed(),
+               'active_action':None if active is None else active.objectName(),
+               'tooltip':menu.toolTip(),'actions':[]}
+        for action in menu.actions():
+            rectangle=menu.actionGeometry(action)
+            center=menu.mapToGlobal(rectangle.center());target_screen=QtGui.QGuiApplication.screenAt(center)
+            entry['actions'].append({'name':action.objectName(),'text':action.text(),
+                                     'enabled':action.isEnabled(),'visible':action.isVisible(),
+                                     'geometry':[rectangle.x(),rectangle.y(),rectangle.width(),rectangle.height()],
+                                     'center_global':[center.x(),center.y()],
+                                     'center_on_available_screen':target_screen is not None and target_screen.availableGeometry().contains(center)})
+        state['menus'].append(entry)
+    result.setdefault('menu_events',[]).append(state)
+    checkpoint(stage)
+
+def wait_menu_state(label,predicate,menus):
+    # Wait for the actual popup lifecycle, not an assumed platform submenu delay.
+    # Never poll action enablement: aboutToShow must establish it before display.
+    timer=QtCore.QElapsedTimer();timer.start()
+    while not predicate() and timer.elapsed()<3000:QtTest.QTest.qWait(20)
+    menu_diagnostic(label,menus)
+    result['menu_events'][-1]['wait_ms']=timer.elapsed()
+    check(label,predicate())
+
+def close_menus(*menus):
+    for menu in reversed(menus):menu.close()
+    wait_menu_state('CPlane popup chain closes',lambda:all(not menu.isVisible() for menu in menus),menus)
+
+def select_menu_action(menu,action,menus):
+    center=menu.actionGeometry(action).center();global_center=menu.mapToGlobal(center)
+    screen=QtGui.QGuiApplication.screenAt(global_center)
+    handle=menu.windowHandle()
+    interaction={'menu':menu.objectName(),'action':action.objectName() or action.text(),
+                 'target_global':[global_center.x(),global_center.y()],
+                 'window_exposed':handle is not None and handle.isExposed(),
+                 'target_on_available_screen':screen is not None and screen.availableGeometry().contains(global_center),
+                 'method':'keyboard',
+                 'reason':'Deterministic native keyboard replay: this host did not deliver QTest cursor movement to visible popup targets'}
+    result.setdefault('menu_interactions',[]).append(interaction)
+    checkpoint('Select native menu action '+interaction['action'])
+    # Traverse real keyboard focus; never setActiveAction or trigger directly.
+    QtTest.QTest.keyClick(menu,QtCore.Qt.Key_Home)
+    for _ in range(len(menu.actions())+1):
+        if menu.activeAction()==action:break
+        QtTest.QTest.keyClick(menu,QtCore.Qt.Key_Down);QtTest.QTest.qWait(20)
+    menu_diagnostic('After keyboard selection of '+interaction['action'],menus)
+    check('Keyboard selects '+interaction['action'],menu.activeAction()==action)
+
+def open_submenu(parent,child,menus):
+    select_menu_action(parent,child.menuAction(),menus)
+    QtTest.QTest.keyClick(parent,QtCore.Qt.Key_Right)
+    wait_menu_state(child.objectName()+' becomes visible',child.isVisible,menus)
+
+def activate_menu_action(menu,action,menus):
+    select_menu_action(menu,action,menus)
+    QtTest.QTest.keyClick(menu,QtCore.Qt.Key_Return)
+
+def open_cplane_menu(subwindow):
+    arrow=subwindow.widget().findChild(QtWidgets.QToolButton,'OM9ViewportDropdown')
+    root=subwindow.widget().findChild(QtWidgets.QMenu,'OM9ViewportMenu')
+    menu=root.findChild(QtWidgets.QMenu,'OM9CPlaneMenu')
+    fixture_popups.extend([root,menu])
+    check('CPlane popup chain starts hidden',not root.isVisible() and not menu.isVisible())
+    QtTest.QTest.mouseMove(arrow,pos=arrow.rect().center(),delay=20)
+    QtTest.QTest.mouseClick(arrow,QtCore.Qt.LeftButton)
+    wait_menu_state('Viewport menu becomes visible',root.isVisible,[root,menu])
+    check('Set CPlane submenu is enabled',menu is not None and menu.menuAction().isEnabled())
+    open_submenu(root,menu,[root,menu])
+    return root,menu
+
+def menu_action(subwindow,name):
+    root,menu=open_cplane_menu(subwindow)
+    action=next(a for a in menu.actions() if a.objectName()==name)
+    menu_diagnostic('Before '+name,[root,menu])
+    check('CPlane menu action enabled '+name,action.isEnabled())
+    activate_menu_action(menu,action,[root,menu]);settle()
+    close_menus(root,menu)
+
+def menu_name(subwindow,label):
+    state={'label':label,'attempts':0,'callback_ran':False,'finished':False,'completed':False,'errors':[],'events':[]}
+    result.setdefault('naming_dialogs',[]).append(state)
+    def owned_dialog():
+        return window.findChild(QtWidgets.QInputDialog,'OM9SaveNamedCPlaneDialog')
+    def describe(widget):
+        return None if widget is None else {'class':widget.metaObject().className(),'name':widget.objectName(),'visible':widget.isVisible(),'title':widget.windowTitle()}
+    def record(stage):
+        state['events'].append({'stage':stage,'active_modal':describe(QtWidgets.QApplication.activeModalWidget()),
+                                'owned_dialog':describe(owned_dialog()),'prompt':command_prompt(window).text()})
+        checkpoint(stage)
+    def fail(message):
+        state['errors'].append(message);state['finished']=True
+        try:record('Naming dialog failure')
+        finally:
+            # Only the fixture-owned naming dialog may be rejected to unblock
+            # its nested event loop. The failure remains an explicit assertion.
+            dialog=owned_dialog()
+            if dialog is not None and dialog.isVisible():dialog.reject()
+    def completed():
+        if state['finished']:return
+        try:
+            record('After naming dialog Escape' if label is None else 'After naming dialog accept')
+            dialog=owned_dialog()
+            if dialog is not None and dialog.isVisible():
+                fail('Naming dialog remained visible after Escape' if label is None else 'Naming dialog remained visible after accept')
+            else:state['completed']=True;state['finished']=True
+        except Exception:fail(traceback.format_exc())
+    def fill():
+        if state['finished']:return
+        try:
+            state['attempts']+=1
+            dialog=owned_dialog()
+            if dialog is None or not dialog.isVisible():
+                if state['attempts']<30:QtCore.QTimer.singleShot(60,fill)
+                else:fail('Save Named CPlane dialog did not appear')
+                return
+            state['callback_ran']=True;record('Naming dialog callback before input')
+            if label is None:QtTest.QTest.keyClick(dialog,QtCore.Qt.Key_Escape)
+            else:dialog.setTextValue(label);dialog.accept()
+            QtCore.QTimer.singleShot(100,completed)
+        except Exception:fail(traceback.format_exc())
+    root,menu=open_cplane_menu(subwindow)
+    action=next(a for a in menu.actions() if a.objectName()=='OM9CPlaneSaveNamed')
+    menu_diagnostic('Before named-plane dialog',[root,menu])
+    check('CPlane naming action is enabled',action.isEnabled())
+    watchdog=QtCore.QTimer(window);watchdog.setSingleShot(True)
+    watchdog.timeout.connect(lambda:fail('Naming dialog exceeded the 4 second callback deadline') if not state['finished'] else None)
+    watchdog.start(4000)
+    QtCore.QTimer.singleShot(80,fill)
+    try:
+        activate_menu_action(menu,action,[root,menu])
+        timer=QtCore.QElapsedTimer();timer.start()
+        while not state['finished'] and timer.elapsed()<5000:QtTest.QTest.qWait(20)
+        if not state['finished']:fail('Naming dialog callback did not finish')
+    except Exception:
+        state['finished']=True
+        raise
+    finally:watchdog.stop();watchdog.deleteLater()
+    close_menus(root,menu)
+    check('Naming dialog callback ran',state['callback_ran'])
+    check('Naming dialog callback completed without error',state['completed'] and not state['errors'])
+
+def menu_restore(subwindow,label):
+    root,menu=open_cplane_menu(subwindow)
+    named=menu.findChild(QtWidgets.QMenu,'OM9CPlaneRestoreNamed')
+    fixture_popups.append(named)
+    check('Named CPlane submenu is enabled',named is not None and named.menuAction().isEnabled())
+    open_submenu(menu,named,[root,menu,named])
+    action=next(a for a in named.actions() if a.text()==label)
+    menu_diagnostic('Before restoring '+label,[root,menu,named])
+    check('Named CPlane restore action is enabled',action.isEnabled())
+    activate_menu_action(named,action,[root,menu,named]);settle()
+    close_menus(root,menu,named)
+
+def run():
+    global field, window
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench'); window=Gui.getMainWindow(); window.resize(1400,950)
+        field=command_input(window)
+        import OpenMatrix9Gui as OM9
+        native=Path(OM9.__file__)
+        result['native_module']=str(native); result['native_sha256']=hashlib.sha256(native.read_bytes()).hexdigest()
+        root=Path(__file__).parent.parent
+        result['source_sha256']={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in [root/'rust/src/coordinates.rs',root/'rust/src/cplanes.rs',root/'rust/src/curve.rs',root/'Gui/CoreCPlanes.cpp',root/'Gui/CoreWorkspace.cpp']}
+        if os.environ.get('OM9_TEST_NATIVE_DIR'):
+            check('Requested native module loaded', native.parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        if os.environ.get('OM9_CPLANE_REOPEN_FILE'):
+            saved=Path(os.environ['OM9_CPLANE_REOPEN_FILE']);source=json.loads((saved.parent/'results.json').read_text(encoding='utf-8'))
+            result['mode']='cold_reopen';result['source_artifact']=str(saved)
+            doc=App.openDocument(str(saved));owned_names.add(doc.Name);settle();settle();settle()
+            records=OM9.namedCPlanes(doc.Name);expected=source['named_records']
+            check('Cold process restores exact slot CPlane',tuple(OM9.cplane(doc.Name,0))==FRAME)
+            check('Cold process preserves every named identity label and frame',records==expected or [{**r,'frame':list(r['frame'])} for r in records]==expected)
+            cameras=[v.getCamera() for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')];objects=len(doc.Objects);undos=doc.UndoCount
+            ring=next(r for r in records if r['name']=='Ring')
+            check('Cold process named restore uses persistent identity',tuple(OM9.restoreNamedCPlane(doc.Name,1,ring['id']))==FRAME)
+            after_cameras=[v.getCamera() for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')]
+            result['cold_cameras']={'before':cameras,'after':after_cameras}
+            check('Cold named restore leaves camera views geometry Undo intact',camera_view_states(cameras)==camera_view_states(after_cameras) and len(doc.Objects)==objects and doc.UndoCount==undos)
+            area=window.findChild(QtWidgets.QMdiArea);first=next(sub for sub in area.subWindowList() if sub.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(first);settle()
+            obj=line('1,2,3','wr1,2,3');points=[v.Point for v in obj.Shape.Vertexes]
+            check('Cold restored plane drives actual Line input',near(points[0],[13,21,32]) and near(points[1],[14,23,35]))
+            result['ok']=True
+            return
+        doc=App.newDocument('CoreCoordinates');owned_names.add(doc.Name); doc.UndoMode=1; settle(); settle(); settle()
+        area=window.findChild(QtWidgets.QMdiArea)
+        first=next(sub for sub in area.subWindowList() if sub.widget().property('om9ViewSlot')==0)
+        area.setActiveSubWindow(first); settle()
+        views=Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')
+        cameras=[view.getCamera() for view in views]; undos=doc.UndoCount
+        defaults=[OM9.cplane(doc.Name,slot) for slot in range(4)]
+        doc.saveAs(str(out/'core-coordinates-initial.FCStd'))
+        # App.saveAs establishes the path; only the host GUI save clears its
+        # modified flag after a successful document write.
+        check('Host GUI save succeeds without a filename dialog',Gui.activeDocument().save())
+        check('Initial save leaves document clean',not Gui.activeDocument().Modified)
+        check('Translated CPlane set returns exact frame', tuple(OM9.setCPlane(doc.Name,0,FRAME))==FRAME)
+        check('CPlane-only edits mark the document modified for Save prompts',Gui.activeDocument().Modified)
+        Gui.activeDocument().Modified=False;OM9.setCPlane(doc.Name,0,FRAME)
+        check('Identical plane does not dirty a clean document',not Gui.activeDocument().Modified)
+        check('CPlane independent across view slots', all(tuple(OM9.cplane(doc.Name,slot))==tuple(defaults[slot]) for slot in [1,2,3]))
+        check('CPlane edits leave camera views geometry and document Undo intact', camera_view_states(cameras)==camera_view_states([view.getCamera() for view in views]) and not doc.Objects and doc.UndoCount==undos)
+        from pivy import coin
+        grid=coin.SoSearchAction();grid.setSearchingAll(True);grid.setName('OM9ConstructionGridTransform')
+        active=Gui.activeDocument().activeView();grid.apply(active.getSceneGraph());path=grid.getPath()
+        check('Displayed grid uses translated CPlane origin', path is not None and near(App.Vector(*path.getTail().translation.getValue()),[10,20,30]))
+        toggle=coin.SoSearchAction();toggle.setSearchingAll(True);toggle.setName('OM9ConstructionGrid');toggle.apply(active.getSceneGraph())
+        switch=toggle.getPath().getTail();visibility=switch.whichChild.getValue();switch.whichChild=coin.SO_SWITCH_NONE
+        shifted=list(FRAME);shifted[:3]=[40,50,60];OM9.setCPlane(doc.Name,0,shifted)
+        grid.apply(active.getSceneGraph())
+        check('Hidden grid follows CPlane edits without changing visibility',near(App.Vector(*grid.getPath().getTail().translation.getValue()),[40,50,60]) and switch.whichChild.getValue()==coin.SO_SWITCH_NONE)
+        OM9.setCPlane(doc.Name,0,FRAME);switch.whichChild=visibility
+
+        def menu_snapshot():
+            return {'planes':[list(OM9.cplane(doc.Name,slot)) for slot in range(4)],
+                    'cameras':[view.getCamera() for view in views],
+                    'objects':[obj.Name for obj in doc.Objects],
+                    'undo_count':doc.UndoCount,'modified':Gui.activeDocument().Modified}
+        menu_diagnostics={'original_baseline':{'planes':[list(plane) for plane in defaults],
+                            'cameras':cameras,'objects':[],'undo_count':undos},
+                          'before_menu':menu_snapshot(),'steps':[],
+                          'camera_contract':'All serialized fields except renderer-managed nearDistance/farDistance'}
+        result['menu_invariants']=menu_diagnostics
+        for name,expected in [
+            ('OM9CPlaneWorldXY',WORLD),
+            ('OM9CPlaneWorldXZ',(0.,0.,0.,1.,0.,0.,0.,0.,1.,0.,-1.,0.)),
+            ('OM9CPlaneWorldYZ',(0.,0.,0.,0.,1.,0.,0.,0.,1.,1.,0.,0.)),
+        ]:
+            menu_action(first,name)
+            menu_diagnostics['steps'].append({'action':name,'state':menu_snapshot()})
+            check('Native menu sets exact world plane '+name,tuple(OM9.cplane(doc.Name,0))==expected)
+        menu_action(first,'OM9CPlanePrevious')
+        menu_diagnostics['steps'].append({'action':'OM9CPlanePrevious','state':menu_snapshot()})
+        check('Native menu Previous restores XZ',tuple(OM9.cplane(doc.Name,0))==(0.,0.,0.,1.,0.,0.,0.,0.,1.,0.,-1.,0.))
+        menu_action(first,'OM9CPlaneNext')
+        menu_diagnostics['steps'].append({'action':'OM9CPlaneNext','state':menu_snapshot()})
+        check('Native menu Next restores YZ',tuple(OM9.cplane(doc.Name,0))==(0.,0.,0.,0.,1.,0.,0.,0.,1.,1.,0.,0.))
+        after_menu=menu_snapshot();menu_diagnostics['after_menu']=after_menu
+        invariants=[
+            ('Native menu changes preserve other CPlane slots',all(tuple(after_menu['planes'][slot])==tuple(defaults[slot]) for slot in [1,2,3])),
+            ('Native menu changes preserve all camera fields except automatic clipping',camera_view_states(cameras)==camera_view_states(after_menu['cameras'])),
+            ('Native menu changes preserve document objects',not after_menu['objects']),
+            ('Native menu changes preserve document Undo',after_menu['undo_count']==undos),
+        ]
+        # Record every predicate before raising so one failure cannot hide the others.
+        result['checks'].extend({'name':name,'passed':bool(passed)} for name,passed in invariants)
+        if not all(passed for _,passed in invariants):
+            raise AssertionError('; '.join(name for name,passed in invariants if not passed))
+        second=next(sub for sub in area.subWindowList() if sub.widget().property('om9ViewSlot')==1)
+        menu_action(second,'OM9CPlaneWorldXZ')
+        check('CPlane menu targets its own viewport slot',tuple(OM9.cplane(doc.Name,1))==(0.,0.,0.,1.,0.,0.,0.,0.,1.,0.,-1.,0.) and tuple(OM9.cplane(doc.Name,0))==(0.,0.,0.,0.,1.,0.,0.,0.,1.,1.,0.,0.))
+        OM9.setCPlane(doc.Name,1,defaults[1]);area.setActiveSubWindow(first);settle();OM9.setCPlane(doc.Name,0,FRAME)
+        enter('Circle');enter('1,2,3');prompt_before=command_prompt(window).text();count=len(doc.Objects);undo_before=doc.UndoCount
+        root,menu=open_cplane_menu(first);QtTest.QTest.keyClick(menu,QtCore.Qt.Key_Escape);close_menus(root,menu);settle()
+        check('Cancelling CPlane menu preserves active Circle',command_prompt(window).text()==prompt_before)
+        names_before=OM9.namedCPlanes(doc.Name);menu_name(first,None)
+        check('Cancelling named-plane dialog preserves Circle and table',command_prompt(window).text()==prompt_before and OM9.namedCPlanes(doc.Name)==names_before)
+        Gui.activeDocument().Modified=False;menu_name(first,'Menu Work')
+        check('Native naming dialog saves current frame without cancelling Circle',command_prompt(window).text()==prompt_before and Gui.activeDocument().Modified and any(p['name']=='Menu Work' and tuple(p['frame'])==FRAME for p in OM9.namedCPlanes(doc.Name)))
+        menu_action(first,'OM9CPlaneWorldXY');menu_restore(first,'Menu Work')
+        check('Native named restore menu preserves Circle and exact frame',tuple(OM9.cplane(doc.Name,0))==FRAME and command_prompt(window).text()==prompt_before)
+        menu_action(first,'OM9CPlaneWorldXY')
+        check('Menus do not create geometry or document Undo during point input',len(doc.Objects)==count and doc.UndoCount==undo_before)
+        enter('4,6,3');circle=doc.Objects[-1].Shape.Edges[0].Curve
+        check('Circle retains first-point latch through native menu changes',near(circle.Center,[13,21,32]) and abs(circle.Radius-5)<1e-7 and near(circle.Axis,[1,0,0]))
+        OM9.setCPlane(doc.Name,0,FRAME)
+
+        for token, expected in [('r1,2,3',[16,22,34]),('R1,2,3',[16,22,34]),('@1,2,3',[16,22,34]),('wr1,2,3',[14,23,35])]:
+            obj=line('1,2,3',token);points=[v.Point for v in obj.Shape.Vertexes]
+            check('T01/T03 Line '+token,len(points)==2 and near(points[0],[13,21,32]) and near(points[1],expected))
+        obj=line('1,2','w0,0,0');points=[v.Point for v in obj.Shape.Vertexes]
+        check('T02 2D CPlane and explicit world origin',near(points[0],[10,21,32]) and near(points[1],[0,0,0]))
+        obj=line('w1,2,3','wr1,2,3');points=[v.Point for v in obj.Shape.Vertexes]
+        check('T02 explicit world bypasses CPlane',near(points[0],[1,2,3]) and near(points[1],[2,4,6]))
+
+        enter('Circle'); enter('1,2,3'); enter('5')
+        circle=doc.Objects[-1].Shape.Edges[0].Curve
+        check('T08 target Circle xyz is CPlane, with latched normal',near(circle.Center,[13,21,32]) and near(circle.Axis,[1,0,0]) and abs(circle.Radius-5)<1e-7)
+        result['circle_legacy_record']={'record':'three-axis typed input world XYZ','target':'three-axis typed input CPlane','actual_center':[circle.Center.x,circle.Center.y,circle.Center.z],'migration':'target shared parser; legacy record is not current runtime behavior'}
+
+        enter('Circle'); enter('1,2,3'); OM9.setCPlane(doc.Name,0,WORLD); enter('4,6,3')
+        circle=doc.Objects[-1].Shape.Edges[0].Curve
+        check('T04 Circle keeps first-point construction frame after CPlane change',near(circle.Center,[13,21,32]) and abs(circle.Radius-5)<1e-7)
+        OM9.setCPlane(doc.Name,0,FRAME)
+        count=len(doc.Objects); undos=doc.UndoCount; enter('Polyline');enter('1,2,3')
+        for invalid in ['4, 5,6','wNaN,2,3','1,,3','wr1,2,3junk']:
+            enter(invalid);check('T06 invalid input preserves active session '+invalid,len(doc.Objects)==count and doc.UndoCount==undos and not command_prompt(window).text().startswith('Command:'))
+        enter('Undo');enter('@1,2,3');check('T09 Undo removes relative base',len(doc.Objects)==count)
+        enter('Cancel');check('T09 Cancel returns idle without geometry',len(doc.Objects)==count and command_prompt(window).text().startswith('Command:'))
+        invalid=list(FRAME);invalid[9]=-1
+        try: OM9.setCPlane(doc.Name,0,invalid)
+        except (ValueError,RuntimeError): rejected=True
+        else: rejected=False
+        check('T06 left-handed plane rejects atomically',rejected and tuple(OM9.cplane(doc.Name,0))==FRAME)
+        try: OM9.setCPlane3Point(doc.Name,0,[0,0,0,1,0,0,2,0,0])
+        except (ValueError,RuntimeError): rejected=True
+        else: rejected=False
+        check('T06 collinear plane rejects atomically',rejected and tuple(OM9.cplane(doc.Name,0))==FRAME)
+        check('ThreePoint builds independently calculated right-handed frame',tuple(OM9.setCPlane3Point(doc.Name,0,[10,20,30,10,22,30,10,21,33]))==FRAME)
+
+        before_objects=[(o.Name,o.Shape.BoundBox.XMin,o.Shape.BoundBox.XMax,o.Shape.BoundBox.YMin,o.Shape.BoundBox.YMax,o.Shape.BoundBox.ZMin,o.Shape.BoundBox.ZMax) for o in doc.Objects]
+        Gui.activeDocument().Modified=False;named=OM9.saveNamedCPlane(doc.Name,0,'Work')
+        check('Named-plane-only save marks document modified',Gui.activeDocument().Modified)
+        Gui.activeDocument().Modified=False;OM9.renameNamedCPlane(doc.Name,named,'Ring')
+        check('Named-plane rename marks document modified',Gui.activeDocument().Modified)
+        Gui.activeDocument().Modified=False;OM9.renameNamedCPlane(doc.Name,named,'Ring')
+        check('Identical named-plane label does not dirty document',not Gui.activeDocument().Modified)
+        names_before=OM9.namedCPlanes(doc.Name);plane_before=tuple(OM9.cplane(doc.Name,0));undo_before=doc.UndoCount
+        oversized_name='x'*(512*1024+1)
+        try: OM9.saveNamedCPlane(doc.Name,0,oversized_name)
+        except (ValueError,RuntimeError): rejected=True
+        else: rejected=False
+        check('Oversized named save rejects before changing table frame Undo or dirty state',rejected and OM9.namedCPlanes(doc.Name)==names_before and tuple(OM9.cplane(doc.Name,0))==plane_before and doc.UndoCount==undo_before and not Gui.activeDocument().Modified)
+        try: OM9.renameNamedCPlane(doc.Name,named,oversized_name)
+        except (ValueError,RuntimeError): rejected=True
+        else: rejected=False
+        check('Oversized named rename rejects before changing table frame Undo or dirty state',rejected and OM9.namedCPlanes(doc.Name)==names_before and tuple(OM9.cplane(doc.Name,0))==plane_before and doc.UndoCount==undo_before and not Gui.activeDocument().Modified)
+        OM9.setCPlane(doc.Name,0,WORLD);check('Previous restores exact plane',tuple(OM9.previousCPlane(doc.Name,0))==FRAME)
+        check('Next restores exact plane',tuple(OM9.nextCPlane(doc.Name,0))==WORLD)
+        check('Named restore preserves stable identity',tuple(OM9.restoreNamedCPlane(doc.Name,0,named))==FRAME and any(p['id']==named and p['name']=='Ring' for p in OM9.namedCPlanes(doc.Name)))
+        check('Plane history and named edits never move geometry',[tuple(v) for v in before_objects]==[(o.Name,o.Shape.BoundBox.XMin,o.Shape.BoundBox.XMax,o.Shape.BoundBox.YMin,o.Shape.BoundBox.YMax,o.Shape.BoundBox.ZMin,o.Shape.BoundBox.ZMax) for o in doc.Objects])
+        result['named_records']=OM9.namedCPlanes(doc.Name)
+        file=out/'core-coordinates.FCStd';result['persistent_file']=str(file);doc.saveAs(str(file));App.closeDocument(doc.Name);doc=App.openDocument(str(file));owned_names.add(doc.Name);settle();settle()
+        check('T05 CPlane and named identity survive save/reload',tuple(OM9.cplane(doc.Name,0))==FRAME and any(p['id']==named and p['name']=='Ring' for p in OM9.namedCPlanes(doc.Name)))
+        check('T05 named restore after reload',tuple(OM9.restoreNamedCPlane(doc.Name,1,named))==FRAME)
+        stale_name=doc.Name;App.closeDocument(stale_name);doc=App.newDocument(stale_name);owned_names.add(doc.Name);settle();settle()
+        check('T09 replacement document has no old plane or named registry',tuple(OM9.cplane(doc.Name,0))==tuple(defaults[0]) and not OM9.namedCPlanes(doc.Name))
+
+        Gui.activateWorkbench('PartWorkbench');bad=App.newDocument('CoreCoordinatesInvalid');owned_names.add(bad.Name);bad.UndoMode=1
+        malformed='{"version":99,"views":[],"named":[]}'
+        bad.Meta={'OpenMatrix9.CPlanes.v1':malformed}
+        Gui.activateWorkbench('OpenMatrix9Workbench');settle();settle();settle()
+        rejected=False
+        try:OM9.cplane(bad.Name,0)
+        except (ValueError,RuntimeError):rejected=True
+        check('Future CPlane metadata rejects through API without crashing viewport setup',rejected)
+        grid=coin.SoSearchAction();grid.setSearchingAll(True);grid.setName('OM9ConstructionGridTransform');grid.apply(Gui.activeDocument().activeView().getSceneGraph())
+        check('Invalid CPlane hides construction grid instead of using a silent default',grid.getPath() is None)
+        enter('Line');enter('1,2,3');enter('4,5,6');enter('Cancel')
+        check('Invalid CPlane command cannot create geometry or mutate saved metadata',not bad.Objects and bad.UndoCount==0 and bad.Meta.get('OpenMatrix9.CPlanes.v1')==malformed)
+
+        Gui.activateWorkbench('PartWorkbench');nul_doc=App.newDocument('CoreCoordinatesInvalidNul');owned_names.add(nul_doc.Name);nul_doc.UndoMode=1
+        nul_metadata=json.dumps({'version':1,'views':[{'slot':0,'frame':FRAME}],'named':[
+            {'id':'7','name':'Valid prior record','frame':WORLD},
+            {'id':'8','name':'Visible\u0000Hidden','frame':FRAME},
+        ]})
+        nul_doc.Meta={'OpenMatrix9.CPlanes.v1':nul_metadata};nul_undos=nul_doc.UndoCount
+        rejected=False;error_text=''
+        try:OM9.cplane(nul_doc.Name,0)
+        except (ValueError,RuntimeError) as error:rejected=True;error_text=str(error)
+        check('Fresh saved CPlane label rejects embedded NUL before C-string truncation',rejected and 'NUL' in error_text)
+        rejected=False
+        try:OM9.namedCPlanes(nul_doc.Name)
+        except (ValueError,RuntimeError):rejected=True
+        check('Malformed named table is not partially imported or truncated',rejected and nul_doc.Meta.get('OpenMatrix9.CPlanes.v1')==nul_metadata and not nul_doc.Objects and nul_doc.UndoCount==nul_undos)
+        Gui.activateWorkbench('OpenMatrix9Workbench');settle();settle()
+        grid=coin.SoSearchAction();grid.setSearchingAll(True);grid.setName('OM9ConstructionGridTransform');grid.apply(Gui.activeDocument().activeView().getSceneGraph())
+        check('Embedded-NUL metadata keeps grid unavailable without crashing',grid.getPath() is None)
+        result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        for popup in reversed(fixture_popups):
+            try:popup.close()
+            except RuntimeError:pass # A successfully reloaded document deleted its old menus.
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):
+            if name in owned_names:App.closeDocument(name)
+        if os.environ.get('OM9_SMOKE_KEEP_OPEN')!='1':QtCore.QTimer.singleShot(0,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

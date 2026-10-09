@@ -11,6 +11,8 @@ pub fn names() -> &'static [&'static str] {
             .filter(|s| !s.is_empty() && !s.starts_with('#'))
             .collect();
         names.extend(["Sweep1", "Sweep2", "Loft", "Box", "Sphere"]);
+        names.extend(crate::history::ICONS.into_iter().filter_map(crate::history::command));
+        names.extend(crate::cage_commands::ICONS.into_iter().filter_map(crate::cage_commands::command));
         names.extend(
             crate::core_keyboard::ICONS
                 .into_iter()

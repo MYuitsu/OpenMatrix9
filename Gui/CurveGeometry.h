@@ -15,6 +15,7 @@ public:
     CurvePyRef(const CurvePyRef&)=delete;
     CurvePyRef& operator=(const CurvePyRef&)=delete;
     CurvePyRef(CurvePyRef&& other)noexcept:value(std::exchange(other.value,nullptr)){}
+    CurvePyRef& operator=(CurvePyRef&& other)noexcept{if(this!=&other){Py_XDECREF(value);value=std::exchange(other.value,nullptr);}return *this;}
 };
 CurvePyRef publishedSplineShape();
 CurvePyRef createCurveFeature(App::Document&,PyObject* shape,const char* name);

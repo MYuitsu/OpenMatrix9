@@ -1,0 +1,178 @@
+"""Native History contracts; run with OM9_SMOKE_OUTPUT pointing at a report directory."""
+import json, os, traceback, sys
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+from PySide6 import QtCore, QtGui, QtWidgets
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[]}
+def check(name,ok):
+    report['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def events():QtWidgets.QApplication.processEvents()
+def enter(text=''):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));events()
+def feature(doc,name,start,end):
+    o=doc.addObject('Part::Feature',name);o.Shape=Part.makeLine(App.Vector(*start),App.Vector(*end));return o
+def join(doc,objects):
+    Gui.Selection.clearSelection()
+    for o in objects:Gui.Selection.addSelection(o)
+    count=len([o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOOLS-017'])
+    enter('gvJoinHistory');enter()
+    check('JoinHistory native options',any(d.isVisible() for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9JoinHistoryOptions')))
+    enter('OK')
+    joined=[o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOOLS-017']
+    check('JoinHistory creates one child',len(joined)==count+1)
+    return joined[-1]
+def policy(**options):
+    enter('History')
+    check('History native policy UI',any(d.isVisible() for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9HistoryOptions')))
+    for k,v in options.items():enter(k+'='+('Yes' if v else 'No'))
+    enter()
+def modify(doc,o,shape):
+    doc.openTransaction('Edit parent curve');o.Shape=shape;doc.recompute();doc.commitTransaction()
+def sweep(doc,rail,profile):
+    Gui.Selection.clearSelection();Gui.Selection.addSelection(rail);Gui.Selection.addSelection(profile)
+    before={o.Name for o in doc.Objects};enter('gvSweepHistory');enter()
+    check('History Sweep native options',any(d.isVisible() for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9SurfaceOptions')))
+    enter('OK');created=[o for o in doc.Objects if o.Name not in before and o.TypeId=='OpenMatrix9Gui::SurfaceHistory']
+    check('History Sweep creates native surface',len(created)==1 and created[0].Shape.isValid())
+    return created[0]
+def run():
+    global console
+    try:
+        if os.environ.get('OM9_JOIN_HISTORY_RESTORE_FILE'):
+            check('native module absent before cold restore','OpenMatrix9Gui' not in sys.modules)
+            cold=App.openDocument(os.environ['OM9_JOIN_HISTORY_RESTORE_FILE']);cold.UndoMode=1
+            check('cold FCStd loads namespace module','OpenMatrix9Gui' in sys.modules)
+            child=cold.getObject('JoinHistory');grandchild=cold.getObject('JoinHistory001')
+            check('cold restore retains native links',child.Recorded and len(child.Parents)==2 and grandchild.Recorded)
+            modify(cold,cold.getObject('A'),Part.makeLine(App.Vector(-21,0,0),App.Vector(5,0,0)))
+            check('cold restored native descendants update',abs(child.Shape.Length-31)<1e-7 and abs(grandchild.Shape.Length-36)<1e-7)
+            report['ok']=True;return
+        Gui.activateWorkbench('OpenMatrix9Workbench');events();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        import OpenMatrix9Gui
+        report['native_module_path']=str(getattr(OpenMatrix9Gui,'__file__',''))
+        if os.environ.get('OM9_TEST_NATIVE_DIR'):check('requested native module loaded',Path(report['native_module_path']).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        doc=App.newDocument('HistoryChain');doc.UndoMode=1
+        a=feature(doc,'A',(0,0,0),(5,0,0));b=feature(doc,'B',(5,0,0),(10,0,0));c=feature(doc,'C',(10,0,0),(15,0,0))
+        child=join(doc,[a,b]);grandchild=join(doc,[child,c])
+        check('native Part feature and two separate parents',child.TypeId=='OpenMatrix9Gui::HistoryJoin' and child.Recorded and child.Parents==[a,b] and doc.getObject('A') is a and doc.getObject('B') is b)
+        settings=next(o for o in doc.Objects if o.TypeId=='OpenMatrix9Gui::HistorySettings')
+        check('Record and Update default On',settings.Record and settings.Update)
+        modify(doc,a,Part.makeLine(App.Vector(-5,0,0),App.Vector(5,0,0)))
+        check('A to B to C native recompute',abs(child.Shape.Length-15)<1e-7 and abs(grandchild.Shape.Length-20)<1e-7)
+        enter('MatrixHistoryUpdate');check('Update toggle Off',not settings.Update)
+        modify(doc,a,Part.makeLine(App.Vector(-10,0,0),App.Vector(5,0,0)))
+        check('Update Off retains relationships and geometry',child.Recorded and child.Parents==[a,b] and abs(child.Shape.Length-15)<1e-7)
+        enter('MatrixHistoryUpdate');check('Update On catches up descendants',abs(child.Shape.Length-20)<1e-7 and abs(grandchild.Shape.Length-25)<1e-7)
+        policy(Record=False)
+        unrecorded=join(doc,[b,c]);check('Record Off child has no record',not unrecorded.Recorded and not unrecorded.Parents)
+        modify(doc,a,Part.makeLine(App.Vector(-15,0,0),App.Vector(5,0,0)))
+        check('Record Off permits existing child updates',abs(child.Shape.Length-25)<1e-7 and child.Recorded)
+        policy(Record=True);check('Record On does not retroactively record snapshots',abs(child.Shape.Length-25)<1e-7 and not unrecorded.Recorded and not unrecorded.Parents)
+        policy(Lock=True,BrokenHistoryWarning=False)
+        check('configurable policy persisted in document',settings.Lock and not settings.BrokenHistoryWarning)
+        rejected=False
+        try:child.Placement=App.Placement(App.Vector(0,2,0),App.Rotation())
+        except Exception:rejected=True
+        check('Lock rejects child geometry edit',rejected and child.Recorded)
+        child.Label='Selectable metadata';check('Lock allows child label edits',child.Label=='Selectable metadata')
+        policy(Lock=False)
+        doc.openTransaction('Independent middle generation edit');child.Shape=Part.makeLine(App.Vector(-18,0,0),App.Vector(10,0,0));doc.recompute();doc.commitTransaction()
+        check('middle edit detaches incoming but preserves descendants',not child.Recorded and not child.Parents and grandchild.Parents==[child,c])
+        check('middle edit updates its descendants',abs(grandchild.Shape.Length-33)<1e-7)
+        doc.undo();doc.recompute();check('Undo restores geometry and History links',child.Recorded and child.Parents==[a,b] and grandchild.Recorded)
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(child);enter('MatrixClearObjectHistory')
+        check('selected-only Clear preserves grandchild',not child.Recorded and not child.Parents and grandchild.Recorded and grandchild.Parents==[child,c])
+        doc.undo();doc.recompute();check('Undo restores Clear',child.Recorded and child.Parents==[a,b])
+        path=out/'history-native.FCStd';doc.saveAs(str(path));name=doc.Name;App.closeDocument(name);doc=App.openDocument(str(path));events()
+        child=doc.getObject('JoinHistory');grandchild=doc.getObject('JoinHistory001');a=doc.getObject('A')
+        report['restored_history']=[{'name':o.Name,'recorded':bool(o.Recorded),'parents':[p.Name for p in o.Parents]} for o in doc.Objects if o.TypeId=='OpenMatrix9Gui::HistoryJoin']
+        check('FCStd stores native records',child.TypeId=='OpenMatrix9Gui::HistoryJoin' and child.Recorded and len(child.Parents)==2 and grandchild.Recorded)
+        modify(doc,a,Part.makeLine(App.Vector(-20,0,0),App.Vector(5,0,0)));check('restored native child recomputes',abs(child.Shape.Length-30)<1e-7 and abs(grandchild.Shape.Length-35)<1e-7)
+        other=App.newDocument('HistoryOther');policy(Record=False,Update=False)
+        App.setActiveDocument(doc.Name);check('policy isolated between documents',next(o for o in doc.Objects if o.TypeId=='OpenMatrix9Gui::HistorySettings').Record)
+        App.closeDocument(other.Name)
+        # Normal Join consumes the child and must break surviving grandchild's record.
+        child_name=child.Name;Gui.Selection.clearSelection();Gui.Selection.addSelection(child);Gui.Selection.addSelection(doc.getObject('C'));enter('Join');enter();enter('OK')
+        check('ordinary Join breaks affected History in transaction',doc.getObject(child_name) is None and not grandchild.Recorded and not grandchild.Parents)
+        doc.undo();doc.recompute();check('ordinary Join Undo restores History',doc.getObject('JoinHistory').Recorded and doc.getObject('JoinHistory001').Recorded)
+        # Disconnected curves fail without creating partial native objects.
+        distant=feature(doc,'Distant',(100,0,0),(110,0,0));before=len(doc.Objects)
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(doc.getObject('B'));Gui.Selection.addSelection(distant);enter('gvJoinHistory');enter();enter('OK')
+        check('invalid Join History is atomic',len(doc.Objects)==before)
+        enter('Cancel')
+        deletion=App.newDocument('HistoryParentDeletion');deletion.UndoMode=1
+        x=feature(deletion,'X',(0,0,0),(5,0,0));y=feature(deletion,'Y',(5,0,0),(10,0,0));z=join(deletion,[x,y]);policy(BrokenHistoryWarning=False)
+        deletion.openTransaction('Delete History parent');deletion.removeObject('X');deletion.recompute();deletion.commitTransaction()
+        check('parent deletion breaks record and preserves last child geometry',not z.Recorded and not z.Parents and abs(z.Shape.Length-10)<1e-7)
+        deletion.undo();deletion.recompute();check('parent deletion Undo restores linked History',z.Recorded and len(z.Parents)==2)
+        surface_doc=App.newDocument('HistorySurfaces');surface_doc.UndoMode=1
+        rail=feature(surface_doc,'Rail',(0,0,0),(10,0,0));profile=feature(surface_doc,'Profile',(0,0,0),(0,3,0));surface=sweep(surface_doc,rail,profile)
+        check('native surface records parents',surface.HistoryEnabled and len(surface.SourceCurves)==2)
+        policy(Update=False,BrokenHistoryWarning=False);before=surface.Shape.Area
+        modify(surface_doc,rail,Part.makeLine(App.Vector(),App.Vector(15,0,0)))
+        check('global Update Off suspends recorded surface',abs(surface.Shape.Area-before)<1e-7 and surface.HistoryEnabled)
+        policy(Update=True);check('global Update On resumes recorded surface',abs(surface.Shape.Area-45)<1e-6)
+        surface.UpdateHistory=False;policy(Update=False)
+        modify(surface_doc,rail,Part.makeLine(App.Vector(),App.Vector(20,0,0)));policy(Update=True)
+        check('global resume preserves surface local suspension',not surface.UpdateHistory and abs(surface.Shape.Area-45)<1e-6)
+        surface.UpdateHistory=True;surface_doc.recompute();check('local surface resume catches up',abs(surface.Shape.Area-60)<1e-6)
+        policy(Record=False);modify(surface_doc,rail,Part.makeLine(App.Vector(),App.Vector(25,0,0)))
+        check('global Record Off permits existing surface updates',surface.HistoryEnabled and len(surface.SourceCurves)==2 and abs(surface.Shape.Area-75)<1e-6)
+        unrecorded_surface=sweep(surface_doc,rail,profile);check('Record Off creates surface without retroactive record',not unrecorded_surface.HistoryEnabled and not unrecorded_surface.SourceCurves)
+        policy(Record=True);check('Record On does not retroactively record surface snapshots',abs(surface.Shape.Area-75)<1e-6 and not unrecorded_surface.HistoryEnabled and not unrecorded_surface.SourceCurves)
+        policy(Lock=True);rejected=False
+        try:surface.Placement=App.Placement(App.Vector(0,0,2),App.Rotation())
+        except Exception:rejected=True
+        check('global Lock prevents recorded surface geometry edit',rejected and surface.HistoryEnabled)
+        surface.Label='History Surface';check('global Lock permits surface metadata',surface.Label=='History Surface')
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(surface);enter('MatrixClearObjectHistory')
+        check('global selected Clear detaches locked surface only',not surface.HistoryEnabled and not surface.SourceCurves and not unrecorded_surface.HistoryEnabled)
+        surface_doc.undo();surface_doc.recompute();check('surface Clear Undo restores native record',surface.HistoryEnabled and len(surface.SourceCurves)==2)
+        policy(Lock=False)
+        split=feature(surface_doc,'RailTail',(25,0,0),(30,0,0))
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(rail);Gui.Selection.addSelection(split);enter('Join');enter();enter('OK')
+        check('ordinary Join breaks surviving surface dependency',not surface.HistoryEnabled and not surface.SourceCurves and abs(surface.Shape.Area-75)<1e-6)
+        surface_doc.undo();surface_doc.recompute();check('ordinary Join Undo restores surface record',surface.HistoryEnabled and len(surface.SourceCurves)==2)
+        policy(BrokenHistoryWarning=True)
+        surface_doc.openTransaction('Independent surface child edit');surface.Shape=surface.Shape.copy();surface_doc.recompute();surface_doc.commitTransaction();events()
+        warnings=[d for d in Gui.getMainWindow().findChildren(QtWidgets.QMessageBox,'OM9BrokenHistoryWarning') if d.isVisible()]
+        check('configurable Broken History Warning shows native Undo guidance',bool(warnings) and any('Undo restores' in d.text() for d in warnings) and not surface.HistoryEnabled)
+        for warning in warnings:warning.accept()
+        surface_doc.undo();surface_doc.recompute();check('surface direct edit Undo restores History',surface.HistoryEnabled and len(surface.SourceCurves)==2)
+        invalid=App.newDocument('HistoryInvalidParents');invalid.UndoMode=1
+        ia=feature(invalid,'A',(0,0,0),(5,0,0));ib=feature(invalid,'B',(5,0,0),(10,0,0));ic=feature(invalid,'C',(10,0,0),(15,0,0))
+        ij=join(invalid,[ia,ib]);ig=join(invalid,[ij,ic])
+        modify(invalid,ia,Part.makeLine(App.Vector(),App.Vector(3,0,0)))
+        report['invalid_history']=[{'name':o.Name,'null':o.Shape.isNull(),'recorded':bool(o.Recorded),'parents':[p.Name for p in o.Parents],'state':list(o.State)} for o in [ij,ig]]
+        check('invalid parent clears child and descendant without consuming stale geometry',ij.Shape.isNull() and ig.Shape.isNull() and ij.Recorded and ig.Recorded and len(ij.Parents)==2 and len(ig.Parents)==2)
+        invalid.undo();invalid.recompute();check('invalid parent Undo restores valid recorded descendants',abs(ij.Shape.Length-10)<1e-6 and abs(ig.Shape.Length-15)<1e-6 and ij.Recorded and ig.Recorded)
+        modify(invalid,ia,Part.Shape());check('null parent invalidates complete recorded chain',ij.Shape.isNull() and ig.Shape.isNull() and ij.Recorded and ig.Recorded)
+        modify(invalid,ia,Part.makeLine(App.Vector(-5,0,0),App.Vector(5,0,0)));check('valid parent recovers native recorded descendants',abs(ij.Shape.Length-15)<1e-6 and abs(ig.Shape.Length-20)<1e-6 and ij.Recorded and ig.Recorded)
+        grouped=App.newDocument('HistoryParentFrames');grouped.UndoMode=1
+        frame=grouped.addObject('App::Part','Frame')
+        ga=feature(grouped,'A',(0,0,0),(5,0,0));gb=feature(grouped,'B',(5,0,0),(10,0,0));frame.addObject(ga);frame.addObject(gb)
+        gj=join(grouped,[ga,gb]);initial_center=gj.Shape.CenterOfMass
+        grouped.openTransaction('Move parent frame');frame.Placement=App.Placement(App.Vector(20,30,40),App.Rotation(App.Vector(0,0,1),90));grouped.recompute();grouped.commitTransaction()
+        check('JoinHistory follows grouped parent translation and rotation',(gj.Shape.CenterOfMass-App.Vector(20,35,40)).Length<1e-6 and gj.Recorded and abs(gj.Shape.Length-10)<1e-6)
+        grouped.undo();grouped.recompute();check('parent frame Undo restores descendant position',(gj.Shape.CenterOfMass-initial_center).Length<1e-6 and gj.Recorded)
+        other_frame=grouped.addObject('App::Part','OtherFrame');other_frame.Placement=App.Placement(App.Vector(-10,0,0),App.Rotation())
+        other_frame.addObject(ga);other_frame.addObject(gb);grouped.recompute()
+        check('JoinHistory updates after parent curve reparenting',(gj.Shape.CenterOfMass-App.Vector(-5,0,0)).Length<1e-6 and gj.Recorded)
+        other_frame.Placement=App.Placement(App.Vector(-20,0,0),App.Rotation());grouped.recompute()
+        check('JoinHistory tracks replacement parent frame',(gj.Shape.CenterOfMass-App.Vector(-15,0,0)).Length<1e-6 and gj.Recorded)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        if 'console' in globals() and console is not None:
+            report['transcript']=console.toPlainText();report['prompt']=str(console.property('om9Prompt'))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(500,run)

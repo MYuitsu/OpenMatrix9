@@ -6,7 +6,7 @@ The grid has **8 by 8 major cells**, each divided into **5 by 5 minor cells**, g
 
 Keep the grid unpickable, outside document geometry and excluded from model fit bounds. Viewport canvases are black (#000000); major lines are stronger than minor lines. Command/active UI uses Matrix green (#82B48C), with black text. New Curve edges use green (#008255). Native four-view rendering and geometry stay in FreeCAD.
 
-Reference: (Ảnh tham chiếu riêng không phân phối trong source public.).
+Private reference logical filename: `matrix-finite-grid.png`. Resolve it through the ignored `docs/openmatrix9-reference-locations.json` registry under the [private reference policy](../../../docs/private-reference-policy.md); it is not distributed in repository assets.
 
 ## Viewport titles and layout
 
@@ -16,7 +16,7 @@ Clicking a label activates its own view. Double-clicking the label shows only th
 
 Preserve camera pose/zoom, geometry, selection, document Undo and an active point command while toggling. Native redraw may update automatic near/far clipping; this does not authorize resetting the camera. Restore native title chrome and display settings on workbench exit. Rebuild one title/menu per replaced view; respect active-document and native task restrictions.
 
-Reference: (Ảnh tham chiếu riêng không phân phối trong source public.).
+Private reference logical filename: `matrix-viewport-menu.png`. Resolve it through the same ignored registry; it is not distributed in repository assets.
 
 ## Display modes and implementation limits
 

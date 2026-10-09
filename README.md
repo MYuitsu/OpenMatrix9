@@ -9,10 +9,31 @@ An experimental jewelry CAD workbench for FreeCAD. Rust owns command catalog,
 state and behavior; C++/Qt provides native integration. Unsupported commands
 remain visible and disabled.
 
+<!-- rhino-core-p0-checkpoint:start -->
+Nền tảng Rhino P0 — 2026-10-09: đã bổ sung context đơn vị/tolerance tường minh,
+parser điểm dùng chung, CPlane theo viewport và menu, vòng đời snap một lần/repeat,
+validation spline/3DM và tách History Record khỏi Update.
+Đây là **triển khai một phần P0**; chưa hoàn tất registry/selection identity chung,
+tolerance resolver cho mọi solver, History schema chung hoặc xuất 3DM giữ trạng thái đã sửa.
+Phạm vi, kết quả kiểm thử và các phần còn thiếu nằm trong
+[báo cáo P0](docs/validation/2026-10-09-rhino-core-p0.md).
+Các kết quả 321 Rust, 23 Python và 657 native GUI assertions thuộc snapshot CAD/P0
+trước gộp; không xác nhận phiên bản sau gộp. Bản native đó được build và thử ở
+runtime riêng; ứng dụng đang mở chưa tự nhận module mới.
+<!-- rhino-core-p0-checkpoint:end -->
+
+<!-- main-merge-validation -->
+Kiểm chứng sau gộp `main` — 2026-10-09: 334 kiểm thử Rust, 49 Python
+(1 bỏ qua), 8 bộ native và 847 kiểm tra GUI đều qua. Xem
+[báo cáo merge](docs/validation/2026-10-09-main-merge.md) cho phạm vi,
+module đã dùng và các giới hạn còn lại. P0 vẫn chưa hoàn tất.
+<!-- /main-merge-validation -->
+
 This project was developed with Matrix9 as a functional reference. Compatibility
 identifiers and familiar color roles remain. This public snapshot excludes
-commercial artwork, extracted resource archives, manuals, decompiled source and
-private design samples. It does not claim clean-room development, affiliation
+commercial artwork, extracted resource archives, Matrix manuals, decompiled source
+and private design samples. The approved pinned Rhino 5 guide is documented in
+[the reference policy](ref/rhino5/README.md). It does not claim clean-room development, affiliation
 with the original vendors, or legal clearance of the implementation.
 
 All **510 icon bindings** use independently authored SVGs. The exporter accepts
@@ -40,9 +61,52 @@ Xem [hướng dẫn build FreeCAD và OpenMatrix9 trên Windows](docs/build-wind
 OpenMatrix9 có module native C++/Rust; chỉ clone vào `Mod` chưa đủ.
 Bản cài FreeCAD thông thường không tự cung cấp SDK để build module này.
 
+<!-- edit-options-validation -->
+Edit cập nhật 2026-10-09: Trim ExtendLines/ApparentIntersections (curve,
+orthographic/perspective frozen view), Join midpoint/tolerance, Explode nhóm/Mesh,
+Boolean mặt/Mesh với các giới hạn rõ trong [native contract](docs/features/edit-native-contract.md).
+Đã qua 115 core + 57 options kiểm tra native, Rust 140 và Python 23.
+Lệnh vẫn `partially_implemented`; các kết quả trên chỉ xác nhận geometry slice trước nhánh mới bên dưới.
+Audit lịch sử của lần kiểm chứng này báo 290 artifact tham chiếu/private có sẵn
+trong workspace; không có file triển khai Edit bị gắn cờ. Báo cáo đó không xác nhận
+trạng thái audit của phiên bản sau gộp.
+<!-- /edit-options-validation -->
+
+<!-- history-special-explode-validation -->
+History/Explode cập nhật 2026-10-09: [Join History và policy native](docs/features/history-native-contract.md)
+đã có Record/Update/Lock/warning/Clear; [Explode adapters](docs/features/edit-native-contract.md)
+cho block qua CMD, text/dimension/cage native và retained 3DM đã có triển khai.
+Final SDK retained3DM40/40 và native special25/25 pass.
+History SDK83/83 + cold4/4 gồm grouped frames/invalid chain; core115/options57 pass.
+Chi tiết trong [validation record](docs/validation/2026-10-09-edit-history-special-types.md).
+Ordinary Edit phá links Join/Surface History liên quan; unsupported font/view-dependent
+annotation/custom arrow bị từ chối atomically. Không xác nhận đầy đủ Matrix History.
+<!-- /history-special-explode-validation -->
+
+
+<!-- reusable-builder-cage-validation -->
+### Reusable Builder API và Cage — 2026-10-09
+
+`createBuilderRecord`, `restoreBuilderOutputs` và `matchBuilderAttributes` cung cấp
+durable native record/output và versioned affine-template replay; parameters tồn
+tại sau khi output bị xóa, restore là thao tác tường minh. Match API yêu cầu
+same explicit OM9GemShape và áp toàn bộ supported records atomically. Đây là
+nền tảng API; original Gem builder solvers, Match styles popup, sliders/handles,
+Styles UI và .mss vẫn chưa có, các original command tương ứng vẫn disabled.
+Rust sở hữu validation/recipe state; C++ là adapter bắt buộc cho FreeCAD document,
+transactions/persistence/signals và OCCT geometry.
+
+Cage/Create Cage/ReleaseFromCage có native menu/CMD cho World BoundingBox và
+existing 3D cage, Global/Local trong giới hạn geometry đã công bố. Cage links
+cập nhật khi global History Record/Update Off. 1D/2D controls, Accurate/Fast và
+general BRep refit vẫn unsupported. Xem [Builder API](docs/features/builder-history-native-contract.md),
+[Cage contract](docs/features/cage-command-native-contract.md) và
+[bằng chứng native](docs/validation/2026-10-09-reusable-builder-cage.md).
+<!-- /reusable-builder-cage-validation -->
+
 ## Tiến độ lệnh / Command progress
 
-Cập nhật: **2026-10-08**. Bảng này mô tả phạm vi đang có trong source public.
+Cập nhật: **2026-10-09**. Bảng này mô tả phạm vi đang có trong source public.
 **510 icon bindings không tương đương 510 lệnh đã hoàn thành.** Lệnh chưa có
 implementation vẫn hiển thị nhưng bị vô hiệu hóa. Có tên trong command completion
 hoặc có phím tắt không chứng minh lệnh đã chạy được.
@@ -73,10 +137,10 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 | Mirror | `TopIconMirror` | Tạo bản đối xứng qua mặt phẳng. | 🔴 |
 | Move | `TopIconMove` | Di chuyển đối tượng. | 🔴 |
 | Rotate | `TopIconRotate` | Xoay đối tượng quanh tâm hoặc trục. | 🔴 |
-| Explode | `TopIconExplode` | Native Explode: [phạm vi, thao tác và giới hạn](docs/features/OM9-TOP11-005.md). | 🟢 |
-| Join | `TopIconJoin` | Native Join: [phạm vi, thao tác và giới hạn](docs/features/OM9-TOP11-008.md). | 🟢 |
+| Explode | `TopIconExplode` | Native Explode: [phạm vi, tùy chọn và giới hạn](docs/features/OM9-TOP11-005.md). | 🟢 |
+| Join | `TopIconJoin` | Native Join: [phạm vi, tùy chọn và giới hạn](docs/features/OM9-TOP11-008.md). | 🟢 |
 | Split | `TopIconSplit` | Chia đối tượng bằng đối tượng cắt. | 🔴 |
-| Trim | `TopIconTrim` | Native Trim: [phạm vi, thao tác và giới hạn](docs/features/OM9-TOP11-010.md). | 🟢 |
+| Trim | `TopIconTrim` | Native Trim: [phạm vi, tùy chọn và giới hạn](docs/features/OM9-TOP11-010.md). | 🟢 |
 | Ring Rail | `TopIconRingRail` | Tạo đường dẫn cơ sở cho thân nhẫn. | 🔴 |
 
 #### File
@@ -173,9 +237,9 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 | Polyline | `CurvePolylinePolyline` | Vẽ đường gấp khúc qua nhiều điểm bằng chuột hoặc console. | 🟢 |
 | Line | `CurveLineSingleLine` | Vẽ đoạn thẳng giữa các điểm bằng chuột hoặc console. | 🟢 |
 | Interpolate Points | `CurveFreeFormInterpolatePoints` | Vẽ B-spline qua điểm bằng chuột/CMD; Degree, Knots, Close/Sharp, Undo. Tangent chưa hỗ trợ. | 🟢 |
-| Rectangle Cornerto Corner | `CurveRectangleCornertoCorner` | Vẽ hình chữ nhật bằng hai góc. | 🔴 |
-| Circle Center Radius | `CurveCircleCenterRadius` | Vẽ đường tròn từ tâm và bán kính. | 🔴 |
-| Ellipse From Center | `CurveEllipseFromCenter` | Vẽ ellipse từ tâm. | 🔴 |
+| Rectangle Cornerto Corner | `CurveRectangleCornertoCorner` | Hai góc, Center, 3Point, Vertical, Length/Width và Shift square; preview, Undo/Redo, FCStd. Rounded/Conic chưa hỗ trợ. Kiểm chứng 2026-10-09: [OM9-CURVE-004](docs/features/OM9-CURVE-004.md). | 🟢 |
+| Circle Center Radius | `CurveCircleCenterRadius` | Cơ bản/nâng cao; Tangent 3D không đồng phẳng; History mọi nhánh gồm Deformable; layer hiện hành/màu/ẩn/khóa; Undo/Redo và cold FCStd. Bộ giải có giới hạn tìm nghiệm. [OM9-CURVE-005](docs/features/OM9-CURVE-005.md). | 🟢 |
+| Ellipse From Center | `CurveEllipseFromCenter` | Center, Diameter/chuột phải, Corner, Vertical, FromFoci/MarkFoci, AroundCurve, Deformable; preview, layer, Undo/Redo và FCStd. Snapshot; History chưa hỗ trợ. [OM9-CURVE-006](docs/features/OM9-CURVE-006.md). | 🟢 |
 | Arc Center Start Angle | `CurveArcCenterStartAngle` | Vẽ cung tròn từ tâm, điểm đầu và góc. | 🔴 |
 | Arc Start End Direction | `CurveArcStartEndDirection` | Vẽ cung tròn theo điểm đầu, điểm cuối và hướng. | 🔴 |
 | Curve Rebuild | `OthersCurveRebuild` | Dựng lại curve/polyline theo PointCount/Degree; preview độ lệch lấy mẫu, DeleteInput, Undo. Current layer chưa hỗ trợ. | 🟢 |
@@ -233,15 +297,15 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 
 | Tên lệnh / mục menu | Mã catalog | Ý nghĩa | Trạng thái |
 |---|---|---|---|
-| Sweep1 Rail | `SurfaceSweepSweep1Rail` | Native Sweep1: rail → profiles → preview/OK; Reverse, seam và Frenet. [Phạm vi](docs/features/OM9-SURFACE-001.md). | 🟢 |
-| Sweep2 Rails | `SurfaceSweepSweep2Rails` | Native Sweep2: hai rail → profiles; kiểm tra bám rail, preview/OK. [Giới hạn kernel](docs/features/OM9-SURFACE-003.md). | 🟢 |
+| Sweep1 Rail | `SurfaceSweepSweep1Rail` | Native Sweep1: Refit theo dung sai, History tùy chọn, Chain Edges, seams, Rebuild/Closed và Preview. [Phạm vi](docs/features/OM9-SURFACE-001.md). | 🟢 |
+| Sweep2 Rails | `SurfaceSweepSweep2Rails` | Native Sweep2: G1/G2 cạnh mặt, Refit, Add Slash một profile, History và Maintain Height trong giới hạn host. [Phạm vi](docs/features/OM9-SURFACE-003.md). | 🟢 |
 | Profile Sweep | `SurfaceSweepProfileSweep` | Quét mặt từ profile theo workflow Profile Sweep. | 🔴 |
 | Planar Curves | `SurfacePlanarCurves` | Tạo mặt phẳng từ các đường biên đồng phẳng. | 🔴 |
 | Plane Cornerto Corner | `SurfacePlaneCornertoCorner` | Tạo mặt phẳng bằng hai góc. | 🔴 |
 | Surface Rebuild | `OthersSurfaceRebuild` | Dựng lại mặt với cấu trúc control points mới. | 🔴 |
 | Blend Surface | `SurfaceBlendSurface` | Tạo mặt chuyển tiếp giữa các mặt. | 🔴 |
 | Variable Blend Surfaces | `SurfaceVariableFilletBlendChamferVariableBlendSurfaces` | Tạo blend giữa các mặt với tham số biến thiên. | 🔴 |
-| Loft | `SurfaceLoft` | Native Loft: profiles/edges → Normal hoặc Straight Sections; seam, Reverse, Closed loft. [Phạm vi](docs/features/OM9-SURFACE-009.md). | 🟢 |
+| Loft | `SurfaceLoft` | Native Loft: Match Start/End Tangents, Refit, History và các style trong giới hạn host. [Phạm vi](docs/features/OM9-SURFACE-009.md). | 🟢 |
 | Curve Network | `SurfaceCurveNetwork` | Tạo mặt từ mạng đường cong. | 🔴 |
 | Shrink Trimmed Surface | `SurfaceSurfaceEditToolsShrinkTrimmedSurface` | Thu gọn miền nền của mặt đã trim. | 🔴 |
 | Patch | `SurfacePatch` | Tạo mặt patch phủ vùng biên. | 🔴 |
@@ -278,10 +342,10 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 
 | Tên lệnh / mục menu | Mã catalog | Ý nghĩa | Trạng thái |
 |---|---|---|---|
-| Union | `SolidUnion` | Native BooleanUnion: [phạm vi, thao tác và giới hạn](docs/features/OM9-SOLID-003.md). | 🟢 |
-| Difference | `SolidDifference` | Native BooleanDifference: [phạm vi, thao tác và giới hạn](docs/features/OM9-SOLID-001.md). | 🟢 |
-| Intersection | `SolidIntersection` | Native BooleanIntersection: [phạm vi, thao tác và giới hạn](docs/features/OM9-SOLID-002.md). | 🟢 |
-| Boolean Two Objects | `SolidBooleanTwoObjects` | Native Boolean2Objects: [phạm vi, thao tác và giới hạn](docs/features/OM9-SOLID-004.md). | 🟢 |
+| Union | `SolidUnion` | Native BooleanUnion: [phạm vi, tùy chọn và giới hạn](docs/features/OM9-SOLID-003.md). | 🟢 |
+| Difference | `SolidDifference` | Native BooleanDifference: [phạm vi, tùy chọn và giới hạn](docs/features/OM9-SOLID-001.md). | 🟢 |
+| Intersection | `SolidIntersection` | Native BooleanIntersection: [phạm vi, tùy chọn và giới hạn](docs/features/OM9-SOLID-002.md). | 🟢 |
+| Boolean Two Objects | `SolidBooleanTwoObjects` | Native Boolean2Objects: [phạm vi, tùy chọn và giới hạn](docs/features/OM9-SOLID-004.md). | 🟢 |
 | Cap Planar Holes | `SolidCapPlanarHoles` | Đóng các lỗ đồng phẳng để tạo khối kín. | 🔴 |
 | Extract Surface | `SolidExtractSurface` | Trích một mặt khỏi khối hoặc polysurface. | 🔴 |
 | Fillet Edge | `SolidFilletEdgeFilletEdge` | Bo tròn các cạnh khối. | 🔴 |
@@ -289,8 +353,8 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 | Extrude Planar Curve Straight | `SolidExtrudePlanarCurveStraight` | Extrude đường kín đồng phẳng theo phương thẳng. | 🔴 |
 | GVDAll Extrude | `SolidGVDAllExtrude` | Extrude theo workflow GVD. | 🔴 |
 | Pipe | `SolidPipe` | Tạo ống theo đường dẫn. | 🔴 |
-| Box Cornerto Corner Height | `SolidBoxCornertoCornerHeight` | Native Box: hai góc đáy/Length, Width, Height; 3Point, CMD/mouse, preview, Undo và save/reload. [Phạm vi](docs/features/OM9-SOLID-012.md). | 🟢 |
-| Sphere Center Radius | `SolidSphereCenterRadius` | Native Sphere: tâm + bán kính/điểm, CMD/mouse, Osnap, preview và save/reload. [Phạm vi](docs/features/OM9-SOLID-014.md). | 🟢 |
+| Box Cornerto Corner Height | `SolidBoxCornertoCornerHeight` | Native Box: Corners/Diagonal/3Point/Vertical/Center/Cube, CMD/mouse, preview và persistence. [Phạm vi](OpenMatrix9_Codex_Spec_v1/specs/04-solid/om9-solid-012-box.md). | 🟢 |
+| Sphere Center Radius | `SolidSphereCenterRadius` | Native Sphere: Center/Diameter, 2/3/4Point/Radius, Vertical, FitPoints, AroundCurve, planar Tangent. [Phạm vi](OpenMatrix9_Codex_Spec_v1/specs/04-solid/om9-solid-014-sphere.md). | 🟢 |
 | Ellipsoid From Center | `SolidEllipsoidFromCenter` | Tạo ellipsoid từ tâm. | 🔴 |
 | Torus | `SolidTorus` | Tạo khối xuyến. | 🔴 |
 | Cylinder | `SolidCylinder` | Tạo hình trụ. | 🔴 |
@@ -332,7 +396,8 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 | Orient Perpendicularto Curve | `TransformOrientPerpendiculartoCurve` | Định hướng đối tượng vuông góc đường cong. | 🔴 |
 | Symmetry | `TransformSymmetry` | Thiết lập đối xứng của đối tượng. | 🔴 |
 | Solid Pt On | `TransformSolidPtOn` | Bật các điểm điều khiển của khối. | 🔴 |
-| Cage Edit | `TransformCageEditingCageEdit` | Biến dạng đối tượng bằng lồng cage. | 🔴 |
+| Cage Edit | `TransformCageEditingCageEdit` | Native existing 3D Cage: Global/Local Mesh và exact Edge/rectangular Face; general BRep global affine-only. [Phạm vi/giới hạn](docs/features/cage-command-native-contract.md), [validation](docs/validation/2026-10-09-reusable-builder-cage.md). | 🟡 |
+| Release From Cage | `ReleaseFromCage` | Native selected-only detach, giữ current geometry/control/unselected bindings; Undo và FCStd. [Validation](docs/validation/2026-10-09-reusable-builder-cage.md). | 🟡 |
 | Along Curve | `TransformArrayAlongCurve` | Tạo mảng dọc đường cong. | 🔴 |
 | Array Linear | `TransformArrayArrayLinear` | Tạo mảng theo phương thẳng. | 🔴 |
 | Along Surface | `TransformArrayAlongSurface` | Tạo mảng trên mặt. | 🔴 |
@@ -352,7 +417,7 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 | Orient Remapto CPlane | `TransformOrientRemaptoCPlane` | Chuyển đối tượng giữa các construction plane. | 🔴 |
 | Move UVN | `TransformMoveUVN` | Di chuyển theo hệ tọa độ UVN. | 🔴 |
 | Soft Move | `TransformSoftMove` | Di chuyển với ảnh hưởng mềm. | 🔴 |
-| Create Cage | `TransformCageEditingCreateCage` | Tạo lồng điều khiển cage. | 🔴 |
+| Create Cage | `TransformCageEditingCreateCage` | Native World BoundingBox với positive X/Y/Z extents; explicit counts/degrees, editable CageControl, không tự capture. [Contract](docs/features/cage-command-native-contract.md). | 🟡 |
 
 #### Clayoo / SubD
 
@@ -469,7 +534,7 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 | Smart Target On Crv End | `gvSmartTargetOnCrvEnd` | Đặt Smart Target ở đầu đường cong. | 🔴 |
 | Smart Blend | `gvSmartBlend` | Tạo chuyển tiếp theo workflow Smart Blend. | 🔴 |
 | Smart MSR | `gvSmartMSR` | Workflow Smart MSR; thuật toán cụ thể chưa xác minh. | 🔴 |
-| Join History | `gvJoinHistory` | Ghép đối tượng có quan hệ history. | 🔴 |
+| Join History | `gvJoinHistory` | Native curve [Join History](docs/features/history-native-contract.md); supported SDK83/cold4 đã kiểm chứng. | 🟢 |
 | Image Trace | `BuilderImageTrace` | Trace đường cong từ ảnh. | 🔴 |
 | Object Checker | `BuilderObjectChecker` | Kiểm tra đối tượng trước xuất hoặc sản xuất. | 🔴 |
 | Mesh Repair | `BuilderMeshRepair` | Sửa mesh theo builder. | 🔴 |
@@ -517,7 +582,7 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 | Gem Springs | `BuilderGemSprings` | Workflow Gem Springs; quy tắc chi tiết chưa xác minh. | 🔴 |
 | Gem Follow | `BuilderGemFollow` | Cho đá theo đối tượng hoặc đường tham chiếu. | 🔴 |
 | Gem Control | `BuilderGemControl` | Điều khiển các tham số bố trí đá. | 🔴 |
-| Match Attributes | `OthersMatchAttributes` | Sao chép thuộc tính giữa các đối tượng. | 🔴 |
+| Match Attributes | `OthersMatchAttributes` | Original command/UI vẫn disabled; reusable native `matchBuilderAttributes` API có same-shape durable records. [Phạm vi API](docs/features/builder-history-native-contract.md). | 🔴 |
 | Save Style | `OthersSaveStyle` | Lưu style đối tượng. | 🔴 |
 | Load Style | `OthersLoadStyle` | Nạp style đối tượng. | 🔴 |
 | GVDGem Flow | `BuilderGVDGemFlow` | Flow đá theo workflow GVD. | 🔴 |
@@ -673,10 +738,10 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 | Gumball ON | `InfoSettingsGumballON` | Bật gizmo thao tác. | 🔴 |
 | Smart Targets Gumball ON | `InfoSettingsSmartTargetsGumballON` | Bật gizmo cho Smart Targets. | 🔴 |
 | Rhino Smart Track ON | `RhinoSmartTrackON` | Bật tracking thông minh theo catalog. | 🔴 |
-| Rhino History ON | `RhinoHistoryON` | Bật history tương đương workflow Rhino. | 🔴 |
-| GVHistory Update ON | `GVHistoryUpdateON` | Bật cập nhật history GV. | 🔴 |
-| GVHistory Record ON | `GVHistoryRecordON` | Bật ghi history GV. | 🔴 |
-| GVClear History | `InfoSettingsGVClearHistory` | Xóa quan hệ history GV. | 🔴 |
+| Rhino History ON | `RhinoHistoryON` | [History policy](docs/features/history-native-contract.md): Record/Update/Lock/warning trên Join/Surface/Builder; Cage bindings cập nhật độc lập Record/Update. [Reusable validation](docs/validation/2026-10-09-reusable-builder-cage.md). | 🟢 |
+| GVHistory Update ON | `GVHistoryUpdateON` | RCORE-09: Update suspend/resume các liên kết đã ghi, độc lập Record, trên supported Join/Surface/Builder; Cage bindings độc lập global policy. | 🟢 |
+| GVHistory Record ON | `GVHistoryRecordON` | RCORE-09: Record chỉ điều khiển liên kết mới; Record Off không dừng descendant đã ghi khi Update On. Cage capture giữ persistent binding khi Record Off. | 🟢 |
+| GVClear History | `InfoSettingsGVClearHistory` | Clear incoming native Join/Surface/Builder links hoặc selected Cage influence; durable Builder recipe được giữ. | 🟢 |
 | Layer Arrow | `LayerArrow` | Chọn layer thao tác trên sidebar. | 🔴 |
 | Layer Lock | `LayerLock` | Khóa layer trên sidebar. | 🔴 |
 | Layer Visibility | `LayerVisibility` | Bật/tắt visibility layer trên sidebar. | 🔴 |
@@ -802,3 +867,19 @@ Danh mục chuẩn hóa có131 khai báo nguồn,128 lớp runtime đã đối c
 
 
 Xem [phạm vi nhánh mới và cách kiểm tra](docs/public-update-2026-10-08.md).
+
+The project follows its existing **LGPL-2.1-or-later** declaration; the license
+text is in [LICENSE](LICENSE). Separate dependency notices remain applicable.
+
+### Surface advanced và History — 2026-10-09
+
+Refit, Sweep2 G1/G2, Add Slash và Loft tangent matching đã có native geometry trong [giới hạn host](docs/features/surface-advanced-options.md). Bật History trong options để sửa rail/profile và tự dựng lại mặt; CMD `gvSweepHistory` / `gvSweep2History` tạo variant002/004. Native type giữ dependency qua Undo/Redo/FCStd, kể cả mở file trong tiến trình mới. **530/530 kiểm tra native**, 164 Rust và23 Python đã qua; [bằng chứng](docs/validation/2026-10-09-surface-constraints-history.md).
+
+### Nguồn Rhino 5 cho core
+
+[Hướng dẫn và bảng tra Rhino 5](ref/rhino5/README.md) ánh xạ tài liệu gốc,
+Command Help và các bước kiểm chứng sang 12 chương
+[00-rhino-core](OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/README.md).
+Đọc nguồn theo phần chức năng trước khi triển khai và chạy fixture trước khi
+xác nhận tương đương. Đây là ngoại lệ cho tài liệu Rhino 5 được người dùng
+cho phép; code decompile, tài nguyên và tài liệu Matrix vẫn ở kho riêng.

@@ -48,3 +48,29 @@ fn om9_top11_005_single_explode_input() {
     assert!(s.finish());
     assert!(s.delete_input);
 }
+
+#[test]
+fn om9_top11_010_options_are_kind_gated_and_reset() {
+    let mut trim = Session::new(Kind::Trim);
+    assert!(trim.set_option(1, true));
+    assert!(trim.set_option(2, true));
+    assert!(trim.extend_lines && trim.apparent_intersections);
+    assert!(!trim.set_option(9, true));
+    let fresh = Session::new(Kind::Trim);
+    assert!(!fresh.extend_lines && !fresh.apparent_intersections);
+    for kind in [Kind::Explode, Kind::Union, Kind::Join] {
+        assert!(!Session::new(kind).set_option(1, true));
+    }
+}
+
+#[test]
+fn om9_top11_008_explicit_finite_tolerance() {
+    let mut join = Session::new(Kind::Join);
+    assert!(join.set_tolerance(0.003));
+    assert_eq!(join.tolerance, 0.003);
+    for bad in [0.0, -1.0, 1e-12, 1e7, f64::NAN, f64::INFINITY] {
+        assert!(!join.set_tolerance(bad));
+        assert_eq!(join.tolerance, 0.003);
+    }
+    assert!(!Session::new(Kind::Trim).set_tolerance(0.1));
+}

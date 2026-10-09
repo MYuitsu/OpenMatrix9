@@ -11,11 +11,11 @@ class EditController final:public QObject {
 public:
     static EditController& instance();static bool handles(std::size_t);static bool matches(std::size_t,const QString&);
     void activate();void deactivate();bool available(std::size_t)const;bool active()const;
-    bool start(std::size_t);void cancel();void submit(const QString&);
+    bool start(std::size_t,bool fromCommand=false);void cancel();void submit(const QString&);
 protected:bool eventFilter(QObject*,QEvent*)override;
 private:
     EditController();bool valid()const;void prompt(const QString&);void refresh();void add(const std::string&);
-    void prepare();void preview();void clearPreview();void commit();void trim(const std::string&,const std::array<double,3>&);void error(const std::exception&);
+    void prepare();void rebuildTrim();void preview();void clearPreview();void commit();void trim(const std::string&,const std::array<double,3>&);void error(const std::exception&);
     bool enabled=false;App::Document* document=nullptr;std::size_t command=0;unsigned kind=0;
     std::vector<EditInput> inputs;EditShapes output;std::vector<EditShapes> fragments;
     std::vector<std::set<std::size_t>> removed;std::vector<std::pair<std::size_t,std::size_t>> trimUndo;
@@ -23,6 +23,8 @@ private:
     std::vector<std::pair<SoSeparator*,SoSeparator*>> previews;
     std::vector<std::pair<SoSwitch*,int>> hidden;
     std::vector<std::tuple<SoSeparator*,std::size_t,std::size_t>> trimPreviewSources;
+    EditProjection projection;
+    bool allowBlocks=false;
     fastsignals::scoped_connection deleteConnection,activeConnection;
 };
 }

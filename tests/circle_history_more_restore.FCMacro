@@ -1,0 +1,30 @@
+# OM9-CURVE-005 cold-process recipe restore. Run after history_more smoke macro.
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok: raise AssertionError(name)
+def run():
+    try:
+        check('Workbench remains inactive before cold restore',Gui.activeWorkbench().name()!='OpenMatrix9Workbench')
+        root=Path(__file__).parents[1]/'build/circle_history_more_smoke-1'
+        files=sorted(root.glob('*/history_more.FCStd'),key=lambda p:p.stat().st_mtime,reverse=True)
+        source=Path(os.environ['OM9_HISTORY_MORE_FILE']) if os.environ.get('OM9_HISTORY_MORE_FILE') else files[0]
+        doc=App.openDocument(str(source));import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__
+        check('Cold native module loaded',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        doc.recompute();records=[o for o in doc.Objects if o.TypeId=='OpenMatrix9Gui::CircleHistory' and o.Recorded]
+        check('Cold Circle recipes restore with valid native shapes',len(records)>=10 and all(o.Shape.isValid() and len(o.Recipe)==24 for o in records))
+        group=doc.getObject('SourceGroup');group.Placement.Base=App.Vector(0,50,0);doc.recompute();analytic=[o for o in records if o.Recipe[1]==0 and o.Recipe[3]==5 and o.Recipe[18]==0 and o.Sources]
+        check('Cold point parent notifications update circle',bool(analytic) and all((o.Shape.Edges[0].Curve.Center-App.Vector(1,50,0)).Length<1e-7 for o in analytic))
+        splines=[o for o in records if o.Recipe[18]==1 and o.Recipe[1]==0];check('Cold deformable replay keeps degree/count',bool(splines) and all(o.Shape.Edges[0].Curve.isPeriodic() and o.Shape.Edges[0].Curve.NbPoles==12 and o.Shape.Edges[0].Curve.Degree==3 for o in splines))
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2));App.Console.PrintMessage(json.dumps(result)+'\n')
+    for name in list(App.listDocuments()): App.closeDocument(name)
+    QtWidgets.QApplication.quit()
+QtCore.QTimer.singleShot(700,run)

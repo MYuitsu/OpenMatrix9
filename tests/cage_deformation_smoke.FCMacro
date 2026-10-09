@@ -1,0 +1,83 @@
+"""Reusable native CageEdit dependency/geometry contract."""
+import os,sys,json,traceback
+from pathlib import Path
+native=os.environ.get('OM9_TEST_NATIVE_DIR','')
+if native:sys.path.insert(0,native)
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh
+from PySide6 import QtCore,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(n,v):result['checks'].append({'name':n,'passed':bool(v)})
+def feature(d,n,s):o=d.addObject('Part::Feature',n);o.Shape=s;return o
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui as om
+        result['native_module_path']=om.__file__
+        check('Matching private native module loaded',not native or Path(om.__file__).parent.resolve()==Path(native).resolve())
+        check('CageEdit native reusable API exists',all(hasattr(om,n) for n in ['createCage','captureCage','releaseFromCage']))
+        if not result['checks'][-1]['passed']:return
+        d=App.newDocument('CageDeformation');d.UndoMode=1
+        a=feature(d,'Box',Part.makeBox(1,1,1));c=om.createCage(d.Name,[0,0,0],[1,1,1])
+        check('Cage creation does not capture objects',len([o for o in d.Objects if o.TypeId=='OpenMatrix9Gui::CageBinding'])==0)
+        empty=d.addObject('Part::Feature','EmptyCaptive');before={o.Name for o in d.Objects};rejected=False
+        try:om.captureCage(c,[empty])
+        except RuntimeError as error:rejected='Empty captive shape' in str(error)
+        check('Empty native captive rejects safely before document writes',rejected and before=={o.Name for o in d.Objects})
+        bindings=om.captureCage(c,[a]);d.recompute()
+        check('Capture creates persistent explicit native relationship',len(bindings)==1 and bindings[0].Control==c and bindings[0].Captive==a)
+        check('Initial binding preserves geometry',abs(a.Shape.Volume-1)<1e-8)
+        points=list(c.ControlPoints);c.ControlPoints=[App.Vector(p.x+2,p.y,p.z) for p in points];d.recompute()
+        check('Affine cage updates full solid exactly',a.Shape.isValid() and abs(a.Shape.Volume-1)<1e-8 and abs(a.Shape.BoundBox.XMin-2)<1e-7)
+        c.ControlPoints=[App.Vector(p.x+3,p.y,p.z) for p in points];d.recompute()
+        check('Repeated changes use frozen bind snapshot',abs(a.Shape.BoundBox.XMin-3)<1e-7)
+        settings=om.createHistorySettings(d.Name) if hasattr(om,'createHistorySettings') else d.addObject('OpenMatrix9Gui::HistorySettings','Policy')
+        settings.Record=False;settings.Update=False;c.ControlPoints=[App.Vector(p.x+4,p.y,p.z) for p in points];d.recompute()
+        check('Cage dependency active with global History off',abs(a.Shape.BoundBox.XMin-4)<1e-7)
+        d.openTransaction('Control edit');c.ControlPoints=[App.Vector(p.x+5,p.y,p.z) for p in points];d.recompute();d.commitTransaction();d.undo();d.recompute()
+        check('Cage control Undo restores geometry and relationship',abs(a.Shape.BoundBox.XMin-4)<1e-7 and bindings[0].Active)
+        d.redo();d.recompute();check('Cage control Redo',abs(a.Shape.BoundBox.XMin-5)<1e-7)
+        f=out/'cage.FCStd';d.saveAs(str(f));name=d.Name;App.closeDocument(name);d=App.openDocument(str(f));c=d.getObject('Cage');a=d.getObject('Box');points=list(c.ControlPoints);c.ControlPoints=[App.Vector(p.x+1,p.y,p.z) for p in points];d.recompute()
+        check('Cage links and frozen bind data survive FCStd',abs(a.Shape.BoundBox.XMin-6)<1e-7)
+        om.releaseFromCage([a]);frozen=a.Shape.BoundBox.XMin;c.ControlPoints=[App.Vector(p.x+2,p.y,p.z) for p in points];d.recompute()
+        check('Release preserves current geometry and only removes selected influence',abs(a.Shape.BoundBox.XMin-frozen)<1e-7)
+        d.undo();d.recompute();check('Release Undo restores binding',any(getattr(o,'Active',False) and getattr(o,'Captive',None)==a for o in d.Objects if o.TypeId=='OpenMatrix9Gui::CageBinding'))
+        App.closeDocument(d.Name)
+        d=App.newDocument('CageMesh');d.UndoMode=1;c=om.createCage(d.Name,[0,0,0],[1,1,1]);m=d.addObject('Mesh::Feature','Mesh');m.Mesh=Mesh.Mesh([[(0,0,0),(1,0,0),(1,1,1)]]);bind=om.captureCage(c,[m]);pts=list(c.ControlPoints);pts[-1].z=2;c.ControlPoints=pts;d.recompute()
+        check('Nonaffine cage deforms mesh by rational basis',m.Mesh.Topology[0][-1].distanceToPoint(App.Vector(1,1,2))<1e-7)
+        c.ControlPoints=list(c.ControlPoints);d.recompute();check('Mesh updates do not accumulate',m.Mesh.Topology[0][-1].distanceToPoint(App.Vector(1,1,2))<1e-7)
+        before=len(d.Objects)
+        try:om.captureCage(c,[m,m])
+        except RuntimeError:pass
+        check('Duplicate/already captured batch rejected atomically',len(d.Objects)==before)
+        App.closeDocument(d.Name)
+        d=App.newDocument('CageLocal');c=om.createCage(d.Name,[0,0,0],[1,1,1]);m=d.addObject('Mesh::Feature','Mesh');m.Mesh=Mesh.Mesh([[(.5,.5,.5),(1.5,.4,.5),(2.5,.3,.5)]]);d.recompute();om.captureCage(c,[m],'Local',1)
+        pts=list(c.ControlPoints);c.ControlPoints=[App.Vector(p.x+2,p.y,p.z) for p in pts];d.recompute()
+        check('Local falloff preserves outside vertices and blends transition',all(abs(p.x-2.5)<1e-6 for p in m.Mesh.Topology[0]))
+        App.closeDocument(d.Name)
+        d=App.newDocument('CageNurbs');c=om.createCage(d.Name,[0,0,0],[1,1,1]);edge=feature(d,'Edge',Part.makeLine(App.Vector(0,0,0),App.Vector(1,1,1)));d.recompute();om.captureCage(c,[edge]);pts=list(c.ControlPoints);pts[-1].z=2;c.ControlPoints=pts;d.recompute()
+        check('Nonaffine structural mapping updates native edge',edge.Shape.isValid() and edge.Shape.Vertexes[-1].Point.distanceToPoint(App.Vector(1,1,2))<1e-7)
+        App.closeDocument(d.Name)
+        d=App.newDocument('CagePatch');c=om.createCage(d.Name,[0,0,0],[1,1,1]);face=feature(d,'Patch',Part.makePlane(1,1));d.recompute();om.captureCage(c,[face]);pts=list(c.ControlPoints);pts[3].z=.5;c.ControlPoints=pts;d.recompute()
+        check('Nonaffine structural mapping updates native rectangular face',face.Shape.isValid() and len(face.Shape.Faces)==1 and abs(face.Shape.BoundBox.ZMax-.5)<1e-7)
+        App.closeDocument(d.Name)
+        d=App.newDocument('CageInputValidation');before=len(d.Objects)
+        for name,counts,degrees,hi in [('huge count',[1e300,2,2],[1,1,1],[1,1,1]),('fractional count',[2.5,2,2],[1,1,1],[1,1,1]),('invalid degree',[2,2,2],[2,1,1],[1,1,1]),('flat cage',[2,2,2],[1,1,1],[1,1,0])]:
+            rejected=False
+            try:om.createCage(d.Name,[0,0,0],hi,counts,degrees)
+            except RuntimeError:rejected=True
+            check(name+' rejected before native mutation',rejected and len(d.Objects)==before)
+        c=om.createCage(d.Name,[0,0,0],[1,1,1],[4,5,2],[2,3,1]);check('Mixed cage degrees/counts use Rust builder',len(c.ControlPoints)==40 and list(c.Degrees)==[2,3,1])
+        unbound=feature(d,'Unbound',Part.makeBox(1,1,1));before={o.Name for o in d.Objects};rejected=False
+        try:om.releaseFromCage([unbound])
+        except RuntimeError:rejected=True
+        check('Release refuses empty influence without mutation',rejected and before=={o.Name for o in d.Objects})
+        App.closeDocument(d.Name)
+        d=App.newDocument('CageRotatedFrame');a=feature(d,'Box',Part.makeBox(1,1,1));c=om.createCage(d.Name,[0,0,0],[1,1,1]);om.captureCage(c,[a]);group=d.addObject('App::Part','ControlFrame');group.addObject(c);group.Placement=App.Placement(App.Vector(3,2,1),App.Rotation(App.Vector(0,0,1),30));d.recompute()
+        expected=group.Placement.multVec(App.Vector(.5,.5,.5));check('Rotated cage ancestor preserves exact affine solid',not a.Shape.isNull() and a.Shape.isValid() and a.Shape.CenterOfGravity.distanceToPoint(expected)<1e-7 and abs(a.Shape.Volume-1)<1e-7)
+        App.closeDocument(d.Name)
+    except Exception:result['error']=traceback.format_exc()
+    finally:
+        result['ok']=not result.get('error') and all(x['passed'] for x in result['checks'])
+        for n in list(App.listDocuments()):App.closeDocument(n)
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(800,run)

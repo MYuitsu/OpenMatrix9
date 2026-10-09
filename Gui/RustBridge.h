@@ -1,11 +1,30 @@
 #pragma once
 #include <cstddef>
+extern "C" {
+bool om9_curve_input_units(double);
+std::size_t om9_command_repeat_candidate();
+bool om9_command_repeatable(std::size_t);
+unsigned int om9_snap_effective_state();
+void om9_snap_transient_clear();
+void om9_snap_accept_point(bool);
+unsigned int om9_snap_submit(const char*);
+}
 #include <cstddef>
 extern "C" {
 unsigned int om9_solid_kind(const char*);
 bool om9_solid_start(const char*);
 void om9_solid_cancel();
 unsigned int om9_solid_phase();
+unsigned int om9_solid_reference_mode();
+const char* om9_solid_mode_name();
+unsigned int om9_solid_reference(double,double,double,double,double,double);
+unsigned int om9_solid_resolve(double,double,double,double);
+bool om9_solid_reference_frame(double*);
+std::size_t om9_solid_constraints(double*);
+double om9_solid_tangent_radius();
+std::size_t om9_solid_point_count();
+unsigned int om9_solid_fit_points(const double*,std::size_t);
+bool om9_solid_pick_plane(double*);
 unsigned int om9_solid_input(const char*);
 unsigned int om9_solid_point(double,double,double,bool);
 bool om9_solid_frame(const double*);
@@ -15,6 +34,15 @@ std::size_t om9_solid_message(char*,std::size_t);
 }
 extern "C" {
 unsigned om9_edit_kind(const char*);
+bool om9_edit_set_option(unsigned,bool);
+bool om9_edit_option(unsigned);
+bool om9_edit_set_tolerance(double);
+unsigned om9_history_command_kind(const char*);
+unsigned om9_history_option(const char*);
+int om9_history_parse_boolean(const char*);
+bool om9_history_can_update(bool,bool);
+bool om9_history_can_edit(bool,bool);
+double om9_edit_tolerance();
 bool om9_edit_start(const char*);
 void om9_edit_cancel();
 unsigned om9_edit_phase();
@@ -37,6 +65,14 @@ unsigned int om9_surface_kind(const char*);
 unsigned int om9_surface_sweep2_contact(std::size_t);
 bool om9_surface_options_valid(unsigned int,unsigned int,bool);
 bool om9_surface_transport(const double*,double*);
+bool om9_surface_transport_height(const double*,bool,double*);
+bool om9_surface_uniform_spline(const double*,std::size_t,bool);
+bool om9_surface_refit(const double*,std::size_t,double,bool);
+double om9_surface_refit_deviation();
+double om9_surface_slash_parameter(const double*,std::size_t,double);
+bool om9_surface_chain_start();
+bool om9_surface_chain_add(const char*);
+bool om9_surface_chain_finish(bool);
 bool om9_surface_start(const char*);
 bool om9_surface_add(const char*,bool closed);
 bool om9_surface_finish();
@@ -78,6 +114,39 @@ double om9_spline_value(double u,std::size_t axis);
 std::size_t om9_spline_message(char* buffer,std::size_t capacity);
 std::size_t om9_curve_count();
 std::size_t om9_curve_preview_count();
+std::size_t om9_curve_outline(const double* hover,bool square);
+double om9_curve_outline_coordinate(std::size_t point,std::size_t axis);
+bool om9_curve_pick_plane(double* output);
+bool om9_curve_circle_plan(double* output);
+// Ellipse plan: center3, unit canonical major direction3, unit normal3, major/minor radii.
+bool om9_curve_ellipse_plan(double* output);
+bool om9_ellipse_deformable();
+bool om9_ellipse_mark_foci();
+double om9_ellipse_deviation();
+unsigned om9_ellipse_reference_mode();
+unsigned om9_ellipse_reference(double,double,double,double,double,double,unsigned);
+unsigned om9_circle_reference_mode();
+unsigned om9_circle_reference(double,double,double,double,double,double,unsigned);
+unsigned om9_circle_solution_accept(double,double,double,double);
+unsigned om9_circle_solution_accept_normal(double,double,double,double,double,double,double);
+bool om9_circle_tangent_frame(const double*,std::size_t,const double*,double*);
+bool om9_circle_validate_plan(const double*,double*);
+bool om9_circle_history();
+std::size_t om9_circle_history_snapshot(double*,double*,std::size_t);
+bool om9_circle_history_replay(const double*,const double*,std::size_t,const double*,double*);
+double om9_circle_history_radius(const double*,const double*);
+bool om9_circle_tangent_vertical();
+bool om9_circle_plane_frame(const double*,std::size_t,const double*,double*);
+bool om9_circle_spatial_solve(const double*,const double*,std::size_t,const double*,bool,bool,int,bool (*)(void*,std::size_t,double,double*),void*,double*,char*,std::size_t);
+unsigned om9_circle_fit_batch(const double*,std::size_t);
+std::size_t om9_circle_constraints(double*);
+bool om9_circle_frame(double*);
+bool om9_circle_from_first();
+int om9_circle_solution_index();
+bool om9_circle_deformable();
+double om9_circle_deviation(bool approx);
+unsigned om9_circle_construction();
+bool om9_circle_hover_measure(const double*,double*);
 double om9_curve_preview_coordinate(std::size_t point,std::size_t axis);
 bool om9_curve_preview_point(double x,double y,double z,bool shift,double* output);
 double om9_curve_coordinate(std::size_t point,std::size_t axis);

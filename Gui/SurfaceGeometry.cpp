@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "SurfaceGeometry.h"
+#include "SurfaceLoft.h"
+#include "SurfaceSeams.h"
+#include "SurfaceRefit.h"
+#include "SurfaceConstraints.h"
+#include "SurfaceHistory.h"
+#include "CurveGeometry.h"
 #include "RustBridge.h"
 #include <App/Document.h>
 #include <App/DocumentObject.h>
@@ -43,7 +49,7 @@ void verifyCurves(PyObject* part,PyObject* wires,PyObject* surface) {
 std::array<double,3> coordinates(PyObject* point){
     std::array<double,3> p;const char* keys[]={"x","y","z"};for(unsigned i=0;i<3;++i){Ref v(PyObject_GetAttrString(point,keys[i]));p[i]=PyFloat_AsDouble(v.p);}return p;
 }
-Ref transportedSections(PyObject* part,PyObject* wires) {
+Ref transportedSections(PyObject* part,PyObject* wires,bool maintainHeight,const std::vector<std::pair<double,double>>& slashes) {
     // A single profile is carried by two rails; rail separation scales the
     // profile. Never call OCCT's crashing ContactOnBorder path on this SDK.
     auto* rail=PyList_GetItem(wires,0);auto* auxiliary=PyList_GetItem(wires,1);auto* section=PyList_GetItem(wires,2);
@@ -51,6 +57,15 @@ Ref transportedSections(PyObject* part,PyObject* wires) {
     std::vector<std::array<double,3>> a,b;
     for(Py_ssize_t i=0;i<PySequence_Size(aPoints.p);++i){Ref p(PySequence_GetItem(aPoints.p,i));a.push_back(coordinates(p.p));}
     for(Py_ssize_t i=0;i<PySequence_Size(bPoints.p);++i){Ref p(PySequence_GetItem(bPoints.p,i));b.push_back(coordinates(p.p));}
+    if(!slashes.empty()){
+        std::vector<double> stations,pairs;for(unsigned i=0;i<=64;++i)stations.push_back(double(i)/64);
+        for(const auto& [x,y]:slashes){stations.push_back(x);pairs.insert(pairs.end(),{x,y});}
+        std::sort(stations.begin(),stations.end());stations.erase(std::unique(stations.begin(),stations.end()),stations.end());
+        a.clear();b.clear();
+        for(double x:stations){const double y=om9_surface_slash_parameter(pairs.data(),slashes.size(),x);
+            if(!std::isfinite(y))throw std::runtime_error("Slash pairs must be strictly increasing interior positions on both rails");
+            a.push_back(OpenMatrix9Gui::surfaceRailPoint(rail,x));b.push_back(OpenMatrix9Gui::surfaceRailPoint(auxiliary,y));}
+    }
     if(a.size()!=b.size()||a.size()<3||flag(rail,"isClosed")!=flag(auxiliary,"isClosed"))throw std::runtime_error("Sweep2 rails need matching open/closed state");
     for(PyObject* points:{aPoints.p,bPoints.p}){Ref point(PySequence_GetItem(points,0)),vertex(PyObject_CallMethod(part,"Vertex","O",point.p)),distance(PyObject_CallMethod(vertex.p,"distToShape","O",section)),d(PySequence_GetItem(distance.p,0));
         if(PyFloat_AsDouble(d.p)>1e-4)throw std::runtime_error("Single-profile Sweep2: profile must meet both rail starts; align rail seams or use multiple profiles");}
@@ -58,7 +73,7 @@ Ref transportedSections(PyObject* part,PyObject* wires) {
     Ref sections(PyList_New(0));const auto t0=tangent(0);const bool closed=flag(rail,"isClosed");
     for(std::size_t i=0;i<a.size()-(closed?1:0);++i){
         const auto t=tangent(i);double p[18],matrix[16];for(unsigned k=0;k<3;++k){p[k]=a[0][k];p[3+k]=b[0][k];p[6+k]=t0[k];p[9+k]=a[i][k];p[12+k]=b[i][k];p[15+k]=t[k];}
-        if(!om9_surface_transport(p,matrix))throw std::runtime_error("Sweep2 rails intersect or cannot define a section frame");
+        if(!om9_surface_transport_height(p,maintainHeight,matrix))throw std::runtime_error("Sweep2 rails intersect or cannot define a section frame");
         Ref transform(PyObject_CallMethod(app.p,"Matrix",nullptr));for(unsigned row=0;row<4;++row)for(unsigned col=0;col<4;++col){const std::string key="A"+std::to_string(row+1)+std::to_string(col+1);Ref value(PyFloat_FromDouble(matrix[row*4+col]));set(transform.p,key.c_str(),value.p);}
         Ref moved(PyObject_CallMethod(section,"transformGeometry","O",transform.p));Ref wire=wireFromShape(part,moved.p);if(PyList_Append(sections.p,wire.p)<0)throw std::runtime_error(pythonError());
     }
@@ -68,14 +83,20 @@ Ref transportedSections(PyObject* part,PyObject* wires) {
 namespace OpenMatrix9Gui {
 PyObject* surfaceWire(App::Document& doc,const SurfaceInput& input) {
     auto* object=doc.getObject(input.object.c_str());if(!object)throw std::runtime_error("An input curve was deleted");
-    Ref part(PyImport_ImportModule("Part"));Ref pyObject(object->getPyObject());Ref original(PyObject_GetAttrString(pyObject.p,"Shape"));Ref shape(PyObject_CallMethod(original.p,"copy",nullptr));
-    if(PyObject_HasAttrString(pyObject.p,"Placement")&&PyObject_HasAttrString(pyObject.p,"getGlobalPlacement")){
+    Ref part(PyImport_ImportModule("Part"));Ref pyObject(object->getPyObject());Ref original(PyObject_GetAttrString(pyObject.p,"Shape"));Ref shape(PyObject_CallMethod(original.p,"copy","OO",Py_True,Py_False));
+    if(!input.chain.empty()){
+        Ref edges(PyList_New(0));
+        for(const auto& [name,sub]:input.chain){Ref segment(surfaceWire(doc,{name,sub}));Ref items(PyObject_GetAttrString(segment.p,"Edges"));
+            if(PySequence_Size(items.p)!=1)throw std::runtime_error("Each rail chain reference must contain exactly one edge");
+            Ref edge(PySequence_GetItem(items.p,0));if(PyList_Append(edges.p,edge.p)<0)throw std::runtime_error(pythonError());}
+        Ref joined(PyObject_CallMethod(part.p,"Wire","O",edges.p));Py_SETREF(shape.p,joined.release());
+    }else if(PyObject_HasAttrString(pyObject.p,"Placement")&&PyObject_HasAttrString(pyObject.p,"getGlobalPlacement")){
         // Shape already carries local Placement. Apply only the parent's frame.
         Ref global(PyObject_CallMethod(pyObject.p,"getGlobalPlacement",nullptr)),local(PyObject_GetAttrString(pyObject.p,"Placement"));
         Ref inverse(PyObject_CallMethod(local.p,"inverse",nullptr)),parent(PyNumber_Multiply(global.p,inverse.p)),matrix(PyObject_CallMethod(parent.p,"toMatrix",nullptr));
         Ref transformed(PyObject_CallMethod(shape.p,"transformShape","OO",matrix.p,Py_False));
     }
-    if(!input.sub.empty()) {
+    if(input.chain.empty()&&!input.sub.empty()) {
         if(input.sub.rfind("Edge",0)!=0&&input.sub.rfind("Wire",0)!=0)throw std::runtime_error("Select a curve or an edge, not a face or vertex");
         Ref element(PyObject_CallMethod(shape.p,"getElement","s",input.sub.c_str()));Py_SETREF(shape.p,element.release());
     }
@@ -88,7 +109,8 @@ PyObject* surfaceWire(App::Document& doc,const SurfaceInput& input) {
     if(PyErr_Occurred())throw std::runtime_error(pythonError());if(!std::isfinite(l)||l<=1e-7)throw std::runtime_error("Input curve has zero or invalid length");
     if(input.seam!=0) {
         if(!flag(wire.p,"isClosed")||!std::isfinite(input.seam)||input.seam<0||input.seam>=1)throw std::runtime_error("Seam needs a closed profile and a fraction between 0 and 1");
-        Ref edges(PyObject_GetAttrString(wire.p,"Edges"));if(PySequence_Size(edges.p)!=1)throw std::runtime_error("Seam adjustment currently supports single-edge closed curves");
+        Ref edges(PyObject_GetAttrString(wire.p,"Edges"));
+        if(PySequence_Size(edges.p)!=1){Ref moved(rotateSurfaceWire(wire.p,input.seam));Py_SETREF(wire.p,moved.release());if(input.reverse){Ref reversed(PyObject_CallMethod(wire.p,"reverse",nullptr));}return wire.release();}
         Ref edge(PySequence_GetItem(edges.p,0));Ref splineShape(PyObject_CallMethod(edge.p,"toNurbs",nullptr));Ref splineEdges(PyObject_GetAttrString(splineShape.p,"Edges"));Ref splineEdge(PySequence_GetItem(splineEdges.p,0));Ref spline(PyObject_GetAttrString(splineEdge.p,"Curve"));
         if(!flag(spline.p,"isPeriodic")){Ref periodic(PyObject_CallMethod(spline.p,"setPeriodic",nullptr));}
         Ref first(PyObject_GetAttrString(spline.p,"FirstParameter")),last(PyObject_GetAttrString(spline.p,"LastParameter"));
@@ -100,6 +122,9 @@ PyObject* surfaceWire(App::Document& doc,const SurfaceInput& input) {
         if(!originIndex)throw std::runtime_error("Cannot locate the requested seam parameter");
         Ref origin(PyObject_CallMethod(spline.p,"setOrigin","i",originIndex));
         Ref newEdge(PyObject_CallMethod(spline.p,"toShape",nullptr));Ref newWire=wireFromShape(part.p,newEdge.p);Py_SETREF(wire.p,newWire.release());
+        // Rebuilding a periodic origin creates a forward edge. Preserve the
+        // source traversal before applying the independent user Flip below.
+        if(string(edge.p,"Orientation")=="Reversed"){Ref restored(PyObject_CallMethod(wire.p,"reverse",nullptr));}
     }
     if(input.reverse){Ref reversed(PyObject_CallMethod(wire.p,"reverse",nullptr));}
     return wire.release();
@@ -109,12 +134,64 @@ PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& input
     const unsigned rails=options.kind==1?1:options.kind==2?2:0;
     if(options.kind<1||options.kind>3||inputs.size()<rails+(rails?1:2))throw std::runtime_error("Not enough input curves");
     if(!om9_surface_options_valid(options.kind,options.style,options.closed))throw std::runtime_error("Unsupported surface options");
-    if(options.closed&&inputs.size()<3)throw std::runtime_error("A closed Loft needs at least three sections");
+    if(options.closed&&inputs.size()<rails+(rails?2:3))throw std::runtime_error("Closed Sweep needs two profiles; Closed Loft needs three sections");
+    if(options.maintainHeight&&(options.kind!=2||inputs.size()!=3))throw std::runtime_error("Maintain Height currently requires exactly one Sweep2 profile; clear it for multiple profiles");
+    if(!options.slashes.empty()&&(options.kind!=2||inputs.size()!=3||inputs[0].closed||inputs[1].closed||options.continuityA||options.continuityB))
+        throw std::runtime_error("Add Slash currently requires one Sweep2 profile and two open rails, without face continuity constraints");
+    if(options.sectionMode>2||options.pointCount<2||options.pointCount>256||!std::isfinite(options.tolerance)||options.tolerance<=0||options.tolerance>1e6)throw std::runtime_error("Unsupported section fitting options");
+    if(options.continuityA||options.continuityB||options.matchStart||options.matchEnd)
+        return constrainedSurface(doc,inputs,options);
     Ref part(PyImport_ImportModule("Part")),wires(PyList_New(0));
-    for(const auto& input:inputs){Ref wire(surfaceWire(doc,input));if(PyList_Append(wires.p,wire.p)<0)throw std::runtime_error(pythonError());}
+    bool profileClosure=false;
+    for(std::size_t i=0;i<inputs.size();++i){
+        Ref wire(surfaceWire(doc,inputs[i]));
+        const bool nativeClosed=flag(wire.p,"isClosed");
+        if(i==rails)profileClosure=nativeClosed;
+        if(i>rails&&nativeClosed!=profileClosure)throw std::runtime_error("Use either all open or all closed profiles");
+        if(options.kind==2&&i>=rails){
+            // Reject disconnected original data before OCCT's auxiliary-spine
+            // solver: this SDK can crash instead of raising on such inputs.
+            Ref length(PyObject_GetAttrString(wire.p,"Length"));
+            const double tolerance=std::max(1e-4,PyFloat_AsDouble(length.p)*1e-7);
+            for(unsigned rail=0;rail<2;++rail){
+                Ref distance(PyObject_CallMethod(wire.p,"distToShape","O",PyList_GetItem(wires.p,rail)));
+                Ref separation(PySequence_GetItem(distance.p,0));const double value=PyFloat_AsDouble(separation.p);
+                if(!std::isfinite(value)||value>tolerance)throw std::runtime_error("Each original Sweep2 profile must meet both rails before construction");
+            }
+        }
+        if(i>=rails&&options.sectionMode!=0){
+            const bool closed=flag(wire.p,"isClosed");auto points=sampleCurve(wire.p,options.sectionMode==2?1025u:std::max(513u,4*options.pointCount+1));
+            // The shared Rust rebuild removes the repeated closing sample
+            // internally; keep it here so periodic input is validated once.
+            std::vector<double> xyz;xyz.reserve(points.size()*3);
+            for(const auto& p:points)xyz.insert(xyz.end(),p.begin(),p.end());
+            const bool fitted=options.sectionMode==2?om9_surface_refit(xyz.data(),points.size(),options.tolerance,closed):
+                om9_spline_rebuild(xyz.data(),points.size(),options.pointCount,std::min(3u,options.pointCount-1),closed);
+            if(!fitted){
+                char message[2048]={};om9_spline_message(message,sizeof(message));throw std::runtime_error(message);
+            }
+            auto fit=publishedSplineShape();Ref rebuilt=wireFromShape(part.p,fit.value);
+            if(options.sectionMode==2)certifySurfaceRefit(wire.p,rebuilt.p,options.tolerance);
+            Py_SETREF(wire.p,rebuilt.release());
+        }
+        if(PyList_Append(wires.p,wire.p)<0)throw std::runtime_error(pythonError());
+    }
+    if(options.closed&&rails){
+        if(!flag(PyList_GetItem(wires.p,0),"isClosed")||(rails==2&&!flag(PyList_GetItem(wires.p,1),"isClosed")))
+            throw std::runtime_error("Closed Sweep requires closed rails in this implementation");
+    }
+    if(!options.slashes.empty()&&(flag(PyList_GetItem(wires.p,0),"isClosed")||flag(PyList_GetItem(wires.p,1),"isClosed")))
+        throw std::runtime_error("Add Slash requires open rails after source changes");
     PyObject* result=nullptr;
     if(options.kind==3) {
-        result=PyObject_CallMethod(part.p,"makeLoft","OOOO",wires.p,Py_False,options.style?Py_True:Py_False,options.closed?Py_True:Py_False);
+        if(options.style>=2)result=advancedLoft(wires.p,options.style,options.closed);
+        else result=PyObject_CallMethod(part.p,"makeLoft","OOOO",wires.p,Py_False,options.style==1?Py_True:Py_False,options.closed?Py_True:Py_False);
+    }else if(rails==2&&inputs.size()==3){
+        // The SDK PipeShell is unstable for dense transformed curved sections
+        // (65-station arch probe). Loft the same transported sections instead;
+        // both rails still drive every frame and are checked on the result.
+        Ref sections=transportedSections(part.p,wires.p,options.maintainHeight,options.slashes);
+        result=PyObject_CallMethod(part.p,"makeLoft","OOOOi",sections.p,Py_False,Py_False,flag(PyList_GetItem(wires.p,0),"isClosed")?Py_True:Py_False,3);
     }else {
         Ref api(PyObject_GetAttrString(part.p,"BRepOffsetAPI"));Ref constructor(PyObject_GetAttrString(api.p,"MakePipeShell"));
         Ref pipe(PyObject_CallFunctionObjArgs(constructor.p,PyList_GetItem(wires.p,0),nullptr));
@@ -122,8 +199,8 @@ PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& input
         if(rails==2){
             Ref auxiliary(PyObject_CallMethod(pipe.p,"setAuxiliarySpine","OOi",PyList_GetItem(wires.p,1),Py_True,int(om9_surface_sweep2_contact(inputs.size()-rails))));
         }
-        if(rails==2&&inputs.size()==3){Ref sections=transportedSections(part.p,wires.p);for(Py_ssize_t i=0;i<PyList_Size(sections.p);++i){Ref added(PyObject_CallMethod(pipe.p,"add","OOO",PyList_GetItem(sections.p,i),Py_False,Py_False));}}
-        else for(std::size_t i=rails;i<inputs.size();++i){Ref added(PyObject_CallMethod(pipe.p,"add","OOO",PyList_GetItem(wires.p,i),Py_False,Py_False));}
+        for(std::size_t i=rails;i<inputs.size();++i){Ref added(PyObject_CallMethod(pipe.p,"add","OOO",PyList_GetItem(wires.p,i),Py_False,Py_False));}
+        if(options.closed){Ref added(PyObject_CallMethod(pipe.p,"add","OOO",PyList_GetItem(wires.p,rails),Py_False,Py_False));}
         if(!flag(pipe.p,"isReady"))throw std::runtime_error("Sweep could not use these profiles");
         Ref built(PyObject_CallMethod(pipe.p,"build",nullptr));result=PyObject_CallMethod(pipe.p,"shape",nullptr);
     }
@@ -137,10 +214,21 @@ void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceI
     const char* feature=options.kind==1?"OM9-SURFACE-001":options.kind==2?"OM9-SURFACE-003":"OM9-SURFACE-009";
     doc.openTransaction(name);
     try {
+        if(options.history){
+            auto* feature=createSurfaceHistory(doc,shape,inputs,options);Ref object(feature->getPyObject());
+            Ref view(PyObject_GetAttrString(object.p,"ViewObject")),color(Py_BuildValue("(ddd)",0.0,130.0/255.0,85.0/255.0));set(view.p,"ShapeColor",color.p);set(view.p,"LineColor",color.p);
+            doc.recompute();if(!feature->isValid()||feature->Shape.getShape().isNull())throw std::runtime_error("Surface History recompute failed before commit");
+            doc.commitTransaction();return;
+        }
         Ref pyDoc(doc.getPyObject()),object(PyObject_CallMethod(pyDoc.p,"addObject","ss","Part::Feature",name));set(object.p,"Shape",shape);
         Ref id(PyUnicode_FromString(feature)),command(PyUnicode_FromString(name));property(object.p,"App::PropertyString","OM9FeatureId",id.p);property(object.p,"App::PropertyString","OM9Command",command.p);
-        Ref sources(PyList_New(0));std::ostringstream settings;settings<<"style="<<options.style<<";frenet="<<options.frenet<<";closed="<<options.closed;
-        for(const auto& input:inputs){auto* source=doc.getObject(input.object.c_str());if(!source)throw std::runtime_error("An input curve was deleted");Ref pySource(source->getPyObject());Ref subs(Py_BuildValue("[s]",input.sub.c_str()));Ref entry(PyTuple_Pack(2,pySource.p,subs.p));if(PyList_Append(sources.p,entry.p)<0)throw std::runtime_error(pythonError());settings<<";"<<input.object<<"."<<input.sub<<":reverse="<<input.reverse<<",seam="<<input.seam;}
+        Ref sources(PyList_New(0));std::ostringstream settings;settings.precision(17);settings<<"style="<<options.style<<";frenet="<<options.frenet<<";closed="<<options.closed<<";maintainHeight="<<options.maintainHeight<<";sectionMode="<<options.sectionMode<<";pointCount="<<options.pointCount<<";preview="<<options.preview<<";tolerance="<<options.tolerance<<";continuityA="<<options.continuityA<<";continuityB="<<options.continuityB<<";matchStart="<<options.matchStart<<";matchEnd="<<options.matchEnd;
+        for(const auto& [a,b]:options.slashes)settings<<";slash="<<a<<","<<b;
+        for(const auto& input:inputs){
+            const auto references=input.chain.empty()?std::vector<std::pair<std::string,std::string>>{{input.object,input.sub}}:input.chain;
+            settings<<";input="<<input.object<<"."<<input.sub<<":reverse="<<input.reverse<<",seam="<<input.seam<<",chain="<<input.chain.size();
+            for(const auto& [name,sub]:references){auto* source=doc.getObject(name.c_str());if(!source)throw std::runtime_error("An input curve was deleted");Ref pySource(source->getPyObject());Ref subs(Py_BuildValue("[s]",sub.c_str()));Ref entry(PyTuple_Pack(2,pySource.p,subs.p));if(PyList_Append(sources.p,entry.p)<0)throw std::runtime_error(pythonError());}
+        }
         property(object.p,"App::PropertyLinkSubList","SourceCurves",sources.p);Ref config(PyUnicode_FromString(settings.str().c_str()));property(object.p,"App::PropertyString","SurfaceOptions",config.p);
         Ref view(PyObject_GetAttrString(object.p,"ViewObject")),color(Py_BuildValue("(ddd)",0.0,130.0/255.0,85.0/255.0));set(view.p,"ShapeColor",color.p);set(view.p,"LineColor",color.p);
         doc.recompute();doc.commitTransaction();

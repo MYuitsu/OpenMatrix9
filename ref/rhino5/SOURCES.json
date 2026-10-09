@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "reference_scope": "Rhino 5 for Windows behavior and UI documentation for OpenMatrix9 core implementation",
+  "user_authorization_date": "2026-10-09",
+  "documents": [
+    {
+      "id": "RHINO5-WINDOWS-USER-GUIDE",
+      "title": "Rhinoceros 5 for Windows - User's Guide",
+      "publisher": "Robert McNeel & Associates",
+      "version": "Rhino 5 for Windows",
+      "language": "en-US",
+      "path": "windows_pdf_user_s_guide.pdf",
+      "official_url": "https://docs.mcneel.com/rhino/5/usersguide/en-us/windows_pdf_user_s_guide.pdf",
+      "official_html_url": "https://docs.mcneel.com/rhino/5/usersguide/en-us/html/webtitlepage.htm",
+      "bytes": 13533999,
+      "sha256": "f42df0ecced753d98afcf93c5442597fe842df75efb03b321170e11790fa84ce",
+      "source_snapshot": "Exact original user-supplied PDF; preserved without edits",
+      "official_download_hash_verified": true,
+      "official_download_verification_note": null,
+      "access_classification": "Publicly downloadable official documentation",
+      "rights_note": "Original copyright/license notices retained. Public download is not a claim that this document is open-source or that its contents may be reused without applicable terms.",
+      "implementation_limit": "Documentation is behavior evidence, not solver source or runtime parity proof.",
+      "pdf_pages": 284,
+      "document_date": "2016-11-30",
+      "original_copyright_notice": "© Robert McNeel & Associates, 11/30/2016."
+    }
+  ],
+  "private_reference_rule": "Decompiled source, recovered Matrix resources, Matrix manuals, and private models stay outside the repository. This exact guide exception does not permit other PDFs or raw code in ref."
+}

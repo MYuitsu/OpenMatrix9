@@ -69,6 +69,9 @@ pub struct Session {
     pub second: Vec<String>,
     pub cycle: u32,
     pub delete_input: bool,
+    pub extend_lines: bool,
+    pub apparent_intersections: bool,
+    pub tolerance: f64,
 }
 impl Session {
     pub fn new(kind: Kind) -> Self {
@@ -79,7 +82,28 @@ impl Session {
             second: vec![],
             cycle: 0,
             delete_input: (kind as u32) <= 3,
+            extend_lines: false,
+            apparent_intersections: false,
+            tolerance: 1e-7,
         }
+    }
+    pub fn set_option(&mut self, option: u32, value: bool) -> bool {
+        if self.kind != Kind::Trim {
+            return false;
+        }
+        match option {
+            1 => self.extend_lines = value,
+            2 => self.apparent_intersections = value,
+            _ => return false,
+        }
+        true
+    }
+    pub fn set_tolerance(&mut self, value: f64) -> bool {
+        if self.kind != Kind::Join || !value.is_finite() || !(1e-9..=1e6).contains(&value) {
+            return false;
+        }
+        self.tolerance = value;
+        true
     }
     pub fn add(&mut self, name: &str) -> bool {
         if !(1..=2).contains(&self.phase)
@@ -242,4 +266,41 @@ pub extern "C" fn om9_edit_delete_input(value: i32) -> bool {
         s.delete_input = value != 0;
     }
     s.delete_input
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_edit_set_option(option: u32, value: bool) -> bool {
+    state()
+        .lock()
+        .unwrap()
+        .as_mut()
+        .is_some_and(|s| s.set_option(option, value))
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_edit_option(option: u32) -> bool {
+    state()
+        .lock()
+        .unwrap()
+        .as_ref()
+        .is_some_and(|s| match option {
+            1 => s.extend_lines,
+            2 => s.apparent_intersections,
+            _ => false,
+        })
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_edit_set_tolerance(value: f64) -> bool {
+    state()
+        .lock()
+        .unwrap()
+        .as_mut()
+        .is_some_and(|s| s.set_tolerance(value))
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_edit_tolerance() -> f64 {
+    state()
+        .lock()
+        .unwrap()
+        .as_ref()
+        .map_or(1e-7, |s| s.tolerance)
 }

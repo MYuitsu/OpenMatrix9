@@ -1,23 +1,21 @@
 # OM9-SOLID-001 — BooleanDifference
 
-Source: `specs/04-solid/om9-solid-001-boolean-difference.md`; Matrix 8 Book 1, printed
-p.213, PDF pp.223 verified on 2026-10-06.
-Command continuation was read through the next feature heading.
+Source engineering contract: `specs/04-solid/om9-solid-001-boolean-difference.md`. Matrix 8 Book 1 PDF pp.223
+re-read through continuation to the next command heading on 2026-10-09.
+Original PDF remains an ignored reference, excluded from runtime resources.
 
-Source behavior stays in the original specification. The normalized inputs,
-units/tolerances/defaults, output/placement, preview/cancel/errors, dependency
-guards, Undo/Redo and FCStd persistence are documented in
-[native Edit contract](edit-native-contract.md).
+Implemented slice: Ordered target/cutter sets for solid BRep, surface-area BRep or closed Mesh via polyhedral OCCT; target replacement and cutter DeleteInput, cavities and persistence. Mixed categories and invalid/empty results reject.
 
-Implemented slice: Ordered target/cutter sets, native solid subtraction, target replacement and optional cutter DeleteInput; mesh/open-surface booleans unsupported.
+Invocation: stable menu/F6 `OM9_SolidDifference` and CMD `BooleanDifference`. The
+[shared native Edit contract](edit-native-contract.md) distinguishes manual
+facts from host options/defaults, geometry types, tolerance, lifecycle and limits.
 
-Invocation: stable menu/F6 ID `OM9_SolidDifference` and English CMD `BooleanDifference`.
-Native semantic/lifecycle fixtures use this exact ID in
-`tests/edit_commands_smoke.FCMacro`. Evidence: `build/edit_commands_smoke-1/fd9e161d7d9847f5b93ee59c9e2b9307/results.json`;
-115/115 checks passed with process exit 0.
-The SDK build passed. Rust state/permission checks are in
-`rust/tests/edit_session.rs` and `rust/tests/edit_commands.rs`.
+Validation: options `build/edit_options_smoke-1/19b793add82d48de9e92ffcbf2c43343/results.json` — 57/57;
+core `build/edit_commands_smoke-1/4ebfad5e7e844c999ca94dc0a4493dea/results.json` — 115/115. Fixtures use exact feature IDs.
+Both FreeCAD processes exited 0. Matching SDK build passed; Rust 140 tests
+and Python 23 tests passed. Current regression reports and audit limitations
+are in [implementation ledger](../openmatrix9-progress.json).
 
-Status: `partially_implemented`, `validated_supported_slice`. No full
-Matrix/Rhino compatibility or live History recomputation is claimed. Continue
-with the remaining options/types above and their cited original source pages.
+Status: `partially_implemented`, `validated_supported_slice`. Source edits do
+not recompute snapshot results. Live Matrix History, annotation/block/cage
+adapters, document-tolerance compatibility and exhaustive topology remain open.

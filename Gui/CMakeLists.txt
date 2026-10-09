@@ -96,7 +96,6 @@ add_library(
 
 
 
-
 set_target_properties(
     OpenMatrix9RustLib
     PROPERTIES
@@ -119,6 +118,10 @@ add_dependencies(
 
 set(
     OpenMatrix9Gui_SRCS
+    CoreUnits.cpp
+    CoreUnits.h
+    CoreCPlanes.cpp
+    CoreCPlanes.h
 
     AppOpenMatrix9Gui.cpp
     ThreeDmPython.cpp
@@ -128,6 +131,8 @@ set(
     ThreeDmHatchDialog.h
     ThreeDmMerge.cpp
     ThreeDmMerge.h
+    CadPresentation.cpp
+    CadPresentation.h
     CoreThreeDm.cpp
     CoreThreeDm.h
 
@@ -137,16 +142,61 @@ set(
     Command.cpp
     CurveController.cpp
     CurveController.h
+    CurveCircle.cpp
+    CurveCircle.h
+    CurveEllipse.cpp
+    CurveEllipse.h
+    CircleHistory.cpp
+    CircleHistory.h
+    CircleHistoryAdapter.cpp
+    CircleHistoryAdapter.h
+    CircleTangent.cpp
+    CircleTangent.h
+    CoreLayers.cpp
+    CoreLayers.h
     SurfaceController.cpp
     EditController.cpp
     EditController.h
     EditGeometry.cpp
+    EditCurveOptions.cpp
+    EditMesh.cpp
+    EditSpecialTypes.cpp
+    EditSpecialTypes.h
+    ExplodedText.cpp
+    ExplodedText.h
+    HistoryController.cpp
+    HistoryController.h
+    CageController.cpp
+    CageController.h
+    HistoryFeature.cpp
+    HistoryFeature.h
+    BuilderHistory.cpp
+    BuilderHistory.h
+    CageFeature.cpp
+    CageFeature.h
+    CageGeometry.cpp
+    CageGeometry.h
+    CageRust.h
+    RetainedArchive.cpp
+    RetainedArchive.h
     EditGeometry.h
     SurfaceController.h
     SolidController.cpp
     SolidController.h
+    SolidReferences.cpp
+    SolidReferences.h
     SurfaceGeometry.cpp
     SurfaceGeometry.h
+    SurfaceLoft.cpp
+    SurfaceLoft.h
+    SurfaceSeams.cpp
+    SurfaceSeams.h
+    SurfaceRefit.cpp
+    SurfaceRefit.h
+    SurfaceConstraints.cpp
+    SurfaceConstraints.h
+    SurfaceHistory.cpp
+    SurfaceHistory.h
     CurveGeometry.cpp
     CurveGeometry.h
     CoreRebuild.cpp
@@ -155,8 +205,6 @@ set(
     CommandConsole.h
     CoreWorkspace.cpp
     CoreWorkspace.h
-    CadPresentation.cpp
-    CadPresentation.h
     CoreViewControls.cpp
     CoreViewControls.h
     CoreNotes.cpp
@@ -212,6 +260,7 @@ target_include_directories(
     ${CMAKE_BINARY_DIR}/src
 
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${OpenCASCADE_INCLUDE_DIR}
 )
 
 
@@ -221,18 +270,29 @@ target_link_libraries(
     PRIVATE
 
     FreeCADGui
-    Part
-    TKOffset
     OM9ThreeDm
     libfastsignals
 
     OpenMatrix9RustLib
     Qt6::Widgets
+    TKOffset
 )
+if(TARGET Part)
+    target_link_libraries(OpenMatrix9Gui PRIVATE Part)
+else()
+    find_library(OM9_PART_LIBRARY NAMES Part
+        HINTS "${FREECAD_SDK_BUILD}/src/Mod/Part/App" REQUIRED)
+    target_link_libraries(OpenMatrix9Gui PRIVATE "${OM9_PART_LIBRARY}")
+endif()
 if(WIN32)
     target_link_libraries(OpenMatrix9Gui PRIVATE ws2_32 userenv ntdll bcrypt)
 endif()
 target_compile_features(OpenMatrix9Gui PRIVATE cxx_std_23)
+foreach(om9_occ_lib TKGeomAlgo TKGeomBase TKG2d TKG3d TKMath TKernel)
+    find_library(OM9_${om9_occ_lib}_LIBRARY NAMES ${om9_occ_lib}
+        HINTS "${FREECAD_DEPENDENCY_PREFIX}/lib" "${OpenCASCADE_LIBRARY_DIR}" ${OpenCASCADE_LIBRARY_DIRS} REQUIRED)
+    target_link_libraries(OpenMatrix9Gui PRIVATE "${OM9_${om9_occ_lib}_LIBRARY}")
+endforeach()
 if(MSVC)
     target_compile_options(OpenMatrix9Gui PRIVATE /utf-8 /FIFCGlobal.h /FIFCConfig.h)
 endif()
