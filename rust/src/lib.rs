@@ -2,6 +2,7 @@ pub mod circle;
 pub mod circle_history;
 pub mod circle_tangent;
 pub mod coordinates;
+pub mod coordinate_input;
 pub mod cplanes;
 pub mod units;
 pub mod tolerances;

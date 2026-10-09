@@ -3883,7 +3883,7 @@
   description: PictureFrame chọn image file rồi hai điểm/góc và length, giữ aspect ratio; Shift dùng Ortho. Plane có thể move/scale và transparency qua material properties. Vertical theo normal CPlane; SelfIllumination giữ intensity không theo lights/shadows; EmbedBitmap lưu bytes image trong document hoặc external path có missing status; Autoname lấy filename cho object name; AlphaTrasnparency giữ identifier tương thích và chọn hiển thị màu object xuyên alpha hoặc thật trong suốt. Đây là textured plane tham chiếu, không phải bitmap tracing tự tạo geometry.
   access: Access this command from View>Picture Frame
   spec_path: specs/01-core/om9-view-001-picture-frame.md
-  implementation_status: not_started
+  implementation_status: partially_implemented
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -3941,7 +3941,13 @@
     date: '2026-10-07'
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
-    native_implementation_status: not_started
+    native_implementation_status: partially_implemented
+  implementation_validation_status: validated_supported_slice
+  implementation_verified_at: '2026-10-09'
+  implementation_scope: Native aspect-preserving ImagePlane with shared point/length input, transient preview, transaction guard and persisted coordinate/unit provenance. Explicit embedding/external/alpha modes and complete naming/option UI remain open.
+  implementation_followup_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-point-consumers.md
+    scope: Native aspect-preserving ImagePlane with shared point/length input, transient preview, transaction guard and persisted coordinate/unit provenance. Explicit embedding/external/alpha modes and complete naming/option UI remain open.
 - id: OM9-VIEW-002
   name: Restore Viewports
   command: null
@@ -5373,7 +5379,7 @@
   description: Angle thu hai cặp endpoints xác định hai lines rồi báo angle feedback, không tạo annotation. TwoObjects nhận hai planar surfaces hoặc hai lines; dùng normals/hướng có orientation policy rõ để chọn angle chính/supplement. Snaps cho points, vector zero không hợp lệ.
   access: Access this command from Measure>Angle
   spec_path: specs/01-core/om9-measure-001-angle.md
-  implementation_status: not_started
+  implementation_status: partially_implemented
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -5401,7 +5407,13 @@
     date: '2026-10-07'
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
-    native_implementation_status: not_started
+    native_implementation_status: partially_implemented
+  implementation_validation_status: validated_supported_slice
+  implementation_verified_at: '2026-10-09'
+  implementation_scope: Four-point read-only Angle with shared Cartesian/unit input, accepted world-coordinate reports and lifetime guards. TwoObjects and full grammar remain open.
+  implementation_followup_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-point-consumers.md
+    scope: Four-point read-only Angle with shared Cartesian/unit input, accepted world-coordinate reports and lifetime guards. TwoObjects and full grammar remain open.
 - id: OM9-MEASURE-002
   name: Distance
   command: Distance
@@ -5413,7 +5425,7 @@
   description: Distance chọn hai points và báo khoảng 3D trong feedback/history. Unit đổi unit display; Model_Units là khởi tạo được mô tả, ngữ cảnh thường mm nhưng không hardcode model luôn mm. Snaps/ProjectOsnap ảnh hưởng points input nên phải báo coordinates đã nhận.
   access: Access this command from Measure>Distance
   spec_path: specs/01-core/om9-measure-002-distance.md
-  implementation_status: not_started
+  implementation_status: partially_implemented
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -5441,7 +5453,13 @@
     date: '2026-10-07'
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
-    native_implementation_status: not_started
+    native_implementation_status: partially_implemented
+  implementation_validation_status: validated_supported_slice
+  implementation_verified_at: '2026-10-09'
+  implementation_scope: Two-point read-only Distance with five display units, shared Cartesian/unit input and accepted-coordinate reports. Model_Units choice/default and full grammar remain open.
+  implementation_followup_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-point-consumers.md
+    scope: Two-point read-only Distance with five display units, shared Cartesian/unit input and accepted-coordinate reports. Model_Units choice/default and full grammar remain open.
 - id: OM9-MEASURE-003
   name: Length
   command: Length

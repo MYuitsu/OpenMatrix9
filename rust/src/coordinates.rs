@@ -6,6 +6,12 @@
 pub type Point = [f64; 3];
 pub type Axes = [Point; 3];
 const LIMIT: f64 = 1e9;
+// Dimensionless roundoff allowance for the Gram matrix, not model tolerance.
+// Three-term dot products and quaternion-to-basis arithmetic accumulate several
+// ulps (the rotation regression sample reaches 8 EPSILON). Keeping a 64-EPSILON
+// margin accepts rounded rigid rotations without admitting geometric scale or
+// shear that a native rotation/placement would silently discard.
+const ORTHONORMAL_ROUNDOFF: f64 = 64. * f64::EPSILON;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Frame {
@@ -60,7 +66,9 @@ impl Frame {
         }
         for i in 0..3 {
             for j in 0..3 {
-                if (dot(axes[i], axes[j]) - if i == j { 1. } else { 0. }).abs() > 1e-6 {
+                if (dot(axes[i], axes[j]) - if i == j { 1. } else { 0. }).abs()
+                    > ORTHONORMAL_ROUNDOFF
+                {
                     return Err("Construction plane must be orthonormal".into());
                 }
             }

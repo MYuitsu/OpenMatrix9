@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreCoordinates.h"
 #include <QObject>
 #include <QString>
 #include <QImage>
@@ -24,16 +25,18 @@ protected:
 private:
     CorePictureFrame();
     bool valid()const;
+    bool checkContext();
     void prompt(const QString& error={});
-    void point(const Base::Vector3d&,bool ortho=false);
-    void finish(const double* placement);
+    void point(const CoordinateInput&,bool ortho=false);
+    void finish(const double* placement,const CoordinateInput&);
     bool plan(const Base::Vector3d* reference,double width,bool ortho,double* output)const;
     void clearPreview();
     void preview(const double* placement);
     bool enabled=false,running=false,hasCorner=false,vertical=false,selfIllumination=true,autoname=true;
     QString source;
     QImage image;
-    Base::Placement plane;
+    CoordinateContext coordinateContext;
+    std::vector<CoordinateInput> acceptedInputs;
     Base::Vector3d corner;
     App::Document* document=nullptr;
     std::size_t command=0;

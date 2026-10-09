@@ -1,5 +1,13 @@
 # Implementation status — 2026-10-09
 
+<!-- rhino-core-point-consumers:start -->
+Distance, Angle và PictureFrame đã dùng chung parser Rust, giữ tọa độ/đơn vị đầu vào và provenance.
+CPlane sai scale/shear bị từ chối; PictureFrame kiểm giao dịch trước mutation.
+**324 native checks / 9 runs; 364 Rust tests; 49 Python pass, 1 skip.**
+P0 toàn bộ vẫn đang triển khai; [phạm vi và bằng chứng](../docs/validation/2026-10-09-rhino-core-point-consumers.md).
+
+<!-- rhino-core-point-consumers:end -->
+
 <!-- rhino-core-tolerance-workers:start -->
 Rust đã nối dung sai document/override vào Join curve và surface, lưu cutoff thực tế
 và provenance cùng kết quả; backend không được tự nâng dung sai. Worker nhập 3DM

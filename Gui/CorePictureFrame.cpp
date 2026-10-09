@@ -3,7 +3,7 @@
 #include "CoreMouse.h"
 #include "CoreSnaps.h"
 #include "CoreDistance.h"
-#include "CoreWorkspace.h"
+#include "CoreUnits.h"
 #include "CoreViewControls.h"
 #include "CurveController.h"
 #include "RustBridge.h"
@@ -39,10 +39,10 @@
 #include <QLabel>
 #include <QMouseEvent>
 #include <QKeyEvent>
-#include <QRegularExpression>
 #include <QTimer>
 #include <cmath>
 #include <exception>
+#include <utility>
 namespace {
 Gui::View3DInventor* view(){auto* doc=Gui::Application::Instance->activeDocument();return doc?dynamic_cast<Gui::View3DInventor*>(doc->getActiveView()):nullptr;}
 }
@@ -52,7 +52,7 @@ CorePictureFrame::CorePictureFrame():QObject(qApp) {
     deletedConnection=App::GetApplication().signalDeleteDocument.connect([this](const App::Document& doc){if(document==&doc)cancel();});
     activeConnection=App::GetApplication().signalActiveDocument.connect([this](const App::Document& doc){if(running&&document!=&doc)cancel();});
     auto* timer=new QTimer(this);timer->setInterval(150);connect(timer,&QTimer::timeout,this,[this]{
-        if(running&&!valid()){cancel();return;}
+        if(running&&!checkContext())return;
         if(running&&previewOwner){SoSearchAction search;search.setNode(previewNode);search.apply(view()->getViewer()->getSceneGraph());if(!search.getPath())clearPreview();}
     });timer->start();
     qApp->installEventFilter(this);
@@ -63,6 +63,19 @@ bool CorePictureFrame::available()const {
     return enabled&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&view()&&Gui::Control().isAllowedAlterDocument(doc);
 }
 bool CorePictureFrame::valid()const{return running&&document==App::GetApplication().getActiveDocument()&&available();}
+bool CorePictureFrame::checkContext(){
+    if(!valid()){cancel();return false;}
+    const auto reject=[this](QString message){
+        cancel();
+        if(!message.contains("restart",Qt::CaseInsensitive))message+="; restart the command";
+        prompt(message);
+    };
+    try{verifyCoordinateContext(*document,coordinateContext);return true;}
+    catch(const Base::Exception& error){reject(QString::fromUtf8(error.what()));}
+    catch(const std::exception& error){reject(QString::fromUtf8(error.what()));}
+    catch(...){reject("PictureFrame: Input context is unavailable; restart the command");}
+    return false;
+}
 void CorePictureFrame::activate(){enabled=true;}
 void CorePictureFrame::deactivate(){enabled=false;cancel();}
 void CorePictureFrame::clearPreview(){
@@ -87,7 +100,7 @@ void CorePictureFrame::preview(const double* p){
     for(int i=0;i<4;++i){double v[3];for(int j=0;j<3;++j)v[j]=p[j]+((i==1||i==2)?p[6+j]*p[15]:0)+(i>=2?p[9+j]*p[16]:0);coordinates->point.set1Value(i,float(v[0]),float(v[1]),float(v[2]));}
     content->addChild(coordinates);auto* face=new SoFaceSet;face->numVertices.setValue(4);content->addChild(face);native->getViewer()->redraw();
 }
-void CorePictureFrame::cancel(){if(running)CoreSnaps::clearTransient();clearPreview();running=false;hasCorner=false;document=nullptr;source.clear();image=QImage();}
+void CorePictureFrame::cancel(){if(running)CoreSnaps::clearTransient();clearPreview();running=false;hasCorner=false;document=nullptr;source.clear();image=QImage();coordinateContext={};acceptedInputs.clear();}
 void CorePictureFrame::prompt(const QString& error) {
     CurveController::instance().setPrompt(error.isEmpty()?(hasCorner?"PictureFrame: Pick width reference or type length; Shift for Ortho; Esc cancels":"PictureFrame: Pick first corner or enter x,y,z; Esc cancels"):error);
     if(!error.isEmpty())CurveController::instance().logMessage(error);
@@ -95,33 +108,47 @@ void CorePictureFrame::prompt(const QString& error) {
 bool CorePictureFrame::start(std::size_t index) {
     if(!handles(index)||!available())return false;
     cancel();CoreDistance::instance().cancel();CurveController::instance().cancel();CoreViewControls::instance().cancel();
-    auto* identity=App::GetApplication().getActiveDocument();Base::Placement construction;
-    try {construction=CoreWorkspace::instance().plane(view());}
+    auto* identity=App::GetApplication().getActiveDocument();CoordinateContext captured;
+    try {captured=captureCoordinateContext(*identity,view());}
+    catch(const Base::Exception& error){cancel();CoreSnaps::clearTransient();prompt(QString::fromUtf8(error.what()));return false;}
     catch(const std::exception& error){cancel();CoreSnaps::clearTransient();prompt(QString::fromUtf8(error.what()));return false;}
+    catch(...){cancel();CoreSnaps::clearTransient();prompt("PictureFrame: Cannot capture coordinate context");return false;}
     QFileDialog dialog(Gui::getMainWindow(),"PictureFrame: Select image");dialog.setObjectName("OM9PictureFrameImageDialog");dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.bmp *.gif *.tif *.tiff *.webp)");
     if(dialog.exec()!=QDialog::Accepted||dialog.selectedFiles().isEmpty())return false;
     if(identity!=App::GetApplication().getActiveDocument()||!available())return false;
+    try {verifyCoordinateContext(*identity,captured);}
+    catch(const Base::Exception& error){cancel();CoreSnaps::clearTransient();prompt(QString::fromUtf8(error.what()));return false;}
+    catch(const std::exception& error){cancel();CoreSnaps::clearTransient();prompt(QString::fromUtf8(error.what()));return false;}
+    catch(...){cancel();CoreSnaps::clearTransient();prompt("PictureFrame: Coordinate context changed during image selection");return false;}
     const auto file=dialog.selectedFiles().front();QImageReader reader(file);auto loaded=reader.read();
     if(loaded.isNull()){prompt("PictureFrame: Cannot read image: "+reader.errorString());return false;}
-    document=identity;command=index;plane=construction;source=file;image=loaded;hasCorner=false;vertical=false;selfIllumination=true;autoname=true;running=true;
+    document=identity;command=index;coordinateContext=std::move(captured);source=file;image=loaded;hasCorner=false;vertical=false;selfIllumination=true;autoname=true;running=true;
     qApp->installEventFilter(this);CoreMouse::instance().prioritize();prompt();return false; // successful history waits for image commit
 }
 bool CorePictureFrame::plan(const Base::Vector3d* reference,double width,bool ortho,double* output)const {
-    double axes[9];for(int i=0;i<3;++i){Base::Vector3d axis;axis[i]=1;axis=plane.getRotation().multVec(axis);for(int j=0;j<3;++j)axes[i*3+j]=axis[j];}
+    double axes[9];for(int i=0;i<3;++i){Base::Vector3d axis;axis[i]=1;axis=coordinateContext.plane.getRotation().multVec(axis);for(int j=0;j<3;++j)axes[i*3+j]=axis[j];}
     const double first[]={corner.x,corner.y,corner.z};double second[3]={};if(reference)for(int i=0;i<3;++i)second[i]=(*reference)[i];
     return om9_picture_frame_plan(axes,first,reference?second:nullptr,width,double(image.width())/image.height(),(ortho?1U:0U)|(vertical?2U:0U)|(reference?0U:4U),output);
 }
-void CorePictureFrame::point(const Base::Vector3d& value,bool ortho) {
-    if(!valid()){cancel();return;}
+void CorePictureFrame::point(const CoordinateInput& input,bool ortho) {
+    if(!checkContext())return;
+    const auto& value=input.point;
     for(int i=0;i<3;++i)if(!std::isfinite(value[i])||std::abs(value[i])>1e9){prompt("PictureFrame: Point must be finite within supported coordinates");return;}
-    if(!hasCorner){corner=value;hasCorner=true;CoreSnaps::acceptedPoint(true);prompt();return;}
-    double placement[17];if(!plan(&value,0,ortho,placement)){prompt("PictureFrame: Choose a valid second reference point");return;}CoreSnaps::acceptedPoint(true);finish(placement);
+    if(!hasCorner){acceptedInputs.push_back(input);corner=value;hasCorner=true;CoreSnaps::acceptedPoint(true);prompt();return;}
+    double placement[17];if(!plan(&value,0,ortho,placement)){prompt("PictureFrame: Choose a valid second reference point");return;}finish(placement,input);
 }
-void CorePictureFrame::finish(const double* p) {
-    if(!valid()){cancel();return;}
-    auto* doc=document;doc->openTransaction("PictureFrame");
+void CorePictureFrame::finish(const double* p,const CoordinateInput& input) {
+    if(!checkContext())return;
+    auto* doc=document;bool transactionOpen=false;
     try {
+        // A rejected plan or failed commit keeps the accepted corner/options.
+        // Serialize the complete candidate before opening the native transaction.
+        auto inputs=acceptedInputs;inputs.push_back(input);coordinateInputReport(inputs);
+        if(!checkContext())return;
+        const auto transactionId=doc->openTransaction("PictureFrame");
+        if(!transactionId)throw Base::RuntimeError("PictureFrame: Cannot open transaction; retry when the document is ready");
+        transactionOpen=true;
         auto* object=dynamic_cast<Image::ImagePlane*>(doc->addObject("Image::ImagePlane","PictureFrame"));
         if(!object)throw Base::RuntimeError("Native ImagePlane is unavailable");
         object->ImageFile.setValue(source.toUtf8().constData());object->XSize.setValue(p[15]);object->YSize.setValue(p[16]);
@@ -129,14 +156,21 @@ void CorePictureFrame::finish(const double* p) {
         object->Placement.setValue(Base::Placement(Base::Vector3d(p[3],p[4],p[5]),Base::Rotation(matrix)));
         if(autoname)object->Label.setValue(QFileInfo(source).completeBaseName().toUtf8().constData());
         if(auto* provider=dynamic_cast<Gui::ViewProviderDocumentObject*>(Gui::Application::Instance->getDocument(doc)->getViewProvider(object)))provider->DisplayMode.setValue(selfIllumination?"No shading":"Shading");
-        doc->recompute();doc->commitTransaction();om9_sidebar_record_execution(command,true);cancel();
+        persistCoordinateProvenance(*object,inputs);
+        addUnitContextProvenance(*object,coordinateContext.unitContext);
+        doc->recompute();if(object->isError())throw Base::RuntimeError("PictureFrame recompute failed");
+        doc->commitTransaction();transactionOpen=false;
+        CoreSnaps::acceptedPoint(true);om9_sidebar_record_execution(command,true);cancel();
         CurveController::instance().setPrompt("PictureFrame created");
         CurveController::instance().logMessage("PictureFrame created");
-    }catch(const Base::Exception& error){doc->abortTransaction();prompt(QString::fromUtf8(error.what()));}
+    }catch(const Base::Exception& error){if(transactionOpen)doc->abortTransaction();if(checkContext())prompt(QString::fromUtf8(error.what()));}
+    catch(const std::exception& error){if(transactionOpen)doc->abortTransaction();if(checkContext())prompt(QString::fromUtf8(error.what()));}
+    catch(...){if(transactionOpen)doc->abortTransaction();if(checkContext())prompt("PictureFrame: Creation failed");}
 }
 void CorePictureFrame::submit(const QString& text) {
     if(!valid()){cancel();return;}const auto input=text.trimmed();
     if(input.compare("Cancel",Qt::CaseInsensitive)==0){cancel();prompt("PictureFrame cancelled");return;}
+    if(!checkContext())return;
     const auto parts=input.split('=');
     if(parts.size()==2) {
         const auto name=parts[0].trimmed();const auto value=parts[1].trimmed();
@@ -149,33 +183,56 @@ void CorePictureFrame::submit(const QString& text) {
             prompt();return;
         }
     }
-    const auto fields=input.split(QRegularExpression("[,\\s]+"),Qt::SkipEmptyParts);
-    if(fields.size()==3){bool ok[3];Base::Vector3d value;for(int i=0;i<3;++i)value[i]=fields[i].toDouble(&ok[i]);if(ok[0]&&ok[1]&&ok[2]){point(value);return;}}
-    if(hasCorner){bool ok=false;const double width=input.toDouble(&ok);double placement[17];if(ok&&plan(nullptr,width,false,placement)){finish(placement);return;}}
-    prompt("PictureFrame: Enter a valid point x,y,z or a positive width after the first corner");
+    try {
+        const auto previous=hasCorner?std::optional<Base::Vector3d>(corner):std::nullopt;
+        const auto parsed=parseCoordinateInput(coordinateContext,text,
+            hasCorner?CoordinateExpected::PointOrLength:CoordinateExpected::Point,previous);
+        if(parsed.kind==CoordinateValueKind::Point){point(parsed);return;}
+        double placement[17];
+        if(!plan(nullptr,parsed.lengthMm,false,placement)){prompt("PictureFrame: Enter a positive width within supported dimensions");return;}
+        finish(placement,parsed);
+    }catch(const Base::Exception& error){prompt(QString::fromUtf8(error.what()));}
+    catch(const std::exception& error){prompt(QString::fromUtf8(error.what()));}
+    catch(...){prompt("PictureFrame: Coordinate input failed");}
 }
 bool CorePictureFrame::eventFilter(QObject* watched,QEvent* event) {
     if(!running||Gui::Application::Instance->isClosing())return false;
+    if(!valid()){cancel();return false;}
     if(event->type()==QEvent::KeyPress) {
         const auto* key=static_cast<QKeyEvent*>(event);if(key->key()==Qt::Key_Escape){cancel();prompt("PictureFrame cancelled");return true;}
-        if(key->key()==Qt::Key_F4&&CoreKeyboard::pointKeyAllowed(watched,key)){point(plane.getPosition());return true;}
+        if(key->key()==Qt::Key_F4&&CoreKeyboard::pointKeyAllowed(watched,key)){
+            if(!checkContext())return true;
+            try{point(worldCoordinateInput(coordinateContext,coordinateContext.plane.getPosition(),CoordinateSource::OriginShortcut,
+                hasCorner?std::optional<Base::Vector3d>(corner):std::nullopt));}
+            catch(const Base::Exception& error){prompt(QString::fromUtf8(error.what()));}
+            catch(const std::exception& error){prompt(QString::fromUtf8(error.what()));}
+            catch(...){prompt("PictureFrame: Origin input failed");}
+            return true;
+        }
     }
     const bool moving=event->type()==QEvent::MouseMove;
     if(!moving&&event->type()!=QEvent::MouseButtonPress)return false;
     const auto* mouse=static_cast<QMouseEvent*>(event);if((!moving&&mouse->button()!=Qt::LeftButton)||!valid())return false;
     auto* native=view();auto* widget=qobject_cast<QWidget*>(watched);auto* viewer=native->getViewer();if(!widget||!viewer->isAncestorOf(widget))return false;
+    if(!checkContext())return !moving;
     try {
         const auto pos=viewer->viewport()->mapFrom(widget,mouse->position().toPoint());const auto pixel=viewer->fromQPoint(pos);
         Base::Vector3d reference;
-        if(!CoreSnaps::pick(native,pos,reference)){
-            SbVec3f nearPoint,farPoint;viewer->projectPointToLine(pixel,nearPoint,farPoint);const auto direction=farPoint-nearPoint;const auto normal=plane.getRotation().multVec(Base::Vector3d(0,0,1));
+        const bool snapped=CoreSnaps::pick(native,pos,reference);
+        if(!snapped){
+            SbVec3f nearPoint,farPoint;viewer->projectPointToLine(pixel,nearPoint,farPoint);const auto direction=farPoint-nearPoint;const auto normal=coordinateContext.plane.getRotation().multVec(Base::Vector3d(0,0,1));
             if(std::abs(direction[0]*normal.x+direction[1]*normal.y+direction[2]*normal.z)<=1e-6*direction.length())throw Base::RuntimeError("Ray parallel to construction plane");
-            const auto value=viewer->getPointOnXYPlaneOfPlacement(pixel,plane);reference=Base::Vector3d(value[0],value[1],value[2]);
+            const auto value=viewer->getPointOnXYPlaneOfPlacement(pixel,coordinateContext.plane);reference=Base::Vector3d(value[0],value[1],value[2]);
         }
+        const auto parsed=worldCoordinateInput(coordinateContext,reference,
+            snapped?CoordinateSource::WorldSnap:CoordinateSource::WorldPick,
+            hasCorner?std::optional<Base::Vector3d>(corner):std::nullopt);
         const bool ortho=om9_ortho_active(mouse->modifiers().testFlag(Qt::ShiftModifier));
         if(moving){if(hasCorner){double placement[17];if(plan(&reference,0,ortho,placement))preview(placement);else clearPreview();}return false;}
-        point(reference,ortho);
+        point(parsed,ortho);
     }catch(const Base::Exception& error){prompt(QString::fromUtf8(error.what()));}
+    catch(const std::exception& error){prompt(QString::fromUtf8(error.what()));}
+    catch(...){prompt("PictureFrame: World input failed");}
     return true;
 }
 }

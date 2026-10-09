@@ -265,28 +265,52 @@
           "spec_requirement": "RCORE-03.T01 | `O=(10,20,30), X=(0,1,0), Y=(0,0,1), Z=(1,0,0)`; `1,2,3` → world `(13,21,32)` cho mỗi command có point input",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            }
+          ]
         },
         {
           "id": "RCORE-03.T02",
           "spec_requirement": "RCORE-03.T02 | Cùng frame T01, `1,2` → `(10,21,32)`; `w1,2,3` → world `(1,2,3)`; `w0,0,0` → world origin; không suy frame bằng số thành phần",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            }
+          ]
         },
         {
           "id": "RCORE-03.T03",
           "spec_requirement": "RCORE-03.T03 | Previous world `(13,21,32)`: mỗi input `r1,2,3`, `R1,2,3`, `@1,2,3` → `(16,22,34)`; `wr1,2,3` → `(14,23,35)`; reset cùng previous trước từng ca, thiếu previous bị từ chối",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            }
+          ]
         },
         {
           "id": "RCORE-03.T04",
           "spec_requirement": "RCORE-03.T04 | Chuyển view trước/sau first pick và CPlane dịch/xoay; latch/version đúng policy; preview và commit đồng điểm",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            }
+          ]
         },
         {
           "id": "RCORE-03.T05",
@@ -300,7 +324,13 @@
           "spec_requirement": "RCORE-03.T06 | 3Point collinear, NaN, unit sai, locale separator mơ hồ; lỗi không thêm point, object hoặc undo entry",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            }
+          ]
         },
         {
           "id": "RCORE-03.T07",
@@ -321,7 +351,13 @@
           "spec_requirement": "RCORE-03.T09 | Esc, Undo điểm, restart, đóng viewport/document trong preview; không còn latch/callback/scene node thuộc session cũ",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            }
+          ]
         }
       ]
     },
@@ -373,7 +409,13 @@
           "spec_requirement": "RCORE-04.T02 | Esc ở selection/point/option/preview và completion mở; teardown đúng tầng, không output/undo entry dư",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            }
+          ]
         },
         {
           "id": "RCORE-04.T03",
@@ -394,7 +436,13 @@
           "spec_requirement": "RCORE-04.T05 | Undo điểm khác Ctrl+Z document; Redo geometry khôi phục metadata/History; transcript vẫn phản ánh input lỗi",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            }
+          ]
         },
         {
           "id": "RCORE-04.T06",
@@ -408,14 +456,26 @@
           "spec_requirement": "RCORE-04.T07 | Pan/zoom/orbit/chuyển viewport giữa hai điểm: session còn active; navigation không tăng point count",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            }
+          ]
         },
         {
           "id": "RCORE-04.T08",
           "spec_requirement": "RCORE-04.T08 | Đóng document/deactivate trong preview hoặc worker, nhận kết quả muộn: không crash, không object mới, không callback còn sống",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            }
+          ]
         },
         {
           "id": "RCORE-04.T09",
@@ -953,5 +1013,5 @@
       ]
     }
   ],
-  "updated_at": "2026-10-09T21:17:06+07:00"
+  "updated_at": "2026-10-09T21:51:35+07:00"
 }

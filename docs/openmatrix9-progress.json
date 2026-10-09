@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-09T21:17:06+07:00",
+  "updated_at": "2026-10-09T21:51:35+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -1548,11 +1548,12 @@
       ],
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/02-units-tolerances.md",
       "next_action": "Continue operation-specific effective tolerance and capability/permission coverage; shared runtime guards now cover Edit/Boolean, Rebuild and interactive Surface only. Durable History and remaining P0 contracts stay open.",
-      "updated_at": "2026-10-09T21:17:06+07:00",
+      "updated_at": "2026-10-09T21:51:35+07:00",
       "scope": "Partial P0 foundations from pre-merge snapshot 5011bab; historical 321 Rust, 23 Python and 657 native GUI assertions do not validate the merged revision or complete P0.",
       "followup_evidence": [
         "docs/validation/2026-10-09-rhino-core-object-foundations.md",
-        "docs/validation/2026-10-09-rhino-core-tolerance-workers.md"
+        "docs/validation/2026-10-09-rhino-core-tolerance-workers.md",
+        "docs/validation/2026-10-09-rhino-core-point-consumers.md"
       ]
     },
     {
@@ -1708,6 +1709,72 @@
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/03-coordinates-cplanes.md",
       "next_action": "Continue shared parser adoption and remaining all-P0 requirements.",
       "updated_at": "2026-10-09T21:17:06+07:00"
+    },
+    {
+      "key": "rhino-core-point-consumers",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-MEASURE-001",
+        "OM9-MEASURE-002",
+        "OM9-VIEW-001"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "scope": "Shared Cartesian parser adoption and provenance for three native consumers; all P0 remains open.",
+      "outputs": [
+        "Gui/CMakeLists.txt",
+        "Gui/CoreCPlanes.cpp",
+        "Gui/CoreCPlanes.h",
+        "Gui/CoreCoordinates.cpp",
+        "Gui/CoreCoordinates.h",
+        "Gui/CoreDistance.cpp",
+        "Gui/CoreDistance.h",
+        "Gui/CorePictureFrame.cpp",
+        "Gui/CorePictureFrame.h",
+        "Gui/CurveController.cpp",
+        "rust/src/lib.rs",
+        "rust/src/coordinate_input.rs",
+        "rust/src/coordinates.rs",
+        "rust/tests/coordinate_input.rs",
+        "rust/tests/coordinates.rs",
+        "tests/core_point_parser_tools_smoke.FCMacro",
+        "tests/core_distance_smoke.FCMacro",
+        "tests/core_angle_smoke.FCMacro",
+        "tests/core_picture_frame_smoke.FCMacro",
+        "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+        "docs/validation/2026-10-09-rhino-core-point-consumers-evidence.json"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-09-rhino-core-point-consumers-evidence.json",
+        "docs/reviews/2026-10-09-point-consumer-review.md",
+        "docs/reviews/2026-10-09-distance-parser-review.md"
+      ],
+      "tests": [
+        {
+          "command": "Full Rust / Clippy",
+          "result": "364 passed; Clippy exit0 with existing warnings"
+        },
+        {
+          "command": "Python tooling",
+          "result": "49 passed,1 skipped"
+        },
+        {
+          "command": "SDK build / native GUI",
+          "result": "324 assertions in9 exit0 processes, including cold restore"
+        }
+      ],
+      "uncertainties": [
+        "Cartesian grammar only; polar/spherical/surveyor/fraction/locale and one-shot angle execution remain P0 work.",
+        "Distance still starts in mm and lacks Model_Units; Angle TwoObjects is unsupported.",
+        "PictureFrame lacks explicit EmbedBitmap/external-missing and AlphaTrasnparency modes; Autoname changes Label only and option prompt parity remains open.",
+        "Logical view slot and runtime document owner are recorded; snap object identity is explicitly unavailable. Reports do not establish associative History or complete session/view identity.",
+        "Tighter Frame::new validation rejects previously tolerated non-rigid rounded saved/imported axes; no silent normalization is performed.",
+        "Forced transaction-start rejection is exercised; arbitrary post-add property/recompute faults are not injected. Native libraries and release panic=abort remain outside safe Rust crash-containment guarantees.",
+        "No new Rhino runtime comparison was performed; all P0 remains in progress."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/03-coordinates-cplanes.md",
+      "next_action": "Continue extended coordinate grammar and remaining P0 contracts.",
+      "updated_at": "2026-10-09T21:51:35+07:00"
     }
   ],
   "merge_context": {

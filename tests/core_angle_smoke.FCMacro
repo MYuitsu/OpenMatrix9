@@ -28,6 +28,16 @@ def run():
         cmd('7,12,9');check('CMD four-point angle with distinct origins is 90 degrees',prompt.text()=='Angle: 90 degrees')
         action.trigger();settle();cmd('0,0,0');cmd('0,0,0');check('degenerate first line retains end prompt','nonzero length' in prompt.text())
         cmd('1,0,0');cmd('0,0,0');cmd('0,0,0');check('degenerate second line can retry endpoint','nonzero length' in prompt.text());cmd('1,1,0');check('menu shares CMD geometry after invalid retries',prompt.text()=='Angle: 45 degrees')
+        cmd('Angle');cmd('w0,0,0');cmd('wr0,0,0')
+        check('relative zero first endpoint retains the accepted start','nonzero length' in prompt.text())
+        cmd('wr1,0,0');cmd('wr0,2,0');cmd('wr0,0,0')
+        check('relative zero second endpoint retains the accepted third point','nonzero length' in prompt.text())
+        cmd('wr1,1,0');check('relative Angle advances across all four accepted points',prompt.text()=='Angle: 45 degrees')
+        inputs=json.loads(window.property('om9MeasurementReport'))['inputs']
+        check('Angle report excludes rejected endpoints and preserves relative bases',
+            len(inputs)==4 and [value['original_text'] for value in inputs]==['w0,0,0','wr1,0,0','wr0,2,0','wr1,1,0']
+            and inputs[2]['previous_world_mm']==[1,0,0] and inputs[3]['previous_world_mm']==[1,2,0]
+            and inputs[3]['result']['point_mm']==[2,3,0])
         cmd('Angle');cmd('TwoObjects');check('unimplemented TwoObjects cue reports gap without committing','not implemented' in prompt.text());QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle();check('Esc cancels Angle',prompt.text()=='Angle cancelled')
         area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
         viewer=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport();center=viewer.rect().center()
@@ -37,6 +47,7 @@ def run():
         check('Angle creates no model or Undo output',not doc.Objects and not doc.UndoNames and not doc.RedoNames and not Gui.Selection.getSelection())
         report=next((w for w in window.findChildren(QtWidgets.QTextEdit) if w.metaObject().className().endswith('ReportOutput')),None)
         check('Angle results retained in native feedback history',report is not None and 'Angle: 90 degrees' in report.toPlainText() and 'Angle: 45 degrees' in report.toPlainText())
+        check('accepted world coordinates are readable in native feedback history',report is not None and 'Point 4 (world, mm): 2, 3, 0' in report.toPlainText())
         result['ok']=True
     except Exception:result['ok']=False;result['error']=traceback.format_exc()
     finally:

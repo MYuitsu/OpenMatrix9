@@ -266,6 +266,28 @@ Base::Placement constructionPlane(Gui::View3DInventor* view,const Base::Placemen
     if(!view||!view->property("om9ViewSlot").isValid()||!view->getGuiDocument())return fallback;
     return placement(store().ensure(*view->getGuiDocument()->getDocument(),view->property("om9ViewSlot").toUInt(),values(fallback)));
 }
+ConstructionPlaneSnapshot captureConstructionPlane(App::Document& doc,Gui::View3DInventor* view) {
+    guiThread();
+    auto* gui=view?view->getGuiDocument():nullptr;
+    if(doc.testStatus(App::Document::Restoring)||!gui||gui->isAboutToClose()||gui->getDocument()!=&doc)
+        throw std::runtime_error("Coordinate viewport does not belong to the current document");
+    const auto property=view->property("om9ViewSlot");bool ok=false;
+    const auto slot=property.toUInt(&ok);
+    if(!property.isValid()||!ok||slot>=4)throw std::runtime_error("Coordinate input requires an OpenMatrix9 viewport slot");
+    ConstructionPlaneSnapshot result;
+    result.logicalViewSlot=slot;
+    result.documentOwner=store().identity(doc);
+    store().ensure(doc,slot,defaultFrame(slot));
+    if(!om9_cplane_read(result.documentOwner,slot+1,result.frame.data(),&result.revision)||!result.revision)
+        throw std::runtime_error("Cannot capture the construction plane revision");
+    result.plane=placement(result.frame);
+    return result;
+}
+std::uint64_t constructionPlaneDocumentOwner(const App::Document& doc) {
+    guiThread();
+    if(doc.testStatus(App::Document::Restoring))throw std::runtime_error("Cannot verify a restoring coordinate document");
+    return store().identity(doc);
+}
 QMenu* addCPlaneMenu(QMenu* parent,Gui::View3DInventor* view) {
     auto* menu=parent->addMenu("Set CPlane");menu->setObjectName("OM9CPlaneMenu");QPointer<Gui::View3DInventor> target(view);
     const std::array<const char*,3> titles={"World XY","World XZ","World YZ"};

@@ -131,6 +131,8 @@ set(
     CoreObjects.h
     CoreTolerance.cpp
     CoreTolerance.h
+    CoreCoordinates.cpp
+    CoreCoordinates.h
     CoreCPlanes.cpp
     CoreCPlanes.h
 

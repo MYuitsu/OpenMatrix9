@@ -1,0 +1,156 @@
+"""RCORE-03/04: independent Cartesian/unit oracles for native point consumers."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+sys.path.insert(0, str(Path(__file__).parent))
+from command_console_support import command_input, command_prompt
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+result = {'checks': []}
+FRAME = (10., 20., 30., 0., 1., 0., 0., 0., 1., 1., 0., 0.)
+WORLD = (0., 0., 0., 1., 0., 0., 0., 1., 0., 0., 0., 1.)
+
+def settle():
+    QtTest.QTest.qWait(100)
+
+def enter(text):
+    field.setFocus(); field.setText(text)
+    QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return); settle()
+
+def check(name, value):
+    result['checks'].append({'name': name, 'passed': bool(value)})
+
+def start_picture(during_dialog=None):
+    attempts = [0]
+    def answer():
+        attempts[0] += 1
+        dialog = QtWidgets.QApplication.activeModalWidget()
+        if not isinstance(dialog, QtWidgets.QFileDialog):
+            if attempts[0] < 40: QtCore.QTimer.singleShot(50, answer)
+            return
+        dialog.setDirectory(str(source.parent))
+        if during_dialog: during_dialog()
+        def choose():
+            edit = dialog.findChild(QtWidgets.QLineEdit, 'fileNameEdit')
+            edit.setFocus(); edit.setText(source.name)
+            QtCore.QTimer.singleShot(100, lambda: QtTest.QTest.mouseClick(dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Open), QtCore.Qt.LeftButton))
+        QtCore.QTimer.singleShot(100, choose)
+    QtCore.QTimer.singleShot(100, answer)
+    enter('PictureFrame')
+
+def run():
+    global field, source
+    try:
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_DontUseNativeDialogs, True)
+        Gui.activateWorkbench('OpenMatrix9Workbench'); import OpenMatrix9Gui as OM
+        doc = App.newDocument('PointConsumers'); doc.UndoMode = 1; settle()
+        window = Gui.getMainWindow(); field = command_input(window); prompt = command_prompt(window)
+        cold = os.environ.get('OM9_POINT_CONSUMER_RESTORE_REPORT')
+        if cold:
+            saved = json.loads(Path(cold).read_text())
+            App.closeDocument(doc.Name); doc = App.openDocument(saved['saved_document'])
+            obj = doc.getObject(saved['saved_name'])
+            check('cold restore preserves exact accepted input provenance', obj.OM9CoordinateReport == saved['saved_provenance'])
+            check('cold restore preserves explicit unit context', obj.OM9UnitContext == OM.unitContext(doc.Name)['snapshot'])
+            check('cold restore preserves dimensions and transformed placement', abs(obj.XSize.Value - 25.4) < 1e-9 and (obj.Placement.Base - App.Vector(13, 58.1, 56.35)).Length < 1e-9)
+            check('cold restore preserves embedded image', Path(obj.ImageFile).is_file() and not QtGui.QImage(obj.ImageFile).isNull())
+            result['ok'] = all(c['passed'] for c in result['checks'])
+            return
+        area = window.findChild(QtWidgets.QMdiArea)
+        sub = next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot') == 0)
+        area.setActiveSubWindow(sub); settle(); OM.setCPlane(doc.Name, 0, FRAME)
+        Gui.activeDocument().Modified = False
+        before = (len(doc.Objects), doc.UndoCount, len(doc.RedoNames), Gui.activeDocument().Modified, dict(doc.Meta))
+        enter('Distance'); enter('  1,2,3  '); enter('w13,21,42')
+        check('mixed CPlane/world Distance resolves independent endpoints to 10 mm', prompt.text() == 'Distance: 10 mm')
+        info = json.loads(window.property('om9MeasurementReport'))
+        check('Distance report retains actual world endpoints', [i['result']['point_mm'] for i in info['inputs']] == [[13.,21.,32.], [13.,21.,42.]])
+        first = info['inputs'][0]
+        check('Distance preserves original syntax including whitespace and declared coordinate kind', first['original_text'] == '  1,2,3  ' and first['kind'] == 'absolute_cplane' and info['inputs'][1]['kind'] == 'absolute_world')
+        check('Distance preserves actual frame and nonzero runtime revision', first['context']['frame']['origin_mm'] == list(FRAME[:3]) and first['context']['frame']['axes'] == [list(FRAME[i:i+3]) for i in (3,6,9)] and int(first['context']['frame']['revision']) > 0 and int(first['context']['document']['runtime_owner']) > 0)
+        enter('Cancel')
+        enter('Angle'); enter('1,2,3'); enter('r5,0,0'); enter('w0,0,0'); enter('w0,5,0')
+        check('mixed CPlane/relative/world Angle resolves equal world directions', prompt.text() == 'Angle: 0 degrees')
+        info = json.loads(window.property('om9MeasurementReport'))
+        check('Angle report retains four independent world endpoints', [i['result']['point_mm'] for i in info['inputs']] == [[13.,21.,32.], [13.,26.,32.], [0.,0.,0.], [0.,5.,0.]])
+        enter('Cancel')
+        for invalid in ('5', 'r1,2,3', '1,,3', '1, 2,3', 'NaN,0,0', '1s,2,3'):
+            enter('Distance'); enter(invalid); enter('1,2,3'); enter('wr0,0,10')
+            info = json.loads(window.property('om9MeasurementReport'))
+            check('invalid initial point preserves phase and accepts retry ' + invalid, prompt.text() == 'Distance: 10 mm' and len(info['inputs']) == 2)
+        enter('Angle'); enter('1,2,3'); enter('1,2,3'); enter('r5,0,0'); enter('r0,0,0'); enter('wr0,5,0')
+        info = json.loads(window.property('om9MeasurementReport'))
+        check('rejected Angle endpoint never changes accepted relative base', prompt.text() == 'Angle: 0 degrees' and [i['result']['point_mm'] for i in info['inputs']] == [[13.,21.,32.],[13.,26.,32.],[13.,26.,32.],[13.,31.,32.]])
+        check('measurement input leaves objects metadata modified and Undo unchanged', before == (len(doc.Objects), doc.UndoCount, len(doc.RedoNames), Gui.activeDocument().Modified, dict(doc.Meta)))
+        enter('Distance'); QtTest.QTest.keyClick(field,QtCore.Qt.Key_F4); settle(); enter('w10,20,40')
+        info = json.loads(window.property('om9MeasurementReport'))
+        check('F4 world origin bypasses the typed CPlane transform', prompt.text() == 'Distance: 10 mm' and info['inputs'][0]['result']['point_mm'] == [10.,20.,30.])
+        check('F4 provenance declares an origin shortcut', info['inputs'][0]['source']['kind'] == 'origin_shortcut')
+        enter('Distance'); enter('1,2,3'); OM.setCPlane(doc.Name,0,WORLD); enter('1,2,13')
+        info = json.loads(window.property('om9MeasurementReport'))
+        check('Distance keeps command-start frame after CPlane change', prompt.text() == 'Distance: 10 mm' and info['inputs'][1]['result']['point_mm'] == [23.,21.,32.])
+        OM.setCPlane(doc.Name,0,FRAME)
+        source = out / 'point-guide.png'
+        image = QtGui.QImage(120, 60, QtGui.QImage.Format_RGBA8888); image.fill(QtGui.QColor(80, 160, 220)); image.save(str(source))
+        OM.setUnitContext(doc.Name, 25.4, 1., .01, .001, .02)
+        enter('Distance'); enter('Unit=in'); enter('1,2cm,3mm'); enter('wr0,0,25.4mm')
+        info = json.loads(window.property('om9MeasurementReport'))
+        check('Distance output unit never changes mixed-unit input scale', prompt.text() == 'Distance: 1 in' and info['inputs'][0]['result']['point_mm'] == [13.,45.4,50.])
+        previous_report = window.property('om9MeasurementReport')
+        enter('Distance'); enter('0,0,0'); OM.setUnitContext(doc.Name,1.,1.,.01,.001,.02); undo = doc.UndoCount; enter('3,4,0')
+        check('unit change cannot complete a mixed-context measurement', window.property('om9MeasurementReport') == previous_report and doc.UndoCount == undo)
+        enter('Cancel'); OM.setUnitContext(doc.Name,25.4,1.,.01,.001,.02)
+        baseline = len(doc.Objects)
+        undo = doc.UndoCount
+        start_picture(); enter('  1,2cm,3mm  '); enter('  1  ')
+        images = [o for o in doc.Objects if o.TypeId == 'Image::ImagePlane']
+        check('PictureFrame shared parser creates an image from mixed length units', len(images) == 1 and len(doc.Objects) == baseline + 1)
+        if images:
+            obj = images[0]
+            check('PictureFrame scalar width converts document inches once', abs(obj.XSize.Value - 25.4) < 1e-9 and abs(obj.YSize.Value - 12.7) < 1e-9)
+            check('PictureFrame mixed-unit CPlane corner has independent world placement', (obj.Placement.Base - App.Vector(13, 58.1, 56.35)).Length < 1e-9)
+            report = json.loads(obj.OM9CoordinateReport)
+            check('PictureFrame persists tagged point and scalar records', report['inputs'][0]['result']['point_mm'] == [13.,45.4,50.] and report['inputs'][1]['result']['length_mm'] == 25.4)
+            check('PictureFrame preserves raw unit input including whitespace and captured document scale', [i['original_text'] for i in report['inputs']] == ['  1,2cm,3mm  ','  1  '] and all(i['context']['units']['model_mm'] == 25.4 for i in report['inputs']) and obj.OM9UnitContext == OM.unitContext(doc.Name)['snapshot'])
+            check('PictureFrame provenance shares its geometry Undo transaction', doc.UndoCount == undo + 1)
+            name = obj.Name; provenance = obj.OM9CoordinateReport
+            doc.undo(); check('PictureFrame Undo removes geometry and provenance', doc.getObject(name) is None)
+            doc.redo(); obj = doc.getObject(name)
+            check('PictureFrame Redo restores exact provenance', obj.OM9CoordinateReport == provenance)
+            archive = out / 'point-consumers.FCStd'; doc.saveAs(str(archive))
+            result.update(saved_document=str(archive),saved_name=name,saved_provenance=provenance)
+        start_picture(); enter('r1,2,3'); enter('1,2cm,3mm'); enter('-1'); enter('1cm')
+        images = [o for o in doc.Objects if o.TypeId == 'Image::ImagePlane']
+        obj = images[-1]; report = json.loads(obj.OM9CoordinateReport)
+        check('invalid PictureFrame point and width preserve accepted corner only', len(images) == 2 and len(report['inputs']) == 2 and abs(obj.XSize.Value - 10) < 1e-9)
+        before_count = len(doc.Objects)
+        start_picture(); enter('1,2cm,3mm')
+        OM.setUnitContext(doc.Name, 1., 1., .01, .001, .02); undo = doc.UndoCount
+        QtTest.QTest.qWait(200)
+        check('stale PictureFrame context reports a restart diagnostic', 'Unit context changed' in prompt.text() and 'restart' in prompt.text())
+        enter('10')
+        check('unit change invalidates PictureFrame before output or Undo', len(doc.Objects) == before_count and doc.UndoCount == undo)
+        enter('Cancel')
+        before_count = len(doc.Objects)
+        start_picture(lambda: OM.setUnitContext(doc.Name,25.4,1.,.01,.001,.02)); undo = doc.UndoCount
+        enter('0,0,0'); enter('10')
+        check('unit change during image dialog rejects the captured session', len(doc.Objects) == before_count and doc.UndoCount == undo)
+        enter('Cancel')
+        for label, near_frame in (
+            ('scale', (0.,0.,0.,1.0000004,0.,0.,0.,1.,0.,0.,0.,1.)),
+            ('shear', (0.,0.,0.,1.,0.,0.,0.0000004,1.,0.,0.,0.,1.)),
+        ):
+            rejected = False
+            try: OM.setCPlane(doc.Name,0,near_frame)
+            except Exception: rejected = True
+            check('CPlane rejects near-' + label + ' that a native rigid placement would silently remove', rejected)
+        result['ok'] = all(c['passed'] for c in result['checks'])
+        if result['ok']: source.unlink()
+    except Exception:
+        result.update(ok=False, error=traceback.format_exc())
+    finally:
+        (out / 'results.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        for name in list(App.listDocuments()): App.closeDocument(name)
+        QtWidgets.QApplication.quit()
+QtCore.QTimer.singleShot(700, run)

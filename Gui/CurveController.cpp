@@ -286,7 +286,7 @@ void CurveController::submit(const QString& text) {
     if(input.compare("Distance",Qt::CaseInsensitive)==0||input.compare("Angle",Qt::CaseInsensitive)==0){for(std::size_t i=0;i<om9_command_count();++i)if(CoreDistance::handles(i)&&input.compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0){CoreDistance::instance().start(i);return;}}
     if(CoreDistance::instance().active()){
         for(std::size_t i=0;i<om9_command_count();++i)if(isCurveCommand(i)&&input.compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0){start(i);return;}
-        CoreDistance::instance().submit(input);return;
+        CoreDistance::instance().submit(text);return;
     }
     if(input.compare("PictureFrame",Qt::CaseInsensitive)==0){for(std::size_t i=0;i<om9_command_count();++i)if(CorePictureFrame::handles(i)){CorePictureFrame::instance().start(i);return;}}
     if(input.left(12).compare("ViewportTabs",Qt::CaseInsensitive)==0&&(input.size()==12||input[12].isSpace())) {
@@ -300,7 +300,7 @@ void CurveController::submit(const QString& text) {
         for(std::size_t i=0;i<om9_command_count();++i)if((isCurveCommand(i)||CoreViewControls::handles(i))&&input.compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0) {
             if(isCurveCommand(i))start(i);else om9_sidebar_record_execution(i,CoreViewControls::instance().execute(i));return;
         }
-        CorePictureFrame::instance().submit(input);return;
+        CorePictureFrame::instance().submit(text);return;
     }
     if(om9_curve_active()) {
         if(!validDocument()){cancel();return;}

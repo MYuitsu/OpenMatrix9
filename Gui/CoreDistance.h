@@ -2,7 +2,8 @@
 #include <QObject>
 #include <QString>
 #include <QPointer>
-#include <Base/Placement.h>
+#include "CoreCoordinates.h"
+#include <fastsignals/signal.h>
 #include <cstddef>
 namespace App {class Document;}
 namespace OpenMatrix9Gui {
@@ -21,16 +22,21 @@ protected:
     bool eventFilter(QObject*,QEvent*)override;
 private:
     CoreDistance();
-    void point(const Base::Vector3d&);
+    void point(const CoordinateInput&);
+    void finish(const CoordinateInput&,const QString&);
+    bool checkContext();
+    std::optional<Base::Vector3d> previousPoint()const;
     void prompt(const QString&);
     bool valid()const;
     bool enabled=false,running=false,hasFirst=false;
     unsigned int unit=0;
     std::size_t command=0;
     App::Document* document=nullptr;
-    Base::Placement plane;
+    CoordinateContext coordinateContext;
+    std::vector<CoordinateInput> accepted;
     Base::Vector3d first;
     QPointer<QObject> releaseTarget;
+    fastsignals::scoped_connection deletedConnection,activeConnection;
     bool measuringAngle=false;
     unsigned int angleCount=0;
     Base::Vector3d anglePoints[4];

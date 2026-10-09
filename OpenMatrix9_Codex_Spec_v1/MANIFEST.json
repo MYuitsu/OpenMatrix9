@@ -21,13 +21,13 @@
   },
   {
     "path": "FEATURES.json",
-    "bytes": 1806526,
-    "sha256": "c1457579c3652ad42a2e5f313c0e8584ca9a83fc88abe1e070a0c48f75b3ecb3"
+    "bytes": 1808583,
+    "sha256": "5a89241fe92339bba4027663d6c51e3eda6f78a77fdfaa83c134b84724d78104"
   },
   {
     "path": "FEATURES.yaml",
-    "bytes": 1445201,
-    "sha256": "b82d18b6e6a20da34270b4c0b52397cb7caa0992e9c245ec9bf8365620d386c1"
+    "bytes": 1447123,
+    "sha256": "defce222e87781ce76e6bb6649db4d6386c01a86614e18376a1803c0848d9f31"
   },
   {
     "path": "FEATURE_LOOKUP.json",
@@ -46,8 +46,8 @@
   },
   {
     "path": "IMPLEMENTATION_STATUS.md",
-    "bytes": 18805,
-    "sha256": "f56dc9c8b9c692a9b3e2b16b45227ff0100c2f08ae1aa3b4410e1554aec53a04"
+    "bytes": 19306,
+    "sha256": "67ccb034e9e1c59c172d92bacabae8d799193b84c92089338a86176209e2273b"
   },
   {
     "path": "INDEX.md",
@@ -121,13 +121,13 @@
   },
   {
     "path": "specs/00-rhino-core/03-coordinates-cplanes.md",
-    "bytes": 20685,
-    "sha256": "a6dee21ea36027855c36214816cc6484210c92239f7d39d62f29fbb3ea9e84d2"
+    "bytes": 21454,
+    "sha256": "e079a0219a8188d87a5261d769c84eb89f1a7f01af668150fea9b8df288c8b5c"
   },
   {
     "path": "specs/00-rhino-core/04-command-engine.md",
-    "bytes": 20495,
-    "sha256": "01e359ed04a51110ff55b3bc9e6c43fc1511b06e3dea79c17e26329df15c0e7b"
+    "bytes": 21264,
+    "sha256": "29f49d7ce37e1b1e9733240aa2f17b617b191caa75fdc3e16bb734c9e212ce18"
   },
   {
     "path": "specs/00-rhino-core/05-picking-snapping.md",
@@ -436,13 +436,13 @@
   },
   {
     "path": "specs/01-core/om9-measure-001-angle.md",
-    "bytes": 6934,
-    "sha256": "77cfe3edd3d01a42b840f98d4e050b23688038ae1989fe491eb05b58ddb989c4"
+    "bytes": 9176,
+    "sha256": "ec630fb929f8d5e716987caff2fcfb36f3d8a78c63bef3fcd9e450097c4b76b3"
   },
   {
     "path": "specs/01-core/om9-measure-002-distance.md",
-    "bytes": 6922,
-    "sha256": "dbf029d15a1411a93826431c3bac18b60d0d8c274ed2bd954ccd93fe1227c3a1"
+    "bytes": 9061,
+    "sha256": "999a9323f70206d19cd5b6ef9d97f75ebe068370fd6ccea34f096ef2d438d61f"
   },
   {
     "path": "specs/01-core/om9-measure-003-length.md",
@@ -781,8 +781,8 @@
   },
   {
     "path": "specs/01-core/om9-view-001-picture-frame.md",
-    "bytes": 8703,
-    "sha256": "01d5d5faad69fe11f3c79a79e235d12da01ca87e14c9570e7714f35836e1c006"
+    "bytes": 12133,
+    "sha256": "c3658d15dd9c5592c6571eee87a42e999ddc6907ff55933d8ce689a413b285ed"
   },
   {
     "path": "specs/01-core/om9-view-002-restore-viewports.md",

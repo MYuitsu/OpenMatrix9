@@ -10,6 +10,18 @@ date: 2026-10-09
 
 # RCORE-03 — Tọa độ, parser điểm và CPlane
 
+<!-- rhino-core-point-consumers:start -->
+## Bổ sung đã kiểm chứng — shared point consumers
+
+Distance, Angle và PictureFrame đã dùng chung parser Rust, giữ tọa độ/đơn vị đầu vào và provenance.
+CPlane sai scale/shear bị từ chối; PictureFrame kiểm giao dịch trước mutation.
+**324 native checks / 9 runs; 364 Rust tests; 49 Python pass, 1 skip.**
+P0 toàn bộ vẫn đang triển khai; [phạm vi và bằng chứng](../../../docs/validation/2026-10-09-rhino-core-point-consumers.md).
+
+Đây là slice Cartesian và lifecycle của ba consumer. Các hợp đồng grammar, session, view identity và History còn lại vẫn mở; không đóng toàn bộ fixture xuyên mọi command.
+
+<!-- rhino-core-point-consumers:end -->
+
 ## Cập nhật triển khai P0 — 2026-10-09
 
 Baseline source audit phía dưới được giữ nguyên về phạm vi; evidence triển khai
