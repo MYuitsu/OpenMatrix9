@@ -1,15 +1,31 @@
 //! OM9-CURVE-001/002/003: shared mouse and command-frame session.
 //! Host choices: millimetres, 1e-7 mm minimum segment, finite coordinates <1e9 mm.
 use crate::circle::{Circle, Mode as CircleMode, Plan as CirclePlan, Size as CircleSize};
-use crate::coordinates::{Frame, PointInput};
+use crate::coordinates::{Frame, NumericSyntax, PointInput, classify_numeric};
 use crate::ellipse::{Ellipse, Mode as EllipseMode, Plan as EllipsePlan};
 use crate::rectangle::{Mode, Rectangle};
 use crate::spline::{self, Knots, Spline};
+use std::collections::VecDeque;
+use std::sync::Arc;
+const UNSUPPORTED_ANGLE_CONSTRAINT: &str =
+    "One-shot angle constraints are not supported in this command phase";
+// Keep recent accepted input bounded, including option-only sessions.
+const CIRCLE_INPUT_CHECKPOINT_LIMIT: usize = 1024;
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Effect {
     Waiting,
     Commit,
     Cancelled,
+}
+#[derive(Clone)]
+struct CircleInputCheckpoint {
+    native_context_key: u64,
+    points: Vec<[f64; 3]>,
+    options: Circle,
+    frame: Option<Frame>,
+    input_mm_per_unit: f64,
+    previous: Option<[f64; 3]>,
+    awaiting_option: Option<String>,
 }
 #[derive(Default, Clone)]
 pub struct CurveSession {
@@ -29,6 +45,10 @@ pub struct CurveSession {
     awaiting_option: Option<String>,
     rectangle: Rectangle,
     pub(crate) circle_options: Circle,
+    circle_previous: Option<[f64; 3]>,
+    circle_native_context_key: u64,
+    circle_native_context_counter: u64,
+    circle_input_history: VecDeque<Arc<CircleInputCheckpoint>>,
     circle_plan: Option<CirclePlan>,
     circle_approx_deviation: f64,
     ellipse_options: Ellipse,
@@ -48,6 +68,76 @@ pub fn name(icon: &str) -> Option<&'static str> {
     }
 }
 impl CurveSession {
+    fn circle_input_checkpoint(&self) -> CircleInputCheckpoint {
+        CircleInputCheckpoint {
+            native_context_key: self.circle_native_context_key,
+            points: self.points.clone(),
+            options: self.circle_options.clone(),
+            frame: self.frame,
+            input_mm_per_unit: self.input_mm_per_unit,
+            previous: self.circle_previous,
+            awaiting_option: self.awaiting_option.clone(),
+        }
+    }
+    fn restore_circle_input(&mut self, checkpoint: CircleInputCheckpoint) {
+        self.circle_native_context_key = checkpoint.native_context_key;
+        self.points = checkpoint.points;
+        self.circle_options = checkpoint.options;
+        self.frame = checkpoint.frame;
+        self.input_mm_per_unit = checkpoint.input_mm_per_unit;
+        self.circle_previous = checkpoint.previous;
+        self.awaiting_option = checkpoint.awaiting_option;
+    }
+    fn with_circle_input_checkpoint(
+        &mut self,
+        accept: impl FnOnce(&mut Self) -> Result<Effect, String>,
+    ) -> Result<Effect, String> {
+        if self.name != "Circle" || !self.active {
+            return accept(self);
+        }
+        let next_key = self.circle_native_context_counter.checked_add(1)
+            .ok_or("Circle input context identity exhausted; restart the command")?;
+        let checkpoint = self.circle_input_checkpoint();
+        match accept(self) {
+            Ok(effect) => {
+                if effect != Effect::Cancelled {
+                    self.circle_native_context_counter = next_key;
+                    self.circle_native_context_key = next_key;
+                }
+                if self.active {
+                    if self.circle_input_history.len() == CIRCLE_INPUT_CHECKPOINT_LIMIT {
+                        self.circle_input_history.pop_front();
+                    }
+                    self.circle_input_history.push_back(Arc::new(checkpoint));
+                } else {
+                    self.circle_input_history.clear();
+                }
+                Ok(effect)
+            }
+            Err(error) => {
+                self.restore_circle_input(checkpoint);
+                Err(error)
+            }
+        }
+    }
+    fn circle_input_undo(&mut self) -> Result<Effect, String> {
+        let checkpoint = self
+            .circle_input_history
+            .pop_back()
+            .ok_or("No Circle input to undo")?;
+        self.restore_circle_input(Arc::unwrap_or_clone(checkpoint));
+        Ok(Effect::Waiting)
+    }
+    /// Opaque native resource identity only; it contains no host pointer.
+    pub fn circle_input_context_key(&self) -> u64 {
+        if self.name == "Circle" { self.circle_native_context_key } else { 0 }
+    }
+    /// Authoritative retention policy for the native resource adapter.
+    pub fn circle_input_context_keys(&self) -> Vec<u64> {
+        if self.name != "Circle" { return Vec::new(); }
+        self.circle_input_history.iter().map(|item| item.native_context_key)
+            .chain(std::iter::once(self.circle_native_context_key)).collect()
+    }
     pub fn start(&mut self, name: &str) -> Result<(), String> {
         let name = if name.eq_ignore_ascii_case("Line") {
             "Line"
@@ -207,6 +297,9 @@ impl CurveSession {
         self.spline = None;
         self.circle_plan = None;
         self.circle_options = Circle::default();
+        self.circle_previous = None;
+        self.circle_native_context_key = 0;
+        self.circle_input_history.clear();
         self.circle_approx_deviation = 0.;
         self.ellipse_options = Ellipse::default();
         self.ellipse_plan = None;
@@ -437,7 +530,10 @@ impl CurveSession {
             .copied()
             .ok_or("No preview point".into())
     }
-    pub fn point(&mut self, mut p: [f64; 3]) -> Result<Effect, String> {
+    pub fn point(&mut self, p: [f64; 3]) -> Result<Effect, String> {
+        self.with_circle_input_checkpoint(|session| session.point_impl(p))
+    }
+    fn point_impl(&mut self, mut p: [f64; 3]) -> Result<Effect, String> {
         if self.name == "Ellipse" {
             if !self.active {
                 return Err("No active command".into());
@@ -458,6 +554,9 @@ impl CurveSession {
             if !self.active {
                 return Err("No active command".into());
             }
+            if self.awaiting_option.is_some() {
+                return Err("Enter the pending Circle option before picking".into());
+            }
             if self.points.is_empty() {
                 self.circle_options.axes =
                     Some(self.frame.map_or(crate::rectangle::AXES, Frame::axes));
@@ -468,6 +567,7 @@ impl CurveSession {
             let effect = self.circle_finish(plan)?;
             self.circle_options = next;
             self.points = points;
+            self.circle_previous = Some(p);
             return Ok(effect);
         }
         if self.name == "Rectangle" {
@@ -517,6 +617,27 @@ impl CurveSession {
         }
     }
     pub fn input(&mut self, text: &str) -> Result<Effect, String> {
+        if text.trim().eq_ignore_ascii_case("cancel") || text.trim().eq_ignore_ascii_case("esc") {
+            return self.input_impl(text);
+        }
+        if self.name == "Circle"
+            && self.active
+            && (text.trim().eq_ignore_ascii_case("undo") || text.trim().eq_ignore_ascii_case("u"))
+        {
+            return self.circle_input_undo();
+        }
+        if self.name == "Circle"
+            && self.active
+            && self.awaiting_option.is_none()
+            && text.trim().is_empty()
+            && self.circle_options.tangent_ready()
+        {
+            // Enter requests a native solve; it accepts no new input state.
+            return self.input_impl(text);
+        }
+        self.with_circle_input_checkpoint(|session| session.input_impl(text))
+    }
+    fn input_impl(&mut self, text: &str) -> Result<Effect, String> {
         let text = text.trim();
         if text.eq_ignore_ascii_case("Esc") || text.eq_ignore_ascii_case("Cancel") {
             return Ok(self.cancel());
@@ -525,8 +646,11 @@ impl CurveSession {
             return Err("No active command".into());
         }
         if let Some(option) = self.awaiting_option.clone() {
+            if classify_numeric(text) == NumericSyntax::AngleConstraint {
+                return Err(UNSUPPORTED_ANGLE_CONSTRAINT.into());
+            }
             self.awaiting_option = None;
-            let result = self.input(&format!("{option}={text}"));
+            let result = self.input_impl(&format!("{option}={text}"));
             if result.is_err() {
                 self.awaiting_option = Some(option);
             }
@@ -550,6 +674,9 @@ impl CurveSession {
             });
         }
         if self.awaiting_length {
+            if classify_numeric(text) == NumericSyntax::AngleConstraint {
+                return Err(UNSUPPORTED_ANGLE_CONSTRAINT.into());
+            }
             let length = self.length_value(text)?;
             if length < 1e-7 {
                 return Err("Length must be positive".into());
@@ -662,9 +789,17 @@ impl CurveSession {
             }
             return Ok(Effect::Waiting);
         }
+        if classify_numeric(text) == NumericSyntax::AngleConstraint {
+            return Err(UNSUPPORTED_ANGLE_CONSTRAINT.into());
+        }
+        let previous = if self.name == "Circle" {
+            self.circle_previous
+        } else {
+            self.points.last().copied()
+        };
         let point = PointInput::parse(text, |value| self.length_value(value))?
-            .resolve(self.frame.unwrap_or_default(), self.points.last().copied())?;
-        self.point(point.world)
+            .resolve(self.frame.unwrap_or_default(), previous)?;
+        self.point_impl(point.world)
     }
     fn rectangle_point(&mut self, p: [f64; 3], square: bool) -> Result<Effect, String> {
         if !self.active {
@@ -766,16 +901,18 @@ impl CurveSession {
             }
             _ => {}
         }
-        if !text.contains(',') {
-            let number = self.length_value(text)?;
-            return self
-                .rectangle_dimension(
+        match classify_numeric(text) {
+            NumericSyntax::Point => Ok(None),
+            NumericSyntax::AngleConstraint => Err(UNSUPPORTED_ANGLE_CONSTRAINT.into()),
+            NumericSyntax::Scalar => {
+                let number = self.length_value(text)?;
+                self.rectangle_dimension(
                     self.points.len() == 1 && self.rectangle.length.is_none(),
                     number,
                 )
-                .map(|_| Some(()));
+                .map(|_| Some(()))
+            }
         }
-        Ok(None)
     }
     fn rectangle_dimension(&mut self, length: bool, value: f64) -> Result<(), String> {
         if self.points.is_empty() {
@@ -939,8 +1076,10 @@ impl CurveSession {
             }
             "history" => return Err("Ellipse History is not implemented".into()),
             _ => {
-                if text.contains(',') {
-                    return Ok(None);
+                match classify_numeric(text) {
+                    NumericSyntax::Point => return Ok(None),
+                    NumericSyntax::AngleConstraint => return Err(UNSUPPORTED_ANGLE_CONSTRAINT.into()),
+                    NumericSyntax::Scalar => {}
                 }
                 let size = self.length_value(text)?;
                 let p = self.ellipse_options.numeric_point(&self.points, size)?;
@@ -993,6 +1132,7 @@ impl CurveSession {
         self.circle_plan = Some(plan);
         self.circle_approx_deviation = deviation;
         self.active = false;
+        self.circle_input_history.clear();
         Ok(Effect::Commit)
     }
     pub fn circle_reference_mode(&self) -> u32 {
@@ -1008,6 +1148,16 @@ impl CurveSession {
         normal: [f64; 3],
         kind: u32,
     ) -> Result<Effect, String> {
+        self.with_circle_input_checkpoint(|session| {
+            session.circle_native_reference_impl(p, normal, kind)
+        })
+    }
+    fn circle_native_reference_impl(
+        &mut self,
+        p: [f64; 3],
+        normal: [f64; 3],
+        kind: u32,
+    ) -> Result<Effect, String> {
         if self.name != "Circle" || !self.active {
             return Err("No active Circle".into());
         }
@@ -1017,7 +1167,9 @@ impl CurveSession {
         crate::circle::check_point(p)?;
         if kind == 4 && self.circle_options.orientating {
             let plan = self.circle_options.pick(&mut self.points, p)?;
-            return self.circle_finish(plan);
+            let effect = self.circle_finish(plan)?;
+            self.circle_previous = Some(p);
+            return Ok(effect);
         }
         match (self.circle_reference_mode(), kind) {
             (1, 1) => {
@@ -1036,9 +1188,15 @@ impl CurveSession {
             }
             _ => return Err("Circle reference does not match current construction step".into()),
         }
+        if kind != 1 {
+            self.circle_previous = Some(p);
+        }
         Ok(Effect::Waiting)
     }
     pub fn circle_fit_batch(&mut self, points: &[[f64; 3]]) -> Result<Effect, String> {
+        self.with_circle_input_checkpoint(|session| session.circle_fit_batch_impl(points))
+    }
+    fn circle_fit_batch_impl(&mut self, points: &[[f64; 3]]) -> Result<Effect, String> {
         if self.circle_reference_mode() != 4
             || points.is_empty()
             || self.points.len() + points.len() > 1024
@@ -1052,6 +1210,7 @@ impl CurveSession {
             self.circle_options.axes = Some(self.frame.map_or(crate::rectangle::AXES, Frame::axes));
         }
         self.points.extend_from_slice(points);
+        self.circle_previous = points.last().copied();
         Ok(Effect::Waiting)
     }
     pub fn circle_accept_solution(
@@ -1217,8 +1376,7 @@ impl CurveSession {
             if value.is_some() {
                 return Err("Undo takes no value".into());
             }
-            self.circle_options.undo(&mut self.points)?;
-            return Ok(Some(Effect::Waiting));
+            return self.circle_input_undo().map(Some);
         }
         if key == "point" {
             if self.circle_options.mode != CircleMode::Tangent
@@ -1278,13 +1436,15 @@ impl CurveSession {
                     return Err("Pick two circumference points before Radius".into());
                 }
                 self.circle_options.radius_pending = true;
-            } else if !text.contains(',') {
-                self.circle_options.set_radius(
-                    &self.points,
-                    crate::circle::dimension(&self.dimension_text(text, false)?, false)?,
-                )?;
             } else {
-                return Ok(None);
+                match classify_numeric(text) {
+                    NumericSyntax::Point => return Ok(None),
+                    NumericSyntax::AngleConstraint => return Err(UNSUPPORTED_ANGLE_CONSTRAINT.into()),
+                    NumericSyntax::Scalar => self.circle_options.set_radius(
+                        &self.points,
+                        crate::circle::dimension(&self.dimension_text(text, false)?, false)?,
+                    )?,
+                }
             }
             return Ok(Some(Effect::Waiting));
         }
@@ -1313,14 +1473,17 @@ impl CurveSession {
             self.circle_options.orientating = true;
             return Ok(Some(Effect::Waiting));
         }
-        if !text.contains(',') {
-            let plan = self.circle_options.numeric(
-                &self.points,
-                &self.dimension_text(text, self.circle_options.size == CircleSize::Area)?,
-            )?;
-            return Ok(Some(self.circle_finish(Some(plan))?));
+        match classify_numeric(text) {
+            NumericSyntax::Point => Ok(None),
+            NumericSyntax::AngleConstraint => Err(UNSUPPORTED_ANGLE_CONSTRAINT.into()),
+            NumericSyntax::Scalar => {
+                let plan = self.circle_options.numeric(
+                    &self.points,
+                    &self.dimension_text(text, self.circle_options.size == CircleSize::Area)?,
+                )?;
+                Ok(Some(self.circle_finish(Some(plan))?))
+            }
         }
-        Ok(None)
     }
 }
 fn option_bool(value: Option<&str>, current: bool) -> Result<bool, String> {

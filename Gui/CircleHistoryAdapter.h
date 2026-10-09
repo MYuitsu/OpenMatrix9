@@ -18,6 +18,10 @@ struct CircleHistorySource {
 std::vector<SolidPoint> circleHistorySourcePoints(App::Document&,const std::string&,const std::string&);
 std::optional<unsigned> circleHistoryNativeInput(App::Document&,const QString&);
 void clearCircleHistoryReferences();
+// Value snapshots only: identities are compared with the live document before
+// use, and this ledger never retains Python-owned references.
+std::vector<CircleHistorySource> circleHistoryReferenceSnapshot();
+void restoreCircleHistoryReferenceSnapshot(std::vector<CircleHistorySource>);
 void pruneCircleHistoryReferences(unsigned effect);
 void verifyCircleHistoryReferences(App::Document&);
 App::DocumentObject* createCircleHistoryForCommand(App::Document&,PyObject*,const std::map<std::size_t,SolidCurveReference>&,const std::optional<SolidCurveReference>&);

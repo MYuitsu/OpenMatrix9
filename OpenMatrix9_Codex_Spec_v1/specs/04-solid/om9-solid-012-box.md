@@ -15,6 +15,15 @@ sample_status: compiled_and_validation_tests_passed
 
 # OM9-SOLID-012 — Box
 
+<!-- rhino-core-extended-input:start -->
+## Extended numeric input — validated slice
+
+Extended typed point input through existing native geometry; no all-option or all-P0 completion. Legacy Solid mm/cm/in callback remains; actual accepted relative base and Undo are repaired.
+
+[Runtime/source evidence](../../../docs/validation/2026-10-09-rhino-core-extended-input.md). Native geometry is reused; live constraints, locale and other missing contracts remain open.
+
+<!-- rhino-core-extended-input:end -->
+
 Alias tương thích: `Box`. Nhóm: `04-solid`. Trạng thái: `partially_implemented`.
 
 ## Hợp đồng thiết kế

@@ -1,6 +1,6 @@
 //! OM9-SOLID-012 / OM9-SOLID-014: native solid creation sessions.
 //! Host decisions: mm, right-handed CPlane, standalone BRep, 1e-7 mm minimum.
-use crate::coordinates::{Frame, PointInput};
+use crate::coordinates::{Frame, NumericSyntax, PointInput, classify_numeric};
 use std::{
     ffi::{CStr, c_char},
     sync::{Mutex, OnceLock},
@@ -96,6 +96,7 @@ struct Data {
     phase: u32,
     first: Point,
     last: Point,
+    previous_accepted: Option<Point>,
     axes: [Point; 3],
     length: f64,
     width: f64,
@@ -137,6 +138,7 @@ impl Session {
                 phase: 1,
                 first: [0.; 3],
                 last: [0.; 3],
+                previous_accepted: None,
                 axes,
                 length: 0.,
                 width: 0.,
@@ -382,13 +384,18 @@ impl Session {
             }
             return self.numeric(number(value)?);
         }
-        if !text.contains(',') {
-            return self.numeric(number(text)?);
+        match classify_numeric(text) {
+            NumericSyntax::Point => {}
+            NumericSyntax::Scalar => return self.numeric(number(text)?),
+            NumericSyntax::AngleConstraint => {
+                return Err("One-shot angle constraints are not supported in this command phase".into());
+            }
         }
         let frame = Frame::new(self.frame.0, self.frame.1)?;
-        let previous = (self.phase() != 1).then_some(self.data.last);
-        let point = PointInput::parse(text, number)?.resolve(frame, previous)?;
-        self.point_inner(point.world)
+        let point = PointInput::parse(text, number)?.resolve(frame, self.data.previous_accepted)?;
+        let effect = self.point_inner(point.world)?;
+        self.data.previous_accepted = Some(point.world);
+        Ok(effect)
     }
     fn numeric(&mut self, n: f64) -> Result<Effect, String> {
         let n = dimension(n)?;
@@ -455,6 +462,7 @@ impl Session {
         let before = self.data.clone();
         match self.point_inner(p) {
             Ok(e) => {
+                self.data.previous_accepted = Some(p);
                 if e == Effect::Waiting {
                     self.history.push(before);
                 }
@@ -652,6 +660,7 @@ impl Session {
         })();
         match effect {
             Ok(e) => {
+                self.data.previous_accepted = Some(p);
                 self.history.push(before);
                 Ok(e)
             }
@@ -688,6 +697,7 @@ impl Session {
         self.history.push(self.data.clone());
         self.data.points.extend_from_slice(points);
         self.data.last = *points.last().unwrap();
+        self.data.previous_accepted = Some(self.data.last);
         Ok(Effect::Waiting)
     }
     fn circle_result(&mut self, circle: (Point, f64, Point)) -> Result<Effect, String> {

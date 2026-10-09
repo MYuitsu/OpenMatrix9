@@ -100,7 +100,13 @@ fn om9_curve_005_fit_degenerate_and_batch_rejection_do_not_advance() {
     assert!(s.circle_fit_batch(&[[f64::NAN, 0., 0.]]).is_err());
     assert_eq!(s.points().len(), 3);
     s.input("Undo").unwrap();
-    s.input("0,1").unwrap();
+    assert!(s.points().is_empty(), "Undo removes the accepted fit batch");
+    assert!(
+        s.input("wr0,1,0").is_err(),
+        "Removed batch has no relative base"
+    );
+    s.circle_fit_batch(&[[0.; 3], [1., 0., 0.], [0., 1., 0.]])
+        .unwrap();
     s.input("").unwrap();
     assert!(s.circle().is_some());
 }
@@ -115,11 +121,33 @@ fn om9_curve_005_from_first_point_and_radius_undo_recover() {
     s.input("FromFirstPoint=No").unwrap();
     s.input("0,0").unwrap();
     s.input("Undo").unwrap();
+    assert_eq!(
+        s.circle_reference_mode(),
+        0,
+        "Undo restores the accepted Point option"
+    );
+    s.input("Undo").unwrap();
+    assert_eq!(
+        s.circle_reference_mode(),
+        0,
+        "Undo restores FromFirstPoint=Yes before removing Point"
+    );
+    assert!(
+        s.input("0,0").is_err(),
+        "Restored FromFirstPoint rejects a free first constraint"
+    );
+    s.input("Undo").unwrap();
     assert_eq!(s.circle_reference_mode(), 3);
     let mut s = session();
-    for p in ["3Point", "-3,0", "3,0", "Radius", "5", "Undo", "0,3"] {
+    for p in ["3Point", "-3,0", "3,0", "Radius", "5", "Undo"] {
         s.input(p).unwrap();
     }
+    assert!(
+        s.prompt().contains("Radius"),
+        "Undo restores pending Radius input"
+    );
+    s.input("Undo").unwrap();
+    s.input("0,3").unwrap();
     assert!((s.circle().unwrap().radius - 3.).abs() < 1e-7);
 }
 #[test]

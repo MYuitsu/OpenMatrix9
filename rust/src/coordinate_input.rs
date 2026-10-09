@@ -3,7 +3,10 @@
 //! Grammar/unit conversion stay in `coordinates::PointInput` and `units`. This
 //! layer owns phase routing, world-source bypass, snapshots and JSON reports;
 //! it retains no host pointer, document object or mutable command session.
-use crate::coordinates::{Frame, Point, PointInput, PointKind};
+use crate::coordinates::{
+    Frame, NumericSyntax, Point, PointInput, PointKind, PointNotation, SurveyorQuadrant,
+    classify_numeric,
+};
 use crate::units;
 use std::fmt::Write;
 
@@ -95,6 +98,7 @@ pub struct Resolved {
     original: String,
     previous: Option<Point>,
     components: Vec<f64>,
+    notation: Option<PointNotation>,
     kind: &'static str,
 }
 
@@ -124,7 +128,7 @@ pub fn resolve(request: &Request<'_>) -> Result<Resolved, String> {
     }
     let scale = units.as_ref().map_or(1., |context| context.model_mm);
     let parse = |token: &str| units::parse_length(token, scale).map_err(|error| error.to_string());
-    let (value, components, kind) = if request.source != Source::Typed {
+    let (value, components, kind, notation) = if request.source != Source::Typed {
         if !request.original.is_empty() {
             return Err("World-coordinate sources cannot contain typed text".into());
         }
@@ -133,11 +137,16 @@ pub fn resolve(request: &Request<'_>) -> Result<Resolved, String> {
             Value::Point(request.world),
             request.world.to_vec(),
             source_name(request.source),
+            None,
         )
-    } else if request.expected == Expected::PointOrLength && !request.original.contains(',') {
+    } else if classify_numeric(request.original) == NumericSyntax::AngleConstraint {
+        return Err("Angle constraints are not supported in this point phase".into());
+    } else if request.expected == Expected::PointOrLength
+        && classify_numeric(request.original) == NumericSyntax::Scalar
+    {
         let length = parse(request.original)?;
         check_point([length, 0., 0.])?;
-        (Value::Length(length), vec![length], "length")
+        (Value::Length(length), vec![length], "length", None)
     } else {
         let input = PointInput::parse(request.original, parse)?;
         let point = input.resolve(request.context.frame, request.previous)?;
@@ -151,6 +160,7 @@ pub fn resolve(request: &Request<'_>) -> Result<Resolved, String> {
             Value::Point(point.world),
             point.input.components[..point.input.component_count].to_vec(),
             kind,
+            Some(point.input.notation),
         )
     };
     Ok(Resolved {
@@ -161,6 +171,7 @@ pub fn resolve(request: &Request<'_>) -> Result<Resolved, String> {
         original: request.original.into(),
         previous: request.previous,
         components,
+        notation,
         kind,
     })
 }
@@ -191,6 +202,50 @@ fn numbers(values: &[f64]) -> String {
             .collect::<Vec<_>>()
             .join(",")
     )
+}
+
+fn notation_json(notation: &Option<PointNotation>) -> String {
+    match notation {
+        None => "null".into(),
+        Some(PointNotation::Cartesian) => "{\"kind\":\"cartesian\"}".into(),
+        Some(PointNotation::Polar {
+            radius_mm,
+            azimuth_rad,
+            height_mm,
+        }) => format!(
+            "{{\"kind\":\"polar\",\"radius_mm\":{radius_mm},\"angles_rad\":[{azimuth_rad}],\"height_mm\":{}}}",
+            height_mm.map_or_else(|| "null".into(), |height| height.to_string())
+        ),
+        Some(PointNotation::Spherical {
+            radius_mm,
+            azimuth_rad,
+            elevation_rad,
+        }) => format!(
+            "{{\"kind\":\"spherical\",\"radius_mm\":{radius_mm},\"angles_rad\":[{azimuth_rad},{elevation_rad}]}}"
+        ),
+        Some(PointNotation::SphericalXY {
+            horizontal_mm,
+            elevation_rad,
+        }) => format!(
+            "{{\"kind\":\"spherical_xy\",\"horizontal_mm\":{},\"angles_rad\":[{elevation_rad}]}}",
+            numbers(horizontal_mm)
+        ),
+        Some(PointNotation::Surveyor {
+            radius_mm,
+            bearing_rad,
+            quadrant,
+        }) => {
+            let quadrant = match quadrant {
+                SurveyorQuadrant::NorthEast => "NE",
+                SurveyorQuadrant::NorthWest => "NW",
+                SurveyorQuadrant::SouthEast => "SE",
+                SurveyorQuadrant::SouthWest => "SW",
+            };
+            format!(
+                "{{\"kind\":\"surveyor\",\"radius_mm\":{radius_mm},\"angles_rad\":[{bearing_rad}],\"quadrant\":\"{quadrant}\"}}"
+            )
+        }
+    }
 }
 
 impl Resolved {
@@ -230,12 +285,13 @@ impl Resolved {
             Expected::PointOrLength => "point_or_length",
         };
         format!(
-            "{{\"version\":1,\"grammar\":\"cartesian_v1\",\"locale\":\"dot_decimal\",\"original_text\":{},\"expected\":{},\"source\":{},\"kind\":{},\"components_mm\":{},\"result\":{},\"previous_world_mm\":{},\"context\":{{\"document\":{{\"runtime_owner\":{},\"uid\":{}}},\"view\":{{\"logical_slot\":{},\"identity_scope\":\"logical_document_slot\"}},\"frame\":{{\"revision\":{},\"origin_mm\":{},\"axes\":[{}],\"latch\":\"command_start\"}},\"units\":{}}}}}",
+            "{{\"version\":1,\"grammar\":\"rhino5_point_v2\",\"locale\":\"dot_decimal\",\"original_text\":{},\"expected\":{},\"source\":{},\"kind\":{},\"components_mm\":{},\"notation\":{},\"result\":{},\"previous_world_mm\":{},\"context\":{{\"document\":{{\"runtime_owner\":{},\"uid\":{}}},\"view\":{{\"logical_slot\":{},\"identity_scope\":\"logical_document_slot\"}},\"frame\":{{\"revision\":{},\"origin_mm\":{},\"axes\":[{}],\"latch\":\"command_start\"}},\"units\":{}}}}}",
             quoted(&self.original),
             quoted(expected),
             source,
             quoted(self.kind),
             numbers(&self.components),
+            notation_json(&self.notation),
             result,
             previous,
             quoted(&context.document_owner.to_string()),

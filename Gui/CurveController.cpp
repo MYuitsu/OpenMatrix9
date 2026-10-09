@@ -364,6 +364,10 @@ bool CurveController::eventFilter(QObject* watched,QEvent* event) {
             auto* view=dynamic_cast<Gui::View3DInventor*>(Gui::Application::Instance->activeDocument()->getActiveView());
             try {
                 updateInputFrame();
+                if(QString::fromUtf8(om9_command_id(command))=="Circle") {
+                    captureCircleReferenceContext();
+                    verifyCircleReferences(*App::GetApplication().getActiveDocument());
+                }
                 const auto origin=CoreWorkspace::instance().plane(view).getPosition();
                 const auto effect=om9_curve_point(origin.x,origin.y,origin.z);CoreSnaps::acceptedPoint(effect==1||effect==2);result(effect);
             }catch(const std::exception& error){clearPreview();setPrompt(QString::fromUtf8(error.what()));}

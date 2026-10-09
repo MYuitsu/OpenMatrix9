@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 // FreeCAD topology/selection/shape adapter; Rust owns Circle replay and bounds.
 #include "CircleHistoryAdapter.h"
+#include "CurveCircle.h"
 #include "CircleHistory.h"
 #include "HistoryFeature.h"
 #include "RustBridge.h"
@@ -66,7 +67,7 @@ std::vector<SolidPoint> circleHistorySourcePoints(App::Document& doc,const std::
     if(result.empty())throw std::runtime_error("Circle source has no points");return result;
 }
 std::optional<unsigned> circleHistoryNativeInput(App::Document& doc,const QString& text){
-    Base::PyGILStateLocker lock;const auto t=text.trimmed();const bool direction=t.startsWith("Direction=",Qt::CaseInsensitive),p=t.startsWith("Point=",Qt::CaseInsensitive);
+    Base::PyGILStateLocker lock;captureCircleReferenceContext();const auto t=text.trimmed();const bool direction=t.startsWith("Direction=",Qt::CaseInsensitive),p=t.startsWith("Point=",Qt::CaseInsensitive);
     if(p||direction){
         verifyCircleHistoryReferences(doc);const auto [name,sub]=vertexPath(t.mid(direction?10:6));
         const auto index=om9_curve_preview_count();auto source=capture(doc,name,sub,direction?-1:0,direction?0:index);
@@ -98,6 +99,9 @@ std::optional<unsigned> circleHistoryNativeInput(App::Document& doc,const QStrin
         }
         if(flat.empty())throw std::runtime_error("Select native Circle fit points");const auto effect=om9_circle_fit_batch(flat.data(),flat.size()/3);
         if(effect!=1)return effect;sources.insert(sources.end(),picked.begin(),picked.end());
+        // Empty input also finishes the fit. Preserve the batch's own context
+        // after its source ledger is attached and before the second Rust event.
+        captureCircleReferenceContext();
         if(t.isEmpty())return om9_curve_input("");return effect;
     }
     const auto key=t.section('=',0,0).trimmed();
@@ -111,6 +115,8 @@ std::optional<unsigned> circleHistoryNativeInput(App::Document& doc,const QStrin
     return {};
 }
 void clearCircleHistoryReferences(){sources.clear();}
+std::vector<CircleHistorySource> circleHistoryReferenceSnapshot(){return sources;}
+void restoreCircleHistoryReferenceSnapshot(std::vector<CircleHistorySource> snapshot){sources=std::move(snapshot);}
 void verifyCircleHistoryReferences(App::Document& doc){
     Base::PyGILStateLocker lock;
     for(const auto& source:sources){if(doc.getObject(source.name.c_str())!=source.identity)throw std::runtime_error("Circle point source changed or was deleted; Undo and reselect");const auto points=circleHistorySourcePoints(doc,source.name,source.sub);if(points!=source.snapshot||signature(doc,source.name,points)!=source.signature)throw std::runtime_error("Circle point source changed; Undo and reselect");}

@@ -122,6 +122,30 @@ pub extern "C" fn om9_circle_reference_mode() -> u32 {
         .map_or(0, |s| s.session.circle_reference_mode())
 }
 #[unsafe(no_mangle)]
+pub extern "C" fn om9_circle_input_context_key() -> u64 {
+    state()
+        .lock()
+        .ok()
+        .map_or(0, |s| s.session.circle_input_context_key())
+}
+/// # Safety
+/// When nonnull, output is aligned writable storage for capacity u64 values.
+/// Size probes and short buffers leave output unchanged; no pointer is retained.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_circle_input_context_keys(output: *mut u64, capacity: usize) -> usize {
+    let Ok(s) = state().lock() else {
+        return 0;
+    };
+    let keys = s.session.circle_input_context_keys();
+    if !output.is_null() && capacity >= keys.len() {
+        unsafe {
+            std::ptr::copy_nonoverlapping(keys.as_ptr(), output, keys.len());
+        }
+    }
+    keys.len()
+}
+
+#[unsafe(no_mangle)]
 pub extern "C" fn om9_circle_reference(
     x: f64,
     y: f64,
@@ -681,4 +705,46 @@ pub unsafe extern "C" fn om9_curve_message(buffer: *mut c_char, capacity: usize)
         }
     }
     bytes.len()
+}
+
+#[cfg(test)]
+mod context_key_tests {
+    use super::*;
+    #[test]
+    fn native_context_key_buffer_probes_and_short_writes_are_atomic() {
+        {
+            let mut s = state().lock().unwrap();
+            s.session.start("Circle").unwrap();
+            s.session.input("AroundCurve").unwrap();
+            s.session
+                .circle_native_reference([0.; 3], [0.; 3], 1)
+                .unwrap();
+        }
+        let current = om9_circle_input_context_key();
+        let count = unsafe { om9_circle_input_context_keys(std::ptr::null_mut(), 0) };
+        assert_eq!(count, 3);
+        let mut keys = [u64::MAX; 4];
+        assert_eq!(
+            unsafe { om9_circle_input_context_keys(keys.as_mut_ptr(), count - 1) },
+            count
+        );
+        assert_eq!(keys, [u64::MAX; 4]);
+        assert_eq!(
+            unsafe { om9_circle_input_context_keys(keys.as_mut_ptr(), keys.len()) },
+            count
+        );
+        assert_eq!(keys, [0, 1, current, u64::MAX]);
+        {
+            let mut s = state().lock().unwrap();
+            s.session.input("Undo").unwrap();
+        }
+        assert_ne!(om9_circle_input_context_key(), current);
+        let mut restored = [u64::MAX; 4];
+        assert_eq!(
+            unsafe { om9_circle_input_context_keys(restored.as_mut_ptr(), restored.len()) },
+            2
+        );
+        assert_eq!(restored, [0, 1, u64::MAX, u64::MAX]);
+        state().lock().unwrap().session.cancel();
+    }
 }

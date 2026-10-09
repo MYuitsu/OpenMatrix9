@@ -10,6 +10,19 @@ date: 2026-10-09
 
 # RCORE-05 — Pick, snapping và constraints
 
+<!-- rhino-core-extended-input:start -->
+## Bổ sung đã kiểm chứng — extended numeric input
+
+Bổ sung nhập polar/spherical/surveyor, fraction/feet-inch và góc DMS bằng Rust,
+dùng lại bộ dựng hình FreeCAD/OM9 hiện có. Sửa mốc tương đối và Undo của Circle/Sphere.
+**421 Rust tests; 1108 native checks / 21 runs; 49 Python pass,1 skip.**
+P0 toàn bộ còn mở; [phạm vi và bằng chứng](../../../docs/validation/2026-10-09-rhino-core-extended-input.md).
+
+- [x] Grammar/routing và retry của supported slice đã kiểm chứng.
+- [ ] Live constraints, locale và toàn bộ yêu cầu xuyên family còn mở.
+
+<!-- rhino-core-extended-input:end -->
+
 ## Cập nhật triển khai P0 — 2026-10-09
 
 Metadata và rà nguồn phía dưới là baseline ban đầu. Rust nay tách persistent

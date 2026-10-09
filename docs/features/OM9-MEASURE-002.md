@@ -1,5 +1,14 @@
 # OM9-MEASURE-002 — Distance
 
+<!-- rhino-core-extended-input:start -->
+## Extended numeric input — validated slice
+
+Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+
+[Runtime/source evidence](../validation/2026-10-09-rhino-core-extended-input.md). Native geometry is reused; live constraints, locale and other missing contracts remain open.
+
+<!-- rhino-core-extended-input:end -->
+
 Status: partially_implemented; validated_supported_slice (2026-10-09).
 
 **Supported slice:** native two-point 3D Distance measurement, five explicit display units, shared Cartesian point input and accepted-coordinate reporting. The contract's Model_Units display default remains open.

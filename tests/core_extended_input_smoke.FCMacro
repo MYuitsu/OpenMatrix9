@@ -1,0 +1,141 @@
+"""RCORE-02/03: extended notation with independent native world-space oracles."""
+import json, math, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input, command_prompt
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+result={'checks':[],'feature_ids':['OM9-MEASURE-001','OM9-MEASURE-002','OM9-VIEW-001','OM9-CURVE-001','OM9-CURVE-002','OM9-CURVE-003','OM9-CURVE-004','OM9-CURVE-005','OM9-CURVE-006','OM9-SOLID-012','OM9-SOLID-014']}
+FRAME=(10.,20.,30.,0.,1.,0.,0.,0.,1.,1.,0.,0.)
+def settle():QtTest.QTest.qWait(100)
+def enter(text):
+    field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def check(name,value):result['checks'].append({'name':name,'passed':bool(value)})
+def near(actual,expected,tol=1e-8):return len(actual)==len(expected) and all(abs(a-b)<tol for a,b in zip(actual,expected))
+def measure(first,second,expected_first,expected_second,notation):
+    enter('Distance');enter(first);enter(second)
+    raw=window.property('om9MeasurementReport');info=json.loads(raw) if raw else {'inputs':[]}
+    inputs=info['inputs']
+    expected=math.sqrt(sum((a-b)**2 for a,b in zip(expected_first,expected_second)))
+    try:actual=float(prompt.text().split()[1]) if prompt.text().startswith('Distance: ') else float('nan')
+    except ValueError:actual=float('nan')
+    accepted=len(inputs)==2 and near(inputs[0]['result']['point_mm'],expected_first) and near(inputs[1]['result']['point_mm'],expected_second)
+    check('world geometry for '+second,accepted and abs(actual-expected)<1e-8)
+    check('typed notation and raw input for '+second,accepted and inputs[1]['original_text']==second and inputs[1].get('notation',{}).get('kind')==notation)
+    enter('Cancel')
+def picture():
+    attempts=[0]
+    def answer():
+        attempts[0]+=1;dialog=QtWidgets.QApplication.activeModalWidget()
+        if not isinstance(dialog,QtWidgets.QFileDialog):
+            if attempts[0]<40:QtCore.QTimer.singleShot(50,answer)
+            return
+        dialog.setDirectory(str(source.parent))
+        def choose():
+            edit=dialog.findChild(QtWidgets.QLineEdit,'fileNameEdit');edit.setFocus();edit.setText(source.name)
+            QtCore.QTimer.singleShot(100,lambda:QtTest.QTest.mouseClick(dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Open),QtCore.Qt.LeftButton))
+        QtCore.QTimer.singleShot(100,choose)
+    QtCore.QTimer.singleShot(100,answer);enter('PictureFrame')
+def create(command,tokens,predicate):
+    before={o.Name for o in doc.Objects};undo=doc.UndoCount
+    enter(command)
+    for token in tokens:enter(token)
+    added=[o for o in doc.Objects if o.Name not in before]
+    passed=False
+    if len(added)==1:
+        try:passed=predicate(added[0])
+        except Exception:result.setdefault('geometry_errors',[]).append(traceback.format_exc())
+    if not passed:
+        detail={'command':command,'tokens':tokens,'prompt':prompt.text(),'added':[o.Name for o in added],'undo_delta':doc.UndoCount-undo}
+        if len(added)==1:
+            shape=added[0].Shape;detail.update(volume=shape.Volume,bbox_center=list(shape.BoundBox.Center),center_of_mass=list(shape.CenterOfMass),face_surfaces=[str(f.Surface) for f in shape.Faces])
+        result.setdefault('rejected_geometry',[]).append(detail)
+    check(command+' routes extended points to native geometry',passed and doc.UndoCount==undo+1)
+    enter('Cancel')
+def run():
+    global doc,field,prompt,window,source
+    try:
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_DontUseNativeDialogs,True)
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM
+        doc=App.newDocument('ExtendedInput');doc.UndoMode=1;settle()
+        cold=os.environ.get('OM9_EXTENDED_RESTORE_REPORT')
+        if cold:
+            saved=json.loads(Path(cold).read_text());App.closeDocument(doc.Name)
+            doc=App.openDocument(saved['saved_document']);obj=doc.getObject(saved['saved_name'])
+            check('cold restore retains exact polar input report',obj.OM9CoordinateReport==saved['saved_provenance'])
+            check('cold restore retains polar image dimensions',abs(obj.XSize.Value-5)<1e-9 and abs(obj.YSize.Value-2.5)<1e-9)
+            check('cold restore retains transformed polar image placement',(obj.Placement.Base-App.Vector(10,22.5,31.25)).Length<1e-8)
+            check('cold restore retains embedded polar image',Path(obj.ImageFile).is_file() and not QtGui.QImage(obj.ImageFile).isNull())
+            result['ok']=all(c['passed'] for c in result['checks']);return
+        window=Gui.getMainWindow();field=command_input(window);prompt=command_prompt(window)
+        area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0)
+        area.setActiveSubWindow(sub);settle();OM.setCPlane(doc.Name,0,FRAME)
+        Gui.activeDocument().Modified=False
+        before=(len(doc.Objects),doc.UndoCount,len(doc.RedoNames),Gui.activeDocument().Modified,dict(doc.Meta))
+        base=[13.,21.,32.];root3=math.sqrt(3.)
+        for token,expected,notation in [
+            ('5<0',[10.,25.,30.],'polar'),('5<90,2',[12.,20.,35.],'polar'),
+            ('5<0<90',[15.,20.,30.],'spherical'),('3,4<45',[15.,23.,34.],'spherical_xy'),
+            ('5<N30E',[10.,22.5,30.+2.5*root3],'surveyor'),
+            ('w5<90',[0.,5.,0.],'polar'),('r5<90',[13.,21.,37.],'polar'),
+            ('rw5<90',[13.,26.,32.],'polar'),('wr5<90',[13.,26.,32.],'polar'),
+            ('@w5<N30E',[15.5,21.+2.5*root3,32.],'surveyor'),
+            ('1-3/4,0,0',[10.,21.75,30.],'cartesian'),
+            ('1\'2-3/4",0,0',[10.,394.65,30.],'cartesian'),
+            ('1.235millimeters,0,0',[10.,21.235,30.],'cartesian'),
+            ('5<N30d0\'0"W',[10.,17.5,30.+2.5*root3],'surveyor'),
+        ]:measure('w13,21,32',token,base,expected,notation)
+        enter('Angle');enter('w0,0,0');enter('rw5<90');enter('w0,0,0');enter('w5<90')
+        check('Angle accepts non-Cartesian world directions',prompt.text()=='Angle: 0 degrees');enter('Cancel')
+        for invalid in ['rw5<','rw5<NaN','rw5<90mm','1/0,0,0','<90','rw5<90 trailing','5<1000000000-1/9007199254740991','w0.00001,0.00001<99990']:
+            enter('Distance');enter('w13,21,32');enter(invalid);enter('wr0,5,0')
+            info=json.loads(window.property('om9MeasurementReport')) if window.property('om9MeasurementReport') else {'inputs':[]}
+            check('invalid extended input retains accepted point '+invalid,prompt.text()=='Distance: 5 mm' and len(info['inputs'])==2 and info['inputs'][0]['original_text']=='w13,21,32')
+        check('extended measurements preserve document state',before==(len(doc.Objects),doc.UndoCount,len(doc.RedoNames),Gui.activeDocument().Modified,dict(doc.Meta)))
+        OM.setUnitContext(doc.Name,25.4,1.,.01,.001,.02)
+        measure('w13mm,21mm,32mm','1<90',base,[10.,20.,55.4],'polar')
+        measure('w13mm,21mm,32mm','2cm<90',base,[10.,20.,50.],'polar')
+        OM.setUnitContext(doc.Name,1.,1.,.01,.001,.02)
+        source=out/'extended-guide.png';image=QtGui.QImage(120,60,QtGui.QImage.Format_RGBA8888);image.fill(QtGui.QColor(20,100,180));image.save(str(source))
+        count=len(doc.Objects);undo=doc.UndoCount
+        picture();enter('0,0,0');enter('5<0')
+        images=[o for o in doc.Objects if o.TypeId=='Image::ImagePlane']
+        check('PictureFrame accepts polar width point without scalar fallback',len(images)==1 and len(doc.Objects)==count+1 and doc.UndoCount==undo+1)
+        if images:
+            obj=images[0];info=json.loads(obj.OM9CoordinateReport)
+            check('polar image geometry and notation agree',abs(obj.XSize.Value-5.)<1e-9 and (obj.Placement.Base-App.Vector(10,22.5,31.25)).Length<1e-8 and info['inputs'][1].get('notation',{}).get('kind')=='polar')
+            archive=out/'extended-input.FCStd';doc.saveAs(str(archive))
+            result.update(saved_document=str(archive),saved_name=obj.Name,saved_provenance=obj.OM9CoordinateReport)
+        picture();enter('0,0,0');enter('1-1/2in')
+        images=[o for o in doc.Objects if o.TypeId=='Image::ImagePlane']
+        check('PictureFrame accepts fractional width with explicit length unit',len(images)==2 and abs(images[-1].XSize.Value-38.1)<1e-9)
+        if len(images)==2:
+            obj=images[-1];saved=obj.OM9CoordinateReport;name=obj.Name
+            doc.undo();check('extended image Undo removes output',doc.getObject(name) is None)
+            doc.redo();check('extended image Redo preserves exact notation',doc.getObject(name).OM9CoordinateReport==saved)
+        create('Line',['0,0,0','5<90'],lambda o:(o.Shape.Vertexes[-1].Point-App.Vector(10,20,35)).Length<1e-8)
+        create('Polyline',['0,0,0','5<0','5<90',''],lambda o:len(o.Shape.Edges)==2 and (o.Shape.Vertexes[-1].Point-App.Vector(10,20,35)).Length<1e-8)
+        create('InterpCrv',['0,0,0','5<0','5<90',''],lambda o:(o.Shape.Vertexes[-1].Point-App.Vector(10,20,35)).Length<1e-8)
+        create('Circle',['0,0,0','5<0'],lambda o:abs(o.Shape.Edges[0].Curve.Radius-5)<1e-8)
+        create('Circle',['3Point','w-5,0,0','w5,0,0','Radius','w0,5,0','wr0,0,5'],lambda o:(o.Shape.Edges[0].Curve.Center-App.Vector(0,math.sqrt(12.5),math.sqrt(12.5))).Length<1e-8 and abs(o.Shape.Edges[0].Curve.Radius-math.sqrt(50))<1e-8)
+        create('Rectangle',['0,0,0','5<45'],lambda o:abs(o.Shape.BoundBox.YLength-5/math.sqrt(2))<1e-8 and abs(o.Shape.BoundBox.ZLength-5/math.sqrt(2))<1e-8)
+        create('Ellipse',['0,0,0','5<0','2<90'],lambda o:abs(o.Shape.Edges[0].Curve.MajorRadius-5)<1e-8 and abs(o.Shape.Edges[0].Curve.MinorRadius-2)<1e-8)
+        create('Box',['0,0,0','5<45','2'],lambda o:abs(o.Shape.Volume-25)<1e-7)
+        create('Sphere',['0,0,0','5<0'],lambda o:abs(o.Shape.Volume-4/3*math.pi*125)<1e-7)
+        # Default display-derived bounds are asymmetric even for the exact unit
+        # sphere. Inspect the analytic surface instead of treating that bbox as
+        # the sphere's center; retain the independent exact volume oracle.
+        create('Sphere',['4Point','w1,0,0','w0,1,0','w-1,0,0','wr1,0,1'],lambda o:abs(o.Shape.Volume-4/3*math.pi)<1e-8 and o.Shape.Faces[0].Surface.Center.Length<1e-8 and abs(o.Shape.Faces[0].Surface.Radius-1)<1e-8)
+        before_objects=len(doc.Objects);before_undo=doc.UndoCount
+        enter('Sphere');enter('FitPoints');enter('rw1<0');enter('Undo')
+        check('FitPoints rejects a relative first point without adding an input checkpoint','Center (' in prompt.text() and len(doc.Objects)==before_objects and doc.UndoCount==before_undo)
+        enter('Cancel')
+        result['ok']=all(c['passed'] for c in result['checks'])
+        if result['ok']:source.unlink()
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtWidgets.QApplication.quit()
+QtCore.QTimer.singleShot(700,run)

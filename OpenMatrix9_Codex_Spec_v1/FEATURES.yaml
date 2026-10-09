@@ -3948,6 +3948,10 @@
   implementation_followup_evidence:
     report: ../docs/validation/2026-10-09-rhino-core-point-consumers.md
     scope: Native aspect-preserving ImagePlane with shared point/length input, transient preview, transaction guard and persisted coordinate/unit provenance. Explicit embedding/external/alpha modes and complete naming/option UI remain open.
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-VIEW-002
   name: Restore Viewports
   command: null
@@ -5414,6 +5418,10 @@
   implementation_followup_evidence:
     report: ../docs/validation/2026-10-09-rhino-core-point-consumers.md
     scope: Four-point read-only Angle with shared Cartesian/unit input, accepted world-coordinate reports and lifetime guards. TwoObjects and full grammar remain open.
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-MEASURE-002
   name: Distance
   command: Distance
@@ -5460,6 +5468,10 @@
   implementation_followup_evidence:
     report: ../docs/validation/2026-10-09-rhino-core-point-consumers.md
     scope: Two-point read-only Distance with five display units, shared Cartesian/unit input and accepted-coordinate reports. Model_Units choice/default and full grammar remain open.
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-MEASURE-003
   name: Length
   command: Length
@@ -6325,6 +6337,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-CURVE-002
   name: Line
   command: Line
@@ -6420,6 +6436,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-CURVE-003
   name: Interp Curve
   command: InterpCrv
@@ -6495,6 +6515,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-CURVE-004
   name: Rectangle
   command: Rectangle
@@ -6570,6 +6594,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-CURVE-005
   name: Circle
   command: Circle
@@ -6685,6 +6713,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion. Circle checkpoints retain Radius/Orientation point base, options, frame and native source identities; F4 rejects stale sources before accepting a point.
+    verified_at: '2026-10-09'
 - id: OM9-CURVE-006
   name: Ellipse
   command: Ellipse
@@ -6765,6 +6797,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-CURVE-007
   name: Arc
   command: Arc
@@ -12447,6 +12483,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion. Legacy Solid mm/cm/in callback remains; actual accepted relative base and Undo are repaired.
+    verified_at: '2026-10-09'
 - id: OM9-SOLID-013
   name: Ellipsoid
   command: Ellipsoid
@@ -12556,6 +12596,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion. Legacy Solid mm/cm/in callback remains; actual accepted relative base and Undo are repaired.
+    verified_at: '2026-10-09'
 - id: OM9-SOLID-015
   name: Torus
   command: Torus

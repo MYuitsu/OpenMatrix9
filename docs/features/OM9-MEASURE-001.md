@@ -1,5 +1,14 @@
 # OM9-MEASURE-001 — Angle
 
+<!-- rhino-core-extended-input:start -->
+## Extended numeric input — validated slice
+
+Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+
+[Runtime/source evidence](../validation/2026-10-09-rhino-core-extended-input.md). Native geometry is reused; live constraints, locale and other missing contracts remain open.
+
+<!-- rhino-core-extended-input:end -->
+
 Status: partially_implemented; validated_supported_slice (2026-10-09).
 
 **Supported slice:** native four-point Angle measurement, shared Cartesian point input and accepted-coordinate reporting. The TwoObjects branch remains unimplemented.

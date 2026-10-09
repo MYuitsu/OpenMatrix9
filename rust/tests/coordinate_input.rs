@@ -88,8 +88,8 @@ fn world_sources_never_transform_or_scale_the_host_point() {
 fn malformed_context_and_unsupported_grammar_never_fall_back() {
     let context = context();
     for token in [
-        "", "1", "w1,2", "1,2,3,4", "1,,2", "1, 2", "1;2", "1<30", "N45E", "rw1,2,3", "W1,2,3",
-        "1/2,3", "1deg,2", "NaN,0", "inf,0", "1e309,0", "1e9m,0", "r1,2,3",
+        "", "1", "w1,2", "1,2,3,4", "1,,2", "1, 2", "1;2", "1<", "N45E", "rw1,2,3", "W1,2,3",
+        "1/0,3", "1deg,2", "NaN,0", "inf,0", "1e309,0", "1e9m,0", "r1,2,3",
     ] {
         assert!(
             resolve(&request(&context, token)).is_err(),
@@ -123,6 +123,48 @@ fn malformed_context_and_unsupported_grammar_never_fall_back() {
     let mut input = request(&context, "1,2");
     input.previous = Some([f64::NAN, 0., 0.]);
     assert!(resolve(&input).is_err());
+}
+
+#[test]
+fn point_or_length_routes_polar_before_scalar_and_preserves_angle_event_identity() {
+    let context = context();
+    let mut input = request(&context, "5<90");
+    input.expected = Expected::PointOrLength;
+    let resolved = resolve(&input).unwrap();
+    let Value::Point(actual) = resolved.value() else {
+        panic!("polar became scalar")
+    };
+    for (a, e) in actual.iter().zip([10., 20., 35.]) {
+        assert!((a - e).abs() < 1e-12);
+    }
+    for expected in [Expected::Point, Expected::PointOrLength] {
+        let mut input = request(&context, "<90");
+        input.expected = expected;
+        assert!(resolve(&input).unwrap_err().contains("Angle constraint"));
+    }
+}
+
+#[test]
+fn extended_provenance_owns_notation_and_separates_angles_from_mm() {
+    let mut context = context();
+    context.unit_context = "1|7|25.4|1|0.01|0.001|0.01".into();
+    let mut input = request(&context, "\t r1/2in<90,2cm\n");
+    input.previous = Some([13., 21., 32.]);
+    let polar = resolve(&input).unwrap();
+    let Value::Point(actual) = polar.value() else {
+        panic!("polar became scalar")
+    };
+    for (a, e) in actual.iter().zip([33., 21., 44.7]) {
+        assert!((a - e).abs() < 1e-12);
+    }
+    let spherical = resolve(&request(&context, "10mm<30<30")).unwrap();
+    let xy = resolve(&request(&context, "3mm,4mm<45")).unwrap();
+    let surveyor = resolve(&request(&context, "10mm<N30W")).unwrap();
+    let raw = report(&[polar, spherical, xy, surveyor]).unwrap();
+    assert!(raw.contains("\"grammar\":\"rhino5_point_v2\""));
+    assert!(raw.contains("\"notation\":{\"kind\":\"polar\",\"radius_mm\":12.7"));
+    assert!(raw.contains("\"angles_rad\":[1.5707963267948966]"));
+    println!("EXTENDED_REPORT_JSON={raw}");
 }
 
 #[test]
@@ -438,4 +480,78 @@ fn abi_context_verification_uses_lifetime_and_units_without_current_frame() {
     assert!(!verify(17, "1|1|1|1|0.01|0.001|0.01", &mut error));
     assert!(verify(17, "", &mut error));
     assert_eq!(error[0], 0);
+}
+
+#[test]
+fn abi_extended_point_or_length_and_angle_failure_preserve_atomic_outputs() {
+    let context = context();
+    let mut input = abi(&context, "5<90");
+    input.expected = 1;
+    let mut error = [0u8; 512];
+    let mut value = sentinel();
+    let mut output = [0xa5; 4096];
+    let count = unsafe {
+        om9_coordinate_resolve(
+            &input,
+            &mut value,
+            output.as_mut_ptr(),
+            output.len(),
+            error.as_mut_ptr(),
+            error.len(),
+        )
+    };
+    assert!(count > 0);
+    assert_eq!(value.kind, 0);
+    for (a, e) in value.point.into_iter().zip([10., 20., 35.]) {
+        assert!((a - e).abs() < 1e-12);
+    }
+    input = abi(&context, "<90");
+    input.expected = 1;
+    value = sentinel();
+    output.fill(0xa5);
+    assert_eq!(
+        unsafe {
+            om9_coordinate_resolve(
+                &input,
+                &mut value,
+                output.as_mut_ptr(),
+                output.len(),
+                error.as_mut_ptr(),
+                error.len(),
+            )
+        },
+        0
+    );
+    assert_eq!(value, sentinel());
+    assert!(output.iter().all(|byte| *byte == 0xa5));
+    let error =
+        std::str::from_utf8(&error[..error.iter().position(|byte| *byte == 0).unwrap()]).unwrap();
+    assert!(error.contains("Angle constraint"));
+}
+
+#[test]
+fn abi_exact_angle_bounds_and_multiturn_singularities_leave_outputs_untouched() {
+    let context = context();
+    for text in ["5<1000000000-1/9007199254740991", "w0.00001,0.00001<99990"] {
+        let input = abi(&context, text);
+        let mut value = sentinel();
+        let mut output = [0xa5; 4096];
+        let mut error = [0u8; 512];
+        assert_eq!(
+            unsafe {
+                om9_coordinate_resolve(
+                    &input,
+                    &mut value,
+                    output.as_mut_ptr(),
+                    output.len(),
+                    error.as_mut_ptr(),
+                    error.len(),
+                )
+            },
+            0
+        );
+        assert_eq!(value, sentinel());
+        assert!(output.iter().all(|byte| *byte == 0xa5));
+        assert_ne!(error[0], 0);
+    }
 }

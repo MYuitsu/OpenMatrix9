@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <cstdint>
 extern "C" {
 bool om9_curve_input_units(double);
 std::size_t om9_command_repeat_candidate();
@@ -126,6 +127,10 @@ double om9_ellipse_deviation();
 unsigned om9_ellipse_reference_mode();
 unsigned om9_ellipse_reference(double,double,double,double,double,double,unsigned);
 unsigned om9_circle_reference_mode();
+// Rust owns accepted-input identity and retention. Nonnull output is writable
+// storage for capacity keys; a short buffer is left unchanged.
+std::uint64_t om9_circle_input_context_key();
+std::size_t om9_circle_input_context_keys(std::uint64_t*,std::size_t);
 unsigned om9_circle_reference(double,double,double,double,double,double,unsigned);
 unsigned om9_circle_solution_accept(double,double,double,double);
 unsigned om9_circle_solution_accept_normal(double,double,double,double,double,double,double);

@@ -21,13 +21,13 @@
   },
   {
     "path": "FEATURES.json",
-    "bytes": 1808583,
-    "sha256": "5a89241fe92339bba4027663d6c51e3eda6f78a77fdfaa83c134b84724d78104"
+    "bytes": 1812013,
+    "sha256": "b7a06266ca8c9cfeb10d4fadabccaf0100c6eac794d617057cd2fa3ee411e64c"
   },
   {
     "path": "FEATURES.yaml",
-    "bytes": 1447123,
-    "sha256": "defce222e87781ce76e6bb6649db4d6386c01a86614e18376a1803c0848d9f31"
+    "bytes": 1450212,
+    "sha256": "9d13e67645fbb4165b69718451c97079aa8b35db99d10d6f489941d71a199181"
   },
   {
     "path": "FEATURE_LOOKUP.json",
@@ -46,8 +46,8 @@
   },
   {
     "path": "IMPLEMENTATION_STATUS.md",
-    "bytes": 19306,
-    "sha256": "67ccb034e9e1c59c172d92bacabae8d799193b84c92089338a86176209e2273b"
+    "bytes": 19777,
+    "sha256": "051128405d175af49fb8e99789c4eb4b3da0eb44fa79ef4f0bbe96fd7188beee"
   },
   {
     "path": "INDEX.md",
@@ -116,23 +116,23 @@
   },
   {
     "path": "specs/00-rhino-core/02-units-tolerances.md",
-    "bytes": 23958,
-    "sha256": "3ee0aa5b2f7d642092b069f11aac31305936f33b845949c9b38ae10f7145c1ab"
+    "bytes": 24654,
+    "sha256": "642cb79b1d7affcb0af4cfec52bfb4588bbb21621f34c7d662c48c515db94e13"
   },
   {
     "path": "specs/00-rhino-core/03-coordinates-cplanes.md",
-    "bytes": 21454,
-    "sha256": "e079a0219a8188d87a5261d769c84eb89f1a7f01af668150fea9b8df288c8b5c"
+    "bytes": 22150,
+    "sha256": "ebe29ecead4e43fa3581bc63bf2e525f48d13f69e2ecbf0ad2b59b1504041acc"
   },
   {
     "path": "specs/00-rhino-core/04-command-engine.md",
-    "bytes": 21264,
-    "sha256": "29f49d7ce37e1b1e9733240aa2f17b617b191caa75fdc3e16bb734c9e212ce18"
+    "bytes": 21960,
+    "sha256": "0d524ca3c0500682abfef743c9068767942af4cc0a4689e10459a45ab769048a"
   },
   {
     "path": "specs/00-rhino-core/05-picking-snapping.md",
-    "bytes": 21996,
-    "sha256": "45060baeb92ed0d8e0974219e1ef9683dd30664bc1e2e47b7d08e22fb3299ba6"
+    "bytes": 22692,
+    "sha256": "1985ae6028b9716f700fd82c4dfc903058ec6eba88435c407079e6e583fd1f50"
   },
   {
     "path": "specs/00-rhino-core/06-selection-organization-blocks.md",
@@ -436,13 +436,13 @@
   },
   {
     "path": "specs/01-core/om9-measure-001-angle.md",
-    "bytes": 9176,
-    "sha256": "ec630fb929f8d5e716987caff2fcfb36f3d8a78c63bef3fcd9e450097c4b76b3"
+    "bytes": 9589,
+    "sha256": "3e0f185a6aba055130c1bb3d96a0430570cf5334900601f0fdb4f8d602ac76b0"
   },
   {
     "path": "specs/01-core/om9-measure-002-distance.md",
-    "bytes": 9061,
-    "sha256": "999a9323f70206d19cd5b6ef9d97f75ebe068370fd6ccea34f096ef2d438d61f"
+    "bytes": 9474,
+    "sha256": "6bfa35b18d9719f5f794bdb3ed3cefccc52f9cb3b3a4b013b57d03baaa4bd260"
   },
   {
     "path": "specs/01-core/om9-measure-003-length.md",
@@ -781,8 +781,8 @@
   },
   {
     "path": "specs/01-core/om9-view-001-picture-frame.md",
-    "bytes": 12133,
-    "sha256": "c3658d15dd9c5592c6571eee87a42e999ddc6907ff55933d8ce689a413b285ed"
+    "bytes": 12546,
+    "sha256": "063254e5e2af9c487b048cc560e2b310ee01a5f1e42e8c2f427fd17da40107e7"
   },
   {
     "path": "specs/01-core/om9-view-002-restore-viewports.md",
@@ -856,33 +856,33 @@
   },
   {
     "path": "specs/02-curve/om9-curve-001-polyline.md",
-    "bytes": 10766,
-    "sha256": "d473c5720a297e6e4fd6161ade24a40f55dbbdfdfefde218d5ec09250fb003d9"
+    "bytes": 11179,
+    "sha256": "0de6a06cc39f653ce542654e494bb1e3029200e66eb177063f1a328c53c3d2c7"
   },
   {
     "path": "specs/02-curve/om9-curve-002-line.md",
-    "bytes": 11888,
-    "sha256": "dde6aa71afda0deb8cbcc1f98753d6fac2fe4f0e820ff1eb9373fe1c732567d7"
+    "bytes": 12301,
+    "sha256": "135f676360834cac909d05c2c04eb7b5fd44cd79727e1b615d77370d544a9f9e"
   },
   {
     "path": "specs/02-curve/om9-curve-003-interp-curve.md",
-    "bytes": 12924,
-    "sha256": "eba3e2ad94278d917125e38804074ebc3827b30b4197b8e11f71c5c514cf79d8"
+    "bytes": 13337,
+    "sha256": "d34e2cb8448c09c6c12547a06a90f882beb10fbf3d9514836547908c8ed3777c"
   },
   {
     "path": "specs/02-curve/om9-curve-004-rectangle.md",
-    "bytes": 13082,
-    "sha256": "bee44e655c9a680b5b31817705452873ad322a9299279c6d036d38b6b6f71a22"
+    "bytes": 13495,
+    "sha256": "5e0434b6856ff72a7f9909345c38638360036850a0f2ee8b288db1f65dfb10e4"
   },
   {
     "path": "specs/02-curve/om9-curve-005-circle.md",
-    "bytes": 24519,
-    "sha256": "4e97ce3d7ae153b316729503d2543507492b6f672f08d23ab3e0442c3cfc398b"
+    "bytes": 25085,
+    "sha256": "19d2bda518a06d61ee5b65ac5d71c82f2027c1b7d4c3c021e96b0cfd01f79353"
   },
   {
     "path": "specs/02-curve/om9-curve-006-ellipse.md",
-    "bytes": 12747,
-    "sha256": "e3972a87cc683cd525e98da3b7e17b08fc32dc39f14f20833931be147c242ca5"
+    "bytes": 13160,
+    "sha256": "53fed3bc639c6c560680606d73a2cb0d0836555edac09a78a15ca8dc58b259cc"
   },
   {
     "path": "specs/02-curve/om9-curve-007-arc.md",
@@ -1411,8 +1411,8 @@
   },
   {
     "path": "specs/04-solid/om9-solid-012-box.md",
-    "bytes": 13174,
-    "sha256": "36ef5977d2cd005ecdcc225ad3741e665176334bcef5ce25111351f87696c6e9"
+    "bytes": 13680,
+    "sha256": "520287cf7c4c7ca8161a23e7ee76817d90b4b8b73ee7558801a99a115daa3e4c"
   },
   {
     "path": "specs/04-solid/om9-solid-013-ellipsoid.md",
@@ -1421,8 +1421,8 @@
   },
   {
     "path": "specs/04-solid/om9-solid-014-sphere.md",
-    "bytes": 13562,
-    "sha256": "98f1052e8e99b7412c0561e6db56731553ec9ec2c9800b59196ab35f8d5d91ca"
+    "bytes": 14068,
+    "sha256": "90b3befae54c6d49f78654fa33534858ee46b89e49738bc6128c82292eb9e239"
   },
   {
     "path": "specs/04-solid/om9-solid-015-torus.md",

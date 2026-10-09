@@ -1,0 +1,75 @@
+"""RCORE-03/04: restore native references alongside accepted Circle context."""
+import json,math,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtTest
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[],'feature_ids':['OM9-CURVE-005']}
+def enter(text):
+    field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);QtTest.QTest.qWait(120)
+def check(name,passed):result['checks'].append({'name':name,'passed':bool(passed)})
+def feature(name,shape):
+    obj=doc.addObject('Part::Feature',name);obj.Shape=shape;doc.recompute();return obj
+def vertex(name,p):return feature(name,Part.Vertex(App.Vector(*p)))
+def point(obj):return 'Point='+obj.Name+'.Vertex1'
+def create(tokens):
+    before={o.Name for o in doc.Objects};undo=doc.UndoCount
+    enter('Circle')
+    for text in tokens:enter(text)
+    added=[o for o in doc.Objects if o.Name not in before]
+    check('one native transaction '+repr(tokens),len(added)==1 and doc.UndoCount==undo+1)
+    enter('Cancel');return added[0] if len(added)==1 else None
+def exact(obj,r,p,n):
+    if obj is None or obj.Shape.isNull():return False
+    curve=obj.Shape.Edges[0].Curve
+    return obj.Shape.isValid() and obj.Shape.isClosed() and abs(curve.Radius-r)<1e-8 and (curve.Center-App.Vector(*p)).Length<1e-8 and abs(abs(curve.Axis.dot(App.Vector(*n)))-1)<1e-8
+def run():
+    global doc,field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('CircleInputContext');doc.UndoMode=1
+        field=command_input(Gui.getMainWindow());path=feature('Path',Part.makeLine(App.Vector(10,20,30),App.Vector(30,20,30)))
+        obj=create(['AroundCurve','Curve='+path.Name+'.Edge1','Center','Undo','OnCurve=.5','2'])
+        check('Undo mode restores selected path identity',exact(obj,2,(20,20,30),(1,0,0)))
+        obj=create(['AroundCurve','Curve='+path.Name+'.Edge1@20,20,30','Undo','OnCurve=.75','3'])
+        check('Undo composed native center retains intermediate path context',exact(obj,3,(25,20,30),(1,0,0)))
+        center=vertex('Center',(0,0,0));direction=vertex('Direction',(0,0,5))
+        obj=create(['History=Yes',point(center),'Orientation','Direction='+direction.Name+'.Vertex1','Orientation','Undo','2'])
+        check('Undo Orientation option restores native direction source',exact(obj,2,(0,0,0),(0,0,1)) and obj.Recorded and len(obj.Sources)==2)
+        direction.Shape=Part.Vertex(App.Vector(5,0,0));doc.recompute()
+        check('Restored direction source remains associative',exact(obj,2,(0,0,0),(1,0,0)))
+        a=vertex('A',(-3,0,0));b=vertex('B',(3,0,0));radial=vertex('Radial',(3,5,0));side=vertex('Side',(0,1,0))
+        obj=create(['History=Yes','3Point',point(a),point(b),'Radius',point(radial),'Radius=6','Undo',point(side)])
+        check('Undo numeric Radius replacement restores native probe source',exact(obj,5,(0,4,0),(0,0,1)) and obj.Recorded and len(obj.Sources)==4)
+        radial.Shape=Part.Vertex(App.Vector(3,6,0));doc.recompute()
+        check('Restored Radius source remains associative',exact(obj,6,(0,math.sqrt(27),0),(0,0,1)))
+        before=len(doc.Objects);undo=doc.UndoCount
+        enter('Circle');enter('AroundCurve');enter('Curve='+path.Name+'.Edge1');enter('Center');enter('Undo')
+        path.Placement.Base=App.Vector(1,0,0);doc.recompute();enter('OnCurve=.5')
+        prompt=command_prompt(Gui.getMainWindow()).text().lower()
+        check('Restored stale native path rejects before mutation',len(doc.Objects)==before and doc.UndoCount==undo and ('changed' in prompt or 'deleted' in prompt))
+        enter('Cancel')
+        obj=create(['AroundCurve','Curve='+path.Name+'.Edge1','OnCurve=.5','2'])
+        check('Cancel releases old contexts and allows fresh path capture',exact(obj,2,(21,20,30),(1,0,0)))
+        tangent=feature('F4Source',Part.makeLine(App.Vector(-20,0,0),App.Vector(20,0,0)))
+        enter('Circle');enter('Tangent');enter('Curve='+tangent.Name+'.Edge1@4,0,0')
+        prior=command_prompt(Gui.getMainWindow()).text();enter('Point')
+        before=len(doc.Objects);undo=doc.UndoCount
+        tangent.Placement.Base=App.Vector(0,1,0);doc.recompute()
+        QtTest.QTest.keyClick(field,QtCore.Qt.Key_F4);QtTest.QTest.qWait(120)
+        prompt=command_prompt(Gui.getMainWindow()).text().lower()
+        check('F4 rejects stale tangent source before accepting origin',len(doc.Objects)==before and doc.UndoCount==undo and ('changed' in prompt or 'deleted' in prompt))
+        enter('Undo')
+        check('Rejected F4 adds no accepted-input checkpoint',command_prompt(Gui.getMainWindow()).text()==prior)
+        enter('Cancel');enter('Circle');before=len(doc.Objects);undo=doc.UndoCount
+        QtTest.QTest.keyClick(field,QtCore.Qt.Key_F4);QtTest.QTest.qWait(120);enter('2')
+        added=doc.Objects[-1] if len(doc.Objects)==before+1 else None
+        check('F4 origin still commits one ordinary Circle',added is not None and doc.UndoCount==undo+1 and exact(added,2,(0,0,0),(0,0,1)))
+        enter('Cancel')
+        result['ok']=all(c['passed'] for c in result['checks'])
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtWidgets.QApplication.quit()
+QtCore.QTimer.singleShot(700,run)

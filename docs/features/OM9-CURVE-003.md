@@ -1,5 +1,14 @@
 # OM9-CURVE-003 — Interp Curve
 
+<!-- rhino-core-extended-input:start -->
+## Extended numeric input — validated slice
+
+Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+
+[Runtime/source evidence](../validation/2026-10-09-rhino-core-extended-input.md). Native geometry is reused; live constraints, locale and other missing contracts remain open.
+
+<!-- rhino-core-extended-input:end -->
+
 Command `InterpCrv`, icon `CurveFreeFormInterpolatePoints`, Curve menu.
 Implemented slice: native point interpolation, parameterization, closure and
 command lifecycle. This is not a claim of complete Matrix/Rhino compatibility.

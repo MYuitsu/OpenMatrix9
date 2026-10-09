@@ -116,7 +116,13 @@
           "spec_requirement": "RCORE-02.T01 | Cùng circle khai báo radius 25.4 mm và 1 inch | World radius bằng nhau trong tolerance fixture; area/volume chuyển đúng dimensions",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
         },
         {
           "id": "RCORE-02.T02",
@@ -172,6 +178,10 @@
             {
               "report": "docs/validation/2026-10-09-rhino-core-tolerance-workers.md",
               "scope": "Join consumer only; other named operations and conditions remain unverified."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
             }
           ]
         },
@@ -185,6 +195,10 @@
             {
               "report": "docs/validation/2026-10-09-rhino-core-tolerance-workers.md",
               "scope": "Join consumer only; other named operations and conditions remain unverified."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
             }
           ]
         },
@@ -270,6 +284,10 @@
             {
               "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
               "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
             }
           ]
         },
@@ -283,6 +301,10 @@
             {
               "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
               "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
             }
           ]
         },
@@ -296,6 +318,10 @@
             {
               "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
               "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
             }
           ]
         },
@@ -309,6 +335,10 @@
             {
               "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
               "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
             }
           ]
         },
@@ -329,6 +359,10 @@
             {
               "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
               "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
             }
           ]
         },
@@ -356,6 +390,10 @@
             {
               "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
               "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
             }
           ]
         }
@@ -422,7 +460,13 @@
           "spec_requirement": "RCORE-04.T03 | Nhập option bằng tên/mnemonic/click trong phase số; không parse nhầm option thành numeric failure hoặc đổi phase",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
         },
         {
           "id": "RCORE-04.T04",
@@ -441,6 +485,10 @@
             {
               "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
               "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
             }
           ]
         },
@@ -569,7 +617,13 @@
           "spec_requirement": "RCORE-05.T06 | Distance `5` và angle `30°` trên frame đã chốt: length 5, angular residual trong tolerance; impossible tangent không nhận point",
           "priority": "P0",
           "status": "not_fully_verified",
-          "complete_evidence": []
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
         },
         {
           "id": "RCORE-05.T07",
@@ -1013,5 +1067,5 @@
       ]
     }
   ],
-  "updated_at": "2026-10-09T21:51:35+07:00"
+  "updated_at": "2026-10-09T23:46:12+07:00"
 }

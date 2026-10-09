@@ -1,5 +1,13 @@
 # OpenMatrix9
 
+<!-- rhino-core-extended-input:start -->
+Bổ sung nhập polar/spherical/surveyor, fraction/feet-inch và góc DMS bằng Rust,
+dùng lại bộ dựng hình FreeCAD/OM9 hiện có. Sửa mốc tương đối và Undo của Circle/Sphere.
+**421 Rust tests; 1108 native checks / 21 runs; 49 Python pass,1 skip.**
+P0 toàn bộ còn mở; [phạm vi và bằng chứng](docs/validation/2026-10-09-rhino-core-extended-input.md).
+
+<!-- rhino-core-extended-input:end -->
+
 <!-- rhino-core-point-consumers:start -->
 Distance, Angle và PictureFrame đã dùng chung parser Rust, giữ tọa độ/đơn vị đầu vào và provenance.
 CPlane sai scale/shear bị từ chối; PictureFrame kiểm giao dịch trước mutation.

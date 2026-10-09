@@ -9,6 +9,8 @@ namespace App {class Document;class DocumentObject;}
 namespace Gui {class View3DInventor;}
 namespace OpenMatrix9Gui {
 void clearCircleReferences();
+// Capture native resources for the current opaque Rust input context.
+void captureCircleReferenceContext();
 void verifyCircleReferences(App::Document&);
 std::optional<unsigned> circleNativeInput(App::Document&,const QString&);
 std::optional<unsigned> circleNativePick(App::Document&,Gui::View3DInventor*,const QPoint&);

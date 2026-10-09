@@ -7,6 +7,8 @@ pub enum UnitError {
     InvalidContext,
     InvalidNumber,
     WrongDimension,
+    InvalidAngle,
+    WrongAngle,
     Overflow,
     StaleContext,
     Schema,
@@ -20,6 +22,8 @@ impl std::fmt::Display for UnitError {
                 Self::InvalidContext => "Invalid unit/tolerance context",
                 Self::InvalidNumber => "Expected a finite length",
                 Self::WrongDimension => "Unsupported or ambiguous length unit",
+                Self::InvalidAngle => "Expected a finite angle",
+                Self::WrongAngle => "Unsupported or ambiguous angle",
                 Self::Overflow => "Unit conversion overflow",
                 Self::StaleContext => "Unit context revision is stale",
                 Self::Schema => "Unsupported unit context schema",
@@ -152,19 +156,188 @@ impl Context {
     }
 }
 
-/// Parse a length only. Decimal comma and mixed/fractional quantities are not
-/// silently reinterpreted; an explicit unit overrides the command's input unit.
+const MAX_NUMERIC_BYTES: usize = 128;
+// OM9 validation choices, not limits documented by Rhino: fractional integer
+// components are exactly representable in f64; mixed fractions must be proper.
+const MAX_FRACTION_COMPONENT: u64 = (1 << 53) - 1;
+const MAX_ANGLE_DEGREES: f64 = 1e9;
+
+fn numeric_text(raw: &str) -> Result<&str, UnitError> {
+    let text = raw.trim();
+    if text.is_empty() || text.len() > MAX_NUMERIC_BYTES {
+        Err(UnitError::InvalidNumber)
+    } else {
+        Ok(text)
+    }
+}
+
+fn sign_and_magnitude(text: &str) -> (f64, &str) {
+    if let Some(rest) = text.strip_prefix('-') {
+        (-1., rest)
+    } else {
+        (1., text.strip_prefix('+').unwrap_or(text))
+    }
+}
+
+fn integer_component(text: &str) -> Result<f64, UnitError> {
+    if text.is_empty() || !text.bytes().all(|value| value.is_ascii_digit()) {
+        return Err(UnitError::WrongDimension);
+    }
+    let value = text.parse::<u64>().map_err(|_| UnitError::WrongDimension)?;
+    if value > MAX_FRACTION_COMPONENT {
+        return Err(UnitError::WrongDimension);
+    }
+    Ok(value as f64)
+}
+
+fn scalar(text: &str) -> Result<f64, UnitError> {
+    if text.is_empty() || text.contains(char::is_whitespace) || text.contains(',') {
+        return Err(UnitError::WrongDimension);
+    }
+    let value = if let Some((head, denominator)) = text.split_once('/') {
+        let (sign, head) = sign_and_magnitude(head);
+        let denominator = integer_component(denominator)?;
+        if denominator == 0. {
+            return Err(UnitError::WrongDimension);
+        }
+        let (whole, numerator) = if let Some((whole, numerator)) = head.split_once('-') {
+            let whole = integer_component(whole)?;
+            let numerator = integer_component(numerator)?;
+            if numerator >= denominator {
+                return Err(UnitError::WrongDimension);
+            }
+            (whole, numerator)
+        } else {
+            (0., integer_component(head)?)
+        };
+        sign * (whole + numerator / denominator)
+    } else {
+        text.parse::<f64>().map_err(|_| UnitError::WrongDimension)?
+    };
+    if value.is_finite() {
+        Ok(value)
+    } else {
+        Err(UnitError::InvalidNumber)
+    }
+}
+
+fn unsigned_scalar(text: &str) -> Result<f64, UnitError> {
+    if text.starts_with(['+', '-']) {
+        return Err(UnitError::WrongDimension);
+    }
+    strict_scalar(text)
+}
+
+fn strict_scalar(text: &str) -> Result<f64, UnitError> {
+    let value = scalar(text)?;
+    // New grammars must not turn a nonzero decimal into zero during parsing.
+    // Fractions cannot underflow here with the bounded integer components.
+    // Keep the legacy decimal length path unchanged for compatibility.
+    if value == 0.
+        && !text.contains('/')
+        && text
+            .split(['e', 'E'])
+            .next()
+            .unwrap_or("")
+            .bytes()
+            .any(|value| matches!(value, b'1'..=b'9'))
+    {
+        return Err(UnitError::Overflow);
+    }
+    Ok(value)
+}
+
+fn angle_scalar(text: &str) -> Result<f64, UnitError> {
+    let value = strict_scalar(text)?;
+    if value.abs() != MAX_ANGLE_DEGREES {
+        return Ok(value);
+    }
+    // At the inclusive bound, f64 can hide a positive fractional remainder.
+    // Compare the already validated, bounded token before rounding it away.
+    let (_, magnitude) = sign_and_magnitude(text);
+    let exceeds_bound = if let Some((head, denominator)) = magnitude.split_once('/') {
+        let denominator = denominator
+            .parse::<u128>()
+            .map_err(|_| UnitError::Overflow)?;
+        let (whole, numerator) = head.split_once('-').unwrap_or(("0", head));
+        let whole = whole.parse::<u128>().map_err(|_| UnitError::Overflow)?;
+        let numerator = numerator.parse::<u128>().map_err(|_| UnitError::Overflow)?;
+        // scalar() bounded every component to 2^53-1, so these products fit.
+        whole * denominator + numerator > 1_000_000_000_u128 * denominator
+    } else {
+        let (mantissa, exponent) = magnitude.split_once(['e', 'E']).unwrap_or((magnitude, "0"));
+        let exponent = exponent.parse::<i32>().map_err(|_| UnitError::Overflow)?;
+        let fractional_digits = mantissa.split_once('.').map_or(0, |(_, tail)| tail.len());
+        let digits: String = mantissa
+            .chars()
+            .filter(|value| value.is_ascii_digit())
+            .collect();
+        let digits = digits.trim_start_matches('0');
+        let order = digits.len() as i32 - fractional_digits as i32 + exponent - 1;
+        order > 9
+            || (order == 9
+                && (digits.as_bytes()[0] != b'1' || digits[1..].bytes().any(|value| value != b'0')))
+    };
+    if exceeds_bound {
+        Err(UnitError::Overflow)
+    } else {
+        Ok(value)
+    }
+}
+
+fn scaled(value: f64, scale: f64) -> Result<f64, UnitError> {
+    let result = value * scale;
+    if !result.is_finite() || (value != 0. && result == 0.) {
+        Err(UnitError::Overflow)
+    } else {
+        Ok(result)
+    }
+}
+
+fn imperial(text: &str) -> Result<f64, UnitError> {
+    if text.contains(char::is_whitespace) {
+        return Err(UnitError::WrongDimension);
+    }
+    let (sign, magnitude) = sign_and_magnitude(text);
+    let millimeters = if let Some((feet, rest)) = magnitude.split_once('\'') {
+        if rest.is_empty() {
+            scaled(unsigned_scalar(feet)?, 304.8)?
+        } else {
+            // OM9 compound-form policy: whole feet, a single overall sign,
+            // and an inch remainder in [0,12). No implicit normalization.
+            let feet = integer_component(feet)?;
+            let inches = unsigned_scalar(rest.strip_suffix('"').ok_or(UnitError::WrongDimension)?)?;
+            if !(0. ..12.).contains(&inches) {
+                return Err(UnitError::WrongDimension);
+            }
+            scaled(feet, 304.8)? + scaled(inches, 25.4)?
+        }
+    } else {
+        let inches = magnitude
+            .strip_suffix('"')
+            .ok_or(UnitError::WrongDimension)?;
+        scaled(unsigned_scalar(inches)?, 25.4)?
+    };
+    scaled(millimeters, sign)
+}
+
+/// Parse decimal/scientific, simple fraction or mixed fraction length input.
+/// Rhino 5 documents `5/16`, `1-3/4`, `1.235millimeters`, `+16'5"` and
+/// `1'2-3/4"` (user_interface/unit_systems.htm). Explicit units override input
+/// scale. Existing whitespace before mm/cm/m/in/ft remains accepted; compound
+/// quantities contain no whitespace. Numeric bounds above are OM9 policy.
 pub fn parse_length(raw: &str, mm_per_unit: f64) -> Result<f64, UnitError> {
     if !mm_per_unit.is_finite() || mm_per_unit <= 0.0 {
         return Err(UnitError::InvalidContext);
     }
-    let text = raw.trim();
-    if text.is_empty() || text.len() > 128 {
-        return Err(UnitError::InvalidNumber);
+    let text = numeric_text(raw)?;
+    if text.contains(['\'', '"']) {
+        return imperial(text);
     }
     let mut number = text;
     let mut scale = mm_per_unit;
     for (suffix, factor) in [
+        ("millimeters", 1.0),
         ("mm", 1.0),
         ("cm", 10.0),
         ("in", 25.4),
@@ -177,21 +350,72 @@ pub fn parse_length(raw: &str, mm_per_unit: f64) -> Result<f64, UnitError> {
             break;
         }
     }
-    if number.is_empty() || number.contains(char::is_whitespace) || number.contains(',') {
-        return Err(UnitError::WrongDimension);
+    scaled(scalar(number)?, scale)
+}
+
+/// Parse degrees or DMS and retain degrees for checks before trig conversion.
+/// Rhino 5 documents `30d22'54.43"` and disallows internal numeric whitespace.
+/// OM9 choices: lowercase `d`, one overall sign, whole degrees/minutes when
+/// lower components follow, decimal seconds, minutes/seconds in [0,60), and
+/// absolute total degrees <=1e9. No wrapping, radians suffix or unit inference.
+pub(crate) fn angle_degrees(raw: &str) -> Result<f64, UnitError> {
+    let parse_degrees = || {
+        let text = numeric_text(raw)?;
+        if text.contains(char::is_whitespace) {
+            return Err(UnitError::WrongDimension);
+        }
+        if let Some((head, rest)) = text.split_once('d') {
+            if rest.is_empty() {
+                return angle_scalar(head);
+            }
+            let (sign, degrees) = sign_and_magnitude(head);
+            let degrees = integer_component(degrees)?;
+            let (minutes, seconds) = if let Some((minutes, rest)) = rest.split_once('\'') {
+                (integer_component(minutes)?, rest)
+            } else {
+                (0., rest)
+            };
+            let seconds = if seconds.is_empty() {
+                0.
+            } else {
+                let seconds = seconds.strip_suffix('"').ok_or(UnitError::WrongDimension)?;
+                if seconds.is_empty()
+                    || !seconds
+                        .bytes()
+                        .all(|value| value.is_ascii_digit() || value == b'.')
+                {
+                    return Err(UnitError::WrongDimension);
+                }
+                strict_scalar(seconds)?
+            };
+            if !(0. ..60.).contains(&minutes) || !(0. ..60.).contains(&seconds) {
+                return Err(UnitError::WrongDimension);
+            }
+            // A tiny lower component can round away at the degree limit.
+            if degrees > MAX_ANGLE_DEGREES
+                || (degrees == MAX_ANGLE_DEGREES && (minutes != 0. || seconds != 0.))
+            {
+                return Err(UnitError::Overflow);
+            }
+            Ok(sign * (degrees + minutes / 60. + seconds / 3600.))
+        } else {
+            angle_scalar(text)
+        }
+    };
+    let degrees = parse_degrees().map_err(|error| match error {
+        UnitError::InvalidNumber => UnitError::InvalidAngle,
+        UnitError::WrongDimension => UnitError::WrongAngle,
+        other => other,
+    })?;
+    if degrees.abs() > MAX_ANGLE_DEGREES {
+        return Err(UnitError::Overflow);
     }
-    let value = number
-        .parse::<f64>()
-        .map_err(|_| UnitError::WrongDimension)?;
-    if !value.is_finite() {
-        return Err(UnitError::InvalidNumber);
-    }
-    let result = value * scale;
-    if !result.is_finite() || (value != 0.0 && result == 0.0) {
-        Err(UnitError::Overflow)
-    } else {
-        Ok(result)
-    }
+    Ok(degrees)
+}
+
+/// Parse a bounded degree/DMS token and return radians without length scaling.
+pub fn parse_angle(raw: &str) -> Result<f64, UnitError> {
+    scaled(angle_degrees(raw)?, std::f64::consts::PI / 180.)
 }
 
 /// # Safety

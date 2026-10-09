@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-09T21:51:35+07:00",
+  "updated_at": "2026-10-09T23:46:12+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -1548,12 +1548,13 @@
       ],
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/02-units-tolerances.md",
       "next_action": "Continue operation-specific effective tolerance and capability/permission coverage; shared runtime guards now cover Edit/Boolean, Rebuild and interactive Surface only. Durable History and remaining P0 contracts stay open.",
-      "updated_at": "2026-10-09T21:51:35+07:00",
+      "updated_at": "2026-10-09T23:46:12+07:00",
       "scope": "Partial P0 foundations from pre-merge snapshot 5011bab; historical 321 Rust, 23 Python and 657 native GUI assertions do not validate the merged revision or complete P0.",
       "followup_evidence": [
         "docs/validation/2026-10-09-rhino-core-object-foundations.md",
         "docs/validation/2026-10-09-rhino-core-tolerance-workers.md",
-        "docs/validation/2026-10-09-rhino-core-point-consumers.md"
+        "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+        "docs/validation/2026-10-09-rhino-core-extended-input.md"
       ]
     },
     {
@@ -1775,6 +1776,82 @@
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/03-coordinates-cplanes.md",
       "next_action": "Continue extended coordinate grammar and remaining P0 contracts.",
       "updated_at": "2026-10-09T21:51:35+07:00"
+    },
+    {
+      "key": "rhino-core-extended-input",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-CURVE-001",
+        "OM9-CURVE-002",
+        "OM9-CURVE-003",
+        "OM9-CURVE-004",
+        "OM9-CURVE-005",
+        "OM9-CURVE-006",
+        "OM9-SOLID-012",
+        "OM9-SOLID-014",
+        "OM9-MEASURE-001",
+        "OM9-MEASURE-002",
+        "OM9-VIEW-001"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "scope": "Extended common numeric grammar and existing command routing; Circle/Sphere accepted-base repairs. All P0 remains open.",
+      "outputs": [
+        "rust/src/units.rs",
+        "rust/src/coordinates.rs",
+        "rust/src/coordinate_input.rs",
+        "rust/src/curve.rs",
+        "rust/src/solid.rs",
+        "rust/tests/numeric_units.rs",
+        "rust/tests/extended_coordinates.rs",
+        "rust/tests/extended_coordinate_sessions.rs",
+        "rust/tests/coordinate_input.rs",
+        "rust/tests/circle_input_context.rs",
+        "tests/core_extended_input_smoke.FCMacro",
+        "rust/src/curve_ffi.rs",
+        "rust/tests/circle_advanced.rs",
+        "tests/circle_input_context_smoke.FCMacro",
+        "Gui/CurveCircle.cpp",
+        "Gui/CurveCircle.h",
+        "Gui/CircleHistoryAdapter.cpp",
+        "Gui/CircleHistoryAdapter.h",
+        "Gui/CurveController.cpp",
+        "Gui/RustBridge.h",
+        "docs/validation/2026-10-09-rhino-core-extended-input.md",
+        "docs/validation/2026-10-09-rhino-core-extended-input-evidence.json"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-09-rhino-core-extended-input-evidence.json",
+        "docs/reviews/2026-10-09-extended-units-review.md",
+        "docs/reviews/2026-10-09-extended-routing-review.md",
+        "docs/reviews/2026-10-09-circle-input-context-review.md"
+      ],
+      "tests": [
+        {
+          "command": "Full Rust / Clippy",
+          "result": "421 passed; Clippy exit0 with existing warnings"
+        },
+        {
+          "command": "Python tooling",
+          "result": "49 passed,1 skipped"
+        },
+        {
+          "command": "SDK build / native GUI",
+          "result": "1108 assertions in 21 exit0 processes, including cold restore"
+        }
+      ],
+      "uncertainties": [
+        "All P0 remains in progress. Live distance/one-shot-angle constraints, locale variants, other CPlane modes, common all-family sessions and snap identity remain open.",
+        "Solid retains its legacy mm/cm/in and bare-mm callback; fractions/feet/meters/model-unit capture for Solid are not supplied by this increment.",
+        "Distance Model_Units, Angle TwoObjects and PictureFrame explicit embed/external/alpha controls remain open. Persisted provenance is verified for PictureFrame, not every geometry family or associative History.",
+        "Report schema_version=1 retains original fields and adds typed notation; grammar rhino5_point_v2 replaces cartesian_v1. Consumers must read the declared grammar.",
+        "New numeric bounds and ambiguity rejection are OM9 policy. Legacy bare decimal length parse underflow remains unchanged. Native dependency safety and release panic=abort remain limits.",
+        "Circle retains the most recent 1024 accepted-input Undo checkpoints and at most1025 native contexts. Geometry copies are shared across contexts, but aggregate source-geometry/ledger RAM is not certified; source byte budget remains open.",
+        "Rhino5 5.14.522.8390 is installed, but two isolated startup probes exited3 before Python executed (MSVCR100.dll, exception0x40000015). No new Rhino runtime numeric parity is claimed."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/04-command-engine.md",
+      "next_action": "Continue common typed command sessions and remaining all-P0 contracts using existing host services.",
+      "updated_at": "2026-10-09T23:46:12+07:00"
     }
   ],
   "merge_context": {
