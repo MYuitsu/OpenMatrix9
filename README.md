@@ -1,5 +1,8 @@
 # OpenMatrix9
 
+[Tiếng Việt — mục lục và tiến độ theo nhóm](README.vi.md) ·
+[English — contents and group progress](README.en.md)
+
 ![OpenMatrix9 — Open-source Jewelry CAD Workbench](Resources/branding/introduction.png)
 
 An experimental jewelry CAD workbench for FreeCAD. Rust owns command catalog,
