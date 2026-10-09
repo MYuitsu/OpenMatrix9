@@ -1,0 +1,60 @@
+"""OM9-HISTORY-001 durable builder outputs in App::Part frames."""
+import os,sys,json,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[]}
+def check(name,ok):
+    report['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def world(o):return o.getGlobalPlacement().multiply(o.Placement.inverse()).multVec(o.Shape.CenterOfGravity)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM
+        d=App.newDocument('BuilderGroups');d.UndoMode=1
+        gem=d.addObject('Part::Feature','Gem');gem.Shape=Part.makeBox(2,4,8);gem.addProperty('App::PropertyString','OM9GemShape');gem.OM9GemShape='round'
+        seed=d.addObject('Part::Feature','Seed');seed.Shape=Part.makeBox(1,1,1,App.Vector(2,0,0))
+        raw=json.dumps({'schema':1,'evaluator':'om9.affine-template','version':1,'settings':{},'scale':[1,1,1],'offset':[0,0,0]})
+        r=OM.createBuilderRecord(gem,'OM9-SETTING-001',raw,[seed]);child=d.getObject(r.OutputNames[0]);d.removeObject(seed.Name)
+        group=d.addObject('App::Part','OutputFrame');group.Placement.Base=App.Vector(10,0,0);group.addObject(child);d.recompute()
+        check('grouped output maps world recipe into parent local frame',child.Recorded and child.ParentRecord==r and abs(world(child).x-2.5)<1e-7 and child.isValid())
+        shared=d.addObject('App::Part','SharedFrame');shared.addObject(gem);shared.addObject(group);shared.Placement.Base=App.Vector(100,0,0);d.recompute()
+        check('shared gem/output ancestor follows recipe without double transform',child.Recorded and abs(world(child).x-102.5)<1e-7)
+        shared.Placement.Base=App.Vector(200,0,0);d.recompute()
+        check('shared ancestor edit preserves native History',child.Recorded and abs(world(child).x-202.5)<1e-7)
+        settings=d.addObject('OpenMatrix9Gui::HistorySettings','Policy');settings.Lock=True;settings.BrokenHistoryWarning=False;rejected=False
+        try:group.Placement=App.Placement(App.Vector(20,0,0),App.Rotation())
+        except Exception:rejected=True
+        check('independent output ancestor edit honors Lock',rejected and child.Recorded and abs(world(child).x-202.5)<1e-7)
+        settings.Lock=False;d.openTransaction('Move output frame');group.Placement=App.Placement(App.Vector(20,0,0),App.Rotation());d.commitTransaction()
+        check('independent output ancestor edit detaches while keeping edited geometry',not child.Recorded and child.ParentRecord is None and abs(world(child).x-212.5)<1e-7 and r.Recorded)
+        d.undo();d.recompute();check('output ancestor Undo restores native relationship',child.Recorded and child.ParentRecord==r and abs(world(child).x-202.5)<1e-7)
+        d.redo();d.recompute();check('output ancestor Redo repeats detach',not child.Recorded and child.ParentRecord is None and abs(world(child).x-212.5)<1e-7)
+        d.undo();d.recompute();path=str(out/'builder-groups.FCStd');d.saveAs(path);App.closeDocument(d.Name);d=App.openDocument(path)
+        child=d.getObject('BuilderOutput');r=d.getObject('BuilderRecord');d.getObject('SharedFrame').Placement.Base=App.Vector(300,0,0);d.recompute()
+        check('FCStd grouped output relationship and frames recompute',child.Recorded and child.ParentRecord==r and abs(world(child).x-302.5)<1e-7)
+        rotated=d.addObject('App::Part','RotatedOutputFrame');rotated.Placement=App.Placement(App.Vector(25,8,3),App.Rotation(App.Vector(0,0,1),45));rotated.addObject(child);d.recompute()
+        p=world(child);check('rotated reparent preserves recipe world geometry and own placement',child.Recorded and abs(p.x-302.5)<1e-7 and abs(p.y-.5)<1e-7 and abs(p.z-.5)<1e-7 and child.Placement.Base.Length<1e-7)
+        # Exercise the native adapter's aggregate rejection before it creates any
+        # of the 17,408 outputs, rather than relying only on the Rust unit test.
+        source=d.addObject('Part::Feature','BudgetSource');source.Shape=Part.makeBox(2,4,8);source.addProperty('App::PropertyString','OM9GemShape');source.OM9GemShape='round'
+        seeds=[]
+        for i in range(17):
+            s=d.addObject('Part::Feature','BudgetSeed');s.Shape=Part.makeBox(1,1,1,App.Vector(i,0,0));seeds.append(s)
+        OM.createBuilderRecord(source,'OM9-SETTING-001',raw,seeds)
+        targets=[]
+        for i in range(1024):
+            target=d.addObject('Part::Feature','BudgetTarget');target.Shape=Part.makeBox(2,4,8);target.addProperty('App::PropertyString','OM9GemShape');target.OM9GemShape='round';targets.append(target)
+        before={o.Name for o in d.Objects};rejected=False
+        try:OM.matchBuilderAttributes(source,targets)
+        except Exception as e:rejected='aggregate' in str(e).lower() and 'budget' in str(e).lower()
+        check('native Match aggregate output budget rejects before writes',rejected and before=={o.Name for o in d.Objects})
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(800,run)

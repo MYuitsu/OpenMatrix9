@@ -1,0 +1,136 @@
+"""Native RCORE-04/05 lifecycle: real Command input, native picks and Undo."""
+import json, os, sys, traceback
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+from command_console_support import command_input, command_prompt
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+result = {'checks': []}
+
+def check(name, ok):
+    result['checks'].append({'name': name, 'passed': bool(ok)})
+    if not ok:
+        raise AssertionError(name)
+
+def settle():
+    loop = QtCore.QEventLoop()
+    QtCore.QTimer.singleShot(350, loop.quit)
+    loop.exec()
+
+def cmd(text):
+    field.setText(text)
+    QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return)
+    settle()
+
+import sys
+if os.environ.get('OM9_TEST_NATIVE_DIR'): sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+
+def run():
+    global field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc = App.newDocument('SnapLifecycle')
+        doc.UndoMode = 1
+        guide = doc.addObject('Part::Feature', 'Guide')
+        guide.Shape = Part.makeLine(App.Vector(-10, 0, 10), App.Vector(10, 0, 10))
+        doc.recompute()
+        window = Gui.getMainWindow()
+        window.resize(1500, 1000)
+        settle()
+        field, prompt = command_input(window), command_prompt(window)
+        area = window.findChild(QtWidgets.QMdiArea)
+        sub = next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot') == 0)
+        area.setActiveSubWindow(sub)
+        settle()
+        target = next(w for w in sub.widget().findChildren(QtWidgets.QWidget)
+                      if w.metaObject().className() == 'Gui::View3DInventorViewer').viewport()
+        pixel = target.rect().center() + QtCore.QPoint(3, 2)
+        prefs = App.ParamGet('User parameter:BaseApp/Preferences/Mod/OpenMatrix9/Osnap')
+
+        cmd('Osnap Only End')
+        cmd('Line')
+        cmd('0,0,0')
+        cmd('Osnap Once Mid')
+        cmd('invalid-point')
+        check('Rejected input retains Line session', len(doc.Objects) == 1)
+        QtTest.QTest.mouseMove(target, pixel)
+        settle()
+        QtTest.QTest.mouseClick(target, QtCore.Qt.LeftButton, pos=pixel)
+        settle()
+        check('One-shot survives invalid input and hover then accepts exact 3D Mid',
+              len(doc.Objects) == 2 and abs(doc.Objects[-1].Shape.Length - 10) < 1e-9)
+        check('One-shot never persists in saved settings', prefs.GetInt('State') == 3)
+        doc.undo()
+        settle()
+
+        # Undo must not replace the successful Line repeat candidate.
+        cmd('')
+        check('Empty Enter repeats completed Line after Undo', prompt.text().startswith('Start of line'))
+        cmd('0,0,0')
+        cmd('Osnap Once Mid')
+        QtTest.QTest.keyClick(field, QtCore.Qt.Key_Escape)
+        settle()
+        cmd('Line')
+        cmd('0,0,0')
+        QtTest.QTest.mouseClick(target, QtCore.Qt.LeftButton, pos=pixel)
+        settle()
+        check('Cancel clears one-shot before the next session',
+              len(doc.Objects) == 2 and all(abs(v.Point.z) < 1e-9 for v in doc.Objects[-1].Shape.Vertexes))
+        doc.undo()
+        settle()
+
+        cmd('Line')
+        cmd('0,0,0')
+        cmd('Osnap Once Mid')
+        cmd('Osnap Suspend')
+        cmd('Osnap Resume')
+        QtTest.QTest.mouseClick(target, QtCore.Qt.LeftButton, pos=pixel)
+        settle()
+        check('Suspend and Resume restore the pending override',
+              len(doc.Objects) == 2 and abs(doc.Objects[-1].Shape.Length - 10) < 1e-9)
+        cmd('Osnap Clear')
+        check('Clear removes persistent modes without disabling master', prefs.GetInt('State') == 1)
+        cmd('Polyline')
+        cmd('Osnap Once Mid')
+        cmd('0,0,0')
+        QtTest.QTest.mouseClick(target, QtCore.Qt.LeftButton, pos=pixel)
+        settle()
+        cmd('10,0,0')
+        cmd('')
+        check('Typed accepted point consumes override before the next pointer pick',
+              len(doc.Objects) == 3 and all(abs(v.Point.z) < 1e-9 for v in doc.Objects[-1].Shape.Vertexes))
+        for obj in doc.Objects:
+            if obj != guide:
+                obj.ViewObject.Visibility = False
+        settle()
+        cmd('Circle')
+        cmd('-5,0,0')
+        cmd('Osnap Once Mid')
+        cmd('Radius')
+        QtTest.QTest.mouseClick(target, QtCore.Qt.LeftButton, pos=pixel)
+        settle()
+        check('Circle Radius option preserves one-shot until radius point acceptance',
+              len(doc.Objects) == 4 and abs(doc.Objects[-1].Shape.Edges[0].Curve.Radius - 5) < 1e-9)
+        doc.Objects[-1].ViewObject.Visibility = False
+        cmd('Ellipse')
+        cmd('Osnap Once Mid')
+        cmd('Center')
+        QtTest.QTest.mouseClick(target, QtCore.Qt.LeftButton, pos=pixel)
+        settle()
+        cmd('5,0,10')
+        cmd('0,2,10')
+        check('Ellipse Center option preserves one-shot until first point acceptance',
+              len(doc.Objects) == 5 and abs(doc.Objects[-1].Shape.BoundBox.ZMin - 10) < 1e-9)
+        result['ok'] = True
+    except Exception:
+        result['ok'] = False
+        result['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        QtCore.QTimer.singleShot(500, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1800, run)

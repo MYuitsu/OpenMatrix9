@@ -1,0 +1,3322 @@
+[
+  {
+    "path": "AGENTS.md",
+    "bytes": 1838,
+    "sha256": "c7a14f4ffdd170a5e8aad4cf856abe0858151dd2df1bbb68c69f7a0500e432ea"
+  },
+  {
+    "path": "ALL_FEATURES.md",
+    "bytes": 75040,
+    "sha256": "41d84317df678dfd66652af1283893b29dd013dfb55d02985a9058a689a5f06b"
+  },
+  {
+    "path": "CODE_GUIDE.md",
+    "bytes": 9357,
+    "sha256": "a12b9b081887a3f497136d83a2022048adb21cb3446a2bad446a57a0bb900094"
+  },
+  {
+    "path": "ENGINEERING_CONTRACTS.md",
+    "bytes": 7150,
+    "sha256": "a210eff9c970ae1103e370da8143ef96c238fb627adc5f2f196dae5c2dfe1f46"
+  },
+  {
+    "path": "FEATURES.json",
+    "bytes": 1849456,
+    "sha256": "081b69a719d6421ff71a240c8fa7edbca0de6dcea0ba23b1d94477aeb6003b76"
+  },
+  {
+    "path": "FEATURES.yaml",
+    "bytes": 1477270,
+    "sha256": "fe6cb3c8a4f10429aaedd498519eabbccf16cf2059086f58e589ecc5cf6dbaa2"
+  },
+  {
+    "path": "FEATURE_LOOKUP.json",
+    "bytes": 111986,
+    "sha256": "cd705369e3c21cd0f10cf08b9451bfec593366b6f7b9aa55a41b34044cddc175"
+  },
+  {
+    "path": "GUIDANCE_VALIDATION.md",
+    "bytes": 14117,
+    "sha256": "5be0e28e3626d94eb39a7cafc363d248e560146acfa820551a82a434284b2275"
+  },
+  {
+    "path": "IMPLEMENTATION_RULES.md",
+    "bytes": 2428,
+    "sha256": "77ca25229c77ab7a72b26689d837478aa9bd3ab4e3f9ba3100f7f88d6998e2bb"
+  },
+  {
+    "path": "IMPLEMENTATION_STATUS.md",
+    "bytes": 17446,
+    "sha256": "c5e422e753b9d4356e5f5873df2cbc75e3a1e684f6cb93c5e54eed286e98d35c"
+  },
+  {
+    "path": "INDEX.md",
+    "bytes": 1888,
+    "sha256": "18a8d8a3b3516949b52b0a11d46c2fac54709e05cf2679327a1c460239390661"
+  },
+  {
+    "path": "PROMPT_EXAMPLES.md",
+    "bytes": 894,
+    "sha256": "714b4b4e2b95e888d12ce748240abd1d39fddfab77f4f1b5ffa0e769b6de6c56"
+  },
+  {
+    "path": "README.md",
+    "bytes": 3211,
+    "sha256": "3e1f937b8fa2a893e142e03c24b59a735c0aeb666b846367d2dc774da2faa867"
+  },
+  {
+    "path": "RHINO_CORE_REQUIREMENTS.md",
+    "bytes": 728,
+    "sha256": "5fd5fd6bd43d3190fdab8c6d3b7f6e7596845929ea91573a77757c49f46a83ff"
+  },
+  {
+    "path": "TERMINOLOGY.md",
+    "bytes": 1439,
+    "sha256": "31bf1ca7fa30ef1339f9b0aedbdc289ca676980037680352e4e5b49057ba368c"
+  },
+  {
+    "path": "examples/rust/Cargo.lock",
+    "bytes": 161,
+    "sha256": "26707efde6d8de66dd3fb9eb33f56335d17b1b23d4ae0897e661246cc20097ed"
+  },
+  {
+    "path": "examples/rust/Cargo.toml",
+    "bytes": 129,
+    "sha256": "9f133804ae2e35f36e0b8922c247ef86dc8a4023f9cb7db08e2be2072135c76b"
+  },
+  {
+    "path": "examples/rust/README.md",
+    "bytes": 986,
+    "sha256": "2f9aa3fd6d713a52087e4077b2ab5f890785809c499881437f94776803210fdd"
+  },
+  {
+    "path": "examples/rust/src/features.rs",
+    "bytes": 633048,
+    "sha256": "38e7b75a1a94bfa86bd9e16dce807b5c7609ae7a9dfcaf63b7f5aabde4a3a702"
+  },
+  {
+    "path": "examples/rust/src/lib.rs",
+    "bytes": 5156,
+    "sha256": "ef8c069a3759c8491d9510a9916ab8698c6bfa8484f366cd71dac7c961dfee21"
+  },
+  {
+    "path": "examples/rust/tests/features.rs",
+    "bytes": 35160,
+    "sha256": "2a85ee98a812bdb8fa5d42a85fc8623f1bef2ab0f555c30b7f95e2053ee54e14"
+  },
+  {
+    "path": "examples/rust/tests/validation.rs",
+    "bytes": 2331,
+    "sha256": "285387e010f6ae628069db3407878a69e4dee5545488531b0cab609ba67f7d85"
+  },
+  {
+    "path": "specs/00-rhino-core/01-object-model-kernel.md",
+    "bytes": 21674,
+    "sha256": "0a853a13f4aea9c4265264e4ed4e569f47fb2f3d95c5e003d58eab28fef13ca8"
+  },
+  {
+    "path": "specs/00-rhino-core/02-units-tolerances.md",
+    "bytes": 23023,
+    "sha256": "ff5ce94953cb88cd7ad0ef62c3557810d87c5d426286d48183dabb1d8c2918ae"
+  },
+  {
+    "path": "specs/00-rhino-core/03-coordinates-cplanes.md",
+    "bytes": 20685,
+    "sha256": "a6dee21ea36027855c36214816cc6484210c92239f7d39d62f29fbb3ea9e84d2"
+  },
+  {
+    "path": "specs/00-rhino-core/04-command-engine.md",
+    "bytes": 19492,
+    "sha256": "cd063c5b534c2b39aa6cc4a87d5ae35e4799ed84bbb399055afc25338143e765"
+  },
+  {
+    "path": "specs/00-rhino-core/05-picking-snapping.md",
+    "bytes": 21996,
+    "sha256": "45060baeb92ed0d8e0974219e1ef9683dd30664bc1e2e47b7d08e22fb3299ba6"
+  },
+  {
+    "path": "specs/00-rhino-core/06-selection-organization-blocks.md",
+    "bytes": 24320,
+    "sha256": "5d0f62288362e53715e1171d4e42d50e89f49f1c97c918fbbb90a4419c4d63dd"
+  },
+  {
+    "path": "specs/00-rhino-core/07-nurbs-editing-modeling.md",
+    "bytes": 30778,
+    "sha256": "92971dd63398490a409af672f23af8e28ea7cdbdd436f5b626c2770344f170c1"
+  },
+  {
+    "path": "specs/00-rhino-core/08-analysis-repair.md",
+    "bytes": 24576,
+    "sha256": "ae61404cecd5d4dcf4f73b8aff7d2f60053ec712119d649121b45d4867d77cad"
+  },
+  {
+    "path": "specs/00-rhino-core/09-history-dependencies.md",
+    "bytes": 19154,
+    "sha256": "a23567fb8fd5f6289006fac0e87939e56d353e90b810b883b556b31a9e95cac2"
+  },
+  {
+    "path": "specs/00-rhino-core/10-persistence-3dm-clipboard.md",
+    "bytes": 19961,
+    "sha256": "d2bbce036154bd6bd86af67858a2d8dcb796aa01ebf36777518436f1c02ba238"
+  },
+  {
+    "path": "specs/00-rhino-core/11-annotation-layout-print.md",
+    "bytes": 18442,
+    "sha256": "c106656831dd8fc23181b1cc7f0fe81d8c1eb95454aab1b9a871067a9502bf8d"
+  },
+  {
+    "path": "specs/00-rhino-core/12-display-render-resources.md",
+    "bytes": 19440,
+    "sha256": "e8f51603354068970a3b63a259d6ae3a816761d282368e56901bada99f6355dd"
+  },
+  {
+    "path": "specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+    "bytes": 74253,
+    "sha256": "5223c1bc0c368eb3140dd3093e96355f1bb405ae3aee506f34b0d378628097ba"
+  },
+  {
+    "path": "specs/00-rhino-core/DECOMPILE_AUDIT.md",
+    "bytes": 8030,
+    "sha256": "7a7c0c39cf60d65fcb02181cb4ad9403ffd544a4e7634186b2632731680c757e"
+  },
+  {
+    "path": "specs/00-rhino-core/README.md",
+    "bytes": 19081,
+    "sha256": "6cc8a34ba49b231ba6239128999a0d8894e25a38e09f5f7f34f97c2f6be3ae53"
+  },
+  {
+    "path": "specs/00-rhino-core/SOURCE_BASELINE.json",
+    "bytes": 38665,
+    "sha256": "b3919f9525b31863dd850122344cb0e47366163329b7c0e01edd86397217bd1c"
+  },
+  {
+    "path": "specs/00-rhino-core/UI_DETAILS.md",
+    "bytes": 15149,
+    "sha256": "8253917a4c67072cfc3c409ca74cc954678ed385e6721e99763512c75c68b554"
+  },
+  {
+    "path": "specs/01-core/README.md",
+    "bytes": 14412,
+    "sha256": "5647d7b4104ea787c1dd926792b130eaa0d75f0904f9b8a3e15a1490393fc602"
+  },
+  {
+    "path": "specs/01-core/om9-buildercore-001-builder-framework.md",
+    "bytes": 10101,
+    "sha256": "946a8a3296ee7557f7579fb2988569333dd7f6e2b9047872f86344ff97a03fd8"
+  },
+  {
+    "path": "specs/01-core/om9-display-001-preview-shade.md",
+    "bytes": 7003,
+    "sha256": "c830fbcee5506fda11b8e99593ca945e37eb2b34eab3b156fa984de93eb20a0a"
+  },
+  {
+    "path": "specs/01-core/om9-display-002-shade-selected.md",
+    "bytes": 7101,
+    "sha256": "ff44a5e831fd2a05ceb8df7efb5db3262c53d975a190b3640e2bfe8f01737d22"
+  },
+  {
+    "path": "specs/01-core/om9-display-003-show-cutters.md",
+    "bytes": 7020,
+    "sha256": "4e502db13e2e8b2393723c01bb2d698e7da96f6101ab6191b149b3ac2bca90e8"
+  },
+  {
+    "path": "specs/01-core/om9-display-004-show-grid.md",
+    "bytes": 7047,
+    "sha256": "ab3a20000244c00af4ff16160d2e10b69c20d9181b1bf3a11215f48967bb4f72"
+  },
+  {
+    "path": "specs/01-core/om9-display-005-gem-view.md",
+    "bytes": 7102,
+    "sha256": "4f2b78ec37bce19a1685f2915c577b2dbfe3a52ef4ef24a89d9447525b6f051c"
+  },
+  {
+    "path": "specs/01-core/om9-display-006-render-mesh.md",
+    "bytes": 7396,
+    "sha256": "3026ff47ff2bc594318502c63f47c782cc75eaf040382f4d2d901a1c01eb9a33"
+  },
+  {
+    "path": "specs/01-core/om9-display-007-surface-view.md",
+    "bytes": 7099,
+    "sha256": "324231760343bea24adf8889cec52d200dc942b6b0edc7afda358c3477d4e9c3"
+  },
+  {
+    "path": "specs/01-core/om9-display-008-shade-mode.md",
+    "bytes": 10664,
+    "sha256": "c1fab78634a0886cfa99ef7ed2986f1bf75d9564e9b4f06b8a843e390385bfaf"
+  },
+  {
+    "path": "specs/01-core/om9-f6-001-f6-context-menu.md",
+    "bytes": 10976,
+    "sha256": "921541b19703e1acd4b8d970d776a5ade104ad63cdc138e3b3910262d644f7a9"
+  },
+  {
+    "path": "specs/01-core/om9-file-001-export-selected.md",
+    "bytes": 8315,
+    "sha256": "c85adcded0f77464b314f2b66cf8d30f5126c0504607f8cb94898ebc5e49efb7"
+  },
+  {
+    "path": "specs/01-core/om9-file-002-new.md",
+    "bytes": 6937,
+    "sha256": "f7ef9af72918aa96067cb2939d3a6c20bf5fe75eded2d058867606b43e5bff1e"
+  },
+  {
+    "path": "specs/01-core/om9-file-003-open.md",
+    "bytes": 7378,
+    "sha256": "d7a534b9711c8705daa7c5dbad4d2919cb0b496fe74b2fe9f82393091311eb5f"
+  },
+  {
+    "path": "specs/01-core/om9-file-004-import.md",
+    "bytes": 7389,
+    "sha256": "60d2f0b15cfacc9b477a13a465cebc34c4d2ea8fef1784df3e8df3646d3e0733"
+  },
+  {
+    "path": "specs/01-core/om9-file-005-save.md",
+    "bytes": 7325,
+    "sha256": "0e6093e139498efc73d9857b908bee404ca41dcd445e62b378ea3cf2422dca67"
+  },
+  {
+    "path": "specs/01-core/om9-file-006-save-as.md",
+    "bytes": 7284,
+    "sha256": "6b4579e844d1f8f24a09914102bc115e8fec187406fa5e08b542bbd7f46f4091"
+  },
+  {
+    "path": "specs/01-core/om9-file-007-save-small.md",
+    "bytes": 7406,
+    "sha256": "30431d2baeb19ed60e591dc4254064208789193701939a15fed3f7f31b3fef85"
+  },
+  {
+    "path": "specs/01-core/om9-file-008-notes.md",
+    "bytes": 6996,
+    "sha256": "5d13a29cc441c0b37cde0864e351a2f711ee50a84c9cf50ec9da37858720e28d"
+  },
+  {
+    "path": "specs/01-core/om9-file-009-print.md",
+    "bytes": 12334,
+    "sha256": "ac9bdf90a1861d7d7f4fb7705d64409d498cdb9592e23442f599b28d2a0a07af"
+  },
+  {
+    "path": "specs/01-core/om9-file-010-save-small-as.md",
+    "bytes": 7236,
+    "sha256": "22c21a70f646cac14c3ba8b728d3cabaa02b63ac0ff15578dc326fa946347f60"
+  },
+  {
+    "path": "specs/01-core/om9-file-011-stuller-studio-cam-services.md",
+    "bytes": 7289,
+    "sha256": "7945af0cd229a082433d3f377b60d1548499a9051e2e0982228f46f573099933"
+  },
+  {
+    "path": "specs/01-core/om9-history-001-history-workflow.md",
+    "bytes": 10769,
+    "sha256": "346200da9b0af8fdfc10b1d3fda3d7cb2fa221869a0b71f713cadf934ae1335f"
+  },
+  {
+    "path": "specs/01-core/om9-iface-001-matrix-interface.md",
+    "bytes": 9779,
+    "sha256": "aa4f0e2046c31f6227fc7b5191f6b57867f3385ee03f98973f01e9043c97329a"
+  },
+  {
+    "path": "specs/01-core/om9-info-001-object-properties.md",
+    "bytes": 7437,
+    "sha256": "174434405dcf88e5d21fe9f1492a9c0bdff7ac4bf92d2f7a68f0db8bab5dc5df"
+  },
+  {
+    "path": "specs/01-core/om9-info-002-rhino-options.md",
+    "bytes": 7682,
+    "sha256": "6813267cf2e340cc90d077003d69af028b64f6306491f0b4da996846683157fd"
+  },
+  {
+    "path": "specs/01-core/om9-info-003-all-object-info.md",
+    "bytes": 6863,
+    "sha256": "1a7c074e15b136ef8ee01e4638719c27c0e54f2f61a5780f6ddf93ba71c8ae8c"
+  },
+  {
+    "path": "specs/01-core/om9-info-004-command-history.md",
+    "bytes": 7016,
+    "sha256": "0289a65b02913860cf601b288af09c5685fcdc78c58c6a9aa4fbe7c70f41ed1f"
+  },
+  {
+    "path": "specs/01-core/om9-info-005-object-info.md",
+    "bytes": 6952,
+    "sha256": "7efcdbf2bff975600f810bf847a5451bb5ecfe6c805fefd7a6116ef6d31c048b"
+  },
+  {
+    "path": "specs/01-core/om9-info-006-project-notes.md",
+    "bytes": 7033,
+    "sha256": "72608c00693833f660a11351520ec92bc21008951e6c9be110c924c77679254f"
+  },
+  {
+    "path": "specs/01-core/om9-info-007-super-select.md",
+    "bytes": 7282,
+    "sha256": "71538e1c348eb05ce384f3d20396166b6515beeb55e1410ad23f405de84bf201"
+  },
+  {
+    "path": "specs/01-core/om9-info-008-viewport-tabs-toggle.md",
+    "bytes": 7241,
+    "sha256": "83bbabf33ae3e4ac10fb1724d37d6cdb298fe804212080087b5823dd3b84ad6a"
+  },
+  {
+    "path": "specs/01-core/om9-info-009-box-edit-menu.md",
+    "bytes": 12468,
+    "sha256": "0aaaea787c0703023586832fe04dd2e2007319eed22a1b23dd26c1d7ff6ef193"
+  },
+  {
+    "path": "specs/01-core/om9-info-010-display-menu.md",
+    "bytes": 7748,
+    "sha256": "d4e9f7a38541bfbdb46594b56f71de9cd845fccb072898fd768d9bba21ee0cfe"
+  },
+  {
+    "path": "specs/01-core/om9-info-011-library-menu.md",
+    "bytes": 7615,
+    "sha256": "1acc7f0a6444be27cfa19add0b84168f03fd985b6fec746b85b973fd1ea741ab"
+  },
+  {
+    "path": "specs/01-core/om9-info-012-selection-filter-menu.md",
+    "bytes": 7761,
+    "sha256": "7627da18764671bc48a6cf7677b578d697d8fea7815bd77b8e9059c23c5baafb"
+  },
+  {
+    "path": "specs/01-core/om9-info-013-smarttrack.md",
+    "bytes": 7849,
+    "sha256": "6212faf7b807f8bc8933b2a7ff355086e0db8aae9358136dd006ad2b949823b7"
+  },
+  {
+    "path": "specs/01-core/om9-info-014-design-report.md",
+    "bytes": 9889,
+    "sha256": "72c3f1e7525ea7b819a11de1e8c1769d3a64d915c17dc4336093de3b21e2ef76"
+  },
+  {
+    "path": "specs/01-core/om9-info-015-rhino-history.md",
+    "bytes": 8529,
+    "sha256": "f3aec4a7b7af19511e85ed9e09acae2003cda5d1176fd3893dc741efcf696d06"
+  },
+  {
+    "path": "specs/01-core/om9-info-016-matrix-clear-object-history.md",
+    "bytes": 7164,
+    "sha256": "43ffdd41dcc47e09c6c89306478fce90f546af2078edcbd35ec85ce27717fb88"
+  },
+  {
+    "path": "specs/01-core/om9-info-017-matrix-history-record.md",
+    "bytes": 7667,
+    "sha256": "ad88d26cad22068b3cc9925ad5b1c4825d01149ff4ba27dddcb657b5500328d1"
+  },
+  {
+    "path": "specs/01-core/om9-info-018-matrix-history-update.md",
+    "bytes": 7556,
+    "sha256": "837d8c2eea77f2b8eccce4ac5f220cf9ec4f48c53279007afc8116529131de53"
+  },
+  {
+    "path": "specs/01-core/om9-info-019-smart-target-msr.md",
+    "bytes": 7841,
+    "sha256": "641ba05ebc2c5154ae2c23e8ecf9d364d6373b7d1ef26657a74c5b6eb6849380"
+  },
+  {
+    "path": "specs/01-core/om9-info-020-gumball.md",
+    "bytes": 8817,
+    "sha256": "dc133a2e6356ff8b6856750347f52fc7763bbd9e7e4fd0d8a40ec40329d7cf96"
+  },
+  {
+    "path": "specs/01-core/om9-info-021-gumball-alignment.md",
+    "bytes": 7186,
+    "sha256": "a75292923fea600329fa49864a621ab91dfecd2520b0a2f6e3a36897f8c854f3"
+  },
+  {
+    "path": "specs/01-core/om9-info-022-relocate-gumball.md",
+    "bytes": 7383,
+    "sha256": "17a26415a0a014c0414951bf1080fe63ddeb7a5a30f09601fcbeeb0c736f5f28"
+  },
+  {
+    "path": "specs/01-core/om9-layer-001-layer-management.md",
+    "bytes": 10396,
+    "sha256": "b375dd49b6c13146ea442136605e0f6d12ace81d63f43a6f5a1037b4932aeee0"
+  },
+  {
+    "path": "specs/01-core/om9-main-001-main-menu.md",
+    "bytes": 8903,
+    "sha256": "9cc7801234b762ec4b5620bd461f50ab353d8991a07de0e8118e6205d8782ec2"
+  },
+  {
+    "path": "specs/01-core/om9-measure-001-angle.md",
+    "bytes": 7070,
+    "sha256": "9fc7a40f2f52c704c28e817619dd3ecb18eef423b75bee22303bb944e02713f1"
+  },
+  {
+    "path": "specs/01-core/om9-measure-002-distance.md",
+    "bytes": 7058,
+    "sha256": "d37b9e9c9e432d5f082eee81fdea46bb59d672429b27730594599c199a631c84"
+  },
+  {
+    "path": "specs/01-core/om9-measure-003-length.md",
+    "bytes": 7087,
+    "sha256": "564de2cafaec2f7da4a82c57d01dde12ce7f9650b9747c71cc785580b895fd93"
+  },
+  {
+    "path": "specs/01-core/om9-measure-004-horizontal-dimension.md",
+    "bytes": 7776,
+    "sha256": "b85d8b0b03b19541e997fb3b97a896634673d999bce92473016b72a7e0e0f835"
+  },
+  {
+    "path": "specs/01-core/om9-measure-005-radius.md",
+    "bytes": 7536,
+    "sha256": "8c250bb87218156e179ff4fd13dd0a82cd245f03373eafe6a6d000ac598483cf"
+  },
+  {
+    "path": "specs/01-core/om9-measure-006-vertical-dimension.md",
+    "bytes": 7729,
+    "sha256": "3edfa258e5e05e59f38e75ee34ce4ea3c0bc65d36bf528ef3a74cdaa2a3d4d7d"
+  },
+  {
+    "path": "specs/01-core/om9-measure-007-angle-dimension.md",
+    "bytes": 7371,
+    "sha256": "7527eeeab05bebc028f3bd589ac9bca16ab1e036a279931e19c4b9523e4ceeae"
+  },
+  {
+    "path": "specs/01-core/om9-measure-008-rotated-dimension.md",
+    "bytes": 7715,
+    "sha256": "a21bf6aa71b36ec747223083a92ff2a36df5ed3e3fd3261a773b58e0ca182920"
+  },
+  {
+    "path": "specs/01-core/om9-measure-009-aligned-dimension.md",
+    "bytes": 7744,
+    "sha256": "710c0d581caae5c4f1f5b7760df6851f0de8e06e46b251ef1c1b0779e735c509"
+  },
+  {
+    "path": "specs/01-core/om9-measure-010-diameter-dimension.md",
+    "bytes": 7386,
+    "sha256": "6d4c0a8c20fa539414e557956884a7da807f10167cc8773b3c1c2b2491057575"
+  },
+  {
+    "path": "specs/01-core/om9-measure-011-radial-dimension.md",
+    "bytes": 7397,
+    "sha256": "eb2e99ececf23243ee525c18ca6c3bbc70d9856c3c770820e06e8f193a3af128"
+  },
+  {
+    "path": "specs/01-core/om9-measure-012-leader.md",
+    "bytes": 8101,
+    "sha256": "d1f82201a80a95f4dbde51bf4a0c4f74b36d57d7afbee262b21777bd846ccc95"
+  },
+  {
+    "path": "specs/01-core/om9-measure-013-text-block.md",
+    "bytes": 9249,
+    "sha256": "5bb7530333b2f46c6e001971f9b8c571faa86394e1b7ad34db7e102e6d1ee3d8"
+  },
+  {
+    "path": "specs/01-core/om9-measure-014-edit-dimension.md",
+    "bytes": 8413,
+    "sha256": "7d7254fcd50da1daa6365afa92dde5bf1a724cad884b8dbef950ae687207b3a3"
+  },
+  {
+    "path": "specs/01-core/om9-measure-015-edit-text.md",
+    "bytes": 7220,
+    "sha256": "575188bfe49875cecf6d4e78584ac54741c5cf43349d96d1fb0e5a7739700c0a"
+  },
+  {
+    "path": "specs/01-core/om9-measure-016-dimension-options.md",
+    "bytes": 9307,
+    "sha256": "df72345842bd08481bbc6d2a0bc543a5042df23452ea4c2da3f742c8067b7aa9"
+  },
+  {
+    "path": "specs/01-core/om9-measure-017-recenter-dimension-text.md",
+    "bytes": 7008,
+    "sha256": "d07899a9c811c6c9f325b528de62fb45ed65a0cf7e008dedcbe18ce0cd8c3a98"
+  },
+  {
+    "path": "specs/01-core/om9-project-001-project-manager-workflow.md",
+    "bytes": 10038,
+    "sha256": "1f03dafd13768280c3e0957043fbad8f98c3162c8dd72ffcb0f33c870bf4e1b2"
+  },
+  {
+    "path": "specs/01-core/om9-projectdb-001-project-manager-database.md",
+    "bytes": 10222,
+    "sha256": "89e94adeadf74bc1fd44b2e3c31a6fbb009967291a4f39a15feea71adff5e42c"
+  },
+  {
+    "path": "specs/01-core/om9-snap-001-center-snap.md",
+    "bytes": 7220,
+    "sha256": "46b13ba3e5de7b4a72725af945cbfbf43f68d7efc76da893156c5758170b1ea8"
+  },
+  {
+    "path": "specs/01-core/om9-snap-002-end-snap.md",
+    "bytes": 7149,
+    "sha256": "3613b531483d3c043526bc9dd83cef0791928414ee5935e9e526337d20a7fe27"
+  },
+  {
+    "path": "specs/01-core/om9-snap-003-mid-snap.md",
+    "bytes": 7213,
+    "sha256": "03f999a758cef8851f26fa0661f5c95535fda69f8533af603dbabadda02832a3"
+  },
+  {
+    "path": "specs/01-core/om9-snap-004-quad-snap.md",
+    "bytes": 7204,
+    "sha256": "992c102124d29c2127f1fc45b1cd483e1f50c70acf82b445291d8a5c8d28ad99"
+  },
+  {
+    "path": "specs/01-core/om9-snap-005-intersection-snap.md",
+    "bytes": 7369,
+    "sha256": "72d98b4fbce729e0086dc053b942c965a77a9c9e8befc87d39affb8664349d89"
+  },
+  {
+    "path": "specs/01-core/om9-snap-006-near-snap.md",
+    "bytes": 7207,
+    "sha256": "f334cad213a500719236b6adf563f775693cc4b18192c21122a9fb55a987860d"
+  },
+  {
+    "path": "specs/01-core/om9-snap-007-point-snap.md",
+    "bytes": 7094,
+    "sha256": "f500295160d1eeb4932f49d8ad9734674db19db0cfa47c2edc4c88102b7109e9"
+  },
+  {
+    "path": "specs/01-core/om9-snap-008-tangent-snap.md",
+    "bytes": 7234,
+    "sha256": "49a6c5c5839e00562bdacc2ae5450db975152d6a63273f6c6353d391fd72559c"
+  },
+  {
+    "path": "specs/01-core/om9-snap-009-between.md",
+    "bytes": 7284,
+    "sha256": "4b33872d05d73fb5d5b20f6d3dc0fc17f252945c28ec3b4d1dae32073c97b7c5"
+  },
+  {
+    "path": "specs/01-core/om9-snap-010-perpendicular-snap.md",
+    "bytes": 7240,
+    "sha256": "364088a284501ffa8f4968b3c3ef1faf33d85737a4965af42416836996967394"
+  },
+  {
+    "path": "specs/01-core/om9-snap-011-polysurface-snap.md",
+    "bytes": 7514,
+    "sha256": "5815c73024e3f0086c4c206f9f1d0587e36d0f78bb74b0ecb38d6ab47c6c084b"
+  },
+  {
+    "path": "specs/01-core/om9-snap-012-surface-snap.md",
+    "bytes": 7430,
+    "sha256": "8e142a1725306585d637d70724b0632e963c8e7ff1b96fed8a90bfced313bdef"
+  },
+  {
+    "path": "specs/01-core/om9-snap-013-grid-snap.md",
+    "bytes": 7515,
+    "sha256": "64a586b51a555fd4eeda9347ccb1b1a751baf3b1d02cd05e82f5d0c931bc2b1d"
+  },
+  {
+    "path": "specs/01-core/om9-snap-014-ortho.md",
+    "bytes": 7258,
+    "sha256": "bd23ac9195451cb5c602de41267ecaf5219537d731fec8a9c31c17ab848032b8"
+  },
+  {
+    "path": "specs/01-core/om9-snap-015-planar.md",
+    "bytes": 7340,
+    "sha256": "befe5a9f4d484908e993ecae9d401906cb0cee00217ba1582af6a5dc99d52352"
+  },
+  {
+    "path": "specs/01-core/om9-snap-016-project.md",
+    "bytes": 7265,
+    "sha256": "934c56a97128e1088dc022e42ad3e699c4976e2fb0490d4603f2eb6225279b4f"
+  },
+  {
+    "path": "specs/01-core/om9-style-001-styles-framework.md",
+    "bytes": 8213,
+    "sha256": "97a84d339d5a684416947fe6958697cb408cdaf7e59bce5d5254cba385144345"
+  },
+  {
+    "path": "specs/01-core/om9-top11-001-control-points-on.md",
+    "bytes": 7619,
+    "sha256": "bfe5e49d79e19da8324bfcebbae2e9a9feffb880e50ee64f6fa933bfe86f6caf"
+  },
+  {
+    "path": "specs/01-core/om9-top11-002-duplicate.md",
+    "bytes": 8557,
+    "sha256": "37fbbdb80c73c5e20a20ec55a61e130948860b5fc20b87cbac7cb8b13e256dc2"
+  },
+  {
+    "path": "specs/01-core/om9-top11-003-edit-points-on.md",
+    "bytes": 7286,
+    "sha256": "55e3b168f88999c52c0a0e413ceda285ab835c4a4939b1dce1eb68c7a11a1dd1"
+  },
+  {
+    "path": "specs/01-core/om9-top11-004-mirror.md",
+    "bytes": 8031,
+    "sha256": "35bd60f560a5ad36ec5aca60c242bab7d87665a0ae3533d1919dfe2187b5c443"
+  },
+  {
+    "path": "specs/01-core/om9-top11-005-explode.md",
+    "bytes": 9457,
+    "sha256": "64422d935a7e68d271052ca292a8d715cf73dafef78487f61ca4dd995e0cee37"
+  },
+  {
+    "path": "specs/01-core/om9-top11-006-move.md",
+    "bytes": 7309,
+    "sha256": "ad4f5145734d4c72d601ab26a6f2de2b8a0e4f8b604b3667cc357f8f9b4f5343"
+  },
+  {
+    "path": "specs/01-core/om9-top11-007-rotate.md",
+    "bytes": 7453,
+    "sha256": "7fac521386e03c5215c955ad93ede8f71b559a8392fdfe9b808e944d88a01c1c"
+  },
+  {
+    "path": "specs/01-core/om9-top11-008-join.md",
+    "bytes": 8297,
+    "sha256": "2ab7e27fee8da64980acda62ab9d19e3430a986118aaf7bf30a08418f563d70b"
+  },
+  {
+    "path": "specs/01-core/om9-top11-009-split.md",
+    "bytes": 8105,
+    "sha256": "404422728c18a92f4da402a4076875cc5537b82eaafec92cb4fce13fe837bb68"
+  },
+  {
+    "path": "specs/01-core/om9-top11-010-trim.md",
+    "bytes": 8598,
+    "sha256": "76595117af31faa7696e709185384e404419838ffcc42129cce1bca2ee445bca"
+  },
+  {
+    "path": "specs/01-core/om9-top11-011-ring-rail.md",
+    "bytes": 8725,
+    "sha256": "e3f9489ae8dbf05183244a473830efd537365fc1de08dea53f83f54176d0ddab"
+  },
+  {
+    "path": "specs/01-core/om9-util-001-direction.md",
+    "bytes": 7591,
+    "sha256": "7b143c9acde25274e11521e4c1a09c9bcbf3ef3ab0c1501e7bd7703ec9a332c9"
+  },
+  {
+    "path": "specs/01-core/om9-util-002-check.md",
+    "bytes": 6856,
+    "sha256": "504a781998e89a827bbda7587870ecd25a3139e7a5900c278c0d958be5422205"
+  },
+  {
+    "path": "specs/01-core/om9-util-003-select-bad-objects.md",
+    "bytes": 6877,
+    "sha256": "4e5805c44ca0d04923291f23f3aa03acefa96c3ea92d07ce4ecda28500ab07eb"
+  },
+  {
+    "path": "specs/01-core/om9-util-004-show-edges.md",
+    "bytes": 8035,
+    "sha256": "1e6fdeaedcedca7fd72383022351750fe66432d1ffbbd7aece880db4e6ed028a"
+  },
+  {
+    "path": "specs/01-core/om9-util-005-merge-edge.md",
+    "bytes": 6897,
+    "sha256": "213b4f47df9e89b17743bb3750cf59e2e26f6fc1903a59e6ddc9d9224d2d6ed3"
+  },
+  {
+    "path": "specs/01-core/om9-util-006-split-edge.md",
+    "bytes": 6884,
+    "sha256": "ed76267ff4716683ef19d55323810faddf39c3fafe79f2955df9a5dbc0d67c7f"
+  },
+  {
+    "path": "specs/01-core/om9-util-007-join-2-naked-edges.md",
+    "bytes": 7285,
+    "sha256": "302b804aaf92d885d9335db0dcf9f8f4f75d738ac67f02e8600b91b7cc51b226"
+  },
+  {
+    "path": "specs/01-core/om9-util-008-make-2d-drawing.md",
+    "bytes": 9159,
+    "sha256": "35fa9397dc7d93be5591d4123a6d38c65173af4d97eee1bc03b26ffea4b1b9f6"
+  },
+  {
+    "path": "specs/01-core/om9-util-009-unjoin-edge.md",
+    "bytes": 6861,
+    "sha256": "7666884c380bd463c5ae2e9b1cbef5e07a69676d13711fbb4b8528bf1c4ef0bf"
+  },
+  {
+    "path": "specs/01-core/om9-util-010-bounding-box.md",
+    "bytes": 7429,
+    "sha256": "f33f7dbd09169c4722f71a1fb5b1691dee7ca9ac38886f11a1ff649ad231529e"
+  },
+  {
+    "path": "specs/01-core/om9-util-011-center-object.md",
+    "bytes": 7686,
+    "sha256": "437e42fa1ef0423f8a1a28a7f6f3c205f2c0c44c15ac32da319ac63ad75df378"
+  },
+  {
+    "path": "specs/01-core/om9-util-012-group.md",
+    "bytes": 7355,
+    "sha256": "bcd2c8723ee8d161785f0a737f8421259efd7ee42c6e134bc1200bc8c29fdaf4"
+  },
+  {
+    "path": "specs/01-core/om9-util-013-extract-bad-surface.md",
+    "bytes": 7024,
+    "sha256": "b99f0097deb49f7eb0b4b5151a4a704e8338ccc56c7b2fb849eabfc97a88c338"
+  },
+  {
+    "path": "specs/01-core/om9-util-014-show-z-buffer.md",
+    "bytes": 7099,
+    "sha256": "895c7c0a8b11c646eb7cc9747560753674f72ab550ab70c28a0ad540ea580301"
+  },
+  {
+    "path": "specs/01-core/om9-util-015-ungroup.md",
+    "bytes": 6943,
+    "sha256": "a9963a4e5aeefbb9a9a7a4436c65fe9f2618e3cf27334633981f58a1ad6ea9b3"
+  },
+  {
+    "path": "specs/01-core/om9-util-016-align-mesh-vertices.md",
+    "bytes": 7501,
+    "sha256": "8b08b92ddc07ef7d1d721e448b9a565206ae98f039732fc4900077003be4e616"
+  },
+  {
+    "path": "specs/01-core/om9-util-017-fill-hole.md",
+    "bytes": 6837,
+    "sha256": "02c89998731bd8c90d0a59f17a09c3ef51e599469dcb8ab1e7adf41ce6615f9c"
+  },
+  {
+    "path": "specs/01-core/om9-util-018-fill-holes.md",
+    "bytes": 6905,
+    "sha256": "7d74299410b69eb201a68359473ae2ee0e0c5ab1748c30f3057d1f9b6ae4de77"
+  },
+  {
+    "path": "specs/01-core/om9-util-019-mesh-from-nurbs-object.md",
+    "bytes": 10861,
+    "sha256": "1552cad6a37117a59168e5d46ae34ab3b43c21308b2fc1b1b567d6fe83078ba8"
+  },
+  {
+    "path": "specs/01-core/om9-util-020-apply-mesh-uvn.md",
+    "bytes": 7436,
+    "sha256": "ba5f87ca635c99eeda6c3189e68082833bb351e9c4755db6ff98f57ab1e34169"
+  },
+  {
+    "path": "specs/01-core/om9-util-021-mesh-reduce.md",
+    "bytes": 7901,
+    "sha256": "b2ba83c3fe22c81d7d81586a4a584a15a203141e88331b3525eb867375d05c73"
+  },
+  {
+    "path": "specs/01-core/om9-util-022-extract-render-mesh.md",
+    "bytes": 7048,
+    "sha256": "88841f2e74206f2eed1655acad70d6da2d1332e86873125c1d65f90fc34e369d"
+  },
+  {
+    "path": "specs/01-core/om9-view-001-picture-frame.md",
+    "bytes": 8852,
+    "sha256": "68608a191df873a57dc1c580c9ad0c5673b1e8a6375442824fedbe2a7f65da79"
+  },
+  {
+    "path": "specs/01-core/om9-view-002-restore-viewports.md",
+    "bytes": 6900,
+    "sha256": "675ed4020db661bcfdb7ab1b07937abaadfc865ea5d49611c41ed1e24c2a9b39"
+  },
+  {
+    "path": "specs/01-core/om9-view-003-synchronize-viewports.md",
+    "bytes": 6829,
+    "sha256": "c411a91d5e183013aa65934f5c07f96e4e79be68f0869f1e7e29d283391e1ebb"
+  },
+  {
+    "path": "specs/01-core/om9-view-004-zoom-dynamic.md",
+    "bytes": 6842,
+    "sha256": "01481d1d3bf0308d6d6401bd60dc7973a28a6e35ed78e1aabcbaa9f137c5397d"
+  },
+  {
+    "path": "specs/01-core/om9-view-005-viewport-to-file.md",
+    "bytes": 7275,
+    "sha256": "2a69ee2223123a1a6709d738e172ca69daff817477e20937029357ab59088ebc"
+  },
+  {
+    "path": "specs/01-core/om9-view-006-zoom-extents.md",
+    "bytes": 6832,
+    "sha256": "62d44355f31b30d3ab3256fc8497460ec12d1210d0a53538522031450d4e89cb"
+  },
+  {
+    "path": "specs/01-core/om9-view-007-zoom-selected.md",
+    "bytes": 6791,
+    "sha256": "1ce971484d4885ee21f374a1877785d2d04805f8f5797f78c2ecbb1fd4b27144"
+  },
+  {
+    "path": "specs/01-core/om9-view-008-zoom-window.md",
+    "bytes": 6719,
+    "sha256": "d8e03923a4cedbf627aeccf3d0631d1892e0b7dcebe300393f9d97ac5b4ab61b"
+  },
+  {
+    "path": "specs/01-core/om9-view-009-set-crosshairs.md",
+    "bytes": 6910,
+    "sha256": "b320a89d48917f0de4807256231e4970015befc0920b2a3e7f769cbdac9a6acc"
+  },
+  {
+    "path": "specs/01-core/om9-view-010-system-6-hd-view.md",
+    "bytes": 7169,
+    "sha256": "fb764d08781c9dff2566aabf2eead58fda8d62b37111cce9149afbc30b64e1a8"
+  },
+  {
+    "path": "specs/01-core/om9-view-011-zoom-1-1.md",
+    "bytes": 6878,
+    "sha256": "b50d7717bba7dfdd9b85d7bd917d13b5c5fa3b22cf9ac28990c65abbf5859488"
+  },
+  {
+    "path": "specs/01-core/om9-view-012-center-viewport.md",
+    "bytes": 6719,
+    "sha256": "ca13e4651c5cff8639372228f9ca2496ab5f968c3a1ca93eaa90d34708b1daf1"
+  },
+  {
+    "path": "specs/01-core/om9-view-013-zoom-1-1-calibrate.md",
+    "bytes": 7189,
+    "sha256": "805f853504e80b6b63e0f4dc26be55308e1fd215064ceaa28958e5408bb08559"
+  },
+  {
+    "path": "specs/01-core/om9-viewport-001-four-viewports-c-plane-f4.md",
+    "bytes": 8389,
+    "sha256": "5eb339a1fd0ee17c08761f8eac28917a4f2cbeaf6b9242126cb7bbcfba8d772f"
+  },
+  {
+    "path": "specs/02-curve/README.md",
+    "bytes": 6998,
+    "sha256": "d6a3f20b6afc9984b32ce76e9db9cc9bb24a3bfa64e0437429efd4e72ed0a7db"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-001-polyline.md",
+    "bytes": 10941,
+    "sha256": "7bb6229ee70469d26a3b28c70420ac436fe6f5efe85918430d5b78048bebaf1e"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-002-line.md",
+    "bytes": 12073,
+    "sha256": "82aacd9ec1ad9ebe00ed837556f91c959a81ca4112065d82e548664c92e5f91e"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-003-interp-curve.md",
+    "bytes": 13122,
+    "sha256": "a643252cd876520c73cfc36d2c81af56c249b30615aa80de2a0d0ec34d5c1b1c"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-004-rectangle.md",
+    "bytes": 13082,
+    "sha256": "bee44e655c9a680b5b31817705452873ad322a9299279c6d036d38b6b6f71a22"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-005-circle.md",
+    "bytes": 24875,
+    "sha256": "70bbebe3d38191fdaefc4017ab66be89eba78261ce36b65a1a671e9256aeb574"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-006-ellipse.md",
+    "bytes": 12903,
+    "sha256": "8ac16e7f110d693845131525e7d05c6723f153c4bd4287fe31596dd7e57adc06"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-007-arc.md",
+    "bytes": 10614,
+    "sha256": "3f037f9c0af3ee5d80efbc5e6f73b88040e28b5d4263daf8dffa3cee22d6313c"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-008-arc-direction.md",
+    "bytes": 7450,
+    "sha256": "00388d13a3a6074bcc1ce6180fa715b933a5e742c28a2a9d67c63a3f45ed2788"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-009-rebuild.md",
+    "bytes": 12392,
+    "sha256": "9660396511d140ab5f5078442849e969448195257fb14dbb2caa3f7f079798f1"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-010-refit-to-tolerance.md",
+    "bytes": 8099,
+    "sha256": "84314ba4cc7763c12c72d492035c7b20a046326f685eda7956d8bd8e746faf36"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-011-quick-curve-blend.md",
+    "bytes": 7552,
+    "sha256": "86db5dfe626f1ef0dd2e11987e7a6957d90f8322f9fc3f699a5e7a85ea4c58a5"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-012-adjustable-curve-blend.md",
+    "bytes": 9025,
+    "sha256": "91bb5a7002db1dd1d8fdfb15465a587f9f462600f17cd72c2776c627e3775c02"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-013-curve-from-2-views.md",
+    "bytes": 6991,
+    "sha256": "81afccad8cee5ca5e5bad39f354a0de334316cb1a54bffd00345c1a24cb126f3"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-014-curve-2-views-with-history.md",
+    "bytes": 7021,
+    "sha256": "e2db631c2f07c948a431562eb3326781f4352ec2cae9d110c0bbf7fef09c3b6f"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-015-pullback.md",
+    "bytes": 7690,
+    "sha256": "c8c64a587a4c781e5fd8704e758e693c908e492480cc655dbd4e38b33e0130e3"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-016-project.md",
+    "bytes": 7615,
+    "sha256": "fbe1efa2f63962c85e7e102ba82cb01eb1249fc3b1d28b8125d5ac7af84f4399"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-017-intersection.md",
+    "bytes": 6672,
+    "sha256": "9cd61c1a6610fea6335681ce002b6da952c50b99366c238777ed11421fe46846"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-018-offset-curve.md",
+    "bytes": 8473,
+    "sha256": "28350aefd873d71dcad05c7a3f2bd1748e65e2b6cf6146668590683d69baf426"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-019-extract-isocurve.md",
+    "bytes": 7616,
+    "sha256": "02c79d7d03a6299af5486b006bdf38988b935f32557bd928c2bee54c4a97e969"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-020-offset-curve-on-surface.md",
+    "bytes": 7801,
+    "sha256": "7a246853bf3d0ad45c749c091912ed489a8b12c929310839be18799907caa04e"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-021-fillet-curves.md",
+    "bytes": 7525,
+    "sha256": "81219adc5ef212a07d0194ff402e4a7954b163bf99b083fbd570a847c2307ae5"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-022-chamfer-curves.md",
+    "bytes": 7477,
+    "sha256": "cebac4e4f044cf46feb08b3ee643ca8c0d496657065211d5b9f6975711b3f1d9"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-023-fillet-corners.md",
+    "bytes": 6826,
+    "sha256": "1083f1e63e40dd4ebf52f76ca6fd9212c71d7bc1fc4f60646097e298556dac71"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-024-apply-uv-curves.md",
+    "bytes": 6763,
+    "sha256": "c5bf9465894aea495ffd45d3cb70ba45916a92d9c03ab4be025f9874eb523c57"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-025-create-uv-curves.md",
+    "bytes": 6827,
+    "sha256": "e08cc76849d0918b9bcb600eb36037b8b27aee82f425df44d86a6caa4e7b9e40"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-026-through-points.md",
+    "bytes": 7671,
+    "sha256": "bb35a564a24a2548d8c7ce625e816b01479b8e8635d7452c5570db6a064474dd"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-027-extend-curve.md",
+    "bytes": 8301,
+    "sha256": "1b18fdbd2b95b8f22943cd9a2ac855c9546a510da7728e33f47a01b89c730a2d"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-028-polygon.md",
+    "bytes": 8032,
+    "sha256": "552d050ab586d21232ecdd5967d907c9cacb6b730f89334e63944a0ce1ba9ccb"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-029-spiral.md",
+    "bytes": 8803,
+    "sha256": "4e98222e5296e5ce60c706011ba673f7627ee788e8beb6187ed2518eb87988e2"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-030-helix.md",
+    "bytes": 8450,
+    "sha256": "39983e9e310e37618d4fcbb2bae86b137ad52ad8ce8babcf77ae90ec69f53e11"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-031-adjust-closed-curve-seam.md",
+    "bytes": 7332,
+    "sha256": "45d14c6733570c6b73143837cfcddc6187e64ac9f0171a6f4b872dd77a4a393b"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-032-mark-curve-end.md",
+    "bytes": 6530,
+    "sha256": "11361f1ac8273947897326034c4916035dd5d22879ab7ff2f21aebaa93e70545"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-033-mark-curve-start.md",
+    "bytes": 6477,
+    "sha256": "f12e52cca3bd16aa2ac8b3dbfa5c34e3948cea8f271c57fb260e0fac8fa33757"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-034-point.md",
+    "bytes": 6556,
+    "sha256": "f5963baebcb52ce8c9e050ef31d1f2ea1b3eaa7c3777aedcdce356c791f7f0ec"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-035-continue-interpolated-curve.md",
+    "bytes": 7977,
+    "sha256": "48d280a1f20581cd050062d77e87fba4f97fd6be010c406a2d39de93f5ac7260"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-036-divide-curve.md",
+    "bytes": 7802,
+    "sha256": "f1968f05d718e8c6c6499390700570bae7521d97067232b0a32d2940b11dcd10"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-037-curve-boolean.md",
+    "bytes": 7161,
+    "sha256": "1ae52854fdbaf8a9d451dc613ca6eba55eaa7b6e4299ac142fc14a6a3a4949ad"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-038-tween-curves.md",
+    "bytes": 7435,
+    "sha256": "1b59ccfcb6a640ef6e37cccd18707d71e256e0db536b7bcc922efbc84d9639a2"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-039-duplicate-border.md",
+    "bytes": 6800,
+    "sha256": "b6d34c985703c6771924c908eb96dbe2a028a687fb24de98b7f25a32355e9937"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-040-duplicate-edge.md",
+    "bytes": 6718,
+    "sha256": "57a83f99c615ab2fe009794aa9cba11064723bb00a753853a1ef4e62ccf7d495"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-041-continue-control-point-curve.md",
+    "bytes": 7591,
+    "sha256": "d4e6db571352cc8b44c002a088c75385e569e93b80d151f3eb6c7de28626e53c"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-042-curve.md",
+    "bytes": 7766,
+    "sha256": "15ab12f334f37671dc1ea682c3fd85207acbaa26127f7a26bd8664d85d87f9f6"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-043-cross-section-profiles.md",
+    "bytes": 6941,
+    "sha256": "d19869213df61223237484a65ba504387b344a5d170825be0539923b5a1147bb"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-044-extract-angle-isocurve.md",
+    "bytes": 6955,
+    "sha256": "07b62e669823c09291ff3b745f33d60b9e7e8cfc35697ba2ea26257dab862083"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-045-sketch.md",
+    "bytes": 7089,
+    "sha256": "80065edee15bafe288af7ff2a928fef03aea7c7f06e52cf875c51573eb19a8c5"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-046-sketch-on-surface.md",
+    "bytes": 6960,
+    "sha256": "394eb7b18902e3e27a46bff8d6f7629ab1b15dedd8754224c9ccf11f1bf491bb"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-047-interp-curve-on-surface.md",
+    "bytes": 6979,
+    "sha256": "c62e205bbccf5028e173e664efa215af7a69ba7da0d1641fa64a206cf7ae339c"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-048-polyline-on-surface.md",
+    "bytes": 6824,
+    "sha256": "1ad9b22b05ce6bbdd4481e4679aef436b9c9f27fabe0c14761a7f56c9227874f"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-049-sketch-on-mesh.md",
+    "bytes": 6919,
+    "sha256": "b76bf55af8528b8ad4244587d469d402e0575f440d8cb40090179bcbd279ecb0"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-050-curve-to-lines.md",
+    "bytes": 8864,
+    "sha256": "d001d28b56f258ad884f6b93c0afd4bd1f88dde77b26de2db83321d98f0c2d34"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-051-section.md",
+    "bytes": 8302,
+    "sha256": "5b13b92ce50a84541fb6ed6d641f887a7663c2b8ee54346391bf76e83c6b8e3f"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-052-match.md",
+    "bytes": 8558,
+    "sha256": "d507f8a8f162043c76730a59f8afa06a1bc76a51ca060156e1933c56f71c9ab0"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-053-silhouette.md",
+    "bytes": 6673,
+    "sha256": "bc3a58d9d39d6e8627d06b04fac3c36a5a25bc981a228c407e3f44a8af32a878"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-054-extract-wire-frame.md",
+    "bytes": 7165,
+    "sha256": "16501bf021112f21dc041e1251aab05d0a565824933c5435da26353c69d5b48c"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-055-soft-edit.md",
+    "bytes": 7524,
+    "sha256": "8e306ebc1310453ea2a86b0a706b21676db1f62ab25614490fe4ca03409ab0f3"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-056-arc-blend.md",
+    "bytes": 7894,
+    "sha256": "9da648d3c230e82ddcf731daf4622a452c538402e01faeb7c8e11c2d000de74f"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-057-offset-normal-to-surface.md",
+    "bytes": 7627,
+    "sha256": "9d19ef7fff236596296d72388f6d9355d3e3338210a70f2a617babd8182442f6"
+  },
+  {
+    "path": "specs/02-curve/om9-curve-058-intersect-two-sets.md",
+    "bytes": 6861,
+    "sha256": "9880e62ced17b0c1c0361ba0a2a67c7b1efb6cabf898abca3d8f1d5f1342f76b"
+  },
+  {
+    "path": "specs/03-surface/README.md",
+    "bytes": 5287,
+    "sha256": "f417889b09f44a499e4d38083e3387df00793ceb5f951a32d0cae83ac50e032b"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-001-sweep-1.md",
+    "bytes": 16078,
+    "sha256": "794a6b2bbd1506a87843633595419d2d6c0346666c8b190956db5c12c17cab2b"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-002-sweep-1-history.md",
+    "bytes": 8787,
+    "sha256": "5f1581ed7567f03ea8b744b332790c9137eb4893d24f0605b016148af70ddd63"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-003-sweep-2.md",
+    "bytes": 15391,
+    "sha256": "a5ff9493b69a3eb13cddd5636f92572bd60681c5ac644b4a1437b7ac0882420e"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-004-sweep-2-history.md",
+    "bytes": 8937,
+    "sha256": "d008b2b67fa6aaedfb41a8b209e214a75d831813b8f5a05999dc1c1f2b7f0549"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-005-profile-sweep.md",
+    "bytes": 8367,
+    "sha256": "aa1058420affcf011d41e3538e8fb919fb899eaffef6716c089d489b2be49526"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-006-rebuild.md",
+    "bytes": 9372,
+    "sha256": "046ca4e0461d2cf3d0b7bd3f5724ad7a4fc5de68c9a7fa492287defdba8955a7"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-007-blend-surface.md",
+    "bytes": 9524,
+    "sha256": "b4e031447598fbf213727cc4a631eca912d60f021876fcb9f277aa7cd6566dde"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-008-variable-blend-surfaces.md",
+    "bytes": 8969,
+    "sha256": "8699c673ec5c0bc5996fc7c225f72b348e18b0a2a74f8c303119ee8de31de53a"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-009-loft.md",
+    "bytes": 14320,
+    "sha256": "bf4275379febbf41ea83e0fba259e7f1d1c22035aa14a951cfe65c56ee56f7bf"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-010-curve-network.md",
+    "bytes": 9864,
+    "sha256": "4a36d8da0551c0c2355feb36ef3d75278a318a76063a895c4a8537123639a58c"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-011-patch.md",
+    "bytes": 10019,
+    "sha256": "2421df0cf1cde3c8d09d280f3f3c33d692d3eb4b9a6a2ff33d56b7ffa0c0d755"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-012-shrink-trimmed-surface.md",
+    "bytes": 6902,
+    "sha256": "a7a08fbd13b5b0f656abb09d6e2610185699b9cd5d56c8ae4f9c789e6905cbee"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-013-planar-curves.md",
+    "bytes": 6862,
+    "sha256": "3d5b6c0bd5b641ba106190e6dbfc8abe4111277b28092c48d91ec603deef86cd"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-014-edge-curves.md",
+    "bytes": 6709,
+    "sha256": "8530bab72932e2a87b905a5fae9355e52af7b9ad2ee9cb1d8d13ea43bbac36a4"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-015-plane-from-corners.md",
+    "bytes": 8706,
+    "sha256": "f5dfc441810a38096d006d7584b142b626af0e03da96246ec272eef6758ba638"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-016-surface-extrude-all.md",
+    "bytes": 10750,
+    "sha256": "744531b4d10b84f79ea2989a1620fee82a8427b01e6340567500ba54b814f345"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-017-untrim.md",
+    "bytes": 7526,
+    "sha256": "84ff9c9f647ef477f1ade53fd0ae21cd0f26e7c5af84737bd870e2c707825985"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-018-revolve.md",
+    "bytes": 9380,
+    "sha256": "3493fb6a5a9a999b30e73a5a7f13f43c57fdda4ad22382167c336e41930bfb3f"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-019-rail-revolve.md",
+    "bytes": 7989,
+    "sha256": "f8718825fe7ad28a190385f32cc2d11d21eb74a84ee57d52164280ef91f8bd45"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-020-fillet-surfaces.md",
+    "bytes": 7859,
+    "sha256": "f29cac1fd88ab3c2ee481bf79b3d9db40de7ac6c469bb371b171b455a02834e2"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-021-sweep-4.md",
+    "bytes": 7094,
+    "sha256": "4e7cbea4dc7d1c9008771774c7bd230e5902282c87e07ed6688d701f49a2dc5d"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-022-variable-fillet-surfaces.md",
+    "bytes": 8466,
+    "sha256": "aee1b87bc34aabcca7159fa59267738aef6f9c6d1f141d94381636b2a8fc0d5e"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-023-chamfer-surfaces.md",
+    "bytes": 7843,
+    "sha256": "9b3bc6491dcfe0082d8e376f83f0e32e479f5d293e24315edf60c06aa1198c23"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-024-variable-chamfer-surfaces.md",
+    "bytes": 8258,
+    "sha256": "61ff3224630885c2cc94038fff5e3b8970ea4ff588b8111ce70db0f7496caa41"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-025-offset-surface.md",
+    "bytes": 8840,
+    "sha256": "6b2dc30f9027ef204254de0c3bf2c5ad5c172b40879c5557b0e4b4cffbed3a5a"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-026-variable-offset-surface.md",
+    "bytes": 8707,
+    "sha256": "6956eb332d0f763fdebc4127e7173695a7fcc04277973f1792e3ad4d8153ee3e"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-027-tween-surfaces.md",
+    "bytes": 7927,
+    "sha256": "f14d1a4de4a19b570145f02dd97027890e2ff5f4b9763393a62f0ac0e758f0cb"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-028-match-surfaces.md",
+    "bytes": 10441,
+    "sha256": "5c908c34f1fc50260bd47ee75841be704478bb025515e5eff50ed549de3a4926"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-029-merge-surfaces.md",
+    "bytes": 7616,
+    "sha256": "af3cbbb2dace5353e52227880c45b970906620bdbab70a3a777f55482f67d5da"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-030-drape.md",
+    "bytes": 8276,
+    "sha256": "199a2588e3f3eb9bfeceeff63fc1f5adf06a980fea23cc7e5cd56dfbf8739081"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-031-heightfield-from-image.md",
+    "bytes": 9029,
+    "sha256": "9a7a95f71f76716ff2e2577ad2008d888f2367cc180f4c073c588c9e31767926"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-032-sweep-multi.md",
+    "bytes": 6944,
+    "sha256": "b40464a1a240827654e210754c83b856062763150035fe062af48a1da00d98cd"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-033-extend-surface.md",
+    "bytes": 7312,
+    "sha256": "85f8a3de282e5a7c454159f8cbe7d0517f3cd6207c39361bd8315e3801643e3b"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-034-split-at-isocurve.md",
+    "bytes": 7508,
+    "sha256": "5e1cd242b1e0dbe7cc5dbb48b4d38773cdaf55190e317aedeeeadc80d73b3b2c"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-035-extrude-normal-to-surface.md",
+    "bytes": 7866,
+    "sha256": "b50ee3b650195e8b66067ef13d8afa1ea05e1f7da7b137d65235a813581937d2"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-036-unroll-surface.md",
+    "bytes": 8323,
+    "sha256": "6355291cd286d2238e71d4cc8f13fcd6a02e4ca3d720bbf4ecf0bc8ef7becdae"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-037-soft-edit.md",
+    "bytes": 8409,
+    "sha256": "e0d1a2d0a30884bab33e8547381f0a0ca43a0d666b0237221a58dc024219b667"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-038-adjust-closed-surface-seam.md",
+    "bytes": 6915,
+    "sha256": "36b0eef19cb2ee2a5e593035a0457ae58ceecde62332a0b1aea45bea97ed9f2d"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-039-cutting-plane.md",
+    "bytes": 7317,
+    "sha256": "945ff9a8ab8cdbd7eed5ce70ddfb4b8e31481e27d1bd243faa3eb22abc259ac4"
+  },
+  {
+    "path": "specs/03-surface/om9-surface-040-set-surface-tangent.md",
+    "bytes": 6881,
+    "sha256": "7b13e3312463a4ae7d14274d3e9fa905185e627b0bfa50e06ce7d9356449fdf0"
+  },
+  {
+    "path": "specs/04-solid/README.md",
+    "bytes": 3485,
+    "sha256": "0c469992896e791950cb85ab55d606af1ac4158abab549921faccf0ce27c152a"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-001-boolean-difference.md",
+    "bytes": 8261,
+    "sha256": "4dbd0774a0c9d0898b055accc169eab307ff3253f8a4aee7a68d1e2e7140e79f"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-002-boolean-intersection.md",
+    "bytes": 7866,
+    "sha256": "04d67018ebe10f7a2e95a61a963ff082c48ab4f582357eeef2f60cd0c2353a29"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-003-boolean-union.md",
+    "bytes": 7625,
+    "sha256": "8517c2e2394d98713b3061cf78a612f1e375171e6bfb183d594bebfe865e2bca"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-004-boolean-two-objects.md",
+    "bytes": 8577,
+    "sha256": "ea87eec2a887c5ca73af9d4ad841681576e4fe6446318b53bd3f2d00b4373f93"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-005-cap-planar.md",
+    "bytes": 6498,
+    "sha256": "2abe5cb0a60db8d0acd8689ff2bdb6b173e2c4b64635b2e130867472a3750553"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-006-extract-surface.md",
+    "bytes": 7365,
+    "sha256": "7780c4431704a4ff64bec5409b16427867c45fd86bacbb9aa371f5239b74db89"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-007-fillet-edge.md",
+    "bytes": 9533,
+    "sha256": "b15f800b4bd04c601ff86770ab9280bc8cb947e0067051b42ca4e6027e787092"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-008-text.md",
+    "bytes": 10125,
+    "sha256": "8578dda48a43623152d1a2b6c5cc3d6fc842257c068a84198b13a07fa6d875e1"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-009-extrude-curve-straight.md",
+    "bytes": 9218,
+    "sha256": "c6b3f5ff18404b62a301ef676c2f5d8da628e71b695c246bbef5cd470ce91a0c"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-010-solid-extrude-all.md",
+    "bytes": 10961,
+    "sha256": "d8aab66c235514f89a1d4ea8e8d275ee4f6cfc271c44d8e5fc86120178926b74"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-011-pipe.md",
+    "bytes": 9190,
+    "sha256": "58a4a1b0c46d77976b5c94912f26deb9e7eb393aaecd52f38c2620f7ae4e2f95"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-012-box.md",
+    "bytes": 13345,
+    "sha256": "8b728ef415970cbe0e699872d41e3886c59b15cc329b1b94f70c45f0fdf3af30"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-013-ellipsoid.md",
+    "bytes": 8183,
+    "sha256": "11928c9b1e2f1663d1daa8123f40e622625db07fb6277067c1c7e268ffd4622a"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-014-sphere.md",
+    "bytes": 13722,
+    "sha256": "4f210d41e584b91a61d236f288966ca5889fbdd5ba8bfc43d0822889f007b9cb"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-015-torus.md",
+    "bytes": 7687,
+    "sha256": "d447d77537421ef8a084c2b120db28870f90e359a5ec470c14c5ecc6c21a07d5"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-016-cylinder.md",
+    "bytes": 8253,
+    "sha256": "958b2debb5c76b3e462513407ee17f73a094d6079bfc885f1f4db8904ea66e42"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-017-tube.md",
+    "bytes": 9345,
+    "sha256": "b09c8225eda8affd293cf83406a0a44be245e1860f715f30efcd90c70e64778a"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-018-pyramid.md",
+    "bytes": 8497,
+    "sha256": "bb48ed1746ba3cb6d2766e510883df8910fdb60148230c59a3e4bc99a4e30d05"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-019-cone.md",
+    "bytes": 8274,
+    "sha256": "cb7ec3673e799f2775b18c1f20dd05f811daeb0d3f58eafe4ebae4d89c9543f9"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-020-truncated-cone.md",
+    "bytes": 8911,
+    "sha256": "04eecae8afcd356c763894511c0b5ac31bcd6f9294ff3b5de36c28536245883d"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-021-boss.md",
+    "bytes": 7248,
+    "sha256": "fc26235b025a3027b7ba6b6067111184601720a567ea3482cfe2affe93e5d965"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-022-rib.md",
+    "bytes": 7753,
+    "sha256": "2d54a83630ae4311aa5dfe7e89e271569dab967ac4eee20b0e4a9f1abc35738d"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-023-make-hole.md",
+    "bytes": 8014,
+    "sha256": "0f7da9307c55c55462eba3047380239fdb437c9893eec24db3a19ed531527b98"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-024-slab.md",
+    "bytes": 7893,
+    "sha256": "6629b707ed6c7683487e6d8c3f36e09af573c976725273fe4d1a7c4f764af94e"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-025-array-hole.md",
+    "bytes": 8573,
+    "sha256": "5c4d71ed1d42078f2aa00bf79f1b9e8116e989cca4d90b7ca7feca2ae378008c"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-026-array-hole-polar.md",
+    "bytes": 7170,
+    "sha256": "161f1a1fd0420ea45a685fbeb17e5c66b1b20c7ed31eab40d933dd7a18c75904"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-027-move-hole.md",
+    "bytes": 6932,
+    "sha256": "587ebc611d76790cea0446ed1a80075e513e1bbef71fa05c8ca78a69289ff04e"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-028-move-face.md",
+    "bytes": 7914,
+    "sha256": "8c67b172db546e5d618ee149389adebf87e2a82cdc270bc9f114c7b82685317e"
+  },
+  {
+    "path": "specs/04-solid/om9-solid-029-shell.md",
+    "bytes": 6999,
+    "sha256": "df61fa13fb234313089419f555f05928c54c6e593922087937bb9d59ee0eaa4b"
+  },
+  {
+    "path": "specs/05-transform/README.md",
+    "bytes": 5465,
+    "sha256": "9efdabf62850142270d7f48e8970a6c0952f680626b2b386788ac49624f041d7"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-001-scale-3d.md",
+    "bytes": 7187,
+    "sha256": "01a14157f186d1504000fc1cc1d08b893a40022718a5dfa6cae871c22c4f7d81"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-002-scale2d.md",
+    "bytes": 7405,
+    "sha256": "d7f087e6fec8b958f055ff31b303983ccff052662884190fd9ccd9daf860ab10"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-003-scale-non-uniform.md",
+    "bytes": 8213,
+    "sha256": "9f2ab8161cead34f90b32a1c317985d5120363b33221e82297e4abe9f271a1b5"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-004-scale1d.md",
+    "bytes": 7327,
+    "sha256": "fe95859333dc0d594a6aa7fb77224b0295eb00440a9385f6b5ddb14f87b75eb9"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-005-orient-2-points.md",
+    "bytes": 7487,
+    "sha256": "38c95a4456d4441839580a8fd76cc06ed867ce4ff7a1ed6503efca30393f7c0f"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-006-orient-3-points.md",
+    "bytes": 7227,
+    "sha256": "ac3a118612ad06718a56209e290a79f161204617218c7f8f4b55e24a43ba8017"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-007-bend.md",
+    "bytes": 8225,
+    "sha256": "39c9b1acd67c81555cc137f730852494bee7a225bd8f44fc9e9ffce074f80a30"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-008-rotate3d.md",
+    "bytes": 7000,
+    "sha256": "58fb0a45dba4cc7df9a0921111a7840caaceedd8dc18efc90df627e3524842f4"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-009-array-polar.md",
+    "bytes": 8153,
+    "sha256": "83cd57bda24d3c4fc76bbb897026e86efa54880e83ab389accd1b789aaf26878"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-010-project-to-c-plane.md",
+    "bytes": 6582,
+    "sha256": "ded8d6a8e40fd33d02f7fd9904292b675e27a4cde5ff07f9dd4e8b4d7b56aec9"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-011-smart-flow.md",
+    "bytes": 9058,
+    "sha256": "8f0fe5847354824a879b6265c61c59d270c6bfba1337e6770b9fa2352034b2cd"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-012-smart-flow-rigid.md",
+    "bytes": 6831,
+    "sha256": "3f3a50366c0e466f26a43cf01b6460dd71257839ae904c4096ebec9084df3917"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-013-orient-on-surface.md",
+    "bytes": 9123,
+    "sha256": "920ee3292829a260c79771bfd89daf82f7d52e2bbcda7ce9f4253353f91a3e33"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-014-smart-flow-break.md",
+    "bytes": 6399,
+    "sha256": "77e95670cb79d28f1f7ad8080dc843c4467a8855db06889889b6115b1a10c445"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-015-smart-flow-pull-down-curves.md",
+    "bytes": 6698,
+    "sha256": "d6e15d74596e9677a8fb61a8d1b72d38c6c86d737bb0e07b808a74aaeda77664"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-016-orient-perpendicular-to-curve.md",
+    "bytes": 8078,
+    "sha256": "2c6f47c386781c809ecf0631e2c187532c2f9e8b0b7574a0098be3a641ac8084"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-017-orient-on-curve.md",
+    "bytes": 7370,
+    "sha256": "54800fb9816aa9f4a2bd80dc1aac2000f7d47dfa4967f61ce926cbec30ca4f9d"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-018-symmetry.md",
+    "bytes": 6927,
+    "sha256": "e4f639243107533bfe0612d640dabcd98d0b84a78d3760b8ce59796ce917e1d7"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-019-solid-points-on.md",
+    "bytes": 6310,
+    "sha256": "6a10aa000a56f359e5a1ca55b19a221a74d1359f5862427a42f8174949181979"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-020-cage-edit.md",
+    "bytes": 13870,
+    "sha256": "b60934606fb00b3436a2bab5b72ec63f10d83e9ec276be4d295eff4b663d3665"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-021-array-along-curve.md",
+    "bytes": 8078,
+    "sha256": "3355272a0931915ecabc2d3decb258699d4b0e2c79dede20d29a3c8577c29df0"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-022-releasefromcage.md",
+    "bytes": 6894,
+    "sha256": "e2cf38d845e897837d2f0de0177a4d1d18a0e0f2972064bdc1d35121dce47a14"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-023-array-along-surface.md",
+    "bytes": 7565,
+    "sha256": "c0306efd3957fb99a076c8b7d1dc9edc2da0fb75e77a2c73e40ffc5de65fa09f"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-024-array-linear.md",
+    "bytes": 7012,
+    "sha256": "b43f76b78d76e69fdd087e640b70c3de2c957e9e39518ae044c5442aff54e6f3"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-025-array.md",
+    "bytes": 8267,
+    "sha256": "15ff434a57f629f46c09cf12586c18b4147b5c1155ddd1d7157140919fb29498"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-026-array-curve-on-surface.md",
+    "bytes": 7452,
+    "sha256": "a516b89e51866a53f820c8cfc99e2572e728d70d07a38b80e28073c4c622009a"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-027-flow-along-curve.md",
+    "bytes": 8209,
+    "sha256": "65ecb4f1cb40dea1e383516e775fe9494f714a6aa1f58341d101c2ff67cfff0d"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-028-flow-along-surface.md",
+    "bytes": 7796,
+    "sha256": "b3b3fc3e5c0f3d3c214450c7858ee63da11bf82f53742635ad9d95f21f7ce8c6"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-029-splop.md",
+    "bytes": 8482,
+    "sha256": "c98c88e23747a98c329dd088c39ae636aed6db99de8518e0d90ada92374ee82c"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-030-set-points.md",
+    "bytes": 7558,
+    "sha256": "68780f60f29f7f224b74306185d3f243ad555a9790d0b13128eae36f2ad4ee11"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-031-scale-by-plane.md",
+    "bytes": 7522,
+    "sha256": "de8064c2f0276c0d150ed312d39a6aa7cd3fb9e149482a1b3b3bc12fb52fdcba"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-032-stretch.md",
+    "bytes": 8824,
+    "sha256": "fa7c199560e7cfeccac5e40985ea91332568f001dcc17ecefb93935de8340729"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-033-taper.md",
+    "bytes": 10163,
+    "sha256": "35a115d417913b67356bb57542ad9f042c81a898aace546bed8deee5f9341d12"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-034-shear.md",
+    "bytes": 7150,
+    "sha256": "044bc722b54ac3109ce031c3bbca6700ba882bfe30ac8eaa50fad7fb7af97d2f"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-035-maelstrom.md",
+    "bytes": 8300,
+    "sha256": "0382fa1b647e768f2bca6d4fb8966e2a59a742a1af0ac0ad5fc23a6db95fa222"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-036-twist.md",
+    "bytes": 7796,
+    "sha256": "2f211d8219f238055eb6059a8834e3cc136d887cac71d167ef479c6154e01511"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-037-make-down-facing.md",
+    "bytes": 6606,
+    "sha256": "92777a6ff8b12888541b29dd7adef7a70dac8ab3994083162fc2a148cd023583"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-038-remap-to-c-plane.md",
+    "bytes": 7344,
+    "sha256": "969b125c23a0501022d4c7482042eb471b9e41f621681dc2db8e1c8d6b58a1f7"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-039-moveuvn.md",
+    "bytes": 8865,
+    "sha256": "5e0bf69d827231d0abe54b1fb5580e06927d80ba4f42ceb47c7625244a84a573"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-040-soft-move.md",
+    "bytes": 8887,
+    "sha256": "61da23a76ef76287a0119487c9ef6e640af863010f74b7fbeefd8f4a14aa2131"
+  },
+  {
+    "path": "specs/05-transform/om9-transform-041-create-cage.md",
+    "bytes": 10117,
+    "sha256": "ce92e8b5ad3fc1617f7cb93d507bbcc219f38561de5534405ce5b18078bb016b"
+  },
+  {
+    "path": "specs/06-tsplines/README.md",
+    "bytes": 9256,
+    "sha256": "686dd2d799e207a56833ea31619c1c131a71eda793804fc36f75b34cd7cfe330"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-001-t-splines-hud.md",
+    "bytes": 8272,
+    "sha256": "c2ae76fdc01a0de9535e5d891021d300abb95f6b97af62149506769e6c8f5379"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-002-convert-to-t-splines.md",
+    "bytes": 8212,
+    "sha256": "464b51a1f7bf41c98c215be65589b47f307a170579ddc6388037c4277a10b215"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-003-t-splines-to-rhino-surface.md",
+    "bytes": 7714,
+    "sha256": "c0a428d2142a4546851c4249d199836fb6e5810aaf5a02d829a33fb098fbf455"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-004-loop-select.md",
+    "bytes": 6104,
+    "sha256": "1f51d40279b213236e338601c4d529e5da9de5c0f62dd971840ccfa3077964a7"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-005-ring-select.md",
+    "bytes": 6050,
+    "sha256": "d2f9d3ebb406943c57b316d52c9a75a4928ce401797462e86d4ed0a693829871"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-006-symmetry.md",
+    "bytes": 8117,
+    "sha256": "37459ee847a78737379823587448f42d735d02a5407e3fd5106470c56a8c01ad"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-007-symmetry-off.md",
+    "bytes": 6612,
+    "sha256": "047eb85b28c0070769c16c4c62172594b473a3a67ecff7d726db9301ceeb8e3f"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-008-x-and-y-symmetry.md",
+    "bytes": 6463,
+    "sha256": "67820f1328d72a029d20aa26b864fc4ad7a52252fb271fdbdb9ae4b66bb7295e"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-009-box-smooth-toggle.md",
+    "bytes": 6390,
+    "sha256": "c83a7371b8f43a543e54141715163f4378643978c0cd0ca8c674b600e0cb5531"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-010-x-symmetry.md",
+    "bytes": 6425,
+    "sha256": "45daaaff013523a2c5029b2fdbd5f305c99b7c75ff7f2b5055105de19c2b3ffd"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-011-y-symmetry.md",
+    "bytes": 6425,
+    "sha256": "ef6087ba4081e4fe1c9cc0fed66177b7deda6a31181b8355ba197bc0b0eb663e"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-012-compatibility-mode.md",
+    "bytes": 6516,
+    "sha256": "23dffa74aa33213f8e20687308418c157591ec170ffa146779f37c61ea244c6c"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-013-drag-modes.md",
+    "bytes": 6854,
+    "sha256": "d73f950c05a001dd71ebddc1e19822569b043d1a4a4c4d2a4f84b792646cac0e"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-014-scale-msr.md",
+    "bytes": 7224,
+    "sha256": "05b1e78aef863efd85960c2347a6a1ee359e7d5a62242a1b43c41c15dfa24db5"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-015-translate-msr.md",
+    "bytes": 7192,
+    "sha256": "f2278236b3fbaf236f1e17028fa3938f96761c694324da88ed8017fa1ede17ac"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-016-rotate-msr.md",
+    "bytes": 7014,
+    "sha256": "980b6695855cfa3e6aa53e9eb121190be0077655935d3279ed3544679f48ae32"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-017-set-pivot-point-msr.md",
+    "bytes": 6157,
+    "sha256": "19ad6d0df2b6112804fec8c35bc388819646c18219d3fcbc0a6762e7957490b5"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-018-select-edge-mode.md",
+    "bytes": 6063,
+    "sha256": "6cf80c47ce3f0d50434bcd72b0516ea91ae4d31ee806cdcec63d53c1794634a7"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-019-select-face-mode.md",
+    "bytes": 6069,
+    "sha256": "7764d1dfd340f1fe75ed77f6c7026d0b20db3687e7ce76fadc7d775eade4feaa"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-020-select-vert-mode.md",
+    "bytes": 6069,
+    "sha256": "d685a5a578fe829520387223a8dae4727be3dd5cc7e7c42a77c54abaeba0ca05"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-021-extrude.md",
+    "bytes": 7791,
+    "sha256": "16f6b7fb69d1bc480b56d56f280019e2328c822e1cc0847a7ffba0ba1ecf1c51"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-022-select-object-mode.md",
+    "bytes": 6055,
+    "sha256": "dba21a68e5fc1a71949d296eab19e5ff71285fa1dff7e12f8c59fd25d2742f5f"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-023-insert-edge-simple.md",
+    "bytes": 8192,
+    "sha256": "9852ca24fa3214ab49abbe8b4afcfab1108f3423481c866c97cb91c17aeb2045"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-024-insert-edge-exact.md",
+    "bytes": 6972,
+    "sha256": "f40b656f375072439d9ae0683216b8002ad8c6915349225515be852da1392fb9"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-025-insert-point-simple.md",
+    "bytes": 7398,
+    "sha256": "6cb471dbc4a22fd5b41445bdee64d798f15749b1d90f7ea356618d0e555766f9"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-026-insert-point-exact.md",
+    "bytes": 7261,
+    "sha256": "b416ede1217c65b7baef66efa3b48d735706af4d975a0f0c3e58fac15f1268f0"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-027-thicken.md",
+    "bytes": 7738,
+    "sha256": "b92151bb0b8333f5645844fa26fdabbbbda2180793557117dab02c1fcb5ca180"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-028-append.md",
+    "bytes": 7739,
+    "sha256": "183e54d4b983be5c541a4232c91454d196ebcbc7d8ffb99ea0c0684a31fb4085"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-029-bridge.md",
+    "bytes": 8172,
+    "sha256": "3d35eb1c3c9e284982cc2278a7c2afec840d0280107573232e78ba60dc33d598"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-030-pipe.md",
+    "bytes": 11611,
+    "sha256": "f710cef336e81e3273203b991a4f92e21793c53e104731ad41f11b49b7b034cc"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-031-fill-hole.md",
+    "bytes": 6370,
+    "sha256": "4118d95709a95a53f3ccf5e0d8025c67fb080c144bf0763cc96fc73b6a54dbf0"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-032-subdivide-simple.md",
+    "bytes": 7265,
+    "sha256": "5bd38f793077156a5cca5a8b7f3f7e95cb750640b7510bff86d6dcde55a4b12c"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-033-crease.md",
+    "bytes": 6824,
+    "sha256": "f013f509a14200be73dbfe1d18b3909b877d418c9815740d2c1d34043a5528fb"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-034-subdivide-exact.md",
+    "bytes": 7284,
+    "sha256": "e7045108fb84ee175f8e39737fc9163a98e7cab73d51d42e3c9720b31595b5ca"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-035-merge.md",
+    "bytes": 6841,
+    "sha256": "9e86cfffdb3309c0044a992d0258da7bd107676db0488de37ca2bcd43fb67da2"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-036-remove-creases.md",
+    "bytes": 6234,
+    "sha256": "065c24b2fcdada32572af7e659f5288626937da91e49baadc71f3f3abdac42ea"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-037-set-points.md",
+    "bytes": 7836,
+    "sha256": "0b6926258c62eb52bcf1574579679e1256efe9418d59cb059d118bbe676d35c8"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-038-unweld.md",
+    "bytes": 6230,
+    "sha256": "b6c380a58eedf2fd4ef0cb9438f8192fe3fe793461c6bb7811e60e0a3e73fa1b"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-039-weld.md",
+    "bytes": 6348,
+    "sha256": "cbbfc998e05c7339edc7f5ced3cc5a228ba8a086cab4c6726081fe8f0d1c1406"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-040-make-uniform.md",
+    "bytes": 6332,
+    "sha256": "61d5b402b3579b15d39304c7eb8b0dedd171148756022950de8331e10a81401a"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-041-t-spline-box.md",
+    "bytes": 9133,
+    "sha256": "aacd88b560dba0b81ad7afeae0315b8364582baf3f2595f2d3ebf3dc9a177542"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-042-t-spline-primitives.md",
+    "bytes": 6466,
+    "sha256": "33d345031cac290644f6e08dfd4b9ec5c73ea038cb80af85cfb604c84143fb87"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-043-t-spline-sphere.md",
+    "bytes": 12136,
+    "sha256": "6690d5380ecdfd15a370964adf041e7a009c06341c1493c6ab396b951cbc2c05"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-044-t-spline-quadball.md",
+    "bytes": 10250,
+    "sha256": "9e3e6337f7a7a5c6b06380f1520a84a3b22a4678a1faed52c46f75eb1a9ff065"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-045-t-spline-cylinder.md",
+    "bytes": 12056,
+    "sha256": "8e9581546f4a95bc5bc476c72b9faf2aa6ffa86318a4625d7435d7804445108f"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-046-t-spline-cone.md",
+    "bytes": 11983,
+    "sha256": "8e95b4472d6b7a28b79c684d104e5e19e63b6e2ad191da390f48f3088688f689"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-047-t-spline-torus.md",
+    "bytes": 11696,
+    "sha256": "5f5cbae80df98bef0b169ec2d1cccb2376e426f551697709636a8950de8e2e49"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-048-plane.md",
+    "bytes": 8135,
+    "sha256": "23bb28eccb099e913c3b7f660f2744cf5671c342540ee4455fa7075c29e4b3c1"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-049-t-splines-tube-from-curves.md",
+    "bytes": 9421,
+    "sha256": "da3b342e037d015257c374f824239f9dc9ca535d2b71edce29dcea841956cddb"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-050-t-spline-bezel-builder.md",
+    "bytes": 10229,
+    "sha256": "c8c01643d9ed6f33ba921d20d6fdbc66febe3233d233488a6e605d0ce310545a"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-051-t-splines-under-bezel.md",
+    "bytes": 9688,
+    "sha256": "0b6df323acb7664cb37bd96e7ce8aed5e135f986024b19803651a6bd5cbd5e62"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-052-t-splines-signet.md",
+    "bytes": 9305,
+    "sha256": "a7a9cbed7f874fa841b6cd9afe9bd1826560f5c621347635c725ceb2d86d1827"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-053-skin.md",
+    "bytes": 9885,
+    "sha256": "1c09699489bdba20084784ed74c5d052b5a432de86170a1cfda206e6f9e03245"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-054-loft.md",
+    "bytes": 8784,
+    "sha256": "974a99824232cb1c49c2dd147a357906c7d9f8edc56e3b57e25955f6a52849c4"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-055-duplicate.md",
+    "bytes": 6346,
+    "sha256": "13e8a6c709e35e6b6c7c5e514d0bb77a85450a51158c3384c715625b262c5818"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-056-match.md",
+    "bytes": 9391,
+    "sha256": "0a91f8f37ae5504e3cf147fd80ec3417dfa4e3aee76e7337680a6b7d9cdd65a0"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-057-pull.md",
+    "bytes": 6726,
+    "sha256": "f99897fa21e94b91e574e50ef8b5da2e6c2ce9314fa90cc31e8490abfd93972a"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-058-selection-sets.md",
+    "bytes": 7409,
+    "sha256": "5443fe2bdbf6b54449fd319ddbeec98f3a5fb7d33d76ae80a07ca4b388750995"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-059-weight.md",
+    "bytes": 6573,
+    "sha256": "57415ad1fffd4bb268d3414480986a4588316f06850b95a73fd476c25d46bf0a"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-060-edit-layout.md",
+    "bytes": 8220,
+    "sha256": "7a0fa27888b59f0a56daaab15db16601a15953beeaafd8ce4aa3985559c4030f"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-061-t-splines-library.md",
+    "bytes": 6735,
+    "sha256": "06d398dcd706d8d8ba5e3579258ab6481b59ddf0be2b990fffa338e9d50950cf"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-062-bevel.md",
+    "bytes": 8698,
+    "sha256": "03b04aa520678d4f4bd6c1e6ff405e036dec009b9b021a0b18d28f1cdf9a09e3"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-063-extract-wireframe.md",
+    "bytes": 6430,
+    "sha256": "fdb3f6a607386ce7a6d4de08520b5a242786d984a593410295d8630e4b29258d"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-064-slide.md",
+    "bytes": 8075,
+    "sha256": "0d9b14019d0c4d29c6deca1852d27faea4999950f2d8064c20c7b1b50fe34ef5"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-065-flatten.md",
+    "bytes": 6381,
+    "sha256": "74608f70f4e05f5344fc6a6b4c8a8d9da4f7a8ca10db2a2b6c632cf49e687a1a"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-066-flip-normals.md",
+    "bytes": 6261,
+    "sha256": "40a2c8825ec66cb119d3a9e9ce7bb740e77889920cc17d57309c047b2a59a769"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-067-extract-edge-curves.md",
+    "bytes": 7013,
+    "sha256": "373f483536c5aead9ba7aad8169af2945782a7e15cf1b5d011bac39d4e5e3080"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-068-retopology-snap-options.md",
+    "bytes": 7056,
+    "sha256": "44c1a24afddd990c141d57d39101b7f49c7c34f9074f67730e9a789c34249a89"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-069-split-curves.md",
+    "bytes": 6874,
+    "sha256": "251232122a9d1c5dcaf4a392551e41214813e2aa0f7583a1be2c724fe79ea866"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-070-edit-uvs.md",
+    "bytes": 8323,
+    "sha256": "68475dd50acb1438580beb343533493a7078fe5bcb5bebef2edb600e5e617fbd"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-071-mesh-t-spline.md",
+    "bytes": 7447,
+    "sha256": "fc5b8d74e1aa0e3bd07d99ca3cab83cb20ef383b0b5386539f34583934f983ae"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-072-from-lines.md",
+    "bytes": 8318,
+    "sha256": "2d1217d9cda26553a12455bcc938e98e9add6770f6e48d332d7abde95adb3052"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-073-extrude-lines.md",
+    "bytes": 8722,
+    "sha256": "ddedd964904eaed807b53b3c0a8c4e1ee2df8312f41be3ad9fe222272ae1f92a"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-074-grow.md",
+    "bytes": 6042,
+    "sha256": "166fbd9c6ef8f5b30f13d78535c2bcc5450bc6d7710bfa0f530931e986d685a6"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-075-shrink.md",
+    "bytes": 6051,
+    "sha256": "5f633f40a37a835bc7b009e73baa16d4ab511285f60d5f4c0343e9810e60c7e7"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-076-options.md",
+    "bytes": 7811,
+    "sha256": "9e7fb01d2930df57b6508013fe8ddb0c575153b4b1155f5bab6789ef582680e3"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-077-standardize-surface.md",
+    "bytes": 6428,
+    "sha256": "d452f4bab2a13a333bb4738fabd2ae8c9c154afa6b8efd15cf774632bdaf0d47"
+  },
+  {
+    "path": "specs/06-tsplines/om9-tspline-078-proxy.md",
+    "bytes": 6384,
+    "sha256": "00ab14b05f9d2b995bb967e9e18aef45dd430af2aee0259bd6735799f019fd1d"
+  },
+  {
+    "path": "specs/07-matrix-art/README.md",
+    "bytes": 1128,
+    "sha256": "8d4336e257c60493bdad4378f2621745a1d6c02f0384cc55417984941c4a50bd"
+  },
+  {
+    "path": "specs/07-matrix-art/om9-art-001-matrix-art.md",
+    "bytes": 7955,
+    "sha256": "14c6d52dde5ac85070e4b0971f843460f34be28f92c86b417f988c4865997ab5"
+  },
+  {
+    "path": "specs/07-matrix-art/om9-art-002-layer-menu-matrix-art.md",
+    "bytes": 7554,
+    "sha256": "9293c2c3f755d4077cacfa99e00b7deb9e17917c07b44da0c8de6ff2e6b9dde3"
+  },
+  {
+    "path": "specs/07-matrix-art/om9-art-003-picture-menu.md",
+    "bytes": 9833,
+    "sha256": "b38b1c894ff810e2e0a5b6b38fc3cae7e18505c8b6d4061fa55d27c92bfd8d62"
+  },
+  {
+    "path": "specs/07-matrix-art/om9-art-004-tips-and-tricks.md",
+    "bytes": 6442,
+    "sha256": "ee11a7cb7c78d27d7bb73927586abaf58cffea8a4e0ddfed7c2700bb98153d3e"
+  },
+  {
+    "path": "specs/07-matrix-art/om9-art-005-effects-menu.md",
+    "bytes": 8509,
+    "sha256": "61e06023e45cb5dbb23be4338984a16a4f1150c2ca656189e9777e051e351dc3"
+  },
+  {
+    "path": "specs/07-matrix-art/om9-art-006-sculpt-menu.md",
+    "bytes": 7058,
+    "sha256": "da3fc6e8f7fbc97ae88b1f387784af4e26015dbb34f92e3765de020a11371cb0"
+  },
+  {
+    "path": "specs/07-matrix-art/om9-art-007-convert-to-bitmap.md",
+    "bytes": 6485,
+    "sha256": "4c173d34511f47983664bb5dd153aa455416af4b28241ca413d9a5d7ab8a48dc"
+  },
+  {
+    "path": "specs/08-builders/README.md",
+    "bytes": 1598,
+    "sha256": "aabb0365f075c1dd95793fdd53f749bbaaec4b4e456856a0d3cb1c9f410417c8"
+  },
+  {
+    "path": "specs/08-builders/om9-builder-001-eternity-band-builder.md",
+    "bytes": 9456,
+    "sha256": "e2eeb9bd886bcb96cfcd2445f0ef8d4e1c1555186efa774d8fd95f8ecb91a394"
+  },
+  {
+    "path": "specs/08-builders/om9-builder-002-signet-builder.md",
+    "bytes": 10516,
+    "sha256": "f0df5ded01b3223652d9c0eec06167e5f7eea23a8571fa3cc243e04291bd14e3"
+  },
+  {
+    "path": "specs/08-builders/om9-builder-003-t-spline-signet-ring-builder.md",
+    "bytes": 8607,
+    "sha256": "4bb570419803defa9b5b97fe61a88dc36a37fd91477e3003c62a7c228623183d"
+  },
+  {
+    "path": "specs/08-builders/om9-builder-004-raised-band-builder.md",
+    "bytes": 9834,
+    "sha256": "7f64d7a4564b55d1effde9ffc56462d06c858db542f98b5428a9b4029c0cf99a"
+  },
+  {
+    "path": "specs/08-builders/om9-builder-005-award-ring-builder.md",
+    "bytes": 16214,
+    "sha256": "54848063c6615eef5e616124077793f65afde97c5d15b9dd5facee8b6a080d39"
+  },
+  {
+    "path": "specs/08-builders/om9-builder-006-knot-builder.md",
+    "bytes": 9492,
+    "sha256": "805ab200a93df621980d7518008f53ef168868c21d4d797e356711ff6483c151"
+  },
+  {
+    "path": "specs/08-builders/om9-builder-007-freeform-knot-builder.md",
+    "bytes": 8470,
+    "sha256": "85c937d3573beba25788011a99e732834013e4e68ae343c261310b08cae21e6d"
+  },
+  {
+    "path": "specs/08-builders/om9-builder-008-jump-ring-builder.md",
+    "bytes": 8355,
+    "sha256": "905d8a95fc9f850fc2f50bbab5a4b0d5012a403ed0f9a39c138ad126d705ec28"
+  },
+  {
+    "path": "specs/08-builders/om9-builder-009-pattern-builder.md",
+    "bytes": 7741,
+    "sha256": "3f8763c86c7315d57f3a54add9613eaa221860ecded085f05beb1a76f2037e31"
+  },
+  {
+    "path": "specs/08-builders/om9-builder-010-nautilus-builder.md",
+    "bytes": 7402,
+    "sha256": "c25e0e5fa203a127cd0f03b577b153b5f189c003db8f7442a9988e0ebb5b8dc4"
+  },
+  {
+    "path": "specs/09-tools/README.md",
+    "bytes": 5059,
+    "sha256": "ebb5d65c023ba5dedaf94b794e20e302509051b2d7f2e9f2065f6413c93aebd6"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-001-ring-rail.md",
+    "bytes": 7927,
+    "sha256": "04cbab9d7bdc90b3557b85c6a16d40f8fed0b1bba0b14d115fe4181420061daa"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-002-profile-placer.md",
+    "bytes": 10677,
+    "sha256": "15506db55bf600c95bbe67f3f010e34415ba767946be12a77844be6f8fa44dac"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-003-outside-ring-rail.md",
+    "bytes": 7841,
+    "sha256": "9fb2761fe1d53a14e5114e1ef1c32c6e19d293c840aad2995472cf196ebc5ed9"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-004-custom-rail.md",
+    "bytes": 7137,
+    "sha256": "fe8e1497a4bc05875455268fe9182e4a734361625df2ad938e710cb95faaf128"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-005-four-rail-profile.md",
+    "bytes": 7706,
+    "sha256": "e70d2d78068e92962e1fcd80819b979931df4c207a01b6413895bf428a0685fb"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-006-metal-weights.md",
+    "bytes": 7440,
+    "sha256": "db22e4ac571f8b492cac54e821c72e02b32b6bb5bffcbca915b0898b64a0f868"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-007-ring-resizer.md",
+    "bytes": 8541,
+    "sha256": "c92efe3a8a06b2f21e328439070fb34a75b089fa48904ce5b3a2958c4d9df270"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-008-surface-pullback.md",
+    "bytes": 7799,
+    "sha256": "8a65b0d950062570745fb51617b4a3c77bbfe31745f924591729f50b6624caf4"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-009-bermark-library.md",
+    "bytes": 6946,
+    "sha256": "0b924560da677dea2b40deb780e551d50f44761b52bbaa381cc5e66a1f1680b8"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-010-stuller-findings-library.md",
+    "bytes": 7595,
+    "sha256": "7ab105146c08dd26e9c48c190a50b79293f15bd158ef05a03956f40174f9e4f0"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-011-smart-target.md",
+    "bytes": 6633,
+    "sha256": "e82250cd289aa33967b8fb02574c4607f68dcc78f14554717481224f8b793831"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-012-smart-blend.md",
+    "bytes": 6386,
+    "sha256": "ce8990905cb718e4ab663811b53c43aa602a5c43e6ed34015b8a9513e7ece5d1"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-013-smart-target-add.md",
+    "bytes": 6574,
+    "sha256": "b6680a90dd33b1a263e6805f90a2449ae6df0a905e61bc4eb7c99940dd88527f"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-014-smart-targets-on-curve-end.md",
+    "bytes": 6474,
+    "sha256": "68746b42b88d980cca205a78ddf3a01faab1a6fba76f2fabd9eb2f63b8f2d858"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-015-smart-msr.md",
+    "bytes": 6716,
+    "sha256": "7d08494e69840c462f7c1c07d7cf2b234000f79517f1a94d3a47b3d0b602d179"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-016-image-trace.md",
+    "bytes": 8951,
+    "sha256": "c47c3120b30ea6f3b2a2aaaa8f381eeae41f4d392a109bcb126b3870d4d1fff0"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-017-join-history.md",
+    "bytes": 6995,
+    "sha256": "f2f6e6233c9e50b4bd64fe946c0db0d2671e05dbea7f0e99ed7fe938a8557d3c"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-018-object-checker.md",
+    "bytes": 6449,
+    "sha256": "ac11679d6f8ad328bdaf7ab9f94c521363ef28635976739194e8fcac3b23f13c"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-019-3d-printing.md",
+    "bytes": 6256,
+    "sha256": "32f18acb504eb807ac59d619c26d2e822bb55fe6c5548a595a93fa7eb914c5df"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-020-mesh-repair.md",
+    "bytes": 8128,
+    "sha256": "229cb56b7eab476285f3ec8b5033a42121fdae9e811b229667e018a7d12c8e54"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-021-support-region-analysis.md",
+    "bytes": 6743,
+    "sha256": "729db50db2a0f47fc7f10365e2cf515bc209c88666b57c06cdcf42b795110d67"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-022-orient-text-on-surface.md",
+    "bytes": 7252,
+    "sha256": "7394e335aafcd37916706cb6519a92f480f510edf6008cfd4f9252ad74e25090"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-023-ring-rail-text.md",
+    "bytes": 7495,
+    "sha256": "dee3759185aff5b497c60b779d5586c21a92022408fd96c2ce0f63536b311579"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-024-ring-support-sprue.md",
+    "bytes": 8001,
+    "sha256": "cbf3aa44cbbd67f61b6c80a8275370d58786b5767c6340d628b576891b1d344e"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-025-support-base.md",
+    "bytes": 6923,
+    "sha256": "15ec5fa72ae04c53decfc5dfdd1b7327541213ecca91617d15e15b49d7c1dfd9"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-026-support-ring.md",
+    "bytes": 9066,
+    "sha256": "aab4df5e92f1499e95484fda313c0e6a5e1d51375a388cdb2aeb4a80598ea6b4"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-027-blend-supports.md",
+    "bytes": 8456,
+    "sha256": "32d61fb4002bd96d17761901124c39454be2062912e4eee49669b2804d6c0834"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-028-cylinder-supports.md",
+    "bytes": 7504,
+    "sha256": "edb714b6dd1f277ebee1068c10a62834d52b3d1b5dca06c873625b7d643ea085"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-029-large-tapered-supports.md",
+    "bytes": 8089,
+    "sha256": "d663c9250adb908b79bc162fa4b3d41cedc28557c16f82c3d257adac4d903468"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-030-medium-tapered-supports.md",
+    "bytes": 7978,
+    "sha256": "760ffa07015a147984688b7596c2e08c003f68db9d678377a3f8852685c49fa8"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-031-supports.md",
+    "bytes": 7952,
+    "sha256": "8a87a2ac15e9498f13c7df0292047daa744d21b5cf301af9d0d983aa64e6c88a"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-032-profile.md",
+    "bytes": 6763,
+    "sha256": "fcf37aa279d594eb1d4c8c280ce2fe8f3a3ea41aa999e5c58cb4316ccc5ed82b"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-033-profile-end-cap.md",
+    "bytes": 6744,
+    "sha256": "aa74d3bcf1642b58005ff3a22b9120bb2214424d27bd48a987baa059ba4a983f"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-034-profile-merge.md",
+    "bytes": 6424,
+    "sha256": "63e5202340369c5e490889704ada66897d1fe1c37921c1b7b74fd40445c53b6a"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-035-custom-rail-advanced.md",
+    "bytes": 8432,
+    "sha256": "8686783959797db4e4b27ee184904bfec3619430315cc4d867cf830b7062d9b0"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-036-object-on-curve.md",
+    "bytes": 10484,
+    "sha256": "90e6aa1cc21782760865e8dac1d0d51e188debbbede5d4e38aedec4dad267fe8"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-037-mesh-reducer.md",
+    "bytes": 8042,
+    "sha256": "5065f7c5d52752b4ddc269a01ae88da823bf073d7cd4aa6b3628e2280aafbf61"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-038-surface-inset.md",
+    "bytes": 8145,
+    "sha256": "a34b7d6104c1ae8acad1aa012aeb9f7b521e1f360d75a46ba9e763c293687aba"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-039-mesh-mapper.md",
+    "bytes": 7285,
+    "sha256": "7d8b0394b4e25314f4fa319bf15510a583b0846072270751455b1f9442ecc481"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-040-curve-transform.md",
+    "bytes": 7343,
+    "sha256": "88d9b710de7cff5d6de8ce673e242d60f61c1fdbe86f550dd32f3d2f3af05205"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-041-boolean-builder.md",
+    "bytes": 9061,
+    "sha256": "09381b1cea81bed51904ca5449c6d123ded340e2981a53d4275f74dcea23efcd"
+  },
+  {
+    "path": "specs/09-tools/om9-tools-042-center-line-builder.md",
+    "bytes": 6707,
+    "sha256": "a8304f7f7d5d526917decd89c4a9a04380401cde4c29d28c97aff7b353680b2f"
+  },
+  {
+    "path": "specs/10-gems/README.md",
+    "bytes": 4359,
+    "sha256": "fc2a0f81e2bb00dc433648c833f71e71b26d5f6349f11a2291cd466bd5cca4fd"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-001-gem-loader.md",
+    "bytes": 9922,
+    "sha256": "e2f3eda62f6722be9fbaeac6b190c5396102454fe9f625701d08b427c711e3f3"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-002-gem-on-curve.md",
+    "bytes": 13848,
+    "sha256": "fd93f40bd0f591c2515350885cd44972aa39c048242e6c3f91835094e7de2983"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-003-gem-on-curve-advanced.md",
+    "bytes": 14803,
+    "sha256": "5cd1412bec59064839dae140b5393fea46e6619b6460d22a864847aa16378393"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-004-gem-count-on-curve.md",
+    "bytes": 14100,
+    "sha256": "e20147e53ebb109b91b165c7ef94f1c93efcf329145b1c12ae004589ff33fc4d"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-005-gem-list-on-curve.md",
+    "bytes": 13832,
+    "sha256": "8eb71b72bbc395c873512e2f3e99c5948ed5af61b50308bc70a7131689c7d4f4"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-006-gem-on-curve-multi.md",
+    "bytes": 12922,
+    "sha256": "5e638d8ab86c731733b7382dfa0b0eafe206f8603763c49c528d3809a35f6508"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-007-gem-profile-curve.md",
+    "bytes": 9833,
+    "sha256": "d42319436de130e54227687e64967d6e82deca75326e4b1546af97543a784fe2"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-008-gem-guides.md",
+    "bytes": 10838,
+    "sha256": "caa74058a513797ac96655259aaef1ac4e046bfb1e2fe9da67d3a0a5a52e75cf"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-009-orient-to-gem.md",
+    "bytes": 7192,
+    "sha256": "8b7c55ad7295f9494d5121eacb57709e168d1d08d17b55551edc855fe51a4ff1"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-010-halo-builder.md",
+    "bytes": 17134,
+    "sha256": "2f2f1cb4024a0ad4211f7b697abff99db495b805e1340ea92872e1559314d15a"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-011-gem-on-surface.md",
+    "bytes": 10012,
+    "sha256": "423b1c8a15ccde3b292f0b4ac4d3664520a3b7aeb5c3a5cbc6c57321eed25ca4"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-012-custom-gem-builder.md",
+    "bytes": 9909,
+    "sha256": "5b9b740d86b14b5df6b8653311c18b4944c13e0f347b292771714f498e77f4ed"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-013-emerald-builder.md",
+    "bytes": 10481,
+    "sha256": "8f2485d572d548c745d68938e7e797f9e06daf2f1170baf7e5ad9db9820aa776"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-014-baguette-builder.md",
+    "bytes": 10367,
+    "sha256": "f1f4dd87d51d234b28338d42881c7ce17afad4e20d1d30e2b70e18160288732f"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-015-baguette-channel.md",
+    "bytes": 9176,
+    "sha256": "febb2cdc0dfa40077e56c4ad8d7b6b50c1ccf97c4258f31aa3425ab1bee02ab6"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-016-gems-between-2-curves.md",
+    "bytes": 7753,
+    "sha256": "4bcffcb892a1841b25081187ca2b015a517d6da01bcce52f873509454e217656"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-017-cluster-builder.md",
+    "bytes": 14647,
+    "sha256": "3cbdc9171dbe7fd9d4b389fdd2a55a46b59d8d4495a2fd63d87c2e08568b8f51"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-018-gem-map.md",
+    "bytes": 7138,
+    "sha256": "faf76d76a20c52d9966ef85325abdb8824e0b9f4a27d5f106f7c182394310a70"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-019-gem-reporter.md",
+    "bytes": 7715,
+    "sha256": "1c2d0c04a2f799d9004b4e7673075cfb6592cffb2cce15eec7de3c54b6d397af"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-020-auto-pave-builder.md",
+    "bytes": 17950,
+    "sha256": "2aeb0de18484567b03a48d0f2dab356aaacf75fdcab7f271e6f9c28550dd654d"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-021-pave-builder.md",
+    "bytes": 9237,
+    "sha256": "5bec351105f41e9a5c2c4c5737c962003fcf2c00a9a87068b7f509d927ee0d26"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-022-pave-azure-builder.md",
+    "bytes": 9442,
+    "sha256": "c7cd19d195bf5cd7833e5b4ca71f9da5105c5b1d479fc37f6d2f5b71ce542908"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-023-pave-prong-builder.md",
+    "bytes": 10129,
+    "sha256": "ef97aa48bbecc740f180edfe8694f8637ce3468122f34a9a081c8edbc0665b38"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-024-gem-follow.md",
+    "bytes": 6584,
+    "sha256": "6161e02f96416a6a92934a289d18757752f471c1beeb5bdd1b3bf50fb64d7c24"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-025-gem-springs.md",
+    "bytes": 7082,
+    "sha256": "69023d76b7e2235e65b6cc0b8212933edf3e5d993bffe3d1b4b7989b5aedb884"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-026-gem-control.md",
+    "bytes": 7832,
+    "sha256": "da97c21ef9a4eb4f6834088ff41c9897741f945c8b7b873a1be163975ae38909"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-027-match-attributes.md",
+    "bytes": 7625,
+    "sha256": "327cb77a6f3297a220bd1736ddc8956e03d134e435e491f1be9813494d6bd77b"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-028-save-styles.md",
+    "bytes": 7361,
+    "sha256": "b4a9cf24cab1a8fd12bc49e3031d82d73976d1e57cd65ce2a80429eadac0ced6"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-029-gem-flow.md",
+    "bytes": 9505,
+    "sha256": "ea484a4da14491529fbf193ffce4bf85cc0c1804e157cd5407ab04ecf0c44bef"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-030-load-styles.md",
+    "bytes": 7047,
+    "sha256": "167e46b1cf7be4af565bc20ccb51001c5c6649b31a8fbc8159f27a0f4feddfd3"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-031-gem-splop.md",
+    "bytes": 6913,
+    "sha256": "5bfeccb2484802fa571ca239b40d7a574dc3d30d7fe80c2a2785fd6258766da0"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-032-pave-sphere.md",
+    "bytes": 10300,
+    "sha256": "b52cf77a4c3f60d57b19cfc7f065d6f27b7e189d50fdd60067a08a115a8eb3a7"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-033-gem-positioner-msr.md",
+    "bytes": 9460,
+    "sha256": "5693069a9ab7b99f58a84b3d0e18dc6873e8db3954d1390a4b04eccd2ffef924"
+  },
+  {
+    "path": "specs/10-gems/om9-gem-034-gem-update.md",
+    "bytes": 6334,
+    "sha256": "d600aaa02989de4c0c8166244ffd9381fe5dafeb19c14dbefd290caae7ec2611"
+  },
+  {
+    "path": "specs/10-gems/supplement-tapered-baguette-between-two-curves.md",
+    "bytes": 1808,
+    "sha256": "9045e02c427b44e9876bce355ee5af8b54d40d953cb590c8cda96acdcb7267dd"
+  },
+  {
+    "path": "specs/11-settings/README.md",
+    "bytes": 2017,
+    "sha256": "2b56d8d094161121cf68b575135a2817fa79bac60258dd8a39b8e57588e3dc7c"
+  },
+  {
+    "path": "specs/11-settings/om9-setting-001-head-builder.md",
+    "bytes": 18077,
+    "sha256": "6b0d95e19b6354a5688ebb94fb9f286be71c565d27406ce2d26d378f6585a92b"
+  },
+  {
+    "path": "specs/11-settings/om9-setting-002-bezel-builder.md",
+    "bytes": 12683,
+    "sha256": "2074ea1a993cd5744757c84296b3aeda4f6cfc9de07364a022efb85a75016b40"
+  },
+  {
+    "path": "specs/11-settings/om9-setting-003-t-splines-bezel.md",
+    "bytes": 10585,
+    "sha256": "c08a4151b5931bf19cf2cc3c8c8e64e418ca1dd354d5a275ee2a40794557bb44"
+  },
+  {
+    "path": "specs/11-settings/om9-setting-004-t-splines-under-bezel.md",
+    "bytes": 10070,
+    "sha256": "a59bfb1309be73df27ef2b9d1cbe1f7897f156971b07bc27fcca110026ba2a19"
+  },
+  {
+    "path": "specs/11-settings/om9-setting-005-pull-object-to-rail.md",
+    "bytes": 6548,
+    "sha256": "3de2a9d283737508435ff4b9e7c162b587abbad17a4cce840b58aa213fdb5e1f"
+  },
+  {
+    "path": "specs/11-settings/om9-setting-006-scallop-bezel.md",
+    "bytes": 11950,
+    "sha256": "d7e5d316d7e3e2785dd540a8a6121e3aade184e54c34f5788497d48fd4322af0"
+  },
+  {
+    "path": "specs/11-settings/om9-setting-007-prong-builder.md",
+    "bytes": 11696,
+    "sha256": "b5af760d4a556a6e5b1414ddb051a332f974a74557a0dfe4d1184e5fb0b039a2"
+  },
+  {
+    "path": "specs/11-settings/om9-setting-008-prong-editor.md",
+    "bytes": 10062,
+    "sha256": "90f732abd957d3298e1707389576ae738e39511a837cb1976a1952de3f4101a1"
+  },
+  {
+    "path": "specs/11-settings/om9-setting-009-prong-on-surface.md",
+    "bytes": 9457,
+    "sha256": "24e656bc34f67877c0bdbca9214e68afe12ee5715d6a16a077ba7c9c35cdab2f"
+  },
+  {
+    "path": "specs/11-settings/om9-setting-010-bead-on-surface.md",
+    "bytes": 8938,
+    "sha256": "636f86011c67357a944f77d9efaedf3da9d1f2f91d99826e15b1afe8e9d372ea"
+  },
+  {
+    "path": "specs/11-settings/om9-setting-011-metal-from-gems.md",
+    "bytes": 18033,
+    "sha256": "fc86c66fa21fb6718c723382ca06bb6b56ff901403db94764d40256c9d7c8d32"
+  },
+  {
+    "path": "specs/11-settings/om9-setting-012-bead-on-curve.md",
+    "bytes": 13744,
+    "sha256": "2bed7717c9b56da281d88e03e49eb5d25a3df56466a01781ad39dd4852515b1f"
+  },
+  {
+    "path": "specs/11-settings/om9-setting-013-channel-border-curve.md",
+    "bytes": 9610,
+    "sha256": "4703749d280f2dafc5aeda6012daa30e634a5fd0712e40ababba866b4a5c587a"
+  },
+  {
+    "path": "specs/12-cutters/README.md",
+    "bytes": 1808,
+    "sha256": "dba2d04959acc01e4c47bfc50947cd8c374e1d61d59db742df4bf8a2e245bcfc"
+  },
+  {
+    "path": "specs/12-cutters/om9-cutter-001-gem-cutter.md",
+    "bytes": 17127,
+    "sha256": "dba2196cb614cfda4a77a322a746bdffddcb85822e222c71505dc31732f91383"
+  },
+  {
+    "path": "specs/12-cutters/om9-cutter-002-gem-cutter-library.md",
+    "bytes": 8301,
+    "sha256": "bfe98087a718dbbb226f4668e43f753635b223967b18ec929a94eb47da698b88"
+  },
+  {
+    "path": "specs/12-cutters/om9-cutter-003-channel-builder.md",
+    "bytes": 13302,
+    "sha256": "de833c660d97c2ddb66fd559de395e327d6721a8c45dc89e38dca10540c91970"
+  },
+  {
+    "path": "specs/12-cutters/om9-cutter-004-micro-prong-cutter.md",
+    "bytes": 11849,
+    "sha256": "80a99aadb55aab16cb7fb797e2fd0f13c474b59117191fae7815e7a8a4c69b75"
+  },
+  {
+    "path": "specs/12-cutters/om9-cutter-005-bright-cut-channel-builder.md",
+    "bytes": 10651,
+    "sha256": "ea0dc64e50118975ec7b04b0cac4892f56f6180f58cd08f028d05010ff09ced1"
+  },
+  {
+    "path": "specs/12-cutters/om9-cutter-006-bright-cutter.md",
+    "bytes": 9630,
+    "sha256": "f901df5ddbbb0898e68d5bc07a4f6017181c8d612ce87422e9bf27de0188a4cb"
+  },
+  {
+    "path": "specs/12-cutters/om9-cutter-007-bezel-cutter-builder.md",
+    "bytes": 11963,
+    "sha256": "292e80c3be55e93096c9a1b823eaa6151f8a8fc7904aa1f8e5afd8d5b1ccd0fc"
+  },
+  {
+    "path": "specs/12-cutters/om9-cutter-008-cut-to-finger-rail.md",
+    "bytes": 6523,
+    "sha256": "15b4c8bf29e18cc014d2668dd1bbd31d5adb3be25367a277b2266031a69f8cca"
+  },
+  {
+    "path": "specs/12-cutters/om9-cutter-009-plane-and-cube-cutters.md",
+    "bytes": 6965,
+    "sha256": "92c75eca92287c55265b29c20633dca6f6e3c3f81f48311716976e2c137f118c"
+  },
+  {
+    "path": "specs/12-cutters/om9-cutter-010-boolean-builder.md",
+    "bytes": 11260,
+    "sha256": "6136788b1e08c6587737cdad2851c4024568ba6af0bfcac1a184a5de1e15fc64"
+  },
+  {
+    "path": "specs/12-cutters/om9-cutter-011-quad-flip-routines.md",
+    "bytes": 6693,
+    "sha256": "785ece1c8070b99f71a08742d825307915757510ac625401b97cc6ba2a86a557"
+  },
+  {
+    "path": "specs/13-render/README.md",
+    "bytes": 3939,
+    "sha256": "963af146badd34712db93d57920caa6de5d1d6266a5f53e2d2bb048a4bcdc0e5"
+  },
+  {
+    "path": "specs/13-render/om9-render-001-ground-plane.md",
+    "bytes": 6512,
+    "sha256": "f0229ad90d22a40cb6e88e0b74c06c68a1c1020f9be0f02c08da22efbf009387"
+  },
+  {
+    "path": "specs/13-render/om9-render-002-render-button.md",
+    "bytes": 6897,
+    "sha256": "5981d990587e9a1dd022ae189ebdf65613e0e05318fedca675e30326bfb1b7d3"
+  },
+  {
+    "path": "specs/13-render/om9-render-003-resolution-amount.md",
+    "bytes": 6653,
+    "sha256": "8624ccc1ac604381fa8fccf169a02db035d61e8af11fcce07ba763810777eabb"
+  },
+  {
+    "path": "specs/13-render/om9-render-004-show-vray-frame-buffer.md",
+    "bytes": 5912,
+    "sha256": "d74b947fbfdcd43edcbba7426082c69a70e631912bfb311839be309e509978b3"
+  },
+  {
+    "path": "specs/13-render/om9-render-005-choose-a-style.md",
+    "bytes": 6595,
+    "sha256": "6874ee0350dfd743e8a9ac04a5daf2797cbb2d2dcdf5f0243354e662352fd299"
+  },
+  {
+    "path": "specs/13-render/om9-render-006-export-vray-render.md",
+    "bytes": 6707,
+    "sha256": "bb7624435df5383b11d51a985147290e8b64043f6c5b123586e13d83b2f4a261"
+  },
+  {
+    "path": "specs/13-render/om9-render-007-native-vray-controls.md",
+    "bytes": 6049,
+    "sha256": "0e7af2d848021b83998354a3a834cc1388002dfa213ff5619668f1463a0cf075"
+  },
+  {
+    "path": "specs/13-render/om9-render-008-material-editor.md",
+    "bytes": 36881,
+    "sha256": "cdc8410e1222076897a21d30600af830ef66d43552e66ef2b8240cfd63ffaa9a"
+  },
+  {
+    "path": "specs/13-render/om9-render-009-create-spotlight.md",
+    "bytes": 7722,
+    "sha256": "00c8934f0b2e3a582289cae10615ece554d67d5694c5fdf4f218c65f2b32e6db"
+  },
+  {
+    "path": "specs/13-render/om9-render-010-create-directional-light.md",
+    "bytes": 6185,
+    "sha256": "c3c3c6743db0ff477b45815cd26e499f59351b30b309b53a0f2fb5f9dee05427"
+  },
+  {
+    "path": "specs/13-render/om9-render-011-create-point-light.md",
+    "bytes": 5955,
+    "sha256": "027655e8605f7f5d89570a6daca2c87c73aa65d1dee17c9245d17761d3fbad7f"
+  },
+  {
+    "path": "specs/13-render/om9-render-012-create-rectangular-light.md",
+    "bytes": 6819,
+    "sha256": "314c4b2f048a7497f0a52a7dcb88feadecdd20e672da94fad66be977415db22f"
+  },
+  {
+    "path": "specs/13-render/om9-render-013-set-spotlight-to-view.md",
+    "bytes": 6132,
+    "sha256": "af9e279afb4fc08fc8958eba263604af15e032deff7b672789e053fcdbb1edb0"
+  },
+  {
+    "path": "specs/13-render/om9-render-014-create-linear-light.md",
+    "bytes": 6117,
+    "sha256": "4621e096bd8ea07e8ee25019944f3a56a99b5aeac826997822d5e6d026496161"
+  },
+  {
+    "path": "specs/13-render/om9-render-015-props-library.md",
+    "bytes": 6269,
+    "sha256": "5b0852bf32aa78c4442e4cf3fb4faace97b63876bf5efc2b3a45e8fb6ac00d7e"
+  },
+  {
+    "path": "specs/13-render/om9-render-016-set-renderer.md",
+    "bytes": 6300,
+    "sha256": "79782b63486c8d6458562fde71d24241315a8f54c62097ddd0a59325c2d7b228"
+  },
+  {
+    "path": "specs/13-render/om9-render-017-apply-edge-softening.md",
+    "bytes": 7525,
+    "sha256": "83f571c6749a881bbf15eb7ab0581ad5711f2dc15eddd86245aef000a350c637"
+  },
+  {
+    "path": "specs/13-render/om9-render-018-environment-map.md",
+    "bytes": 7284,
+    "sha256": "ba097c7893446c1d2cc3a16f60d91d670d9b69fe50b5116fe7b6fa61a1a00a61"
+  },
+  {
+    "path": "specs/13-render/om9-render-019-animation-builder.md",
+    "bytes": 8779,
+    "sha256": "0450476dae88d4c6bcc8e9a98ec02aee81b17b68e50fef8ac1e00c921c693ead"
+  },
+  {
+    "path": "specs/13-render/om9-render-020-animation-builder-advanced.md",
+    "bytes": 25359,
+    "sha256": "e1691098aab22b7c7121a1cd764279a433de8628726105034e67c6672b87c1f6"
+  },
+  {
+    "path": "specs/13-render/om9-render-021-matrix-movie-maker.md",
+    "bytes": 11527,
+    "sha256": "f6afbd70da5cbe7b011f9507c27f83222170e7b5bb23a0448610030b8afcb66a"
+  },
+  {
+    "path": "specs/13-render/om9-render-022-render-editor.md",
+    "bytes": 19934,
+    "sha256": "3f0831a42977493fc5a7e3cca55e3df832167436865d73f77f3e28b35ed474fd"
+  },
+  {
+    "path": "specs/13-render/om9-render-023-batch-render.md",
+    "bytes": 6998,
+    "sha256": "771cc6cfdbd532626ea3fdf6f15366d5ce2272d0137b243f608e4a34fc9c85e7"
+  },
+  {
+    "path": "specs/13-render/om9-render-024-layout-tools.md",
+    "bytes": 18252,
+    "sha256": "fa312d7d962ebf17dd5f8cccfff166878ade5411286fd0da8b975a863a27f39d"
+  },
+  {
+    "path": "specs/13-render/om9-render-025-4-view-capture.md",
+    "bytes": 7564,
+    "sha256": "9daedc16f8b9f032a7dcc95e2a8dc4ddfd71dbc6441b0543b4ad5e1d5d825718"
+  },
+  {
+    "path": "specs/13-render/om9-render-026-render-scheduler.md",
+    "bytes": 8696,
+    "sha256": "a2f13c3c22bd2241aebc79f017866a3679d13819505c023925f5883e65173f04"
+  },
+  {
+    "path": "specs/13-render/om9-render-027-alpha-erase.md",
+    "bytes": 7406,
+    "sha256": "ec257bfaa4a3cfc3d733fdaf858c17ffadb12afdaec9a044463a62493827fe53"
+  },
+  {
+    "path": "specs/13-render/om9-render-028-apply-displacement.md",
+    "bytes": 10088,
+    "sha256": "2c1bd2ed86a3653fabd616d420c0b961b6047d5b5a91a578759242e893418372"
+  },
+  {
+    "path": "specs/13-render/om9-render-029-saverenderwindowas.md",
+    "bytes": 6650,
+    "sha256": "7a925c1bc5ab324542951972c28230f2324253ae86a5a5406f57838a5cedf20d"
+  },
+  {
+    "path": "specs/14-subd/README.md",
+    "bytes": 7095,
+    "sha256": "b210cc8fd75b1e792270ca048b3cf1c2e1f3d2141993f24862073a7eb8260a3a"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-001-clay-edit.md",
+    "bytes": 6090,
+    "sha256": "a57be5a5b21de3ba762e8805aa1dbcd3010cb4b0c6c84f0cffffec52d4a36143"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-002-gumball-modes.md",
+    "bytes": 7029,
+    "sha256": "645922a93372b32407d76ab68534296bf83f1abca592213f2d69d94dfd9a4386"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-003-selection-mode.md",
+    "bytes": 6238,
+    "sha256": "6f277b8c3d7413c9785789659df4e2f8b949991791ae36853ef6352d498bcbd9"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-004-hot-keys.md",
+    "bytes": 7132,
+    "sha256": "ff0e8f31ac8842e8569320fbaadec88c22a24d11255bbd240d5342ca2ab979fa"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-005-points-on-surface.md",
+    "bytes": 10192,
+    "sha256": "b980305432ab2e88ae2ed379c6b6cb0a8b32a78b2f722c2dcbe8f764f84cb43e"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-006-clayoo-divide.md",
+    "bytes": 6253,
+    "sha256": "8bb3fa947b571f35ace1eb098c4676bd08e3f99f055fd3b9015fd01be2c0060f"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-007-visualization-mode.md",
+    "bytes": 6187,
+    "sha256": "5a3939f550ee5528f8bb05cfff6817c75d6350fb6f6f605b0d1369deee12156c"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-008-inset.md",
+    "bytes": 6503,
+    "sha256": "21291b7d0f7e7b10a10e3b6774cde6da88a7eda5858c25717445dedbf48d54f8"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-009-split-sides.md",
+    "bytes": 6322,
+    "sha256": "eb91c93d68d0af353ed08c50c153418bed161baf730ab8a0f19ea408471e41a8"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-010-clayoo-extrude.md",
+    "bytes": 7982,
+    "sha256": "e85879a95746acc8ab39bf98a4c57c78723ef82d58396d0013afc4485e56e83f"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-011-clayoo-knife.md",
+    "bytes": 6728,
+    "sha256": "7a71ef3f2d9c5cc2b8fe96f28698798ba81709f1f6929d1ad52a1273dafd459c"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-012-clayoo-bridge.md",
+    "bytes": 7745,
+    "sha256": "3e35ff290cab44a967ae04dcdb690c5a4f23629455423703e03797217a73bc61"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-013-clayoo-offset.md",
+    "bytes": 6275,
+    "sha256": "489d2867ee88fe3f66bf1fe475050a764dd65732431bc0fed4ac0332abd8039e"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-014-append-face.md",
+    "bytes": 7802,
+    "sha256": "8940544cb235f6a3e56046a10cb4c9c2e5fc984c339e583a2d785258f2317450"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-015-clayoo-pipe.md",
+    "bytes": 9068,
+    "sha256": "2a43149bcba23a7cf22ac5040feb9905697040a0dfa56b9d659a180da66c23ea"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-016-clayoo-bezel.md",
+    "bytes": 8406,
+    "sha256": "9085b05688d8f9a5b0fb655a8c591cece8dcd21ef9ca4c95a234e9695ac2775e"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-017-clayoo-ring.md",
+    "bytes": 11089,
+    "sha256": "089a518f5a47a31ef707db23e923d804660094704cc1ffa504c2ab3ab8e5425a"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-018-clayoo-signet-ring.md",
+    "bytes": 10654,
+    "sha256": "f623be89a58663ba0e7a8f01a503b68166af2d7a4c8f7aa8c997fa0dc4ca7949"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-019-clayoo-project-to-plane.md",
+    "bytes": 6932,
+    "sha256": "99812ab572733025b8461d2c6311d1af7be1ff9e6060b3ca1ed646b36e15f848"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-020-crease-edges.md",
+    "bytes": 6271,
+    "sha256": "9cc9170624850481efb466099f988ed02b2162467f91b07195935a43aa5ba04a"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-021-uncrease-edges.md",
+    "bytes": 5884,
+    "sha256": "cd1a1ff96ffc61a02b9c7a433ae4785ef5e141994734f80d36ac37ce67836898"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-022-collapse.md",
+    "bytes": 6036,
+    "sha256": "5cd6f30a78bd62fed60a449b3f8c64b61ffa345f8bab585794d2c755c9d8990b"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-023-match.md",
+    "bytes": 8056,
+    "sha256": "b5ac65b2f9377d7e1a276e7832bdc14e58bbf1f6ae6f47aea726176e04f07ef7"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-024-clayoo-symmetry.md",
+    "bytes": 7324,
+    "sha256": "b1a10af45443559cf25123c929782ddf8969a88b3f6816c3d5e6d4dda5f1aba8"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-025-weld.md",
+    "bytes": 7044,
+    "sha256": "0dc445e71711499bf38c521507f4077ec57a254f912bf8068ae42742eaa55c06"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-026-clayoo-box.md",
+    "bytes": 8177,
+    "sha256": "be6dd2128dbefea4588e435f1f019bac0d311da4c0f4fa0a98cf3bc3a125645f"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-027-clayoo-sphere.md",
+    "bytes": 7460,
+    "sha256": "ac3cfc98ae03d25cac89d2c57edacd8ae4d5e99fb0d0f0fa3060dc5a49a84c0a"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-028-clayoo-cylinder.md",
+    "bytes": 7811,
+    "sha256": "5d7f4261a8ea3fcd108c98980dd1de4fcdc9f371035f7cbe26c9b6ba4b1dcb97"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-029-clayoo-cone.md",
+    "bytes": 8111,
+    "sha256": "320e587d55c4553697bb7df9ab16ac73e391f716135f8dffce5050a2812f69cb"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-030-clayoo-plane.md",
+    "bytes": 7305,
+    "sha256": "c3e9b8e8d7e28020421e714b57a5911800079c511004f4d54d707799208afc03"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-031-clayoo-sweep-1.md",
+    "bytes": 7706,
+    "sha256": "f17664d97dafddf0b54cb712e9b313c5180f0d3e801aa766646eba657f538bf8"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-032-clayoo-sweep-2.md",
+    "bytes": 7660,
+    "sha256": "7e3a0dd54aef64c81027d7c797d090de71b43e6b381f7d0dc65286afa7385e64"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-033-clayoo-loft.md",
+    "bytes": 7947,
+    "sha256": "2068395d5a68ceeab1a2de3d618cf1c45f42f17cb754947ccdcc28d1ffe9346e"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-034-clayoo-wrap.md",
+    "bytes": 7290,
+    "sha256": "f91d72fcb33529e67df04346d3265e9427c54ed441ee651aab14a3e5005bb510"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-035-clayoo-revolve.md",
+    "bytes": 8034,
+    "sha256": "ab2c463886fe887adc652682e8492a6bf3519319a3f90947de51a152d399d617"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-036-create-by-curve.md",
+    "bytes": 7728,
+    "sha256": "74379a30924afb5ac6425820c2b68029aef45bf529a03173a5966f5ba0bd1ee7"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-037-create-by-two-curves.md",
+    "bytes": 8052,
+    "sha256": "80cac0c4090b56f7df8851e4ebdcaa60f4322a002852b98ba89d3f11947d33ee"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-038-clayoo-extract.md",
+    "bytes": 6214,
+    "sha256": "b8a89c64b0ea01a27f41f9314128f6c3015bdeb5ae34eb502d5a13538b34c966"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-039-clayoo-fill.md",
+    "bytes": 5990,
+    "sha256": "118e5b711764f12b0eb77e345a0a9869b3e9366781ced4a5bfba734197f9f55b"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-040-clayoo-shell.md",
+    "bytes": 6392,
+    "sha256": "9af2a6f3d52527be92d812a1c94e18af520a3421979f4d459eb8362b6a1caec4"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-041-clayoo-flip-normals.md",
+    "bytes": 6090,
+    "sha256": "2848f100b72aac0c9cf3e55b64fe418216c728e9569d48e8a2ee7730974b17e9"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-042-convert-surfaces.md",
+    "bytes": 7046,
+    "sha256": "b4a86c18da74d9351434c2bd5845236b65a607e0cb980a62a776789f27e20c2b"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-043-convert-tspline.md",
+    "bytes": 6008,
+    "sha256": "a004dd4c1a4ea06cf31c40b8d4e65f167173d2bc429fb65c0c911af18a923b1b"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-044-convert-to-nurbs.md",
+    "bytes": 6384,
+    "sha256": "f1b285780b34cb06391ef5321747186b86357dd3a284c029f8d8247ee5e50e50"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-045-create-by-mesh.md",
+    "bytes": 5989,
+    "sha256": "ee8f25d196376905e6380da0e1c46a0ed114d7e6d25da7b677dad9d079eaa4d5"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-046-clayoo-sets.md",
+    "bytes": 6215,
+    "sha256": "37820e2b3eada2d80a20a321272563438ae744e6d1e13398cfb3806612492e4f"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-047-clayoo-loop-selection.md",
+    "bytes": 5905,
+    "sha256": "ea1c9265723d9aeb4dca3ab5f93182c030a5f5fe44ce2cf8491129ad47cf9c23"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-048-clayoo-ring-selection.md",
+    "bytes": 5847,
+    "sha256": "120d5a061b5c3461fb6a661943c59aa549eac443ec26de7ecd177b68f56ffdf3"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-049-select-u.md",
+    "bytes": 5833,
+    "sha256": "c7dc4afd2ad55bb531e25d3157d3c1660201b81a7ef8ad29fa93767cdbfd8e75"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-050-select-v.md",
+    "bytes": 5793,
+    "sha256": "e9edf984bb83ecf6dd707a6b21ce2771bb0099ea9e40ab29451a11d9dba784d9"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-051-clayoo-paint-selection.md",
+    "bytes": 5888,
+    "sha256": "b645d65f82f8e17cb0a0e3b99ec9d966dfcd0380b7111f3e582068d11e35090d"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-052-clayoo-select-all.md",
+    "bytes": 5823,
+    "sha256": "b767f52f0780b4ce0e4be1315c795963d7a004d6d90bbc404075d998ba10ebd4"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-053-clayoo-select-none.md",
+    "bytes": 5780,
+    "sha256": "b591f36386ec7e30e9024345f7133ce23c363ed26fb8de5fc81dd3998ac4888e"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-054-clayoo-invert.md",
+    "bytes": 5784,
+    "sha256": "023f6f24a0f45e0406630a5219e376143357623b31ae0a48c713431cdfdd48f4"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-055-clayoo-selection-grow.md",
+    "bytes": 5843,
+    "sha256": "9a1e67c6b9cdaa8c056a515de342f4f9487388bb29d9ac9d990f9ec815f94329"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-056-clayoo-selection-shrink.md",
+    "bytes": 5846,
+    "sha256": "b00981e96fd5f9819367406777976a106aa8e6ac14a624e1755b591db977b86d"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-057-clayoo-select-crease-edges.md",
+    "bytes": 5927,
+    "sha256": "5f5d3edfcdf85b02ea8adfd366a6680e9656dd27ba4b09ebdb9b47cb3139981a"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-058-clayoo-select-naked-edges.md",
+    "bytes": 5891,
+    "sha256": "58d1a447bfca26bb449369291ea49674d46dfadc3b12ad9ebc447960a045f7c9"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-059-clayoo-select-uncrease-edges.md",
+    "bytes": 6013,
+    "sha256": "44cf85dea9e924ac53b3cd8f8eab0e81e4bde1568c425a2206513e202401a8fc"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-060-clayoo-library.md",
+    "bytes": 6453,
+    "sha256": "7f84c554c4de160b9b54a3e31324f4f2fddb4be101aca8735a62c53eae86455e"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-061-select-coplanar.md",
+    "bytes": 5952,
+    "sha256": "332a38fd7b7d704b6b10ca278f1fc17f3dd8577fdde7e61414df0eb8c92e8acc"
+  },
+  {
+    "path": "specs/14-subd/om9-subd-062-subdivision-level.md",
+    "bytes": 6263,
+    "sha256": "c416e1bd0355857dd11424fb2863dd02b91ec01a5c31d90af9472cccae0854c9"
+  },
+  {
+    "path": "specs/15-emboss/README.md",
+    "bytes": 1860,
+    "sha256": "314fc364dee6f93a3e0a8dd66ec3bc9d74d7e2917a9dfad557a4177697fd44f7"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-001-emboss.md",
+    "bytes": 9616,
+    "sha256": "ddcc6cfa2b69538014be290fb771d0bcf9b6936a1ae02254af268802788edc43"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-002-by-profile.md",
+    "bytes": 8907,
+    "sha256": "aa2446975accb2a0cf1f2f7c73f288e09aaef7ce4a4b409de184bdeb8dfb5313"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-003-extrude.md",
+    "bytes": 7543,
+    "sha256": "57ea888c0d08126e4beededed2eb83218ba0e9353c4bee3629827b01af4209ac"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-004-base-on-geometry.md",
+    "bytes": 7055,
+    "sha256": "659ff7faba91374ce1b6ea64da4efad2bc8e36a9bda7c4f4129ca6528ac25570"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-005-revolve.md",
+    "bytes": 6894,
+    "sha256": "6d1ff7c7a2e5aa4dec9090bf9f495d9433953e1297c047b94ae65e0c7be5dbe5"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-006-texture.md",
+    "bytes": 7525,
+    "sha256": "550efb75b8d9ac7fa31c591c17a252452d3753f8b161d8d3a24539fc731c8108"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-007-stamp.md",
+    "bytes": 6814,
+    "sha256": "1b3f34df52404890bbaf11471ff50b953709ed22315f050dbe4daaae6c585758"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-008-carbon-copy.md",
+    "bytes": 7220,
+    "sha256": "2b1d1446e97a67fab4150aa7fce5b7ddadb6cc4222da59d9b7075227999489d9"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-009-carbon-copy-by-brush.md",
+    "bytes": 7045,
+    "sha256": "7f60d9e9e42a43f0d185e7bb96446f5759b2ed809313ccfbdfecbea3a91dd75c"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-010-brush.md",
+    "bytes": 7326,
+    "sha256": "b39979ec513058cb0a919db98e6b87a599bed904e356624fd4188dffda53bb59"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-011-smooth.md",
+    "bytes": 7002,
+    "sha256": "9b415859fd737bb919126deac2d15327c7976ceccd073d77cddbc9c5eb6aa4e4"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-012-sculpting.md",
+    "bytes": 8086,
+    "sha256": "cc5c8d2f795989cbaba915bde515661d90f45bd56b233df8a5cf869d46be9342"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-013-heightfield-image.md",
+    "bytes": 7629,
+    "sha256": "be8e2411dad9af9f65e3c5190d67bd1958a18db6a96a7a74103be3283f78a4ef"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-014-clay-emboss-resources.md",
+    "bytes": 6513,
+    "sha256": "0822442de666498869d24104d929f624149461cd5122bb74248085a387710386"
+  },
+  {
+    "path": "specs/15-emboss/om9-emboss-015-decimator.md",
+    "bytes": 7239,
+    "sha256": "96a3813de28d71c8e2e5802218423f0d84d971dc84cc1e34796ef97232c7d6e8"
+  },
+  {
+    "path": "specs/16-matrix-tools/README.md",
+    "bytes": 1372,
+    "sha256": "853f5aa73bd94e21e4b0a96da7921b46f399cea50251b583ebaf62857ee7993a"
+  },
+  {
+    "path": "specs/16-matrix-tools/om9-matrixtools-001-smart-pattern.md",
+    "bytes": 14706,
+    "sha256": "866ef450e2556ed0a5d1ab42c4a5c5f6674b91862116dc0902fb5b1bad9b6994"
+  },
+  {
+    "path": "specs/16-matrix-tools/om9-matrixtools-002-texture-builder.md",
+    "bytes": 9046,
+    "sha256": "cd91964f0595f7a606e8ac37527e598c7d995f2383fd553b78925a79036aaede"
+  },
+  {
+    "path": "specs/16-matrix-tools/om9-matrixtools-003-rope.md",
+    "bytes": 8245,
+    "sha256": "a6fedbca5a97cecae8580a2d2d81bdefa191f38331194851b0c79c86ecc288fa"
+  },
+  {
+    "path": "specs/16-matrix-tools/om9-matrixtools-004-text-on-curve.md",
+    "bytes": 10127,
+    "sha256": "1ab475de4e91beb92bb864b845d29a5b0fb1ea58f3092c5c06d5999bac5e25a9"
+  },
+  {
+    "path": "specs/16-matrix-tools/om9-matrixtools-005-styles.md",
+    "bytes": 8014,
+    "sha256": "fb77f88af18eaccb5c4f5f3b9b8855a934ae0982ee0a56123bb13a94ed67cfbc"
+  },
+  {
+    "path": "specs/16-matrix-tools/om9-matrixtools-006-user-libraries.md",
+    "bytes": 7894,
+    "sha256": "1d4aacc8a0d4de44a6e2f7a897791f3fada91688aa2f7b8a10ca2df676f48703"
+  },
+  {
+    "path": "specs/16-matrix-tools/om9-matrixtools-007-blueprint.md",
+    "bytes": 7038,
+    "sha256": "586f2b557b35d664e3a94e6c1f21fcccc9c7db42eb2d6f76e1c877df8f126090"
+  },
+  {
+    "path": "specs/16-matrix-tools/om9-matrixtools-008-view-manager.md",
+    "bytes": 13668,
+    "sha256": "46830c0be8a0ee01abf2df11b02ddebd8632079de0cd4fbfcd81057cad41cf55"
+  },
+  {
+    "path": "stats.json",
+    "bytes": 595,
+    "sha256": "c4c995481bf844961c66677d9f8f304eb84268e3d9bacb15b97dbf0086b4c11a"
+  }
+]

@@ -1,0 +1,114 @@
+"""Invalid saved CPlane must stay inside native point-tool event boundaries."""
+import hashlib, json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore, QtWidgets, QtTest
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0, os.environ['OM9_TEST_NATIVE_DIR'])
+sys.path.insert(0, str(Path(__file__).parent))
+from command_console_support import command_input, command_prompt
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+result = {'checks': []}
+malformed = '{"version":99,"views":[],"named":[]}'
+metadata_key = 'OpenMatrix9.CPlanes.v1'
+
+def check(name, ok):
+    result['checks'].append({'name': name, 'passed': bool(ok)})
+    if not ok:
+        raise AssertionError(name)
+
+def settle():
+    loop = QtCore.QEventLoop()
+    QtCore.QTimer.singleShot(160, loop.quit)
+    loop.exec()
+
+def enter(text):
+    field.setFocus()
+    field.setText(text)
+    QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return)
+    settle()
+
+def run():
+    global field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui as OM9
+        native = Path(OM9.__file__)
+        result['native_sha256'] = hashlib.sha256(native.read_bytes()).hexdigest()
+        window = Gui.getMainWindow()
+        field, prompt = command_input(window), command_prompt(window)
+        doc = App.newDocument('InvalidCPlaneTools')
+        doc.UndoMode = 1
+        doc.Meta = {metadata_key: malformed}
+        settle()
+        for name in ['Distance', 'Angle', 'Box', 'Sphere', 'PictureFrame']:
+            # A failed PictureFrame preflight must not open its image dialog.
+            unexpected = []
+            def reject_dialog():
+                for dialog in window.findChildren(QtWidgets.QFileDialog):
+                    if dialog.objectName() == 'OM9PictureFrameImageDialog' and dialog.isVisible():
+                        unexpected.append(True)
+                        dialog.reject()
+            QtCore.QTimer.singleShot(100, reject_dialog)
+            enter(name)
+            check(name + ' reports invalid CPlane without escaping the event callback',
+                  'CPlane' in prompt.text() and not unexpected)
+            enter('0,0,0')
+            check(name + ' leaves no running point session or document mutation',
+                  'Unknown or unsupported command' in prompt.text() and not doc.Objects
+                  and doc.UndoCount == 0 and doc.Meta.get(metadata_key) == malformed)
+
+        doc.Meta = {}
+        settle()
+        enter('Box')
+        enter('0,0,0')
+        runtime_plane = tuple(OM9.cplane(doc.Name, 0))
+        doc.Meta = {metadata_key: malformed}
+        enter('1,1,0')
+        check('Stored metadata does not replace an initialized runtime CPlane',
+              tuple(OM9.cplane(doc.Name, 0)) == runtime_plane
+              and 'CPlane' not in prompt.text() and not doc.Objects and doc.UndoCount == 0)
+        field.setFocus()
+        QtTest.QTest.keyClick(field, QtCore.Qt.Key_Escape)
+        settle()
+        enter('0,0,0')
+        check('Runtime-plane command cancels without geometry mutation',
+              'Unknown or unsupported command' in prompt.text() and not doc.Objects)
+        App.closeDocument(doc.Name)
+
+        # Persistence metadata is loaded only for a new registry owner. Create
+        # this fixture outside OM9 so its save cannot serialize a live registry.
+        Gui.activateWorkbench('PartWorkbench')
+        doc = App.newDocument('InvalidCPlaneToolsCold')
+        doc.Meta = {metadata_key: malformed}
+        saved = out / 'invalid-cplane.FCStd'
+        doc.saveAs(str(saved))
+        App.closeDocument(doc.Name)
+        doc = App.openDocument(str(saved))
+        doc.UndoMode = 1
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        field, prompt = command_input(window), command_prompt(window)
+        settle()
+        enter('Box')
+        check('Cold restore rejects the saved invalid CPlane before starting Box',
+              'CPlane' in prompt.text() and not doc.Objects and doc.UndoCount == 0)
+        doc.Meta = {}
+        settle()
+        enter('Line')
+        enter('0,0,0')
+        enter('1,0,0')
+        check('Valid command works after rejected starts and cold restore',
+              len(doc.Objects) == 1 and abs(doc.Objects[0].Shape.Length - 1) < 1e-9)
+        result['ok'] = True
+    except Exception:
+        result['ok'] = False
+        result['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        if os.environ.get('OM9_SMOKE_KEEP_OPEN') != '1':
+            QtCore.QTimer.singleShot(0, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1800, run)

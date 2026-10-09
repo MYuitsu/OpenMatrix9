@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenMatrix9 · Triển khai chức năng"
+  short_description: "Đọc đúng đặc tả OM9 và chuẩn hóa hành vi trước khi viết"
+  default_prompt: "Dùng $openmatrix9-feature-port để chọn đúng mã chức năng OM9, xác minh nguồn và triển khai bằng Rust trong FreeCAD."

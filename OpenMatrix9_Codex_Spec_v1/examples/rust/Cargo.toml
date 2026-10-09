@@ -1,0 +1,8 @@
+[package]
+name = "om9_spec_examples"
+version = "0.1.0"
+edition = "2021"
+license = "LGPL-2.1-or-later"
+
+[lib]
+path = "src/lib.rs"

@@ -18,14 +18,17 @@ Thumbs.db
 .env.*
 !.env.example
 
-# Private research and redistributed commercial assets are never public inputs.
-/ref/
+/code/
 /analysis/
-/danhsach_file_*.txt
-/Resources/icons/rgb-plus5/
-/Resources/icons/original/
-/Resources/icons/modern/
-/tests/fixtures/
+
+# Private reference inputs and local paths must not be published.
+/ref/*
+!/ref/rhino5/
+/ref/rhino5/*
+/private-references/
+/Matrix90_Codex_Guide_MD/
+/docs/openmatrix9-reference-locations.json
+
 *.pdf
 *.chm
 *.frx
@@ -45,3 +48,9 @@ Thumbs.db
 *.key
 *.p12
 *.pfx
+
+# Exact user-approved Rhino 5 documentation; the source audit verifies its hash.
+!/ref/rhino5/windows_pdf_user_s_guide.pdf
+!/ref/rhino5/README.md
+!/ref/rhino5/SOURCES.json
+!/ref/rhino5/CORE_REFERENCE_INDEX.json

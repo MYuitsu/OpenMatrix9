@@ -1,0 +1,188 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# OM9-CURVE-005: bounded active-layer adapter, Circle/History transactions.
+# Requires a matching newly built native module. This macro is not Rust proof.
+import json, math, os, struct, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0, os.environ['OM9_TEST_NATIVE_DIR'])
+sys.path.insert(0, str(Path(__file__).parent))
+from command_console_support import command_input, command_prompt
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+out.mkdir(parents=True, exist_ok=True)
+result = {'checks': []}
+
+def check(name, ok):
+    result['checks'].append({'name': name, 'passed': bool(ok)})
+    (out/'progress.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+    if not ok:
+        raise AssertionError(name)
+
+def settle():
+    loop = QtCore.QEventLoop()
+    QtCore.QTimer.singleShot(420, loop.quit)
+    loop.exec()
+
+def enter(text):
+    field.setFocus(); field.setText(text)
+    QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return)
+    settle()
+
+def circles(document):
+    return [o for o in document.Objects if 'OM9FeatureId' in o.PropertiesList and o.OM9FeatureId == 'OM9-CURVE-005']
+
+def circle(*inputs, menu=False):
+    previous = {o.Name for o in circles(doc)}
+    if menu:
+        window.findChild(QtGui.QAction, 'Circle').trigger(); settle()
+    else:
+        enter('Circle')
+    for value in inputs:
+        enter(value)
+    outputs = [o for o in circles(doc) if o.Name not in previous]
+    check('One Circle output: '+str(inputs), len(outputs) == 1)
+    return outputs[0]
+
+def layer(index):
+    matches = [o for o in doc.Objects if 'OM9LayerSchema' in o.PropertiesList and o.OM9LayerSchema == '1' and o.OM9LayerIndex == index]
+    check('Unique explicit OM9 layer '+str(index), len(matches) == 1)
+    return matches[0]
+
+def settings():
+    return next(o for o in doc.Objects if 'OM9LayerStateSchema' in o.PropertiesList and o.OM9LayerStateSchema == '1')
+
+def click(role, index):
+    button = dock.findChild(QtWidgets.QToolButton, 'OM9Layer'+role+str(index-1))
+    check('Enabled layer '+role+' '+str(index), button is not None and button.isEnabled())
+    button.click(); settle()
+
+def rgb_equal(a,b):
+    return len(a) >= 3 and len(b) >= 3 and all(abs(a[i]-b[i]) < 1e-6 for i in range(3))
+
+def owns(group, obj):
+    return obj in group.Group and obj.OM9OutputLayerIndex == group.OM9LayerIndex and group.TypeId == 'App::DocumentObjectGroup' and not group.InList
+
+def run():
+    global doc, window, field, dock
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui
+        result['native_module'] = OpenMatrix9Gui.__file__
+        if os.environ.get('OM9_TEST_NATIVE_DIR'):
+            check('Selected native module loaded', Path(OpenMatrix9Gui.__file__).parent.resolve() == Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        window = Gui.getMainWindow(); window.resize(1400,950)
+        field = command_input(window)
+        dock = window.findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar')
+        doc = App.newDocument('CircleLayers'); doc.UndoMode = 1
+        Gui.activeDocument().activeView().viewTop(); settle()
+        check('Workbench activation creates no layer/settings objects', not doc.Objects)
+        root = circle('0,0','3',menu=True); root_name = root.Name
+        root_color = tuple(root.ViewObject.LineColor)
+        check('Unselected Circle remains root legacy green', not root.InList and 'OM9OutputLayerIndex' not in root.PropertiesList and rgb_equal(root_color,(0,130/255,85/255)))
+        # Imported layer metadata and display are deliberately outside OM9's schema.
+        imported = doc.addObject('App::DocumentObjectGroup','ImportedGemLayer'); imported.Label = 'Gem 01'
+        imported.addProperty('App::PropertyString','OM9RhinoLayerName'); imported.OM9RhinoLayerName = 'Original::Gem 01'
+        imported.addProperty('App::PropertyInteger','OM9RhinoLayerIndex'); imported.OM9RhinoLayerIndex = 71
+        child = doc.addObject('Part::Feature','ImportedCurve'); child.Shape = Part.makeCircle(7)
+        child.ViewObject.LineColor = (0.9,0.1,0.8); imported.addObject(child)
+        imported_color = tuple(child.ViewObject.LineColor)
+        click('Arrow',5); g = layer(5); group_name = g.Name
+        check('Arrow persists document active index', settings().OM9ActiveLayer == 5)
+        check('Label collision does not reuse imported layer', g != imported and imported.OM9RhinoLayerIndex == 71 and imported.OM9RhinoLayerName == 'Original::Gem 01')
+        obj = circle('1,2,3','4',menu=True); obj_name = obj.Name
+        check('Menu Circle uses layer group and style', owns(g,obj) and rgb_equal(obj.ViewObject.LineColor,g.OM9LayerColor))
+        doc.undo(); settle(); check('Single Circle Undo removes output and membership', doc.getObject(obj_name) is None and all(o.Name != obj_name for o in g.Group))
+        doc.redo(); settle(); obj = doc.getObject(obj_name)
+        check('Redo restores membership and exact shape', owns(g,obj) and isinstance(obj.Shape.Edges[0].Curve,Part.Circle) and abs(obj.Shape.Edges[0].Curve.Radius-4) < 1e-7)
+        old_color = tuple(g.OM9LayerColor)
+        chosen = QtGui.QColor(12,100,180)
+        dialog_result = {'accepted':False}
+        def accept_color():
+            dialog = next((w for w in QtWidgets.QApplication.topLevelWidgets() if isinstance(w,QtWidgets.QColorDialog)),None)
+            if dialog is not None:
+                dialog.setCurrentColor(chosen); dialog.accept(); dialog_result['accepted'] = True
+            else:
+                QtCore.QTimer.singleShot(100,accept_color)
+        QtCore.QTimer.singleShot(100,accept_color)
+        click('Swatch',5); g = layer(5); obj = doc.getObject(obj_name)
+        check('Swatch propagates layer color to owned Circle', dialog_result['accepted'] and rgb_equal(g.OM9LayerColor,(12/255,100/255,180/255)) and rgb_equal(obj.ViewObject.LineColor,g.OM9LayerColor))
+        check('Swatch preserves prior root and imported colors', rgb_equal(doc.getObject(root_name).ViewObject.LineColor,root_color) and rgb_equal(child.ViewObject.LineColor,imported_color))
+        doc.undo(); settle(); check('Layer color Undo restores group and member', rgb_equal(g.OM9LayerColor,old_color) and rgb_equal(obj.ViewObject.LineColor,old_color))
+        doc.redo(); settle(); check('Layer color Redo restores new style', rgb_equal(g.OM9LayerColor,(12/255,100/255,180/255)) and rgb_equal(obj.ViewObject.LineColor,g.OM9LayerColor))
+        click('Lock',5); count = len(doc.Objects); undo = doc.UndoCount
+        enter('Circle'); enter('0,0'); enter('5')
+        check('Locked active layer rejects with no geometry or Undo entry', len(doc.Objects) == count and doc.UndoCount == undo and 'locked' in command_prompt(window).text().lower())
+        enter('Cancel'); click('Lock',5)
+        click('Visibility',5)
+        check('Visibility control hides layer and existing members', not g.ViewObject.Visibility and not obj.ViewObject.Visibility)
+        hidden = circle('0,0','2'); hidden_name = hidden.Name
+        check('Hidden layer accepts new hidden Circle', owns(g,hidden) and not hidden.ViewObject.Visibility and not g.ViewObject.Visibility)
+        doc.undo(); settle(); check('Hidden Circle Undo preserves layer state', doc.getObject(hidden_name) is None and not g.ViewObject.Visibility)
+        doc.undo(); settle(); check('Visibility Undo restores group and members', g.ViewObject.Visibility and doc.getObject(obj_name).ViewObject.Visibility)
+        doc.redo(); settle(); check('Visibility Redo hides group and members', not g.ViewObject.Visibility and not doc.getObject(obj_name).ViewObject.Visibility)
+        click('Visibility',5)
+        enter('Layer=Metal 02'); check('CMD resolves stable named layer', settings().OM9ActiveLayer == 2)
+        doc.undo(); settle(); check('Selection Undo restores previous active layer', settings().OM9ActiveLayer == 5)
+        doc.redo(); settle(); check('Selection Redo restores named active layer', settings().OM9ActiveLayer == 2)
+        enter('Layer=5'); g = layer(5)
+        malformed_count = len(doc.Objects); undo = doc.UndoCount
+        enter('Layer=Lights'); enter('Layer=33')
+        check('Invalid Layer values do not mutate document', settings().OM9ActiveLayer == 5 and len(doc.Objects) == malformed_count and doc.UndoCount == undo)
+        deform = circle('Deformable=Yes','Degree=3','PointCount=12','0,0','5')
+        check('Deformable Circle keeps layer ownership/style', owns(g,deform) and isinstance(deform.Shape.Edges[0].Curve,Part.BSplineCurve) and rgb_equal(deform.ViewObject.LineColor,g.OM9LayerColor))
+        hs = doc.addObject('OpenMatrix9Gui::HistorySettings','OM9HistorySettings'); hs.Record = True; hs.BrokenHistoryWarning = False
+        source = doc.addObject('Part::Feature','LayerHistorySource'); source_name = source.Name; source.Shape = Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0)); doc.recompute()
+        h = circle('AroundCurve','History=Yes','Curve='+source.Name+'.Edge1','OnCurve=0.5','3'); history_name = h.Name
+        check('Recorded Circle output belongs to layer without grouping its source', owns(g,h) and h.TypeId == 'OpenMatrix9Gui::CircleHistory' and source not in g.Group and rgb_equal(h.ViewObject.LineColor,g.OM9LayerColor))
+        source.Shape = Part.makeLine(App.Vector(0,0,0),App.Vector(20,0,0)); doc.recompute()
+        check('Layered History updates source geometry without style loss', abs(h.Shape.Edges[0].Curve.Center.x-10) < 1e-6 and owns(g,h) and rgb_equal(h.ViewObject.LineColor,g.OM9LayerColor))
+        other = App.newDocument('CircleLayersOther'); other.UndoMode = 1; settle()
+        enter('Circle'); enter('0,0'); enter('2')
+        other_output = circles(other)[0]
+        check('Other document defaults to independent root output', len(other.Objects) == 1 and not other_output.InList and rgb_equal(other_output.ViewObject.LineColor,root_color))
+        enter('Layer=1'); other_state = next(o for o in other.Objects if 'OM9LayerStateSchema' in o.PropertiesList)
+        check('Independent document selection persists locally', other_state.OM9ActiveLayer == 1)
+        Gui.setActiveDocument(doc.Name); App.setActiveDocument(doc.Name); settle()
+        check('Returning document restores its active layer', settings().OM9ActiveLayer == 5)
+        enter('Layer=None'); unlayered = circle('0,0','1')
+        check('Explicit Layer=None restores legacy root output', not unlayered.InList and rgb_equal(unlayered.ViewObject.LineColor,root_color))
+        enter('Layer=5'); click('Visibility',5)
+        imported_before_save = doc.getObject('ImportedGemLayer')
+        imported_curve_before_save = doc.getObject('ImportedCurve')
+        result['imported_before_save'] = {'index': imported_before_save.OM9RhinoLayerIndex, 'name': imported_before_save.OM9RhinoLayerName, 'initial_color': list(imported_color), 'color': list(imported_curve_before_save.ViewObject.LineColor)}
+        check('Imported metadata and raw color remain untouched before save', imported_before_save.OM9RhinoLayerIndex == 71 and imported_before_save.OM9RhinoLayerName == 'Original::Gem 01' and rgb_equal(imported_curve_before_save.ViewObject.LineColor, imported_color))
+        # Base::Color uses float32 multiplication before lround, then float32
+        # division on restore. Python's double arithmetic would round .9's
+        # stored float32 value to 229 instead of the native packed byte 230.
+        # The pre-save assertion above checks the original float exactly.
+        def float32(value):
+            return struct.unpack('f',struct.pack('f',value))[0]
+        imported_serialized_color = tuple(float32(math.floor(float32(float32(v)*255.0)+0.5)/255.0) for v in imported_color[:3])
+        name = doc.Name; file = out/'circle-layers.FCStd'; doc.saveAs(str(file)); App.closeDocument(name)
+        doc = App.openDocument(str(file)); settle(); g = layer(5)
+        check('FCStd restores active layer, group schema, color and visibility', settings().OM9ActiveLayer == 5 and g.Name == group_name and not g.ViewObject.Visibility and rgb_equal(g.OM9LayerColor,(12/255,100/255,180/255)))
+        h = doc.getObject(history_name)
+        check('FCStd preserves layered History membership/source and style', owns(g,h) and h.SourceCurve[0].Name == source_name and rgb_equal(h.ViewObject.LineColor,g.OM9LayerColor))
+        saved = circle('0,0','6')
+        check('Circle after reload uses saved active layer visibility/style', owns(g,saved) and not saved.ViewObject.Visibility and rgb_equal(saved.ViewObject.LineColor,g.OM9LayerColor))
+        imported_after_reload = doc.getObject('ImportedGemLayer')
+        imported_curve_after_reload = doc.getObject('ImportedCurve')
+        result['imported_after_reload'] = {'index': imported_after_reload.OM9RhinoLayerIndex, 'name': imported_after_reload.OM9RhinoLayerName, 'color': list(imported_curve_after_reload.ViewObject.LineColor), 'expected_serialized_color': list(imported_serialized_color)}
+        check('Imported metadata survives unrelated layer operations and reload', imported_after_reload.OM9RhinoLayerIndex == 71 and imported_after_reload.OM9RhinoLayerName == 'Original::Gem 01' and rgb_equal(imported_curve_after_reload.ViewObject.LineColor,imported_serialized_color))
+        window.grab().save(str(out/'circle-layers.png')); result['ok'] = True
+    except Exception:
+        result['ok'] = False; result['error'] = traceback.format_exc()
+        if 'window' in globals(): result['prompt'] = command_prompt(window).text()
+    finally:
+        for name in list(App.listDocuments()):
+            # The smoke launcher owns its isolated FreeCAD process. Close all
+            # process documents, including any startup document, so quitting
+            # cannot wait on an unsaved-document dialog.
+            try:
+                App.closeDocument(name)
+            except Exception:
+                result.setdefault('cleanup_errors', []).append(traceback.format_exc())
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        if os.environ.get('OM9_SMOKE_KEEP_OPEN') != '1': QtCore.QTimer.singleShot(0,QtWidgets.QApplication.instance().quit)
+QtCore.QTimer.singleShot(1800,run)

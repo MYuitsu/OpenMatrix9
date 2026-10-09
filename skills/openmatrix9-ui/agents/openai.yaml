@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenMatrix9 · Giao diện Matrix9"
+  short_description: "Dựng menu, sidebar, icon và viewport theo nguồn gốc"
+  default_prompt: "Dùng $openmatrix9-ui để tiếp tục giao diện Matrix9 trong FreeCAD với Rust và đọc đúng nguồn của thành phần đang làm."

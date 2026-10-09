@@ -1,0 +1,93 @@
+"""RCORE-09/10 focused host regressions; run in a fresh matching FreeCAD build.
+Set OM9_RCORE_HISTORY_RESTORE_FILE for cold restore without activating OM9 first.
+"""
+import json, os, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide import QtCore
+
+output = Path(os.environ['OM9_SMOKE_OUTPUT'])
+output.mkdir(parents=True, exist_ok=True)
+report = {'checks': []}
+
+def check(name, condition):
+    report['checks'].append({'name': name, 'passed': bool(condition)})
+    if not condition:
+        raise AssertionError(name)
+
+import sys
+if os.environ.get('OM9_TEST_NATIVE_DIR'): sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+
+def run():
+    doc = None
+    try:
+        restore = os.environ.get('OM9_RCORE_HISTORY_RESTORE_FILE')
+        if restore:
+            doc = App.openDocument(restore)
+            child,settings = doc.getObject('Join'),doc.getObject('Policy')
+            check('cold FCStd restores native History without activating OM9', child.TypeId=='OpenMatrix9Gui::HistoryJoin' and child.HistoryDirty and not settings.Update)
+            settings.Update = True
+            doc.recompute()
+            check('cold restored stale History recomputes with Record Off', not settings.Record and not child.HistoryDirty and abs(child.Shape.Length-20)<1e-7)
+            report['ok'] = True
+            return
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui as OM
+        doc = App.newDocument('RCoreHistoryIO')
+        doc.UndoMode = 1
+        settings = doc.addObject('OpenMatrix9Gui::HistorySettings', 'Policy')
+        settings.BrokenHistoryWarning = False
+        a = doc.addObject('Part::Feature', 'A')
+        b = doc.addObject('Part::Feature', 'B')
+        a.Shape = Part.makeLine(App.Vector(), App.Vector(5,0,0))
+        b.Shape = Part.makeLine(App.Vector(5,0,0), App.Vector(10,0,0))
+        child = doc.addObject('OpenMatrix9Gui::HistoryJoin', 'Join')
+        child.Parents = [a,b]
+        child.Recorded = True
+        doc.recompute()
+        check('initial Join resolves native links', child.Recorded and abs(child.Shape.Length-10)<1e-7 and not child.HistoryDirty)
+        settings.Record = False
+        a.Shape = Part.makeLine(App.Vector(-5,0,0), App.Vector(5,0,0))
+        doc.recompute()
+        check('Record Off does not disable existing dependencies', abs(child.Shape.Length-15)<1e-7 and not child.HistoryDirty)
+        settings.Update = False
+        a.Shape = Part.makeLine(App.Vector(-10,0,0), App.Vector(5,0,0))
+        doc.recompute()
+        check('Update Off persists explicit stale state', child.HistoryDirty and abs(child.Shape.Length-15)<1e-7)
+        save = output / 'rhino-core-history-stale.FCStd'
+        doc.saveAs(str(save))
+        doc_name = doc.Name
+        App.closeDocument(doc_name)
+        doc = App.openDocument(str(save))
+        child = doc.getObject('Join')
+        settings = doc.getObject('Policy')
+        check('FCStd restore preserves suspended dirty state', child.HistoryDirty and not settings.Update and not settings.Record)
+        settings.Update = True
+        doc.recompute()
+        check('Update resumes while Record remains Off', abs(child.Shape.Length-20)<1e-7 and not child.HistoryDirty)
+        invalid = doc.addObject('OpenMatrix9Gui::HistoryJoin', 'MissingParents')
+        invalid.Shape = Part.makeLine(App.Vector(), App.Vector(1,0,0))
+        invalid.Recorded = True
+        doc.recompute()
+        check('malformed recorded Join cannot succeed with stale geometry', invalid.Shape.isNull() and invalid.HistoryDirty and 'Invalid' in invalid.State)
+        target = output / 'must-preserve-invalid-write.3dm'
+        before = b'known destination content'
+        target.write_bytes(before)
+        payload = {'items':[{'name':'mesh','color':[128,0,255], 'vertices':[[0,0],[1,0,0],[0,1,0]], 'faces':[[0,1,2,2]]}], 'tolerance':1e-6}
+        rejected = False
+        try:
+            OM.write3dm(json.dumps(payload), str(target))
+        except Exception:
+            rejected = True
+        check('malformed tuple rejects before touching export destination', rejected and target.read_bytes()==before)
+        report['ok'] = True
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        if doc is not None:
+            App.closeDocument(doc.Name)
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(500,run)

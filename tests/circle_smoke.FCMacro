@@ -1,0 +1,113 @@
+# OM9-CURVE-005: native analytic circles, Qt entry points and session lifecycle.
+import json, math, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input, command_prompt
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(160,loop.quit);loop.exec()
+def enter(text):
+    field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def circle(*inputs):
+    enter('Circle')
+    for text in inputs:enter(text)
+    return App.activeDocument().Objects[-1]
+def analytic(obj,radius,center):
+    shape=obj.Shape
+    return (shape.isValid() and shape.isClosed() and len(shape.Edges)==1 and len(shape.Wires)==1
+        and isinstance(shape.Edges[0].Curve,Part.Circle) and abs(shape.Edges[0].Curve.Radius-radius)<1e-6
+        and (shape.Edges[0].Curve.Center-App.Vector(*center)).Length<1e-6)
+def on_circle(obj,point):
+    c=obj.Shape.Edges[0].Curve;delta=App.Vector(*point)-c.Center
+    return abs(delta.Length-c.Radius)<1e-6 and abs(delta.dot(c.Axis))<1e-6
+def run():
+    global field,window
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');window=Gui.getMainWindow();window.resize(1400,950);field=command_input(window)
+        action=window.findChild(QtGui.QAction,'Circle');settle()
+        check('Circle disabled without document',action is not None and not action.isEnabled())
+        doc=App.newDocument('CircleTest');doc.UndoMode=1;view=Gui.activeDocument().activeView();view.setAnimationEnabled(False);view.viewTop();settle();settle();settle();Gui.updateGui()
+        import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__
+        if os.environ.get('OM9_TEST_NATIVE_DIR'):
+            check('Smoke loads the explicitly selected new native module',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        result['circle_actions']=[{'name':a.objectName(),'text':a.text(),'enabled':a.isEnabled()} for a in window.findChildren(QtGui.QAction) if 'Circle' in a.objectName()]
+        check('OM9-CURVE-005 menu enabled',action.isEnabled())
+        action.trigger();settle();enter('1,2,3');check('Center preview has no document object',not doc.Objects);enter('5')
+        obj=doc.Objects[-1];check('Native Circle is exact closed single circular edge',analytic(obj,5,[1,2,3]))
+        check('Circle feature identity and idle prompt',obj.OM9FeatureId=='OM9-CURVE-005' and command_prompt(window).text().startswith('Command:'))
+        doc.undo();check('Single Undo removes whole Circle',not doc.Objects);doc.redo();check('Redo restores exact Circle',len(doc.Objects)==1 and analytic(doc.Objects[0],5,[1,2,3]))
+        obj=circle('1,2,3','5');check('CMD matches menu geometry',analytic(obj,5,[1,2,3]))
+        for size in ['Radius=4','Diameter=8','Circumference=25.132741228718345','Area=0.5026548245743669cm2']:
+            obj=circle('0,0',size);check('Exact numeric measure '+size,analytic(obj,4,[0,0,0]))
+        obj=circle('Diameter','0,0','8,0,2');check('Diameter point measures projected length',analytic(obj,4,[0,0,0]))
+        obj=circle('Circumference','0,0','25.132741228718345,0');check('Circumference point converts picked length',analytic(obj,4,[0,0,0]))
+        obj=circle('2Point','1,2,3','7,2,11');check('Spatial 2Point preserves exact diameter endpoints',analytic(obj,5,[4,2,7]) and all(on_circle(obj,p) for p in [[1,2,3],[7,2,11]]))
+        obj=circle('3Point','1,2,6','5,2,2','1,2,-2');check('Spatial 3Point circumcircle',analytic(obj,4,[1,2,2]) and abs(obj.Shape.Edges[0].Curve.Axis.y)>0.999999)
+        obj=circle('3Point','0,0','0.0001,0','0,0.0001');check('Small 3Point circle accepted at geometric tolerance',analytic(obj,0.00005*math.sqrt(2),[0.00005,0.00005,0]))
+        obj=circle('2,3,4','Orientation','2,4,4','5,8,8');check('Orientation and projected radius',analytic(obj,5,[2,3,4]) and abs(obj.Shape.Edges[0].Curve.Axis.y)>0.999999)
+        obj=circle('Vertical','0,0','3,4');check('Vertical point selects vertical plane',analytic(obj,5,[0,0,0]) and abs(obj.Shape.Edges[0].Curve.Axis.z)<1e-7)
+        obj=circle('Vertical','0,0','5');check('Vertical scalar uses CPlane X Z plane',analytic(obj,5,[0,0,0]) and abs(obj.Shape.Edges[0].Curve.Axis.y)>0.999999)
+        count=len(doc.Objects);enter('Circle');enter('3Point');enter('0,0');enter('5,0')
+        for text in ['10,0','0,0','Radius=1','Tangent','Deformable=invalid']:
+            enter(text);check('Invalid or unsupported input stays active: '+text,len(doc.Objects)==count and 'Circle' in command_prompt(window).text())
+        enter('Undo');enter('0,5');enter('5,0');check('Session Undo replaces second circumference point',len(doc.Objects)==count+1 and analytic(doc.Objects[-1],math.sqrt(12.5),[2.5,2.5,0]))
+        count=len(doc.Objects);enter('Circle');enter('Area');enter('0,0');enter('4,0')
+        check('Area point sizing creates radius under cursor',len(doc.Objects)==count+1 and analytic(doc.Objects[-1],4,[0,0,0]))
+        obj=circle('Area','0,0','Area=50.26548245743669');check('Area numeric and point sizing agree',analytic(obj,4,[0,0,0]))
+        count=len(doc.Objects);enter('Circle');enter('0,0');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle()
+        check('Escape cancels Circle without object',len(doc.Objects)==count and command_prompt(window).text().startswith('Command:'))
+        Gui.Selection.clearSelection();QtWidgets.QApplication.sendEvent(window,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_F6,QtCore.Qt.NoModifier));settle()
+        popup=window.findChild(QtWidgets.QMenu,'OM9F6Menu');groups=[a.menu() for a in popup.actions() if a.menu()] if popup else []
+        context=next((a for g in groups for a in g.actions() if a.property('om9OriginalCommand')=='Circle'),None)
+        check('F6 Circle shares native capability gate',context is not None and context.isEnabled());popup.close();context.trigger();settle();enter('0,0');enter('Radius=1cm')
+        check('F6 and explicit length units',analytic(doc.Objects[-1],10,[0,0,0]))
+        dock=window.findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar');dock.findChild(QtWidgets.QToolButton,'OM9Group5').click();settle()
+        button=next(b for b in dock.findChildren(QtWidgets.QToolButton) if b.property('om9IconKey')=='CurveCircleCenterRadius')
+        check('Circle sidebar button enabled',button.isEnabled());button.click();settle()
+        viewer=next(w for w in window.findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible())
+        target=viewer.viewport();center=target.rect().center();first=center+QtCore.QPoint(-60,30);second=center+QtCore.QPoint(60,-30)
+        enter('Osnap Off');enter('Ortho');count=len(doc.Objects)
+        QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=first);settle()
+        motion=QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(second),QtCore.QPointF(target.mapToGlobal(second)),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.ShiftModifier)
+        QtWidgets.QApplication.sendEvent(target,motion);settle()
+        from pivy import coin
+        search=coin.SoSearchAction();search.setSearchingAll(True);search.setName('OM9CurvePreviewLine');search.apply(view.getSceneGraph());path=search.getPath()
+        check('Hover renders closed 129 point outline with no document edits',path is not None and path.getTail().point.getNum()==129 and len(doc.Objects)==count)
+        preview=[App.Vector(*path.getTail().point[i].getValue()) for i in range(129)]
+        QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,QtCore.Qt.ShiftModifier,pos=second);settle();obj=doc.Objects[-1];c=obj.Shape.Edges[0].Curve
+        check('Mouse with Shift Ortho commits analytic circular edge',len(doc.Objects)==count+1 and isinstance(c,Part.Circle) and obj.Shape.isClosed())
+        check('Transient outline agrees with exact committed circle',all(abs((p-c.Center).Length-c.Radius)<1e-4 and abs((p-c.Center).dot(c.Axis))<1e-4 for p in preview))
+        search.apply(view.getSceneGraph());check('Commit removes transient preview',search.getPath() is None)
+        enter('Ortho');count=len(doc.Objects);enter('Circle');enter('0,0');enter('Orientation');enter('0,1,0');view.viewFront();settle()
+        QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=center+QtCore.QPoint(40,-60));settle()
+        check('Oriented radius mouse pick intersects Circle plane',len(doc.Objects)==count+1 and abs(doc.Objects[-1].Shape.Edges[0].Curve.Axis.y)>0.999999)
+        view.viewTop();settle();area=window.findChild(QtWidgets.QMdiArea);original=area.activeSubWindow();count=len(doc.Objects);enter('Circle')
+        front=next(sub for sub in area.subWindowList() if sub.widget().property('om9ViewSlot')==3)
+        area.setActiveSubWindow(front);settle()
+        frontviewer=next(w for w in front.findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer')
+        QtTest.QTest.keyClick(frontviewer.viewport(),QtCore.Qt.Key_F4);settle();enter('5')
+        check('F4 first point latches current Through Finger CPlane',len(doc.Objects)==count+1 and analytic(doc.Objects[-1],5,[0,0,0]) and abs(doc.Objects[-1].Shape.Edges[0].Curve.Axis.y)>0.999999)
+        area.setActiveSubWindow(original);settle()
+        count=len(doc.Objects);enter('Circle');enter('0,0');other=App.newDocument('CircleOther');settle();enter('4')
+        check('Document switch cancels Circle',len(doc.Objects)==count and not other.Objects)
+        enter('Circle');enter('0,0');Gui.activateWorkbench('PartWorkbench');settle();Gui.activateWorkbench('OpenMatrix9Workbench');settle()
+        check('Workbench switch cancels Circle',not other.Objects and command_prompt(window).text().startswith('Command:'))
+        App.closeDocument(other.Name);Gui.setActiveDocument(doc.Name);settle();saved=[(o.Shape.Edges[0].Curve.Radius,o.Shape.Edges[0].Curve.Center) for o in doc.Objects];file=out/'circles.FCStd';doc.saveAs(str(file));App.closeDocument(doc.Name);doc=App.openDocument(str(file));settle()
+        check('FCStd reload retains analytic Circle and feature IDs',len(doc.Objects)==len(saved) and all(analytic(o,r,list(center)) and o.OM9FeatureId=='OM9-CURVE-005' for o,(r,center) in zip(doc.Objects,saved)))
+        window.grab().save(str(out/'circle-runtime.png'));result['ok']=True
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc();result['prompt']=command_prompt(window).text()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):
+            if name.startswith('Circle'):App.closeDocument(name)
+        if os.environ.get('OM9_SMOKE_KEEP_OPEN')!='1':QtCore.QTimer.singleShot(0,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

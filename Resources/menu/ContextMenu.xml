@@ -15,7 +15,27 @@
         </ObjectContextMenuItem>
         <ObjectContextMenuItem>
           <ActionName>Join</ActionName>
-          <ActionCommand>Join</ActionCommand>
+          <ActionCommand>OM9_TopIconJoin</ActionCommand>
+        </ObjectContextMenuItem>
+        <ObjectContextMenuItem>
+          <ActionName>Explode</ActionName>
+          <ActionCommand>OM9_TopIconExplode</ActionCommand>
+        </ObjectContextMenuItem>
+        <ObjectContextMenuItem>
+          <ActionName>Boolean Union</ActionName>
+          <ActionCommand>OM9_SolidUnion</ActionCommand>
+        </ObjectContextMenuItem>
+        <ObjectContextMenuItem>
+          <ActionName>Boolean Difference</ActionName>
+          <ActionCommand>OM9_SolidDifference</ActionCommand>
+        </ObjectContextMenuItem>
+        <ObjectContextMenuItem>
+          <ActionName>Boolean Intersection</ActionName>
+          <ActionCommand>OM9_SolidIntersection</ActionCommand>
+        </ObjectContextMenuItem>
+        <ObjectContextMenuItem>
+          <ActionName>Boolean Two Objects</ActionName>
+          <ActionCommand>OM9_SolidBooleanTwoObjects</ActionCommand>
         </ObjectContextMenuItem>
         <ObjectContextMenuItem>
           <ActionName>Move</ActionName>
@@ -35,7 +55,7 @@
         </ObjectContextMenuItem>
         <ObjectContextMenuItem>
           <ActionName>Trim</ActionName>
-          <ActionCommand>Trim</ActionCommand>
+          <ActionCommand>OM9_TopIconTrim</ActionCommand>
         </ObjectContextMenuItem>
       </MenuItems>
     </ObjectContextMenuGroup>
@@ -50,6 +70,10 @@
         <ObjectContextMenuItem>
           <ActionName>Circle</ActionName>
           <ActionCommand>Circle</ActionCommand>
+        </ObjectContextMenuItem>
+        <ObjectContextMenuItem>
+          <ActionName>Rectangle</ActionName>
+          <ActionCommand>Rectangle</ActionCommand>
         </ObjectContextMenuItem>
         <ObjectContextMenuItem>
           <ActionName>Control Points</ActionName>
@@ -75,8 +99,20 @@
       <Mode>SurfaceModeling</Mode>
       <MenuItems>
         <ObjectContextMenuItem>
+          <ActionName>Sweep 1</ActionName>
+          <ActionCommand>OM9_SurfaceSweepSweep1Rail</ActionCommand>
+        </ObjectContextMenuItem>
+        <ObjectContextMenuItem>
+          <ActionName>Sweep 2</ActionName>
+          <ActionCommand>OM9_SurfaceSweepSweep2Rails</ActionCommand>
+        </ObjectContextMenuItem>
+        <ObjectContextMenuItem>
+          <ActionName>Loft</ActionName>
+          <ActionCommand>OM9_SurfaceLoft</ActionCommand>
+        </ObjectContextMenuItem>
+        <ObjectContextMenuItem>
           <ActionName>Join</ActionName>
-          <ActionCommand>Join</ActionCommand>
+          <ActionCommand>OM9_TopIconJoin</ActionCommand>
         </ObjectContextMenuItem>
         <ObjectContextMenuItem>
           <ActionName>Split</ActionName>
@@ -84,7 +120,7 @@
         </ObjectContextMenuItem>
         <ObjectContextMenuItem>
           <ActionName>Trim</ActionName>
-          <ActionCommand>Trim</ActionCommand>
+          <ActionCommand>OM9_TopIconTrim</ActionCommand>
         </ObjectContextMenuItem>
       </MenuItems>
     </ObjectContextMenuGroup>

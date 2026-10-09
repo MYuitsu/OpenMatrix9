@@ -1,0 +1,84 @@
+# OM9-CURVE-005: arbitrary-plane tangent and analytic AroundCurve History.
+import json,math,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtTest
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(100,loop.quit);loop.exec()
+def enter(text):
+    field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def feature(name,shape):
+    o=doc.addObject('Part::Feature',name);o.Shape=shape;doc.recompute();return o
+def line(name,a,b):return feature(name,Part.makeLine(App.Vector(*a),App.Vector(*b)))
+def circle(*args):
+    n=len(doc.Objects);enter('Circle')
+    for text in args:enter(text)
+    check('One Circle output: '+str(args[:2]),len(doc.Objects)==n+1)
+    return doc.Objects[-1]
+def seed(o,p):return 'Curve='+o.Name+'.Edge1@'+','.join(str(v) for v in p)
+def exact(o,r,p,n):
+    s=o.Shape;c=s.Edges[0].Curve
+    return s.isValid() and s.isClosed() and len(s.Edges)==1 and isinstance(c,Part.Circle) and abs(c.Radius-r)<1e-6 and (c.Center-App.Vector(*p)).Length<1e-6 and abs(abs(c.Axis.dot(App.Vector(*n)))-1)<1e-7
+def midpoint(o):
+    edge=o.Shape.Edges[0];parent=o.getGlobalPlacement()*o.Placement.inverse();p=parent.multVec(edge.valueAt((edge.FirstParameter+edge.LastParameter)/2));n=parent.Rotation.multVec(edge.tangentAt((edge.FirstParameter+edge.LastParameter)/2));return p,n
+def run():
+    global doc,field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__;check('Selected native module loaded',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        window=Gui.getMainWindow();window.resize(1400,950);field=command_input(window);doc=App.newDocument('CircleSpatialHistory');doc.UndoMode=1;Gui.activeDocument().activeView().viewTop();settle()
+        a=line('VerticalA',(10,0,-20),(10,0,20));b=line('VerticalB',(10,-20,0),(10,20,0))
+        o=circle('Tangent','Vertical=Yes',seed(a,(10,0,4)),'Radius=4',seed(b,(10,4,0)));check('Vertical Tangent in YZ plane',exact(o,4,(10,4,4),(1,0,0)))
+        d=line('VerticalDiagonal',(10,0,12),(10,12,0));o=circle('Tangent',seed(a,(10,0,4)),seed(b,(10,4,0)),seed(d,(10,6,6)));r=12/(2+math.sqrt(2));check('Three-curve incircle on spatial plane',exact(o,r,(10,r,r),(1,0,0)))
+        place=App.Placement(App.Vector(20,-10,8),App.Rotation(App.Vector(1,0,0),45));pa=place.multVec(App.Vector(0,4,0));pb=place.multVec(App.Vector(4,0,0));pc=place.multVec(App.Vector(4,4,0));pn=place.Rotation.multVec(App.Vector(0,0,1))
+        ta=line('TiltA',(0,-20,0),(0,20,0));tb=line('TiltB',(-20,0,0),(20,0,0));ta.Placement=place;tb.Placement=place;doc.recompute()
+        o=circle('Tangent',seed(ta,pa),'Radius=4',seed(tb,pb));check('Tilted placed native lines',exact(o,4,pc,pn))
+        count=len(doc.Objects);enter('Circle');enter('Tangent');enter('Vertical=Yes');enter(seed(ta,pa));enter('Radius=4');enter(seed(tb,pb));check('Nonvertical plane rejects Vertical without commit',len(doc.Objects)==count and 'perpendicular' in command_prompt(window).text());enter('Vertical=No');check('Vertical option recovery commits same tangent solution',len(doc.Objects)==count+1 and exact(doc.Objects[-1],4,pc,pn))
+        c1=feature('SpatialCircleA',Part.makeCircle(6,App.Vector(10,-10,0),App.Vector(1,0,0)));c2=feature('SpatialCircleB',Part.makeCircle(6,App.Vector(10,10,0),App.Vector(1,0,0)))
+        o=circle('Tangent',seed(c1,(10,-4,0)),'Radius=4',seed(c2,(10,4,0)));check('Native circles in YZ plane retain exact tangencies',exact(o,4,(10,0,0),(1,0,0)))
+        tiny1=feature('TinySpatialA',Part.makeCircle(5e-7,App.Vector(0,0,0),App.Vector(1,0,0)));tiny2=feature('TinySpatialB',Part.makeCircle(5e-7,App.Vector(0,2e-6,0),App.Vector(1,0,0)))
+        o=circle('Tangent',seed(tiny1,(0,5e-7,0)),'Radius=0.0000005',seed(tiny2,(0,1.5e-6,0)));c=o.Shape.Edges[0].Curve;check('Tiny spatial conics preserve angular plane',abs(abs(c.Axis.x)-1)<1e-8 and abs(c.Radius-5e-7)<1e-12 and (c.Center-App.Vector(0,1e-6,0)).Length<1e-10)
+        nurbs=Part.BSplineCurve();nurbs.buildFromPolesMultsKnots([App.Vector(10,0,-20),App.Vector(10,0,-7),App.Vector(10,0,7),App.Vector(10,0,20)],[4,4],[0.,1.],False,3);nc=feature('SpatialNurbs',nurbs.toShape())
+        o=circle('Tangent',seed(nc,(10,0,4)),'Radius=4',seed(b,(10,4,0)));check('Bounded NURBS in arbitrary plane',exact(o,4,(10,4,4),(1,0,0)))
+        o=circle('Tangent','FromFirstPoint=Yes',seed(a,(10,0,4)),'Radius=4','Point','10,4,8');check('Spatial fixed contact and free Point',exact(o,4,(10,4,4),(1,0,0)))
+        skew=line('Skew',(-20,5,0),(20,5,0));count=len(doc.Objects);enter('Circle');enter('Tangent');enter(seed(skew,(4,5,0)));enter('Radius=4');enter(seed(a,(10,0,4)));check('Skew lines reject without object','Tangent' in command_prompt(window).text() and len(doc.Objects)==count);enter('Cancel')
+        nonplanar=Part.BSplineCurve();nonplanar.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(1,4,1),App.Vector(4,8,0),App.Vector(0,12,0)],[4,4],[0.,1.],False,3);bad=feature('Nonplanar',nonplanar.toShape());count=len(doc.Objects);enter('Circle');enter('Tangent');enter('FromFirstPoint=Yes');enter(seed(bad,(0,0,0)));enter('Radius=4');enter(seed(skew,(4,5,0)));check('Infeasible fixed nonplanar contact rejects','Tangent' in command_prompt(window).text() and len(doc.Objects)==count);enter('Undo');enter('Cancel')
+        settings=doc.addObject('OpenMatrix9Gui::HistorySettings','OM9HistorySettings');settings.BrokenHistoryWarning=False
+        group=doc.addObject('App::Part','HistoryParent');group.Placement=App.Placement(App.Vector(10,20,30),App.Rotation())
+        path=line('HistoryPath',(1,0,0),(11,0,0));group.addObject(path);path.Placement=App.Placement(App.Vector(1,2,3),App.Rotation());doc.recompute()
+        h=circle('AroundCurve','History=Yes','Curve='+path.Name+'.Edge1','OnCurve=0.5','3');check('Recorded AroundCurve has native type, link and fraction',h.TypeId=='OpenMatrix9Gui::CircleHistory' and h.Recorded and h.SourceCurve==(path,['Edge1']) and abs(h.PathFraction-.5)<1e-10 and h.OM9FeatureId=='OM9-CURVE-005');check('History initial world placement',exact(h,3,(17,22,33),(1,0,0)))
+        hname=h.Name;doc.undo();check('One Undo removes recorded Circle',doc.getObject(hname) is None);doc.redo();doc.recompute();h=doc.getObject(hname);check('Redo restores recorded Circle and source',h.Recorded and h.SourceCurve[0]==path)
+        doc.openTransaction('Move Circle parent');group.Placement.Base=App.Vector(15,20,30);doc.commitTransaction();doc.recompute();check('Parent placement updates circle',exact(h,3,(22,22,33),(1,0,0)))
+        doc.undo();doc.recompute();check('Parent Undo recomputes Circle',exact(h,3,(17,22,33),(1,0,0)));doc.redo();doc.recompute();check('Parent Redo recomputes Circle',exact(h,3,(22,22,33),(1,0,0)))
+        path.Shape=Part.makeLine(App.Vector(1,0,0),App.Vector(21,0,0));doc.recompute();p,n=midpoint(path);check('Source geometry updates parameter-based center',exact(h,3,p,n))
+        group.Placement.Rotation=App.Rotation(App.Vector(0,0,1),90);doc.recompute();p,n=midpoint(path);check('Parent rotation updates circle normal',exact(h,3,p,n))
+        settings.Update=False;old=h.Shape.copy();group.Placement.Base=App.Vector(25,20,30);doc.recompute();check('Update No preserves previous geometry',(h.Shape.Edges[0].Curve.Center-old.Edges[0].Curve.Center).Length<1e-8);settings.Update=True;doc.recompute();p,n=midpoint(path);check('Update Yes resumes dependency graph',exact(h,3,p,n))
+        settings.Record=False;old=h.Shape.copy();group.Placement.Base=App.Vector(35,20,30);doc.recompute();check('Record No pauses existing record',(h.Shape.Edges[0].Curve.Center-old.Edges[0].Curve.Center).Length<1e-8);settings.Record=True;doc.recompute();p,n=midpoint(path);check('Record Yes resumes Circle dependency',exact(h,3,p,n))
+        settings.Lock=True;blocked=False
+        try:h.Placement=App.Placement(App.Vector(1,0,0),App.Rotation())
+        except Exception:blocked=True
+        check('History Lock prevents child edit',blocked and h.Recorded);settings.Lock=False
+        doc.openTransaction('Detach Circle by child edit');h.Placement=App.Placement(App.Vector(1,0,0),App.Rotation());doc.commitTransaction();check('Child edit detaches source links',not h.Recorded and h.SourceCurve is None);doc.undo();doc.recompute();check('Undo restores recorded Circle link',h.Recorded and h.SourceCurve[0]==path);doc.redo();doc.recompute();check('Redo detaches again',not h.Recorded);doc.undo();doc.recompute()
+        name=path.Name;settings.Lock=True;doc.openTransaction('Delete Circle source');doc.removeObject(name);doc.commitTransaction();doc.recompute();check('Deleted source under Lock clears stale circle',h.Shape.isNull());doc.undo();doc.recompute();path=doc.getObject(name);p,n=midpoint(path);check('Undo source deletion restores analytic circle',h.Recorded and exact(h,3,p,n));settings.Lock=False
+        saved=path.Shape.copy();path.Shape=Part.Shape();doc.recompute();check('Empty source clears output and reports error',h.Shape.isNull() and 'Invalid' in h.State);path.Shape=saved;doc.recompute();p,n=midpoint(path);check('Valid source recovery restores circle',exact(h,3,p,n))
+        curved=feature('HistoryCurvedPath',Part.makeCircle(10));hc=circle('AroundCurve','History=Yes','Curve='+curved.Name+'.Edge1','OnCurve=0.25','2');check('Curved path History records local tangent',hc.Recorded and exact(hc,2,(0,10,0),(1,0,0)));curved.Shape=Part.makeCircle(20);doc.recompute();check('Curved source edit updates center and tangent',exact(hc,2,(0,20,0),(1,0,0)))
+        blocked=False
+        try:h.SourceCurve=(curved,['Edge1'])
+        except Exception:blocked=True
+        check('Recorded source replacement rejects without changing recipe',blocked and h.SourceCurve[0]==path)
+        snapshot=circle('AroundCurve','Curve='+path.Name+'.Edge1','OnCurve=0.5','2');check('Default AroundCurve remains snapshot',snapshot.TypeId=='Part::Feature' and 'Recorded' not in snapshot.PropertiesList)
+        settings.Record=False;snapshot=circle('AroundCurve','History=Yes','Curve='+path.Name+'.Edge1','OnCurve=0.5','2');check('Global Record No suppresses new record',snapshot.TypeId=='Part::Feature');settings.Record=True
+        file=out/'history.FCStd';hname=h.Name;doc.saveAs(str(file));App.closeDocument(doc.Name);doc=App.openDocument(str(file));h=doc.getObject(hname);path=doc.getObject(name);p,n=midpoint(path);check('FCStd restores typed record and metadata',h.Recorded and h.SourceCurve[0]==path and exact(h,3,p,n) and h.OM9FeatureId=='OM9-CURVE-005');group=doc.getObject('HistoryParent');group.Placement.Base=App.Vector(45,20,30);doc.recompute();p,n=midpoint(path);check('Restored parent notification updates Circle',exact(h,3,p,n));doc.saveAs(str(file));result['history_file']=str(file);result['history_object']=hname;result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2));App.Console.PrintMessage(json.dumps(result)+'\n')
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtWidgets.QApplication.quit()
+QtCore.QTimer.singleShot(700,run)

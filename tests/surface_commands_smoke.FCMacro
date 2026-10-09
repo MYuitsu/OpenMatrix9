@@ -1,0 +1,287 @@
+"""OM9-SURFACE-001/003/009 native command, geometry and lifecycle checks."""
+import json
+import math
+import os
+import sys
+from pathlib import Path
+import traceback
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+from PySide6 import QtCore, QtGui, QtWidgets
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+out.mkdir(parents=True, exist_ok=True)
+result = {'checks': []}
+
+def check(name, value):
+    result['checks'].append({'name': name, 'passed': bool(value)})
+    if not value:
+        raise AssertionError(name)
+
+def events():
+    QtWidgets.QApplication.processEvents()
+
+def enter(text=''):
+    console.setFocus()
+    # The CommandConsole protects its transcript; only the suffix is editable.
+    key = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_End, QtCore.Qt.ControlModifier)
+    QtWidgets.QApplication.sendEvent(console, key)
+    if text:
+        QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+            QtCore.QEvent.KeyPress, 0, QtCore.Qt.NoModifier, text))
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_Return, QtCore.Qt.NoModifier))
+    events()
+
+def dialog():
+    return next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog, 'OM9SurfaceOptions')
+                 if d.isVisible()), None)
+
+def feature(doc, name, shape):
+    obj = doc.addObject('Part::Feature', name)
+    obj.Shape = shape
+    return obj
+
+def start(doc, command, inputs):
+    before_count = len(doc.Objects)
+    Gui.Selection.clearSelection()
+    for obj, sub in inputs:
+        Gui.Selection.addSelection(doc.Name, obj.Name, sub)
+    Gui.runCommand(command)
+    events()
+    enter()
+    d = dialog()
+    if d:
+        table = d.findChild(QtWidgets.QTableWidget, 'OM9SurfaceInputs')
+        result.setdefault('input_orders', []).append([table.item(i, 0).text() for i in range(table.rowCount())])
+    check(command + ': options opened; ' + str(console.property('om9Prompt')), d is not None and d.isVisible())
+    check(command + ': preview creates no document object', len(doc.Objects) == before_count)
+    return d
+
+def accept(d):
+    button = d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok)
+    status = d.findChild(QtWidgets.QLabel, 'OM9SurfaceStatus')
+    check('valid native preview: ' + status.text(), button.isEnabled())
+    button.click()
+    events()
+
+def surface(doc, feature_id):
+    matches = [o for o in doc.Objects if getattr(o, 'OM9FeatureId', '') == feature_id]
+    check(feature_id + ': one committed output', len(matches) == 1)
+    obj = matches[0]
+    check(feature_id + ': valid surface, no solid', obj.Shape.isValid()
+          and bool(obj.Shape.Faces) and not obj.Shape.Solids)
+    check(feature_id + ': original inputs retained', bool(obj.SourceCurves))
+    return obj
+
+def persist(doc, obj, feature_id):
+    area = obj.Shape.Area
+    count = len(doc.Objects)
+    doc.undo()
+    check(feature_id + ': Undo removes output only', len(doc.Objects) == count - 1)
+    doc.redo()
+    check(feature_id + ': Redo restores output', len(doc.Objects) == count)
+    file = out / (feature_id + '.FCStd')
+    doc.recompute()
+    doc.saveAs(str(file))
+    App.closeDocument(doc.Name)
+    reopened = App.openDocument(str(file))
+    restored = surface(reopened, feature_id)
+    check(feature_id + ': save/reload preserves geometry', abs(restored.Shape.Area - area) < 1e-6)
+    App.closeDocument(reopened.Name)
+
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__
+        if os.environ.get('OM9_TEST_NATIVE_DIR'):
+            check('isolated native module loaded',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        events()
+        console = Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript')
+        check('shared native command console', console is not None)
+        # OM9-SURFACE-009: equal-radius circles loft to an uncapped cylinder.
+        doc = App.newDocument('LoftTest')
+        doc.UndoMode = 1
+        a = feature(doc, 'A', Part.Wire([Part.makeCircle(3)]))
+        b = feature(doc, 'B', Part.Wire([Part.makeCircle(3, App.Vector(0, 0, 8))]))
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceLoft', [(a, ''), (b, '')])
+        accept(d)
+        obj = surface(doc, 'OM9-SURFACE-009')
+        check('Loft cylinder analytic area', abs(obj.Shape.Area - 2*math.pi*3*8) < 1e-5)
+        persist(doc, obj, 'OM9-SURFACE-009')
+        doc = App.newDocument('GroupedLoft')
+        doc.UndoMode = 1
+        group = doc.addObject('App::Part', 'Group')
+        a = feature(doc, 'A', Part.makeLine(App.Vector(0, 0, 0), App.Vector(4, 0, 0)))
+        b = feature(doc, 'B', Part.makeLine(App.Vector(0, 0, 5), App.Vector(4, 0, 5)))
+        group.addObject(a)
+        group.addObject(b)
+        group.Placement = App.Placement(App.Vector(20, 30, 40), App.Rotation(App.Vector(0, 0, 1), 90))
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceLoft', [(a, ''), (b, '')])
+        accept(d)
+        obj = surface(doc, 'OM9-SURFACE-009')
+        center = obj.Shape.CenterOfMass
+        check('grouped Loft uses world placement', (center - App.Vector(20, 32, 42.5)).Length < 1e-6)
+        App.closeDocument(doc.Name)
+        # OM9-SURFACE-001: circular section along a straight rail.
+        doc = App.newDocument('Sweep1Test')
+        doc.UndoMode = 1
+        rail = feature(doc, 'Rail', Part.makeLine(App.Vector(0, 0, 0), App.Vector(0, 0, 8)))
+        profile = feature(doc, 'Profile', Part.Wire([Part.makeCircle(2)]))
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceSweepSweep1Rail', [(rail, ''), (profile, '')])
+        accept(d)
+        obj = surface(doc, 'OM9-SURFACE-001')
+        check('Sweep1 cylinder analytic area', abs(obj.Shape.Area - 2*math.pi*2*8) < 1e-5)
+        persist(doc, obj, 'OM9-SURFACE-001')
+        # OM9-SURFACE-003: second rail controls a varying strip width.
+        doc = App.newDocument('Sweep2Test')
+        doc.UndoMode = 1
+        r1 = feature(doc, 'R1', Part.makeLine(App.Vector(0, 0, 0), App.Vector(0, 0, 10)))
+        r2 = feature(doc, 'R2', Part.makeLine(App.Vector(5, 0, 0), App.Vector(8, 0, 10)))
+        p1 = feature(doc, 'P1', Part.makeLine(App.Vector(0, 0, 0), App.Vector(5, 0, 0)))
+        p2 = feature(doc, 'P2', Part.makeLine(App.Vector(0, 0, 10), App.Vector(8, 0, 10)))
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceSweepSweep2Rails', [(r1, ''), (r2, ''), (p1, ''), (p2, '')])
+        accept(d)
+        obj = surface(doc, 'OM9-SURFACE-003')
+        check('Sweep2 follows second rail: trapezoid area', abs(obj.Shape.Area - 65) < 1e-4)
+        check('Sweep2 both rails lie on surface', r1.Shape.distToShape(obj.Shape)[0] < 1e-7
+              and r2.Shape.distToShape(obj.Shape)[0] < 1e-7)
+        persist(doc, obj, 'OM9-SURFACE-003')
+        # One profile: changing the second rail changes the swept width.
+        doc = App.newDocument('Sweep2OneProfile')
+        doc.UndoMode = 1
+        r1 = feature(doc, 'R1', Part.makeLine(App.Vector(0, 0, 0), App.Vector(0, 0, 10)))
+        r2 = feature(doc, 'R2', Part.makeLine(App.Vector(5, 0, 0), App.Vector(9, 0, 10)))
+        p = feature(doc, 'P', Part.makeLine(App.Vector(0, 0, 0), App.Vector(5, 0, 0)))
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceSweepSweep2Rails', [(r1, ''), (r2, ''), (p, '')])
+        accept(d)
+        obj = surface(doc, 'OM9-SURFACE-003')
+        check('Sweep2 one section varies width from second rail', abs(obj.Shape.Area - 70) < 1e-4)
+        App.closeDocument(doc.Name)
+        # Closed ring rail, closed profile: sweep produces an uncapped torus.
+        doc = App.newDocument('RingSweep')
+        doc.UndoMode = 1
+        r = feature(doc, 'RingRail', Part.makeCircle(10))
+        p = feature(doc, 'Profile', Part.makeCircle(2, App.Vector(10, 0, 0), App.Vector(0, 1, 0)))
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceSweepSweep1Rail', [(r, ''), (p, '')])
+        accept(d)
+        obj = surface(doc, 'OM9-SURFACE-001')
+        check('closed ring Sweep1 torus area', abs(obj.Shape.Area - 4*math.pi**2*10*2) < 1e-3)
+        App.closeDocument(doc.Name)
+        # Closed Loft profiles: seam edits and flips preserve a valid surface.
+        doc = App.newDocument('SeamLoft')
+        doc.UndoMode = 1
+        a = feature(doc, 'A', Part.makeCircle(3))
+        b = feature(doc, 'B', Part.makeCircle(3, App.Vector(0, 0, 8)))
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceLoft', [(a, ''), (b, '')])
+        table = d.findChild(QtWidgets.QTableWidget, 'OM9SurfaceInputs')
+        table.cellWidget(0, 2).setValue(.25)
+        table.cellWidget(1, 2).setValue(.25)
+        table.cellWidget(0, 1).setChecked(True)
+        table.cellWidget(1, 1).setChecked(True)
+        accept(d)
+        obj = surface(doc, 'OM9-SURFACE-009')
+        # Shape.Area uses coarse integration for rational BSpline surfaces;
+        # check the actual surface rather than mistaking integration error for deformation.
+        face = obj.Shape.Faces[0]
+        u0, u1, v0, v1 = face.ParameterRange
+        points = [face.Surface.value(u0 + (u1-u0)*i/64, (v0+v1)/2) for i in range(65)]
+        check('seam and reverse keep exact cylinder radius', all(
+            abs(math.hypot(p.x, p.y) - 3) < 1e-7 and abs(p.z - 4) < 1e-7 for p in points))
+        check('seam values are persisted', 'seam=0.25' in obj.SurfaceOptions)
+        App.closeDocument(doc.Name)
+        # Same Loft handler through the human-readable CMD alias; no preselection.
+        doc = App.newDocument('CancelTest')
+        doc.UndoMode = 1
+        a = feature(doc, 'A', Part.makeLine(App.Vector(0, 0, 0), App.Vector(4, 0, 0)))
+        b = feature(doc, 'B', Part.makeLine(App.Vector(0, 0, 5), App.Vector(4, 0, 5)))
+        doc.recompute()
+        Gui.Selection.clearSelection()
+        enter('Loft')
+        enter('A')
+        enter('B')
+        enter()
+        d = dialog()
+        check('Loft CMD alias uses same native options', d is not None)
+        d.findChild(QtWidgets.QComboBox, 'OM9LoftStyle').setCurrentIndex(1)
+        check('Straight Sections preview succeeds', d.findChild(QtWidgets.QDialogButtonBox)
+              .button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+        before = len(doc.Objects)
+        d.reject()
+        events()
+        check('Cancel preview leaves document unchanged', len(doc.Objects) == before)
+        enter('Loft')
+        enter('A')
+        enter()
+        check('one-section Loft rejected', dialog() is None)
+        enter('Cancel')
+        check('invalid input has no partial output', len(doc.Objects) == before)
+        App.closeDocument(doc.Name)
+        # Surface-edge input references survive the same geometry path.
+        doc = App.newDocument('EdgeLoft')
+        doc.UndoMode = 1
+        a = feature(doc, 'A', Part.makePlane(4, 3))
+        b = feature(doc, 'B', Part.makePlane(4, 3, App.Vector(0, 0, 5)))
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceLoft', [(a, 'Edge1'), (b, 'Edge1')])
+        accept(d)
+        obj = surface(doc, 'OM9-SURFACE-009')
+        check('Loft retains edge subreferences', all(ref[1] == ('Edge1',) for ref in obj.SourceCurves))
+        persist(doc, obj, 'OM9-SURFACE-009')
+        # Cancelling on document close must remove preview and options safely.
+        doc = App.newDocument('ClosingSurface')
+        a = feature(doc, 'A', Part.makeLine(App.Vector(0, 0, 0), App.Vector(2, 0, 0)))
+        b = feature(doc, 'B', Part.makeLine(App.Vector(0, 3, 0), App.Vector(2, 3, 0)))
+        c = feature(doc, 'C', Part.makeLine(App.Vector(0, 0, 3), App.Vector(2, 0, 3)))
+        doc.recompute()
+        d = start(doc, 'OM9_SurfaceLoft', [(a, ''), (b, ''), (c, '')])
+        d.findChild(QtWidgets.QCheckBox, 'OM9ClosedLoft').setChecked(True)
+        check('closed Loft preview is valid', d.findChild(QtWidgets.QDialogButtonBox)
+              .button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+        App.closeDocument(doc.Name)
+        events()
+        check('document close cancels options and preview', dialog() is None)
+        doc = App.newDocument('F6Surface')
+        a = feature(doc, 'A', Part.makeLine(App.Vector(0, 0, 0), App.Vector(2, 0, 0)))
+        b = feature(doc, 'B', Part.makeLine(App.Vector(0, 3, 0), App.Vector(2, 3, 0)))
+        doc.recompute()
+        Gui.Selection.clearSelection()
+        Gui.Selection.addSelection(a)
+        Gui.Selection.addSelection(b)
+        Gui.runCommand('F6')
+        events()
+        menu = Gui.getMainWindow().findChild(QtWidgets.QMenu, 'OM9F6Menu')
+        actions = [action for sub in menu.findChildren(QtWidgets.QMenu) for action in sub.actions()]
+        for command in ('OM9_SurfaceSweepSweep1Rail', 'OM9_SurfaceSweepSweep2Rails', 'OM9_SurfaceLoft'):
+            check('F6 exposes ' + command, any(action.property('om9OriginalCommand') == command
+                  and action.isEnabled() for action in actions))
+        next(a for a in actions if a.property('om9OriginalCommand') == 'OM9_SurfaceLoft').trigger()
+        events()
+        enter()
+        check('F6 Loft uses the same native options', dialog() is not None)
+        dialog().reject()
+        events()
+        App.closeDocument(doc.Name)
+        result['ok'] = True
+    except Exception:
+        result['ok'] = False
+        result['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        Gui.getMainWindow().close()
+
+QtCore.QTimer.singleShot(1000, run)

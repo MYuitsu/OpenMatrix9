@@ -1,0 +1,81 @@
+"""OM9-TOP11-005 native block/text/dimension/cage regression."""
+import os,sys
+native_dir=os.environ.get('OM9_TEST_NATIVE_DIR','')
+if native_dir:sys.path.insert(0,native_dir)
+import FreeCAD as App, FreeCADGui as Gui, Part, Draft
+from PySide6 import QtCore, QtGui, QtWidgets
+import json,os,traceback
+from pathlib import Path
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,v):result['checks'].append({'name':name,'passed':bool(v)})
+def events():QtWidgets.QApplication.processEvents()
+def enter(text=''):
+    console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));events()
+def select(items):
+    Gui.Selection.clearSelection()
+    for o in items:Gui.Selection.addSelection(o)
+def outputs(d):return [o for o in d.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOP11-005']
+def close(d):enter('Cancel');App.closeDocument(d.Name);events()
+def feature(d,n,s):o=d.addObject('Part::Feature',n);o.Shape=s;return o
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');events();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        import OpenMatrix9Gui
+        result['native_module_path']=str(Path(OpenMatrix9Gui.__file__).resolve())
+        if native_dir:check('Selected native module is loaded',Path(OpenMatrix9Gui.__file__).resolve().parent==Path(native_dir).resolve())
+        d=App.newDocument('NativeBlock');d.UndoMode=1;definition=d.addObject('App::Part','Definition')
+        a=feature(d,'A',Part.makeLine(App.Vector(),App.Vector(4,0,0)));b=feature(d,'B',Part.makeLine(App.Vector(0,2,0),App.Vector(0,5,0)));definition.addObject(a);definition.addObject(b)
+        link=d.addObject('App::Link','Block');link.setLink(definition);link.LinkPlacement=App.Placement(App.Vector(20,30,40),App.Rotation(App.Vector(0,0,1),90));d.recompute();select([link]);Gui.runCommand('OM9_TopIconExplode');events();enter();enter()
+        a.ViewObject.LineColor=(1.,0.,0.);b.ViewObject.LineColor=(0.,0.,1.)
+        check('Explode menu preserves block instance',d.getObject('Block') is not None and not outputs(d));enter('Cancel')
+        select([link]);enter('Explode');enter();enter();found=outputs(d)
+        result['block_centers']=[tuple(o.Shape.CenterOfMass) for o in found]
+        result['block_styles']=[{'label':o.Label,'line_color':tuple(o.ViewObject.LineColor),'metadata':getattr(o,'ExplodeSourceMetadata','')} for o in found]
+        check('Explicit CMD Explode converts block members without deleting definition',len(found)==2 and d.getObject('Block') is None and d.getObject('Definition') is not None and d.getObject('A') is not None and d.getObject('B') is not None)
+        check('Block world placement preserved once',len(found)==2 and sorted(tuple(round(v,6) for v in o.Shape.CenterOfMass) for o in found)==[(16.5,30.,40.),(20.,32.,40.)])
+        # FreeCAD's duplicate-label preference appends a suffix while definitions
+        # remain. Preserve source names in metadata and respect that preference.
+        check('Block members retain individual native colors and source names',len(found)==2 and {json.loads(o.ExplodeSourceMetadata)['native_source'] for o in found}=={'A','B'} and all(o.Label.startswith(json.loads(o.ExplodeSourceMetadata)['name']) for o in found) and sorted(tuple(o.ViewObject.LineColor)[:3] for o in found)==[(0.,0.,1.),(1.,0.,0.)])
+        if found:
+            d.undo();check('Block Explode atomic Undo restores instance',d.getObject('Block') is not None and not outputs(d));d.redo();check('Block Explode Redo',len(outputs(d))==2)
+        close(d)
+        d=App.newDocument('NestedNativeBlock');container=d.addObject('App::Part','Container');container.Placement.Base=App.Vector(100,200,300);definition=d.addObject('App::Part','Definition');a=feature(d,'A',Part.makeLine(App.Vector(),App.Vector(4,0,0)));definition.addObject(a);link=d.addObject('App::Link','Block');link.setLink(definition);link.LinkPlacement=App.Placement(App.Vector(20,30,40),App.Rotation(App.Vector(0,0,1),90));container.addObject(link);d.recompute();select([link]);enter('Explode');enter();enter();found=outputs(d)
+        check('Grouped block retains membership and composes global placement once',len(found)==1 and found[0] in container.Group and found[0].getGlobalPlacement().Base.distanceToPoint(App.Vector(120,230,340))<1e-6 and found[0].getGlobalPlacement().Rotation.multVec(App.Vector(1,0,0)).distanceToPoint(App.Vector(0,1,0))<1e-6)
+        close(d)
+        d=App.newDocument('NativeFont');font='C:/Windows/Fonts/arial.ttf';text=Draft.make_shapestring(String='AB',FontFile=font,Size=5);text.Placement.Base=App.Vector(10,20,3);d.recompute();bounds=text.Shape.BoundBox;select([text]);enter('Explode');enter();enter();found=outputs(d)
+        check('ShapeString Explode creates native glyph curves',bool(found) and all(o.Shape.ShapeType in ('Edge','Wire') for o in found))
+        if found:
+            shape=Part.makeCompound([o.Shape for o in found]);check('Text curves preserve font outlines and placement',abs(shape.BoundBox.XMin-bounds.XMin)<1e-6 and abs(shape.BoundBox.XMax-bounds.XMax)<1e-6 and abs(shape.BoundBox.ZMin-3)<1e-6)
+        close(d)
+        d=App.newDocument('NativeDimension');dim=Draft.make_dimension(App.Vector(0,0,0),App.Vector(10,0,0),App.Vector(0,3,0));d.recompute();events();label=dim.ViewObject.Proxy.string;select([dim]);enter('Explode');enter();enter();found=outputs(d)
+        curves=[o for o in found if hasattr(o,'Shape')];texts=[o for o in found if hasattr(o,'LabelText')]
+        result['dimension_outputs']=[(o.Name,o.TypeId) for o in found]
+        check('Linear Dimension Explode retains native curves and editable label',bool(curves) and len(texts)==1 and ''.join(texts[0].LabelText)==label)
+        if texts:
+            check('Native dimension retains centered label frame and visible arrow curves',texts[0].ViewObject.Justification=='Center' and texts[0].TextFrame.A14==5 and texts[0].TextFrame.A24==4 and len(curves)>3)
+            filename=out/'native-dimension.FCStd';d.saveAs(str(filename));name=d.Name;App.closeDocument(name);d=App.openDocument(str(filename));events();labels=[o for o in outputs(d) if hasattr(o,'LabelText')];check('Native dimension detached label survives FCStd and stays editable',len(labels)==1 and ''.join(labels[0].LabelText)==label);labels[0].LabelText=['Edited'];d.recompute();check('Native dimension label content can be edited',labels[0].LabelText==['Edited'])
+        close(d)
+        d=App.newDocument('NativeText');text=Draft.make_text(['AB'],App.Vector(10,20,3));d.recompute();events();select([text]);enter('Explode');enter();enter();found=outputs(d)
+        check('Draft Text produces native glyph outlines in its source plane',bool(found) and all(abs(o.Shape.BoundBox.ZMin-3)<1e-6 for o in found))
+        close(d)
+        for justify in ['Center','Right']:
+            d=App.newDocument('NativeAlignedText');text=Draft.make_text(['AB','C'],App.Vector(10,20,3));text.ViewObject.Justification=justify;text.ViewObject.LineSpacing=2;d.recompute();events();select([text]);enter('Explode');enter();enter();found=outputs(d);shape=Part.makeCompound([o.Shape for o in found]) if found else None;check('Native '+justify+' text retains alignment and line spacing',shape is not None and shape.BoundBox.XMin<10 and shape.BoundBox.XMax<=(10.1 if justify=='Right' else 30) and shape.BoundBox.YMin<15);close(d)
+        d=App.newDocument('NativeLabel');label=Draft.make_label(App.Vector(),App.Vector(30,30,0),custom_text='AB');labelName=label.Name;d.recompute();events();select([label]);enter('Explode');enter();enter();found=outputs(d);check('Native Label retains glyphs leader and frame curves',bool(found) and len(found)>5 and d.getObject(labelName) is None);close(d)
+        for kind in ['Text','Dimension']:
+            d=App.newDocument('NativeScreenAnnotation');o=Draft.make_text(['AB']) if kind=='Text' else Draft.make_dimension(App.Vector(),App.Vector(10,0,0),App.Vector(0,3,0));o.ViewObject.DisplayMode='Screen';d.recompute();events();original=len(d.Objects);select([o]);enter('Explode');enter();enter();check('Screen '+kind+' rejected atomically without inventing plane',d.getObject(o.Name) is not None and len(d.Objects)==original and not outputs(d));close(d)
+        d=App.newDocument('MissingDimensionFont');o=Draft.make_dimension(App.Vector(),App.Vector(10,0,0),App.Vector(0,3,0));o.ViewObject.FontName='OM9 Missing Font Fixture';d.recompute();events();original=len(d.Objects);select([o]);enter('Explode');enter();enter();check('Native dimension with missing font is preserved atomically',d.getObject(o.Name) is not None and len(d.Objects)==original and not outputs(d));close(d)
+        d=App.newDocument('StaleText');o=Draft.make_text(['AB']);d.recompute();events();select([o]);enter('Explode');enter();o.Text=['Changed'];enter();check('Changed text parameters invalidate an existing Explode preview',d.getObject(o.Name) is not None and not outputs(d));close(d)
+        d=App.newDocument('NativeAngularDimension');dim=Draft.make_angular_dimension(App.Vector(1,2,3),[0,90],App.Vector(11,2,3));d.recompute();events();label=dim.ViewObject.Proxy.string;select([dim]);enter('Explode');enter();enter();found=outputs(d);texts=[o for o in found if hasattr(o,'LabelText')];check('Native angular dimension separates displayed curves and editable angle label',len(found)>3 and len(texts)==1 and ''.join(texts[0].LabelText)==label);check('Native angular dimension keeps analytic arc',any(hasattr(o,'Shape') and any(type(e.Curve).__name__=='Circle' and abs(e.Length-15.707963267949)<1e-6 for e in o.Shape.Edges) for o in found));close(d)
+        d=App.newDocument('NativeCage');cage=d.addObject('Part::Feature','Cage');cage.addProperty('App::PropertyLinkList','OM9CageComponents');c1=feature(d,'ControlCurve',Part.makeLine(App.Vector(),App.Vector(5,0,0)));c2=feature(d,'ControlSurface',Part.makePlane(5,3));cage.OM9CageComponents=[c1,c2];cage.Shape=Part.makeCompound([c1.Shape,c2.Shape]);select([cage]);enter('Explode');enter();enter();found=outputs(d)
+        check('Native cage component adapter separates curve and surface preserving controls',len(found)==2 and any(o.Shape.ShapeType=='Edge' for o in found) and any(o.Shape.ShapeType=='Face' for o in found) and d.getObject('ControlCurve') is not None and d.getObject('ControlSurface') is not None)
+        close(d)
+        result['transcript']=console.toPlainText()
+        result['ok']=all(c['passed'] for c in result['checks'])
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        for n in list(App.listDocuments()):App.closeDocument(n)
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(800,run)

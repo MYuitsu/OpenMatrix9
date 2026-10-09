@@ -3,6 +3,9 @@
 #include "MatrixSidebar.h"
 #include "NativeCommands.h"
 #include "CurveController.h"
+#include "SurfaceController.h"
+#include "EditController.h"
+#include "SolidController.h"
 #include "CoreWorkspace.h"
 #include "CoreViewControls.h"
 #include "CoreNotes.h"
@@ -44,6 +47,9 @@ void Workbench::activated()
     }
     static_cast<MatrixSidebar*>(sidebar.data())->activate();
     CurveController::instance().activate();
+    SurfaceController::instance().activate();
+    EditController::instance().activate();
+    SolidController::instance().activate();
     CoreWorkspace::instance().activate();
     CoreViewControls::instance().activate();
     CoreNotes::activate();
@@ -57,6 +63,9 @@ void Workbench::activated()
 
 void Workbench::deactivated()
 {
+    SurfaceController::instance().deactivate();
+    EditController::instance().deactivate();
+    SolidController::instance().deactivate();
     CoreMouse::instance().deactivate();
     CoreKeyboard::instance().deactivate();
     CoreSnaps::deactivate();
@@ -114,6 +123,7 @@ Gui::MenuItem* Workbench::setupMenuBar() const
 
         submenu->setCommand(title);
         if(std::string(title)=="File")*submenu << "Import3dm" << "Export3dm";
+        if(std::string(title)=="Transform")*submenu << "OM9_ReleaseFromCage";
 
         const std::size_t commandCount =
             om9_menu_group_command_count(

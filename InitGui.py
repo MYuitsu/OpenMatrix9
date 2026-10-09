@@ -10,6 +10,7 @@ class OpenMatrix9Workbench(Gui.Workbench):
     ToolTip = "OpenMatrix9 Jewelry CAD"
 
     def Initialize(self):
+        import Part  # Native Surface History derives from the Part document feature.
         # Khi user chọn OpenMatrix9 thì load native GUI module.
         import OpenMatrix9Gui
 

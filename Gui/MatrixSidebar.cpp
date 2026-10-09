@@ -2,6 +2,9 @@
 #include "RustBridge.h"
 #include "CoreSnaps.h"
 #include "CoreKeyboard.h"
+#include "CoreLayers.h"
+#include <App/Application.h>
+#include <App/Document.h>
 #include <QMainWindow>
 #include <QScrollArea>
 #include <QToolButton>
@@ -20,9 +23,11 @@
 #include <QVBoxLayout>
 #include <QGridLayout>
 #include <QRegularExpression>
+#include <QColorDialog>
 #include <algorithm>
 #include <limits>
 #include <utility>
+#include <exception>
 
 namespace {
 class TitleButton final : public QToolButton {
@@ -189,15 +194,28 @@ MatrixSidebar::MatrixSidebar(QMainWindow* window,const QString& resourceRoot,Hos
     auto* lights=new QWidget(layers);auto* lightsLayout=new QHBoxLayout(lights);lightsLayout->setContentsMargins(0,0,0,0);lightsLayout->setSpacing(1);auto* lightsLabel=new QLabel("Lights",lights);lightsLabel->setFixedWidth(51);lightsLayout->addWidget(lightsLabel);
     lightsLayout->addWidget(iconButton(lights,"LayerArrow","OM9LightsArrow",QSize(15,15)));auto* lightColor=new QLabel(lights);lightColor->setFixedSize(21,15);lightColor->setStyleSheet("background:white;border:1px solid #bbbbbb;");lightsLayout->addWidget(lightColor);
     lightsLayout->addWidget(iconButton(lights,"LayerLock","OM9LightsLock",QSize(18,15)));lightsLayout->addWidget(iconButton(lights,"LayerVisibility","OM9LightsVisibility",QSize(26,15)));lightsLayout->addStretch();lightsLayout->addWidget(textButton(lights,"Hide ◉",QSize(55,15)));lightsLayout->addWidget(textButton(lights,"Show ◉",QSize(58,15)));layersLayout->addWidget(lights);
-    QStringList layerNames={"Metal 01","Metal 02","Metal 03","Metal 04","Gem 01","Gem 02","Gem 03","Gem 04","User 01","User 02","User 03","User 04","Heads","Finger","Cutting","Creation"};
-    QStringList swatches={"#229987","#319f49","#70c64b","#a0cf78","#598bc2","#4f80cb","#7aa7ce","#accae4","#e23434","#70c133","#3468ff","#777777","#851ca1","#ad423c","#ca7135","#dfb126"};
-    for(int n:{17,18,19,20,25,26,27,28,21,22,23,24,29,30,31,32})layerNames.append(QString("User %1").arg(n));
-    swatches+=QStringList{"#df9098","#dabb7c","#bd8735","#a5c14b","#47c7aa","#72c6cb","#607cab","#4d626a","#57b397","#586076","#c6bbb7","#6c5578","#57536b","#1e555b","#0c343f","#1b3555"};
     for(int block=0;block<2;++block){if(block)layersLayout->addWidget(separator(layers));auto* rows=new QWidget(layers);auto* gridLayout=new QGridLayout(rows);gridLayout->setContentsMargins(0,0,0,0);gridLayout->setSpacing(1);
         for(int j=0;j<16;++j){int i=block*16+j;auto* row=new QWidget(rows);auto* rowLayout=new QHBoxLayout(row);rowLayout->setContentsMargins(0,0,0,0);rowLayout->setSpacing(0);
-            auto* label=new QLabel(layerNames[i],row);label->setObjectName(QString("OM9LayerName%1").arg(i));label->setFixedSize(51,15);label->setStyleSheet(i==0?"font-size:10px;background:#759df0;":"font-size:10px;");rowLayout->addWidget(label);
-            rowLayout->addWidget(iconButton(row,"LayerArrow",QString("OM9LayerArrow%1").arg(i),QSize(15,15)));auto* swatch=new QLabel(row);swatch->setFixedSize(21,15);swatch->setStyleSheet("background:"+swatches[i]+";border:1px solid #bbbbbb;");rowLayout->addWidget(swatch);
-            rowLayout->addWidget(iconButton(row,"LayerLock",QString("OM9LayerLock%1").arg(i),QSize(18,15)));auto* visibility=textButton(row,"I",QSize(26,15));visibility->setObjectName(QString("OM9LayerVisibility%1").arg(i));visibility->setStyleSheet("background:#789de9;border:1px solid #c5d7ff;color:#162f54;");rowLayout->addWidget(visibility);gridLayout->addWidget(row,j%8,j/8);}
+            auto* label=new QLabel(QString("Layer %1").arg(i+1),row);label->setObjectName(QString("OM9LayerName%1").arg(i));label->setFixedSize(51,15);rowLayout->addWidget(label);
+            const auto layerButton=[this,row,i](const QString& key,const QString& role,const QSize& size){
+                auto* button=new QToolButton(row);button->setObjectName(QString("OM9Layer%1%2").arg(role).arg(i));button->setFixedSize(size);button->setIcon(iconForKey(key,size-QSize(1,1)));button->setIconSize(size-QSize(1,1));button->setCheckable(true);return button;
+            };
+            auto* arrow=layerButton("LayerArrow","Arrow",QSize(15,15));rowLayout->addWidget(arrow);
+            connect(arrow,&QToolButton::clicked,this,[this,i]{CoreLayers::select(i+1);refreshLayers();});
+            auto* swatch=new QToolButton(row);swatch->setObjectName(QString("OM9LayerSwatch%1").arg(i));swatch->setFixedSize(21,15);rowLayout->addWidget(swatch);
+            connect(swatch,&QToolButton::clicked,this,[this,i]{
+                auto* original=App::GetApplication().getActiveDocument();if(!original)return;const std::string uid=original->Uid.getValueStr();
+                try {
+                    const auto s=CoreLayers::state(i+1);const auto chosen=QColorDialog::getColor(QColor::fromRgbF(s.color[0],s.color[1],s.color[2]),this,tr("Layer color"),QColorDialog::DontUseNativeDialog);
+                    auto* current=App::GetApplication().getActiveDocument();
+                    if(chosen.isValid()&&current==original&&current->Uid.getValueStr()==uid)CoreLayers::setColor(i+1,{chosen.redF(),chosen.greenF(),chosen.blueF()});
+                }catch(const std::exception&){}
+                refreshLayers();
+            });
+            auto* lock=layerButton("LayerLock","Lock",QSize(18,15));rowLayout->addWidget(lock);
+            connect(lock,&QToolButton::clicked,this,[this,i]{CoreLayers::toggleLocked(i+1);refreshLayers();});
+            auto* visibility=new QToolButton(row);visibility->setText("I");visibility->setFixedSize(26,15);visibility->setCheckable(true);visibility->setObjectName(QString("OM9LayerVisibility%1").arg(i));rowLayout->addWidget(visibility);
+            connect(visibility,&QToolButton::clicked,this,[this,i]{CoreLayers::toggleVisible(i+1);refreshLayers();});gridLayout->addWidget(row,j%8,j/8);}
         layersLayout->addWidget(rows);}
     layersLayout->addWidget(separator(layers));layout->addWidget(section(5,"LAYERS",layers));
 
@@ -284,6 +302,7 @@ void MatrixSidebar::refreshState() {
     populateGrid();populateHistory();refreshAvailability();
 }
 void MatrixSidebar::refreshAvailability() {
+    refreshLayers();
     std::vector<std::size_t> currentHistory;
     for(std::size_t i=0;i<om9_sidebar_history_count();++i)currentHistory.push_back(om9_sidebar_history_command(i));
     if(currentHistory!=renderedHistory)populateHistory();
@@ -305,6 +324,31 @@ void MatrixSidebar::refreshAvailability() {
         viewsAvailable|=enabled;
     }
     findChild<QToolButton*>("OM9WorkspaceViews")->setEnabled(viewsAvailable);
+}
+void MatrixSidebar::refreshLayers() {
+    const bool editable=CoreLayers::available();
+    for(int i=0;i<32;++i) {
+        auto* label=findChild<QLabel*>(QString("OM9LayerName%1").arg(i));
+        auto* arrow=findChild<QToolButton*>(QString("OM9LayerArrow%1").arg(i));
+        auto* lock=findChild<QToolButton*>(QString("OM9LayerLock%1").arg(i));
+        auto* visible=findChild<QToolButton*>(QString("OM9LayerVisibility%1").arg(i));
+        auto* swatch=findChild<QToolButton*>(QString("OM9LayerSwatch%1").arg(i));
+        if(!label||!arrow||!lock||!visible||!swatch)continue;
+        for(auto* button:{arrow,lock,visible,swatch})button->setEnabled(editable);
+        try {
+            const auto s=CoreLayers::state(i+1);label->setText(s.name);
+            label->setStyleSheet(s.active?"font-size:10px;background:#759df0;":"font-size:10px;");
+            const QSignalBlocker a(arrow),l(lock),v(visible);arrow->setChecked(s.active);lock->setChecked(s.locked);visible->setChecked(s.visible);visible->setText(s.visible?"I":"—");
+            arrow->setToolTip(tr("Set active layer for new Circles: %1 (Layer=%2)").arg(s.name).arg(i+1));
+            lock->setToolTip(s.locked?tr("Unlock %1 for new Circles").arg(s.name):tr("Lock %1 against new Circles").arg(s.name));
+            visible->setToolTip(s.visible?tr("Hide %1 and its members").arg(s.name):tr("Show %1 and its members; new Circles inherit visibility").arg(s.name));
+            visible->setStyleSheet(s.visible?"background:#789de9;border:1px solid #c5d7ff;color:#162f54;":"background:#555555;border:1px solid #939393;");
+            swatch->setStyleSheet("QToolButton{background:"+QColor::fromRgbF(s.color[0],s.color[1],s.color[2]).name()+";border:1px solid #bbbbbb;}");
+            swatch->setToolTip(tr("Set %1 color for its OM9 Circle outputs").arg(s.name));
+        }catch(const std::exception& e) {
+            for(auto* button:{arrow,lock,visible,swatch}){button->setEnabled(false);button->setToolTip(QString::fromUtf8(e.what()));}
+        }
+    }
 }
 void MatrixSidebar::activate() {
     if(active)return;active=true;alteredDocks.clear();

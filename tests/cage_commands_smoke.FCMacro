@@ -1,0 +1,92 @@
+"""Native Cage menu/CMD contracts; run through tools/run_menu_smoke.py."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part, Mesh
+from PySide6 import QtCore, QtGui, QtWidgets
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[]}
+def check(name,ok):
+    report['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def events():QtWidgets.QApplication.processEvents()
+def enter(text=''):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));events()
+def select(*objects):
+    Gui.Selection.clearSelection()
+    for o in objects:Gui.Selection.addSelection(o)
+def cages(doc):return [o for o in doc.Objects if o.TypeId=='OpenMatrix9Gui::CageControl']
+def bindings(doc):return [o for o in doc.Objects if o.TypeId=='OpenMatrix9Gui::CageBinding']
+def options():return next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9CageOptions') if d.isVisible()),None)
+def box(doc,name):
+    o=doc.addObject('Part::Feature',name);o.Shape=Part.makeBox(10,10,10);doc.recompute();return o
+def mesh(doc,name,offset=0):
+    o=doc.addObject('Mesh::Feature',name);o.Mesh=Mesh.Mesh([(App.Vector(1+offset,1,1),App.Vector(4+offset,1,1),App.Vector(1+offset,4,4))]);doc.recompute();return o
+def points(o):return [App.Vector(p) for p in o.Mesh.Topology[0]]
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');events()
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        check('native CMD transcript available',console is not None)
+        import OpenMatrix9Gui
+        report['native_module_path']=str(getattr(OpenMatrix9Gui,'__file__',''))
+        if os.environ.get('OM9_TEST_NATIVE_DIR'):check('requested native module loaded',Path(report['native_module_path']).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        doc=App.newDocument('CageCommands');doc.UndoMode=1;source=box(doc,'Source')
+        select(source);Gui.runCommand('OM9_TransformCageEditingCreateCage');events();enter()
+        d=options();check('menu opens nonmodal native cage options',d is not None and not d.isModal())
+        check('explicit OM9 2-count 1-degree defaults',all(d.findChild(QtWidgets.QLineEdit,'OM9Cage'+axis+'Count').text()=='2' and d.findChild(QtWidgets.QLineEdit,'OM9Cage'+axis+'Degree').text()=='1' for axis in 'UVW'))
+        check('preview creates no document object',len(doc.Objects)==1);enter('OK');control=cages(doc)[0]
+        report['created_control']={'type':control.TypeId,'feature':control.OM9FeatureId,'editor_mode':control.getEditorMode('ControlPoints'),'point_count':len(control.ControlPoints),'binding_count':len(bindings(doc))}
+        check('menu creates correct native control identity',control.TypeId=='OpenMatrix9Gui::CageControl' and control.OM9FeatureId=='OM9-TRANSFORM-041')
+        check('menu control has eight points',len(control.ControlPoints)==8)
+        check('menu creation makes no captures',not bindings(doc))
+        check('native control points are view-editable',not any(flag in control.getEditorMode('ControlPoints') for flag in ['ReadOnly','Hidden']))
+        select();enter('Cage');enter('Source');enter();enter('OK');typed=cages(doc)[-1]
+        check('Cage CMD uses same native service',len(cages(doc))==2 and typed.Counts==control.Counts and typed.Degrees==control.Degrees and all((a-b).Length<1e-12 for a,b in zip(typed.ControlPoints,control.ControlPoints)))
+        first=mesh(doc,'First');second=mesh(doc,'Second',1)
+        select();enter('CageEdit');enter('First');enter('Second');enter()
+        check('CageEdit separates captives from control role',any(d.isVisible() for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9CageChooseControl')))
+        enter(control.Name);check('existing cage capture options',options() is not None);enter('Region=Local');enter('Falloff=2.5');enter('Region=Global');enter('OK')
+        check('typed CageEdit creates selected native bindings',len(bindings(doc))==2 and all(b.Active and b.Control==control and b.Captive in [first,second] and b.OM9FeatureId=='OM9-TRANSFORM-020' for b in bindings(doc)))
+        policy=doc.addObject('OpenMatrix9Gui::HistorySettings','HistorySettings');policy.Record=False;policy.Update=False
+        before=points(first);doc.openTransaction('Edit cage control point');changed=list(control.ControlPoints);changed[-1]=changed[-1]+App.Vector(0,0,4);control.ControlPoints=changed;doc.recompute();doc.commitTransaction()
+        check('native mesh deforms from cage CV with global History Off',any((a-b).Length>1e-5 for a,b in zip(before,points(first))) and all(b.Active for b in bindings(doc)))
+        frozen=points(first);select(first);enter('ReleaseFromCage');enter()
+        check('Release selected-only preserves control and other captives',not next(b for b in bindings(doc) if b.Captive==first).Active and next(b for b in bindings(doc) if b.Captive==second).Active and doc.getObject(control.Name)==control and all((a-b).Length<1e-12 for a,b in zip(frozen,points(first))))
+        doc.undo();doc.recompute();check('Release Undo restores binding',all(b.Active and b.Control==control for b in bindings(doc)))
+        count=len(doc.Objects);select(source);enter('Cage');enter();enter('Cancel');check('Cancel creates no outputs',len(doc.Objects)==count and options() is None)
+        select(source);enter('Cage');enter();d=options();d.findChild(QtWidgets.QLineEdit,'OM9CageUCount').setText('NaN');enter('OK')
+        check('nonfinite native UI uses Rust validation',len(doc.Objects)==count and options() is not None and 'finite integer' in options().findChild(QtWidgets.QLabel,'OM9CageStatus').text());enter('Cancel')
+        select(source);enter('Cage');enter();d=options();d.findChild(QtWidgets.QLineEdit,'OM9CageUCount').setText('1');enter('OK')
+        check('invalid count UI rejected without mutation',len(doc.Objects)==count and options() is not None and 'Counts must exceed degree' in options().findChild(QtWidgets.QLabel,'OM9CageStatus').text());enter('Cancel')
+        select(source);enter('Cage');enter();source.Shape=Part.makeBox(11,10,10);doc.recompute();enter('OK')
+        check('stale full geometry preview rejected before OK',len(doc.Objects)==count and options() is not None and 'changed' in options().findChild(QtWidgets.QLabel,'OM9CageStatus').text());enter('Cancel')
+        fresh=mesh(doc,'Fresh');select(fresh);enter('CageEdit');enter();enter(control.Name);capture_count=len(bindings(doc));enter('Falloff=NaN');enter('Falloff=-1')
+        check('typed nonfinite and negative falloff rejected by Rust','Falloff must be finite and nonnegative' in console.toPlainText());enter('Cancel')
+        select(fresh);enter('CageEdit');enter();enter(control.Name);changed=list(control.Weights);changed[0]=2;control.Weights=changed;doc.recompute();enter('OK')
+        check('stale rational control data rejected before capture',len(bindings(doc))==capture_count and options() is not None and 'changed' in options().findChild(QtWidgets.QLabel,'OM9CageStatus').text());enter('Cancel')
+        retained=doc.addObject('App::FeaturePython','RetainedControl')
+        for key,value in {'OM9SourceUUID':'11111111-2222-3333-4444-555555555555','OM9SourceClass':'ON_MorphControl','OM9ImportNamespace':'missing_archive_fixture','OM9Capability':'retained_morph_control'}.items():
+            retained.addProperty('App::PropertyString',key);setattr(retained,key,value)
+        count=len(doc.Objects);select(fresh);enter('CageEdit');enter();enter('Restore=RetainedControl');check('explicit retained restoration option',options() is not None);enter('OK')
+        check('retained API error preserved before mutation',len(doc.Objects)==count and len(bindings(doc))==capture_count and options() is not None and 'Retained source archive is missing' in options().findChild(QtWidgets.QLabel,'OM9CageStatus').text());enter('Cancel')
+        flat=doc.addObject('Part::Feature','Flat');flat.Shape=Part.makePlane(10,10);doc.recompute();count=len(doc.Objects);select(flat);enter('Cage');enter()
+        check('flat bbox rejects missing extent with no padding',len(doc.Objects)==count and options() is None and 'positive extents' in console.toPlainText());enter('Cancel')
+        select(source);enter('Cage');enter();other=App.newDocument('CageSwitch');events()
+        check('document switch closes native options and leaves no outputs',options() is None and not other.Objects and len(doc.Objects)==count)
+        App.setActiveDocument(doc.Name);events();select(source);enter('Cage');enter();Gui.activateWorkbench('PartWorkbench');events()
+        check('workbench switch cancels native cage session',options() is None and len(doc.Objects)==count)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        if 'console' in globals() and console is not None:report['transcript']=console.toPlainText();report['prompt']=str(console.property('om9Prompt'))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf8')
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(800,run)

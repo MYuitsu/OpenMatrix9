@@ -1,0 +1,109 @@
+# OM9-CURVE-005: portable recipes and live native Circle source dependencies.
+import json, math, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtWidgets, QtTest
+if os.environ.get('OM9_TEST_NATIVE_DIR'): sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not ok: raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(100,loop.quit);loop.exec()
+def enter(text):
+    field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def feature(name,shape):
+    o=doc.addObject('Part::Feature',name);o.Shape=shape;doc.recompute();return o
+def vertex(name,p): return feature(name,Part.Vertex(App.Vector(*p)))
+def point(o): return 'Point='+o.Name+'.Vertex1'
+def curve(o,p): return 'Curve='+o.Name+'.Edge1@'+','.join(str(v) for v in p)
+def circle(*args):
+    n=len(doc.Objects);enter('Circle')
+    for text in args: enter(text)
+    check('One Circle output: '+str(args[:3]),len(doc.Objects)==n+1)
+    o=doc.Objects[-1];check('Recorded '+o.Name,o.TypeId=='OpenMatrix9Gui::CircleHistory' and o.Recorded and len(o.Recipe)==24);return o
+def exact(o,r,p,n=(0,0,1)):
+    if o.Shape.isNull(): return False
+    c=o.Shape.Edges[0].Curve
+    return o.Shape.isValid() and o.Shape.isClosed() and isinstance(c,Part.Circle) and abs(c.Radius-r)<1e-6 and (c.Center-App.Vector(*p)).Length<1e-6 and abs(abs(c.Axis.dot(App.Vector(*n)))-1)<1e-7
+def deformable(o,r,p,count=12,degree=3):
+    detail={'name':o.Name,'expected_radius':r,'expected_center':list(p),'expected_poles':count,'expected_degree':degree,'recipe':list(o.Recipe),'radius':o.Radius.Value,'reported_approx_deviation':o.ApproxDeviation,'source_names':[entry[0].Name for entry in o.Sources]}
+    result.setdefault('deformable_diagnostics',[]).append(detail)
+    if o.Shape.isNull(): detail['null_shape']=True;return False
+    edge=o.Shape.Edges[0];c=edge.Curve;center=App.Vector(*p)
+    detail.update({'valid':o.Shape.isValid(),'closed':o.Shape.isClosed(),'curve_type':type(c).__name__,'periodic':c.isPeriodic(),'poles':getattr(c,'NbPoles',None),'degree':getattr(c,'Degree',None),'parameter_range':[edge.FirstParameter,edge.LastParameter]})
+    sampled=max(abs((edge.valueAt(edge.FirstParameter+(edge.LastParameter-edge.FirstParameter)*i/1024)-center).Length-r) for i in range(1024));detail['max_native_radial_error']=sampled;detail['relative_native_error']=sampled/r
+    # Cubic twelve-pole Circle rebuild has a measured unit-radius deviation
+    # ~0.00011137. Keep a strict 0.2% radius quality bound and verify OCCT's
+    # sampled error against Rust's reported spatial approximation deviation.
+    quality_limit=.002*r;agreement_tolerance=1e-6*max(1.,r)
+    detail.update({'quality_limit':quality_limit,'reported_agreement_tolerance':agreement_tolerance})
+    ok=(detail['valid'] and detail['closed'] and isinstance(c,Part.BSplineCurve) and detail['periodic'] and detail['poles']==count and detail['degree']==degree and abs(o.Radius.Value-r)<1e-6 and 0<=o.ApproxDeviation<=quality_limit and sampled<=quality_limit and sampled<=o.ApproxDeviation+agreement_tolerance)
+    detail['passed']=ok;return ok
+def run():
+    global doc,field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__;check('Selected native module loaded',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        window=Gui.getMainWindow();window.resize(1400,950);field=command_input(window);doc=App.newDocument('CircleHistoryMore');doc.UndoMode=1;Gui.activeDocument().activeView().viewTop();settle()
+        settings=doc.addObject('OpenMatrix9Gui::HistorySettings','OM9HistorySettings');settings.BrokenHistoryWarning=False
+        center=vertex('CenterSource',(0,0,0));radial=vertex('RadiusSource',(4,0,0));direction=vertex('DirectionSource',(0,0,10))
+        scalar=circle('History=Yes',point(center),'Diameter=10');check('Numeric Center links source and preserves converted radius',exact(scalar,5,(0,0,0)) and len(scalar.Sources)==1)
+        picked=circle('History=Yes',point(center),point(radial));check('Picked Center starts with native source radius',exact(picked,4,(0,0,0)))
+        radial.Shape=Part.Vertex(App.Vector(6,0,0));doc.recompute();check('Radius source recomputes picked radius',exact(picked,6,(0,0,0)) and exact(scalar,5,(0,0,0)))
+        center.Placement.Base=App.Vector(1,0,0);doc.recompute();check('Center source placement recomputes centers and picked span',exact(picked,5,(1,0,0)) and exact(scalar,5,(1,0,0)))
+        oriented=circle('History=Yes',point(center),'Orientation','Direction='+direction.Name+'.Vertex1','3');check('Direction source initially records endpoint',oriented.Recorded and len(oriented.Sources)==2)
+        direction.Shape=Part.Vertex(App.Vector(11,0,0));doc.recompute();check('Direction source edit updates analytic normal',exact(oriented,3,(1,0,0),(1,0,0)))
+        obsolete=vertex('ObsoleteDirection',(2,3,14));reoriented=circle('History=Yes','2,3,4','Orientation','Direction='+obsolete.Name+'.Vertex1','Orientation','12,3,4','3');check('Replacing native Direction with typed direction prunes old source',not reoriented.Sources and exact(reoriented,3,(2,3,4),(1,0,0)));doc.removeObject(obsolete.Name);doc.recompute();check('Deleting replaced Direction source preserves new circle',exact(reoriented,3,(2,3,4),(1,0,0)))
+        two=circle('2Point','History=Yes',point(center),point(radial));check('TwoPoint vertex recipe',exact(two,2.5,(3.5,0,0)))
+        radial.Shape=Part.Vertex(App.Vector(9,0,0));doc.recompute();check('TwoPoint changes diameter from live vertices',exact(two,4,(5,0,0)))
+        a=vertex('ChordA',(-3,0,0));b=vertex('ChordB',(3,0,0));side=vertex('CircleSide',(0,10,0))
+        three=circle('3Point','History=Yes',point(a),point(b),'Radius=5',point(side));check('ThreePoint Radius recorded constraint',exact(three,5,(0,4,0)))
+        a.Shape=Part.Vertex(App.Vector(-6,0,0));b.Shape=Part.Vertex(App.Vector(6,0,0));doc.recompute();check('Growing chord invalidates recorded radius and clears output',three.Shape.isNull() and 'Invalid' in three.State)
+        a.Shape=Part.Vertex(App.Vector(-3,0,0));b.Shape=Part.Vertex(App.Vector(3,0,0));doc.recompute();check('Valid chord source restores radius branch',exact(three,5,(0,4,0)))
+        endpoint=vertex('RadiusEndpoint',(3,5,0));linked_radius=circle('3Point','History=Yes',point(a),point(b),'Radius',point(endpoint),point(side));check('Picked Radius endpoint records associative source',exact(linked_radius,5,(0,4,0)) and len(linked_radius.Sources)==4);endpoint.Shape=Part.Vertex(App.Vector(3,6,0));doc.recompute();check('Radius endpoint updates constraint with Rust measurement',exact(linked_radius,6,(0,math.sqrt(27),0)))
+        obsolete_radius=vertex('ObsoleteRadiusEndpoint',(3,5,0));replaced_radius=circle('3Point','History=Yes',point(a),point(b),'Radius',point(obsolete_radius),'Radius=5',point(side));check('Numeric Radius replacement prunes native endpoint source',len(replaced_radius.Sources)==3 and exact(replaced_radius,5,(0,4,0)));doc.removeObject(obsolete_radius.Name);doc.recompute();check('Deleting replaced Radius endpoint preserves constant constraint',exact(replaced_radius,5,(0,4,0)))
+        free=circle('3Point','History=Yes',point(a),point(b),point(side));check('ThreePoint without radius records source geometry',free.Shape.isValid())
+        vertical=circle('Vertical','History=Yes',point(center),point(radial));check('Vertical numeric recipe retains perpendicular normal',vertical.Shape.isValid() and abs(vertical.Shape.Edges[0].Curve.Axis.z)<1e-8)
+        constants=circle('History=Yes','2,3,4','Area=78.53981633974483');check('Constant-only recipe persists exact numeric area',exact(constants,5,(2,3,4)) and not constants.Sources)
+        group=doc.addObject('App::Part','SourceGroup');group.addObject(center);group.Placement.Base=App.Vector(0,10,0);doc.recompute();check('Parent placement updates point dependencies',exact(scalar,5,(1,10,0)))
+        old=scalar.Shape.copy();settings.Update=False;group.Placement.Base=App.Vector(0,20,0);doc.recompute();check('Update No freezes point records',(scalar.Shape.Edges[0].Curve.Center-old.Edges[0].Curve.Center).Length<1e-8);settings.Update=True;doc.recompute();check('Update Yes resumes point records',exact(scalar,5,(1,20,0)))
+        settings.Record=False;group.Placement.Base=App.Vector(0,30,0);doc.recompute();check('Record No permits existing point record updates',exact(scalar,5,(1,30,0)));settings.Record=True;doc.recompute();check('Record Yes preserves point records',exact(scalar,5,(1,30,0)))
+        cloud=feature('FitVertices',Part.makeCompound([Part.Vertex(App.Vector(*p)) for p in [(5,0,0),(0,5,0),(-5,0,0),(0,-5,0)]]));Gui.Selection.clearSelection();Gui.Selection.addSelection(cloud)
+        fit=circle('FitPoints','History=Yes','Selection','');check('FitPoints Selection creates live whole-object source',exact(fit,5,(0,0,0)) and len(fit.Sources)==1 and fit.FitDeviation<1e-7)
+        cloud.Shape=Part.makeCompound([Part.Vertex(App.Vector(*p)) for p in [(7,0,0),(0,7,0),(-7,0,0),(0,-7,0),(7/math.sqrt(2),7/math.sqrt(2),0)]]);doc.recompute();check('Fit source topology grows and recomputes full current samples',exact(fit,7,(0,0,0)))
+        cloud.Placement.Base=App.Vector(0,0,10);doc.recompute();check('Whole Fit source placement updates circle',exact(fit,7,(0,0,10)))
+        fit_spline=circle('FitPoints','History=Yes','Deformable=Yes','PointCount=12','Selection','');check('FitPoints Deformable retains fitted radius and source',deformable(fit_spline,7,(0,0,10)) and len(fit_spline.Sources)==1)
+        spline=circle('History=Yes','Deformable=Yes','PointCount=12',point(center),'5');check('Deformable point-source recipe builds owned periodic spline',deformable(spline,5,(1,30,0)))
+        group.Placement.Base=App.Vector(0,40,0);doc.recompute();check('Deformable source updates same degree/count',deformable(spline,5,(1,40,0)) and spline.ApproxDeviation<.02)
+        path=feature('DeformablePath',Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0)));around=circle('AroundCurve','History=Yes','Deformable=Yes','PointCount=12','Curve='+path.Name+'.Edge1','OnCurve=.5','4');check('AroundCurve Deformable recipe records path',deformable(around,4,(5,0,0)))
+        path.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(20,0,0));doc.recompute();check('AroundCurve Deformable source recomputes spline',deformable(around,4,(10,0,0)))
+        ta=feature('TangentA',Part.makeLine(App.Vector(0,-20,0),App.Vector(0,20,0)));tb=feature('TangentB',Part.makeLine(App.Vector(-20,0,0),App.Vector(20,0,0)))
+        tangent=circle('Tangent','History=Yes',curve(ta,(0,4,0)),'Radius=4',curve(tb,(4,0,0)));check('Tangent records native bounded curve dependencies',exact(tangent,4,(4,4,0)) and len(tangent.Sources)==2)
+        ta.Placement.Base=App.Vector(1,0,0);doc.recompute();check('Tangent source placement replays common solver',exact(tangent,4,(5,4,0)))
+        tangent_point=vertex('TangentPoint',(5,8,0));point_tangent=circle('Tangent','History=Yes','FromFirstPoint=Yes',curve(ta,(1,4,0)),'Radius=4',point(tangent_point));check('Tangent typed Point records live vertex dependency',exact(point_tangent,4,(5,4,0)) and len(point_tangent.Sources)==2)
+        tangent_point.Shape=Part.Vertex(App.Vector(5,10,0));doc.recompute();check('Unsatisfied fixed-contact Point source clears tangent output',point_tangent.Shape.isNull());tangent_point.Shape=Part.Vertex(App.Vector(5,8,0));doc.recompute();check('Restored Point source recovers tangent recipe',exact(point_tangent,4,(5,4,0)))
+        tangent_spline=circle('Tangent','History=Yes','Deformable=Yes','PointCount=12',curve(ta,(1,4,0)),'Radius=4',curve(tb,(5,0,0)));check('Tangent Deformable builds owned source-dependent spline',deformable(tangent_spline,4,(5,4,0)))
+        enter('Circle');enter('History=Yes');enter(point(center));enter('Undo');enter('2,3,4');enter('3');check('Command Undo prunes explicit point reference',doc.Objects[-1].Recorded and not doc.Objects[-1].Sources and exact(doc.Objects[-1],3,(2,3,4)))
+        enter('Circle');enter(point(center));enter('Cancel');clean=circle('History=Yes','2,3,4','3');check('Cancel clears explicit point references before next Circle',not clean.Sources)
+        settings.Lock=True;blocked=False
+        try: constants.Placement=App.Placement(App.Vector(1,0,0),App.Rotation())
+        except Exception: blocked=True
+        check('Lock includes constant-only Circle records',blocked and constants.Recorded);settings.Lock=False
+        blocked=False
+        try: scalar.Points=[App.Vector(100,0,0)]
+        except Exception: blocked=True
+        check('Recorded point snapshots cannot be replaced',blocked and scalar.Recorded)
+        doc.openTransaction('Detach point history');scalar.Placement.Base=App.Vector(0,0,1);doc.commitTransaction();check('Child edit detaches all point links',not scalar.Recorded and not scalar.Sources)
+        doc.undo();doc.recompute();check('Undo detach restores source recipe',scalar.Recorded and exact(scalar,5,(1,40,0)))
+        cname=center.Name;settings.Lock=True;doc.openTransaction('Delete point source');doc.removeObject(cname);doc.commitTransaction();doc.recompute();check('Source deletion under Lock clears dependent analytic and spline shapes',scalar.Shape.isNull() and spline.Shape.isNull());doc.undo();doc.recompute();center=doc.getObject(cname);check('Undo source deletion restores analytic and spline recipes',exact(scalar,5,(1,40,0)) and deformable(spline,5,(1,40,0)));settings.Lock=False
+        file=out/'history_more.FCStd';names={'scalar':scalar.Name,'fit':fit.Name,'spline':spline.Name,'tangent':tangent.Name,'constants':constants.Name};doc.saveAs(str(file));App.closeDocument(doc.Name);doc=App.openDocument(str(file));doc.recompute();check('FCStd restores point and constant recipes',exact(doc.getObject(names['scalar']),5,(1,40,0)) and exact(doc.getObject(names['constants']),5,(2,3,4)));check('FCStd restores FitPoints, tangent and deformable recipes',exact(doc.getObject(names['fit']),7,(0,0,10)) and exact(doc.getObject(names['tangent']),4,(5,4,0)) and deformable(doc.getObject(names['spline']),5,(1,40,0)))
+        doc.getObject('SourceGroup').Placement.Base=App.Vector(0,45,0);doc.recompute();check('Restored point parent notifications update analytic and spline outputs',exact(doc.getObject(names['scalar']),5,(1,45,0)) and deformable(doc.getObject(names['spline']),5,(1,45,0)));doc.saveAs(str(file));result['history_file']=str(file);result['history_objects']=names;result['ok']=True
+    except Exception: result['ok']=False;result['error']=traceback.format_exc()
+    (out/'results.json').write_text(json.dumps(result,indent=2));App.Console.PrintMessage(json.dumps(result)+'\n')
+    for name in list(App.listDocuments()): App.closeDocument(name)
+    QtWidgets.QApplication.quit()
+QtCore.QTimer.singleShot(700,run)

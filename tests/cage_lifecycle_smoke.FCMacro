@@ -1,0 +1,99 @@
+"""OM9-TRANSFORM-020/041 native cage grouped frames and deletion lifecycle."""
+import os,sys,json,traceback,math
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh
+from PySide6 import QtCore
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[]}
+def check(name,ok):
+    report['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def world(o):return o.getGlobalPlacement().multiply(o.Placement.inverse()).multVec(o.Shape.CenterOfGravity)
+def meshworld(o):return o.getGlobalPlacement().multiply(o.Placement.inverse()).multVec(o.Mesh.Topology[0][0])
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM
+        md=App.newDocument('CageMeshFrames');md.UndoMode=1
+        mc=OM.createCage(md.Name,[0,0,0],[10,10,10]);mg=md.addObject('App::Part','MeshControlFrame');mg.addObject(mc)
+        mt=md.addObject('Mesh::Feature','MeshCaptive');mt.Mesh=Mesh.Mesh([[(1,1,1),(2,1,1),(1,2,1)]]);mtg=md.addObject('App::Part','MeshCaptiveFrame');mtg.addObject(mt)
+        mb=OM.captureCage(mc,[mt])[0]
+        check('grouped mesh initial capture stays active',mb.Active and abs(meshworld(mt).x-1)<1e-7)
+        mg.Placement.Base=App.Vector(5,0,0);md.recompute()
+        check('grouped mesh control frame updates captive',mb.Active and abs(meshworld(mt).x-6)<1e-7)
+        mb.Region='Local';mb.LocalMin=App.Vector(100,100,100);mb.LocalMax=App.Vector(110,110,110);mb.Falloff=0;md.recompute()
+        check('editing only Local region properties recomputes mesh',abs(meshworld(mt).x-1)<1e-7)
+        mb.Falloff=1000;md.recompute();t=math.sqrt(3)*99/1000;expected=1+5*(1-t*t*(3-2*t))
+        report['falloff_probe']={'observed':meshworld(mt).x,'expected':expected,'active':mb.Active,'state':str(mb.State)}
+        # Native Mesh stores float32 vertices: allow one ULP at this 5.6 mm coordinate.
+        check('editing only Falloff recomputes mesh with independent blend',abs(meshworld(mt).x-expected)<5e-7)
+        mb.LocalMin=App.Vector(0,0,0);mb.LocalMax=App.Vector(10,10,10);md.recompute()
+        check('editing only Local bounds recomputes mesh',abs(meshworld(mt).x-6)<1e-7)
+        mb.Region='Global';md.recompute();check('editing only Region recomputes mesh',abs(meshworld(mt).x-6)<1e-7)
+        ms=md.addObject('OpenMatrix9Gui::HistorySettings','MeshPolicy');ms.Lock=True;ms.BrokenHistoryWarning=False;rejected=False
+        try:mtg.Placement=App.Placement(App.Vector(1,0,0),App.Rotation())
+        except Exception:rejected=True
+        check('grouped mesh captive ancestor honors Lock',rejected and mb.Active)
+        ms.Lock=False;md.openTransaction('Move mesh captive frame');mtg.Placement=App.Placement(App.Vector(1,0,0),App.Rotation());md.commitTransaction()
+        check('grouped mesh captive ancestor detaches',not mb.Active and abs(meshworld(mt).x-7)<1e-7)
+        md.undo();md.recompute();check('grouped mesh captive ancestor Undo restores link',mb.Active and abs(meshworld(mt).x-6)<1e-7)
+        shared=md.addObject('App::Part','MeshSharedFrame');shared.addObject(mg);shared.addObject(mtg);shared.Placement.Base=App.Vector(10,0,0);md.recompute()
+        check('mesh shared ancestor preserves link and world mapping',mb.Active and abs(meshworld(mt).x-16)<1e-7)
+        ms.Update=False;mg.Placement.Base=App.Vector(6,0,0);md.recompute()
+        check('mesh cage remains active independently of general History Update',mb.Active and abs(meshworld(mt).x-17)<1e-7)
+        saved=list(mc.ControlPoints);mc.ControlPoints=[];md.recompute()
+        check('invalid grouped mesh control clears captive',mb.Active and len(mt.Mesh.Topology[0])==0)
+        mc.ControlPoints=saved;md.recompute();check('repaired grouped mesh control rebuilds captive',mb.Active and abs(meshworld(mt).x-17)<1e-7)
+        md.openTransaction('Delete mesh control');md.removeObject(mc.Name);md.commitTransaction();md.recompute()
+        check('mesh control deletion preserves recipe for Undo',mb.Active and mb.Control is None and len(mt.Mesh.Topology[0])==0)
+        md.undo();md.recompute();mc=md.getObject('Cage');check('mesh control deletion Undo restores native relationship',mb.Active and mb.Control==mc and abs(meshworld(mt).x-17)<1e-7)
+        md.openTransaction('Delete mesh captive');md.removeObject(mt.Name);md.commitTransaction();md.recompute()
+        check('mesh captive deletion preserves recipe for Undo',mb.Active and mb.Captive is None)
+        md.undo();md.recompute();mt=md.getObject('MeshCaptive');check('mesh captive deletion Undo restores native relationship',mb.Active and mb.Captive==mt and abs(meshworld(mt).x-17)<1e-7)
+        meshpath=str(out/'cage-mesh-lifecycle.FCStd');md.saveAs(meshpath);App.closeDocument(md.Name);md=App.openDocument(meshpath)
+        mt=md.getObject('MeshCaptive');mb=md.getObject('CageBinding');md.getObject('MeshControlFrame').Placement.Base=App.Vector(8,0,0);md.recompute()
+        check('FCStd grouped mesh frames and binding recompute',mb.Active and abs(meshworld(mt).x-19)<1e-7)
+        App.closeDocument(md.Name)
+        d=App.newDocument('CageLifecycle');d.UndoMode=1
+        cage=OM.createCage(d.Name,[0,0,0],[10,10,10])
+        cg=d.addObject('App::Part','ControlFrame');cg.addObject(cage)
+        target=d.addObject('Part::Feature','Captive');target.Shape=Part.makeBox(2,2,2,App.Vector(1,1,1))
+        tg=d.addObject('App::Part','CaptiveFrame');tg.addObject(target)
+        binding=OM.captureCage(cage,[target])[0]
+        report['capture_probe']={'active':binding.Active,'center':tuple(world(target)),'volume':target.Shape.Volume,'target_state':str(target.State),'binding_state':str(binding.State),'control_state':str(cage.State)}
+        check('native initial capture',binding.Active and abs(world(target).x-2)<1e-7)
+        cg.Placement.Base=App.Vector(5,0,0);d.recompute()
+        check('grouped cage placement updates captive',binding.Active and abs(world(target).x-7)<1e-7)
+        settings=d.addObject('OpenMatrix9Gui::HistorySettings','OM9HistorySettings');settings.BrokenHistoryWarning=False
+        settings.Lock=True;rejected=False
+        try:tg.Placement=App.Placement(App.Vector(1,0,0),App.Rotation())
+        except Exception:rejected=True
+        check('captive ancestor independent placement honors Lock',rejected and binding.Active)
+        settings.Lock=False;d.openTransaction('Move captive frame');tg.Placement=App.Placement(App.Vector(1,0,0),App.Rotation());d.commitTransaction()
+        check('captive ancestor independent placement detaches',not binding.Active and abs(world(target).x-8)<1e-7)
+        d.undo();d.recompute();check('captive frame Undo restores binding',binding.Active and abs(world(target).x-7)<1e-7)
+        both=d.addObject('App::Part','SharedFrame');both.addObject(cg);both.addObject(tg);both.Placement.Base=App.Vector(10,0,0);d.recompute()
+        check('shared ancestor moves cage and captive while preserving link',binding.Active and abs(world(target).x-17)<1e-7)
+        settings.Update=False;cg.Placement.Base=App.Vector(6,0,0);d.recompute()
+        check('cage updates independently while general History Update is Off',abs(world(target).x-18)<1e-7)
+        settings.Update=True;d.recompute();check('general History Update On retains cage geometry',abs(world(target).x-18)<1e-7)
+        saved=list(cage.ControlPoints);cage.ControlPoints=[];d.recompute()
+        check('invalid cage clears captive geometry',target.Shape.isNull() and binding.Active)
+        cage.ControlPoints=saved;d.recompute();check('repaired cage rebuilds captive',not target.Shape.isNull() and abs(world(target).x-18)<1e-7)
+        d.openTransaction('Delete control');d.removeObject(cage.Name);d.commitTransaction();d.recompute()
+        check('control deletion preserves recipe for Undo',binding.Active and binding.Control is None and target.Shape.isNull())
+        d.undo();d.recompute();cage=d.getObject('Cage');check('control deletion Undo restores deformation',binding.Active and binding.Control==cage and abs(world(target).x-18)<1e-7)
+        d.openTransaction('Delete captive');d.removeObject(target.Name);d.commitTransaction();d.recompute()
+        check('captive deletion preserves recipe for Undo',binding.Active and binding.Captive is None)
+        d.undo();d.recompute();target=d.getObject('Captive');check('captive deletion Undo restores deformation',binding.Active and binding.Captive==target and abs(world(target).x-18)<1e-7)
+        path=str(out/'cage-lifecycle.FCStd');d.saveAs(path);App.closeDocument(d.Name);d=App.openDocument(path)
+        cage=d.getObject('Cage');target=d.getObject('Captive');binding=d.getObject('CageBinding')
+        d.getObject('ControlFrame').Placement.Base=App.Vector(8,0,0);d.recompute()
+        check('FCStd restored grouped control updates native captive',binding.Active and abs(world(target).x-20)<1e-7)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2));App.Console.PrintMessage(json.dumps(report)+'\n')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(800,run)

@@ -1,0 +1,163 @@
+"""Remaining native options: OM9-TOP11-005/008/010, OM9-SOLID-001..004."""
+import FreeCAD as App, FreeCADGui as Gui, Part, Mesh
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+import json, os, traceback, math
+from pathlib import Path
+out=Path(os.environ['OM9_SMOKE_OUTPUT']); result={'checks':[]}
+def check(name,value): result['checks'].append({'name':name,'passed':bool(value)})
+def events(): QtWidgets.QApplication.processEvents()
+def enter(text=''):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    if text: QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));events()
+def feature(doc,name,shape):
+    o=doc.addObject('Mesh::Feature' if isinstance(shape,Mesh.Mesh) else 'Part::Feature',name)
+    if isinstance(shape,Mesh.Mesh): o.Mesh=shape
+    else: o.Shape=shape
+    return o
+def start(doc,name,items):
+    Gui.Selection.clearSelection()
+    for o in items: Gui.Selection.addSelection(o)
+    enter(name)
+def dialog(): return next((w for w in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9EditOptions') if w.isVisible()),None)
+def outputs(doc,fid): return [o for o in doc.Objects if getattr(o,'OM9FeatureId','')==fid]
+def option(name,value): enter(name+'='+value)
+def close(doc): enter('Cancel');App.closeDocument(doc.Name);events()
+def click_world(point):
+    view=Gui.activeDocument().activeView();p=view.getPointOnScreen(point)
+    viewer=next(w for w in Gui.getMainWindow().findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible());target=viewer.viewport();ratio=viewer.devicePixelRatioF()
+    QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=QtCore.QPoint(round(p[0]/ratio),round(target.height()-(p[1]+1)/ratio)));events()
+def persistence(doc,fid,source_count):
+    count=len(outputs(doc,fid));doc.undo();check(fid+' options atomic Undo',len(doc.Objects)==source_count);doc.redo();check(fid+' options Redo',len(outputs(doc,fid))==count)
+    path=out/(doc.Name+'.FCStd');doc.saveAs(str(path));name=doc.Name;App.closeDocument(name);doc=App.openDocument(str(path));check(fid+' options FCStd reload',len(outputs(doc,fid))==count);close(doc)
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');events();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        # A true line extension meets the target at x=0, outside cutter y=[2,4].
+        doc=App.newDocument('TrimExtend');doc.UndoMode=1
+        a=feature(doc,'A',Part.makeLine(App.Vector(-5,0,0),App.Vector(5,0,0)));b=feature(doc,'B',Part.makeLine(App.Vector(0,2,0),App.Vector(0,4,0)))
+        start(doc,'Trim',[a,b]);option('ExtendLines','Yes');enter();enter('A@3,0,0');enter();found=outputs(doc,'OM9-TOP11-010')
+        check('Trim ExtendLines cuts imaginary line, retaining original extent',len(found)==2 and abs(sum(o.Shape.Length for o in found)-7)<1e-6)
+        if found: persistence(doc,'OM9-TOP11-010',2)
+        else: close(doc)
+        doc=App.newDocument('TrimApparent');doc.UndoMode=1
+        a=feature(doc,'A',Part.makeLine(App.Vector(-5,0,0),App.Vector(5,0,0)));b=feature(doc,'B',Part.makeLine(App.Vector(0,-5,3),App.Vector(0,5,3)))
+        Gui.activeDocument().activeView().viewTop();events();start(doc,'Trim',[a,b]);option('ApparentIntersections','Yes');enter()
+        check('Trim option panel exposes both switches',dialog() is not None and dialog().findChild(QtWidgets.QCheckBox,'OM9EditExtendLines') is not None and dialog().findChild(QtWidgets.QCheckBox,'OM9EditApparentIntersections') is not None)
+        Gui.activeDocument().activeView().viewFront();events();enter('A@3,0,0');enter();found=outputs(doc,'OM9-TOP11-010')
+        check('Trim freezes initial view and preserves different curve depths',len(found)==3 and abs(sum(o.Shape.Length for o in found)-15)<1e-6 and sorted(round(o.Shape.CenterOfMass.z,6) for o in found)==[0,3,3])
+        check('Trim persists explicit option metadata',bool(found) and all(o.TrimApparentIntersections and not o.TrimExtendLines for o in found))
+        if found: persistence(doc,'OM9-TOP11-010',2)
+        else: close(doc)
+        doc=App.newDocument('TrimApparentCircle')
+        a=feature(doc,'A',Part.makeCircle(5));b=feature(doc,'B',Part.makeLine(App.Vector(-7,0,3),App.Vector(7,0,3)))
+        Gui.activeDocument().activeView().viewTop();events();start(doc,'Trim',[a,b]);option('ApparentIntersections','Yes');enter();enter('A@0,5,0');enter();found=outputs(doc,'OM9-TOP11-010')
+        check('Trim projected rational circle preserves analytic arcs',bool(found) and abs(sum(o.Shape.Length for o in found)-(5*math.pi+14))<1e-5 and any(isinstance(e.Curve,Part.Circle) for o in found for e in o.Shape.Edges));close(doc)
+        doc=App.newDocument('TrimPerspective')
+        events();Gui.getMainWindow().findChild(QtWidgets.QTabBar,'OM9ViewportTabs').setCurrentIndex(1);events()
+        a=feature(doc,'A',Part.makeLine(App.Vector(1,-5,0),App.Vector(1,5,0)));b=feature(doc,'B',Part.makeLine(App.Vector(-2,0,0),App.Vector(2,0,8)))
+        Gui.activeDocument().activeView().setCameraType('Perspective')
+        Gui.activeDocument().activeView().setCamera('#Inventor V2.1 ascii\nPerspectiveCamera { position 0 0 20 orientation 0 0 1 0 nearDistance 1 farDistance 100 focalDistance 20 heightAngle 0.6 }');events()
+        start(doc,'Trim',[a,b]);option('ApparentIntersections','Yes');option('ExtendLines','Yes');enter();enter('B@-1,0,2');enter();found=outputs(doc,'OM9-TOP11-010')
+        result['perspective_probe']={'camera':Gui.activeDocument().activeView().getCamera(),'prompt':str(console.property('om9Prompt')),'outputs':[{'length':o.Shape.Length,'perspective':o.TrimPerspectiveProjection,'center':tuple(o.Shape.CenterOfMass)} for o in found]}
+        check('Trim perspective projection preserves rational parameter mapping and depth',bool(found) and abs(sum(o.Shape.Length for o in found)-(10+math.sqrt(80)*7/22))<1e-6 and all(o.TrimPerspectiveProjection for o in found));close(doc)
+        doc=App.newDocument('TrimSurfaceOptionGuard');a=feature(doc,'A',Part.makePlane(10,10));b=feature(doc,'B',Part.makeLine(App.Vector(5,-5,3),App.Vector(5,15,3)))
+        start(doc,'Trim',[a,b]);option('ApparentIntersections','Yes');enter();enter('A@2,2,0');enter();check('Trim apparent rejects surfaces without modifying inputs',len(doc.Objects)==2 and not outputs(doc,'OM9-TOP11-010'));close(doc)
+        doc=App.newDocument('TrimApparentBoundary')
+        a=feature(doc,'A',Part.makeLine(App.Vector(-5,0,0),App.Vector(5,0,0)));b=feature(doc,'B',Part.makeLine(App.Vector(0,-5,3),App.Vector(0,5,3)))
+        Gui.activeDocument().activeView().viewTop();Gui.activeDocument().activeView().fitAll();events();start(doc,'Trim',[a,b]);option('ApparentIntersections','Yes');enter();click_world(App.Vector(0,0,0));enter()
+        check('Trim apparent mouse split boundary rejects ambiguous removal',not outputs(doc,'OM9-TOP11-010') and len(doc.Objects)==2);close(doc)
+        doc=App.newDocument('TrimCombinedOptions')
+        a=feature(doc,'A',Part.makeLine(App.Vector(-5,0,0),App.Vector(5,0,0)));b=feature(doc,'B',Part.makeLine(App.Vector(0,2,3),App.Vector(0,4,3)))
+        events();Gui.activeDocument().activeView().viewTop();events();start(doc,'Trim',[a,b]);enter();panel=dialog()
+        check('Trim missing intersections disables acceptance',panel is not None and not panel.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+        panel.findChild(QtWidgets.QCheckBox,'OM9EditApparentIntersections').setChecked(True);panel.findChild(QtWidgets.QCheckBox,'OM9EditExtendLines').setChecked(True);events();enter('A@3,0,0');enter('Undo');enter()
+        check('Trim removal Undo prevents empty operation commit',len(doc.Objects)==2 and not outputs(doc,'OM9-TOP11-010'))
+        enter('A@3,0,0');panel.findChild(QtWidgets.QCheckBox,'OM9EditExtendLines').setChecked(False);panel.findChild(QtWidgets.QCheckBox,'OM9EditExtendLines').setChecked(True);events();enter()
+        check('Trim intersection option changes reset previous removal picks',not outputs(doc,'OM9-TOP11-010') and len(doc.Objects)==2)
+        enter('A@3,0,0');enter();found=outputs(doc,'OM9-TOP11-010')
+        check('Trim GUI toggles combine apparent and imaginary extension with original depths',len(found)==2 and abs(sum(o.Shape.Length for o in found)-7)<1e-6 and all(o.TrimApparentIntersections and o.TrimExtendLines for o in found));close(doc)
+        doc=App.newDocument('JoinMidpoint');doc.UndoMode=1
+        a=feature(doc,'A',Part.makeLine(App.Vector(0,0,0),App.Vector(5,0,0)));b=feature(doc,'B',Part.makeLine(App.Vector(5.002,0,0),App.Vector(10,0,0)))
+        start(doc,'Join',[a,b]);option('Tolerance','0.003');enter();enter();found=outputs(doc,'OM9-TOP11-008')
+        check('Join moves near endpoints to their midpoint within explicit tolerance',len(found)==1 and found[0].Shape.ShapeType=='Wire' and any(abs(v.Point.x-5.001)<1e-7 for v in found[0].Shape.Vertexes) and abs(found[0].Shape.Length-10)<1e-7)
+        if found: persistence(doc,'OM9-TOP11-008',2)
+        else: close(doc)
+        doc=App.newDocument('JoinGap')
+        a=feature(doc,'A',Part.makeLine(App.Vector(0,0,0),App.Vector(5,0,0)));b=feature(doc,'B',Part.makeLine(App.Vector(5.004,0,0),App.Vector(10,0,0)))
+        start(doc,'Join',[a,b]);option('Tolerance','0.003');enter();enter();check('Join never silently enlarges explicit tolerance',not outputs(doc,'OM9-TOP11-008') and len(doc.Objects)==2);close(doc)
+        doc=App.newDocument('JoinTinyGap')
+        a=feature(doc,'A',Part.makeLine(App.Vector(0,0,0),App.Vector(5,0,0)));b=feature(doc,'B',Part.makeLine(App.Vector(5.00000005,0,0),App.Vector(10,0,0)))
+        start(doc,'Join',[a,b]);option('Tolerance','0.000000001');enter();enter();check('Join gap 5e-8 mm cannot pass tolerance 1e-9 mm',not outputs(doc,'OM9-TOP11-008') and len(doc.Objects)==2);close(doc)
+        doc=App.newDocument('JoinCurvedMidpoint');curve=Part.BezierCurve();curve.setPoles([App.Vector(0,0,0),App.Vector(2,3,0),App.Vector(5,0,0)])
+        a=feature(doc,'A',curve.toShape());b=feature(doc,'B',Part.makeLine(App.Vector(5.002,0,0),App.Vector(10,0,0)));original=a.Shape.exportBrepToString()
+        start(doc,'Join',[a,b]);enter();dialog().findChild(QtWidgets.QDoubleSpinBox,'OM9EditTolerance').setValue(.003);events();enter('Cancel')
+        check('Join GUI tolerance preview cancel preserves original curved geometry',len(doc.Objects)==2 and a.Shape.exportBrepToString()==original)
+        start(doc,'Join',[a,b]);option('Tolerance','0.003');enter();enter();found=outputs(doc,'OM9-TOP11-008')
+        check('Join near curved endpoint uses bounded midpoint BSpline',len(found)==1 and found[0].Shape.isValid() and any(abs(v.Point.x-5.001)<1e-7 and abs(v.Point.y)<1e-7 for v in found[0].Shape.Vertexes) and any(isinstance(e.Curve,Part.BSplineCurve) for e in found[0].Shape.Edges));close(doc)
+        doc=App.newDocument('JoinBranch');items=[feature(doc,'A'+str(i),Part.makeLine(App.Vector(),v)) for i,v in enumerate([App.Vector(5,0,0),App.Vector(0,5,0),App.Vector(-5,0,0)])]
+        start(doc,'Join',items);enter();enter();check('Join ambiguous endpoint branch rejects without mutation',not outputs(doc,'OM9-TOP11-008') and len(doc.Objects)==3);close(doc)
+        doc=App.newDocument('ExplodeGrouped');doc.UndoMode=1;group=doc.addObject('App::Part','Group');group.Placement=App.Placement(App.Vector(20,30,40),App.Rotation(App.Vector(0,0,1),90))
+        a=feature(doc,'A',Part.makePolygon([App.Vector(0,0,0),App.Vector(4,0,0),App.Vector(4,3,0)]));group.addObject(a);a.ViewObject.LineColor=(1.,0.,0.)
+        start(doc,'Explode',[a]);enter();enter();found=outputs(doc,'OM9-TOP11-005')
+        result['grouped_explode_probe']=[{'name':o.Name,'group':o in group.Group,'color':tuple(o.ViewObject.LineColor)} for o in found]
+        check('Explode preserves containing group and source attributes',len(found)==2 and all(o in group.Group and tuple(o.ViewObject.LineColor)[:3]==(1.,0.,0.) for o in found))
+        check('Explode grouped world frame applied exactly once',len(found)==2 and sorted(tuple(round(x,6) for x in o.getGlobalPlacement().multVec(o.Placement.inverse().multVec(o.Shape.CenterOfMass))) for o in found)==[(18.5,34.,40.),(20.,32.,40.)]);close(doc)
+        doc=App.newDocument('ExplodeFontGuard');a=doc.addObject('Part::Feature','Text');a.addProperty('App::PropertyString','String');a.String='AB';a.addProperty('App::PropertyString','FontFile');a.FontFile='test-font.ttf';a.Shape=Part.makeCompound([Part.makePlane(2,2),Part.makePlane(2,2,App.Vector(3,0,0))])
+        start(doc,'Explode',[a]);enter();enter();check('Explode preserves unsupported font annotation identity',doc.getObject('Text') is not None and doc.getObject('Text').String=='AB' and not outputs(doc,'OM9-TOP11-005'));close(doc)
+        doc=App.newDocument('MeshExplodeFrame');group=doc.addObject('App::Part','Group');group.Placement.Base=App.Vector(20,0,0);m=Mesh.createBox(2,2,2);n=Mesh.createBox(2,2,2);n.translate(5,0,0);m.addMesh(n);a=feature(doc,'A',m);group.addObject(a);a.Placement=App.Placement(App.Vector(),App.Rotation(App.Vector(0,0,1),90));doc.recompute()
+        expected=sorted(tuple(round(v,6) for v in a.getGlobalPlacement().multVec(a.Placement.inverse().multVec(piece.CenterOfGravity))) for piece in a.Mesh.getSeparateComponents())
+        start(doc,'Explode',[a]);enter();enter();found=outputs(doc,'OM9-TOP11-005');actual=sorted(tuple(round(v,6) for v in o.getGlobalPlacement().multVec(o.Placement.inverse().multVec(o.Mesh.CenterOfGravity))) for o in found)
+        result['mesh_explode_frame_probe']={'expected':expected,'actual':actual}
+        check('Mesh Explode keeps group and correct parent-local order',len(found)==2 and all(o in group.Group for o in found) and actual==expected);close(doc)
+        for name,fid,area in [('BooleanUnion','OM9-SOLID-003',150),('BooleanDifference','OM9-SOLID-001',50),('BooleanIntersection','OM9-SOLID-002',50)]:
+            doc=App.newDocument('Surface'+name);a=feature(doc,'A',Part.makePlane(10,10));b=feature(doc,'B',Part.makePlane(10,10,App.Vector(5,0,0)))
+            start(doc,name,[a,b] if name=='BooleanUnion' else [a]);enter()
+            if name!='BooleanUnion': enter('B');enter()
+            enter();found=outputs(doc,fid);check(name+' coplanar open BRep area',bool(found) and abs(sum(o.Shape.Area for o in found)-area)<1e-6 and all(o.Shape.isValid() and not o.Shape.Solids for o in found));close(doc)
+        doc=App.newDocument('ExplodeMesh');a=Mesh.createBox(2,2,2);b=Mesh.createBox(2,2,2);b.translate(5,0,0);a.addMesh(b);o=feature(doc,'M',a)
+        start(doc,'Explode',[o]);enter();enter();found=outputs(doc,'OM9-TOP11-005');check('Explode Mesh splits connected components without unwelding',len(found)==2 and all(isinstance(o.Mesh,Mesh.Mesh) and o.Mesh.CountFacets==12 for o in found));close(doc)
+        for name,fid,volume in [('BooleanUnion','OM9-SOLID-003',1500),('BooleanDifference','OM9-SOLID-001',500),('BooleanIntersection','OM9-SOLID-002',500)]:
+            doc=App.newDocument('Mesh'+name);doc.UndoMode=1;ma=Mesh.createBox(10,10,10);mb=Mesh.createBox(10,10,10);mb.translate(5,0,0);a=feature(doc,'A',ma);b=feature(doc,'B',mb)
+            start(doc,name,[a,b] if name=='BooleanUnion' else [a]);enter()
+            if name!='BooleanUnion': enter('B');enter()
+            enter();found=outputs(doc,fid);check(name+' closed Mesh analytic volume',bool(found) and all(o.Mesh.isSolid() for o in found) and abs(sum(o.Mesh.Volume for o in found)-volume)<1e-3)
+            if found: persistence(doc,fid,2)
+            else: close(doc)
+        doc=App.newDocument('MeshWorldPlacement');group=doc.addObject('App::Part','Group');group.Placement.Base=App.Vector(20,0,0)
+        a=feature(doc,'A',Mesh.createBox(4,4,4));b=feature(doc,'B',Mesh.createBox(4,4,4));group.addObject(a);group.addObject(b)
+        a.Placement=App.Placement(App.Vector(),App.Rotation(App.Vector(0,0,1),90));b.Placement=App.Placement(App.Vector(0,2,0),App.Rotation(App.Vector(0,0,1),90));doc.recompute()
+        start(doc,'BooleanUnion',[a,b]);enter();enter();found=outputs(doc,'OM9-SOLID-003')
+        result['mesh_frame_probe']=[{'bbox':str(o.Mesh.BoundBox),'placement':str(o.Placement),'mesh_placement':str(o.Mesh.Placement),'volume':o.Mesh.Volume} for o in found]
+        check('Mesh Boolean composes parent translation and local rotation in world order',bool(found) and abs(sum(o.Mesh.Volume for o in found)-96)<1e-4 and all(abs(o.Mesh.BoundBox.XMin-18)<1e-6 and abs(o.Mesh.BoundBox.XMax-22)<1e-6 and abs(o.Mesh.BoundBox.YMin+2)<1e-6 and abs(o.Mesh.BoundBox.YMax-4)<1e-6 for o in found));close(doc)
+        doc=App.newDocument('MeshCavityReuse');a=feature(doc,'A',Mesh.createBox(10,10,10));inner=Mesh.createBox(4,4,4);b=feature(doc,'B',inner)
+        start(doc,'BooleanDifference',[a]);enter();enter('B');enter();enter();found=outputs(doc,'OM9-SOLID-001')
+        check('Mesh Difference retains enclosed cavity volume',bool(found) and abs(sum(o.Mesh.Volume for o in found)-936)<1e-3)
+        c=feature(doc,'C',Mesh.createBox(2,2,2));c.Placement.Base=App.Vector(15,0,0)
+        if found: start(doc,'BooleanUnion',[found[0],c]);enter();enter()
+        again=outputs(doc,'OM9-SOLID-003');check('Mesh cavity result can be reused without filling cavity',bool(again) and abs(sum(o.Mesh.Volume for o in again)-944)<1e-3);close(doc)
+        for mode,volume in enumerate([1500,500,500,500,1000]):
+            doc=App.newDocument('MeshTwoMode'+str(mode));ma=Mesh.createBox(10,10,10);mb=Mesh.createBox(10,10,10);mb.translate(5,0,0);a=feature(doc,'A',ma);b=feature(doc,'B',mb)
+            start(doc,'Boolean2Objects',[a,b]);enter()
+            for _ in range(mode): enter('Next')
+            option('DeleteInput','Yes');enter();found=outputs(doc,'OM9-SOLID-004');check('Mesh Boolean2Objects mode '+str(mode)+' closed volume and DeleteInput',bool(found) and abs(sum(o.Mesh.Volume for o in found)-volume)<1e-3 and all(o.Mesh.isSolid() and o.BooleanMode==mode for o in found) and doc.getObject('A') is None and doc.getObject('B') is None);close(doc)
+        doc=App.newDocument('MeshMixedGuard');a=feature(doc,'A',Mesh.createBox(10,10,10));b=feature(doc,'B',Part.makeBox(10,10,10))
+        start(doc,'BooleanUnion',[a,b]);enter();enter();check('Mesh BRep mixed Boolean rejected without mutation',len(doc.Objects)==2 and not outputs(doc,'OM9-SOLID-003'));close(doc)
+        doc=App.newDocument('MeshOpenGuard');a=feature(doc,'A',Mesh.Mesh([(App.Vector(),App.Vector(5,0,0),App.Vector(0,5,0))]));b=feature(doc,'B',Mesh.createBox(10,10,10))
+        start(doc,'BooleanIntersection',[a]);enter();enter('B');enter();enter();check('Open Mesh Boolean rejected without mutation',len(doc.Objects)==2 and not outputs(doc,'OM9-SOLID-002'));close(doc)
+        # Characterization evidence for native Mesh Boolean backend, separate from command tests.
+        a=Mesh.createBox(10,10,10);b=Mesh.createBox(10,10,10);b.translate(5,0,0)
+        result['mesh_backend']={}
+        for method in ['unite','difference','intersect']:
+            try:
+                m=getattr(a,method)(b);result['mesh_backend'][method]={'solid':m.isSolid(),'volume':m.Volume,'facets':m.CountFacets}
+            except Exception as e: result['mesh_backend'][method]={'error':str(e)}
+        result['ok']=all(c['passed'] for c in result['checks'])
+    except Exception:
+        result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()): App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(800,run)

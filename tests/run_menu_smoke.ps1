@@ -3,6 +3,7 @@ param(
     [Parameter(Mandatory=$true)][string]$DependencyPrefix,
     [double]$Scale = 1,
     [string]$Macro = 'public_icons_smoke.FCMacro',
+    [string]$NativeModuleDirectory = '',
     [ValidateRange(1,600)][int]$TimeoutSeconds = 60,
     [switch]$KeepOpen
 )
@@ -12,14 +13,16 @@ $suite=if($Macro -eq 'menu_smoke.FCMacro'){'smoke'}else{[IO.Path]::GetFileNameWi
 $outputRoot=Join-Path $moduleRoot "build/$suite-$Scale/$([guid]::NewGuid().ToString('N'))"
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 $oldVars=@{}
-foreach($key in @('PATH','FREECAD_USER_HOME','OM9_SMOKE_OUTPUT','OM9_SMOKE_KEEP_OPEN','QT_SCALE_FACTOR')) {$oldVars[$key]=[Environment]::GetEnvironmentVariable($key,'Process')}
+foreach($key in @('PATH','FREECAD_USER_HOME','OM9_SMOKE_OUTPUT','OM9_SMOKE_KEEP_OPEN','QT_SCALE_FACTOR','OM9_TEST_NATIVE_DIR')) {$oldVars[$key]=[Environment]::GetEnvironmentVariable($key,'Process')}
 try {
     $env:PATH="$DependencyPrefix/bin;$(Split-Path $DependencyPrefix -Parent);"+$env:PATH
     $env:FREECAD_USER_HOME=Join-Path $outputRoot 'profile'
     $env:OM9_SMOKE_OUTPUT=$outputRoot
+    $env:OM9_TEST_NATIVE_DIR=$NativeModuleDirectory
     $env:OM9_SMOKE_KEEP_OPEN=if($KeepOpen){'1'}else{'0'}
     $env:QT_SCALE_FACTOR=$Scale.ToString([System.Globalization.CultureInfo]::InvariantCulture)
     $arguments=@('-u',"`"$(Join-Path $outputRoot 'user.cfg')`"",'-s',"`"$(Join-Path $outputRoot 'system.cfg')`"","`"$(Join-Path $PSScriptRoot $Macro)`"")
+    if($NativeModuleDirectory){$arguments=@('-P',"`"$NativeModuleDirectory`"")+$arguments}
     $process=Start-Process -FilePath $FreeCADExe -ArgumentList $arguments -WindowStyle Hidden -PassThru
     if(-not $KeepOpen) {
         if(-not $process.WaitForExit($TimeoutSeconds*1000)){throw "Smoke process $($process.Id) did not finish within $TimeoutSeconds seconds; inspect its logs/window."}

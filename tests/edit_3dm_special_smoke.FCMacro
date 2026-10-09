@@ -1,0 +1,249 @@
+"""OM9-TOP11-005 retained 3DM block/text/dimension/cage runtime proof."""
+import os,sys
+native_dir=os.environ.get('OM9_TEST_NATIVE_DIR','')
+if native_dir:sys.path.insert(0,native_dir)
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtGui, QtWidgets
+import hashlib, json, os, traceback
+from pathlib import Path
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+fixtures = Path(os.environ.get('OM9_3DM_EXPLODE_FIXTURES',
+    'H:/FreeCAD-src/Mod/OpenMatrix9/build/edit-special-fixtures'))
+result = {'checks': [], 'fixtures': str(fixtures)}
+
+def check(name, value):
+    result['checks'].append({'name': name, 'passed': bool(value)})
+    if not value:
+        raise AssertionError(name)
+
+def near(a, b, tolerance=1e-6):
+    return abs(a-b) < tolerance
+
+def events():
+    QtWidgets.QApplication.processEvents()
+
+def enter(text=''):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_End, QtCore.Qt.ControlModifier))
+    if text:
+        QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+            QtCore.QEvent.KeyPress, 0, QtCore.Qt.NoModifier, text))
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_Return, QtCore.Qt.NoModifier))
+    events()
+
+def select(obj):
+    Gui.Selection.clearSelection()
+    Gui.Selection.addSelection(obj)
+
+def outputs(doc):
+    return [o for o in doc.Objects if getattr(o, 'OM9FeatureId', '') == 'OM9-TOP11-005']
+
+def archive(doc):
+    return next(o for o in doc.Objects if hasattr(o, 'OM9SourceArchive'))
+
+def source(doc, key):
+    return next(o for o in doc.Objects if getattr(o, 'OM9SourceUUID', '') == ids[key])
+
+def imported(name):
+    doc = App.newDocument(name)
+    doc.UndoMode = 1
+    ThreeDm.import_file(str(fixtures/'explode-special.3dm'), doc, mode='preserve')
+    doc.recompute()
+    events()
+    return doc
+
+def explicit(obj):
+    select(obj)
+    enter('Explode')
+    enter()
+    enter()
+
+def close(doc):
+    enter('Cancel')
+    Gui.Selection.clearSelection()
+    App.closeDocument(doc.Name)
+    events()
+
+def valid_shapes(found):
+    return all(o.Shape.isValid() and not o.Shape.isNull() for o in found if hasattr(o, 'Shape'))
+
+def snapshot_intact(doc):
+    container = archive(doc)
+    loaded = state.load_archive_state(container)
+    return hashlib.sha256(Path(loaded['snapshot']).read_bytes()).hexdigest() == input_hash
+
+def reload(doc, filename):
+    enter('Cancel')
+    target = out/filename
+    doc.saveAs(str(target))
+    App.closeDocument(doc.Name)
+    reopened = App.openDocument(str(target))
+    events()
+    return reopened
+
+def check_cage(found):
+    faces = [o for o in found if hasattr(o, 'Shape') and o.Shape.ShapeType == 'Face']
+    edges = [o for o in found if hasattr(o, 'Shape') and o.Shape.ShapeType == 'Edge']
+    check('Retained cage separates six exact boundaries and twenty control edges',
+          len(found) == 26 and len(faces) == 6 and len(edges) == 20 and valid_shapes(found))
+    metadata=[json.loads(o.ExplodeSourceMetadata) for o in found]
+    check('Cage descriptors retain current CV weights knots units and source identity',
+          all(m['cage']['counts']==[3,2,2] and m['cage']['degrees']==[2,1,1] and len(m['cage']['control_points_mm'])==12 and len(m['cage']['weights'])==12 and len(m['cage']['knots'])==3 and m['scale_mm']==25.4 and m['source_record_uuid'] and m['import_namespace'] for m in metadata))
+    # Boundary at w=1: quadratic Bernstein interpolation of current CVs gives
+    # (1.375,3.25,4.5) inches at u=.5,v=1. It is not the cage bounding box.
+    target = App.Vector(34.925, 82.55, 114.3)
+    check('Deformed NURBS cage boundary preserves exact mathematical coordinates',
+          any(o.Shape.Faces[0].Surface.value(.5, 1).distanceToPoint(target) < 1e-6 for o in faces))
+    check('Cage current deformed CV is present in editable lattice',
+          any(v.Point.distanceToPoint(App.Vector(44.45, 88.9, 127)) < 1e-6
+              for o in edges for v in o.Shape.Vertexes))
+
+def run():
+    global console, ThreeDm, state, ids, input_hash
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui
+        result['native_module_path']=str(Path(OpenMatrix9Gui.__file__).resolve())
+        if native_dir:check('Selected native module is loaded',Path(OpenMatrix9Gui.__file__).resolve().parent==Path(native_dir).resolve())
+        events()
+        console = Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript')
+        check('Native command transcript is available', console is not None)
+        import ThreeDm
+        import ThreeDmArchiveState as state
+        ids = json.loads((fixtures/'explode-special.ids.json').read_text(encoding='utf-8'))
+        input_hash = hashlib.sha256((fixtures/'explode-special.3dm').read_bytes()).hexdigest()
+
+        doc = imported('RetainedBlockExplode')
+        obj = source(doc, 'block')
+        name = obj.Name
+        check('Embedded nested block is imported as a retained source record', obj.OM9Capability == 'retained')
+        select(obj)
+        Gui.runCommand('OM9_TopIconExplode')
+        events()
+        enter()
+        enter()
+        check('Menu Explode preserves retained block instance', doc.getObject(name) is not None and not outputs(doc))
+        enter('Cancel')
+        explicit(doc.getObject(name))
+        found = outputs(doc)
+        check('Explicit CMD Explode detaches nested block into native geometry',
+              len(found) == 1 and doc.getObject(name) is None and valid_shapes(found))
+        vertices = sorted(tuple(round(n, 6) for n in v.Point) for v in found[0].Shape.Vertexes)
+        check('Nested block reflection, nonuniform scale and inch units are applied once',
+              near(found[0].Shape.Length, 152.4) and
+              vertices == [(-711.2, 660.4, 304.8), (-558.8, 660.4, 304.8)])
+        check('Detached block output has no retained archive identity',
+              all(not state.archive_identity(o) for o in found))
+        check('Source archive remains byte-identical after block Explode', snapshot_intact(doc))
+        doc.undo()
+        check('Retained block Explode is one Undo transaction', doc.getObject(name) is not None and not outputs(doc))
+        doc.redo()
+        check('Retained block Explode Redo restores native output', len(outputs(doc)) == 1)
+        doc = reload(doc, 'retained-block-exploded.FCStd')
+        check('Detached block geometry and included source archive survive FCStd reload',
+              len(outputs(doc)) == 1 and near(outputs(doc)[0].Shape.Length, 152.4) and snapshot_intact(doc))
+        close(doc)
+
+        doc = imported('RetainedDimensionExplode')
+        obj = source(doc, 'dimension')
+        name = obj.Name
+        container = archive(doc)
+        original_hash = container.OM9ArchiveHash
+        object_count = len(doc.Objects)
+        container.OM9ArchiveHash = '0'*64
+        explicit(obj)
+        check('Corrupt source archive hash blocks Explode before document mutation',
+              doc.getObject(name) is not None and len(doc.Objects) == object_count and not outputs(doc))
+        container.OM9ArchiveHash = original_hash
+        enter('Cancel')
+        explicit(doc.getObject(name))
+        found = outputs(doc)
+        curves = [o for o in found if hasattr(o, 'Shape')]
+        labels = [o for o in found if hasattr(o, 'LabelText')]
+        check('3DM dimension Explode creates display curves plus editable native label',
+              len(found) == 6 and len(curves) == 5 and len(labels) == 1 and valid_shapes(found)
+              and 'Length 10' in ''.join(labels[0].LabelText) and 'in' in ''.join(labels[0].LabelText))
+        check('Dimension units and native text height remain faithful',
+              near(labels[0].ViewObject.FontSize, 6.35)
+              and sorted(round(o.Shape.Length, 6) for o in curves)[-1] == 254.0
+              and near(labels[0].TextFrame.A11, 1.0))
+        label_name = labels[0].Name
+        original_label = list(labels[0].LabelText)
+        doc = reload(doc, 'retained-dimension-exploded.FCStd')
+        label = doc.getObject(label_name)
+        check('Detached native dimension label and frame survive FCStd reload',
+              label is not None and list(label.LabelText) == original_label and hasattr(label, 'TextFrame')
+              and near(label.ViewObject.FontSize, 6.35) and snapshot_intact(doc))
+        label.LabelText = ['Edited native dimension label']
+        doc.recompute()
+        check('Exploded dimension label remains editable after reload', list(label.LabelText) == ['Edited native dimension label'])
+        close(doc)
+
+        doc = imported('RetainedCageExplode')
+        obj = source(doc, 'cage')
+        name = obj.Name
+        explicit(obj)
+        check_cage(outputs(doc))
+        check('Cage source is replaced while immutable archive is retained', doc.getObject(name) is None and snapshot_intact(doc))
+        doc.undo()
+        check('Cage Explode Undo restores one retained source record', doc.getObject(name) is not None and not outputs(doc))
+        doc.redo()
+        check('Cage Explode Redo restores all twenty-six native pieces', len(outputs(doc)) == 26)
+        doc = reload(doc, 'retained-cage-exploded.FCStd')
+        check_cage(outputs(doc))
+        check('Cage archive integrity survives FCStd reload', snapshot_intact(doc))
+        close(doc)
+
+        for key, count, shape_type, measure in [('curve_control', 1, 'Edge', 76.2),
+                                               ('surface_control', 1, 'Face', 3870.96),
+                                               ('cage_control', 26, None, None)]:
+            doc = imported('Retained'+key.title().replace('_', ''))
+            obj = source(doc, key)
+            name = obj.Name
+            explicit(obj)
+            found = outputs(doc)
+            check('MorphControl '+key+' produces editable native control geometry',
+                  len(found) == count and doc.getObject(name) is None and valid_shapes(found))
+            if shape_type:
+                check('MorphControl '+key+' preserves exact type, units and measure',
+                      found[0].Shape.ShapeType == shape_type and
+                      near(found[0].Shape.Length if shape_type == 'Edge' else found[0].Shape.Area, measure))
+            else:
+                check_cage(found)
+            close(doc)
+
+        doc = imported('RetainedTextExplode')
+        obj = source(doc, 'text')
+        name = obj.Name
+        explicit(obj)
+        found = outputs(doc)
+        result['text_contours_available'] = bool(found)
+        if found:
+            check('3DM text Explode produces editable native font contours',
+                  doc.getObject(name) is None and valid_shapes(found) and
+                  all(o.Shape.ShapeType in ('Edge', 'Wire') for o in found))
+            check('Source text plane and inch units survive contour conversion',
+                  all(near(v.Point.z, 177.8) for o in found for v in o.Shape.Vertexes))
+        else:
+            diagnostic = console.toPlainText()
+            check('Unavailable native source-font contours reject text Explode atomically',
+                  doc.getObject(name) is not None and 'font' in diagnostic.lower() and snapshot_intact(doc))
+            result['text_contour_limitation'] = 'Source font contour service unavailable; retained text was preserved.'
+        close(doc)
+        check('Original fixture is unchanged after all native edit operations',
+              hashlib.sha256((fixtures/'explode-special.3dm').read_bytes()).hexdigest() == input_hash)
+        result['ok'] = True
+    except Exception:
+        result['ok'] = False
+        result['error'] = traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        out.mkdir(parents=True, exist_ok=True)
+        (out/'results.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(800, run)

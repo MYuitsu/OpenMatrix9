@@ -44,6 +44,8 @@ def export_assets(ref_root,output_root,named_root=None,named_bindings=None,
     owners={}
     for _,catalog,module in CATALOGS:
         for key in catalog:owners.setdefault(key,module)
+    aliases={'ReleaseFromCage':'TransformCageEditingCageEdit'}
+    for alias,target in aliases.items():owners[alias]=owners[target]
     unknown=set(names)-set(owners)
     if unknown:raise ValueError('Missing authored command symbols: '+', '.join(sorted(unknown)))
     bindings=configparser.ConfigParser(interpolation=None)
@@ -51,7 +53,9 @@ def export_assets(ref_root,output_root,named_root=None,named_bindings=None,
         'resolved':[],'missing':{},'shifted_icons':{},'authored_symbols':{}}
     for key in names:
         tooltip=existing[key].get('tooltip') if existing.has_section(key) else None
-        metadata,record=owners[key].write_asset(output,key,tooltip)
+        metadata,record=owners[key].write_asset(output,aliases.get(key,key),tooltip)
+        if key=='ReleaseFromCage':
+            record=dict(record,symbol=key,label='Release From Cage',meaning='Release selected captives while preserving geometry',spec_id='OM9-TRANSFORM-022')
         if existing.has_section(key) and existing[key].get('feature_id'):
             metadata['feature_id']=existing[key]['feature_id']
         bindings[key]=metadata;report['authored_symbols'][key]=public_record(record)

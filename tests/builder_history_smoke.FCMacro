@@ -1,0 +1,165 @@
+"""OM9-HISTORY-001 / OM9-GEM-027 durable native Builder History contracts."""
+import os,sys,json,traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore,QtGui,QtWidgets
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[]}
+def check(name,ok):
+    report['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def enter(text):
+    console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier))
+    QtWidgets.QApplication.processEvents()
+def run():
+    try:
+        if os.environ.get('OM9_BUILDER_RESTORE_FILE'):
+            check('cold native module absent initially','OpenMatrix9Gui' not in sys.modules)
+            doc=App.openDocument(os.environ['OM9_BUILDER_RESTORE_FILE'])
+            check('cold FCStd loads namespace module','OpenMatrix9Gui' in sys.modules)
+            report['native_module_path']=sys.modules['OpenMatrix9Gui'].__file__
+            rec=doc.getObject('BuilderRecord');child=doc.getObject(rec.OutputNames[0])
+            if child is None:
+                import OpenMatrix9Gui as OM
+                child=OM.restoreBuilderOutputs(rec)[0]
+                check('cold restore explicitly recreates deleted output',child.ParentRecord==rec)
+            doc.getObject('Gem').Placement.Base=App.Vector(40,0,0);doc.recompute()
+            check('cold restore native recompute',abs(child.Shape.CenterOfGravity.x-45)<1e-7)
+            report['ok']=True;return
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui as OM
+        check('native createBuilderRecord API exists',hasattr(OM,'createBuilderRecord'))
+        doc=App.newDocument('BuilderHistory');doc.UndoMode=1
+        gem=doc.addObject('Part::Feature','Gem');gem.Shape=Part.makeBox(2,4,8)
+        gem.addProperty('App::PropertyString','OM9GemShape');gem.OM9GemShape='round'
+        seedframe=doc.addObject('App::Part','SeedFrame');seedframe.Placement.Base=App.Vector(100,0,0)
+        seed=doc.addObject('Part::Feature','Seed');seed.Shape=Part.makeBox(1,1,1,App.Vector(-98,0,0));seedframe.addObject(seed)
+        raw=json.dumps({'schema':1,'evaluator':'om9.affine-template','version':1,'settings':{'builder':'bezel','height':1.7,'extra':[True,None]},'scale':[1,1,1],'offset':[0,0,0]})
+        before={o.Name for o in doc.Objects};rejected=False
+        try:OM.createBuilderRecord(gem,'generic builder',raw,[seed])
+        except Exception:rejected=True
+        check('invalid exact feature identity rejects without writes',rejected and before=={o.Name for o in doc.Objects})
+        otherdoc=App.newDocument('OtherBuilderDocument');before={o.Name for o in doc.Objects};rejected=False
+        try:OM.createBuilderRecord(gem,'OM9-SETTING-001',raw,[seed])
+        except Exception:rejected=True
+        check('inactive document API refuses writes',rejected and before=={o.Name for o in doc.Objects})
+        App.closeDocument(otherdoc.Name);App.setActiveDocument(doc.Name)
+        rec=OM.createBuilderRecord(gem,'OM9-SETTING-001',raw,[seed],True)
+        child=doc.getObject(rec.OutputNames[0]);doc.removeObject(seed.Name);doc.recompute()
+        check('native durable record independent of outputs',rec.TypeId=='OpenMatrix9Gui::BuilderRecord' and rec.SourceGem==gem and rec.Parameters==raw and child.TypeId=='OpenMatrix9Gui::BuilderOutput')
+        check('initial independent geometry',abs(child.Shape.CenterOfGravity.x-2.5)<1e-7 and abs(child.Shape.Volume-1)<1e-7)
+        gem.Shape=Part.makeBox(4,4,8);gem.Placement.Base=App.Vector(10,0,0);doc.recompute()
+        check('dimension/frame native update',abs(child.Shape.CenterOfGravity.x-15)<1e-7 and abs(child.Shape.Volume-2)<1e-7)
+        settings=next((o for o in doc.Objects if o.TypeId=='OpenMatrix9Gui::HistorySettings'),None)
+        if settings is None:settings=doc.addObject('OpenMatrix9Gui::HistorySettings','OM9HistorySettings')
+        settings.BrokenHistoryWarning=False;settings.Update=False
+        gem.Placement.Base=App.Vector(20,0,0);doc.recompute()
+        check('global Update suspension freezes outputs',abs(child.Shape.CenterOfGravity.x-15)<1e-7)
+        settings.Update=True;doc.recompute()
+        check('global Update resume schedules durable outputs',abs(child.Shape.CenterOfGravity.x-25)<1e-7)
+        settings.Record=False;gem.Placement.Base=App.Vector(30,0,0);doc.recompute()
+        check('global Record Off permits existing output updates',abs(child.Shape.CenterOfGravity.x-35)<1e-7)
+        offseed=doc.addObject('Part::Feature','OffSeed');offseed.Shape=Part.makeBox(1,1,1,App.Vector(32,0,0))
+        offrec=OM.createBuilderRecord(gem,'OM9-SETTING-001',raw,[offseed]);offchild=doc.getObject(offrec.OutputNames[0])
+        check('Record Off creates permanently unrecorded output',not offrec.Recorded and not offchild.Recorded and offchild.ParentRecord is None)
+        restoredOff=OM.restoreBuilderOutputs(offrec)
+        check('Record Off existing detached slot restores without false failure',restoredOff[0]==offchild and not offchild.Recorded)
+        doc.removeObject(offchild.Name);offchild=OM.restoreBuilderOutputs(offrec)[0]
+        check('Record Off missing slot explicitly restores unrecorded output',not offchild.Recorded and offchild.ParentRecord is None)
+        offcenter=offchild.Shape.CenterOfGravity.x
+        settings.Record=True;doc.recompute()
+        check('global Record On preserves existing output geometry',abs(child.Shape.CenterOfGravity.x-35)<1e-7)
+        gem.Placement.Base=App.Vector(31,0,0);doc.recompute()
+        check('Record resume does not retrofit new output',not offchild.Recorded and abs(offchild.Shape.CenterOfGravity.x-offcenter)<1e-7)
+        for o in [offchild,offrec,offseed]:doc.removeObject(o.Name)
+        settings.Lock=True;rejected=False
+        try:child.Placement=App.Placement(App.Vector(1,0,0),App.Rotation())
+        except Exception:rejected=True
+        check('global Lock prevents independent child edit',rejected and child.Recorded)
+        settings.Lock=False
+        doc.openTransaction('Independent child edit');child.Placement=App.Placement(App.Vector(1,0,0),App.Rotation());doc.commitTransaction()
+        check('independent child edit detaches only output',not child.Recorded and child.ParentRecord is None and rec.Recorded)
+        doc.undo();doc.recompute()
+        check('Undo restores native output recipe link',child.Recorded and child.ParentRecord==rec)
+        doc.redo();doc.recompute()
+        check('Redo repeats child detach',not child.Recorded and child.ParentRecord is None)
+        doc.undo();doc.recompute();gem.Placement.Base=App.Vector(10,0,0);doc.recompute()
+        gem.Placement.Rotation=App.Rotation(App.Vector(0,0,1),90);doc.recompute()
+        check('source gem rotation maps local template frame',abs(child.Shape.CenterOfGravity.x-9.5)<1e-7 and abs(child.Shape.CenterOfGravity.y-5)<1e-7)
+        gem.Placement.Rotation=App.Rotation();doc.recompute()
+        changed=json.loads(raw);changed['scale']=[2,2,2];changed['offset']=[4,0,0]
+        doc.openTransaction('Edit registered affine recipe');rec.Parameters=json.dumps(changed);doc.recompute();doc.commitTransaction()
+        check('registered evaluator applies explicit scale and offset',abs(child.Shape.CenterOfGravity.x-24)<1e-7 and abs(child.Shape.Volume-16)<1e-7)
+        doc.undo();doc.recompute()
+        check('Undo restores versioned raw parameters and geometry',rec.Parameters==raw and abs(child.Shape.CenterOfGravity.x-15)<1e-7 and abs(child.Shape.Volume-2)<1e-7)
+        old=child.Name;doc.openTransaction('Delete output');doc.removeObject(old);doc.commitTransaction();doc.recompute()
+        check('output deletion leaves record without implicit resurrection',doc.getObject(rec.Name)==rec and doc.getObject(old) is None)
+        restored=OM.restoreBuilderOutputs(rec);child=restored[0]
+        check('explicit restore replays durable template',abs(child.Shape.CenterOfGravity.x-15)<1e-7)
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(child);enter('MatrixClearObjectHistory')
+        check('native Clear Object History detaches output only',not child.Recorded and child.ParentRecord is None and rec.Recorded)
+        doc.undo();doc.recompute()
+        check('native Clear Undo restores output recipe link',child.Recorded and child.ParentRecord==rec)
+        group=doc.addObject('App::Part','GemFrame');group.addObject(gem);group.Placement.Base=App.Vector(5,0,0);doc.recompute()
+        check('parent App Part frame updates output',abs(child.Shape.CenterOfGravity.x-20)<1e-7)
+        doc.openTransaction('Move gem frame');group.Placement.Base=App.Vector(15,0,0);doc.recompute();doc.commitTransaction()
+        check('parent App Part frame edit updates output',abs(child.Shape.CenterOfGravity.x-30)<1e-7)
+        doc.undo();doc.recompute()
+        check('parent App Part frame Undo updates output',abs(child.Shape.CenterOfGravity.x-20)<1e-7)
+        group.removeObject(gem);doc.recompute()
+        check('parent frame removal refreshes dependencies',abs(child.Shape.CenterOfGravity.x-15)<1e-7)
+        extra=doc.addObject('Part::Feature','Extra');extra.Shape=Part.makeBox(.5,.5,.5,App.Vector(10,0,2))
+        extra2=doc.addObject('Part::Feature','Extra2');extra2.Shape=Part.makeBox(.25,.25,.25,App.Vector(11,0,3))
+        rec2=OM.createBuilderRecord(gem,'OM9-CUTTER-001',raw,[extra,extra2],False)
+        for o in [extra,extra2]:doc.removeObject(o.Name)
+        check('multiple independent settings/cutters records per gem',rec2!=rec and rec2.SourceGem==gem)
+        survivor=doc.getObject(rec2.OutputNames[1]);survivorname=survivor.Name
+        doc.removeObject(rec2.OutputNames[0]);doc.recompute();slots=OM.restoreBuilderOutputs(rec2)
+        check('multioutput slots stable after deletion',len(slots)==2 and slots[1].Name==survivorname and slots[0].TemplateIndex==0 and slots[1].TemplateIndex==1 and abs(slots[1].Shape.CenterOfGravity.x-11.125)<1e-7)
+        target=doc.addObject('Part::Feature','Target');target.Shape=Part.makeBox(2,4,8);target.Placement.Base=App.Vector(30,0,0)
+        target.addProperty('App::PropertyString','OM9GemShape');target.OM9GemShape='round'
+        matched=OM.matchBuilderAttributes(gem,[target]);new=doc.getObject(matched[0].OutputNames[0])
+        check('match retains all settings/cutters and gem-local geometry',len(matched)==2 and matched[0].Parameters==raw and matched[0].SourceGem==target and abs(new.Shape.CenterOfGravity.x-32.5)<1e-7)
+        bad=doc.addObject('Part::Feature','Bad');bad.Shape=target.Shape;bad.addProperty('App::PropertyString','OM9GemShape');bad.OM9GemShape='oval'
+        before={o.Name for o in doc.Objects};rejected=False
+        try:OM.matchBuilderAttributes(gem,[target,bad])
+        except Exception:rejected=True
+        check('incompatible match all-or-error',rejected and before=={o.Name for o in doc.Objects})
+        path=str(out/'builder-history.FCStd');doc.saveAs(path);recname=rec.Name;childname=child.Name;App.closeDocument(doc.Name)
+        doc=App.openDocument(path);rec=doc.getObject(recname);child=doc.getObject(childname)
+        check('FCStd native recipe and links survive',rec.Parameters==raw and child.ParentRecord==rec)
+        doc.getObject('Gem').Placement.Base=App.Vector(20,0,0);doc.recompute()
+        check('FCStd recomputes durable template',abs(child.Shape.CenterOfGravity.x-25)<1e-7)
+        doc.removeObject(child.Name);doc.saveAs(str(out/'builder-history-missing.FCStd'));missingpath=doc.FileName;App.closeDocument(doc.Name)
+        doc=App.openDocument(missingpath);rec=doc.getObject(recname)
+        check('FCStd survives with all record outputs deleted',doc.getObject(rec.OutputNames[0]) is None and rec.Parameters==raw and not rec.Templates.isNull())
+        child=OM.restoreBuilderOutputs(rec)[0]
+        check('FCStd explicitly restores deleted output from persisted template',abs(child.Shape.CenterOfGravity.x-25)<1e-7)
+        gem=doc.getObject('Gem');oldshape=gem.Shape.copy();gem.Shape=Part.Shape();doc.recompute()
+        check('invalid source clears live output instead of stale geometry',child.Shape.isNull())
+        gem.Shape=oldshape;doc.recompute()
+        check('repaired source recomputes persisted output',not child.Shape.isNull() and abs(child.Shape.CenterOfGravity.x-25)<1e-7)
+        doc.UndoMode=1;doc.openTransaction('Delete source gem');doc.removeObject(gem.Name);doc.commitTransaction();doc.recompute()
+        check('deleted source invalidates output and leaves durable storage',rec.SourceGem is None and child.Shape.isNull() and rec.Parameters==raw)
+        before={o.Name for o in doc.Objects};rejected=False
+        try:OM.restoreBuilderOutputs(rec)
+        except Exception:rejected=True
+        check('missing source restore refuses without writes',rejected and before=={o.Name for o in doc.Objects})
+        rejected=False
+        try:OM.createBuilderRecord(gem,'OM9-SETTING-001',raw,[child])
+        except Exception:rejected=True
+        check('deleted native source wrapper safely rejects',rejected and before=={o.Name for o in doc.Objects})
+        doc.undo();doc.recompute()
+        check('source deletion Undo restores native link and geometry',rec.SourceGem==doc.getObject('Gem') and abs(child.Shape.CenterOfGravity.x-25)<1e-7)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2));App.Console.PrintMessage(json.dumps(report)+'\n')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(800,run)

@@ -5,6 +5,8 @@ description: Create, replace or review minimal SVG menu icons for OpenMatrix9, p
 
 # OpenMatrix9 icons
 
+Rust là ưu tiên số 1 khi viết/chuyển code hỗ trợ OM9. Đọc [quy tắc Rust và ranh giới native](../openmatrix9-workflow/references/rust-first.md) trước khi chọn ngôn ngữ/FFI/worker. Logic sản phẩm và dữ liệu độc lập thuộc safe Rust; giữ generator/audit Python hiện hữu khi cần để kiểm chứng. Quy tắc này không chuyển SVG thành Rust, không đổi palette/ý nghĩa/lệnh và không coi native FFI là memory-safe.
+
 Build recognizable vector symbols from verified command meaning. Resolve the
 active OpenMatrix9 module root (the directory directly containing `Resources`
 and `tools`) from the workspace; do not assume an old D: or E: location.
@@ -72,6 +74,11 @@ build, copy only scoped resources, verify bytes, and exercise Qt loading, button
 images and disabled colors; use the existing Curve smoke when applicable.
 Record what was actually checked and link a gallery. Do not claim arbitrary DPI
 support, complete feature implementation or copyright clearance from icon tests.
+
+Before reporting completion, follow [progress synchronization](../openmatrix9-workflow/references/progress.md)
+to check relevant Spec v1 items and align the project README and ledger with
+the completed artwork or integration scope. Icon verification does not advance
+the command's implementation status.
 
 Maintain the repository skill and installed Codex copy together when updating
 this skill, within the user's authorization. The installed copy is discoverable

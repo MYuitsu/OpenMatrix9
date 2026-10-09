@@ -1,9 +1,85 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-06",
+  "updated_at": "2026-10-09T17:43:14+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
+    {
+      "key": "curve-interp-rebuild",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-CURVE-003",
+        "OM9-CURVE-009"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "outputs": [
+        "Gui/CurveController.cpp",
+        "Gui/CurveController.h",
+        "Gui/CurveGeometry.cpp",
+        "Gui/CurveGeometry.h",
+        "Gui/CoreRebuild.cpp",
+        "Gui/CoreRebuild.h",
+        "Gui/RustBridge.h",
+        "rust/src/curve.rs",
+        "rust/src/curve_ffi.rs",
+        "rust/src/spline.rs",
+        "rust/src/spline_ffi.rs",
+        "rust/src/ffi.rs",
+        "rust/tests/curve_session.rs",
+        "rust/tests/spline_geometry.rs",
+        "rust/tests/curve_command_permissions.rs",
+        "tests/curve_spline_smoke.FCMacro",
+        "docs/features/OM9-CURVE-003.md",
+        "docs/features/OM9-CURVE-009.md",
+        "README.md"
+      ],
+      "evidence": [
+        "InterpCrv and Rebuild now dispatch from native menu and shared CMD; write permissions and success-only history are enforced.",
+        "Rust fits B-splines; the typed Part adapter constructs actual native spline edges. Preview adds no document objects.",
+        "Native fixtures verify 3D interpolation within 1e-7 mm, periodic native seam/picked-point consistency, mouse AutoClose and Alt suspension.",
+        "Rebuild supports single-edge curves and connected polyline wires, exact degree/pole count, sampled deviation, transactional batch DeleteInput and root-level output in world coordinates.",
+        "Independent review identified nested App::Part placement loss; native regression reproduced it, and parent-only transform plus global-placement stale checks fixed it.",
+        "RelWithDebInfo SDK build succeeded; isolated matching FreeCAD runtime passed 40 spline checks and all 26 existing Line/Polyline checks.",
+        "Runtime reports: build/curve_spline_smoke-1/d69e4389475e433cafef8eed0d89498d/results.json and build/curve_smoke-1/7e8e0bb23e7f48dcb73f095bf1793b90/results.json.",
+        "At the owner request, completed scope/checklists synchronized to OpenMatrix9_Codex_Spec_v1 on 2026-10-06; skill files unchanged."
+      ],
+      "tests": [
+        {
+          "command": "cargo test --manifest-path rust/Cargo.toml",
+          "result": "85 passed across 22 suites; includes concurrent Surface work"
+        },
+        {
+          "command": "python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "python tools/public_source_audit.py",
+          "result": "510 authored icon bindings, no errors"
+        },
+        {
+          "command": "cmake --build H:/FreeCAD-src/build/openmatrix9-final --target OpenMatrix9Gui --parallel 4",
+          "result": "passed against matching MSVC/Qt6 SDK, isolated runtime output"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro curve_spline_smoke.FCMacro",
+          "result": "40/40 passed; process exited 0"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro curve_smoke.FCMacro",
+          "result": "26/26 passed; process exited 0"
+        }
+      ],
+      "uncertainties": [
+        "Validation applies to the documented slices, not full Matrix/Rhino compatibility.",
+        "Matrix 8 Book 1 PDF pp.135-136 (Interp) and p.144 (Rebuild) are unavailable; Matrix defaults remain TODO_EVIDENCE. Supplemental Rhino 5 official command documentation was consulted.",
+        "Interp tangent constraints and two-point PersistentClose are unsupported. Current-layer mapping and Rebuild subedge editing are unsupported.",
+        "Rebuild deviation is a sampled bidirectional estimate, not a certified global tolerance bound.",
+        "The already-open SDK FreeCAD process still uses its loaded module; validation used a separate matching runtime."
+      ],
+      "next_document": "docs/features/OM9-CURVE-003.md and docs/features/OM9-CURVE-009.md",
+      "next_action": "Obtain Matrix manual pages to verify remaining defaults/options; implement tangent and active-layer workflows as subsequent feature slices."
+    },
     {
       "key": "public-source-snapshot",
       "stage": "ui-menu",
@@ -32,9 +108,18 @@
         "Local history reset to one root commit at the owner's explicit request; final history scan is documented in public-source-checks.json."
       ],
       "tests": [
-        {"command": "python -m unittest discover -s tools/tests", "result": "23 passed"},
-        {"command": "cargo test --manifest-path rust/Cargo.toml", "result": "68 passed"},
-        {"command": "tests/run_menu_smoke.ps1 -Macro public_icons_smoke.FCMacro", "result": "3093/3093 passed in isolated runtime"}
+        {
+          "command": "python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "cargo test --manifest-path rust/Cargo.toml",
+          "result": "68 passed"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro public_icons_smoke.FCMacro",
+          "result": "3093/3093 passed in isolated runtime"
+        }
       ],
       "uncertainties": [
         "Technical audit does not establish copyright clearance or complete command implementation.",
@@ -43,6 +128,1318 @@
       ],
       "next_document": "docs/public-source-review.md",
       "next_action": "Review provenance limits and choose a publication destination. Do not publish an unchanged old remote."
+    },
+    {
+      "key": "surface-sweep1-sweep2-loft-native",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-SURFACE-001",
+        "OM9-SURFACE-003",
+        "OM9-SURFACE-009"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "scope": "Historical 2026-10-06 native slice; additional options and current limits are recorded in surface-options-2026-10-09.",
+      "outputs": [
+        "rust/src/surface.rs",
+        "rust/tests/surface_session.rs",
+        "Gui/SurfaceController.cpp",
+        "Gui/SurfaceController.h",
+        "Gui/SurfaceGeometry.cpp",
+        "Gui/SurfaceGeometry.h",
+        "Resources/menu/ContextMenu.xml",
+        "tests/surface_commands_smoke.FCMacro",
+        "docs/features/OM9-SURFACE-001.md",
+        "docs/features/OM9-SURFACE-003.md",
+        "docs/features/OM9-SURFACE-009.md"
+      ],
+      "evidence": [
+        "build/surface_commands_smoke-1/2bc35ea73c404b8bbed1d1a65f8e335f/results.json",
+        "Stable menu IDs; CMD aliases Sweep1/Sweep2/Loft; F6 Surface actions share the native controller.",
+        "Native analytic cylinders, closed-ring Sweep1 torus, variable-width Sweep2 one/multiple profiles, seam radii, edge subreferences and transformed App::Part fixture passed.",
+        "Preview does not alter document objects; Cancel/invalid input/document-close cleanup, Undo/Redo and FCStd save/reload passed.",
+        "Independent reviewer identified missing parent placement; grouped-input regression reproduced it, then passed after global/local parent transform was applied.",
+        "Minimal SDK ContactOnBorder failure reproduced; implementation avoids this kernel path and validates both rails/all profiles.",
+        "Rational BSpline seam probe preserves exact radii; coarse Shape.Area integration is not used as the seam deformation test."
+      ],
+      "tests": [
+        {
+          "command": "cargo test --manifest-path rust/Cargo.toml",
+          "result": "85 passed in current checkout"
+        },
+        {
+          "command": "python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "cmake --build build/openmatrix9 --target OpenMatrix9Gui --parallel 4",
+          "result": "passed, matching RelWithDebInfo FreeCAD SDK"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro surface_commands_smoke.FCMacro",
+          "result": "96/96 passed; isolated profile; process exit 0"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro public_icons_smoke.FCMacro",
+          "result": "3093/3093 passed; process exit 0"
+        },
+        {
+          "command": "python tools/public_source_audit.py",
+          "result": "510 authored SVG bindings; no errors"
+        },
+        {
+          "command": "git -c core.whitespace=cr-at-eol diff --check",
+          "result": "passed; existing LF/CRLF normalization warnings only"
+        }
+      ],
+      "uncertainties": [
+        "One-profile Sweep2 requires profile contact at both rail starts; rail transport, scaling, 65-station approximation and sampled tolerance are explicit OpenMatrix9 decisions.",
+        "Multiple-profile Sweep2 rejects inputs when native contact mode cannot satisfy all rails/sections. Sampling is not proof of exact whole-curve contact.",
+        "Source links persist as provenance; outputs are snapshots without source-edit recomputation. Full Rhino/Matrix acceptance remains unverified."
+      ],
+      "next_document": "docs/features/OM9-SURFACE-003.md",
+      "next_action": "See surface-options-2026-10-09 for verified continuation pages, additional options and current next work.",
+      "superseded_by": "surface-options-2026-10-09"
+    },
+    {
+      "key": "spec-v1-completion-sync",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-CURVE-001",
+        "OM9-CURVE-002",
+        "OM9-CURVE-003",
+        "OM9-CURVE-009",
+        "OM9-SURFACE-001",
+        "OM9-SURFACE-003",
+        "OM9-SURFACE-009"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "outputs": [
+        "OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md",
+        "OpenMatrix9_Codex_Spec_v1/FEATURES.json",
+        "OpenMatrix9_Codex_Spec_v1/FEATURES.yaml",
+        "OpenMatrix9_Codex_Spec_v1/MANIFEST.json",
+        "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-001-polyline.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-002-line.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-003-interp-curve.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-009-rebuild.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/03-surface/om9-surface-001-sweep-1.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/03-surface/om9-surface-003-sweep-2.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/03-surface/om9-surface-009-loft.md"
+      ],
+      "evidence": [
+        "Existing successful native reports read: Line/Polyline 26/26, Interp/Rebuild 40/40, Surface commands 96/96.",
+        "All 7 source-derived sections preserved; JSON/YAML and feature front matter agree; 600 unrelated entries retained."
+      ],
+      "tests": [
+        {
+          "command": "python build/verify_spec_sync.py",
+          "result": "607 unique IDs; 7 synchronized records; matching JSON/YAML/front matter; unchanged source sections; verified links and manifest"
+        },
+        {
+          "command": "python tools/public_source_audit.py",
+          "result": "510 authored icon bindings verified; audit rejects the three existing Matrix reference PDFs in spec_v1."
+        }
+      ],
+      "uncertainties": [
+        "Statuses identify validated supported slices; full Matrix/Rhino compatibility and source-page rechecks remain unverified.",
+        "Three Matrix reference PDFs are now present in spec_v1. Public-source audit reports those three private/binary artifacts; they were preserved. Existing code diff check also reports CRLF whitespace in CMakeLists.txt and ContextMenu.xml, outside this documentation synchronization."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md",
+      "next_action": "After each further implementation/verification, synchronize completed scope, limitations and evidence into spec_v1 per owner instruction."
+    },
+    {
+      "key": "solid-box-sphere",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-SOLID-012",
+        "OM9-SOLID-014"
+      ],
+      "procedure_va": null,
+      "status": "validated_supported_slice",
+      "outputs": [
+        "rust/src/solid.rs",
+        "rust/tests/solid_session.rs",
+        "rust/tests/solid_commands.rs",
+        "Gui/SolidController.cpp",
+        "Gui/SolidController.h",
+        "tests/solid_commands_smoke.FCMacro",
+        "docs/validation/2026-10-06-solid-box-sphere.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/04-solid/om9-solid-012-box.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/04-solid/om9-solid-014-sphere.md"
+      ],
+      "evidence": [
+        "Matrix 8 Book 1 PDF pp.232-233 extracted and visually checked; original source-derived sections preserved.",
+        "Rust owns Box/Sphere input/placement; typed native Part adapter creates one valid closed standalone BRep in one transaction.",
+        "Native Solid menu/CMD and mouse checks cover analytic geometry, preview, invalid/cancel input, input Undo, native Undo/Redo and FCStd reload.",
+        "Independent review found pending-text Esc and stale-CPlane F4; both reproduced by native red tests, fixed, reviewed and passed.",
+        "Owner requested completed work be synchronized into spec_v1; scope, status, checklists, catalog, status summary and manifest updated."
+      ],
+      "tests": [
+        {
+          "command": "rtk cargo test --manifest-path rust/Cargo.toml",
+          "result": "100 passed across 26 suites; includes concurrent Edit changes"
+        },
+        {
+          "command": "rtk proxy python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "Native matching-SDK RelWithDebInfo build and solid_commands_smoke.FCMacro",
+          "result": "70/70 passed; build/solid_commands_smoke-1/22155c12fb3d47b48dbe06f13dc093e6/results.json"
+        },
+        {
+          "command": "Native standard SDK output build and solid_commands_smoke.FCMacro without path override",
+          "result": "69/69 passed; build/solid_commands_smoke-1/22044e17980f4ca1aa3ce395ef4023f6/results.json; bin/OpenMatrix9Gui.pyd loaded"
+        },
+        {
+          "command": "Native curve_smoke.FCMacro",
+          "result": "26/26 passed; build/curve_smoke-1/8627e53b05304b19b9133202f93bb9bc/results.json"
+        },
+        {
+          "command": "Native curve_spline_smoke.FCMacro",
+          "result": "40/40 passed; build/curve_spline_smoke-1/86d2b813f5a044ab89692ab551515e41/results.json"
+        },
+        {
+          "command": "Native surface_commands_smoke.FCMacro",
+          "result": "96/96 passed; build/surface_commands_smoke-1/3a91b633429d4f41a2119827f827ef11/results.json"
+        },
+        {
+          "command": "rtk proxy python tools/public_source_audit.py",
+          "result": "Failed on 290 private/binary artifacts: 3 supplied PDFs in package and 287 under code/; 510 authored SVG bindings valid; files preserved"
+        },
+        {
+          "command": "cargo clippy --all-targets -- -D warnings",
+          "result": "Unrelated existing/concurrent warnings prevent strict pass; see validation record"
+        }
+      ],
+      "uncertainties": [
+        "Box Diagonal/Cube orientation, Vertical and Center remain unsupported.",
+        "Sphere 2Point/3Point/3Point with Radius/Tangent/AroundCurve/4Point/FitPoints remain unsupported.",
+        "Associative History, active layers/Builder/Styles and complete Rhino foundation acceptance remain unverified."
+      ],
+      "next_actions": [
+        "Implement another explicitly scoped source option and verify native behavior before raising feature completion status.",
+        "Refresh spec_v1 per-feature notes/indexes/checklists and manifest after each verified slice."
+      ]
+    },
+    {
+      "key": "edit-trim-join-explode-booleans",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-TOP11-005",
+        "OM9-TOP11-008",
+        "OM9-TOP11-010",
+        "OM9-SOLID-001",
+        "OM9-SOLID-002",
+        "OM9-SOLID-003",
+        "OM9-SOLID-004"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "scope": "Partial feature implementation; supported native Edit slice validated.",
+      "outputs": [
+        "Gui/EditController.cpp",
+        "Gui/EditController.h",
+        "Gui/EditGeometry.cpp",
+        "Gui/EditGeometry.h",
+        "rust/src/edit.rs",
+        "rust/tests/edit_session.rs",
+        "rust/tests/edit_commands.rs",
+        "tests/edit_commands_smoke.FCMacro",
+        "docs/features/edit-native-contract.md",
+        "docs/features/OM9-TOP11-005.md",
+        "docs/features/OM9-TOP11-008.md",
+        "docs/features/OM9-TOP11-010.md",
+        "docs/features/OM9-SOLID-001.md",
+        "docs/features/OM9-SOLID-002.md",
+        "docs/features/OM9-SOLID-003.md",
+        "docs/features/OM9-SOLID-004.md"
+      ],
+      "evidence": [
+        "build/edit_commands_smoke-1/fd9e161d7d9847f5b93ee59c9e2b9307/results.json",
+        "Matrix8 Book1 PDF84–87 and223–224 read through command continuations.",
+        "Menu/CMD/F6 share native handlers; write permissions; success-only history.",
+        "Native straight/curved Trim picks, curve/surface Join, wire/solid Explode, five Boolean modes, DeleteInput, input dependency guard, stale BRep/global placement, Cancel/document-switch/close, world placement, Undo/Redo and FCStd save/reload.",
+        "Transient pickable fragment previews preserve analytic curve geometry without adding objects or modifying Visibility.",
+        "build/curve_smoke-1/4ec284f5ffd943288cc40011e89402e5/results.json",
+        "build/surface_commands_smoke-1/0f961e61b55240a6b083842096423f04/results.json",
+        "build/public_icons_smoke-1/ae83a90d2eaf4009a3291bbc925b7e32/results.json",
+        "Independent native review reproductions fixed: lossless placement snapshots, disconnected surface shell rejection, solid-only compound rejection, option-change preview recovery and mouse shared-boundary ambiguity.",
+        "Translated Trim boundary and interior picks passed at x=10000.0047; measured float/projection error informed depth-aware camera/pixel uncertainty while typed CMD tolerance remains unchanged.",
+        "Final focused read-only reviewer found no remaining correctness blockers in the supported slice.",
+        "JSON/YAML metadata match; 667 manifest entries verified; git diff --check passed with cr-at-eol whitespace policy."
+      ],
+      "tests": [
+        {
+          "command": "cargo test --manifest-path rust/Cargo.toml",
+          "result": "100 passed (26 suites; includes concurrent solid work)"
+        },
+        {
+          "command": "python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "cmake --build H:/FreeCAD-src/build/openmatrix9 --target OpenMatrix9Gui --parallel 4",
+          "result": "passed, matching RelWithDebInfo SDK"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro edit_commands_smoke.FCMacro",
+          "result": "115 passed; process exited 0"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro curve_smoke.FCMacro",
+          "result": "26 passed; process exited 0"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro surface_commands_smoke.FCMacro",
+          "result": "96 passed; process exited 0"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro public_icons_smoke.FCMacro",
+          "result": "3093 passed; process exited 0"
+        },
+        {
+          "command": "python tools/public_source_audit.py",
+          "result": "510 authored SVG bindings; 290 errors: 3 existing Matrix PDF references and 287 private VB6/binary artifacts under code/. Full report: build/edit-public-source-audit.json. No Edit implementation files are flagged."
+        }
+      ],
+      "uncertainties": [
+        "Preview/retention/tolerances and multi-solid output decisions are host choices. Native output snapshots do not support Matrix History source-edit recomputation.",
+        "Source PDFs and private VB6/binary reference files were added by other workspace activity; they are retained and are flagged by the public source audit. No such artifacts were copied into runtime resources by this task.",
+        "Business-rule skill update proposal: record the supported Edit lifecycle, input policies, five Boolean modes, Difference cutter policy and host tolerances in openmatrix9-feature-port; pending user consent. No skill files changed by this task.",
+        "Remaining options/types updated and validated by edit-remaining-options on 2026-10-09; original report retained as historical evidence."
+      ],
+      "next_document": "docs/features/edit-native-contract.md and Matrix8 Book1 PDF86–87",
+      "next_action": "See edit-remaining-options for current scope and remaining adapter/History work."
+    },
+    {
+      "key": "curve-rectangle-native",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-CURVE-004"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "verified_at": "2026-10-09",
+      "scope": "Native sharp Rectangle: opposite corners, Center, 3Point, Vertical, Length/Width, Shift square, preview, Undo/Redo and FCStd persistence; Rounded/Conic remain unsupported.",
+      "outputs": [
+        "rust/src/rectangle.rs",
+        "rust/src/curve.rs",
+        "rust/src/curve_ffi.rs",
+        "Gui/CurveController.cpp",
+        "Gui/CurveController.h",
+        "Gui/RustBridge.h",
+        "Resources/menu/ContextMenu.xml",
+        "rust/tests/rectangle_session.rs",
+        "tests/rectangle_smoke.FCMacro",
+        "docs/features/OM9-CURVE-004.md",
+        "docs/validation/2026-10-09-rectangle.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-004-rectangle.md"
+      ],
+      "evidence": [
+        "Matrix8 Book1 PDF137–138 read through Rectangle continuation before Circle.",
+        "build/rectangle_smoke-1/364e1332381546b692bf7f983fcbd0ef/results.json",
+        "Menu/CMD/sidebar/F6 share the native capability gate; valid four-edge closed wire and exact OM9FeatureId persist.",
+        "Independent review and red/green regressions resolved inactive prompt, vertical ray plane, adjusted endpoint overflow and Shift after early Width.",
+        "Spec notes/checklists, JSON/YAML, overview, README and manifest synchronized.",
+        "build/curve_smoke-1/c257ecea6a5e4e5d8dcc6573307ad71b/results.json",
+        "build/curve_spline_smoke-1/8af8358f2d3245549c778dfaa1f8a2dd/results.json"
+      ],
+      "tests": [
+        {
+          "command": "cargo test --manifest-path rust/Cargo.toml --test rectangle_session",
+          "result": "12 passed"
+        },
+        {
+          "command": "cargo test --manifest-path rust/Cargo.toml --quiet",
+          "result": "128 passed in 27 suites at final verification, including concurrent work"
+        },
+        {
+          "command": "python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "cargo clippy --manifest-path rust/Cargo.toml --lib",
+          "result": "exit 0; 20 warnings in other existing/concurrent code; Rectangle geometry has no warnings"
+        },
+        {
+          "command": "cmake --build H:/FreeCAD-src/build/openmatrix9-final --target OpenMatrix9Gui --parallel 4",
+          "result": "passed using matching MSVC/Qt6/OpenCascade SDK; isolated native module output"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro rectangle_smoke.FCMacro",
+          "result": "36 passed; SDK FreeCAD.exe with isolated module; process exit 0"
+        },
+        {
+          "command": "python tools/public_source_audit.py",
+          "result": "510 authored icon bindings; 290 existing private reference/binary artifacts flagged, report build/rectangle-public-source-audit.json"
+        },
+        {
+          "command": "git -c core.whitespace=cr-at-eol diff --check",
+          "result": "passed"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro curve_smoke.FCMacro",
+          "result": "26 passed; process exit 0"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro curve_spline_smoke.FCMacro",
+          "result": "40 passed; process exit 0"
+        }
+      ],
+      "uncertainties": [
+        "Rounded Arc/Conic and Rounded right-click, active-layer mapping, History source-edit recomputation and exhaustive compatibility remain unsupported.",
+        "Center full numeric dimensions, projections, sign conventions and bounds are labeled OM9 decisions; no unsupported Matrix defaults claimed.",
+        "Public source audit flags preserved reference PDFs and code/vb6-lite inputs outside this feature; no publication performed.",
+        "Older isolated FreeCAD.exe failed before macro execution with DLL initialization error; matching SDK executable successfully loaded the isolated new module.",
+        "Concurrent Surface build needed OpenCascade .hxx header/include corrections; no Surface behavior change made for this feature.",
+        "Main-window screenshot contains OpenGL capture artifacts; geometry and preview coordinates were measured, while viewport rendering quality is not certified by this capture."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-005-circle.md",
+      "next_action": "Continue missing Curve commands using exact feature ID and verified source; synchronize finished scopes into spec_v1."
+    },
+    {
+      "key": "solid-box-sphere-options",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-SOLID-012",
+        "OM9-SOLID-014"
+      ],
+      "status": "validated_supported_slice",
+      "verified_at": "2026-10-09",
+      "outputs": [
+        "rust/src/solid.rs",
+        "rust/src/solid/geometry.rs",
+        "rust/tests/solid_options.rs",
+        "Gui/SolidController.cpp",
+        "Gui/SolidReferences.cpp",
+        "tests/solid_options_smoke.FCMacro",
+        "docs/validation/2026-10-09-solid-box-sphere-options.md",
+        "skills/openmatrix9-feature-port/SKILL.md",
+        "skills/openmatrix9-feature-port/references/solid-box-sphere-contract.md"
+      ],
+      "evidence": [
+        "All listed Box/Sphere construction modes have adapters within explicit host limits; matching OCCT 8.0.1 standard native SDK verified.",
+        "Independent read-only review fixes verified with Rust and native regression cases.",
+        "Owner-requested spec_v1/catalog/checklists/README/manifest synchronization complete."
+      ],
+      "tests": [
+        {
+          "command": "rtk cargo test --test solid_options --test solid_session --test solid_commands",
+          "result": "23 passed across 3 suites"
+        },
+        {
+          "command": "rtk cargo test",
+          "result": "140 passed across 29 suites"
+        },
+        {
+          "command": "rtk proxy python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "Box/Sphere extended, standard SDK",
+          "result": "251/251 passed; build/solid_options_smoke-1/51d6532222c14097a757b21470c6c2e3/results.json",
+          "report": "build/solid_options_smoke-1/51d6532222c14097a757b21470c6c2e3/results.json"
+        },
+        {
+          "command": "Box/Sphere core, isolated native module",
+          "result": "70/70 passed; build/solid_commands_smoke-1/54c0ef266ec641e8a5e2e7228a387dab/results.json",
+          "report": "build/solid_commands_smoke-1/54c0ef266ec641e8a5e2e7228a387dab/results.json"
+        },
+        {
+          "command": "Edit regression, standard SDK",
+          "result": "115/115 passed; build/edit_commands_smoke-1/33a63dbc423a497fabfbd52b70ebfad4/results.json",
+          "report": "build/edit_commands_smoke-1/33a63dbc423a497fabfbd52b70ebfad4/results.json"
+        }
+      ],
+      "uncertainties": [
+        "General nonplanar Tangent and exhaustive NURBS solution discovery unsupported.",
+        "Associative History/active-layer/Builder/Styles and full shared foundation acceptance unverified.",
+        "Strict global Clippy/source publication audit remain limited by unrelated warnings/private reference artifacts."
+      ],
+      "business_rule_skill_sync": {
+        "status": "completed",
+        "authorized_at": "2026-10-09",
+        "authorization": "User: có cập nhật skill",
+        "scope": "Box/Sphere frame/dimensions/Cube, coplanar FitPoints, native AroundCurve and planar Tangent/explicit branch choice; labeled as OpenMatrix9 host decisions.",
+        "source_skill": "skills/openmatrix9-feature-port/SKILL.md",
+        "installed_skill": "C:/Users/nguye/.codex/skills/openmatrix9-feature-port/SKILL.md",
+        "reference": "skills/openmatrix9-feature-port/references/solid-box-sphere-contract.md",
+        "reference_sha256": "6633d5526855c44a670d0b3a3c9460271fe3db4c51acedf778433c66326d1018",
+        "validation": [
+          "Both source and installed quick_validate.py passed.",
+          "Identical Box/Sphere reference/router and package-resolution paragraph; all entrypoint links resolve; existing installed 3DM guidance and authorization rule preserved.",
+          "Baseline retrieval missed all four policies; independent updated-skill retrieval correctly applied Cube/frame, coplanar fitting, native/periodic AroundCurve and Tangent branch/scope rules."
+        ]
+      },
+      "next_document": "OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md",
+      "next_action": "Follow owner scope for next feature; preserve exact native evidence and synchronize completed slices into spec_v1."
+    },
+    {
+      "key": "surface-options-2026-10-09",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-SURFACE-001",
+        "OM9-SURFACE-003",
+        "OM9-SURFACE-009"
+      ],
+      "procedure_va": null,
+      "status": "validated_supported_slice",
+      "verified_at": "2026-10-09",
+      "scope": "Native Sweep1 with Chain Edges, Automatic/Natural and multi-edge seams, section Rebuild, Closed Sweep on closed rails, Preview and persistence; Road-like/blending/miters/Refit remain unsupported.; Native Sweep2 with Chain Edges, section Rebuild, Closed Sweep, shared seams/Preview and single-profile Maintain Height; multiple-profile height constraints, G1/G2 and Add Slash remain unsupported.; Native Normal/Straight/Loose/Tight/Uniform and bounded Developable Loft, closed/periodic modes, section Rebuild, shared seams/Preview and persistence; tangent matching, SplitAtTangents and certified Refit remain unsupported.",
+      "outputs": [
+        "Gui/SurfaceController.cpp",
+        "Gui/SurfaceGeometry.cpp",
+        "Gui/SurfaceLoft.cpp",
+        "Gui/SurfaceSeams.cpp",
+        "rust/src/surface.rs",
+        "rust/src/spline.rs",
+        "rust/tests/surface_session.rs",
+        "tests/surface_options_smoke.FCMacro",
+        "docs/validation/2026-10-09-surface-options.md"
+      ],
+      "evidence": [
+        "build/surface_options_smoke-1/f48fabdcc6bb4b979a8928a6c4d6dd09/results.json",
+        "build/surface_commands_smoke-1/9ab468916424424d9bfbfe05cc05e655/results.json",
+        "Source Book1 PDF180–186 and193–195 read through command continuations; host algorithm bounds stated separately.",
+        "Read-only review fixes and source-preservation/periodic/rational Uniform regressions passed.",
+        "Spec_v1 engineering contracts retained; implementation notes/catalog/status/checklists and manifest synchronized."
+      ],
+      "tests": [
+        {
+          "command": "surface_options_smoke.FCMacro on isolated matching SDK module",
+          "result": "180/180 passed; process exit 0"
+        },
+        {
+          "command": "surface_commands_smoke.FCMacro on the same module",
+          "result": "97/97 passed; process exit 0"
+        },
+        {
+          "command": "Rust library and 26 existing integration targets",
+          "result": "132 passed in 27 suites; full cargo test blocked by concurrent unfinished circle_session"
+        },
+        {
+          "command": "python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "Matching MSVC/Ninja native OpenMatrix9Gui build",
+          "result": "passed; build/om9-surface-options/bin/OpenMatrix9Gui.pyd"
+        },
+        {
+          "command": "cargo clippy --lib",
+          "result": "exit 0; 17 warnings across existing/new code, including FFI safety docs"
+        },
+        {
+          "command": "public_source_audit",
+          "result": "510 SVG bindings valid; 290 existing private/binary input artifacts rejected; build/surface-options-public-source-audit.json"
+        }
+      ],
+      "uncertainties": [
+        "Maintain Height is single-profile only; closed Sweep needs closed rails.",
+        "Developable curvature and Sweep2 contact checks are bounded sampling, not exact certificates.",
+        "Historical unsupported-option list is superseded by the advanced validation record; loaded user modules still need an explicit reload."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/03-surface/om9-surface-003-sweep-2.md",
+      "next_action": "See surface-constraints-history-2026-10-09 for advanced options, associative graph and current limits.",
+      "superseded_by": "surface-constraints-history-2026-10-09"
+    },
+    {
+      "key": "edit-remaining-options",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-TOP11-005",
+        "OM9-TOP11-008",
+        "OM9-TOP11-010",
+        "OM9-SOLID-001",
+        "OM9-SOLID-002",
+        "OM9-SOLID-003",
+        "OM9-SOLID-004"
+      ],
+      "status": "validated",
+      "verified_at": "2026-10-09",
+      "scope": "Trim extension/frozen apparent projection, Join midpoint/tolerance, grouped Mesh Explode and same-category surface/Mesh Booleans; partial feature compatibility.",
+      "outputs": [
+        "Gui/EditCurveOptions.cpp",
+        "Gui/EditMesh.cpp",
+        "Gui/EditGeometry.cpp",
+        "Gui/EditGeometry.h",
+        "Gui/EditController.cpp",
+        "Gui/EditController.h",
+        "Gui/RustBridge.h",
+        "Gui/CMakeLists.txt",
+        "rust/src/edit.rs",
+        "rust/tests/edit_session.rs",
+        "tests/edit_options_smoke.FCMacro",
+        "docs/features/edit-native-contract.md",
+        "docs/superpowers/plans/2026-10-09-edit-options.md",
+        "docs/features/OM9-TOP11-005.md",
+        "docs/features/OM9-TOP11-008.md",
+        "docs/features/OM9-TOP11-010.md",
+        "docs/features/OM9-SOLID-001.md",
+        "docs/features/OM9-SOLID-002.md",
+        "docs/features/OM9-SOLID-003.md",
+        "docs/features/OM9-SOLID-004.md"
+      ],
+      "evidence": [
+        "build/edit_options_smoke-1/19b793add82d48de9e92ffcbf2c43343/results.json",
+        "build/edit_commands_smoke-1/4ebfad5e7e844c999ca94dc0a4493dea/results.json",
+        "Matrix8 Book1 PDF84–87 and223–224 re-read on 2026-10-09 through next headings. Ignored PDFs exist; old rg-only absence inference corrected.",
+        "Independent read-only review; reproduced tiny Join tolerance, projected mouse boundary and nested Mesh cavity reuse, fixed with red/green native fixtures.",
+        "True Perspective viewport: rational parameter 15/22 cut, remaining 7/22, both apparent and extension options enabled; virtual camera-plane clipping preserves original geometry.",
+        "Groups/world placement/display fields, nonlinear midpoint, GUI option reset/Undo, surface areas, three Mesh volumes and all five TwoObjects modes, closed/open/mixed guards, Undo/Redo/reload.",
+        "build/curve_smoke-1/69b5b252c5ff46b2a665716bc735e53d/results.json",
+        "build/surface_commands_smoke-1/db624d61218d422ebfd0197acdbe9a24/results.json"
+      ],
+      "tests": [
+        {
+          "command": "cargo test --manifest-path rust/Cargo.toml --quiet",
+          "result": "140 passed (29 suites, includes concurrent work)"
+        },
+        {
+          "command": "python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "cmake --build H:/FreeCAD-src/build/openmatrix9 --target OpenMatrix9Gui --parallel 4",
+          "result": "passed, matching RelWithDebInfo SDK"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro edit_options_smoke.FCMacro",
+          "result": "57 passed; process exit 0"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro edit_commands_smoke.FCMacro",
+          "result": "115 passed; process exit 0"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro curve_smoke.FCMacro",
+          "result": "26 passed; process exit 0"
+        },
+        {
+          "command": "python tools/public_source_audit.py",
+          "result": "510 bindings; 290 existing private/reference artifacts: 3 PDFs +287 VB6/private binary files. No Edit implementation flagged. build/edit-options-source-audit.json; audit exit 1, not a clean public release."
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro surface_commands_smoke.FCMacro",
+          "result": "96 passed; process exit 0"
+        },
+        {
+          "command": "git -c core.whitespace=cr-at-eol diff --check",
+          "result": "passed"
+        }
+      ],
+      "uncertainties": [
+        "App::Link/block, font/text/dimension/cage adapters, active layers/rich style mapping, live Matrix History and automatic document tolerance are unsupported.",
+        "Direct same-command Mesh Boolean polyhedral routing, frozen projection/defaults, bounded tolerance and snapshot outputs are explicit OM9 decisions, not recovered Matrix defaults.",
+        "Large/ill-conditioned meshes, extreme projection and exhaustive open-surface orientation/topology are unverified. Native Mesh Boolean backend failed closedness/volume probes and is not used.",
+        "Shared workspace has concurrent non-Edit changes; preserved without commit/publication. Source reference artifacts are retained and audit remains failing.",
+        "Skill business update pending user consent; no skill files changed for this work."
+      ],
+      "next_document": "docs/features/edit-native-contract.md",
+      "next_action": "Implement dedicated annotation/block/cage adapters or History/document tolerance compatibility against verified source."
+    },
+    {
+      "key": "curve-circle-native",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-CURVE-005"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "verified_at": "2026-10-09",
+      "scope": "Native analytic Circle: center Radius/Diameter/Circumference/Area, spatial 2Point/3Point, Orientation, Vertical, preview, Undo/Redo and FCStd persistence; advanced constructions and Area point sizing remain unsupported.",
+      "outputs": [
+        "rust/src/circle.rs",
+        "rust/src/curve.rs",
+        "rust/src/curve_ffi.rs",
+        "Gui/CurveController.cpp",
+        "Gui/RustBridge.h",
+        "rust/tests/circle_session.rs",
+        "tests/circle_smoke.FCMacro",
+        "docs/features/OM9-CURVE-005.md",
+        "docs/validation/2026-10-09-circle.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-005-circle.md"
+      ],
+      "evidence": [
+        "Matrix8 Book1 PDF138–140 Circle continuation read before Ellipse.",
+        "build/circle_smoke-1/c9a15a1009f1454d98f73f65ac949809/results.json",
+        "Typed native adapter creates an exact Part.Circle in a closed one-edge wire; all menu/CMD/sidebar/F6 routes share handler.",
+        "Independent reviewer identified stale CPlane on F4 first point; fixed and native viewport-switch regression passed.",
+        "Tiny 3Point normal tolerance regression reproduced red and fixed green.",
+        "New native module file path is explicitly asserted; earlier Circle failures loaded the SDK executable-directory older module.",
+        "Spec notes/checklists, JSON/YAML, overview, README and manifest synchronized."
+      ],
+      "tests": [
+        {
+          "command": "cargo test --manifest-path rust/Cargo.toml --test circle_session",
+          "result": "10 passed"
+        },
+        {
+          "command": "cargo test --manifest-path rust/Cargo.toml --quiet",
+          "result": "142 passed in 28 suites including concurrent feature work"
+        },
+        {
+          "command": "python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "cargo clippy --manifest-path rust/Cargo.toml --lib",
+          "result": "exit 0; 17 warnings in other code; Circle additions have no warnings"
+        },
+        {
+          "command": "cmake --build H:/FreeCAD-src/build/openmatrix9-final --target OpenMatrix9Gui --parallel 4",
+          "result": "passed; matching MSVC/Qt6/OpenCascade SDK, isolated module output"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro circle_smoke.FCMacro",
+          "result": "42 passed, selected new native module asserted, process exit 0"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro rectangle_smoke.FCMacro / curve_smoke.FCMacro / curve_spline_smoke.FCMacro",
+          "result": "37 + 27 + 41 = 105 passed, selected new native module asserted, all process exits 0"
+        },
+        {
+          "command": "python tools/public_source_audit.py",
+          "result": "510 icon bindings; 290 existing private reference/binary artifacts flagged; build/circle-public-source-audit.json"
+        },
+        {
+          "command": "rustfmt --edition 2024 --check circle/curve/curve_ffi/circle_session; git diff --check",
+          "result": "passed"
+        }
+      ],
+      "uncertainties": [
+        "Advanced Tangent/AroundCurve/FitPoints/Deformable, 3Point Radius, Area point sizing and original right-click 2Points remain unsupported.",
+        "Host sizing/plane/bounds policy is documented separately from Matrix source; active-layer mapping and associative History remain unverified.",
+        "Screenshot retains existing OpenGL capture artifacts; analytic geometry and Coin preview coordinates are verified independently, rendering quality not certified.",
+        "Source audit preserves existing reference PDFs and code/vb6-lite inputs; no publication performed."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-006-ellipse.md",
+      "next_action": "Continue remaining Curve commands using exact feature IDs, verified source and spec_v1 synchronization."
+    },
+    {
+      "key": "history-special-explode",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-HISTORY-001",
+        "OM9-TOOLS-017",
+        "OM9-INFO-015",
+        "OM9-INFO-016",
+        "OM9-INFO-017",
+        "OM9-INFO-018",
+        "OM9-TOP11-005"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "scope": "Completed supported slice: native Join/Surface History global policy SDK83 + cold4, native special Explode25, retained3DM40; core115/options57/SurfaceHistory65/Curve27/Surface97 final regressions pass. Broad features remain partially_implemented.",
+      "outputs": [
+        "Gui/HistoryFeature.cpp",
+        "Gui/HistoryController.cpp",
+        "rust/src/history.rs",
+        "Gui/EditSpecialTypes.cpp",
+        "Gui/ThreeDmExplode.cpp",
+        "Gui/ExplodedText.cpp",
+        "docs/features/history-native-contract.md",
+        "docs/features/edit-native-contract.md",
+        "docs/features/OM9-HISTORY-001.md",
+        "docs/features/OM9-TOOLS-017.md",
+        "docs/features/OM9-INFO-015.md",
+        "docs/features/OM9-INFO-016.md",
+        "docs/features/OM9-INFO-017.md",
+        "docs/features/OM9-INFO-018.md",
+        "docs/validation/2026-10-09-edit-history-special-types.md"
+      ],
+      "evidence": [
+        "Spec v1 engineering contracts, native type/code inspection, Rust graph/policy ownership and typed native/retained-archive adapters define the supported slice.",
+        "Final actual SDK History83 + cold4:0a28ceafabe247a8ad0389272225c714 / 2e27955c3b79451a8ee7c47bcb1a8bff; grouped parent translation/rotation/reparent/Undo and invalid/null full-chain propagation/recovery fix review findings.",
+        "Final actual SDK native special25 and retained3DM40:b52b0d2757dc464c8b6ccd91a864d5ef / 2f68c35673a44bfba6f26c318c833ea7; Screen/font/stale-state guards, source text layout, analytic angular arc, editable labels, current cage metadata and block styles verified.",
+        "Native member fixture verifies RGB channels and preserved source metadata A/B while FreeCAD may assign unique display Labels A001/B001.",
+        "Final regressions core115/options57/SurfaceHistory65/Curve27/Surface97 pass. Fresh implementer Rust166/32 suites and Python23 passed; matching SDK native build succeeded.",
+        "Contracts, per-feature records, Spec statuses/checklists, README counts, design invalidation semantics and validation artifact synchronized. Focused review found no remaining supported-slice blocker.",
+        "Root source audit retains290 preexisting reference/private/binary errors (12226 source files,510 icon bindings/SVG); no clean publication claim or artifact deletion."
+      ],
+      "tests": [
+        {
+          "command": "cargo test --manifest-path rust/Cargo.toml / Python suite",
+          "result": "Fresh implementer result:Rust166 in32 suites;Python23 passed."
+        },
+        {
+          "command": "tests/history_smoke.FCMacro",
+          "result": "Actual SDK83/83 0a28ceafabe247a8ad0389272225c714; cold4/4 2e27955c3b79451a8ee7c47bcb1a8bff."
+        },
+        {
+          "command": "tests/edit_3dm_special_smoke.FCMacro",
+          "result": "Final SDK40/40 2f68c35673a44bfba6f26c318c833ea7."
+        },
+        {
+          "command": "tests/edit_special_types_smoke.FCMacro",
+          "result": "Final SDK25/25 b52b0d2757dc464c8b6ccd91a864d5ef."
+        },
+        {
+          "command": "tests/edit_commands_smoke.FCMacro / tests/edit_options_smoke.FCMacro",
+          "result": "Final SDK115/115 2d83a4f497de4cc48327549ca2f29e87;57/57 6b25f835369b4e90be86b7a5e9e96aa2."
+        },
+        {
+          "command": "tests/surface_history_smoke.FCMacro",
+          "result": "Final SDK65/65 4cc81a475b094b43bd05e6e8f9f674bb."
+        },
+        {
+          "command": "tools/public_source_audit.py",
+          "result": "Final build/edit-history-special-source-audit.json:12226 files,510bindings/SVG,290 preexisting private/reference/binary errors; root audit fails; no publication."
+        },
+        {
+          "command": "tests/curve_smoke.FCMacro / tests/surface_commands_smoke.FCMacro",
+          "result": "Final SDK27/27 d5a4281e069847ab9e26e095357bd90c;97/97 007a7bd4878d4d2982dcdd9e12be9a7b."
+        }
+      ],
+      "uncertainties": [
+        "Full Matrix History, Gem Builder records and arbitrary operation histories are outside this Join-derived slice.",
+        "Ordinary Edit breaks affected Join/Surface History links; it does not record associative Edit operations.",
+        "Block expansion requires explicit CMD; unavailable/substituted fonts, view-dependent annotations, custom arrows and unsupported archive members reject atomically.",
+        "Cage adapters expose current exact boundaries/control components, not captive-object deformation history.",
+        "Rich styles, exhaustive annotation layouts, mixed Part/Mesh/text preview completeness and remaining persistence/transform edge cases are unverified."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-history-001-history-workflow.md",
+      "next_action": "Scoped work complete. Continue only newly requested unsupported History/annotation/control branches; preserve partial statuses and source-audit publication boundary.",
+      "verified_at": "2026-10-09"
+    },
+    {
+      "key": "surface-constraints-history-2026-10-09",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-SURFACE-001",
+        "OM9-SURFACE-002",
+        "OM9-SURFACE-003",
+        "OM9-SURFACE-004",
+        "OM9-SURFACE-009",
+        "OM9-HISTORY-001"
+      ],
+      "procedure_va": null,
+      "status": "validated_supported_slice",
+      "verified_at": "2026-10-09",
+      "scope": "Native Sweep1 with section Refit using numerical hull bounds, optional associative History, Chain Edges, seams, Rebuild, Closed Sweep and Preview; Road-like/blending/miters/Refit Rail remain unsupported.; Native gvSweepHistory CMD alias with exact ID, conditional Closed Yes, source/parent recompute, detach/Undo and FCStd; dedicated History menu/F6 and full Matrix workflow remain unverified.; Native Sweep2 with bounded support-edge G1/G2, section Refit, one-profile/open-rail Add Slash, optional History and earlier options; constraint combinations and multiple-profile Maintain Height remain unsupported.; Native gvSweep2History CMD alias with exact ID, one-profile Maintain Height Yes, conditional Closed Yes, source/parent recompute and native persistence; full History/menu parity remains unverified.; Native Loft with bounded Normal/Tight support-edge tangent matching, section Refit, optional History and earlier styles/seams; unsupported fitting/closed/rational tangent combinations and SplitAtTangents remain.; Verified native Surface dependency graph: three surface kinds, source/parent frames, two generations, direct child detach/Undo, suspend/resume, invalidation, cycle rejection and cold FCStd rebuild; global/all-command Matrix History remains unverified.",
+      "outputs": [
+        "Gui/SurfaceConstraints.cpp",
+        "Gui/SurfaceRefit.cpp",
+        "Gui/SurfaceHistory.cpp",
+        "Gui/SurfaceController.cpp",
+        "Gui/SurfaceGeometry.cpp",
+        "rust/src/surface_refit.rs",
+        "rust/src/surface.rs",
+        "tests/surface_advanced_smoke.FCMacro",
+        "tests/surface_constraints_smoke.FCMacro",
+        "tests/surface_history_smoke.FCMacro",
+        "docs/validation/2026-10-09-surface-constraints-history.md"
+      ],
+      "evidence": [
+        "build/surface_advanced_smoke-1/ba00b512629c49a8881fe191d3a94d87/results.json",
+        "build/surface_constraints_smoke-1/cafc4a45c3584f36a90d34c865c986cb/results.json",
+        "build/surface_history_smoke-1/416db955978e4a199dc72f32deb8b7f9/results.json",
+        "build/surface_history_smoke-1/272d273abd1141fa9495ed81caf7a303/results.json",
+        "build/surface_options_smoke-1/4ccd74c2744044d6b0062bc82e108583/results.json",
+        "build/surface_commands_smoke-1/095f6e3de0c74bae9fb9ba5c96bb5a8c/results.json",
+        "Book1 PDF180–186/193–195 verified; solver/default host choices documented separately.",
+        "Independent native contact, normals and second fundamental form checks; geometry source preservation and actual viewport Slash picks.",
+        "Independent Refit/Slash review resolved narrow-parameter shortcut and coordinate-scale padding.",
+        "Spec_v1 source contracts retained; six native metadata records, implementation notes/checklists/status, README and manifest synchronized."
+      ],
+      "tests": [
+        {
+          "command": "surface_advanced_smoke.FCMacro",
+          "result": "108/ 108 passed; native process exit0"
+        },
+        {
+          "command": "surface_constraints_smoke.FCMacro",
+          "result": "77/ 77 passed; native process exit0"
+        },
+        {
+          "command": "surface_history_smoke.FCMacro",
+          "result": "65/ 65 passed; native process exit0"
+        },
+        {
+          "command": "surface_history_smoke.FCMacro cold",
+          "result": "3/ 3 passed; native process exit0"
+        },
+        {
+          "command": "surface_options_smoke.FCMacro",
+          "result": "180/ 180 passed; native process exit0"
+        },
+        {
+          "command": "surface_commands_smoke.FCMacro",
+          "result": "97/ 97 passed; native process exit0"
+        },
+        {
+          "command": "cargo test --no-fail-fast",
+          "result": "164 passed /32 suites"
+        },
+        {
+          "command": "python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "cargo clippy --lib",
+          "result": "exit0;23 warnings"
+        },
+        {
+          "command": "Matching MSVC/Ninja isolated OpenMatrix9Gui target",
+          "result": "exit0; SHA256 1c0e6d930d3a5f91683fec1d72136e9619e3d800dea652ec074c6f0b9bb69b49"
+        },
+        {
+          "command": "public_source_audit whole working tree",
+          "result": "510 SVG bindings valid;290 existing private/binary artifacts rejected; build/surface-advanced-public-source-audit.json"
+        }
+      ],
+      "uncertainties": [
+        "G1/G2 needs eligible support-edge open rectangular patches and2–32 matching nonrational sections; no fitting/Closed/height/Slash combination.",
+        "Tangent matching is Normal/Tight open original mode only; Slash is one-profile/open-rail only.",
+        "Refit uses numerical continuous curve hull bounds; contact/continuity use bounded sampling, not formal floating-point/global certificates.",
+        "Global/all-command Matrix History, dedicated History menu/F6 and topological naming compatibility remain unverified.",
+        "Road-like/blending/miters/Preserve Shape/Simple Sweep/Refit Rail/SplitAtTangents/Point endpoints/dragged seams and multiple-profile height remain unsupported.",
+        "Isolated module does not replace the module already loaded in the user process."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/03-surface/om9-surface-003-sweep-2.md",
+      "next_action": "Continue another remaining option or extend a solver combination against the cited manual; retain evidence-based partial status."
+    },
+    {
+      "key": "curve-circle-advanced-native",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-CURVE-005"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "verified_at": "2026-10-09",
+      "scope": "Native Circle basic modes plus 3Point Radius, Area point/live measures, AroundCurve, FitPoints, Deformable Degree/PointCount, bounded planar Tangent/Point/FromFirstPoint/Radius/Solution, right-click 2Point, reference recovery, Undo/Redo and FCStd persistence; general nonplanar Tangent and associative History remain unsupported.",
+      "outputs": [
+        "rust/src/circle.rs",
+        "rust/src/circle_fit.rs",
+        "rust/src/curve.rs",
+        "rust/src/curve_ffi.rs",
+        "Gui/CurveCircle.cpp",
+        "Gui/CurveCircle.h",
+        "Gui/CurveController.cpp",
+        "Gui/SolidReferences.cpp",
+        "rust/tests/circle_advanced.rs",
+        "tests/circle_advanced_smoke.FCMacro",
+        "docs/features/OM9-CURVE-005.md",
+        "docs/validation/2026-10-09-circle-advanced.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-005-circle.md"
+      ],
+      "evidence": [
+        "Matrix8 Book1 PDF138–140 Circle advanced source reread.",
+        "build/circle_advanced_smoke-1/40958fcf3fbe413bac04533d944e4e93/results.json",
+        "build/circle_smoke-1/5667e7573fe9477d96c02599bb25fac2/results.json",
+        "build/rectangle_smoke-1/a8c29c8dbb8d4934a31804ffdec80ee2/results.json",
+        "build/curve_smoke-1/c2696cb2a63b437c9fa7f1c78027052c/results.json",
+        "build/curve_spline_smoke-1/c7a4c15c7c7e4ec9ba0711c86f93eba3/results.json",
+        "build/solid_options_smoke-1/d53eab4c359d430f8fe1487983b8af01/results.json",
+        "Independent review fixes verified: stale Cancel, normalized tiny Deformable and invalid hover prompt.",
+        "Spec contract/sample preserved; advanced notes/catalogs/checklist/overview/README/status hashes synchronized."
+      ],
+      "tests": [
+        {
+          "command": "cargo test --manifest-path rust/Cargo.toml --quiet",
+          "result": "166 passed in 32 suites; 21 Circle tests"
+        },
+        {
+          "command": "python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "cargo clippy --manifest-path rust/Cargo.toml --lib",
+          "result": "exit 0; 23 warnings elsewhere, none in Circle source"
+        },
+        {
+          "command": "cmake --build H:/FreeCAD-src/build/openmatrix9-final --target OpenMatrix9Gui --parallel 4",
+          "result": "passed, isolated matching SDK native module"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro circle_advanced_smoke.FCMacro",
+          "result": "64 passed; selected native module asserted; process exit 0"
+        },
+        {
+          "command": "Circle / Rectangle / Line-Polyline / Interp-Rebuild native regression",
+          "result": "42 + 37 + 27 + 41 = 147 passed, all process exits 0"
+        },
+        {
+          "command": "tests/run_menu_smoke.ps1 -Macro solid_options_smoke.FCMacro",
+          "result": "252 passed for shared native adapter"
+        },
+        {
+          "command": "python tools/public_source_audit.py",
+          "result": "510 icons; 290 existing private/reference artifacts flagged, no publication"
+        },
+        {
+          "command": "rustfmt selected files; git -c core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol diff --check",
+          "result": "passed"
+        }
+      ],
+      "uncertainties": [
+        "General nonplanar/different-plane Tangent and Tangent Vertical remain unsupported.",
+        "NURBS root enumeration is bounded multistart, not exhaustive/certified.",
+        "Whole surface pole grid is supported; individual edit-mode pole selection is not.",
+        "Associative Circle History and layer inheritance are not accepted; deviations are sampled estimates."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-006-ellipse.md",
+      "next_action": "Continue remaining Curve feature branches from exact source/spec and update spec_v1 after verified native evidence."
+    },
+    {
+      "key": "curve-circle-spatial-history-native",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-CURVE-005"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "verified_at": "2026-10-09",
+      "scope": "Native Circle basic/advanced modes, arbitrary common-plane Tangent with Vertical/Point/FromFirstPoint/Radius/Solution, analytic AroundCurve History (edge parameter, parent/source recompute, Record/Update/Lock/detach, Undo/Redo and cold FCStd restore); general nonplanar Tangent, other Circle History modes and layers remain unsupported.",
+      "outputs": [
+        "rust/src/circle.rs",
+        "rust/src/curve.rs",
+        "rust/src/curve_ffi.rs",
+        "Gui/CurveCircle.cpp",
+        "Gui/CircleHistory.cpp",
+        "Gui/CircleHistory.h",
+        "Gui/HistoryFeature.cpp",
+        "Gui/CurveController.cpp",
+        "rust/tests/circle_spatial.rs",
+        "tests/circle_spatial_history_smoke.FCMacro",
+        "tests/circle_history_restore.FCMacro",
+        "docs/validation/2026-10-09-circle-spatial-history.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-005-circle.md"
+      ],
+      "evidence": [
+        "build/circle_spatial_history_smoke-1/b4eb25e8c6534b96b2b2b067b751c424/results.json",
+        "build/circle_history_restore-1/636271b937ad46e3bf9ac3dffbcde74c/results.json",
+        "build/circle_advanced_smoke-1/a8afe08309924e36afb4cb9a0bd465ad/results.json",
+        "build/circle_smoke-1/d98e66912c66452ea429f5d0a954b5c5/results.json",
+        "build/rectangle_smoke-1/179443162053452ba0273d05c1e7cdf2/results.json",
+        "build/curve_smoke-1/f5f1588b0dc14b86a5b9a4c6d0dcdee3/results.json",
+        "build/curve_spline_smoke-1/b2159ff3be704eb28fd73504a98e6b19/results.json",
+        "build/history_smoke-1/2a6fc7fd99484a36accbaa0f6bcc5daa/results.json",
+        "build/surface_history_smoke-1/98d7b07edb8d4909acef145d943f755c/results.json",
+        "Native SHA256 abe3dd064817eeb02e430fefbc04a57524f1ecd3ce0924913da8b88d0c4ad440",
+        "Independent review and native recovery/lifecycle corrections verified; original target contract/sample preserved."
+      ],
+      "tests": [
+        {
+          "command": "cargo test --manifest-path rust/Cargo.toml --quiet",
+          "result": "171 passed in33 suites,26 Circle tests"
+        },
+        {
+          "command": "python -m unittest discover -s tools/tests",
+          "result": "23 passed"
+        },
+        {
+          "command": "cargo clippy --manifest-path rust/Cargo.toml --lib",
+          "result": "exit0;23 warnings outside Circle"
+        },
+        {
+          "command": "matching SDK native build / spatial-History and cold restore",
+          "result": "passed;51+3 native checks,process exit0"
+        },
+        {
+          "command": "Circle/Rectangle/Line/Interp/Rebuild native regression",
+          "result": "211 passed,all process exits0"
+        },
+        {
+          "command": "History and SurfaceHistory native regression",
+          "result": "148 passed,all process exits0"
+        },
+        {
+          "command": "public_source_audit / selected rustfmt / git diff --check cr-at-eol",
+          "result": "510 icons,290 preserved existing audit artifacts; formatting/whitespace pass"
+        }
+      ],
+      "uncertainties": [
+        "Nonplanar Tangent is unsupported; candidate enumeration not exhaustive/certified.",
+        "Only analytic AroundCurve has recorded History; EdgeN/fraction is not automatic topology correspondence.",
+        "Other Circle History, individual surface CV selection and active layers remain unaccepted."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-006-ellipse.md",
+      "next_action": "Continue remaining Curve features from exact source/spec and synchronize validated native scope."
+    },
+    {
+      "key": "curve-circle-complete-branches-native",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-CURVE-005"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "verified_at": "2026-10-09",
+      "scope": "Native Circle basic/advanced modes; bounded spatial Tangent for noncoplanar NURBS with exact native contact verification, Radius/Point/FromFirstPoint/Vertical/Solution; versioned History for all Circle branches including FitPoints and Deformable, explicit point/direction/radius sources, Record/Update/Lock and cold FCStd; persistent active-layer membership/color/visibility/lock with Undo/Redo. Exhaustive roots, automatic topology correspondence and full Rhino layer inheritance remain unaccepted.",
+      "outputs": [
+        "rust/src/circle_tangent.rs",
+        "rust/src/circle_history.rs",
+        "rust/src/layers.rs",
+        "Gui/CircleTangent.cpp",
+        "Gui/CircleHistory.cpp",
+        "Gui/CircleHistoryAdapter.cpp",
+        "Gui/CoreLayers.cpp",
+        "Gui/CurveCircle.cpp",
+        "Gui/CurveController.cpp",
+        "Gui/MatrixSidebar.cpp",
+        "docs/validation/2026-10-09-circle-complete-branches.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-005-circle.md"
+      ],
+      "evidence": [
+        "build/circle_nonplanar_smoke-1/0232008ec2214cf98453ea19d93eee0b/results.json",
+        "build/circle_history_more_smoke-1/66ef2407bc6a467ca03f62ffd1b3ff22/results.json",
+        "build/circle_layers_smoke-1/04d2073d994748429eafa5eae05e0917/results.json",
+        "build/circle_history_more_restore-1/c60d95d4e984413ba7375d0111ff30b6/results.json",
+        "build/circle_spatial_history_smoke-1/1c701b4b14d54f48a2a15b1b0210d236/results.json",
+        "build/circle_history_restore-1/f97c234cc8654b15868fb37d4efab98a/results.json",
+        "build/circle_smoke-1/0ec5c7dfad1540919ca7ca27115d5565/results.json",
+        "build/circle_advanced_smoke-1/f2bc37bf287f416a96879647d7b62e94/results.json",
+        "build/rectangle_smoke-1/8779fbea46ec4ef3a7ae7e44bcba1ab8/results.json",
+        "build/curve_smoke-1/de25c7ffe10a479ea03103231560c6db/results.json",
+        "build/curve_spline_smoke-1/5167e2b11fb54e988becc41ae86ecfd0/results.json",
+        "build/history_smoke-1/18c157ce039a4e1aaa1b9194ef04a102/results.json",
+        "build/surface_history_smoke-1/eda69e6472fd47b785d949053b666c0f/results.json",
+        "build/solid_options_smoke-1/880b9acc7f0e40a29754fdce449585fb/results.json",
+        "Native SHA256 97d84edbbe29c108b69fa07affc08cd0d108ffdae2cefdbd2e1a4ac566330908"
+      ],
+      "tests": [
+        {
+          "command": "targeted Circle/layer Rust suites",
+          "result": "56 passed"
+        },
+        {
+          "command": "Python tool unittest",
+          "result": "23 passed"
+        },
+        {
+          "command": "matching native build / new scope / regression",
+          "result": "176 new +665 regression checks passed; process exits0"
+        },
+        {
+          "command": "full shared Rust suites",
+          "result": "237 passed in39 nonempty suites; final exit0"
+        },
+        {
+          "command": "clippy / rustfmt / whitespace / source audit",
+          "result": "clippy exit0 warnings; selected format/whitespace pass;290 preserved audit artifacts,510 icons"
+        }
+      ],
+      "uncertainties": [
+        "Bounded spatial root search, not exhaustive/certified.",
+        "VertexN/EdgeN references do not implement automatic topology correspondence.",
+        "Whole-source Fit pole sets supported; individual surface edit-CVs and full Rhino layer/import semantics unaccepted."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-006-ellipse.md",
+      "next_action": "Continue remaining Curve commands from exact source/spec and synchronize native-verified scope."
+    },
+    {
+      "key": "reusable-builder-cage-native",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-HISTORY-001",
+        "OM9-BUILDERCORE-001",
+        "OM9-GEM-027",
+        "OM9-TRANSFORM-020",
+        "OM9-TRANSFORM-022",
+        "OM9-TRANSFORM-041"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "verified_at": "2026-10-09",
+      "scope": "Durable native versioned Builder templates/outputs, explicit restore and compatible Match API; global History/group/cold lifecycle; native3D Cage/Create/Edit/Release, frozen capture, Global/Local falloff and typed Rhino5 current-output rebind. Original arbitrary Gem solvers/style UI,1D/2D and general nonlinear BRep/refit remain unsupported.",
+      "outputs": [
+        "Gui/BuilderHistory.cpp",
+        "Gui/CageFeature.cpp",
+        "Gui/CageController.cpp",
+        "Gui/RetainedArchive.cpp",
+        "Gui/ThreeDmCage.cpp",
+        "rust/src/builder_history.rs",
+        "rust/src/cage.rs",
+        "rust/src/cage_commands.rs",
+        "rust/src/retained_archive.rs",
+        "docs/validation/2026-10-09-reusable-builder-cage.md"
+      ],
+      "evidence": [
+        "build/builder_history_smoke-1/224b8e6e4fbd4270aa7e061de9f121e2/results.json",
+        "build/builder_history_groups_smoke-1/f0a55a6a58e548358c49ca13d1077ab0/results.json",
+        "build/builder_history_smoke-1/faa6507eefd64a7ab18d7650ccadcc3a/results.json",
+        "build/cage_deformation_smoke-1/e738decd103e4060beabe247142f3880/results.json",
+        "build/cage_lifecycle_smoke-1/1e334c16804c476bb6f2e47d60347eb9/results.json",
+        "build/cage_commands_smoke-1/94c78083a5a54e09aad9de3ff1935e54/results.json",
+        "build/cage_3dm_restore_smoke-1/01b247791a4345f788a4255449e44938/results.json",
+        "build/edit_3dm_special_smoke-1/ba7983ca2b824560aa97d636e8176354/results.json",
+        "build/history_smoke-1/ade3c723938646bf83318a4ebe09dcad/results.json",
+        "build/edit_commands_smoke-1/72b17a7f6e5348ad9415436c57f2dc90/results.json",
+        "build/surface_history_smoke-1/3e950f7eda234b52855e7840d25a46ac/results.json",
+        "build/curve_smoke-1/80418fc69b21433291f973cf776647b6/results.json",
+        "build/builder_history_smoke-1/4fb5f50bc5744166a68e64290d70df56/results.json",
+        "build/cage_commands_smoke-1/0faa8c2b5ea8473eab0a1561e5a1d315/results.json",
+        "build/validation/reusable-builder-cage-20261009.json",
+        "Native SHA256 e442e530d63a299742943f1c0e2ed3702740a3c5fc4c16a20115df9ffa21c5b7"
+      ],
+      "tests": [
+        {
+          "command": "full Rust tests",
+          "result": "256 passed across41 suites; exit0"
+        },
+        {
+          "command": "optimized cage/recipe/retained manifest tests",
+          "result": "49 passed; exit0"
+        },
+        {
+          "command": "Python tool unittest",
+          "result": "23 passed; exit0"
+        },
+        {
+          "command": "matching SDK native new scope/regression/cold",
+          "result": "529 private +30 installed checks passed; process exits0;2 standalone native executables PASS"
+        },
+        {
+          "command": "clippy/source audit",
+          "result": "clippy exit0 with56warnings; sourceaudit290 existing private artifacts,0othererrors,511bindings/510SVG"
+        }
+      ],
+      "uncertainties": [
+        "Only om9.affine-template evaluator; original arbitrary setting/cutter solvers and Gem Match UI disabled.",
+        "General nonlinear BRep,trim/hole refit,exhaustive inverse uniqueness,1D/2D/AccuracyFast and localized archive morphs unsupported.",
+        "Native FreeCAD/Qt/OCCT/openNURBS unsafe boundaries remain; sourceaudit is not publication clearance."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-buildercore-001-builder-framework.md",
+      "next_action": "Reuse durable records and cage services in individually specified builders with explicit versioned evaluators and native acceptance."
+    },
+    {
+      "key": "curve-ellipse-native",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-CURVE-006"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "verified_at": "2026-10-09",
+      "scope": "Native exact closed Ellipse: Center, Diameter/right-click, Corner, Vertical, spatial FromFoci/MarkFoci, AroundCurve exact bounded edge/tangent, Deformable Degree/PointCount; preview, current layer membership/color/visibility/lock, atomic ellipse plus two foci, Undo/Redo and FCStd. Snapshot outputs; History, automatic topology correspondence and full editing/Rhino layer compatibility remain unaccepted.",
+      "outputs": [
+        "rust/src/ellipse.rs",
+        "rust/src/curve.rs",
+        "rust/src/curve_ffi.rs",
+        "Gui/CurveEllipse.cpp",
+        "Gui/CoreLayers.cpp",
+        "Gui/CurveController.cpp",
+        "tests/ellipse_smoke.FCMacro",
+        "docs/features/OM9-CURVE-006.md",
+        "docs/validation/2026-10-09-ellipse.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-006-ellipse.md"
+      ],
+      "evidence": [
+        "build/ellipse_smoke-1/afaffd660a95480b84aaec01f4861a96/results.json",
+        "build/circle_layers_smoke-1/448f88dce1344f88998b0eb1c961aa2c/results.json",
+        "build/circle_smoke-1/219575f2d1e743cca8fc7dcf8302f454/results.json",
+        "build/rectangle_smoke-1/fdcc1d2e928644389e3b4162d8f14fac/results.json",
+        "build/curve_smoke-1/d6dbb5461aa843c7948395607f5f9885/results.json",
+        "build/curve_spline_smoke-1/7f4badb4f0204f349854db804747a8a6/results.json",
+        "Native SHA256 8109277ded2414c31760419fe8e906b2e787fe36d76d0f27ae710df03186471f"
+      ],
+      "tests": [
+        {
+          "command": "matching SDK build and Ellipse",
+          "result": "75 pass; process exit0"
+        },
+        {
+          "command": "Curve/Circle/layer regressions",
+          "result": "199 pass; process exits0"
+        },
+        {
+          "command": "full Rust / targeted Ellipse",
+          "result": "316 pass in48 suites;14 Ellipse tests pass"
+        },
+        {
+          "command": "Python / clippy / format / whitespace / source audit",
+          "result": "23 tests; clippy exit0 warnings; format/Windows-aware whitespace pass; audit exit0 1668 source/511 bindings/510SVGs"
+        }
+      ],
+      "uncertainties": [
+        "Snapshot Ellipse; History explicitly unsupported.",
+        "Coincident foci/collinear FromFoci do not define a plane.",
+        "Sampled approximation only; full Matrix/Rhino common contracts unaccepted."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/02-curve/om9-curve-007-arc.md",
+      "next_action": "Continue Arc from exact source and update native-verified scope in spec_v1."
+    },
+    {
+      "key": "rhino-core-p0-foundations",
+      "stage": "feature-port",
+      "feature_ids": [],
+      "procedure_va": null,
+      "status": "in_progress",
+      "outputs": [
+        "rust/src/units.rs",
+        "rust/src/coordinates.rs",
+        "rust/src/cplanes.rs",
+        "rust/src/curve.rs",
+        "rust/src/curve_ffi.rs",
+        "rust/src/solid.rs",
+        "rust/src/core_snaps.rs",
+        "rust/src/state.rs",
+        "rust/src/ffi.rs",
+        "rust/src/history.rs",
+        "rust/src/retained_archive.rs",
+        "rust/src/core_3dm_archive.rs",
+        "rust/src/spline.rs",
+        "rust/src/spline_ffi.rs",
+        "Gui/CoreUnits.cpp",
+        "Gui/CoreUnits.h",
+        "Gui/CoreCPlanes.cpp",
+        "Gui/CoreCPlanes.h",
+        "Gui/CoreWorkspace.cpp",
+        "Gui/CurveController.cpp",
+        "Gui/CurveController.h",
+        "Gui/CurveEllipse.cpp",
+        "Gui/CoreDistance.cpp",
+        "Gui/CorePictureFrame.cpp",
+        "Gui/SolidController.cpp",
+        "Gui/CoreSnaps.cpp",
+        "Gui/CoreSnaps.h",
+        "Gui/CoreMouse.cpp",
+        "Gui/HistoryFeature.cpp",
+        "Gui/ThreeDmPython.cpp",
+        "Gui/RetainedArchive.cpp",
+        "Gui/AppOpenMatrix9Gui.cpp",
+        "Gui/CMakeLists.txt",
+        "tests/native/three_dm_geometry.cpp",
+        "docs/validation/2026-10-09-rhino-core-p0.md",
+        "docs/validation/2026-10-09-rhino-core-p0-evidence.json"
+      ],
+      "evidence": [
+        "User selected only P0 foundations on 2026-10-09. Bounded services implemented and supported slices verified; entire P0 remains open.",
+        "Rust owns units/point grammar/CPlane registry/snap/repeat/graph/manifest/spline validation; C++ only native adapter responsibilities.",
+        "See validation report and machine evidence for exact assertions, process exits, hashes, environment and excluded failed fixture attempts."
+      ],
+      "tests": [
+        {
+          "command": "rtk cargo test --manifest-path rust/Cargo.toml",
+          "result": "321 passed / 49 suites"
+        },
+        {
+          "command": "Python tooling unittest",
+          "result": "23 passed"
+        },
+        {
+          "command": "rtk cargo clippy --manifest-path rust/Cargo.toml --all-targets",
+          "result": "exit 0; 60 warnings remain"
+        },
+        {
+          "command": "Matching SDK build + native runtime macros",
+          "result": "build passed; 657 GUI assertions passed / 16 exit-0 runs; standalone ThreeDmGeometryTests passed"
+        }
+      ],
+      "uncertainties": [
+        "P0 is partially implemented, not complete. Common object/selection identity and revision snapshots, all-operation tolerance resolver, common History schema and current-state preservation writer remain open.",
+        "Units/context is adopted by Curve only; declared-number scaling of nonempty documents rejects. Other command families retain their existing policies.",
+        "No Rhino5 application/clipboard compatibility is certified. Unsupported CPlane modes and full snap/constraint composition remain open.",
+        "Existing unrelated working-tree work including parallel Ellipse implementation was preserved. Test module is in private runtime; already-open applications retain their loaded module."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
+      "next_action": "Implement shared object/selection identity and revision/capability snapshots for existing adapters, then operation-specific tolerance resolution; continue open P0 contracts in validation report.",
+      "updated_at": "2026-10-09T17:43:14+07:00"
     }
   ]
 }

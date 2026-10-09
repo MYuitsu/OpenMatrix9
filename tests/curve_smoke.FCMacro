@@ -2,6 +2,7 @@
 import json, os, traceback
 from pathlib import Path
 import sys
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
 sys.path.insert(0,str(Path(__file__).parent))
 from command_console_support import command_input,command_prompt
 import FreeCAD as App, FreeCADGui as Gui
@@ -18,6 +19,9 @@ def run():
     global field
     try:
         Gui.activateWorkbench('OpenMatrix9Workbench');window=Gui.getMainWindow();window.resize(1400,950)
+        import OpenMatrix9Gui
+        result['native_module']=OpenMatrix9Gui.__file__
+        if os.environ.get('OM9_TEST_NATIVE_DIR'):check('Selected native module loaded',Path(OpenMatrix9Gui.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
         field=command_input(window);check('CMD input exists',field is not None)
         action=window.findChild(QtGui.QAction,'Line');check('Line unavailable without document',action is not None and not action.isEnabled())
         doc=App.newDocument('CurveTest');doc.UndoMode=1;Gui.activeDocument().activeView().viewTop();settle()

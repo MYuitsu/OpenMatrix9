@@ -17,10 +17,20 @@ commercial Rhino SDK.
 
 All distributed icon SVG geometry is authored for OpenMatrix9. Palette choices
 and functional cues were informed by historical product references. No
-extracted icon pixels, product logos, commercial binaries or manuals are
-distributed in this snapshot. Matrix, Gemvision, Rhino, Stuller and other product
+extracted icon pixels, product logos, commercial binaries or private Matrix
+manuals are distributed in this snapshot. Matrix, Gemvision, Rhino, Stuller and other product
 names that remain as compatibility identifiers belong to their respective
 owners. Such identifiers do not grant rights in vendor code or artwork.
+
+The user-approved documentation exception in `ref/rhino5` contains the unchanged
+Rhino 5 User's Guide (Windows), publicly downloadable from Robert McNeel &
+Associates at
+https://docs.mcneel.com/rhino/5/usersguide/en-us/windows_pdf_user_s_guide.pdf.
+The original notice is “© Robert McNeel & Associates, 11/30/2016.”
+Its original notices and applicable terms remain in effect; the project's
+LGPL declaration does not relicense this vendor document. The source URL,
+byte count, SHA256 and verified download identity are in `ref/rhino5/SOURCES.json`.
+This exception does not cover recovered code, vendor SDKs, images or Matrix manuals.
 
 The publication audit records technical exclusions and checks. It does not
 establish ownership of every implementation detail or certify freedom from

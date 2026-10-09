@@ -17,12 +17,15 @@
 #include <QFile>
 #include <QCryptographicHash>
 #include <cmath>
+#include <cstring>
 #include <App/Application.h>
 #include <App/Document.h>
 #include <Gui/Application.h>
 #include <Gui/Document.h>
 #include <Gui/Control.h>
 using namespace OpenMatrix9Gui::ThreeDm;
+extern "C" bool om9_3dm_export_manifest_valid(const unsigned char*,std::size_t);
+extern "C" bool om9_retained_dependencies_valid(const unsigned char*,std::size_t);
 static QJsonObject encode(const ExchangeItem& item,const std::filesystem::path& dir,int index){
     QJsonObject o{{"name",QString::fromStdString(item.name)},{"layer",QString::fromStdString(item.layer)},{"visible",item.visible},{"locked",item.locked}};
     o["color"]=QJsonArray{item.color[0],item.color[1],item.color[2]};
@@ -53,6 +56,8 @@ static PyObject* prepare3dmArchive(PyObject*,PyObject* args){const char *path,*d
         if(std::filesystem::exists(snapshot))throw ExchangeError("Snapshot destination already exists");
         auto manifest=inspectArchive(input,scale).document;
         if(!manifest["issues"].toArray().isEmpty())throw ExchangeError("3DM archive has unresolved dependencies");
+        const auto manifestBytes=QJsonDocument(manifest).toJson(QJsonDocument::Compact);
+        if(!om9_retained_dependencies_valid(reinterpret_cast<const unsigned char*>(manifestBytes.constData()),manifestBytes.size()))throw ExchangeError("3DM archive has invalid, missing or cyclic source dependencies");
         std::filesystem::copy_file(input,snapshot);
         try{
             auto snapshotManifest=inspectArchive(snapshot,scale).document;
@@ -80,7 +85,8 @@ static PyObject* measure3dmBrep(PyObject*,PyObject* args){const char* path;if(!P
 }
 static PyObject* write3dm(PyObject*,PyObject* args){const char *json,*path;
     if(!PyArg_ParseTuple(args,"ss",&json,&path))return nullptr;
-    try{QJsonParseError error;auto doc=QJsonDocument::fromJson(QByteArray(json),&error);if(error.error!=QJsonParseError::NoError||!doc.isObject())throw ExchangeError("Invalid export manifest");
+    try{if(!om9_3dm_export_manifest_valid(reinterpret_cast<const unsigned char*>(json),std::strlen(json)))throw ExchangeError("Invalid geometry-only export manifest: check tuple sizes, mesh indices, types, tolerance and byte budget");
+        QJsonParseError error;auto doc=QJsonDocument::fromJson(QByteArray(json),&error);if(error.error!=QJsonParseError::NoError||!doc.isObject())throw ExchangeError("Invalid export manifest");
         ExchangeModel model;model.tolerance=doc.object()["tolerance"].toDouble(1e-6);if(!std::isfinite(model.tolerance)||model.tolerance<=0)throw ExchangeError("Invalid export tolerance");for(auto value:doc.object()["items"].toArray()){auto o=value.toObject();ExchangeItem item;
             item.name=o["name"].toString().toStdString();item.layer=o["layer"].toString().toStdString();item.visible=o["visible"].toBool(true);item.locked=o["locked"].toBool();auto color=o["color"].toArray();for(int i=0;i<3;++i)item.color[i]=color[i].toInt();
             if(o.contains("brep")){TopoDS_Shape shape;BRep_Builder builder;auto file=o["brep"].toString().toStdString();if(!BRepTools::Read(shape,file.c_str(),builder)||shape.IsNull())throw ExchangeError("Cannot read selected shape");item.geometry=shape;}

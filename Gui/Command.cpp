@@ -2,6 +2,14 @@
 #include "CoreThreeDm.h"
 #include "NativeCommands.h"
 #include "CurveController.h"
+#include "SurfaceController.h"
+#include "EditController.h"
+#include "HistoryController.h"
+#include "CageController.h"
+#include "HistoryFeature.h"
+#include "BuilderHistory.h"
+#include "CageFeature.h"
+#include "SolidController.h"
 #include "CoreWorkspace.h"
 #include "CoreViewControls.h"
 #include "CoreNotes.h"
@@ -62,12 +70,17 @@ private:std::size_t index;std::string accelerator;
 }
 bool om9NativeCommandAvailable(std::size_t index) {
     if(!Gui::Application::Instance || !qApp || QThread::currentThread()!=qApp->thread())return false;
+    if(OpenMatrix9Gui::HistoryController::handles(index))return OpenMatrix9Gui::HistoryController::instance().available(index);
+    if(OpenMatrix9Gui::CageController::handles(index))return OpenMatrix9Gui::CageController::instance().available(index);
     if(auto operation=om9_3dm_operation(index)) {auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();return doc&&gui&&!gui->getInEdit()&&Gui::Control().isAllowedAlterDocument(doc)&&(operation==1||Gui::Selection().hasSelection(doc->getName()));}
     if(OpenMatrix9Gui::CoreKeyboard::handles(index))return OpenMatrix9Gui::CoreKeyboard::instance().available(index);
     if(OpenMatrix9Gui::CoreSnaps::handles(index))return OpenMatrix9Gui::CoreSnaps::available();
     if(OpenMatrix9Gui::CoreDistance::handles(index))return OpenMatrix9Gui::CoreDistance::instance().available();
     if(OpenMatrix9Gui::CorePictureFrame::handles(index))return OpenMatrix9Gui::CorePictureFrame::instance().available();
     if(OpenMatrix9Gui::CoreNotes::handles(index))return OpenMatrix9Gui::CoreNotes::available(index);
+    if(OpenMatrix9Gui::SurfaceController::handles(index))return OpenMatrix9Gui::SurfaceController::instance().available(index);
+    if(OpenMatrix9Gui::EditController::handles(index))return OpenMatrix9Gui::EditController::instance().available(index);
+    if(OpenMatrix9Gui::SolidController::handles(index))return OpenMatrix9Gui::SolidController::instance().available(index);
     if(OpenMatrix9Gui::isCurveCommand(index))return OpenMatrix9Gui::CurveController::instance().available(index);
     if(OpenMatrix9Gui::CoreWorkspace::handles(index))return OpenMatrix9Gui::CoreWorkspace::instance().available(index);
     if(OpenMatrix9Gui::CoreViewControls::handles(index))return OpenMatrix9Gui::CoreViewControls::instance().available(index);
@@ -91,6 +104,11 @@ bool om9NativeCommandAvailable(std::size_t index) {
     return command && command->isActive();
 }
 bool om9ExecuteNativeCommand(std::size_t index) {
+    if(OpenMatrix9Gui::HistoryController::handles(index))return OpenMatrix9Gui::HistoryController::instance().start(index);
+    if(OpenMatrix9Gui::CageController::handles(index))return OpenMatrix9Gui::CageController::instance().start(index);
+    if(OpenMatrix9Gui::EditController::handles(index))return OpenMatrix9Gui::EditController::instance().start(index);
+    if(OpenMatrix9Gui::SolidController::handles(index))return OpenMatrix9Gui::SolidController::instance().start(index);
+    if(OpenMatrix9Gui::SurfaceController::handles(index))return OpenMatrix9Gui::SurfaceController::instance().start(index);
     if(auto operation=om9_3dm_operation(index)) {
         if(!om9NativeCommandAvailable(index))return false;
         return executeThreeDm(operation);
@@ -119,7 +137,7 @@ bool om9ExecuteNativeCommand(std::size_t index) {
             Gui::Selection().clearSelection(name.c_str());
             if(auto* current=App::GetApplication().getDocument(name.c_str())) {
                 std::vector<App::DocumentObject*> objects;
-                for(auto* object:current->getObjects())if(!OpenMatrix9Gui::CoreNotes::isStorageObject(object))objects.push_back(object);
+                for(auto* object:current->getObjects())if(!OpenMatrix9Gui::CoreNotes::isStorageObject(object)&&!dynamic_cast<OpenMatrix9Gui::HistorySettings*>(object)&&!OpenMatrix9Gui::isBuilderStorageObject(object)&&!OpenMatrix9Gui::isCageStorageObject(object))objects.push_back(object);
                 Gui::Selection().setSelection(name.c_str(),objects);
             }
         }

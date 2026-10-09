@@ -1,0 +1,1629 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-10-09",
+  "feature_catalog_count": 607,
+  "evidence_level": "source_inspected",
+  "runtime_validation": "partial_native_validation",
+  "scope": "Cross-cutting requirements; capability rows are not executable feature IDs or runtime validation.",
+  "chapters": [
+    {
+      "id": "RCORE-01",
+      "spec_path": "01-object-model-kernel.md",
+      "capability_count": 12,
+      "fixture_ids": [
+        "RCORE-01.T01",
+        "RCORE-01.T02",
+        "RCORE-01.T03",
+        "RCORE-01.T04",
+        "RCORE-01.T05",
+        "RCORE-01.T06",
+        "RCORE-01.T07",
+        "RCORE-01.T08",
+        "RCORE-01.T09",
+        "RCORE-01.T10",
+        "RCORE-01.T11"
+      ],
+      "runtime_validation": "partial_native_validation",
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+    },
+    {
+      "id": "RCORE-02",
+      "spec_path": "02-units-tolerances.md",
+      "capability_count": 12,
+      "fixture_ids": [
+        "RCORE-02.T01",
+        "RCORE-02.T02",
+        "RCORE-02.T03",
+        "RCORE-02.T04",
+        "RCORE-02.T05",
+        "RCORE-02.T06",
+        "RCORE-02.T07",
+        "RCORE-02.T08",
+        "RCORE-02.T09",
+        "RCORE-02.T10",
+        "RCORE-02.T11",
+        "RCORE-02.T12",
+        "RCORE-02.T13"
+      ],
+      "runtime_validation": "partial_native_validation",
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+    },
+    {
+      "id": "RCORE-03",
+      "spec_path": "03-coordinates-cplanes.md",
+      "capability_count": 10,
+      "fixture_ids": [
+        "RCORE-03.T01",
+        "RCORE-03.T02",
+        "RCORE-03.T03",
+        "RCORE-03.T04",
+        "RCORE-03.T05",
+        "RCORE-03.T06",
+        "RCORE-03.T07",
+        "RCORE-03.T08",
+        "RCORE-03.T09",
+        "RCORE-03.T10",
+        "RCORE-03.T11",
+        "RCORE-03.T12"
+      ],
+      "runtime_validation": "partial_native_validation",
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+    },
+    {
+      "id": "RCORE-04",
+      "spec_path": "04-command-engine.md",
+      "capability_count": 11,
+      "fixture_ids": [
+        "RCORE-04.T01",
+        "RCORE-04.T02",
+        "RCORE-04.T03",
+        "RCORE-04.T04",
+        "RCORE-04.T05",
+        "RCORE-04.T06",
+        "RCORE-04.T07",
+        "RCORE-04.T08",
+        "RCORE-04.T09",
+        "RCORE-04.T10",
+        "RCORE-04.T11",
+        "RCORE-04.T12",
+        "RCORE-04.T13"
+      ],
+      "runtime_validation": "partial_native_validation",
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+    },
+    {
+      "id": "RCORE-05",
+      "spec_path": "05-picking-snapping.md",
+      "capability_count": 12,
+      "fixture_ids": [
+        "RCORE-05.T01",
+        "RCORE-05.T02",
+        "RCORE-05.T03",
+        "RCORE-05.T04",
+        "RCORE-05.T05",
+        "RCORE-05.T06",
+        "RCORE-05.T07",
+        "RCORE-05.T08",
+        "RCORE-05.T09",
+        "RCORE-05.T10",
+        "RCORE-05.T11",
+        "RCORE-05.T12",
+        "RCORE-05.T13",
+        "RCORE-05.T14",
+        "RCORE-05.T15"
+      ],
+      "runtime_validation": "partial_native_validation",
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+    },
+    {
+      "id": "RCORE-06",
+      "spec_path": "06-selection-organization-blocks.md",
+      "capability_count": 12,
+      "fixture_ids": [
+        "RCORE-06.T01",
+        "RCORE-06.T02",
+        "RCORE-06.T03",
+        "RCORE-06.T04",
+        "RCORE-06.T05",
+        "RCORE-06.T06",
+        "RCORE-06.T07",
+        "RCORE-06.T08",
+        "RCORE-06.T09",
+        "RCORE-06.T10",
+        "RCORE-06.T11",
+        "RCORE-06.T12",
+        "RCORE-06.T13",
+        "RCORE-06.T14",
+        "RCORE-06.T15"
+      ],
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "capability_count": 16,
+      "fixture_ids": [
+        "RCORE-07.T01",
+        "RCORE-07.T02",
+        "RCORE-07.T03",
+        "RCORE-07.T04",
+        "RCORE-07.T05",
+        "RCORE-07.T06",
+        "RCORE-07.T07",
+        "RCORE-07.T08",
+        "RCORE-07.T09",
+        "RCORE-07.T10",
+        "RCORE-07.T11",
+        "RCORE-07.T12",
+        "RCORE-07.T13",
+        "RCORE-07.T14"
+      ],
+      "runtime_validation": "partial_native_validation",
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+    },
+    {
+      "id": "RCORE-08",
+      "spec_path": "08-analysis-repair.md",
+      "capability_count": 16,
+      "fixture_ids": [
+        "RCORE-08.T01",
+        "RCORE-08.T02",
+        "RCORE-08.T03",
+        "RCORE-08.T04",
+        "RCORE-08.T05",
+        "RCORE-08.T06",
+        "RCORE-08.T07",
+        "RCORE-08.T08",
+        "RCORE-08.T09",
+        "RCORE-08.T10",
+        "RCORE-08.T11",
+        "RCORE-08.T12",
+        "RCORE-08.T13"
+      ],
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-09",
+      "spec_path": "09-history-dependencies.md",
+      "capability_count": 11,
+      "fixture_ids": [
+        "RCORE-09.T01",
+        "RCORE-09.T02",
+        "RCORE-09.T03",
+        "RCORE-09.T04",
+        "RCORE-09.T05",
+        "RCORE-09.T06",
+        "RCORE-09.T07",
+        "RCORE-09.T08",
+        "RCORE-09.T09",
+        "RCORE-09.T10",
+        "RCORE-09.T11",
+        "RCORE-09.T12"
+      ],
+      "runtime_validation": "partial_native_validation",
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+    },
+    {
+      "id": "RCORE-10",
+      "spec_path": "10-persistence-3dm-clipboard.md",
+      "capability_count": 12,
+      "fixture_ids": [
+        "RCORE-10.T01",
+        "RCORE-10.T02",
+        "RCORE-10.T03",
+        "RCORE-10.T04",
+        "RCORE-10.T05",
+        "RCORE-10.T06",
+        "RCORE-10.T07",
+        "RCORE-10.T08",
+        "RCORE-10.T09",
+        "RCORE-10.T10",
+        "RCORE-10.T11",
+        "RCORE-10.T12"
+      ],
+      "runtime_validation": "partial_native_validation",
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+    },
+    {
+      "id": "RCORE-11",
+      "spec_path": "11-annotation-layout-print.md",
+      "capability_count": 12,
+      "fixture_ids": [
+        "RCORE-11.T01",
+        "RCORE-11.T02",
+        "RCORE-11.T03",
+        "RCORE-11.T04",
+        "RCORE-11.T05",
+        "RCORE-11.T06",
+        "RCORE-11.T07",
+        "RCORE-11.T08",
+        "RCORE-11.T09",
+        "RCORE-11.T10",
+        "RCORE-11.T11",
+        "RCORE-11.T12"
+      ],
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-12",
+      "spec_path": "12-display-render-resources.md",
+      "capability_count": 12,
+      "fixture_ids": [
+        "RCORE-12.T01",
+        "RCORE-12.T02",
+        "RCORE-12.T03",
+        "RCORE-12.T04",
+        "RCORE-12.T05",
+        "RCORE-12.T06",
+        "RCORE-12.T07",
+        "RCORE-12.T08",
+        "RCORE-12.T09",
+        "RCORE-12.T10",
+        "RCORE-12.T11",
+        "RCORE-12.T12",
+        "RCORE-12.T13"
+      ],
+      "runtime_validation": "not_run"
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "RCORE-01.C01",
+      "capability": "BRep object có placement và property shape",
+      "freecad": "API",
+      "source_summary": "Part::Feature::Shape`, kế thừa `App::GeoFeature`; S1/S2",
+      "om9_summary": "Adapter identity/revision và routing representation",
+      "spec_path": "01-object-model-kernel.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-01.C02",
+      "capability": "Curve NURBS rational/periodic",
+      "freecad": "API",
+      "source_summary": "GeomBSplineCurve`, persistence poles/weights/knots/degree; S3",
+      "om9_summary": "Bảo toàn dữ liệu qua 3DM/FCStd và supported edit slices",
+      "spec_path": "01-object-model-kernel.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-01.C03",
+      "capability": "Surface NURBS, face trim và pcurve",
+      "freecad": "API",
+      "source_summary": "GeomBSplineSurface`; `CurveOnSurface`, `isSeam`; S3/S4",
+      "om9_summary": "Mapping loop/orientation/domain có fixture lỗ và seam",
+      "spec_path": "01-object-model-kernel.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-01.C04",
+      "capability": "Phân biệt face/shell/solid/compound",
+      "freecad": "API",
+      "source_summary": "TopoShape` có type, `isValid`, `isClosed`; S5",
+      "om9_summary": "Quy tắc solid đầy đủ; không suy solid từ một boolean",
+      "spec_path": "01-object-model-kernel.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-01.C05",
+      "capability": "Point cloud và mesh độc lập BRep",
+      "freecad": "API",
+      "source_summary": "Points::Feature`, `Mesh::Feature`; S6/S7",
+      "om9_summary": "Type mapping và policy chuyển đổi, không dùng mesh cache làm master",
+      "spec_path": "01-object-model-kernel.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-01.C06",
+      "capability": "Shared instance/placement",
+      "freecad": "API",
+      "source_summary": "App::Link`, link placement và scale; S8",
+      "om9_summary": "Rhino definition/instance attributes và nested transform thuộc RCORE-06",
+      "spec_path": "01-object-model-kernel.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-01.C07",
+      "capability": "Lightweight extrusion giữ nguyên representation",
+      "freecad": "Một phần",
+      "source_summary": "Part::Extrusion` có feature dựng hình; S9; chưa chứng minh serialization tương đương Rhino extrusion",
+      "om9_summary": "Tách preserve payload khỏi BRep editable và cảnh báo conversion",
+      "spec_path": "01-object-model-kernel.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-01.C08",
+      "capability": "Native CAD và tessellation tách biệt",
+      "freecad": "API",
+      "source_summary": "TopoShape` giữ BRep; tessellation trong luồng shape/display; S5",
+      "om9_summary": "Cache generation/invalidation và đảm bảo export dùng CAD hiện tại",
+      "spec_path": "01-object-model-kernel.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-01.C09",
+      "capability": "Polycurve giữ phân đoạn/thuộc tính Rhino",
+      "freecad": "Một phần",
+      "source_summary": "Wire/edge topology có ở S5; chưa chứng minh giữ semantics mọi polycurve",
+      "om9_summary": "Conversion report và kiểm exactness theo từng kiểu đoạn",
+      "spec_path": "01-object-model-kernel.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-01.C10",
+      "capability": "Backend registry chung theo operation × type × options",
+      "freecad": "Chưa thấy trong phạm vi rà",
+      "source_summary": "Đã rà Part geometry/topology và OM9 curve/surface/3DM entry points; chưa thấy contract thống nhất của nhóm này",
+      "om9_summary": "Rust registry bắt buộc trước enable command",
+      "spec_path": "01-object-model-kernel.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-01.C11",
+      "capability": "Native lifetime qua worker và document close",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Source shape/property không chứng minh lifecycle OM9 khi hủy/đóng document",
+      "om9_summary": "Audit handle/generation/cancel rồi fixture runtime",
+      "spec_path": "01-object-model-kernel.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-01.C12",
+      "capability": "Annotation typed và structural 3DM roundtrip",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Không audit toàn bộ annotation/3DM trong file này",
+      "om9_summary": "Liên kết RCORE-10/11, không flatten rồi gọi là preserve",
+      "spec_path": "01-object-model-kernel.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-02.C01",
+      "capability": "Đơn vị có dimension và canonical values",
+      "freecad": "API",
+      "source_summary": "Base::Unit`, `Quantity`; mm/deg được khai báo ở S1/S2",
+      "om9_summary": "Rust typed quantities và conversion biên ABI",
+      "spec_path": "02-units-tolerances.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-02.C02",
+      "capability": "Unit system trên document",
+      "freecad": "API",
+      "source_summary": "Document::UnitSystem`, khởi tạo từ preference `UserSchema`; S3",
+      "om9_summary": "Không gọi host là chỉ có global units; bổ sung context revision/schema",
+      "spec_path": "02-units-tolerances.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-02.C03",
+      "capability": "Quantity input và quantity property",
+      "freecad": "UI+API",
+      "source_summary": "QuantitySpinBox`, `PropertyLength`, `PropertyAngle`; S4/S5",
+      "om9_summary": "Parser command/CPlane dùng cùng units policy, không chỉ widget",
+      "spec_path": "02-units-tolerances.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-02.C04",
+      "capability": "Định dạng precision/fraction",
+      "freecad": "API",
+      "source_summary": "UnitsApi::setDecimals/getDecimals`, Quantity format; S2/S6",
+      "om9_summary": "Tách revision format khỏi geometric tolerance và bảo đảm không mutate shape",
+      "spec_path": "02-units-tolerances.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-02.C05",
+      "capability": "Tolerance topology theo shape/subshape",
+      "freecad": "API",
+      "source_summary": "getTolerance`, `overTolerance`, `inTolerance`, `fixTolerance`; S7",
+      "om9_summary": "Report read-only riêng; mutation cần explicit repair contract",
+      "spec_path": "02-units-tolerances.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-02.C06",
+      "capability": "GUI thay tolerance native",
+      "freecad": "UI+API",
+      "source_summary": "BOPTools.ToleranceFeatures`, `FeatureToleranceSet`; S8",
+      "om9_summary": "Không coi đây là Rhino document tolerance context",
+      "spec_path": "02-units-tolerances.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-02.C07",
+      "capability": "Tham số tolerance cho sewing/offset/fix",
+      "freecad": "API",
+      "source_summary": "TopoShape::sewShape`, `makeOffsetShape`, `fix(precision,min,max)`; S9",
+      "om9_summary": "Mapping per operation, không áp relative formula chung",
+      "spec_path": "02-units-tolerances.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-02.C08",
+      "capability": "Context absolute/relative/angular chung toàn OM9",
+      "freecad": "Chưa thấy trong phạm vi rà",
+      "source_summary": "Đã đọc Base units, Document, Part tolerance và OM9 surface/3DM paths; chưa thấy schema thống nhất",
+      "om9_summary": "Rust context persisted, migration từng supported slice",
+      "spec_path": "02-units-tolerances.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-02.C09",
+      "capability": "Đổi units kèm scale document có transaction",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Property UnitSystem không chứng minh compound scale policy và Undo/History",
+      "om9_summary": "Implement plan/apply và fixture trên objects có placements/History",
+      "spec_path": "02-units-tolerances.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-02.C10",
+      "capability": "Refit có tolerance và numerical budget",
+      "freecad": "Một phần",
+      "source_summary": "GeomBSplineCurve::approximate` có tolerance và degree/segment limits; S12; chưa chứng minh bound toàn workflow",
+      "om9_summary": "S10: Rust candidate và native `certifySurfaceRefit` có bound/budget; giữ semantics slice riêng",
+      "spec_path": "02-units-tolerances.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-02.C11",
+      "capability": "3DM scale/override",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "File này không audit importer 3DM độc lập của host FreeCAD",
+      "om9_summary": "S11: `core_3dm::scale(unit_mm, override_mm)` có ở OM9; đối soát unitless/custom theo RCORE-10",
+      "spec_path": "02-units-tolerances.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-02.C12",
+      "capability": "Page units độc lập model units",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "File này không audit toàn bộ TechDraw/layout",
+      "om9_summary": "Contract RCORE-11 phải có fixture tỷ lệ in, không lấy UnitSystem làm đủ",
+      "spec_path": "02-units-tolerances.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-03.C01",
+      "capability": "Frame local↔world",
+      "freecad": "API",
+      "source_summary": "[WorkingPlane][fc-wp] `PlaneBase.get_global_coords/get_local_coords` dùng matrix và inverse",
+      "om9_summary": "Có frame trong [Session][om9-curve]; cần tagged parser dùng chung",
+      "spec_path": "03-coordinates-cplanes.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-03.C02",
+      "capability": "CPlane riêng từng viewport",
+      "freecad": "UI+API",
+      "source_summary": "get_working_plane` lưu `PlaneGui` theo view; Auto có thể bám camera",
+      "om9_summary": "Chưa chứng minh OM9 đồng bộ với Draft; cần nguồn state duy nhất",
+      "spec_path": "03-coordinates-cplanes.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-03.C03",
+      "capability": "World/Origin/3Point",
+      "freecad": "UI+API",
+      "source_summary": "[Draft_SelectPlane][fc-ui], `align_to_3_points`, `align_to_point_and_axis`, top/front/side",
+      "om9_summary": "Menu Set CPlane đang disabled tại [CoreWorkspace][om9-workspace]; không suy thiếu host",
+      "spec_path": "03-coordinates-cplanes.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-03.C04",
+      "capability": "Theo curve/face/placement",
+      "freecad": "API",
+      "source_summary": "align_to_edge_or_wire`, `align_to_face`, `align_to_obj_placement",
+      "om9_summary": "Cần mapping option và singular/trim policy theo command",
+      "spec_path": "03-coordinates-cplanes.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-03.C05",
+      "capability": "CPlane previous/next",
+      "freecad": "UI+API",
+      "source_summary": "PlaneGui._previous/_next`; task panel có nút nối handler",
+      "om9_summary": "Chưa kiểm tương tác với session latch và OM9 view undo",
+      "spec_path": "03-coordinates-cplanes.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-03.C06",
+      "capability": "Named frame persistence",
+      "freecad": "Một phần",
+      "source_summary": "[WorkingPlaneProxy][fc-proxy] và `align_to_wp_proxy` cung cấp object/restore",
+      "om9_summary": "Chưa chứng minh equivalent NamedCPlane/import Rhino hoặc persistence mọi viewport",
+      "spec_path": "03-coordinates-cplanes.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-03.C07",
+      "capability": "Grammar điểm Rhino dùng chung",
+      "freecad": "Chưa thấy trong phạm vi rà",
+      "source_summary": "WorkingPlane là phép chuyển frame; Draft task field không chứng minh grammar toàn host",
+      "om9_summary": "Session::input` có comma coordinates và `r/R`; cần adapter cho `w/wr/@` đã có help, cùng locale fixtures",
+      "spec_path": "03-coordinates-cplanes.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-03.C08",
+      "capability": "x,y,z` theo CPlane",
+      "freecad": "Một phần",
+      "source_summary": "Host có API frame nhưng không áp grammar Rhino cho mọi workbench",
+      "om9_summary": "Source [curve.rs][om9-curve] transform cả 2/3 số khi `frame` có giá trị; record Circle khác",
+      "spec_path": "03-coordinates-cplanes.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-03.C09",
+      "capability": "Units/angle/scalar xuyên lệnh",
+      "freecad": "Một phần",
+      "source_summary": "Draft panel dùng `Units.Quantity`; không phải parser point session thống nhất",
+      "om9_summary": "Các family có slice riêng; hợp nhất không được đổi threshold đã duyệt",
+      "spec_path": "03-coordinates-cplanes.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-03.C10",
+      "capability": "Đổi view/đóng doc giữa nhập điểm",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "PlaneGui` có view observer; `Draft_SelectPlane.Activated` finish active Draft command",
+      "om9_summary": "[CurveController][om9-controller] kiểm document/updateInputFrame; cần native fixtures",
+      "spec_path": "03-coordinates-cplanes.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-04.C01",
+      "capability": "Command registry/menu/action",
+      "freecad": "UI+API",
+      "source_summary": "[Command][fc-command] `CommandBase`, `Command`, `CommandManager`; QAction activation",
+      "om9_summary": "[Command.cpp][om9-command] gate/dispatch theo index; cần request thống nhất mọi entrypoint",
+      "spec_path": "04-command-engine.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-04.C02",
+      "capability": "isActive và quyền host",
+      "freecad": "UI+API",
+      "source_summary": "Command::isActive`, host GUI command lifecycle",
+      "om9_summary": "om9NativeCommandAvailable` xét document/control và các family; giữ slice explicit",
+      "spec_path": "04-command-engine.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-04.C03",
+      "capability": "Atomic transaction/Undo",
+      "freecad": "API",
+      "source_summary": "openCommand`, `commitCommand`, `abortCommand` nối App transaction",
+      "om9_summary": "Curve commit đã có; phải nghiệm thu mỗi family và metadata/History đi cùng",
+      "spec_path": "04-command-engine.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-04.C04",
+      "capability": "Console nhập lệnh",
+      "freecad": "Một phần",
+      "source_summary": "[PythonConsole][fc-console] `InteractiveInterpreter::runSource` compile/execute Python",
+      "om9_summary": "[CommandConsole][om9-console] là UI riêng; cần grammar/options/session Rhino ở Rust",
+      "spec_path": "04-command-engine.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-04.C05",
+      "capability": "Prompt/options/completion",
+      "freecad": "Một phần",
+      "source_summary": "PythonConsole có Python completion/history, không chứng minh command options Rhino",
+      "om9_summary": "optionAt`, `chooseCompletion`, `setPrompt`, Rust [completion][om9-completion]; cần typed option model",
+      "spec_path": "04-command-engine.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-04.C06",
+      "capability": "Preselection/postselection",
+      "freecad": "UI+API",
+      "source_summary": "[SelectionSingleton][fc-selection] có selected/preselected objects và gates",
+      "om9_summary": "Các controller phải normalize filter/cardinality cùng RCORE-06",
+      "spec_path": "04-command-engine.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-04.C07",
+      "capability": "Session checkpoint và Esc",
+      "freecad": "Một phần",
+      "source_summary": "Host hỗ trợ command/task callback; mỗi workbench tự có lifecycle",
+      "om9_summary": "[Curve Session][om9-session] và [CurveController][om9-controller] có input/cancel; chưa kiểm xuyên family",
+      "spec_path": "04-command-engine.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-04.C08",
+      "capability": "Repeat từ success history",
+      "freecad": "Một phần",
+      "source_summary": "Host command registry không tự cung cấp semantics repeat Rhino cho mọi command",
+      "om9_summary": "CurveController::submit` input rỗng gọi history đầu; cần exclusion/focus/phase fixtures",
+      "spec_path": "04-command-engine.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-04.C09",
+      "capability": "Navigation trong active pick",
+      "freecad": "Một phần",
+      "source_summary": "Native view có event/navigation API; hành vi phụ thuộc tool",
+      "om9_summary": "Chưa chứng minh pan/orbit/Space/right-click cùng policy cho mọi controller",
+      "spec_path": "04-command-engine.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-04.C10",
+      "capability": "RhinoScript/Rhino plugin runtime",
+      "freecad": "Chưa thấy trong phạm vi rà",
+      "source_summary": "Rà Command/PythonConsole chỉ thấy Python host execution, không Rhino runtime",
+      "om9_summary": "Alias/completion không phải implementation; giữ unsupported capability rõ",
+      "spec_path": "04-command-engine.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-04.C11",
+      "capability": "Close/deactivate/stale cleanup",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Host document/view lifecycle là nền tảng cần tích hợp",
+      "om9_summary": "Curve có `validDocument`, cancel và preview cleanup; cần worker/native replay",
+      "spec_path": "04-command-engine.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-05.C01",
+      "capability": "Snapper chung/marker",
+      "freecad": "UI+API",
+      "source_summary": "[Draft Snapper][fc-snap] `snap`, `constrain`, `getPoint`; snap tuple real/marker/visual",
+      "om9_summary": "[CoreSnaps][om9-snap] đang có resolver native riêng; cần protocol chung preview/commit",
+      "spec_path": "05-picking-snapping.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-05.C02",
+      "capability": "End/Mid/Near/Center",
+      "freecad": "UI+API",
+      "source_summary": "snapToEndpoints/Midpoint/Near/Center` và toolbar modes",
+      "om9_summary": "OM9 Rust [State][om9-state] chỉ công bố master/End/Mid/Point tại đây",
+      "spec_path": "05-picking-snapping.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-05.C03",
+      "capability": "Perpendicular/face",
+      "freecad": "UI+API",
+      "source_summary": "snapToPerpendicular`, `snapToPerpendicularFace",
+      "om9_summary": "Cần residual/trim/from-vs-to contract, không coi Draft tương thích trọn Rhino",
+      "spec_path": "05-picking-snapping.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-05.C04",
+      "capability": "Intersection thật/biểu kiến",
+      "freecad": "Một phần",
+      "source_summary": "snapToIntersection` có nhánh projected WorkingPlane cho line/segment",
+      "om9_summary": "Cần loại candidate explicit và test lệch Z; chưa có general OM9 path tại CoreSnaps",
+      "spec_path": "05-picking-snapping.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-05.C05",
+      "capability": "Knot snap",
+      "freecad": "API",
+      "source_summary": "snapToBSplineKnots` trong mode Special dùng `getKnots`/`value",
+      "om9_summary": "Có nền tảng thật, không kết luận thiếu vì khác tên; bounded trim/domain cần xác minh",
+      "spec_path": "05-picking-snapping.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-05.C06",
+      "capability": "Grid snap độc lập hiển thị",
+      "freecad": "Một phần",
+      "source_summary": "snapToGrid` kiểm `self.grid.Visible` trước mode Grid",
+      "om9_summary": "Không đáp ứng ngay policy ẩn grid vẫn snap; cần resolver Rust riêng/adapter tách state",
+      "spec_path": "05-picking-snapping.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-05.C07",
+      "capability": "Ortho/angle/extensions",
+      "freecad": "UI+API",
+      "source_summary": "snapToOrtho`, `snapToAngles`, `snapToPolar`, `snapToExtensions",
+      "om9_summary": "Cần bảng tổ hợp với modes OM9, distance và per-command exceptions",
+      "spec_path": "05-picking-snapping.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-05.C08",
+      "capability": "Tangent snap tổng quát",
+      "freecad": "Chưa thấy trong phạm vi rà",
+      "source_summary": "Không thấy tangent mode/hàm tương đương trong Snapper đã đọc",
+      "om9_summary": "Circle Tangent có solver riêng, không thay global tangent snap",
+      "spec_path": "05-picking-snapping.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-05.C09",
+      "capability": "Persistent/one-shot/suspend/clear",
+      "freecad": "Một phần",
+      "source_summary": "active_snaps`, preferences và mode switches có sẵn",
+      "om9_summary": "State`/CoreSnaps có bitmask/toggle; chưa thấy đủ one-shot lifecycle trong hai file",
+      "spec_path": "05-picking-snapping.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-05.C10",
+      "capability": "Locked nhưng vẫn snappable",
+      "freecad": "Một phần",
+      "source_summary": "snapToObject` bỏ `ViewObject.Selectable=False",
+      "om9_summary": "Không thể map lock→Selectable rồi dùng nguyên Draft snap; tách edit và reference permission",
+      "spec_path": "05-picking-snapping.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-05.C11",
+      "capability": "SmartTrack/Elevator Rhino",
+      "freecad": "Một phần",
+      "source_summary": "Draft có extension/hold/constraints; không đủ chứng minh semantics Rhino",
+      "om9_summary": "Chưa thấy session model tương đương trong CoreSnaps; cần state/fixtures riêng",
+      "spec_path": "05-picking-snapping.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-05.C12",
+      "capability": "Candidate identity/revision",
+      "freecad": "Một phần",
+      "source_summary": "Draft `snapInfo` có object/component/parent path",
+      "om9_summary": "Rust `Candidate` chỉ world+screen, CoreSnaps trả point; cần identity/provenance và stale checks",
+      "spec_path": "05-picking-snapping.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-06.C01",
+      "capability": "Object/subelement selection",
+      "freecad": "UI+API",
+      "source_summary": "[Selection][fc-selection] `addSelection`, `setPreselect`, `SelectionObject`, resolve modes",
+      "om9_summary": "[OM9 Command][om9-command] dùng Selection keys; cần identity/revision contract toàn family",
+      "spec_path": "06-selection-organization-blocks.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-06.C02",
+      "capability": "Filter/gate theo phase",
+      "freecad": "API",
+      "source_summary": "SelectionGate`, `SelectionGateFilterExternal`, `addSelectionGate/rmvSelectionGate",
+      "om9_summary": "Cần adapter owns/restores gate và edit-vs-reference role",
+      "spec_path": "06-selection-organization-blocks.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-06.C03",
+      "capability": "Window/crossing",
+      "freecad": "Một phần",
+      "source_summary": "[BoxSelection][fc-box] `applyBoxSelection`, CENTER/INTERSECT; CENTER có nhánh tâm bbox",
+      "om9_summary": "Chưa equivalent fully enclosed Rhino; cần exact fixture và policy riêng",
+      "spec_path": "06-selection-organization-blocks.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-06.C04",
+      "capability": "Visible/selectable",
+      "freecad": "UI+API",
+      "source_summary": "[ViewProviderGeometryObject][fc-selectable] `Selectable`; [ViewProviderDocumentObject][fc-visible] `Visibility",
+      "om9_summary": "Không suy selectable=False thành locked-but-snappable",
+      "spec_path": "06-selection-organization-blocks.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-06.C05",
+      "capability": "Layer membership/style/UI",
+      "freecad": "UI+API",
+      "source_summary": "[Layer][fc-layer] `Group` PropertyLinkListHidden; [Layer UI][fc-layer-ui] manager; [view layer][fc-layer-view] overrides",
+      "om9_summary": "Cần persistent layer ID/mapping nhập-xuất và per-command assignment",
+      "spec_path": "06-selection-organization-blocks.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-06.C06",
+      "capability": "Current-layer creation",
+      "freecad": "Một phần",
+      "source_summary": "ViewProviderLayer.activate` gọi Draft_AutoGroup làm active layer",
+      "om9_summary": "[Circle record][circle-record] ghi active-layer mapping chưa implement; không áp AutoGroup mặc nhiên cho OM9",
+      "spec_path": "06-selection-organization-blocks.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-06.C07",
+      "capability": "Layer lock còn snap được",
+      "freecad": "Chưa thấy trong phạm vi rà",
+      "source_summary": "Layer source đã đọc không chứng minh Rhino lock; Draft snap loại Selectable=False",
+      "om9_summary": "Cần lock policy Rust, gate edit và reference permission tách biệt",
+      "spec_path": "06-selection-organization-blocks.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-06.C08",
+      "capability": "Group/nested membership",
+      "freecad": "API",
+      "source_summary": "[GroupExtension][fc-group] `Group`, `addObject/removeObject`, `isChildOf",
+      "om9_summary": "Cần semantics select-as-one, Ungroup và name collision Rhino; group không là block",
+      "spec_path": "06-selection-organization-blocks.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-06.C09",
+      "capability": "Shared instances/transforms",
+      "freecad": "UI+API",
+      "source_summary": "[App::Link][fc-link] LinkedObject/LinkPlacement/ScaleVector; [CommandLink][fc-link-ui] tạo/chọn link",
+      "om9_summary": "Nền phù hợp để khảo sát block mapping, chưa là BlockEdit/Manager hoàn chỉnh",
+      "spec_path": "06-selection-organization-blocks.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-06.C10",
+      "capability": "External object references",
+      "freecad": "API",
+      "source_summary": "App::Link dùng PropertyXLink, có liên kết sang document khác",
+      "om9_summary": "Cần Worksession active-file/read-only/refresh/missing-file contract độc lập",
+      "spec_path": "06-selection-organization-blocks.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-06.C11",
+      "capability": "Block authoring workflow",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Link UI/API không tự chứng minh Block/Insert/Edit/Manager Rhino semantics",
+      "om9_summary": "Chưa thấy equivalent đầy đủ trong OM9 Command và exchange files rà; cần implementation riêng",
+      "spec_path": "06-selection-organization-blocks.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-06.C12",
+      "capability": "Explode embedded/nested blocks",
+      "freecad": "Một phần",
+      "source_summary": "Link là cơ sở instance; không đồng nhất với file-exchange explode",
+      "om9_summary": "[ThreeDmExplode][om9-explode] decode instance references, depth/cycle/flatten; không là preservation roundtrip",
+      "spec_path": "06-selection-organization-blocks.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C01",
+      "capability": "Curve poles/weights/knots/degree",
+      "freecad": "API",
+      "source_summary": "GeomBSplineCurve`, getters/setters và native OCCT handle; S1/S2",
+      "om9_summary": "Validate owned basis Rust, conversion và typed errors",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C02",
+      "capability": "Surface pole grid/weights U/V",
+      "freecad": "API",
+      "source_summary": "BSplineSurfacePy` có row/column setters, `buildFromPolesMultsKnots`; S3",
+      "om9_summary": "Editor grid/grip identity, trim propagation",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C03",
+      "capability": "Knot insertion/removal và degree elevation",
+      "freecad": "API",
+      "source_summary": "Curve `insertKnot/removeKnot/increaseDegree`; U/V variants của surface; S2/S3",
+      "om9_summary": "UI options và shape-preservation fixtures; không suy đã tương thích Rhino",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C04",
+      "capability": "Periodicity, seam/origin và domain",
+      "freecad": "API",
+      "source_summary": "setPeriodic/setOrigin`, `setU/VPeriodic`, `setU/VOrigin`, `segment`; S2/S3",
+      "om9_summary": "Direction/domain map xuyên preview và History",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C05",
+      "capability": "Curve/surface approximation và interpolation",
+      "freecad": "API",
+      "source_summary": "approximate/interpolate` ở S1/S2/S3",
+      "om9_summary": "Không đồng nhất với exact Rebuild count/deviation contract",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C06",
+      "capability": "Generic PointsOn/EditPtOn cho mọi Rhino type",
+      "freecad": "Một phần",
+      "source_summary": "Basis API có; Sketcher có B-spline display tools S9; chưa chứng minh editor chung",
+      "om9_summary": "Rust session CV/edit-point; PointsOn alias trong keyboard không là completion",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C07",
+      "capability": "Sweep/Loft/offset/Boolean BRep",
+      "freecad": "API",
+      "source_summary": "TopoShape` có makePipe/makeLoft/makeElementOffset/makeElementFuse/Cut; S4",
+      "om9_summary": "Per-operation options, tolerances, topology và failure mapping",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C08",
+      "capability": "Surface filling và boundary curves",
+      "freecad": "UI+API",
+      "source_summary": "Surface_Filling`, `Surface_GeomFillSurface` tạo native features; S5/S6",
+      "om9_summary": "Map EdgeSrf/Patch theo supported inputs; không gọi mọi Patch/NetworkSrf đã có",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C09",
+      "capability": "Projection lên surface",
+      "freecad": "API",
+      "source_summary": "Part::ProjectOnSurface`; S7",
+      "om9_summary": "Phân biệt projection với pull và trim domain; kiểm multi-result",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C10",
+      "capability": "Pcurve/domain/normal/curvature access",
+      "freecad": "API",
+      "source_summary": "Face domain và surface evaluation; S8",
+      "om9_summary": "Dùng làm validator và editor trim, không chỉ xem tessellation",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C11",
+      "capability": "Full solid grips giữ topology chung",
+      "freecad": "Chưa thấy trong phạm vi rà",
+      "source_summary": "Đã rà Part/Surface NURBS API và OM9 Curve/Surface/PointsOn entry points",
+      "om9_summary": "Contract riêng; không di chuyển CV độc lập của faces",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C12",
+      "capability": "Rhino Rebuild/Refit end-to-end",
+      "freecad": "Một phần",
+      "source_summary": "FreeCAD approximation primitives S1/S2/S3; chưa chứng minh toàn workflow Rhino",
+      "om9_summary": "S10/S11 có Rust rebuild + CoreRebuild/refit adapter; nghiệm thu count/degree/retrim/deviation riêng từng slice",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C13",
+      "capability": "G0/G1/G2 certification xuyên trimmed joins",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Có curvature/derivative nền, chưa chạy certifier cho fixtures",
+      "om9_summary": "Nêu measure/bounds, xử lý seam/singularity và report uncovered region",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C14",
+      "capability": "Grip cancel/Undo/redo/reload",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Geometry API không chứng minh transaction lifecycle của UI OM9",
+      "om9_summary": "Chạy fixtures state/History/identity trước bật command",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C15",
+      "capability": "Affine transform BRep và matrix analysis",
+      "freecad": "API",
+      "source_summary": "transformShape`, `transformGeometry/transformGShape`, `mirror`; Matrix determinant/analysis; S13",
+      "om9_summary": "Frame/copy/Array ordering, singular rejection, mirror orientation và conversion report",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-07.C16",
+      "capability": "Bend/Twist/Flow/Cage phi tuyến đầy đủ",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "S13 chỉ chứng minh transform matrix; chưa audit toàn bộ solver deformation của host",
+      "om9_summary": "Contract riêng từng deformation family và deviation/topology fixtures",
+      "spec_path": "07-nurbs-editing-modeling.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C01",
+      "capability": "Check BRep structural validity",
+      "freecad": "UI+API",
+      "source_summary": "Part_CheckGeometry`, `TaskCheckGeometry`, `TopoShape::isValid/analyze`; S1/S2",
+      "om9_summary": "Chuẩn hóa report/selection/highlight, checks coverage",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C02",
+      "capability": "BOP/self-intersection diagnostic",
+      "freecad": "UI+API",
+      "source_summary": "BOP analyzer có mode; GUI chỉ chạy sau BRep pass và `RunBOPCheck`; S1/S2",
+      "om9_summary": "Ghi mode thực dùng; không nói mọi Check đã chạy BOP",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C03",
+      "capability": "Naked/non-manifold topology",
+      "freecad": "Một phần",
+      "source_summary": "BRepCheck lỗi free-edge/multi-connexity và ancestor access; S1/S3",
+      "om9_summary": "ShowEdges filtering, seam/edge-use classification và marker lifecycle",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C04",
+      "capability": "Curve/face direction và normals",
+      "freecad": "API",
+      "source_summary": "normalAt`, curve tangent/curvature và face orientation; S3/S4",
+      "om9_summary": "Dir overlay, frame và reverse transaction rõ",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C05",
+      "capability": "Curve curvature graph",
+      "freecad": "Một phần",
+      "source_summary": "Sketcher có B-spline curvature comb UI; curve API có curvature; S4/S5",
+      "om9_summary": "Mở rộng tới generic 3D curves; range/scale/sample contract",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C06",
+      "capability": "NURBS surface curvature values",
+      "freecad": "API",
+      "source_summary": "GeometrySurfacePy::curvature` Max/Min/Mean/Gauss, directions; S4",
+      "om9_summary": "NURBS-trimmed map/legend/range và invalid-point handling",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C07",
+      "capability": "Mesh curvature visualization",
+      "freecad": "UI+API",
+      "source_summary": "Mesh curvature feature và view provider với Mean/Gaussian/Min/Max/Absolute modes; S6",
+      "om9_summary": "Báo mesh estimate, không gắn nhãn exact NURBS measurement",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C08",
+      "capability": "EMap/environment reflection foundation",
+      "freecad": "Một phần",
+      "source_summary": "Std_TextureMapping` và `SoTextureCoordinateEnvironment`; S7 có UI execution",
+      "om9_summary": "OM9-RENDER-018` cần selection/lifecycle/options riêng, không thêm feature trùng",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C09",
+      "capability": "Zebra stripe analysis chuyên biệt",
+      "freecad": "Chưa thấy trong phạm vi rà",
+      "source_summary": "Tìm Zebra/reflection-line trong src Gui/Mod và shader/UI files; S7 chỉ là environment mapping foundation",
+      "om9_summary": "Stripe generation, density, overlay và G0/G1/G2 numeric companion",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C10",
+      "capability": "Draft-angle analysis chỉ đọc",
+      "freecad": "Một phần",
+      "source_summary": "Normal evaluation S4 có; PartDesign Draft S8 là modeling, chưa thấy dedicated analysis trong phạm vi rà",
+      "om9_summary": "Rust pull-direction/range/sign policy và display adapter",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C11",
+      "capability": "BRep fixing/sewing",
+      "freecad": "API",
+      "source_summary": "TopoShape::fix`, tolerance overload, `sewShape`; S2",
+      "om9_summary": "Clone before repair, deviation/atomic commit; không tự heal trong Check",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C12",
+      "capability": "RebuildEdges semantics Rhino",
+      "freecad": "Một phần",
+      "source_summary": "ShapeFix và pcurve access S2/S3 là primitives; chưa chứng minh cùng repair behavior",
+      "om9_summary": "Edge 3D–UV consistency operation và fixtures riêng",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C13",
+      "capability": "Mesh Evaluate and Repair",
+      "freecad": "UI+API",
+      "source_summary": "Mesh_Evaluation`, dialog check/repair modes, `MeshPy` solid/self-intersection; S9",
+      "om9_summary": "Chọn subset supported, preserve input/metadata và report mutations",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C14",
+      "capability": "Area/volume tích phân trên BRep",
+      "freecad": "API",
+      "source_summary": "BRepGProp::SurfaceProperties/VolumeProperties`; S10",
+      "om9_summary": "Precondition solid/orientation, density/units và sai số cho metal weight",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C15",
+      "capability": "Audit3dmFile archive-level",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "File này không audit thư viện archive backend hoặc host importer đầy đủ",
+      "om9_summary": "RCORE-10 phải thêm read-only archive audit contract/evidence",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-08.C16",
+      "capability": "Chứng nhận sản xuất/độ dày mọi loại model",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Validity/curvature/mesh checks không đủ chứng minh profile sản xuất",
+      "om9_summary": "Profile theo công nghệ, thresholds và fixtures nghiệp vụ riêng",
+      "spec_path": "08-analysis-repair.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-09.C01",
+      "capability": "Links object và subelement",
+      "freecad": "API",
+      "source_summary": "PropertyLink`, `PropertyLinkList`, `PropertyLinkSub` trong [PropertyLinks.h](../../../../../src/App/PropertyLinks.h).",
+      "om9_summary": "Đã thấy `Parents`, `SourceCurve`, `SourceCurves`; chưa phải schema chung mọi family.",
+      "spec_path": "09-history-dependencies.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-09.C02",
+      "capability": "Dependency/recompute",
+      "freecad": "UI+API",
+      "source_summary": "Document::recompute`, `DocumentObject::execute/mustExecute` trong [Document.h](../../../../../src/App/Document.h), [DocumentObject.h](../../../../../src/App/DocumentObject.h); `StdCmdRefresh` trong [CommandDoc.cpp](../../../../../src/Gui/CommandDoc.cpp).",
+      "om9_summary": "Join/Circle/Surface dùng native feature; cần thống nhất dirty/error policy.",
+      "spec_path": "09-history-dependencies.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-09.C03",
+      "capability": "Commit/abort/Undo/Redo",
+      "freecad": "API",
+      "source_summary": "openTransaction`, `commitTransaction`, `abortTransaction`, undo/redo trong [Document.cpp](../../../../../src/App/Document.cpp).",
+      "om9_summary": "Controller mở transaction; còn cần fixture nguyên tử xuyên family.",
+      "spec_path": "09-history-dependencies.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-09.C04",
+      "capability": "Record/Update/Lock/Clear kiểu Rhino",
+      "freecad": "Một phần",
+      "source_summary": "Host graph không tự cung cấp semantics Record một lệnh hoặc khóa child của Rhino.",
+      "om9_summary": "[HistoryController.cpp](../../../Gui/HistoryController.cpp) và `HistorySettings` có bốn option; cần mapping theo family.",
+      "spec_path": "09-history-dependencies.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-09.C05",
+      "capability": "Kiểm tra DAG/cycle",
+      "freecad": "API",
+      "source_summary": "testIfLinkDAGCompatible` trong [DocumentObject.h](../../../../../src/App/DocumentObject.h).",
+      "om9_summary": "Phải kiểm cả dependency placement và graph Rust; chưa kết luận mọi đường mutation đều từ chối cycle.",
+      "spec_path": "09-history-dependencies.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-09.C06",
+      "capability": "Identity subelement qua topology change",
+      "freecad": "Một phần",
+      "source_summary": "Link API có element-reference support trong [PropertyLinks.h](../../../../../src/App/PropertyLinks.h); không bảo đảm mọi OCCT edit giữ nghĩa của edge.",
+      "om9_summary": "Phải có unresolved policy; cần fixture đổi số/thứ tự edges.",
+      "spec_path": "09-history-dependencies.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-09.C07",
+      "capability": "Cold FCStd restore",
+      "freecad": "API",
+      "source_summary": "Save/Restore`, `afterRestore` trong [Document.cpp](../../../../../src/App/Document.cpp).",
+      "om9_summary": "onDocumentRestored` có ở các native History classes; chưa chạy restore lần này.",
+      "spec_path": "09-history-dependencies.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-09.C08",
+      "capability": "Theo dõi placement hierarchy",
+      "freecad": "Một phần",
+      "source_summary": "Native document properties/links và notification là nền.",
+      "om9_summary": "PlacementSources` hidden và refresh hook trong [HistoryFeature.h](../../../Gui/HistoryFeature.h), [SurfaceHistory.h](../../../Gui/SurfaceHistory.h).",
+      "spec_path": "09-history-dependencies.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-09.C09",
+      "capability": "Sửa child/xóa parent có policy",
+      "freecad": "Một phần",
+      "source_summary": "Host cho feature xử lý lost link/execute failure; không áp một policy Rhino chung.",
+      "om9_summary": "detachObjectHistory`, `breakHistoryForEdit`, `onLostLinkToObject` có slice; cần audit từng command gọi.",
+      "spec_path": "09-history-dependencies.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-09.C10",
+      "capability": "Schema command version/units/frame chung",
+      "freecad": "Chưa thấy trong phạm vi rà",
+      "source_summary": "Rà App links/transactions không thấy schema OM9/Rhino ở lớp host.",
+      "om9_summary": "Các field hiện phân tán theo family; cần schema version và migration.",
+      "spec_path": "09-history-dependencies.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-09.C11",
+      "capability": "Toàn bộ Matrix Builder/Styles History",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Graph FreeCAD không phải bằng chứng phục dựng builder độc quyền.",
+      "om9_summary": "Join/Surface/Circle chưa chứng minh mọi builder, Style hoặc plugin.",
+      "spec_path": "09-history-dependencies.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-10.C01",
+      "capability": "FCStd model persistence",
+      "freecad": "UI+API",
+      "source_summary": "[Document.cpp](../../../../../src/App/Document.cpp): `saveAs`, `Save`, `Restore`, `Document.xml`; [CommandDoc.cpp](../../../../../src/Gui/CommandDoc.cpp): `StdCmdSave/StdCmdSaveAs`.",
+      "om9_summary": "Cần native property serialization cho schema OM9 và cold reload fixture.",
+      "spec_path": "10-persistence-3dm-clipboard.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-10.C02",
+      "capability": "GUI state/object appearance persistence",
+      "freecad": "API",
+      "source_summary": "[Gui Document.cpp](../../../../../src/Gui/Document.cpp): `Save`, `Restore`, `exportObjects`, `importObjects`.",
+      "om9_summary": "Appearance/selection transient phải phân biệt field cần lưu.",
+      "spec_path": "10-persistence-3dm-clipboard.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-10.C03",
+      "capability": "Object clipboard FreeCAD",
+      "freecad": "UI+API",
+      "source_summary": "[CommandDoc.cpp](../../../../../src/Gui/CommandDoc.cpp): `StdCmdCopy/StdCmdPaste`; [MainWindow.cpp](../../../../../src/Gui/MainWindow.cpp): MIME/export/import.",
+      "om9_summary": "Có thể tái dùng host transaction; không chứng minh Rhino binary clipboard.",
+      "spec_path": "10-persistence-3dm-clipboard.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-10.C04",
+      "capability": "Clipboard Rhino hai chiều",
+      "freecad": "Chưa thấy trong phạm vi rà",
+      "source_summary": "Rà CmdCopy/Paste và MainWindow MIME chỉ thấy protocol host, URL/image.",
+      "om9_summary": "Rà `Gui`/`rust/src` chỉ thấy clipboard text ở CommandConsole; chưa thấy geometry protocol Rhino trong phạm vi đó.",
+      "spec_path": "10-persistence-3dm-clipboard.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-10.C05",
+      "capability": "STEP/IGES làm exchange native",
+      "freecad": "API",
+      "source_summary": "[ImportStep.cpp](../../../../../src/Mod/Part/App/ImportStep.cpp), [ImportIges.cpp](../../../../../src/Mod/Part/App/ImportIges.cpp): OCCT readers.",
+      "om9_summary": "Không dùng sự có mặt của các reader này để đánh dấu 3DM native.",
+      "spec_path": "10-persistence-3dm-clipboard.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-10.C06",
+      "capability": "Đọc/ghi geometry 3DM",
+      "freecad": "Chưa thấy trong phạm vi rà",
+      "source_summary": "Không thấy openNURBS ở các entry Part exchange vừa rà.",
+      "om9_summary": "[ThreeDmArchive.cpp](../../../Gui/ThreeDmArchive.cpp): `readArchive`, `writeArchive5`; actual runtime chưa chạy.",
+      "spec_path": "10-persistence-3dm-clipboard.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-10.C07",
+      "capability": "Units 3DM và block flatten",
+      "freecad": "Một phần",
+      "source_summary": "Host placement/shape có nền; không tự hiểu units/definition 3DM.",
+      "om9_summary": "Reader xử lý scale mm, nested blocks, cycle/missing/singular errors; cần fixture số.",
+      "spec_path": "10-persistence-3dm-clipboard.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-10.C08",
+      "capability": "Inventory/immutable source retention",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "FCStd có khả năng lưu properties/files; chưa kiểm preservation 3DM trong host chuẩn.",
+      "om9_summary": "[ThreeDmPython.cpp](../../../Gui/ThreeDmPython.cpp): `prepare3dmArchive`; [core_3dm_archive.rs](../../../rust/src/core_3dm_archive.rs) có identity/export policy.",
+      "spec_path": "10-persistence-3dm-clipboard.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-10.C09",
+      "capability": "Current-state merged preservation export",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Không suy từ native save.",
+      "om9_summary": "[ThreeDm.py](../../../ThreeDm.py) có chặn legacy export khi retained/preserved data có thể bị bỏ; chưa chứng minh merged writer đầy đủ.",
+      "spec_path": "10-persistence-3dm-clipboard.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-10.C10",
+      "capability": "Geometry-only export có thông báo mất dữ liệu",
+      "freecad": "Một phần",
+      "source_summary": "Host exchange là theo format riêng; cần contract OM9.",
+      "om9_summary": "export_file` có `geometry_only` và warning; `writeArchive5` từ chối retained record.",
+      "spec_path": "10-persistence-3dm-clipboard.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-10.C11",
+      "capability": "Atomic paste/import + Undo",
+      "freecad": "API",
+      "source_summary": "App document transaction và object import/export.",
+      "om9_summary": "Python chuẩn bị trước native commit; cần kiểm failure từng phase và Redo.",
+      "spec_path": "10-persistence-3dm-clipboard.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-10.C12",
+      "capability": "Rhino 5 mở/edit + FCStd cold reload",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Source/API không chứng minh binary đang chạy.",
+      "om9_summary": "Bằng chứng checkout khác không chuyển thành pass cho checkout này.",
+      "spec_path": "10-persistence-3dm-clipboard.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-11.C01",
+      "capability": "Model dimensions",
+      "freecad": "UI+API",
+      "source_summary": "[make_dimension.py](../../../../../src/Mod/Draft/draftmake/make_dimension.py) có linear/radial/angular; [gui_dimensions.py](../../../../../src/Mod/Draft/draftguitools/gui_dimensions.py) có GUI.",
+      "om9_summary": "Cần mapping exact kind/selection/options của MEASURE specs.",
+      "spec_path": "11-annotation-layout-print.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-11.C02",
+      "capability": "Associative/projected dimensions",
+      "freecad": "UI+API",
+      "source_summary": "[DrawViewDimension.cpp](../../../../../src/Mod/TechDraw/App/DrawViewDimension.cpp): `References2D/3D`, `MeasureType`, `FormatSpec`; [CommandCreateDims.cpp](../../../../../src/Mod/TechDraw/Gui/CommandCreateDims.cpp): dimension commands.",
+      "om9_summary": "Phải tách snapshot và History, không mặc định mọi dimension associative.",
+      "spec_path": "11-annotation-layout-print.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-11.C03",
+      "capability": "Annotation styles",
+      "freecad": "UI+API",
+      "source_summary": "[gui_annotationstyleeditor.py](../../../../../src/Mod/Draft/draftguitools/gui_annotationstyleeditor.py): style metadata/editor.",
+      "om9_summary": "Cần schema units/font/scale và style IDs chung với page dimension.",
+      "spec_path": "11-annotation-layout-print.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-11.C04",
+      "capability": "Text và leader",
+      "freecad": "API",
+      "source_summary": "[make_text.py](../../../../../src/Mod/Draft/draftmake/make_text.py), [make_label.py](../../../../../src/Mod/Draft/draftmake/make_label.py) có text/leader data.",
+      "om9_summary": "Adapter phải giữ font fallback, text override và history policy.",
+      "spec_path": "11-annotation-layout-print.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-11.C05",
+      "capability": "Dot cỡ màn hình đúng Rhino",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Draft có text/screen option; chưa đối chiếu đủ Dot size/pick/color/persistence.",
+      "om9_summary": "Cần contract riêng, không bật từ tên Text/Label.",
+      "spec_path": "11-annotation-layout-print.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-11.C06",
+      "capability": "HLR/projection geometry",
+      "freecad": "API",
+      "source_summary": "[GeometryObject.cpp](../../../../../src/Mod/TechDraw/App/GeometryObject.cpp): `projectShape`, polygon HLR; [ProjectionAlgos.cpp](../../../../../src/Mod/TechDraw/App/ProjectionAlgos.cpp).",
+      "om9_summary": "Dùng được làm solver candidate; cần frame/layer/option wrapper Make2D.",
+      "spec_path": "11-annotation-layout-print.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-11.C07",
+      "capability": "Trang, template và scale",
+      "freecad": "UI+API",
+      "source_summary": "[DrawPage.cpp](../../../../../src/Mod/TechDraw/App/DrawPage.cpp): `Template`, `Scale`, `KeepUpdated`; [DrawView.cpp](../../../../../src/Mod/TechDraw/App/DrawView.cpp): ScaleType; [Command.cpp](../../../../../src/Mod/TechDraw/Gui/Command.cpp): PageDefault/PageTemplate.",
+      "om9_summary": "Layout Tools đã có spec, adapter runtime riêng chưa được xác minh.",
+      "spec_path": "11-annotation-layout-print.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-11.C08",
+      "capability": "Camera/projection/hidden edges trên drawing view",
+      "freecad": "API",
+      "source_summary": "[DrawViewPart.cpp](../../../../../src/Mod/TechDraw/App/DrawViewPart.cpp): Direction, XDirection, Perspective, Smooth/Seam/HardHidden.",
+      "om9_summary": "Không đồng nhất drawing projection với live Rhino Detail.",
+      "spec_path": "11-annotation-layout-print.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-11.C09",
+      "capability": "Khóa pan/zoom live Detail",
+      "freecad": "Một phần",
+      "source_summary": "DrawView::LockPosition` khóa page position; nguồn này không chứng minh khóa camera tương đương Rhino Detail.",
+      "om9_summary": "Cần detail interaction state/scale lock riêng và nghiệm thu.",
+      "spec_path": "11-annotation-layout-print.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-11.C10",
+      "capability": "PDF/print theo paper size",
+      "freecad": "UI+API",
+      "source_summary": "[PagePrinter.cpp](../../../../../src/Mod/TechDraw/Gui/PagePrinter.cpp): `makePageLayout`, `printAll`, `printAllPdf`; [MDIViewPage.cpp](../../../../../src/Mod/TechDraw/Gui/MDIViewPage.cpp): print UI.",
+      "om9_summary": "Cần kiểm 20 mm tại scale 2:1 cho output 40 mm và driver thực.",
+      "spec_path": "11-annotation-layout-print.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-11.C11",
+      "capability": "Layout image/reference resources",
+      "freecad": "Một phần",
+      "source_summary": "Host image objects và drawing page có nền riêng.",
+      "om9_summary": "[CorePictureFrame.cpp](../../../Gui/CorePictureFrame.cpp) tạo ImagePlane; chưa chứng minh full layout resources.",
+      "spec_path": "11-annotation-layout-print.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-11.C12",
+      "capability": "Roundtrip Rhino annotations/layout",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Native FCStd/TechDraw serialization không là 3DM annotation writer.",
+      "om9_summary": "3DM retained records không chứng minh editable/exported layout.",
+      "spec_path": "11-annotation-layout-print.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-12.C01",
+      "capability": "Wireframe/Shaded/Flat Lines/Points",
+      "freecad": "UI+API",
+      "source_summary": "[ViewProviderExt.cpp](../../../../../src/Mod/Part/Gui/ViewProviderExt.cpp): `setDisplayMode/getDisplayModes`; [CommandView.cpp](../../../../../src/Gui/CommandView.cpp): `StdCmdDrawStyle`.",
+      "om9_summary": "[CoreWorkspace.cpp](../../../Gui/CoreWorkspace.cpp): `displayTitle/reconcileDisplay` có wire/shaded integration.",
+      "spec_path": "12-display-render-resources.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-12.C02",
+      "capability": "Tessellation density",
+      "freecad": "API",
+      "source_summary": "Deviation`, `AngularDeflection`, `updateVisual` trong [ViewProviderExt.cpp](../../../../../src/Mod/Part/Gui/ViewProviderExt.cpp); chưa rà UI editor của hai thuộc tính này.",
+      "om9_summary": "Cần capability/tolerance tách modeling; chưa chạy invariant geometry.",
+      "spec_path": "12-display-render-resources.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-12.C03",
+      "capability": "Invalidation khi shape đổi",
+      "freecad": "API",
+      "source_summary": "updateData` kiểm Shape/Touched; object ẩn dùng `VisualTouched`.",
+      "om9_summary": "Nền có sẵn; cần generation/cache keys cho async OM9 và Undo/Redo.",
+      "spec_path": "12-display-render-resources.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-12.C04",
+      "capability": "Color/material/transparency display",
+      "freecad": "UI+API",
+      "source_summary": "[ViewProviderGeometryObject.cpp](../../../../../src/Gui/ViewProviderGeometryObject.cpp): appearance/SoMaterial; [PropertyItem.cpp](../../../../../src/Gui/PropertyEditor/PropertyItem.cpp): `PropertyMaterialItem`; [TaskAppearance.cpp](../../../../../src/Gui/TaskView/TaskAppearance.cpp): transparency UI.",
+      "om9_summary": "Chưa chứng minh mapping mọi Rhino material/shader/texture.",
+      "spec_path": "12-display-render-resources.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-12.C05",
+      "capability": "Camera và viewport lighting",
+      "freecad": "API",
+      "source_summary": "[View3DInventorViewer.cpp](../../../../../src/Gui/View3DInventorViewer.cpp): `setCamera`, `setCameraType`, headlight.",
+      "om9_summary": "Cần scene light persistence riêng; headlight không là đủ light workflow.",
+      "spec_path": "12-display-render-resources.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-12.C06",
+      "capability": "Camera/GUI persistence",
+      "freecad": "API",
+      "source_summary": "[Gui Document.cpp](../../../../../src/Gui/Document.cpp): `Save/Restore`, camera settings.",
+      "om9_summary": "Per-view OM9 mode/frame persistence cần fixture; không suy từ camera host duy nhất.",
+      "spec_path": "12-display-render-resources.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-12.C07",
+      "capability": "Viewport image export",
+      "freecad": "UI+API",
+      "source_summary": "[CommandView.cpp](../../../../../src/Gui/CommandView.cpp): saveImage command; [View3DInventorViewer.cpp](../../../../../src/Gui/View3DInventorViewer.cpp): `savePicture`.",
+      "om9_summary": "Là capture path; chưa phải renderer production tương thích Rhino.",
+      "spec_path": "12-display-render-resources.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-12.C08",
+      "capability": "Reference image/PictureFrame",
+      "freecad": "Một phần",
+      "source_summary": "Native ImagePlane được OM9 adapter gọi.",
+      "om9_summary": "[CorePictureFrame.cpp](../../../Gui/CorePictureFrame.cpp) + [core_picture_frame.rs](../../../rust/src/core_picture_frame.rs) có placement/preview/transaction; missing/relink policy cần mở rộng.",
+      "spec_path": "12-display-render-resources.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-12.C09",
+      "capability": "Environment/ground plane/light editor parity",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Các file Gui/Part vừa rà chưa chứng minh pipeline Rhino scene tương đương.",
+      "om9_summary": "Cần backend mapping riêng và field-level support table, không suy từ RenderLight retained.",
+      "spec_path": "12-display-render-resources.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-12.C10",
+      "capability": "EMap/analysis display",
+      "freecad": "Một phần",
+      "source_summary": "[TextureMapping.cpp](../../../../../src/Gui/TextureMapping.cpp): `SoTextureCoordinateEnvironment`, `onCheckEnvToggled`; [CommandView.cpp](../../../../../src/Gui/CommandView.cpp): `Std_TextureMapping`.",
+      "om9_summary": "OM9-RENDER-018 có spec; host có environment mapping, parity EMap và continuity fixtures chưa kiểm.",
+      "spec_path": "12-display-render-resources.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-12.C11",
+      "capability": "V-Ray/Clayoo/T-Splines runtime",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Không audit add-on/plugin ngoài phạm vi source đã chọn.",
+      "om9_summary": "Menu/catalog không chứng minh installation, license, ABI hoặc supported rendering.",
+      "spec_path": "12-display-render-resources.md",
+      "runtime_validation": "not_run"
+    },
+    {
+      "id": "RCORE-12.C12",
+      "capability": "Async render budget/cancel/cleanup",
+      "freecad": "Chưa kiểm chứng",
+      "source_summary": "Lifecycle hooks/view refs là nền; chưa kiểm toàn pipeline job.",
+      "om9_summary": "Cần Rust scheduler và stale-result tests xuyên preview/mesh/render/import.",
+      "spec_path": "12-display-render-resources.md",
+      "runtime_validation": "not_run"
+    }
+  ],
+  "decompile_details_date": "2026-10-09",
+  "ui_details_path": "UI_DETAILS.md",
+  "ui_fixture_ids": [
+    "DUI-T01",
+    "DUI-T02",
+    "DUI-T03",
+    "DUI-T04",
+    "DUI-T05",
+    "DUI-T06",
+    "DUI-T07",
+    "DUI-T08",
+    "DUI-T09",
+    "DUI-T10",
+    "DUI-T11"
+  ],
+  "source_audit_baseline": {
+    "date": "2026-10-09",
+    "evidence_level": "source_inspected",
+    "runtime_validation": "not_run"
+  },
+  "implementation_checkpoint": {
+    "date": "2026-10-09",
+    "status": "partially_implemented",
+    "report": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
+    "scope": "Bounded P0 foundations only. Original capability rows are source-audit claims; not_run on a row means its complete acceptance has not been established. See the report for actual assertions and remaining requirements."
+  }
+}

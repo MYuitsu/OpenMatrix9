@@ -1,0 +1,1843 @@
+{
+  "schema_version": 1,
+  "index_date": "2026-10-09",
+  "target": "Rhino 5 for Windows as shared CAD behavior underlying Matrix workflows",
+  "scope": "Reading and verification map only; not a command catalog, solver specification, implementation status authority or proof of parity.",
+  "path_base": "All relative file paths resolve from this ref/rhino5 directory.",
+  "source": {
+    "local_pdf": "windows_pdf_user_s_guide.pdf",
+    "metadata_path": "SOURCES.json",
+    "title": "Rhinoceros 5 for Windows - User's Guide",
+    "metadata_title": "Rhino 5 User's Guide (Windows)",
+    "author": "Robert McNeel & Associates",
+    "source_date": "2016-11-30",
+    "original_copyright_notice": "© Robert McNeel & Associates, 11/30/2016.",
+    "page_count": 284,
+    "bytes": 13533999,
+    "sha256": "f42df0ecced753d98afcf93c5442597fe842df75efb03b321170e11790fa84ce",
+    "official_pdf_url": "https://docs.mcneel.com/rhino/5/usersguide/en-us/windows_pdf_user_s_guide.pdf",
+    "official_html_url": "https://docs.mcneel.com/rhino/5/usersguide/en-us/html/webtitlepage.htm",
+    "notices": "The unmodified PDF retains its original source notices. Public availability is not a new open-source license; it is not relabeled under the project license."
+  },
+  "page_numbering": {
+    "pdf": "1-based physical PDF page number",
+    "printed": "Printed Arabic body page number where present; observed body relation printed = PDF - 8",
+    "front_matter": "PDF 1 title/copyright; PDF 3-7 contents printed iii-vii; blank separator pages have no printed body footer."
+  },
+  "verification": {
+    "guide": {
+      "date": "2026-10-09",
+      "method": "Bundled pypdf 6.10.0 extraction; contents, headings, native hyperlink targets and printed footers checked. Selected prose anchors reviewed; Poppler render/view for listed visual pages.",
+      "front_matter_pdf_pages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "heading_and_footer_verified_pdf_ranges": [
+        {
+          "start": 11,
+          "end": 23
+        },
+        {
+          "start": 25,
+          "end": 31
+        },
+        {
+          "start": 33,
+          "end": 43
+        },
+        {
+          "start": 45,
+          "end": 51
+        },
+        {
+          "start": 53,
+          "end": 67
+        },
+        {
+          "start": 69,
+          "end": 71
+        },
+        {
+          "start": 73,
+          "end": 91
+        },
+        {
+          "start": 93,
+          "end": 104
+        },
+        {
+          "start": 281,
+          "end": 284
+        }
+      ],
+      "selected_prose_review_pdf_pages": [
+        11,
+        12,
+        21,
+        22,
+        23,
+        25,
+        26,
+        27,
+        29,
+        30,
+        31,
+        33,
+        34,
+        37,
+        39,
+        40,
+        43,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        53,
+        54,
+        56,
+        57,
+        60,
+        64,
+        66,
+        69,
+        70,
+        71,
+        73,
+        81,
+        85,
+        88,
+        91,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        281,
+        282,
+        283,
+        284
+      ],
+      "visually_reviewed_pdf_pages": [
+        50,
+        95,
+        98,
+        283
+      ],
+      "limits": "Page location verification and selected reading only. No exhaustive tutorial, command-option/default, API or solver audit."
+    },
+    "web": {
+      "date": "2026-10-09",
+      "method": "Web reader open/click results; content_returned means page identity/content was accessible, not HTTP live-download verification or a complete behavior/default audit.",
+      "html_guide_result": "content_returned",
+      "official_pdf_download_verification": "See SOURCES.json for independently checked official-download bytes/hash; not inferred from web-reader HTML success.",
+      "help_url_count": 50,
+      "help_url_content_returned_count": 44,
+      "help_url_fetch_failed_count": 6
+    },
+    "runtime": {
+      "rhino5": "not_run_for_this_reference_index",
+      "freecad_om9": "not_run_for_this_reference_index",
+      "existing_checkpoint": "../../docs/validation/2026-10-09-rhino-core-p0.md",
+      "rule": "Existing bounded P0/native results remain authoritative only for their stated slice; this source index neither resets them to not_run nor upgrades remaining fixtures to pass."
+    }
+  },
+  "mandatory_workflow": [
+    "Select the exact RCORE capability and existing OM9 feature ID; read the current chapter/checkpoint and this index read_next before editing behavior.",
+    "Read the mapped local guide pages, then the exact Rhino 5 command/variant help (F1 during the command or Command Help Auto-Update, PDF 23 / printed 15). For units, History and 3DM use dedicated help/API and native fixtures; guide overview is insufficient.",
+    "Record Rhino 5 Windows SR/build, template, document/model/page units, absolute/relative/angular tolerances, options/default source, pre/postselection, CPlane/view, settings and plugin context. Explicit options, template defaults and current saved settings are distinct.",
+    "Separate source_verified facts (source/version/page or URL and observed contract), fixture_observed behavior (binary/input/results) and OM9_decision (chosen policy/threshold/migration). An unknown default stays unresolved until verified or explicitly chosen as OM9 policy.",
+    "Compare the current FreeCAD native UI/API/backend and OM9 adapter ownership/lifecycle against that exact contract. Reuse a primitive only when supported input/type/options/error/transaction semantics meet the slice; API existence is not parity.",
+    "Run representative Rhino 5 and FreeCAD/OM9 native fixtures with the same input and recorded context; measure geometry/topology/units/state, cancellation, Undo/Redo and persistence as relevant. Keep failures, unsupported/skipped/not_run and evidence gaps explicit. Update acceptance/status only to the scope actually demonstrated."
+  ],
+  "evidence_types": {
+    "source_verified": "Guide/help/API location and version support a stated fact; this alone does not show implementation or solver equivalence.",
+    "fixture_observed": "Native run in a named binary and input/context, with measured outcomes and assertion coverage.",
+    "OM9_decision": "Deliberate implementation choice, priority, bound, error policy, ownership or migration; do not attribute it to Rhino without a source/fixture."
+  },
+  "counts": {
+    "chapters": 12,
+    "capabilities": 148,
+    "acceptance_fixtures": 155,
+    "ui_fixtures": 11,
+    "counts_meaning": "Copied ID coverage from current CAPABILITY_LOOKUP; counts are navigation/backlog counts, not completion percentages."
+  },
+  "companion_paths": {
+    "chapter_readme": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/README.md",
+    "capability_lookup": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+    "source_audit": "../../docs/reviews/2026-10-09-rhino-core-gap-audit.md",
+    "p0_checkpoint": "../../docs/validation/2026-10-09-rhino-core-p0.md"
+  },
+  "supplemental_official_references": [
+    {
+      "title": "What is openNURBS?",
+      "url": "https://developer.rhino3d.com/guides/opennurbs/what-is-opennurbs/",
+      "kind": "official_API_scope_guide",
+      "version_scope": "General openNURBS scope, not a Rhino 5 modeling/default specification",
+      "url_accessibility": {
+        "checked_date": "2026-10-09",
+        "result": "content_returned"
+      },
+      "read_for": "3DM interchange/library scope; obtaining openNURBS is not obtaining the Rhino modeling kernel."
+    }
+  ],
+  "chapters": [
+    {
+      "id": "RCORE-01",
+      "title": "Kiểu đối tượng và ranh giới kernel",
+      "priority": "P0",
+      "spec_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
+      "guide_pdf_ranges": [
+        {
+          "start": 25,
+          "end": 31,
+          "printed_start": 17,
+          "printed_end": 23,
+          "topic": "Rhino Objects: NURBS, trims, polysurfaces, solids, lightweight extrusions, meshes",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        }
+      ],
+      "guide_coverage": "overview_only",
+      "help_references": [
+        {
+          "label": "ExtrudeCrv",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/extrudecrv.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Mesh",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/mesh.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        }
+      ],
+      "capability_lookup_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "capability_ids": [
+        "RCORE-01.C01",
+        "RCORE-01.C02",
+        "RCORE-01.C03",
+        "RCORE-01.C04",
+        "RCORE-01.C05",
+        "RCORE-01.C06",
+        "RCORE-01.C07",
+        "RCORE-01.C08",
+        "RCORE-01.C09",
+        "RCORE-01.C10",
+        "RCORE-01.C11",
+        "RCORE-01.C12"
+      ],
+      "fixture_ids": [
+        "RCORE-01.T01",
+        "RCORE-01.T02",
+        "RCORE-01.T03",
+        "RCORE-01.T04",
+        "RCORE-01.T05",
+        "RCORE-01.T06",
+        "RCORE-01.T07",
+        "RCORE-01.T08",
+        "RCORE-01.T09",
+        "RCORE-01.T10",
+        "RCORE-01.T11"
+      ],
+      "status_snapshot": {
+        "snapshot_date": "2026-10-09",
+        "authority": "CAPABILITY_LOOKUP.json chapter runtime_validation; original capability rows remain source-audit records",
+        "runtime_validation": "partial_native_validation",
+        "checkpoint_report": "../../docs/validation/2026-10-09-rhino-core-p0.md",
+        "fixture_parity": "not_claimed_by_reference_index"
+      },
+      "read_next": [
+        "Đọc representation trong Guide trước; chọn operation × input/output type trong chương 01, rồi đọc exact command help và API backend tương ứng.",
+        "Read the current capability row, source symbols and P0 checkpoint before interpreting baseline source_inspected/not_run."
+      ],
+      "verify": {
+        "representative_fixture_ids": [
+          "RCORE-01.T01",
+          "RCORE-01.T02",
+          "RCORE-01.T03",
+          "RCORE-01.T04"
+        ],
+        "compare": "Đối chiếu rational arc, face có lỗ, mặt trụ mở và CAD kèm mesh. Đo locus/weights, trim/area, closedness và representation trước-sau; preview/commit phải cùng contract.",
+        "record": [
+          "Rhino 5 Windows exact SR/build, template, model/page units, tolerances, saved settings and plugins",
+          "FreeCAD binary/modules/backend and OM9 working-tree hashes",
+          "Exact command/variant/options, pre/postselection, CPlane/view/frame and input geometry",
+          "Expected vs observed measurements and errors; Undo/Redo, cancel, persistence and stale job outcomes as applicable"
+        ],
+        "parity_gate": "Run the relevant representative fixtures in Rhino 5 and native FreeCAD/OM9, and close the full acceptance scope before claiming that scope as parity. This index does not execute or pass fixtures."
+      },
+      "evidence_gap": "Không suy kernel intersection/Boolean/refit hoặc bảo toàn parameterization từ guide/openNURBS, render mesh hay tên BRep."
+    },
+    {
+      "id": "RCORE-02",
+      "title": "Units, tolerance và độ chính xác",
+      "priority": "P0",
+      "spec_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/02-units-tolerances.md",
+      "guide_pdf_ranges": [],
+      "guide_coverage": "no_full_units_tolerance_contract_in_indexed_guide_sections",
+      "help_references": [
+        {
+          "label": "Units properties",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/documentproperties/units.htm",
+          "kind": "document_property_topic",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        }
+      ],
+      "capability_lookup_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "capability_ids": [
+        "RCORE-02.C01",
+        "RCORE-02.C02",
+        "RCORE-02.C03",
+        "RCORE-02.C04",
+        "RCORE-02.C05",
+        "RCORE-02.C06",
+        "RCORE-02.C07",
+        "RCORE-02.C08",
+        "RCORE-02.C09",
+        "RCORE-02.C10",
+        "RCORE-02.C11",
+        "RCORE-02.C12"
+      ],
+      "fixture_ids": [
+        "RCORE-02.T01",
+        "RCORE-02.T02",
+        "RCORE-02.T03",
+        "RCORE-02.T04",
+        "RCORE-02.T05",
+        "RCORE-02.T06",
+        "RCORE-02.T07",
+        "RCORE-02.T08",
+        "RCORE-02.T09",
+        "RCORE-02.T10",
+        "RCORE-02.T11",
+        "RCORE-02.T12",
+        "RCORE-02.T13"
+      ],
+      "status_snapshot": {
+        "snapshot_date": "2026-10-09",
+        "authority": "CAPABILITY_LOOKUP.json chapter runtime_validation; original capability rows remain source-audit records",
+        "runtime_validation": "partial_native_validation",
+        "checkpoint_report": "../../docs/validation/2026-10-09-rhino-core-p0.md",
+        "fixture_parity": "not_claimed_by_reference_index"
+      },
+      "read_next": [
+        "Đọc Units properties trước và chapter 02 context; lấy units/tolerance từ document/template cụ thể trong Rhino 5, rồi xem API host cho scale/tolerance của đúng operation.",
+        "Read the current capability row, source symbols and P0 checkpoint before interpreting baseline source_inspected/not_run."
+      ],
+      "verify": {
+        "representative_fixture_ids": [
+          "RCORE-02.T01",
+          "RCORE-02.T02",
+          "RCORE-02.T03",
+          "RCORE-02.T04",
+          "RCORE-02.T13"
+        ],
+        "compare": "So mm/inch và đổi precision; thử endpoint gap quanh τ cho đúng Join variant; đo geometry/context/Undo khi đổi units ở từng scale mode. Không áp rule Join cho mọi solver.",
+        "record": [
+          "Rhino 5 Windows exact SR/build, template, model/page units, tolerances, saved settings and plugins",
+          "FreeCAD binary/modules/backend and OM9 working-tree hashes",
+          "Exact command/variant/options, pre/postselection, CPlane/view/frame and input geometry",
+          "Expected vs observed measurements and errors; Undo/Redo, cancel, persistence and stale job outcomes as applicable"
+        ],
+        "parity_gate": "Run the relevant representative fixtures in Rhino 5 and native FreeCAD/OM9, and close the full acceptance scope before claiming that scope as parity. This index does not execute or pass fixtures."
+      },
+      "evidence_gap": "Guide/layout tutorial không định nghĩa shared tolerance context. Default tài liệu help, template, setting hiện tại và ngưỡng solver OM9 phải ghi riêng."
+    },
+    {
+      "id": "RCORE-03",
+      "title": "Tọa độ, parser điểm và CPlane",
+      "priority": "P0",
+      "spec_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/03-coordinates-cplanes.md",
+      "guide_pdf_ranges": [
+        {
+          "start": 39,
+          "end": 43,
+          "printed_start": 31,
+          "printed_end": 35,
+          "topic": "Navigating Viewports",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        },
+        {
+          "start": 49,
+          "end": 51,
+          "printed_start": 41,
+          "printed_end": 43,
+          "topic": "Coordinate systems, CPlane x,y[,z], relative coordinates",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        }
+      ],
+      "guide_coverage": "overview_and_explicit_coordinate_examples",
+      "help_references": [
+        {
+          "label": "CPlane",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/cplane.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "NamedCPlane",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/namedcplane.htm",
+          "kind": "command_help",
+          "url_provenance": "official_CPlane_help_link",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "fetch_failed_cache_miss"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Cursor constraints / coordinate entry",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/user_interface/cursor_constraints.htm",
+          "kind": "input_topic",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        }
+      ],
+      "capability_lookup_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "capability_ids": [
+        "RCORE-03.C01",
+        "RCORE-03.C02",
+        "RCORE-03.C03",
+        "RCORE-03.C04",
+        "RCORE-03.C05",
+        "RCORE-03.C06",
+        "RCORE-03.C07",
+        "RCORE-03.C08",
+        "RCORE-03.C09",
+        "RCORE-03.C10"
+      ],
+      "fixture_ids": [
+        "RCORE-03.T01",
+        "RCORE-03.T02",
+        "RCORE-03.T03",
+        "RCORE-03.T04",
+        "RCORE-03.T05",
+        "RCORE-03.T06",
+        "RCORE-03.T07",
+        "RCORE-03.T08",
+        "RCORE-03.T09",
+        "RCORE-03.T10",
+        "RCORE-03.T11",
+        "RCORE-03.T12"
+      ],
+      "status_snapshot": {
+        "snapshot_date": "2026-10-09",
+        "authority": "CAPABILITY_LOOKUP.json chapter runtime_validation; original capability rows remain source-audit records",
+        "runtime_validation": "partial_native_validation",
+        "checkpoint_report": "../../docs/validation/2026-10-09-rhino-core-p0.md",
+        "fixture_parity": "not_claimed_by_reference_index"
+      },
+      "read_next": [
+        "Đọc PDF 50 / in 42 và Cursor constraints trước; kiểm grammar với CPlane dịch/xoay. Chọn latch/revision theo family và đọc checkpoint mới trước khi sửa parser.",
+        "Read the current capability row, source symbols and P0 checkpoint before interpreting baseline source_inspected/not_run."
+      ],
+      "verify": {
+        "representative_fixture_ids": [
+          "RCORE-03.T01",
+          "RCORE-03.T02",
+          "RCORE-03.T03",
+          "RCORE-03.T04",
+          "RCORE-03.T08"
+        ],
+        "compare": "Dùng O=(10,20,30), X=(0,1,0), Y=(0,0,1), Z=(1,0,0): 1,2,3 phải đo world (13,21,32); thử w/r/wr với previous point reset, đổi view trước/sau first pick và lưu binary/source hash.",
+        "record": [
+          "Rhino 5 Windows exact SR/build, template, model/page units, tolerances, saved settings and plugins",
+          "FreeCAD binary/modules/backend and OM9 working-tree hashes",
+          "Exact command/variant/options, pre/postselection, CPlane/view/frame and input geometry",
+          "Expected vs observed measurements and errors; Undo/Redo, cancel, persistence and stale job outcomes as applicable"
+        ],
+        "parity_gate": "Run the relevant representative fixtures in Rhino 5 and native FreeCAD/OM9, and close the full acceptance scope before claiming that scope as parity. This index does not execute or pass fixtures."
+      },
+      "evidence_gap": "Guide xác nhận x,y và x,y,z theo CPlane; không dùng native record Circle cũ để kết luận binary hiện tại dùng world XYZ. UI CPlane còn pending theo checkpoint."
+    },
+    {
+      "id": "RCORE-04",
+      "title": "Command engine và vòng đời tương tác",
+      "priority": "P0",
+      "spec_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/04-command-engine.md",
+      "guide_pdf_ranges": [
+        {
+          "start": 11,
+          "end": 23,
+          "printed_start": 3,
+          "printed_end": 15,
+          "topic": "Interface, menu/toolbars/command prompt, options, Undo/Redo/repeat/help",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        }
+      ],
+      "guide_coverage": "interaction_overview",
+      "help_references": [
+        {
+          "label": "Undo / Redo",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/undo.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Aliases",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/options/aliases.htm",
+          "kind": "options_topic",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Rhino scripting / command macros",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/information/rhinoscripting.htm",
+          "kind": "scripting_topic",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Enter key",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/popup_actions/enter_key.htm",
+          "kind": "input_topic",
+          "url_provenance": "PDF_p22_native_link",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "fetch_failed_cache_miss"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        }
+      ],
+      "capability_lookup_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "capability_ids": [
+        "RCORE-04.C01",
+        "RCORE-04.C02",
+        "RCORE-04.C03",
+        "RCORE-04.C04",
+        "RCORE-04.C05",
+        "RCORE-04.C06",
+        "RCORE-04.C07",
+        "RCORE-04.C08",
+        "RCORE-04.C09",
+        "RCORE-04.C10",
+        "RCORE-04.C11"
+      ],
+      "fixture_ids": [
+        "RCORE-04.T01",
+        "RCORE-04.T02",
+        "RCORE-04.T03",
+        "RCORE-04.T04",
+        "RCORE-04.T05",
+        "RCORE-04.T06",
+        "RCORE-04.T07",
+        "RCORE-04.T08",
+        "RCORE-04.T09",
+        "RCORE-04.T10",
+        "RCORE-04.T11",
+        "RCORE-04.T12",
+        "RCORE-04.T13"
+      ],
+      "status_snapshot": {
+        "snapshot_date": "2026-10-09",
+        "authority": "CAPABILITY_LOOKUP.json chapter runtime_validation; original capability rows remain source-audit records",
+        "runtime_validation": "partial_native_validation",
+        "checkpoint_report": "../../docs/validation/2026-10-09-rhino-core-p0.md",
+        "fixture_parity": "not_claimed_by_reference_index"
+      },
+      "read_next": [
+        "Đọc prompts/options/repeat trên PDF 22 và exact feature command help; đối chiếu aliases/macros và Undo với command session OM9.",
+        "Read the current capability row, source symbols and P0 checkpoint before interpreting baseline source_inspected/not_run."
+      ],
+      "verify": {
+        "representative_fixture_ids": [
+          "RCORE-04.T01",
+          "RCORE-04.T02",
+          "RCORE-04.T04",
+          "RCORE-04.T05",
+          "RCORE-04.T08"
+        ],
+        "compare": "Chạy cùng Circle/Line từ menu/CMD/F6/shortcut; thử Esc theo phase, repeat sau success/error/cancel, session Undo so document Undo và document-close/late-worker cleanup.",
+        "record": [
+          "Rhino 5 Windows exact SR/build, template, model/page units, tolerances, saved settings and plugins",
+          "FreeCAD binary/modules/backend and OM9 working-tree hashes",
+          "Exact command/variant/options, pre/postselection, CPlane/view/frame and input geometry",
+          "Expected vs observed measurements and errors; Undo/Redo, cancel, persistence and stale job outcomes as applicable"
+        ],
+        "parity_gate": "Run the relevant representative fixtures in Rhino 5 and native FreeCAD/OM9, and close the full acceptance scope before claiming that scope as parity. This index does not execute or pass fixtures."
+      },
+      "evidence_gap": "Command transcript, successful repeat candidate, point/session Undo, document Undo và associative History là các loại state riêng. Repeat whitelist P0 không đóng toàn command engine."
+    },
+    {
+      "id": "RCORE-05",
+      "title": "Pick, snapping và constraints",
+      "priority": "P0",
+      "spec_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/05-picking-snapping.md",
+      "guide_pdf_ranges": [
+        {
+          "start": 45,
+          "end": 51,
+          "printed_start": 37,
+          "printed_end": 43,
+          "topic": "Accurate Modeling: grid/Ortho/object snaps, constraints, Elevator, SmartTrack, coordinates",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        }
+      ],
+      "guide_coverage": "interaction_overview",
+      "help_references": [
+        {
+          "label": "Object snaps",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/user_interface/object_snaps.htm",
+          "kind": "input_topic",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Ortho / OrthoAngle / SetOrtho",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/ortho.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Cursor constraints / Elevator",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/user_interface/cursor_constraints.htm",
+          "kind": "input_topic",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        }
+      ],
+      "capability_lookup_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "capability_ids": [
+        "RCORE-05.C01",
+        "RCORE-05.C02",
+        "RCORE-05.C03",
+        "RCORE-05.C04",
+        "RCORE-05.C05",
+        "RCORE-05.C06",
+        "RCORE-05.C07",
+        "RCORE-05.C08",
+        "RCORE-05.C09",
+        "RCORE-05.C10",
+        "RCORE-05.C11",
+        "RCORE-05.C12"
+      ],
+      "fixture_ids": [
+        "RCORE-05.T01",
+        "RCORE-05.T02",
+        "RCORE-05.T03",
+        "RCORE-05.T04",
+        "RCORE-05.T05",
+        "RCORE-05.T06",
+        "RCORE-05.T07",
+        "RCORE-05.T08",
+        "RCORE-05.T09",
+        "RCORE-05.T10",
+        "RCORE-05.T11",
+        "RCORE-05.T12",
+        "RCORE-05.T13",
+        "RCORE-05.T14",
+        "RCORE-05.T15"
+      ],
+      "status_snapshot": {
+        "snapshot_date": "2026-10-09",
+        "authority": "CAPABILITY_LOOKUP.json chapter runtime_validation; original capability rows remain source-audit records",
+        "runtime_validation": "partial_native_validation",
+        "checkpoint_report": "../../docs/validation/2026-10-09-rhino-core-p0.md",
+        "fixture_parity": "not_claimed_by_reference_index"
+      },
+      "read_next": [
+        "Đọc marker/cursor và persistent/one-shot snaps trong Guide, rồi Object snaps và Cursor constraints cho đúng mode; xác định document/CPlane/base/previous point và phase.",
+        "Read the current capability row, source symbols and P0 checkpoint before interpreting baseline source_inspected/not_run."
+      ],
+      "verify": {
+        "representative_fixture_ids": [
+          "RCORE-05.T01",
+          "RCORE-05.T02",
+          "RCORE-05.T11",
+          "RCORE-05.T12",
+          "RCORE-05.T14"
+        ],
+        "compare": "Đo accepted point và marker trên fixture CPlane xoay; previous/base khác nhau, Ortho/Planar/Project và visible/locked/hidden. Ghi setting thật và source/subelement identity; không tự đặt precedence còn chưa có evidence.",
+        "record": [
+          "Rhino 5 Windows exact SR/build, template, model/page units, tolerances, saved settings and plugins",
+          "FreeCAD binary/modules/backend and OM9 working-tree hashes",
+          "Exact command/variant/options, pre/postselection, CPlane/view/frame and input geometry",
+          "Expected vs observed measurements and errors; Undo/Redo, cancel, persistence and stale job outcomes as applicable"
+        ],
+        "parity_gate": "Run the relevant representative fixtures in Rhino 5 and native FreeCAD/OM9, and close the full acceptance scope before claiming that scope as parity. This index does not execute or pass fixtures."
+      },
+      "evidence_gap": "Lifecycle one-shot/suspend trong checkpoint không chứng minh geometric snapping, ranking hay precedence Project/Ortho/SmartTrack/Elevator/SnapToLocked."
+    },
+    {
+      "id": "RCORE-06",
+      "title": "Selection, layer, group, block và Worksession",
+      "priority": "P0/P1/P2",
+      "spec_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/06-selection-organization-blocks.md",
+      "guide_pdf_ranges": [
+        {
+          "start": 33,
+          "end": 38,
+          "printed_start": 25,
+          "printed_end": 30,
+          "topic": "Selecting Objects: click/window/crossing/subobjects",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        },
+        {
+          "start": 97,
+          "end": 98,
+          "printed_start": 89,
+          "printed_end": 90,
+          "topic": "Layers, groups, blocks, worksessions",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        }
+      ],
+      "guide_coverage": "interaction_and_organization_overview",
+      "help_references": [
+        {
+          "label": "Selection commands / sub-object selection",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/selection_commands.htm",
+          "kind": "command_collection",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Layer",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/layer.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Block",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/block.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Insert",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/insert.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "BlockEdit",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/blockedit.htm",
+          "kind": "command_help",
+          "url_provenance": "PDF_p98_native_link",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "fetch_failed_web_reader"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "BlockManager",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/blockmanager.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Worksession",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/worksession.htm",
+          "kind": "command_help",
+          "url_provenance": "PDF_p98_native_link",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "fetch_failed_web_reader"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        }
+      ],
+      "capability_lookup_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "capability_ids": [
+        "RCORE-06.C01",
+        "RCORE-06.C02",
+        "RCORE-06.C03",
+        "RCORE-06.C04",
+        "RCORE-06.C05",
+        "RCORE-06.C06",
+        "RCORE-06.C07",
+        "RCORE-06.C08",
+        "RCORE-06.C09",
+        "RCORE-06.C10",
+        "RCORE-06.C11",
+        "RCORE-06.C12"
+      ],
+      "fixture_ids": [
+        "RCORE-06.T01",
+        "RCORE-06.T02",
+        "RCORE-06.T03",
+        "RCORE-06.T04",
+        "RCORE-06.T05",
+        "RCORE-06.T06",
+        "RCORE-06.T07",
+        "RCORE-06.T08",
+        "RCORE-06.T09",
+        "RCORE-06.T10",
+        "RCORE-06.T11",
+        "RCORE-06.T12",
+        "RCORE-06.T13",
+        "RCORE-06.T14",
+        "RCORE-06.T15"
+      ],
+      "status_snapshot": {
+        "snapshot_date": "2026-10-09",
+        "authority": "CAPABILITY_LOOKUP.json chapter runtime_validation; original capability rows remain source-audit records",
+        "runtime_validation": "not_run",
+        "checkpoint_report": "../../docs/validation/2026-10-09-rhino-core-p0.md",
+        "fixture_parity": "not_claimed_by_reference_index"
+      },
+      "read_next": [
+        "Đọc PDF 34 window/crossing, PDF 97 locked-but-snappable/current-layer và PDF 98 definition/instance/reference; đọc exact help theo authoring hoặc reference intent.",
+        "Read the current capability row, source symbols and P0 checkpoint before interpreting baseline source_inspected/not_run."
+      ],
+      "verify": {
+        "representative_fixture_ids": [
+          "RCORE-06.T01",
+          "RCORE-06.T03",
+          "RCORE-06.T04",
+          "RCORE-06.T06",
+          "RCORE-06.T08",
+          "RCORE-06.T10"
+        ],
+        "compare": "Thử object cắt biên window, locked-visible layer và layer xóa giữa preview/commit; hai instance chung definition, Explode một instance và Worksession reference dùng creation input nhưng chặn Move.",
+        "record": [
+          "Rhino 5 Windows exact SR/build, template, model/page units, tolerances, saved settings and plugins",
+          "FreeCAD binary/modules/backend and OM9 working-tree hashes",
+          "Exact command/variant/options, pre/postselection, CPlane/view/frame and input geometry",
+          "Expected vs observed measurements and errors; Undo/Redo, cancel, persistence and stale job outcomes as applicable"
+        ],
+        "parity_gate": "Run the relevant representative fixtures in Rhino 5 and native FreeCAD/OM9, and close the full acceptance scope before claiming that scope as parity. This index does not execute or pass fixtures."
+      },
+      "evidence_gap": "Group/App::Link/import flatten không chứng minh block editor hay Worksession. Chương 06 vẫn not_run trong CAPABILITY_LOOKUP dù có bounded identity/I/O checkpoint liên quan."
+    },
+    {
+      "id": "RCORE-07",
+      "title": "NURBS editing và modeling",
+      "priority": "P0/P1",
+      "spec_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/07-nurbs-editing-modeling.md",
+      "guide_pdf_ranges": [
+        {
+          "start": 53,
+          "end": 67,
+          "printed_start": 45,
+          "printed_end": 59,
+          "topic": "EdgeSrf, ExtrudeCrv, Loft, Revolve, RailRevolve, Sweep1/2",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        },
+        {
+          "start": 69,
+          "end": 71,
+          "printed_start": 61,
+          "printed_end": 63,
+          "topic": "Join/Explode/Trim/Split, CV editing and degree",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        },
+        {
+          "start": 73,
+          "end": 91,
+          "printed_start": 65,
+          "printed_end": 83,
+          "topic": "Move/Copy/Rotate/Scale/Mirror/Array/Orient",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        }
+      ],
+      "guide_coverage": "command_workflow_examples",
+      "help_references": [
+        {
+          "label": "PointsOn / PointsOff",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/pointson.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Rebuild",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/rebuild.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "FitCrv",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/fitcrv.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Loft",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/loft.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Sweep1",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/sweep1.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Sweep2",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/sweep2.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        }
+      ],
+      "capability_lookup_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "capability_ids": [
+        "RCORE-07.C01",
+        "RCORE-07.C02",
+        "RCORE-07.C03",
+        "RCORE-07.C04",
+        "RCORE-07.C05",
+        "RCORE-07.C06",
+        "RCORE-07.C07",
+        "RCORE-07.C08",
+        "RCORE-07.C09",
+        "RCORE-07.C10",
+        "RCORE-07.C11",
+        "RCORE-07.C12",
+        "RCORE-07.C13",
+        "RCORE-07.C14",
+        "RCORE-07.C15",
+        "RCORE-07.C16"
+      ],
+      "fixture_ids": [
+        "RCORE-07.T01",
+        "RCORE-07.T02",
+        "RCORE-07.T03",
+        "RCORE-07.T04",
+        "RCORE-07.T05",
+        "RCORE-07.T06",
+        "RCORE-07.T07",
+        "RCORE-07.T08",
+        "RCORE-07.T09",
+        "RCORE-07.T10",
+        "RCORE-07.T11",
+        "RCORE-07.T12",
+        "RCORE-07.T13",
+        "RCORE-07.T14"
+      ],
+      "status_snapshot": {
+        "snapshot_date": "2026-10-09",
+        "authority": "CAPABILITY_LOOKUP.json chapter runtime_validation; original capability rows remain source-audit records",
+        "runtime_validation": "partial_native_validation",
+        "checkpoint_report": "../../docs/validation/2026-10-09-rhino-core-p0.md",
+        "fixture_parity": "not_claimed_by_reference_index"
+      },
+      "read_next": [
+        "Đọc dựng mặt/CV/transforms theo slice; lấy đúng exact command help kể cả options U/V, degree/count, seam, retrim và fitting tolerance; tra primitive Part/Surface trước khi chọn adapter.",
+        "Read the current capability row, source symbols and P0 checkpoint before interpreting baseline source_inspected/not_run."
+      ],
+      "verify": {
+        "representative_fixture_ids": [
+          "RCORE-07.T01",
+          "RCORE-07.T03",
+          "RCORE-07.T05",
+          "RCORE-07.T07",
+          "RCORE-07.T08",
+          "RCORE-07.T10"
+        ],
+        "compare": "Đo locus/basis sau knot/degree, cancel/Undo grip edit, trim hole sau Rebuild, seam/order của Loft và narrow spike của Fit; báo numerical bound/budget và continuity riêng.",
+        "record": [
+          "Rhino 5 Windows exact SR/build, template, model/page units, tolerances, saved settings and plugins",
+          "FreeCAD binary/modules/backend and OM9 working-tree hashes",
+          "Exact command/variant/options, pre/postselection, CPlane/view/frame and input geometry",
+          "Expected vs observed measurements and errors; Undo/Redo, cancel, persistence and stale job outcomes as applicable"
+        ],
+        "parity_gate": "Run the relevant representative fixtures in Rhino 5 and native FreeCAD/OM9, and close the full acceptance scope before claiming that scope as parity. This index does not execute or pass fixtures."
+      },
+      "evidence_gap": "Tutorial success, valid basis hay coarse sampled deviation không chứng minh shared solver, G0/G1/G2, knot/domain semantics hoặc full NURBS editor."
+    },
+    {
+      "id": "RCORE-08",
+      "title": "Analysis, diagnostic và repair",
+      "priority": "P1",
+      "spec_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/08-analysis-repair.md",
+      "guide_pdf_ranges": [
+        {
+          "start": 93,
+          "end": 96,
+          "printed_start": 85,
+          "printed_end": 88,
+          "topic": "Distance/direction, curvature/EMap/Zebra/draft, edges and diagnostics",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        }
+      ],
+      "guide_coverage": "tool_purpose_overview",
+      "help_references": [
+        {
+          "label": "CurvatureGraph",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/curvaturegraph.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "CurvatureAnalysis",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/curvatureanalysis.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Zebra",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/zebra.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "DraftAngleAnalysis",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/draftangleanalysis.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "RebuildEdges",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/rebuildedges.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Check",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/check.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Audit / Audit3dmFile",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/audit.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "List",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/list.htm",
+          "kind": "command_help",
+          "url_provenance": "PDF_p96_native_link",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "fetch_failed_cache_miss"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        }
+      ],
+      "capability_lookup_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "capability_ids": [
+        "RCORE-08.C01",
+        "RCORE-08.C02",
+        "RCORE-08.C03",
+        "RCORE-08.C04",
+        "RCORE-08.C05",
+        "RCORE-08.C06",
+        "RCORE-08.C07",
+        "RCORE-08.C08",
+        "RCORE-08.C09",
+        "RCORE-08.C10",
+        "RCORE-08.C11",
+        "RCORE-08.C12",
+        "RCORE-08.C13",
+        "RCORE-08.C14",
+        "RCORE-08.C15",
+        "RCORE-08.C16"
+      ],
+      "fixture_ids": [
+        "RCORE-08.T01",
+        "RCORE-08.T02",
+        "RCORE-08.T03",
+        "RCORE-08.T04",
+        "RCORE-08.T05",
+        "RCORE-08.T06",
+        "RCORE-08.T07",
+        "RCORE-08.T08",
+        "RCORE-08.T09",
+        "RCORE-08.T10",
+        "RCORE-08.T11",
+        "RCORE-08.T12",
+        "RCORE-08.T13"
+      ],
+      "status_snapshot": {
+        "snapshot_date": "2026-10-09",
+        "authority": "CAPABILITY_LOOKUP.json chapter runtime_validation; original capability rows remain source-audit records",
+        "runtime_validation": "not_run",
+        "checkpoint_report": "../../docs/validation/2026-10-09-rhino-core-p0.md",
+        "fixture_parity": "not_claimed_by_reference_index"
+      },
+      "read_next": [
+        "Đọc PDF 94-96 và đúng help numeric vs visual vs mutation; chọn measurable diagnostic và repair policy trong chapter 08.",
+        "Read the current capability row, source symbols and P0 checkpoint before interpreting baseline source_inspected/not_run."
+      ],
+      "verify": {
+        "representative_fixture_ids": [
+          "RCORE-08.T01",
+          "RCORE-08.T04",
+          "RCORE-08.T06",
+          "RCORE-08.T07",
+          "RCORE-08.T11",
+          "RCORE-08.T12"
+        ],
+        "compare": "Dùng known curvature/naked seam/draft CPlane và invalid preconditions; đo before/after topology/deviation khi RebuildEdges hoặc repair, reject không mutation/Undo giả; giữ diagnostic read-only theo contract.",
+        "record": [
+          "Rhino 5 Windows exact SR/build, template, model/page units, tolerances, saved settings and plugins",
+          "FreeCAD binary/modules/backend and OM9 working-tree hashes",
+          "Exact command/variant/options, pre/postselection, CPlane/view/frame and input geometry",
+          "Expected vs observed measurements and errors; Undo/Redo, cancel, persistence and stale job outcomes as applicable"
+        ],
+        "parity_gate": "Run the relevant representative fixtures in Rhino 5 and native FreeCAD/OM9, and close the full acceptance scope before claiming that scope as parity. This index does not execute or pass fixtures."
+      },
+      "evidence_gap": "Zebra/EMap/shaded không tự chứng nhận G2, closedness hoặc archive integrity; validity/BOP coverage và skipped/not_run phải giữ rõ. PDF liên kết Audit3dmFile tới audit.htm."
+    },
+    {
+      "id": "RCORE-09",
+      "title": "Associative History và dependency identity",
+      "priority": "P0",
+      "spec_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/09-history-dependencies.md",
+      "guide_pdf_ranges": [
+        {
+          "start": 98,
+          "end": 98,
+          "printed_start": 90,
+          "printed_end": 90,
+          "topic": "Dimension association only: geometry updates require History",
+          "coverage": "incidental_dimension_note_only",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        }
+      ],
+      "guide_coverage": "incidental_note_not_history_engine_specification",
+      "help_references": [
+        {
+          "label": "History / HistoryUpdate / HistoryPurge",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/history.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Loft (history-enabled example)",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/loft.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Undo / Redo",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/undo.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        }
+      ],
+      "capability_lookup_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "capability_ids": [
+        "RCORE-09.C01",
+        "RCORE-09.C02",
+        "RCORE-09.C03",
+        "RCORE-09.C04",
+        "RCORE-09.C05",
+        "RCORE-09.C06",
+        "RCORE-09.C07",
+        "RCORE-09.C08",
+        "RCORE-09.C09",
+        "RCORE-09.C10",
+        "RCORE-09.C11"
+      ],
+      "fixture_ids": [
+        "RCORE-09.T01",
+        "RCORE-09.T02",
+        "RCORE-09.T03",
+        "RCORE-09.T04",
+        "RCORE-09.T05",
+        "RCORE-09.T06",
+        "RCORE-09.T07",
+        "RCORE-09.T08",
+        "RCORE-09.T09",
+        "RCORE-09.T10",
+        "RCORE-09.T11",
+        "RCORE-09.T12"
+      ],
+      "status_snapshot": {
+        "snapshot_date": "2026-10-09",
+        "authority": "CAPABILITY_LOOKUP.json chapter runtime_validation; original capability rows remain source-audit records",
+        "runtime_validation": "partial_native_validation",
+        "checkpoint_report": "../../docs/validation/2026-10-09-rhino-core-p0.md",
+        "fixture_parity": "not_claimed_by_reference_index"
+      },
+      "read_next": [
+        "Đọc History help và replay/API của đúng command family trước; dùng Guide 98 chỉ để định vị ghi chú dimension. Đọc P0 checkpoint và policy OM9 Record/Update/Detach riêng.",
+        "Read the current capability row, source symbols and P0 checkpoint before interpreting baseline source_inspected/not_run."
+      ],
+      "verify": {
+        "representative_fixture_ids": [
+          "RCORE-09.T01",
+          "RCORE-09.T03",
+          "RCORE-09.T04",
+          "RCORE-09.T05",
+          "RCORE-09.T08",
+          "RCORE-09.T11",
+          "RCORE-09.T12"
+        ],
+        "compare": "Thử hai thế hệ, topology change, Record/Update matrix, child lock/clear, Undo/delete và cold restore; ghi family/version/IDs/units/frame, trạng thái dirty/failed và replay metadata; Rhino và OM9 decision so riêng.",
+        "record": [
+          "Rhino 5 Windows exact SR/build, template, model/page units, tolerances, saved settings and plugins",
+          "FreeCAD binary/modules/backend and OM9 working-tree hashes",
+          "Exact command/variant/options, pre/postselection, CPlane/view/frame and input geometry",
+          "Expected vs observed measurements and errors; Undo/Redo, cancel, persistence and stale job outcomes as applicable"
+        ],
+        "parity_gate": "Run the relevant representative fixtures in Rhino 5 and native FreeCAD/OM9, and close the full acceptance scope before claiming that scope as parity. This index does not execute or pass fixtures."
+      },
+      "evidence_gap": "Guide không đặc tả graph/schema/migration/identity. OM9 Detach/Undo hoặc dirty-state policy là quyết định OM9; không suy giống HistoryPurge hoặc Rhino queue từ FreeCAD recompute."
+    },
+    {
+      "id": "RCORE-10",
+      "title": "Persistence, 3DM và clipboard",
+      "priority": "P0",
+      "spec_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/10-persistence-3dm-clipboard.md",
+      "guide_pdf_ranges": [],
+      "guide_coverage": "no_3dm_or_clipboard_preservation_contract_in_indexed_guide_sections",
+      "help_references": [
+        {
+          "label": "Save / -Save",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/save.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Import",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/import.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Export",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/export.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "CopyToClipboard",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/copytoclipboard.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Paste",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/paste.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Rhino (.3dm) export to earlier versions",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/fileio/rhino_3dm_export_to_earlier_versions.htm",
+          "kind": "file_format_topic",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        }
+      ],
+      "capability_lookup_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "capability_ids": [
+        "RCORE-10.C01",
+        "RCORE-10.C02",
+        "RCORE-10.C03",
+        "RCORE-10.C04",
+        "RCORE-10.C05",
+        "RCORE-10.C06",
+        "RCORE-10.C07",
+        "RCORE-10.C08",
+        "RCORE-10.C09",
+        "RCORE-10.C10",
+        "RCORE-10.C11",
+        "RCORE-10.C12"
+      ],
+      "fixture_ids": [
+        "RCORE-10.T01",
+        "RCORE-10.T02",
+        "RCORE-10.T03",
+        "RCORE-10.T04",
+        "RCORE-10.T05",
+        "RCORE-10.T06",
+        "RCORE-10.T07",
+        "RCORE-10.T08",
+        "RCORE-10.T09",
+        "RCORE-10.T10",
+        "RCORE-10.T11",
+        "RCORE-10.T12"
+      ],
+      "status_snapshot": {
+        "snapshot_date": "2026-10-09",
+        "authority": "CAPABILITY_LOOKUP.json chapter runtime_validation; original capability rows remain source-audit records",
+        "runtime_validation": "partial_native_validation",
+        "checkpoint_report": "../../docs/validation/2026-10-09-rhino-core-p0.md",
+        "fixture_parity": "not_claimed_by_reference_index"
+      },
+      "read_next": [
+        "Đọc exact Save/Import/Export/Clipboard help, file format/version và openNURBS/API; chọn type/field read/edit/retain/export support table của checkout này rồi fixture.",
+        "Read the current capability row, source symbols and P0 checkpoint before interpreting baseline source_inspected/not_run."
+      ],
+      "verify": {
+        "representative_fixture_ids": [
+          "RCORE-10.T01",
+          "RCORE-10.T02",
+          "RCORE-10.T03",
+          "RCORE-10.T05",
+          "RCORE-10.T06",
+          "RCORE-10.T08",
+          "RCORE-10.T10",
+          "RCORE-10.T12"
+        ],
+        "compare": "Import mixed rational CAD/trim/solid/mesh; sửa A, xóa B, tạo C rồi xuất/mở/edit/save thực trong Rhino 5 và reimport; kiểm units/table remap/nested transform, cold FCStd và clipboard riêng từng chiều.",
+        "record": [
+          "Rhino 5 Windows exact SR/build, template, model/page units, tolerances, saved settings and plugins",
+          "FreeCAD binary/modules/backend and OM9 working-tree hashes",
+          "Exact command/variant/options, pre/postselection, CPlane/view/frame and input geometry",
+          "Expected vs observed measurements and errors; Undo/Redo, cancel, persistence and stale job outcomes as applicable"
+        ],
+        "parity_gate": "Run the relevant representative fixtures in Rhino 5 and native FreeCAD/OM9, and close the full acceptance scope before claiming that scope as parity. This index does not execute or pass fixtures."
+      },
+      "evidence_gap": "Guide hoặc archive version 5/parser reread không chứng minh Rhino-readable edited output, units, structural blocks, userdata/History hay hai chiều binary clipboard. FCStd khác 3DM."
+    },
+    {
+      "id": "RCORE-11",
+      "title": "Annotation, Make2D, Layout/Detail và print",
+      "priority": "P1/P2",
+      "spec_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/11-annotation-layout-print.md",
+      "guide_pdf_ranges": [
+        {
+          "start": 98,
+          "end": 100,
+          "printed_start": 90,
+          "printed_end": 92,
+          "topic": "Dimensions/styles, Text/Leader/Dot, Make2D/Notes",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        },
+        {
+          "start": 281,
+          "end": 284,
+          "printed_start": 273,
+          "printed_end": 276,
+          "topic": "Mechanical Part - Layouts: page, title block, Detail scale/lock, print widths",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        }
+      ],
+      "guide_coverage": "overview_and_layout_tutorial",
+      "help_references": [
+        {
+          "label": "Dim",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/dim.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Make2D",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/make2d.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Detail",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/detail.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Layout",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/layout.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Print",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/print.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        }
+      ],
+      "capability_lookup_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "capability_ids": [
+        "RCORE-11.C01",
+        "RCORE-11.C02",
+        "RCORE-11.C03",
+        "RCORE-11.C04",
+        "RCORE-11.C05",
+        "RCORE-11.C06",
+        "RCORE-11.C07",
+        "RCORE-11.C08",
+        "RCORE-11.C09",
+        "RCORE-11.C10",
+        "RCORE-11.C11",
+        "RCORE-11.C12"
+      ],
+      "fixture_ids": [
+        "RCORE-11.T01",
+        "RCORE-11.T02",
+        "RCORE-11.T03",
+        "RCORE-11.T04",
+        "RCORE-11.T05",
+        "RCORE-11.T06",
+        "RCORE-11.T07",
+        "RCORE-11.T08",
+        "RCORE-11.T09",
+        "RCORE-11.T10",
+        "RCORE-11.T11",
+        "RCORE-11.T12"
+      ],
+      "status_snapshot": {
+        "snapshot_date": "2026-10-09",
+        "authority": "CAPABILITY_LOOKUP.json chapter runtime_validation; original capability rows remain source-audit records",
+        "runtime_validation": "not_run",
+        "checkpoint_report": "../../docs/validation/2026-10-09-rhino-core-p0.md",
+        "fixture_parity": "not_claimed_by_reference_index"
+      },
+      "read_next": [
+        "Đọc Guide dimension/space và layout tutorial; đọc Make2D projection option, Detail scale/lock và Print help trước khi nối Draft/TechDraw/OM9 Layout Tools.",
+        "Read the current capability row, source symbols and P0 checkpoint before interpreting baseline source_inspected/not_run."
+      ],
+      "verify": {
+        "representative_fixture_ids": [
+          "RCORE-11.T01",
+          "RCORE-11.T03",
+          "RCORE-11.T04",
+          "RCORE-11.T06",
+          "RCORE-11.T07",
+          "RCORE-11.T11"
+        ],
+        "compare": "So snapshot/History dimension, Dot pixel size; Make2D trên CPlane dịch/xoay; Detail parallel paper:model 2:1 đo line 20 mm thành 40 mm trên PDF, lock pan/zoom và perspective-scale gate.",
+        "record": [
+          "Rhino 5 Windows exact SR/build, template, model/page units, tolerances, saved settings and plugins",
+          "FreeCAD binary/modules/backend and OM9 working-tree hashes",
+          "Exact command/variant/options, pre/postselection, CPlane/view/frame and input geometry",
+          "Expected vs observed measurements and errors; Undo/Redo, cancel, persistence and stale job outcomes as applicable"
+        ],
+        "parity_gate": "Run the relevant representative fixtures in Rhino 5 and native FreeCAD/OM9, and close the full acceptance scope before claiming that scope as parity. This index does not execute or pass fixtures."
+      },
+      "evidence_gap": "Layout/Make2D đã có spec; guide overview world XY không ghi đè help Current CPlane. Ví dụ page 11×8.5 inch và scale 1:1 không phải defaults chung."
+    },
+    {
+      "id": "RCORE-12",
+      "title": "Display, render và resource lifecycle",
+      "priority": "P1/P2",
+      "spec_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/12-display-render-resources.md",
+      "guide_pdf_ranges": [
+        {
+          "start": 39,
+          "end": 43,
+          "printed_start": 31,
+          "printed_end": 35,
+          "topic": "Viewport projection/navigation/display modes",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        },
+        {
+          "start": 101,
+          "end": 104,
+          "printed_start": 93,
+          "printed_end": 96,
+          "topic": "Lights, materials, environment, ground plane, render/save",
+          "coverage": "overview",
+          "verification": "heading_and_printed_footer_checked_against_local_pdf"
+        }
+      ],
+      "guide_coverage": "display_and_scene_workflow_overview",
+      "help_references": [
+        {
+          "label": "SetDisplayMode",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/setdisplaymode.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Mesh",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/mesh.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "Render / render-window commands",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/render.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "MaterialEditor",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/materialeditor.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "EnvironmentEditor",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/environmenteditor.htm",
+          "kind": "command_help",
+          "url_provenance": "official_help_page",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "content_returned"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        },
+        {
+          "label": "GroundPlane",
+          "url": "https://docs.mcneel.com/rhino/5/help/en-us/commands/groundplane.htm",
+          "kind": "command_help",
+          "url_provenance": "PDF_p103_native_link_and_Render_help_link",
+          "url_accessibility": {
+            "checked_date": "2026-10-09",
+            "method": "web_reader",
+            "result": "fetch_failed_cache_miss"
+          },
+          "content_verification": "Navigation and page identity checked where content returned; full options/defaults contract must be read for the implementation slice."
+        }
+      ],
+      "capability_lookup_path": "../../OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "capability_ids": [
+        "RCORE-12.C01",
+        "RCORE-12.C02",
+        "RCORE-12.C03",
+        "RCORE-12.C04",
+        "RCORE-12.C05",
+        "RCORE-12.C06",
+        "RCORE-12.C07",
+        "RCORE-12.C08",
+        "RCORE-12.C09",
+        "RCORE-12.C10",
+        "RCORE-12.C11",
+        "RCORE-12.C12"
+      ],
+      "fixture_ids": [
+        "RCORE-12.T01",
+        "RCORE-12.T02",
+        "RCORE-12.T03",
+        "RCORE-12.T04",
+        "RCORE-12.T05",
+        "RCORE-12.T06",
+        "RCORE-12.T07",
+        "RCORE-12.T08",
+        "RCORE-12.T09",
+        "RCORE-12.T10",
+        "RCORE-12.T11",
+        "RCORE-12.T12",
+        "RCORE-12.T13"
+      ],
+      "status_snapshot": {
+        "snapshot_date": "2026-10-09",
+        "authority": "CAPABILITY_LOOKUP.json chapter runtime_validation; original capability rows remain source-audit records",
+        "runtime_validation": "not_run",
+        "checkpoint_report": "../../docs/validation/2026-10-09-rhino-core-p0.md",
+        "fixture_parity": "not_claimed_by_reference_index"
+      },
+      "read_next": [
+        "Đọc modes và scene workflow trong Guide; đọc renderer/material/environment help và backend capability trước khi tạo UI/job/cache contract.",
+        "Read the current capability row, source symbols and P0 checkpoint before interpreting baseline source_inspected/not_run."
+      ],
+      "verify": {
+        "representative_fixture_ids": [
+          "RCORE-12.T01",
+          "RCORE-12.T02",
+          "RCORE-12.T04",
+          "RCORE-12.T05",
+          "RCORE-12.T06",
+          "RCORE-12.T08",
+          "RCORE-12.T13"
+        ],
+        "compare": "Đổi display/mesh density mà CAD không đổi; thử revision/Undo cache, material inheritance, missing/relink texture và stale/cancel/close. Phân biệt capture/renderer; output dimensions/channels và write errors phải đo.",
+        "record": [
+          "Rhino 5 Windows exact SR/build, template, model/page units, tolerances, saved settings and plugins",
+          "FreeCAD binary/modules/backend and OM9 working-tree hashes",
+          "Exact command/variant/options, pre/postselection, CPlane/view/frame and input geometry",
+          "Expected vs observed measurements and errors; Undo/Redo, cancel, persistence and stale job outcomes as applicable"
+        ],
+        "parity_gate": "Run the relevant representative fixtures in Rhino 5 and native FreeCAD/OM9, and close the full acceptance scope before claiming that scope as parity. This index does not execute or pass fixtures."
+      },
+      "evidence_gap": "Viewport capture, EMap hoặc Rendered label không chứng minh production renderer; mesh/cache/resource lifecycle và plugin availability cần fixture/backend evidence riêng."
+    }
+  ]
+}

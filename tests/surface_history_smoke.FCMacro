@@ -1,0 +1,240 @@
+"""Native Surface History: OM9-SURFACE-002/004/009, lifecycle and graph evidence."""
+import json
+import os
+from pathlib import Path
+import sys
+import traceback
+import FreeCAD as App
+import FreeCADGui as Gui
+from PySide6 import QtCore, QtWidgets
+
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0, os.environ['OM9_TEST_NATIVE_DIR'])
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+out.mkdir(parents=True, exist_ok=True)
+result = {'checks': []}
+private_documents = []
+
+
+def check(name, passed):
+    result['checks'].append({'name': name, 'passed': bool(passed)})
+    if not passed:
+        raise AssertionError(name)
+
+
+def line(doc, name, a, b):
+    obj = doc.addObject('Part::Feature', name)
+    obj.Shape = Part.makeLine(App.Vector(*a), App.Vector(*b))
+    return obj
+
+
+def settings(kind, count, **extra):
+    data = dict(version=1, kind=kind, style=0, frenet=False, closed=False,
+                maintainHeight=False, preview=True, sectionMode=0, pointCount=16,
+                tolerance=.01, continuityA=0, continuityB=0, matchStart=False,
+                matchEnd=False, slashes=[], history=True, historyCommand=kind != 3,
+                inputs=[dict(count=1, chain=False, closed=False, reverse=False, seam=0)
+                        for _ in range(count)])
+    data.update(extra)
+    return json.dumps(data, allow_nan=False)
+
+
+def history(doc, kind, sources):
+    obj = doc.addObject('OpenMatrix9Gui::SurfaceHistory', 'SurfaceHistory')
+    obj.SourceCurves = [(s, ['']) for s in sources]
+    obj.SurfaceOptions = settings(kind, len(sources))
+    doc.recompute()
+    check('native type and no Python proxy', obj.TypeId == 'OpenMatrix9Gui::SurfaceHistory'
+          and not hasattr(obj, 'Proxy'))
+    check('valid surface output', not obj.Shape.isNull() and obj.Shape.isValid()
+          and bool(obj.Shape.Faces) and not obj.Shape.Solids)
+    return obj
+
+
+def run():
+    global Part
+    try:
+        if os.environ.get('OM9_HISTORY_RESTORE_FILE'):
+            # A separate fresh FreeCAD process proves namespace-based module
+            # loading, rather than relying on the activation used below.
+            check('module not already loaded before cold restore', 'OpenMatrix9Gui' not in sys.modules)
+            doc = App.openDocument(os.environ['OM9_HISTORY_RESTORE_FILE'])
+            private_documents.append(doc.Name)
+            import Part
+            h = next(o for o in doc.Objects if o.TypeId == 'OpenMatrix9Gui::SurfaceHistory')
+            check('cold FCStd restore imports native module', 'OpenMatrix9Gui' in sys.modules and not h.Shape.isNull())
+            previous = h.Shape.Area
+            source = h.SourceCurves[-1][0]
+            source.Shape = Part.makeLine(App.Vector(25, 0, 0), App.Vector(25, 3, 0))
+            doc.recompute()
+            check('cold restored source edit rebuilds', not h.Shape.isNull()
+                  and abs(h.Shape.Area - previous * 5 / 3) < 1e-5)
+            result['ok'] = True
+            return
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui
+        import Part
+        result['native_module'] = OpenMatrix9Gui.__file__
+        for kind in (1, 2, 3):
+            doc = App.newDocument('History' + str(kind))
+            private_documents.append(doc.Name)
+            doc.UndoMode = 1
+            if kind == 3:
+                sources = [line(doc, 'First', (0, 0, 0), (0, 3, 0)),
+                           line(doc, 'Last', (10, 0, 0), (10, 3, 0))]
+            else:
+                sources = [line(doc, 'Rail', (0, 0, 0), (10, 0, 0))]
+                if kind == 2:
+                    sources.append(line(doc, 'RailB', (0, 3, 0), (10, 3, 0)))
+                sources.append(line(doc, 'Profile', (0, 0, 0), (0, 3, 0)))
+            group = doc.addObject('App::Part', 'InputFrame')
+            group.Group = sources
+            h = history(doc, kind, sources)
+            check('correct exact feature ID', h.OM9FeatureId ==
+                  {1: 'OM9-SURFACE-002', 2: 'OM9-SURFACE-004', 3: 'OM9-SURFACE-009'}[kind])
+            area = h.Shape.Area
+            doc.openTransaction('Edit source')
+            if kind == 3:
+                sources[-1].Shape = Part.makeLine(App.Vector(15, 0, 0), App.Vector(15, 3, 0))
+            else:
+                sources[0].Shape = Part.makeLine(App.Vector(0, 0, 0), App.Vector(15, 0, 0))
+                if kind == 2:
+                    sources[1].Shape = Part.makeLine(App.Vector(0, 3, 0), App.Vector(15, 3, 0))
+            doc.recompute()
+            doc.commitTransaction()
+            check('source edit automatically changes geometry', abs(h.Shape.Area - 1.5 * area) < 1e-5)
+            doc.undo()
+            doc.recompute()
+            check('source edit Undo', abs(h.Shape.Area - area) < 1e-5)
+            doc.redo()
+            doc.recompute()
+            check('source edit Redo', abs(h.Shape.Area - 1.5 * area) < 1e-5)
+            before = h.Shape.BoundBox.XMin
+            group.Placement.Base = App.Vector(5, 0, 0)
+            doc.recompute()
+            check('parent placement recomputes without source touch', abs(h.Shape.BoundBox.XMin - before - 5) < 1e-6)
+            original = sources[-1].Shape.copy()
+            sources[-1].Shape = Part.Shape()
+            doc.recompute()
+            check('invalid source explicit error and no stale output', h.Shape.isNull() and 'Invalid' in h.State)
+            sources[-1].Shape = original
+            doc.recompute()
+            check('invalid source recovery', not h.Shape.isNull() and 'Invalid' not in h.State)
+            serialized = h.SurfaceOptions
+            bad = json.loads(serialized)
+            bad['tolerance'] = -1
+            h.SurfaceOptions = json.dumps(bad)
+            count = len(doc.Objects)
+            doc.recompute()
+            check('invalid persisted numerical settings fail atomically', h.Shape.isNull()
+                  and 'Invalid' in h.State and len(doc.Objects) == count)
+            h.SurfaceOptions = serialized
+            doc.recompute()
+            check('numerical settings recovery', not h.Shape.isNull() and 'Invalid' not in h.State)
+            filename = out / ('surface-history-' + str(kind) + '.FCStd')
+            doc.saveAs(str(filename))
+            hname, source_names = h.Name, [s.Name for s in sources]
+            App.closeDocument(doc.Name)
+            doc = App.openDocument(str(filename))
+            private_documents.append(doc.Name)
+            h = doc.getObject(hname)
+            group = doc.getObject('InputFrame')
+            sources = [doc.getObject(n) for n in source_names]
+            result['restored'] = dict(type=h.TypeId, options=h.SurfaceOptions,
+                                      links=[(s.Name, list(subs)) for s, subs in h.SourceCurves],
+                                      enabled=h.HistoryEnabled, state=list(h.State))
+            check('FCStd restores native type/options/references', h.TypeId == 'OpenMatrix9Gui::SurfaceHistory'
+                  and h.SurfaceOptions == serialized and len(h.SourceCurves) == len(sources))
+            previous = h.Shape.Area
+            if kind == 3:
+                sources[-1].Shape = Part.makeLine(App.Vector(20, 0, 0), App.Vector(20, 3, 0))
+            else:
+                sources[0].Shape = Part.makeLine(App.Vector(0, 0, 0), App.Vector(20, 0, 0))
+                if kind == 2:
+                    sources[1].Shape = Part.makeLine(App.Vector(0, 3, 0), App.Vector(20, 3, 0))
+            doc.recompute()
+            check('source edit after FCStd rebuilds', abs(h.Shape.Area - previous * 4 / 3) < 1e-5)
+            # A child remains a parent of the next generation when directly edited.
+            edge = h.Shape.Edges[0].copy()
+            edge.translate(App.Vector(0, 0, 4))
+            child_source = doc.addObject('Part::Feature', 'ChildSection')
+            child_source.Shape = edge
+            child = doc.addObject('OpenMatrix9Gui::SurfaceHistory', 'Descendant')
+            child.SourceCurves = [(h, ['Edge1']), (child_source, [''])]
+            child.SurfaceOptions = settings(3, 2)
+            doc.recompute()
+            check('two generation native graph', not child.Shape.isNull())
+            doc.openTransaction('Directly edit child geometry')
+            moved = h.Shape.copy()
+            moved.translate(App.Vector(0, 0, 1))
+            h.Shape = moved
+            doc.recompute()
+            doc.commitTransaction()
+            check('direct child edit detaches parents but retains descendants', not h.HistoryEnabled
+                  and not h.SourceCurves and child.SourceCurves[0][0] == h and not child.Shape.isNull())
+            doc.undo()
+            doc.recompute()
+            check('Undo restores detached history', h.HistoryEnabled and len(h.SourceCurves) == len(sources))
+            # Reject A -> B -> A by refusing the new parent link without damaging geometry.
+            old_links = list(h.SourceCurves)
+            try:
+                h.SourceCurves = [(child, ['Edge1'])] + old_links[1:]
+            except Exception:
+                pass
+            check('dependency cycle refused', h.SourceCurves == old_links)
+            foreign = App.newDocument('Foreign' + str(kind))
+            private_documents.append(foreign.Name)
+            # Reuse a source name: resolving this foreign reference by the name
+            # alone would silently build from the local curve instead.
+            other = line(foreign, sources[0].Name, (0, 0, 0), (99, 0, 0))
+            try:
+                h.SourceCurves = [(other, [''])] + old_links[1:]
+            except Exception:
+                pass
+            check('foreign same-name source refused without replacing parents', h.SourceCurves == old_links)
+            App.closeDocument(foreign.Name)
+            App.setActiveDocument(doc.Name)
+            h.UpdateHistory = False
+            frozen = h.Shape.Area
+            group.Placement.Base = App.Vector(5, 0, 2)
+            doc.recompute()
+            check('Update off suspends existing links', h.Shape.Area == frozen and h.SourceCurves == old_links)
+            h.UpdateHistory = True
+            doc.recompute()
+            check('Update on resumes recompute', not h.Shape.isNull())
+            count = len(doc.Objects)
+            doc.removeObject(sources[0].Name)
+            doc.recompute()
+            check('deleted source explicit error and atomic output', len(doc.Objects) == count - 1
+                  and h.Shape.isNull() and 'Invalid' in h.State)
+            App.closeDocument(doc.Name)
+        doc = App.newDocument('HistoryChain')
+        private_documents.append(doc.Name)
+        a = line(doc, 'RailA', (0, 0, 0), (5, 0, 0))
+        b = line(doc, 'RailB', (5, 0, 0), (10, 0, 0))
+        profile = line(doc, 'Profile', (0, 0, 0), (0, 3, 0))
+        h = doc.addObject('OpenMatrix9Gui::SurfaceHistory', 'ChainSweep')
+        h.SourceCurves = [(a, ['Edge1']), (b, ['Edge1']), (profile, [''])]
+        grouped = json.loads(settings(1, 2))
+        grouped['inputs'][0].update(count=2, chain=True)
+        h.SurfaceOptions = json.dumps(grouped)
+        doc.recompute()
+        check('ordered chain references form one rail', not h.Shape.isNull() and abs(h.Shape.Area - 30) < 1e-5)
+        b.Shape = Part.makeLine(App.Vector(5, 0, 0), App.Vector(15, 0, 0))
+        doc.recompute()
+        check('editing chain segment rebuilds whole rail', abs(h.Shape.Area - 45) < 1e-5)
+        App.closeDocument(doc.Name)
+        result['ok'] = True
+    except Exception:
+        result['ok'] = False
+        result['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        App.Console.PrintMessage(json.dumps(result) + '\n')
+        for name in private_documents:
+            if name in App.listDocuments():
+                App.closeDocument(name)
+        Gui.getMainWindow().close()
+
+
+QtCore.QTimer.singleShot(8000, run)

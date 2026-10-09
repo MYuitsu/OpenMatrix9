@@ -1,0 +1,311 @@
+"""Verified Rhino 5 current-cage/captive reconstruction in the native host."""
+import os, sys, json, hashlib, traceback
+from pathlib import Path
+native_dir = os.environ.get('OM9_TEST_NATIVE_DIR', '')
+if native_dir:
+    sys.path.insert(0, native_dir)
+import FreeCAD as App, FreeCADGui as Gui, Mesh
+from PySide6 import QtCore, QtWidgets
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+fixtures = Path(os.environ.get('OM9_3DM_CAGE_FIXTURES',
+    'H:/FreeCAD-src/Mod/OpenMatrix9/build/cage-fixtures'))
+result = {'checks': [], 'fixtures': str(fixtures)}
+
+def check(name, value):
+    result['checks'].append({'name': name, 'passed': bool(value)})
+    if not value:
+        raise AssertionError(name)
+
+def events():
+    QtWidgets.QApplication.processEvents()
+
+def bindings(doc):
+    return [o for o in doc.Objects if o.TypeId == 'OpenMatrix9Gui::CageBinding']
+
+def cages(doc):
+    return [o for o in doc.Objects if o.TypeId == 'OpenMatrix9Gui::CageControl']
+
+def source(doc, identifier, namespace=None):
+    return next(o for o in doc.Objects if getattr(o, 'OM9SourceUUID', '') == identifier
+                and (namespace is None or o.OM9ImportNamespace == namespace))
+
+def archive(doc, namespace):
+    return next(o for o in doc.Objects if hasattr(o, 'OM9SourceArchive')
+                and o.OM9ImportNamespace == namespace)
+
+def world_vertices(obj):
+    # Mesh.Topology already includes the object's own Placement, matching the
+    # native adapter. Apply only its enclosing group placement here.
+    parent = obj.getGlobalPlacement().multiply(obj.Placement.inverse())
+    return [parent.multVec(p) for p in obj.Mesh.Topology[0]]
+
+def equal_points(actual, expected, tolerance=1e-5):
+    return len(actual) == len(expected) and all(a.distanceToPoint(b) < tolerance
+                                               for a, b in zip(actual, expected))
+
+def snapshot(doc):
+    return (tuple(o.Name for o in doc.Objects),
+            tuple((o.Name, tuple(tuple(p) for p in world_vertices(o)))
+                  for o in doc.Objects if hasattr(o, 'Mesh')),
+            tuple(o.Name for o in cages(doc)), tuple(o.Name for o in bindings(doc)))
+
+def rejects_atomic(doc, control, label, expected):
+    before = snapshot(doc)
+    diagnostic = ''
+    try:
+        om.restore3dmCage(control)
+    except RuntimeError as error:
+        diagnostic = str(error)
+    check(label, expected.lower() in diagnostic.lower() and snapshot(doc) == before)
+    result.setdefault('rejections', []).append({'name': label, 'diagnostic': diagnostic})
+
+def imported(stem, name, scale=0):
+    doc = App.newDocument(name)
+    doc.UndoMode = 1
+    ThreeDm.import_file(str(fixtures/(stem+'.3dm')), doc, mode='preserve', scale=scale)
+    doc.recompute()
+    events()
+    return doc
+
+def reopen(doc, filename):
+    file = out/filename
+    doc.saveAs(str(file))
+    App.closeDocument(doc.Name)
+    doc = App.openDocument(str(file))
+    events()
+    return doc
+
+def restore_case(stem, grouped=False):
+    ids = json.loads((fixtures/(stem+'.ids.json')).read_text(encoding='utf-8'))
+    doc = imported(stem, 'RhinoCage'+('Grouped' if grouped else stem.replace('-', '')))
+    retained = source(doc, ids['control'])
+    captive = source(doc, ids['captive'])
+    unrelated = source(doc, ids['unrelated'])
+    namespace = retained.OM9ImportNamespace
+    original_file_hash = hashlib.sha256((fixtures/(stem+'.3dm')).read_bytes()).hexdigest()
+    check(stem+' preserves authoritative current imported mesh',
+          equal_points(world_vertices(captive), [App.Vector(*p) for p in ids['current_vertices_mm']]))
+    if grouped:
+        retained.addProperty('App::PropertyPlacement', 'Placement')
+        placement = App.Placement(App.Vector(3,4,5), App.Rotation())
+        group = doc.addObject('App::Part', 'ImportedGroup')
+        group.Placement = App.Placement(App.Vector(100,-50,20), App.Rotation(App.Vector(0,0,1), 30))
+        for obj in (retained, captive, unrelated):
+            obj.Placement = placement
+            group.addObject(obj)
+        doc.recompute()
+    initial = world_vertices(captive)
+    untouched = world_vertices(unrelated)
+    source_name = retained.Name
+    c = om.restore3dmCage(retained)
+    doc.recompute()
+    control_name = c.Name
+    check(stem+' restore preserves current output without a second deformation'+(' in transformed group' if grouped else ''),
+          equal_points(world_vertices(captive), initial))
+    check(stem+' restores only explicit captive UUIDs',
+          len(bindings(doc)) == 1 and bindings(doc)[0].Captive == captive
+          and bindings(doc)[0].Control == c and equal_points(world_vertices(unrelated), untouched))
+    check(stem+' retains source record and current-output metadata',
+          doc.getObject(source_name) is not None and json.loads(c.SourceMetadata)['bind_geometry'] == 'current_archive_output'
+          and json.loads(c.SourceMetadata)['import_namespace'] == namespace)
+    if grouped:
+        expected = group.Placement.multiply(retained.Placement).multVec(App.Vector(*ids['control_points_mm'][0]))
+        check('Grouped and placed retained control frame is applied exactly once',
+              c.getGlobalPlacement().multVec(c.ControlPoints[0]).distanceToPoint(expected) < 1e-5)
+    doc.undo()
+    doc.recompute()
+    check(stem+' restore Undo removes relationships in one transaction',
+          not bindings(doc) and not cages(doc) and doc.getObject(source_name) is not None
+          and equal_points(world_vertices(captive), initial))
+    doc.redo()
+    doc.recompute()
+    c = doc.getObject(control_name)
+    check(stem+' restore Redo restores persistent native links', len(bindings(doc)) == 1 and bindings(doc)[0].Control == c)
+    points = list(c.ControlPoints)
+    doc.openTransaction('Native cage control move')
+    c.ControlPoints = [App.Vector(p.x, p.y, p.z+2) for p in points]
+    doc.recompute()
+    doc.commitTransaction()
+    expected = [p+App.Vector(0,0,2) for p in initial]
+    check(stem+' native control edit deforms current bound mesh once',
+          equal_points(world_vertices(captive), expected) and equal_points(world_vertices(unrelated), untouched))
+    c.ControlPoints = list(c.ControlPoints)
+    doc.recompute()
+    check(stem+' recompute does not accumulate deformation', equal_points(world_vertices(captive), expected))
+    doc.undo()
+    doc.recompute()
+    check(stem+' control Undo restores frozen current bind geometry', equal_points(world_vertices(captive), initial))
+    doc.redo()
+    doc.recompute()
+    check(stem+' control Redo restores edited geometry', equal_points(world_vertices(captive), expected))
+    captive_name, unrelated_name = captive.Name, unrelated.Name
+    doc = reopen(doc, stem+('-grouped' if grouped else '')+'.FCStd')
+    c, captive, unrelated = doc.getObject(control_name), doc.getObject(captive_name), doc.getObject(unrelated_name)
+    check(stem+' FCStd restores native cage links and current mesh',
+          len(bindings(doc)) == 1 and bindings(doc)[0].Captive == captive and bindings(doc)[0].Control == c
+          and equal_points(world_vertices(captive), expected))
+    c.ControlPoints = [App.Vector(p.x, p.y, p.z+1) for p in c.ControlPoints]
+    doc.recompute()
+    check(stem+' reopened cage remains reusable',
+          equal_points(world_vertices(captive), [p+App.Vector(0,0,3) for p in initial])
+          and equal_points(world_vertices(unrelated), untouched))
+    state = archive_state.load_archive_state(archive(doc, namespace))
+    check(stem+' included archive remains byte-identical',
+          hashlib.sha256(Path(state['snapshot']).read_bytes()).hexdigest() == original_file_hash)
+    App.closeDocument(doc.Name)
+
+def grouped_affine_part_case():
+    import Part
+    ids = json.loads((fixtures/'cage-native.ids.json').read_text(encoding='utf-8'))
+    doc = imported('cage-native', 'RhinoCageAffinePartPose')
+    retained, captive = source(doc, ids['control']), source(doc, ids['captive'])
+    retained.addProperty('App::PropertyPlacement', 'Placement')
+    retained.Placement = App.Placement(App.Vector(3,4,5), App.Rotation())
+    captive.Placement = retained.Placement
+    group = doc.addObject('App::Part', 'AffineArchiveFrame')
+    group.Placement = App.Placement(App.Vector(100,-50,20), App.Rotation(App.Vector(0,0,1), 30))
+    group.addObject(retained)
+    group.addObject(captive)
+    solid = doc.addObject('Part::Feature', 'AdditionalSolid')
+    solid.Shape = Part.makeBox(1,1,1,App.Vector(14.5,20.5,31))
+    solid.Placement = retained.Placement
+    group.addObject(solid)
+    doc.recompute()
+    def centroid(obj):
+        return obj.getGlobalPlacement().multiply(obj.Placement.inverse()).multVec(obj.Shape.CenterOfGravity)
+    initial = centroid(solid)
+    c = om.restore3dmCage(retained)
+    binding = om.captureCage(c, [solid])[0]
+    doc.recompute()
+    result['affine_part_pose_probe'] = {'active': binding.Active, 'valid': solid.Shape.isValid(),
+        'closed': solid.Shape.isClosed(), 'volume': solid.Shape.Volume,
+        'center': tuple(centroid(solid)), 'initial_center': tuple(initial), 'state': str(solid.State),
+        'source_center': tuple(binding.SourceShape.CenterOfGravity),
+        'source_placement': str(binding.SourceShape.Placement), 'target_placement': str(solid.Placement)}
+    raw = binding.SourceShape.transformGeometry(App.Matrix(), True)
+    local = raw.transformGeometry(solid.getGlobalPlacement().inverse().toMatrix(), True)
+    result['affine_part_pose_probe']['raw_geometry'] = {'center':tuple(raw.CenterOfGravity),'placement':str(raw.Placement)}
+    result['affine_part_pose_probe']['local_geometry'] = {'center':tuple(local.CenterOfGravity),'placement':str(local.Placement)}
+    local.Placement = solid.Placement
+    result['affine_part_pose_probe']['assigned_geometry'] = {'center':tuple(local.CenterOfGravity),'placement':str(local.Placement)}
+    check('Rotated retained affine cage captures an additional native solid exactly',
+          binding.Active and solid.Shape.isValid() and solid.Shape.isClosed()
+          and abs(solid.Shape.Volume-1) < 1e-7 and centroid(solid).distanceToPoint(initial) < 1e-7)
+    delta = c.getGlobalPlacement().Rotation.multVec(App.Vector(1,0,0))
+    c.ControlPoints = [App.Vector(p.x+1,p.y,p.z) for p in c.ControlPoints]
+    doc.recompute()
+    check('Rotated retained affine cage preserves exact solid geometry after local CV edit',
+          binding.Active and solid.Shape.isValid() and solid.Shape.isClosed()
+          and abs(solid.Shape.Volume-1) < 1e-7 and centroid(solid).distanceToPoint(initial+delta) < 1e-7)
+    cage_name, solid_name = c.Name, solid.Name
+    doc = reopen(doc, 'cage-archive-affine-part-pose.FCStd')
+    c, solid = doc.getObject(cage_name), doc.getObject(solid_name)
+    c.ControlPoints = [App.Vector(p.x+1,p.y,p.z) for p in c.ControlPoints]
+    doc.recompute()
+    check('FCStd retained affine pose remains reusable on native solids',
+          solid.Shape.isValid() and solid.Shape.isClosed()
+          and centroid(solid).distanceToPoint(initial+delta*2) < 1e-7)
+    App.closeDocument(doc.Name)
+
+def invalid_cases():
+    ids = json.loads((fixtures/'cage-native.ids.json').read_text(encoding='utf-8'))
+    doc = imported('cage-native', 'RhinoCageAtomicFailures')
+    retained = source(doc, ids['control'])
+    captive = source(doc, ids['captive'])
+    container = archive(doc, retained.OM9ImportNamespace)
+    digest = container.OM9ArchiveHash
+    container.OM9ArchiveHash = '0'*64
+    rejects_atomic(doc, retained, 'Corrupt archive hash rejects restoration before native mutation', 'integrity')
+    container.OM9ArchiveHash = digest
+    manifest = container.OM9ArchiveManifest
+    changed = json.loads(manifest)
+    changed['scale_mm'] = 2
+    container.OM9ArchiveManifest = json.dumps(changed)
+    rejects_atomic(doc, retained, 'Mismatched archive units reject restoration atomically', 'units mismatch')
+    container.OM9ArchiveManifest = manifest
+    namespace = captive.OM9ImportNamespace
+    captive.OM9ImportNamespace = 'foreign-import'
+    rejects_atomic(doc, retained, 'Missing captive in original namespace rejects restoration atomically', 'missing')
+    captive.OM9ImportNamespace = namespace
+    shadow = doc.addObject('Mesh::Feature', 'AmbiguousCaptive')
+    shadow.Mesh = captive.Mesh.copy()
+    shadow.addProperty('App::PropertyString', 'OM9ImportNamespace')
+    shadow.addProperty('App::PropertyString', 'OM9SourceUUID')
+    shadow.OM9ImportNamespace, shadow.OM9SourceUUID = namespace, '{' + ids['captive'].upper() + '}'
+    rejects_atomic(doc, retained, 'Ambiguous captive UUID rejects restoration atomically', 'ambiguous')
+    doc.removeObject(shadow.Name)
+    saved_namespace = retained.OM9ImportNamespace
+    duplicate_manifest = json.loads(manifest)
+    duplicate_row = dict(duplicate_manifest['records'][0])
+    duplicate_row['source_uuid'] = '{' + duplicate_row['source_uuid'].upper().strip('{}') + '}'
+    duplicate_manifest['records'].append(duplicate_row)
+    container.OM9ArchiveManifest = json.dumps(duplicate_manifest)
+    rejects_atomic(doc, retained, 'Semantically duplicate manifest UUID rejects atomically', 'identity')
+    container.OM9ArchiveManifest = manifest
+    retained.OM9ImportNamespace = ''
+    rejects_atomic(doc, retained, 'Malformed source namespace rejects restoration atomically', 'identity')
+    retained.OM9ImportNamespace = saved_namespace
+    # A second import with the same source IDs has a different namespace. Only
+    # the first imported captive is bound; the second remains independent.
+    ThreeDm.import_file(str(fixtures/'cage-native.3dm'), doc, mode='preserve')
+    second = next(o for o in doc.Objects if getattr(o, 'OM9SourceUUID', '') == ids['captive']
+                  and o.OM9ImportNamespace != namespace)
+    second_points = world_vertices(second)
+    retained.OM9SourceUUID = '{' + ids['control'].upper() + '}'
+    captive.OM9SourceUUID = '{' + ids['captive'].upper() + '}'
+    c = om.restore3dmCage(retained)
+    check('Braced uppercase retained source UUID decodes the canonical archive record',
+          json.loads(c.SourceMetadata)['source_record_uuid'] == ids['control'])
+    c.ControlPoints = [App.Vector(p.x+1,p.y,p.z) for p in c.ControlPoints]
+    doc.recompute()
+    check('Same archive imported twice binds by namespace without UUID cross-talk',
+          len(bindings(doc)) == 1 and bindings(doc)[0].Captive == captive
+          and equal_points(world_vertices(second), second_points))
+    App.closeDocument(doc.Name)
+
+def units_cases():
+    for stem, scale, factor, knots in [('cage-unitless', 2.5, 2.5, [0,0,1,1]),
+                                     ('cage-parameter-domain', 0, 25.4, [2,2,4,4])]:
+        doc = imported(stem, 'RhinoCageUnits'+stem.replace('-', ''), scale)
+        retained = next(o for o in doc.Objects if getattr(o, 'OM9SourceClass', '') == 'ON_MorphControl')
+        c = om.restore3dmCage(retained)
+        doc.recompute()
+        check(stem+' restores archive units once with unchanged parameter knots',
+              abs(c.ControlPoints[0].x-14*factor) < 1e-6
+              and list(c.UKnots) == knots and json.loads(c.SourceMetadata)['scale_mm'] == factor
+              and not bindings(doc))
+        App.closeDocument(doc.Name)
+
+def run():
+    global om, ThreeDm, archive_state
+    try:
+        out.mkdir(parents=True, exist_ok=True)
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui as om
+        import ThreeDm
+        import ThreeDmArchiveState as archive_state
+        result['native_module_path'] = str(Path(om.__file__).resolve())
+        check('Selected private native module loaded', Path(om.__file__).resolve().parent == Path(native_dir).resolve())
+        check('Native archive cage restoration API exists', hasattr(om, 'restore3dmCage'))
+        for label, operation in [('affine', lambda: restore_case('cage-native')),
+                                 ('nonaffine', lambda: restore_case('cage-native-nonaffine')),
+                                 ('grouped', lambda: restore_case('cage-native-nonaffine', True)),
+                                 ('grouped-affine-part', grouped_affine_part_case),
+                                 ('invalid', invalid_cases), ('units', units_cases)]:
+            try:
+                operation()
+            except Exception:
+                result.setdefault('errors', []).append({'case': label, 'error': traceback.format_exc()})
+            finally:
+                for name in list(App.listDocuments()):
+                    App.closeDocument(name)
+    except Exception:
+        result['error'] = traceback.format_exc()
+    finally:
+        result['ok'] = not result.get('error') and not result.get('errors') and all(c['passed'] for c in result['checks'])
+        out.mkdir(parents=True, exist_ok=True)
+        (out/'results.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(800, run)
