@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-10T02:43:11+07:00",
+  "updated_at": "2026-10-10T03:10:51+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -1548,7 +1548,7 @@
       ],
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/02-units-tolerances.md",
       "next_action": "Continue operation-specific effective tolerance and capability/permission coverage; shared runtime guards now cover Edit/Boolean, Rebuild and interactive Surface only. Durable History and remaining P0 contracts stay open.",
-      "updated_at": "2026-10-10T02:43:11+07:00",
+      "updated_at": "2026-10-10T03:10:51+07:00",
       "scope": "Partial P0 foundations from pre-merge snapshot 5011bab; historical 321 Rust, 23 Python and 657 native GUI assertions do not validate the merged revision or complete P0.",
       "followup_evidence": [
         "docs/validation/2026-10-09-rhino-core-object-foundations.md",
@@ -1557,7 +1557,8 @@
         "docs/validation/2026-10-09-rhino-core-extended-input.md",
         "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
         "docs/validation/2026-10-10-rhino-core-curve-parameters.md",
-        "docs/validation/2026-10-10-rhino-core-polycurve-partition.md"
+        "docs/validation/2026-10-10-rhino-core-polycurve-partition.md",
+        "docs/validation/2026-10-10-rhino-core-instance-isolation.md"
       ]
     },
     {
@@ -2036,6 +2037,61 @@
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
       "next_action": "Reuse existing instance/transform support and complete the exact T06 definition/sibling/world-coordinate fixture; continue all P0.",
       "updated_at": "2026-10-10T02:43:11+07:00"
+    },
+    {
+      "key": "rhino-core-instance-isolation",
+      "stage": "feature-port",
+      "feature_ids": [],
+      "status": "validated_bounded_increment",
+      "scope": "Fixture-only reuse proof; authored RCORE-01.T06 complete.",
+      "outputs": [
+        "Gui/ThreeDmArchive.cpp",
+        "Gui/ThreeDmTransforms.cpp",
+        "Gui/ThreeDmMerge.cpp",
+        "Gui/ThreeDmInventory.cpp",
+        "Gui/ThreeDmBrep.cpp",
+        "Gui/ThreeDmStaging.cpp",
+        "ThreeDm.py",
+        "ThreeDmArchiveState.py",
+        "rust/src/core_3dm.rs",
+        "rust/src/core_3dm_archive.rs",
+        "cmake/OpenNURBS.cmake",
+        "tests/native/CMakeLists.txt",
+        "tests/native/rhino_core_instance_isolation.cpp",
+        "tests/rhino_core_instance_isolation_smoke.FCMacro",
+        "tests/three_dm_new_blocks_smoke.FCMacro",
+        "docs/validation/2026-10-10-rhino-core-instance-isolation.md",
+        "docs/validation/2026-10-10-rhino-core-instance-isolation-evidence.json"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-10-rhino-core-instance-isolation-evidence.json",
+        "docs/reviews/2026-10-10-instance-isolation-review.md"
+      ],
+      "tests": [
+        {
+          "command": "native instance fixture and related CTest",
+          "result": "146 checks +4 suites pass; build/run0"
+        },
+        {
+          "command": "fresh FreeCAD T06 and new blocks",
+          "result": "69+29=98 checks,2 processes exit0"
+        },
+        {
+          "command": "parent production/runtime reuse check",
+          "result": "unchanged source bytes, matching module61708e51; prior523Rust/SDK proofs reused, not rerun"
+        }
+      ],
+      "uncertainties": [
+        "Authored two-root shared native box fixture only; complete nested/all-family/attribute/History/command UI parity remains open.",
+        "Host bbox numerical enclosure padding1e-7+64ULP is separate from unchanged1e-7mm bijective corner oracle.",
+        "Independent host output layer UUIDs are unclaimed; raw inventories retained, exact geometry projection and native full serialization checked.",
+        "Authored native model member bbox cache is primed before source baseline; unprimed cache immutability is not claimed.",
+        "Archive expansion finite-determinant overflow/empty-definition coverage remains unverified.",
+        "FCStd saved, but no fresh-process T06 cold reopening claim; native owners/lifetime/global memory safety remain caller obligations."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
+      "next_action": "Complete exact T07 input rejection and T08 stale-preview lifecycle using audited existing gates; continue all P0.",
+      "updated_at": "2026-10-10T03:10:51+07:00"
     }
   ],
   "merge_context": {

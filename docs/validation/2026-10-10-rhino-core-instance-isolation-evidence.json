@@ -1,0 +1,1469 @@
+{
+  "schema_version": 1,
+  "checkpoint": "rhino-core-instance-isolation",
+  "date": "2026-10-10T03:10:51+07:00",
+  "parent_commit": "661529f",
+  "p0_status": "in_progress",
+  "production_changes": false,
+  "native_module": {
+    "path": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+    "sha256": "61708e51c37e9dc150d355b968a5be9ab29886858ae9ce0cea108fc2b87e5e09"
+  },
+  "native_report": {
+    "cases": [
+      {
+        "actual_corners": [
+          [
+            105,
+            207,
+            309
+          ],
+          [
+            107,
+            207,
+            309
+          ],
+          [
+            107,
+            207,
+            313
+          ],
+          [
+            105,
+            207,
+            313
+          ],
+          [
+            107,
+            210,
+            309
+          ],
+          [
+            107,
+            210,
+            313
+          ],
+          [
+            105,
+            210,
+            309
+          ],
+          [
+            105,
+            210,
+            313
+          ]
+        ],
+        "name": "A/Canonical"
+      },
+      {
+        "actual_corners": [
+          [
+            105,
+            207,
+            309
+          ],
+          [
+            107,
+            207,
+            309
+          ],
+          [
+            107,
+            207,
+            313
+          ],
+          [
+            105,
+            207,
+            313
+          ],
+          [
+            107,
+            210,
+            309
+          ],
+          [
+            107,
+            210,
+            313
+          ],
+          [
+            105,
+            210,
+            309
+          ],
+          [
+            105,
+            210,
+            313
+          ]
+        ],
+        "corner_residuals": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "name": "A/Canonical"
+      },
+      {
+        "actual_corners": [
+          [
+            -1,
+            20,
+            44.5
+          ],
+          [
+            -1,
+            16,
+            44.5
+          ],
+          [
+            -1,
+            16,
+            46.5
+          ],
+          [
+            -1,
+            20,
+            46.5
+          ],
+          [
+            -10,
+            16,
+            44.5
+          ],
+          [
+            -10,
+            16,
+            46.5
+          ],
+          [
+            -10,
+            20,
+            44.5
+          ],
+          [
+            -10,
+            20,
+            46.5
+          ]
+        ],
+        "name": "B/Canonical"
+      },
+      {
+        "actual_corners": [
+          [
+            -1,
+            20,
+            44.5
+          ],
+          [
+            -1,
+            16,
+            44.5
+          ],
+          [
+            -1,
+            16,
+            46.5
+          ],
+          [
+            -1,
+            20,
+            46.5
+          ],
+          [
+            -10,
+            16,
+            44.5
+          ],
+          [
+            -10,
+            16,
+            46.5
+          ],
+          [
+            -10,
+            20,
+            44.5
+          ],
+          [
+            -10,
+            20,
+            46.5
+          ]
+        ],
+        "corner_residuals": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "name": "B/Canonical"
+      },
+      {
+        "actual_corners": [
+          [
+            105,
+            207,
+            309
+          ],
+          [
+            107,
+            207,
+            309
+          ],
+          [
+            107,
+            207,
+            313
+          ],
+          [
+            105,
+            207,
+            313
+          ],
+          [
+            107,
+            210,
+            309
+          ],
+          [
+            107,
+            210,
+            313
+          ],
+          [
+            105,
+            210,
+            309
+          ],
+          [
+            105,
+            210,
+            313
+          ]
+        ],
+        "name": "A/Canonical"
+      },
+      {
+        "actual_corners": [
+          [
+            105,
+            207,
+            309
+          ],
+          [
+            107,
+            207,
+            309
+          ],
+          [
+            107,
+            207,
+            313
+          ],
+          [
+            105,
+            207,
+            313
+          ],
+          [
+            107,
+            210,
+            309
+          ],
+          [
+            107,
+            210,
+            313
+          ],
+          [
+            105,
+            210,
+            309
+          ],
+          [
+            105,
+            210,
+            313
+          ]
+        ],
+        "corner_residuals": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "name": "A/Canonical"
+      },
+      {
+        "actual_corners": [
+          [
+            6,
+            9,
+            57.5
+          ],
+          [
+            6,
+            5,
+            57.5
+          ],
+          [
+            6,
+            5,
+            59.5
+          ],
+          [
+            6,
+            9,
+            59.5
+          ],
+          [
+            -3,
+            5,
+            57.5
+          ],
+          [
+            -3,
+            5,
+            59.5
+          ],
+          [
+            -3,
+            9,
+            57.5
+          ],
+          [
+            -3,
+            9,
+            59.5
+          ]
+        ],
+        "name": "B/Canonical"
+      },
+      {
+        "actual_corners": [
+          [
+            6,
+            9,
+            57.5
+          ],
+          [
+            6,
+            5,
+            57.5
+          ],
+          [
+            6,
+            5,
+            59.5
+          ],
+          [
+            6,
+            9,
+            59.5
+          ],
+          [
+            -3,
+            5,
+            57.5
+          ],
+          [
+            -3,
+            5,
+            59.5
+          ],
+          [
+            -3,
+            9,
+            57.5
+          ],
+          [
+            -3,
+            9,
+            59.5
+          ]
+        ],
+        "corner_residuals": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "name": "B/Canonical"
+      },
+      {
+        "name": "singular instance matrix explicitly rejected",
+        "rejection": "Invalid or singular instance overlay transform"
+      },
+      {
+        "name": "projective instance matrix explicitly rejected",
+        "rejection": "Invalid or singular instance overlay transform"
+      },
+      {
+        "name": "actual native NaN transform rejected",
+        "rejection": "Invalid or singular native geometry transform"
+      },
+      {
+        "name": "actual native Infinity transform rejected",
+        "rejection": "Invalid or singular native geometry transform"
+      },
+      {
+        "A_id": "a5cd3e19-e27d-4f36-884e-5ed79f5298e4",
+        "A_payload_sha256": "0d190f115abb2d75e8e0f219d55e3270005fb4dcfa23da5de721544bcfbcea63",
+        "B_id": "b3782187-9d49-4517-83e5-c2781a1d6efc",
+        "definition_id": "fdaba251-b1af-4d9e-bef0-e9c1218588a8",
+        "definition_payload_sha256": "506782ef0eb48aac0ca9fc6585d4e9bfe612cb60c82fb515c01d16e8271eab0b",
+        "member_id": "489f96a3-1ea1-4628-942c-7c1e25f640b5",
+        "member_payload_sha256": "7d2ef49da1acb5d99268cf1edc4815f37d792ab7ed3c92af6f94472df64fd2d9",
+        "output": "H:\\FreeCAD-src\\build\\p0-instance-native-final-artifacts\\instance-fixtures\\instance-edited.3dm",
+        "source": "H:\\FreeCAD-src\\build\\p0-instance-native-final-artifacts\\instance-fixtures\\instance-source.3dm"
+      }
+    ],
+    "checks": [
+      {
+        "name": "authored local box valid",
+        "passed": true
+      },
+      {
+        "name": "independently resolved box outward",
+        "passed": true
+      },
+      {
+        "name": "authored model member has exact valid local bounds before baseline",
+        "passed": true
+      },
+      {
+        "name": "authored source V5 written",
+        "passed": true
+      },
+      {
+        "name": "artifact opened",
+        "passed": true
+      },
+      {
+        "name": "two placements expand without canonical duplication",
+        "passed": true
+      },
+      {
+        "name": "instance output is native CAD",
+        "passed": true
+      },
+      {
+        "name": "expanded leaf belongs to an exact authored root UUID",
+        "passed": true
+      },
+      {
+        "name": "each authored root expands once",
+        "passed": true
+      },
+      {
+        "name": "exact eight native corners",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "instance output is native CAD",
+        "passed": true
+      },
+      {
+        "name": "expanded leaf belongs to an exact authored root UUID",
+        "passed": true
+      },
+      {
+        "name": "each authored root expands once",
+        "passed": true
+      },
+      {
+        "name": "exact eight native corners",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "both exact root identities observed",
+        "passed": true
+      },
+      {
+        "name": "exact component identity found",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "exact component identity found",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "exact component identity found",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "two placements expand without canonical duplication",
+        "passed": true
+      },
+      {
+        "name": "instance output is native CAD",
+        "passed": true
+      },
+      {
+        "name": "expanded leaf belongs to an exact authored root UUID",
+        "passed": true
+      },
+      {
+        "name": "each authored root expands once",
+        "passed": true
+      },
+      {
+        "name": "exact eight native corners",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "instance output is native CAD",
+        "passed": true
+      },
+      {
+        "name": "expanded leaf belongs to an exact authored root UUID",
+        "passed": true
+      },
+      {
+        "name": "each authored root expands once",
+        "passed": true
+      },
+      {
+        "name": "exact eight native corners",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "no ambiguous corner match",
+        "passed": true
+      },
+      {
+        "name": "bijective independent world corner",
+        "passed": true
+      },
+      {
+        "name": "both exact root identities observed",
+        "passed": true
+      },
+      {
+        "name": "native payload diagnostic opened",
+        "passed": true
+      },
+      {
+        "name": "native payload diagnostic written",
+        "passed": true
+      },
+      {
+        "name": "exact component identity found",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "native payload diagnostic opened",
+        "passed": true
+      },
+      {
+        "name": "native payload diagnostic written",
+        "passed": true
+      },
+      {
+        "name": "native payload diagnostic opened",
+        "passed": true
+      },
+      {
+        "name": "native payload diagnostic written",
+        "passed": true
+      },
+      {
+        "name": "exact component identity found",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "native payload diagnostic opened",
+        "passed": true
+      },
+      {
+        "name": "native payload diagnostic written",
+        "passed": true
+      },
+      {
+        "name": "native payload diagnostic opened",
+        "passed": true
+      },
+      {
+        "name": "native payload diagnostic written",
+        "passed": true
+      },
+      {
+        "name": "exact component identity found",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "native payload diagnostic opened",
+        "passed": true
+      },
+      {
+        "name": "native payload diagnostic written",
+        "passed": true
+      },
+      {
+        "name": "exact component identity found",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "B overlay leaves exact native canonical geometry payload",
+        "passed": true
+      },
+      {
+        "name": "exact component identity found",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "B overlay leaves exact native sibling payload",
+        "passed": true
+      },
+      {
+        "name": "exact component identity found",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "B overlay leaves exact native shared definition payload",
+        "passed": true
+      },
+      {
+        "name": "artifact opened",
+        "passed": true
+      },
+      {
+        "name": "B overlay leaves input archive bytes unchanged",
+        "passed": true
+      },
+      {
+        "name": "artifact opened",
+        "passed": true
+      },
+      {
+        "name": "singular instance matrix explicitly rejected",
+        "passed": true
+      },
+      {
+        "name": "artifact opened",
+        "passed": true
+      },
+      {
+        "name": "artifact opened",
+        "passed": true
+      },
+      {
+        "name": "invalid writer preserves destination and source bytes",
+        "passed": true
+      },
+      {
+        "name": "projective instance matrix explicitly rejected",
+        "passed": true
+      },
+      {
+        "name": "artifact opened",
+        "passed": true
+      },
+      {
+        "name": "artifact opened",
+        "passed": true
+      },
+      {
+        "name": "invalid writer preserves destination and source bytes",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "actual native NaN transform rejected",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "native invalid transform rejected before geometry mutation",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "actual native Infinity transform rejected",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "native invalid transform rejected before geometry mutation",
+        "passed": true
+      },
+      {
+        "name": "exact component identity found",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "exact component identity found",
+        "passed": true
+      },
+      {
+        "name": "native object serialized",
+        "passed": true
+      },
+      {
+        "name": "retained original native owners unchanged after all calls",
+        "passed": true
+      }
+    ],
+    "error": "",
+    "fixture_length_unit": "mm",
+    "length_tolerance": 1e-07,
+    "schema": 1
+  },
+  "native_report_path": "H:\\FreeCAD-src\\build\\p0-instance-native-final-artifacts\\results.json",
+  "native_report_sha256": "237bc3d93758a48ced2d83695e39f0331ce9ade64dc46f99699697c84b77f965",
+  "native": {
+    "checks": 146,
+    "regression_suites": [
+      "Blocks",
+      "NativeTransform",
+      "Merge",
+      "ModelingExchange"
+    ],
+    "build_exit": 0,
+    "run_exit": 0,
+    "ctest_exit": 0,
+    "executable": {
+      "path": "H:\\FreeCAD-src\\build\\rcore-native\\ThreeDmInstanceIsolationTests.exe",
+      "sha256": "3a21039c487e5d086d6c53608a4f74b6794f6bfefe1ff82b8beea448a4194e4c"
+    }
+  },
+  "accepted_runs": [
+    {
+      "suite": "T06",
+      "count": 69,
+      "process_exit": 0,
+      "path": "build/merge_replay-1/7df9aa4dabe7493bbd9b142d940c0559/results.json",
+      "result_sha256": "c462a91e492725dcc651116be431a6def44209e041839f4e91d823775736378c",
+      "module_proof": "build/merge_replay-1/7df9aa4dabe7493bbd9b142d940c0559/merge-native-module.json",
+      "module_proof_sha256": "de1b1e85106c4711d6c1c05df9cbd716dba422e27a4e37b775359aa691865656",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7df9aa4dabe7493bbd9b142d940c0559\\edited-structural.3dm",
+          "sha256": "af5a511ef1da5d0353da849a30565f933fe6bf9c15e567fbc0bfc9a629971ad3"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7df9aa4dabe7493bbd9b142d940c0559\\initial-structural.3dm",
+          "sha256": "0a6c6244afa9a4c1501b1c0d67d47bb2902945acc05537dd4a933aba2ca8257c"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7df9aa4dabe7493bbd9b142d940c0559\\merge-native-module.json",
+          "sha256": "de1b1e85106c4711d6c1c05df9cbd716dba422e27a4e37b775359aa691865656"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7df9aa4dabe7493bbd9b142d940c0559\\progress.json",
+          "sha256": "281c01af6272c7be6498437208dd72ea869fff06851120c7c7ebdb436ff20bdd"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7df9aa4dabe7493bbd9b142d940c0559\\results.json",
+          "sha256": "c462a91e492725dcc651116be431a6def44209e041839f4e91d823775736378c"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7df9aa4dabe7493bbd9b142d940c0559\\shared-instances.FCStd",
+          "sha256": "72c1c2d6bc4df8c3649ad86f5ba42cba160ef49ef2ba4dc25d6eaa99d746cf0f"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7df9aa4dabe7493bbd9b142d940c0559\\working-current.3dm",
+          "sha256": "d61fdc7518bafea90224acfa0d511276347d27176ef2881b1d61e311326b1124"
+        }
+      ],
+      "macro": "rhino_core_instance_isolation_smoke.FCMacro",
+      "macro_sha256": "96062e6a19e7c14d088c818ba9d68fe64a597bd1282aa5d03d42ae9560e4a9fe",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "61708e51c37e9dc150d355b968a5be9ab29886858ae9ce0cea108fc2b87e5e09"
+    },
+    {
+      "suite": "new-blocks",
+      "count": 29,
+      "process_exit": 0,
+      "path": "build/merge_replay-1/046b74d10162481a9bf16c4ed140f47a/results.json",
+      "result_sha256": "01ba7d7ea40202b8e42174de37e2ae25e3d0220287e7b5b94341785fd1407807",
+      "module_proof": "build/merge_replay-1/046b74d10162481a9bf16c4ed140f47a/merge-native-module.json",
+      "module_proof_sha256": "2b52f22c60edbdca7401feb4df2168013501e03c023fb4b41483c3f69a39df0b",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\046b74d10162481a9bf16c4ed140f47a\\0.brep",
+          "sha256": "0e2bc8192d672463c25365f242f7ff9b48de4caf69cd75d35be691f067225cba"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\046b74d10162481a9bf16c4ed140f47a\\1.brep",
+          "sha256": "53e1735f63efaac198c30a2f6ba86d009c05cedf5d200d26c55026ee0147cd28"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\046b74d10162481a9bf16c4ed140f47a\\2.brep",
+          "sha256": "9cf7c6d9a5a119bd3ec2add23183a0a473551e64ce68bb0249317e73c27b6a84"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\046b74d10162481a9bf16c4ed140f47a\\included-source.FCStd",
+          "sha256": "da361db7c1f6ebdfd88d46bc594ab704e85c224a576b6b1c5c884c4f8b0e9439"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\046b74d10162481a9bf16c4ed140f47a\\merge-native-module.json",
+          "sha256": "2b52f22c60edbdca7401feb4df2168013501e03c023fb4b41483c3f69a39df0b"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\046b74d10162481a9bf16c4ed140f47a\\new-blocks.3dm",
+          "sha256": "1cc2ca599eae063f7f4d3cd1b722be3fd49b0c3a83b837080dee843e632f93c0"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\046b74d10162481a9bf16c4ed140f47a\\new-blocks.FCStd",
+          "sha256": "8036d578aecf7fb4dcb5a60e88903f38c85a52e56a4acd1793db8e3238cd0ffa"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\046b74d10162481a9bf16c4ed140f47a\\results.json",
+          "sha256": "01ba7d7ea40202b8e42174de37e2ae25e3d0220287e7b5b94341785fd1407807"
+        }
+      ],
+      "macro": "three_dm_new_blocks_smoke.FCMacro",
+      "macro_sha256": "70ee734ad30714865ef9f98a03e4fcba34c2070895324603a8263bdc7596a55e",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "61708e51c37e9dc150d355b968a5be9ab29886858ae9ce0cea108fc2b87e5e09"
+    }
+  ],
+  "application_assertions": 98,
+  "complete_fixtures": [
+    "RCORE-01.T06"
+  ],
+  "source_files": [
+    {
+      "path": "Gui/ThreeDmArchive.cpp",
+      "sha256": "5c18f465c7141847a2337a41fc7d940714601c99ed3d8c393fa189f5224ebcd0",
+      "unchanged_from_parent": true
+    },
+    {
+      "path": "Gui/ThreeDmTransforms.cpp",
+      "sha256": "aaec4422174faee6e1fd51a666931ad95da04f452c3efb6c1bd6ec9cbd9ed395",
+      "unchanged_from_parent": true
+    },
+    {
+      "path": "Gui/ThreeDmMerge.cpp",
+      "sha256": "8690af306b4f3d0c9e07e432328f803fe2dc088a779859130fb7325e33b14d83",
+      "unchanged_from_parent": true
+    },
+    {
+      "path": "Gui/ThreeDmInventory.cpp",
+      "sha256": "711187180e69fd423878851add379bf25761e23ee0067b803f92dff92613e748",
+      "unchanged_from_parent": true
+    },
+    {
+      "path": "Gui/ThreeDmBrep.cpp",
+      "sha256": "54162f12baf400a38042acbf1d9fcc543e79080c7e6ea9f867be854bb257de40",
+      "unchanged_from_parent": true
+    },
+    {
+      "path": "Gui/ThreeDmStaging.cpp",
+      "sha256": "70457375be4ba1cbb7dd1b23466b1237df1e1a828232e2ccf46a506f4f55903d",
+      "unchanged_from_parent": true
+    },
+    {
+      "path": "ThreeDm.py",
+      "sha256": "348f514a53f62199c25ba9fc63d2bbb8fd9da27183b10b761b55000c0298c76d",
+      "unchanged_from_parent": true
+    },
+    {
+      "path": "ThreeDmArchiveState.py",
+      "sha256": "6b2bf6afb2b189805eb7520945a9931239cadc42cae394a09051e83da545180e",
+      "unchanged_from_parent": true
+    },
+    {
+      "path": "rust/src/core_3dm.rs",
+      "sha256": "e5b3f368058bb903818ddd128b23770b1de40f02c1c51e74ca78a365789ce18a",
+      "unchanged_from_parent": true
+    },
+    {
+      "path": "rust/src/core_3dm_archive.rs",
+      "sha256": "86bed2afc534079903c8fc0547a8ff4e53a7646a9314f97e2ec217510f1eef62",
+      "unchanged_from_parent": true
+    },
+    {
+      "path": "cmake/OpenNURBS.cmake",
+      "sha256": "bec4936dee0e990372a0b246360f4807f3f0255a557677f1d5b64a46f4eb6b33",
+      "unchanged_from_parent": true
+    },
+    {
+      "path": "tests/native/CMakeLists.txt",
+      "sha256": "9b6408fb98392b809692d8e5abb633ecaf64a5d6925722474f3677051c04dcae",
+      "unchanged_from_parent": false
+    },
+    {
+      "path": "tests/native/rhino_core_instance_isolation.cpp",
+      "sha256": "f8ec96cada1dba32eec5e3354306e921ed37d1cdf7d9c172bea0c2c0b5309df9",
+      "unchanged_from_parent": false
+    },
+    {
+      "path": "tests/rhino_core_instance_isolation_smoke.FCMacro",
+      "sha256": "96062e6a19e7c14d088c818ba9d68fe64a597bd1282aa5d03d42ae9560e4a9fe",
+      "unchanged_from_parent": false
+    },
+    {
+      "path": "tests/three_dm_new_blocks_smoke.FCMacro",
+      "sha256": "70ee734ad30714865ef9f98a03e4fcba34c2070895324603a8263bdc7596a55e",
+      "unchanged_from_parent": false
+    }
+  ],
+  "source_reviews": [
+    {
+      "path": "docs/reviews/2026-10-10-instance-isolation-review.md",
+      "sha256": "a4e6259e70089c65a44ab1fbb5187d3c863cdb570fea549d3dbfbc0aee36b127"
+    }
+  ],
+  "reuse_audit": {
+    "path": "H:\\FreeCAD-src\\build\\p0-next-instance-reuse.md",
+    "sha256": "5a5fb3e3037e650206d77f4085531b32af04011a9f2d0eb8f3312140f3c3b0d9"
+  },
+  "prior_reused_proof": {
+    "path": "docs/validation/2026-10-10-rhino-core-polycurve-partition-evidence.json",
+    "sha256": "c05880a02b226cff775c9826ce98dd2ce9520a2ffdbcb63a316a35b12c0de24a",
+    "rust523_sdk0_not_rerun": true
+  },
+  "artifacts": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-final-artifacts\\instance-fixtures\\current-A.bin",
+      "sha256": "0d190f115abb2d75e8e0f219d55e3270005fb4dcfa23da5de721544bcfbcea63"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-final-artifacts\\instance-fixtures\\current-definition.bin",
+      "sha256": "506782ef0eb48aac0ca9fc6585d4e9bfe612cb60c82fb515c01d16e8271eab0b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-final-artifacts\\instance-fixtures\\current-member.bin",
+      "sha256": "7d2ef49da1acb5d99268cf1edc4815f37d792ab7ed3c92af6f94472df64fd2d9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-final-artifacts\\instance-fixtures\\instance-edited.3dm",
+      "sha256": "8e36e64f3cd14352f1b8e1341ee2debe70af4161ff5f04df6867d4383e310021"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-final-artifacts\\instance-fixtures\\instance-source.3dm",
+      "sha256": "ac142227e824e6d87bedebf19c605404b15b9fac26fe5a26cf1df972520ed655"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-final-artifacts\\instance-fixtures\\original-A.bin",
+      "sha256": "0d190f115abb2d75e8e0f219d55e3270005fb4dcfa23da5de721544bcfbcea63"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-final-artifacts\\instance-fixtures\\original-definition.bin",
+      "sha256": "506782ef0eb48aac0ca9fc6585d4e9bfe612cb60c82fb515c01d16e8271eab0b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-final-artifacts\\instance-fixtures\\original-member.bin",
+      "sha256": "7d2ef49da1acb5d99268cf1edc4815f37d792ab7ed3c92af6f94472df64fd2d9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-final-artifacts\\results.json",
+      "sha256": "237bc3d93758a48ced2d83695e39f0331ce9ade64dc46f99699697c84b77f965"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-acceptance-build.log",
+      "sha256": "3b05ce7260faaecf9814abd8b9f3a40d3d0cb6639a37d2e4b4f97c8d3721ff81"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-acceptance-exit.json",
+      "sha256": "ae30fb8b29ae95a96f9a6751eacae9ba19eeb0b8ca1ebb3189b5c1aec50b7756"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-acceptance-run.log",
+      "sha256": "89027aba4387735e31d9a4743dfd5188263e3fe805e9531e65f4bcedcd618ebe"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-baseline-build.log",
+      "sha256": "9af63f65a4dbd2785f578ae85ee066a1c4e494245cda965b02f78961bd034c9b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-baseline-exit.json",
+      "sha256": "75eec5c6f2e348f87a6f8e078543d4114affba7e24ca0a71d01fdaf43b632542"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-compile-fixed-build.log",
+      "sha256": "3b05ce7260faaecf9814abd8b9f3a40d3d0cb6639a37d2e4b4f97c8d3721ff81"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-compile-fixed-exit.json",
+      "sha256": "2968202043b08eb3073c157a31fe193f11d582f46b96244cd6c7180101fd4b15"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-compile-fixed-results.json",
+      "sha256": "0ef539f95979bda942355ed7af996e2bdac7d9e9f8d37db7978f8ed34b2f74d9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-compile-fixed-run.log",
+      "sha256": "0c4ade448640c204c8fa8a25fb1b77719f7c4e4096a3f07c1602d08770311d4e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-corner-diagnostic-build.log",
+      "sha256": "3b05ce7260faaecf9814abd8b9f3a40d3d0cb6639a37d2e4b4f97c8d3721ff81"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-corner-diagnostic-exit.json",
+      "sha256": "86cbabe1e539e035dbe20eb5b565f7e3d31f1e512ffad717114b459a021c50a9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-corner-diagnostic-results.json",
+      "sha256": "76f03983feb72902ee736f56df7f817adc89cd4c615e39bd32a1317125c1d0be"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-corner-diagnostic-run.log",
+      "sha256": "0c4ade448640c204c8fa8a25fb1b77719f7c4e4096a3f07c1602d08770311d4e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-final-build.log",
+      "sha256": "3b05ce7260faaecf9814abd8b9f3a40d3d0cb6639a37d2e4b4f97c8d3721ff81"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-final-exit.json",
+      "sha256": "d2dc11e90a2808a1930110afc9f5d05e202267dca8e15af158360c0d860c878d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-final-run.log",
+      "sha256": "89027aba4387735e31d9a4743dfd5188263e3fe805e9531e65f4bcedcd618ebe"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-payload-diagnostic-build.log",
+      "sha256": "3b05ce7260faaecf9814abd8b9f3a40d3d0cb6639a37d2e4b4f97c8d3721ff81"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-payload-diagnostic-exit.json",
+      "sha256": "c46768e072569d85df45d1fcb30c4d2c6b616eadd79f34df60ce5ca6d54eb5b6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-payload-diagnostic-results.json",
+      "sha256": "4167715c5dcbf840bb1dd18453619a21d660087c9c144a09472d53954dc1b3ee"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-payload-diagnostic-run.log",
+      "sha256": "f55cd57df32cbe27d16c592e9cbb880fa8fa7de4d750cd9670a473f789a45e37"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-root-identity-build.log",
+      "sha256": "3b05ce7260faaecf9814abd8b9f3a40d3d0cb6639a37d2e4b4f97c8d3721ff81"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-root-identity-exit.json",
+      "sha256": "0180fe87648294816ebc73b5d5d753b3917b45f4662c085c2ecb8955c5388801"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-root-identity-results.json",
+      "sha256": "744488a934108bfd22f342d082413eb5c4927761193adca8c64dc0dd97e489f2"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-root-identity-run.log",
+      "sha256": "4fac1e4ef7992b6431145d19eb466d42bfb2bfe53401a67bd041ffc8b28680a8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-valid-cache-build.log",
+      "sha256": "3b05ce7260faaecf9814abd8b9f3a40d3d0cb6639a37d2e4b4f97c8d3721ff81"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-valid-cache-exit.json",
+      "sha256": "270ee2f4280b0bffb27d7a0712e376a22a1df89ac0bc7eee4731dee47724309f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-valid-cache-results.json",
+      "sha256": "5a8860293cca0817ff8e9a47d52d1f6163431c202bbf96cd65a68009f477810f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-native-valid-cache-run.log",
+      "sha256": "89027aba4387735e31d9a4743dfd5188263e3fe805e9531e65f4bcedcd618ebe"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-regressions-build.log",
+      "sha256": "039452b3adbd20bc71c65b7064ef4cfea35caba96dc253d2365ebaa6f1765d9b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-regressions-ctest.log",
+      "sha256": "1dc1c628f99dff7332b80171dc75b5995989a5d9d2030a4fab232a58ab1d71c2"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-instance-regressions-exit.json",
+      "sha256": "1a9007ee0d1b93d78bcb1a65ee37ec8101b99a7f6501b9d76ff23e197ee89a2b"
+    }
+  ],
+  "excluded_runs": [
+    {
+      "path": "build/merge_replay-1/76ac701cda5145d7921234dd11d01cf9",
+      "reason": "BBox-only predicate ignored pinned numerical padding; actual corners correct."
+    },
+    {
+      "path": "build/merge_replay-1/f44f03ecc5804851ac75eee19e7ed11d",
+      "reason": "BBox roundoff budget omitted prior larger coordinate operations; corners unchanged."
+    },
+    {
+      "path": "build/merge_replay-1/f9d9a983c41246aab6ffb125fee1ea09",
+      "reason": "Full inventory equality includes independently allocated output-layer UUIDs; geometry unchanged."
+    },
+    {
+      "path": "build/merge_replay-1/845b55c03ff040289f42950e7c104e87",
+      "reason": "64checks passed with correct A/B data; superseded by stronger current macro69checks."
+    },
+    {
+      "artifact": "p0-instance-native-baseline",
+      "reason": "Fixture ON_3dPoint explicit constructor compile failure."
+    },
+    {
+      "artifact": "p0-instance-native-compile-fixed",
+      "reason": "Wrong name-based table selected for A/Canonical."
+    },
+    {
+      "artifact": "p0-instance-native-corner-diagnostic",
+      "reason": "Same wrong table; exact actual A coordinates retained."
+    },
+    {
+      "artifact": "p0-instance-native-root-identity",
+      "reason": "Unprimed serialized model-member bbox differs after necessary writer bounds computation."
+    },
+    {
+      "artifact": "p0-instance-native-payload-diagnostic",
+      "reason": "13bbox/chunkCRC bytes differ; sibling and definition exact. Not a geometry transform bug."
+    },
+    {
+      "artifact": "p0-instance-native-valid-cache",
+      "reason": "146pass predates persisted concrete error reasons; superseded by immutable acceptance proof."
+    }
+  ],
+  "spec_package": {
+    "manifest_entries": 664,
+    "manifest_sha256": "287b09fbe12e3afac48b19ff43535ba98cd3ec784c8756498c6cf8f89c99ba28",
+    "json_yaml_equal": true,
+    "catalog_status_changes": [],
+    "command_capability_changes": []
+  },
+  "limits": [
+    "Authored two-root shared native box fixture only; complete nested/all-family/attribute/History/command UI parity remains open.",
+    "Host bbox numerical enclosure padding1e-7+64ULP is separate from unchanged1e-7mm bijective corner oracle.",
+    "Independent host output layer UUIDs are unclaimed; raw inventories retained, exact geometry projection and native full serialization checked.",
+    "Authored native model member bbox cache is primed before source baseline; unprimed cache immutability is not claimed.",
+    "Archive expansion finite-determinant overflow/empty-definition coverage remains unverified.",
+    "FCStd saved, but no fresh-process T06 cold reopening claim; native owners/lifetime/global memory safety remain caller obligations."
+  ],
+  "public_source_audit": {
+    "exit": 0,
+    "raw_log": "H:\\FreeCAD-src\\build\\p0-instance-public-audit.log",
+    "raw_log_sha256": "ec7cf6126563104f8455f897fe2c385132ee9b7f32ae997e2fa2fcc4359ab40f",
+    "result": {
+      "source_files": 2130,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    }
+  }
+}

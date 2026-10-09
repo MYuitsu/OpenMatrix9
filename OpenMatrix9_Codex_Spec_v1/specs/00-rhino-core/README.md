@@ -1,5 +1,13 @@
 # 00 - Nền tảng Rhino và khả năng tái sử dụng FreeCAD
 
+<!-- rhino-core-instance-isolation:start -->
+Dùng lại App::Link, mirror/scale không đều và các exporter hiện có; thêm fixture
+kiểm đúng tọa độ, giữ nguyên member/definition/instance A khi chỉ sửa B.
+T06 đã nghiệm thu:146 kiểm tra native,98 kiểm tra FreeCAD và4 bộ hồi quy native.
+Không cần viết lại code instance. **Toàn bộ P0 vẫn đang triển khai.**
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-10-rhino-core-instance-isolation.md).
+<!-- rhino-core-instance-isolation:end -->
+
 <!-- rhino-core-polycurve-partition:start -->
 Dùng lại wire, đảo hướng và FCStd của FreeCAD; sửa bước working 3DM để polycurve
 giữ từng đoạn thay vì gộp thành một cạnh. Rust kiểm tra thứ tự, miền và điểm nối;

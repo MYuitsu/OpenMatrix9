@@ -1,0 +1,128 @@
+"""RCORE-01.T06: authored shared-definition fixture using existing native APIs."""
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,hashlib,traceback,tempfile,math
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+report={'checks':[],'fixture_length_unit':'mm','length_tolerance':1e-7,'ledgers':{}}
+TOL=1e-7
+A=((105,207,309),(107,207,309),(107,210,309),(105,210,309),(105,207,313),(107,207,313),(107,210,313),(105,210,313))
+B=((-1,20,44.5),(-1,16,44.5),(-10,16,44.5),(-10,20,44.5),(-1,20,46.5),(-1,16,46.5),(-10,16,46.5),(-10,20,46.5))
+DELTA=(7,-11,13)
+MOVED=tuple(tuple(p[i]+DELTA[i] for i in range(3)) for p in B)
+MA=[1,0,0,104,0,1,0,205,0,0,1,306,0,0,0,1]
+MB=[0,-3,0,5,-2,0,0,22,0,0,.5,43,0,0,0,1]
+MM=[0,-3,0,12,-2,0,0,11,0,0,.5,56,0,0,0,1]
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    (out/'progress.json').write_text(json.dumps(report,indent=2))
+    if not value:raise AssertionError(name)
+def xyz(v):return [v.x,v.y,v.z]
+def distance(a,b):return math.hypot(*(a[i]-b[i] for i in range(3)))
+def brep(shape):return shape.exportBrepToString().encode('utf-8')
+def sha(data):return hashlib.sha256(data).hexdigest()
+def world(link):return Part.getShape(link,'',needSubElement=False,transform=True).copy(copyGeom=True,copyMesh=False)
+def member_stamp(member,definition):
+    return {'member_name':member.Name,'member_uuid':member.OM9NewGeometryUUID,'member_brep':sha(brep(member.Shape)),
+            'member_placement':list(member.Placement.toMatrix().A),'definition_uuid':definition.OM9NewDefinitionUUID,
+            'definition_placement':list(definition.Placement.toMatrix().A),'members':[o.Name for o in definition.Group]}
+def link_stamp(link):
+    return {'uuid':link.OM9NewInstanceUUID,'target':link.LinkedObject.OM9NewDefinitionUUID,'placement':list(link.Placement.toMatrix().A),
+            'scale':xyz(link.ScaleVector),'link_transform':link.LinkTransform,'world_brep':sha(brep(world(link)))}
+def verify(name,shape,expected):
+    copied=shape.copy(copyGeom=True,copyMesh=False)
+    actual=[xyz(v.Point) for v in copied.Vertexes];box=copied.optimalBoundingBox(False,False)
+    bounds=[box.XMin,box.XMax,box.YMin,box.YMax,box.ZMin,box.ZMax]
+    wanted=[f(p[i] for p in expected) for i in range(3) for f in (min,max)]
+    residuals=[];matched=[]
+    for p in expected:
+        errors=[distance(p,q) for q in actual];indices=[i for i,e in enumerate(errors) if e<=TOL]
+        matched.extend(indices);residuals.append(min(errors) if errors else None)
+    # AddOptimal(False,False) still uses OCCT Precision::Confusion in numerical
+    # curve/surface bounds. Record that enclosure padding separately from geometry.
+    bbox_padding=1e-7
+    bbox_roundoff=64*math.ulp(max(1.,*(abs(v) for v in bounds+wanted)))
+    report['ledgers'][name]={'vertices':actual,'expected':expected,'corner_residuals':residuals,'bounds':bounds,'expected_bounds':wanted,'kernel_bbox_padding':bbox_padding,'kernel_bbox_roundoff_allowance':bbox_roundoff,'solid_count':len(copied.Solids),'volume':copied.Volume,'world_brep_sha256':sha(brep(copied))}
+    check(name+' is native CAD with one solid and eight corners',len(copied.Solids)==1 and len(actual)==8)
+    check(name+' independent corner oracle is bijective',len(matched)==8 and len(set(matched))==8 and all(e is not None and e<=TOL for e in residuals))
+    check(name+' kernel bounds agree within declared enclosure padding',all(abs(v-w)<=bbox_padding+bbox_roundoff for v,w in zip(bounds,wanted)))
+def near_matrix(a,b):return len(a)==len(b)==16 and all(math.isfinite(x) and abs(x-y)<=1e-10 for x,y in zip(a,b))
+def native_ledger(native,path,tag,expected_b):
+    inventory=json.loads(native.inspect3dm(str(path)));report.setdefault('inventories',{})[tag]=inventory
+    definitions=[r for r in inventory['components'] if r['class_name']=='ON_InstanceDefinition']
+    roots=[r for r in inventory['records'] if r['class_name']=='ON_InstanceRef' and r['role']=='top-level']
+    members=[r for r in inventory['records'] if r['role']=='definition-member']
+    check(tag+' has exactly one canonical member definition and two roots',len(definitions)==1 and len(members)==1 and len(roots)==2 and members[0]['class_name']=='ON_Brep')
+    check(tag+' roots share one definition with distinct identities',roots[0]['source_uuid']!=roots[1]['source_uuid'] and all(r['instance_definition_uuid']==definitions[0]['source_uuid'] for r in roots) and definitions[0]['dependencies']==[members[0]['source_uuid']])
+    root_a=next(r for r in roots if r['name']=='A');root_b=next(r for r in roots if r['name']=='B')
+    check(tag+' authored once-applied instance matrices',near_matrix(root_a['instance_matrix'],MA) and near_matrix(root_b['instance_matrix'],MB if expected_b==B else MM))
+    with tempfile.TemporaryDirectory() as staging:
+        decoded=json.loads(native.read3dm(str(path),staging));check(tag+' expands two CAD leaves only',len(decoded['items'])==2)
+        seen=set()
+        for item in decoded['items']:
+            shape=Part.Shape();shape.read(item['brep']);is_a=item['root_uuid']==root_a['source_uuid']
+            check(tag+' native root identity belongs to selected pair once',item['root_uuid'] not in seen and (is_a or item['root_uuid']==root_b['source_uuid']))
+            seen.add(item['root_uuid'])
+            verify(tag+('-A' if is_a else '-B'),shape,A if is_a else expected_b)
+        check(tag+' covers both exact selected root identities',seen=={root_a['source_uuid'],root_b['source_uuid']})
+    return {'definition':definitions[0],'member':members[0],'A':root_a,'B':root_b}
+def run():
+    documents=[]
+    try:
+        import ThreeDm, OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        report['native_module']=str(native.__file__);report['native_sha256']=sha(Path(native.__file__).read_bytes())
+        doc=App.newDocument('InstanceIsolation');documents.append(doc.Name);doc.UndoMode=1
+        member=doc.addObject('Part::Feature','Member');member.Shape=Part.makeBox(2,3,4);member.Placement.Base=App.Vector(1,2,3)
+        definition=ThreeDm.create_definition(doc,[member],'Shared');definition.Placement.Base=App.Vector(4,5,6)
+        a=ThreeDm.create_instance(definition,App.Placement(App.Vector(100,200,300),App.Rotation()),'A')
+        b=ThreeDm.create_instance(definition,App.Placement(App.Vector(20,30,40),App.Rotation(App.Vector(0,0,1),90)),'B');b.ScaleVector=App.Vector(-2,3,.5);doc.recompute()
+        check('two real links target the exact same definition',a.LinkedObject==b.LinkedObject==definition and definition.Group==[member] and a.LinkTransform and b.LinkTransform)
+        verify('initial-A',world(a),A);verify('initial-B',world(b),B)
+        canonical=member_stamp(member,definition);sibling=link_stamp(a);report['initial_canonical']=canonical;report['initial_sibling']=sibling
+        initial=out/'initial-structural.3dm';ThreeDm.export_preserved(str(initial),[a,b]);original_native=native_ledger(native,initial,'initial',B);initial_bytes=initial.read_bytes()
+        check('initial structural export leaves canonical member and sibling exact',canonical==member_stamp(member,definition) and sibling==link_stamp(a))
+        before_undo=doc.UndoCount;doc.openTransaction('Move B only');placement=b.Placement;placement.Base+=App.Vector(*DELTA);b.Placement=placement;doc.recompute();doc.commitTransaction()
+        verify('moved-B',world(b),MOVED);verify('unchanged-A',world(a),A)
+        check('B-only edit is one Undo and leaves shared member and A exact',doc.UndoCount==before_undo+1 and canonical==member_stamp(member,definition) and sibling==link_stamp(a))
+        edited=out/'edited-structural.3dm';ThreeDm.export_preserved(str(edited),[a,b]);changed_native=native_ledger(native,edited,'edited',MOVED)
+        geometry_keys=('source_uuid','class_uuid','class_name','role','geometry_crc','instance_matrix','instance_definition_uuid')
+        geometry_record=lambda row:{k:row[k] for k in geometry_keys if k in row}
+        # New output layer UUIDs are independently allocated on each export.
+        # Preserve all raw inventory rows, but inspect geometry identities/CRC,
+        # target and matrix separately from unclaimed output-table identities.
+        check('B structural edit leaves exact native member and sibling geometry records',geometry_record(original_native['member'])==geometry_record(changed_native['member']) and geometry_record(original_native['A'])==geometry_record(changed_native['A']))
+        check('B structural edit leaves definition semantic record exact',original_native['definition']==changed_native['definition'])
+        check('original exported source archive bytes unchanged',initial.read_bytes()==initial_bytes)
+        doc.undo();doc.recompute();verify('undo-B',world(b),B);check('Undo keeps canonical and sibling exact',canonical==member_stamp(member,definition) and sibling==link_stamp(a))
+        doc.redo();doc.recompute();verify('redo-B',world(b),MOVED);check('Redo keeps canonical and sibling exact',canonical==member_stamp(member,definition) and sibling==link_stamp(a))
+        working=out/'working-current.3dm';ThreeDm.export_file(str(working),[a,b],modeling=True)
+        with tempfile.TemporaryDirectory() as staging:
+            prepared=json.loads(native.prepareModeling3dm(str(working),staging));check('working export has two independent CAD leaves',len(prepared['items'])==2 and all(i['geometry_kind']==3 and i['representation']=='native-cad' for i in prepared['items']))
+            seen=set()
+            for item in prepared['items']:
+                check('working leaf belongs to authored pair once',item['name'] in ('A','B') and item['name'] not in seen);seen.add(item['name'])
+                shape=Part.Shape();shape.read(item['brep']);verify('working-'+item['name'],shape,A if item['name']=='A' else MOVED)
+            check('working export covers A and B exactly once',seen=={'A','B'})
+        check('actual structural and working exports keep canonical and sibling exact',canonical==member_stamp(member,definition) and sibling==link_stamp(a))
+        sentinel=edited.read_bytes();doc.openTransaction('Invalid B scale');b.ScaleVector=App.Vector(0,3,.5);doc.recompute();doc.commitTransaction()
+        invalid={'count':len(doc.Objects),'undo':doc.UndoCount,'canonical':member_stamp(member,definition),'A':link_stamp(a),'B_scale':xyz(b.ScaleVector),'B_placement':list(b.Placement.toMatrix().A)}
+        error=None
+        try:ThreeDm.export_preserved(str(edited),[a,b])
+        except Exception as exc:error=str(exc)
+        report['singular_error']=error
+        check('singular current transform explicitly rejects',error is not None and ('singular' in error.lower() or 'transform' in error.lower()))
+        after={'count':len(doc.Objects),'undo':doc.UndoCount,'canonical':member_stamp(member,definition),'A':link_stamp(a),'B_scale':xyz(b.ScaleVector),'B_placement':list(b.Placement.toMatrix().A)}
+        check('singular rejection preserves document Undo and requested state',invalid==after)
+        check('singular rejection preserves existing output and source bytes',edited.read_bytes()==sentinel and initial.read_bytes()==initial_bytes)
+        doc.undo();doc.recompute();verify('restored-B',world(b),MOVED)
+        saved=out/'shared-instances.FCStd';doc.saveAs(str(saved));report['fcstd']=str(saved);report['fcstd_sha256']=sha(saved.read_bytes())
+        report['file_hashes']={p.name:sha(p.read_bytes()) for p in (initial,edited,working,saved)}
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in documents:
+            if App.getDocument(name):App.closeDocument(name)
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

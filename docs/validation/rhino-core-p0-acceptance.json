@@ -81,8 +81,11 @@
           "id": "RCORE-01.T06",
           "spec_requirement": "RCORE-01.T06 | Hai instances cùng definition, một instance mirror và scale không đều | Transform áp đúng một lần; không biến đổi definition của instance kia; unsupported transform phải từ chối rõ",
           "priority": "P0",
-          "status": "not_fully_verified",
-          "complete_evidence": []
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-instance-isolation-evidence.json"
+          ],
+          "verification_scope": "Authored shared local box definition/two links, once-applied mirror/nonuniform matrices and eight independent world corners; exact local member/definition/A stamps and native serialized payloads, B-only transactionUndoRedo, actual structural+working V5, named singular/projective/nativeNaNInfinity atomic rejections."
         },
         {
           "id": "RCORE-01.T07",
@@ -1121,5 +1124,5 @@
       ]
     }
   ],
-  "updated_at": "2026-10-10T02:43:11+07:00"
+  "updated_at": "2026-10-10T03:10:51+07:00"
 }
