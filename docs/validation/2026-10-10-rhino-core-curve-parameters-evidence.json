@@ -1,0 +1,2231 @@
+{
+  "schema_version": 1,
+  "checkpoint": "rhino-core-curve-parameters",
+  "date": "2026-10-10T01:50:39+07:00",
+  "parent_commit": "e5633b7",
+  "p0_status": "in_progress",
+  "native_module": {
+    "path": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+    "sha256": "803bdc39d0877cf17e0bb5159c347be84f90e2cc740f9265b14847bcb1ee45a2"
+  },
+  "native_query_report": {
+    "cases": [
+      {
+        "after_clamp_periodic": false,
+        "attributes_preserved": null,
+        "before_clamp_periodic": false,
+        "fixture_length_unit": "mm",
+        "frame": "native_conversion_local",
+        "get_nurb_form_domain": [
+          0,
+          6.283185307179586
+        ],
+        "global_deviation": null,
+        "length_tolerance": 1e-07,
+        "length_unit": null,
+        "locus_preserved": null,
+        "locus_sample_count": 1001,
+        "measurement_scope": "requested point samples only",
+        "method": "ON_GetNurbForm_to_OCCT",
+        "name": "circle-r10-radians",
+        "native_conversion_tolerance": 0,
+        "native_form": 2,
+        "parameter_map": null,
+        "parameter_tolerance": 1e-10,
+        "parameter_unit": "native source/target domain units",
+        "parameterization_preserved": null,
+        "queries": [
+          {
+            "intermediate_point": [
+              10,
+              0,
+              0
+            ],
+            "inverse_parameter": 0,
+            "mapped_parameter": 0,
+            "native_point": [
+              10,
+              0,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              10,
+              0,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              0,
+              0,
+              0
+            ],
+            "schema_version": 1,
+            "source_parameter": 0,
+            "source_point": [
+              10,
+              0,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              8.660254037844389,
+              4.9999999999999964,
+              0
+            ],
+            "inverse_parameter": 0.5235987755982985,
+            "mapped_parameter": 0.5357693747613761,
+            "native_point": [
+              8.660254037844389,
+              4.9999999999999964,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              8.722604191027173,
+              4.890416764108682,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              3.2023728339893768e-15,
+              3.2023728339893768e-15,
+              0.12607944792998133
+            ],
+            "schema_version": 1,
+            "source_parameter": 0.5235987755982988,
+            "source_point": [
+              8.660254037844387,
+              4.999999999999999,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              5.000000000000003,
+              8.660254037844384,
+              0
+            ],
+            "inverse_parameter": 1.0471975511965974,
+            "mapped_parameter": 1.0350269520335198,
+            "native_point": [
+              5.000000000000003,
+              8.660254037844384,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              4.890416764108685,
+              8.72260419102717,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              2.5121479338940403e-15,
+              2.5121479338940403e-15,
+              0.1260794479299797
+            ],
+            "schema_version": 1,
+            "source_parameter": 1.0471975511965976,
+            "source_point": [
+              5.000000000000001,
+              8.660254037844386,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              -8.660254037844382,
+              5.000000000000008,
+              0
+            ],
+            "inverse_parameter": 2.6179938779914935,
+            "mapped_parameter": 2.605823278828416,
+            "native_point": [
+              -8.660254037844382,
+              5.000000000000008,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              -8.722604191027171,
+              4.890416764108682,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              1.03578512786223e-14,
+              1.03578512786223e-14,
+              0.12607944792998046
+            ],
+            "schema_version": 1,
+            "source_parameter": 2.6179938779914944,
+            "source_point": [
+              -8.660254037844387,
+              4.999999999999999,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              3.505343201912592,
+              9.365498867481922,
+              0
+            ],
+            "inverse_parameter": 1.21265476428566,
+            "mapped_parameter": 1.1967394093929462,
+            "native_point": [
+              3.5053432019125927,
+              9.365498867481923,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              3.355009772247314,
+              9.420398581170812,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              2.8435583831733384e-15,
+              3.1086244689504383e-15,
+              0.16004411466232138
+            ],
+            "schema_version": 1,
+            "source_parameter": 1.2126547642856602,
+            "source_point": [
+              3.5053432019125896,
+              9.365498867481923,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              -7.417417727387392,
+              -6.706855765367201,
+              0
+            ],
+            "inverse_parameter": 3.8767253345298047,
+            "mapped_parameter": 3.8793261150864993,
+            "native_point": [
+              -7.417417727387391,
+              -6.7068557653672,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              -7.435776265978384,
+              -6.68649619175189,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              2.5121479338940403e-15,
+              2.808666774861361e-15,
+              0.027414379018939648
+            ],
+            "schema_version": 1,
+            "source_parameter": 3.8767253345298047,
+            "source_point": [
+              -7.417417727387393,
+              -6.706855765367199,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              7.823908105765872,
+              -6.227877804881135,
+              0
+            ],
+            "inverse_parameter": 5.610884479311369,
+            "mapped_parameter": 5.60512457860821,
+            "native_point": [
+              7.82390810576587,
+              -6.227877804881136,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              7.8614742523978,
+              -6.180390163969135,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              1.2623387138745463e-14,
+              1.4458497151625688e-14,
+              0.06054990844053404
+            ],
+            "schema_version": 1,
+            "source_parameter": 5.610884479311371,
+            "source_point": [
+              7.82390810576588,
+              -6.227877804881126,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              10,
+              0,
+              0
+            ],
+            "inverse_parameter": 6.283185307179586,
+            "mapped_parameter": 6.283185307179586,
+            "native_point": [
+              10,
+              0,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              10,
+              0,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              0,
+              0,
+              0
+            ],
+            "schema_version": 1,
+            "source_parameter": 6.283185307179586,
+            "source_point": [
+              10,
+              0,
+              0
+            ]
+          }
+        ],
+        "sampled_radius_residual": 3.552713678800501e-15,
+        "schema_version": 1,
+        "source_crc": 1661844819,
+        "source_domain": [
+          0,
+          6.283185307179586
+        ],
+        "source_identity": null,
+        "stages": [
+          "GetNurbForm full domain",
+          "ClampEnd(2) owned buffer",
+          "OCCT rational B-spline reconstruction"
+        ],
+        "target_basis": {
+          "convention": "openNURBS expanded structural view after ClampEnd",
+          "degree": 2,
+          "domain": [
+            0,
+            6.283185307179586
+          ],
+          "knots": [
+            0,
+            1.5707963267948966,
+            3.141592653589793,
+            4.71238898038469,
+            6.283185307179586
+          ],
+          "multiplicities": [
+            3,
+            2,
+            2,
+            2,
+            3
+          ],
+          "periodic": false,
+          "poles": [
+            [
+              10,
+              0,
+              0
+            ],
+            [
+              10,
+              10,
+              0
+            ],
+            [
+              6.123233995736766e-16,
+              10,
+              0
+            ],
+            [
+              -9.999999999999998,
+              10,
+              0
+            ],
+            [
+              -10,
+              1.2246467991473533e-15,
+              0
+            ],
+            [
+              -10,
+              -9.999999999999998,
+              0
+            ],
+            [
+              -1.8369701987210296e-15,
+              -10,
+              0
+            ],
+            [
+              9.999999999999996,
+              -10,
+              0
+            ],
+            [
+              10,
+              0,
+              0
+            ]
+          ],
+          "weights": [
+            1,
+            0.7071067811865476,
+            1,
+            0.7071067811865476,
+            1,
+            0.7071067811865476,
+            1,
+            0.7071067811865476,
+            1
+          ]
+        },
+        "target_domain": [
+          0,
+          6.283185307179586
+        ],
+        "topology_preserved": null
+      },
+      {
+        "after_clamp_periodic": false,
+        "attributes_preserved": null,
+        "before_clamp_periodic": false,
+        "fixture_length_unit": "mm",
+        "frame": "native_conversion_local",
+        "get_nurb_form_domain": [
+          2,
+          7
+        ],
+        "global_deviation": null,
+        "length_tolerance": 1e-07,
+        "length_unit": null,
+        "locus_preserved": null,
+        "locus_sample_count": 1001,
+        "measurement_scope": "requested point samples only",
+        "method": "ON_GetNurbForm_to_OCCT",
+        "name": "circle-r10-domain-2-7",
+        "native_conversion_tolerance": 0,
+        "native_form": 2,
+        "parameter_map": null,
+        "parameter_tolerance": 1e-10,
+        "parameter_unit": "native source/target domain units",
+        "parameterization_preserved": null,
+        "queries": [
+          {
+            "intermediate_point": [
+              10,
+              0,
+              0
+            ],
+            "inverse_parameter": 2,
+            "mapped_parameter": 2,
+            "native_point": [
+              10,
+              0,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              10,
+              0,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              0,
+              0,
+              0
+            ],
+            "schema_version": 1,
+            "source_parameter": 2,
+            "source_point": [
+              10,
+              0,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              8.660254037844382,
+              5.000000000000007,
+              0
+            ],
+            "inverse_parameter": 2.4166666666666674,
+            "mapped_parameter": 2.4263517217526367,
+            "native_point": [
+              8.660254037844382,
+              5.000000000000006,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              8.722604191027173,
+              4.890416764108682,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              1.03578512786223e-14,
+              9.607118501968132e-15,
+              0.12607944792998058
+            ],
+            "schema_version": 1,
+            "source_parameter": 2.4166666666666665,
+            "source_point": [
+              8.660254037844387,
+              4.999999999999998,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              5.000000000000013,
+              8.66025403784438,
+              0
+            ],
+            "inverse_parameter": 2.833333333333332,
+            "mapped_parameter": 2.823648278247363,
+            "native_point": [
+              5.000000000000012,
+              8.66025403784438,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              4.890416764108687,
+              8.72260419102717,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              1.112884370092863e-14,
+              1.03578512786223e-14,
+              0.12607944792998046
+            ],
+            "schema_version": 1,
+            "source_parameter": 2.833333333333333,
+            "source_point": [
+              5.0000000000000036,
+              8.660254037844386,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              -8.660254037844382,
+              5.000000000000008,
+              0
+            ],
+            "inverse_parameter": 4.083333333333333,
+            "mapped_parameter": 4.073648278247363,
+            "native_point": [
+              -8.660254037844382,
+              5.000000000000008,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              -8.722604191027173,
+              4.890416764108677,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              1.432144669219779e-14,
+              1.432144669219779e-14,
+              0.12607944792998202
+            ],
+            "schema_version": 1,
+            "source_parameter": 4.083333333333334,
+            "source_point": [
+              -8.660254037844389,
+              4.999999999999996,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              3.5053432019125914,
+              9.365498867481923,
+              0
+            ],
+            "inverse_parameter": 2.965,
+            "mapped_parameter": 2.952334962988814,
+            "native_point": [
+              3.5053432019125914,
+              9.365498867481923,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              3.355009772247317,
+              9.42039858117081,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              4.440892098500626e-16,
+              4.440892098500626e-16,
+              0.16004411466231996
+            ],
+            "schema_version": 1,
+            "source_parameter": 2.965,
+            "source_point": [
+              3.505343201912592,
+              9.365498867481923,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              -7.41741772738739,
+              -6.706855765367204,
+              0
+            ],
+            "inverse_parameter": 5.085000000000001,
+            "mapped_parameter": 5.0870696354074765,
+            "native_point": [
+              -7.417417727387389,
+              -6.706855765367203,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              -7.435776265978384,
+              -6.68649619175189,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              6.4047456679787536e-15,
+              6.2803698347351005e-15,
+              0.027414379018939648
+            ],
+            "schema_version": 1,
+            "source_parameter": 5.085,
+            "source_point": [
+              -7.417417727387393,
+              -6.706855765367199,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              7.82390810576587,
+              -6.227877804881137,
+              0
+            ],
+            "inverse_parameter": 6.464999999999998,
+            "mapped_parameter": 6.460416416656868,
+            "native_point": [
+              7.823908105765868,
+              -6.227877804881137,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              7.861474252397798,
+              -6.180390163969137,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              1.512513347095137e-14,
+              1.632896157031126e-14,
+              0.06054990844053155
+            ],
+            "schema_version": 1,
+            "source_parameter": 6.465,
+            "source_point": [
+              7.82390810576588,
+              -6.227877804881126,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              10,
+              0,
+              0
+            ],
+            "inverse_parameter": 7,
+            "mapped_parameter": 7,
+            "native_point": [
+              10,
+              0,
+              0
+            ],
+            "query_action": 2,
+            "raw_native_point": [
+              10,
+              0,
+              0
+            ],
+            "raw_parameter_reusable": false,
+            "sampled_residuals": [
+              0,
+              0,
+              0
+            ],
+            "schema_version": 1,
+            "source_parameter": 7,
+            "source_point": [
+              10,
+              0,
+              0
+            ]
+          }
+        ],
+        "sampled_radius_residual": 5.329070518200751e-15,
+        "schema_version": 1,
+        "source_crc": 3128256781,
+        "source_domain": [
+          2,
+          7
+        ],
+        "source_identity": null,
+        "stages": [
+          "GetNurbForm full domain",
+          "ClampEnd(2) owned buffer",
+          "OCCT rational B-spline reconstruction"
+        ],
+        "target_basis": {
+          "convention": "openNURBS expanded structural view after ClampEnd",
+          "degree": 2,
+          "domain": [
+            2,
+            7
+          ],
+          "knots": [
+            2,
+            3.25,
+            4.5,
+            5.75,
+            7
+          ],
+          "multiplicities": [
+            3,
+            2,
+            2,
+            2,
+            3
+          ],
+          "periodic": false,
+          "poles": [
+            [
+              10,
+              0,
+              0
+            ],
+            [
+              10,
+              10,
+              0
+            ],
+            [
+              6.123233995736766e-16,
+              10,
+              0
+            ],
+            [
+              -9.999999999999998,
+              10,
+              0
+            ],
+            [
+              -10,
+              1.2246467991473533e-15,
+              0
+            ],
+            [
+              -10,
+              -9.999999999999998,
+              0
+            ],
+            [
+              -1.8369701987210296e-15,
+              -10,
+              0
+            ],
+            [
+              9.999999999999996,
+              -10,
+              0
+            ],
+            [
+              10,
+              0,
+              0
+            ]
+          ],
+          "weights": [
+            1,
+            0.7071067811865476,
+            1,
+            0.7071067811865476,
+            1,
+            0.7071067811865476,
+            1,
+            0.7071067811865476,
+            1
+          ]
+        },
+        "target_domain": [
+          2,
+          7
+        ],
+        "topology_preserved": null
+      },
+      {
+        "after_clamp_periodic": false,
+        "attributes_preserved": null,
+        "before_clamp_periodic": false,
+        "frame": "native_conversion_local",
+        "get_nurb_form_domain": [
+          0,
+          15.707963267948966
+        ],
+        "global_deviation": null,
+        "length_tolerance": 1e-07,
+        "length_unit": null,
+        "locus_preserved": null,
+        "measurement_scope": "requested point samples only",
+        "method": "ON_GetNurbForm_to_OCCT",
+        "native_conversion_tolerance": 0,
+        "native_form": 1,
+        "parameter_map": null,
+        "parameter_tolerance": 1e-10,
+        "parameter_unit": "native source/target domain units",
+        "parameterization_preserved": null,
+        "queries": [
+          {
+            "intermediate_point": [
+              10,
+              0,
+              0
+            ],
+            "inverse_parameter": 0,
+            "mapped_parameter": 0,
+            "native_point": [
+              10,
+              0,
+              0
+            ],
+            "query_action": 1,
+            "raw_native_point": [
+              10,
+              0,
+              0
+            ],
+            "raw_parameter_reusable": true,
+            "sampled_residuals": [
+              0,
+              0,
+              0
+            ],
+            "schema_version": 1,
+            "source_parameter": 0,
+            "source_point": [
+              10,
+              0,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              9.590113233446795,
+              2.8336774992346396,
+              0
+            ],
+            "inverse_parameter": 3.0316369107141505,
+            "mapped_parameter": 3.0316369107141505,
+            "native_point": [
+              9.590113233446791,
+              2.8336774992346383,
+              0
+            ],
+            "query_action": 1,
+            "raw_native_point": [
+              9.590113233446791,
+              2.8336774992346383,
+              0
+            ],
+            "raw_parameter_reusable": true,
+            "sampled_residuals": [
+              0,
+              3.794299872214038e-15,
+              3.794299872214038e-15
+            ],
+            "schema_version": 1,
+            "source_parameter": 3.0316369107141505,
+            "source_point": [
+              9.590113233446795,
+              2.8336774992346396,
+              0
+            ]
+          },
+          {
+            "intermediate_point": [
+              6.123233995736766e-16,
+              10,
+              0
+            ],
+            "inverse_parameter": 15.707963267948966,
+            "mapped_parameter": 15.707963267948966,
+            "native_point": [
+              6.123233995736766e-16,
+              10,
+              0
+            ],
+            "query_action": 1,
+            "raw_native_point": [
+              6.123233995736766e-16,
+              10,
+              0
+            ],
+            "raw_parameter_reusable": true,
+            "sampled_residuals": [
+              0,
+              0,
+              0
+            ],
+            "schema_version": 1,
+            "source_parameter": 15.707963267948966,
+            "source_point": [
+              6.123233995736766e-16,
+              10,
+              0
+            ]
+          }
+        ],
+        "schema_version": 1,
+        "source_crc": 1629324164,
+        "source_domain": [
+          0,
+          15.707963267948966
+        ],
+        "source_identity": null,
+        "stages": [
+          "GetNurbForm full domain",
+          "ClampEnd(2) owned buffer",
+          "OCCT rational B-spline reconstruction"
+        ],
+        "target_basis": {
+          "convention": "openNURBS expanded structural view after ClampEnd",
+          "degree": 2,
+          "domain": [
+            0,
+            15.707963267948966
+          ],
+          "knots": [
+            0,
+            15.707963267948966
+          ],
+          "multiplicities": [
+            3,
+            3
+          ],
+          "periodic": false,
+          "poles": [
+            [
+              10,
+              0,
+              0
+            ],
+            [
+              10,
+              10,
+              0
+            ],
+            [
+              6.123233995736766e-16,
+              10,
+              0
+            ]
+          ],
+          "weights": [
+            1,
+            0.7071067811865476,
+            1
+          ]
+        },
+        "target_domain": [
+          0,
+          15.707963267948966
+        ],
+        "topology_preserved": null
+      },
+      {
+        "after_clamp_periodic": false,
+        "attributes_preserved": null,
+        "before_clamp_periodic": false,
+        "frame": "native_conversion_local",
+        "get_nurb_form_domain": [
+          2,
+          7
+        ],
+        "global_deviation": null,
+        "length_tolerance": 1e-07,
+        "length_unit": null,
+        "locus_preserved": null,
+        "measurement_scope": "requested point samples only",
+        "method": "ON_GetNurbForm_to_OCCT",
+        "native_conversion_tolerance": 0,
+        "native_form": 1,
+        "parameter_map": null,
+        "parameter_tolerance": 1e-10,
+        "parameter_unit": "native source/target domain units",
+        "parameterization_preserved": null,
+        "queries": [
+          {
+            "intermediate_point": [
+              1,
+              2,
+              3
+            ],
+            "inverse_parameter": 2,
+            "mapped_parameter": 2,
+            "native_point": [
+              1,
+              2,
+              3
+            ],
+            "query_action": 1,
+            "raw_native_point": [
+              1,
+              2,
+              3
+            ],
+            "raw_parameter_reusable": true,
+            "sampled_residuals": [
+              0,
+              0,
+              0
+            ],
+            "schema_version": 1,
+            "source_parameter": 2,
+            "source_point": [
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "intermediate_point": [
+              3.74,
+              7.48,
+              11.220000000000002
+            ],
+            "inverse_parameter": 3.37,
+            "mapped_parameter": 3.37,
+            "native_point": [
+              3.74,
+              7.48,
+              11.220000000000002
+            ],
+            "query_action": 1,
+            "raw_native_point": [
+              3.74,
+              7.48,
+              11.220000000000002
+            ],
+            "raw_parameter_reusable": true,
+            "sampled_residuals": [
+              1.7763568394002505e-15,
+              1.7763568394002505e-15,
+              1.7763568394002505e-15
+            ],
+            "schema_version": 1,
+            "source_parameter": 3.37,
+            "source_point": [
+              3.74,
+              7.48,
+              11.22
+            ]
+          },
+          {
+            "intermediate_point": [
+              11,
+              22,
+              33
+            ],
+            "inverse_parameter": 7,
+            "mapped_parameter": 7,
+            "native_point": [
+              11,
+              22,
+              33
+            ],
+            "query_action": 1,
+            "raw_native_point": [
+              11,
+              22,
+              33
+            ],
+            "raw_parameter_reusable": true,
+            "sampled_residuals": [
+              0,
+              0,
+              0
+            ],
+            "schema_version": 1,
+            "source_parameter": 7,
+            "source_point": [
+              11,
+              22,
+              33
+            ]
+          }
+        ],
+        "schema_version": 1,
+        "source_crc": 3418558764,
+        "source_domain": [
+          2,
+          7
+        ],
+        "source_identity": null,
+        "stages": [
+          "GetNurbForm full domain",
+          "ClampEnd(2) owned buffer",
+          "OCCT rational B-spline reconstruction"
+        ],
+        "target_basis": {
+          "convention": "openNURBS expanded structural view after ClampEnd",
+          "degree": 1,
+          "domain": [
+            2,
+            7
+          ],
+          "knots": [
+            2,
+            7
+          ],
+          "multiplicities": [
+            2,
+            2
+          ],
+          "periodic": false,
+          "poles": [
+            [
+              1,
+              2,
+              3
+            ],
+            [
+              11,
+              22,
+              33
+            ]
+          ],
+          "weights": []
+        },
+        "target_domain": [
+          2,
+          7
+        ],
+        "topology_preserved": null
+      }
+    ],
+    "checks": [
+      {
+        "name": "circle domain authored",
+        "passed": true
+      },
+      {
+        "name": "native form2 is retained",
+        "passed": true
+      },
+      {
+        "name": "source domain retained",
+        "passed": true
+      },
+      {
+        "name": "matching target domain is separate from mapping",
+        "passed": true
+      },
+      {
+        "name": "actual converted edge valid",
+        "passed": true
+      },
+      {
+        "name": "complete requested batch only",
+        "passed": true
+      },
+      {
+        "name": "rational weights retained",
+        "passed": true
+      },
+      {
+        "name": "weights are not replaced with all1",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "pi6 mapped parameter differs from raw",
+        "passed": true
+      },
+      {
+        "name": "raw pi6 point mismatch demonstrates dependency error",
+        "passed": true
+      },
+      {
+        "name": "seam endpoint sides stay distinct",
+        "passed": true
+      },
+      {
+        "name": "separate target-domain sampled locus bound",
+        "passed": true
+      },
+      {
+        "name": "original analytic source unchanged",
+        "passed": true
+      },
+      {
+        "name": "global correspondence stays unknown",
+        "passed": true
+      },
+      {
+        "name": "circle domain authored",
+        "passed": true
+      },
+      {
+        "name": "native form2 is retained",
+        "passed": true
+      },
+      {
+        "name": "source domain retained",
+        "passed": true
+      },
+      {
+        "name": "matching target domain is separate from mapping",
+        "passed": true
+      },
+      {
+        "name": "actual converted edge valid",
+        "passed": true
+      },
+      {
+        "name": "complete requested batch only",
+        "passed": true
+      },
+      {
+        "name": "rational weights retained",
+        "passed": true
+      },
+      {
+        "name": "weights are not replaced with all1",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "validated native nonlinear query",
+        "passed": true
+      },
+      {
+        "name": "mapped dependent point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "same prepared NURBS point matches independent analytic point",
+        "passed": true
+      },
+      {
+        "name": "inverse parameter meets declared bound",
+        "passed": true
+      },
+      {
+        "name": "form2 never authorizes raw parameter reuse",
+        "passed": true
+      },
+      {
+        "name": "pi6 mapped parameter differs from raw",
+        "passed": true
+      },
+      {
+        "name": "raw pi6 point mismatch demonstrates dependency error",
+        "passed": true
+      },
+      {
+        "name": "seam endpoint sides stay distinct",
+        "passed": true
+      },
+      {
+        "name": "separate target-domain sampled locus bound",
+        "passed": true
+      },
+      {
+        "name": "original analytic source unchanged",
+        "passed": true
+      },
+      {
+        "name": "global correspondence stays unknown",
+        "passed": true
+      },
+      {
+        "name": "line domain authored",
+        "passed": true
+      },
+      {
+        "name": "line native form1 retained",
+        "passed": true
+      },
+      {
+        "name": "line identity allowed at inspected query only",
+        "passed": true
+      },
+      {
+        "name": "line target actual point matches source",
+        "passed": true
+      },
+      {
+        "name": "line identity allowed at inspected query only",
+        "passed": true
+      },
+      {
+        "name": "line target actual point matches source",
+        "passed": true
+      },
+      {
+        "name": "line identity allowed at inspected query only",
+        "passed": true
+      },
+      {
+        "name": "line target actual point matches source",
+        "passed": true
+      },
+      {
+        "name": "line source immutable",
+        "passed": true
+      },
+      {
+        "name": "independent rational NURBS control authored",
+        "passed": true
+      },
+      {
+        "name": "already NURBS form1 retained",
+        "passed": true
+      },
+      {
+        "name": "already NURBS inspected identity",
+        "passed": true
+      },
+      {
+        "name": "already NURBS inspected identity",
+        "passed": true
+      },
+      {
+        "name": "already NURBS inspected identity",
+        "passed": true
+      },
+      {
+        "name": "NURBS source immutable across clamp",
+        "passed": true
+      },
+      {
+        "name": "empty batch imports geometry without mapping promise",
+        "passed": true
+      },
+      {
+        "name": "copied report survives original native owners",
+        "passed": true
+      },
+      {
+        "name": "copied target basis survives native owners",
+        "passed": true
+      },
+      {
+        "name": "bad native mapping publishes no result",
+        "passed": true
+      },
+      {
+        "name": "failed mapping leaves source unchanged",
+        "passed": true
+      },
+      {
+        "name": "one native forward call for valid request",
+        "passed": true
+      },
+      {
+        "name": "bad forward output is rejected before inverse native call",
+        "passed": true
+      },
+      {
+        "name": "bad native mapping publishes no result",
+        "passed": true
+      },
+      {
+        "name": "failed mapping leaves source unchanged",
+        "passed": true
+      },
+      {
+        "name": "one native forward call for valid request",
+        "passed": true
+      },
+      {
+        "name": "bad forward output is rejected before inverse native call",
+        "passed": true
+      },
+      {
+        "name": "bad native mapping publishes no result",
+        "passed": true
+      },
+      {
+        "name": "failed mapping leaves source unchanged",
+        "passed": true
+      },
+      {
+        "name": "one native forward call for valid request",
+        "passed": true
+      },
+      {
+        "name": "bad forward output is rejected before inverse native call",
+        "passed": true
+      },
+      {
+        "name": "bad native mapping publishes no result",
+        "passed": true
+      },
+      {
+        "name": "failed mapping leaves source unchanged",
+        "passed": true
+      },
+      {
+        "name": "one native forward call for valid request",
+        "passed": true
+      },
+      {
+        "name": "bad forward output is rejected before inverse native call",
+        "passed": true
+      },
+      {
+        "name": "bad native mapping publishes no result",
+        "passed": true
+      },
+      {
+        "name": "failed mapping leaves source unchanged",
+        "passed": true
+      },
+      {
+        "name": "one native forward call for valid request",
+        "passed": true
+      },
+      {
+        "name": "bad forward output is rejected before inverse native call",
+        "passed": true
+      },
+      {
+        "name": "bad native mapping publishes no result",
+        "passed": true
+      },
+      {
+        "name": "failed mapping leaves source unchanged",
+        "passed": true
+      },
+      {
+        "name": "one native forward call for valid request",
+        "passed": true
+      },
+      {
+        "name": "bad forward output is rejected before inverse native call",
+        "passed": true
+      },
+      {
+        "name": "invalid source parameter rejected before mapping",
+        "passed": true
+      },
+      {
+        "name": "invalid source parameter rejected before mapping",
+        "passed": true
+      },
+      {
+        "name": "invalid source parameter rejected before mapping",
+        "passed": true
+      },
+      {
+        "name": "invalid requests never call native mapping",
+        "passed": true
+      },
+      {
+        "name": "query budget rejects before conversion/query results",
+        "passed": true
+      },
+      {
+        "name": "undeclared length bound rejected",
+        "passed": true
+      },
+      {
+        "name": "negative native conversion tolerance rejected",
+        "passed": true
+      },
+      {
+        "name": "malformed-count control starts from valid NURBS",
+        "passed": true
+      },
+      {
+        "name": "raw storage/count gate precedes Domain and CRC reads",
+        "passed": true
+      }
+    ],
+    "error": "",
+    "fixture": "RCORE-01.T10.native-query-slice",
+    "passed": true,
+    "schema_version": 1
+  },
+  "native_query_report_sha256": "e26fe3b7a29800f15144411bfe360da197549aa937b048b5ddb86688f191d471",
+  "native": {
+    "query_checks": 159,
+    "kernel_checks": 59,
+    "regression_suites": [
+      "NativeBasisGate",
+      "Geometry",
+      "TrimInteriorMapping",
+      "MultiShellSolid"
+    ],
+    "build_exit": 0,
+    "query_exit": 0,
+    "kernel_exit": 0,
+    "ctest_exit": 0,
+    "executables": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\rcore-native\\ThreeDmCurveParameterTests.exe",
+        "sha256": "9157b8969c7c8ba8f3eac2ca6b3c02222699353e737d8578102e5cd52a8012bc"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\rcore-native\\ThreeDmKernelContractTests.exe",
+        "sha256": "5f2b7adbab04a5c9c185475581c2b709e1b1dd3a55cc7003ec82fd469bdfbfe5"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\rcore-native\\NurbsBasisContractTests.exe",
+        "sha256": "ac824427eb5af610bd5cf34f75c2bf3cc1803211036265ba81b236c0286cbc92"
+      }
+    ]
+  },
+  "build": {
+    "configure_exit": 0,
+    "build_exit": 0
+  },
+  "rust": {
+    "tests_passed": 502,
+    "test_exit": 0,
+    "clippy_exit": 0,
+    "existing_warnings": true
+  },
+  "python": {
+    "run": 50,
+    "passed": 49,
+    "skipped": 1,
+    "exit": 0,
+    "runner": "unittest discover -s tools/tests"
+  },
+  "accepted_runs": [
+    {
+      "suite": "modeling-exchange",
+      "count": 32,
+      "process_exit": 0,
+      "path": "build/merge_replay-1/48c178502eb847e1afd904f91a0933ec/results.json",
+      "result_sha256": "8e9aa502a1f83a40a7ccf6f05d1269b8a976c550f51d8d835f748972eebb640d",
+      "module_proof": "build/merge_replay-1/48c178502eb847e1afd904f91a0933ec/merge-native-module.json",
+      "module_proof_sha256": "193316e60547ed3d0838ad35d2650c69961fdad014ff32ed2e53a09e5fcbaf02",
+      "macro": "modeling_exchange_smoke.FCMacro",
+      "macro_sha256": "53c8e706e1bf648f24d4a809b8364e310124d1a2ef5c77a7ef4e6f050d7bef68",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "803bdc39d0877cf17e0bb5159c347be84f90e2cc740f9265b14847bcb1ee45a2"
+    },
+    {
+      "suite": "kernel",
+      "count": 142,
+      "process_exit": 0,
+      "path": "build/merge_replay-1/56f1204a6e864fa5b92cd63c538bee1f/results.json",
+      "result_sha256": "77dd032951af4a96843f5dbf0b63e60791a6118d30d2435a3e2298a83b06ee81",
+      "module_proof": "build/merge_replay-1/56f1204a6e864fa5b92cd63c538bee1f/merge-native-module.json",
+      "module_proof_sha256": "f352f971ac11ff2e83c86db5c1234b941fc94053c41db0d70383cb16b19d9bfd",
+      "macro": "rhino_core_kernel_contract_smoke.FCMacro",
+      "macro_sha256": "5032a961fb9870a916e46faec6d7caf95c63d0a349d2a7ac341c4a22ee34e4d9",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "803bdc39d0877cf17e0bb5159c347be84f90e2cc740f9265b14847bcb1ee45a2"
+    },
+    {
+      "suite": "spline",
+      "count": 41,
+      "process_exit": 0,
+      "path": "build/merge_replay-1/40240fbddc974f08925e65658ebec4d8/results.json",
+      "result_sha256": "5f448e7e985e3f20b90da9e8778773bb116daf19b133ea6d6d25a9b11d75faa8",
+      "module_proof": "build/merge_replay-1/40240fbddc974f08925e65658ebec4d8/merge-native-module.json",
+      "module_proof_sha256": "4aa49bb2caa973143b4c386cbea1e9d1e4cb368b1c31f7ae1965ff9c98024fad",
+      "macro": "curve_spline_smoke.FCMacro",
+      "macro_sha256": "b74c0e86b4133aee06854e3f88206e87632dea2b94cf68c55344e8d1326b6c66",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "803bdc39d0877cf17e0bb5159c347be84f90e2cc740f9265b14847bcb1ee45a2"
+    },
+    {
+      "suite": "circle",
+      "count": 42,
+      "process_exit": 0,
+      "path": "build/merge_replay-1/1da6d128a0504e8bbafef296da3168e8/results.json",
+      "result_sha256": "c89855d6121557af019c2d7a1fd0faf8365c925e4ad63fec8fd22bb3e084fc2e",
+      "module_proof": "build/merge_replay-1/1da6d128a0504e8bbafef296da3168e8/merge-native-module.json",
+      "module_proof_sha256": "292276bbe4754bca03fca4db76b18999e032e85ca470c1dda640891dc2479bda",
+      "macro": "circle_smoke.FCMacro",
+      "macro_sha256": "ef8680386bc622569608caffeff3bad6a02dd409f9a6d80db2e31c33bb96dd65",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "803bdc39d0877cf17e0bb5159c347be84f90e2cc740f9265b14847bcb1ee45a2"
+    }
+  ],
+  "application_assertions": 257,
+  "complete_fixtures": [
+    "RCORE-01.T01"
+  ],
+  "partial_fixtures": [
+    "RCORE-01.T07",
+    "RCORE-01.T10"
+  ],
+  "source_files": [
+    {
+      "path": "Gui/CurveConversionContract.h",
+      "sha256": "f70e2fff510ef7652a79345833c13eff055bd6b769654447668d248cb4db0d58"
+    },
+    {
+      "path": "Gui/CurveConversionContract.cpp",
+      "sha256": "5c950c807e3b7aa2537b9919d4589c6fb0b7521fb462a22ff2d76a6a2dbe0e03"
+    },
+    {
+      "path": "Gui/ThreeDmCurves.cpp",
+      "sha256": "4c65cb8baf9e194c5888125da7ce63841f132ada867767237cd136c6ea457669"
+    },
+    {
+      "path": "cmake/OpenNURBS.cmake",
+      "sha256": "71aa792005477d4461cafe71d8ffab8a66f2082db4da801052ba541bc5cecdbe"
+    },
+    {
+      "path": "tests/native/CMakeLists.txt",
+      "sha256": "7db49aee2f09c2e5fbb26484b161916062b8e3b1a4377da176abaf92f6ff1c93"
+    },
+    {
+      "path": "tests/native/rhino_core_curve_parameters.cpp",
+      "sha256": "c4a239096f08f26f2fef1f214f1494eaf9c42cfcc9fbddf4d712a52f03a58926"
+    },
+    {
+      "path": "rust/src/lib.rs",
+      "sha256": "1cc2e87fe94a2a89d55adffa918dbc8dc4a0d42e7e178a085021d7c607294522"
+    },
+    {
+      "path": "rust/src/curve_conversion.rs",
+      "sha256": "dc302e1f759abbfbf1c05f8cb9c831a7cf337b382fcfe857cefbfa48a111963a"
+    },
+    {
+      "path": "rust/src/curve_conversion_ffi.rs",
+      "sha256": "9d964b66dfd767ad2532e02713b0213a284723fa3d8dedee1a54487d284fa3a7"
+    },
+    {
+      "path": "rust/tests/curve_conversion.rs",
+      "sha256": "48646ec56f8754352930debc0401492e7d92d50a7829221bc12630486366a590"
+    },
+    {
+      "path": "rust/tests/curve_conversion_ffi.rs",
+      "sha256": "e4a6d70923215455ad2654781964f7d0c8c19e82ffa927f8a8344cebfed7a665"
+    }
+  ],
+  "source_reviews": [
+    {
+      "path": "docs/reviews/2026-10-10-curve-parameters-rust-review.md",
+      "sha256": "21dd52d01dfa7a2b808c3e5b3079b58b5987eeac29c6d6807a1db1bf62958a32"
+    },
+    {
+      "path": "docs/reviews/2026-10-10-curve-parameters-native-review.md",
+      "sha256": "51b3bec1b72641555c83aaa3d69ccd4cc5bb0039693c1031b63ae1d4094793d2"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-checks-exits.json",
+      "sha256": "3f11b17e9c7fff5965542795de8561e9fd6420f4d31a604ca5bbad0fd03813d0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-clippy.log",
+      "sha256": "e7a997a17c5440ed5b9d91a0a43e8566d4a77291d322b6a7906919e8d8070c8c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-ffi-green-exit.json",
+      "sha256": "e4b39fa87bf976f1e9cf0705839446689048ecbd16b08163e79f7a16b8eea0cc"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-ffi-green.log",
+      "sha256": "477f31cb8522c2d0c2602e859d550c8719676544aa27945c2a9d0cbeb87682ac"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-ffi-red-exit.json",
+      "sha256": "0c76c7187353a6e207705af6ba334795e0a181509d56daca50e12e0406c50063"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-ffi-red.log",
+      "sha256": "3c434fd7d2cd11a4c817058c3ca39dbbcd3b1422e5c7e5aa02935216661075ab"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-gates-green-exit.json",
+      "sha256": "e4b39fa87bf976f1e9cf0705839446689048ecbd16b08163e79f7a16b8eea0cc"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-gates-green.log",
+      "sha256": "43e151f0c038f867d77b11e88b60be92bf1acdb18170247c022cd4529c6510c7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-gates-red-exit.json",
+      "sha256": "0c76c7187353a6e207705af6ba334795e0a181509d56daca50e12e0406c50063"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-gates-red.log",
+      "sha256": "9da2ce549d59371d57d63f6a176073c5fa1a1a92226948c95336ea7f4702f981"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-kernel-results.json",
+      "sha256": "f14f1b625aec416aace94ff52bd6d43efc4b4de8862280d3baf2169b5468a9c9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-mapped-gate-red-exit.json",
+      "sha256": "0c76c7187353a6e207705af6ba334795e0a181509d56daca50e12e0406c50063"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-mapped-gate-red.log",
+      "sha256": "5299cf9ff0124e80307bf521833aadaee7fc82764edf46bdb49d4027d31ede59"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-domain-green-build.log",
+      "sha256": "d8db44d713c0c74bbd4da797e7727cd3db256c64d281ed6ac82f7da868625cf0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-domain-green-exit.json",
+      "sha256": "1ac600d5208f1933664f661a47769a0f9e86618dbfbe723ae55e7fdf2f1b453c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-domain-green-results.json",
+      "sha256": "61e917a2a360ab12ae171ee271c08835657233492b412188a81949e435315b1e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-domain-green-run.log",
+      "sha256": "c29603e2c040e7bdd7bb65ec8d4c781ad2cfab5d277b35ec34752e30f85bc5f0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-final-results.json",
+      "sha256": "e26fe3b7a29800f15144411bfe360da197549aa937b048b5ddb86688f191d471"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-green-build.log",
+      "sha256": "b02858a03fcc6884d68197605be26ca048d9be1a2b02469ae2137443f85cad08"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-green-exit.json",
+      "sha256": "50be3716728250e18ec0284a7bb9e5c9aa2d824596178343c5f12bfa772a3d44"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-green-results.json",
+      "sha256": "0a1d5832063ab9608d9a4e7361c94fd0800b6215321ee8706bfd0de764e913bc"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-green-run.log",
+      "sha256": "de02a865d476b42057908fe43d389958835abee037023b04cb3e86183eb845c2"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-green-build.log",
+      "sha256": "65e049ee2c74e9e8ced18104d197608479f46b1d13d551ab58a559cf93106921"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-green-exit.json",
+      "sha256": "802dc03f3fbf0c2c6992114dd8a568b8666f2c5bbdcf45160841900f2919f461"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-red-build.log",
+      "sha256": "5ce177d1de4f64b730560bf3da029d49056021359664e6c2dd3664b3a44d1e53"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-red-exit.json",
+      "sha256": "7cf915311d2098eada29a4825b37252959981fef9c22e53291ad386586f64bcf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-red-results.json",
+      "sha256": "e26fe3b7a29800f15144411bfe360da197549aa937b048b5ddb86688f191d471"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-red-run.log",
+      "sha256": "5e029d95ff501ddb2c9c4ea737cca71f72532953ea8e60197a244b90f972d7f7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-rerun-green-build.log",
+      "sha256": "e5ca24c1e8bf2b0b6e123ab669b4dd104d68739e4ba1ab781a5593743f03b02f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-rerun-green-exit.json",
+      "sha256": "ccb9d3dfeeccbeb2baa41bb286ae927980a06625e78c526b09ce8a58bea71c35"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-rerun-green-results.json",
+      "sha256": "e26fe3b7a29800f15144411bfe360da197549aa937b048b5ddb86688f191d471"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-rerun-green-run.log",
+      "sha256": "5e029d95ff501ddb2c9c4ea737cca71f72532953ea8e60197a244b90f972d7f7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-rerun-red-build.log",
+      "sha256": "e5ca24c1e8bf2b0b6e123ab669b4dd104d68739e4ba1ab781a5593743f03b02f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-rerun-red-exit.json",
+      "sha256": "e9b280fb5f2263d7febca72aafc1c364b748ad577d8f0b8fbaffb5646ef84be4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-rerun-red-results.json",
+      "sha256": "a9ca4824be9c73e40ebb31ad71e155a9a61889ad44842808dedb2206fa00cad9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-preflight-rerun-red-run.log",
+      "sha256": "aed8fc6323f6315c84c7709ef8f2457ac4fd496762b79076bf1301af72df4cd9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-red-build.log",
+      "sha256": "81d974557532c02016304d94b9e98cf283b02a65da669d3c1a8613f963a9f26c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-red-exit.json",
+      "sha256": "3313dc32f71ff3daaeeccd3d668b14e63a386ee597cfdb3874ec7d2ebdbba686"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-red-results.json",
+      "sha256": "2d9ee123d5bf74b44995ec9fad50ef934a5cb4e9f83e07da155105a44722c093"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-red-run.log",
+      "sha256": "298f7374434058d9d8f2644e9ef14c0a1a6da932beaec269f9faa9bf7a78aae7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-regressions-build.log",
+      "sha256": "9a587172f9f7c287969b0e299438f678314ec5f79031354552cd703291dbe9b7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-regressions-ctest.log",
+      "sha256": "e57063584909bbf6c32701af143144a413b59d6a536340b2d4fa7c9401a9a270"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-regressions-exits.json",
+      "sha256": "b1f4b5bf3f37f79adb80121de12766847d6d323bb92f613fe5cf5d143745019b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-regressions-kernel.log",
+      "sha256": "0d7e289c50f5f4d88b7d9d3f92087282deb6de9a83afee2bfe804878770a25b3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-native-regressions-query.log",
+      "sha256": "5e029d95ff501ddb2c9c4ea737cca71f72532953ea8e60197a244b90f972d7f7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-python.log",
+      "sha256": "6499e0d465353fc8c67420fa6395a60c0bf1307d621613899e9ea73f69751f6a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-rust-full.log",
+      "sha256": "c77df838a28eaf93fdb7ba4b1c8b523d770f3a71bd12770c6299a9081c5672b2"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-rust-green-exit.json",
+      "sha256": "e4b39fa87bf976f1e9cf0705839446689048ecbd16b08163e79f7a16b8eea0cc"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-rust-green.log",
+      "sha256": "2cfe1b9dc05d17f7a877cde36deec0126485b09f88fd48c739b7ad14a636cc9a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-rust-red-exit.json",
+      "sha256": "0c76c7187353a6e207705af6ba334795e0a181509d56daca50e12e0406c50063"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-rust-red.log",
+      "sha256": "68d70906810147b0e33b2b33a96b974297f88e90351da7ed3384ad1709ce283f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-sdk-build.log",
+      "sha256": "908a5b08ce0756219a069b58d7ad9db035770a4a48a6630d2a0b9a91acd9b712"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-sdk-configure.log",
+      "sha256": "9befe6aeed5862ed73c18bdb6a4cf887d4ac43db76b21128eef09caed4a14e49"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-sdk-exits.json",
+      "sha256": "b7c326b7db3d5c25dc367c8d81d5683469405523df279c416ff29d962ddfc7d1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-tooling-unittest-exit.json",
+      "sha256": "5a05677ae6e255b8cfee5614f17eeefc62ece77150be523e03e2965696017dee"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-tooling-unittest.log",
+      "sha256": "86f824057d84cb5e1a1f4be53d7c0ea2805d95079469bdef0c848539274ceac0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-unittest-exit.json",
+      "sha256": "eb0c248c8f836450a93af0f120cf872da5251cfb851ed5d4ca4315b76e814915"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-curve-parameters-unittest.log",
+      "sha256": "fcecb6139633007e71a04d99e722d6813ab2e8fa6b163c8a23efcc7ce58fa29c"
+    }
+  ],
+  "excluded_runs": [
+    {
+      "artifact": "p0-curve-parameters-native-green-results.json",
+      "reason": "Fault fixture assumed radian constructor domain; actual default is arc length. Explicitly authored domain rerun passed."
+    },
+    {
+      "artifact": "p0-curve-parameters-native-preflight-red-exit.json",
+      "reason": "Overlapping shared build/source mutation invalidates RED interpretation; excluded."
+    },
+    {
+      "artifact": "p0-curve-parameters-native-preflight-green-exit.json",
+      "reason": "Overlapping compiler object lock failed build; excluded."
+    },
+    {
+      "artifact": "p0-curve-parameters-checks-exits.json",
+      "reason": "Rust/Clippy0 valid; initial pytest unavailable, Python1 is not a passing Python run."
+    },
+    {
+      "artifact": "p0-curve-parameters-unittest-exit.json",
+      "reason": "Wrong discovery directory, zero tests; correct tooling directory rerun passed."
+    },
+    {
+      "path": "build/merge_replay-1/2d84470d56f9450bab1588964c046ebc",
+      "reason": "Misspelled macro absent; no report. Exact identified test process8716 stopped, correct macro rerun passed."
+    }
+  ],
+  "spec_package": {
+    "manifest_entries": 664,
+    "manifest_sha256": "f6fd8dd9f16d70d484f92ba31a85f96fdff4fe28a5f293a1e5f258940882464b",
+    "json_yaml_equal": true,
+    "catalog_status_changes": [],
+    "command_capability_changes": []
+  },
+  "public_source_audit": {
+    "exit": 0,
+    "raw_log": "H:\\FreeCAD-src\\build\\p0-curve-parameters-public-audit.log",
+    "raw_log_sha256": "c102b88e9cc6916b174dc0a50a314894a2dbc113af716cf99d7a0ee70d442c85"
+  },
+  "limits": [
+    "Full T10/History and guarded host query integration are open.",
+    "Only finite full-domain import observations; global/affine map and preservation unknown.",
+    "Raw diagnostics outside target domain reject; transforms/subdomains/reversal/export and surface UV maps open.",
+    "Direct raw NURBS envelope checked before metadata, not all wrappers/aggregate allocations or full T07.",
+    "Standalone report has no host identity or length units; fixture units explicitly authored.",
+    "Sampled point/radius data, not a global certificate; native owners immutable/live during calls.",
+    "No new Rhino5 runtime parity or complete all-P0 claim."
+  ]
+}

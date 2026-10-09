@@ -1,5 +1,13 @@
 # OpenMatrix9
 
+<!-- rhino-core-curve-parameters:start -->
+Dùng lại openNURBS/OCCT cho báo cáo query tham số toàn miền: giữ native form1/2,
+chặn output lỗi trước khi tính điểm và giữ basis/report độc lập. 502 Rust tests;
+159 kiểm tra query native; 257 kiểm tra FreeCAD. Fixture RCORE-01.T01 đã nghiệm thu
+với oracle lấy mẫu; T10/History vẫn thiếu tích hợp host. **Toàn bộ P0 đang triển khai.**
+[Bằng chứng và giới hạn](docs/validation/2026-10-10-rhino-core-curve-parameters.md).
+<!-- rhino-core-curve-parameters:end -->
+
 <!-- rhino-core-kernel-contract:start -->
 Dùng lại bộ chuyển đổi FreeCAD/OCCT/openNURBS; bổ sung validator basis Rust,
 descriptor chỉ đọc và policy cho inspection/working 3DM. 480 Rust tests;

@@ -27,7 +27,8 @@
       "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
       "implementation_followup_evidence": [
         "../../../docs/validation/2026-10-09-rhino-core-object-foundations.md",
-        "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md"
+        "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+        "../../../docs/validation/2026-10-10-rhino-core-curve-parameters.md"
       ]
     },
     {
@@ -1666,6 +1667,16 @@
       ],
       "evidence": "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md",
       "scope": "Selected shared basis/descriptor/working-exchange gates and exact fixtures; no complete chapter or all-P0 closure."
+    },
+    {
+      "id": "rhino-core-curve-parameters",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-curve-parameters.md",
+      "scope": "Finite full-domain native curve parameter queries and T01 sampled fixture; broader T10/History and all P0 remain open."
     }
   ]
 }

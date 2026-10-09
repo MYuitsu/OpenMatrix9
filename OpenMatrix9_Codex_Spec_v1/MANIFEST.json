@@ -46,8 +46,8 @@
   },
   {
     "path": "IMPLEMENTATION_STATUS.md",
-    "bytes": 20255,
-    "sha256": "71efd73abb65c1fbfcacc40d92ed147fedf73662d6e95d699a00f3b083772d63"
+    "bytes": 20830,
+    "sha256": "0cac8bfaccef6de84b3e8404f29132c6c4755fcfaae8fb8a8ff296e2e62b095c"
   },
   {
     "path": "INDEX.md",
@@ -111,8 +111,8 @@
   },
   {
     "path": "specs/00-rhino-core/01-object-model-kernel.md",
-    "bytes": 23413,
-    "sha256": "32c386223b27cbbccc9ab50bffd4197fe9dedb70797d24cf25cb34fb07d4c1d0"
+    "bytes": 23994,
+    "sha256": "df04041785405a291e9052549fc62d1f3cb800b0c07146798082d39b7cc4d265"
   },
   {
     "path": "specs/00-rhino-core/02-units-tolerances.md",
@@ -171,8 +171,8 @@
   },
   {
     "path": "specs/00-rhino-core/CAPABILITY_LOOKUP.json",
-    "bytes": 74456,
-    "sha256": "980b197c7d7537f630b46f12639c474bfd3cc2a7506beaf503f4612275d21085"
+    "bytes": 74947,
+    "sha256": "98801c797fa007ba3adf833facde295129371c9576fc46ca5fea143dae30ef5f"
   },
   {
     "path": "specs/00-rhino-core/DECOMPILE_AUDIT.md",
@@ -181,8 +181,8 @@
   },
   {
     "path": "specs/00-rhino-core/README.md",
-    "bytes": 20106,
-    "sha256": "20ea294fe88d21bdfbeb5f53bbe5fa9ca0436b15ac1542db27e9bd4e1e5607ef"
+    "bytes": 20687,
+    "sha256": "9c4395c13ff97ac33c59f458f7275f985aa7ac6934106b31a7c4849d4855d1f3"
   },
   {
     "path": "specs/00-rhino-core/SOURCE_BASELINE.json",

@@ -1,5 +1,13 @@
 # RCORE-01 shared basis and geometry contracts
 
+<!-- rhino-core-curve-parameters:start -->
+Dùng lại openNURBS/OCCT cho báo cáo query tham số toàn miền: giữ native form1/2,
+chặn output lỗi trước khi tính điểm và giữ basis/report độc lập. 502 Rust tests;
+159 kiểm tra query native; 257 kiểm tra FreeCAD. Fixture RCORE-01.T01 đã nghiệm thu
+với oracle lấy mẫu; T10/History vẫn thiếu tích hợp host. **Toàn bộ P0 đang triển khai.**
+[Bằng chứng và giới hạn](../validation/2026-10-10-rhino-core-curve-parameters.md).
+<!-- rhino-core-curve-parameters:end -->
+
 Implementation target: Safe Rust owns structural validation, explicit limits,
 representation/operation policy, count budgets and copied facts. Native C++ owns
 FreeCAD object resolution, OCCT/openNURBS storage envelopes and value extraction;
