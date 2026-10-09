@@ -81,7 +81,15 @@ Ref transportedSections(PyObject* part,PyObject* wires,bool maintainHeight,const
 }
 }
 namespace OpenMatrix9Gui {
+namespace {
+void verifySurfaceInput(App::Document& doc,const SurfaceInput& input) {
+    // Empty guards are intentional for persistent History reconstruction and
+    // transient type probes. Accepted interactive selections always carry guards.
+    for(const auto& guard:input.guards)verifyObject(doc,guard);
+}
+}
 PyObject* surfaceWire(App::Document& doc,const SurfaceInput& input) {
+    verifySurfaceInput(doc,input);
     auto* object=doc.getObject(input.object.c_str());if(!object)throw std::runtime_error("An input curve was deleted");
     Ref part(PyImport_ImportModule("Part"));Ref pyObject(object->getPyObject());Ref original(PyObject_GetAttrString(pyObject.p,"Shape"));Ref shape(PyObject_CallMethod(original.p,"copy","OO",Py_True,Py_False));
     if(!input.chain.empty()){
@@ -130,6 +138,7 @@ PyObject* surfaceWire(App::Document& doc,const SurfaceInput& input) {
     return wire.release();
 }
 PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& inputs,const SurfaceOptions& options) {
+    for(const auto& input:inputs)verifySurfaceInput(doc,input);
     // Spec: OM9-SURFACE-001, OM9-SURFACE-003, OM9-SURFACE-009.
     const unsigned rails=options.kind==1?1:options.kind==2?2:0;
     if(options.kind<1||options.kind>3||inputs.size()<rails+(rails?1:2))throw std::runtime_error("Not enough input curves");
@@ -212,6 +221,7 @@ PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& input
 void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceInput>& inputs,const SurfaceOptions& options) {
     const char* name=options.kind==1?"Sweep1":options.kind==2?"Sweep2":"Loft";
     const char* feature=options.kind==1?"OM9-SURFACE-001":options.kind==2?"OM9-SURFACE-003":"OM9-SURFACE-009";
+    for(const auto& input:inputs)verifySurfaceInput(doc,input);
     doc.openTransaction(name);
     try {
         if(options.history){

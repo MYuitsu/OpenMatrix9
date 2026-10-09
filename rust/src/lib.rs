@@ -13,6 +13,7 @@ pub mod core_distance;
 pub mod core_keyboard;
 pub mod core_mouse;
 pub mod core_notes;
+pub mod core_objects;
 pub mod core_picture_frame;
 pub mod core_snaps;
 pub mod core_view_controls;

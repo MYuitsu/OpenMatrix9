@@ -120,6 +120,8 @@ set(
     OpenMatrix9Gui_SRCS
     CoreUnits.cpp
     CoreUnits.h
+    CoreObjects.cpp
+    CoreObjects.h
     CoreCPlanes.cpp
     CoreCPlanes.h
 

@@ -3789,6 +3789,11 @@
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
       "native_implementation_status": "partially_implemented"
+    },
+    "implementation_followup_evidence": {
+      "date": "2026-10-09",
+      "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+      "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
     }
   },
   {
@@ -3952,6 +3957,11 @@
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
       "native_implementation_status": "partially_implemented"
+    },
+    "implementation_followup_evidence": {
+      "date": "2026-10-09",
+      "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+      "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
     }
   },
   {
@@ -4085,6 +4095,11 @@
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
       "native_implementation_status": "partially_implemented"
+    },
+    "implementation_followup_evidence": {
+      "date": "2026-10-09",
+      "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+      "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
     }
   },
   {
@@ -8849,6 +8864,11 @@
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
       "native_implementation_status": "partially_implemented"
+    },
+    "implementation_followup_evidence": {
+      "date": "2026-10-09",
+      "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+      "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
     }
   },
   {
@@ -12025,6 +12045,11 @@
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
       "native_implementation_status": "partially_implemented"
+    },
+    "implementation_followup_evidence": {
+      "date": "2026-10-09",
+      "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+      "scope": "Interactive selection and every Chain Edges member keep the accepted runtime guard; source edits require Cancel/reselect even after geometry restoration. Persistent History reconstructs without session tokens."
     }
   },
   {
@@ -12218,6 +12243,11 @@
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
       "native_implementation_status": "partially_implemented"
+    },
+    "implementation_followup_evidence": {
+      "date": "2026-10-09",
+      "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+      "scope": "Interactive selection and every Chain Edges member keep the accepted runtime guard; source edits require Cancel/reselect even after geometry restoration. Persistent History reconstructs without session tokens."
     }
   },
   {
@@ -12733,6 +12763,11 @@
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
       "native_implementation_status": "partially_implemented"
+    },
+    "implementation_followup_evidence": {
+      "date": "2026-10-09",
+      "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+      "scope": "Interactive selection and every Chain Edges member keep the accepted runtime guard; source edits require Cancel/reselect even after geometry restoration. Persistent History reconstructs without session tokens."
     }
   },
   {
@@ -15027,6 +15062,11 @@
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
       "native_implementation_status": "partially_implemented"
+    },
+    "implementation_followup_evidence": {
+      "date": "2026-10-09",
+      "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+      "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
     }
   },
   {
@@ -15076,6 +15116,11 @@
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
       "native_implementation_status": "partially_implemented"
+    },
+    "implementation_followup_evidence": {
+      "date": "2026-10-09",
+      "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+      "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
     }
   },
   {
@@ -15119,6 +15164,11 @@
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
       "native_implementation_status": "partially_implemented"
+    },
+    "implementation_followup_evidence": {
+      "date": "2026-10-09",
+      "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+      "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
     }
   },
   {
@@ -15177,6 +15227,11 @@
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
       "native_implementation_status": "partially_implemented"
+    },
+    "implementation_followup_evidence": {
+      "date": "2026-10-09",
+      "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+      "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
     }
   },
   {

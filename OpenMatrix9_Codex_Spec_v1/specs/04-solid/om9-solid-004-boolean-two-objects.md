@@ -13,6 +13,18 @@ sample_status: compiled_and_validation_tests_passed
 
 # OM9-SOLID-004 — Boolean Two Objects
 
+<!-- rhino-core-object-foundations:start -->
+## Bổ sung guard input dùng chung — 2026-10-09
+
+Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
+
+Snapshot kiểm document session, native ID/generation/revision, Undo/Redo epoch,
+unit context và world/parent placement trước transaction; đọc snapshot không sửa
+document. [Báo cáo nghiệm thu](../../../docs/validation/2026-10-09-rhino-core-object-foundations.md) ghi kiểm thử consumer và giới hạn.
+Trạng thái toàn feature và supported slice trước đây được giữ nguyên; metadata
+`implementation_followup_evidence` ghi riêng phần nền tảng mới.
+<!-- rhino-core-object-foundations:end -->
+
 Alias tương thích: `Boolean2Objects`. Nhóm: `04-solid`. Trạng thái: `partially_implemented`.
 
 ## Hợp đồng thiết kế

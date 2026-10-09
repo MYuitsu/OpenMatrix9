@@ -1,5 +1,11 @@
 # OpenMatrix9 — English
 
+<!-- rhino-core-object-foundations:start -->
+P0 follow-up: shared object identity/lifecycle and stale selection guards for
+Edit/Boolean, Rebuild and interactive Surface have been validated. **Full P0
+remains in progress.** See the [evidence and limits](docs/validation/2026-10-09-rhino-core-object-foundations.md).
+<!-- rhino-core-object-foundations:end -->
+
 [Tiếng Việt](README.vi.md) · [Detailed command list](README.md)
 
 ![OpenMatrix9 — Open-source jewelry CAD workbench](Resources/branding/introduction.png)

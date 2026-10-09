@@ -10,6 +10,21 @@ date: 2026-10-09
 
 # RCORE-06 — Selection và tổ chức mô hình
 
+<!-- rhino-core-object-foundations:start -->
+## Bổ sung nền tảng object snapshot — 2026-10-09
+
+Snapshot whole-object/subelement đã được dùng trong Edit, Rebuild và Surface;
+mỗi thành viên Chain Edges giữ guard riêng. Đổi label/Visibility/display không
+làm stale geometry; thay placement owner hoặc unit context có kiểm lại.
+Đây là identity của lựa chọn đã nhận, chưa phải resolver topology bền qua chỉnh
+sửa. Type/subelement do consumer hiện có xác thực trước khi nhận lựa chọn.
+Policy edit/reference, visibility/lock/SnapToLocked và active layer xuyên mọi
+command vẫn mở; snapshot không tự cấp quyền thao tác.
+
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-09-rhino-core-object-foundations.md); P0 vẫn `partially_implemented`.
+Các phần cập nhật cũ và bảng audit bên dưới giữ bằng chứng lịch sử, không phải tổng kết checkpoint này.
+<!-- rhino-core-object-foundations:end -->
+
 ## Cập nhật triển khai P0 — 2026-10-09
 
 Các bảng source bên dưới ghi baseline audit ban đầu. Đợt P0 này tăng kiểm identity

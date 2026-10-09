@@ -1,5 +1,13 @@
 # OpenMatrix9
 
+<!-- rhino-core-object-foundations:start -->
+Nền tảng P0 tiếp theo — **object identity và stale selection**: Rust registry
+đã được nối vào Edit/Boolean, Rebuild và Surface tương tác. Lựa chọn bị thay thế
+hoặc chỉnh sửa được chặn trước khi ghi kết quả; snapshot không sửa document.
+[Phạm vi, kiểm thử và phần còn thiếu](docs/validation/2026-10-09-rhino-core-object-foundations.md). P0 vẫn đang triển khai;
+các checkpoint bên dưới là bằng chứng riêng của từng phiên bản.
+<!-- rhino-core-object-foundations:end -->
+
 [Tiếng Việt — mục lục và tiến độ theo nhóm](README.vi.md) ·
 [English — contents and group progress](README.en.md)
 

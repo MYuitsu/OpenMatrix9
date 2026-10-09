@@ -10,6 +10,21 @@ date: 2026-10-09
 
 # RCORE-04 — Command engine và vòng đời tương tác
 
+<!-- rhino-core-object-foundations:start -->
+## Bổ sung nền tảng object snapshot — 2026-10-09
+
+Edit, Rebuild và Surface tương tác giữ snapshot tại thời điểm nhận input và
+kiểm lại trước transaction. Snapshot gồm session/generation/revision/epoch,
+unit context, world placement và các placement owner có giới hạn độ sâu.
+Source stale yêu cầu Cancel/chọn lại; chỉnh option không tự làm mới token.
+Fixture kiểm cả commit thật và không có output/Undo dư khi bị từ chối.
+Chưa thống nhất CommandRequest/CommandSession, view/CPlane revision, worker
+cancellation hoặc late-result rejection cho mọi family.
+
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-09-rhino-core-object-foundations.md); P0 vẫn `partially_implemented`.
+Các phần cập nhật cũ và bảng audit bên dưới giữ bằng chứng lịch sử, không phải tổng kết checkpoint này.
+<!-- rhino-core-object-foundations:end -->
+
 ## Cập nhật triển khai P0 — 2026-10-09
 
 Các nhận định nguồn/metadata bên dưới thuộc baseline audit ban đầu. Đợt triển

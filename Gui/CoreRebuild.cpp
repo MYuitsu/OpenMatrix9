@@ -1,4 +1,5 @@
 #include "CoreRebuild.h"
+#include "CoreObjects.h"
 #include "CurveController.h"
 #include "CurveGeometry.h"
 #include "RustBridge.h"
@@ -40,6 +41,7 @@ struct CoreRebuild::State {
         CurvePyRef object,shape,edge;
         bool closed;
         Base::Placement globalPlacement;
+        ObjectSnapshot guard;
         int count=0,degree=0;
         Input(std::string n,PyObject* o,PyObject* s,PyObject* e,bool c):name(std::move(n)),object(o),shape(s),edge(e),closed(c){}
     };
@@ -104,6 +106,7 @@ void CoreRebuild::options(){
             if(selection.SubName&&*selection.SubName)throw std::runtime_error("Select whole curve objects; surface edges cannot be rebuilt here");
             if(!seen.insert(selection.FeatName).second)continue;
             if(seen.size()>16)throw std::runtime_error("Rebuild supports up to 16 curves per operation");
+            auto guard=captureObject(*state->document,selection.FeatName);
             CurvePyRef object(PyObject_CallMethod(doc.value,"getObject","s",selection.FeatName));
             if(!PyObject_HasAttrString(object.value,"Shape"))throw std::runtime_error("Selection contains an object without curve geometry");
             CurvePyRef shape(PyObject_GetAttrString(object.value,"Shape")),world(PyObject_CallMethod(shape.value,"copy",nullptr));
@@ -128,6 +131,7 @@ void CoreRebuild::options(){
             if(PyObject_IsTrue(closed.value)<0)throw std::runtime_error("Cannot determine curve closure");
             auto input=std::make_unique<State::Input>(selection.FeatName,Py_NewRef(object.value),Py_NewRef(shape.value),Py_NewRef(edge.value),PyObject_IsTrue(closed.value)==1);
             input->globalPlacement=globalPlacement;
+            input->guard=std::move(guard);
             CurvePyRef firstEdge(PySequence_GetItem(edges.value,0)),curve(PyObject_GetAttrString(firstEdge.value,"Curve"));
             if(PyObject_HasAttrString(curve.value,"NbPoles")){CurvePyRef n(PyObject_GetAttrString(curve.value,"NbPoles"));input->count=int(PyLong_AsLong(n.value));}
             if(PyObject_HasAttrString(curve.value,"Degree")){CurvePyRef n(PyObject_GetAttrString(curve.value,"Degree"));input->degree=int(PyLong_AsLong(n.value));}
@@ -163,6 +167,7 @@ void CoreRebuild::calculate(bool commit){
         CurvePyRef vertex(PyObject_GetAttrString(part.value,"Vertex")),vector(PyObject_GetAttrString(app.value,"Vector"));
         std::vector<CurvePyRef> outputs;double maximum=0;
         for(const auto& input:state->inputs){
+            verifyObject(*state->document,input->guard);
             CurvePyRef current(PyObject_CallMethod(doc.value,"getObject","s",input->name.c_str()));
             if(current.value!=input->object.value)throw std::runtime_error("A selected curve was removed or replaced; start Rebuild again");
             if(!input->globalPlacement.isSame(App::GeoFeature::getGlobalPlacement(state->document->getObject(input->name.c_str())),1e-12))throw std::runtime_error("A selected curve's placement changed; start Rebuild again");
@@ -186,6 +191,7 @@ void CoreRebuild::calculate(bool commit){
             }
         }
         if(commit){
+            for(const auto& input:state->inputs)verifyObject(*state->document,input->guard);
             state->document->openTransaction("Rebuild Curve");
             try{
                 for(std::size_t i=0;i<outputs.size();++i){

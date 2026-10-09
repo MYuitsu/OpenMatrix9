@@ -1,5 +1,16 @@
 # 00 - Nền tảng Rhino và khả năng tái sử dụng FreeCAD
 
+<!-- rhino-core-object-foundations:start -->
+## Tiếp tục P0: object identity và stale selection — 2026-10-09
+
+RCORE-01/04/06 đã có registry Rust và native snapshot dùng chung cho Edit,
+Rebuild, Sweep1/Sweep2/Loft. Input bị thay thế, sửa rồi Undo/khôi phục, đổi
+placement owner/unit context hoặc đóng document phải được chọn lại.
+Snapshot read-only, không sinh Undo/property/object; token không persist qua FCStd.
+[Bằng chứng checkpoint mới](../../../docs/validation/2026-10-09-rhino-core-object-foundations.md) tách khỏi checkpoint P0 trước merge.
+Capability/fixture gốc chưa đủ bằng chứng vẫn giữ trạng thái mở; chưa hoàn tất P0.
+<!-- rhino-core-object-foundations:end -->
+
 <!-- rhino-core-p0-checkpoint:start -->
 ## Checkpoint triển khai P0 — 2026-10-09
 

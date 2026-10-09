@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-09T20:09:38+07:00",
+  "updated_at": "2026-10-09T20:43:23+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -1546,10 +1546,13 @@
         "Existing unrelated working-tree work including parallel Ellipse implementation was preserved. Test module is in private runtime; already-open applications retain their loaded module.",
         "The retained-archive manifest/dependency validation overlaps the advanced 3DM archive path from c55af89. Both scopes require post-merge regression; the general current-state preservation writer remains open."
       ],
-      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
-      "next_action": "Implement shared object/selection identity and revision/capability snapshots for existing adapters, then operation-specific tolerance resolution; continue open P0 contracts in validation report.",
-      "updated_at": "2026-10-09T17:43:14+07:00",
-      "scope": "Partial P0 foundations from pre-merge snapshot 5011bab; historical 321 Rust, 23 Python and 657 native GUI assertions do not validate the merged revision or complete P0."
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/02-units-tolerances.md",
+      "next_action": "Continue operation-specific effective tolerance and capability/permission coverage; shared runtime guards now cover Edit/Boolean, Rebuild and interactive Surface only. Durable History and remaining P0 contracts stay open.",
+      "updated_at": "2026-10-09T20:43:23+07:00",
+      "scope": "Partial P0 foundations from pre-merge snapshot 5011bab; historical 321 Rust, 23 Python and 657 native GUI assertions do not validate the merged revision or complete P0.",
+      "followup_evidence": [
+        "docs/validation/2026-10-09-rhino-core-object-foundations.md"
+      ]
     },
     {
       "key": "main-merge-20261009",
@@ -1587,6 +1590,65 @@
       "next_document": "docs/validation/2026-10-09-main-merge.md",
       "next_action": "Continue explicitly scoped P0 contracts from the retained checkpoint.",
       "updated_at": "2026-10-09T20:09:38+07:00"
+    },
+    {
+      "key": "rhino-core-object-foundations",
+      "stage": "feature-port",
+      "feature_ids": [],
+      "procedure_va": null,
+      "status": "validated",
+      "scope": "RCORE-01/04/06 shared runtime snapshots in Edit/Boolean, Rebuild and interactive Sweep1/Sweep2/Loft; no all-family capability or permission completion.",
+      "outputs": [
+        "rust/src/core_objects.rs",
+        "rust/tests/core_objects.rs",
+        "rust/src/lib.rs",
+        "Gui/CoreObjects.h",
+        "Gui/CoreObjects.cpp",
+        "Gui/AppOpenMatrix9Gui.cpp",
+        "Gui/CMakeLists.txt",
+        "Gui/CoreRebuild.cpp",
+        "Gui/EditGeometry.cpp",
+        "Gui/EditGeometry.h",
+        "Gui/SurfaceController.cpp",
+        "Gui/SurfaceGeometry.cpp",
+        "Gui/SurfaceGeometry.h",
+        "tests/core_object_lifecycle_smoke.FCMacro",
+        "tests/surface_constraints_smoke.FCMacro",
+        "tests/circle_spatial_history_smoke.FCMacro",
+        "tests/cage_commands_smoke.FCMacro",
+        "docs/validation/2026-10-09-rhino-core-object-foundations.md",
+        "docs/validation/2026-10-09-rhino-core-object-foundations-evidence.json",
+        "docs/features/rhino-core-object-snapshots.md"
+      ],
+      "evidence": [
+        "Bounded shared object lifecycle foundation validated; full P0 remains in_progress.",
+        "Machine evidence verifies every accepted macro/module hash, result and process exit."
+      ],
+      "tests": [
+        {
+          "command": "Full Rust tests and Clippy",
+          "result": "338 tests passed; Clippy exit 0, 66 warning diagnostic lines"
+        },
+        {
+          "command": "Python tooling unittest",
+          "result": "49 passed, 1 skipped"
+        },
+        {
+          "command": "Matching SDK build and native runtime",
+          "result": "Build passed; 1182 GUI assertions / 15 exit-0 runs"
+        }
+      ],
+      "uncertainties": [
+        "Session tokens are process-local; no durable History/subelement remapping.",
+        "Native bridge runs on the GUI thread; registry mutex does not certify FreeCAD/Qt/native libraries as thread-safe.",
+        "C ABI never retains host pointers; existing release panic=abort means panic/OOM recovery is not promised.",
+        "Capability registry, all-family edit/reference/visibility/lock/layer policies, effective tolerance routing and async worker cancellation remain open.",
+        "No complete RCORE fixture, feature, or Rhino/Matrix parity claim; historical evidence remains separate.",
+        "Native tests use a dedicated runtime; already-open user applications retain their loaded module."
+      ],
+      "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/02-units-tolerances.md",
+      "next_action": "Continue operation-specific effective tolerance and capability/permission coverage; shared runtime guards now cover Edit/Boolean, Rebuild and interactive Surface only. Durable History and remaining P0 contracts stay open.",
+      "updated_at": "2026-10-09T20:43:23+07:00"
     }
   ],
   "merge_context": {

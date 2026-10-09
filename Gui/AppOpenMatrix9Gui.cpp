@@ -5,6 +5,7 @@
 #include "BuilderHistory.h"
 #include "CageFeature.h"
 #include "CoreUnits.h"
+#include "CoreObjects.h"
 #include "CoreCPlanes.h"
 
 #include <Base/Console.h>
@@ -81,6 +82,7 @@ PyMOD_INIT_FUNC(OpenMatrix9Gui)
     OpenMatrix9Gui::initializeHistoryTypes();
     OpenMatrix9Gui::initializeUnitTypes();
     OpenMatrix9Gui::addUnitMethods(module);
+    OpenMatrix9Gui::addObjectSnapshotMethods(module);
     OpenMatrix9Gui::addCPlaneMethods(module);
     OpenMatrix9Gui::initializeEditSpecialTypes();
     OpenMatrix9Gui::initializeBuilderHistoryTypes();

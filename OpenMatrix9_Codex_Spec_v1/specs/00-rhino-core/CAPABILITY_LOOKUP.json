@@ -24,7 +24,10 @@
         "RCORE-01.T11"
       ],
       "runtime_validation": "partial_native_validation",
-      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
+      "implementation_followup_evidence": [
+        "../../../docs/validation/2026-10-09-rhino-core-object-foundations.md"
+      ]
     },
     {
       "id": "RCORE-02",
@@ -89,7 +92,10 @@
         "RCORE-04.T13"
       ],
       "runtime_validation": "partial_native_validation",
-      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
+      "implementation_followup_evidence": [
+        "../../../docs/validation/2026-10-09-rhino-core-object-foundations.md"
+      ]
     },
     {
       "id": "RCORE-05",
@@ -136,7 +142,10 @@
         "RCORE-06.T14",
         "RCORE-06.T15"
       ],
-      "runtime_validation": "not_run"
+      "runtime_validation": "not_run",
+      "implementation_followup_evidence": [
+        "../../../docs/validation/2026-10-09-rhino-core-object-foundations.md"
+      ]
     },
     {
       "id": "RCORE-07",
@@ -1625,5 +1634,19 @@
     "status": "partially_implemented",
     "report": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
     "scope": "Bounded P0 foundations only. Original capability rows are source-audit claims; not_run on a row means its complete acceptance has not been established. See the report for actual assertions and remaining requirements."
-  }
+  },
+  "implementation_followups": [
+    {
+      "id": "rhino-core-object-foundations-20261009",
+      "date": "2026-10-09",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01",
+        "RCORE-04",
+        "RCORE-06"
+      ],
+      "evidence": "../../../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+      "scope": "Shared runtime object sessions/generations/revisions and stale selection guards in Edit, Rebuild and interactive Surface. No full chapter or original fixture completion; durable subelement mapping, all-family permissions/capabilities and worker cancellation remain open."
+    }
+  ]
 }

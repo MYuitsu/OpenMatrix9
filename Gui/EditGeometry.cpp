@@ -37,7 +37,8 @@ bool surfaceOnly(PyObject* shape){const auto type=attr(shape,"ShapeType");if(typ
 namespace OpenMatrix9Gui {
 EditInput editInput(App::Document& doc,const std::string& name,unsigned kind,bool allowBlocks){
     auto* o=doc.getObject(name.c_str());if(!o)throw std::runtime_error("Select an object in the active document");
-    Ref object(o->getPyObject());if(kind==2&&specialExplodeSource(object.value)){auto parts=specialExplodeComponents(object.value,allowBlocks);auto preview=specialExplodePreview(parts);return {name,signature(object.value),preview,false,parts};}
+    auto guard=captureObject(doc,name);
+    Ref object(o->getPyObject());if(kind==2&&specialExplodeSource(object.value)){auto parts=specialExplodeComponents(object.value,allowBlocks);auto preview=specialExplodePreview(parts);return {name,signature(object.value),preview,false,parts,std::move(guard)};}
     const bool mesh=PyObject_HasAttrString(object.value,"Mesh");if(o->isDerivedFrom(Base::Type::fromName("App::Link"))||(!mesh&&!PyObject_HasAttrString(object.value,"Shape")))throw std::runtime_error("Select native curve/surface/solid/mesh objects; blocks require explicit CMD Explode");
     if(kind==2){if(PyObject_HasAttrString(object.value,"String")&&PyObject_HasAttrString(object.value,"FontFile"))throw std::runtime_error("Font/text Explode requires a dedicated annotation adapter; source is preserved");
         if(PyObject_HasAttrString(object.value,"Proxy")){Ref proxy(PyObject_GetAttrString(object.value,"Proxy"));if(proxy.value!=Py_None&&PyObject_HasAttrString(proxy.value,"Type")){Ref type(PyObject_GetAttrString(proxy.value,"Type"));if(PyUnicode_Check(type.value)){const auto name=text(type.value);if(name=="Dimension"||name=="AngularDimension"||name=="Text"||name=="Label"||name=="ShapeString")throw std::runtime_error("Annotation Explode requires a dedicated adapter; source is preserved");}}}}
@@ -51,10 +52,10 @@ EditInput editInput(App::Document& doc,const std::string& name,unsigned kind,boo
         Ref global(PyObject_CallMethod(object.value,"getGlobalPlacement",nullptr)),local(PyObject_GetAttrString(object.value,"Placement")),inverse(PyObject_CallMethod(local.value,"inverse",nullptr)),parent(PyNumber_Multiply(global.value,inverse.value)),matrix(PyObject_CallMethod(parent.value,"toMatrix",nullptr));
         if(mesh)set(shape->value,"Placement",global.value);else{Ref moved(PyObject_CallMethod(shape->value,"transformShape","OO",matrix.value,Py_False));}
     }
-    return {name,signature(object.value),shape,mesh};
+    return {name,signature(object.value),shape,mesh,{},std::move(guard)};
 }
 EditInput nativeShapeInput(App::Document& doc,const std::string& name){return editInput(doc,name,0);}
-void verifyEditInputs(App::Document& doc,const std::vector<EditInput>& inputs){for(const auto& i:inputs){auto* o=doc.getObject(i.name.c_str());if(!o)throw std::runtime_error("An edit input was deleted; cancel and reselect");Ref object(o->getPyObject());if(signature(object.value)!=i.signature)throw std::runtime_error("An edit input changed; cancel and reselect");}}
+void verifyEditInputs(App::Document& doc,const std::vector<EditInput>& inputs){for(const auto& i:inputs){verifyObject(doc,i.guard);auto* o=doc.getObject(i.name.c_str());if(!o)throw std::runtime_error("An edit input was deleted; cancel and reselect");Ref object(o->getPyObject());if(signature(object.value)!=i.signature)throw std::runtime_error("An edit input changed; cancel and reselect");}}
 EditShapes buildEdit(const std::vector<EditInput>& inputs,unsigned kind,std::size_t first,unsigned mode,double tolerance){
     // Spec: OM9-TOP11-005/008; OM9-SOLID-001..004. No interpreted command text.
     if(inputs.empty()||kind<1||kind>7)throw std::runtime_error("Select input objects");

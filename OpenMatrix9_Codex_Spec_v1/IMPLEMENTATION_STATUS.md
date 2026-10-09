@@ -1,5 +1,18 @@
 # Implementation status — 2026-10-09
 
+<!-- rhino-core-object-foundations:start -->
+## Bổ sung nền tảng object dùng chung — 2026-10-09
+
+RCORE-01/04/06: registry Rust quản lý document session, object generation/revision
+và Undo/Redo epoch; native guard được nối vào Edit/Boolean, Rebuild và Surface
+tương tác. Input stale bị từ chối trước transaction, kể cả thay bằng đối tượng
+cùng tên/cùng shape hoặc phục hồi bằng Undo.
+[Báo cáo kiểm chứng](../docs/validation/2026-10-09-rhino-core-object-foundations.md) ghi kiểm thử và scope chính xác.
+11 feature liên quan có `implementation_followup_evidence`; không đổi trạng thái
+607 feature và không đóng toàn bộ P0. Policy quyền/chọn/layer, capability chung,
+tolerance resolver và durable History vẫn còn việc.
+<!-- rhino-core-object-foundations:end -->
+
 <!-- rhino-core-p0-checkpoint:start -->
 ## Nền tảng P0 xuyên các nhóm — 2026-10-09
 

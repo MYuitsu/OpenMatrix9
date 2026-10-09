@@ -10,6 +10,21 @@ evidence_scope: initial_source_audit_2026-10-09
 
 # RCORE-01 — Kiểu đối tượng và ranh giới kernel
 
+<!-- rhino-core-object-foundations:start -->
+## Bổ sung nền tảng object snapshot — 2026-10-09
+
+Rust đã có registry dùng chung cho document session, native object ID,
+generation, revision và Undo/Redo epoch. C++ theo dõi vòng đời host; snapshot
+không thêm property/object hay Undo entry. Xóa/tạo lại, Undo phục hồi cùng ID,
+đóng/mở lại FCStd và source sửa rồi trở về cùng geometry đều không hồi sinh token cũ.
+Đã tích hợp vào Edit, Rebuild và Surface tương tác; native UUID/ID là provenance,
+runtime token chỉ có hiệu lực trong phiên. Chưa có descriptor/capability chung,
+durable subelement remapping hoặc chứng nhận ownership cho mọi adapter.
+
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-09-rhino-core-object-foundations.md); P0 vẫn `partially_implemented`.
+Các phần cập nhật cũ và bảng audit bên dưới giữ bằng chứng lịch sử, không phải tổng kết checkpoint này.
+<!-- rhino-core-object-foundations:end -->
+
 ## Cập nhật triển khai P0 — 2026-10-09
 
 Metadata `source_inspected/not_run` và các phát hiện nguồn bên dưới là baseline

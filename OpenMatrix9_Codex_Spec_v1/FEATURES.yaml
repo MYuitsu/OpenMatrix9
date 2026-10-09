@@ -2979,6 +2979,10 @@
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
   implementation_scope: "Polycurve edges, polysurface faces, compound children and Mesh connected components; source groups/world placement/display fields preserved. Blocks, font/text, dimensions and cages require dedicated adapters."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-TOP11-006
   name: Move
   command: Move
@@ -3110,6 +3114,10 @@
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
   implementation_scope: "Curve endpoint midpoint snapping with explicit bounded tolerance and sewn surface shells; disconnected/mixed/ambiguous inputs rejected. Document-tolerance compatibility and rich History remain unverified."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-TOP11-009
   name: Split
   command: Split
@@ -3215,6 +3223,10 @@
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
   implementation_scope: "True 3D curve/surface splitting, ExtendLines and frozen orthographic/perspective ApparentIntersections for curves, GUI/CMD region removal, Undo/reset and persistence. Degenerate/overlapping projections and apparent surfaces reject."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-TOP11-011
   name: Ring Rail
   command: gvRingRail
@@ -6944,6 +6956,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-CURVE-010
   name: Refit to Tolerance
   command: FitCrv
@@ -9389,6 +9405,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Interactive selection and every Chain Edges member keep the accepted runtime guard; source edits require Cancel/reselect even after geometry restoration. Persistent History reconstructs without session tokens.
 - id: OM9-SURFACE-002
   name: Sweep 1 History
   command: gvSweepHistory
@@ -9536,6 +9556,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Interactive selection and every Chain Edges member keep the accepted runtime guard; source edits require Cancel/reselect even after geometry restoration. Persistent History reconstructs without session tokens.
 - id: OM9-SURFACE-004
   name: Sweep 2 History
   command: gvSweep2History
@@ -9929,6 +9953,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Interactive selection and every Chain Edges member keep the accepted runtime guard; source edits require Cancel/reselect even after geometry restoration. Persistent History reconstructs without session tokens.
 - id: OM9-SURFACE-010
   name: Curve Network
   command: null
@@ -11696,6 +11724,10 @@
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
   implementation_scope: "Ordered target/cutter sets for solid BRep, surface-area BRep or closed Mesh via polyhedral OCCT; target replacement and cutter DeleteInput, cavities and persistence. Mixed categories and invalid/empty results reject."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-SOLID-002
   name: Boolean Intersection
   command: BooleanIntersection
@@ -11736,6 +11768,10 @@
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
   implementation_scope: "Ordered solid BRep, surface-area BRep or closed Mesh sets; validated common results and persistence. Mixed categories, edge-only surfaces and invalid/empty results reject."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-SOLID-003
   name: Boolean Union
   command: BooleanUnion
@@ -11772,6 +11808,10 @@
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
   implementation_scope: "Solid BRep, surface-area BRep or closed Mesh union, disconnected components/cavities, DeleteInput and persistence. Mixed categories and invalid results reject."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-SOLID-004
   name: Boolean Two Objects
   command: Boolean2Objects
@@ -11818,6 +11858,10 @@
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
   implementation_scope: "Exactly two same-category BRep solid/surface or closed Mesh inputs; five Union/A-B/B-A/Common/XOR modes, DeleteInput and persistence. Exhaustive topology and live History remain unverified."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-SOLID-005
   name: Cap Planar
   command: Cap

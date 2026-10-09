@@ -106,7 +106,7 @@ void SurfaceController::error(const std::exception& e){const auto text=QString::
 void SurfaceController::add(const std::string& object,const std::string& sub){
     if(!active()||!valid()||om9_surface_phase()==4)return;
     try{
-        Base::PyGILStateLocker lock;SurfaceInput input{object,sub};ShapeRef wire(surfaceWire(*document,input));ShapeRef closed(PyObject_CallMethod(wire.p,"isClosed",nullptr));
+        Base::PyGILStateLocker lock;SurfaceInput input{object,sub};input.guards.push_back(captureObject(*document,object,sub));ShapeRef wire(surfaceWire(*document,input));ShapeRef closed(PyObject_CallMethod(wire.p,"isClosed",nullptr));
         if(!closed.p){PyErr_Clear();throw std::runtime_error("Cannot inspect curve closure");}input.closed=PyObject_IsTrue(closed.p)==1;
         const auto key=object+"."+sub;
         if(om9_surface_phase()==5){
@@ -144,7 +144,8 @@ void SurfaceController::submit(const QString& text){
         if(om9_surface_phase()==5){
             if(chainInputs.empty()){prompt("Select touching rail edges first");return;}
             try {Base::PyGILStateLocker lock;SurfaceInput rail=chainInputs.front();
-                for(const auto& edge:chainInputs)rail.chain.emplace_back(edge.object,edge.sub);
+                rail.guards.clear();
+                for(const auto& edge:chainInputs){rail.chain.emplace_back(edge.object,edge.sub);rail.guards.insert(rail.guards.end(),edge.guards.begin(),edge.guards.end());}
                 ShapeRef wire(surfaceWire(*document,rail)),closed(PyObject_CallMethod(wire.p,"isClosed",nullptr));
                 if(!closed.p)throw std::runtime_error("Cannot inspect rail chain");rail.closed=PyObject_IsTrue(closed.p)==1;
                 if(!om9_surface_chain_finish(rail.closed)){prompt(message());return;}

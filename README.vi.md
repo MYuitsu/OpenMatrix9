@@ -1,5 +1,11 @@
 # OpenMatrix9 — Tiếng Việt
 
+<!-- rhino-core-object-foundations:start -->
+Checkpoint P0 mới: định danh/vòng đời đối tượng và guard lựa chọn dùng chung
+cho Edit/Boolean, Rebuild, Surface đã được kiểm chứng. **P0 chưa hoàn tất.**
+Xem [bằng chứng và giới hạn](docs/validation/2026-10-09-rhino-core-object-foundations.md).
+<!-- rhino-core-object-foundations:end -->
+
 [English](README.en.md) · [Danh sách chi tiết từng lệnh](README.md)
 
 ![OpenMatrix9 — Workbench CAD trang sức nguồn mở](Resources/branding/introduction.png)

@@ -21,13 +21,13 @@
   },
   {
     "path": "FEATURES.json",
-    "bytes": 1802431,
-    "sha256": "b9dcf9e284e188d12f3bff2383e62b8fabfc0b3a09abcfc9a9a8e4ac5e0df188"
+    "bytes": 1806109,
+    "sha256": "dc9ba0fbc5f4d6985c77f5ba060560a8c136c6dffeb05ddd6e33b8c02c2c602d"
   },
   {
     "path": "FEATURES.yaml",
-    "bytes": 1441477,
-    "sha256": "7d891bfc4d774aa7b3269517b458f85b2f75758073f665670e9dfb353eb2f67f"
+    "bytes": 1444814,
+    "sha256": "4aab5eaabbbc2a6b3150e688593c5e7d1956603267f20c9ae7726a6c19f4fa9d"
   },
   {
     "path": "FEATURE_LOOKUP.json",
@@ -46,8 +46,8 @@
   },
   {
     "path": "IMPLEMENTATION_STATUS.md",
-    "bytes": 17352,
-    "sha256": "0819394124491d7c6d50bbe73f4b4d7a9c670d5739e87206f3d7bb73125fa8c7"
+    "bytes": 18206,
+    "sha256": "c60bdce0a22a1f0cde9e9f49405e42d0d8d2ffca040720f8eaf0d5f3fb7e538f"
   },
   {
     "path": "INDEX.md",
@@ -111,8 +111,8 @@
   },
   {
     "path": "specs/00-rhino-core/01-object-model-kernel.md",
-    "bytes": 21674,
-    "sha256": "0a853a13f4aea9c4265264e4ed4e569f47fb2f3d95c5e003d58eab28fef13ca8"
+    "bytes": 22720,
+    "sha256": "5ce3a341ac35660af2ffec764660d0573b6b7a2fb3beb799e7174a8d6ead3835"
   },
   {
     "path": "specs/00-rhino-core/02-units-tolerances.md",
@@ -126,8 +126,8 @@
   },
   {
     "path": "specs/00-rhino-core/04-command-engine.md",
-    "bytes": 19492,
-    "sha256": "cd063c5b534c2b39aa6cc4a87d5ae35e4799ed84bbb399055afc25338143e765"
+    "bytes": 20495,
+    "sha256": "01e359ed04a51110ff55b3bc9e6c43fc1511b06e3dea79c17e26329df15c0e7b"
   },
   {
     "path": "specs/00-rhino-core/05-picking-snapping.md",
@@ -136,8 +136,8 @@
   },
   {
     "path": "specs/00-rhino-core/06-selection-organization-blocks.md",
-    "bytes": 24320,
-    "sha256": "5d0f62288362e53715e1171d4e42d50e89f49f1c97c918fbbb90a4419c4d63dd"
+    "bytes": 25340,
+    "sha256": "097e36db4968f3c8ca5cbffb3322635366a538c34160664fb7427fa19521858b"
   },
   {
     "path": "specs/00-rhino-core/07-nurbs-editing-modeling.md",
@@ -171,8 +171,8 @@
   },
   {
     "path": "specs/00-rhino-core/CAPABILITY_LOOKUP.json",
-    "bytes": 72624,
-    "sha256": "67ef6392164af8557ac35c065d7d58815c767e4e70a375af3e97428917e634c2"
+    "bytes": 73674,
+    "sha256": "7c7d0d603bd5fe7edf69e4c565f76a1a3b04649e2e38904e3bbb22e44c019fa9"
   },
   {
     "path": "specs/00-rhino-core/DECOMPILE_AUDIT.md",
@@ -181,8 +181,8 @@
   },
   {
     "path": "specs/00-rhino-core/README.md",
-    "bytes": 18870,
-    "sha256": "81bf9cdb2e0b14eceeba25bbec55a27b1e590af144b34054f896ed3270ee40e4"
+    "bytes": 19622,
+    "sha256": "62f835155cb9a822155c4ece960688f502402f91fe7d53f599a8b60ee1242cdf"
   },
   {
     "path": "specs/00-rhino-core/SOURCE_BASELINE.json",
@@ -636,8 +636,8 @@
   },
   {
     "path": "specs/01-core/om9-top11-005-explode.md",
-    "bytes": 9457,
-    "sha256": "64422d935a7e68d271052ca292a8d715cf73dafef78487f61ca4dd995e0cee37"
+    "bytes": 10230,
+    "sha256": "c3b31d24a4d1ea74709beeb814412ad01160ea320e867f106730dd5fdda57832"
   },
   {
     "path": "specs/01-core/om9-top11-006-move.md",
@@ -651,8 +651,8 @@
   },
   {
     "path": "specs/01-core/om9-top11-008-join.md",
-    "bytes": 8162,
-    "sha256": "b48b3781b509f79b66f53f02bf2b8a7b11dc033e647db6af48a17d9ca59595f8"
+    "bytes": 8935,
+    "sha256": "69983e096203d1dea3cbe55340c70794069d8f3669d0143875b5f7df9e61c154"
   },
   {
     "path": "specs/01-core/om9-top11-009-split.md",
@@ -661,8 +661,8 @@
   },
   {
     "path": "specs/01-core/om9-top11-010-trim.md",
-    "bytes": 8461,
-    "sha256": "94c18fd68bf06ad5a718d5fa049170330e69ca4c05f2ac73f2e3ec2c79587a3a"
+    "bytes": 9234,
+    "sha256": "5a5a5c8bec438c4e9475a27a3cb520c3c8bf178a9ab31ffd35873676c990c517"
   },
   {
     "path": "specs/01-core/om9-top11-011-ring-rail.md",
@@ -896,8 +896,8 @@
   },
   {
     "path": "specs/02-curve/om9-curve-009-rebuild.md",
-    "bytes": 12197,
-    "sha256": "ce3a2776032f35c0f858ba4acbcacecef749c6e5398a79ad4992cecc0aee3a52"
+    "bytes": 12970,
+    "sha256": "87347ab2f57871f94a5f05fa962b34b18d324cb1284b4d03f1dfb3c2f0f44d56"
   },
   {
     "path": "specs/02-curve/om9-curve-010-refit-to-tolerance.md",
@@ -1151,8 +1151,8 @@
   },
   {
     "path": "specs/03-surface/om9-surface-001-sweep-1.md",
-    "bytes": 15845,
-    "sha256": "63fc0ddaf12ebabe0d219d85096a332662fc9a1c25c0b053ba55074228fdef06"
+    "bytes": 16689,
+    "sha256": "5f5bfb5f1cbb2c7c719eba99eda0423d67b1c5290834a3ca9b23e42fd9b67b0c"
   },
   {
     "path": "specs/03-surface/om9-surface-002-sweep-1-history.md",
@@ -1161,8 +1161,8 @@
   },
   {
     "path": "specs/03-surface/om9-surface-003-sweep-2.md",
-    "bytes": 15169,
-    "sha256": "5d309a3407fa214eeeeeba228c567526ab7bcb2ca29147b92b1ca868edd70c3e"
+    "bytes": 16013,
+    "sha256": "e418ab7909470d70c7258610fd4524d59beb2d07887b4c8f094d373ee20a114c"
   },
   {
     "path": "specs/03-surface/om9-surface-004-sweep-2-history.md",
@@ -1191,8 +1191,8 @@
   },
   {
     "path": "specs/03-surface/om9-surface-009-loft.md",
-    "bytes": 14108,
-    "sha256": "f8b9bae77d9b0395a948dc1e22c512eaebf3559c42419694520e75b7582e8035"
+    "bytes": 14952,
+    "sha256": "99fe516f4227361b9cf47c3bf682c8df49964ad162cfa1e77dce5364c01b6523"
   },
   {
     "path": "specs/03-surface/om9-surface-010-curve-network.md",
@@ -1356,23 +1356,23 @@
   },
   {
     "path": "specs/04-solid/om9-solid-001-boolean-difference.md",
-    "bytes": 8122,
-    "sha256": "1bebc4339361f90ab0bbf00212c8641b40aedac295b93c99ab920a65ebb9abf5"
+    "bytes": 8895,
+    "sha256": "28c6c24006c8438e7f0fee7059999b0979a33409694dfc51501a311234bef12f"
   },
   {
     "path": "specs/04-solid/om9-solid-002-boolean-intersection.md",
-    "bytes": 7734,
-    "sha256": "213445f42b30bb0f9fcfac05b57c9c8e9b3085993bea61e940d6d1ddb804c055"
+    "bytes": 8507,
+    "sha256": "368b91c97f63e69da6a7f2c6b7189e21f9e8c3abb5475a71849a14ed58df95bc"
   },
   {
     "path": "specs/04-solid/om9-solid-003-boolean-union.md",
-    "bytes": 7495,
-    "sha256": "151a23b16fdd4a8d41906f476dd6cad356012db1bec2629effb0c59785b9e402"
+    "bytes": 8268,
+    "sha256": "661513db5e59d4143c72f98800298faaea10513b102def63f1465a61f6d9e494"
   },
   {
     "path": "specs/04-solid/om9-solid-004-boolean-two-objects.md",
-    "bytes": 8437,
-    "sha256": "ba4a383aa03038bced5fb0dca02492406c488691ff7f42c18a33176fb22756a4"
+    "bytes": 9210,
+    "sha256": "d0d5940c78998b2328cbf4620ebd32bbacdfd306b8edba1a59e96f7c0b17cc0f"
   },
   {
     "path": "specs/04-solid/om9-solid-005-cap-planar.md",
