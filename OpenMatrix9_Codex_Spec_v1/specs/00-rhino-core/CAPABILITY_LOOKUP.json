@@ -34,7 +34,8 @@
         "../../../docs/validation/2026-10-10-rhino-core-hatch-input-gate.md",
         "../../../docs/validation/2026-10-10-rhino-core-periodic-persistence.md",
         "../../../docs/validation/2026-10-10-rhino-core-subobject-ownership.md",
-        "../../../docs/validation/2026-10-10-rhino-core-delayed-publication.md"
+        "../../../docs/validation/2026-10-10-rhino-core-delayed-publication.md",
+        "../../../docs/validation/2026-10-10-rhino-core-host-parameter-dependency.md"
       ]
     },
     {
@@ -1743,6 +1744,16 @@
       ],
       "evidence": "../../../docs/validation/2026-10-10-rhino-core-delayed-publication.md",
       "scope": "Authored RCORE-01.T08 actual Rebuild result-publication boundary, owned outputs/source guards, GUI queue cancellation/close/options/newer request and shutdown discard; broader worker lifecycle/P0 stays open."
+    },
+    {
+      "id": "rhino-core-host-parameter-dependency",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-host-parameter-dependency.md",
+      "scope": "Authored T10 Circle/Line native durable parameter consumer with fresh guarded observed conversion, source/point/target query/basis persistence, History and lifecycle; broader conversion/P0 stays open."
     }
   ]
 }

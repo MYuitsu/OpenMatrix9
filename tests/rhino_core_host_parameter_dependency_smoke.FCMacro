@@ -1,0 +1,161 @@
+# RCORE-01.T10: original analytic parameters, owned target, native History/FCStd.
+import json,math,os,sys,traceback,hashlib
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[],'observations':[],'rejections':[]};serial=0
+def check(name,value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def vec(v):return [v.x,v.y,v.z]
+def brep(shape,name):
+    global serial
+    serial+=1;path=out/('%03d-%s.brep'%(serial,name));data=shape.exportBrepToString();path.write_bytes(data.encode('utf-8'))
+    return {'path':path.name,'sha256':hashlib.sha256(data.encode('utf-8')).hexdigest()}
+def inventory(doc):
+    shapes={}
+    for o in doc.Objects:
+        for p in o.PropertiesList:
+            if o.getTypeIdOfProperty(p)=='Part::PropertyPartShape':shapes[o.Name+'.'+p]=hashlib.sha256(getattr(o,p).exportBrepToString().encode('utf-8')).hexdigest()
+    return {'objects':sorted((o.Name,o.TypeId) for o in doc.Objects),'shapes':shapes,'undo':doc.UndoCount,'redo':doc.RedoCount}
+def make_doc(name):
+    d=App.newDocument('HostParameter'+name);d.UndoMode=1;OM.setUnitContext(d.Name,1,1,0.001,0.01,0.01)
+    s=d.addObject('OpenMatrix9Gui::HistorySettings','HistorySettings');s.BrokenHistoryWarning=False
+    return d,s
+def circle(d,r=10,name='Circle'):
+    o=d.addObject('Part::Feature',name);o.Shape=Part.makeCircle(r);d.recompute();return o
+def create(d,s,p=0.31,raw=False):return OM.createCurveParameterPoint(d.Name,s.Name,'Edge1',p,1e-7,1e-10,raw)
+def world_point(p):return p.getGlobalPlacement().multiply(p.Placement.inverse()).multVec(p.Shape.Vertexes[0].Point)
+def basis(p):
+    edge=p.ConvertedShape.Edges[0];c=edge.Curve
+    return {'degree':c.Degree,'knots':c.getKnots(),'multiplicities':c.getMultiplicities(),'weights':c.getWeights(),'poles':[vec(v) for v in c.getPoles()],'periodic':c.isPeriodic(),'domain':[edge.FirstParameter,edge.LastParameter]}
+def observe(name,p,s,r):
+    expected=s.getGlobalPlacement().multVec(App.Vector(r*math.cos(p.SourceParameter),r*math.sin(p.SourceParameter),0));report=json.loads(p.QueryReport);q=report['queries'][0]
+    target=p.ConvertedShape.Edges[0].valueAt(report['dependent_query']['target_parameter'])
+    row={'name':name,'report':report,'native_basis':basis(p),'expected':vec(expected),'world_point':vec(world_point(p)),'target_point':vec(target),'state':list(p.State),'dirty':p.HistoryDirty,'source':brep(s.Shape,name+'-source'),'point':brep(p.Shape,name+'-point'),'converted':brep(p.ConvertedShape,name+'-converted')};result['observations'].append(row)
+    check(name+' point matches independent world analytic angle',(world_point(p)-expected).Length<=1e-7)
+    check(name+' actual retained target matches original source',(target-expected).Length<=1e-7)
+    check(name+' mapped and direct host bounds pass',q['sampled_residuals'][1]<=1e-7 and report['dependent_query']['host_point_residual']<=1e-7)
+    check(name+' valid fresh recorded link/recipe',p.Recorded and p.Source==(s,['Edge1']) and not p.HistoryDirty and 'Invalid' not in p.State)
+    check(name+' actual source identity and explicit mm frame',report['source_identity']['document_uid']==str(s.Document.Uid) and report['source_identity']['object_name']==s.Name and report['source_identity']['subelement']=='Edge1' and report['length_unit']=='mm' and report['host_frame']=='FreeCAD_world_mm')
+    check(name+' nonlinear circle map never grants raw reuse',report['native_form']==2 and not q['raw_parameter_reusable'] and not report['dependent_query']['used_raw'])
+    return report
+def reject(name,d,fn,reason):
+    before=inventory(d);error=None
+    try:fn()
+    except Exception as e:error=str(e)
+    after=inventory(d);result['rejections'].append({'name':name,'error':error,'before':before,'after':after})
+    check(name+' rejects explicitly',error is not None and reason in error)
+    check(name+' preserves inventory/source bytes/Undo/Redo',before==after)
+def edit(d,name,fn):d.openTransaction(name);fn();d.recompute();d.commitTransaction()
+def invalid(name,p):
+    result['observations'].append({'name':name,'null_point':p.Shape.isNull(),'null_target':p.ConvertedShape.isNull(),'report':p.QueryReport,'recorded':p.Recorded,'dirty':p.HistoryDirty,'state':list(p.State)})
+    check(name+' clears stale outputs/report with unresolved recorded recipe',p.Shape.isNull() and p.ConvertedShape.isNull() and not p.QueryReport and p.Recorded and p.HistoryDirty and 'Invalid' in p.State)
+class FailingSource:
+    def execute(self,o):
+        if o.Fail:raise RuntimeError('authored source error retaining nonnull Shape')
+def cold():
+    path=Path(os.environ['OM9_HOST_PARAMETER_RESTORE_FILE']);base=json.loads((path.parent/'host-parameter-persistence.json').read_text(encoding='utf-8'))
+    d=App.openDocument(str(path));d.UndoMode=1;s=d.getObject('Circle');p=d.getObject('CurveParameterPoint');old=json.loads(p.QueryReport);result['cold_before_recompute']=old
+    check('cold native source link/query recipe survive',p.TypeId=='OpenMatrix9Gui::CurveParameterPoint' and p.Source==(s,['Edge1']) and p.SourceParameter==base['parameter'] and p.LengthTolerance==1e-7 and p.ParameterTolerance==1e-10)
+    check('cold query/basis/durable source identity survive',old['queries']==base['report']['queries'] and old['target_basis']==base['report']['target_basis'] and old['source_identity']==base['report']['source_identity'])
+    check('cold report dirty until runtime refreshed',p.HistoryDirty)
+    restored={key:brep(shape,'cold-restored-'+key) for key,shape in [('source',s.Shape),('point',p.Shape),('converted',p.ConvertedShape)]};result['cold_restored_breps']=restored
+    check('cold actual source/point BReps exactly survive',all(restored[key]['sha256']==base[key]['sha256'] and (out/restored[key]['path']).read_bytes()==(path.parent/base[key]['path']).read_bytes() for key in ['source','point']))
+    restored_basis=basis(p);result['cold_native_basis']=restored_basis
+    check('cold actual target degree/knots/multiplicities/weights/domain survive',all(restored_basis[key]==base['native_basis'][key] for key in ['degree','knots','multiplicities','weights','periodic','domain']))
+    pole_delta=max((App.Vector(*a)-App.Vector(*b)).Length for a,b in zip(restored_basis['poles'],base['native_basis']['poles']));result['cold_pole_delta_mm']=pole_delta
+    check('cold actual target poles retain declared serialization bound',len(restored_basis['poles'])==len(base['native_basis']['poles']) and pole_delta<=1e-12)
+    # Native ASCII FCStd rounds near-zero coordinates; raw BReps remain recorded.
+    edge=p.ConvertedShape.Edges[0];samples=[]
+    for i in range(65):
+        t=edge.FirstParameter+(edge.LastParameter-edge.FirstParameter)*i/64
+        value=edge.valueAt(t);samples.append({'parameter':t,'point':vec(value),'radial_residual':abs(value.Length-base['radius']),'plane_residual':abs(value.z)})
+    result['cold_target_samples']=samples
+    check('cold retained target independently preserves R17 locus',max(max(v['radial_residual'],v['plane_residual']) for v in samples)<=1e-7)
+    d.recompute();fresh=observe('cold recomputed',p,s,base['radius'])
+    check('cold uses new session guard and stable durable identity',fresh['source_identity']['document_session']!=old['source_identity']['document_session'] and fresh['source_identity']['document_uid']==old['source_identity']['document_uid'] and fresh['source_identity']['native_object_id']==old['source_identity']['native_object_id'])
+    edit(d,'Cold source edit',lambda:setattr(s,'Shape',Part.makeCircle(19)));observe('cold source edited',p,s,19)
+    d.undo();d.recompute();observe('cold source Undo',p,s,base['radius'])
+    f=App.openDocument(str(path.parent/'host-parameter-frozen.FCStd'));fp=f.getObject('CurveParameterPoint');fs=f.getObject('Circle');retained=fp.QueryReport;f.recompute()
+    check('cold Update Off keeps owned output explicitly dirty',fp.HistoryDirty and fp.Recorded and fp.QueryReport==retained and not fp.Shape.isNull())
+    f.getObject('HistorySettings').Update=True;f.recompute();observe('cold Update On',fp,fs,base['radius'])
+def main():
+    ud,us=make_doc('CreationUndo');source=circle(ud);frame=ud.addObject('App::Part','UnrelatedFrame');up=create(ud,source);name=up.Name
+    ud.undo();check('creation Undo removes native dependency',ud.getObject(name) is None)
+    # FreeCAD retains an Undo-held native object until Redo/transaction retirement.
+    held=(up.Shape.exportBrepToString(),up.ConvertedShape.exportBrepToString(),up.QueryReport,up.HistoryDirty)
+    frame.addObject(source);frame.Placement=App.Placement(App.Vector(8,2,0),App.Rotation());ud.recompute()
+    check('Undo-held record receives no hidden group/recompute mutation',held==(up.Shape.exportBrepToString(),up.ConvertedShape.exportBrepToString(),up.QueryReport,up.HistoryDirty))
+    ud.redo();ud.recompute();up=ud.getObject(name);observe('creation Redo',up,source,10);App.closeDocument(ud.Name)
+    d,settings=make_doc('Circle');s=circle(d);before=inventory(d);p=create(d,s)
+    check('single native output and creation Undo',len(d.Objects)==len(before['objects'])+1 and d.UndoCount==before['undo']+1)
+    check('source bytes unchanged by creation',inventory(d)['shapes']['Circle.Shape']==before['shapes']['Circle.Shape'])
+    report=observe('initial circle',p,s,10)
+    check('actual rational target keeps nonunit weights',isinstance(p.ConvertedShape.Edges[0].Curve,Part.BSplineCurve) and p.ConvertedShape.Edges[0].Curve.isRational() and any(abs(w-1)>0.01 for w in report['target_basis']['weights']))
+    check('raw angle gives distinct measured displacement',report['queries'][0]['sampled_residuals'][2]>0.01 and abs(report['queries'][0]['mapped_parameter']-0.31)>1e-4)
+    reject('unproved raw Circle',d,lambda:create(d,s,raw=True),'115');reject('coincident form2 seam raw',d,lambda:create(d,s,0,True),'115')
+    for parameter in [-1,7,float('nan'),float('inf')]:reject('invalid parameter '+str(parameter),d,lambda t=parameter:create(d,s,t),'Curve parameter query rejected')
+    for length,parameter in [(0,1e-10),(-1,1e-10),(float('nan'),1e-10),(1e-7,0),(1e-7,float('inf'))]:reject('invalid tolerances '+str((length,parameter)),d,lambda l=length,t=parameter:OM.createCurveParameterPoint(d.Name,s.Name,'Edge1',0.31,l,t),'102')
+    reject('missing source',d,lambda:OM.createCurveParameterPoint(d.Name,'Gone','Edge1',0.31,1e-7,1e-10),'live valid')
+    reject('wrong subelement',d,lambda:OM.createCurveParameterPoint(d.Name,s.Name,'Vertex1',0.31,1e-7,1e-10),'Edge')
+    unsupported=d.addObject('Part::Feature','Unsupported');unsupported.Shape=s.Shape.toNurbs();d.recompute()
+    reject('NURBS source explicit extraction scope',d,lambda:create(d,unsupported),'Circle and Line only')
+    unsupported.Shape=Part.makeCircle(10,App.Vector(),App.Vector(0,0,1),0,90);d.recompute();reject('trimmed Circle scope',d,lambda:create(d,unsupported),'Trimmed Circle')
+    line=d.addObject('Part::Feature','Line');line.Shape=Part.makeLine(App.Vector(2,3,4),App.Vector(9,3,4));d.recompute();lp=create(d,line,2.5,True);lr=json.loads(lp.QueryReport);result['line_report']=lr
+    check('native Line form1 proves raw requested sample',lr['native_form']==1 and lr['dependent_query']['used_raw'] and lr['queries'][0]['raw_parameter_reusable'] and (world_point(lp)-App.Vector(4.5,3,4)).Length<=1e-7)
+    edit(d,'Change radius',lambda:setattr(s,'Shape',Part.makeCircle(13)));fresh=observe('source edit',p,s,13)
+    check('source edit fresh guard revision',fresh['source_identity']['geometry_revision']!=report['source_identity']['geometry_revision'])
+    d.undo();d.recompute();observe('source Undo',p,s,10);d.redo();d.recompute();observe('source Redo',p,s,13)
+    settings.Update=False;d.recompute();retained=p.QueryReport;retained_shape=p.Shape.exportBrepToString()
+    edit(d,'Update Off source edit',lambda:setattr(s,'Shape',Part.makeCircle(14)))
+    check('Update Off retains owned output and marks dirty',p.HistoryDirty and p.Recorded and p.QueryReport==retained and p.Shape.exportBrepToString()==retained_shape)
+    settings.Update=True;d.recompute();observe('Update On',p,s,14)
+    settings.Lock=True;reject('Lock query edit',d,lambda:setattr(p,'SourceParameter',0.5),'History Lock');settings.Lock=False
+    edit(d,'Edit angle',lambda:setattr(p,'SourceParameter',0.53));observe('query edit',p,s,14);d.undo();d.recompute();observe('query Undo',p,s,14)
+    frame=d.addObject('App::Part','SourceFrame');frame.addObject(s);d.recompute()
+    edit(d,'Move source parent',lambda:setattr(frame,'Placement',App.Placement(App.Vector(11,-3,7),App.Rotation(App.Vector(0,0,1),33))));observe('source parent moved',p,s,14)
+    d.undo();d.recompute();observe('source parent Undo',p,s,14);d.redo();d.recompute();observe('source parent Redo',p,s,14)
+    output=d.addObject('App::Part','OutputFrame');output.Placement=App.Placement(App.Vector(-22,9,2),App.Rotation(App.Vector(1,0,0),17))
+    edit(d,'Group output',lambda:output.addObject(p));observe('placed output',p,s,14)
+    edit(d,'Move output parent',lambda:setattr(output,'Placement',App.Placement(App.Vector(41,-7,3),App.Rotation(App.Vector(0,1,0),27))));observe('output parent moved',p,s,14)
+    d.undo();d.recompute();observe('output parent Undo',p,s,14);d.undo();d.recompute();observe('output reparent Undo',p,s,14)
+    old_units=json.loads(p.QueryReport)['unit_context_snapshot'];OM.setUnitContext(d.Name,2,1,0.001,0.01,0.01);d.recompute();units=observe('unit change',p,s,14)
+    check('unit provenance changes with canonical mm geometry',units['unit_context_snapshot']!=old_units)
+    edit(d,'Unsupported replacement',lambda:setattr(s,'Shape',Part.makeCircle(14).toNurbs()));invalid('unsupported replacement',p)
+    d.undo();d.recompute();observe('unsupported Undo',p,s,14)
+    edit(d,'Null source',lambda:setattr(s,'Shape',Part.Shape()));invalid('null source',p);d.undo();d.recompute();observe('null Undo',p,s,14)
+    settings.Lock=True;edit(d,'Delete locked source',lambda:d.removeObject(s.Name));invalid('source deleted under Lock',p)
+    check('missing source stays unresolved recorded',p.Source is None)
+    d.undo();d.recompute();s=d.getObject('Circle');observe('deletion Undo',p,s,14);d.redo();d.recompute();invalid('deletion Redo',p)
+    d.undo();d.recompute();s=d.getObject('Circle');observe('second deletion Undo',p,s,14);settings.Lock=False
+    unit=p.UnitSource;edit(d,'Delete unit context',lambda:d.removeObject(unit.Name));invalid('unit deleted',p)
+    reject('missing explicit units',d,lambda:create(d,s),'explicit document unit');d.undo();d.recompute();observe('unit deletion Undo',p,s,14)
+    fd,fs=make_doc('SourceError');f=fd.addObject('Part::FeaturePython','FailingCircle');f.Shape=Part.makeCircle(10);f.addProperty('App::PropertyBool','Fail');f.Proxy=FailingSource();fd.recompute();fp=create(fd,f)
+    edit(fd,'Fail retaining source Shape',lambda:setattr(f,'Fail',True));check('error source retains nonnull Shape',not f.Shape.isNull() and 'Invalid' in f.State);invalid('nonnull source execution error',fp)
+    edit(fd,'Recover source',lambda:setattr(f,'Fail',False));observe('source error recovery',fp,f,10)
+    dd,ds=make_doc('Detached');source=circle(dd);dp=create(dd,source);static=dp.ConvertedShape.exportBrepToString()
+    edit(dd,'Independent point edit',lambda:setattr(dp,'Shape',Part.Vertex(App.Vector(1,2,3))))
+    check('direct edit detaches with owned target',not dp.Recorded and dp.Source is None and dp.ConvertedShape.exportBrepToString()==static)
+    dd.undo();dd.recompute();observe('direct edit Undo',dp,source,10);ds.Record=False;unrecorded=create(dd,source)
+    check('Record Off creates owned static point',not unrecorded.Recorded and unrecorded.Source is None and not unrecorded.Shape.isNull())
+    saved,ss=make_doc('Persistence');source=circle(saved,17);point=create(saved,source,0.43);saved_report=observe('saved baseline',point,source,17)
+    base=result['observations'][-1].copy();base.update({'radius':17,'parameter':0.43});path=out/'host-parameter.FCStd';saved.saveAs(str(path));(out/'host-parameter-persistence.json').write_text(json.dumps(base,indent=2),encoding='utf-8')
+    ss.Update=False;saved.recompute();saved.saveAs(str(out/'host-parameter-frozen.FCStd'));App.closeDocument(saved.Name)
+    warm=App.openDocument(str(path));warm.UndoMode=1;wp=warm.getObject('CurveParameterPoint');ws=warm.getObject('Circle')
+    check('warm query/basis/source link and dirty runtime report',json.loads(wp.QueryReport)['queries']==saved_report['queries'] and wp.Source==(ws,['Edge1']) and wp.HistoryDirty)
+    warm.recompute();observe('warm FCStd',wp,ws,17);result['persistence_file']=str(path)
+def run():
+    global OM
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM;result['native_module']=OM.__file__
+        if os.environ.get('OM9_HOST_PARAMETER_RESTORE_FILE'):cold()
+        else:main()
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        if os.environ.get('OM9_SMOKE_KEEP_OPEN')!='1':QtCore.QTimer.singleShot(0,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

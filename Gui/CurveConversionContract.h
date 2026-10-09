@@ -22,6 +22,20 @@ struct QuerySummary {
     Observation observation;
     std::array<double, 3> residuals;
 };
+struct DependencyInput {
+    Input conversion;
+    Observation observation;
+    std::array<double,3> host_source_point;
+    std::uint32_t use_raw,reserved;
+};
+struct DependencySummary {
+    std::uint32_t status,schema_version,used_raw,reserved;
+    double target_parameter;
+    std::array<double,3> point;
+    double host_source_residual,host_point_residual;
+};
+static_assert(sizeof(DependencyInput)==232 && offsetof(DependencyInput,host_source_point)==200);
+static_assert(sizeof(DependencySummary)==64 && offsetof(DependencySummary,target_parameter)==16);
 static_assert(sizeof(Input) == 72 && alignof(Input) == 8);
 static_assert(offsetof(Input, source_domain) == 16 && offsetof(Input, conversion_tolerance) == 48);
 static_assert(sizeof(Observation) == 128 && alignof(Observation) == 8);
@@ -34,6 +48,7 @@ std::uint32_t om9_curve_conversion_preflight(Input, std::size_t);
 std::uint32_t om9_curve_conversion_request(Input, double);
 std::uint32_t om9_curve_conversion_mapped_parameter(Input, double, std::uint32_t success, std::uint32_t direction);
 QuerySummary om9_curve_conversion_observation(Input, Observation);
+DependencySummary om9_curve_parameter_dependency(DependencyInput);
 }
 struct Options {
     double conversionTolerance;

@@ -5,6 +5,7 @@
 #include "CircleHistory.h"
 #include "BuilderHistory.h"
 #include "CageFeature.h"
+#include "CurveParameterPoint.h"
 #include <App/Document.h>
 #include <App/GeoFeatureGroupExtension.h>
 #include <Base/Console.h>
@@ -28,6 +29,7 @@ PROPERTY_SOURCE(OpenMatrix9Gui::HistoryJoin,Part::Feature)
 namespace {
 struct Writing {bool& flag;bool old;explicit Writing(bool& f):flag(f),old(f){flag=true;}~Writing(){flag=old;}};
 std::vector<App::DocumentObject*> historyParents(App::DocumentObject* object){
+    if(curveParameterRecorded(object))return curveParameterParents(object);
     if(builderHistoryRecorded(object))return builderHistoryParents(object);
     if(cageHistoryRecorded(object))return cageHistoryParents(object);
     if(auto* j=dynamic_cast<HistoryJoin*>(object))return j->Parents.getValues();
@@ -140,6 +142,7 @@ App::DocumentObjectExecReturn* HistoryJoin::execute(){
     catch(...){Writing internal(writing);Shape.setValue(Part::TopoShape());return new App::DocumentObjectExecReturn("Join History recompute failed",this);}
 }
 bool hasRecordedHistory(App::DocumentObject* o){
+    if(curveParameterRecorded(o))return true;
     if(builderHistoryRecorded(o)||cageHistoryRecorded(o))return true;
     if(auto* c=dynamic_cast<CircleHistory*>(o))return c->Recorded.getValue()&&(c->SourceCurve.getValue()||!c->Recipe.getValues().empty());
     if(auto* j=dynamic_cast<HistoryJoin*>(o))return j->Recorded.getValue();
@@ -163,7 +166,7 @@ void HistoryJoin::onChanged(const App::Property* p){
 }
 void HistoryJoin::detach(){Writing internal(writing);Parents.setValues({});PlacementSources.setValues({});Recorded.setValue(false);HistoryDirty.setValue(false);}
 void HistoryJoin::setInitialShape(PyObject* shape){Writing internal(writing);Shape.setPyObject(shape);}
-void detachObjectHistory(App::DocumentObject* o){if(detachBuilderHistory(o))return;if(cageHistoryRecorded(o)){detachCageHistory(o);return;}if(auto* c=dynamic_cast<CircleHistory*>(o))c->detach();else if(auto* j=dynamic_cast<HistoryJoin*>(o))j->detach();else if(auto* s=dynamic_cast<SurfaceHistory*>(o))s->HistoryEnabled.setValue(false);}
+void detachObjectHistory(App::DocumentObject* o){if(detachCurveParameter(o)||detachBuilderHistory(o))return;if(cageHistoryRecorded(o)){detachCageHistory(o);return;}if(auto* c=dynamic_cast<CircleHistory*>(o))c->detach();else if(auto* j=dynamic_cast<HistoryJoin*>(o))j->detach();else if(auto* s=dynamic_cast<SurfaceHistory*>(o))s->HistoryEnabled.setValue(false);}
 bool hasHistoryDependents(App::DocumentObject* o){
     if(!o||!o->getDocument())return false;
     for(auto* candidate:o->getDocument()->getObjects())if(hasRecordedHistory(candidate))

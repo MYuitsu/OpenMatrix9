@@ -78,6 +78,57 @@ pub enum QueryError {
     IntermediateDeviation,
     NativeDeviation,
     AllocationFailed,
+    HostSourceDeviation,
+    RawParameterUnproved,
+    HostPointDeviation,
+}
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct DependentPoint {
+    pub target_parameter: f64,
+    pub point: [f64; 3],
+    pub host_source_residual: f64,
+    pub host_point_residual: f64,
+    pub used_raw: bool,
+}
+/// Bind the inspected native conversion to the actual host source sample.
+/// The permission and returned point belong only to this query/lineage.
+pub fn dependency_point(
+    input: ConversionInput,
+    row: ParameterObservation,
+    host_source_point: [f64; 3],
+    use_raw: bool,
+) -> Result<DependentPoint, QueryError> {
+    let valid = validate_observation(input, row)?;
+    if !host_source_point.into_iter().all(f64::is_finite) {
+        return Err(QueryError::NonFinite);
+    }
+    let host_source_residual = distance(host_source_point, row.source_point);
+    if !host_source_residual.is_finite() || host_source_residual > input.length_tolerance {
+        return Err(QueryError::HostSourceDeviation);
+    }
+    if use_raw && !valid.raw_parameter_reusable {
+        return Err(QueryError::RawParameterUnproved);
+    }
+    let point = if use_raw {
+        row.raw_native_point
+    } else {
+        row.native_point
+    };
+    let host_point_residual = distance(host_source_point, point);
+    if !host_point_residual.is_finite() || host_point_residual > input.length_tolerance {
+        return Err(QueryError::HostPointDeviation);
+    }
+    Ok(DependentPoint {
+        target_parameter: if use_raw {
+            row.source_parameter
+        } else {
+            row.target_parameter
+        },
+        point,
+        host_source_residual,
+        host_point_residual,
+        used_raw: use_raw,
+    })
 }
 fn validate_input(input: ConversionInput) -> Result<QueryAction, QueryError> {
     let action = match input.form {

@@ -185,6 +185,8 @@ set(
     CageController.h
     HistoryFeature.cpp
     HistoryFeature.h
+    CurveParameterPoint.cpp
+    CurveParameterPoint.h
     BuilderHistory.cpp
     BuilderHistory.h
     CageFeature.cpp

@@ -7,6 +7,7 @@
 #include "CoreUnits.h"
 #include "CoreObjects.h"
 #include "CoreRebuild.h"
+#include "CurveParameterPoint.h"
 #include "CoreGeometryContract.h"
 #include "CoreCPlanes.h"
 
@@ -82,6 +83,8 @@ PyMOD_INIT_FUNC(OpenMatrix9Gui)
     AddThreeDmMethods(module);
     AddThreeDmRegistryMethods(module);
     OpenMatrix9Gui::initializeHistoryTypes();
+    OpenMatrix9Gui::initializeCurveParameterTypes();
+    OpenMatrix9Gui::addCurveParameterMethods(module);
     OpenMatrix9Gui::initializeUnitTypes();
     OpenMatrix9Gui::addUnitMethods(module);
     OpenMatrix9Gui::addObjectSnapshotMethods(module);

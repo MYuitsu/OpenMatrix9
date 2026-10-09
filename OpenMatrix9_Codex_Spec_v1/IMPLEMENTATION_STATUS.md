@@ -1,5 +1,14 @@
 # Implementation status — 2026-10-09
 
+<!-- rhino-core-host-parameter-dependency:start -->
+Đã nghiệm thu fixture T10 cho điểm phụ thuộc Circle/Line: dùng map openNURBS/OCCT
+có sẵn, Rust kiểm điểm với source thật và chặn raw parameter chưa được chứng minh.
+Query/basis/source identity được lưu FCStd và tính lại sau sửa/Undo/restore.
+238 kiểm tra fixture +114 hồi quy FreeCAD;556 Rust và159 native query đạt.
+Phạm vi Circle/Line và oracle lấy mẫu; **toàn bộ P0 vẫn đang triển khai.**
+[Bằng chứng và giới hạn](../docs/validation/2026-10-10-rhino-core-host-parameter-dependency.md).
+<!-- rhino-core-host-parameter-dependency:end -->
+
 <!-- rhino-core-delayed-publication:start -->
 Đã nghiệm thu fixture T08 cho native Rebuild: kết quả được giữ qua lượt giao,
 source/session/options hết hiệu lực bị chặn trước Coin/transaction;36 envelope

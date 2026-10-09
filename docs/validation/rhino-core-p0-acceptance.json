@@ -142,8 +142,10 @@
           "id": "RCORE-01.T10",
           "spec_requirement": "RCORE-01.T10 | Analytic curve chuyển sang NURBS, dependency lấy điểm theo tham số gốc | Đo locus riêng với parameter mapping; không reuse raw parameter khi conversion chưa chứng minh tương ứng; lưu kết quả query và mapping",
           "priority": "P0",
-          "status": "not_fully_verified",
-          "complete_evidence": [],
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-host-parameter-dependency-evidence.json"
+          ],
           "partial_evidence": [
             {
               "report": "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
@@ -153,7 +155,8 @@
               "report": "docs/validation/2026-10-10-rhino-core-curve-parameters.md",
               "scope": "Direct raw NURBS early storage preflight and finite standalone exact-lineage point queries; full allocation/host/History assertions remain open."
             }
-          ]
+          ],
+          "verification_scope": "Authored original analytic full Circle and Line dependency via actual observed ON map/OCCT target. Independent world source-point/locus samples, distinct raw/mapped residuals, Rust host-to-selected bound, per-query form1 raw proof/form2 rejection, persisted original parameter/map/query/basis/native link identity, fresh guards on source/Undo/frames/units/error/deletion/warm+cold FCStd and History update/lock/detach. No global deviation or all-family certificate."
         },
         {
           "id": "RCORE-01.T11",
@@ -1137,5 +1140,5 @@
       ]
     }
   ],
-  "updated_at": "2026-10-10T04:36:59+07:00"
+  "updated_at": "2026-10-10T05:16:42+07:00"
 }
