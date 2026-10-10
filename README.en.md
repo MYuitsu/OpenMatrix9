@@ -1,3 +1,5 @@
+> **0.0.1 Windows x64**: [Download](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.1) · [Install](INSTALL.en.md).
+
 # OpenMatrix9 — English
 
 [Tiếng Việt](README.vi.md) · [Detailed command list](README.md)
@@ -138,17 +140,20 @@ userdata retain limitations. See the 3DM exchange section in the
 Rhino 5 application evidence and remaining gaps.
 
 <a id="build"></a>
-## Build and installation
+## Install 0.0.1
 
-Use the [Windows guide](docs/build-windows.md), written in Vietnamese, to choose
-a combined FreeCAD/OM9 build, a standalone OM9 build against a matching SDK, or
-a compatible binary for an installed FreeCAD. The module requires matching
-SDK/ABI components; cloning it into `Mod` alone is insufficient.
+Download **FreeCAD-OM9-27.1-Windows-x64.zip** and **OpenMatrix9-0.0.1-Windows-x64.zip**
+from [release 0.0.1](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.1).
+Extract the host, put the plugin's **OpenMatrix9** folder inside
+**`FreeCAD-OM9-27.1/Mod`**, then run **`Mod/OpenMatrix9/Start-OM9.cmd`**.
+No separate Python, Rust or Pixi installation is needed to use these packages.
 
-The documented baseline is Windows x64, MSVC and Qt6, with Rust supporting
-edition 2024, CMake, Python and dependencies matching the FreeCAD SDK.
-Linux/macOS have not been validated for this module. Integration details:
-[build and validation](docs/build.md).
+[Detailed installation and troubleshooting](INSTALL.en.md).
+This experimental binary is verified with the supplied host only. Main continues
+development; its newer checkpoints are not automatically part of this release.
+
+For source builds: [Windows guide](docs/build-windows.md) and
+[SDK/validation](docs/build.md). The native module requires a matching FreeCAD ABI.
 
 <a id="checks"></a>
 ## Checks

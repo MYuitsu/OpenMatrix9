@@ -1,3 +1,5 @@
+> **0.0.1 Windows x64**: [Download](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.1) · [Install](INSTALL.vi.md).
+
 # OpenMatrix9 — Tiếng Việt
 
 [English](README.en.md) · [Danh sách chi tiết từng lệnh](README.md)
@@ -134,15 +136,20 @@ History/plugin userdata còn giới hạn. Xem phần trao đổi 3DM trong
 bằng chứng ứng dụng Rhino 5 riêng và các phần còn thiếu.
 
 <a id="build"></a>
-## Build và cài đặt
+## Cài bản 0.0.1
 
-Đọc [hướng dẫn Windows](docs/build-windows.md) để chọn build FreeCAD cùng OM9,
-build OM9 riêng với SDK, hoặc dùng binary tương thích với bản FreeCAD đã cài.
-Module cần SDK/ABI khớp; chỉ clone vào `Mod` chưa đủ để sử dụng.
+Tải **FreeCAD-OM9-27.1-Windows-x64.zip** và **OpenMatrix9-0.0.1-Windows-x64.zip**
+tại [Release 0.0.1](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.1).
+Giải nén host FreeCAD, đặt thư mục **OpenMatrix9** của gói plugin vào
+**`FreeCAD-OM9-27.1/Mod`**, rồi mở **`Mod/OpenMatrix9/Start-OM9.cmd`**.
+Không cần tự build, cài Python/Rust hoặc Pixi để dùng gói này.
 
-Baseline tài liệu là Windows x64, MSVC và Qt6, với Rust hỗ trợ edition 2024,
-CMake, Python và dependencies của đúng FreeCAD SDK. Linux/macOS chưa được
-kiểm chứng cho module này. Chi tiết tích hợp: [build và validation](docs/build.md).
+[Hướng dẫn cài chi tiết, cấu trúc thư mục và xử lý lỗi](INSTALL.vi.md).
+Binary 0.0.1 chỉ được xác nhận với host FreeCAD đi kèm. Đây là bản thử nghiệm;
+main tiếp tục phát triển nên các checkpoint mới trên main không tự có trong release.
+
+Để build source: [hướng dẫn Windows](docs/build-windows.md),
+[SDK/validation](docs/build.md). OM9 native yêu cầu SDK/ABI của đúng FreeCAD.
 
 <a id="checks"></a>
 ## Kiểm tra

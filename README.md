@@ -1,3 +1,5 @@
+> **0.0.1 Windows x64**: [Download](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.1) · [Install](INSTALL.vi.md).
+
 # OpenMatrix9
 
 [Tiếng Việt — mục lục và tiến độ theo nhóm](README.vi.md) ·
@@ -50,16 +52,20 @@ Mọi đóng góp đều tự nguyện. Cảm ơn bạn đã hỗ trợ dự án
 
 <img src="docs/images/donate/momo-qr.png" alt="Mã QR MoMo donate cho NGUYEN THAI DUY" width="300">
 
-## Build và cài đặt
+## Cài bản 0.0.1
 
-Xem [hướng dẫn build FreeCAD và OpenMatrix9 trên Windows](docs/build-windows.md):
+Tải **FreeCAD-OM9-27.1-Windows-x64.zip** và **OpenMatrix9-0.0.1-Windows-x64.zip**
+tại [Release 0.0.1](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.1).
+Giải nén host FreeCAD, đặt thư mục **OpenMatrix9** của gói plugin vào
+**`FreeCAD-OM9-27.1/Mod`**, rồi mở **`Mod/OpenMatrix9/Start-OM9.cmd`**.
+Không cần tự build, cài Python/Rust hoặc Pixi để dùng gói này.
 
-- **Build cùng FreeCAD từ source**: clone workspace, tích hợp CMake, Pixi, build và chạy.
-- **Build riêng OpenMatrix9**: dùng source/build SDK và dependencies của FreeCAD đã build.
-- **Dùng với FreeCAD installer/portable**: yêu cầu ABI/SDK khớp, vị trí `.pyd` và resources, kiểm tra sau cài.
+[Hướng dẫn cài chi tiết, cấu trúc thư mục và xử lý lỗi](INSTALL.vi.md).
+Binary 0.0.1 chỉ được xác nhận với host FreeCAD đi kèm. Đây là bản thử nghiệm;
+main tiếp tục phát triển nên các checkpoint mới trên main không tự có trong release.
 
-OpenMatrix9 có module native C++/Rust; chỉ clone vào `Mod` chưa đủ.
-Bản cài FreeCAD thông thường không tự cung cấp SDK để build module này.
+Để build source: [hướng dẫn Windows](docs/build-windows.md),
+[SDK/validation](docs/build.md). OM9 native yêu cầu SDK/ABI của đúng FreeCAD.
 
 <!-- edit-options-validation -->
 Edit cập nhật 2026-10-09: Trim ExtendLines/ApparentIntersections (curve,
