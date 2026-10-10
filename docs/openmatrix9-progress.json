@@ -3303,7 +3303,7 @@
     {
       "key": "release-0.0.2-stock-freecad-1.1.4",
       "stage": "compatibility-release",
-      "status": "native_compatibility_verified_release_pending",
+      "status": "published_experimental_verified",
       "outputs": [
         "INSTALL.vi.md",
         "INSTALL.en.md",
@@ -3312,7 +3312,12 @@
       "checks": 217.0,
       "limitations": [
         "Stock FreeCAD 1.1 commits prior document drafts when a new transaction starts in another document; verified without OM9. Single active document workflow tested."
-      ]
+      ],
+      "release_url": "https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.2",
+      "source_commit": "aebddfae3611929783ceb50b7c3edd20649b54ba",
+      "installed_user_discovery_checks": 12,
+      "extracted_package_startup_checks": 12,
+      "rust_tests": 262
     }
   ],
   "publication_push_20261008": {

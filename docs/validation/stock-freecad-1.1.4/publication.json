@@ -1,0 +1,46 @@
+{
+  "ok": true,
+  "url": "https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.2",
+  "tag": "v0.0.2",
+  "source_commit": "aebddfae3611929783ceb50b7c3edd20649b54ba",
+  "published_at": "2026-10-10T16:37:41Z",
+  "prerelease": true,
+  "assets": [
+    {
+      "name": "INSTALL.en.md",
+      "size": 3481,
+      "digest": "sha256:e7120f637c167474adc3647914a2a9265494b1a36077dd9af75a0dfa3c933536",
+      "url": "https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/INSTALL.en.md"
+    },
+    {
+      "name": "INSTALL.vi.md",
+      "size": 4595,
+      "digest": "sha256:e1154ee2f49d0e51147b5d6b4933a8ac7337316bddee372d51ec7f617bcb6792",
+      "url": "https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/INSTALL.vi.md"
+    },
+    {
+      "name": "OpenMatrix9-0.0.2-FreeCAD-1.1.4-Windows-x64.zip",
+      "size": 12324118,
+      "digest": "sha256:2f0d28d2081896cf8749098b584e0c48d7f71972fb973621d581abb0f2662eb8",
+      "url": "https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-FreeCAD-1.1.4-Windows-x64.zip"
+    },
+    {
+      "name": "OpenMatrix9-0.0.2-source.zip",
+      "size": 23155146,
+      "digest": "sha256:5d03d7d0b66cc1cda1030c7843b943eb0f90fb202381e34cd7465483b1bfdd62",
+      "url": "https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-source.zip"
+    },
+    {
+      "name": "release-validation.json",
+      "size": 1190,
+      "digest": "sha256:6a751b398f8290318a385d7a7a7e83e548f4d587cde40f52a85128186f3f0ab8",
+      "url": "https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/release-validation.json"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 464,
+      "digest": "sha256:c04d31a0bad11f854abca2a9ac5ad498f5cea8e8dafe781f1bd7d55cb121b5d3",
+      "url": "https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/SHA256SUMS.txt"
+    }
+  ]
+}
