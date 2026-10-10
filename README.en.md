@@ -1,4 +1,4 @@
-> **OpenMatrix9 0.0.1 (experimental, Windows x64)**: [Download release](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.1) · [Installation guide](INSTALL.en.md). Use the matching FreeCAD portable host supplied with this release.
+> **OpenMatrix9 0.0.2 (experimental, Windows x64)**: [Download release](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.2) · [Installation guide](INSTALL.en.md). Use **official FreeCAD 1.1.4**, with OM9 in the versioned user Mod directory. [Fresh compatibility evidence and limits](docs/validation/2026-10-10-stock-freecad-1.1.4.md); older development-host tests below do not certify all stock workflows.
 
 # OpenMatrix9 — English
 
