@@ -46,7 +46,7 @@ Giữ clipboard yên khi trao đổi. Các script kiểm chứng Matrix trong so
 
 ## Phạm vi bản thử nghiệm
 
-- `0.0.3` bổ sung tương thích FreeCAD chính thức; bộ kiểm tra mới đo trực tiếp host 1.1.4. Bằng chứng Rhino/Matrix của các nhánh dev trước không phải chứng nhận lại toàn bộ bản stock này.
+- `0.0.3` bổ sung build công khai trên GitHub và launcher mới, trên nền tương thích FreeCAD chính thức của `0.0.2`. Xem [phạm vi CI và lỗi tooling lịch sử còn lại](docs/validation/2026-10-11-release003-ci.md). Bằng chứng Rhino/Matrix của các nhánh dev trước không phải chứng nhận lại toàn bộ bản stock này.
 - Chỉnh curve, bảng layer, Copy/Paste, BRep trong các mẫu đã kiểm tra, worker import và thao tác viewport có báo cáo kèm release. Full openNURBS, mọi thuật toán trang sức và chuyển đầy đủ bảng màu/khóa bằng thao tác Matrix sản phẩm vẫn chưa được nghiệm thu toàn bộ.
 - Làm việc trên **một tài liệu active** khi đang vẽ. FreeCAD 1.1 có thể commit draft của tài liệu trước khi bắt đầu transaction ở tài liệu khác; bản dev mới có API khác. Hãy hoàn tất hoặc hủy lệnh trước khi chuyển tài liệu.
 - Các luồng nâng cao phụ thuộc bản sửa core FreeCAD dev, như copy dữ liệu Hatch dùng `PropertyFileIncluded`, chưa được chứng nhận trên host stock.

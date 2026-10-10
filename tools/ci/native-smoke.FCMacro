@@ -1,14 +1,18 @@
 import os,json,traceback,sys
 from pathlib import Path
 import FreeCAD as App,FreeCADGui as Gui
-from PySide6 import QtCore,QtWidgets,QtSvg,QtTest
+from PySide6 import QtCore,QtWidgets,QtSvg,QtTest,QtGui
 out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
 def check(name,value):
     report['checks'].append({'name':name,'passed':bool(value)})
     if not value:raise AssertionError(name)
 def run():
     try:
+        context=QtGui.QOpenGLContext();check('real OpenGL context creates',context.create())
+        report['opengl']={'major':context.format().majorVersion(),'minor':context.format().minorVersion(),'software':QtCore.QCoreApplication.testAttribute(QtCore.Qt.AA_UseSoftwareOpenGL)}
+        check('OpenGL supports stock host',report['opengl']['major']>=2)
         import Part,OpenMatrix9Gui as native
+        report.update(module=native.__file__,user_data=App.getUserAppDataDir(),module_search=sys.path)
         root=Path(os.environ['OM9_TEST_PLUGIN'])
         check('uses verified official FreeCAD 1.1.4',App.Version()[:3]==['1','1','4'] and Path(App.getHomePath()).resolve()==Path(os.environ['OM9_TEST_HOST']).resolve())
         check('uses installed Python 3.11',sys.version_info[:2]==(3,11))

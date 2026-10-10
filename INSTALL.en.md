@@ -40,7 +40,7 @@ The Matrix diagnostic scripts in the source are development tools, not installat
 
 ## Experimental scope
 
-- This release adds official-host compatibility. Fresh 1.1.4 reports cover the named curve, layer, clipboard, BRep, worker and viewport cases. Earlier Rhino/Matrix development reports are historical evidence, not a full recertification of the stock build.
+- v0.0.3 adds the public CI build and latest launcher to the official-host compatibility introduced in v0.0.2. CI scope and remaining historical tooling failures are documented in [build validation](docs/validation/2026-10-11-release003-ci.md). Earlier Rhino/Matrix development reports are historical evidence, not a full recertification of this stock build.
 - Full openNURBS, all jewelry algorithms and production Matrix palette/lock handoff are not fully accepted yet.
 - Finish or cancel a modeling command before changing documents. Official FreeCAD 1.1 can commit a draft in one document when a transaction begins in another; the verified workflow uses one active document.
 - Advanced workflows requiring patched development FreeCAD core, including Hatch `PropertyFileIncluded` copy, are not certified on the stock host.

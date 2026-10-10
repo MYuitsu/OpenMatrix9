@@ -11,6 +11,7 @@ foreach($test in @('test_release_package.py','test_public_source_audit.py')){
 & (Join-Path $source 'tools/tests/launcher-tests.ps1') -OutputRoot (Join-Path $evidence 'installer')
 & (Join-Path $source 'tools/tests/launcher-update-tests.ps1') -OutputRoot (Join-Path $evidence 'updater')
 & (Join-Path $source 'tools/tests/stock-host-tests.ps1') -OutputRoot (Join-Path $evidence 'stock-host')
+& (Join-Path $source 'tools/tests/ci-gui-profile-tests.ps1') -OutputRoot (Join-Path $evidence 'gui-profile')
 $env:CARGO_TARGET_DIR=Join-Path $paths.build 'Gui/rust-target'
 $env:CARGO_BUILD_JOBS=[string]$paths.workers
 & cargo test --locked --release --manifest-path (Join-Path $source 'rust/Cargo.toml') *> (Join-Path $evidence 'rust-tests.log')
@@ -32,9 +33,12 @@ foreach($key in @('PYTHONHOME','PYTHONPATH','QT_PLUGIN_PATH','QT_QPA_PLATFORM_PL
 & (Join-Path $paths.build 'ThreeDmModelingBrepTests.exe') *> (Join-Path $evidence 'brep.log')
 if($LASTEXITCODE -ne 0){Get-Content -LiteralPath (Join-Path $evidence 'brep.log');throw 'Eight independent analytic BRep fixtures failed'}
 $reports=@()
+. (Join-Path $PSScriptRoot 'gui-profile.ps1')
 foreach($macro in @('native-smoke.FCMacro','worker-smoke.FCMacro')){
  $output=Join-Path $evidence $macro;New-Item -ItemType Directory -Path $output -Force|Out-Null
  $env:FREECAD_USER_HOME=Join-Path $output 'profile';$env:OM9_SMOKE_OUTPUT=$output;$env:OM9_TEST_PLUGIN=$paths.plugin;$env:OM9_TEST_HOST=$paths.host
+ Initialize-OM9CIGuiProfile $paths.host $output|Out-Null
+ Write-Output "Starting $macro with the official host software OpenGL renderer."
  $arguments=@('-M',('"'+$paths.plugin+'"'),'-u',('"'+(Join-Path $output 'user.cfg')+'"'),'-s',('"'+(Join-Path $output 'system.cfg')+'"'),('"'+(Join-Path $PSScriptRoot $macro)+'"'))
  $process=Start-Process -FilePath (Join-Path $paths.host 'bin/FreeCAD.exe') -ArgumentList $arguments -WorkingDirectory $paths.host -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $output 'stdout.log') -RedirectStandardError (Join-Path $output 'stderr.log')
  if(-not $process.WaitForExit(180000)){$process.Kill();throw "Owned CI host timeout: $macro; see $output"}
