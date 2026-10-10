@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-10T22:00:04.036088+00:00",
+  "updated_at": "2026-10-10T22:28:02.936384+00:00",
   "implementation_target": "Safe Rust is priority1 for portable logic/state/data/validation/index/cache/workers; native C++/Qt/OCCT/openNURBS adapters only; Python bootstrap/tests/tools when required.",
-  "active_item": "release-0.0.2-windows-launcher",
+  "active_item": "release-0.0.2-launcher-r2",
   "items": [
     {
       "key": "reference-skills",
@@ -3356,7 +3356,52 @@
         "Existing experimental stock-host limitations remain; no new Rhino/Matrix modeling certification."
       ],
       "next_document": "docs/validation/2026-10-11-windows-launcher.md",
-      "next_action": "User requested Start Menu and automatic update check; short additional design awaits approval."
+      "next_action": "Launcher r2 adds Start Menu and background update checks; see release-0.0.2-launcher-r2."
+    },
+    {
+      "key": "release-0.0.2-launcher-r2",
+      "stage": "deployment",
+      "status": "validated",
+      "feature_ids": [],
+      "procedure_va": null,
+      "outputs": [
+        "launcher/Start-OM9.ps1",
+        "launcher/README.md",
+        "tools/build-launcher-bundle.py",
+        "tools/tests/launcher-tests.ps1",
+        "tools/tests/launcher-update-tests.ps1",
+        "README.md",
+        "README.vi.md",
+        "README.en.md",
+        "docs/validation/2026-10-11-launcher-r2.md",
+        "docs/validation/launcher-r2-0.0.2/summary.json"
+      ],
+      "evidence": [
+        "User approved Desktop/Start Menu shortcuts and automatic background update checking; notifications link to manual download/new script, with offline-safe startup.",
+        "26 installer, 17 update/shortcut, 21 actual native startup checks passed, including actual Start Menu shortcut activation and live GitHub check.",
+        "Actual user OneDrive Desktop and Start Menu icons installed; physical-volume hashes verified 541 plugin files/four cache files and physical Start Menu shortcut.",
+        "Independent review findings fixed: complete payload fingerprint detects removed files; redirected Programs Known Folder supports trusted shortcut write. Native Rust/plugin/worker unchanged; no FreeCAD rebuild."
+      ],
+      "tests": [
+        {
+          "command": "Windows PowerShell 5.1 tools/tests/launcher-tests.ps1",
+          "result": "26 passed"
+        },
+        {
+          "command": "Windows PowerShell 5.1 tools/tests/launcher-update-tests.ps1",
+          "result": "17 passed"
+        },
+        {
+          "command": "Official FreeCAD 1.1.4 launcher r2 integration",
+          "result": "21 passed; live background check current"
+        }
+      ],
+      "uncertainties": [
+        "Network/rate-limit failures are recorded without blocking startup. No automatic plugin download/install.",
+        "All earlier experimental stock-host and modeling limits remain."
+      ],
+      "next_document": "docs/validation/2026-10-11-launcher-r2.md",
+      "next_action": "Push source/docs and publish supplementary r2 ZIP/checksum without replacing existing assets."
     }
   ],
   "publication_push_20261008": {

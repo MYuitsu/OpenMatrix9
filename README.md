@@ -16,9 +16,11 @@ Ví dụ chương trình đã cài: `C:\Program Files\FreeCAD 1.1\bin\FreeCAD.ex
 
 ### 2. Tải OM9 và đặt đúng thư mục
 
-**Cách tự cài, khuyến nghị:** tải [OpenMatrix9-0.0.2-SetupLauncher-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-SetupLauncher-Windows-x64.zip), giải nén toàn bộ rồi bấm **Start-OM9.cmd**. Script tự chép/cập nhật plugin vào AppData, tạo icon **OpenMatrix9** trên Desktop và mở đúng workbench. Các lần sau chỉ cần bấm icon Desktop; có thể di chuyển/xóa thư mục giải nén sau khi cài xong. Không cần Administrator.
+**Cách tự cài, khuyến nghị:** tải [OpenMatrix9-0.0.2-SetupLauncher-r2-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-SetupLauncher-r2-Windows-x64.zip), giải nén toàn bộ rồi bấm **Start-OM9.cmd**. Script tự chép/cập nhật plugin vào AppData, tạo icon **OpenMatrix9** trên Desktop và Start Menu rồi mở đúng workbench. Các lần sau bấm icon Desktop hoặc tìm OpenMatrix9 trong Start Menu; có thể di chuyển/xóa thư mục giải nén sau khi cài xong. Không cần Administrator.
 
-Khi cập nhật, chạy `Start-OM9.cmd` trong gói mới. Script giữ bản cũ ở `%APPDATA%\FreeCAD\v1-1\OM9-backups`, bỏ qua chép plugin nếu không đổi và yêu cầu lưu/đóng FreeCAD đang dùng plugin nếu cần thay bản. Log ở `%APPDATA%\FreeCAD\v1-1\OM9-launcher`. Gói thiếu/hỏng hoặc cập nhật thất bại sẽ không thay bản đang dùng. Kiểm tra ZIP này bằng **Launcher-SHA256SUMS.txt** trên release.
+Khi cập nhật, chạy `Start-OM9.cmd` trong gói mới. Script giữ bản cũ ở `%APPDATA%\FreeCAD\v1-1\OM9-backups`, bỏ qua chép plugin nếu không đổi và yêu cầu lưu/đóng FreeCAD đang dùng plugin nếu cần thay bản. Log ở `%APPDATA%\FreeCAD\v1-1\OM9-launcher`. Gói thiếu/hỏng hoặc cập nhật thất bại sẽ không thay bản đang dùng. Kiểm tra ZIP này bằng **Launcher-r2-SHA256SUMS.txt** trên release.
+
+Khi mở, launcher tự kiểm tra release mới trên GitHub ở tiến trình nền. Có phiên bản/plugin hoặc revision launcher mới thì báo link tải, mỗi bản chỉ báo một lần; mất mạng vẫn mở OM9. Tải gói mới, giải nén và chạy lại `Start-OM9.cmd` để cập nhật. Launcher không tự tải/cài plugin. Nếu chỉ đổi launcher, không chép lại plugin và không cần đóng OM9. Kết quả kiểm tra nằm trong `OM9-launcher\update-check.json`.
 
 **Cài thủ công** nếu muốn tự quản lý thư mục:
 

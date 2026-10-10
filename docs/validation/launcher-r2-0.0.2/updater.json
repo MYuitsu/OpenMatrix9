@@ -1,0 +1,73 @@
+{
+    "checks":  [
+                   {
+                       "name":  "installed release has no update",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "older development release cannot trigger downgrade",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "new application version is offered",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "launcher revision update is offered",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "draft release is excluded",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "foreign download endpoint is excluded",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "unsupported platform asset is excluded",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "versions compare numerically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "offline check returns status without breaking launch",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "offline diagnostic is recorded",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "silent check records available update without UI",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "new release notification appears once",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "same release notification is not repeated",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Desktop and Start Menu shortcuts both exist",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "both shortcuts use the same persistent launcher and icon",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "redirected Windows Programs Known Folder creates a working shortcut",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "redirected Start Menu still uses the persistent launcher",
+                       "passed":  true
+                   }
+               ],
+    "ok":  true
+}

@@ -4,9 +4,11 @@ This experimental package targets **Windows x64 and official FreeCAD 1.1.4**, wi
 
 ## Automatic installation and Desktop icon (recommended)
 
-Install official FreeCAD 1.1.4, then download [the setup launcher ZIP](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-SetupLauncher-Windows-x64.zip). Extract the entire ZIP and double-click **Start-OM9.cmd**. It installs or updates the bundled module in `%APPDATA%\FreeCAD\v1-1\Mod\OpenMatrix9`, creates an **OpenMatrix9** Desktop shortcut with its icon, and starts the workbench. No Administrator access is needed.
+Install official FreeCAD 1.1.4, then download [the setup launcher ZIP](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-SetupLauncher-r2-Windows-x64.zip). Extract the entire ZIP and double-click **Start-OM9.cmd**. It installs or updates the bundled module in `%APPDATA%\FreeCAD\v1-1\Mod\OpenMatrix9`, creates **OpenMatrix9** shortcuts with its icon on Desktop and in Start Menu, and starts the workbench. No Administrator access is needed.
 
-Use the Desktop icon afterwards; it remains usable after moving or deleting the extracted folder. To update, run Start-OM9.cmd from a new bundle. Previous modules are kept outside Mod in `v1-1\OM9-backups`; an unchanged module is not recopied. Save and close the FreeCAD instance using this installation if an update is required. The launcher never closes your application or downloads a plugin. Incomplete packages and failed cache updates preserve the previous installation. Logs are in `v1-1\OM9-launcher`. Check this ZIP against **Launcher-SHA256SUMS.txt** on the release page.
+Use Desktop or search OpenMatrix9 in Start Menu afterwards; it remains usable after moving or deleting the extracted folder. To update, run Start-OM9.cmd from a new bundle. Previous modules are kept outside Mod in `v1-1\OM9-backups`; an unchanged module is not recopied. Save and close the FreeCAD instance using this installation if an update is required. The launcher never closes your application or downloads a plugin. Incomplete packages and failed cache updates preserve the previous installation. Logs are in `v1-1\OM9-launcher`. Check this ZIP against **Launcher-r2-SHA256SUMS.txt** on the release page.
+
+The launcher checks GitHub releases in the background whenever OM9 starts. New application versions or launcher revisions prompt once with a download-page link. Network errors do not prevent startup. Download/extract the new bundle and run its Start-OM9.cmd to update; it never installs updates automatically. A launcher-only update does not recopy the plugin or require closing OM9. Check status in `OM9-launcher\update-check.json`.
 
 ## Manual installation
 

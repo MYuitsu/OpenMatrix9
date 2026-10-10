@@ -22,13 +22,13 @@ def main():
         shutil.copy2(source/'launcher'/name,out/name)
     rows=[dict(path=f.relative_to(dest).as_posix(),sha256=sha(f)) for f in sorted(dest.rglob('*')) if f.is_file()]
     bootstrap=[dict(path=name,sha256=sha(out/name)) for name in ['Start-OM9.ps1','Start-OM9.cmd','Start-OM9.FCMacro','OpenMatrix9.ico','README.md']]
-    (out/'launcher-manifest.json').write_text(json.dumps(dict(version='0.0.2',freecad='1.1.4',files=rows,launcher_files=bootstrap),indent=2)+'\n')
-    archive=out.parent/'OpenMatrix9-0.0.2-SetupLauncher-Windows-x64.zip'
+    (out/'launcher-manifest.json').write_text(json.dumps(dict(version='0.0.2',freecad='1.1.4',launcher_revision=2,files=rows,launcher_files=bootstrap),indent=2)+'\n')
+    archive=out.parent/'OpenMatrix9-0.0.2-SetupLauncher-r2-Windows-x64.zip'
     with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
         for f in sorted(out.rglob('*')):
             if f.is_file():z.write(f,f.relative_to(out).as_posix())
     with zipfile.ZipFile(archive) as z:assert z.testzip() is None
-    (out.parent/'Launcher-SHA256SUMS.txt').write_text(sha(archive)+'  '+archive.name+'\n',encoding='ascii')
+    (out.parent/'Launcher-r2-SHA256SUMS.txt').write_text(sha(archive)+'  '+archive.name+'\n',encoding='ascii')
     print(json.dumps(dict(ok=True,files=len(rows),archive=str(archive),sha256=sha(archive)),indent=2))
 
 if __name__=='__main__':main()
