@@ -10,6 +10,7 @@ foreach($test in @('test_release_package.py','test_public_source_audit.py')){
 }
 & (Join-Path $source 'tools/tests/launcher-tests.ps1') -OutputRoot (Join-Path $evidence 'installer')
 & (Join-Path $source 'tools/tests/launcher-update-tests.ps1') -OutputRoot (Join-Path $evidence 'updater')
+& (Join-Path $source 'tools/tests/stock-host-tests.ps1') -OutputRoot (Join-Path $evidence 'stock-host')
 $env:CARGO_TARGET_DIR=Join-Path $paths.build 'Gui/rust-target'
 $env:CARGO_BUILD_JOBS=[string]$paths.workers
 & cargo test --locked --release --manifest-path (Join-Path $source 'rust/Cargo.toml') *> (Join-Path $evidence 'rust-tests.log')

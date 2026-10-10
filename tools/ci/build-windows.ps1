@@ -20,9 +20,8 @@ if(-not (Test-Path -LiteralPath $hostRoot)){
  & 7z x $archive "-o$hostRoot" -y|Out-Null
  if($LASTEXITCODE -ne 0){throw 'FreeCAD archive extraction failed'}
 }
-$executables=@(Get-ChildItem -LiteralPath $hostRoot -Filter FreeCAD.exe -File -Recurse)
-if($executables.Count -ne 1){throw 'Expected one official FreeCAD host'}
-$stock=Split-Path (Split-Path $executables[0].FullName)
+. (Join-Path $PSScriptRoot 'stock-host.ps1')
+$stock=Find-OM9StockHost $hostRoot
 $python=Join-Path $source 'tools/ci/.pixi/envs/default/python.exe'
 $prefix=Join-Path $source 'tools/ci/.pixi/envs/default/Library'
 & $python (Join-Path $PSScriptRoot 'prepare_sdk.py') --root $Root --host $stock
