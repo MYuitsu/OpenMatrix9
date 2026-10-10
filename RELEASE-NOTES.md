@@ -18,6 +18,7 @@ Experimental **Windows x64 / official FreeCAD 1.1.4** release.
 · [Official FreeCAD download](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4).
 Experimental: unfinished commands remain disabled. Back up models; provenance
 does not guarantee antivirus acceptance or complete Matrix/Rhino compatibility.
+Hosted viewport rendering remains unverified; see [validation limits](https://github.com/MYuitsu/OpenMatrix9/blob/v0.0.3/docs/validation/2026-10-11-release003-ci.md).
 
 ## Tiếng Việt
 
@@ -39,3 +40,4 @@ Bản thử nghiệm **Windows x64 / FreeCAD 1.1.4 chính thức**.
 · [Tải FreeCAD chính thức](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4).
 Bản thử nghiệm: lệnh chưa hoàn thiện vẫn bị vô hiệu hóa. Hãy sao lưu bản vẽ;
 chứng thực không bảo đảm antivirus chấp nhận hoặc toàn bộ tương thích Matrix/Rhino.
+Hiển thị viewport trên máy CI chưa được xác thực đầy đủ; xem [giới hạn kiểm thử](https://github.com/MYuitsu/OpenMatrix9/blob/v0.0.3/docs/validation/2026-10-11-release003-ci.md).
