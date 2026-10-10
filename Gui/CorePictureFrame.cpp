@@ -59,7 +59,7 @@ CorePictureFrame::CorePictureFrame():QObject(qApp) {
 bool CorePictureFrame::handles(std::size_t index){const auto* name=om9_command_id(index);return name&&QString::fromUtf8(name)=="PictureFrame";}
 bool CorePictureFrame::available()const {
     auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
-    return enabled&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&view()&&Gui::Control().isAllowedAlterDocument(doc);
+    return enabled&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&view()&&om9AlterDocument(doc);
 }
 bool CorePictureFrame::valid()const{return running&&document==App::GetApplication().getActiveDocument()&&available();}
 void CorePictureFrame::activate(){enabled=true;}
@@ -117,7 +117,7 @@ void CorePictureFrame::point(const Base::Vector3d& value,bool ortho) {
 }
 void CorePictureFrame::finish(const double* p) {
     if(!valid()){cancel();return;}
-    auto* doc=document;doc->openTransaction("PictureFrame");
+    auto* doc=document;om9OpenTransaction(*doc,"PictureFrame");
     try {
         auto* object=dynamic_cast<Image::ImagePlane*>(doc->addObject("Image::ImagePlane","PictureFrame"));
         if(!object)throw Base::RuntimeError("Native ImagePlane is unavailable");
@@ -126,10 +126,10 @@ void CorePictureFrame::finish(const double* p) {
         object->Placement.setValue(Base::Placement(Base::Vector3d(p[3],p[4],p[5]),Base::Rotation(matrix)));
         if(autoname)object->Label.setValue(QFileInfo(source).completeBaseName().toUtf8().constData());
         if(auto* provider=dynamic_cast<Gui::ViewProviderDocumentObject*>(Gui::Application::Instance->getDocument(doc)->getViewProvider(object)))provider->DisplayMode.setValue(selfIllumination?"No shading":"Shading");
-        doc->recompute();doc->commitTransaction();om9_sidebar_record_execution(command,true);cancel();
+        doc->recompute();om9CommitTransaction(*doc);om9_sidebar_record_execution(command,true);cancel();
         CurveController::instance().setPrompt("PictureFrame created");
         CurveController::instance().logMessage("PictureFrame created");
-    }catch(const Base::Exception& error){doc->abortTransaction();prompt(QString::fromUtf8(error.what()));}
+    }catch(const Base::Exception& error){om9AbortTransaction(*doc);prompt(QString::fromUtf8(error.what()));}
 }
 void CorePictureFrame::submit(const QString& text) {
     if(!valid()){cancel();return;}const auto input=text.trimmed();

@@ -35,7 +35,7 @@ CoreDistance::CoreDistance():QObject(qApp){
 bool CoreDistance::handles(std::size_t index){auto* name=om9_command_id(index);return name&&(QString::fromUtf8(name)=="Distance"||QString::fromUtf8(name)=="Angle");}
 bool CoreDistance::available()const{
     auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
-    return enabled&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&view()&&Gui::Control().isAllowedAlterView(doc);
+    return enabled&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&view()&&om9AlterView(doc);
 }
 bool CoreDistance::active()const{return running;}
 bool CoreDistance::valid()const{return document==App::GetApplication().getActiveDocument()&&available();}

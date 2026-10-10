@@ -131,7 +131,7 @@ CoreWorkspace::CoreWorkspace():QObject(qApp) {
     saveConnection=App::GetApplication().signalStartSaveDocument.connect([this](const App::Document& doc,const std::string&) {
         auto values=doc.Meta.getValues();auto views=slots(Gui::Application::Instance->getDocument(&doc));
         for(int slot=0;slot<4;++slot)if(auto* view=views[slot]) {
-            auto suffix=std::to_string(slot);values["OpenMatrix9.ViewCamera."+suffix]=view->getCamera();
+            auto suffix=std::to_string(slot);values["OpenMatrix9.ViewCamera."+suffix]=cameraState(view->getViewer());
             if(auto* node=grid(view))values["OpenMatrix9.ViewGrid."+suffix]=(enabled?node->whichChild.getValue()!=SO_SWITCH_NONE:!view->property("om9GridHidden").toBool())?"1":"0";
         }
         if(values!=doc.Meta.getValues())const_cast<App::Document&>(doc).Meta.setValues(std::move(values));
@@ -140,7 +140,7 @@ CoreWorkspace::CoreWorkspace():QObject(qApp) {
     qApp->installEventFilter(this);
 }
 bool CoreWorkspace::handles(std::size_t command) {auto name=id(command);return name=="RestoreViewports"||name=="SynchronizeViews"||name=="CenterViewport"||name=="ShowGrid"||name=="ViewportTabs";}
-bool CoreWorkspace::available(std::size_t command)const {return enabled&&handles(command)&&activeView()&&Gui::Control().isAllowedAlterView(App::GetApplication().getActiveDocument());}
+bool CoreWorkspace::available(std::size_t command)const {return enabled&&handles(command)&&activeView()&&om9AlterView(App::GetApplication().getActiveDocument());}
 void CoreWorkspace::activate(){
     auto* area=Gui::getMainWindow()->findChild<QMdiArea*>();if(!enabled&&area){previousMdiMode=int(area->viewMode());previousMdiMaximizeOption=area->testOption(QMdiArea::DontMaximizeSubWindowOnActivation);area->setOption(QMdiArea::DontMaximizeSubWindowOnActivation,true);}
     auto pref=App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Mod/OpenMatrix9/ViewportTabs");
@@ -173,7 +173,7 @@ void CoreWorkspace::deactivate(){
 }
 void CoreWorkspace::ensure(bool restore) {
     if(!enabled||arranging||Gui::Application::Instance->isClosing())return;auto* doc=Gui::Application::Instance->activeDocument();if(!doc||doc->isAboutToClose()||!activeView()){pendingEnsure=false;updateTabs();return;}
-    if(doc->getInEdit()||!Gui::Control().isAllowedAlterView(doc->getDocument())){pendingEnsure=true;updateTabs();return;}
+    if(doc->getInEdit()||!om9AlterView(doc->getDocument())){pendingEnsure=true;updateTabs();return;}
     QScopedValueRollback<bool> guard(arranging,true);
     auto* previousView=activeView();
     auto views=slots();
@@ -202,7 +202,6 @@ void CoreWorkspace::ensure(bool restore) {
         ensureTitle(view);auto* node=grid(view,true);if(node&&(fresh||restore))node->whichChild=SO_SWITCH_ALL;
         if(!viewer->property("om9PreviousBackground").isValid()){viewer->setProperty("om9PreviousBackground",viewer->backgroundColor());viewer->setProperty("om9PreviousGradient",int(viewer->getGradientBackground()));}
         viewer->setBackgroundColor(QColor(0,0,0));viewer->setGradientBackground(Gui::View3DInventorViewer::Background::NoGradient);
-        if(!qgetenv("OM9_TRACE_CAMERA").isEmpty()&&!viewer->property("om9CameraTrace").toBool()){viewer->setProperty("om9CameraTrace",true);QObject::connect(viewer,&Gui::View3DInventorViewer::cameraChanged,this,[view,i]{if(auto* camera=dynamic_cast<SoPerspectiveCamera*>(view->getViewer()->getSoRenderManager()->getCamera()))traceCameraChange(i,camera->heightAngle.getValue());});}
         if(fresh||restore) {
             viewer->setAnimationEnabled(false);
             viewer->setCameraType(om9_core_view_perspective(i)?SoPerspectiveCamera::getClassTypeId():SoOrthographicCamera::getClassTypeId());
@@ -258,7 +257,7 @@ void CoreWorkspace::updateTabs() {
         tabs=new QTabBar(tabsDock);tabs->setObjectName("OM9ViewportTabs");tabs->setExpanding(false);tabs->setDrawBase(false);tabs->setElideMode(Qt::ElideNone);tabsDock->setWidget(tabs);
         for(auto* title:titles)tabs->addTab(QString::fromUtf8(title));
         connect(tabs,&QTabBar::currentChanged,this,[this,area](int slot){
-            if(!enabled||!Gui::Control().isAllowedAlterView(App::GetApplication().getActiveDocument())){updateTabs();return;}
+            if(!enabled||!om9AlterView(App::GetApplication().getActiveDocument())){updateTabs();return;}
             auto views=slots();if(slot<0||slot>=4||!views[slot]){updateTabs();return;}
             bool maximized=area->activeSubWindow()&&area->activeSubWindow()->isMaximized();
             Gui::getMainWindow()->setActiveWindow(views[slot]);
@@ -274,7 +273,7 @@ void CoreWorkspace::updateTabs() {
         constexpr QTabBar::Shape shapes[]={QTabBar::RoundedNorth,QTabBar::RoundedSouth,QTabBar::RoundedWest,QTabBar::RoundedEast};
         tabs->setShape(shapes[alignment]);window->addDockWidget(locations[alignment],tabsDock,alignment<2?Qt::Vertical:Qt::Horizontal);tabsAlignment=alignment;
     }
-    QSignalBlocker block(tabs);auto views=slots();const bool allowed=Gui::Control().isAllowedAlterView(App::GetApplication().getActiveDocument());
+    QSignalBlocker block(tabs);auto views=slots();const bool allowed=om9AlterView(App::GetApplication().getActiveDocument());
     for(int i=0;i<4;++i)tabs->setTabEnabled(i,allowed&&views[i]);
     if(auto* view=activeView();view&&view->property("om9ViewSlot").isValid())tabs->setCurrentIndex(view->property("om9ViewSlot").toInt());
     bool visible=(state&1)&&activeView();if(tabsDock->isVisible()!=visible)tabsDock->setVisible(visible);
@@ -308,7 +307,7 @@ void CoreWorkspace::reconcileDisplay(){
     }
 }
 bool CoreWorkspace::selectTitle(Gui::View3DInventor* view){
-    auto* doc=Gui::Application::Instance->activeDocument();if(!enabled||!doc||doc->isAboutToClose()||!view||view->getGuiDocument()!=doc||!Gui::Control().isAllowedAlterView(doc->getDocument()))return false;
+    auto* doc=Gui::Application::Instance->activeDocument();if(!enabled||!doc||doc->isAboutToClose()||!view||view->getGuiDocument()!=doc||!om9AlterView(doc->getDocument()))return false;
     Gui::getMainWindow()->setActiveWindow(view);updateTabs();return true;
 }
 bool CoreWorkspace::toggleTitle(Gui::View3DInventor* view){
@@ -345,7 +344,7 @@ void CoreWorkspace::ensureTitle(Gui::View3DInventor* view){
 void CoreWorkspace::updateTitle(Gui::View3DInventor* view){
     auto* header=view->findChild<QWidget*>("OM9ViewportTitle");if(!header)return;
     auto* doc=Gui::Application::Instance->activeDocument();const bool current=enabled&&doc&&view->getGuiDocument()==doc;
-    const bool allowed=current&&Gui::Control().isAllowedAlterView(doc->getDocument());
+    const bool allowed=current&&om9AlterView(doc->getDocument());
     const bool active=view==activeView();header->setStyleSheet(QString("QWidget#OM9ViewportTitle { background:%1; color:black; } QLabel { background:transparent; color:black; } QToolButton { border:none; background:transparent; color:black; }").arg(active?"#82b48c":"#cdd7dc"));
     header->setFixedSize(header->sizeHint().width(),header->fontMetrics().lineSpacing()+2);header->move(view->getViewer()->viewport()->mapTo(view,QPoint(0,0)));header->setVisible(current);header->raise();
     auto* menu=header->findChild<QMenu*>("OM9ViewportMenu");if(!menu)return;
@@ -387,7 +386,7 @@ bool CoreWorkspace::execute(std::size_t command) {
     return true;
 }
 bool CoreWorkspace::toggleActiveGrid(){
-    auto* view=activeView();if(!enabled||!view||!Gui::Control().isAllowedAlterView(App::GetApplication().getActiveDocument()))return false;
+    auto* view=activeView();if(!enabled||!view||!om9AlterView(App::GetApplication().getActiveDocument()))return false;
     if(auto* node=grid(view)){node->whichChild=node->whichChild.getValue()==SO_SWITCH_NONE?SO_SWITCH_ALL:SO_SWITCH_NONE;return true;}
     return false;
 }
@@ -404,7 +403,7 @@ bool CoreWorkspace::eventFilter(QObject* object,QEvent* event) {
     if(event->type()!=QEvent::KeyPress)return false;
     auto* view=activeView();auto* widget=qobject_cast<QWidget*>(object);if(!view||!widget||!view->getViewer()->isAncestorOf(widget))return false;
     const auto key=static_cast<QKeyEvent*>(event)->key();
-    if((key==Qt::Key_F5||key==Qt::Key_F7)&&!Gui::Control().isAllowedAlterView(App::GetApplication().getActiveDocument()))return true;
+    if((key==Qt::Key_F5||key==Qt::Key_F7)&&!om9AlterView(App::GetApplication().getActiveDocument()))return true;
     if(static_cast<QKeyEvent*>(event)->key()==Qt::Key_F7){toggleActiveGrid();return true;}
     if(static_cast<QKeyEvent*>(event)->key()==Qt::Key_F5){center(view);return true;}
     return false;

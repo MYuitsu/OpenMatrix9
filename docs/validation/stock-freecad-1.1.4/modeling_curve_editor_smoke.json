@@ -1,0 +1,95 @@
+{
+  "checks": [
+    {
+      "name": "curve_edit_preserves_rational_basis",
+      "passed": true
+    },
+    {
+      "name": "one typed CV edit transaction",
+      "passed": true
+    },
+    {
+      "name": "CV edit Undo exact original",
+      "passed": true
+    },
+    {
+      "name": "CV edit Redo current geometry",
+      "passed": true
+    },
+    {
+      "name": "invalid weights rejected atomically",
+      "passed": true
+    },
+    {
+      "name": "invalid knots rejected atomically",
+      "passed": true
+    },
+    {
+      "name": "invalid degree rejected atomically",
+      "passed": true
+    },
+    {
+      "name": "stale curve request rejected",
+      "passed": true
+    },
+    {
+      "name": "orientation changed request rejected atomically",
+      "passed": true
+    },
+    {
+      "name": "FCStd reopens edited rational basis",
+      "passed": true
+    },
+    {
+      "name": "current curve V5 export reimport",
+      "passed": true
+    }
+  ],
+  "pre_edit_shape_copy_identity_equal": false,
+  "undo_basis": {
+    "degree": 3,
+    "first": 0,
+    "knots": [
+      0,
+      1
+    ],
+    "last": 1,
+    "multiplicities": [
+      4,
+      4
+    ],
+    "periodic": false,
+    "poles": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        4,
+        0
+      ],
+      [
+        7,
+        2,
+        0
+      ],
+      [
+        10,
+        0,
+        0
+      ]
+    ],
+    "signature": "88027c9c1424b24a1936e49b78216f9460d900c2f2b8cd1bca20c693c4810d39",
+    "weights": [
+      1,
+      2,
+      0.7,
+      1
+    ]
+  },
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\runtime\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+  "exported": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\modeling_curve_editor_smoke-86b92ce66eee4c17be4a5ad2551ef256\\edited-curve-v5.3dm"
+}

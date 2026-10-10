@@ -95,7 +95,7 @@ bool CoreRebuild::handles(std::size_t index){auto* id=om9_command_id(index);retu
 bool CoreRebuild::active()const{return state->selecting||state->dialog;}
 bool CoreRebuild::valid()const {
     auto* gui=Gui::Application::Instance->activeDocument();
-    return state->document&&state->document==App::GetApplication().getActiveDocument()&&gui&&!gui->getInEdit()&&!gui->isAboutToClose()&&Gui::Control().isAllowedAlterDocument(state->document);
+    return state->document&&state->document==App::GetApplication().getActiveDocument()&&gui&&!gui->getInEdit()&&!gui->isAboutToClose()&&om9AlterDocument(state->document);
 }
 void CoreRebuild::clearPreview(){for(auto [root,node]:state->previews){if(root->findChild(node)>=0)root->removeChild(node);root->unref();}state->previews.clear();}
 void CoreRebuild::cancel(){
@@ -192,7 +192,7 @@ void CoreRebuild::calculate(bool commit){
         if(commit){
             requireLayerGeometryEditable(*state->document);
             const auto finalWitnesses=state->witnesses(*state->document);phase2Require(om9_phase2_rebuild_check(state->session,finalWitnesses.data(),finalWitnesses.size()),state->session);
-            const int transaction=state->document->openTransaction("Rebuild Curve");
+            const int transaction=om9OpenTransaction(*state->document,"Rebuild Curve");
             try{
                 LayerGeometryTransaction layers(*state->document,transaction);
                 const auto commitWitnesses=state->witnesses(*state->document);phase2Require(om9_phase2_rebuild_check(state->session,commitWitnesses.data(),commitWitnesses.size()),state->session);
@@ -202,8 +202,8 @@ void CoreRebuild::calculate(bool commit){
                     if(oldView&&newView)for(const char* name:{"LineColor","PointColor","LineWidth"})if(auto* oldProperty=oldView->getPropertyByName(name))if(auto* newProperty=newView->getPropertyByName(name))newProperty->Paste(*oldProperty);
                 }
                 if(owned.delete_input)for(const auto& input:state->inputs)state->document->removeObject(input->name.c_str());
-                state->document->recompute();layers.finish();state->document->commitTransaction();
-            }catch(...){if(ownsLayerGeometryTransaction(*state->document,transaction))state->document->abortTransaction();throw;}
+                state->document->recompute();layers.finish();om9CommitTransaction(*state->document);
+            }catch(...){if(ownsLayerGeometryTransaction(*state->document,transaction))om9AbortTransaction(*state->document);throw;}
             const auto command=state->command;cancel();om9_sidebar_record_execution(command,true);CurveController::instance().setPrompt("Command: ");CurveController::instance().logMessage("Rebuild completed");return;
         }
         for(const auto& output:outputs){

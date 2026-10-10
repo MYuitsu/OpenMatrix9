@@ -69,7 +69,7 @@ bool om9NativeCommandAvailable(std::size_t index) {
     if(!Gui::Application::Instance || !qApp || QThread::currentThread()!=qApp->thread())return false;
     if(auto operation=om9_3dm_operation(index)) {
         auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
-        if(!doc||!gui||gui->getInEdit()||!Gui::Control().isAllowedAlterDocument(doc))return false;
+        if(!doc||!gui||gui->getInEdit()||!om9AlterDocument(doc))return false;
         if(operation<3)return operation==1||Gui::Selection().hasSelection(doc->getName());
         Base::PyGILStateLocker lock;auto* module=PyImport_ImportModule("ThreeDmClipboard");
         auto* result=module?PyObject_CallMethod(module,"available","i",static_cast<int>(operation)):nullptr;
@@ -89,9 +89,9 @@ bool om9NativeCommandAvailable(std::size_t index) {
     auto* doc=App::GetApplication().getActiveDocument();
     const std::string id=native;
     const auto permissions=om9_command_permissions(index);
-    if((permissions&1U) && !Gui::Control().isAllowedAlterDocument(doc))return false;
-    if((permissions&2U) && !Gui::Control().isAllowedAlterView(doc))return false;
-    if((permissions&4U) && !Gui::Control().isAllowedAlterSelection(doc))return false;
+    if((permissions&1U) && !om9AlterDocument(doc))return false;
+    if((permissions&2U) && !om9AlterView(doc))return false;
+    if((permissions&4U) && !om9AlterSelection(doc))return false;
     if(id=="OM9_SelectAllObjects" || id=="OM9_ClearSelection" || id=="Std_Delete" || id=="Std_ViewFitSelection") {
         if(!doc)return false;
         auto* guiDoc=Gui::Application::Instance->activeDocument();

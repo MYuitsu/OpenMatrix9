@@ -51,7 +51,7 @@ namespace OpenMatrix9Gui {
 void CoreSnaps::activate(){enabled=true;if(!om9_snap_load(static_cast<unsigned int>(preferences()->GetInt("State",0))))om9_snap_load(0);syncAction();}
 void CoreSnaps::deactivate(){enabled=false;syncAction();}
 bool CoreSnaps::handles(std::size_t index){auto* id=om9_command_id(index);return id&&modeBit(QString::fromUtf8(id));}
-bool CoreSnaps::available(){return enabled&&!Gui::Application::Instance->isClosing()&&Gui::Control().isAllowedAlterView(App::GetApplication().getActiveDocument());}
+bool CoreSnaps::available(){return enabled&&!Gui::Application::Instance->isClosing()&&om9AlterView(App::GetApplication().getActiveDocument());}
 bool CoreSnaps::checked(std::size_t command){return handles(command)&&(om9_snap_state()&modeBit(QString::fromUtf8(om9_command_id(command))))!=0;}
 bool CoreSnaps::execute(std::size_t command){if(!handles(command)||!available())return false;om9_snap_toggle(modeBit(QString::fromUtf8(om9_command_id(command))));save();return true;}
 bool CoreSnaps::submit(const QString& text){

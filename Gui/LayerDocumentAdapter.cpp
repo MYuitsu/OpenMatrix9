@@ -53,9 +53,9 @@ void requireGuiThread() {
 void requireEditable(App::Document& doc) {
     requireGuiThread();
     auto* gui=Gui::Application::Instance->getDocument(&doc);
-    if(App::GetApplication().getActiveDocument()!=&doc || doc.isReadOnlyFile() || !gui || gui->getInEdit() || !Gui::Control().isAllowedAlterDocument(&doc))
+    if(App::GetApplication().getActiveDocument()!=&doc || om9ReadOnlyFile(doc) || !gui || gui->getInEdit() || !om9AlterDocument(&doc))
         throw std::runtime_error("Layer document is not editable");
-    if(doc.hasPendingTransaction() || doc.getBookedTransactionID()!=0 || App::GetApplication().getGlobalTransaction()!=0 || doc.isPerformingTransaction())
+    if(doc.hasPendingTransaction() || om9BookedTransaction(doc)!=0 || om9GlobalTransaction()!=0 || doc.isPerformingTransaction())
         throw std::runtime_error("Layer controller refuses an unrelated transaction");
 }
 template<class T> T* property(App::PropertyContainer& container,const char* name) {
@@ -143,18 +143,18 @@ class OwnedTransaction final {
     App::Document& doc_;int id_=0;bool done_=false;
 public:
     explicit OwnedTransaction(App::Document& doc):doc_(doc) {
-        id_=doc_.openTransaction(std::string("OM9 Layer state"));
-        if(id_==0 || doc_.getBookedTransactionID()!=id_) throw std::runtime_error("Cannot own layer transaction");
+        id_=om9OpenTransaction(doc_,std::string("OM9 Layer state"));
+        if(id_==0 || om9BookedTransaction(doc_)!=id_) throw std::runtime_error("Cannot own layer transaction");
     }
     bool owns() const {
-        return doc_.getBookedTransactionID()==id_ && (!doc_.hasPendingTransaction() || doc_.getTransactionID(true)==id_);
+        return om9BookedTransaction(doc_)==id_ && (!doc_.hasPendingTransaction() || doc_.getTransactionID(true)==id_);
     }
     ~OwnedTransaction() {
-        if(!done_ && owns()) { try { doc_.abortTransaction(); } catch(...) {} }
+        if(!done_ && owns()) { try { om9AbortTransaction(doc_); } catch(...) {} }
     }
     void commit() {
         if(!owns()) throw std::runtime_error("Layer transaction ownership changed");
-        doc_.commitTransaction();done_=true;
+        om9CommitTransaction(doc_);done_=true;
     }
 };
 void project(const std::vector<Binding>& bindings,std::uint64_t snapshot) {
@@ -335,7 +335,7 @@ class NativeLayerObserver final {
             if(supplementing || abort)return;
             auto documents=App::GetApplication().getDocuments();
             std::set<int> closing;
-            for(auto* doc:documents)if(doc->hasPendingTransaction() && doc->transacting() && !doc->isPerformingTransaction())closing.insert(doc->getTransactionID(true));
+            for(auto* doc:documents)if(doc->hasPendingTransaction() && om9ClosingTransaction(*doc) && !doc->isPerformingTransaction())closing.insert(doc->getTransactionID(true));
             Guard guard(supplementing);
             for(auto* doc:documents) {
                 if(!doc->hasPendingTransaction() || doc->isPerformingTransaction())continue;
@@ -408,7 +408,7 @@ std::string layerDocumentPanel(App::Document& doc) {
 LayerExportSelection layerDocumentExportSelection(App::Document& doc,const std::vector<std::string>& names) {
     requireGuiThread();
     auto* gui=Gui::Application::Instance->getDocument(&doc);
-    if(App::GetApplication().getActiveDocument()!=&doc || !gui || gui->isAboutToClose() || gui->getInEdit() || !Gui::Control().isAllowedAlterDocument(&doc))
+    if(App::GetApplication().getActiveDocument()!=&doc || !gui || gui->isAboutToClose() || gui->getInEdit() || !om9AlterDocument(&doc))
         throw std::runtime_error("Layer export document is not available");
     auto state=stateOrDefault(doc);bindObjects(doc,state.get());
     LayerExportSelection result;result.objectIds.reserve(names.size());
@@ -453,7 +453,7 @@ std::uint64_t layerMutationGeneration(App::Document& doc,const std::vector<std::
     return counts.generation;
 }
 bool ownsLayerGeometryTransaction(App::Document& doc,int id) {
-    return id!=0 && doc.getBookedTransactionID()==id && (!doc.hasPendingTransaction() || doc.getTransactionID(true)==id);
+    return id!=0 && om9BookedTransaction(doc)==id && (!doc.hasPendingTransaction() || doc.getTransactionID(true)==id);
 }
 LayerDocumentReceivePlan::LayerDocumentReceivePlan(App::Document& document,const std::string& json,const std::vector<std::string>& sourceIds):doc(document),identity(document.Uid.getValueStr()) {
     requireEditable(doc);

@@ -43,7 +43,8 @@ void Workbench::activated()
 
     om9_workbench_activated();
     if(!sidebar) {
-        const QString resources=QDir(QString::fromStdString(App::Application::getHomePath())).filePath("Mod/OpenMatrix9/Resources");
+        const QString root=qEnvironmentVariable("OM9_PLUGIN_ROOT");
+        const QString resources=root.isEmpty()?QDir(QString::fromStdString(App::Application::getHomePath())).filePath("Mod/OpenMatrix9/Resources"):QDir(root).filePath("Resources");
         sidebar=new MatrixSidebar(Gui::getMainWindow(),resources,{om9NativeCommandAvailable,om9ExecuteNativeCommand,
             [](std::size_t command)->std::optional<bool>{
                 if(CoreSnaps::handles(command))return CoreSnaps::checked(command);

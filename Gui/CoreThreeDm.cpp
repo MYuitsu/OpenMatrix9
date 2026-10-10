@@ -12,7 +12,7 @@
 #include <QGridLayout>
 #include <Base/Console.h>
 #include <Base/Interpreter.h>
-static bool ready(){auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();return doc&&gui&&!gui->getInEdit()&&Gui::Control().isAllowedAlterDocument(doc);}
+static bool ready(){auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();return doc&&gui&&!gui->getInEdit()&&om9AlterDocument(doc);}
 bool executeThreeDm(std::size_t operation){
     if(!ready())return false;
     if(operation==3||operation==4||operation==5){

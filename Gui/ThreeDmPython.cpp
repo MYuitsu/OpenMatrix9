@@ -344,13 +344,13 @@ static PyObject* validateLayerBindings3dm(PyObject*,PyObject* args) {
 }
 static PyObject* commit3dm(PyObject*,PyObject* args){const char* name;PyObject* prepared;if(!PyArg_ParseTuple(args,"sO",&name,&prepared))return nullptr;
     auto* doc=App::GetApplication().getDocument(name);auto* gui=Gui::Application::Instance->activeDocument();
-    if(!doc||doc!=App::GetApplication().getActiveDocument()||!gui||gui->getInEdit()||!Gui::Control().isAllowedAlterDocument(doc)){PyErr_SetString(PyExc_RuntimeError,"The active project is not editable");return nullptr;}
+    if(!doc||doc!=App::GetApplication().getActiveDocument()||!gui||gui->getInEdit()||!om9AlterDocument(doc)){PyErr_SetString(PyExc_RuntimeError,"The active project is not editable");return nullptr;}
     const std::string documentName=doc->getName(),documentIdentity=doc->Uid.getValueStr();
     auto alive=[&]{auto* current=App::GetApplication().getDocument(documentName.c_str());return current && current==doc && current->Uid.getValueStr()==documentIdentity;};
     auto requireTarget=[&]{
         if(!alive())throw ExchangeError("3DM receive target changed or closed during binding");
         auto* currentGui=Gui::Application::Instance->getDocument(doc);
-        if(App::GetApplication().getActiveDocument()!=doc || !currentGui || currentGui->isAboutToClose() || currentGui->getInEdit() || doc->isReadOnlyFile() || !Gui::Control().isAllowedAlterDocument(doc))
+        if(App::GetApplication().getActiveDocument()!=doc || !currentGui || currentGui->isAboutToClose() || currentGui->getInEdit() || om9ReadOnlyFile(*doc) || !om9AlterDocument(doc))
             throw ExchangeError("3DM receive target is no longer editable");
     };
     int transactionId=0;PyObject* result=nullptr;LayerSelection selection;
@@ -368,7 +368,7 @@ static PyObject* commit3dm(PyObject*,PyObject* args){const char* name;PyObject* 
         requireTarget();
         layers=std::make_unique<OpenMatrix9Gui::LayerDocumentReceivePlan>(*doc,json,sourceIds);
     }
-    transactionId=doc->openTransaction(std::string("Import Rhino 5 3DM"));
+    transactionId=om9OpenTransaction(*doc,std::string("Import Rhino 5 3DM"));
     if(!OpenMatrix9Gui::ownsLayerGeometryTransaction(*doc,transactionId))throw std::runtime_error("Cannot own 3DM import transaction");
     OpenMatrix9Gui::LayerNativeReceiveScope receiving(*doc);
     auto* module=PyImport_ImportModule("ThreeDm");
@@ -378,19 +378,19 @@ static PyObject* commit3dm(PyObject*,PyObject* args){const char* name;PyObject* 
         // Rollback invokes Python document observers. Preserve the binding
         // exception while those callbacks run, then return its original type.
         ReceivePythonError error;
-        if(alive() && OpenMatrix9Gui::ownsLayerGeometryTransaction(*doc,transactionId)){doc->abortTransaction();if(alive())restoreReceiveSelection(*doc,selection);}return nullptr;
+        if(alive() && OpenMatrix9Gui::ownsLayerGeometryTransaction(*doc,transactionId)){om9AbortTransaction(*doc);if(alive())restoreReceiveSelection(*doc,selection);}return nullptr;
     }
     if(layers)layers->finish(transactionId,receivedNativeNames(*doc,result,sourceIds.size()));
     requireTarget();
     if(!OpenMatrix9Gui::ownsLayerGeometryTransaction(*doc,transactionId))throw std::runtime_error("3DM import transaction ownership changed");
-    doc->commitTransaction();return result;
+    om9CommitTransaction(*doc);return result;
     } catch(const std::exception& error) {
         Py_XDECREF(result);
-        if(alive() && OpenMatrix9Gui::ownsLayerGeometryTransaction(*doc,transactionId)){try{doc->abortTransaction();if(alive())restoreReceiveSelection(*doc,selection);}catch(...){}}
+        if(alive() && OpenMatrix9Gui::ownsLayerGeometryTransaction(*doc,transactionId)){try{om9AbortTransaction(*doc);if(alive())restoreReceiveSelection(*doc,selection);}catch(...){}}
         PyErr_SetString(PyExc_RuntimeError,error.what());return nullptr;
     }
 }
-static bool ready3dm(const char* name){auto* doc=App::GetApplication().getDocument(name);auto* gui=Gui::Application::Instance->activeDocument();if(doc&&doc==App::GetApplication().getActiveDocument()&&gui&&!gui->getInEdit()&&Gui::Control().isAllowedAlterDocument(doc))return true;PyErr_SetString(PyExc_RuntimeError,"The active project is not editable");return false;}
+static bool ready3dm(const char* name){auto* doc=App::GetApplication().getDocument(name);auto* gui=Gui::Application::Instance->activeDocument();if(doc&&doc==App::GetApplication().getActiveDocument()&&gui&&!gui->getInEdit()&&om9AlterDocument(doc))return true;PyErr_SetString(PyExc_RuntimeError,"The active project is not editable");return false;}
 static PyObject* validateDocument(PyObject*,PyObject* args){const char* name;if(!PyArg_ParseTuple(args,"s",&name)||!ready3dm(name))return nullptr;Py_RETURN_NONE;}
 static PyObject* import3dm(PyObject*,PyObject* args){const char *path,*name;double scale=0;if(!PyArg_ParseTuple(args,"ss|d",&path,&name,&scale)||!ready3dm(name))return nullptr;auto* module=PyImport_ImportModule("ThreeDm");auto* result=module?PyObject_CallMethod(module,"import_file","sOd",path,Py_None,scale):nullptr;Py_XDECREF(module);return result;}
 static PyObject* export3dm(PyObject*,PyObject* args){const char *path,*name;PyObject* names;if(!PyArg_ParseTuple(args,"ssO",&path,&name,&names)||!ready3dm(name))return nullptr;auto* module=PyImport_ImportModule("ThreeDm");auto* result=module?PyObject_CallMethod(module,"export_named","ssO",path,name,names):nullptr;Py_XDECREF(module);return result;}

@@ -9,6 +9,13 @@ if(BUILD_GUI)
     add_subdirectory(Gui)
 endif()
 
+# Optional independent test oracle; excluded from the plugin's default build.
+if(OPENMATRIX9_STOCK_HOST)
+    add_executable(ThreeDmModelingBrepTests EXCLUDE_FROM_ALL tests/native/three_dm_modeling_brep.cpp)
+    target_link_libraries(ThreeDmModelingBrepTests PRIVATE OM9ThreeDm)
+    target_compile_definitions(ThreeDmModelingBrepTests PRIVATE OM9_BREP_FIXTURES="${CMAKE_BINARY_DIR}/modeling-brep-fixtures")
+endif()
+
 set(OpenMatrix9_Scripts
     Init.py
     ThreeDm.py

@@ -140,7 +140,7 @@ void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const Ed
         if(dependent->isDerivedFrom(Base::Type::fromName("App::Part"))||dependent->isDerivedFrom(Base::Type::fromName("App::DocumentObjectGroup")))continue;
         throw std::runtime_error("DeleteInput is unsafe for referenced objects; retain inputs or detach their dependents");
     }}
-    const int transactionId=doc.openTransaction(name(kind));
+    const int transactionId=om9OpenTransaction(doc,name(kind));
     try{LayerGeometryTransaction layers(doc,transactionId);verifyEditInputs(doc,inputs);
         Ref pyDoc(doc.getPyObject()),id(PyUnicode_FromString(feature(kind))),command(PyUnicode_FromString(name(kind))),sources(PyList_New(0));
         for(const auto& i:inputs){Ref n(PyUnicode_FromString(i.name.c_str()));append(sources.value,n.value);}
@@ -157,7 +157,7 @@ void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const Ed
         }
         for(const auto& n:deleting)doc.removeObject(n.c_str());doc.recompute();layers.finish();
         if(!ownsLayerGeometryTransaction(doc,transactionId))throw std::runtime_error("BRep edit transaction ownership changed");
-        doc.commitTransaction();
-    }catch(...){if(ownsLayerGeometryTransaction(doc,transactionId))doc.abortTransaction();throw;}
+        om9CommitTransaction(doc);
+    }catch(...){if(ownsLayerGeometryTransaction(doc,transactionId))om9AbortTransaction(doc);throw;}
 }
 }

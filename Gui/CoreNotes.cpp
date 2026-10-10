@@ -137,7 +137,7 @@ bool notesStorageIdentity(const App::DocumentObject* object,bool requireTextWitn
 }
 namespace OpenMatrix9Gui {
 bool CoreNotes::isStorageObject(const App::DocumentObject* object){return notesStorageIdentity(object,true);}
-bool CoreNotes::available(std::size_t index){auto* doc=App::GetApplication().getActiveDocument();return enabled&&handles(index)&&doc&&Gui::Control().isAllowedAlterDocument(doc);}
+bool CoreNotes::available(std::size_t index){auto* doc=App::GetApplication().getActiveDocument();return enabled&&handles(index)&&doc&&om9AlterDocument(doc);}
 bool CoreNotes::execute(std::size_t index) {
     if(!available(index))return false;
     CoreDistance::instance().cancel();CorePictureFrame::instance().cancel();CoreViewControls::instance().cancel();CurveController::instance().cancel();
@@ -146,7 +146,7 @@ bool CoreNotes::execute(std::size_t index) {
     NotesDialog dialog(id(index)=="OM9_FileNotes");dialog.editor->setPlainText(QString::fromUtf8(previous.data(),qsizetype(previous.size())));dialog.editor->setFocus();
     if(dialog.exec()!=QDialog::Accepted)return false;
     auto* doc=App::GetApplication().getDocument(name.c_str());
-    if(doc!=original||!enabled||!Gui::Control().isAllowedAlterDocument(doc))return false;
+    if(doc!=original||!enabled||!om9AlterDocument(doc))return false;
     const auto proposed=dialog.editor->toPlainText().toUtf8();
     const auto decision=om9_notes_decide(reinterpret_cast<const unsigned char*>(previous.data()),previous.size(),reinterpret_cast<const unsigned char*>(proposed.constData()),std::size_t(proposed.size()));
     if(decision==2){QMessageBox::warning(Gui::getMainWindow(),"Notes","Notes must be valid text without NUL and at most 1 MiB.");return false;}
@@ -157,13 +157,13 @@ bool CoreNotes::execute(std::size_t index) {
         auto* text=dynamic_cast<App::PropertyString*>(object->getPropertyByName("Notes"));if(!text)throw Base::RuntimeError("Invalid project notes storage");
         if(auto* gui=Gui::Application::Instance->getDocument(doc))if(auto* provider=dynamic_cast<Gui::ViewProviderDocumentObject*>(gui->getViewProvider(object))){provider->ShowInTree.setValue(false);provider->Visibility.setValue(false);}
         auto metadata=doc->Meta.getValues();metadata["OpenMatrix9.ProjectNotesStorage"]="v1";doc->Meta.setValues(std::move(metadata));
-        doc->openTransaction("Project Notes");text->setValue(proposed.constData());
+        om9OpenTransaction(*doc,"Project Notes");text->setValue(proposed.constData());
         // Keep the legacy identity's text witness in the same owned Undo record
         // as Notes. Observers must see a consistent factory context at commit.
         auto committedMetadata=doc->Meta.getValues();
         if(proposed.isEmpty())committedMetadata.erase(key);else committedMetadata[key]=proposed.constData();
         doc->Meta.setValues(std::move(committedMetadata));
-        doc->commitTransaction();synchronize(*doc);return true;
-    }catch(const Base::Exception& error){doc->abortTransaction();Base::Console().error("OpenMatrix9 Notes: %s\n",error.what());return false;}
+        om9CommitTransaction(*doc);synchronize(*doc);return true;
+    }catch(const Base::Exception& error){om9AbortTransaction(*doc);Base::Console().error("OpenMatrix9 Notes: %s\n",error.what());return false;}
 }
 }

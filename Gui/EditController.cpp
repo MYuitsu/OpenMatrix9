@@ -61,8 +61,8 @@ bool EditController::matches(std::size_t i,const QString& text){return handles(i
 void EditController::activate(){enabled=true;qApp->installEventFilter(this);}
 void EditController::deactivate(){enabled=false;cancel();}
 bool EditController::active()const{return document&&om9_edit_phase()!=0;}
-bool EditController::available(std::size_t i)const{auto* d=App::GetApplication().getActiveDocument();auto* g=Gui::Application::Instance->activeDocument();return enabled&&handles(i)&&d&&!d->isReadOnlyFile()&&!d->testStatus(App::Document::Restoring)&&g&&!g->isAboutToClose()&&!g->getInEdit()&&!dialog&&dynamic_cast<Gui::View3DInventor*>(g->getActiveView())&&Gui::Control().isAllowedAlterDocument(d);}
-bool EditController::valid()const{auto* g=Gui::Application::Instance->activeDocument();return enabled&&document&&document==App::GetApplication().getActiveDocument()&&!document->isReadOnlyFile()&&!document->testStatus(App::Document::Restoring)&&g&&!g->isAboutToClose()&&!g->getInEdit()&&Gui::Control().isAllowedAlterDocument(document);}
+bool EditController::available(std::size_t i)const{auto* d=App::GetApplication().getActiveDocument();auto* g=Gui::Application::Instance->activeDocument();return enabled&&handles(i)&&d&&!om9ReadOnlyFile(*d)&&!d->testStatus(App::Document::Restoring)&&g&&!g->isAboutToClose()&&!g->getInEdit()&&!dialog&&dynamic_cast<Gui::View3DInventor*>(g->getActiveView())&&om9AlterDocument(d);}
+bool EditController::valid()const{auto* g=Gui::Application::Instance->activeDocument();return enabled&&document&&document==App::GetApplication().getActiveDocument()&&!om9ReadOnlyFile(*document)&&!document->testStatus(App::Document::Restoring)&&g&&!g->isAboutToClose()&&!g->getInEdit()&&om9AlterDocument(document);}
 void EditController::prompt(const QString& s){CurveController::instance().setPrompt(s);CurveController::instance().logMessage(s);}
 void EditController::refresh(){QString text=QString::fromUtf8(caption(kind))+": ";switch(om9_edit_phase()){
     case 1:text+=(kind==4?"Select objects to subtract from":kind==5?"Select first set":kind==7?"Select exactly two solid objects":"Select objects");text+="; Enter / Undo / Cancel";break;

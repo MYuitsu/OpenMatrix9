@@ -48,8 +48,8 @@ PyObject* transactionFacts(PyObject*,PyObject* args) {
             "document",doc.getName(),"uid",uid.c_str(),
             "pending",pending?Py_True:Py_False,
             "pending_id",pending?doc.getTransactionID(true):0,
-            "booked_id",doc.getBookedTransactionID(),
-            "transacting",doc.transacting()?Py_True:Py_False,
+            "booked_id",om9BookedTransaction(doc),
+            "transacting",om9ClosingTransaction(doc)?Py_True:Py_False,
             "performing",doc.isPerformingTransaction()?Py_True:Py_False);
     }
     catch(const std::exception& error){PyErr_SetString(PyExc_RuntimeError,error.what());return nullptr;}

@@ -1,87 +1,57 @@
-# Cài OpenMatrix9 0.0.1 trên Windows
+# Cài OpenMatrix9 0.0.2 cho FreeCAD chính thức
 
-Đây là bản **thử nghiệm**, dành cho Windows 64-bit. Tải hai file tại
-[Release 0.0.1](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.1):
+Bản thử nghiệm này dành cho **Windows x64, FreeCAD 1.1.4 chính thức** (Python 3.11, Qt 6.8.3, OCCT 7.8.1). Không cần source FreeCAD, Rust hay Visual Studio để sử dụng.
 
-1. **FreeCAD-OM9-27.1-Windows-x64.zip** — FreeCAD portable tương thích, đã build sẵn.
-2. **OpenMatrix9-0.0.1-Windows-x64.zip** — plugin OM9.
+## 1. Cài FreeCAD
 
-## Cài và mở
+Tải bộ cài Windows x64 từ [release FreeCAD 1.1.4 chính thức](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4), cài và mở một lần. Vào Help → About FreeCAD để kiểm tra phiên bản **1.1.4**; tên thư mục cài có thể chỉ ghi `FreeCAD 1.1`.
 
-1. Giải nén gói FreeCAD vào một thư mục có quyền ghi, ví dụ `C:\CAD`.
-2. Giải nén gói plugin. Chuyển cả thư mục **OpenMatrix9** vào
-   **`C:\CAD\FreeCAD-OM9-27.1\Mod`**.
-3. Mở **`C:\CAD\FreeCAD-OM9-27.1\Mod\OpenMatrix9\Start-OM9.cmd`**.
-   Launcher tự mở FreeCAD và chọn workbench OpenMatrix9.
+Ví dụ chương trình đã cài: `C:\Program Files\FreeCAD 1.1\bin\FreeCAD.exe`.
 
-Cấu trúc cuối cùng phải là:
+## 2. Tải OM9 và đặt đúng thư mục
 
-```text
-C:\CAD\FreeCAD-OM9-27.1\
-  bin\FreeCAD.exe
-  Runtime\
-  Mod\
-    Part\
-    OpenMatrix9\
-      Init.py
-      InitGui.py
-      Start-OM9.cmd
-      Launch-OM9.ps1
-      Resources\
-      bin\
-        OpenMatrix9Gui.pyd
-        OM9ThreeDmImportWorker.exe
-```
+1. Đóng các cửa sổ FreeCAD trước khi thay plugin.
+2. Tải [OpenMatrix9-0.0.2-FreeCAD-1.1.4-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-FreeCAD-1.1.4-Windows-x64.zip).
+3. Giải nén; bên trong có thư mục **OpenMatrix9**.
+4. Nhấn **Win + R**, dán `%APPDATA%\FreeCAD\v1-1\Mod` rồi Enter. Nếu chưa có thư mục này, tạo nó.
+5. Chép thư mục **OpenMatrix9** vào đó. Nếu đã có bản cũ, chuyển bản cũ ra ngoài thư mục `Mod` trước để có thể khôi phục.
 
-Không để lồng thành `Mod\OpenMatrix9\OpenMatrix9`. Không cần Python, Rust,
-Visual Studio hoặc Pixi để sử dụng. Cấu hình OM9 nằm riêng tại
-`%APPDATA%\OpenMatrix9\0.0.1`; cập nhật plugin bằng cách đóng ứng dụng rồi thay
-thư mục `Mod\OpenMatrix9`. Các file bản vẽ do người dùng lưu được giữ ở vị trí
-người dùng chọn.
-
-## FreeCAD tải ở đâu?
-
-Để dùng **binary OM9 0.0.1 này**, tải gói FreeCAD tương thích ngay trong release
-OM9 phía trên. Host được đóng gói từ build dùng chung hiện có: FreeCAD 27.1.0dev,
-revision `21d36cfa1eb110a1d0667050ff31706298805bbd`, Python 3.13, Qt6.
-
-FreeCAD thông thường có tại [trang tải chính thức](https://www.freecad.org/downloads.php)
-và [GitHub FreeCAD](https://github.com/FreeCAD/FreeCAD/releases). Binary plugin
-này chưa được xác nhận với những gói đó. Muốn dùng host khác cần build OM9 với
-SDK/ABI tương ứng; chép riêng `.pyd` vào FreeCAD khác phiên bản có thể không nạp được.
-
-## Thao tác và phạm vi bản 0.0.1
-
-- Chọn workbench **OpenMatrix9** nếu đổi sang workbench khác. Lệnh chưa hỗ trợ
-  vẫn hiện nhưng bị vô hiệu hóa.
-- Import/Export 3DM, Copy/Paste hình học và Undo/Redo trong OM9 đã có phạm vi
-  kiểm chứng; không phải hỗ trợ toàn bộ openNURBS hoặc toàn bộ Matrix9.
-- Bảng layer của OM9 có màu, khóa/ẩn và layer hiện hành. Kiểm chứng chuyển đủ
-  palette hai chiều trong Matrix đã đạt 16/16 với adapter riêng; adapter đó
-  chưa tích hợp vào giao diện chính Matrix và không nằm trong gói cài OM9 này.
-  Copy/Paste mặc định của Matrix không được coi là đã mang đầy đủ palette.
-- Undo/Redo nghiệm thu thuộc OM9. Không chuyển lịch sử Undo giữa hai phần mềm.
-- Worker mặc định dùng 60% CPU logic, làm tròn xuống và tối thiểu một worker.
-
-## Khi mở không được
-
-Chạy đúng `Start-OM9.cmd`, không mở trực tiếp `bin\FreeCAD.exe` của gói này vì
-launcher thiết lập Python và DLL của host portable. Kiểm tra cấu trúc thư mục
-trên. Xem lỗi ở:
+Đường dẫn đúng có dạng:
 
 ```text
-%APPDATA%\OpenMatrix9\0.0.1\last-launch.stdout.log
-%APPDATA%\OpenMatrix9\0.0.1\last-launch.stderr.log
+%APPDATA%\FreeCAD\v1-1\Mod\OpenMatrix9\
+    Init.py
+    InitGui.py
+    ThreeDm.py
+    Resources\
+    bin\OpenMatrix9Gui.pyd
+    bin\OM9ThreeDmImportWorker.exe
 ```
 
-Trong FreeCAD, bật **View → Panels → Report view** để xem lỗi workbench.
-`SHA256SUMS.txt` trong release dùng để đối chiếu file tải; có thể chạy
-`Get-FileHash -Algorithm SHA256 <đường-dẫn-file>` trong PowerShell.
+`InitGui.py` phải nằm ngay trong thư mục `OpenMatrix9`, tránh giải nén thành `OpenMatrix9\OpenMatrix9\InitGui.py`. Không chép DLL/plugin vào `Program Files` và không cần mở FreeCAD bằng Administrator để dùng OM9.
 
-## Source và giấy phép
+## 3. Mở OM9
 
-Source OM9 được gắn tag `v0.0.1`. Source host tương ứng ở asset
-`FreeCAD-OM9-27.1-source.zip` và
-[repository FreeCAD của dự án](https://github.com/MYuitsu/FreeCAD/tree/21d36cfa1eb110a1d0667050ff31706298805bbd).
-Giữ các giấy phép trong gói; xem `LICENSE`, `THIRD_PARTY_NOTICES.md`,
-`Resources/licenses` và thư mục `licenses` của host.
+Mở lại **FreeCAD đã cài**, chọn **OpenMatrix9** trong danh sách workbench. Giao diện OM9 gồm sidebar, vùng Command, viewport và bảng Layers 32 màu. Các lệnh đã hỗ trợ được bật; các mục chưa port vẫn bị vô hiệu hóa.
+
+Kiểm tra nhanh: tạo tài liệu mới, vẽ một Line, Undo rồi Redo; thử đổi màu, khóa/mở layer trong bảng Layers. Đối tượng bị khóa không cho chỉnh sửa/chọn theo luồng OM9 đã hỗ trợ.
+
+## 4. Chuyển bản vẽ
+
+Trong OM9, dùng lệnh **Copy/Paste** cho đối tượng đã chọn; **Copy Session** chuyển cả bảng layer, gồm layer trống, màu, khóa/ẩn và layer đang dùng. Cũng có thể import/export file `.3dm` và lưu dự án FreeCAD `.FCStd`.
+
+Giữ clipboard yên khi trao đổi. Các script kiểm chứng Matrix trong source là công cụ phát triển; **không cần chạy chúng để cài hoặc mở OM9**, và OM9 là workbench FreeCAD. Bản release này không cài plugin `.rhp` hay adapter sản phẩm vào Matrix.
+
+## Phạm vi bản thử nghiệm
+
+- `0.0.2` bổ sung tương thích FreeCAD chính thức; bộ kiểm tra mới đo trực tiếp host 1.1.4. Bằng chứng Rhino/Matrix của các nhánh dev trước không phải chứng nhận lại toàn bộ bản stock này.
+- Chỉnh curve, bảng layer, Copy/Paste, BRep trong các mẫu đã kiểm tra, worker import và thao tác viewport có báo cáo kèm release. Full openNURBS, mọi thuật toán trang sức và chuyển đầy đủ bảng màu/khóa bằng thao tác Matrix sản phẩm vẫn chưa được nghiệm thu toàn bộ.
+- Làm việc trên **một tài liệu active** khi đang vẽ. FreeCAD 1.1 có thể commit draft của tài liệu trước khi bắt đầu transaction ở tài liệu khác; bản dev mới có API khác. Hãy hoàn tất hoặc hủy lệnh trước khi chuyển tài liệu.
+- Các luồng nâng cao phụ thuộc bản sửa core FreeCAD dev, như copy dữ liệu Hatch dùng `PropertyFileIncluded`, chưa được chứng nhận trên host stock.
+- Binary của `0.0.1` dành cho FreeCAD dev 27.1; không dùng chung với binary stock `0.0.2`. Hãy giữ plugin và host đúng phiên bản.
+
+## Khi không thấy workbench hoặc có lỗi tải module
+
+Kiểm tra lại phiên bản FreeCAD, đường dẫn versioned `v1-1\Mod`, cấu trúc giải nén và đủ hai file trong `bin`. Khởi động lại sau khi thay plugin. Mở View → Panels → Report view và gửi thông báo nếu vẫn lỗi. Không lấy DLL từ bản FreeCAD khác để chép đè.
+
+Để gỡ OM9: đóng FreeCAD, chuyển `OpenMatrix9` ra ngoài `Mod`. Dự án đã lưu vẫn còn nguyên. Để kiểm tra tải xuống, so SHA256 với `SHA256SUMS.txt` của [release 0.0.2](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.2).

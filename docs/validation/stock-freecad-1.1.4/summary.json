@@ -1,0 +1,65 @@
+{
+  "checks": 217.0,
+  "reports": [
+    {
+      "macro": "stock_smoke.FCMacro",
+      "report": "docs/validation/stock-freecad-1.1.4/stock_smoke.json",
+      "checks": 12
+    },
+    {
+      "macro": "plugin-source/tests/modeling_layer_panel_smoke.FCMacro",
+      "report": "docs/validation/stock-freecad-1.1.4/modeling_layer_panel_smoke.json",
+      "checks": 27
+    },
+    {
+      "macro": "plugin-source/tests/modeling_clipboard_user_smoke.FCMacro",
+      "report": "docs/validation/stock-freecad-1.1.4/modeling_clipboard_user_smoke.json",
+      "checks": 26
+    },
+    {
+      "macro": "plugin-source/tests/modeling_curve_editor_smoke.FCMacro",
+      "report": "docs/validation/stock-freecad-1.1.4/modeling_curve_editor_smoke.json",
+      "checks": 11
+    },
+    {
+      "macro": "plugin-source/tests/modeling_curve_join_smoke.FCMacro",
+      "report": "docs/validation/stock-freecad-1.1.4/modeling_curve_join_smoke.json",
+      "checks": 6
+    },
+    {
+      "macro": "plugin-source/tests/modeling_brep_smoke.FCMacro",
+      "report": "docs/validation/stock-freecad-1.1.4/modeling_brep_smoke.json",
+      "checks": 45
+    },
+    {
+      "macro": "stock_native_creation.FCMacro",
+      "report": "docs/validation/stock-freecad-1.1.4/stock_native_creation.json",
+      "checks": 19
+    },
+    {
+      "macro": "stock_worker.FCMacro",
+      "report": "docs/validation/stock-freecad-1.1.4/stock_worker.json",
+      "checks": 5
+    },
+    {
+      "macro": "plugin-source/tests/core_view_controls_smoke.FCMacro",
+      "report": "docs/validation/stock-freecad-1.1.4/core_view_controls_smoke.json",
+      "checks": 20
+    },
+    {
+      "macro": "stock_mouse.FCMacro",
+      "report": "docs/validation/stock-freecad-1.1.4/stock_mouse.json",
+      "checks": 46
+    }
+  ],
+  "version": "1.1.4",
+  "ok": true,
+  "host": "C:/Program Files/FreeCAD 1.1",
+  "limitations": [
+    "Stock FreeCAD 1.1 commits prior document drafts when a new transaction starts in another document; verified without OM9. Single active document workflow tested."
+  ],
+  "plugin_sha256": "d8ff685215348310844019c7611cf709a97fd0db45a8d83a98312ae84913c699",
+  "oracle_sha256": "8114722e0d6bf39960bae83924dc21aac9486e1fc9f83599c9582c1560fad007",
+  "brep_fixtures": 8,
+  "rhino_matrix_recertified": false
+}

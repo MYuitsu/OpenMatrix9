@@ -1,0 +1,124 @@
+{
+  "checks": [
+    {
+      "name": "native feature gets current layer and immutable native anchor",
+      "passed": true
+    },
+    {
+      "name": "native creation is current ByLayer with independent own flags",
+      "passed": true
+    },
+    {
+      "name": "native creation metadata shares exactly one Undo",
+      "passed": true
+    },
+    {
+      "name": "one native Undo removes geometry and restores exact layer state",
+      "passed": true
+    },
+    {
+      "name": "one native Redo restores geometry and exact layer state",
+      "passed": true
+    },
+    {
+      "name": "native copy never aliases original logical ID",
+      "passed": true
+    },
+    {
+      "name": "native duplicate gets new current layer instead of copied anchor",
+      "passed": true
+    },
+    {
+      "name": "native duplicate shares one Undo with layer projection",
+      "passed": true
+    },
+    {
+      "name": "native duplicate Undo restores original state",
+      "passed": true
+    },
+    {
+      "name": "native duplicate Redo restores exact state",
+      "passed": true
+    },
+    {
+      "name": "actual native primitive panel opened",
+      "passed": true
+    },
+    {
+      "name": "actual native Part primitive inherits current layer/color",
+      "passed": true
+    },
+    {
+      "name": "actual primitive layer state shares native Undo",
+      "passed": true
+    },
+    {
+      "name": "actual primitive Undo restores exact metadata",
+      "passed": true
+    },
+    {
+      "name": "actual primitive Redo restores exact metadata",
+      "passed": true
+    },
+    {
+      "name": "import refuses current foreign transaction without closing it",
+      "passed": true
+    },
+    {
+      "name": "legacy exchange never takes native creation defaults",
+      "passed": true
+    },
+    {
+      "name": "legacy incoming own state is conservatively readable",
+      "passed": true
+    },
+    {
+      "name": "FCStd native creation bindings survive reopen",
+      "passed": true
+    }
+  ],
+  "native_copy": {
+    "name": "NativeBox001",
+    "logical_id": "NativeBox001",
+    "anchor": "NativeBox001",
+    "layer": "om9-preset-5",
+    "rows": [
+      {
+        "id": "NativeBox",
+        "layer_id": "om9-preset-7",
+        "locked": false,
+        "visible": true,
+        "color_source": "ByLayer",
+        "rgb": [
+          122,
+          167,
+          206
+        ]
+      },
+      {
+        "id": "NativeBox001",
+        "layer_id": "om9-preset-5",
+        "locked": false,
+        "visible": true,
+        "color_source": "ByLayer",
+        "rgb": [
+          89,
+          139,
+          194
+        ]
+      }
+    ],
+    "facts": {
+      "document": "NativeLayerCreate",
+      "uid": "e7bb1c2f-6ecd-4369-b8c1-62253366643c",
+      "pending": false,
+      "pending_id": 0,
+      "booked_id": 0,
+      "transacting": false,
+      "performing": false
+    }
+  },
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\runtime\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+  "scope": "native feature/copy/actual Part UI creation and Undo; general mutation guards and receive still pending"
+}

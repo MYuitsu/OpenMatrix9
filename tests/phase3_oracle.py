@@ -1,11 +1,11 @@
 """Host test glue: precise native OCCT mass oracle, separately hashed executable."""
 from pathlib import Path
 import json, subprocess, os, hashlib
-EXECUTABLE=Path('H:/FreeCAD-src/build/om9-phase3-native/ThreeDmModelingBrepTests.exe')
+EXECUTABLE=Path(os.environ.get('OM9_PHASE3_ORACLE','H:/FreeCAD-src/build/om9-phase3-native/ThreeDmModelingBrepTests.exe'))
 def measure(shape,path):
     path=Path(path);shape.exportBrep(str(path))
     environment=os.environ.copy()
-    environment['PATH']='H:/FreeCAD-src/.pixi/envs/default/Library/bin;'+environment.get('PATH','')
+    environment['PATH']=os.environ.get('OM9_PHASE3_ORACLE_DLL_DIR','H:/FreeCAD-src/.pixi/envs/default/Library/bin')+';'+environment.get('PATH','')
     result=subprocess.run([str(EXECUTABLE),str(path)],capture_output=True,text=True,timeout=30,env=environment,creationflags=subprocess.CREATE_NO_WINDOW)
     if result.returncode:raise RuntimeError('Native mass oracle: '+result.stdout+result.stderr)
     values=json.loads(result.stdout)

@@ -1,6 +1,8 @@
 #include "ThreeDmStaging.h"
 #include <QCoreApplication>
 #include <QProcess>
+#include <QProcessEnvironment>
+#include <QDir>
 #include <QFile>
 #include <QJsonDocument>
 #include <QElapsedTimer>
@@ -30,7 +32,8 @@ QJsonArray stagePreservedArchive(const std::filesystem::path& source,const std::
     if(roots.size()<8||std::filesystem::file_size(source)>16ULL*1024*1024)workers=1;
     auto base=staging/(members?"definitions":"geometry");std::filesystem::create_directory(base);
     if(workers==1){auto model=readArchive(source,scale,!working,members,"",working);QJsonArray rows;int index=0;for(auto& item:model.items){auto row=encodeExchangeItem(item,base,index++);row["tolerance"]=model.tolerance;rows.append(row);}return rows;}
-    QString executable=QCoreApplication::applicationDirPath()+"/OM9ThreeDmImportWorker";
+    const auto pluginRoot=qEnvironmentVariable("OM9_PLUGIN_ROOT");
+    QString executable=(pluginRoot.isEmpty()?QCoreApplication::applicationDirPath():QDir(pluginRoot).filePath("bin"))+"/OM9ThreeDmImportWorker";
 #ifdef _WIN32
     executable+=".exe";
 #endif
@@ -42,7 +45,9 @@ QJsonArray stagePreservedArchive(const std::filesystem::path& source,const std::
         auto request=QString::fromStdWString((dir/"request.json").wstring()),result=QString::fromStdWString((dir/"result.json").wstring());
         auto bytes=QJsonDocument(QJsonObject{{"source",QString::fromStdWString(source.wstring())},{"staging",QString::fromStdWString(dir.wstring())},{"scale",scale},{"members",members},{"working",working},{"ids",ids}}).toJson(QJsonDocument::Compact);
         QFile file(request);if(!file.open(QIODevice::WriteOnly|QIODevice::NewOnly)||file.write(bytes)!=bytes.size())throw ExchangeError("Cannot stage worker request");file.close();
-        auto process=std::make_unique<QProcess>();process->setProcessChannelMode(QProcess::SeparateChannels);process->setProgram(executable);process->setArguments({request,result});process->start();jobs.processes.push_back(std::move(process));
+        auto process=std::make_unique<QProcess>();process->setProcessChannelMode(QProcess::SeparateChannels);process->setProgram(executable);process->setArguments({request,result});
+        auto environment=QProcessEnvironment::systemEnvironment();environment.insert("PATH",QCoreApplication::applicationDirPath()+QDir::listSeparator()+environment.value("PATH"));process->setProcessEnvironment(environment);
+        process->start();jobs.processes.push_back(std::move(process));
         if(!jobs.processes.back()->waitForStarted(10000))throw ExchangeError("Cannot start 3DM import worker");outputs.push_back(result);
     }
     std::map<std::string,QJsonArray> converted;

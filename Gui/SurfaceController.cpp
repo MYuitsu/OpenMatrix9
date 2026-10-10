@@ -71,10 +71,10 @@ void SurfaceController::deactivate(){enabled=false;cancel();}
 bool SurfaceController::active()const{return document&&om9_surface_phase()!=0;}
 bool SurfaceController::available(std::size_t i)const{
     auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
-    return enabled&&handles(i)&&doc&&!doc->isReadOnlyFile()&&!doc->testStatus(App::Document::Restoring)&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&!dialog&&dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())&&Gui::Control().isAllowedAlterDocument(doc);
+    return enabled&&handles(i)&&doc&&!om9ReadOnlyFile(*doc)&&!doc->testStatus(App::Document::Restoring)&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&!dialog&&dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())&&om9AlterDocument(doc);
 }
 bool SurfaceController::valid()const{
-    auto* gui=Gui::Application::Instance->activeDocument();return enabled&&document&&document==App::GetApplication().getActiveDocument()&&!document->isReadOnlyFile()&&!document->testStatus(App::Document::Restoring)&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&Gui::Control().isAllowedAlterDocument(document);
+    auto* gui=Gui::Application::Instance->activeDocument();return enabled&&document&&document==App::GetApplication().getActiveDocument()&&!om9ReadOnlyFile(*document)&&!document->testStatus(App::Document::Restoring)&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&om9AlterDocument(document);
 }
 void SurfaceController::prompt(const QString& text){CurveController::instance().setPrompt(text);CurveController::instance().logMessage(text);}
 void SurfaceController::refresh(){

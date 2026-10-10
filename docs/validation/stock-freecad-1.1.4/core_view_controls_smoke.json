@@ -1,0 +1,175 @@
+{
+  "checks": [
+    {
+      "name": "original view command names registered",
+      "passed": true
+    },
+    {
+      "name": "Ctrl zoom works before invoking any view tool",
+      "passed": true
+    },
+    {
+      "name": "OM9-VIEW-008 reversed CMD drag zooms correct scale",
+      "passed": true
+    },
+    {
+      "name": "window center matches independent ray projection",
+      "passed": true
+    },
+    {
+      "name": "view tools create no model object or Undo transaction",
+      "passed": true
+    },
+    {
+      "name": "tiny box does not zoom",
+      "passed": true
+    },
+    {
+      "name": "box Esc clears rubber band",
+      "passed": true
+    },
+    {
+      "name": "OM9-VIEW-004 menu drag changes zoom",
+      "passed": true
+    },
+    {
+      "name": "Ctrl left drag zooms in",
+      "passed": true
+    },
+    {
+      "name": "dynamic drag previews camera change",
+      "passed": true
+    },
+    {
+      "name": "dynamic Esc restores starting camera",
+      "passed": true
+    },
+    {
+      "name": "Perspective dynamic preview changes angle",
+      "passed": true
+    },
+    {
+      "name": "Perspective Esc restores zoom angle",
+      "passed": true
+    },
+    {
+      "name": "OM9-VIEW-009 crosshairs track cursor",
+      "passed": true
+    },
+    {
+      "name": "menu Crosshairs toggles off",
+      "passed": true
+    },
+    {
+      "name": "crosshairs hide outside OM9",
+      "passed": true
+    },
+    {
+      "name": "crosshair toggle survives workbench switch",
+      "passed": true
+    },
+    {
+      "name": "document switch cancels view tool",
+      "passed": true
+    },
+    {
+      "name": "restricted task disables view tool actions",
+      "passed": true
+    },
+    {
+      "name": "restricted task blocks Ctrl zoom",
+      "passed": true
+    }
+  ],
+  "mouse_events": [
+    {
+      "type": 2,
+      "position": "PySide6.QtCore.QPointF(298.000000, 180.000000)"
+    },
+    {
+      "type": 2,
+      "position": "PySide6.QtCore.QPointF(397.000000, 149.000000)"
+    },
+    {
+      "type": 3,
+      "position": "PySide6.QtCore.QPointF(178.000000, 89.000000)"
+    },
+    {
+      "type": 2,
+      "position": "PySide6.QtCore.QPointF(298.000000, 180.000000)"
+    },
+    {
+      "type": 3,
+      "position": "PySide6.QtCore.QPointF(299.000000, 181.000000)"
+    },
+    {
+      "type": 2,
+      "position": "PySide6.QtCore.QPointF(298.000000, 180.000000)"
+    },
+    {
+      "type": 3,
+      "position": "PySide6.QtCore.QPointF(298.000000, 260.000000)"
+    },
+    {
+      "type": 2,
+      "position": "PySide6.QtCore.QPointF(298.000000, 180.000000)"
+    },
+    {
+      "type": 2,
+      "position": "PySide6.QtCore.QPointF(298.000000, 180.000000)"
+    }
+  ],
+  "first_ctrl": {
+    "height_before": 50.0,
+    "height_after": 58.27683639526367,
+    "prompt": "Command: "
+  },
+  "input_region": {
+    "start_global": "PySide6.QtCore.QPoint(864, 529)",
+    "end_global": "PySide6.QtCore.QPoint(1083, 589)",
+    "screen": "PySide6.QtCore.QRect(0, 0, 2560, 1392)",
+    "window": "PySide6.QtCore.QRect(380, 227, 1500, 1000)",
+    "active_slot": 0
+  },
+  "drag_state": {
+    "visible": true,
+    "enabled": true,
+    "prompt": "",
+    "active_slot": 0,
+    "rubber_bands": 0,
+    "height_before": 50.0,
+    "height_after": 18.34170913696289
+  },
+  "viewport": {
+    "logical": [
+      597,
+      362
+    ],
+    "ratio": 1.0,
+    "render_pixels": "PySide6.QtCore.QSize(597, 362)",
+    "rectangle": [
+      178,
+      89,
+      397,
+      149
+    ]
+  },
+  "window_center": {
+    "actual": [
+      -1.5218857526779175,
+      8.656510353088379,
+      100.0
+    ],
+    "expected": [
+      -1.5218857526779175,
+      8.656510353088379,
+      0.0
+    ]
+  },
+  "crosshair": {
+    "exists": true,
+    "visible": true,
+    "cursor": "PySide6.QtCore.QPoint(45, 65)"
+  },
+  "ok": true
+}

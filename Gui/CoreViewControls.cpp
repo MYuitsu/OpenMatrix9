@@ -79,8 +79,8 @@ bool CoreViewControls::handles(std::size_t command){auto name=id(command);return
 bool CoreViewControls::available(std::size_t command)const {
     if(!enabled||!handles(command)||!active())return false;
     if(id(command)=="ViewCaptureToFile")return true;
-    if(!Gui::Control().isAllowedAlterView(App::GetApplication().getActiveDocument()))return false;
-    return id(command)!="Zoom_Selected"||!Gui::Selection().getSelectionT(App::GetApplication().getActiveDocument()->getName(),Gui::ResolveMode::NoResolve).empty();
+    if(!om9AlterView(App::GetApplication().getActiveDocument()))return false;
+    return id(command)!="Zoom_Selected"||!Gui::Selection().getSelection(App::GetApplication().getActiveDocument()->getName(),Gui::ResolveMode::NoResolve).empty();
 }
 void CoreViewControls::activate(){
     qApp->installEventFilter(this);
@@ -106,7 +106,7 @@ void CoreViewControls::startTool(unsigned int value,std::size_t command,Gui::Vie
     CorePictureFrame::instance().cancel();
     CoreDistance::instance().cancel();
     stopTool(true);if(!view||!om9_view_tool_start(value))return;
-    kind=value;toolCommand=command;toolView=view;originalCamera=view->getCamera();originalCursor=view->getViewer()->viewport()->cursor();
+    kind=value;toolCommand=command;toolView=view;originalCamera=cameraState(view->getViewer());originalCursor=view->getViewer()->viewport()->cursor();
     // FreeCAD may install its dock-overlay filter after this controller was created.
     // Give the explicitly started tool first refusal for its own viewport events.
     qApp->installEventFilter(this);
@@ -123,18 +123,18 @@ bool CoreViewControls::execute(std::size_t command) {
     if(!available(command))return false;
     if(id(command)=="ViewCaptureToFile")return capture();
     if(id(command)=="Zoom_Extents"||id(command)=="Zoom_Selected") {
-        cancel();auto* view=active();auto* viewer=view->getViewer();const auto before=view->getCamera();
+        cancel();auto* view=active();auto* viewer=view->getViewer();const auto before=cameraState(view->getViewer());
         if(id(command)=="Zoom_Extents") {
-            SbBox3f bounds;if(!viewer->getSceneBoundBox(bounds))return false;
-            viewer->viewBoundBox(bounds);
+            SbBox3f bounds;bounds=viewer->getBoundingBox();if(bounds.isEmpty())return false;
+            viewer->viewAll();
         } else {
             // Use all selected targets, without the host's maximum-selection
             // truncation applied by viewSelection().
-            const auto targets=Gui::Selection().getSelectionT(App::GetApplication().getActiveDocument()->getName(),Gui::ResolveMode::NoResolve);
+            const auto targets=Gui::Selection().getSelection(App::GetApplication().getActiveDocument()->getName(),Gui::ResolveMode::NoResolve);
             auto* gui=view->getGuiDocument();bool valid=false;
-            for(const auto& target:targets)if(auto* provider=dynamic_cast<Gui::ViewProviderDocumentObject*>(gui->getViewProvider(target.getObject())))if(provider->getBoundingBox(target.getSubName().c_str()).IsValid()){valid=true;break;}
+            for(const auto& target:targets)if(auto* provider=dynamic_cast<Gui::ViewProviderDocumentObject*>(gui->getViewProvider(target.pObject)))if(provider->getBoundingBox(target.SubName).IsValid()){valid=true;break;}
             if(!valid)return false;
-            viewer->viewObjects(targets,false);
+            viewer->viewSelection();
         }
         if(auto* camera=dynamic_cast<SoPerspectiveCamera*>(viewer->getSoRenderManager()->getCamera())) {
             // Coin fits a bounding sphere using radius/tan(halfAngle). The
@@ -150,7 +150,7 @@ bool CoreViewControls::execute(std::size_t command) {
             camera->nearDistance=camera->nearDistance.getValue()+delta;
             camera->farDistance=camera->farDistance.getValue()+delta;
         }
-        return before!=view->getCamera();
+        return before!=cameraState(view->getViewer());
     }
     if(id(command)=="Crosshairs"){om9_core_crosshairs_toggle();refreshCrosshairs();return true;}
     startTool(id(command)=="Zoom_Window"?1:2,command,active());return false; // history waits for completed drag
@@ -185,7 +185,7 @@ bool CoreViewControls::eventFilter(QObject* object,QEvent* event) {
     auto* mouse=static_cast<QMouseEvent*>(event);auto* viewport=view->getViewer()->viewport();
     const auto position=viewport->mapFrom(widget,mouse->position().toPoint());
     if(event->type()==QEvent::MouseMove&&om9_core_crosshairs())if(auto* lines=overlay(view,true))lines->track(position);
-    const bool allowed=Gui::Control().isAllowedAlterView(App::GetApplication().getActiveDocument());
+    const bool allowed=om9AlterView(App::GetApplication().getActiveDocument());
     if(!kind)return false;
     if(!allowed||view!=toolView){stopTool(true);return false;}
     const QPoint point(std::clamp(position.x(),0,std::max(0,viewport->width()-1)),std::clamp(position.y(),0,std::max(0,viewport->height()-1)));
@@ -210,7 +210,7 @@ bool CoreViewControls::eventFilter(QObject* object,QEvent* event) {
             viewport->setProperty("om9ZoomViewportPixels",QSize(pixels[0],pixels[1]));
             view->getViewer()->boxZoom(SbBox2s(short(qRound(om9_view_tool_value(0)*ratio)),short(qRound(om9_view_tool_value(1)*ratio)),short(qRound(om9_view_tool_value(2)*ratio)),short(qRound(om9_view_tool_value(3)*ratio))));
         }
-        if(effect==1||effect==3){const bool changed=view->getCamera()!=originalCamera;om9_sidebar_record_execution(toolCommand,changed);stopTool(false);}
+        if(effect==1||effect==3){const bool changed=cameraState(view->getViewer())!=originalCamera;om9_sidebar_record_execution(toolCommand,changed);stopTool(false);}
         return true;
     }
     return false;

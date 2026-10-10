@@ -72,12 +72,12 @@ void commit(App::Document& doc,const char* label) {
     else {const auto count=om9_curve_count();if(count<2||count>4097)throw std::runtime_error("Invalid Curve output");BRepBuilderAPI_MakePolygon builder;for(std::size_t i=0;i<count;++i)builder.Add(gp_Pnt(om9_curve_coordinate(i,0),om9_curve_coordinate(i,1),om9_curve_coordinate(i,2)));if(!builder.IsDone())throw std::runtime_error("Native curve polygon construction failed");shape=builder.Wire();}
     if(!BRepCheck_Analyzer(shape).IsValid())throw std::runtime_error("Native kernel produced invalid geometry");
     OpenMatrix9Gui::requireLayerGeometryEditable(doc);
-    const int transaction=doc.openTransaction(std::string(label));
+    const int transaction=om9OpenTransaction(doc,std::string(label));
     try {
         OpenMatrix9Gui::LayerGeometryTransaction layers(doc,transaction);
         OpenMatrix9Gui::createCurveFeature(doc,shape,label);
-        doc.recompute();layers.finish();doc.commitTransaction();
-    }catch(...){if(OpenMatrix9Gui::ownsLayerGeometryTransaction(doc,transaction))doc.abortTransaction();throw;}
+        doc.recompute();layers.finish();om9CommitTransaction(doc);
+    }catch(...){if(OpenMatrix9Gui::ownsLayerGeometryTransaction(doc,transaction))om9AbortTransaction(doc);throw;}
 }
 }
 namespace OpenMatrix9Gui {
@@ -117,7 +117,7 @@ bool CurveController::available(std::size_t index)const {
     if(QString::fromUtf8(om9_command_id(index))=="PointsOn")return enabled&&modelingCurveEditorAvailable();
     if(QString::fromUtf8(om9_command_id(index))=="Join")return enabled&&modelingCurveJoinAvailable();
     auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
-    return enabled&&isCurveCommand(index)&&doc&&gui&&!gui->getInEdit()&&dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())&&Gui::Control().isAllowedAlterDocument(doc);
+    return enabled&&isCurveCommand(index)&&doc&&gui&&!gui->getInEdit()&&dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())&&om9AlterDocument(doc);
 }
 bool CurveController::validDocument()const {auto* doc=App::GetApplication().getActiveDocument();return !document.empty()&&doc&&documentIdentity==doc&&document==doc->getName()&&available(command);}
 bool CurveController::start(std::size_t index) {

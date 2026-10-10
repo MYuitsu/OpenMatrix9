@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-10T09:33:30.542574+00:00",
+  "updated_at": "2026-10-10T16:26:22.278241+00:00",
   "implementation_target": "Safe Rust is priority1 for portable logic/state/data/validation/index/cache/workers; native C++/Qt/OCCT/openNURBS adapters only; Python bootstrap/tests/tools when required.",
-  "active_item": "layer-session-handoff-20261010",
+  "active_item": "release-0.0.2-stock-freecad-1.1.4",
   "items": [
     {
       "key": "reference-skills",
@@ -3299,6 +3299,20 @@
       "next_action": "Continue OM9 product UI deployment and remaining original transfer/lifecycle/retained/performance tasks. No repeat of this five-fixture native gate required for the summary-only fix.",
       "undo_scope": "om9_only",
       "native_transfer_scope_accepted": true
+    },
+    {
+      "key": "release-0.0.2-stock-freecad-1.1.4",
+      "stage": "compatibility-release",
+      "status": "native_compatibility_verified_release_pending",
+      "outputs": [
+        "INSTALL.vi.md",
+        "INSTALL.en.md",
+        "docs/validation/stock-freecad-1.1.4/summary.json"
+      ],
+      "checks": 217.0,
+      "limitations": [
+        "Stock FreeCAD 1.1 commits prior document drafts when a new transaction starts in another document; verified without OM9. Single active document workflow tested."
+      ]
     }
   ],
   "publication_push_20261008": {

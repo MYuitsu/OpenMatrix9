@@ -1,0 +1,113 @@
+{
+  "checks": [
+    {
+      "name": "uses installed official FreeCAD 1.1.4",
+      "passed": true
+    },
+    {
+      "name": "uses installed Python 3.11",
+      "passed": true
+    },
+    {
+      "name": "exact compatible plugin loaded",
+      "passed": true
+    },
+    {
+      "name": "OM9 workbench activated",
+      "passed": true
+    },
+    {
+      "name": "OM9 sidebar present",
+      "passed": true
+    },
+    {
+      "name": "resources discovered in user plugin",
+      "passed": true
+    },
+    {
+      "name": "authored SVG renders",
+      "passed": true
+    },
+    {
+      "name": "plugin-local import worker",
+      "passed": true
+    },
+    {
+      "name": "default palette32",
+      "passed": true
+    },
+    {
+      "name": "stock OCCT ring valid",
+      "passed": true
+    },
+    {
+      "name": "stock host Undo removes ring",
+      "passed": true
+    },
+    {
+      "name": "stock host Redo restores ring",
+      "passed": true
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\release-0.0.2\\extracted-check\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+  "version": [
+    "1",
+    "1",
+    "4",
+    "20260928 (Git shallow)",
+    "Unknown",
+    "2026/09/28 13:46:34",
+    "(HEAD detached at 4fd3bf320)",
+    "4fd3bf320d9566a27e60069fc8387448aaa3a094"
+  ],
+  "python": "3.11.14 | packaged by conda-forge | (main, Oct 13 2025, 14:00:26) [MSC v.1944 64 bit (AMD64)]",
+  "user_data": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\stock_smoke-5b5ccf5054324327b2530a467b951c8d\\profile\\",
+  "user_addons": "",
+  "module_search": [
+    "H:\\FreeCAD-src\\build\\release-0.0.2\\extracted-check\\OpenMatrix9\\bin",
+    "H:/FreeCAD-src/build/release-0.0.2/extracted-check/OpenMatrix9",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Web",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Tux",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Test",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\TechDraw",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Surface",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Start",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Spreadsheet",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Sketcher",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Show",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Robot",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\ReverseEngineering",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Points",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Plot",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\PartDesign",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Part",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\OpenSCAD",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\MeshPart",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Mesh",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Measure",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Material",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Inspection",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Import",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Idf",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Help",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Fem",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Draft",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\CAM",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\BIM",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\Assembly",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\AddonManager\\.\\",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod\\AddonManager",
+    "C:\\Program Files\\FreeCAD 1.1\\Mod",
+    "C:\\Program Files\\FreeCAD 1.1\\lib",
+    "C:\\Program Files\\FreeCAD 1.1\\Ext",
+    "C:\\Program Files\\FreeCAD 1.1\\bin\\python311.zip",
+    "C:\\Program Files\\FreeCAD 1.1\\bin\\DLLs",
+    "C:\\Program Files\\FreeCAD 1.1\\bin\\Lib",
+    "C:\\Program Files\\FreeCAD 1.1\\bin",
+    "C:\\Program Files\\FreeCAD 1.1\\bin\\Lib\\site-packages",
+    "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\stock_smoke-5b5ccf5054324327b2530a467b951c8d\\profile\\",
+    "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\stock_smoke-5b5ccf5054324327b2530a467b951c8d\\profile\\",
+    "C:\\Program Files\\FreeCAD 1.1\\Macro"
+  ]
+}

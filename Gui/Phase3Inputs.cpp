@@ -36,7 +36,7 @@ std::uint32_t count(PyObject* p,const char* attr){Ref result(PyObject_GetAttrStr
 bool solidsOnly(PyObject* p){Ref type(PyObject_GetAttrString(p,"ShapeType"));auto name=text(type.value);if(name=="Solid")return flag(p,"isClosed");if(name!="Compound"&&name!="CompSolid")return false;Ref children(PyObject_CallMethod(p,"childShapes",nullptr));auto n=PySequence_Size(children.value);if(n<1)return false;for(Py_ssize_t i=0;i<n;++i){Ref child(PySequence_GetItem(children.value,i));if(!solidsOnly(child.value))return false;}return true;}
 struct Current {std::string document,identity,signature;Om9Phase3Snapshot view()const{return {reinterpret_cast<const std::uint8_t*>(identity.data()),identity.size(),reinterpret_cast<const std::uint8_t*>(signature.data()),signature.size()};}};
 Current current(App::Document& doc,const std::string& name,const std::string& sub){
-    if(doc.isReadOnlyFile())phase3Require(8);
+    if(om9ReadOnlyFile(doc))phase3Require(8);
     auto* object=doc.getObject(name.c_str());if(!object||object->getLinkedObject(true)!=object)throw std::runtime_error("Select an owning native CAD object");
     auto* property=object->getPropertyByName("Shape");
     if(object->getPropertyByName("OM9SourceUUID")||object->isReadOnly("Shape")||(property&&property->isReadOnly()))phase3Require(6);
@@ -62,7 +62,7 @@ Phase3Snapshot capturePhase3Object(App::Document& doc,const std::string& name,co
 }
 void verifyPhase3Object(App::Document& doc,const Phase3Snapshot& state){
     if(!state)phase3Require(9);auto* gui=Gui::Application::Instance->activeDocument();
-    bool available=&doc==App::GetApplication().getActiveDocument()&&!doc.isReadOnlyFile()&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&!doc.testStatus(App::Document::Restoring)&&Gui::Control().isAllowedAlterDocument(&doc);
+    bool available=&doc==App::GetApplication().getActiveDocument()&&!om9ReadOnlyFile(doc)&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&!doc.testStatus(App::Document::Restoring)&&om9AlterDocument(&doc);
     if(!available)phase3Require(8);auto value=current(doc,state->name,state->sub);auto view=value.view();phase3Require(om9_phase3_request_validate(state->handle,reinterpret_cast<const std::uint8_t*>(value.document.data()),value.document.size(),&view,1,available));
 }
 Om9Phase3Facts phase3ShapeFacts(PyObject* shape,bool protectedInput){

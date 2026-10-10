@@ -226,7 +226,7 @@ void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceI
     for(const auto& input:inputs)verifySurfaceInput(doc,input);
     std::vector<Om9Phase3Facts> facts;for(const auto& input:inputs){Ref wire(surfaceWire(doc,input));facts.push_back(phase3ShapeFacts(wire.p));}phase3Validate(options.kind==1?8:options.kind==2?9:10,facts);
     if(flag(shape,"isNull")||!flag(shape,"isValid"))throw std::runtime_error("Invalid surface output; inputs are unchanged");
-    const int transactionId=doc.openTransaction(name);
+    const int transactionId=om9OpenTransaction(doc,name);
     try {
         LayerGeometryTransaction layers(doc,transactionId);
         for(const auto& input:inputs)verifySurfaceInput(doc,input);
@@ -244,7 +244,7 @@ void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceI
         Ref view(PyObject_GetAttrString(object.p,"ViewObject")),color(Py_BuildValue("(ddd)",0.0,130.0/255.0,85.0/255.0));set(view.p,"ShapeColor",color.p);set(view.p,"LineColor",color.p);
         doc.recompute();layers.finish();
         if(!ownsLayerGeometryTransaction(doc,transactionId))throw std::runtime_error("Surface transaction ownership changed");
-        doc.commitTransaction();
-    }catch(...){if(ownsLayerGeometryTransaction(doc,transactionId))doc.abortTransaction();throw;}
+        om9CommitTransaction(doc);
+    }catch(...){if(ownsLayerGeometryTransaction(doc,transactionId))om9AbortTransaction(doc);throw;}
 }
 }

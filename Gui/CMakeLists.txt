@@ -267,6 +267,9 @@ endif()
 target_compile_features(OpenMatrix9Gui PRIVATE cxx_std_23)
 if(MSVC)
     target_compile_options(OpenMatrix9Gui PRIVATE /utf-8 /FIFCGlobal.h /FIFCConfig.h)
+    if(OPENMATRIX9_STOCK_HOST)
+        target_compile_options(OpenMatrix9Gui PRIVATE /FIStockCompatibility.h)
+    endif()
 endif()
 
 

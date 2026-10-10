@@ -20,6 +20,7 @@
 #include <Gui/View3DInventor.h>
 #include <Gui/View3DInventorViewer.h>
 #include <Gui/ViewProviderDocumentObject.h>
+#include <Mod/Part/App/PartFeature.h>
 #include <Inventor/SoPickedPoint.h>
 #include <Inventor/SoRenderManager.h>
 #include <Inventor/nodes/SoCamera.h>
@@ -36,6 +37,7 @@
 #include <algorithm>
 #include <memory>
 #include <limits>
+#include <set>
 namespace {
 Gui::View3DInventor* containing(QObject* object){
     auto* widget=qobject_cast<QWidget*>(object);auto* doc=Gui::Application::Instance->activeDocument();if(!widget||!doc)return nullptr;
@@ -88,21 +90,28 @@ void CoreMouse::motion(const QPoint& point){
     last=point;
 }
 void CoreMouse::select(const QPoint& point,bool rectangle){
-    auto* doc=App::GetApplication().getActiveDocument();if(!doc||!Gui::Control().isAllowedAlterSelection(doc))return;
+    auto* doc=App::GetApplication().getActiveDocument();if(!doc||!om9AlterSelection(doc))return;
     auto* viewer=target->getViewer();const char* name=doc->getName();
     if(rectangle){
-        const auto previous=Gui::Selection().getSelectionT(name,Gui::ResolveMode::NoResolve);
+        std::set<std::pair<App::DocumentObject*,std::string>> previous;
+        for(const auto& item:Gui::Selection().getSelection(name,Gui::ResolveMode::NoResolve))previous.emplace(item.pObject,item.SubName);
         // Native crossing tests geometry. Its window mode tests centers; remove
         // partial objects to obtain Rhino's full-window containment behavior.
         Gui::applyBoxSelection(viewer,{viewer->fromQPoint(anchor),viewer->fromQPoint(point)},(modifiers&3)==3,(modifiers&1)!=0);
         if(point.x()>=anchor.x()){
-            const QRect rect=QRect(anchor,point).normalized();auto selected=Gui::Selection().getSelectionT(name,Gui::ResolveMode::NoResolve);
-            for(const auto& selection:selected){if((modifiers&1)&&std::find(previous.begin(),previous.end(),selection)!=previous.end())continue;auto* object=selection.getObject();if(!object)continue;auto* provider=dynamic_cast<Gui::ViewProviderDocumentObject*>(target->getGuiDocument()->getViewProvider(object));if(!provider)continue;
-                const auto bounds=provider->getBoundingBox(selection.getSubName().c_str(),nullptr,true,viewer);if(!bounds.IsValid())continue;
+            const QRect rect=QRect(anchor,point).normalized();std::vector<std::pair<App::DocumentObject*,std::string>> selected;
+            for(const auto& item:Gui::Selection().getSelection(name,Gui::ResolveMode::NoResolve))selected.emplace_back(item.pObject,item.SubName);
+            for(const auto& selection:selected){if((modifiers&1)&&previous.count(selection))continue;auto* object=selection.first;if(!object)continue;auto* provider=dynamic_cast<Gui::ViewProviderDocumentObject*>(target->getGuiDocument()->getViewProvider(object));if(!provider)continue;
+                // Stock Coin's detail path bounds include the whole edge-set.
+                // Use the exact transformed CAD subshape for window containment.
+                auto bounds=provider->getBoundingBox(selection.second.c_str(),true,target);
+                if(!selection.second.empty() && Part::Feature::hasShapeOwner(object,selection.second.c_str()))
+                    bounds=Part::Feature::getTopoShape(object,Part::ShapeOption::NeedSubElement|Part::ShapeOption::ResolveLink|Part::ShapeOption::Transform,selection.second.c_str()).getBoundBox();
+                if(!bounds.IsValid())continue;
                 const auto volume=viewer->getSoRenderManager()->getCamera()->getViewVolume(float(viewer->viewport()->width())/std::max(1,viewer->viewport()->height()));
                 double x0=1e20,y0=1e20,x1=-1e20,y1=-1e20;
                 for(int c=0;c<8;++c){SbVec3f p;volume.projectToScreen(SbVec3f(float(c&1?bounds.MaxX:bounds.MinX),float(c&2?bounds.MaxY:bounds.MinY),float(c&4?bounds.MaxZ:bounds.MinZ)),p);double x=p[0]*(viewer->viewport()->width()-1),y=(1-p[1])*(viewer->viewport()->height()-1);x0=std::min(x0,x);x1=std::max(x1,x);y0=std::min(y0,y);y1=std::max(y1,y);}
-                if(!om9_mouse_window_contains(rect.left(),rect.top(),rect.right(),rect.bottom(),x0,y0,x1,y1))Gui::Selection().rmvSelection(name,object->getNameInDocument(),selection.getSubName().c_str());
+                if(!om9_mouse_window_contains(rect.left(),rect.top(),rect.right(),rect.bottom(),x0,y0,x1,y1))Gui::Selection().rmvSelection(name,object->getNameInDocument(),selection.second.c_str());
             }
         }
         return;
@@ -137,7 +146,7 @@ bool CoreMouse::eventFilter(QObject* object,QEvent* event){
     if(!CoreKeyboard::inputContext(object)){return false;}
     auto* doc=App::GetApplication().getActiveDocument();if(!doc)return false;
     if(event->type()==QEvent::Wheel){
-        auto* wheel=static_cast<QWheelEvent*>(event);if(!Gui::Control().isAllowedAlterView(doc))return true;
+        auto* wheel=static_cast<QWheelEvent*>(event);if(!om9AlterView(doc))return true;
         Gui::getMainWindow()->setActiveWindow(view);auto* camera=view->getViewer()->getSoRenderManager()->getCamera();if(!camera)return true;
         const double steps=wheel->angleDelta().y()?double(wheel->angleDelta().y())/120.:double(wheel->pixelDelta().y())/40.;
         if(wheel->modifiers()==Qt::AltModifier)camera->position=camera->position.getValue()+direction(camera)*float(steps*camera->focalDistance.getValue()*0.1);
@@ -157,7 +166,7 @@ bool CoreMouse::eventFilter(QObject* object,QEvent* event){
         if(buttons==4){const auto prefs=App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Mod/OpenMatrix9/Mouse");const auto mode=prefs->GetInt("MiddleButtonAction",0);if(mode==1)selected=keys==2?4:keys==4?3:2;else if(mode==2)selected=keys==2?4:keys==1?2:3;else if(mode==3)return false;}
         if(buttons==1&&pointTool()&&selected!=4)return false;
         if(selected==0)return false;
-        cancel(false);target=view;action=selected;button=buttons;modifiers=keys;anchor=last=point;originalCamera=view->getCamera();
+        cancel(false);target=view;action=selected;button=buttons;modifiers=keys;anchor=last=point;originalCamera=cameraState(view->getViewer());
         view->getViewer()->viewport()->grabMouse();
         if(button==2){const auto prefs=App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Mod/OpenMatrix9/Mouse");hold->start(std::clamp(int(prefs->GetInt("ContextMenuDelay",500)),100,5000));}
         return true;
@@ -168,7 +177,7 @@ bool CoreMouse::eventFilter(QObject* object,QEvent* event){
         if(longClick)return true;
         if(!dragging&&!om9_mouse_moved(anchor.x(),anchor.y(),point.x(),point.y(),4.))return true;
         dragging=true;hold->stop();
-        if((action==1&&!Gui::Control().isAllowedAlterSelection(doc))||(action!=1&&!Gui::Control().isAllowedAlterView(doc))){cancel();return true;}
+        if((action==1&&!om9AlterSelection(doc))||(action!=1&&!om9AlterView(doc))){cancel();return true;}
         motion(point);return true;
     }
     if(unsigned(mouse->button())!=button)return true;
@@ -176,7 +185,7 @@ bool CoreMouse::eventFilter(QObject* object,QEvent* event){
     if(dragging&&action==1)select(point,true);else if(clicked&&released==1&&!pointTool())select(point,false);
     cancel(false);
     releaseView=nullptr;releaseButton=0;
-    if(clicked&&released==2&&Gui::Control().isAllowedAlterDocument(doc))confirm();
+    if(clicked&&released==2&&om9AlterDocument(doc))confirm();
     if(clicked&&released==4&&operation==8)recent();return true;
 }
 }

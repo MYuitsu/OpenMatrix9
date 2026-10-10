@@ -66,7 +66,7 @@ QJsonObject values(const Basis& basis) {
     output["signature"]=QString::fromLatin1(QCryptographicHash::hash(QJsonDocument(signature).toJson(QJsonDocument::Compact),QCryptographicHash::Sha256).toHex());
     return output;
 }
-bool ready(App::Document& doc) {auto* gui=Gui::Application::Instance->activeDocument();return &doc==App::GetApplication().getActiveDocument()&&gui&&!gui->getInEdit()&&!gui->isAboutToClose()&&Gui::Control().isAllowedAlterDocument(&doc);}
+bool ready(App::Document& doc) {auto* gui=Gui::Application::Instance->activeDocument();return &doc==App::GetApplication().getActiveDocument()&&gui&&!gui->getInEdit()&&!gui->isAboutToClose()&&om9AlterDocument(&doc);}
 std::string joinCurves(App::Document& doc,const std::vector<std::string>& names) {
     if(!ready(doc))throw std::runtime_error("Join needs an editable active project");phase2Require(om9_phase2_join_options(names.size(),1));
     OpenMatrix9Gui::requireLayerGeometryEditable(doc);
@@ -90,9 +90,9 @@ std::string joinCurves(App::Document& doc,const std::vector<std::string>& names)
     if(!BRepCheck_Analyzer(wire).IsValid())throw std::runtime_error("Join could not construct a valid native wire");
     OpenMatrix9Gui::validateCurveWire(wire,count);
     OpenMatrix9Gui::layerMutationGeneration(doc,names,1);
-    const auto transaction=doc.openTransaction("Join curves");
-    try {OpenMatrix9Gui::LayerGeometryTransaction layers(doc,transaction);OpenMatrix9Gui::layerMutationGeneration(doc,names,1);auto* object=doc.addObject("Part::Feature","JoinedCurve");object->getPropertyByName<Part::PropertyPartShape>("Shape")->setValue(wire);doc.recompute();const std::string name=object->getNameInDocument();layers.finish();doc.commitTransaction();return name;}
-    catch(...){if(OpenMatrix9Gui::ownsLayerGeometryTransaction(doc,transaction))doc.abortTransaction();throw;}
+    const auto transaction=om9OpenTransaction(doc,"Join curves");
+    try {OpenMatrix9Gui::LayerGeometryTransaction layers(doc,transaction);OpenMatrix9Gui::layerMutationGeneration(doc,names,1);auto* object=doc.addObject("Part::Feature","JoinedCurve");object->getPropertyByName<Part::PropertyPartShape>("Shape")->setValue(wire);doc.recompute();const std::string name=object->getNameInDocument();layers.finish();om9CommitTransaction(doc);return name;}
+    catch(...){if(OpenMatrix9Gui::ownsLayerGeometryTransaction(doc,transaction))om9AbortTransaction(doc);throw;}
 }
 }
 namespace OpenMatrix9Gui {
@@ -117,16 +117,16 @@ CurveEditResult editModelingCurve(App::Document& doc,const std::string& name,con
     BRepBuilderAPI_MakeEdge builder(curve,first,last);if(!builder.IsDone())throw std::runtime_error("Edited curve cannot form a native edge");
     auto shape=builder.Edge();shape.Orientation(original.edge.Orientation());shape.Location(original.property->getValue().Location());
     if(!BRepCheck_Analyzer(shape).IsValid())throw std::runtime_error("Edited curve is not valid CAD");
-    const auto transaction=doc.openTransaction("Edit curve CV");
+    const auto transaction=om9OpenTransaction(doc,"Edit curve CV");
     try {
         LayerGeometryTransaction layers(doc,transaction);
         const auto commitBasis=readBasis(doc,name);
         const auto commitSignature=values(commitBasis).value("signature").toString().toUtf8();
         const Om9WitnessInput commitWitness{std::uint64_t(reinterpret_cast<std::uintptr_t>(&doc)),std::uint64_t(commitBasis.object->getID())+1,0,reinterpret_cast<const std::uint8_t*>(commitSignature.constData()),std::size_t(commitSignature.size())};
         phase2Require(om9_phase2_session_check(session,&commitWitness),session);
-        commitBasis.property->setValue(shape);doc.recompute();layers.finish();doc.commitTransaction();
+        commitBasis.property->setValue(shape);doc.recompute();layers.finish();om9CommitTransaction(doc);
     }
-    catch(...){if(ownsLayerGeometryTransaction(doc,transaction))doc.abortTransaction();throw;}
+    catch(...){if(ownsLayerGeometryTransaction(doc,transaction))om9AbortTransaction(doc);throw;}
     return {true};
 }
 bool modelingCurveEditorAvailable() {

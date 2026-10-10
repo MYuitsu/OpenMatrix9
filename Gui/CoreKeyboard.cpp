@@ -1,3 +1,4 @@
+#include <Base/Interpreter.h>
 #include "CoreKeyboard.h"
 #include "RustBridge.h"
 #include "NativeCommands.h"
@@ -65,9 +66,9 @@ bool CoreKeyboard::available(std::size_t command)const{
     if(!enabled||!handles(command)||Gui::Application::Instance->isClosing())return false;
     if(id(command)=="CommandHistory")return true;
     auto* document=App::GetApplication().getActiveDocument();if(!document)return false;
-    if(id(command)=="Ortho")return Gui::Control().isAllowedAlterView(document);
-    if(id(command)=="Properties")return !Gui::Selection().getSelection(document->getName()).empty()&&Gui::Control().isAllowedAlterSelection(document);
-    return Gui::Control().isAllowedAlterSelection(document);
+    if(id(command)=="Ortho")return om9AlterView(document);
+    if(id(command)=="Properties")return !Gui::Selection().getSelection(document->getName()).empty()&&om9AlterSelection(document);
+    return om9AlterSelection(document);
 }
 void CoreKeyboard::record(const QString& text){if(enabled&&!text.trimmed().isEmpty()){inputs.append("Command: "+text);if(inputs.size()>10000)inputs.removeFirst();}}
 bool CoreKeyboard::submit(const QString& text){const auto command=find(text.trimmed());if(!handles(command))return false;om9_sidebar_record_execution(command,execute(command));return true;}
@@ -95,7 +96,8 @@ void CoreKeyboard::history(){
 }
 void CoreKeyboard::contextMenu(){
     auto* window=Gui::getMainWindow();if(menu){menu->close();delete menu.data();}menu=new QMenu(window);menu->setObjectName("OM9F6Menu");const auto type=selectedType();menu->setProperty("om9SelectionType",type);
-    QFile file(QDir(QString::fromStdString(App::Application::getHomePath())).filePath("Mod/OpenMatrix9/Resources/menu/ContextMenu.xml"));QDomDocument source;if(file.open(QIODevice::ReadOnly))source.setContent(&file);
+    const auto root=qEnvironmentVariable("OM9_PLUGIN_ROOT");
+    QFile file(root.isEmpty()?QDir(QString::fromStdString(App::Application::getHomePath())).filePath("Mod/OpenMatrix9/Resources/menu/ContextMenu.xml"):QDir(root).filePath("Resources/menu/ContextMenu.xml"));QDomDocument source;if(file.open(QIODevice::ReadOnly))source.setContent(&file);
     const QStringList names={"General","Curve","Gem","Surface","T-Splines","User","Report","Materials"};const QStringList modes={"ObjectActions","CurveLayout","GemLayout","SurfaceModeling","TSplines","User","Report","Materials"};
     const auto groups=source.elementsByTagName("ObjectContextMenuGroup");
     for(int mode=0;mode<names.size();++mode){auto* submenu=menu->addMenu(names[mode]);QDomElement chosen;

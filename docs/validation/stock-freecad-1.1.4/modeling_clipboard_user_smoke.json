@@ -1,0 +1,393 @@
+{
+  "checks": [
+    {
+      "name": "clipboard commands registered",
+      "passed": true
+    },
+    {
+      "name": "menu Copy native Windows format",
+      "passed": true
+    },
+    {
+      "name": "Copy leaves source geometry and object count unchanged",
+      "passed": true
+    },
+    {
+      "name": "Copy keeps GUI event loop alive",
+      "passed": true
+    },
+    {
+      "name": "clipboard includes only current selected objects",
+      "passed": true
+    },
+    {
+      "name": "menu Paste creates independent editable objects",
+      "passed": true
+    },
+    {
+      "name": "current placement survives Copy and source close",
+      "passed": true
+    },
+    {
+      "name": "Command Paste shares handler and creates fresh UUIDs",
+      "passed": true
+    },
+    {
+      "name": "one Undo removes one Paste",
+      "passed": true
+    },
+    {
+      "name": "Redo restores whole Paste",
+      "passed": true
+    },
+    {
+      "name": "Command Copy has two current native selected objects",
+      "passed": true
+    },
+    {
+      "name": "Command Copy shares native format",
+      "passed": true
+    },
+    {
+      "name": "Command Copy contains two selected geometry records",
+      "passed": true
+    },
+    {
+      "name": "unsupported Copy fails before publication",
+      "passed": true
+    },
+    {
+      "name": "failed Copy preserves clipboard",
+      "passed": true
+    },
+    {
+      "name": "text path is not imported",
+      "passed": true
+    },
+    {
+      "name": "failed Paste leaves document unchanged",
+      "passed": true
+    },
+    {
+      "name": "truncated archive fails before commit",
+      "passed": true
+    },
+    {
+      "name": "truncated archive leaves document unchanged",
+      "passed": true
+    },
+    {
+      "name": "Command input keeps text shortcuts",
+      "passed": true
+    },
+    {
+      "name": "Ctrl+C in text field copies text",
+      "passed": true
+    },
+    {
+      "name": "viewport shortcut context exists",
+      "passed": true
+    },
+    {
+      "name": "viewport focus ready before shortcut",
+      "passed": true
+    },
+    {
+      "name": "viewport Ctrl+V uses modeling Paste",
+      "passed": true
+    },
+    {
+      "name": "FCStd reopen survives clipboard/staging deletion",
+      "passed": true
+    },
+    {
+      "name": "clipboard unavailable after clear",
+      "passed": true
+    }
+  ],
+  "pid": 14984,
+  "fixture_measurements": {
+    "fixture_ready": [
+      {
+        "seconds": 0.11572960001649335,
+        "sequence": 20460,
+        "bytes": 35252
+      },
+      {
+        "seconds": 0.14157140004681423,
+        "sequence": 20473,
+        "bytes": 35252
+      }
+    ]
+  },
+  "command_copy_selection": [
+    "RhinoObject002",
+    "RhinoObject003"
+  ],
+  "command_copy_records": 2,
+  "filter_installed": true,
+  "shortcut_focus": "Gui::View3DInventorViewer",
+  "viewers": [
+    {
+      "class": "Gui::View3DInventor",
+      "name": "",
+      "focus_policy": 0
+    },
+    {
+      "class": "Gui::View3DInventorViewer",
+      "name": "",
+      "focus_policy": 11
+    },
+    {
+      "class": "Gui::View3DInventor",
+      "name": "",
+      "focus_policy": 0
+    },
+    {
+      "class": "Gui::View3DInventorViewer",
+      "name": "",
+      "focus_policy": 11
+    },
+    {
+      "class": "Gui::View3DInventor",
+      "name": "",
+      "focus_policy": 0
+    },
+    {
+      "class": "Gui::View3DInventorViewer",
+      "name": "",
+      "focus_policy": 11
+    },
+    {
+      "class": "Gui::View3DInventor",
+      "name": "",
+      "focus_policy": 0
+    },
+    {
+      "class": "Gui::View3DInventorViewer",
+      "name": "",
+      "focus_policy": 11
+    }
+  ],
+  "shortcut_preflight": {
+    "available": true,
+    "busy": false,
+    "transaction": {
+      "document": "ClipboardTarget",
+      "uid": "8428b6f9-4438-4a78-a081-1e8deca20805",
+      "pending": false,
+      "pending_id": 0,
+      "booked_id": 0,
+      "transacting": false,
+      "performing": false
+    },
+    "modal": null,
+    "popup": null
+  },
+  "key_events": [
+    {
+      "type": 51,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "Gui::View3DInventorViewer",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 51,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "QGraphicsScene",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 51,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "QStackedWidget",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 51,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "Gui::View3DInventor",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 51,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "QMdiSubWindow",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 51,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "QWidget",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 51,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "QMdiArea",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 51,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "Gui::MainWindow",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 6,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "Gui::View3DInventorViewer",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 6,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "QGraphicsScene",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 6,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "QStackedWidget",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 6,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "Gui::View3DInventor",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 6,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "QMdiSubWindow",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 6,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "QWidget",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 6,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "QMdiArea",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 6,
+      "key": 16777249,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "Gui::MainWindow",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 51,
+      "key": 86,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "Gui::View3DInventorViewer",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    },
+    {
+      "type": 6,
+      "key": 86,
+      "modifiers": 67108864,
+      "context": true,
+      "receiver": "Gui::View3DInventorViewer",
+      "focus": "Gui::View3DInventorViewer",
+      "busy": false,
+      "auto_repeat": false
+    }
+  ],
+  "shortcut": {
+    "before_count": 4,
+    "after_count": 6,
+    "native_stderr": "",
+    "last_result": {
+      "operation": "Paste",
+      "seconds": 0.1341287000104785,
+      "ok": true,
+      "clipboard": {
+        "evidence": 1,
+        "geometry_bytes": 35252,
+        "geometry_file": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\modeling_clipboard_user_smoke-e75d64086f85462aaa9d5dc8a21449ea\\temp\\om9-clipboard-paste-_grlwazn\\clipboard.3dm",
+        "geometry_version": 50,
+        "metadata_bytes": 0,
+        "metadata_file": null,
+        "scope": 0,
+        "version": 1
+      }
+    }
+  },
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\runtime\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+  "payload_bytes": 35222,
+  "payload_sha256": "0de6de97e2ec5948a7d4b9f18bfaecb6e342e2333dd6cca165102750898a36db"
+}

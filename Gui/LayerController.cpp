@@ -32,9 +32,9 @@ std::vector<std::string> selected(App::Document& doc) {
 }
 bool editable(App::Document& doc) {
     auto* gui=Gui::Application::Instance->getDocument(&doc);
-    return gui && !gui->getInEdit() && Gui::Control().isAllowedAlterDocument(&doc)
-        && !doc.hasPendingTransaction() && doc.getBookedTransactionID()==0
-        && App::GetApplication().getGlobalTransaction()==0 && !doc.isPerformingTransaction();
+    return gui && !gui->getInEdit() && om9AlterDocument(&doc)
+        && !doc.hasPendingTransaction() && om9BookedTransaction(doc)==0
+        && om9GlobalTransaction()==0 && !doc.isPerformingTransaction();
 }
 QString quoted(const QString& path) {
     const auto json=QString::fromUtf8(QJsonDocument(QJsonArray{path}).toJson(QJsonDocument::Compact));

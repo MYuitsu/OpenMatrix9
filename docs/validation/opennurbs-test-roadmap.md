@@ -173,3 +173,8 @@ Final Phase3 batch15: PASS, no stopped cases. Exact native mass/bounds/topology 
 Matrix Rust palette gate `matrix-rust-palette-native-gate-20261010`: one prepared native batch, five geometry fixtures (two Matrix + three OM9), full palettes/empty/nested layers and two injected failure stages. Preparation Rust9 + managed ABI + IronPython3/harness10 PASS, not native acceptance. Recovery30c4 actual PASS removed five objects/30 layers, preserved observed34 layers. Seven broader packages remain unclosed; complete future batch count unknown. [Preparation](layer-session/matrix-rust-palette-preparation.json).
 
 Native matrix-rust-palette-native-gate-20261010 accepted for user-approved OM9-only Undo scope: all16 checks PASS on run7c9, summary cache bug reproduced/fixed. Original report preserved and acceptance recorded separately. Original layer-session Tasks1-5/primary UI deployment and broader packages remain incomplete. [Proof](layer-session/palette-native-acceptance.json).
+
+
+## Stock FreeCAD 1.1.4 compatibility — 2026-10-10
+
+10 native runtime reports, 217 checks passed, including eight BRep fixtures. No fresh Rhino/Matrix cases. Full exchange remains incomplete; seven packages remain open/in progress, and the total future batch count remains unknown. Release packaging and user-folder discovery are the next verification steps. See [evidence](2026-10-10-stock-freecad-1.1.4.md).
