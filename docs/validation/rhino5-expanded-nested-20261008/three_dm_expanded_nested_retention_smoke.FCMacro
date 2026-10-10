@@ -1,0 +1,48 @@
+"""Expanded single-span nested UV: selected V5 and portable native source."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm, ThreeDmArchiveState as state, OpenMatrix9Gui as native
+        root=Path('H:/FreeCAD-src/build/opennurbs-expanded-nested-acceptance-20261008')
+        oracle=json.loads((root/'oracle.json').read_text())
+        for case in oracle['cases']:
+            label=case['fixture'];original=(root/label).read_bytes();source=out/label;source.write_bytes(original)
+            expected=json.loads(native.inspect3dm(str(source)))['records'][0]
+            doc=App.newDocument('NestedUV');obj=ThreeDm.import_file(str(source),doc,mode='preserve')[0]
+            name=obj.Name;baseline=obj.OM9SourceRecord
+            check(label+' exact nested child fields and source identity on preserve import',json.loads(baseline)['curve_on_surface_native']==expected['curve_on_surface_native'] and obj.OM9SourceUUID==expected['source_uuid'] and obj.OM9Capability=='retained')
+            target=out/'selected.3dm';ThreeDm.export_file(str(target),[obj])
+            unchanged=json.loads(native.inspect3dm(str(target)))
+            check(label+' selected V5 retains complete native nested UV profile',unchanged['source_version']==50 and len(unchanged['records'])==1 and unchanged['records'][0]['curve_on_surface_native']==expected['curve_on_surface_native'] and unchanged['records'][0]['source_uuid']==expected['source_uuid'] and obj.OM9SourceRecord==baseline)
+            doc.openTransaction('Move nested native source');obj.OM9BlockMemberPlacement=App.Placement(App.Vector(2,3,4),App.Rotation());doc.commitTransaction()
+            staged=out/('staged-'+label);native.writeGeometryStaging3dm(json.dumps(state.preservation_request([obj],str(out))),str(staged))
+            decoded=json.loads(native.inspect3dm(str(staged)))['records'][0]['curve_on_surface_native']
+            check(label+' coupled model placement retains exact nested UV child',decoded['parameter']==expected['curve_on_surface_native']['parameter'] and obj.OM9SourceRecord==baseline)
+            ThreeDm.export_file(str(target),[obj]);moved=json.loads(native.inspect3dm(str(target)))['records'][0]['curve_on_surface_native']
+            check(label+' public moved V5 profile matches exact staged native tree',moved==decoded)
+            doc.undo();check(label+' Undo restores native placement',obj.OM9BlockMemberPlacement.Base.Length==0)
+            doc.redo();check(label+' Redo restores native placement',(obj.OM9BlockMemberPlacement.Base-App.Vector(2,3,4)).Length==0)
+            copy=doc.copyObject(obj,False);ThreeDm.export_file(str(target),[obj,copy]);copies=json.loads(native.inspect3dm(str(target)))['records']
+            check(label+' independent copies keep complete nested fields and separate UUIDs',len(copies)==2 and len({row['source_uuid'] for row in copies})==2 and all(row['curve_on_surface_native']==moved for row in copies))
+            doc.removeObject(obj.Name);obj=copy;name=obj.Name;ThreeDm.export_file(str(target),[obj]);copy_row=json.loads(native.inspect3dm(str(target)))['records'][0]
+            check(label+' deleting original retains independent native copy identity',copy_row['curve_on_surface_native']==moved and copy_row['source_uuid']!=expected['source_uuid'])
+            saved=out/(label+'.FCStd');doc.saveAs(str(saved));source.unlink();App.closeDocument(doc.Name)
+            doc=App.openDocument(str(saved));obj=doc.getObject(name)
+            check(label+' source-deleted FCStd preserves nested graph and native placement',Path(obj.OM9ArchiveOwner.OM9SourceArchive).read_bytes()==original and obj.OM9SourceRecord==baseline and (obj.OM9BlockMemberPlacement.Base-App.Vector(2,3,4)).Length==0)
+            ThreeDm.export_file(str(target),[obj]);reopened=json.loads(native.inspect3dm(str(target)))['records'][0]
+            result.setdefault('copy_restore_comparison',{})[label]=dict(before=copy_row,after=reopened,host_name=obj.Name,source_host_id=obj.OM9SourceHostID,namespace=obj.OM9ImportNamespace)
+            check(label+' restored independent copy exports identical nested native values and UUID',reopened['curve_on_surface_native']==moved and reopened['source_uuid']==copy_row['source_uuid'])
+            App.closeDocument(doc.Name)
+        result['ok']=True
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

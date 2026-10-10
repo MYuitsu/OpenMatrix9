@@ -1,0 +1,67 @@
+"""Actual retained source payload/native inventory proof; collector scope still pending."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def reject(work):
+    try:work()
+    except RuntimeError:return True
+    return False
+def run():
+    try:
+        import OpenMatrix9Gui as native,ThreeDm
+        check('native source provenance API exists',hasattr(native,'verifySourceArchive3dm'))
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        fixture=Path(native.__file__).parents[2]/'layer-abi'/'retained-layer-fixtures'/'retained-layer-block.3dm'
+        doc=App.newDocument('SourceProvenance');doc.UndoMode=1
+        roots=ThreeDm.import_file(str(fixture),doc,mode='preserve')
+        owner=next(obj for obj in doc.Objects if 'OM9ArchiveMode' in obj.PropertiesList)
+        before=[obj.Name for obj in doc.Objects];manifest=owner.OM9ArchiveManifest;digest=owner.OM9SourceArchiveDigest
+        from ThreeDmStorage import path as payload_path
+        actual=json.loads(native.inspect3dm(payload_path(owner,'OM9SourceArchive',512*1024*1024),json.loads(manifest)['scale_mm']))
+        (out/'stored-manifest.json').write_text(manifest)
+        (out/'native-manifest.json').write_text(json.dumps(actual,indent=2))
+        verified=json.loads(native.verifySourceArchive3dm(doc.Name,owner))
+        check('actual native source inventory matches stored full manifest',verified==json.loads(manifest))
+        check('native proof keeps actual block definition and member',any(row['class_name']=='ON_InstanceDefinition' for row in verified['components']) and any(row['role']=='definition-member' for row in verified['records']))
+        check('proof changes no document objects or source properties',before==[obj.Name for obj in doc.Objects] and manifest==owner.OM9ArchiveManifest and digest==owner.OM9SourceArchiveDigest)
+        owner.addProperty('Part::PropertyPartShape','Shape','Injected payload')
+        check('archive owner augmented with geometry is rejected',reject(lambda:native.verifySourceArchive3dm(doc.Name,owner)))
+        owner.removeProperty('Shape')
+        owner.addProperty('App::PropertyVectorList','UnexpectedPoints','Injected payload')
+        check('archive owner augmented with unknown heavy fields is rejected',reject(lambda:native.verifySourceArchive3dm(doc.Name,owner)))
+        owner.removeProperty('UnexpectedPoints')
+        forged_owner=doc.addObject('Part::Feature','ForgedSourceOwner')
+        for name in owner.PropertiesList:
+            if name.startswith('OM9'):
+                forged_owner.addProperty(owner.getTypeIdOfProperty(name),name,'Copied source')
+                setattr(forged_owner,name,getattr(owner,name))
+        check('native owner type cannot be replaced by copied source markers',reject(lambda:native.verifySourceArchive3dm(doc.Name,forged_owner)))
+        doc.removeObject(forged_owner.Name)
+        owner.OM9SourceArchiveDigest='0'*64
+        check('changed payload digest rejects before inventory trust',reject(lambda:native.verifySourceArchive3dm(doc.Name,owner)))
+        owner.OM9SourceArchiveDigest=digest
+        forged=json.loads(manifest);forged['records'][0]['source_uuid']='11111111-1111-4111-8111-111111111111';owner.OM9ArchiveManifest=json.dumps(forged)
+        check('forged manifest with unchanged source hash rejects',reject(lambda:native.verifySourceArchive3dm(doc.Name,owner)))
+        owner.OM9ArchiveManifest=manifest
+        chunks=list(owner.OM9SourceArchiveChunks);owner.OM9SourceArchiveChunks=['AAAA====']
+        check('malformed native encoded payload rejects',reject(lambda:native.verifySourceArchive3dm(doc.Name,owner)))
+        owner.OM9SourceArchiveChunks=chunks
+        owner.OM9ArchiveHash='0'*64
+        check('separate archive hash must match payload identity',reject(lambda:native.verifySourceArchive3dm(doc.Name,owner)))
+        owner.OM9ArchiveHash=digest
+        check('restored source identity verifies again',json.loads(native.verifySourceArchive3dm(doc.Name,owner))==verified)
+        name=owner.Name;file=out/'source.FCStd';doc.saveAs(str(file));App.closeDocument(doc.Name);doc=App.openDocument(str(file));owner=doc.getObject(name)
+        check('FCStd retained payload reopens and verifies without original temp cache',json.loads(native.verifySourceArchive3dm(doc.Name,owner))==verified)
+        other=App.newDocument('ForeignProvenance')
+        check('foreign native owner cannot be rebound by document name',reject(lambda:native.verifySourceArchive3dm(other.Name,owner)))
+        report.update(ok=True,module=native.__file__,scope='source bytes/native inventory trust only; retained collector/Session routing pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

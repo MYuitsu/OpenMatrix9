@@ -1,0 +1,494 @@
+-- The C compiler identification is MSVC 19.44.35208.0
+-- The CXX compiler identification is MSVC 19.44.35208.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- OM9 audited PolyEdgeSegment Read reversed flag repair; original SDK source unchanged
+-- OM9 audited CurveOnSurface child Read repair for opennurbsStatic; original SDK source unchanged
+-- OM9 audited resource-free Rhino5 RDK3 writer; original SDK source unchanged
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - not found
+-- Found Threads: TRUE
+-- Performing Test HAVE_STDATOMIC
+-- Performing Test HAVE_STDATOMIC - Success
+-- Found WrapAtomic: TRUE
+-- Configuring done (2.2s)
+-- Generating done (0.2s)
+-- Build files have been written to: H:/FreeCAD-src/build/om9-perf-native
+[0/2] Re-checking globbed directories...
+[1/347] Building C object _deps\om9_opennurbs-build\zlib\CMakeFiles\zlib.dir\uncompr.c.obj
+[2/347] Building C object _deps\om9_opennurbs-build\zlib\CMakeFiles\zlib.dir\compress.c.obj
+[3/347] Building C object _deps\om9_opennurbs-build\zlib\CMakeFiles\zlib.dir\zutil.c.obj
+[4/347] Building C object _deps\om9_opennurbs-build\zlib\CMakeFiles\zlib.dir\crc32.c.obj
+[5/347] Building C object _deps\om9_opennurbs-build\zlib\CMakeFiles\zlib.dir\inffast.c.obj
+[6/347] Building C object _deps\om9_opennurbs-build\zlib\CMakeFiles\zlib.dir\inftrees.c.obj
+[7/347] Building C object _deps\om9_opennurbs-build\zlib\CMakeFiles\zlib.dir\trees.c.obj
+[8/347] Building C object _deps\om9_opennurbs-build\zlib\CMakeFiles\zlib.dir\deflate.c.obj
+[9/347] Building C object _deps\om9_opennurbs-build\zlib\CMakeFiles\zlib.dir\adler32.c.obj
+[10/347] Building C object _deps\om9_opennurbs-build\zlib\CMakeFiles\zlib.dir\infback.c.obj
+[11/347] Building C object _deps\om9_opennurbs-build\zlib\CMakeFiles\zlib.dir\inflate.c.obj
+[12/347] Linking C static library _deps\om9_opennurbs-build\zlib\zlib.lib
+[13/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\cmake_pch.cxx.obj
+[14/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_3dm_attributes.cpp.obj
+[15/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMeshes.cpp.obj
+[16/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_3dm_properties.cpp.obj
+[17/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmSurfaces.cpp.obj
+H:\FreeCAD-src\.pixi\envs\default\Library\include\opencascade\TColgp_Array2OfPnt.hxx(27): warning: TColgp_Array2OfPnt.hxx is deprecated since OCCT 8.0.0. Use NCollection_Array2<gp_Pnt> directly.
+H:\FreeCAD-src\.pixi\envs\default\Library\include\opencascade\TColStd_Array2OfReal.hxx(26): warning: TColStd_Array2OfReal.hxx is deprecated since OCCT 8.0.0. Use NCollection_Array2<double> directly.
+H:\FreeCAD-src\.pixi\envs\default\Library\include\opencascade\TColStd_Array1OfReal.hxx(26): warning: TColStd_Array1OfReal.hxx is deprecated since OCCT 8.0.0. Use NCollection_Array1<double> directly.
+H:\FreeCAD-src\.pixi\envs\default\Library\include\opencascade\TColStd_Array1OfInteger.hxx(27): warning: TColStd_Array1OfInteger.hxx is deprecated since OCCT 8.0.0. Use NCollection_Array1<int> directly.
+[18/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmCurves.cpp.obj
+H:\FreeCAD-src\.pixi\envs\default\Library\include\opencascade\TColgp_Array1OfPnt.hxx(27): warning: TColgp_Array1OfPnt.hxx is deprecated since OCCT 8.0.0. Use NCollection_Array1<gp_Pnt> directly.
+H:\FreeCAD-src\.pixi\envs\default\Library\include\opencascade\TColgp_Array1OfPnt2d.hxx(27): warning: TColgp_Array1OfPnt2d.hxx is deprecated since OCCT 8.0.0. Use NCollection_Array1<gp_Pnt2d> directly.
+H:\FreeCAD-src\.pixi\envs\default\Library\include\opencascade\TColStd_Array1OfReal.hxx(26): warning: TColStd_Array1OfReal.hxx is deprecated since OCCT 8.0.0. Use NCollection_Array1<double> directly.
+H:\FreeCAD-src\.pixi\envs\default\Library\include\opencascade\TColStd_Array1OfInteger.hxx(27): warning: TColStd_Array1OfInteger.hxx is deprecated since OCCT 8.0.0. Use NCollection_Array1<int> directly.
+[19/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_apple_nsfont.cpp.obj
+[20/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_arc.cpp.obj
+[21/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_3dm_settings.cpp.obj
+[22/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_annotationbase.cpp.obj
+[23/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_arccurve.cpp.obj
+[24/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_archive_manifest.cpp.obj
+[25/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_base32.cpp.obj
+[26/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_base64.cpp.obj
+[27/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_archivable_dictionary.cpp.obj
+[28/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_array.cpp.obj
+[29/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_archive.cpp.obj
+[30/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_bitmap.cpp.obj
+ --- OpenNURBS including Windows BITMAPINFO support in ON_WindowsBitmap
+[31/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmThreadPool.cpp.obj
+[32/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_beziervolume.cpp.obj
+[33/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_bezier.cpp.obj
+[34/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_beam.cpp.obj
+[35/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_box.cpp.obj
+[36/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_brep_extrude.cpp.obj
+[37/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_bounding_box.cpp.obj
+[38/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_brep_isvalid.cpp.obj
+[39/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_brep_io.cpp.obj
+[40/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_brep_v2valid.cpp.obj
+[41/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_brep_region.cpp.obj
+[42/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_calculator.cpp.obj
+[43/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_circle.cpp.obj
+[44/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmBrep.cpp.obj
+H:\FreeCAD-src\.pixi\envs\default\Library\include\opencascade\TopTools_IndexedMapOfShape.hxx(28): warning: TopTools_IndexedMapOfShape.hxx is deprecated since OCCT 8.0.0. Use NCollection_IndexedMap<TopoDS_Shape, TopTools_ShapeMapHasher> directly.
+H:\FreeCAD-src\.pixi\envs\default\Library\include\opencascade\TColStd_Array1OfReal.hxx(26): warning: TColStd_Array1OfReal.hxx is deprecated since OCCT 8.0.0. Use NCollection_Array1<double> directly.
+[45/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_brep_tools.cpp.obj
+[46/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_compress.cpp.obj
+[47/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_compstat.cpp.obj
+[48/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_cone.cpp.obj
+[49/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_color.cpp.obj
+[50/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_brep.cpp.obj
+[51/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_crc.cpp.obj
+[52/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\__\__\om9-sdk-repairs\opennurbsStatic\opennurbs_curveonsurface.cpp.obj
+[53/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_curveproxy.cpp.obj
+[54/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_convex_poly.cpp.obj
+[55/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_date.cpp.obj
+[56/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_cylinder.cpp.obj
+[57/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmTransforms.cpp.obj
+[58/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_detail.cpp.obj
+[59/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_defines.cpp.obj
+[60/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_dimensionformat.cpp.obj
+[61/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_curve.cpp.obj
+[62/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmStaging.cpp.obj
+[63/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_ellipse.cpp.obj
+[64/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_decals.cpp.obj
+[65/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmHatch.cpp.obj
+[66/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_dithering.cpp.obj
+[67/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_error.cpp.obj
+[68/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_embedded_file.cpp.obj
+[69/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_error_message.cpp.obj
+[70/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_freetype.cpp.obj
+[71/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_fsp.cpp.obj
+[72/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_function_list.cpp.obj
+[73/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_dimension.cpp.obj
+[74/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_geometry.cpp.obj
+[75/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_evaluate_nurbs.cpp.obj
+[76/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_group.cpp.obj
+[77/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_hash_table.cpp.obj
+[78/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmCurveOnSurface.cpp.obj
+[79/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_dimensionstyle.cpp.obj
+[80/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_ground_plane.cpp.obj
+[81/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmPointCloud.cpp.obj
+[82/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_hatch.cpp.obj
+[83/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_instance.cpp.obj
+[84/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\__\__\om9-sdk-repairs\opennurbsStatic\opennurbs_extensions.cpp.obj
+[85/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_internal_V5_annotation.cpp.obj
+[86/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_intersect.cpp.obj
+[87/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_ipoint.cpp.obj
+[88/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_internal_Vx_annotation.cpp.obj
+[89/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_internal_V5_dimstyle.cpp.obj
+[90/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_light.cpp.obj
+[91/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_layer.cpp.obj
+[92/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_knot.cpp.obj
+[93/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_linear_workflow.cpp.obj
+[94/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_leader.cpp.obj
+[95/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_internal_V2_annotation.cpp.obj
+[96/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_file_utilities.cpp.obj
+[97/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_line.cpp.obj
+[98/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_lock.cpp.obj
+[99/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_linecurve.cpp.obj
+[100/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_linetype.cpp.obj
+[101/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_glyph_outline.cpp.obj
+[102/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_memory_util.cpp.obj
+[103/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_locale.cpp.obj
+[104/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_md5.cpp.obj
+[105/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_lookup.cpp.obj
+[106/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_mesh_topology.cpp.obj
+[107/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_math.cpp.obj
+[108/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmInventory.cpp.obj
+[109/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_model_geometry.cpp.obj
+[110/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_matrix.cpp.obj
+[111/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_mesh_modifiers.cpp.obj
+[112/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_mesh_tools.cpp.obj
+[113/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_morph.cpp.obj
+[114/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_font.cpp.obj
+[115/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_model_component.cpp.obj
+[116/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmArchive.cpp.obj
+[117/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_mesh_ngon.cpp.obj
+[118/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_nurbsvolume.cpp.obj
+[119/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_objref.cpp.obj
+[120/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_optimize.cpp.obj
+[121/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_parse_angle.cpp.obj
+[122/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_object.cpp.obj
+[123/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_nurbscurve.cpp.obj
+[124/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_offsetsurface.cpp.obj
+[125/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_parse_length.cpp.obj
+[126/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_nurbssurface.cpp.obj
+[127/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_parse_point.cpp.obj
+[128/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_parse_number.cpp.obj
+[129/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_plane.cpp.obj
+[130/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_pluginlist.cpp.obj
+[131/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_parse_settings.cpp.obj
+[132/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_object_history.cpp.obj
+[133/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_photogrammetry.cpp.obj
+[134/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_pointgeometry.cpp.obj
+[135/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_pointgrid.cpp.obj
+[136/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_material.cpp.obj
+[137/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_pointcloud.cpp.obj
+[138/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_planesurface.cpp.obj
+[139/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\__\__\om9-sdk-repairs\opennurbsStatic\opennurbs_polyedgecurve.cpp.obj
+[140/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmImportJobs.cpp.obj
+[141/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_polyline.cpp.obj
+[142/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_rand.cpp.obj
+[143/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_progress_reporter.cpp.obj
+[144/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_quaternion.cpp.obj
+[145/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_polylinecurve.cpp.obj
+[146/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_post_effects.cpp.obj
+[147/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_polycurve.cpp.obj
+[148/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_render_channels.cpp.obj
+[149/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_safe_frame.cpp.obj
+[150/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_sleeplock.cpp.obj
+[151/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_sectionstyle.cpp.obj
+[152/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_revsurface.cpp.obj
+[153/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_skylight.cpp.obj
+[154/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_sphere.cpp.obj
+[155/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_sort.cpp.obj
+[156/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_std_string_format.cpp.obj
+[157/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_rtree.cpp.obj
+[158/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_mesh.cpp.obj
+[159/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_string_scan.cpp.obj
+[160/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_render_content.cpp.obj
+[161/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_sha1.cpp.obj
+[162/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_std_string_utf.cpp.obj
+[163/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_string_format.cpp.obj
+[164/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_string_compare.cpp.obj
+[165/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_string.cpp.obj
+[166/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_string_values.cpp.obj
+[167/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_archive.cpp.obj
+[168/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_point.cpp.obj
+[169/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_copy.cpp.obj
+[170/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_data.cpp.obj
+[171/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_heap.cpp.obj
+[172/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_eval.cpp.obj
+[173/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_iter.cpp.obj
+[174/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_fragment.cpp.obj
+[175/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_sum.cpp.obj
+[176/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_ref.cpp.obj
+[177/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_sector.cpp.obj
+[178/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_ring.cpp.obj
+[179/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_frommesh.cpp.obj
+[180/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_mesh.cpp.obj
+[181/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_sumsurface.cpp.obj
+[182/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_surfaceproxy.cpp.obj
+[183/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_limit.cpp.obj
+[184/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_terminator.cpp.obj
+[185/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_texture.cpp.obj
+[186/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_testclass.cpp.obj
+[187/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_sun.cpp.obj
+[188/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd_matrix.cpp.obj
+[189/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_surface.cpp.obj
+[190/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_textdraw.cpp.obj
+[191/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_statics.cpp.obj
+[192/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_text_style.cpp.obj
+[193/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_symmetry.cpp.obj
+[194/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_topology.cpp.obj
+[195/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_textcontext.cpp.obj
+[196/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_textobject.cpp.obj
+[197/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_textlog.cpp.obj
+[198/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_textglyph.cpp.obj
+[199/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_torus.cpp.obj
+[200/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_textrun.cpp.obj
+[201/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_text.cpp.obj
+[202/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_units.cpp.obj
+[203/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_version.cpp.obj
+[204/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_version_number.cpp.obj
+[205/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_uuid.cpp.obj
+[206/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_unicode_cpsb.cpp.obj
+[207/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_textiterator.cpp.obj
+[208/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_userdata.cpp.obj
+[209/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_workspace.cpp.obj
+[210/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_unicode.cpp.obj
+[211/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_public_memory.cpp.obj
+[212/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_zlib_memory.cpp.obj
+[213/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_zlib.cpp.obj
+[214/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_wstring.cpp.obj
+[215/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_viewport.cpp.obj
+[216/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_xform.cpp.obj
+[217/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_subd.cpp.obj
+[218/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_xml.cpp.obj
+[219/347] Building CXX object _deps\om9_opennurbs-build\CMakeFiles\opennurbsStatic.dir\opennurbs_win_dwrite.cpp.obj
+[220/347] Linking CXX static library _deps\om9_opennurbs-build\opennurbsStatic.lib
+[221/347] Building CXX object CMakeFiles\ThreeDmPhase2PeriodicTests.dir\three_dm_phase2_periodic.cpp.obj
+[222/347] Building CXX object CMakeFiles\ThreeDmImportFailureWorker.dir\three_dm_import_failure_worker.cpp.obj
+[223/347] Building CXX object CMakeFiles\ThreeDmThreadPoolTests.dir\three_dm_thread_pool.cpp.obj
+[224/347] Building CXX object CMakeFiles\ThreeDmImportWorkerFixture.dir\three_dm_import_worker_fixture.cpp.obj
+[225/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmSolidShells.cpp.obj
+H:\FreeCAD-src\.pixi\envs\default\Library\include\opencascade\TopTools_IndexedMapOfShape.hxx(28): warning: TopTools_IndexedMapOfShape.hxx is deprecated since OCCT 8.0.0. Use NCollection_IndexedMap<TopoDS_Shape, TopTools_ShapeMapHasher> directly.
+[226/347] Building CXX object CMakeFiles\ThreeDmModelingExchangeTests.dir\three_dm_modeling_exchange.cpp.obj
+[227/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmHatchLoops.cpp.obj
+[228/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmClassRegistry.cpp.obj
+[229/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmCurveOnSurfaceSchema.cpp.obj
+[230/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmTrimMapping.cpp.obj
+[231/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmHatchLoopEdit.cpp.obj
+[232/347] Building CXX object CMakeFiles\ThreeDmOvalDisplayDiagnostic.dir\three_dm_oval_display.cpp.obj
+[233/347] Building CXX object CMakeFiles\OM9ThreeDm.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmNativeReferences.cpp.obj
+[234/347] Linking CXX static library OM9ThreeDm.lib
+[235/347] Building CXX object CMakeFiles\CadWireDensityFixture.dir\cad_wire_density_fixture.cpp.obj
+[236/347] Building CXX object CMakeFiles\ThreeDmTrimMappingTests.dir\three_dm_trim_mapping.cpp.obj
+[237/347] Building CXX object CMakeFiles\ThreeDmCoverageTests.dir\three_dm_coverage.cpp.obj
+[238/347] Generating rust-target/release/openmatrix9_rust.lib
+   Compiling openmatrix9_rust v0.1.0 (H:\FreeCAD-src\build\om9-perf-dev\rust)
+    Finished `release` profile [optimized] target(s) in 10.53s
+[239/347] Building CXX object CMakeFiles\ThreeDmReferenceTargetTests.dir\three_dm_reference_target.cpp.obj
+[240/347] Building CXX object CMakeFiles\ThreeDmSurfaceCurveTargetMatrixTests.dir\three_dm_surface_curve_target_matrix.cpp.obj
+[241/347] Building CXX object CMakeFiles\ThreeDmSourceOrientationTests.dir\three_dm_source_orientation.cpp.obj
+[242/347] Building CXX object CMakeFiles\ThreeDmMultiShellTests.dir\three_dm_multishell.cpp.obj
+[243/347] Building CXX object CMakeFiles\ThreeDmCurvedShellsTests.dir\three_dm_curved_shells.cpp.obj
+[244/347] Building CXX object CMakeFiles\ThreeDmBoundsDiagnostic.dir\three_dm_bounds_diagnostic.cpp.obj
+[245/347] Building CXX object CMakeFiles\ThreeDmRingPrecisionTests.dir\three_dm_ring_precision.cpp.obj
+[246/347] Building CXX object CMakeFiles\ThreeDmTrimDomainTests.dir\three_dm_trim_domains.cpp.obj
+[247/347] Building CXX object CMakeFiles\ThreeDmNativeReferenceResolutionTests.dir\three_dm_native_reference_resolution.cpp.obj
+[248/347] Building CXX object CMakeFiles\ThreeDmReferenceGraphIntegrityTests.dir\three_dm_reference_graph_integrity.cpp.obj
+[249/347] Building CXX object CMakeFiles\ThreeDmStandaloneReferenceTests.dir\three_dm_standalone_references.cpp.obj
+[250/347] Building CXX object CMakeFiles\ThreeDmGeometryTests.dir\three_dm_geometry.cpp.obj
+[251/347] Building CXX object CMakeFiles\ThreeDmMixedReferenceTargetTests.dir\three_dm_mixed_reference_target.cpp.obj
+[252/347] Building CXX object CMakeFiles\ThreeDmSeamRhino5Tests.dir\three_dm_seam_rhino.cpp.obj
+[253/347] Building CXX object CMakeFiles\ThreeDmRingTests.dir\three_dm_ring.cpp.obj
+[254/347] Building CXX object CMakeFiles\Phase2RustAbiTests.dir\phase2_rust_abi.cpp.obj
+[255/347] Building CXX object CMakeFiles\ThreeDmMixedReferenceTests.dir\three_dm_mixed_references.cpp.obj
+[256/347] Building CXX object CMakeFiles\ThreeDmBlockTests.dir\three_dm_blocks.cpp.obj
+[257/347] Building CXX object CMakeFiles\ThreeDmSeamTrimRhino5Tests.dir\three_dm_seam_trim_rhino.cpp.obj
+[258/347] Building CXX object CMakeFiles\ThreeDmCurveOnSurfaceArchiveTests.dir\three_dm_curve_on_surface_archive.cpp.obj
+[259/347] Building CXX object CMakeFiles\ThreeDmCurveOnSurfaceTransformTests.dir\three_dm_curve_on_surface_transform.cpp.obj
+[260/347] Building CXX object CMakeFiles\ThreeDmArchiveTests.dir\three_dm_archive.cpp.obj
+[261/347] Building CXX object CMakeFiles\ThreeDmCurveOnSurfaceSchemaTests.dir\three_dm_curve_on_surface_schema.cpp.obj
+[262/347] Building CXX object CMakeFiles\ThreeDmPreservationTests.dir\three_dm_preservation.cpp.obj
+[263/347] Building CXX object CMakeFiles\ThreeDmCloudGeometryTests.dir\three_dm_cloud_geometry.cpp.obj
+[264/347] Building CXX object CMakeFiles\ThreeDmInventoryTests.dir\three_dm_inventory.cpp.obj
+[265/347] Building CXX object CMakeFiles\ThreeDmUnmeshedTests.dir\three_dm_unmeshed.cpp.obj
+[266/347] Building CXX object CMakeFiles\ThreeDmSeamProfileTests.dir\three_dm_seam_profiles.cpp.obj
+[267/347] Building CXX object CMakeFiles\ThreeDmReferenceRemapTests.dir\three_dm_reference_remap.cpp.obj
+[268/347] Building CXX object CMakeFiles\ThreeDmUvReferenceRhinoTests.dir\three_dm_uv_reference_rhino.cpp.obj
+[269/347] Building CXX object CMakeFiles\ThreeDmUvReferenceRemapTests.dir\three_dm_uv_reference_remap.cpp.obj
+[270/347] Building CXX object CMakeFiles\ThreeDmSeamTrimTests.dir\three_dm_seam_trim_applicability.cpp.obj
+[271/347] Building CXX object CMakeFiles\ThreeDmSurfaceCurveV5Tests.dir\three_dm_surface_curve_v5.cpp.obj
+[272/347] Building CXX object CMakeFiles\ThreeDmNativeTransformTests.dir\three_dm_native_transform.cpp.obj
+[273/347] Building CXX object CMakeFiles\ThreeDmPointCloudTests.dir\three_dm_point_cloud.cpp.obj
+[274/347] Building CXX object CMakeFiles\ThreeDmTextDotTests.dir\three_dm_text_dot.cpp.obj
+[275/347] Building CXX object CMakeFiles\ThreeDmHatchTests.dir\three_dm_hatch.cpp.obj
+[276/347] Building CXX object CMakeFiles\ThreeDmHatchAffineTests.dir\three_dm_hatch_affine.cpp.obj
+[277/347] Building CXX object CMakeFiles\ThreeDmReferenceRemapTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[278/347] Building CXX object CMakeFiles\ThreeDmSeamProfileTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[279/347] Building CXX object CMakeFiles\ThreeDmUvReferenceRemapTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[280/347] Building CXX object CMakeFiles\ThreeDmUvReferenceRhinoTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[281/347] Building CXX object CMakeFiles\ThreeDmSeamTrimTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[282/347] Building CXX object CMakeFiles\ThreeDmMergeTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[283/347] Building CXX object CMakeFiles\ThreeDmSurfaceCurveV5Tests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[284/347] Linking CXX executable Phase2RustAbiTests.exe
+[285/347] Linking CXX executable ThreeDmPhase2PeriodicTests.exe
+[286/347] Building CXX object CMakeFiles\ThreeDmHatchCurrentTests.dir\three_dm_hatch_current.cpp.obj
+[287/347] Linking CXX executable ThreeDmThreadPoolTests.exe
+[288/347] Linking CXX executable ThreeDmImportFailureWorker.exe
+[289/347] Linking CXX executable ThreeDmImportWorkerFixture.exe
+[290/347] Linking CXX executable ThreeDmModelingExchangeTests.exe
+[291/347] Building CXX object CMakeFiles\ThreeDmNativeTransformTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[292/347] Linking CXX executable ThreeDmOvalDisplayDiagnostic.exe
+[293/347] Linking CXX executable ThreeDmCoverageTests.exe
+[294/347] Linking CXX executable CadWireDensityFixture.exe
+[295/347] Linking CXX executable ThreeDmTrimMappingTests.exe
+[296/347] Building CXX object CMakeFiles\ThreeDmTextDotTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[297/347] Linking CXX executable ThreeDmMultiShellTests.exe
+[298/347] Building CXX object CMakeFiles\ThreeDmHatchLoopTests.dir\three_dm_hatch_loops.cpp.obj
+[299/347] Linking CXX executable ThreeDmReferenceTargetTests.exe
+[300/347] Linking CXX executable ThreeDmSurfaceCurveTargetMatrixTests.exe
+[301/347] Building CXX object CMakeFiles\ThreeDmHatchLoopEditTests.dir\three_dm_hatch_loop_edit.cpp.obj
+[302/347] Linking CXX executable ThreeDmCurvedShellsTests.exe
+[303/347] Linking CXX executable ThreeDmRingPrecisionTests.exe
+[304/347] Linking CXX executable ThreeDmSourceOrientationTests.exe
+[305/347] Building CXX object CMakeFiles\ThreeDmPointCloudTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[306/347] Linking CXX executable ThreeDmBoundsDiagnostic.exe
+[307/347] Linking CXX executable ThreeDmTrimDomainTests.exe
+[308/347] Linking CXX executable ThreeDmReferenceGraphIntegrityTests.exe
+[309/347] Linking CXX executable ThreeDmNativeReferenceResolutionTests.exe
+[310/347] Linking CXX executable ThreeDmStandaloneReferenceTests.exe
+[311/347] Linking CXX executable ThreeDmMixedReferenceTargetTests.exe
+[312/347] Linking CXX executable ThreeDmMixedReferenceTests.exe
+[313/347] Linking CXX executable ThreeDmReferenceRemapTests.exe
+[314/347] Linking CXX executable ThreeDmSeamProfileTests.exe
+[315/347] Linking CXX executable ThreeDmSeamRhino5Tests.exe
+[316/347] Linking CXX executable ThreeDmUvReferenceRemapTests.exe
+[317/347] Linking CXX executable ThreeDmSeamTrimTests.exe
+[318/347] Linking CXX executable ThreeDmCurveOnSurfaceSchemaTests.exe
+[319/347] Linking CXX executable ThreeDmUvReferenceRhinoTests.exe
+[320/347] Linking CXX executable ThreeDmSeamTrimRhino5Tests.exe
+[321/347] Linking CXX executable ThreeDmGeometryTests.exe
+[322/347] Linking CXX executable ThreeDmCurveOnSurfaceArchiveTests.exe
+[323/347] Linking CXX executable ThreeDmCurveOnSurfaceTransformTests.exe
+[324/347] Linking CXX executable ThreeDmSurfaceCurveV5Tests.exe
+[325/347] Building CXX object CMakeFiles\ThreeDmHatchTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[326/347] Linking CXX executable ThreeDmCloudGeometryTests.exe
+[327/347] Linking CXX executable ThreeDmTextDotTests.exe
+[328/347] Linking CXX executable ThreeDmNativeTransformTests.exe
+[329/347] Linking CXX executable ThreeDmPointCloudTests.exe
+[330/347] Linking CXX executable ThreeDmPreservationTests.exe
+[331/347] Linking CXX executable ThreeDmRingTests.exe
+[332/347] Linking CXX executable ThreeDmArchiveTests.exe
+[333/347] Linking CXX executable ThreeDmInventoryTests.exe
+[334/347] Linking CXX executable ThreeDmHatchTests.exe
+[335/347] Linking CXX executable ThreeDmBlockTests.exe
+[336/347] Linking CXX executable ThreeDmUnmeshedTests.exe
+[337/347] Building CXX object CMakeFiles\ThreeDmMergeTests.dir\three_dm_merge.cpp.obj
+[338/347] Building CXX object CMakeFiles\ThreeDmHatchAffineTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[339/347] Linking CXX executable ThreeDmMergeTests.exe
+[340/347] Linking CXX executable ThreeDmHatchAffineTests.exe
+[341/347] Building CXX object CMakeFiles\ThreeDmHatchCurrentTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[342/347] Linking CXX executable ThreeDmHatchCurrentTests.exe
+[343/347] Building CXX object CMakeFiles\ThreeDmHatchLoopTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[344/347] Building CXX object CMakeFiles\ThreeDmHatchLoopEditTests.dir\H_\FreeCAD-src\build\om9-perf-dev\Gui\ThreeDmMerge.cpp.obj
+[345/347] Linking CXX executable ThreeDmHatchLoopTests.exe
+[346/347] Linking CXX executable ThreeDmHatchLoopEditTests.exe
+Test project H:/FreeCAD-src/build/om9-perf-native
+      Start  1: OM9-FILE-012.Phase2RustAbi
+ 1/50 Test  #1: OM9-FILE-012.Phase2RustAbi .......................   Passed    0.03 sec
+      Start  2: OM9-FILE-012.Phase2Periodic
+ 2/50 Test  #2: OM9-FILE-012.Phase2Periodic ......................   Passed    0.36 sec
+      Start  3: OM9-FILE-012.NativeThreadPool
+ 3/50 Test  #3: OM9-FILE-012.NativeThreadPool ....................   Passed   14.27 sec
+      Start  4: OM9-FILE-012.ModelingExchange
+ 4/50 Test  #4: OM9-FILE-012.ModelingExchange ....................   Passed    0.69 sec
+      Start  5: OM9-FILE-012.CoverageRuntime
+ 5/50 Test  #5: OM9-FILE-012.CoverageRuntime .....................   Passed    0.47 sec
+      Start  6: OM9-FILE-012.TrimInteriorMapping
+ 6/50 Test  #6: OM9-FILE-012.TrimInteriorMapping .................   Passed    0.48 sec
+      Start  7: OM9-FILE-012.MultiShellSolid
+ 7/50 Test  #7: OM9-FILE-012.MultiShellSolid .....................   Passed    3.33 sec
+      Start  8: OM9-FILE-012.CoherentReferenceTarget
+ 8/50 Test  #8: OM9-FILE-012.CoherentReferenceTarget .............   Passed    0.50 sec
+      Start  9: OM9-FILE-012.SurfaceCurveTargetMatrix
+ 9/50 Test  #9: OM9-FILE-012.SurfaceCurveTargetMatrix ............   Passed    1.14 sec
+      Start 10: OM9-FILE-012.CurvedShells
+10/50 Test #10: OM9-FILE-012.CurvedShells ........................   Passed    1.46 sec
+      Start 11: OM9-FILE-012.SourceRingOrientation
+11/50 Test #11: OM9-FILE-012.SourceRingOrientation ...............   Passed   12.66 sec
+      Start 12: OM9-FILE-012.SignedSolidOrientation
+12/50 Test #12: OM9-FILE-012.SignedSolidOrientation ..............   Passed    2.26 sec
+      Start 13: OM9-FILE-012.RevolutionParameterization
+13/50 Test #13: OM9-FILE-012.RevolutionParameterization ..........   Passed    2.28 sec
+      Start 14: OM9-FILE-012.TrimDomains
+14/50 Test #14: OM9-FILE-012.TrimDomains .........................   Passed    0.67 sec
+      Start 15: OM9-FILE-012.ReferenceGraphIntegrity
+15/50 Test #15: OM9-FILE-012.ReferenceGraphIntegrity .............   Passed    0.54 sec
+      Start 16: OM9-FILE-012.NativeReferenceResolution
+16/50 Test #16: OM9-FILE-012.NativeReferenceResolution ...........   Passed    0.56 sec
+      Start 17: OM9-FILE-012.StandaloneReferences
+17/50 Test #17: OM9-FILE-012.StandaloneReferences ................   Passed    1.24 sec
+      Start 18: OM9-FILE-012.MixedReferences
+18/50 Test #18: OM9-FILE-012.MixedReferences .....................   Passed    0.78 sec
+      Start 19: OM9-FILE-012.ReferenceRemap
+19/50 Test #19: OM9-FILE-012.ReferenceRemap ......................   Passed   10.13 sec
+      Start 20: OM9-FILE-012.SeamProfiles
+20/50 Test #20: OM9-FILE-012.SeamProfiles ........................   Passed    0.50 sec
+      Start 21: OM9-FILE-012.SeamRhino5
+21/50 Test #21: OM9-FILE-012.SeamRhino5 ..........................   Passed    0.51 sec
+      Start 22: OM9-FILE-012.UvReferenceRemap
+22/50 Test #22: OM9-FILE-012.UvReferenceRemap ....................   Passed    1.14 sec
+      Start 23: OM9-FILE-012.UvReferenceRhino5
+23/50 Test #23: OM9-FILE-012.UvReferenceRhino5 ...................   Passed    0.50 sec
+      Start 24: OM9-FILE-012.SeamTrimApplicability
+24/50 Test #24: OM9-FILE-012.SeamTrimApplicability ...............   Passed    0.68 sec
+      Start 25: OM9-FILE-012.SeamTrimRhino5
+25/50 Test #25: OM9-FILE-012.SeamTrimRhino5 ......................   Passed    0.74 sec
+      Start 26: OM9-FILE-012.CurveOnSurfaceSchema
+26/50 Test #26: OM9-FILE-012.CurveOnSurfaceSchema ................   Passed    0.55 sec
+      Start 27: OM9-FILE-012.CurveOnSurfaceTransform.Nurbs
+27/50 Test #27: OM9-FILE-012.CurveOnSurfaceTransform.Nurbs .......   Passed    0.48 sec
+      Start 28: OM9-FILE-012.CurveOnSurfaceTransform.Plane
+28/50 Test #28: OM9-FILE-012.CurveOnSurfaceTransform.Plane .......   Passed    0.43 sec
+      Start 29: OM9-FILE-012.CurveOnSurfaceTransform.Rev
+29/50 Test #29: OM9-FILE-012.CurveOnSurfaceTransform.Rev .........   Passed    0.45 sec
+      Start 30: OM9-FILE-012.CurveOnSurfaceTransform.Sum
+30/50 Test #30: OM9-FILE-012.CurveOnSurfaceTransform.Sum .........   Passed    0.43 sec
+      Start 31: OM9-FILE-012.CurveOnSurfaceTransform.Extrusion
+31/50 Test #31: OM9-FILE-012.CurveOnSurfaceTransform.Extrusion ...   Passed    0.43 sec
+      Start 32: OM9-FILE-012.CurveOnSurfaceArchive
+32/50 Test #32: OM9-FILE-012.CurveOnSurfaceArchive ...............   Passed    0.59 sec
+      Start 33: OM9-FILE-012.Merge
+33/50 Test #33: OM9-FILE-012.Merge ...............................   Passed    3.98 sec
+      Start 34: OM9-FILE-012.SurfaceCurveV5Profile
+34/50 Test #34: OM9-FILE-012.SurfaceCurveV5Profile ...............   Passed    4.76 sec
+      Start 35: OM9-FILE-012.NativeTransform
+35/50 Test #35: OM9-FILE-012.NativeTransform .....................   Passed    0.99 sec
+      Start 36: OM9-FILE-012.TextDot
+36/50 Test #36: OM9-FILE-012.TextDot .............................   Passed    0.75 sec
+      Start 37: OM9-FILE-012.PointCloud
+37/50 Test #37: OM9-FILE-012.PointCloud ..........................   Passed    0.73 sec
+      Start 38: OM9-FILE-012.CloudGeometry
+38/50 Test #38: OM9-FILE-012.CloudGeometry .......................   Passed    0.49 sec
+      Start 39: OM9-FILE-012.Hatch
+39/50 Test #39: OM9-FILE-012.Hatch ...............................   Passed    0.52 sec
+      Start 40: OM9-FILE-012.Preservation
+40/50 Test #40: OM9-FILE-012.Preservation ........................   Passed    0.47 sec
+      Start 41: OM9-FILE-012.Inventory
+41/50 Test #41: OM9-FILE-012.Inventory ...........................   Passed    0.51 sec
+      Start 42: OM9-FILE-012.Geometry
+42/50 Test #42: OM9-FILE-012.Geometry ............................   Passed    0.40 sec
+      Start 43: OM9-FILE-012.Archive
+43/50 Test #43: OM9-FILE-012.Archive .............................   Passed    0.85 sec
+      Start 44: OM9-FILE-012.UserRing
+44/50 Test #44: OM9-FILE-012.UserRing ............................   Passed    8.42 sec
+      Start 45: OM9-FILE-012.Blocks
+45/50 Test #45: OM9-FILE-012.Blocks ..............................   Passed    0.58 sec
+      Start 46: OM9-FILE-012.HatchAffine
+46/50 Test #46: OM9-FILE-012.HatchAffine .........................   Passed    1.84 sec
+      Start 47: OM9-FILE-012.HatchCurrent
+47/50 Test #47: OM9-FILE-012.HatchCurrent ........................   Passed    0.59 sec
+      Start 48: OM9-FILE-012.HatchLoops
+48/50 Test #48: OM9-FILE-012.HatchLoops ..........................   Passed    0.67 sec
+      Start 49: OM9-FILE-012.HatchLoopEdit
+49/50 Test #49: OM9-FILE-012.HatchLoopEdit .......................   Passed    0.89 sec
+      Start 50: OM9-FILE-012.Unmeshed
+50/50 Test #50: OM9-FILE-012.Unmeshed ............................   Passed   27.97 sec
+
+100% tests passed out of 50
+
+Total Test time (real) = 116.74 sec

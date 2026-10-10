@@ -1,0 +1,44 @@
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,traceback,time,statistics
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import Part,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('BoundedSnap');doc.UndoMode=1
+        near=doc.addObject('Part::Feature','Near');near.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0))
+        doc.recompute();Gui.activeDocument().activeView().viewTop();Gui.activeDocument().activeView().fitAll();Gui.updateGui()
+        # Fail on a missing production query API before expensive fixture setup.
+        native.querySnap3dm(0,0,2)
+        for i in range(10000):
+            obj=doc.addObject('Part::Feature','Remote');obj.Shape=near.Shape;obj.Placement.Base=App.Vector(100000+i*10,100000,0)
+        doc.recompute();Gui.updateGui()
+        view=Gui.activeDocument().activeView()
+        # The GUI's active viewport dimensions are part of the native query report.
+        initial=json.loads(native.querySnap3dm(0,0,2));x=initial['viewport_width']//2;y=initial['viewport_height']//2
+        warm=json.loads(native.querySnap3dm(x,y,2))
+        check('bounded_query_ignores_remote_objects',warm['visited_objects']<=1 and warm['complete'])
+        timings=[];last=None
+        for i in range(500):
+            start=time.perf_counter();last=json.loads(native.querySnap3dm(x+(i%3),y+(i%2),2));timings.append((time.perf_counter()-start)*1000)
+            if not last['complete'] or last['visited_objects']>1 or last['index_rebuilt']:raise AssertionError('Warm query scans document or loses correctness')
+        p95=sorted(timings)[474];report['performance']={'queries':500,'p95_ms':p95,'median_ms':statistics.median(timings),'last':last}
+        check('500_warm_queries_p95_16ms',p95<=16)
+        check('warm_query_zero_heavy_reads',last['read_mesh_vertices']==0 and last['read_cloud_points']==0)
+        # Dense eligible geometry must report incomplete rather than certify a partial snap.
+        for i in range(70):
+            obj=doc.addObject('Part::Feature','Dense');obj.Shape=near.Shape
+        doc.recompute();Gui.updateGui()
+        dense=json.loads(native.querySnap3dm(x,y,2))
+        check('64_object_budget_incomplete',not dense['complete'] and dense['visited_objects']<=64 and not dense['picked'])
+        check('candidate_budget_never_exceeded',len(dense['candidates'])<=8192 and dense['max_per_object']<=2048)
+        report.update(ok=True,module=native.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -138,7 +138,9 @@ pub unsafe extern "C" fn om9_surface_slash_parameter(
         unsafe { std::slice::from_raw_parts(pairs, count * 2) }
     };
     let values = values
-        .chunks_exact(2)
+        .as_chunks::<2>()
+        .0
+        .iter()
         .map(|p| (p[0], p[1]))
         .collect::<Vec<_>>();
     slash_parameter(&values, a).unwrap_or(f64::NAN)
@@ -156,7 +158,9 @@ pub unsafe extern "C" fn om9_surface_uniform_spline(
     }
     let xyz = unsafe { std::slice::from_raw_parts(xyz, count * 3) };
     let points = xyz
-        .chunks_exact(3)
+        .as_chunks::<3>()
+        .0
+        .iter()
         .map(|p| [p[0], p[1], p[2]])
         .collect::<Vec<_>>();
     crate::spline_ffi::publish(crate::spline::uniform_net_interpolate(&points, closed))
@@ -232,6 +236,8 @@ pub fn transport_with_height(
     }
     Some(m)
 }
+/// # Safety
+/// Non-null `points` has 18 aligned readable doubles and non-null `output` has 16 aligned writable doubles for this call; the regions must not overlap.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn om9_surface_transport(points: *const f64, output: *mut f64) -> bool {
     unsafe { om9_surface_transport_height(points, false, output) }
@@ -411,12 +417,16 @@ fn name(ptr: *const c_char) -> Option<String> {
         .ok()
         .map(str::to_owned)
 }
+/// # Safety
+/// A non-null input must point to a readable NUL-terminated string for this call. No caller storage is retained.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn om9_surface_kind(text: *const c_char) -> u32 {
     name(text)
         .and_then(|s| Kind::from_name(&s))
         .map_or(0, |k| k as u32)
 }
+/// # Safety
+/// A non-null input must point to a readable NUL-terminated string for this call. No caller storage is retained.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn om9_surface_start(text: *const c_char) -> bool {
     let Some(kind) = name(text).and_then(|s| Kind::from_name(&s)) else {
@@ -427,6 +437,8 @@ pub unsafe extern "C" fn om9_surface_start(text: *const c_char) -> bool {
     state.message.clear();
     true
 }
+/// # Safety
+/// A non-null input must point to a readable NUL-terminated string for this call. No caller storage is retained.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn om9_surface_add(key: *const c_char, closed: bool) -> bool {
     let Some(key) = name(key) else {
@@ -452,6 +464,8 @@ pub extern "C" fn om9_surface_finish() -> bool {
 pub extern "C" fn om9_surface_chain_start() -> bool {
     change(Session::begin_chain)
 }
+/// # Safety
+/// A non-null input must point to a readable NUL-terminated string for this call. No caller storage is retained.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn om9_surface_chain_add(key: *const c_char) -> bool {
     let Some(key) = name(key) else {
@@ -495,6 +509,8 @@ pub extern "C" fn om9_surface_count() -> usize {
         .as_ref()
         .map_or(0, Session::count)
 }
+/// # Safety
+/// A non-null `buffer` points to `capacity` writable bytes for this call and does not alias Rust state. Null or zero capacity requests only the required length.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn om9_surface_message(buffer: *mut c_char, capacity: usize) -> usize {
     let state = state().lock().unwrap_or_else(|p| p.into_inner());

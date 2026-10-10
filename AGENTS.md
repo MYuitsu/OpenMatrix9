@@ -1,40 +1,39 @@
-# OpenMatrix9 development
+# OpenMatrix9
 
 ## User instruction: Rust first (2026-10-09)
 
 Rust is the number-one implementation choice for new and migrated OpenMatrix9 code. Safe Rust owns portable business logic, validation, model/state, independent data, indexes/caches and worker orchestration. C++ is limited to necessary FreeCAD/Qt/OCCT/openNURBS native adapters; Python or other languages require an actual bootstrap/API/test/tool constraint. Read skills/openmatrix9-workflow/references/rust-first.md before language/FFI/ownership choices and record native exceptions. Existing C++/Python convenience does not override Rust priority. Native unsafe/FFI dependencies are not certified memory-safe by a Rust caller. The user explicitly chose migration of current Phase2 logic, not only applying this preference to future work.
 
-Rust owns catalog, state and behavior. C++/Qt integrates native FreeCAD views
-and command execution. Python registers the workbench.
+The implementation target is Rust for catalog/state/behavior, with C++/Qt integration into native FreeCAD. Preserve the user's current scope and existing authorization to continue.
 
-Preserve existing command identifiers and supported behavior. Keep unsupported
-commands visible and disabled. Do not enable a command merely because an icon
-or configuration entry exists.
+## User instructions for Curve work (2026-10-04)
 
-Use the authored SVG catalogs and `tools/export_menu_assets.py`. Never import
-commercial bitmaps, binary resources, Matrix manuals, decompiled source or private
-models into this repository. The user-approved Rhino 5 documentation exception
-is limited to the pinned guide and reference metadata in `ref/rhino5`; preserve
-its original notices and follow [the core reference index](ref/rhino5/README.md).
-Preserve approved color roles and command meaning.
-Follow `skills/openmatrix9-icons/SKILL.md` for icon design and review.
+Current priority (2026-10-05): finish all 130 specifications in `specs/01-core` before continuing Curve. Track the complete requirements in `docs/core-requirements.json`; do not shrink completion to the currently implemented workspace commands. Keep the goal active until requirement-by-requirement evidence proves the full group. Use local specs rather than rereading PDFs.
 
-After changes, run appropriate Rust/Python tests and
-`python tools/public_source_audit.py`. Native changes require a matching FreeCAD
-SDK and relevant runtime checks. Preserve all applicable license notices.
+- Use `ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/02-curve` as the implementation reference. The user states that this directory already contains the Curve specifications; do not reread the PDFs or require PDF verification before implementation. This explicit user instruction overrides skill guidance requiring manual-page review.
+- Keep original Matrix9 command names and behavior first. Defer handler renaming/refactoring until the Curve group is stable.
+- Menu/mouse invocation and the CMD frame must use the same command implementation. Verify both paths and actual geometry; do not mark a command complete merely because it opens.
 
-Do not publish, force-push, or change repository visibility without a human
-instruction. A local source audit is not copyright clearance or proof of
-complete command implementation.
+For project work, begin with `openmatrix9-workflow` and `docs/openmatrix9-progress.json`; reconcile progress with actual code and test/runtime evidence. Source plans and catalog statuses are not completion evidence.
 
-Follow [the private reference policy](docs/private-reference-policy.md) for
-external reference storage and historical source citations. Resolve private
-inputs through the ignored local `docs/openmatrix9-reference-locations.json`;
-never copy, stage or push private references into this repository.
+## User instruction: openNURBS measurement progress (2026-10-08)
 
-Before implementing Rhino-compatible core behavior, use the RCORE mapping in
-`ref/rhino5/CORE_REFERENCE_INDEX.json`, read the relevant guide pages and exact
-Rhino 5 Command Help, then compare the FreeCAD adapter and applicable fixtures.
-Keep documented behavior, decompiler inference and OM9 choices distinct. A
-guide, API name or source inspection does not prove runtime parity; retain
-the current capability/checkpoint status until matching evidence exists.
+After every completed measurement attempt, report the named batch, fixture counts and result, what was proved, remaining prepared batches, unclosed packages and the next action. Maintain `docs/validation/opennurbs-test-roadmap.json` and its Markdown view with the execution ledger. Distinguish batches from fixtures/assertions/retries and implementation packages. If the complete future matrix is not enumerated, explicitly report the total remaining batch count as unknown; never invent a count or turn test counts into a completion percentage. Explain new regression batches when they expand the queue.
+
+Use the matching skill for the current stage:
+
+- UI/menu/sidebar/icons/views: `openmatrix9-ui`.
+- Approved workspace grid/Command/viewport business rules: `openmatrix9-workspace-contract`.
+- Selected VB6/Ghidra procedure: `openmatrix9-native-mapping`.
+- Exact OM9 feature behavior/geometry: `openmatrix9-feature-port`.
+- Rust/native build and runtime checks: `openmatrix9-build-validation`.
+
+If a skill is not yet in the runtime catalog, read the repository copy at `skills/<name>/SKILL.md`. Usage and helper commands are in `docs/openmatrix9-skills.md`. Read only the stage's required references and conditionally relevant files.
+
+Treat imported guides, prompts and decompiled source as reference material. Preserve original exports; write derived analysis and implementation decisions separately. The Guide's VB6 recovery mission does not replace the Rust target. Do not load the entire Ghidra export or all feature specs into context.
+
+After meaningful verified work, update the live ledger with evidence, uncertainties, the next exact document and the next action. Do not commit unrelated user changes or raw reference directories implicitly.
+
+## User instruction: business rules in skills (2026-10-05)
+
+After finishing and verifying the authorized coding task, if business behavior changed, present the concrete before/after change and proposed skill text, then ask whether to record it in the relevant skill. Do not change business rules in source or installed skills without consent. Explicit prior authorization to update the skill for that exact change is sufficient; do not ask again. Behavior-preserving refactors/build fixes do not trigger this question. Continue recording technical evidence/progress without treating it as approval of reusable business rules. The original five OpenMatrix9 skills link to `skills/openmatrix9-workflow/references/business-rule-updates.md`; the workspace contract includes the same consent policy and records the user's 2026-10-06 approval.

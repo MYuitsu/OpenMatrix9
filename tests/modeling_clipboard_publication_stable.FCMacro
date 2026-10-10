@@ -1,0 +1,62 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtGui,QtTest
+from pathlib import Path
+import os,json,traceback,time,ctypes,sys
+sys.path.insert(0,str(Path(__file__).parent))
+from clipboard_fixture_support import wait_fixture
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'pid':os.getpid(),'attempts':[], 'fixture_measurements':{}}
+def run():
+    import ctypes
+    import ThreeDmClipboard as clip,OpenMatrix9Gui as native
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('ShortcutTarget');doc.UndoMode=1
+        payload=Path('H:/FreeCAD-src/build/om9-perf-dev/build/modeling_clipboard_smoke-1/a545b5066c8e43aab8d182b4587d0f00/copied-current.3dm').read_bytes()
+        original_paste=clip.paste_selection
+        def observed_paste():
+            report['attempts'][-1]['invoked']=True
+            try:
+                value=original_paste()
+                report['attempts'][-1]['returned']=len(value)
+                return value
+            except BaseException:
+                report['attempts'][-1]['paste_error']=traceback.format_exc()
+                raise
+        clip.paste_selection=observed_paste
+        for i in range(80):
+            row={'iteration':i};report['attempts'].append(row)
+            mime=QtCore.QMimeData();mime.setData(clip.MIME,QtCore.QByteArray(payload))
+            QtWidgets.QApplication.clipboard().setMimeData(mime)
+            row['flush']=ctypes.OleDLL('ole32').OleFlushClipboard()
+            if row['flush']!=0:raise RuntimeError('Fixture flush failed')
+            wait_fixture(clip,payload,report['fixture_measurements'])
+            viewers=[w for w in Gui.getMainWindow().findChildren(QtWidgets.QWidget) if w.isVisible() and 'view3d' in w.metaObject().className().lower() and w.focusPolicy()!=QtCore.Qt.NoFocus]
+            viewer=viewers[0];QtWidgets.QApplication.setActiveWindow(Gui.getMainWindow());viewer.setFocus();Gui.updateGui()
+            row['context']=clip.shortcut_context(QtWidgets.QApplication.focusWidget())
+            row['before']=len([o for o in doc.Objects if hasattr(o,'OM9WorkingUUID')])
+            QtTest.QTest.keyClick(viewer,QtCore.Qt.Key_V,QtCore.Qt.ControlModifier)
+            row['after']=len([o for o in doc.Objects if hasattr(o,'OM9WorkingUUID')])
+            if row['after']!=row['before']+2:raise AssertionError('Ctrl+V creates two working objects')
+            doc.undo();Gui.updateGui()
+        QtWidgets.QApplication.clipboard().setText('foreign clipboard sentinel')
+        _,user,_,_=clip._win32();sequence=user.GetClipboardSequenceNumber()
+        try:wait_fixture(clip,payload,report['fixture_measurements'])
+        except RuntimeError:pass
+        else:raise AssertionError('Foreign data must be rejected')
+        if user.GetClipboardSequenceNumber()!=sequence or QtWidgets.QApplication.clipboard().text()!='foreign clipboard sentinel':raise AssertionError('Fixture wait overwrote foreign data')
+        report['foreign_fixture_preserved']=True
+        report.update(ok=True,module=native.__file__)
+        report['checks']=[{'name':'80 shortcuts create two working objects each','passed':True}]
+    except BaseException:
+        report.update(ok=False,error=traceback.format_exc())
+        report['checks']=[{'name':'80 shortcuts create two working objects each','passed':False}]
+        ctypes,user,_,fid=clip._win32();user.GetOpenClipboardWindow.restype=ctypes.c_void_p
+        user.GetWindowThreadProcessId.argtypes=[ctypes.c_void_p,ctypes.POINTER(ctypes.c_ulong)]
+        window=user.GetOpenClipboardWindow();pid=ctypes.c_ulong();user.GetWindowThreadProcessId(window,ctypes.byref(pid))
+        report['clipboard']={'sequence':user.GetClipboardSequenceNumber(),'available':bool(user.IsClipboardFormatAvailable(fid)),'lock_pid':pid.value}
+    finally:
+        clip.paste_selection=original_paste
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -1,0 +1,15 @@
+{
+    "checks":  [
+
+               ],
+    "ok":  false,
+    "error":  "Traceback (most recent call last):\n  File \"H:/FreeCAD-src/build/om9-dev/tests/three_dm_oval_display_probe.FCMacro\", line 28, in run\n    (out/\u0027objects.json\u0027).write_text(json.dumps(rows,indent=2))\n                                    ~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"H:\\FreeCAD-src\\.pixi\\envs\\default\\Lib\\json\\__init__.py\", line 242, in dumps\n    **kw).encode(obj)\n          ~~~~~~^^^^^\n  File \"H:\\FreeCAD-src\\.pixi\\envs\\default\\Lib\\json\\encoder.py\", line 202, in encode\n    chunks = self.iterencode(o, _one_shot=True)\n  File \"H:\\FreeCAD-src\\.pixi\\envs\\default\\Lib\\json\\encoder.py\", line 263, in iterencode\n    return _iterencode(o, 0)\n  File \"H:\\FreeCAD-src\\.pixi\\envs\\default\\Lib\\json\\encoder.py\", line 182, in default\n    raise TypeError(f\u0027Object of type {o.__class__.__name__} \u0027\n                    f\u0027is not JSON serializable\u0027)\nTypeError: Object of type Quantity is not JSON serializable\n"
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\three_dm_oval_display_probe-1\262479e323bb448986b7c8605d215aa8
+Runtime smoke failed
+At H:\FreeCAD-src\build\om9-dev\tests\run_menu_smoke.ps1:31 char:29
++         if(-not $result.ok){throw 'Runtime smoke failed'}
++                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Runtime smoke failed:String) [], RuntimeException
+    + FullyQualifiedErrorId : Runtime smoke failed
+ 

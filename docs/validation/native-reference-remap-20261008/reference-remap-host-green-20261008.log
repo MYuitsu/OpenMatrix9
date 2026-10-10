@@ -1,0 +1,2530 @@
+{
+    "checks":  [
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm imported/copyRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm imported/copyRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm undo owner delete complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm undo owner deleteRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm undo owner deleteRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm undo owner deleteRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm undo owner deleteRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm undo owner deleteRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm undo owner deleteRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm redo owner delete remains rejected",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm changed current owner cannot silently use immutable snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm current owner metadata complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm current owner metadataRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm current owner metadataRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm current owner metadataRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm current owner metadataRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm current owner metadataRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm current owner metadataRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm reopened without source complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm reopened without sourceRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm reopened without sourceRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm reopened without sourceRhinoObject current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm reopened without sourceRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm reopened without sourceRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm reopened without sourceRhinoObject001 current owner metadata preserved",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm immutable source and typed native record survive reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm public V5 loss still refused atomically",
+                       "passed":  true
+                   }
+               ],
+    "cases":  [
+                  {
+                      "fixture":  "standalone-kind-0-owner-0-reversed-0.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "standalone-kind-0-owner-0-reversed-1.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "standalone-kind-0-owner-1-reversed-0.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "standalone-kind-0-owner-1-reversed-1.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "standalone-kind-0-owner-2-reversed-0.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "standalone-kind-0-owner-2-reversed-1.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "standalone-kind-1-owner-0-reversed-0.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "standalone-kind-1-owner-0-reversed-1.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "standalone-kind-1-owner-1-reversed-0.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "standalone-kind-1-owner-1-reversed-1.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "standalone-kind-1-owner-2-reversed-0.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "standalone-kind-1-owner-2-reversed-1.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "mixed-polycurve-owner-0-reversed-0.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "mixed-polycurve-owner-0-reversed-1.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "mixed-polycurve-owner-1-reversed-0.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "mixed-polycurve-owner-1-reversed-1.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "mixed-polycurve-owner-2-reversed-0.3dm",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "mixed-polycurve-owner-2-reversed-1.3dm",
+                      "passed":  true
+                  }
+              ],
+    "ok":  true,
+    "full_exchange_complete":  false,
+    "scope":  "internal SDK80 graph; owner deletion/edit refusal; public V5 incompatibility unchanged"
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\three_dm_reference_remap_smoke-1\50e2662d38d94477b38f1cacc86a9766

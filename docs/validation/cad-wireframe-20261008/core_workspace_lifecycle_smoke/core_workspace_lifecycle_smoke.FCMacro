@@ -1,0 +1,32 @@
+# Native shutdown regression: runner must also require process exit code zero.
+import json, os, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+
+result = {'checks': []}
+
+def check(name, passed):
+    result['checks'].append({'name': name, 'passed': bool(passed)})
+    if not passed:
+        raise AssertionError(name)
+
+def finish():
+    try:
+        check('workspace creates four native views', len(Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')) == 4)
+        App.closeDocument('WorkspaceLifecycle')
+        check('document close removes model document', not App.listDocuments())
+        result['ok'] = True
+    except Exception:
+        result['ok'] = False
+        result['error'] = traceback.format_exc()
+    finally:
+        Path(os.environ['OM9_SMOKE_OUTPUT'], 'results.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        QtCore.QTimer.singleShot(500, Gui.getMainWindow().close)
+
+def run():
+    Gui.activateWorkbench('OpenMatrix9Workbench')
+    App.newDocument('WorkspaceLifecycle')
+    QtCore.QTimer.singleShot(1200, finish)
+
+QtCore.QTimer.singleShot(1800, run)

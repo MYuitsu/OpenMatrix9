@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #pragma once
-#include "CurveGeometry.h"
+#include "Phase3Inputs.h"
+#include <array>
+#include <vector>
+#include "Phase3Inputs.h"
 #include <memory>
 #include <string>
 #include <set>
 namespace OpenMatrix9Gui {
 using EditShape=std::shared_ptr<CurvePyRef>;
 using EditShapes=std::vector<EditShape>;
-struct EditInput {std::string name,signature;EditShape shape;bool mesh=false;EditShapes components;};
+struct EditInput {std::string name,signature;EditShape shape;bool mesh=false;EditShapes components;Phase3Snapshot guard;};
 struct EditProjection {
     std::array<double,3> eye{0,0,0},right{1,0,0},up{0,1,0},forward{0,0,-1};
     bool perspective=false;

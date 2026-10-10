@@ -1,0 +1,146 @@
+.FFFFF.F
+======================================================================
+FAIL: test_huge_finite_point_does_not_overflow_or_pass (test_rhino5_gui_curve_measurement.CurveMeasurementTests.test_huge_finite_point_does_not_overflow_or_pass)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 27, in measure_without_crashing
+    try:return measurement(curve)
+               ~~~~~~~~~~~^^^^^^^
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 23, in measurement
+    return scope['document_measurements'](expected)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "H:\FreeCAD-src\build\om9-dev\tests\rhino5_gui_profiles_probe.py", line 62, in document_measurements
+    deviation=max(sum((float(a)-float(b))**2 for a,b in zip(p,q))**0.5 for p,q in zip(samples,wanted['samples']))
+  File "H:\FreeCAD-src\build\om9-dev\tests\rhino5_gui_profiles_probe.py", line 62, in <genexpr>
+    deviation=max(sum((float(a)-float(b))**2 for a,b in zip(p,q))**0.5 for p,q in zip(samples,wanted['samples']))
+                  ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "H:\FreeCAD-src\build\om9-dev\tests\rhino5_gui_profiles_probe.py", line 62, in <genexpr>
+    deviation=max(sum((float(a)-float(b))**2 for a,b in zip(p,q))**0.5 for p,q in zip(samples,wanted['samples']))
+                      ~~~~~~~~~~~~~~~~~~~^^~
+OverflowError: (34, 'Result too large')
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 36, in test_huge_finite_point_does_not_overflow_or_pass
+    row=self.measure_without_crashing(Curve(1e200))
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 28, in measure_without_crashing
+    except (OverflowError,ValueError) as error:self.fail('Probe must record failure instead of stopping: '+str(error))
+                                               ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Probe must record failure instead of stopping: (34, 'Result too large')
+
+======================================================================
+FAIL: test_invalid_point_cannot_pass_even_with_correct_coordinates (test_rhino5_gui_curve_measurement.CurveMeasurementTests.test_invalid_point_cannot_pass_even_with_correct_coordinates)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 46, in test_invalid_point_cannot_pass_even_with_correct_coordinates
+    self.assertFalse(measurement(Curve(0.0,False))['passed'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_nonfinite_sample_fails_and_report_is_strict_json (test_rhino5_gui_curve_measurement.CurveMeasurementTests.test_nonfinite_sample_fails_and_report_is_strict_json) (value=inf)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 43, in test_nonfinite_sample_fails_and_report_is_strict_json
+    try:json.dumps(row,allow_nan=False)
+        ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nguye\.pyenv\pyenv-win\versions\3.13.5\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\nguye\.pyenv\pyenv-win\versions\3.13.5\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\nguye\.pyenv\pyenv-win\versions\3.13.5\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+ValueError: Out of range float values are not JSON compliant: inf
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 44, in test_nonfinite_sample_fails_and_report_is_strict_json
+    except ValueError as error:self.fail('Nonfinite coordinate needs explicit diagnostic: '+str(error))
+                               ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Nonfinite coordinate needs explicit diagnostic: Out of range float values are not JSON compliant: inf
+
+======================================================================
+FAIL: test_nonfinite_sample_fails_and_report_is_strict_json (test_rhino5_gui_curve_measurement.CurveMeasurementTests.test_nonfinite_sample_fails_and_report_is_strict_json) (value=-inf)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 43, in test_nonfinite_sample_fails_and_report_is_strict_json
+    try:json.dumps(row,allow_nan=False)
+        ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nguye\.pyenv\pyenv-win\versions\3.13.5\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\nguye\.pyenv\pyenv-win\versions\3.13.5\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\nguye\.pyenv\pyenv-win\versions\3.13.5\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+ValueError: Out of range float values are not JSON compliant: -inf
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 44, in test_nonfinite_sample_fails_and_report_is_strict_json
+    except ValueError as error:self.fail('Nonfinite coordinate needs explicit diagnostic: '+str(error))
+                               ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Nonfinite coordinate needs explicit diagnostic: Out of range float values are not JSON compliant: -inf
+
+======================================================================
+FAIL: test_nonfinite_sample_fails_and_report_is_strict_json (test_rhino5_gui_curve_measurement.CurveMeasurementTests.test_nonfinite_sample_fails_and_report_is_strict_json) (value=nan)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 43, in test_nonfinite_sample_fails_and_report_is_strict_json
+    try:json.dumps(row,allow_nan=False)
+        ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nguye\.pyenv\pyenv-win\versions\3.13.5\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Users\nguye\.pyenv\pyenv-win\versions\3.13.5\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\nguye\.pyenv\pyenv-win\versions\3.13.5\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+ValueError: Out of range float values are not JSON compliant: nan
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 44, in test_nonfinite_sample_fails_and_report_is_strict_json
+    except ValueError as error:self.fail('Nonfinite coordinate needs explicit diagnostic: '+str(error))
+                               ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Nonfinite coordinate needs explicit diagnostic: Out of range float values are not JSON compliant: nan
+
+======================================================================
+FAIL: test_unset_point_is_retained_and_fails_without_overflow (test_rhino5_gui_curve_measurement.CurveMeasurementTests.test_unset_point_is_retained_and_fails_without_overflow)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 27, in measure_without_crashing
+    try:return measurement(curve)
+               ~~~~~~~~~~~^^^^^^^
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 23, in measurement
+    return scope['document_measurements'](expected)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "H:\FreeCAD-src\build\om9-dev\tests\rhino5_gui_profiles_probe.py", line 62, in document_measurements
+    deviation=max(sum((float(a)-float(b))**2 for a,b in zip(p,q))**0.5 for p,q in zip(samples,wanted['samples']))
+  File "H:\FreeCAD-src\build\om9-dev\tests\rhino5_gui_profiles_probe.py", line 62, in <genexpr>
+    deviation=max(sum((float(a)-float(b))**2 for a,b in zip(p,q))**0.5 for p,q in zip(samples,wanted['samples']))
+                  ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "H:\FreeCAD-src\build\om9-dev\tests\rhino5_gui_profiles_probe.py", line 62, in <genexpr>
+    deviation=max(sum((float(a)-float(b))**2 for a,b in zip(p,q))**0.5 for p,q in zip(samples,wanted['samples']))
+                      ~~~~~~~~~~~~~~~~~~~^^~
+OverflowError: (34, 'Result too large')
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 31, in test_unset_point_is_retained_and_fails_without_overflow
+    row=self.measure_without_crashing(Curve(value,False))
+  File "H:\FreeCAD-src\build\om9-dev\tools\tests\test_rhino5_gui_curve_measurement.py", line 28, in measure_without_crashing
+    except (OverflowError,ValueError) as error:self.fail('Probe must record failure instead of stopping: '+str(error))
+                                               ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Probe must record failure instead of stopping: (34, 'Result too large')
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.021s
+
+FAILED (failures=6)

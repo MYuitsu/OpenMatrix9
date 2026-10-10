@@ -1,0 +1,58 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtGui
+from pathlib import Path
+import json,os,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(100,loop.quit);loop.exec()
+    QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+
+def run():
+    try:
+        import Part,ThreeDm,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('CurveTopology');doc.UndoMode=1;settle()
+        vectors=[(0,0,0),(5,0,0),(10,0,0),(5,5,0)]
+        edges=[Part.makeLine(App.Vector(*vectors[a]),App.Vector(*vectors[b])) for a,b in [(0,1),(1,2),(1,3)]]
+        objects=[]
+        for i,edge in enumerate(edges):
+            obj=doc.addObject('Part::Feature','Segment'+str(i));obj.Shape=edge;objects.append(obj)
+        doc.recompute();before=len(doc.Objects);undos=len(doc.UndoNames);rejected=False
+        try:native.joinModelingCurves3dm(doc.Name,[o.Name for o in objects])
+        except (RuntimeError,ValueError):rejected=True
+        check('Join rejects T branch before any mutation or Undo',rejected and len(doc.Objects)==before and len(doc.UndoNames)==undos)
+        branched=doc.addObject('Part::Feature','Branched');branched.Shape=Part.Wire(edges);doc.recompute()
+        check('fixture has valid native wire but incomplete ordered traversal',branched.Shape.isValid() and len(branched.Shape.Edges)==3 and len(branched.Shape.OrderedEdges)==2)
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(branched)
+        action=Gui.getMainWindow().findChild(QtGui.QAction,'Rebuild');action.trigger();settle()
+        dialog=Gui.getMainWindow().findChild(QtWidgets.QDialog,'OM9RebuildDialog')
+        before=len(doc.Objects);undos=len(doc.UndoNames)
+        check('Rebuild rejects branched wire before dialog and transaction',dialog is None and doc.getObject(branched.Name) is branched and len(doc.Objects)==before and len(doc.UndoNames)==undos)
+        if dialog is not None:dialog.reject();settle()
+        simple=doc.addObject('Part::Feature','SimpleChain');simple.Shape=Part.Wire([edges[0],Part.makeLine(App.Vector(5,0,0),App.Vector(5,6,0))]);doc.recompute()
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(simple);action.trigger();settle()
+        dialog=Gui.getMainWindow().findChild(QtWidgets.QDialog,'OM9RebuildDialog')
+        check('Rebuild still accepts entire simple native chain',dialog is not None)
+        if dialog is not None:
+            dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(12)
+            dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree').setValue(3)
+            old_names={o.Name for o in doc.Objects};before=len(doc.Objects)
+            dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+            outputs=[o for o in doc.Objects if o.Name not in old_names and o.TypeId!='OpenMatrix9Gui::LayerDocumentObject']
+            check('layer lifecycle storage is distinct from rebuilt geometry',sum(o.TypeId=='OpenMatrix9Gui::LayerDocumentObject' for o in doc.Objects)==1)
+            check('Rebuild retains both chain endpoints with default DeleteInput',len(outputs)==1 and doc.getObject('SimpleChain') is None and min((v.Point-App.Vector(0,0,0)).Length for v in outputs[0].Shape.Vertexes)<1e-7 and min((v.Point-App.Vector(5,6,0)).Length for v in outputs[0].Shape.Vertexes)<1e-7)
+            export=out/'rebuilt-whole-chain-v5.3dm';ThreeDm.export_file(str(export),outputs,modeling=True)
+            imported=App.newDocument('WholeChainReread');reread=ThreeDm.import_file(str(export),imported,mode='modeling')
+            check('rebuilt full-chain V5 export retains both endpoints',len(reread)==1 and reread[0].Shape.isValid() and min((v.Point-App.Vector(0,0,0)).Length for v in reread[0].Shape.Vertexes)<1e-7 and min((v.Point-App.Vector(5,6,0)).Length for v in reread[0].Shape.Vertexes)<1e-7)
+            App.setActiveDocument(doc.Name);Gui.setActiveDocument(doc.Name)
+            doc.undo();check('whole-chain Rebuild Undo restores complete original',doc.getObject('SimpleChain') is not None and len(doc.getObject('SimpleChain').Shape.Edges)==2 and len(doc.Objects)==before)
+        report.update(ok=all(c['passed'] for c in report['checks']),module=native.__file__,exported=str(export) if 'export' in locals() else None)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

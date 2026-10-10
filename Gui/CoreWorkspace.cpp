@@ -1,13 +1,11 @@
 #include "CoreWorkspace.h"
 #include "CadPresentation.h"
 #include "RustBridge.h"
-#include "CoreCPlanes.h"
 #include "CameraState.h"
 #include "CameraTrace.h"
 #include <App/Application.h>
 #include <App/Document.h>
 #include <Base/Exception.h>
-#include <Base/Console.h>
 #include <Gui/Application.h>
 #include <Gui/Document.h>
 #include <Gui/MainWindow.h>
@@ -96,14 +94,6 @@ SoSwitch* grid(Gui::View3DInventor* view,bool create=false) {
     SoSearchAction search;search.setName("OM9ConstructionGrid");search.setInterest(SoSearchAction::FIRST);search.apply(root);
     if(auto* path=search.getPath())return dynamic_cast<SoSwitch*>(path->getTail());
     if(!create)return nullptr;
-    // Rendering is a Qt callback boundary. An unavailable/malformed plane must
-    // hide the grid, while command input continues to receive the explicit
-    // error from plane(); do not silently draw or accept a default CPlane.
-    Base::Placement plane;
-    try {plane=OpenMatrix9Gui::CoreWorkspace::instance().plane(view);view->setProperty("om9CPlaneError",QVariant());}
-    catch(const Base::Exception& error){const auto message=QString::fromUtf8(error.what());if(view->property("om9CPlaneError").toString()!=message)Base::Console().error("OpenMatrix9 construction grid unavailable: %s\n",error.what());view->setProperty("om9CPlaneError",message);return nullptr;}
-    catch(const std::exception& error){const auto message=QString::fromUtf8(error.what());if(view->property("om9CPlaneError").toString()!=message)Base::Console().error("OpenMatrix9 construction grid unavailable: %s\n",error.what());view->setProperty("om9CPlaneError",message);return nullptr;}
-    catch(...){Base::Console().error("OpenMatrix9 construction grid unavailable: invalid construction-plane state\n");return nullptr;}
     auto* skip=new Gui::SoSkipBoundingGroup;
     // FreeCAD's fit-all action excludes SoSkipBoundingGroup through its action
     // element. Automatic clipping must still see the grid, including empty files.
@@ -111,9 +101,7 @@ SoSwitch* grid(Gui::View3DInventor* view,bool create=false) {
     auto* toggle=new SoSwitch;toggle->setName("OM9ConstructionGrid");toggle->whichChild=SO_SWITCH_ALL;
     auto* separator=new SoSeparator;
     auto* pick=new SoPickStyle;pick->style=SoPickStyle::UNPICKABLE;separator->addChild(pick);
-    auto* transform=new SoTransform;transform->setName("OM9ConstructionGridTransform");
-    const auto origin=plane.getPosition();const auto& quaternion=plane.getRotation();
-    transform->translation.setValue(float(origin.x),float(origin.y),float(origin.z));transform->rotation.setValue(float(quaternion[0]),float(quaternion[1]),float(quaternion[2]),float(quaternion[3]));separator->addChild(transform);
+    auto* transform=new SoTransform;transform->rotation=rotation(view->property("om9ViewSlot").toInt(),true);separator->addChild(transform);
     // World-space construction lines: five 1 mm subdivisions in each major cell.
     // Separate separators prevent color state leaking into subsequent geometry.
     for(unsigned int kind=0;kind<4;++kind){
@@ -348,9 +336,7 @@ void CoreWorkspace::ensureTitle(Gui::View3DInventor* view){
         auto* group=new QActionGroup(menu);group->setExclusive(true);
         for(std::size_t i=0;i<om9_viewport_mode_count();++i){auto* action=menu->addAction(QString::fromUtf8(om9_viewport_mode_name(i)));action->setData(int(i));action->setCheckable(true);group->addAction(action);connect(action,&QAction::triggered,this,[this,target,i]{if(target)displayTitle(target,i);});}
         menu->addSeparator();for(auto* name:{"Print Preview","Flat Shade","Shade Selected Objects Only"}){auto* action=menu->addAction(name);action->setEnabled(false);}menu->addSeparator();
-        for(auto* name:{"Pan, Zoom, and Rotate","Set View"}){auto* child=menu->addMenu(name);child->menuAction()->setEnabled(false);}
-        addCPlaneMenu(menu,view);
-        menu->addMenu("Set Camera")->menuAction()->setEnabled(false);
+        for(auto* name:{"Pan, Zoom, and Rotate","Set View","Set CPlane","Set Camera"}){auto* child=menu->addMenu(name);child->menuAction()->setEnabled(false);}
         connect(menu,&QMenu::aboutToShow,this,[this,target]{if(target)updateTitle(target);});
         connect(arrow,&QToolButton::clicked,this,[this,target,header,menu]{if(target&&selectTitle(target))menu->popup(header->mapToGlobal(QPoint(0,header->height())));});
     }
@@ -364,7 +350,6 @@ void CoreWorkspace::updateTitle(Gui::View3DInventor* view){
     header->setFixedSize(header->sizeHint().width(),header->fontMetrics().lineSpacing()+2);header->move(view->getViewer()->viewport()->mapTo(view,QPoint(0,0)));header->setVisible(current);header->raise();
     auto* menu=header->findChild<QMenu*>("OM9ViewportMenu");if(!menu)return;
     auto* max=menu->findChild<QAction*>("OM9ViewportMaximize");max->setText(subWindow(view)&&subWindow(view)->isMaximized()?"Restore 4V":"Maximize");max->setEnabled(allowed);
-    if(auto* cplane=menu->findChild<QMenu*>("OM9CPlaneMenu"))cplane->menuAction()->setEnabled(allowed);
     const auto mode=view->property("om9ViewportMode").toString();for(auto* action:menu->actions())if(action->data().isValid()) {action->setEnabled(allowed&&om9_viewport_native_mode(std::size_t(action->data().toInt()))>=0);QSignalBlocker guard(action);action->setChecked(action->text()==mode);}
     header->findChild<QToolButton*>("OM9ViewportDropdown")->setEnabled(allowed);
 }
@@ -378,7 +363,7 @@ void CoreWorkspace::center(Gui::View3DInventor* view) {
 }
 Base::Placement CoreWorkspace::plane(Gui::View3DInventor* view)const {
     if(!view||!view->property("om9ViewSlot").isValid())return {};
-    int slot=view->property("om9ViewSlot").toInt();return constructionPlane(view,Base::Placement(Base::Vector3d(),Base::Rotation(om9_core_view_rotation(slot,0,true),om9_core_view_rotation(slot,1,true),om9_core_view_rotation(slot,2,true),om9_core_view_rotation(slot,3,true))));
+    int slot=view->property("om9ViewSlot").toInt();return Base::Placement(Base::Vector3d(),Base::Rotation(om9_core_view_rotation(slot,0,true),om9_core_view_rotation(slot,1,true),om9_core_view_rotation(slot,2,true),om9_core_view_rotation(slot,3,true)));
 }
 bool CoreWorkspace::execute(std::size_t command) {
     if(!available(command))return false;auto name=id(command);

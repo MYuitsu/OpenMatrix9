@@ -1,0 +1,59 @@
+{
+  "checks": [
+    {
+      "name": "imported_curve_command_routes registered",
+      "passed": true
+    },
+    {
+      "name": "menu and CMD create native spline",
+      "passed": true
+    },
+    {
+      "name": "curve cancellation leaves document unchanged",
+      "passed": true
+    },
+    {
+      "name": "Rebuild original command registered",
+      "passed": true
+    },
+    {
+      "name": "Rebuild selected current native curve dialog",
+      "passed": true
+    },
+    {
+      "name": "Rebuild native output exact requested structure",
+      "passed": true
+    },
+    {
+      "name": "DeleteInput=false preserves Rebuild input",
+      "passed": true
+    },
+    {
+      "name": "Rebuild Undo atomic",
+      "passed": true
+    },
+    {
+      "name": "Rebuild Redo restores output",
+      "passed": true
+    },
+    {
+      "name": "legacy Line still works",
+      "passed": true
+    },
+    {
+      "name": "legacy Polyline still works",
+      "passed": true
+    },
+    {
+      "name": "InterpCrv mouse route commits native cubic",
+      "passed": true
+    },
+    {
+      "name": "InterpCrv mouse CMD equivalent native geometry",
+      "passed": true
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_curve_workflow_smoke-1\6fd1db77e60f4dfdbe83e992c9b3a228

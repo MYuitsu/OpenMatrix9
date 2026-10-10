@@ -1,10 +1,23 @@
 //! OM9-FILE-012: policy for CAD-preserving Rhino 5 archive exchange.
 use std::ffi::CStr;
-pub const ICONS: [&str; 2] = ["FileImport3dm", "FileExport3dm"];
+pub const ICONS: [&str; 7] = [
+    "FileImport3dm",
+    "FileExport3dm",
+    "FileCopy3dm",
+    "FilePaste3dm",
+    "FileCopySession3dm",
+    "FileExportSession3dm",
+    "FileExportLayerSelection3dm",
+];
 pub fn command(icon: &str) -> Option<&'static str> {
     match icon {
         "FileImport3dm" => Some("Import3dm"),
         "FileExport3dm" => Some("Export3dm"),
+        "FileCopy3dm" => Some("Copy3dm"),
+        "FilePaste3dm" => Some("Paste3dm"),
+        "FileCopySession3dm" => Some("CopySession3dm"),
+        "FileExportSession3dm" => Some("ExportSession3dm"),
+        "FileExportLayerSelection3dm" => Some("ExportLayerSelection3dm"),
         _ => None,
     }
 }
@@ -12,6 +25,11 @@ pub fn caption(icon: &str) -> Option<&'static str> {
     match icon {
         "FileImport3dm" => Some("Import 3DM..."),
         "FileExport3dm" => Some("Export Selected 3DM..."),
+        "FileCopy3dm" => Some("Copy Rhino Geometry"),
+        "FilePaste3dm" => Some("Paste Rhino Geometry"),
+        "FileCopySession3dm" => Some("Copy Session 3DM"),
+        "FileExportSession3dm" => Some("Export Session 3DM..."),
+        "FileExportLayerSelection3dm" => Some("Export Selected with Layers 3DM..."),
         _ => None,
     }
 }
@@ -40,6 +58,11 @@ pub extern "C" fn om9_3dm_operation(index: usize) -> u32 {
     match unsafe { CStr::from_ptr(p) }.to_bytes() {
         b"Import3dm" => 1,
         b"Export3dm" => 2,
+        b"Copy3dm" => 3,
+        b"Paste3dm" => 4,
+        b"CopySession3dm" => 5,
+        b"ExportSession3dm" => 6,
+        b"ExportLayerSelection3dm" => 7,
         _ => 0,
     }
 }

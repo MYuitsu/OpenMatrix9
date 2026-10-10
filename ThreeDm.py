@@ -22,18 +22,33 @@ def import_file(path, document=None, scale=0, mode='geometry'):
         return objects
 
 
-def _prepare_import(path, staging, scale, mode):
+def _mesh_from_rows(item):
+    """One native construction, preserving triangle and quad winding."""
+    import Mesh
+    points=item['vertices'];facets=[]
+    for a,b,c,d in item['faces']:
+        facets.append((points[a],points[b],points[c]))
+        if d!=c:facets.append((points[a],points[c],points[d]))
+    return Mesh.Mesh(facets)
+
+def _prepare_import(path, staging, scale, mode, model=None):
     """Convert verified source data without mutating a user document."""
     import OpenMatrix9Gui as native, Part, Mesh
     if mode not in ('geometry', 'preserve', 'modeling'):raise RuntimeError('Invalid 3DM import mode')
     archive = None
-    if mode == 'preserve':
+    if model is not None:
+        if mode!='modeling':raise RuntimeError('Preconverted model requires working mode')
+        from ThreeDmModeling import validate_prepared
+        validate_prepared(model['items'],allow_empty='layer_session' in model)
+    elif mode == 'preserve':
         archive = json.loads(native.prepare3dmArchive(os.fspath(path), staging, scale, 1))
         model = dict(items=archive['prepared_geometry'] + archive.get('definition_geometry', []))
     elif mode == 'modeling':
         from ThreeDmModeling import prepare_modeling
         model = prepare_modeling(path, staging, scale)
     else:model = json.loads(native.read3dm(os.fspath(path), staging, scale))
+    if archive is None and 'layer_session' in model:
+        native.validateLayerBindings3dm(json.dumps(model['layer_session']),[row['layer_object_id'] for row in model['items']])
     # Bound all staged native clouds before constructing host properties.
     cloud_rows=[row for row in model['items'] if 'point_cloud_fields' in row]
     if archive is not None:
@@ -52,11 +67,7 @@ def _prepare_import(path, staging, scale, mode):
             import ThreeDmPointCloud
             geometry=ThreeDmPointCloud.read_data(item['point_cloud_fields'],item['point_cloud_sha256'])
         else:
-            geometry = Mesh.Mesh()
-            points = [App.Vector(*p) for p in item["vertices"]]
-            for a, b, c, d in item["faces"]:
-                geometry.addFacet(points[a], points[b], points[c])
-                if d != c:geometry.addFacet(points[a], points[c], points[d])
+            geometry = _mesh_from_rows(item)
         prepared.append((item, geometry))
     if archive is not None:
         import ThreeDmPointCloud
@@ -75,21 +86,18 @@ def _prepare_import(path, staging, scale, mode):
                 elif 'point_cloud_fields' in item:
                     geometry=ThreeDmPointCloud.read_data(item['point_cloud_fields'],item['point_cloud_sha256'])
                 else:
-                    geometry = Mesh.Mesh()
-                    points = [App.Vector(*p) for p in item['vertices']]
-                    for a,b,c,d in item['faces']:
-                        geometry.addFacet(points[a],points[b],points[c])
-                        if d!=c:geometry.addFacet(points[a],points[c],points[d])
+                    geometry = _mesh_from_rows(item)
                 geometries.append((item,geometry))
             if geometries:archive['host_previews'][preview['source_uuid']] = geometries
         from ThreeDmArchiveState import validate_prepared
         validate_prepared(archive)
         archive['host_geometry'] = prepared
         return archive
+    if 'layer_session' in model:return dict(host_geometry=prepared,layer_session=model['layer_session'])
     return prepared
 
 
-def _insert_prepared(name, prepared):
+def _insert_prepared(name, prepared, create_layer_groups=True):
     """Bind native prepared geometry to FreeCAD properties; C++ owns the transaction."""
     doc = App.getDocument(name)
     if isinstance(prepared, dict):
@@ -133,7 +141,7 @@ def _insert_prepared(name, prepared):
             bind_working_metadata(obj,item)
         if hasattr(obj.ViewObject,'Selectable'):obj.ViewObject.Selectable = not item["locked"]
         parent = None
-        path_parts = item["layer"].split("::") if item["layer"] else []
+        path_parts = item["layer"].split("::") if create_layer_groups and item["layer"] else []
         for depth, label in enumerate(path_parts):
             key = "::".join(path_parts[:depth + 1])
             if key not in groups:
@@ -192,14 +200,6 @@ def export_file(path, objects, geometry_only=False, modeling=False):
                 native.writeGeometryStaging3dm(json.dumps(request),selected_archive)
                 prepared=json.loads(native.read3dm(selected_archive,staging))
                 if any(not ('brep' in row or 'point_cloud_fields' in row or ('vertices' in row and 'faces' in row)) for row in prepared['items']):raise RuntimeError('Geometry-only export cannot represent retained native records; select editable geometry')
-                # The native reader also returns source identity and display
-                # metadata. This explicit geometry-only route omits those
-                # fields; the Rust writer validates the remaining typed payload.
-                geometry_keys={'name','layer','visible','locked','color','brep','vertices','faces',
-                               'point_cloud_fields','point_cloud_sha256','point_cloud_transform'}
-                prepared=dict(tolerance=prepared['tolerance'],items=[
-                    {key:value for key,value in row.items() if key in geometry_keys}
-                    for row in prepared['items']])
                 return _write_geometry_atomic(native,prepared,path)
         if any(hasattr(obj,'OM9ArchiveMode') or hasattr(obj,'OM9DefinitionUUID') or hasattr(obj,'OM9NewDefinitionUUID') or getattr(obj,'OM9Capability','') in ('retained','display-retained','incompatible') for obj in objects):
             raise RuntimeError('Geometry-only export requires editable geometry or a supported placed block')
@@ -209,6 +209,10 @@ def export_file(path, objects, geometry_only=False, modeling=False):
 
 def _stage_current_geometry(objects,staging):
     import Part
+    import OpenMatrix9Gui as native
+    objects=list(objects);doc=App.ActiveDocument
+    if doc is None:raise RuntimeError('Open an active project before geometry export')
+    metadata=json.loads(native.exportLayerSelection3dm(doc.Name,objects))
     items = []
     tolerance = 1e-6
     for index, obj in enumerate(objects):
@@ -216,6 +220,7 @@ def _stage_current_geometry(objects,staging):
         item = dict(name=obj.Label, layer=getattr(obj, "OM9LayerPath", "Default"),
                     color=[round(c * 255) for c in color[:3]],
                     visible=obj.ViewObject.Visibility, locked=getattr(obj, "OM9Locked", False))
+        item['layer_object_id']=metadata['object_ids'][index]
         import ThreeDmPointCloud
         if ThreeDmPointCloud.is_adapter(obj):
             if getattr(obj,'OM9Capability','')=='display-retained':raise RuntimeError('Derived PointCloud preview is not an independent export source')
@@ -260,16 +265,17 @@ def _stage_current_geometry(objects,staging):
             shape.exportBrep(filename)
             item["brep"] = filename
         items.append(item)
-    return dict(items=items,tolerance=tolerance)
+    native.validateLayerExport3dm(doc.Name,objects,json.dumps(metadata['layer_session']))
+    return dict(schema_version=2,layer_session=metadata['layer_session'],items=items,tolerance=tolerance)
 
 
 def _write_geometry_atomic(native,prepared,path):
-    if not prepared.get('items'):raise RuntimeError('Select nonempty editable geometry')
+    if not prepared.get('items') and 'layer_session' not in prepared:raise RuntimeError('Select nonempty editable geometry')
     target=os.path.abspath(os.fspath(path))
     # Stage beside the destination so replacement is atomic on its filesystem.
     descriptor,temporary=tempfile.mkstemp(prefix='.om9-',suffix='.3dm',dir=os.path.dirname(target));os.close(descriptor)
     try:
-        native.write3dm(json.dumps(prepared),temporary)
+        native.write3dm(json.dumps(prepared, separators=(',', ':')),temporary)
         os.replace(temporary,target)
     finally:
         if os.path.exists(temporary):os.unlink(temporary)
@@ -309,6 +315,27 @@ def export_selection(path, geometry_only=False, modeling=False):
     if any(s.SubElementNames for s in selected):
         raise RuntimeError("Select whole objects, without subelements")
     export_file(path, [s.Object for s in selected],geometry_only=geometry_only,modeling=modeling)
+
+
+def _export_layer_scope(path, scope):
+    """Host API coordinator: native/Rust owns collection and layer policy."""
+    import OpenMatrix9Gui as native
+    doc=App.ActiveDocument
+    if doc is None:raise RuntimeError('Open an active project before 3DM handoff')
+    selected=Gui.Selection.getSelectionEx() if scope==1 else []
+    if any(s.SubElementNames for s in selected):raise RuntimeError('Select whole objects, without subelements')
+    native.validateDocument(doc.Name)
+    objects=native.collectLayerTransfer3dm(doc.Name,[s.Object for s in selected],scope)
+    with tempfile.TemporaryDirectory(prefix='om9-layer-export-') as staging:
+        return _write_geometry_atomic(native,_stage_current_geometry(objects,staging),path)
+
+
+def export_layer_selection(path):
+    return _export_layer_scope(path,1)
+
+
+def export_session(path):
+    return _export_layer_scope(path,2)
 
 
 def export_named(path, document_name, names, geometry_only=False, modeling=False):

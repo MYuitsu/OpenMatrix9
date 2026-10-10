@@ -1,9 +1,5 @@
 # Tăng tốc import 3DM — 2026-10-08
 
-Báo cáo lịch sử từ workspace kiểm chứng riêng. Cách build bản public nằm trong
-[build-windows.md](../build-windows.md); đường dẫn H: dưới đây chỉ dành cho máy
-đã thực hiện phép đo. Không cần có runtime/launcher riêng đó để build source này.
-
 Đã tối ưu đường **Preserve source data** dùng chung menu/File/API trong source
 phát triển; chưa tích hợp source chính hoặc push. SDK giữ commit
 `eb92af3ba1806b0a34a99aba0d3bda83e3d46083`.
@@ -76,3 +72,13 @@ Tiếp theo người dùng thử import bản nhanh; tiếp tục ma trận plan
 Phiên thử trực tiếp đã mở đúng runtime nhanh: PID77736 responding,
 startup `ok:true`,29 top-level nhẫn người dùng.
 [Bằng chứng](import-fast-20261008/interactive-startup.json).
+
+## Push được người dùng yêu cầu — 2026-10-08
+
+Đã push bản source public có phạm vi lên nhánh
+`codex/3dm-preservation-fast-import`, feature commit2412742 và HEAD85ea4d0
+đã đối chiếu remote. Giữ authored icons/branding/donate; loại reference PNG,
+archive riêng và binary. Public clone build/link thành công, Rust75 đạt,
+Python29 đạt/1 integration skip, FreeCAD đối chiếu9 và Qt menu8 đạt; audit0 lỗi.
+Bổ sung hướng dẫn core patch và worker deployment. Checkout chính có WIP
+Curve/Edit/Surface vẫn nguyên; không merge main.

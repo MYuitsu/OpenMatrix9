@@ -1,0 +1,55 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtTest
+from pathlib import Path
+import json,os,traceback,time,platform,statistics
+import sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input,command_prompt
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import Part,Mesh,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('MillionPointSnap')
+        cad=doc.addObject('Part::Feature','CAD');cad.Shape=Part.makeLine(App.Vector(0,0,10),App.Vector(10,0,10))
+        cloud=doc.addObject('App::FeaturePython','Cloud');cloud.addProperty('App::PropertyVectorList','OM9CloudPoints')
+        cloud.OM9CloudPoints=[App.Vector(i+10000,10000,0) for i in range(1000000)]
+        mesh=doc.addObject('Mesh::Feature','Mesh')
+        mesh.Mesh=Mesh.Mesh([((i*3+10000,10000,0),(i*3+10001,10000,0),(i*3+10000,10001,0)) for i in range(333334)])
+        report['fixtures']={'cloud_points':len(cloud.OM9CloudPoints),'mesh_points':mesh.Mesh.CountPoints,'mesh_facets':mesh.Mesh.CountFacets}
+        check('million-point mesh and cloud fixtures',report['fixtures']['cloud_points']==1000000 and report['fixtures']['mesh_points']>=1000000)
+        class Poison:
+            def __getattr__(self,name):
+                if name in ('Points','Vertexes','Edges','OM9CloudPoints'):raise AssertionError('Heavy array fetched by snap')
+                raise AttributeError(name)
+        cloud.Proxy=Poison()
+        doc.recompute();Gui.activeDocument().activeView().viewTop();Gui.updateGui()
+        initial=json.loads(native.querySnap3dm(0,0,2));x=initial['viewport_width']//2;y=initial['viewport_height']//2
+        for mode in [2,4,8,14]:
+            data=json.loads(native.querySnap3dm(x,y,mode));check('End Mid Point zero reads mode'+str(mode),data['complete'] and data['read_mesh_vertices']==0 and data['read_cloud_points']==0 and data['visited_objects']<=1)
+        timings=[]
+        for i in range(500):
+            start=time.perf_counter();data=json.loads(native.querySnap3dm(x+i%2,y,14));timings.append((time.perf_counter()-start)*1000)
+            if data['index_rebuilt'] or not data['complete']:raise AssertionError('Heavy warm query rebuilt index or failed')
+        p95=sorted(timings)[474];check('million-point 500 warm query p95 16ms',p95<=16)
+        window=Gui.getMainWindow();field=command_input(window);prompt=command_prompt(window)
+        def settle():
+            loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(150,loop.quit);loop.exec()
+        def cmd(text):field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+        area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
+        target=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport()
+        cmd('Osnap E');cmd('Osnap On');cmd('Distance');cmd('0,0,0');QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=target.rect().center()+QtCore.QPoint(3,2));settle()
+        check('real mouse End snap with million mesh and cloud',prompt.text()=='Distance: 10 mm')
+        for i in range(70):
+            obj=doc.addObject('Part::Feature','Dense');obj.Shape=Part.makeLine(App.Vector(0,0,10),App.Vector(1,0,10))
+        doc.recompute();cmd('Distance');cmd('0,0,0');QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=target.rect().center()+QtCore.QPoint(3,2));settle()
+        check('budget incomplete permits manual plane fallback',prompt.text().startswith('Distance: ') and float(prompt.text().split()[1])<5)
+        cmd('Line');cmd('0,0,0');cmd('3,4,0');check('budget incomplete permits typed coordinates',doc.getObject('Line') is not None and abs(doc.getObject('Line').Shape.Length-5)<1e-9)
+        report.update(ok=True,module=native.__file__,performance={'p95_ms':p95,'median_ms':statistics.median(timings),'queries':500},hardware={'logical_cpu':os.cpu_count(),'platform':platform.platform()})
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

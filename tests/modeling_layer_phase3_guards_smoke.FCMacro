@@ -1,0 +1,83 @@
+"""Canonical lock/staleness/ownership through actual Surface and BRep UI."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtTest
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():Gui.updateGui();QtTest.QTest.qWait(300)
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('Phase3LayerGuards');doc.UndoMode=1;settle()
+        field=command_input(Gui.getMainWindow())
+        def cmd(text=''):field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+        def snapshot():return json.loads(native.layerDocumentSnapshot(doc.Name))
+        def command(**kw):native.layerDocumentCommand(doc.Name,json.dumps(kw));settle()
+        def dialog(name):return next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,name) if d.isVisible()),None)
+        def select(objects,force=False):
+            Gui.Selection.clearSelection()
+            for obj in objects:
+                if force:obj.ViewObject.Selectable=True;obj.ViewObject.Visibility=True
+                Gui.Selection.addSelection(obj)
+            settle()
+        profiles=[]
+        for y in [0,4]:
+            obj=doc.addObject('Part::Feature','Profile');obj.Shape=Part.makeLine(App.Vector(0,y,0),App.Vector(10,y,0));profiles.append(obj)
+        a=doc.addObject('Part::Feature','SolidA');a.Shape=Part.makeBox(10,10,10)
+        b=doc.addObject('Part::Feature','SolidB');b.Shape=Part.makeBox(10,10,10,App.Vector(5,0,0));doc.recompute()
+        command(operation='set_current',layer_id='om9-preset-7')
+        command(operation='assign',layer_id='om9-preset-7',object_ids=[o.OM9LayerObjectId for o in profiles+[a]])
+        command(operation='assign',layer_id='om9-preset-8',object_ids=[b.OM9LayerObjectId])
+        hashes={o.Name:o.Shape.hashCode() for o in profiles+[a,b]}
+        command(operation='set_locked',layer_id='om9-preset-7',locked=True);undo=doc.UndoCount;count=len(doc.Objects)
+        select(profiles,True);cmd('Loft');cmd()
+        check('locked canonical profiles cannot open Loft after forced native selection',dialog('OM9SurfaceOptions') is None)
+        check('rejected locked Loft changes no geometry or Undo',len(doc.Objects)==count and doc.UndoCount==undo and all(doc.getObject(name).Shape.hashCode()==value for name,value in hashes.items()))
+        cmd('Cancel');select([a],True);cmd('BooleanDifference');cmd();cmd(b.Name);cmd()
+        check('locked canonical solid cannot open Boolean preview',dialog('OM9EditOptions') is None and doc.UndoCount==undo and abs(a.Shape.Volume-1000)<1e-7)
+        cmd('Cancel');command(operation='set_locked',layer_id='om9-preset-7',locked=False)
+        command(operation='set_visible',layer_id='om9-preset-8',visible=False);undo=doc.UndoCount
+        select([a],True);b.ViewObject.Visibility=True;b.ViewObject.Selectable=True
+        cmd('BooleanDifference');cmd();cmd(b.Name);cmd()
+        check('hidden cutter rejects complete Boolean even after forced display',dialog('OM9EditOptions') is None and doc.UndoCount==undo and abs(a.Shape.Volume-1000)<1e-7 and abs(b.Shape.Volume-1000)<1e-7)
+        cmd('Cancel');command(operation='set_visible',layer_id='om9-preset-8',visible=True);command(operation='set_current',layer_id='om9-preset-7')
+        def previewLoft():select(profiles);cmd('Loft');cmd();check('fresh actual Loft preview opens',dialog('OM9SurfaceOptions') is not None)
+        previewLoft();command(operation='set_color',layer_id='om9-preset-7',rgb=[96,97,98]);undo=doc.UndoCount;count=len(doc.Objects)
+        cmd('OK');check('palette-only change makes Surface preview stale',len(doc.Objects)==count and doc.UndoCount==undo and not any(getattr(o,'OM9FeatureId','')=='OM9-SURFACE-009' for o in doc.Objects))
+        cmd('Cancel');previewLoft();command(operation='set_locked',layer_id='om9-preset-7',locked=True);command(operation='set_locked',layer_id='om9-preset-7',locked=False);undo=doc.UndoCount
+        cmd('OK');check('unlock does not revive old Surface preview',len(doc.Objects)==count and doc.UndoCount==undo)
+        cmd('Cancel');command(operation='set_current',layer_id='om9-preset-7');before=snapshot();undo=doc.UndoCount
+        previewLoft();cmd('OK');loft=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SURFACE-009')
+        after=snapshot();row=next(r for r in after['snapshot']['objects'] if r['id']==loft.OM9LayerObjectId)
+        check('fresh Surface output is current ByLayer with current RGB',row['layer_id']=='om9-preset-7' and row['color_source']=='ByLayer' and row['rgb']==[96,97,98] and tuple(round(c*255) for c in loft.ViewObject.ShapeColor[:3])==(96,97,98))
+        check('fresh Surface is valid and owns one geometry/layer Undo',loft.Shape.isValid() and abs(loft.Shape.Area-40)<1e-7 and doc.UndoCount==undo+1)
+        name=loft.Name;doc.undo();settle();check('Surface Undo restores exact layer state and geometry',doc.getObject(name) is None and snapshot()==before)
+        doc.redo();settle();check('Surface Redo restores exact layer state and geometry',doc.getObject(name) is not None and snapshot()==after)
+        previewLoft();doc.openTransaction('Unrelated user draft');profiles[0].Label='Keep foreign user draft';count=len(doc.Objects);undo=doc.UndoCount
+        cmd('OK');check('Surface commit refuses foreign transaction without closing it',doc.HasPendingTransaction and profiles[0].Label=='Keep foreign user draft' and len(doc.Objects)==count and doc.UndoCount==undo)
+        cmd('Cancel');doc.abortTransaction()
+        select([a]);cmd('BooleanDifference');cmd();cmd(b.Name);cmd();check('fresh Boolean preview opens',dialog('OM9EditOptions') is not None)
+        command(operation='set_color',layer_id='om9-preset-8',rgb=[11,12,13]);undo=doc.UndoCount;count=len(doc.Objects)
+        cmd('OK');check('palette-only change makes BRep preview stale',len(doc.Objects)==count and doc.UndoCount==undo and doc.getObject(a.Name) is a)
+        cmd('Cancel');select([a]);cmd('BooleanDifference');cmd();cmd(b.Name);cmd();check('fresh Boolean after stale cancellation opens',dialog('OM9EditOptions') is not None)
+        before=snapshot();undo=doc.UndoCount;aName=a.Name;cmd('OK');cut=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SOLID-001');after=snapshot()
+        check('Boolean output is native current geometry and current layer',cut.Shape.isValid() and abs(cut.Shape.Volume-500)<1e-7 and cut.OM9LayerId=='om9-preset-7')
+        check('Boolean geometry/deletion/layer share one Undo',doc.UndoCount==undo+1 and doc.getObject(aName) is None)
+        cutName=cut.Name;doc.undo();settle();check('Boolean Undo restores complete before state',doc.getObject(aName) is not None and doc.getObject(cutName) is None and snapshot()==before)
+        doc.redo();settle();check('Boolean Redo restores complete after state',doc.getObject(aName) is None and doc.getObject(cutName) is not None and snapshot()==after)
+        saved=output/'phase3-layer-guards.FCStd';doc.saveAs(str(saved));App.closeDocument(doc.Name);doc=App.openDocument(str(saved));settle()
+        check('FCStd reopens guarded Surface/BRep layer state',snapshot()==after and abs(doc.getObject(cutName).Shape.Volume-500)<1e-7)
+        report.update(ok=True,module=native.__file__,scope='supported native Surface/BRep lock/staleness/owned commit; property/tree/Delete and complete receive still pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for doc in list(App.listDocuments().values()):
+            if doc.HasPendingTransaction:doc.abortTransaction()
+            App.closeDocument(doc.Name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

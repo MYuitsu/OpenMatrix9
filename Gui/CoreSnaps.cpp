@@ -1,7 +1,8 @@
 #include "CoreSnaps.h"
 #include "CoreSnapGeometry.h"
+#include "SnapQueryIndex.h"
+#include <QStatusBar>
 #include "RustBridge.h"
-#include "CurveController.h"
 #include <App/Application.h>
 #include <App/Document.h>
 #include <App/DocumentObject.h>
@@ -48,52 +49,31 @@ void save(){preferences()->SetInt("State",static_cast<long>(om9_snap_state()));s
 }
 namespace OpenMatrix9Gui {
 void CoreSnaps::activate(){enabled=true;if(!om9_snap_load(static_cast<unsigned int>(preferences()->GetInt("State",0))))om9_snap_load(0);syncAction();}
-void CoreSnaps::deactivate(){enabled=false;clearTransient();syncAction();}
+void CoreSnaps::deactivate(){enabled=false;syncAction();}
 bool CoreSnaps::handles(std::size_t index){auto* id=om9_command_id(index);return id&&modeBit(QString::fromUtf8(id));}
 bool CoreSnaps::available(){return enabled&&!Gui::Application::Instance->isClosing()&&Gui::Control().isAllowedAlterView(App::GetApplication().getActiveDocument());}
 bool CoreSnaps::checked(std::size_t command){return handles(command)&&(om9_snap_state()&modeBit(QString::fromUtf8(om9_command_id(command))))!=0;}
 bool CoreSnaps::execute(std::size_t command){if(!handles(command)||!available())return false;om9_snap_toggle(modeBit(QString::fromUtf8(om9_command_id(command))));save();return true;}
 bool CoreSnaps::submit(const QString& text){
     const auto input=text.trimmed();
-    if(input.left(5).compare("Osnap",Qt::CaseInsensitive)!=0||(input.size()>5&&!input[5].isSpace()))return false;
-    if(!available()){CurveController::instance().setPrompt("Object snaps are unavailable in the current view");return true;}
-    const auto effect=om9_snap_submit(input.toUtf8().constData());
-    if(effect==1)save();
-    else if(effect==2)syncAction();
-    else if(effect==3)CurveController::instance().setPrompt("Osnap: End / Mid / Point, On / Off / Toggle, Once / Only <mode>, Suspend / Resume / Clear");
-    return effect!=0;
-}
-void CoreSnaps::acceptedPoint(bool accepted){om9_snap_accept_point(accepted);}
-void CoreSnaps::clearTransient(){om9_snap_transient_clear();}
-bool CoreSnaps::pick(Gui::View3DInventor* view,const QPoint& pixel,Base::Vector3d& output){
-    const auto state=om9_snap_effective_state();
-    if(!enabled||!(state&1U)||!(state&14U)||!view)return false;
-    auto* viewer=view->getViewer();auto* camera=viewer->getSoRenderManager()->getCamera();if(!camera)return false;
-    auto* gui=Gui::Application::Instance->activeDocument();auto* document=App::GetApplication().getActiveDocument();if(!gui||!document||gui->isAboutToClose())return false;
-    const int width=viewer->viewport()->width(),height=viewer->viewport()->height();if(width<=0||height<=0)return false;
-    const auto volume=camera->getViewVolume(float(width)/height);
-    std::vector<double> packed;std::vector<Base::Vector3d> points;
-    for(auto* object:document->getObjects()){
-        auto* provider=gui->getViewProvider(object);if(!provider||!provider->isVisible())continue;
-        bool visible=true;std::unordered_set<const App::DocumentObject*> parents;
-        for(auto* parent=App::GeoFeatureGroupExtension::getGroupOfObject(object);parent;parent=App::GeoFeatureGroupExtension::getGroupOfObject(parent)){
-            if(!parents.insert(parent).second){visible=false;break;}
-            auto* parentProvider=gui->getViewProvider(parent);
-            if(!parentProvider||!parentProvider->isVisible()){visible=false;break;}
-        }
-        if(!visible)continue;
-        try {std::vector<Base::Vector3d> candidates;
-            if(state&2U)candidates=endCandidates(object);
-            if(state&4U){auto mid=midCandidates(object);candidates.insert(candidates.end(),mid.begin(),mid.end());}
-            if(state&8U){auto points=pointCandidates(object);candidates.insert(candidates.end(),points.begin(),points.end());}
-            for(const auto& point:candidates){
-            SbVec3f projected;volume.projectToScreen(SbVec3f(float(point.x),float(point.y),float(point.z)),projected);
-            if(projected[0]<0||projected[0]>1||projected[1]<0||projected[1]>1||projected[2]<0||projected[2]>1)continue;
-            points.push_back(point);packed.insert(packed.end(),{point.x,point.y,point.z,double(projected[0])*width,(1.-double(projected[1]))*height});
-        }}catch(const Base::Exception&){continue;}
+    if(auto mode=modeBit(input)){if(available()){om9_snap_toggle(mode);save();}return true;}
+    if(input.compare("Osnap On",Qt::CaseInsensitive)==0||input.compare("Osnap Off",Qt::CaseInsensitive)==0||input.compare("Osnap Toggle",Qt::CaseInsensitive)==0){
+        if(available()){auto state=om9_snap_state();if(input.endsWith("Toggle",Qt::CaseInsensitive)||bool(state&1U)!=input.endsWith("On",Qt::CaseInsensitive))om9_snap_toggle(1);save();}return true;
     }
-    const auto index=om9_snap_mode_pick(packed.data(),points.size(),pixel.x(),pixel.y(),8.,state&2U?2U:state&4U?4U:8U);
-    if(index==std::numeric_limits<std::size_t>::max()||index>=points.size())return false;
-    output=points[index];return true;
+    return false;
+}
+bool CoreSnaps::pick(Gui::View3DInventor* view,const QPoint& pixel,Base::Vector3d& output){
+    const auto state=om9_snap_state();
+    if(!enabled||!(state&1U)||!(state&14U)||!view)return false;
+    try {
+        SnapQuery query;query.cursor_px=pixel;query.modes=state&14U;
+        const auto result=querySnapCandidates(view,query);
+        if(!result.complete){
+            Gui::getMainWindow()->statusBar()->showMessage(QString::fromStdString(result.reason)+"; choose manually or enter coordinates",2000);
+            return false;
+        }
+        if(!result.picked)return false;
+        output=result.point;return true;
+    }catch(const std::exception& e){Gui::getMainWindow()->statusBar()->showMessage(QString::fromUtf8(e.what()),2000);return false;}
 }
 }

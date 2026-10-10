@@ -1,0 +1,51 @@
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtGui
+from shiboken6 import isValid
+from pathlib import Path
+import json,os,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(220,loop.quit);loop.exec()
+    QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def canceled(d):return not isValid(d) or (not d.isVisible() and int(d.property('om9RustSession'))==0)
+def attempt(d):
+    if isValid(d):d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click()
+def create(doc):
+    c=Part.BSplineCurve();c.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(3,4,0),App.Vector(7,2,0),App.Vector(10,0,0)],[4,4],[0.,1.],False,3)
+    obj=doc.addObject('Part::Feature','Curve');obj.Shape=c.toShape();doc.recompute();return obj
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        window=Gui.getMainWindow()
+        for mode in ['workbench','document-switch-return','document-close','document-replacement','object-replacement']:
+            Gui.activateWorkbench('OpenMatrix9Workbench');other=App.newDocument('OtherContext');doc=App.newDocument('EditorContext');doc.UndoMode=1;obj=create(doc)
+            Gui.Selection.clearSelection();Gui.Selection.addSelection(obj);settle()
+            window.findChild(QtGui.QAction,'PointsOn').trigger();settle();d=window.findChild(QtWidgets.QDialog,'OM9CurveCVDialog')
+            d.findChild(QtWidgets.QTableWidget,'OM9CurveCVPoles').cellWidget(1,1).setValue(9.)
+            before=obj.Shape.exportBrepToString()
+            # No settle/event-loop between context transition and attempted commit.
+            if mode=='workbench':
+                Gui.activateWorkbench('PartWorkbench');attempt(d)
+                good=canceled(d) and obj.Shape.exportBrepToString()==before and not doc.UndoNames
+            elif mode=='document-switch-return':
+                App.setActiveDocument(other.Name);App.setActiveDocument(doc.Name);attempt(d)
+                good=canceled(d) and obj.Shape.exportBrepToString()==before and not doc.UndoNames
+            elif mode in ['document-close','document-replacement']:
+                name=doc.Name;App.closeDocument(name);good=canceled(d)
+                if mode=='document-replacement':
+                    doc=App.newDocument(name);doc.UndoMode=1;obj=create(doc);before=obj.Shape.exportBrepToString();attempt(d)
+                    good=good and obj.Shape.exportBrepToString()==before and not doc.UndoNames
+            else:
+                name=obj.Name;doc.removeObject(name);obj=create(doc);before=obj.Shape.exportBrepToString();attempt(d)
+                good=canceled(d) and obj.Shape.exportBrepToString()==before and not doc.UndoNames
+            check('draft canceled synchronously '+mode,good)
+            if isValid(d):d.reject()
+            for name in list(App.listDocuments()):App.closeDocument(name)
+            settle()
+        report.update(ok=all(c['passed'] for c in report['checks']),module=native.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

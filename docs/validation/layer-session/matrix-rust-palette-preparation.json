@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "application_accepted": false,
+  "native_roundtrip_accepted": false,
+  "prepared_bridge": true,
+  "checks": [
+    {
+      "name": "rust9",
+      "passed": true,
+      "log": "H:\\FreeCAD-src\\build\\om9-layer-edits\\docs\\validation\\layer-session\\matrix-rust-palette-rust9.log"
+    },
+    {
+      "name": "fmt",
+      "passed": true,
+      "log": "H:\\FreeCAD-src\\build\\om9-layer-edits\\docs\\validation\\layer-session\\matrix-rust-palette-fmt.log"
+    },
+    {
+      "name": "clippy",
+      "passed": true,
+      "log": "H:\\FreeCAD-src\\build\\om9-layer-edits\\docs\\validation\\layer-session\\matrix-rust-palette-clippy.log"
+    },
+    {
+      "name": "managed-native-abi",
+      "passed": true,
+      "log": "H:\\FreeCAD-src\\build\\om9-layer-edits\\docs\\validation\\layer-session\\matrix-rust-palette-managed-native-abi.log"
+    },
+    {
+      "name": "harness13",
+      "passed": true,
+      "log": "H:\\FreeCAD-src\\build\\om9-layer-edits\\docs\\validation\\layer-session\\matrix-rust-palette-harness13.log"
+    },
+    {
+      "name": "ironpython-cache",
+      "passed": true,
+      "log": "H:\\FreeCAD-src\\build\\om9-layer-edits\\docs\\validation\\layer-session\\matrix-rust-palette-ironpython-cache.log"
+    },
+    {
+      "name": "witness5",
+      "passed": true,
+      "log": "H:\\FreeCAD-src\\build\\om9-layer-edits\\docs\\validation\\layer-session\\matrix-rust-palette-witness5.log"
+    },
+    {
+      "name": "recovery5",
+      "passed": true,
+      "log": "H:\\FreeCAD-src\\build\\om9-layer-edits\\docs\\validation\\layer-session\\matrix-rust-palette-recovery5.log"
+    },
+    {
+      "name": "ironpython4",
+      "passed": true,
+      "log": "H:\\FreeCAD-src\\build\\om9-layer-edits\\docs\\validation\\layer-session\\matrix-rust-palette-ironpython4.log"
+    }
+  ],
+  "sources": {
+    "bridge/rhino5/rust-core/Cargo.toml": "ff52c12c8d03d116f05dec0f6efa8a20fbcf8df52b4afdd85d38cc36e1722f36",
+    "bridge/rhino5/rust-core/Cargo.lock": "e4b7abf6d4aa3a76f34197e1d98fb130fb2d75464d5b4c51f4f9eba0c4befd32",
+    "bridge/rhino5/rust-core/src/lib.rs": "07ac7ac76eecc52184a1bdca9751f90d9918af8b99932cadf51c3cdd8c364625",
+    "bridge/rhino5/rust-core/tests/handoff.rs": "9a70668cef77e4e79293f2a5a13092d7d41b9e97e9bba769af56466a3aa57eb9",
+    "bridge/rhino5/rust-core/tests/abi.rs": "cc7b189a88d939bb3401c52a64866e2fd55da09e08b2b0ee69791501e53caf1e",
+    "bridge/rhino5/OM9LayerTransfer/NativeLayerApi.cs": "6e25f4f9319c5ebccf0e9e7f446f22c3c1bc840cb68de487cf935091ccf01713",
+    "bridge/rhino5/OM9LayerTransfer/NativeClipboard.cs": "e041417ccb8f24d3940d0465d2f7f7dc3aacf8b0369c9e0a60a3254163172d7b",
+    "bridge/rhino5/OM9LayerTransfer/RhinoLayerAdapter.cs": "093d505c80454d7e9e9a16494a062245f99986075359d68fb480599f3a9b4ae5",
+    "bridge/rhino5/OM9LayerTransfer/NativeLayerWitness.cs": "cd7984f5fb2f042acd54f2e5d731d44efb2504b9c55b8563b0fbb7f97b741b6c",
+    "tests/rhino5_matrix_layer_bridge.py": "01c6ab815a39cb45bcd2f5b9bf99e1f9d8ac5525f85cf151719c3b8e44567739",
+    "tests/rhino5_matrix_layer_receive.py": "f99a1d778c381ccdd9734bf0b2453b9ef65cbe0186d2fa962eac4a372578a5a2",
+    "tests/rhino5_verify_matrix_om9_palette.py": "993bcd37f7ca2eb4e787d5f4d8f8adcc4b276403c06d63aad3ed3f8a62efac21",
+    "tests/rhino5_verify_matrix_om9_handoff.py": "593c2849555ca85de4ea3ec602fdaefad98d84f3e6bf1dcfd75208a3f572a74d",
+    "tests/MatrixLayerAbiProof.cs": "b9c917e25a36c9124c17b488033a236aefb72f90852d142422ab714a0f08ba91",
+    "tools/build-matrix-layer-bridge.ps1": "c73c8597a988baaaca8386bfc0ef238a88fcff7f12b59335bc353845cca49ef2",
+    "tools/check-matrix-layer-bridge.py": "1f0909057c9c9047ce41ac91809929053725b3aee104b3be9ba53bd31c1b0116",
+    "tests/rhino5_recover_matrix_palette.py": "9ac8253fb3c9d03effcaf97fa6a7eb305aee47dc1f12b79b2bd3fe955e4be0f2",
+    "tests/MatrixWitnessContract.cs": "6424cf5c0ffb4ed754e7ab42b4770e266a37577f867bcceecacf189832e986be",
+    "tests/test_matrix_palette_recovery.py": "7ef92e8156f51dae12d7e8f4a4d43b4290fa5e5d5df47fc1405b5249cc6b9e47",
+    "tools/test-matrix-witness-contract.py": "6f934ffa2422b82b3db91055a7aa5a226dcb4942f118b796a8a9793f05059db8",
+    "tests/matrix_om9_handoff_support.py": "81bfc5ab82fb91899eb405a763f552843483515e87d820b5b7ea0143d6074e8a",
+    "tests/test_matrix_om9_handoff_support.py": "e1bb7b116d94acaef71a64f25e7774d3d88efbccbcccfe9835c970fce9a1efcc",
+    "tests/ironpython_handoff_cache_checks.py": "b7b91d4ef2a5a2ae555572cc4d6e50d9f709fc1ef6e2962c01113e2d35b55cb3"
+  },
+  "runtime": {
+    "runtime": "H:\\FreeCAD-src\\build\\om9-layer-edits\\bridge\\rhino5\\runtime",
+    "workers": 14,
+    "source_sha256": "65c89d77627d6001377ab25718e9a6391cc294e58a169bb2a34c9232700406fa",
+    "adapter": "OM9LayerTransfer_65c89d77627d.dll",
+    "version": 1,
+    "rust_sha256": "ac54f27f946507c26b88681f556193bd7556a8da4251b3c3fcc951580d94086b",
+    "adapter_sha256": "7f0fa83268e259b3d7a5bd00d533e98921c231c3b78ffd03dd0597d0e7797080",
+    "application_accepted": false,
+    "rust": "om9_rhino_layer_ac54f27f9465.dll"
+  },
+  "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+  "om9_plugin_sha256": "5a073035f258b856274bd5342104ed1f5c424a098f70674be3a4979f3723534f",
+  "remaining_batch_count": "unknown",
+  "recovery": {
+    "passed": true,
+    "path": "H:\\FreeCAD-src\\build\\matrix-om9-handoff\\303c98e676534ffb91c894c130fba7b7\\recovery-30c4ca02b17249b5a53e81cce8491bb2\\recovery-results.json",
+    "sha256": "0724f09acb842750fa2d457fc5244a74860905241fe4d514755869d5b065fba2",
+    "removed_objects": 5,
+    "removed_layers": 30,
+    "remaining_objects": 0,
+    "remaining_layers": 34,
+    "historical_before_unavailable": true
+  },
+  "next_action": "Run current Matrix native two-app palette/rollback gate with Undo/Redo only in OM9, then finish OM9 UI deployment and remaining original Tasks1-5."
+}

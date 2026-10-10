@@ -1,0 +1,282 @@
+{
+  "checks": [
+    {
+      "name": "OM9-SNAP-002 original End Snap command is checkable",
+      "passed": true
+    },
+    {
+      "name": "CMD turns End Snap mode on",
+      "passed": true
+    },
+    {
+      "name": "CMD synchronizes main O-Snap switch",
+      "passed": true
+    },
+    {
+      "name": "mouse master switch preserves End mode",
+      "passed": true
+    },
+    {
+      "name": "mouse master switch restores O-Snap",
+      "passed": true
+    },
+    {
+      "name": "workbench reactivation restores independent snap choices",
+      "passed": true
+    },
+    {
+      "name": "snap choices are persisted in native preferences",
+      "passed": true
+    },
+    {
+      "name": "native mouse uses exact endpoint outside C-plane",
+      "passed": true
+    },
+    {
+      "name": "Angle mouse input uses spatial endpoint shared with Distance",
+      "passed": true
+    },
+    {
+      "name": "OM9-SNAP-003 original Mid command is checkable",
+      "passed": true
+    },
+    {
+      "name": "Mid-only mouse snaps to exact spatial line midpoint",
+      "passed": true
+    },
+    {
+      "name": "Mid sidebar reflects CMD mode",
+      "passed": true
+    },
+    {
+      "name": "Mid sidebar mouse disables shared mode",
+      "passed": true
+    },
+    {
+      "name": "Mid sidebar mouse restores shared mode",
+      "passed": true
+    },
+    {
+      "name": "OM9-SNAP-003 curved midpoint follows half arc length",
+      "passed": true
+    },
+    {
+      "name": "OM9-SNAP-003 native surface edge midpoint is eligible",
+      "passed": true
+    },
+    {
+      "name": "OM9-SNAP-003 surface interior midpoint is eligible",
+      "passed": true
+    },
+    {
+      "name": "trimmed face hole excludes surface midpoint",
+      "passed": true
+    },
+    {
+      "name": "OM9-SNAP-003 curved surface midpoint matches native UV evaluation",
+      "passed": true
+    },
+    {
+      "name": "Mid menu shares CMD state",
+      "passed": true
+    },
+    {
+      "name": "object placement transforms endpoint into world coordinates",
+      "passed": true
+    },
+    {
+      "name": "joined polyline interior vertex is an End candidate",
+      "passed": true
+    },
+    {
+      "name": "closed circle seam is an End candidate",
+      "passed": true
+    },
+    {
+      "name": "surface corner is an End candidate",
+      "passed": true
+    },
+    {
+      "name": "polysurface topology corner is an End candidate",
+      "passed": true
+    },
+    {
+      "name": "rotated endpoint uses world placement",
+      "passed": true
+    },
+    {
+      "name": "nested group placement transforms endpoint",
+      "passed": true
+    },
+    {
+      "name": "hidden parent excludes child endpoint",
+      "passed": true
+    },
+    {
+      "name": "visible link snaps at instance placement with hidden source",
+      "passed": true
+    },
+    {
+      "name": "hidden link and hidden source supply no endpoint",
+      "passed": true
+    },
+    {
+      "name": "scaled link snap matches native instance endpoint",
+      "passed": true
+    },
+    {
+      "name": "master off preserves End mode",
+      "passed": true
+    },
+    {
+      "name": "master off uses plane fallback",
+      "passed": true
+    },
+    {
+      "name": "hidden object cannot supply endpoint",
+      "passed": true
+    },
+    {
+      "name": "menu toggles same End Snap state off",
+      "passed": true
+    },
+    {
+      "name": "snapping and mode controls create no objects or Undo",
+      "passed": true
+    },
+    {
+      "name": "Mid-only state restored after workbench reactivation",
+      "passed": true
+    },
+    {
+      "name": "Mid-only state saved independently for restart",
+      "passed": true
+    }
+  ],
+  "end_mode_after_cmd": {
+    "saved_state": 2,
+    "checked": true,
+    "prompt": "Command: "
+  },
+  "mid_sidebar_before": {
+    "visible": true,
+    "global": "PySide6.QtCore.QPoint(560, 707)",
+    "screen": "PySide6.QtCore.QRect(0, 0, 2560, 1392)",
+    "state": 5,
+    "buttons": 1
+  },
+  "mid_events": [
+    {
+      "where": "app",
+      "type": 2,
+      "position": "PySide6.QtCore.QPointF(11.000000, 11.000000)",
+      "rect": "PySide6.QtCore.QRect(0, 0, 23, 23)",
+      "enabled": true,
+      "signals_blocked": false,
+      "down": false
+    },
+    {
+      "where": "button",
+      "type": 2,
+      "position": "PySide6.QtCore.QPointF(11.000000, 11.000000)",
+      "rect": "PySide6.QtCore.QRect(0, 0, 23, 23)",
+      "enabled": true,
+      "signals_blocked": false,
+      "down": false
+    },
+    {
+      "where": "app",
+      "type": 3,
+      "position": "PySide6.QtCore.QPointF(11.000000, 11.000000)",
+      "rect": "PySide6.QtCore.QRect(0, 0, 23, 23)",
+      "enabled": true,
+      "signals_blocked": false,
+      "down": true
+    },
+    {
+      "where": "button",
+      "type": 3,
+      "position": "PySide6.QtCore.QPointF(11.000000, 11.000000)",
+      "rect": "PySide6.QtCore.QRect(0, 0, 23, 23)",
+      "enabled": true,
+      "signals_blocked": false,
+      "down": true
+    },
+    {
+      "where": "app",
+      "type": 2,
+      "position": "PySide6.QtCore.QPointF(11.000000, 11.000000)",
+      "rect": "PySide6.QtCore.QRect(0, 0, 23, 23)",
+      "enabled": true,
+      "signals_blocked": false,
+      "down": false
+    },
+    {
+      "where": "button",
+      "type": 2,
+      "position": "PySide6.QtCore.QPointF(11.000000, 11.000000)",
+      "rect": "PySide6.QtCore.QRect(0, 0, 23, 23)",
+      "enabled": true,
+      "signals_blocked": false,
+      "down": false
+    },
+    {
+      "where": "app",
+      "type": 3,
+      "position": "PySide6.QtCore.QPointF(11.000000, 11.000000)",
+      "rect": "PySide6.QtCore.QRect(0, 0, 23, 23)",
+      "enabled": true,
+      "signals_blocked": false,
+      "down": true
+    },
+    {
+      "where": "button",
+      "type": 3,
+      "position": "PySide6.QtCore.QPointF(11.000000, 11.000000)",
+      "rect": "PySide6.QtCore.QRect(0, 0, 23, 23)",
+      "enabled": true,
+      "signals_blocked": false,
+      "down": true
+    }
+  ],
+  "mid_clicks": [
+    false,
+    true
+  ],
+  "mid_after": {
+    "button": false,
+    "action": false,
+    "state": 1,
+    "tooltip": "ToolsObjectSnapMidpoint",
+    "property": "451"
+  },
+  "link_diagnostics": {
+    "prompt": "Distance: 30 mm",
+    "vertices": [
+      [
+        0.0,
+        0.0,
+        30.0
+      ],
+      [
+        10.0,
+        0.0,
+        30.0
+      ]
+    ],
+    "source_vertices": [
+      [
+        0.0,
+        0.0,
+        10.0
+      ],
+      [
+        10.0,
+        0.0,
+        10.0
+      ]
+    ]
+  },
+  "ok": true
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\core_end_snap_smoke-1\517ab2f5adba4483a3ff4e6ef4d11ce5

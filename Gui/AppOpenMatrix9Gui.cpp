@@ -1,11 +1,5 @@
 #include "Workbench.h"
-#include "HistoryFeature.h"
-#include "EditSpecialTypes.h"
-#include "SurfaceHistory.h"
-#include "BuilderHistory.h"
-#include "CageFeature.h"
-#include "CoreUnits.h"
-#include "CoreCPlanes.h"
+#include "CoreNotes.h"
 
 #include <Base/Console.h>
 #include <Base/Interpreter.h>
@@ -17,7 +11,11 @@
 
 void CreateOpenMatrix9Commands();
 void AddThreeDmMethods(PyObject*);
+void AddLayerDocumentMethods(PyObject*);
 void AddThreeDmRegistryMethods(PyObject*);
+void AddModelingSnapMethods(PyObject*);
+void AddSnapQueryMethods(PyObject*);
+void AddModelingCurveMethods(PyObject*);
 
 
 namespace OpenMatrix9Gui
@@ -66,27 +64,13 @@ PyMOD_INIT_FUNC(OpenMatrix9Gui)
 
     PyObject* module =
         OpenMatrix9Gui::initModule();
-    // Register the Part-derived document type only after its base module has
-    // initialized. FreeCAD restores OpenMatrix9Gui::SurfaceHistory by importing
-    // this module even when the workbench has not been selected in this session.
-    PyObject* part = PyImport_ImportModule("Part");
-    if (!part)
-    {
-        PyMOD_Return(nullptr);
-    }
-    Py_DECREF(part);
-    OpenMatrix9Gui::SurfaceHistory::init();
+    OpenMatrix9Gui::CoreNotes::registerTypes();
     AddThreeDmMethods(module);
+    AddLayerDocumentMethods(module);
     AddThreeDmRegistryMethods(module);
-    OpenMatrix9Gui::initializeHistoryTypes();
-    OpenMatrix9Gui::initializeUnitTypes();
-    OpenMatrix9Gui::addUnitMethods(module);
-    OpenMatrix9Gui::addCPlaneMethods(module);
-    OpenMatrix9Gui::initializeEditSpecialTypes();
-    OpenMatrix9Gui::initializeBuilderHistoryTypes();
-    AddBuilderHistoryMethods(module);
-    OpenMatrix9Gui::initializeCageTypes();
-    OpenMatrix9Gui::AddCageMethods(module);
+    AddModelingSnapMethods(module);
+    AddSnapQueryMethods(module);
+    AddModelingCurveMethods(module);
 
     Base::Console().message(
         "Loading OpenMatrix9 GUI...\n"

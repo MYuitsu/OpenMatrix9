@@ -14,7 +14,7 @@ public:
     bool start(std::size_t,bool fromCommand=false);void cancel();void submit(const QString&);
 protected:bool eventFilter(QObject*,QEvent*)override;
 private:
-    EditController();bool valid()const;void prompt(const QString&);void refresh();void add(const std::string&);
+    EditController();bool valid()const;void prompt(const QString&);void refresh();bool add(const std::string&);
     void prepare();void rebuildTrim();void preview();void clearPreview();void commit();void trim(const std::string&,const std::array<double,3>&);void error(const std::exception&);
     bool enabled=false;App::Document* document=nullptr;std::size_t command=0;unsigned kind=0;
     std::vector<EditInput> inputs;EditShapes output;std::vector<EditShapes> fragments;

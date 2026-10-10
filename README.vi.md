@@ -1,3 +1,5 @@
+> **OpenMatrix9 0.0.1 (experimental, Windows x64)**: [Download release](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.1) · [Installation guide](INSTALL.vi.md). Use the matching FreeCAD portable host supplied with this release.
+
 # OpenMatrix9 — Tiếng Việt
 
 [English](README.en.md) · [Danh sách chi tiết từng lệnh](README.md)

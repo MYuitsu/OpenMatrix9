@@ -1,0 +1,27 @@
+{
+  "checks": [
+    {
+      "name": "draft canceled synchronously workbench",
+      "passed": true
+    },
+    {
+      "name": "draft canceled synchronously document-switch-return",
+      "passed": true
+    },
+    {
+      "name": "draft canceled synchronously document-close",
+      "passed": true
+    },
+    {
+      "name": "draft canceled synchronously document-replacement",
+      "passed": true
+    },
+    {
+      "name": "draft canceled synchronously object-replacement",
+      "passed": true
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_rust_context_smoke-1\36ca732f366847e3a8fb70380f03882e

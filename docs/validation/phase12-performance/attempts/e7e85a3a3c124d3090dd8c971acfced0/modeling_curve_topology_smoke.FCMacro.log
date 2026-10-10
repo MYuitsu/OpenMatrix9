@@ -1,0 +1,36 @@
+{
+  "checks": [
+    {
+      "name": "Join rejects T branch before any mutation or Undo",
+      "passed": true
+    },
+    {
+      "name": "fixture has valid native wire but incomplete ordered traversal",
+      "passed": true
+    },
+    {
+      "name": "Rebuild rejects branched wire before dialog and transaction",
+      "passed": true
+    },
+    {
+      "name": "Rebuild still accepts entire simple native chain",
+      "passed": true
+    },
+    {
+      "name": "Rebuild retains both chain endpoints with default DeleteInput",
+      "passed": true
+    },
+    {
+      "name": "rebuilt full-chain V5 export retains both endpoints",
+      "passed": true
+    },
+    {
+      "name": "whole-chain Rebuild Undo restores complete original",
+      "passed": true
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd",
+  "exported": "H:\\FreeCAD-src\\build\\om9-perf-dev\\build\\modeling_curve_topology_smoke-1\\a116659a3a3742c1918fb4efcb302f3e\\rebuilt-whole-chain-v5.3dm"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_curve_topology_smoke-1\a116659a3a3742c1918fb4efcb302f3e

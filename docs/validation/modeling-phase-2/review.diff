@@ -1,0 +1,2650 @@
+--- baseline/CMakeLists.txt
++++ candidate/CMakeLists.txt
+@@ -14,6 +14,7 @@
+     ThreeDm.py
+     ThreeDmModeling.py
+     ThreeDmClipboard.py
++    ModelingCurveEditor.py
+     ThreeDmArchiveState.py
+     ThreeDmStorage.py
+     ThreeDmTextDot.py
+--- baseline/Gui/AppOpenMatrix9Gui.cpp
++++ candidate/Gui/AppOpenMatrix9Gui.cpp
+@@ -11,6 +11,9 @@
+ void CreateOpenMatrix9Commands();
+ void AddThreeDmMethods(PyObject*);
+ void AddThreeDmRegistryMethods(PyObject*);
++void AddModelingSnapMethods(PyObject*);
++void AddSnapQueryMethods(PyObject*);
++void AddModelingCurveMethods(PyObject*);
+ 
+ 
+ namespace OpenMatrix9Gui
+@@ -61,6 +64,9 @@
+         OpenMatrix9Gui::initModule();
+     AddThreeDmMethods(module);
+     AddThreeDmRegistryMethods(module);
++    AddModelingSnapMethods(module);
++    AddSnapQueryMethods(module);
++    AddModelingCurveMethods(module);
+ 
+     Base::Console().message(
+         "Loading OpenMatrix9 GUI...\n"
+--- baseline/Gui/CMakeLists.txt
++++ candidate/Gui/CMakeLists.txt
+@@ -137,6 +137,12 @@
+     Command.cpp
+     CurveController.cpp
+     CurveController.h
++    CurveGeometry.cpp
++    CurveGeometry.h
++    CoreRebuild.cpp
++    CoreRebuild.h
++    ModelingCurveEditor.cpp
++    ModelingCurveEditor.h
+     CommandConsole.cpp
+     CommandConsole.h
+     CoreWorkspace.cpp
+@@ -153,6 +159,10 @@
+     CoreDistance.h
+     CoreSnapGeometry.cpp
+     CoreSnapGeometry.h
++    SnapObjectInfo.cpp
++    SnapObjectInfo.h
++    SnapQueryIndex.cpp
++    SnapQueryIndex.h
+     CoreSnaps.cpp
+     CoreSnaps.h
+     CoreKeyboard.cpp
+--- baseline/Gui/CoreRebuild.cpp
++++ candidate/Gui/CoreRebuild.cpp
+@@ -0,0 +1,212 @@
++#include "CoreRebuild.h"
++#include "CurveController.h"
++#include "CurveGeometry.h"
++#include "RustBridge.h"
++#include <Base/Interpreter.h>
++#include <App/Application.h>
++#include <App/Document.h>
++#include <App/GeoFeature.h>
++#include <App/PropertyGeo.h>
++#include <Gui/Application.h>
++#include <Gui/Document.h>
++#include <Gui/MainWindow.h>
++#include <Gui/Control.h>
++#include <Gui/Selection/Selection.h>
++#include <Gui/View3DInventor.h>
++#include <Gui/View3DInventorViewer.h>
++#include <Inventor/nodes/SoSeparator.h>
++#include <Inventor/nodes/SoPickStyle.h>
++#include <Inventor/nodes/SoBaseColor.h>
++#include <Inventor/nodes/SoCoordinate3.h>
++#include <Inventor/nodes/SoLineSet.h>
++#include <QApplication>
++#include <QDialog>
++#include <QFormLayout>
++#include <QSpinBox>
++#include <QCheckBox>
++#include <QLabel>
++#include <QPushButton>
++#include <QDialogButtonBox>
++#include <QPointer>
++#include <QTimer>
++#include <QKeyEvent>
++#include <set>
++#include <cmath>
++#include <algorithm>
++namespace OpenMatrix9Gui {
++struct CoreRebuild::State {
++    struct Input {
++        std::string name;
++        CurvePyRef object,shape,edge;
++        bool closed;
++        Base::Placement globalPlacement;
++        int count=0,degree=0;
++        Input(std::string n,PyObject* o,PyObject* s,PyObject* e,bool c):name(std::move(n)),object(o),shape(s),edge(e),closed(c){}
++    };
++    App::Document* document=nullptr;
++    std::size_t command=0;
++    bool selecting=false;
++    std::vector<std::unique_ptr<Input>> inputs;
++    QPointer<QDialog> dialog;
++    QSpinBox *count=nullptr,*degree=nullptr;
++    QCheckBox* remove=nullptr;
++    QLabel *deviation=nullptr,*error=nullptr;
++    std::vector<std::pair<SoSeparator*,SoSeparator*>> previews;
++    fastsignals::scoped_connection documentChanged,documentDeleted;
++};
++CoreRebuild& CoreRebuild::instance(){static auto* tool=new CoreRebuild;return *tool;}
++CoreRebuild::CoreRebuild():QObject(qApp),state(std::make_unique<State>()) {
++    qApp->installEventFilter(this);
++    state->documentChanged=App::GetApplication().signalActiveDocument.connect([this](const App::Document& doc){if(active()&&state->document!=&doc)cancel();});
++    state->documentDeleted=App::GetApplication().signalDeleteDocument.connect([this](const App::Document& doc){if(state->document==&doc)cancel();});
++    auto* timer=new QTimer(this);timer->setInterval(100);connect(timer,&QTimer::timeout,this,[this]{if(active()&&!valid())cancel();});timer->start();
++}
++bool CoreRebuild::handles(std::size_t index){auto* id=om9_command_id(index);return id&&std::string(id)=="Rebuild";}
++bool CoreRebuild::active()const{return state->selecting||state->dialog;}
++bool CoreRebuild::valid()const {
++    auto* gui=Gui::Application::Instance->activeDocument();
++    return state->document&&state->document==App::GetApplication().getActiveDocument()&&gui&&!gui->getInEdit()&&!gui->isAboutToClose()&&Gui::Control().isAllowedAlterDocument(state->document);
++}
++void CoreRebuild::clearPreview(){for(auto [root,node]:state->previews){if(root->findChild(node)>=0)root->removeChild(node);root->unref();}state->previews.clear();}
++void CoreRebuild::cancel(){
++    clearPreview();state->selecting=false;state->document=nullptr;
++    if(state->dialog){auto* d=state->dialog.data();state->dialog=nullptr;d->setObjectName({});d->hide();d->deleteLater();}
++    Base::PyGILStateLocker lock;state->inputs.clear();
++}
++bool CoreRebuild::start(std::size_t command){
++    cancel();state->document=App::GetApplication().getActiveDocument();state->command=command;
++    if(!valid()){cancel();return false;}
++    state->selecting=true;
++    if(Gui::Selection().hasSelection(state->document->getName()))options();
++    else {CurveController::instance().setPrompt("Rebuild: Select curves, then press Enter. Esc cancels.");CurveController::instance().logMessage("Rebuild: Select curves, then press Enter. Esc cancels.");}
++    return active();
++}
++void CoreRebuild::submit(const QString& input){
++    if(input.compare("Cancel",Qt::CaseInsensitive)==0||input.compare("Esc",Qt::CaseInsensitive)==0){cancel();CurveController::instance().setPrompt("Command: ");}
++    else if(state->selecting&&input.trimmed().isEmpty())options();
++    else if(state->selecting)CurveController::instance().setPrompt("Rebuild: Select curves and press Enter, or Esc to cancel.");
++}
++bool CoreRebuild::eventFilter(QObject* watched,QEvent* event){
++    if(!active()||event->type()!=QEvent::KeyPress)return false;
++    auto* key=static_cast<QKeyEvent*>(event);
++    if(key->key()==Qt::Key_Escape){cancel();CurveController::instance().setPrompt("Command: ");return true;}
++    if(!state->selecting||!(key->key()==Qt::Key_Return||key->key()==Qt::Key_Enter))return false;
++    auto* gui=Gui::Application::Instance->activeDocument();auto* view=gui?dynamic_cast<Gui::View3DInventor*>(gui->getActiveView()):nullptr;auto* widget=qobject_cast<QWidget*>(watched);
++    if(view&&widget&&(widget==view->getViewer()||view->getViewer()->isAncestorOf(widget))){options();return true;}
++    return false;
++}
++void CoreRebuild::options(){
++    if(!valid()){cancel();return;}
++    Base::PyGILStateLocker lock;
++    try {
++        state->inputs.clear();CurvePyRef doc(state->document->getPyObject());std::set<std::string> seen;
++        for(const auto& selection:Gui::Selection().getSelection(state->document->getName())){
++            if(selection.SubName&&*selection.SubName)throw std::runtime_error("Select whole curve objects; surface edges cannot be rebuilt here");
++            if(!seen.insert(selection.FeatName).second)continue;
++            if(seen.size()>16)throw std::runtime_error("Rebuild supports up to 16 curves per operation");
++            CurvePyRef object(PyObject_CallMethod(doc.value,"getObject","s",selection.FeatName));
++            if(!PyObject_HasAttrString(object.value,"Shape"))throw std::runtime_error("Selection contains an object without curve geometry");
++            CurvePyRef shape(PyObject_GetAttrString(object.value,"Shape")),world(PyObject_CallMethod(shape.value,"copy",nullptr));
++            auto* native=state->document->getObject(selection.FeatName);
++            const auto globalPlacement=App::GeoFeature::getGlobalPlacement(native);
++            if(native->getPropertyByName<App::PropertyPlacement>("Placement")){
++                // Shape includes the child's local placement; add the parent only.
++                CurvePyRef global(PyObject_CallMethod(object.value,"getGlobalPlacement",nullptr)),local(PyObject_GetAttrString(object.value,"Placement"));
++                CurvePyRef inverse(PyObject_CallMethod(local.value,"inverse",nullptr)),parent(PyNumber_Multiply(global.value,inverse.value)),matrix(PyObject_CallMethod(parent.value,"toMatrix",nullptr));
++                CurvePyRef transformed(PyObject_CallMethod(world.value,"transformShape","OO",matrix.value,Py_False));
++            }
++            CurvePyRef faces(PyObject_GetAttrString(world.value,"Faces")),edges(PyObject_GetAttrString(world.value,"Edges"));
++            if(PySequence_Size(faces.value)||PySequence_Size(edges.value)<1)throw std::runtime_error("Rebuild requires curves; surfaces and solids are unsupported");
++            CurvePyRef edge([&]()->PyObject*{
++                if(PySequence_Size(edges.value)==1)return PySequence_GetItem(edges.value,0);
++                CurvePyRef wires(PyObject_GetAttrString(world.value,"Wires"));
++                if(PySequence_Size(wires.value)!=1)throw std::runtime_error("Select one connected curve per object");
++                CurvePyRef wire(PySequence_GetItem(wires.value,0)),wireEdges(PyObject_GetAttrString(wire.value,"Edges"));
++                if(PySequence_Size(wireEdges.value)!=PySequence_Size(edges.value))throw std::runtime_error("Selection contains disconnected curve segments");
++                return Py_NewRef(wire.value);
++            }()),closed(PyObject_CallMethod(edge.value,"isClosed",nullptr));
++            if(PyObject_IsTrue(closed.value)<0)throw std::runtime_error("Cannot determine curve closure");
++            auto input=std::make_unique<State::Input>(selection.FeatName,Py_NewRef(object.value),Py_NewRef(shape.value),Py_NewRef(edge.value),PyObject_IsTrue(closed.value)==1);
++            input->globalPlacement=globalPlacement;
++            CurvePyRef firstEdge(PySequence_GetItem(edges.value,0)),curve(PyObject_GetAttrString(firstEdge.value,"Curve"));
++            if(PyObject_HasAttrString(curve.value,"NbPoles")){CurvePyRef n(PyObject_GetAttrString(curve.value,"NbPoles"));input->count=int(PyLong_AsLong(n.value));}
++            if(PyObject_HasAttrString(curve.value,"Degree")){CurvePyRef n(PyObject_GetAttrString(curve.value,"Degree"));input->degree=int(PyLong_AsLong(n.value));}
++            state->inputs.push_back(std::move(input));
++        }
++        if(state->inputs.empty()){CurveController::instance().setPrompt("Rebuild: Select at least one curve, then press Enter.");return;}
++        state->selecting=false;
++        auto* dialog=new QDialog(Gui::getMainWindow());state->dialog=dialog;dialog->setObjectName("OM9RebuildDialog");dialog->setWindowTitle("Rebuild Curve");dialog->setAttribute(Qt::WA_DeleteOnClose);
++        auto* layout=new QFormLayout(dialog);
++        QStringList current;for(const auto& i:state->inputs)current<<QString("%1: PointCount (%2), Degree (%3)").arg(QString::fromStdString(i->name)).arg(i->count?QString::number(i->count):"analytic").arg(i->degree?QString::number(i->degree):"analytic");
++        layout->addRow(new QLabel(current.join('\n'),dialog));
++        state->count=new QSpinBox(dialog);state->count->setObjectName("OM9RebuildPointCount");state->count->setRange(2,256);state->count->setValue(std::clamp(state->inputs[0]->count,4,256));layout->addRow("PointCount",state->count);
++        state->degree=new QSpinBox(dialog);state->degree->setObjectName("OM9RebuildDegree");state->degree->setRange(1,11);state->degree->setValue(std::clamp(state->inputs[0]->degree,1,3));layout->addRow("Degree",state->degree);
++        state->remove=new QCheckBox("DeleteInput",dialog);state->remove->setObjectName("OM9RebuildDeleteInput");state->remove->setChecked(true);layout->addRow(state->remove);
++        auto* layer=new QCheckBox("Create new object on current layer",dialog);layer->setEnabled(false);layer->setToolTip("Active layers are not available in this workbench. Output is created at the document root.");layout->addRow(layer);
++        state->deviation=new QLabel("Maximum deviation: click Preview",dialog);state->deviation->setObjectName("OM9RebuildDeviation");layout->addRow(state->deviation);
++        state->error=new QLabel(dialog);state->error->setWordWrap(true);state->error->setObjectName("OM9RebuildError");layout->addRow(state->error);
++        auto* buttons=new QDialogButtonBox(dialog);auto* ok=buttons->addButton(QDialogButtonBox::Ok);ok->setObjectName("OM9RebuildOK");auto* no=buttons->addButton(QDialogButtonBox::Cancel);no->setObjectName("OM9RebuildCancel");auto* preview=buttons->addButton("Preview",QDialogButtonBox::ActionRole);preview->setObjectName("OM9RebuildPreview");layout->addRow(buttons);
++        connect(preview,&QPushButton::clicked,this,[this]{calculate(false);});connect(ok,&QPushButton::clicked,this,[this]{calculate(true);});connect(no,&QPushButton::clicked,this,[this]{cancel();CurveController::instance().setPrompt("Command: ");});
++        connect(dialog,&QDialog::rejected,this,[this]{cancel();CurveController::instance().setPrompt("Command: ");});
++        auto stale=[this]{clearPreview();if(state->dialog){state->deviation->setText("Maximum deviation: click Preview");state->error->clear();}};
++        connect(state->count,&QSpinBox::valueChanged,this,stale);connect(state->degree,&QSpinBox::valueChanged,this,stale);
++        CurveController::instance().setPrompt("Rebuild: Adjust options, Preview, then OK; Cancel discards the preview.");dialog->show();
++    }catch(const std::exception& e){cancel();CurveController::instance().setPrompt(QString::fromUtf8(e.what()));CurveController::instance().logMessage(QString::fromUtf8(e.what()));}
++}
++void CoreRebuild::calculate(bool commit){
++    if(!valid()||!state->dialog){cancel();return;}
++    Base::PyGILStateLocker lock;clearPreview();
++    try {
++        const auto poles=std::size_t(state->count->value()),degree=std::size_t(state->degree->value());
++        if(!om9_spline_options(poles,degree))throw std::runtime_error("PointCount must exceed Degree (1 to 11)");
++        CurvePyRef doc(state->document->getPyObject()),part(PyImport_ImportModule("Part")),app(PyImport_ImportModule("FreeCAD"));
++        CurvePyRef vertex(PyObject_GetAttrString(part.value,"Vertex")),vector(PyObject_GetAttrString(app.value,"Vector"));
++        std::vector<CurvePyRef> outputs;double maximum=0;
++        for(const auto& input:state->inputs){
++            CurvePyRef current(PyObject_CallMethod(doc.value,"getObject","s",input->name.c_str()));
++            if(current.value!=input->object.value)throw std::runtime_error("A selected curve was removed or replaced; start Rebuild again");
++            if(!input->globalPlacement.isSame(App::GeoFeature::getGlobalPlacement(state->document->getObject(input->name.c_str())),1e-12))throw std::runtime_error("A selected curve's placement changed; start Rebuild again");
++            CurvePyRef shape(PyObject_GetAttrString(current.value,"Shape")),same(PyObject_CallMethod(shape.value,"isEqual","O",input->shape.value));
++            if(PyObject_IsTrue(same.value)!=1)throw std::runtime_error("A selected curve changed; start Rebuild again");
++            if(state->remove->isChecked()){CurvePyRef uses(PyObject_GetAttrString(current.value,"InList"));if(PySequence_Size(uses.value)>0)throw std::runtime_error("A selected curve has dependents. Clear DeleteInput to keep those links.");}
++            const auto n=std::max<std::size_t>(513,poles*4+1);auto samples=sampleCurve(input->edge.value,n);
++            if(input->closed)samples.back()=samples.front();
++            std::vector<double> xyz;xyz.reserve(n*3);for(const auto& p:samples)xyz.insert(xyz.end(),p.begin(),p.end());
++            if(!om9_spline_rebuild(xyz.data(),n,poles,degree,input->closed)){char message[1024]={};om9_spline_message(message,sizeof(message));throw std::runtime_error(message);}
++            outputs.push_back(publishedSplineShape());
++            if(!commit){
++                // Bidirectional sampled geometric distance, explicitly an estimate.
++                for(auto pair:{std::pair{input->edge.value,outputs.back().value},std::pair{outputs.back().value,input->edge.value}}){
++                    for(const auto& p:sampleCurve(pair.first,129)){
++                        CurvePyRef v(PyObject_CallFunction(vector.value,"ddd",p[0],p[1],p[2])),point(PyObject_CallOneArg(vertex.value,v.value));
++                        CurvePyRef distance(PyObject_CallMethod(point.value,"distToShape","O",pair.second)),first(PySequence_GetItem(distance.value,0));
++                        const double d=PyFloat_AsDouble(first.value);if(PyErr_Occurred()||!std::isfinite(d))throw std::runtime_error("Cannot measure rebuild deviation");maximum=std::max(maximum,d);
++                    }
++                }
++            }
++        }
++        if(commit){
++            state->document->openTransaction("Rebuild Curve");
++            try{
++                for(std::size_t i=0;i<outputs.size();++i){
++                    auto object=createCurveFeature(*state->document,outputs[i].value,"Rebuild");
++                    CurvePyRef oldView(PyObject_GetAttrString(state->inputs[i]->object.value,"ViewObject")),newView(PyObject_GetAttrString(object.value,"ViewObject"));
++                    for(const char* attr:{"LineColor","PointColor","LineWidth"}){CurvePyRef property(PyObject_GetAttrString(oldView.value,attr));if(PyObject_SetAttrString(newView.value,attr,property.value)<0)throw std::runtime_error("Cannot copy curve appearance");}
++                }
++                if(state->remove->isChecked())for(const auto& input:state->inputs)state->document->removeObject(input->name.c_str());
++                state->document->recompute();state->document->commitTransaction();
++            }catch(...){state->document->abortTransaction();throw;}
++            const auto command=state->command;cancel();om9_sidebar_record_execution(command,true);CurveController::instance().setPrompt("Command: ");CurveController::instance().logMessage("Rebuild completed");return;
++        }
++        for(const auto& output:outputs){
++            const auto sampled=sampleCurve(output.value,257);std::vector<SbVec3f> points;for(auto p:sampled)points.emplace_back(float(p[0]),float(p[1]),float(p[2]));
++            for(auto* base:Gui::Application::Instance->activeDocument()->getMDIViews())if(auto* view=dynamic_cast<Gui::View3DInventor*>(base)){
++                auto* root=dynamic_cast<SoSeparator*>(view->getViewer()->getSceneGraph());if(!root)continue;root->ref();auto* node=new SoSeparator;root->addChild(node);state->previews.emplace_back(root,node);
++                node->setName("OM9RebuildPreview");auto* pick=new SoPickStyle;pick->style=SoPickStyle::UNPICKABLE;node->addChild(pick);auto* color=new SoBaseColor;color->rgb.setValue(0.2f,1,0.65f);node->addChild(color);
++                auto* coords=new SoCoordinate3;coords->point.setValues(0,int(points.size()),points.data());node->addChild(coords);auto* line=new SoLineSet;line->numVertices.set1Value(0,int(points.size()));node->addChild(line);view->getViewer()->redraw();
++            }
++        }
++        state->error->clear();state->deviation->setText(QString("Maximum deviation (sampled): %1 mm").arg(maximum,0,'g',8));
++    }catch(const std::exception& e){clearPreview();if(state->dialog){state->error->setText(QString::fromUtf8(e.what()));state->deviation->setText("Maximum deviation: unavailable");}}
++}
++}
+--- baseline/Gui/CoreRebuild.h
++++ candidate/Gui/CoreRebuild.h
+@@ -0,0 +1,27 @@
++#pragma once
++#include <QObject>
++#include <memory>
++#include <cstddef>
++#include <QString>
++namespace OpenMatrix9Gui {
++// OM9-CURVE-009: native selection/dialog/transaction host for the Rust fitter.
++class CoreRebuild final:public QObject {
++public:
++    static CoreRebuild& instance();
++    static bool handles(std::size_t);
++    bool active()const;
++    bool start(std::size_t);
++    void cancel();
++    void submit(const QString&);
++protected:
++    bool eventFilter(QObject*,QEvent*)override;
++private:
++    CoreRebuild();
++    struct State;
++    std::unique_ptr<State> state;
++    void options();
++    bool valid()const;
++    void calculate(bool commit);
++    void clearPreview();
++};
++}
+--- baseline/Gui/CoreSnapGeometry.cpp
++++ candidate/Gui/CoreSnapGeometry.cpp
+@@ -1,96 +1,68 @@
+ #include "CoreSnapGeometry.h"
+-#include <App/DocumentObject.h>
+-#include <App/PropertyGeo.h>
+-#include <App/GeoFeature.h>
+-#include <Base/Interpreter.h>
+-#include <memory>
++#include "SnapObjectInfo.h"
++#include <TopExp_Explorer.hxx>
++#include <TopoDS.hxx>
++#include <BRep_Tool.hxx>
++#include <BRepAdaptor_Curve.hxx>
++#include <BRepAdaptor_Surface.hxx>
++#include <BRepTools.hxx>
++#include <BRepClass_FaceClassifier.hxx>
++#include <GCPnts_AbscissaPoint.hxx>
+ #include <cmath>
+-extern "C" unsigned om9_modeling_capabilities(unsigned kind);
+-namespace {
+-using PyRef=std::unique_ptr<PyObject,decltype(&Py_DecRef)>;
+-PyRef attr(PyObject* object,const char* name){return PyRef(PyObject_GetAttrString(object,name),&Py_DecRef);}
+-}
++extern "C" bool om9_modeling_snap_allowed(unsigned,bool,bool,unsigned);
+ namespace OpenMatrix9Gui {
+-static std::vector<Base::Vector3d> candidates(const App::DocumentObject* object,unsigned int mode){
+-    const bool midpoint=mode==4;
+-    std::vector<Base::Vector3d> result;
+-    if(!object)return result;
+-    if(auto* kind=object->getPropertyByName<App::PropertyInteger>("OM9GeometryKind"))if(!(om9_modeling_capabilities(kind->getValue())&2u))return result;
+-    Base::PyGILStateLocker lock;
+-    PyObject* raw=nullptr;
+-    Base::Matrix4D transform;
+-    if(!object->getSubObject("",&raw,&transform,true)){Py_XDECREF(raw);return result;}
+-    PyRef shape(raw,&Py_DecRef);if(!shape)return result;
+-    // Resolve geometry through the native object API, including App::Link.
+-    // Standalone vertices belong to Point Snap, not End Snap.
+-    auto edges=attr(shape.get(),"Edges");
+-    if(!edges){PyErr_Clear();return result;}
+-    const auto edgeCount=PySequence_Size(edges.get());
+-    if(edgeCount<0||(mode==8?edgeCount!=0:edgeCount==0)){if(PyErr_Occurred())PyErr_Clear();return result;}
+-    // getSubObject already includes the object's local placement. Add only
+-    // the parent transform so nested geometry is not placed twice.
+-    Base::Placement parentTransform;
+-    if(auto* local=object->getPropertyByName<App::PropertyPlacement>("Placement"))
+-        parentTransform=App::GeoFeature::getGlobalPlacement(object)*local->getValue().inverse();
+-    auto vertices=attr(shape.get(),midpoint?"Edges":"Vertexes");
+-    if(!vertices){PyErr_Clear();return result;}
+-    PyRef sequence(PySequence_Fast(vertices.get(),"Expected native shape vertices"),&Py_DecRef);
+-    if(!sequence){PyErr_Clear();return result;}
+-    const auto count=PySequence_Fast_GET_SIZE(sequence.get());result.reserve(static_cast<std::size_t>(count));
+-    const char* axes[]={"x","y","z"};
+-    for(Py_ssize_t i=0;i<count;++i){
+-        auto* item=PySequence_Fast_GET_ITEM(sequence.get(),i);
+-        PyRef point(nullptr,&Py_DecRef);
+-        if(midpoint){
+-            auto length=attr(item,"Length");
+-            if(!length){PyErr_Clear();continue;}
+-            const auto distance=PyFloat_AsDouble(length.get())/2.;
+-            if(PyErr_Occurred()){PyErr_Clear();continue;}
+-            if(!std::isfinite(distance)||distance<=0)continue;
+-            PyRef parameter(PyObject_CallMethod(item,"getParameterByLength","d",distance),&Py_DecRef);
+-            if(!parameter){PyErr_Clear();continue;}
+-            point=PyRef(PyObject_CallMethod(item,"valueAt","O",parameter.get()),&Py_DecRef);
+-        }else point=attr(item,"Point");
+-        if(!point){PyErr_Clear();continue;}
+-        Base::Vector3d value;bool valid=true;
+-        for(int axis=0;axis<3;++axis){
+-            auto component=attr(point.get(),axes[axis]);if(!component){PyErr_Clear();valid=false;break;}
+-            value[axis]=PyFloat_AsDouble(component.get());
+-            if(PyErr_Occurred()){PyErr_Clear();valid=false;break;}
+-            if(!std::isfinite(value[axis])||std::abs(value[axis])>1e9){valid=false;break;}
++SnapCandidates boundedSnapCandidates(const App::DocumentObject* object,unsigned mode,std::size_t budget) {
++    SnapCandidates result;
++    const auto info=classifySnapObject(object);
++    if(!om9_modeling_snap_allowed(info.kind,info.native_cad,info.preview,mode))return result;
++    budget=std::min(budget,std::size_t(2048));
++    if(!budget){result.complete=false;return result;}
++    TopExp_Explorer edges(info.shape,TopAbs_EDGE);
++    if(mode==8&&edges.More())return result;
++    if(mode==2&&!edges.More())return result;
++    auto append=[&](const gp_Pnt& point){
++        if(!std::isfinite(point.X())||!std::isfinite(point.Y())||!std::isfinite(point.Z()))return;
++        Base::Vector3d value;
++        info.global_transform.multVec(Base::Vector3d(point.X(),point.Y(),point.Z()),value);
++        if(std::isfinite(value.x)&&std::isfinite(value.y)&&std::isfinite(value.z))result.points.push_back(value);
++    };
++    auto visit=[&](){
++        ++result.visited_topology;
++        if(result.visited_topology>budget||result.points.size()>=budget){result.complete=false;return false;}
++        return true;
++    };
++    if(mode==2||mode==8) {
++        for(TopExp_Explorer vertices(info.shape,TopAbs_VERTEX);vertices.More();vertices.Next()) {
++            if(!visit())break;
++            append(BRep_Tool::Pnt(TopoDS::Vertex(vertices.Current())));
+         }
+-        if(valid){Base::Vector3d world;parentTransform.multVec(value,world);result.push_back(world);}
+-    }
+-    if(midpoint){
+-        auto faces=attr(shape.get(),"Faces");
+-        PyRef faceList(faces?PySequence_Fast(faces.get(),"Expected native faces"):nullptr,&Py_DecRef);
+-        if(!faceList){PyErr_Clear();return result;}
+-        for(Py_ssize_t i=0;i<PySequence_Fast_GET_SIZE(faceList.get());++i){
+-            auto* face=PySequence_Fast_GET_ITEM(faceList.get(),i);
+-            auto range=attr(face,"ParameterRange");
+-            double bounds[4];
+-            if(!range||!PyArg_ParseTuple(range.get(),"dddd",&bounds[0],&bounds[1],&bounds[2],&bounds[3])){PyErr_Clear();continue;}
+-            bool finite=true;for(double bound:bounds)finite=finite&&std::isfinite(bound);
+-            if(!finite)continue;
+-            PyRef point(PyObject_CallMethod(face,"valueAt","dd",bounds[0]/2.+bounds[1]/2.,bounds[2]/2.+bounds[3]/2.),&Py_DecRef);
+-            if(!point){PyErr_Clear();continue;}
+-            PyRef inside(PyObject_CallMethod(face,"isInside","OdO",point.get(),1e-7,Py_True),&Py_DecRef);
+-            if(!inside){PyErr_Clear();continue;}
+-            if(PyObject_IsTrue(inside.get())!=1)continue;
+-            Base::Vector3d value;bool valid=true;
+-            for(int axis=0;axis<3;++axis){
+-                auto component=attr(point.get(),axes[axis]);
+-                if(!component){PyErr_Clear();valid=false;break;}
+-                value[axis]=PyFloat_AsDouble(component.get());
+-                if(PyErr_Occurred()){PyErr_Clear();valid=false;break;}
+-                if(!std::isfinite(value[axis])||std::abs(value[axis])>1e9){valid=false;break;}
+-            }
+-            if(valid){Base::Vector3d world;parentTransform.multVec(value,world);result.push_back(world);}
++    } else if(mode==4) {
++        for(;edges.More();edges.Next()) {
++            if(!visit())return result;
++            try {
++                BRepAdaptor_Curve curve(TopoDS::Edge(edges.Current()));
++                const double first=curve.FirstParameter(),last=curve.LastParameter();
++                if(!std::isfinite(first)||!std::isfinite(last)||last<=first)continue;
++                const double length=GCPnts_AbscissaPoint::Length(curve,first,last);
++                if(!std::isfinite(length)||length<=0)continue;
++                GCPnts_AbscissaPoint half(curve,length/2.,first);
++                if(half.IsDone())append(curve.Value(half.Parameter()));
++            }catch(const Standard_Failure&){result.complete=false;return result;}
++        }
++        for(TopExp_Explorer faces(info.shape,TopAbs_FACE);faces.More();faces.Next()) {
++            if(!visit())return result;
++            const auto face=TopoDS::Face(faces.Current());double u0,u1,v0,v1;
++            BRepTools::UVBounds(face,u0,u1,v0,v1);
++            if(!std::isfinite(u0)||!std::isfinite(u1)||!std::isfinite(v0)||!std::isfinite(v1))continue;
++            gp_Pnt2d uv(u0/2.+u1/2.,v0/2.+v1/2.);
++            BRepClass_FaceClassifier classifier(face,uv,1e-7);
++            if(classifier.State()==TopAbs_IN||classifier.State()==TopAbs_ON)
++                append(BRepAdaptor_Surface(face).Value(uv.X(),uv.Y()));
+         }
+     }
+     return result;
+ }
+-std::vector<Base::Vector3d> endCandidates(const App::DocumentObject* object){return candidates(object,2);}
+-std::vector<Base::Vector3d> midCandidates(const App::DocumentObject* object){return candidates(object,4);}
+-std::vector<Base::Vector3d> pointCandidates(const App::DocumentObject* object){return candidates(object,8);}
++std::vector<Base::Vector3d> endCandidates(const App::DocumentObject* object){return boundedSnapCandidates(object,2,2048).points;}
++std::vector<Base::Vector3d> midCandidates(const App::DocumentObject* object){return boundedSnapCandidates(object,4,2048).points;}
++std::vector<Base::Vector3d> pointCandidates(const App::DocumentObject* object){return boundedSnapCandidates(object,8,2048).points;}
+ }
+--- baseline/Gui/CoreSnapGeometry.h
++++ candidate/Gui/CoreSnapGeometry.h
+@@ -3,6 +3,12 @@
+ #include <vector>
+ namespace App {class DocumentObject;}
+ namespace OpenMatrix9Gui {
++struct SnapCandidates {
++    std::vector<Base::Vector3d> points;
++    bool complete=true;
++    std::size_t visited_topology=0;
++};
++SnapCandidates boundedSnapCandidates(const App::DocumentObject*,unsigned mode,std::size_t budget);
+ // Native topology vertices with the object's Placement applied by getSubObject.
+ // Visibility, parent/link transforms and cursor projection belong to the caller.
+ std::vector<Base::Vector3d> endCandidates(const App::DocumentObject* object);
+--- baseline/Gui/CoreSnaps.cpp
++++ candidate/Gui/CoreSnaps.cpp
+@@ -1,5 +1,7 @@
+ #include "CoreSnaps.h"
+ #include "CoreSnapGeometry.h"
++#include "SnapQueryIndex.h"
++#include <QStatusBar>
+ #include "RustBridge.h"
+ #include <App/Application.h>
+ #include <App/Document.h>
+@@ -63,32 +65,15 @@
+ bool CoreSnaps::pick(Gui::View3DInventor* view,const QPoint& pixel,Base::Vector3d& output){
+     const auto state=om9_snap_state();
+     if(!enabled||!(state&1U)||!(state&14U)||!view)return false;
+-    auto* viewer=view->getViewer();auto* camera=viewer->getSoRenderManager()->getCamera();if(!camera)return false;
+-    auto* gui=Gui::Application::Instance->activeDocument();auto* document=App::GetApplication().getActiveDocument();if(!gui||!document||gui->isAboutToClose())return false;
+-    const int width=viewer->viewport()->width(),height=viewer->viewport()->height();if(width<=0||height<=0)return false;
+-    const auto volume=camera->getViewVolume(float(width)/height);
+-    std::vector<double> packed;std::vector<Base::Vector3d> points;
+-    for(auto* object:document->getObjects()){
+-        auto* provider=gui->getViewProvider(object);if(!provider||!provider->isVisible())continue;
+-        bool visible=true;std::unordered_set<const App::DocumentObject*> parents;
+-        for(auto* parent=App::GeoFeatureGroupExtension::getGroupOfObject(object);parent;parent=App::GeoFeatureGroupExtension::getGroupOfObject(parent)){
+-            if(!parents.insert(parent).second){visible=false;break;}
+-            auto* parentProvider=gui->getViewProvider(parent);
+-            if(!parentProvider||!parentProvider->isVisible()){visible=false;break;}
++    try {
++        SnapQuery query;query.cursor_px=pixel;query.modes=state&14U;
++        const auto result=querySnapCandidates(view,query);
++        if(!result.complete){
++            Gui::getMainWindow()->statusBar()->showMessage(QString::fromStdString(result.reason)+"; choose manually or enter coordinates",2000);
++            return false;
+         }
+-        if(!visible)continue;
+-        try {std::vector<Base::Vector3d> candidates;
+-            if(state&2U)candidates=endCandidates(object);
+-            if(state&4U){auto mid=midCandidates(object);candidates.insert(candidates.end(),mid.begin(),mid.end());}
+-            if(state&8U){auto points=pointCandidates(object);candidates.insert(candidates.end(),points.begin(),points.end());}
+-            for(const auto& point:candidates){
+-            SbVec3f projected;volume.projectToScreen(SbVec3f(float(point.x),float(point.y),float(point.z)),projected);
+-            if(projected[0]<0||projected[0]>1||projected[1]<0||projected[1]>1||projected[2]<0||projected[2]>1)continue;
+-            points.push_back(point);packed.insert(packed.end(),{point.x,point.y,point.z,double(projected[0])*width,(1.-double(projected[1]))*height});
+-        }}catch(const Base::Exception&){continue;}
+-    }
+-    const auto index=om9_snap_mode_pick(packed.data(),points.size(),pixel.x(),pixel.y(),8.,state&2U?2U:state&4U?4U:8U);
+-    if(index==std::numeric_limits<std::size_t>::max()||index>=points.size())return false;
+-    output=points[index];return true;
++        if(!result.picked)return false;
++        output=result.point;return true;
++    }catch(const std::exception& e){Gui::getMainWindow()->statusBar()->showMessage(QString::fromUtf8(e.what()),2000);return false;}
+ }
+ }
+--- baseline/Gui/CurveController.cpp
++++ candidate/Gui/CurveController.cpp
+@@ -8,6 +8,9 @@
+ #include "CorePictureFrame.h"
+ #include "CoreDistance.h"
+ #include "CoreSnaps.h"
++#include "CoreRebuild.h"
++#include "CurveGeometry.h"
++#include "ModelingCurveEditor.h"
+ #include "CoreKeyboard.h"
+ #include "CoreMouse.h"
+ #include <Base/Interpreter.h>
+@@ -75,7 +78,13 @@
+         PyRef point(PyObject_CallFunction(vector.value,"ddd",x,y,z));
+         if(PyList_Append(points.value,point.value)<0)throw std::runtime_error("Cannot append Curve point");
+     }
+-    PyRef shape(PyObject_CallMethod(part.value,"makePolygon","O",points.value));
++    PyRef shape([&]()->PyObject* {
++        if(std::string(label)=="InterpCrv") {
++            if(!om9_curve_spline_publish())throw std::runtime_error("No committed interpolated spline");
++            auto spline=OpenMatrix9Gui::publishedSplineShape();return Py_NewRef(spline.value);
++        }
++        return PyObject_CallMethod(part.value,"makePolygon","O",points.value);
++    }());
+     PyRef valid(PyObject_CallMethod(shape.value,"isValid",nullptr));
+     if(PyObject_IsTrue(valid.value)!=1)throw std::runtime_error("Part produced invalid geometry");
+     doc.openTransaction(std::string(label));
+@@ -91,7 +100,7 @@
+ }
+ }
+ namespace OpenMatrix9Gui {
+-bool isCurveCommand(std::size_t index) {const char* id=om9_command_id(index);return id && (std::string(id)=="Line" || std::string(id)=="Polyline");}
++bool isCurveCommand(std::size_t index) {const char* id=om9_command_id(index);return id && (std::string(id)=="Line" || std::string(id)=="Polyline" || std::string(id)=="InterpCrv" || std::string(id)=="Rebuild" || std::string(id)=="PointsOn" || std::string(id)=="Join");}
+ CurveController& CurveController::instance(){static auto* controller=new CurveController;return *controller;}
+ CurveController::CurveController():QObject(qApp) {
+     deleteConnection=App::GetApplication().signalDeleteDocument.connect([this](const App::Document& doc){if(document==doc.getName())cancel();});
+@@ -106,7 +115,7 @@
+         auto* title=new QWidget(dock);title->setFixedHeight(0);dock->setTitleBarWidget(title);
+         auto* body=new QWidget(dock);auto* layout=new QVBoxLayout(body);layout->setContentsMargins(4,2,4,2);layout->setSpacing(0);
+         console=new CommandConsole(body);layout->addWidget(console,1);
+-        console->completionEnabled=[this]{return enabled&&!om9_curve_active()&&!CoreDistance::instance().active()&&!CorePictureFrame::instance().active()&&!CoreViewControls::instance().toolActive();};
++        console->completionEnabled=[this]{return enabled&&!om9_curve_active()&&!CoreRebuild::instance().active()&&!CoreDistance::instance().active()&&!CorePictureFrame::instance().active()&&!CoreViewControls::instance().toolActive();};
+         console->completionAvailable=[](const QString& name){for(std::size_t i=0;i<om9_command_count();++i)if(name.compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0)return om9NativeCommandAvailable(i);return false;};
+         console->accepted=[this]{acceptInput();};
+         console->cancelled=[this]{console->setInputText({});historyPosition=-1;CoreDistance::instance().cancel();CorePictureFrame::instance().cancel();cancel();};
+@@ -124,15 +133,20 @@
+ }
+ void CurveController::deactivate(){enabled=false;cancel();if(dock)dock->hide();}
+ bool CurveController::available(std::size_t index)const {
++    if(QString::fromUtf8(om9_command_id(index))=="PointsOn")return enabled&&modelingCurveEditorAvailable();
++    if(QString::fromUtf8(om9_command_id(index))=="Join")return enabled&&modelingCurveJoinAvailable();
+     auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
+     return enabled&&isCurveCommand(index)&&doc&&gui&&!gui->getInEdit()&&dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())&&Gui::Control().isAllowedAlterDocument(doc);
+ }
+ bool CurveController::validDocument()const {auto* doc=App::GetApplication().getActiveDocument();return !document.empty()&&doc&&documentIdentity==doc&&document==doc->getName()&&available(command);}
+ bool CurveController::start(std::size_t index) {
+     if(!available(index))return false;CoreDistance::instance().cancel();CorePictureFrame::instance().cancel();CoreViewControls::instance().cancel();cancel();command=index;documentIdentity=App::GetApplication().getActiveDocument();document=App::GetApplication().getActiveDocument()->getName();
+-    const bool ok=om9_curve_start(om9_command_id(index));refresh();qApp->installEventFilter(this);CoreMouse::instance().prioritize();return ok;
+-}
+-void CurveController::cancel(){clearPreview();om9_curve_cancel();document.clear();documentIdentity=nullptr;refresh();}
++    if(CoreRebuild::handles(index))return CoreRebuild::instance().start(index);
++    if(QString::fromUtf8(om9_command_id(index))=="PointsOn")return startModelingCurveEditor();
++    if(QString::fromUtf8(om9_command_id(index))=="Join"){const bool ok=startModelingCurveJoin();om9_sidebar_record_execution(index,ok);refresh();return ok;}
++    const bool ok=om9_curve_start(om9_command_id(index));if(ok)updateInputFrame();refresh();qApp->installEventFilter(this);CoreMouse::instance().prioritize();return ok;
++}
++void CurveController::cancel(){CoreRebuild::instance().cancel();clearPreview();om9_curve_cancel();document.clear();documentIdentity=nullptr;refresh();}
+ void CurveController::acceptInput(){submit(console?console->takeInput():QString());}
+ bool CurveController::pendingInput()const{return console&&!console->inputText().trimmed().isEmpty();}
+ void CurveController::logMessage(const QString& message){if(console)console->logMessage(message);}
+@@ -143,9 +157,16 @@
+ }
+ void CurveController::updatePreview(const double* hover){
+     clearPreview();const auto count=om9_curve_preview_count();
+-    if(!count||!om9_curve_active()||QString::fromUtf8(om9_command_id(command))!="Polyline")return;
++    const bool interpolated=QString::fromUtf8(om9_command_id(command))=="InterpCrv";
++    if(!count||!om9_curve_active()||(!interpolated&&QString::fromUtf8(om9_command_id(command))!="Polyline"))return;
+     auto* gui=Gui::Application::Instance->activeDocument();if(!gui)return;
+     std::vector<SbVec3f> picked;for(std::size_t i=0;i<count;++i)picked.emplace_back(float(om9_curve_preview_coordinate(i,0)),float(om9_curve_preview_coordinate(i,1)),float(om9_curve_preview_coordinate(i,2)));
++    std::vector<SbVec3f> line=picked;
++    if(hover)line.emplace_back(float(hover[0]),float(hover[1]),float(hover[2]));
++    if(interpolated){
++        line.clear();
++        if(om9_curve_preview_spline_closed(hover,false))for(int i=0;i<=128;++i)line.emplace_back(float(om9_spline_value(i/128.,0)),float(om9_spline_value(i/128.,1)),float(om9_spline_value(i/128.,2)));
++    }
+     for(auto* base:gui->getMDIViews()){
+         auto* view=dynamic_cast<Gui::View3DInventor*>(base);if(!view)continue;
+         auto* root=dynamic_cast<SoSeparator*>(view->getViewer()->getSceneGraph());if(!root)continue;
+@@ -155,9 +176,9 @@
+         auto* content=new SoSeparator;content->setName("OM9CurvePreview");skip->addChild(content);
+         auto* pick=new SoPickStyle;pick->style=SoPickStyle::UNPICKABLE;content->addChild(pick);
+         auto* color=new SoBaseColor;color->rgb.setValue(0,130.f/255.f,85.f/255.f);content->addChild(color);
+-        auto* coords=new SoCoordinate3;coords->setName("OM9CurvePreviewLine");coords->point.setValues(0,int(count),picked.data());if(hover)coords->point.set1Value(int(count),float(hover[0]),float(hover[1]),float(hover[2]));content->addChild(coords);
++        auto* coords=new SoCoordinate3;coords->setName("OM9CurvePreviewLine");if(!line.empty())coords->point.setValues(0,int(line.size()),line.data());content->addChild(coords);
+         auto* style=new SoDrawStyle;style->lineWidth=1;content->addChild(style);
+-        auto* lines=new SoLineSet;lines->numVertices.set1Value(0,int(count)+(hover?1:0));content->addChild(lines);
++        auto* lines=new SoLineSet;lines->numVertices.set1Value(0,int(line.size()));content->addChild(lines);
+         auto* markers=new SoSeparator;content->addChild(markers);
+         auto* points=new SoCoordinate3;points->setName("OM9CurvePreviewPoints");points->point.setValues(0,int(count),picked.data());markers->addChild(points);
+         auto* outer=new SoDrawStyle;outer->pointSize=7;markers->addChild(outer);markers->addChild(new SoPointSet);
+@@ -166,7 +187,7 @@
+         view->getViewer()->redraw();
+     }
+ }
+-void CurveController::refresh(){if(CoreDistance::instance().active()||CorePictureFrame::instance().active())return;char message[2048]={};om9_curve_message(message,sizeof(message));setPrompt(QString::fromUtf8(message));if(om9_curve_active())logMessage(QString::fromUtf8(message));}
++void CurveController::refresh(){if(CoreRebuild::instance().active()||CoreDistance::instance().active()||CorePictureFrame::instance().active())return;char message[2048]={};om9_curve_message(message,sizeof(message));setPrompt(QString::fromUtf8(message));if(om9_curve_active())logMessage(QString::fromUtf8(message));}
+ void CurveController::submit(const QString& text) {
+     if(!enabled)return;
+     const auto input=text.trimmed();
+@@ -175,6 +196,7 @@
+     CoreKeyboard::instance().record(input);
+     if(CoreKeyboard::instance().submit(input))return;
+     if(CoreSnaps::submit(input))return;
++    if(CoreRebuild::instance().active()){CoreRebuild::instance().submit(input);return;}
+     for(std::size_t i=0;i<om9_command_count();++i)if(om9_3dm_operation(i)&&input.compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0){cancel();om9_sidebar_record_execution(i,om9ExecuteNativeCommand(i));refresh();return;}
+     if(input.compare("Distance",Qt::CaseInsensitive)==0||input.compare("Angle",Qt::CaseInsensitive)==0){for(std::size_t i=0;i<om9_command_count();++i)if(CoreDistance::handles(i)&&input.compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0){CoreDistance::instance().start(i);return;}}
+     if(CoreDistance::instance().active()){
+@@ -203,7 +225,7 @@
+         if(om9_sidebar_history_count()){const auto previous=om9_sidebar_history_command(0);if(om9NativeCommandAvailable(previous)){logMessage("Command: "+QString::fromUtf8(om9_command_id(previous)));om9_sidebar_record_execution(previous,om9ExecuteNativeCommand(previous));return;}}
+         refresh();return;
+     }
+-    setPrompt("Unknown or unsupported command. Available: Line, Polyline");logMessage(console->property("om9Prompt").toString());
++    setPrompt("Unknown or unsupported command. Available: Line, Polyline, InterpCrv, Rebuild");logMessage(console->property("om9Prompt").toString());
+ }
+ void CurveController::result(unsigned int effect) {
+     refresh();
+--- baseline/Gui/CurveGeometry.cpp
++++ candidate/Gui/CurveGeometry.cpp
+@@ -0,0 +1,50 @@
++#include "CurveGeometry.h"
++#include "RustBridge.h"
++#include <App/Document.h>
++#include <cmath>
++namespace OpenMatrix9Gui {
++CurvePyRef publishedSplineShape() {
++    // OM9-CURVE-003/009: Rust fits poles; OCCT constructs the native B-spline.
++    const auto count=om9_spline_pole_count(), degree=om9_spline_degree(), knots=om9_spline_knot_count();
++    if(count<=degree||count>256||!degree||knots<2)throw std::runtime_error("Invalid Rust spline output");
++    CurvePyRef app(PyImport_ImportModule("FreeCAD")),part(PyImport_ImportModule("Part"));
++    CurvePyRef vector(PyObject_GetAttrString(app.value,"Vector"));
++    CurvePyRef poles(PyList_New(0)),mults(PyList_New(0)),values(PyList_New(0));
++    for(std::size_t i=0;i<count;++i){
++        const double x=om9_spline_pole(i,0),y=om9_spline_pole(i,1),z=om9_spline_pole(i,2);
++        if(!std::isfinite(x)||!std::isfinite(y)||!std::isfinite(z))throw std::runtime_error("Nonfinite spline pole");
++        CurvePyRef p(PyObject_CallFunction(vector.value,"ddd",x,y,z));
++        if(PyList_Append(poles.value,p.value)<0)throw std::runtime_error("Cannot append spline pole");
++    }
++    for(std::size_t i=0;i<knots;++i){
++        CurvePyRef u(PyFloat_FromDouble(om9_spline_knot(i))),m(PyLong_FromSize_t(om9_spline_multiplicity(i)));
++        if(PyList_Append(values.value,u.value)<0||PyList_Append(mults.value,m.value)<0)throw std::runtime_error("Cannot append spline knot");
++    }
++    CurvePyRef type(PyObject_GetAttrString(part.value,"BSplineCurve")),curve(PyObject_CallNoArgs(type.value));
++    CurvePyRef built(PyObject_CallMethod(curve.value,"buildFromPolesMultsKnots","OOOOn",poles.value,mults.value,values.value,om9_spline_periodic()?Py_True:Py_False,Py_ssize_t(degree)));
++    CurvePyRef shape(PyObject_CallMethod(curve.value,"toShape",nullptr));
++    CurvePyRef valid(PyObject_CallMethod(shape.value,"isValid",nullptr));
++    if(PyObject_IsTrue(valid.value)!=1)throw std::runtime_error("Part produced invalid spline geometry");
++    return shape;
++}
++CurvePyRef createCurveFeature(App::Document& doc,PyObject* shape,const char* name) {
++    CurvePyRef pyDoc(doc.getPyObject()),object(PyObject_CallMethod(pyDoc.value,"addObject","ss","Part::Feature",name));
++    if(PyObject_SetAttrString(object.value,"Shape",shape)<0)throw std::runtime_error("Cannot assign curve shape");
++    CurvePyRef view(PyObject_GetAttrString(object.value,"ViewObject")),color(Py_BuildValue("(ddd)",0.0,130.0/255.0,85.0/255.0));
++    if(PyObject_SetAttrString(view.value,"LineColor",color.value)<0)throw std::runtime_error("Cannot assign curve color");
++    return object;
++}
++std::vector<std::array<double,3>> sampleCurve(PyObject* edge,std::size_t count) {
++    CurvePyRef method(PyObject_GetAttrString(edge,"discretize")),args(PyTuple_New(0)),kwargs(Py_BuildValue("{s:n}","Number",Py_ssize_t(count)));
++    CurvePyRef points(PyObject_Call(method.value,args.value,kwargs.value));
++    const auto n=PySequence_Size(points.value);
++    if(n!=Py_ssize_t(count))throw std::runtime_error("Curve cannot be sampled with the requested count");
++    std::vector<std::array<double,3>> output;output.reserve(count);
++    for(Py_ssize_t i=0;i<n;++i){
++        CurvePyRef p(PySequence_GetItem(points.value,i));std::array<double,3> xyz;
++        for(int j=0;j<3;++j){CurvePyRef v(PyObject_GetAttrString(p.value,j==0?"x":j==1?"y":"z"));xyz[j]=PyFloat_AsDouble(v.value);if(PyErr_Occurred()||!std::isfinite(xyz[j]))throw std::runtime_error("Invalid sampled coordinate");}
++        output.push_back(xyz);
++    }
++    return output;
++}
++}
+--- baseline/Gui/CurveGeometry.h
++++ candidate/Gui/CurveGeometry.h
+@@ -0,0 +1,22 @@
++#pragma once
++#include <Python.h>
++#include <array>
++#include <vector>
++#include <stdexcept>
++#include <utility>
++namespace App {class Document;}
++namespace OpenMatrix9Gui {
++// Owned references for the typed native Part adapter; command input is never evaluated.
++class CurvePyRef {
++public:
++    PyObject* value;
++    explicit CurvePyRef(PyObject* object):value(object) {if(!value){PyErr_Print();throw std::runtime_error("Native Part curve operation failed");}}
++    ~CurvePyRef(){Py_XDECREF(value);}
++    CurvePyRef(const CurvePyRef&)=delete;
++    CurvePyRef& operator=(const CurvePyRef&)=delete;
++    CurvePyRef(CurvePyRef&& other)noexcept:value(std::exchange(other.value,nullptr)){}
++};
++CurvePyRef publishedSplineShape();
++CurvePyRef createCurveFeature(App::Document&,PyObject* shape,const char* name);
++std::vector<std::array<double,3>> sampleCurve(PyObject* edge,std::size_t count);
++}
+--- baseline/Gui/ModelingCurveEditor.cpp
++++ candidate/Gui/ModelingCurveEditor.cpp
+@@ -0,0 +1,162 @@
++#include "ModelingCurveEditor.h"
++#include "SnapObjectInfo.h"
++#include <Base/Interpreter.h>
++#include <App/Application.h>
++#include <App/Document.h>
++#include <App/DocumentObject.h>
++#include <Mod/Part/App/PropertyTopoShape.h>
++#include <Gui/Application.h>
++#include <Gui/Document.h>
++#include <Gui/Control.h>
++#include <Gui/Selection/Selection.h>
++#include <BRepAdaptor_Curve.hxx>
++#include <BRepBuilderAPI_MakeEdge.hxx>
++#include <BRepBuilderAPI_MakeWire.hxx>
++#include <BRepBuilderAPI_GTransform.hxx>
++#include <TopTools_ListOfShape.hxx>
++#include <set>
++#include <BRepCheck_Analyzer.hxx>
++#include <BRep_Tool.hxx>
++#include <GeomConvert.hxx>
++#include <Geom_BSplineCurve.hxx>
++#include <Geom_TrimmedCurve.hxx>
++#include <NCollection_Array1.hxx>
++#include <TopExp_Explorer.hxx>
++#include <TopoDS.hxx>
++#include <QJsonDocument>
++#include <QJsonArray>
++#include <QCryptographicHash>
++#include <cmath>
++#include <stdexcept>
++namespace {
++struct Basis {App::DocumentObject* object;Part::PropertyPartShape* property;Handle(Geom_BSplineCurve) curve;double first,last;TopoDS_Edge edge;};
++Basis readBasis(App::Document& doc,const std::string& name) {
++    auto* object=doc.getObject(name.c_str());if(!object||object->getLinkedObject(true)!=object)throw std::runtime_error("Select one owning editable native curve, not a Link");
++    const auto info=OpenMatrix9Gui::classifySnapObject(object);if(!info.native_cad||info.preview)throw std::runtime_error("Selection is not independently editable CAD");
++    auto* property=object->getPropertyByName<Part::PropertyPartShape>("Shape");
++    TopExp_Explorer faces(info.shape,TopAbs_FACE);if(faces.More())throw std::runtime_error("Surface/solid CV editing is outside this curve editor");
++    TopExp_Explorer edges(info.shape,TopAbs_EDGE);if(!edges.More())throw std::runtime_error("Select a single native curve edge");
++    const auto edge=TopoDS::Edge(edges.Current());edges.Next();if(edges.More())throw std::runtime_error("Select a single native curve edge, not a multi-edge wire");
++    double first,last;auto geometry=BRep_Tool::Curve(edge,first,last);
++    if(geometry.IsNull()||!std::isfinite(first)||!std::isfinite(last)||last<=first)throw std::runtime_error("Curve has an invalid parameter domain");
++    auto curve=Handle(Geom_BSplineCurve)::DownCast(geometry);
++    if(curve.IsNull()){curve=GeomConvert::CurveToBSplineCurve(new Geom_TrimmedCurve(geometry,first,last));first=curve->FirstParameter();last=curve->LastParameter();}
++    if(curve.IsNull()||curve->NbPoles()>4096||curve->NbKnots()>4096)throw std::runtime_error("Selected curve exceeds editor basis budget");
++    return {object,property,curve,first,last,edge};
++}
++QJsonObject values(const Basis& basis) {
++    QJsonArray poles,weights,knots,multiplicities;
++    for(int i=1;i<=basis.curve->NbPoles();++i) {const auto p=basis.curve->Pole(i);poles.append(QJsonArray{p.X(),p.Y(),p.Z()});weights.append(basis.curve->Weight(i));}
++    for(int i=1;i<=basis.curve->NbKnots();++i) {knots.append(basis.curve->Knot(i));multiplicities.append(basis.curve->Multiplicity(i));}
++    QJsonObject output{{"degree",basis.curve->Degree()},{"periodic",bool(basis.curve->IsPeriodic())},{"poles",poles},{"weights",weights},{"knots",knots},{"multiplicities",multiplicities},{"first",basis.first},{"last",basis.last}};
++    const auto info=OpenMatrix9Gui::classifySnapObject(basis.object);
++    QJsonArray placement;for(int i=0;i<4;++i)for(int j=0;j<4;++j)placement.append(info.global_transform[i][j]);
++    QJsonObject signature=output;signature["placement"]=placement;signature["object_identity"]=QString::number(reinterpret_cast<quintptr>(basis.object));
++    signature["document_identity"]=QString::number(reinterpret_cast<quintptr>(basis.object->getDocument()));
++    signature["document_uuid"]=QString::fromStdString(basis.object->getDocument()->Uid.getValueStr());
++    signature["object_id"]=QString::number(basis.object->getID());
++    signature["edge_orientation"]=int(basis.edge.Orientation());
++    output["signature"]=QString::fromLatin1(QCryptographicHash::hash(QJsonDocument(signature).toJson(QJsonDocument::Compact),QCryptographicHash::Sha256).toHex());
++    return output;
++}
++double number(const QJsonValue& value) {const double n=value.toDouble(NAN);if(!value.isDouble()||!std::isfinite(n)||std::abs(n)>1e9)throw std::runtime_error("Curve values must be finite and within 1e9");return n;}
++int integer(const QJsonValue& value,int lo,int hi) {const double n=number(value);if(n<lo||n>hi||std::floor(n)!=n)throw std::runtime_error("Curve integer field is outside its supported range");return int(n);}
++bool ready(App::Document& doc) {auto* gui=Gui::Application::Instance->activeDocument();return &doc==App::GetApplication().getActiveDocument()&&gui&&!gui->getInEdit()&&!gui->isAboutToClose()&&Gui::Control().isAllowedAlterDocument(&doc);}
++std::string joinCurves(App::Document& doc,const std::vector<std::string>& names) {
++    if(!ready(doc)||names.size()<2||names.size()>16)throw std::runtime_error("Join needs 2..16 whole editable curves in the active project");
++    std::set<std::string> unique;TopTools_ListOfShape edges;std::size_t count=0;
++    for(const auto& name:names) {
++        if(!unique.insert(name).second)throw std::runtime_error("Duplicate curve selection");
++        const auto info=OpenMatrix9Gui::classifySnapObject(doc.getObject(name.c_str()));
++        if(!info.native_cad||info.preview||info.kind!=2)throw std::runtime_error("Join supports native curves only");
++        if(BRep_Tool::IsClosed(info.shape))throw std::runtime_error("Join requires open curves with free endpoints; a closed curve has no endpoint to join");
++        gp_GTrsf transform;for(int i=1;i<=3;++i)for(int j=1;j<=4;++j)transform.SetValue(i,j,info.global_transform[i-1][j-1]);
++        const auto world=BRepBuilderAPI_GTransform(info.shape,transform,true).Shape();
++        for(TopExp_Explorer explorer(world,TopAbs_EDGE);explorer.More();explorer.Next()) {
++            if(BRep_Tool::IsClosed(explorer.Current()))throw std::runtime_error("Join cannot include a closed curve segment");
++            if(++count>64)throw std::runtime_error("Selected curves exceed the 64-edge Join budget");edges.Append(explorer.Current());
++        }
++    }
++    BRepBuilderAPI_MakeWire builder;builder.Add(edges);
++    if(builder.Error()!=BRepBuilderAPI_WireDone||!builder.IsDone())throw std::runtime_error("Selected curves do not form one connected wire");
++    const auto wire=builder.Wire();std::size_t joined=0;for(TopExp_Explorer explorer(wire,TopAbs_EDGE);explorer.More();explorer.Next())++joined;
++    if(joined!=count||!BRepCheck_Analyzer(wire).IsValid())throw std::runtime_error("Join could not retain every selected curve edge");
++    doc.openTransaction("Join curves");
++    try {auto* object=doc.addObject("Part::Feature","JoinedCurve");object->getPropertyByName<Part::PropertyPartShape>("Shape")->setValue(wire);doc.recompute();const std::string name=object->getNameInDocument();doc.commitTransaction();return name;}
++    catch(...){doc.abortTransaction();throw;}
++}
++}
++namespace OpenMatrix9Gui {
++CurveEditResult editModelingCurve(App::Document& doc,const std::string& name,const CurveEditRequest& request) {
++    if(!ready(doc))throw std::runtime_error("The active project is not editable");
++    const auto original=readBasis(doc,name);const auto current=values(original);const auto& input=request.basis;
++    if(!input.value("signature").isString()||input.value("signature")!=current.value("signature"))throw std::runtime_error("Curve or placement changed; reopen the CV editor");
++    const auto poles=input.value("poles").toArray(),weights=input.value("weights").toArray(),knots=input.value("knots").toArray(),mults=input.value("multiplicities").toArray();
++    const int degree=integer(input.value("degree"),1,25),count=int(poles.size()),kcount=int(knots.size());
++    if(count<2||count>4096||weights.size()!=count||kcount<2||kcount>4096||mults.size()!=kcount||!input.value("periodic").isBool())throw std::runtime_error("Invalid curve basis array sizes");
++    NCollection_Array1<gp_Pnt> nativePoles(1,count);NCollection_Array1<double> nativeWeights(1,count),nativeKnots(1,kcount);NCollection_Array1<int> nativeMults(1,kcount);
++    for(int i=0;i<count;++i) {const auto xyz=poles[i].toArray();if(xyz.size()!=3)throw std::runtime_error("Each CV needs three numeric coordinates");nativePoles.SetValue(i+1,gp_Pnt(number(xyz[0]),number(xyz[1]),number(xyz[2])));const double w=number(weights[i]);if(w<=0)throw std::runtime_error("Rational weights must be positive");nativeWeights.SetValue(i+1,w);}
++    double previous=-INFINITY;for(int i=0;i<kcount;++i){const double u=number(knots[i]);if(u<=previous)throw std::runtime_error("Distinct knot values must increase strictly");previous=u;nativeKnots.SetValue(i+1,u);nativeMults.SetValue(i+1,integer(mults[i],1,degree+1));}
++    Handle(Geom_BSplineCurve) curve=new Geom_BSplineCurve(nativePoles,nativeWeights,nativeKnots,nativeMults,degree,input.value("periodic").toBool());
++    const double first=number(input.value("first")),last=number(input.value("last"));
++    if(last<=first||first<curve->FirstParameter()-1e-12||last>curve->LastParameter()+1e-12)throw std::runtime_error("Curve trim domain is outside the edited basis");
++    BRepBuilderAPI_MakeEdge builder(curve,first,last);if(!builder.IsDone())throw std::runtime_error("Edited curve cannot form a native edge");
++    auto shape=builder.Edge();shape.Orientation(original.edge.Orientation());shape.Location(original.property->getValue().Location());
++    if(!BRepCheck_Analyzer(shape).IsValid())throw std::runtime_error("Edited curve is not valid CAD");
++    doc.openTransaction("Edit curve CV");
++    try {original.property->setValue(shape);doc.recompute();doc.commitTransaction();}
++    catch(...){doc.abortTransaction();throw;}
++    return {true};
++}
++bool modelingCurveEditorAvailable() {
++    auto* doc=App::GetApplication().getActiveDocument();if(!doc||!ready(*doc))return false;
++    const auto selected=Gui::Selection().getSelection(doc->getName());if(selected.size()!=1||(selected.front().SubName&&*selected.front().SubName))return false;
++    const auto info=classifySnapObject(selected.front().pObject);return info.native_cad&&!info.preview&&info.kind==2;
++}
++bool startModelingCurveEditor() {
++    if(!modelingCurveEditorAvailable())return false;
++    Base::PyGILStateLocker lock;auto* module=PyImport_ImportModule("ModelingCurveEditor");auto* result=module?PyObject_CallMethod(module,"show_editor",nullptr):nullptr;Py_XDECREF(module);
++    if(!result){PyErr_Print();return false;}Py_DECREF(result);return true;
++}
++bool modelingCurveJoinAvailable() {
++    auto* doc=App::GetApplication().getActiveDocument();if(!doc||!ready(*doc))return false;
++    const auto selected=Gui::Selection().getSelection(doc->getName());if(selected.size()<2||selected.size()>16)return false;
++    for(const auto& entry:selected){if(entry.SubName&&*entry.SubName)return false;const auto info=classifySnapObject(entry.pObject);if(!info.native_cad||info.preview||info.kind!=2)return false;}
++    return true;
++}
++bool startModelingCurveJoin() {
++    if(!modelingCurveJoinAvailable())return false;
++    auto* doc=App::GetApplication().getActiveDocument();std::vector<std::string> names;
++    for(const auto& entry:Gui::Selection().getSelection(doc->getName()))names.emplace_back(entry.FeatName);
++    try{joinCurves(*doc,names);return true;}catch(const std::exception& e){Base::Console().error("Join curves: %s\n",e.what());return false;}
++}
++}
++namespace {
++PyObject* basis(PyObject*,PyObject* args) {
++    const char *docName,*name;if(!PyArg_ParseTuple(args,"ss",&docName,&name))return nullptr;
++    auto* doc=App::GetApplication().getDocument(docName);if(!doc){PyErr_SetString(PyExc_ValueError,"Missing curve document");return nullptr;}
++    try {const auto bytes=QJsonDocument(values(readBasis(*doc,name))).toJson(QJsonDocument::Compact);return PyUnicode_FromStringAndSize(bytes.constData(),bytes.size());}
++    catch(const Standard_Failure& e){PyErr_SetString(PyExc_ValueError,e.GetMessageString());return nullptr;}
++    catch(const std::exception& e){PyErr_SetString(PyExc_ValueError,e.what());return nullptr;}
++}
++PyObject* edit(PyObject*,PyObject* args) {
++    const char *docName,*name,*json;if(!PyArg_ParseTuple(args,"sss",&docName,&name,&json))return nullptr;
++    auto* doc=App::GetApplication().getDocument(docName);if(!doc){PyErr_SetString(PyExc_ValueError,"Missing curve document");return nullptr;}
++    QJsonParseError error;const auto document=QJsonDocument::fromJson(json,&error);
++    if(error.error!=QJsonParseError::NoError||!document.isObject()){PyErr_SetString(PyExc_ValueError,"Invalid typed curve request");return nullptr;}
++    try {OpenMatrix9Gui::editModelingCurve(*doc,name,{document.object()});Py_RETURN_NONE;}
++    catch(const Standard_Failure& e){PyErr_SetString(PyExc_ValueError,e.GetMessageString());return nullptr;}
++    catch(const std::exception& e){PyErr_SetString(PyExc_ValueError,e.what());return nullptr;}
++}
++PyObject* join(PyObject*,PyObject* args) {
++    const char *docName;PyObject* input;if(!PyArg_ParseTuple(args,"sO",&docName,&input))return nullptr;
++    auto* doc=App::GetApplication().getDocument(docName);if(!doc){PyErr_SetString(PyExc_ValueError,"Missing curve document");return nullptr;}
++    const auto count=PySequence_Size(input);if(count<2||count>16){PyErr_SetString(PyExc_ValueError,"Join requires 2..16 curve names");return nullptr;}
++    std::vector<std::string> names;
++    for(Py_ssize_t i=0;i<count;++i){auto* item=PySequence_GetItem(input,i);if(!item)return nullptr;const char* value=PyUnicode_AsUTF8(item);if(!value){Py_DECREF(item);return nullptr;}names.emplace_back(value);Py_DECREF(item);}
++    try{const auto name=joinCurves(*doc,names);return PyUnicode_FromString(name.c_str());}
++    catch(const Standard_Failure& e){PyErr_SetString(PyExc_ValueError,e.GetMessageString());return nullptr;}
++    catch(const std::exception& e){PyErr_SetString(PyExc_ValueError,e.what());return nullptr;}
++}
++}
++void AddModelingCurveMethods(PyObject* module) {static PyMethodDef methods[]={{"curveBasis3dm",basis,METH_VARARGS,"Read typed basis of the explicit selected owning curve."},{"editModelingCurve3dm",edit,METH_VARARGS,"Validate an owned typed curve basis and commit one Undo transaction."},{"joinModelingCurves3dm",join,METH_VARARGS,"Join selected curves as an independent native wire."},{nullptr,nullptr,0,nullptr}};PyModule_AddFunctions(module,methods);}
+--- baseline/Gui/ModelingCurveEditor.h
++++ candidate/Gui/ModelingCurveEditor.h
+@@ -0,0 +1,15 @@
++#pragma once
++#include <Python.h>
++#include <QJsonObject>
++#include <string>
++namespace App {class Document;}
++namespace OpenMatrix9Gui {
++struct CurveEditRequest {QJsonObject basis;};
++struct CurveEditResult {bool changed=false;};
++CurveEditResult editModelingCurve(App::Document&,const std::string&,const CurveEditRequest&);
++bool modelingCurveEditorAvailable();
++bool startModelingCurveEditor();
++bool modelingCurveJoinAvailable();
++bool startModelingCurveJoin();
++}
++void AddModelingCurveMethods(PyObject*);
+--- baseline/Gui/RustBridge.h
++++ candidate/Gui/RustBridge.h
+@@ -3,6 +3,19 @@
+ 
+ extern "C"
+ {
++bool om9_curve_spline_publish();
++bool om9_curve_preview_spline_closed(const double* hover,bool close);
++bool om9_spline_rebuild(const double* xyz,std::size_t count,std::size_t poles,std::size_t degree,bool closed);
++bool om9_spline_options(std::size_t poles,std::size_t degree);
++std::size_t om9_spline_degree();
++bool om9_spline_periodic();
++std::size_t om9_spline_pole_count();
++double om9_spline_pole(std::size_t i,std::size_t axis);
++std::size_t om9_spline_knot_count();
++double om9_spline_knot(std::size_t i);
++std::size_t om9_spline_multiplicity(std::size_t i);
++double om9_spline_value(double u,std::size_t axis);
++std::size_t om9_spline_message(char* buffer,std::size_t capacity);
+ bool om9_3dm_overlay_allowed(unsigned int capability,unsigned int action,bool knownReferences,bool isInstance);
+ std::ptrdiff_t om9_3dm_dependency_closure(std::size_t nodeCount,const std::size_t* offsets,const std::size_t* edges,std::size_t edgeCount,const std::size_t* selected,std::size_t selectedCount,std::size_t* output,std::size_t capacity);
+ std::ptrdiff_t om9_3dm_copy_budget(std::size_t bytes,std::size_t copies,std::size_t total);
+--- baseline/Gui/SnapObjectInfo.cpp
++++ candidate/Gui/SnapObjectInfo.cpp
+@@ -0,0 +1,88 @@
++#include <Python.h>
++#include "SnapObjectInfo.h"
++#include "CoreSnapGeometry.h"
++#include <App/Application.h>
++#include <App/Document.h>
++#include <App/DocumentObject.h>
++#include <App/GeoFeature.h>
++#include <App/PropertyStandard.h>
++#include <App/PropertyGeo.h>
++#include <Mod/Part/App/PropertyTopoShape.h>
++#include <BRep_Tool.hxx>
++#include <TopExp_Explorer.hxx>
++#include <TopoDS.hxx>
++#include <QJsonDocument>
++#include <QJsonObject>
++#include <QJsonArray>
++extern "C" bool om9_modeling_snap_allowed(unsigned,bool,bool,unsigned);
++namespace OpenMatrix9Gui {
++SnapObjectInfo classifySnapObject(const App::DocumentObject* object) {
++    SnapObjectInfo info;
++    if(!object)return info;
++    auto* source=object->getLinkedObject(true);
++    if(!source)return info;
++    info.resolved_member=source;
++    if(auto* cap=source->getPropertyByName<App::PropertyString>("OM9Capability")) {
++        const std::string value=cap->getValue();
++        info.preview=value=="retained"||value=="display-retained"||value=="incompatible";
++    }
++    if(source->getPropertyByName("OM9CloudPoints")) {info.kind=5;info.representation="native-cloud";return info;}
++    if(source->getTypeId().isDerivedFrom(Base::Type::fromName("Mesh::Feature"))) {info.kind=4;info.representation="native-mesh";return info;}
++    auto* property=source->getPropertyByName<Part::PropertyPartShape>("Shape");
++    if(!property||property->getValue().IsNull())return info;
++    info.shape=property->getValue().Located(TopLoc_Location());
++    const auto type=info.shape.ShapeType();
++    info.kind=type==TopAbs_VERTEX?1:(type==TopAbs_EDGE||type==TopAbs_WIRE?2:3);
++    info.native_cad=true;info.representation="native-cad";
++    info.display_mesh_state="absent";
++    TopExp_Explorer faces(info.shape,TopAbs_FACE);
++    if(faces.More()) {TopLoc_Location location;info.display_mesh_state=BRep_Tool::Triangulation(TopoDS::Face(faces.Current()),location).IsNull()?"unknown":"present";}
++    Base::Matrix4D local;
++    object->getLinkedObject(true,&local,true);
++    Base::Placement parent;
++    if(auto* placement=object->getPropertyByName<App::PropertyPlacement>("Placement"))
++        parent=App::GeoFeature::getGlobalPlacement(object)*placement->getValue().inverse();
++    info.global_transform=parent.toMatrix()*local;
++    return info;
++}
++}
++namespace {
++App::DocumentObject* findObject(const char* docName,const char* name) {
++    auto* doc=App::GetApplication().getDocument(docName);
++    auto* object=doc?doc->getObject(name):nullptr;
++    if(!object)PyErr_SetString(PyExc_ValueError,"Snap object is not in the named document");
++    return object;
++}
++PyObject* encode(const QJsonObject& result) {
++    const auto bytes=QJsonDocument(result).toJson(QJsonDocument::Compact);
++    return PyUnicode_FromStringAndSize(bytes.constData(),bytes.size());
++}
++PyObject* classify(PyObject*,PyObject* args) {
++    const char *doc,*name;if(!PyArg_ParseTuple(args,"ss",&doc,&name))return nullptr;
++    auto* object=findObject(doc,name);if(!object)return nullptr;
++    try {
++        const auto info=OpenMatrix9Gui::classifySnapObject(object);unsigned modes=0;
++        for(unsigned mode:{2u,4u,8u})if(om9_modeling_snap_allowed(info.kind,info.native_cad,info.preview,mode))modes|=mode;
++        return encode({{"kind",int(info.kind)},{"native_cad",info.native_cad},{"preview",info.preview},
++            {"representation",QString::fromStdString(info.representation)},{"display_mesh_state",QString::fromStdString(info.display_mesh_state)},
++            {"eligible_modes",int(modes)}});
++    }catch(const std::exception& e){PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}
++}
++PyObject* candidates(PyObject*,PyObject* args) {
++    const char *doc,*name;unsigned mode,budget;
++    if(!PyArg_ParseTuple(args,"ssII",&doc,&name,&mode,&budget))return nullptr;
++    if(!budget||budget>2048){PyErr_SetString(PyExc_ValueError,"Candidate budget must be 1..2048");return nullptr;}
++    auto* object=findObject(doc,name);if(!object)return nullptr;
++    try {
++        const auto result=OpenMatrix9Gui::boundedSnapCandidates(object,mode,budget);
++        QJsonArray points;for(const auto& p:result.points)points.append(QJsonArray{p.x,p.y,p.z});
++        return encode({{"points",points},{"complete",result.complete},{"visited_topology",int(result.visited_topology)},
++            {"read_mesh_vertices",0},{"read_cloud_points",0}});
++    }catch(const std::exception& e){PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}
++}
++}
++void AddModelingSnapMethods(PyObject* module) {
++    static PyMethodDef methods[]={{"classifySnap3dm",classify,METH_VARARGS,"Classify native geometry without point-array reads."},
++        {"snapObjectCandidates3dm",candidates,METH_VARARGS,"Bounded native CAD topology candidates."},{nullptr,nullptr,0,nullptr}};
++    PyModule_AddFunctions(module,methods);
++}
+--- baseline/Gui/SnapObjectInfo.h
++++ candidate/Gui/SnapObjectInfo.h
+@@ -0,0 +1,18 @@
++#pragma once
++#include <Python.h>
++#include <Base/Matrix.h>
++#include <TopoDS_Shape.hxx>
++#include <string>
++namespace App { class DocumentObject; }
++namespace OpenMatrix9Gui {
++struct SnapObjectInfo {
++    unsigned kind=9;
++    bool native_cad=false,preview=false;
++    std::string representation="unknown",display_mesh_state="unknown";
++    const App::DocumentObject* resolved_member=nullptr;
++    Base::Matrix4D global_transform;
++    TopoDS_Shape shape;
++};
++SnapObjectInfo classifySnapObject(const App::DocumentObject*);
++}
++void AddModelingSnapMethods(PyObject*);
+--- baseline/Gui/SnapQueryIndex.cpp
++++ candidate/Gui/SnapQueryIndex.cpp
+@@ -0,0 +1,145 @@
++#include "SnapQueryIndex.h"
++#include "SnapObjectInfo.h"
++#include <App/Application.h>
++#include <App/Document.h>
++#include <App/DocumentObject.h>
++#include <App/GeoFeatureGroupExtension.h>
++#include <Mod/Part/App/TopoShape.h>
++#include <Gui/Application.h>
++#include <Gui/Document.h>
++#include <Gui/ViewProvider.h>
++#include <Gui/View3DInventor.h>
++#include <Gui/View3DInventorViewer.h>
++#include <Inventor/SoRenderManager.h>
++#include <Inventor/nodes/SoCamera.h>
++#include <QElapsedTimer>
++#include <QJsonDocument>
++#include <QJsonObject>
++#include <QJsonArray>
++#include <fastsignals/signal.h>
++#include <unordered_map>
++#include <unordered_set>
++#include <algorithm>
++#include <cmath>
++namespace {
++struct Row {const App::DocumentObject* object;double x0,y0,x1,y1;std::unordered_map<unsigned,OpenMatrix9Gui::SnapCandidates> geometry;};
++struct Index {
++    const App::Document* document=nullptr;const Gui::View3DInventor* view=nullptr;
++    bool dirty=true;int width=0,height=0;SbMatrix matrix;
++    std::vector<Row> rows;std::unordered_map<std::size_t,std::vector<std::size_t>> tiles;
++    std::vector<fastsignals::scoped_connection> connections;
++    Index() {
++        auto reset=[this]{dirty=true;rows.clear();tiles.clear();};auto& app=App::GetApplication();
++        connections.emplace_back(app.signalChangedObject.connect([reset](const App::DocumentObject&,const App::Property&){reset();}));
++        connections.emplace_back(app.signalNewObject.connect([reset](const App::DocumentObject&){reset();}));
++        connections.emplace_back(app.signalDeletedObject.connect([reset](const App::DocumentObject&){reset();}));
++        connections.emplace_back(app.signalDeleteDocument.connect([this,reset](const App::Document&){reset();document=nullptr;view=nullptr;}));
++        connections.emplace_back(app.signalUndoDocument.connect([reset](const App::Document&){reset();}));
++        connections.emplace_back(app.signalRedoDocument.connect([reset](const App::Document&){reset();}));
++        connections.emplace_back(Gui::Application::Instance->signalChangedObject.connect([reset](const Gui::ViewProvider&,const App::Property&){reset();}));
++        connections.emplace_back(Gui::Application::Instance->signalDeletedObject.connect([reset](const Gui::ViewProvider&){reset();}));
++    }
++};
++Index& cache(){static auto* index=new Index;return *index;}
++std::size_t tile(int x,int y){return (std::size_t(unsigned(x))<<32)|unsigned(y);}
++bool visible(Gui::Document* gui,const App::DocumentObject* object) {
++    auto* provider=gui->getViewProvider(object);if(!provider||!provider->isVisible())return false;
++    std::unordered_set<const App::DocumentObject*> parents;
++    for(auto* parent=App::GeoFeatureGroupExtension::getGroupOfObject(object);parent;parent=App::GeoFeatureGroupExtension::getGroupOfObject(parent)) {
++        if(!parents.insert(parent).second)return false;
++        auto* p=gui->getViewProvider(parent);if(!p||!p->isVisible())return false;
++    }return true;
++}
++}
++namespace OpenMatrix9Gui {
++SnapQueryResult querySnapCandidates(Gui::View3DInventor* view,const SnapQuery& query) {
++    SnapQueryResult result;QElapsedTimer timer;timer.start();auto finish=[&]{result.elapsed_us=timer.nsecsElapsed()/1000;return result;};
++    try {
++    auto* gui=Gui::Application::Instance->activeDocument();auto* doc=App::GetApplication().getActiveDocument();
++    if(!view||!doc||!gui||gui->isAboutToClose()){result.complete=false;result.reason="No active CAD view";return finish();}
++    auto* viewer=view->getViewer();auto* camera=viewer->getSoRenderManager()->getCamera();
++    result.viewport_width=viewer->viewport()->width();result.viewport_height=viewer->viewport()->height();
++    if(!camera||result.viewport_width<=0||result.viewport_height<=0){result.complete=false;return finish();}
++    if(!(query.modes&14u)||query.modes&~14u||!std::isfinite(query.radius_px)||query.radius_px<=0||query.radius_px>64||!query.max_objects||query.max_objects>64||!query.max_candidates_per_object||query.max_candidates_per_object>2048||!query.max_candidates_total||query.max_candidates_total>8192) {
++        result.complete=false;result.reason="Invalid snap query budget";return finish();
++    }
++    const auto volume=camera->getViewVolume(float(result.viewport_width)/result.viewport_height);
++    const auto matrix=volume.getMatrix();auto& index=cache();
++    if(index.dirty||index.document!=doc||index.view!=view||index.width!=result.viewport_width||index.height!=result.viewport_height||index.matrix!=matrix) {
++        index.rows.clear();index.tiles.clear();index.document=doc;index.view=view;index.width=result.viewport_width;index.height=result.viewport_height;index.matrix=matrix;result.index_rebuilt=true;
++        for(auto* object:doc->getObjects()) {
++            ++result.index_objects;if(!visible(gui,object))continue;
++            const auto info=classifySnapObject(object);if(!info.native_cad||info.preview)continue;
++            const auto bounds=Part::TopoShape(info.shape).getBoundBox();if(!bounds.IsValid())continue;
++            double x0=1e300,y0=1e300,x1=-1e300,y1=-1e300;bool clipped=false;unsigned before=0,after=0;
++            for(unsigned corner=0;corner<8;++corner) {
++                Base::Vector3d world;info.global_transform.multVec(Base::Vector3d(corner&1?bounds.MaxX:bounds.MinX,corner&2?bounds.MaxY:bounds.MinY,corner&4?bounds.MaxZ:bounds.MinZ),world);
++                SbVec3f p;volume.projectToScreen(SbVec3f(float(world.x),float(world.y),float(world.z)),p);
++                if(!std::isfinite(p[0])||!std::isfinite(p[1])||!std::isfinite(p[2])){clipped=true;continue;}
++                before+=p[2]<0;after+=p[2]>1;clipped=clipped||p[2]<0||p[2]>1;
++                const double x=double(p[0])*index.width,y=(1.-double(p[1]))*index.height;
++                x0=std::min(x0,x);x1=std::max(x1,x);y0=std::min(y0,y);y1=std::max(y1,y);
++            }
++            if(before==8||after==8)continue;
++            if(clipped){x0=0;y0=0;x1=index.width;y1=index.height;}
++            if(x1<-64||y1<-64||x0>index.width+64||y0>index.height+64)continue;
++            const auto row=index.rows.size();index.rows.push_back({object,x0,y0,x1,y1,{}});
++            const int left=int(std::floor(std::clamp(x0-64,0.,double(index.width))/64)),right=int(std::floor(std::clamp(x1+64,0.,double(index.width))/64));
++            const int top=int(std::floor(std::clamp(y0-64,0.,double(index.height))/64)),bottom=int(std::floor(std::clamp(y1+64,0.,double(index.height))/64));
++            for(int y=top;y<=bottom;++y)for(int x=left;x<=right;++x)index.tiles[tile(x,y)].push_back(row);
++        }index.dirty=false;
++    }
++    const int x=query.cursor_px.x(),y=query.cursor_px.y();std::vector<std::size_t> rows;
++    if(auto found=index.tiles.find(tile(std::max(0,x/64),std::max(0,y/64)));found!=index.tiles.end()) {
++        for(auto row:found->second) {
++            const auto& r=index.rows[row];if(x+query.radius_px<r.x0||x-query.radius_px>r.x1||y+query.radius_px<r.y0||y-query.radius_px>r.y1)continue;
++            if(rows.size()==query.max_objects){result.complete=false;result.reason="Snap object budget exhausted";result.visited_objects=rows.size();return finish();}
++            rows.push_back(row);
++        }
++    }
++    double best=query.radius_px*query.radius_px;
++    for(auto row:rows) {
++        auto& r=index.rows[row];++result.visited_objects;
++        std::size_t object_count=0;
++        for(unsigned mode:{2u,4u,8u}) {
++            if(!(query.modes&mode))continue;
++            const auto extraction_budget=std::min(query.max_candidates_per_object-object_count,query.max_candidates_total-result.candidates.size());
++            const unsigned cache_key=mode|unsigned(extraction_budget<<4);
++            auto found=r.geometry.find(cache_key);if(found==r.geometry.end()) {
++                auto candidates=boundedSnapCandidates(r.object,mode,extraction_budget);
++                result.generated_candidates+=candidates.points.size();
++                found=r.geometry.emplace(cache_key,std::move(candidates)).first;
++            }
++            const auto& candidates=found->second;result.visited_topology+=candidates.visited_topology;
++            if(!candidates.complete||object_count+candidates.points.size()>query.max_candidates_per_object||result.candidates.size()+candidates.points.size()>query.max_candidates_total) {
++                result.complete=false;result.picked=false;result.reason="Snap topology/candidate budget exhausted";return finish();
++            }
++            object_count+=candidates.points.size();result.max_per_object=std::max(result.max_per_object,object_count);
++            for(const auto& p:candidates.points) {
++                result.candidates.push_back(p);SbVec3f projected;volume.projectToScreen(SbVec3f(float(p.x),float(p.y),float(p.z)),projected);
++                if(projected[2]<0||projected[2]>1)continue;
++                const double dx=double(projected[0])*index.width-x,dy=(1.-double(projected[1]))*index.height-y,distance=dx*dx+dy*dy;
++                if(distance<=best){best=distance;result.point=p;result.picked=true;}
++            }
++        }
++    }return finish();
++    }catch(const Standard_Failure& e){result.complete=false;result.picked=false;result.reason=e.GetMessageString()?e.GetMessageString():"Native CAD snap failed";return finish();}
++    catch(const std::exception& e){result.complete=false;result.picked=false;result.reason=e.what();return finish();}
++}
++}
++namespace {
++PyObject* query(PyObject*,PyObject* args) {
++    int x,y;unsigned modes=2,objects=64,per=2048,total=8192;if(!PyArg_ParseTuple(args,"ii|IIII",&x,&y,&modes,&objects,&per,&total))return nullptr;
++    auto* gui=Gui::Application::Instance->activeDocument();auto* view=gui?dynamic_cast<Gui::View3DInventor*>(gui->getActiveView()):nullptr;
++    try {
++        OpenMatrix9Gui::SnapQuery request;request.cursor_px={x,y};request.modes=modes;request.max_objects=objects;request.max_candidates_per_object=per;request.max_candidates_total=total;
++        const auto r=OpenMatrix9Gui::querySnapCandidates(view,request);QJsonArray candidates;for(const auto& p:r.candidates)candidates.append(QJsonArray{p.x,p.y,p.z});
++        QJsonObject data{{"candidates",candidates},{"complete",r.complete},{"picked",r.picked},{"point",QJsonArray{r.point.x,r.point.y,r.point.z}},
++            {"visited_objects",int(r.visited_objects)},{"visited_topology",int(r.visited_topology)},{"max_per_object",int(r.max_per_object)},{"read_mesh_vertices",0},{"read_cloud_points",0},
++            {"generated_candidates",int(r.generated_candidates)},
++            {"index_rebuilt",r.index_rebuilt},{"index_objects",int(r.index_objects)},{"viewport_width",r.viewport_width},{"viewport_height",r.viewport_height},{"elapsed_us",double(r.elapsed_us)},{"reason",QString::fromStdString(r.reason)}};
++        const auto bytes=QJsonDocument(data).toJson(QJsonDocument::Compact);return PyUnicode_FromStringAndSize(bytes.constData(),bytes.size());
++    }catch(const std::exception& e){PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}
++}
++}
++void AddSnapQueryMethods(PyObject* module) {static PyMethodDef methods[]={{"querySnap3dm",query,METH_VARARGS,"Bounded cached native CAD viewport snap."},{nullptr,nullptr,0,nullptr}};PyModule_AddFunctions(module,methods);}
+--- baseline/Gui/SnapQueryIndex.h
++++ candidate/Gui/SnapQueryIndex.h
+@@ -0,0 +1,27 @@
++#pragma once
++#include <Python.h>
++#include "CoreSnapGeometry.h"
++#include <QPoint>
++#include <string>
++namespace Gui {class View3DInventor;}
++namespace OpenMatrix9Gui {
++struct SnapQuery {
++    QPoint cursor_px;
++    double radius_px=8;
++    unsigned modes=2;
++    std::size_t max_objects=64,max_candidates_per_object=2048,max_candidates_total=8192;
++};
++struct SnapQueryResult {
++    std::vector<Base::Vector3d> candidates;
++    bool complete=true,picked=false,index_rebuilt=false;
++    Base::Vector3d point;
++    std::size_t visited_objects=0,visited_topology=0,max_per_object=0,index_objects=0;
++    std::size_t generated_candidates=0;
++    unsigned read_mesh_vertices=0,read_cloud_points=0;
++    int viewport_width=0,viewport_height=0;
++    long long elapsed_us=0;
++    std::string reason;
++};
++SnapQueryResult querySnapCandidates(Gui::View3DInventor*,const SnapQuery&);
++}
++void AddSnapQueryMethods(PyObject*);
+--- baseline/Gui/ThreeDmCurves.cpp
++++ candidate/Gui/ThreeDmCurves.cpp
+@@ -13,17 +13,22 @@
+ #include <TColStd_Array1OfInteger.hxx>
+ #include <cmath>
+ namespace OpenMatrix9Gui::ThreeDm {
+-static ON_NurbsCurve nurbs(const ON_Curve& c){ON_NurbsCurve n;if(!c.IsValid()||!c.GetNurbForm(n))throw ExchangeError("Invalid or unsupported curve");if(!n.ClampEnd(2))throw ExchangeError("Cannot clamp NURBS curve");return n;}
++static ON_NurbsCurve nurbs(const ON_Curve& c,bool preservePeriodic=false){ON_NurbsCurve n;if(!c.IsValid()||!c.GetNurbForm(n))throw ExchangeError("Invalid or unsupported curve");if((!preservePeriodic||!n.IsPeriodic())&&!n.ClampEnd(2))throw ExchangeError("Cannot clamp NURBS curve");return n;}
+ static void knots(const ON_NurbsCurve& n,std::vector<double>& k,std::vector<int>& m){
+     auto append=[&](double v){if(!std::isfinite(v))throw ExchangeError("Nonfinite knot");if(k.empty()||v!=k.back()){k.push_back(v);m.push_back(1);}else ++m.back();};
+-    append(n.Knot(0));for(int i=0;i<n.KnotCount();++i)append(n.Knot(i));append(n.Knot(n.KnotCount()-1));
++    const bool periodic=n.IsPeriodic();const int unique=n.CVCount()-n.Degree();const double period=n.Domain().Length();
++    append(periodic?n.Knot(unique-1)-period:n.Knot(0));
++    for(int i=0;i<n.KnotCount();++i)append(n.Knot(i));
++    append(periodic?n.Knot(n.KnotCount()-unique)+period:n.Knot(n.KnotCount()-1));
+ }
+-Handle(Geom_Curve) curve3d(const ON_Curve& c){
+-    auto n=nurbs(c);std::vector<double> k;std::vector<int> m;knots(n,k,m);
++Handle(Geom_Curve) curve3d(const ON_Curve& c,bool preservePeriodic){
++    auto n=nurbs(c,preservePeriodic);std::vector<double> k;std::vector<int> m;knots(n,k,m);
+     TColgp_Array1OfPnt p(1,n.CVCount());TColStd_Array1OfReal w(1,n.CVCount()),ks(1,int(k.size()));TColStd_Array1OfInteger ms(1,int(m.size()));
+     for(int i=0;i<n.CVCount();++i){ON_3dPoint v;n.GetCV(i,v);p.SetValue(i+1,gp_Pnt(v.x,v.y,v.z));w.SetValue(i+1,n.Weight(i));}
+     for(int i=0;i<int(k.size());++i){ks.SetValue(i+1,k[i]);ms.SetValue(i+1,m[i]);}
+-    return new Geom_BSplineCurve(p,w,ks,ms,n.Degree(),false);
++    Handle(Geom_BSplineCurve) curve=new Geom_BSplineCurve(p,w,ks,ms,n.Degree(),false);
++    if(preservePeriodic&&c.IsPeriodic())curve->SetPeriodic();
++    return curve;
+ }
+ Handle(Geom2d_Curve) curve2d(const ON_Curve& c){
+     auto n=nurbs(c);std::vector<double> k;std::vector<int> m;knots(n,k,m);
+@@ -32,7 +37,7 @@
+     for(int i=0;i<int(k.size());++i){ks.SetValue(i+1,k[i]);ms.SetValue(i+1,m[i]);}
+     return new Geom2d_BSplineCurve(p,w,ks,ms,n.Degree(),false);
+ }
+-TopoDS_Shape importCurve(const ON_Curve& c,double){auto n=curve3d(c);auto d=c.Domain();BRepBuilderAPI_MakeEdge edge(n,d.Min(),d.Max());if(!edge.IsDone())throw ExchangeError("Curve edge construction failed");return edge.Edge();}
++TopoDS_Shape importCurve(const ON_Curve& c,double){auto n=curve3d(c,true);auto d=c.Domain();BRepBuilderAPI_MakeEdge edge(n,d.Min(),d.Max());if(!edge.IsDone())throw ExchangeError("Curve edge construction failed");return edge.Edge();}
+ template<class Curve> static std::unique_ptr<ON_Curve> toON(const Curve& n,int dimension){
+     auto out=std::make_unique<ON_NurbsCurve>(dimension,n->IsRational(),n->Degree()+1,n->NbPoles());
+     for(int i=1;i<=n->NbPoles();++i){auto p=n->Pole(i);double w=n->Weight(i);double z=0;if constexpr(requires{p.Z();})z=p.Z();out->SetCV(i-1,ON_4dPoint(p.X()*w,p.Y()*w,z*w,w));}
+@@ -41,7 +46,14 @@
+     for(int i=0;i<out->KnotCount();++i)out->SetKnot(i,flat[i+1]);ON_wString log;ON_TextLog errors(log);if(!out->IsValid(&errors))throw ExchangeError(std::string("Exported NURBS curve invalid: ")+ON_String(log).Array());return out;
+ }
+ std::unique_ptr<ON_Curve> curveON(const Handle(Geom_Curve)& c,double a,double b){
+-    auto n=GeomConvert::CurveToBSplineCurve(new Geom_TrimmedCurve(c,a,b));if(n->IsPeriodic())n->SetNotPeriodic();return toON(n,3);
++    auto spline=Handle(Geom_BSplineCurve)::DownCast(c);
++    Handle(Geom_BSplineCurve) n;
++    if(!spline.IsNull()){
++        n=Handle(Geom_BSplineCurve)::DownCast(spline->Copy());
++        const double tolerance=1e-10*std::max({1.0,std::abs(a),std::abs(b)});
++        if(std::abs(a-n->FirstParameter())>tolerance||std::abs(b-n->LastParameter())>tolerance)n->Segment(a,b);
++    }else n=GeomConvert::CurveToBSplineCurve(new Geom_TrimmedCurve(c,a,b));
++    if(n->IsPeriodic())n->SetNotPeriodic();return toON(n,3);
+ }
+ std::unique_ptr<ON_Curve> curveON(const Handle(Geom2d_Curve)& c,double a,double b){
+     auto spline=Handle(Geom2d_BSplineCurve)::DownCast(c);
+--- baseline/Gui/ThreeDmGeometry.h
++++ candidate/Gui/ThreeDmGeometry.h
+@@ -22,7 +22,7 @@
+     GeometryRepresentationUnavailable(const std::string& message,int orientation):ExchangeError(message),solidOrientation(orientation){}
+ };
+ struct MeshData {std::vector<std::array<double,3>> vertices;std::vector<std::array<int,4>> faces;};
+-Handle(Geom_Curve) curve3d(const ON_Curve&);
++Handle(Geom_Curve) curve3d(const ON_Curve&,bool preservePeriodic=false);
+ Handle(Geom2d_Curve) curve2d(const ON_Curve&);
+ std::unique_ptr<ON_Curve> curveON(const Handle(Geom_Curve)&,double first,double last);
+ std::unique_ptr<ON_Curve> curveON(const Handle(Geom2d_Curve)&,double first,double last);
+--- baseline/Gui/Workbench.cpp
++++ candidate/Gui/Workbench.cpp
+@@ -115,6 +115,7 @@
+ 
+         submenu->setCommand(title);
+         if(std::string(title)=="File")*submenu << "Import3dm" << "Export3dm" << "Copy3dm" << "Paste3dm";
++        if(std::string(title)=="Curve")*submenu << "PointsOn" << "Join";
+ 
+         const std::size_t commandCount =
+             om9_menu_group_command_count(
+--- baseline/ModelingCurveEditor.py
++++ candidate/ModelingCurveEditor.py
+@@ -0,0 +1,61 @@
++"""Typed CV editor for one explicitly selected owning CAD curve."""
++import json
++_dialog = None
++
++def show_editor():
++    import FreeCAD as App, FreeCADGui as Gui, OpenMatrix9Gui as native
++    from PySide6 import QtWidgets, QtCore
++    global _dialog
++    if _dialog is not None:
++        _dialog.close()
++    selection = Gui.Selection.getSelectionEx()
++    if len(selection) != 1 or selection[0].SubElementNames:
++        raise ValueError('Select one whole owning native curve')
++    obj = selection[0].Object
++    document, name = obj.Document.Name, obj.Name
++    basis = json.loads(native.curveBasis3dm(document, name))
++    dialog = QtWidgets.QDialog(Gui.getMainWindow())
++    dialog.setObjectName('OM9CurveCVDialog')
++    dialog.setWindowTitle('PointsOn — Curve CV editor')
++    dialog.setAttribute(QtCore.Qt.WA_DeleteOnClose)
++    layout = QtWidgets.QVBoxLayout(dialog)
++    layout.addWidget(QtWidgets.QLabel('CV coordinates use the curve object’s local frame. Changes commit with OK.', dialog))
++    form = QtWidgets.QFormLayout()
++    degree = QtWidgets.QSpinBox(dialog);degree.setObjectName('OM9CurveCVDegree');degree.setRange(1,25);degree.setValue(basis['degree']);form.addRow('Degree',degree)
++    periodic = QtWidgets.QCheckBox(dialog);periodic.setObjectName('OM9CurveCVPeriodic');periodic.setChecked(basis['periodic']);form.addRow('Periodic',periodic);layout.addLayout(form)
++    def table(headers, rows, integer_columns=()):
++        widget=QtWidgets.QTableWidget(len(rows),len(headers),dialog);widget.setHorizontalHeaderLabels(headers)
++        for row,values in enumerate(rows):
++            for column,value in enumerate(values):
++                field=QtWidgets.QSpinBox(widget) if column in integer_columns else QtWidgets.QDoubleSpinBox(widget)
++                if column in integer_columns:field.setRange(1,26)
++                else:field.setDecimals(15);field.setRange(-1e9,1e9)
++                field.setValue(value);widget.setCellWidget(row,column,field)
++        layout.addWidget(widget);return widget
++    poles=table(['X','Y','Z','Weight'],[p+[w] for p,w in zip(basis['poles'],basis['weights'])]);poles.setObjectName('OM9CurveCVPoles')
++    knots=table(['Knot','Multiplicity'],list(zip(basis['knots'],basis['multiplicities'])),(1,));knots.setObjectName('OM9CurveCVKnots')
++    error=QtWidgets.QLabel(dialog);error.setObjectName('OM9CurveCVError');error.setWordWrap(True);layout.addWidget(error)
++    buttons=QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok|QtWidgets.QDialogButtonBox.Cancel,dialog);layout.addWidget(buttons)
++    def commit():
++        request=dict(basis)
++        request.update(degree=degree.value(),periodic=periodic.isChecked(),
++            poles=[[poles.cellWidget(row,col).value() for col in range(3)] for row in range(poles.rowCount())],
++            weights=[poles.cellWidget(row,3).value() for row in range(poles.rowCount())],
++            knots=[knots.cellWidget(row,0).value() for row in range(knots.rowCount())],
++            multiplicities=[knots.cellWidget(row,1).value() for row in range(knots.rowCount())])
++        try:native.editModelingCurve3dm(document,name,json.dumps(request))
++        except (ValueError,RuntimeError) as exc:error.setText(str(exc));return
++        dialog.accept()
++    buttons.accepted.connect(commit);buttons.rejected.connect(dialog.reject)
++    _dialog=dialog
++    def clear():
++        global _dialog
++        if _dialog is dialog:_dialog=None
++    dialog.finished.connect(clear);dialog.resize(760,650);dialog.show()
++    timer=QtCore.QTimer(dialog)
++    def guard():
++        active=App.ActiveDocument
++        if active is None or active.Name!=document or active.getObject(name) is not obj or Gui.activeWorkbench().name()!='OpenMatrix9Workbench':
++            dialog.reject()
++    timer.timeout.connect(guard);timer.start(100)
++    return dialog
+--- baseline/rust/src/curve.rs
++++ candidate/rust/src/curve.rs
+@@ -1,5 +1,6 @@
+-//! OM9-CURVE-001/002: shared mouse and command-frame session.
++//! OM9-CURVE-001/002/003: shared mouse and command-frame session.
+ //! Host choices: millimetres, 1e-7 mm minimum segment, finite coordinates <1e9 mm.
++use crate::spline::{self, Knots, Spline};
+ #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+ pub enum Effect {
+     Waiting,
+@@ -17,11 +18,19 @@
+     length: Option<f64>,
+     awaiting_length: bool,
+     frame: Option<([f64; 3], [[f64; 3]; 3])>,
++    degree: usize,
++    knots: Knots,
++    spline: Option<Spline>,
++    awaiting_option: Option<String>,
+ }
+ pub fn name(icon: &str) -> Option<&'static str> {
+     match icon {
+         "CurvePolylinePolyline" => Some("Polyline"),
+         "CurveLineSingleLine" => Some("Line"),
++        "CurveFreeFormInterpolatePoints" => Some("InterpCrv"),
++        "OthersCurveRebuild" => Some("Rebuild"),
++        "TopIconControlPointsOn" => Some("PointsOn"),
++        "TopIconJoin" => Some("Join"),
+         _ => None,
+     }
+ }
+@@ -31,12 +40,15 @@
+             "Line"
+         } else if name.eq_ignore_ascii_case("Polyline") {
+             "Polyline"
++        } else if name.eq_ignore_ascii_case("InterpCrv") {
++            "InterpCrv"
+         } else {
+             return Err("Unknown Curve command".into());
+         };
+         *self = Self {
+             name,
+             active: true,
++            degree: 3,
+             ..Self::default()
+         };
+         Ok(())
+@@ -67,6 +79,17 @@
+     pub fn output(&self) -> &[[f64; 3]] {
+         &self.output
+     }
++    pub fn spline(&self) -> Option<&Spline> { self.spline.as_ref() }
++    pub fn preview_spline(&self, hover: Option<[f64;3]>) -> Result<Spline,String> {
++        self.preview_spline_closed(hover,false)
++    }
++    pub fn preview_spline_closed(&self, hover: Option<[f64;3]>, close: bool) -> Result<Spline,String> {
++        let mut points=self.points.clone();
++        if let Some(p)=hover {if points.last().is_none_or(|&a| spline::distance(a,p)>=spline::TOLERANCE) {points.push(p);}}
++        let closed=(close || self.persistent_close) && points.len()>=3;
++        if closed && points.len()>3 && spline::distance(points[0],*points.last().unwrap())<spline::TOLERANCE {points.pop();}
++        spline::interpolate(&points,self.degree,self.knots,closed)
++    }
+     pub fn points(&self) -> &[[f64; 3]] {
+         &self.points
+     }
+@@ -76,9 +99,13 @@
+         self.active = false;
+         self.points.clear();
+         self.output.clear();
++        self.spline=None;
++        self.awaiting_option=None;
+         Effect::Cancelled
+     }
+     pub fn prompt(&self) -> String {
++        if !self.active {return "Command: ".into();}
++        if let Some(option)=&self.awaiting_option {return format!("{option} of interpolated curve: ");}
+         if self.awaiting_length {
+             return "Length of next segment: ".into();
+         }
+@@ -86,6 +113,10 @@
+             return "Command: ".into();
+         }
+         let state = if self.persistent_close { "Yes" } else { "No" };
++        if self.name=="InterpCrv" {
++            let knots=match self.knots {Knots::Uniform=>"Uniform",Knots::Chord=>"Chord",Knots::SqrtChord=>"SqrtChrd"};
++            return format!("{} point of interpolated curve. Enter when done ( Degree={} Knots={} PersistentClose={} Close Sharp Undo ): ",if self.points.is_empty(){"Start"}else{"Next"},self.degree,knots,state);
++        }
+         if self.points.is_empty() {
+             if self.name == "Line" {
+                 format!(
+@@ -114,6 +145,13 @@
+             return Err("More distinct points are required".into());
+         }
+         let mut points = self.points.clone();
++        if self.name=="InterpCrv" {
++            let closed=close || (self.persistent_close && points.len()>=3);
++            if closed && points.len()>2 && spline::distance(points[0],*points.last().unwrap())<spline::TOLERANCE {points.pop();}
++            let fitted=spline::interpolate(&points,self.degree,self.knots,closed)?;
++            self.spline=Some(fitted);self.output=points;self.active=false;
++            return Ok(Effect::Commit);
++        }
+         if close || (self.persistent_close && points.len() > 2) {
+             let first = points[0];
+             if points.last() != Some(&first) {
+@@ -161,10 +199,11 @@
+         if self.awaiting_length {
+             return Err("Enter the numeric length before picking a direction".into());
+         }
++        if self.awaiting_option.is_some() {return Err("Enter the pending option value before picking a point".into());}
+         if p.iter().any(|x| !x.is_finite() || x.abs() > 1e9) {
+             return Err("Coordinate must be finite and within 1e9 mm".into());
+         }
+-        if self.points.len() >= 4096 {
++        if self.points.len() >= if self.name=="InterpCrv" {spline::MAX_POLES} else {4096} {
+             return Err("Point limit reached; finish or cancel".into());
+         }
+         if let Some(a) = self.points.last() {
+@@ -197,6 +236,12 @@
+         if !self.active {
+             return Err("No active command".into());
+         }
++        if let Some(option)=self.awaiting_option.clone() {
++            self.awaiting_option=None;
++            let result=self.input(&format!("{option}={text}"));
++            if result.is_err() {self.awaiting_option=Some(option);}
++            return result;
++        }
+         if self.awaiting_length {
+             let length = number(text)?;
+             if length < 1e-7 {
+@@ -214,6 +259,32 @@
+         let (key, value) = lower
+             .split_once('=')
+             .map_or((lower.as_str(), None), |(k, v)| (k.trim(), Some(v.trim())));
++        if self.name=="InterpCrv" {
++            match key {
++                "degree"|"d"|"knots"|"k" if value.is_none()=>{
++                    self.awaiting_option=Some(if key=="degree"||key=="d" {"Degree"} else {"Knots"}.into());return Ok(Effect::Waiting);
++                },
++                "degree"|"d"=>{
++                    let degree=value.unwrap().parse::<usize>().map_err(|_|"Enter an odd degree from 1 to 11")?;
++                    if !(1..=11).contains(&degree)||degree%2==0 {return Err("Enter an odd degree from 1 to 11".into());}
++                    self.degree=degree;return Ok(Effect::Waiting);
++                },
++                "knots"|"k"=>{
++                    self.knots=match value {Some("uniform"|"u")=>Knots::Uniform,Some("chord"|"c")=>Knots::Chord,Some("sqrtchrd"|"sqrtchord"|"s")=>Knots::SqrtChord,_=>return Err("Knots must be Uniform, Chord or SqrtChrd".into())};return Ok(Effect::Waiting);
++                },
++                "persistentclose"|"p"=>{self.persistent_close=option_bool(value,self.persistent_close)?;return Ok(Effect::Waiting);},
++                "close"|"c" if value.is_none()=>return self.finish(true),
++                "sharp"|"s" if value.is_none()=>{
++                    if self.points.len()<3 {return Err("Sharp needs at least 3 points".into());}
++                    let mut points=self.points.clone();if spline::distance(points[0],*points.last().unwrap())>=spline::TOLERANCE {points.push(points[0]);}
++                    let fitted=spline::interpolate(&points,self.degree,self.knots,false)?;
++                    self.output=points;self.spline=Some(fitted);self.active=false;return Ok(Effect::Commit);
++                },
++                "undo"|"u" if value.is_none()=>{self.points.pop().ok_or("No point to undo")?;return Ok(Effect::Waiting);},
++                "starttangent"|"endtangent"=>return Err("Tangent constraints are not implemented".into()),
++                _=>{},
++            }
++        }
+         if self.name == "Polyline" && (key == "close" || key == "c") && value.is_none() {
+             return self.finish(true);
+         }
+@@ -282,6 +353,7 @@
+         }
+         self.point(p)
+     }
++
+ }
+ fn number(text: &str) -> Result<f64, String> {
+     let text = text.trim();
+--- baseline/rust/src/curve_ffi.rs
++++ candidate/rust/src/curve_ffi.rs
+@@ -208,3 +208,23 @@
+     }
+     bytes.len()
+ }
++
++#[unsafe(no_mangle)]
++pub extern "C" fn om9_curve_spline_publish() -> bool {
++    let Ok(s)=state().lock() else {return false;};
++    crate::spline_ffi::publish(s.session.spline().cloned().ok_or("No committed spline".into()))
++}
++/// # Safety
++/// `hover` is null or points to three readable world coordinates.
++#[unsafe(no_mangle)]
++pub unsafe extern "C" fn om9_curve_preview_spline(hover: *const f64) -> bool {
++    unsafe {om9_curve_preview_spline_closed(hover,false)}
++}
++/// # Safety
++/// `hover` is null or points to three readable world coordinates.
++#[unsafe(no_mangle)]
++pub unsafe extern "C" fn om9_curve_preview_spline_closed(hover: *const f64, close: bool) -> bool {
++    let Ok(s)=state().lock() else {return false;};
++    let point=if hover.is_null() {None} else {let p=unsafe{std::slice::from_raw_parts(hover,3)};Some([p[0],p[1],p[2]])};
++    crate::spline_ffi::publish(s.session.preview_spline_closed(point,close))
++}
+--- baseline/rust/src/ffi.rs
++++ candidate/rust/src/ffi.rs
+@@ -185,6 +185,9 @@
+ }
+ #[unsafe(no_mangle)]
+ pub extern "C" fn om9_command_permissions(i: usize) -> u32 {
++    if command(i).and_then(|c| c.icon.to_str().ok()).and_then(crate::curve::name).is_some() {
++        return 1;
++    }
+     match crate::core_3dm::om9_3dm_operation(i) {
+         1 => return 1,
+         2 => return 0,
+--- baseline/rust/src/lib.rs
++++ candidate/rust/src/lib.rs
+@@ -20,3 +20,6 @@
+ pub mod workspace;
+ 
+ pub mod viewport_title;
++
++pub mod spline;
++pub mod spline_ffi;
+--- baseline/rust/src/modeling_exchange.rs
++++ candidate/rust/src/modeling_exchange.rs
+@@ -64,8 +64,8 @@
+         select: exchange,
+         snap: matches!(kind, CadPoint | CadCurve | CadBrep),
+         transform: exchange,
+-        // Direct curve/surface editing belongs to subsequent phases.
+-        curve_edit: false,
++        // Phase2 owns native curve CV editing; surfaces remain a later phase.
++        curve_edit: kind == CadCurve,
+         surface_edit: false,
+         boolean: kind == CadBrep,
+         export_v5: exchange,
+@@ -79,6 +79,19 @@
+     Ok(())
+ }
+ 
++pub fn snap_allowed(kind: GeometryKind, native_cad: bool, preview: bool, mode: u32) -> bool {
++    native_cad && !preview && match mode {
++        2 | 4 => matches!(kind, GeometryKind::CadCurve | GeometryKind::CadBrep),
++        8 => matches!(kind, GeometryKind::CadPoint | GeometryKind::CadBrep),
++        _ => false,
++    }
++}
++
++#[unsafe(no_mangle)]
++pub extern "C" fn om9_modeling_snap_allowed(kind: u32, native_cad: bool, preview: bool, mode: u32) -> bool {
++    snap_allowed(kind.into(), native_cad, preview, mode)
++}
++
+ #[unsafe(no_mangle)]
+ pub extern "C" fn om9_modeling_capabilities(kind: u32) -> u32 {
+     let c = capabilities(kind.into());
+--- baseline/rust/src/spline.rs
++++ candidate/rust/src/spline.rs
+@@ -0,0 +1,168 @@
++//! OM9-CURVE-003/009: non-rational B-splines, interpolation and uniform rebuild.
++//! Millimetres; bounded dense solves, no FreeCAD/Rhino runtime dependency.
++pub const MAX_POLES: usize = 256;
++pub const MAX_SAMPLES: usize = 4096;
++pub const TOLERANCE: f64 = 1e-7;
++#[derive(Clone, Copy, Debug, Default, PartialEq)]
++pub enum Knots { #[default] Uniform, Chord, SqrtChord }
++#[derive(Clone, Debug)]
++pub struct Spline {
++    pub poles: Vec<[f64; 3]>,
++    /// Expanded knot vector, including the extension required for periodic evaluation.
++    pub knots: Vec<f64>,
++    pub degree: usize,
++    pub periodic: bool,
++}
++pub fn distance(a: [f64; 3], b: [f64; 3]) -> f64 {
++    a.iter().zip(b).map(|(x,y)| (x-y).powi(2)).sum::<f64>().sqrt()
++}
++fn validate(points: &[[f64;3]], limit: usize) -> Result<(), String> {
++    if !(2..=limit).contains(&points.len()) { return Err(format!("Use 2 to {limit} distinct points")); }
++    if points.iter().flatten().any(|x| !x.is_finite() || x.abs()>1e9) {
++        return Err("Coordinates must be finite and within 1e9 mm".into());
++    }
++    if points.windows(2).any(|p| distance(p[0],p[1])<TOLERANCE) {
++        return Err("Consecutive points must differ by at least 1e-7 mm".into());
++    }
++    Ok(())
++}
++pub fn rebuild_options(count: usize, degree: usize) -> Result<(), String> {
++    if !(1..=11).contains(&degree) || !(degree+1..=MAX_POLES).contains(&count) {
++        return Err("Degree must be 1 to 11; PointCount must exceed Degree and be at most 256".into());
++    }
++    Ok(())
++}
++pub fn parameters(points: &[[f64;3]], mode: Knots, closed: bool) -> Vec<f64> {
++    let mut params=vec![0.];
++    let segments=points.len()-usize::from(!closed);
++    for i in 0..segments {
++        let d=distance(points[i],points[(i+1)%points.len()]);
++        let step=match mode { Knots::Uniform=>1., Knots::Chord=>d, Knots::SqrtChord=>d.sqrt() };
++        params.push(params.last().unwrap()+step);
++    }
++    let total=*params.last().unwrap();
++    params.iter_mut().for_each(|u| *u/=total);
++    params
++}
++fn periodic_knots(params: &[f64], degree: usize) -> Vec<f64> {
++    let n=params.len()-1;
++    (0..n+2*degree+1).map(|i| {
++        let j=i as isize-degree as isize;
++        params[j.rem_euclid(n as isize) as usize]+j.div_euclid(n as isize) as f64
++    }).collect()
++}
++impl Spline {
++    pub fn basis(&self, u: f64) -> Vec<f64> {
++        let n=self.poles.len();
++        let extended=n+if self.periodic {self.degree} else {0};
++        let u=if self.periodic {u.rem_euclid(1.)} else {u.clamp(0.,1.)};
++        if !self.periodic && u==1. {
++            let mut out=vec![0.;n];out[n-1]=1.;return out;
++        }
++        let mut basis=vec![0.;self.knots.len()-1];
++        for (i,b) in basis.iter_mut().enumerate() {
++            *b=f64::from(self.knots[i]<=u && u<self.knots[i+1]);
++        }
++        for d in 1..=self.degree {
++            for i in 0..basis.len()-d {
++                let left=self.knots[i+d]-self.knots[i];
++                let right=self.knots[i+d+1]-self.knots[i+1];
++                basis[i]=if left>0. {(u-self.knots[i])/left*basis[i]} else {0.}
++                    +if right>0. {(self.knots[i+d+1]-u)/right*basis[i+1]} else {0.};
++            }
++        }
++        let mut out=vec![0.;n];
++        for i in 0..extended {out[i%n]+=basis[i];}
++        out
++    }
++    pub fn value(&self, u: f64) -> [f64;3] {
++        let b=self.basis(u);
++        std::array::from_fn(|axis| self.poles.iter().zip(&b).map(|(p,w)| p[axis]*w).sum())
++    }
++    /// OCCT consumes distinct knots/multiplicities on [0,1] for a periodic spline.
++    pub fn host_knots(&self) -> (Vec<f64>, Vec<usize>) {
++        let source=if self.periodic {&self.knots[self.degree..self.degree+self.poles.len()+1]} else {&self.knots};
++        let mut knots=Vec::new();let mut mults=Vec::new();
++        for &u in source {
++            if knots.last()==Some(&u) {*mults.last_mut().unwrap()+=1;} else {knots.push(u);mults.push(1);}
++        }
++        (knots,mults)
++    }
++}
++/// Partial pivoting solves XYZ together; reject ill-conditioned systems instead of outputting NaNs.
++fn solve(mut a: Vec<Vec<f64>>, mut rhs: Vec<[f64;3]>) -> Result<Vec<[f64;3]>,String> {
++    let n=a.len();
++    for k in 0..n {
++        let pivot=(k..n).max_by(|&i,&j| a[i][k].abs().total_cmp(&a[j][k].abs())).unwrap();
++        if a[pivot][k].abs()<1e-12 {return Err("Points produce an ill-conditioned spline; change spacing, degree or point count".into());}
++        a.swap(k,pivot);rhs.swap(k,pivot);
++        for i in k+1..n {
++            let f=a[i][k]/a[k][k];
++            for j in k..n {a[i][j]-=f*a[k][j];}
++            for axis in 0..3 {rhs[i][axis]-=f*rhs[k][axis];}
++        }
++    }
++    let mut x=vec![[0.;3];n];
++    for i in (0..n).rev() {
++        for axis in 0..3 {x[i][axis]=(rhs[i][axis]-(i+1..n).map(|j| a[i][j]*x[j][axis]).sum::<f64>())/a[i][i];}
++    }
++    if x.iter().flatten().any(|v| !v.is_finite() || v.abs()>1e9) {return Err("Spline poles exceed coordinate limits".into());}
++    Ok(x)
++}
++pub fn interpolate(points: &[[f64;3]], requested_degree: usize, mode: Knots, periodic: bool) -> Result<Spline,String> {
++    validate(points,MAX_POLES)?;
++    if !(1..=11).contains(&requested_degree) || requested_degree%2==0 {
++        return Err("InterpCrv supports odd degrees 1, 3, 5, 7, 9 and 11".into());
++    }
++    if periodic && (points.len()<3 || distance(points[0],*points.last().unwrap())<TOLERANCE) {
++        return Err("A smooth closed curve needs at least 3 distinct points without a repeated endpoint".into());
++    }
++    let n=points.len();
++    let mut degree=requested_degree.min(n-1);
++    if periodic && degree%2==0 {degree-=1;}
++    let params=parameters(points,mode,periodic);
++    let knots=if periodic {periodic_knots(&params,degree)} else {
++        let mut knots=vec![0.;degree+1];
++        for j in 1..n-degree {knots.push(params[j..j+degree].iter().sum::<f64>()/degree as f64);}
++        knots.extend(vec![1.;degree+1]);knots
++    };
++    let mut spline=Spline {poles:vec![[0.;3];n],knots,degree,periodic};
++    let matrix=params[..n].iter().map(|&u| spline.basis(u)).collect();
++    spline.poles=solve(matrix,points.to_vec())?;
++    Ok(spline)
++}
++/// Fit equal arc-length samples to a uniformly knotted spline, preserving open endpoints.
++/// Closed samples include the duplicated last endpoint, which is removed from the solve.
++pub fn rebuild(samples: &[[f64;3]], count: usize, degree: usize, periodic: bool) -> Result<Spline,String> {
++    rebuild_options(count,degree)?;
++    validate(samples,MAX_SAMPLES)?;
++    if periodic && distance(samples[0],*samples.last().unwrap())>TOLERANCE {
++        return Err("Closed samples must end at their start point".into());
++    }
++    let samples=if periodic {&samples[..samples.len()-1]} else {samples};
++    if samples.len()<count*2 {return Err("Rebuild needs at least twice PointCount samples".into());}
++    let knots=if periodic {
++        let params=(0..=count).map(|i| i as f64/count as f64).collect::<Vec<_>>();
++        periodic_knots(&params,degree)
++    } else {
++        let mut knots=vec![0.;degree+1];
++        knots.extend((1..count-degree).map(|i| i as f64/(count-degree) as f64));
++        knots.extend(vec![1.;degree+1]);knots
++    };
++    let mut spline=Spline {poles:vec![[0.;3];count],knots,degree,periodic};
++    let first=if periodic {0} else {1};let end=if periodic {count} else {count-1};
++    if !periodic {spline.poles[0]=samples[0];spline.poles[count-1]=*samples.last().unwrap();}
++    let unknowns=end-first;
++    if unknowns==0 {return Ok(spline);}
++    let mut normal=vec![vec![0.;unknowns];unknowns];let mut rhs=vec![[0.;3];unknowns];
++    for (i,&point) in samples.iter().enumerate() {
++        let u=i as f64/(samples.len()-usize::from(!periodic)) as f64;
++        let b=spline.basis(u);
++        let target: [f64;3]=std::array::from_fn(|axis| point[axis]-if periodic {0.} else {b[0]*spline.poles[0][axis]+b[count-1]*spline.poles[count-1][axis]});
++        for j in first..end {
++            for k in first..end {normal[j-first][k-first]+=b[j]*b[k];}
++            for axis in 0..3 {rhs[j-first][axis]+=b[j]*target[axis];}
++        }
++    }
++    let fit=solve(normal,rhs)?;spline.poles[first..end].copy_from_slice(&fit);Ok(spline)
++}
+--- baseline/rust/src/spline_ffi.rs
++++ candidate/rust/src/spline_ffi.rs
+@@ -0,0 +1,44 @@
++use crate::spline::{self, Spline};
++use std::{ffi::c_char,sync::{Mutex,OnceLock}};
++#[derive(Default)]
++struct State {curve: Option<Spline>, message: String}
++fn state()-> &'static Mutex<State> {static S:OnceLock<Mutex<State>>=OnceLock::new();S.get_or_init(||Mutex::new(State::default()))}
++pub(crate) fn publish(result: Result<Spline,String>)->bool {
++    let Ok(mut s)=state().lock() else {return false;};
++    match result {Ok(curve)=>{s.curve=Some(curve);s.message.clear();true},Err(e)=>{s.curve=None;s.message=e;false}}
++}
++/// # Safety
++/// `xyz` points to `count*3` readable doubles for the duration of this call.
++#[unsafe(no_mangle)]
++pub unsafe extern "C" fn om9_spline_rebuild(xyz:*const f64,count:usize,poles:usize,degree:usize,closed:bool)->bool {
++    if xyz.is_null() || !(2..=spline::MAX_SAMPLES).contains(&count) {return publish(Err("Invalid rebuild samples".into()));}
++    let input=unsafe {std::slice::from_raw_parts(xyz,count*3)};
++    let points=input.chunks_exact(3).map(|p|[p[0],p[1],p[2]]).collect::<Vec<_>>();
++    publish(spline::rebuild(&points,poles,degree,closed))
++}
++#[unsafe(no_mangle)]
++pub extern "C" fn om9_spline_options(poles:usize,degree:usize)->bool {spline::rebuild_options(poles,degree).is_ok()}
++#[unsafe(no_mangle)]
++pub extern "C" fn om9_spline_degree()->usize {state().lock().ok().and_then(|s|s.curve.as_ref().map(|c|c.degree)).unwrap_or(0)}
++#[unsafe(no_mangle)]
++pub extern "C" fn om9_spline_periodic()->bool {state().lock().ok().is_some_and(|s|s.curve.as_ref().is_some_and(|c|c.periodic))}
++#[unsafe(no_mangle)]
++pub extern "C" fn om9_spline_pole_count()->usize {state().lock().ok().and_then(|s|s.curve.as_ref().map(|c|c.poles.len())).unwrap_or(0)}
++#[unsafe(no_mangle)]
++pub extern "C" fn om9_spline_pole(i:usize,axis:usize)->f64 {state().lock().ok().and_then(|s|s.curve.as_ref().and_then(|c|c.poles.get(i).and_then(|p|p.get(axis)).copied())).unwrap_or(f64::NAN)}
++#[unsafe(no_mangle)]
++pub extern "C" fn om9_spline_knot_count()->usize {state().lock().ok().and_then(|s|s.curve.as_ref().map(|c|c.host_knots().0.len())).unwrap_or(0)}
++#[unsafe(no_mangle)]
++pub extern "C" fn om9_spline_knot(i:usize)->f64 {state().lock().ok().and_then(|s|s.curve.as_ref().and_then(|c|c.host_knots().0.get(i).copied())).unwrap_or(f64::NAN)}
++#[unsafe(no_mangle)]
++pub extern "C" fn om9_spline_multiplicity(i:usize)->usize {state().lock().ok().and_then(|s|s.curve.as_ref().and_then(|c|c.host_knots().1.get(i).copied())).unwrap_or(0)}
++#[unsafe(no_mangle)]
++pub extern "C" fn om9_spline_value(u:f64,axis:usize)->f64 {if !u.is_finite(){return f64::NAN;}state().lock().ok().and_then(|s|s.curve.as_ref().and_then(|c|c.value(u).get(axis).copied())).unwrap_or(f64::NAN)}
++/// # Safety
++/// `buffer` is writable for `capacity` bytes, or null when capacity is zero.
++#[unsafe(no_mangle)]
++pub unsafe extern "C" fn om9_spline_message(buffer:*mut c_char,capacity:usize)->usize {
++    let Ok(s)=state().lock() else {return 0;};let bytes=s.message.as_bytes();
++    if !buffer.is_null() && capacity>0 {let n=bytes.len().min(capacity-1);unsafe{std::ptr::copy_nonoverlapping(bytes.as_ptr(),buffer.cast::<u8>(),n);*buffer.add(n)=0;}}
++    bytes.len()
++}
+--- baseline/tests/modeling_curve_editor_smoke.FCMacro
++++ candidate/tests/modeling_curve_editor_smoke.FCMacro
+@@ -0,0 +1,51 @@
++import FreeCAD as App,FreeCADGui as Gui
++from PySide6 import QtCore
++from pathlib import Path
++import json,os,traceback
++out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
++def check(name,value):
++    report['checks'].append({'name':name,'passed':bool(value)})
++    if not value:raise AssertionError(name)
++def run():
++    try:
++        import Part,OpenMatrix9Gui as native,ThreeDm
++        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('CurveEditor');doc.UndoMode=1
++        curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(3,4,0),App.Vector(7,2,0),App.Vector(10,0,0)],[4,4],[0.,1.],False,3,[1.,2.,0.7,1.])
++        obj=doc.addObject('Part::Feature','Rational');obj.Shape=curve.toShape();doc.recompute()
++        basis=json.loads(native.curveBasis3dm(doc.Name,obj.Name));before=obj.Shape.copy()
++        report['pre_edit_shape_copy_identity_equal']=obj.Shape.isEqual(before)
++        request=dict(basis);request['poles']=[p[:] for p in basis['poles']];request['poles'][1][1]+=2
++        native.editModelingCurve3dm(doc.Name,obj.Name,json.dumps(request));doc.recompute()
++        edited=obj.Shape.Edges[0].Curve
++        check('curve_edit_preserves_rational_basis',edited.Degree==basis['degree'] and edited.getWeights()==basis['weights'] and edited.getKnots()==basis['knots'] and edited.getMultiplicities()==basis['multiplicities'] and abs(edited.getPole(2).y-6)<1e-9)
++        check('one typed CV edit transaction',len(doc.UndoNames)==1)
++        doc.undo();restored=json.loads(native.curveBasis3dm(doc.Name,obj.Name))
++        report['undo_basis']=restored
++        check('CV edit Undo exact original',all(restored[k]==basis[k] for k in ['degree','periodic','poles','weights','knots','multiplicities','first','last']))
++        doc.redo();check('CV edit Redo current geometry',abs(obj.Shape.Edges[0].Curve.getPole(2).y-6)<1e-9)
++        for field,value in [('weights',[1.,-1.,0.7,1.]),('knots',[1.,0.]),('degree',50)]:
++            req=json.loads(native.curveBasis3dm(doc.Name,obj.Name));req[field]=value;old=obj.Shape.exportBrepToString();undos=len(doc.UndoNames);failed=False
++            try:native.editModelingCurve3dm(doc.Name,obj.Name,json.dumps(req))
++            except (ValueError,RuntimeError):failed=True
++            check('invalid '+field+' rejected atomically',failed and obj.Shape.exportBrepToString()==old and len(doc.UndoNames)==undos)
++        old=obj.Shape.exportBrepToString();failed=False
++        try:native.editModelingCurve3dm(doc.Name,obj.Name,json.dumps(request))
++        except (ValueError,RuntimeError):failed=True
++        check('stale curve request rejected',failed and obj.Shape.exportBrepToString()==old)
++        oriented=json.loads(native.curveBasis3dm(doc.Name,obj.Name));shape=obj.Shape.copy();shape.reverse();obj.Shape=shape;doc.recompute()
++        old=obj.Shape.exportBrepToString();undos=len(doc.UndoNames);failed=False
++        try:native.editModelingCurve3dm(doc.Name,obj.Name,json.dumps(oriented))
++        except (ValueError,RuntimeError):failed=True
++        check('orientation changed request rejected atomically',failed and obj.Shape.exportBrepToString()==old and len(doc.UndoNames)==undos)
++        shape=obj.Shape.copy();shape.reverse();obj.Shape=shape;doc.recompute()
++        saved=out/'current.FCStd';doc.saveAs(str(saved));App.closeDocument(doc.Name);doc=App.openDocument(str(saved));obj=doc.getObject('Rational')
++        check('FCStd reopens edited rational basis',abs(obj.Shape.Edges[0].Curve.getPole(2).y-6)<1e-9 and obj.Shape.Edges[0].Curve.getWeights()==basis['weights'])
++        exported=out/'edited-curve-v5.3dm';ThreeDm.export_file(str(exported),[obj],modeling=True)
++        reimport=App.newDocument('CurveReread');objects=ThreeDm.import_file(str(exported),reimport,mode='modeling')
++        check('current curve V5 export reimport',len(objects)==1 and abs(objects[0].Shape.Edges[0].Curve.getPole(2).y-6)<1e-9)
++        report.update(ok=True,module=native.__file__,exported=str(exported))
++    except Exception:report.update(ok=False,error=traceback.format_exc())
++    (out/'results.json').write_text(json.dumps(report,indent=2))
++    for name in list(App.listDocuments()):App.closeDocument(name)
++    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
++QtCore.QTimer.singleShot(1000,run)
+--- baseline/tests/modeling_curve_editor_ui_smoke.FCMacro
++++ candidate/tests/modeling_curve_editor_ui_smoke.FCMacro
+@@ -0,0 +1,40 @@
++import FreeCAD as App,FreeCADGui as Gui
++from PySide6 import QtCore,QtWidgets,QtGui,QtTest
++from pathlib import Path
++import json,os,traceback,sys
++sys.path.insert(0,str(Path(__file__).parent))
++from command_console_support import command_input
++out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
++def check(name,value):
++    report['checks'].append({'name':name,'passed':bool(value)})
++    if not value:raise AssertionError(name)
++def settle():
++    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(200,loop.quit);loop.exec()
++    QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
++def run():
++    try:
++        import Part,OpenMatrix9Gui as native
++        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('CVUI');doc.UndoMode=1
++        curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(3,4,0),App.Vector(7,2,0),App.Vector(10,0,0)],[4,4],[0.,1.],False,3,[1.,2.,0.7,1.])
++        obj=doc.addObject('Part::Feature','Rational');obj.Shape=curve.toShape();doc.recompute();Gui.Selection.addSelection(obj);settle()
++        window=Gui.getMainWindow();action=window.findChild(QtGui.QAction,'PointsOn');check('original PointsOn menu available for selected owning curve',action is not None and action.isEnabled())
++        action.trigger();settle();dialog=window.findChild(QtWidgets.QDialog,'OM9CurveCVDialog');check('PointsOn opens typed CV editor only for selection',dialog is not None and dialog.isVisible())
++        poles=dialog.findChild(QtWidgets.QTableWidget,'OM9CurveCVPoles');check('typed CV numeric fields',poles.rowCount()==4 and isinstance(poles.cellWidget(1,1),QtWidgets.QDoubleSpinBox))
++        poles.cellWidget(1,1).setValue(6)
++        buttons=dialog.findChild(QtWidgets.QDialogButtonBox);buttons.button(QtWidgets.QDialogButtonBox.Ok).click();settle()
++        check('UI CV edit commits native shape',abs(obj.Shape.Edges[0].Curve.getPole(2).y-6)<1e-9 and len(doc.UndoNames)==1)
++        field=command_input(window);field.setText('PointsOn');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
++        report['cmd_diagnostic']={'selected':[o.Name for o in Gui.Selection.getSelection()], 'dialogs':[(d.objectName(),d.isVisible()) for d in window.findChildren(QtWidgets.QDialog)],'prompt':field.property('om9Prompt')}
++        dialog=window.findChild(QtWidgets.QDialog,'OM9CurveCVDialog');check('CMD PointsOn shares editor',dialog is not None and dialog.isVisible())
++        poles=dialog.findChild(QtWidgets.QTableWidget,'OM9CurveCVPoles');poles.cellWidget(1,3).setValue(-1)
++        old=obj.Shape.exportBrepToString();buttons=dialog.findChild(QtWidgets.QDialogButtonBox);buttons.button(QtWidgets.QDialogButtonBox.Ok).click();settle()
++        check('UI invalid weight stays open without mutation',dialog.isVisible() and bool(dialog.findChild(QtWidgets.QLabel,'OM9CurveCVError').text()) and obj.Shape.exportBrepToString()==old and len(doc.UndoNames)==1)
++        buttons.button(QtWidgets.QDialogButtonBox.Cancel).click();settle();check('UI Cancel no transaction',len(doc.UndoNames)==1 and obj.Shape.exportBrepToString()==old)
++        action.trigger();settle();Gui.activateWorkbench('PartWorkbench');settle()
++        check('workbench change cancels CV dialog',not any(d.isVisible() for d in window.findChildren(QtWidgets.QDialog,'OM9CurveCVDialog')))
++        report.update(ok=True,module=native.__file__)
++    except Exception:report.update(ok=False,error=traceback.format_exc())
++    (out/'results.json').write_text(json.dumps(report,indent=2))
++    for name in list(App.listDocuments()):App.closeDocument(name)
++    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
++QtCore.QTimer.singleShot(1000,run)
+--- baseline/tests/modeling_curve_join_smoke.FCMacro
++++ candidate/tests/modeling_curve_join_smoke.FCMacro
+@@ -0,0 +1,36 @@
++import FreeCAD as App,FreeCADGui as Gui
++from PySide6 import QtCore
++from pathlib import Path
++import json,os,traceback
++out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
++def check(name,value):
++    report['checks'].append({'name':name,'passed':bool(value)})
++    if not value:raise AssertionError(name)
++def run():
++    try:
++        import Part,ThreeDm,OpenMatrix9Gui as native
++        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('CurveJoin');doc.UndoMode=1
++        a=doc.addObject('Part::Feature','A');a.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(5,0,0))
++        b=doc.addObject('Part::Feature','B');b.Shape=Part.makeLine(App.Vector(5,0,0),App.Vector(5,6,0));doc.recompute()
++        name=native.joinModelingCurves3dm(doc.Name,[b.Name,a.Name]);joined=doc.getObject(name)
++        check('native curve Join creates independent connected wire',joined.Shape.isValid() and len(joined.Shape.Edges)==2 and abs(joined.Shape.Length-11)<1e-9 and len(doc.Objects)==3)
++        doc.undo();check('Join Undo atomic retains inputs',len(doc.Objects)==2);doc.redo();check('Join Redo restores result',len(doc.Objects)==3)
++        before=len(doc.Objects);b.Placement.Base=App.Vector(100,0,0);doc.recompute();failed=False
++        try:native.joinModelingCurves3dm(doc.Name,[a.Name,b.Name])
++        except (ValueError,RuntimeError):failed=True
++        check('disconnected curves rejected without mutation',failed and len(doc.Objects)==before)
++        export=out/'joined-curve-v5.3dm';ThreeDm.export_file(str(export),[joined],modeling=True)
++        target=App.newDocument('JoinedReread');objects=ThreeDm.import_file(str(export),target,mode='modeling')
++        check('joined curve current V5 reimport',len(objects)==1 and abs(objects[0].Shape.Length-11)<1e-8)
++        App.setActiveDocument(doc.Name);Gui.setActiveDocument(doc.Name)
++        closed=doc.addObject('Part::Feature','Closed');closed.Shape=Part.makeCircle(2,App.Vector(0,2,0));tail=doc.addObject('Part::Feature','Tail');tail.Shape=Part.makeLine(App.Vector(2,2,0),App.Vector(2,2,3));doc.recompute()
++        before=len(doc.Objects);undos=len(doc.UndoNames);failed=False
++        try:native.joinModelingCurves3dm(doc.Name,[closed.Name,tail.Name])
++        except (RuntimeError,ValueError):failed=True
++        check('closed curve Join rejected before mutation',failed and len(doc.Objects)==before and len(doc.UndoNames)==undos)
++        report.update(ok=True,module=native.__file__,exported=str(export))
++    except Exception:report.update(ok=False,error=traceback.format_exc())
++    (out/'results.json').write_text(json.dumps(report,indent=2))
++    for name in list(App.listDocuments()):App.closeDocument(name)
++    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
++QtCore.QTimer.singleShot(1000,run)
+--- baseline/tests/modeling_curve_workflow_smoke.FCMacro
++++ candidate/tests/modeling_curve_workflow_smoke.FCMacro
+@@ -0,0 +1,62 @@
++import FreeCAD as App,FreeCADGui as Gui
++from PySide6 import QtCore,QtWidgets,QtGui,QtTest
++from pathlib import Path
++import json,os,traceback,sys
++sys.path.insert(0,str(Path(__file__).parent))
++from command_console_support import command_input
++out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
++def check(name,value):
++    report['checks'].append({'name':name,'passed':bool(value)})
++    if not value:raise AssertionError(name)
++def settle():
++    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(100,loop.quit);loop.exec()
++def cmd(value):
++    field.setText(value);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
++def run():
++    global field
++    try:
++        import Part,OpenMatrix9Gui as native
++        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('CurveWorkflow');doc.UndoMode=1;settle()
++        window=Gui.getMainWindow();field=command_input(window)
++        action=window.findChild(QtGui.QAction,'InterpCrv')
++        check('imported_curve_command_routes registered',action is not None and action.isEnabled())
++        action.trigger();settle()
++        for value in ['0,0,0','2,3,1','5,2,0','8,0,0','']:cmd(value)
++        created=doc.getObject('InterpCrv')
++        check('menu and CMD create native spline',created is not None and created.Shape.isValid() and created.Shape.Edges[0].Curve.Degree==3)
++        before=len(doc.Objects);cmd('InterpCrv');cmd('1,1,1');cmd('Cancel')
++        check('curve cancellation leaves document unchanged',len(doc.Objects)==before)
++        Gui.Selection.clearSelection();Gui.Selection.addSelection(created)
++        rebuild=window.findChild(QtGui.QAction,'Rebuild')
++        check('Rebuild original command registered',rebuild is not None and rebuild.isEnabled())
++        rebuild.trigger();settle();dialog=window.findChild(QtWidgets.QDialog,'OM9RebuildDialog')
++        check('Rebuild selected current native curve dialog',dialog is not None)
++        count=dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount');degree=dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree')
++        count.setValue(12);degree.setValue(3)
++        dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(False)
++        buttons=dialog.findChild(QtWidgets.QDialogButtonBox);buttons.button(QtWidgets.QDialogButtonBox.Ok).click();settle()
++        outputs=[o for o in doc.Objects if o is not created and hasattr(o,'Shape')]
++        check('Rebuild native output exact requested structure',len(outputs)==1 and outputs[0].Shape.Edges[0].Curve.NbPoles==12 and outputs[0].Shape.Edges[0].Curve.Degree==3)
++        check('DeleteInput=false preserves Rebuild input',doc.getObject(created.Name) is not None)
++        doc.undo();check('Rebuild Undo atomic',len(doc.Objects)==before);doc.redo();check('Rebuild Redo restores output',len(doc.Objects)==before+1)
++        cmd('Line');cmd('0,0,0');cmd('3,0,0');check('legacy Line still works',doc.getObject('Line') is not None)
++        cmd('Polyline');cmd('0,0,0');cmd('1,1,0');cmd('2,1,0');cmd('');check('legacy Polyline still works',doc.getObject('Polyline') is not None)
++        window.show();area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
++        view=Gui.activeDocument().activeView();view.viewTop();Gui.updateGui();settle()
++        viewer=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible());target=viewer.viewport();center=target.rect().center()
++        action.trigger();settle();expected=[]
++        for delta in [QtCore.QPoint(-60,20),QtCore.QPoint(-20,-30),QtCore.QPoint(25,-15),QtCore.QPoint(70,20)]:
++            position=center+delta;ratio=viewer.devicePixelRatioF();a,b=view.projectPointToLine(round(position.x()*ratio),round(target.height()*ratio)-round(position.y()*ratio)-1);direction=b-a;expected.append(a+direction*(-a.z/direction.z))
++            QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=position);settle()
++        QtTest.QTest.keyClick(target,QtCore.Qt.Key_Return);settle();mouse=doc.getObject('InterpCrv001')
++        check('InterpCrv mouse route commits native cubic',mouse is not None and mouse.Shape.isValid() and mouse.Shape.Edges[0].Curve.Degree==3)
++        count=len(doc.Objects);cmd('InterpCrv')
++        for p in expected:cmd('{:.12g},{:.12g},{:.12g}'.format(p.x,p.y,p.z))
++        cmd('');typed=doc.getObject('InterpCrv002')
++        check('InterpCrv mouse CMD equivalent native geometry',len(doc.Objects)==count+1 and abs(mouse.Shape.Length-typed.Shape.Length)<1e-7 and all((a-b).Length<1e-7 for a,b in zip(mouse.Shape.Edges[0].Curve.getPoles(),typed.Shape.Edges[0].Curve.getPoles())))
++        report.update(ok=True,module=native.__file__)
++    except Exception:report.update(ok=False,error=traceback.format_exc())
++    (out/'results.json').write_text(json.dumps(report,indent=2))
++    for name in list(App.listDocuments()):App.closeDocument(name)
++    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
++QtCore.QTimer.singleShot(1000,run)
+--- baseline/tests/modeling_phase2_rhino_roundtrip.FCMacro
++++ candidate/tests/modeling_phase2_rhino_roundtrip.FCMacro
+@@ -0,0 +1,87 @@
++import FreeCAD as App,FreeCADGui as Gui
++from PySide6 import QtCore,QtWidgets,QtGui,QtTest
++from pathlib import Path
++import os,json,traceback,sys,hashlib
++sys.path.insert(0,str(Path(__file__).parent))
++from command_console_support import command_input
++out=Path(os.environ['OM9_SMOKE_OUTPUT']);config=json.loads(Path(os.environ['OM9_PHASE2_CASE']).read_text());report={'checks':[],'pid':os.getpid(),'macro_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
++def check(name,value):
++    report['checks'].append({'name':name,'passed':bool(value)})
++    if not value:raise AssertionError(name)
++def settle():
++    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(100,loop.quit);loop.exec();QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
++def cmd(value):
++    field.setText(value);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
++def edgefacts(edge):
++    curve=edge.Curve
++    if not hasattr(curve,'getWeights'):curve=edge.toNurbs().Edges[0].Curve
++    return {'degree':curve.Degree,'weights':curve.getWeights(),'periodic':curve.isPeriodic(),
++            'samples':[list(edge.valueAt(edge.FirstParameter+(edge.LastParameter-edge.FirstParameter)*i/32)) for i in range(33)],
++            'start':list(edge.Vertexes[0].Point),'length':edge.Length,'valid':edge.isValid()}
++
++def facts(obj):
++    if len(obj.Shape.Edges)==1:return edgefacts(obj.Shape.Edges[0])
++    segments=[edgefacts(e) for e in obj.Shape.Edges]
++    return {'segments':segments,'length':sum(e['length'] for e in segments),'valid':obj.Shape.isValid()}
++
++def equivalent(a,b):
++    if isinstance(a,dict):return set(a)==set(b) and all(equivalent(a[k],b[k]) for k in a)
++    if isinstance(a,list):return len(a)==len(b) and all(equivalent(x,y) for x,y in zip(a,b))
++    if isinstance(a,float):return abs(a-b)<=1e-10
++    return a==b
++def run():
++    global field
++    try:
++        import Part,ThreeDm,OpenMatrix9Gui as native
++        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('Phase2Rhino');doc.UndoMode=1
++        objects=ThreeDm.import_file(config['input'],doc,mode='modeling');check('Rhino Export Selected imported owning curve',len(objects)==1)
++        obj=objects[0];obj.Label='EditedCurve';basis=json.loads(native.curveBasis3dm(doc.Name,obj.Name))
++        check('import preserves source periodic basis',basis['periodic']==config['source_periodic'])
++        request=dict(basis);request['poles']=[p[:] for p in basis['poles']];request['poles'][1][1]+=0.25
++        native.editModelingCurve3dm(doc.Name,obj.Name,json.dumps(request));doc.undo();doc.redo();check('imported curve CV Undo Redo',abs(json.loads(native.curveBasis3dm(doc.Name,obj.Name))['poles'][1][1]-request['poles'][1][1])<1e-9)
++        weights=json.loads(native.curveBasis3dm(doc.Name,obj.Name));weights['weights'][1]*=1.1;native.editModelingCurve3dm(doc.Name,obj.Name,json.dumps(weights));check('explicit rational weight edit',abs(obj.Shape.Edges[0].Curve.getWeight(2)-weights['weights'][1])<1e-9)
++        knots=json.loads(native.curveBasis3dm(doc.Name,obj.Name))
++        if len(knots['knots'])>2:
++            knots['knots'][1]=knots['knots'][0]+0.55*(knots['knots'][2]-knots['knots'][0])
++            native.editModelingCurve3dm(doc.Name,obj.Name,json.dumps(knots));check('explicit ordered knot edit',abs(obj.Shape.Edges[0].Curve.getKnot(2)-knots['knots'][1])<1e-9)
++        window=Gui.getMainWindow();field=command_input(window);settle()
++        before=len(doc.Objects);cmd('InterpCrv');cmd('20,0,0');cmd('22,3,1');cmd('25,2,0');cmd('28,0,0');cmd('');new=doc.getObject('InterpCrv');new.Label='NewCurve'
++        check('draw new native curve through CMD',new is not None and new.Shape.isValid() and len(doc.Objects)==before+1)
++        cmd('InterpCrv');cmd('0,0,0');cmd('Cancel');check('curve Cancel no document mutation',len(doc.Objects)==before+1)
++        # Rebuild imported current geometry through the same real command/dialog.
++        existing={o.Name for o in doc.Objects}
++        Gui.Selection.clearSelection();Gui.Selection.addSelection(obj);cmd('Rebuild')
++        dialog=window.findChild(QtWidgets.QDialog,'OM9RebuildDialog');check('imported rational periodic placed curve Rebuild dialog',dialog is not None)
++        dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(12);dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree').setValue(3);dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(False)
++        dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle()
++        rebuilt=next(o for o in doc.Objects if o.Name not in existing and hasattr(o,'Shape'));rebuilt.Label='RebuiltCurve'
++        check('Rebuild native periodic flag and degree',rebuilt.Shape.Edges[0].Curve.Degree==3 and rebuilt.Shape.Edges[0].Curve.NbPoles==12)
++        # Create a tail connected to the edited input's current endpoint, then Join.
++        join_input=obj if not basis['periodic'] else new
++        if basis['periodic']:
++            loop_tail=doc.addObject('Part::Feature','LoopTail');end=obj.Shape.Edges[0].Vertexes[-1].Point;loop_tail.Shape=Part.makeLine(end,end+App.Vector(0,0,2));doc.recompute()
++            count=len(doc.Objects);undos=len(doc.UndoNames);failed=False
++            try:native.joinModelingCurves3dm(doc.Name,[obj.Name,loop_tail.Name])
++            except (ValueError,RuntimeError):failed=True
++            check('closed imported periodic Join rejected atomically',failed and len(doc.Objects)==count and len(doc.UndoNames)==undos)
++            doc.removeObject(loop_tail.Name)
++        end=join_input.Shape.Edges[0].Vertexes[-1].Point
++        tail=doc.addObject('Part::Feature','Tail');tail.Shape=Part.makeLine(end,end+App.Vector(0,0,2));doc.recompute()
++        joined_name=native.joinModelingCurves3dm(doc.Name,[join_input.Name,tail.Name]);joined=doc.getObject(joined_name);joined.Label='JoinedCurve'
++        check('join current open curve with new curve',joined.Shape.isValid() and len(joined.Shape.Edges)==2)
++        selected=[obj,new,rebuilt,joined];expected={o.Label:facts(o) for o in selected}
++        fcstd=out/'phase2.FCStd';doc.saveAs(str(fcstd));name=doc.Name;App.closeDocument(name)
++        source=Path(config['input']);disabled=source.with_suffix('.source-disabled');source.rename(disabled)
++        try:
++            check('owned source absent while reopening FCStd',not source.exists())
++            doc=App.openDocument(str(fcstd));selected=[next(o for o in doc.Objects if o.Label==label) for label in expected]
++        finally:disabled.rename(source)
++        report['fcstd_expected']=expected;report['fcstd_restored']={o.Label:facts(o) for o in selected}
++        check('FCStd preserves edited and new curves without source dependency',all(equivalent(facts(o),expected[o.Label]) for o in selected))
++        output=out/'current-and-new-v5.3dm';ThreeDm.export_file(str(output),selected,modeling=True)
++        report.update(ok=True,module=native.__file__,module_sha256=hashlib.sha256(Path(native.__file__).read_bytes()).hexdigest(),output=str(output),expected=expected)
++    except Exception:report.update(ok=False,error=traceback.format_exc())
++    (out/'results.json').write_text(json.dumps(report,indent=2))
++    for name in list(App.listDocuments()):App.closeDocument(name)
++    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
++QtCore.QTimer.singleShot(1000,run)
+--- baseline/tests/modeling_phase2_saved_reimport.FCMacro
++++ candidate/tests/modeling_phase2_saved_reimport.FCMacro
+@@ -0,0 +1,46 @@
++import FreeCAD as App,FreeCADGui as Gui
++from PySide6 import QtCore
++from pathlib import Path
++import json,os,traceback,hashlib
++out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'cases':[]}
++def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
++def check(name,value):
++    report['checks'].append({'name':name,'passed':bool(value)})
++    if not value:raise AssertionError(name)
++def run():
++    try:
++        import Part,ThreeDm,OpenMatrix9Gui as native
++        Gui.activateWorkbench('OpenMatrix9Workbench');result_path=Path(os.environ['OM9_RHINO_PHASE2_RESULT']);rhino=json.loads(result_path.read_text())
++        check('actual Rhino5 three fixtures completed',rhino['ok'] and len(rhino['cases'])==3 and rhino['rhino_version'].startswith('5.'))
++        for case in rhino['cases']:
++            host_path=Path(case['host_report']);host=json.loads(host_path.read_text());check('host binary same as saved reread '+case['name'],host['module_sha256']==sha(native.__file__))
++            doc=App.newDocument('RhinoSaved');objects=ThreeDm.import_file(case['saved'],doc,mode='modeling');expected=host['expected']
++            check('saved selection exact '+case['name'],len(objects)==len(expected) and {o.Label for o in objects}==set(expected))
++            for obj in objects:
++                wanted=expected[obj.Label];edges=obj.Shape.Edges;wanted_edges=wanted.get('segments',[wanted])
++                if 'segments' in wanted and len(edges)==1:
++                    target=case['rows'][obj.Label];edge=edges[0];curve=edge.Curve
++                    check('saved PolyCurve native equivalent NURBS '+case['name'],obj.Shape.isValid() and curve.Degree==target['degree'] and abs(edge.Length-target['length'])<=0.001)
++                    samples=[list(edge.valueAt(edge.FirstParameter+(edge.LastParameter-edge.FirstParameter)*j/64)) for j in range(65)]
++                    check('saved PolyCurve complete current geometry '+case['name'],all(abs(a-b)<=0.001 for p,q in zip(samples,target['full_samples']) for a,b in zip(p,q)))
++                    check('saved PolyCurve rational shape '+case['name'],curve.isRational()==any(abs(w-1)>1e-12 for segment in wanted['segments'] for w in segment['weights']))
++                    continue
++                check('actual SaveAs native CAD selection '+case['name']+'/'+obj.Label,obj.Shape.isValid() and len(edges)==len(wanted_edges) and abs(sum(e.Length for e in edges)-wanted['length'])<=0.001)
++                for i,(edge,target) in enumerate(zip(edges,wanted_edges)):
++                    curve=edge.Curve
++                    if not hasattr(curve,'getWeights'):curve=edge.toNurbs().Edges[0].Curve
++                    label=case['name']+'/'+obj.Label+'/'+str(i)
++                    check('actual SaveAs native CAD basis '+label,curve.Degree==target['degree'] and curve.isPeriodic()==target['periodic'])
++                    samples=[list(edge.valueAt(edge.FirstParameter+(edge.LastParameter-edge.FirstParameter)*j/32)) for j in range(33)]
++                    check('actual SaveAs current geometry '+label,all(abs(a-b)<=0.001 for p,q in zip(samples,target['samples']) for a,b in zip(p,q)))
++                    weights=curve.getWeights();check('actual SaveAs rational basis '+label,len(weights)==len(target['weights']) and all(abs(a-b)<1e-9 for a,b in zip(weights,target['weights'])))
++            exported=out/(case['name']+'-reread-current-v5.3dm');ThreeDm.export_file(str(exported),objects,modeling=True)
++            check('saved reread exports current native CAD '+case['name'],exported.is_file())
++            report['cases'].append({'name':case['name'],'saved':case['saved'],'saved_sha256':sha(case['saved']),'input_sha256':sha(case['input']),'host_report_sha256':sha(host_path),'host_output_sha256':sha(host['output']),'reexport':str(exported),'reexport_sha256':sha(exported)})
++            App.closeDocument(doc.Name)
++        report.update(ok=True,module=native.__file__,module_sha256=sha(native.__file__),freecad_version=App.Version(),rhino_report=str(result_path),rhino_report_sha256=sha(result_path))
++    except Exception:report.update(ok=False,error=traceback.format_exc())
++    (out/'results.json').write_text(json.dumps(report,indent=2))
++    for name in list(App.listDocuments()):App.closeDocument(name)
++    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
++QtCore.QTimer.singleShot(1000,run)
+--- baseline/tests/modeling_snap_cache_smoke.FCMacro
++++ candidate/tests/modeling_snap_cache_smoke.FCMacro
+@@ -0,0 +1,50 @@
++import FreeCAD as App,FreeCADGui as Gui
++from PySide6 import QtCore
++from pathlib import Path
++import json,os,traceback
++out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
++def check(name,value):
++    report['checks'].append({'name':name,'passed':bool(value)})
++    if not value:raise AssertionError(name)
++def run():
++    try:
++        import Part,OpenMatrix9Gui as native
++        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('SnapCache');doc.UndoMode=1
++        line=doc.addObject('Part::Feature','Line');line.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0))
++        parent=doc.addObject('App::Part','Parent');parent.addObject(line);doc.recompute()
++        view=Gui.activeDocument().activeView();view.viewTop();view.fitAll();Gui.updateGui()
++        initial=json.loads(native.querySnap3dm(0,0,2));height=initial['viewport_height']
++        def query(point,mode=2,per=2048,total=8192):
++            pixel=view.getPointOnScreen(point);return json.loads(native.querySnap3dm(pixel[0],height-pixel[1],mode,64,per,total))
++        first=query(App.Vector(0,0,0));check('native End picks projected CAD endpoint',first['complete'] and first['picked'] and first['point']==[0,0,0])
++        second=query(App.Vector(0,0,0));check('unchanged query reuses screen index',not second['index_rebuilt'])
++        doc.openTransaction('Move');line.Placement.Base=App.Vector(2,0,0);doc.recompute();doc.commitTransaction()
++        moved=query(App.Vector(2,0,0));report['moved_query']=moved
++        check('placement invalidates index and native candidate cache',moved['index_rebuilt'] and moved['picked'] and moved['point']==[2,0,0])
++        doc.undo();undo=query(App.Vector(0,0,0));check('Undo invalidates snap cache',undo['index_rebuilt'] and undo['picked'] and undo['point']==[0,0,0])
++        doc.redo();redo=query(App.Vector(2,0,0));check('Redo invalidates snap cache',redo['index_rebuilt'] and redo['picked'] and redo['point']==[2,0,0])
++        parent.ViewObject.Visibility=False;Gui.updateGui();hidden=query(App.Vector(2,0,0));check('hidden parent excluded',hidden['index_rebuilt'] and hidden['visited_objects']==0 and not hidden['picked'])
++        parent.ViewObject.Visibility=True;Gui.updateGui();shown=query(App.Vector(2,0,0));check('visibility restore invalidates cache',shown['index_rebuilt'] and shown['picked'])
++        camera=view.getCameraOrientation();view.viewAxonometric();Gui.updateGui();changed=query(App.Vector(2,0,0));check('camera invalidates projected index',changed['index_rebuilt'])
++        small=query(App.Vector(2,0,0),14,2);check('combined per-object candidate budget',not small['complete'] and not small['picked'] and len(small['candidates'])<=2)
++        restored=query(App.Vector(2,0,0),14,2048);check('larger budget does not reuse truncated cache',restored['complete'] and restored['picked'])
++        total=query(App.Vector(2,0,0),14,2048,1);check('total budget incomplete not certified',not total['complete'] and not total['picked'] and len(total['candidates'])<=1)
++        check('native allocations obey total cap before output',total['generated_candidates']<=1 and total['visited_topology']<=2)
++        line.Shape=Part.makeLine(App.Vector(1,1,0),App.Vector(7,1,0));doc.recompute()
++        expected_shape=line.getSubObject('').Vertexes[0].Point
++        changed_shape=query(expected_shape);check('Shape edits invalidate native candidate cache',changed_shape['index_rebuilt'] and changed_shape['picked'] and all(abs(a-b)<1e-7 for a,b in zip(changed_shape['point'],list(expected_shape))))
++        source=doc.addObject('Part::Feature','LinkSource');source.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(1,0,0));source.ViewObject.Visibility=False
++        link=doc.addObject('App::Link','Link');link.setLink(source);link.LinkPlacement.Base=App.Vector(3,1,0);doc.recompute()
++        query(App.Vector(3,1,0));source.Shape=Part.makeLine(App.Vector(0.2,0,0),App.Vector(1.2,0,0));doc.recompute()
++        linked=query(App.Vector(3.2,1,0));check('linked source edit invalidates instance candidates',linked['index_rebuilt'] and linked['picked'] and all(abs(a-b)<1e-7 for a,b in zip(linked['point'],[3.2,1,0])))
++        old_name=doc.Name;App.closeDocument(old_name);doc=App.newDocument(old_name);fresh=doc.addObject('Part::Feature','Fresh');fresh.Shape=Part.makeLine(App.Vector(4,1,0),App.Vector(5,1,0));doc.recompute()
++        view=Gui.activeDocument().activeView();view.viewTop();view.fitAll();Gui.updateGui();height=json.loads(native.querySnap3dm(0,0,2))['viewport_height']
++        reopened=query(App.Vector(4,1,0));check('document replacement has no dangling snap rows',reopened['complete'] and reopened['picked'] and reopened['point']==[4,1,0])
++        window=Gui.getMainWindow();window.resize(window.width()+80,window.height()+40);Gui.updateGui()
++        resized=json.loads(native.querySnap3dm(0,0,2));check('viewport resize invalidates projected index',resized['index_rebuilt'] and (resized['viewport_width'],resized['viewport_height'])!=(reopened['viewport_width'],reopened['viewport_height']))
++        report.update(ok=True,module=native.__file__)
++    except Exception:report.update(ok=False,error=traceback.format_exc())
++    (out/'results.json').write_text(json.dumps(report,indent=2))
++    for name in list(App.listDocuments()):App.closeDocument(name)
++    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
++QtCore.QTimer.singleShot(1000,run)
+--- baseline/tests/modeling_snap_heavy_smoke.FCMacro
++++ candidate/tests/modeling_snap_heavy_smoke.FCMacro
+@@ -0,0 +1,55 @@
++import FreeCAD as App,FreeCADGui as Gui
++from PySide6 import QtCore,QtWidgets,QtTest
++from pathlib import Path
++import json,os,traceback,time,platform,statistics
++import sys
++sys.path.insert(0,str(Path(__file__).parent))
++from command_console_support import command_input,command_prompt
++out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
++def check(name,value):
++    report['checks'].append({'name':name,'passed':bool(value)})
++    if not value:raise AssertionError(name)
++def run():
++    try:
++        import Part,Mesh,OpenMatrix9Gui as native
++        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('MillionPointSnap')
++        cad=doc.addObject('Part::Feature','CAD');cad.Shape=Part.makeLine(App.Vector(0,0,10),App.Vector(10,0,10))
++        cloud=doc.addObject('App::FeaturePython','Cloud');cloud.addProperty('App::PropertyVectorList','OM9CloudPoints')
++        cloud.OM9CloudPoints=[App.Vector(i+10000,10000,0) for i in range(1000000)]
++        mesh=doc.addObject('Mesh::Feature','Mesh')
++        mesh.Mesh=Mesh.Mesh([((i*3+10000,10000,0),(i*3+10001,10000,0),(i*3+10000,10001,0)) for i in range(333334)])
++        report['fixtures']={'cloud_points':len(cloud.OM9CloudPoints),'mesh_points':mesh.Mesh.CountPoints,'mesh_facets':mesh.Mesh.CountFacets}
++        check('million-point mesh and cloud fixtures',report['fixtures']['cloud_points']==1000000 and report['fixtures']['mesh_points']>=1000000)
++        class Poison:
++            def __getattr__(self,name):
++                if name in ('Points','Vertexes','Edges','OM9CloudPoints'):raise AssertionError('Heavy array fetched by snap')
++                raise AttributeError(name)
++        cloud.Proxy=Poison()
++        doc.recompute();Gui.activeDocument().activeView().viewTop();Gui.updateGui()
++        initial=json.loads(native.querySnap3dm(0,0,2));x=initial['viewport_width']//2;y=initial['viewport_height']//2
++        for mode in [2,4,8,14]:
++            data=json.loads(native.querySnap3dm(x,y,mode));check('End Mid Point zero reads mode'+str(mode),data['complete'] and data['read_mesh_vertices']==0 and data['read_cloud_points']==0 and data['visited_objects']<=1)
++        timings=[]
++        for i in range(500):
++            start=time.perf_counter();data=json.loads(native.querySnap3dm(x+i%2,y,14));timings.append((time.perf_counter()-start)*1000)
++            if data['index_rebuilt'] or not data['complete']:raise AssertionError('Heavy warm query rebuilt index or failed')
++        p95=sorted(timings)[474];check('million-point 500 warm query p95 16ms',p95<=16)
++        window=Gui.getMainWindow();field=command_input(window);prompt=command_prompt(window)
++        def settle():
++            loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(150,loop.quit);loop.exec()
++        def cmd(text):field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
++        area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
++        target=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport()
++        cmd('Osnap E');cmd('Osnap On');cmd('Distance');cmd('0,0,0');QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=target.rect().center()+QtCore.QPoint(3,2));settle()
++        check('real mouse End snap with million mesh and cloud',prompt.text()=='Distance: 10 mm')
++        for i in range(70):
++            obj=doc.addObject('Part::Feature','Dense');obj.Shape=Part.makeLine(App.Vector(0,0,10),App.Vector(1,0,10))
++        doc.recompute();cmd('Distance');cmd('0,0,0');QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=target.rect().center()+QtCore.QPoint(3,2));settle()
++        check('budget incomplete permits manual plane fallback',prompt.text().startswith('Distance: ') and float(prompt.text().split()[1])<5)
++        cmd('Line');cmd('0,0,0');cmd('3,4,0');check('budget incomplete permits typed coordinates',doc.getObject('Line') is not None and abs(doc.getObject('Line').Shape.Length-5)<1e-9)
++        report.update(ok=True,module=native.__file__,performance={'p95_ms':p95,'median_ms':statistics.median(timings),'queries':500},hardware={'logical_cpu':os.cpu_count(),'platform':platform.platform()})
++    except Exception:report.update(ok=False,error=traceback.format_exc())
++    (out/'results.json').write_text(json.dumps(report,indent=2))
++    for name in list(App.listDocuments()):App.closeDocument(name)
++    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
++QtCore.QTimer.singleShot(1000,run)
+--- baseline/tests/modeling_snap_performance_smoke.FCMacro
++++ candidate/tests/modeling_snap_performance_smoke.FCMacro
+@@ -0,0 +1,44 @@
++import FreeCAD as App, FreeCADGui as Gui
++from PySide6 import QtCore
++from pathlib import Path
++import os,json,traceback,time,statistics
++out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
++def check(name,value):
++    report['checks'].append({'name':name,'passed':bool(value)})
++    if not value:raise AssertionError(name)
++def run():
++    try:
++        import Part,OpenMatrix9Gui as native
++        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('BoundedSnap');doc.UndoMode=1
++        near=doc.addObject('Part::Feature','Near');near.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0))
++        doc.recompute();Gui.activeDocument().activeView().viewTop();Gui.activeDocument().activeView().fitAll();Gui.updateGui()
++        # Fail on a missing production query API before expensive fixture setup.
++        native.querySnap3dm(0,0,2)
++        for i in range(10000):
++            obj=doc.addObject('Part::Feature','Remote');obj.Shape=near.Shape;obj.Placement.Base=App.Vector(100000+i*10,100000,0)
++        doc.recompute();Gui.updateGui()
++        view=Gui.activeDocument().activeView()
++        # The GUI's active viewport dimensions are part of the native query report.
++        initial=json.loads(native.querySnap3dm(0,0,2));x=initial['viewport_width']//2;y=initial['viewport_height']//2
++        warm=json.loads(native.querySnap3dm(x,y,2))
++        check('bounded_query_ignores_remote_objects',warm['visited_objects']<=1 and warm['complete'])
++        timings=[];last=None
++        for i in range(500):
++            start=time.perf_counter();last=json.loads(native.querySnap3dm(x+(i%3),y+(i%2),2));timings.append((time.perf_counter()-start)*1000)
++            if not last['complete'] or last['visited_objects']>1 or last['index_rebuilt']:raise AssertionError('Warm query scans document or loses correctness')
++        p95=sorted(timings)[474];report['performance']={'queries':500,'p95_ms':p95,'median_ms':statistics.median(timings),'last':last}
++        check('500_warm_queries_p95_16ms',p95<=16)
++        check('warm_query_zero_heavy_reads',last['read_mesh_vertices']==0 and last['read_cloud_points']==0)
++        # Dense eligible geometry must report incomplete rather than certify a partial snap.
++        for i in range(70):
++            obj=doc.addObject('Part::Feature','Dense');obj.Shape=near.Shape
++        doc.recompute();Gui.updateGui()
++        dense=json.loads(native.querySnap3dm(x,y,2))
++        check('64_object_budget_incomplete',not dense['complete'] and dense['visited_objects']<=64 and not dense['picked'])
++        check('candidate_budget_never_exceeded',len(dense['candidates'])<=8192 and dense['max_per_object']<=2048)
++        report.update(ok=True,module=native.__file__)
++    except Exception:report.update(ok=False,error=traceback.format_exc())
++    (out/'results.json').write_text(json.dumps(report,indent=2))
++    for name in list(App.listDocuments()):App.closeDocument(name)
++    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
++QtCore.QTimer.singleShot(1000,run)
+--- baseline/tests/modeling_snap_smoke.FCMacro
++++ candidate/tests/modeling_snap_smoke.FCMacro
+@@ -0,0 +1,63 @@
++import FreeCAD as App, FreeCADGui as Gui
++from PySide6 import QtCore
++from pathlib import Path
++import os, json, traceback
++out=Path(os.environ['OM9_SMOKE_OUTPUT']); report={'checks':[]}
++def check(name,value):
++    report['checks'].append({'name':name,'passed':bool(value)})
++    if not value: raise AssertionError(name)
++def run():
++    try:
++        import Part, Mesh, OpenMatrix9Gui as native
++        Gui.activateWorkbench('OpenMatrix9Workbench')
++        doc=App.newDocument('SnapClassifier')
++        cad=doc.addObject('Part::Feature','CAD'); cad.Shape=Part.makeBox(2,3,4)
++        cad.addProperty('App::PropertyInteger','OM9GeometryKind');cad.OM9GeometryKind=4
++        cad.Shape.tessellate(0.1)
++        info=json.loads(native.classifySnap3dm(doc.Name,cad.Name))
++        check('cad_with_render_mesh_remains_cad',info['kind']==3 and info['native_cad'] and info['display_mesh_state']=='present' and info['eligible_modes']&2)
++        mesh=doc.addObject('Mesh::Feature','Mesh');mesh.Mesh=Mesh.Mesh([((0,0,0),(1,0,0),(0,1,0))])
++        cloud=doc.addObject('App::FeaturePython','Cloud');cloud.addProperty('App::PropertyVectorList','OM9CloudPoints');cloud.OM9CloudPoints=[App.Vector(1,2,3)]
++        class Poison:
++            def __getattr__(self,name):
++                if name in ('Points','Vertexes','Edges'): raise AssertionError('Heavy accessor read: '+name)
++                raise AttributeError(name)
++        cloud.Proxy=Poison()
++        for obj,kind in [(mesh,4),(cloud,5)]:
++            info=json.loads(native.classifySnap3dm(doc.Name,obj.Name))
++            check(obj.Name+' default snap ineligible',info['kind']==kind and info['eligible_modes']==0)
++            for mode in [2,4,8]:
++                result=json.loads(native.snapObjectCandidates3dm(doc.Name,obj.Name,mode,2048))
++                check(obj.Name+' zero heavy reads mode'+str(mode),result['complete'] and result['points']==[] and result['read_mesh_vertices']==0 and result['read_cloud_points']==0)
++        result=json.loads(native.snapObjectCandidates3dm(doc.Name,cad.Name,2,3))
++        check('native topology caps before materialization',len(result['points'])<=3 and not result['complete'] and result['visited_topology']<=4)
++        point=doc.addObject('Part::Feature','Point');point.Shape=Part.Vertex(App.Vector(3,4,5))
++        result=json.loads(native.snapObjectCandidates3dm(doc.Name,point.Name,8,2048))
++        check('standalone CAD Point mode',result['points']==[[3,4,5]] and result['complete'])
++        guide=doc.addObject('Part::Feature','Guide');guide.Shape=Part.makeLine(App.Vector(1,2,3),App.Vector(4,5,6))
++        parent=doc.addObject('App::Part','Parent');parent.addObject(guide);parent.Placement.Base=App.Vector(10,20,30)
++        doc.recompute()
++        result=json.loads(native.snapObjectCandidates3dm(doc.Name,guide.Name,2,2048))
++        check('nested parent placement once',result['points']==[[11,22,33],[14,25,36]])
++        first=doc.addObject('App::Link','First');first.setLink(guide);first.Placement.Base=App.Vector(50,0,0)
++        second=doc.addObject('App::Link','Second');second.setLink(first);second.Placement.Base=App.Vector(0,60,0);doc.recompute()
++        result=json.loads(native.snapObjectCandidates3dm(doc.Name,second.Name,2,2048))
++        expected=[list(v.Point) for v in second.getSubObject('').Vertexes]
++        check('nested links native transform exactly once',len(result['points'])==len(expected) and all(abs(a-b)<1e-8 for p,q in zip(result['points'],expected) for a,b in zip(p,q)))
++        second.Scale=-1;doc.recompute()
++        result=json.loads(native.snapObjectCandidates3dm(doc.Name,second.Name,2,2048));expected=[list(v.Point) for v in second.getSubObject('').Vertexes]
++        report['reflection']={'actual':result['points'],'expected':expected}
++        check('reflected nested Link native transform exactly once',len(result['points'])==len(expected) and all(any(all(abs(a-b)<1e-8 for a,b in zip(p,q)) for q in expected) for p in result['points']))
++        large=doc.addObject('Part::Feature','LargeCAD');large.Shape=Part.makeCompound([Part.makeLine(App.Vector(i,0,0),App.Vector(i,1,0)) for i in range(10000)])
++        result=json.loads(native.snapObjectCandidates3dm(doc.Name,large.Name,2,2048))
++        check('large CAD topology bounded before Python materialization',not result['complete'] and len(result['points'])==2048 and result['visited_topology']==2049)
++        first_face=Part.makePlane(2,2);second_face=Part.makePlane(2,2,App.Vector(5,0,0));second_face.tessellate(0.1)
++        partial=doc.addObject('Part::Feature','PartiallyMeshed');partial.Shape=Part.makeCompound([first_face,second_face])
++        partial_info=json.loads(native.classifySnap3dm(doc.Name,partial.Name))
++        check('partial tessellation not certified absent',partial_info['native_cad'] and partial_info['display_mesh_state'] in ('unknown','present'))
++        report.update(ok=True,module=native.__file__)
++    except Exception: report.update(ok=False,error=traceback.format_exc())
++    (out/'results.json').write_text(json.dumps(report,indent=2))
++    for name in list(App.listDocuments()):App.closeDocument(name)
++    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
++QtCore.QTimer.singleShot(1000,run)
+--- baseline/tests/modeling_workers_smoke.FCMacro
++++ candidate/tests/modeling_workers_smoke.FCMacro
+@@ -35,12 +35,12 @@
+             failed=False;worker.rename(hidden);start=time.perf_counter()
+             try:
+                 if replace:shutil.copyfile('H:/FreeCAD-src/build/3dm-preserve-native/ThreeDmImportFailureWorker.exe',worker)
+-                try:ThreeDm.import_file(str(source),doc,mode='modeling')
++                try:ThreeDm.import_file(str(source),doc,mode='preserve')
+                 except RuntimeError:failed=True
+             finally:
+                 if replace and worker.exists():worker.unlink()
+                 hidden.rename(worker)
+-            check(('nonzero' if replace else 'missing')+' worker rolls back before document mutation',failed and [o.Name for o in doc.Objects]==before and abs(sentinel.Shape.Volume-6)<1e-9 and time.perf_counter()-start<15)
++            check('preservation '+('nonzero' if replace else 'missing')+' worker rolls back before document mutation',failed and [o.Name for o in doc.Objects]==before and abs(sentinel.Shape.Volume-6)<1e-9 and time.perf_counter()-start<15)
+         failure_case();failure_case(True)
+         check('failed workers joined before return',not subprocess.run(['tasklist','/FI','IMAGENAME eq OM9ThreeDmImportWorker.exe','/FO','CSV'],capture_output=True,text=True).stdout.count('"OM9ThreeDmImportWorker.exe"'))
+         report.update(ok=True,module=native.__file__,cases=cases)
+--- baseline/tests/native/CMakeLists.txt
++++ candidate/tests/native/CMakeLists.txt
+@@ -1,6 +1,9 @@
+ cmake_minimum_required(VERSION 3.24)
+ project(OM9ThreeDmTests LANGUAGES C CXX)
+ include(../../cmake/OpenNURBS.cmake)
++add_executable(ThreeDmPhase2PeriodicTests three_dm_phase2_periodic.cpp)
++target_link_libraries(ThreeDmPhase2PeriodicTests PRIVATE OM9ThreeDm)
++add_test(NAME OM9-FILE-012.Phase2Periodic COMMAND ThreeDmPhase2PeriodicTests)
+ add_executable(ThreeDmThreadPoolTests three_dm_thread_pool.cpp)
+ target_link_libraries(ThreeDmThreadPoolTests PRIVATE OM9ThreeDm)
+ target_compile_definitions(ThreeDmThreadPoolTests PRIVATE OM9_POOL_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/../fixtures/3dm/Oval-twist-ring.3dm")
+--- baseline/tests/native/three_dm_phase2_periodic.cpp
++++ candidate/tests/native/three_dm_phase2_periodic.cpp
+@@ -0,0 +1,24 @@
++#include "ThreeDmGeometry.h"
++#include <BRep_Tool.hxx>
++#include <TopoDS.hxx>
++#include <Geom_BSplineCurve.hxx>
++#include <iostream>
++#include <stdexcept>
++using namespace OpenMatrix9Gui::ThreeDm;
++static void check(bool value,const char* name){if(!value)throw std::runtime_error(name);}
++int main(){try{
++    ON::Begin();ON_3dPoint points[6];for(int i=0;i<6;++i)points[i]=ON_3dPoint(5*cos(i*ON_PI/3),5*sin(i*ON_PI/3),i%2);
++    for(int degree:{3,5})for(bool rational:{false,true}) {
++    ON_NurbsCurve source;check(source.CreatePeriodicUniformNurbs(3,degree+1,6,points,1.)&&source.IsPeriodic(),"Periodic source fixture");
++    if(rational){source.MakeRational();for(int i=0;i<source.CVCount();++i){ON_3dPoint p;source.GetCV(i,p);double w=1.+.1*(i%6);source.SetCV(i,ON_4dPoint(p.x*w,p.y*w,p.z*w,w));}
++        const double u[6]={0.,.6,1.7,3.,3.9,5.2};for(int i=0;i<source.KnotCount();++i){int j=i-degree+1,cycle=j/6,index=j%6;if(index<0){index+=6;--cycle;}source.SetKnot(i,u[index]+6.*cycle);}}
++    check(source.IsValid()&&source.IsPeriodic(),"Rational/nonuniform periodic source fixture");
++    auto shape=importCurve(source,1e-7);double first,last;auto curve=Handle(Geom_BSplineCurve)::DownCast(BRep_Tool::Curve(TopoDS::Edge(shape),first,last));
++    check(!curve.IsNull()&&curve->IsPeriodic(),"Imported periodic curve keeps periodic basis");
++    auto output=exportCurve(TopoDS::Edge(shape),1e-7);
++    auto on=ON_NurbsCurve::Cast(output.get());std::cerr<<"OCCT poles="<<curve->NbPoles()<<" knots="<<curve->NbKnots()<<" seamMultiplicity="<<curve->Multiplicity(1)<<";ON poles="<<on->CVCount()<<" knots="<<on->KnotCount()<<" periodic="<<on->IsPeriodic()<<'\n';
++    check(output->IsPeriodic(),"Exported periodic curve keeps periodic basis");
++    for(int i=0;i<=64;++i){double t=source.Domain().ParameterAt(i/64.);auto p=curve->Value(t);auto a=source.PointAt(t),b=output->PointAt(output->Domain().ParameterAt(i/64.));check(p.Distance(gp_Pnt(a.x,a.y,a.z))<1e-9&&a.DistanceTo(b)<1e-9,"Periodic sample geometry and domain preserved");}
++    }
++    std::cout<<"Phase2 periodic import/export: 4 fixtures / 276 checks passed\n";return 0;
++}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
+--- baseline/tests/rhino5_phase2_bootstrap.py
++++ candidate/tests/rhino5_phase2_bootstrap.py
+@@ -0,0 +1,7 @@
++import os,traceback
++out=os.environ['OM9_RHINO_PHASE2_OUTPUT']
++try:
++    with open('H:/FreeCAD-src/build/om9-dev/tests/rhino5_phase2_manual.py','rb') as stream:code=stream.read().replace('\r\n','\n')+'\n'
++    exec(compile(code,'<phase2-matrix>','exec'),globals())
++except:
++    with open(os.path.join(out,'bootstrap-error.txt'),'w') as stream:stream.write(traceback.format_exc())
+--- baseline/tests/rhino5_phase2_manual.py
++++ candidate/tests/rhino5_phase2_manual.py
+@@ -0,0 +1,72 @@
++# Actual owned Rhino 5 / IronPython 2.7 document gate.
++import Rhino,scriptcontext as sc,System,os,json,ntpath,time,traceback,hashlib,math
++out=os.environ['OM9_RHINO_PHASE2_OUTPUT'];root='H:/FreeCAD-src/build/om9-dev'
++report={'checks':[],'cases':[],'ok':False,'rhino_version':str(Rhino.RhinoApp.Version),'pid':os.getpid()}
++def check(name,value):
++    report['checks'].append({'name':name,'passed':bool(value)})
++    with open(ntpath.join(out,'progress.json'),'w') as stream:json.dump(report,stream,indent=2)
++    if not value:raise RuntimeError(name)
++def wait(process,seconds):
++    start=time.time()
++    while not process.HasExited and time.time()-start<seconds:Rhino.RhinoApp.Wait();System.Threading.Thread.Sleep(50)
++    return process.HasExited
++def launch(case_dir,config):
++    info=System.Diagnostics.ProcessStartInfo();info.FileName='H:/FreeCAD-src/build/om9-phase2-sdk/bin/FreeCAD.exe';info.UseShellExecute=False;info.CreateNoWindow=True;info.WindowStyle=System.Diagnostics.ProcessWindowStyle.Hidden
++    info.Arguments='-u "'+ntpath.join(case_dir,'user.cfg')+'" -s "'+ntpath.join(case_dir,'system.cfg')+'" "'+ntpath.join(root,'tests/modeling_phase2_rhino_roundtrip.FCMacro')+'"'
++    info.EnvironmentVariables['OM9_SMOKE_OUTPUT']=case_dir;info.EnvironmentVariables['OM9_PHASE2_CASE']=config;info.EnvironmentVariables['FREECAD_USER_HOME']=ntpath.join(case_dir,'profile');info.EnvironmentVariables['PATH']='H:/FreeCAD-src/.pixi/envs/default/Library/bin;H:/FreeCAD-src/.pixi/envs/default;'+os.environ['PATH']
++    process=System.Diagnostics.Process.Start(info);check('owned FreeCAD process finishes',wait(process,180));check('owned FreeCAD exit zero',process.ExitCode==0)
++    with open(ntpath.join(case_dir,'results.json'),'r') as stream:data=json.load(stream)
++    check('FreeCAD phase2 workflow '+case_dir,data.get('ok'));return data
++def rational():
++    curve=Rhino.Geometry.NurbsCurve(3,True,3,3)
++    for i,(x,y,w) in enumerate([(0,0,1),(4,6,0.7),(10,0,1)]):curve.Points.SetPoint(i,x,y,0.,w)
++    for i,value in enumerate([0,0,1,1]):curve.Knots[i]=value
++    return curve
++
++def inspect(geometry,expected,label):
++    check('Rhino current native curve '+label,isinstance(geometry,Rhino.Geometry.Curve) and geometry.IsValid)
++    report.setdefault('length_diagnostics',[]).append({'label':label,'actual':geometry.GetLength(),'expected':expected['length'],'segments':[g.GetLength() for g in geometry.DuplicateSegments()] if 'segments' in expected else []})
++    check('Rhino current curve length '+label,abs(geometry.GetLength()-expected['length'])<=0.001)
++    if 'segments' in expected:
++        segments=list(geometry.DuplicateSegments());check('Rhino joined native segments '+label,len(segments)==len(expected['segments']))
++        points=[geometry.PointAt(geometry.Domain.T0+(geometry.Domain.T1-geometry.Domain.T0)*i/64.) for i in range(65)]
++        return {'segments':[inspect(g,w,label+'/'+str(i)) for i,(g,w) in enumerate(zip(segments,expected['segments']))],'full_samples':[[p.X,p.Y,p.Z] for p in points],'length':geometry.GetLength(),'degree':geometry.ToNurbsCurve().Degree}
++    basis=geometry.ToNurbsCurve()
++    report.setdefault('curve_diagnostics',[]).append({'label':label,'expected_periodic':expected['periodic'],'actual_periodic':geometry.IsPeriodic,'is_closed':geometry.IsClosed,'degree':basis.Degree,'poles':basis.Points.Count})
++    check('Rhino current degree '+label,basis.Degree==expected['degree'])
++    check('Rhino current rational flag '+label,basis.IsRational==any(abs(w-1)>1e-12 for w in expected['weights']))
++    check('Rhino current periodic flag '+label,geometry.IsPeriodic==expected['periodic'])
++    samples=[]
++    for i in range(33):
++        p=geometry.PointAt(geometry.Domain.T0+(geometry.Domain.T1-geometry.Domain.T0)*i/32.);samples.append([p.X,p.Y,p.Z])
++    check('Rhino current curve sampled geometry '+label,all(abs(a-b)<=0.001 for p,q in zip(samples,expected['samples']) for a,b in zip(p,q)))
++    return {'degree':basis.Degree,'poles':basis.Points.Count,'weights':[basis.Points[i].Weight for i in range(basis.Points.Count)],'periodic':geometry.IsPeriodic,'samples':samples}
++try:
++    check('actual Rhino5 target',str(Rhino.RhinoApp.Version).startswith('5.'))
++    check('owned empty Rhino document',len(list(sc.doc.Objects))==0 and not sc.doc.Modified)
++    periodic=Rhino.Geometry.NurbsCurve.Create(True,3,[Rhino.Geometry.Point3d(5*math.cos(i*2*math.pi/6),5*math.sin(i*2*math.pi/6),i%2) for i in range(6)])
++    placed=rational();placed.Transform(Rhino.Geometry.Transform.Rotation(0.4,Rhino.Geometry.Vector3d.ZAxis,Rhino.Geometry.Point3d.Origin));placed.Transform(Rhino.Geometry.Transform.Translation(15,20,2))
++    for name,curve in [('rational',rational()),('periodic',periodic),('placed',placed)]:
++        check('valid Rhino source '+name,curve is not None and curve.IsValid)
++        case_dir=ntpath.join(out,name);os.makedirs(case_dir);sc.doc.Modified=False
++        for obj in list(sc.doc.Objects):sc.doc.Objects.Delete(obj.Id,True)
++        sc.doc.ModelUnitSystem=Rhino.UnitSystem.Millimeters
++        identifier=sc.doc.Objects.AddCurve(curve);sc.doc.Objects.Select(identifier)
++        source=ntpath.join(case_dir,'rhino-selected-v5.3dm')
++        check('actual Rhino Export Selected '+name,Rhino.RhinoApp.RunScript('_-Export "'+source+'" _Enter',False) and os.path.isfile(source))
++        config=ntpath.join(case_dir,'case.json')
++        with open(config,'w') as stream:json.dump({'input':source,'source_periodic':curve.IsPeriodic},stream)
++        host=launch(case_dir,config);sc.doc.Modified=False
++        check('actual Rhino Open current curves '+name,Rhino.RhinoApp.RunScript('_-Open "'+host['output']+'" _Enter',False))
++        rows={}
++        for obj in sc.doc.Objects:
++            label=obj.Attributes.Name;geometry=obj.Geometry
++            rows[label]=inspect(geometry,host['expected'][label],label)
++        check('Rhino edited and new exact selection '+name,set(rows)==set(host['expected']))
++        saved=ntpath.join(case_dir,'phase2.rhino5.3dm');check('actual Rhino SaveAs '+name,Rhino.RhinoApp.RunScript('_-SaveAs "'+saved+'" _Enter',False) and os.path.isfile(saved))
++        report['cases'].append({'name':name,'input':source,'host_report':ntpath.join(case_dir,'results.json'),'output':host['output'],'saved':saved,'rows':rows})
++    report['ok']=True
++except:report['error']=traceback.format_exc()
++with open(ntpath.join(out,'rhino5-results.json'),'w') as stream:json.dump(report,stream,indent=2)
++Rhino.RhinoApp.WriteLine('Phase2 Rhino gate: '+str(report['ok'])+'; '+ntpath.join(out,'rhino5-results.json'))
++if os.environ.get('OM9_RHINO_PHASE2_OUTPUT'):System.Environment.Exit(0 if report['ok'] else 1)
+--- baseline/tests/run_menu_smoke.ps1
++++ candidate/tests/run_menu_smoke.ps1
+@@ -14,6 +14,8 @@
+ $oldVars=@{}
+ foreach($key in @('PATH','FREECAD_USER_HOME','OM9_SMOKE_OUTPUT','OM9_SMOKE_KEEP_OPEN','QT_SCALE_FACTOR')) {$oldVars[$key]=[Environment]::GetEnvironmentVariable($key,'Process')}
+ try {
++    $phase2Evidence=Join-Path $moduleRoot 'tools/phase2_evidence.py'
++    if($env:OM9_PHASE2_MANIFEST){& rtk proxy python $phase2Evidence verify $env:OM9_PHASE2_MANIFEST;if($LASTEXITCODE -ne 0){throw 'Phase2 source/runtime binding failed before launch'}}
+     $env:PATH="$DependencyPrefix/bin;$(Split-Path $DependencyPrefix -Parent);"+$env:PATH
+     $env:FREECAD_USER_HOME=Join-Path $outputRoot 'profile'
+     $env:OM9_SMOKE_OUTPUT=$outputRoot
+@@ -30,5 +32,6 @@
+         Write-Output "Artifacts: $outputRoot"
+         if(-not $result.ok){throw 'Runtime smoke failed'}
+         if($process.ExitCode -ne 0){throw "Native process failed with exit code $($process.ExitCode); inspect startup and crash logs even if UI assertions passed."}
++        if($env:OM9_PHASE2_MANIFEST){& rtk proxy python $phase2Evidence bind $env:OM9_PHASE2_MANIFEST --report $file --macro (Join-Path $PSScriptRoot $Macro) --exe $FreeCADExe --pid $process.Id --exit-code $process.ExitCode;if($LASTEXITCODE -ne 0){throw 'Phase2 evidence binding failed'}}
+     }
+ } finally {foreach($key in $oldVars.Keys){[Environment]::SetEnvironmentVariable($key,$oldVars[$key],'Process')}}
+--- baseline/tests/run_modeling_phase.ps1
++++ candidate/tests/run_modeling_phase.ps1
+@@ -1,13 +1,14 @@
+ param(
+  [ValidateRange(1,5)][int]$Phase=1,
+  [Parameter(Mandatory)][string]$FreeCADExe,
+- [Parameter(Mandatory)][string]$DependencyPrefix
++ [Parameter(Mandatory)][string]$DependencyPrefix,
++ [string]$ResumeSummary
+ )
+ $ErrorActionPreference='Stop'
+-if($Phase -ne 1){throw "Phase $Phase has no completed runtime gate yet"}
++if($Phase -gt 2){throw "Phase $Phase has no completed runtime gate yet"}
+ if(-not [IO.Path]::IsPathRooted($FreeCADExe) -or -not [IO.Path]::IsPathRooted($DependencyPrefix)){throw 'Use absolute executable and dependency paths'}
+ $runtime=Split-Path (Split-Path $FreeCADExe -Parent) -Parent
+-$manifest=Join-Path $runtime 'modeling-build.json'
++$manifest=Join-Path $runtime $(if($Phase -eq 2){'phase2-build.json'}else{'modeling-build.json'})
+ $data=Get-Content -LiteralPath $manifest -Raw | ConvertFrom-Json
+ foreach($entry in $data.source_sha256.PSObject.Properties){
+  $source=Join-Path $data.source_root $entry.Name
+@@ -17,9 +18,39 @@
+  if((Get-FileHash -LiteralPath (Join-Path $runtime $entry.Name) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $entry.Value){throw "Runtime hash mismatch: $($entry.Name)"}
+ }
+ $oldManifest=$env:OM9_MODELING_MANIFEST
++$oldPhase2Manifest=$env:OM9_PHASE2_MANIFEST
++$resumeBatches=@()
++if($ResumeSummary){
++ if($Phase -ne 2){throw 'Only Phase2 has manifest-bound resume reports'}
++ $resume=Get-Content -LiteralPath $ResumeSummary -Raw | ConvertFrom-Json
++ foreach($batch in $resume.batches){
++  $proof=Get-Content -LiteralPath $batch.report -Raw | ConvertFrom-Json
++  if(-not $proof.ok -or -not $proof.phase2_binding.source_and_runtime_verified -or $proof.phase2_binding.manifest_sha256 -ne (Get-FileHash -LiteralPath $manifest -Algorithm SHA256).Hash.ToLowerInvariant() -or $proof.phase2_binding.macro_sha256 -ne (Get-FileHash -LiteralPath (Join-Path $PSScriptRoot $batch.macro) -Algorithm SHA256).Hash.ToLowerInvariant()){throw 'Cannot resume mismatching application evidence'}
++  $resumeBatches+=@{macro=$batch.macro;status=$batch.status;checks=$batch.checks;report=$batch.report;log=$batch.log}
++ }
++}
+ try {
+  $env:OM9_MODELING_MANIFEST=$manifest
+- foreach($macro in @('modeling_baseline_smoke.FCMacro','modeling_exchange_smoke.FCMacro','modeling_workers_smoke.FCMacro','modeling_menu_smoke.FCMacro','three_dm_exchange_menu_smoke.FCMacro','three_dm_import_workers_smoke.FCMacro','modeling_primitives_smoke.FCMacro','modeling_ring_roundtrip_smoke.FCMacro')){
+-  & (Join-Path $PSScriptRoot 'run_menu_smoke.ps1') -FreeCADExe $FreeCADExe -DependencyPrefix $DependencyPrefix -Macro $macro -TimeoutSeconds 600
++ if($Phase -eq 2){$env:OM9_PHASE2_MANIFEST=$manifest}
++ $macros=if($Phase -eq 2){@('modeling_snap_smoke.FCMacro','modeling_snap_cache_smoke.FCMacro','modeling_snap_performance_smoke.FCMacro','modeling_snap_heavy_smoke.FCMacro','modeling_curve_workflow_smoke.FCMacro','modeling_curve_editor_smoke.FCMacro','modeling_curve_editor_ui_smoke.FCMacro','modeling_curve_join_smoke.FCMacro','core_end_snap_smoke.FCMacro','core_point_snap_smoke.FCMacro','curve_smoke.FCMacro','modeling_clipboard_smoke.FCMacro','modeling_clipboard_failure_smoke.FCMacro','modeling_workers_smoke.FCMacro','modeling_exchange_smoke.FCMacro','modeling_primitives_smoke.FCMacro','modeling_ring_roundtrip_smoke.FCMacro','three_dm_import_workers_smoke.FCMacro')}else{@('modeling_baseline_smoke.FCMacro','modeling_exchange_smoke.FCMacro','modeling_workers_smoke.FCMacro','modeling_menu_smoke.FCMacro','three_dm_exchange_menu_smoke.FCMacro','three_dm_import_workers_smoke.FCMacro','modeling_primitives_smoke.FCMacro','modeling_ring_roundtrip_smoke.FCMacro')}
++ foreach($macro in $macros){
++  if(@($resumeBatches | ForEach-Object {$_.macro}) -contains $macro){continue}
++  if($Phase -eq 2){
++   if(-not $attempt){$attempt=Join-Path (Split-Path $PSScriptRoot -Parent) ('docs/validation/modeling-phase-2/runtime-attempts/'+[guid]::NewGuid().ToString('N'));New-Item -ItemType Directory -Path $attempt -Force | Out-Null;$batches=@($resumeBatches)}
++   $log=Join-Path $attempt ($macro+'.log')
++   try{
++    & (Join-Path $PSScriptRoot 'run_menu_smoke.ps1') -FreeCADExe $FreeCADExe -DependencyPrefix $DependencyPrefix -Macro $macro -TimeoutSeconds 600 *> $log
++    $match=[regex]::Match((Get-Content -LiteralPath $log -Raw),'Artifacts: (.+)')
++    if(-not $match.Success){throw 'Missing owned artifact path'}
++    $report=Join-Path $match.Groups[1].Value.Trim() 'results.json';$result=Get-Content -LiteralPath $report -Raw | ConvertFrom-Json
++    $batches+=@{macro=$macro;status='passed';checks=$result.checks.Count;report=$report;log=$log}
++    Write-Output "Batch $macro PASS; checks=$($result.checks.Count); prepared host batches left=$($macros.Count-$batches.Count); full openNURBS packages open=7; total future batches unknown"
++    @{status='in_progress';manifest=$manifest;batches=$batches} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $attempt 'summary.json')
++   }catch{
++    @{status='failed';macro=$macro;error=$_.Exception.Message;manifest=$manifest;batches=$batches;log=$log} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $attempt 'summary.json')
++    Get-Content -LiteralPath $log -Tail 22;throw
++   }
++  }else{& (Join-Path $PSScriptRoot 'run_menu_smoke.ps1') -FreeCADExe $FreeCADExe -DependencyPrefix $DependencyPrefix -Macro $macro -TimeoutSeconds 600}
+  }
+-} finally {$env:OM9_MODELING_MANIFEST=$oldManifest}
++ if($Phase -eq 2){@{status='passed';manifest=$manifest;batches=$batches} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $attempt 'summary.json');Write-Output "Phase2 host gate summary: $attempt/summary.json"}
++} finally {$env:OM9_MODELING_MANIFEST=$oldManifest;$env:OM9_PHASE2_MANIFEST=$oldPhase2Manifest}
+--- baseline/tools/phase2_evidence.py
++++ candidate/tools/phase2_evidence.py
+@@ -0,0 +1,27 @@
++"""Bind owned application reports to the unchanged Phase2 source/runtime."""
++from pathlib import Path
++import argparse,json,hashlib,os,platform
++def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
++def verify(path):
++    path=Path(path);data=json.loads(path.read_text());root=Path(data['source_root']);runtime=path.parent
++    for name,value in data['source_sha256'].items():
++        if sha(root/name)!=value:raise RuntimeError('Source mismatch: '+name)
++    for name,value in data['runtime_sha256'].items():
++        if sha(runtime/name)!=value:raise RuntimeError('Runtime mismatch: '+name)
++    return data
++def bind(manifest,report,macro,exe,pid,exit_code):
++    data=verify(manifest);report=Path(report);r=json.loads(report.read_text());runtime=Path(manifest).parent
++    if not r.get('ok') or exit_code!=0:raise RuntimeError('Cannot bind failed application report')
++    if r.get('macro_sha256') and r['macro_sha256']!=sha(macro):raise RuntimeError('Executed macro changed before evidence binding')
++    if not pid:pid=r.get('pid')
++    if r.get('module'):
++        if Path(r['module']).resolve()!= (runtime/'bin/OpenMatrix9Gui.pyd').resolve():raise RuntimeError('Unexpected loaded native module')
++        if r.get('module_sha256') and r['module_sha256']!=sha(r['module']):raise RuntimeError('Loaded module hash mismatch')
++        r['module_sha256']=sha(r['module'])
++    fixture_hashes={p.relative_to(report.parent).as_posix():sha(p) for p in report.parent.rglob('*') if p.is_file() and p.suffix.lower() in ('.3dm','.fcstd')}
++    r['phase2_binding']={'manifest':str(Path(manifest).resolve()),'manifest_sha256':sha(manifest),'source_and_runtime_verified':True,'executable':str(Path(exe).resolve()),'executable_sha256':sha(exe),'owned_pid':pid,'process_exit_code':exit_code,'macro':str(Path(macro).resolve()),'macro_sha256':sha(macro),'fixture_sha256':fixture_hashes,'hardware':{'logical_cpu':os.cpu_count(),'platform':platform.platform()}}
++    report.write_text(json.dumps(r,indent=2),encoding='utf-8')
++if __name__=='__main__':
++    p=argparse.ArgumentParser();p.add_argument('mode',choices=['verify','bind']);p.add_argument('manifest');p.add_argument('--report');p.add_argument('--macro');p.add_argument('--exe');p.add_argument('--pid',type=int);p.add_argument('--exit-code',type=int);a=p.parse_args()
++    if a.mode=='verify':verify(a.manifest)
++    else:bind(a.manifest,a.report,a.macro,a.exe,a.pid,a.exit_code)

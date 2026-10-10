@@ -183,12 +183,16 @@ unsafe fn name<'a>(p: *const c_char) -> Option<&'a str> {
         unsafe { CStr::from_ptr(p) }.to_str().ok()
     }
 }
+/// # Safety
+/// A non-null input must point to a readable NUL-terminated string for this call. No caller storage is retained.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn om9_edit_kind(p: *const c_char) -> u32 {
     unsafe { name(p) }
         .and_then(Kind::from_name)
         .map_or(0, |k| k as u32)
 }
+/// # Safety
+/// A non-null input must point to a readable NUL-terminated string for this call. No caller storage is retained.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn om9_edit_start(p: *const c_char) -> bool {
     let Some(k) = unsafe { name(p) }.and_then(Kind::from_name) else {
@@ -205,6 +209,8 @@ pub extern "C" fn om9_edit_cancel() {
 pub extern "C" fn om9_edit_phase() -> u32 {
     state().lock().unwrap().as_ref().map_or(0, |s| s.phase)
 }
+/// # Safety
+/// A non-null input must point to a readable NUL-terminated string for this call. No caller storage is retained.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn om9_edit_add(p: *const c_char) -> bool {
     let Some(n) = (unsafe { name(p) }) else {

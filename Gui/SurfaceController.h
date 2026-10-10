@@ -22,7 +22,7 @@ protected:
 private:
     SurfaceController();
     bool valid()const;void prompt(const QString&);void refresh();
-    void add(const std::string&,const std::string&);void optionsDialog();void preview();void commit();void clearPreview();
+    bool add(const std::string&,const std::string&);void optionsDialog();void preview();void commit();void clearPreview();
     void error(const std::exception&);
     void alignInputs(bool automatic);
     void addSlash(double,double);void updateSlashes();

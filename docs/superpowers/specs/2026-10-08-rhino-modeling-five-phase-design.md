@@ -129,3 +129,15 @@ Chỉ tích hợp source/binary khi phase proof đủ; không ghi đè toàn che
 - Mỗi phase có deliverable, dependencies và gate; Phase3 có workflow cụ thể thay cho class-count.
 - Chưa thay source runtime, policy preservation hay skill; cần review tài liệu trước execution.
 
+
+## Implementation checkpoint — Phase1
+
+Phase1 đã được user cho phép thực hiện và nghiệm thu complete_scoped trên matching runtime: docs/validation/modeling-phase-1/requirements.json. Native/host/V5 legacy SDK proof đạt; actual Rhino5 UI chưa được chứng minh. Baseline/planned statuses ở trên mô tả thời điểm thiết kế; Phase2–5 vẫn chưa hoàn tất.
+
+## Actual application acceptance — 2026-10-08 user revision
+
+User yêu cầu actual ứng dụng ở từng phase. Mọi phase phải có FreeCAD/OpenMatrix9 và Rhino target thực tế, cùng binary/hashes, document workflow, target SaveAs và saved-output host reimport trước khi đóng. [Ma trận ứng dụng](../../validation/modeling-application-gates.md) là gate bổ sung. Phase1 đã đạt implementation/native/host/V5 SDK, nhưng application gate hiện pending; câu complete_scoped của checkpoint trước chỉ mô tả tiêu chí cũ, không đóng gate mới.
+
+## Phase1 actual acceptance completed — 2026-10-09
+
+Checkpoint này thay trạng thái application pending của Phase1 ở trên: native/host/version và APP-GATE-P1 đã đạt.10 actual Rhino5 completed cases; nhẫn369 checks với29 roots+1 member và Selected new circle;4 actual FreeCAD target-saved reimport reports230 checks. Bằng chứng: ../../validation/modeling-phase-1/application-evidence.json. Phase2–5 vẫn chưa implemented/accepted và mỗi phase có gate ứng dụng riêng; không chứng nhận full openNURBS hoặc primary build.

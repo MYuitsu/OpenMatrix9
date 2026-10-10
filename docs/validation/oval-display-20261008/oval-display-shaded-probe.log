@@ -1,0 +1,19 @@
+{
+    "checks":  [
+                   {
+                       "name":  "display switch does not change shape hash",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "source hash unchanged",
+                       "passed":  true
+                   }
+               ],
+    "ok":  true,
+    "source_sha256":  "5cdd84533c2dca20ef441fcbe2f1edd0226cc3ab02805caa4af60ef3dbba9997",
+    "module":  "H:\\FreeCAD-src\\build\\om9-ui-3dm-gil-sdk\\bin\\OpenMatrix9Gui.pyd",
+    "source_records":  31,
+    "top_level_imported":  29,
+    "shape_count":  52
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\three_dm_oval_display_probe-1\3801dbe78b384c0db0314a8cbb5a875b

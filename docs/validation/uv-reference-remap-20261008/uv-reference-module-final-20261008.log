@@ -1,0 +1,12 @@
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- OM9 audited PolyEdgeSegment Read reversed flag repair; original SDK source unchanged
+-- OM9 audited CurveOnSurface child Read repair for opennurbsStatic; original SDK source unchanged
+-- OM9 audited resource-free Rhino5 RDK3 writer; original SDK source unchanged
+-- Configuring done (0.5s)
+-- Generating done (0.1s)
+-- Build files have been written to: H:/FreeCAD-src/build/openmatrix9-preservation
+[0/2] Re-checking globbed directories...
+[1/4] Running utility command for OpenMatrix9Scripts
+[2/4] Building CXX object Gui\CMakeFiles\OpenMatrix9Gui.dir\ThreeDmMerge.cpp.obj
+[3/4] Linking CXX shared library H:\FreeCAD-src\build\3dm-preservation-sdk\bin\OpenMatrix9Gui.pyd

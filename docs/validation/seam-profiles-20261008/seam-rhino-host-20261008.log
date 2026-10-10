@@ -1,0 +1,301 @@
+{
+    "checks":  [
+                   {
+                       "name":  "actual Rhino GUI 8-case result binds exact independent writer oracle",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-0-reversed-0.3dm immutable source and actual GUI saved hashes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-0-reversed-0.3dm actual GUI valid geometry and seventeen physical samples",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-0-reversed-0.3dm complete native UUID, class, seam/pole UV tree and graph CRC after GUI SaveAs",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-0-reversed-0.3dm source record retains every decoded child without substituting a preview",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-0-reversed-0.3dm source-deleted FCStd retains entire GUI archive, plugin tables and native record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-0-reversed-0.3dm opaque GUI plugin dependencies retain atomic export guard",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-0-reversed-1.3dm immutable source and actual GUI saved hashes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-0-reversed-1.3dm actual GUI valid geometry and seventeen physical samples",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-0-reversed-1.3dm complete native UUID, class, seam/pole UV tree and graph CRC after GUI SaveAs",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-0-reversed-1.3dm source record retains every decoded child without substituting a preview",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-0-reversed-1.3dm source-deleted FCStd retains entire GUI archive, plugin tables and native record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-0-reversed-1.3dm opaque GUI plugin dependencies retain atomic export guard",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-1-reversed-0.3dm immutable source and actual GUI saved hashes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-1-reversed-0.3dm actual GUI valid geometry and seventeen physical samples",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-1-reversed-0.3dm complete native UUID, class, seam/pole UV tree and graph CRC after GUI SaveAs",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-1-reversed-0.3dm source record retains every decoded child without substituting a preview",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-1-reversed-0.3dm source-deleted FCStd retains entire GUI archive, plugin tables and native record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-1-reversed-0.3dm opaque GUI plugin dependencies retain atomic export guard",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-1-reversed-1.3dm immutable source and actual GUI saved hashes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-1-reversed-1.3dm actual GUI valid geometry and seventeen physical samples",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-1-reversed-1.3dm complete native UUID, class, seam/pole UV tree and graph CRC after GUI SaveAs",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-1-reversed-1.3dm source record retains every decoded child without substituting a preview",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-1-reversed-1.3dm source-deleted FCStd retains entire GUI archive, plugin tables and native record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-1-reversed-1.3dm opaque GUI plugin dependencies retain atomic export guard",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-2-reversed-0.3dm immutable source and actual GUI saved hashes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-2-reversed-0.3dm actual GUI valid geometry and seventeen physical samples",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-2-reversed-0.3dm complete native UUID, class, seam/pole UV tree and graph CRC after GUI SaveAs",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-2-reversed-0.3dm source record retains every decoded child without substituting a preview",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-2-reversed-0.3dm source-deleted FCStd retains entire GUI archive, plugin tables and native record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-2-reversed-0.3dm opaque GUI plugin dependencies retain atomic export guard",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-2-reversed-1.3dm immutable source and actual GUI saved hashes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-2-reversed-1.3dm actual GUI valid geometry and seventeen physical samples",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-2-reversed-1.3dm complete native UUID, class, seam/pole UV tree and graph CRC after GUI SaveAs",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-2-reversed-1.3dm source record retains every decoded child without substituting a preview",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-2-reversed-1.3dm source-deleted FCStd retains entire GUI archive, plugin tables and native record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-2-reversed-1.3dm opaque GUI plugin dependencies retain atomic export guard",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-3-reversed-0.3dm immutable source and actual GUI saved hashes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-3-reversed-0.3dm actual GUI valid geometry and seventeen physical samples",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-3-reversed-0.3dm complete native UUID, class, seam/pole UV tree and graph CRC after GUI SaveAs",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-3-reversed-0.3dm source record retains every decoded child without substituting a preview",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-3-reversed-0.3dm source-deleted FCStd retains entire GUI archive, plugin tables and native record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-3-reversed-0.3dm opaque GUI plugin dependencies retain atomic export guard",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-3-reversed-1.3dm immutable source and actual GUI saved hashes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-3-reversed-1.3dm actual GUI valid geometry and seventeen physical samples",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-3-reversed-1.3dm complete native UUID, class, seam/pole UV tree and graph CRC after GUI SaveAs",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-3-reversed-1.3dm source record retains every decoded child without substituting a preview",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-3-reversed-1.3dm source-deleted FCStd retains entire GUI archive, plugin tables and native record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-kind-3-reversed-1.3dm opaque GUI plugin dependencies retain atomic export guard",
+                       "passed":  true
+                   }
+               ],
+    "gui_plugin_tables":  {
+                              "seam-kind-0-reversed-0.3dm":  [
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "16592d58-4a2f-401d-bf5e-3b87741c1b1b",
+                                                                     "source_version":  50
+                                                                 },
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "5dc0192d-73dc-44f5-9141-8e72542e792d",
+                                                                     "source_version":  50
+                                                                 }
+                                                             ],
+                              "seam-kind-0-reversed-1.3dm":  [
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "16592d58-4a2f-401d-bf5e-3b87741c1b1b",
+                                                                     "source_version":  50
+                                                                 },
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "5dc0192d-73dc-44f5-9141-8e72542e792d",
+                                                                     "source_version":  50
+                                                                 }
+                                                             ],
+                              "seam-kind-1-reversed-0.3dm":  [
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "16592d58-4a2f-401d-bf5e-3b87741c1b1b",
+                                                                     "source_version":  50
+                                                                 },
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "5dc0192d-73dc-44f5-9141-8e72542e792d",
+                                                                     "source_version":  50
+                                                                 }
+                                                             ],
+                              "seam-kind-1-reversed-1.3dm":  [
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "16592d58-4a2f-401d-bf5e-3b87741c1b1b",
+                                                                     "source_version":  50
+                                                                 },
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "5dc0192d-73dc-44f5-9141-8e72542e792d",
+                                                                     "source_version":  50
+                                                                 }
+                                                             ],
+                              "seam-kind-2-reversed-0.3dm":  [
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "16592d58-4a2f-401d-bf5e-3b87741c1b1b",
+                                                                     "source_version":  50
+                                                                 },
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "5dc0192d-73dc-44f5-9141-8e72542e792d",
+                                                                     "source_version":  50
+                                                                 }
+                                                             ],
+                              "seam-kind-2-reversed-1.3dm":  [
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "16592d58-4a2f-401d-bf5e-3b87741c1b1b",
+                                                                     "source_version":  50
+                                                                 },
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "5dc0192d-73dc-44f5-9141-8e72542e792d",
+                                                                     "source_version":  50
+                                                                 }
+                                                             ],
+                              "seam-kind-3-reversed-0.3dm":  [
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "16592d58-4a2f-401d-bf5e-3b87741c1b1b",
+                                                                     "source_version":  50
+                                                                 },
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "5dc0192d-73dc-44f5-9141-8e72542e792d",
+                                                                     "source_version":  50
+                                                                 }
+                                                             ],
+                              "seam-kind-3-reversed-1.3dm":  [
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "16592d58-4a2f-401d-bf5e-3b87741c1b1b",
+                                                                     "source_version":  50
+                                                                 },
+                                                                 {
+                                                                     "capability":  "retained",
+                                                                     "source_uuid":  "5dc0192d-73dc-44f5-9141-8e72542e792d",
+                                                                     "source_version":  50
+                                                                 }
+                                                             ]
+                          },
+    "rhino_report_sha256":  "c15526189e15cb2da6ff8ccd2bdf34720b186c0b512327cd36e63ea61bbf354b",
+    "ok":  true
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\three_dm_rhino5_seam_reimport_smoke-1\3208dc97edd44c34812fe182e988d230

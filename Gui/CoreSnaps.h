@@ -14,8 +14,6 @@ public:
     static bool execute(std::size_t command);
     static bool checked(std::size_t command);
     static bool submit(const QString& text);
-    static void acceptedPoint(bool accepted);
-    static void clearTransient();
     static bool pick(Gui::View3DInventor* view,const QPoint& pixel,Base::Vector3d& output);
 };
 }

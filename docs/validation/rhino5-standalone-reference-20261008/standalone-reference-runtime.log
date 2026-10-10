@@ -1,0 +1,492 @@
+{
+    "checks":  [
+                   {
+                       "name":  "actual Rhino12 failures bind source oracle and revised probe",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-0-reversed-0.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-0-reversed-0.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-0-reversed-0.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-0-reversed-0.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-0-reversed-0.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-1.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-0-reversed-1.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-0-reversed-1.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-0-reversed-1.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-0-reversed-1.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-0-reversed-1.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-0.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-1-reversed-0.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-1-reversed-0.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-1-reversed-0.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-1-reversed-0.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-1-reversed-0.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-1-reversed-1.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-1-reversed-1.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-1-reversed-1.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-1-reversed-1.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-1-reversed-1.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-1-reversed-1.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-0.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-2-reversed-0.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-2-reversed-0.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-2-reversed-0.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-2-reversed-0.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-2-reversed-0.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-2-reversed-1.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-2-reversed-1.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-2-reversed-1.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-2-reversed-1.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-2-reversed-1.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-0-owner-2-reversed-1.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-0.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-0-reversed-0.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-0-reversed-0.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-0-reversed-0.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-0-reversed-0.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-0-reversed-0.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-0-reversed-1.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-0-reversed-1.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-0-reversed-1.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-0-reversed-1.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-0-reversed-1.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-0-reversed-1.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-0.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-1-reversed-0.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-1-reversed-0.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-1-reversed-0.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-1-reversed-0.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-1-reversed-0.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-1-reversed-1.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-1-reversed-1.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-1-reversed-1.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-1-reversed-1.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-1-reversed-1.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-1-reversed-1.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-0.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-2-reversed-0.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-2-reversed-0.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-2-reversed-0.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-2-reversed-0.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-2-reversed-0.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-1-owner-2-reversed-1.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-2-reversed-1.3dm full native root inventory/owner closure is linked and retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-2-reversed-1.3dm public preservation import retains root and editable owner with exact source record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-2-reversed-1.3dm unsafe target export is refused atomically with source and document intact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-2-reversed-1.3dm source-deleted FCStd retains complete source/GUI bytes and exact native fields",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-standalone-kind-1-owner-2-reversed-1.3dm reopened graph resolves owner and preserves native reference fields/CRC",
+                       "passed":  true
+                   }
+               ],
+    "ok":  true,
+    "rhino_report_sha256":  "6a0a82de7d36f18cb782c799e7202adf21726ed098bc8e2d29cd65180b2ad440",
+    "full_exchange_complete":  false
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\three_dm_standalone_reference_smoke-1\8ddd5abade704bc6903edf4cfe3cebec

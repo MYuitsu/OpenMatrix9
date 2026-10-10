@@ -1,0 +1,134 @@
+"""Phase3 actual imported CAD and shared command controllers, no mocks."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore, QtWidgets, QtTest
+from pathlib import Path
+import json, os, traceback, sys, math, tempfile
+sys.path.insert(0, str(Path(__file__).parent))
+from command_console_support import command_input
+from phase3_oracle import measure
+out=Path(os.environ['OM9_SMOKE_OUTPUT']); report={'checks':[]}
+(out/'temp').mkdir(exist_ok=True);tempfile.tempdir=str(out/'temp')
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    (out/'progress.json').write_text(json.dumps(report,indent=2))
+    if not value: raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(200,loop.quit);loop.exec()
+    QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def enter(text=''):
+    field=command_input(Gui.getMainWindow());field.setText(text)
+    QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def dialog(name):
+    return next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,name) if d.isVisible()),None)
+def feature(doc,name,shape):
+    obj=doc.addObject('Part::Feature',name);obj.Shape=shape;doc.recompute();return obj
+def select(objects):
+    Gui.Selection.clearSelection()
+    for o in objects:Gui.Selection.addSelection(o)
+    settle()
+def accept(name):
+    d=dialog(name);check(name+' ready',d is not None)
+    button=d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok)
+    check(name+' valid preview',button.isEnabled());button.click();settle()
+def difference(doc,a,b):
+    select([a]);enter('BooleanDifference');enter();enter(b.Name);enter()
+    return dialog('OM9EditOptions')
+def run():
+    try:
+        import Part, ThreeDm, OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        source=App.newDocument('P3Source')
+        for z in [0,8]:
+            o=source.addObject('Part::Feature','Profile');o.Shape=Part.makeCircle(3,App.Vector(0,0,z))
+        source.recompute();path=out/'rational-profiles.3dm'
+        ThreeDm.export_file(str(path),source.Objects,modeling=True)
+        doc=App.newDocument('P3Imported');doc.UndoMode=1
+        profiles=ThreeDm.import_file(str(path),doc,mode='modeling')
+        check('imported rational profiles are native CAD',len(profiles)==2 and all(o.Shape.isValid() and o.OM9Representation=='native-cad' for o in profiles))
+        Gui.Selection.clearSelection()
+        for o in profiles:Gui.Selection.addSelection(o)
+        Gui.runCommand('OM9_SurfaceLoft');settle();enter()
+        d=dialog('OM9SurfaceOptions');check('imported profiles open native Loft options',d is not None)
+        d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        loft=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SURFACE-009')
+        report['loft']=measure(loft.Shape,out/'loft.brep')
+        check('rational Loft analytic cylinder area',loft.Shape.isValid() and len(loft.Shape.Faces)>0 and abs(report['loft']['area']-48*math.pi)<1e-5)
+        name=loft.Name;before=len(doc.UndoNames);doc.undo();check('Loft Undo removes output',doc.getObject(name) is None)
+        doc.redo();check('Loft Redo restores area',abs(measure(doc.getObject(name).Shape,out/'loft-redo.brep')['area']-48*math.pi)<1e-5)
+        Gui.Selection.clearSelection()
+        for o in profiles:Gui.Selection.addSelection(o)
+        Gui.runCommand('OM9_SurfaceLoft');settle();enter();d=dialog('OM9SurfaceOptions')
+        profiles[0].Placement.Base=App.Vector(1,0,0);doc.recompute()
+        count=len(doc.Objects);enter('OK')
+        check('changed surface input rejects stale preview without mutation',len(doc.Objects)==count and d.isVisible() and bool(d.findChild(QtWidgets.QLabel,'OM9SurfaceStatus').text()))
+        enter('Cancel');check('Cancel dismisses surface preview',dialog('OM9SurfaceOptions') is None)
+        profiles[0].Placement.Base=App.Vector(0,0,0);doc.recompute()
+        rail=feature(doc,'Rail',Part.makeLine(App.Vector(0,0,0),App.Vector(0,0,8)))
+        rail_path=out/'rail.3dm';ThreeDm.export_file(str(rail_path),[rail],modeling=True);doc.removeObject(rail.Name);rail=ThreeDm.import_file(str(rail_path),doc,mode='modeling')[0]
+        select([rail,profiles[0]]);enter('Sweep1');enter();accept('OM9SurfaceOptions')
+        sweep=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SURFACE-001')
+        check('imported rational Sweep1 analytic cylinder area',sweep.Shape.isValid() and abs(measure(sweep.Shape,out/'sweep.brep')['area']-48*math.pi)<1e-5)
+        parent=doc.addObject('App::Part','Parent');parent.Placement=App.Placement(App.Vector(20,30,40),App.Rotation(App.Vector(0,0,1),90))
+        lines=[feature(doc,'Nested',Part.makeLine(App.Vector(0,0,z),App.Vector(4,0,z))) for z in [0,5]]
+        for o in lines:parent.addObject(o)
+        doc.recompute();select(lines);enter('Loft');enter();accept('OM9SurfaceOptions')
+        nested=[o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SURFACE-009'][-1]
+        check('nested parent placement applied once',nested.Shape.isValid() and (nested.Shape.CenterOfMass-App.Vector(20,32,42.5)).Length<1e-6 and abs(nested.Shape.Area-20)<1e-6)
+        select(lines);enter('Loft');enter();d=dialog('OM9SurfaceOptions');count=len(doc.Objects)
+        parent.Placement.Base=App.Vector(21,30,40);doc.recompute();enter('OK')
+        check('ancestor placement invalidates surface request',len(doc.Objects)==count and d.isVisible());enter('Cancel')
+        solid=feature(doc,'SolidA',Part.makeBox(10,10,10));cutter=feature(doc,'SolidB',Part.makeBox(10,10,10,App.Vector(5,0,0)))
+        d=difference(doc,solid,cutter);accept('OM9EditOptions')
+        cut=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SOLID-001')
+        check('CMD Difference closed solid analytic material',cut.Shape.isValid() and abs(cut.Shape.Volume-500)<1e-6 and doc.getObject('SolidA') is None and doc.getObject('SolidB') is not None)
+        cutname=cut.Name;doc.undo();check('Difference Undo restores current input',doc.getObject('SolidA') is not None and doc.getObject(cutname) is None)
+        doc.redo();check('Difference Redo restores material',abs(doc.getObject(cutname).Shape.Volume-500)<1e-6)
+        a=feature(doc,'StaleA',Part.makeBox(10,10,10));b=feature(doc,'StaleB',Part.makeBox(10,10,10,App.Vector(5,0,0)))
+        d=difference(doc,a,b);count=len(doc.Objects);undos=len(doc.UndoNames);a.Shape=Part.makeBox(9,10,10);doc.recompute();enter('OK')
+        check('changed Boolean geometry rejected without transaction',len(doc.Objects)==count and len(doc.UndoNames)==undos and d.isVisible());enter('Cancel')
+        d=difference(doc,a,b);count=len(doc.Objects);doc.removeObject(b.Name);doc.recompute();enter('OK')
+        check('deleted Boolean input rejected before commit',len(doc.Objects)==count-1 and d.isVisible());enter('Cancel')
+        emptycutter=feature(doc,'Cover',Part.makeBox(20,20,20,App.Vector(-5,-5,-5)))
+        d=difference(doc,a,emptycutter);count=len(doc.Objects);undos=len(doc.UndoNames);enter('OK')
+        check('empty kernel Difference preserves inputs',len(doc.Objects)==count and len(doc.UndoNames)==undos and d.isVisible() and doc.getObject(a.Name) is not None);enter('Cancel')
+        face=feature(doc,'OpenFace',Part.makeBox(10,10,10).Faces[0]);select([face]);enter('BooleanDifference');enter();enter(a.Name);enter()
+        check('open face rejected from closed-solid Boolean',dialog('OM9EditOptions') is None and doc.getObject(face.Name) is not None);enter('Cancel')
+        box=Part.makeBox(10,10,10);faces=[feature(doc,'JoinFace',box.Faces[i]) for i in [0,2]]
+        select(faces);enter('Join');enter();accept('OM9EditOptions')
+        joined=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOP11-008')
+        check('face Join native open shell',joined.Shape.isValid() and joined.Shape.ShapeType=='Shell' and len(joined.Shape.Faces)==2 and abs(joined.Shape.Area-200)<1e-6)
+        select([joined]);enter('Explode');enter();accept('OM9EditOptions')
+        pieces=[o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOP11-005']
+        check('polysurface Explode native faces',len(pieces)==2 and all(o.Shape.ShapeType=='Face' and o.Shape.isValid() and abs(o.Shape.Area-100)<1e-6 for o in pieces))
+        holed=ThreeDm.import_file('H:/FreeCAD-src/build/om9-phase3-native/modeling-brep-fixtures/planar-hole.3dm',doc,mode='modeling')[0]
+        cross=feature(doc,'TrimCutter',Part.makePlane(10,10,App.Vector(5,0,-5),App.Vector(1,0,0),App.Vector(0,1,0)))
+        select([holed,cross]);enter('Trim');enter();d=dialog('OM9EditOptions');check('holed face Trim opens preview',d is not None)
+        enter(holed.Name+'@1,1,0');accept('OM9EditOptions')
+        regions=[o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOP11-010' and o.Shape.BoundBox.ZLength<1e-6]
+        check('holed face Trim retains intended complement region',len(regions)==1 and regions[0].Shape.isValid() and abs(regions[0].Shape.Area-42)<1e-6 and regions[0].Shape.BoundBox.XMin>=5-1e-7)
+        for command,identity,volume in [('BooleanUnion','OM9-SOLID-003',1500),('BooleanIntersection','OM9-SOLID-002',500),('Boolean2Objects','OM9-SOLID-004',1500)]:
+            a=feature(doc,'BooleanA',Part.makeBox(10,10,10));b=feature(doc,'BooleanB',Part.makeBox(10,10,10,App.Vector(5,0,0)))
+            select([a] if command=='BooleanIntersection' else [a,b]);enter(command);enter()
+            if command=='BooleanIntersection':enter(b.Name);enter()
+            accept('OM9EditOptions');o=[o for o in doc.Objects if getattr(o,'OM9FeatureId','')==identity][-1]
+            check(command+' analytic native solid',o.Shape.isValid() and abs(o.Shape.Volume-volume)<1e-6)
+        r1=feature(doc,'RailA',Part.makeLine(App.Vector(0,0,0),App.Vector(0,0,5)))
+        r2=feature(doc,'RailB',Part.makeLine(App.Vector(4,0,0),App.Vector(4,0,5)))
+        profile=feature(doc,'SweepSection',Part.makeLine(App.Vector(0,0,0),App.Vector(4,0,0)))
+        profile_path=out/'sweep2-section.3dm';ThreeDm.export_file(str(profile_path),[r1,r2,profile],modeling=True)
+        r1,r2,imported=ThreeDm.import_file(str(profile_path),doc,mode='modeling')
+        select([r1,r2,imported]);enter('Sweep2');enter();accept('OM9SurfaceOptions')
+        swept=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SURFACE-003')
+        check('imported Sweep2 analytic plane',swept.Shape.isValid() and abs(swept.Shape.Area-20)<1e-5)
+        import hashlib
+        report['exchange_cases']=[]
+        for name,obj,area,bounds in [('rational-loft',loft,48*math.pi,[-3,-3,0,3,3,8]),('imported-sweep1',sweep,48*math.pi,[-3,-3,0,3,3,8]),('imported-sweep2',swept,20,[0,0,0,4,0,5])]:
+            p=out/(name+'-current-v5.3dm');ThreeDm.export_file(str(p),[obj],modeling=True)
+            report['exchange_cases'].append({'name':name,'input':str(p),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'expected':[{'object_name':obj.Label,'area':area,'volume':0,'solids':0,'faces':len(obj.Shape.Faces),'bounds':bounds}]})
+        report['command_transcript']=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript').toPlainText()
+        report.update(ok=True,module=native.__file__,python_module=ThreeDm.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

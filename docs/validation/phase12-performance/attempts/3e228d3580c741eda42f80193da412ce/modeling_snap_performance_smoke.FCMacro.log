@@ -1,0 +1,66 @@
+{
+  "checks": [
+    {
+      "name": "bounded_query_ignores_remote_objects",
+      "passed": true
+    },
+    {
+      "name": "500_warm_queries_p95_16ms",
+      "passed": true
+    },
+    {
+      "name": "warm_query_zero_heavy_reads",
+      "passed": true
+    },
+    {
+      "name": "64_object_budget_incomplete",
+      "passed": true
+    },
+    {
+      "name": "candidate_budget_never_exceeded",
+      "passed": true
+    }
+  ],
+  "performance": {
+    "queries": 500,
+    "p95_ms": 0.04110002191737294,
+    "median_ms": 0.020499981474131346,
+    "last": {
+      "candidates": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          10,
+          0,
+          0
+        ]
+      ],
+      "complete": true,
+      "elapsed_us": 2,
+      "generated_candidates": 0,
+      "index_objects": 0,
+      "index_rebuilt": false,
+      "max_per_object": 2,
+      "picked": false,
+      "point": [
+        0,
+        0,
+        0
+      ],
+      "read_cloud_points": 0,
+      "read_mesh_vertices": 0,
+      "reason": "",
+      "state_owner": "rust",
+      "viewport_height": 382,
+      "viewport_width": 747,
+      "visited_objects": 1,
+      "visited_topology": 2
+    }
+  },
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_snap_performance_smoke-1\fdd4c9191d4b4d5fa1ed42a3be290d74

@@ -1,0 +1,499 @@
+   Compiling openmatrix9_rust v0.1.0 (C:\Users\nguye\.codex\worktrees\layer-session-handoff\FreeCAD-src\Mod\OpenMatrix9\rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.63s
+     Running unittests src\lib.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\openmatrix9_rust-4e8914fe98b5f479.exe)
+
+running 4 tests
+test core_view_tabs::tests::alignment_preserves_visibility_and_rejects_invalid_options_atomically ... ok
+test layer_codec::bounded_writer_tests::serialization_refuses_before_allocating_or_writing_past_budget ... ok
+test core_view_tabs::tests::visibility_is_idempotent_and_toggle_changes_it ... ok
+test phase2_snap::performance_tests::query_retains_the_same_immutable_candidate_allocation ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\command_completion.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\command_completion-3b0f2519f7d1e0be.exe)
+
+running 1 test
+test original_names_and_match_order ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_3dm.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\core_3dm-c9a2b39bad63f8f9.exe)
+
+running 3 tests
+test units_never_guess_or_accept_invalid_scale ... ok
+test clipboard_commands_share_catalog_dispatch ... ok
+test import_export_share_catalog_policy_and_completion ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_3dm_archive.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\core_3dm_archive-2c774e9f5d0ba017.exe)
+
+running 9 tests
+test closure_ffi_checks_capacity_and_preserves_output_on_failure ... ok
+test closure_rejects_malformed_cycles_and_limits ... ok
+test member_copy_budget_bounds_total_and_arithmetic ... ok
+test identities_are_scoped_and_canonical ... ok
+test closure_selects_only_reachable_unique_records ... ok
+test modes_and_capabilities_reject_unknown_values ... ok
+test native_geometry_transform_policy_requires_known_non_instance_payload ... ok
+test overlay_policy_rejects_unsupported_edits_and_unknown_references ... ok
+test closure_handles_long_component_chains_without_recursion ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\core_angle.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\core_angle-50199a56fd310a45.exe)
+
+running 4 tests
+test om9_measure_001_four_points_allow_distinct_line_origins ... ok
+test om9_measure_001_invalid_and_degenerate_lines_are_rejected ... ok
+test om9_measure_001_native_bridge_uses_four_xyz_points ... ok
+test om9_measure_001_parallel_opposite_and_scale_invariance ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_distance.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\core_distance-4c7a9267fb5154e6.exe)
+
+running 4 tests
+test om9_measure_002_bridge_rejects_invalid_unit_and_coordinates ... ok
+test om9_measure_002_rejects_nonfinite_or_unsupported_coordinates ... ok
+test om9_measure_002_reports_spatial_distance_and_coincident_points ... ok
+test om9_measure_002_units_convert_result_without_changing_points ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_keyboard.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\core_keyboard-0c72272c2414fb47.exe)
+
+running 3 tests
+test mouse_ortho_uses_cplane_axes_and_leaves_typed_points_exact ... ok
+test shift_temporarily_inverts_ortho_without_changing_saved_mode ... ok
+test original_shortcuts_are_unique_and_keep_matrix_targets ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_mouse.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\core_mouse-d42f4efc7c80c86f.exe)
+
+running 2 tests
+test a_click_never_becomes_navigation_and_window_requires_full_containment ... ok
+test rhino_navigation_and_matrix_override_keep_selection_clicks ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_notes.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\core_notes-41516f950a04918e.exe)
+
+running 2 tests
+test om9_file_008_and_info_006_preserve_unicode_and_multiline_text ... ok
+test invalid_notes_are_rejected_before_commit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_picture_frame.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\core_picture_frame-a8dd78ed7b8df56f.exe)
+
+running 5 tests
+test om9_view_001_cmd_width_is_positive_and_aspect_is_validated ... ok
+test om9_view_001_ffi_is_atomic_and_agrees_with_native_array_layout ... ok
+test om9_view_001_shift_and_vertical_use_construction_plane_axes ... ok
+test om9_view_001_two_points_preserve_source_aspect_and_corner ... ok
+test om9_view_001_validates_every_corner_not_only_diagonal ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_snaps.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\core_snaps-5b35bce352146dad.exe)
+
+running 6 tests
+test om9_snap_002_master_preserves_mode_and_state_roundtrips ... ok
+test om9_snap_002_native_state_and_packed_candidates ... ok
+test om9_snap_002_rejects_invalid_projection_world_and_aperture ... ok
+test om9_snap_002_selects_nearest_projected_candidate_within_aperture ... ok
+test om9_snap_003_mid_mode_is_independent_and_preserved_by_master ... ok
+test om9_snap_007_point_mode_preserves_other_choices ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_view_controls.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\core_view_controls-17e33a98de6ff8b9.exe)
+
+running 5 tests
+test dynamic_zoom_preserves_projection_scale_and_bounds ... ok
+test invalid_drag_does_not_corrupt_session ... ok
+test om9_view_008_window_accepts_reverse_drag_and_rejects_tiny_pick ... ok
+test om9_view_004_incremental_dynamic_drag_and_cancel ... ok
+test om9_view_003_perspective_focal_plane_scale_is_finite ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_views.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\core_views-af8d0d2c9463490e.exe)
+
+running 5 tests
+test matrix_grid_subdivides_major_cells_and_keeps_axes_separate ... ok
+test om9_view_003_preserves_original_command_name ... ok
+test om9_view_006_007_preserve_original_zoom_commands ... ok
+test om9_view_005_preserves_original_capture_command ... ok
+test om9_viewport_001_four_named_views_have_normalized_frames ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\curve_session.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\curve_session-e26c96011acef0be.exe)
+
+running 14 tests
+test cancel_has_no_output_and_restart_clears_options ... ok
+test invalid_input_keeps_session_and_no_partial_commit ... ok
+test mouse_cannot_append_a_point_while_length_value_is_pending ... ok
+test om9_curve_001_polyline_enter_and_close ... ok
+test om9_curve_001_preview_keeps_clicks_and_applies_constraints_without_commit ... ok
+test mouse_points_and_typed_coordinates_share_geometry ... ok
+test om9_viewport_001_typed_coordinates_use_active_plane ... ok
+test om9_curve_002_both_sides_uses_first_point_as_midpoint ... ok
+test polyline_length_option_prompts_for_value_then_direction ... ok
+test polyline_short_enter_and_close_do_not_finish ... ok
+test matrix_prompt_options_and_initial_letter_inputs ... ok
+test relative_points_and_units_are_explicitly_parsed ... ok
+test om9_curve_002_line_commits_two_distinct_points ... ok
+test unavailable_initial_letter_does_not_mutate_polyline ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\edit_commands.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\edit_commands-fd9079225245af0d.exe)
+
+running 1 test
+test edit_commands_require_document_write_permission ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\edit_session.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\edit_session-15ba57fbfcb65aa1.exe)
+
+running 6 tests
+test om9_solid_001_two_sets_and_duplicates ... ok
+test om9_solid_004_exactly_two_and_five_modes ... ok
+test om9_top11_005_single_explode_input ... ok
+test om9_top11_010_options_are_kind_gated_and_reset ... ok
+test om9_top11_008_explicit_finite_tolerance ... ok
+test om9_top11_selection_undo ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\ffi.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\ffi-53fed8dcb3c7ff54.exe)
+
+running 4 tests
+test catalog_indices_strings_and_lifetimes_are_valid ... ok
+test workspace_commands_are_supported_without_enabling_subd_selection ... ok
+test state_bounds_failure_history_and_reset ... ok
+test command_history_requires_the_observed_effect_of_that_command ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_clipboard.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\layer_clipboard-387b2fe418314295.exe)
+
+running 6 tests
+test native_only_never_claims_complete_empty_palette ... ok
+test payload_header_and_size_policy_is_not_sdk_geometry_acceptance ... ok
+test palette_only_session_and_invalid_source_are_explicit ... ok
+test bound_metadata_is_owned_keeps_palette_and_own_flags ... ok
+test digest_length_format_and_version_mismatches_reject ... ok
+test unknown_versions_fields_truncated_and_missing_metadata_are_fatal ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_clipboard_binding.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\layer_clipboard_binding-696ab8bfdcf2af2f.exe)
+
+running 3 tests
+test exact_tagged_binding_uses_physical_identity_and_retains_full_palette_and_own_state ... ok
+test selected_subset_keeps_empty_layers_but_never_accepts_unserialized_objects ... ok
+test missing_duplicate_unknown_or_invalid_binding_rejects_instead_of_mapping_by_order ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_clipboard_ffi.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\layer_clipboard_ffi-13240825f2bb1956.exe)
+
+running 5 tests
+test oversize_views_reject_before_dereference_and_reset_outputs ... ok
+test invalid_controls_outputs_and_wrong_handles_reject_without_consuming_state ... ok
+test native_geometry_binding_ffi_rejects_missing_or_duplicate_tags_before_overlay ... ok
+test native_only_and_invalid_binding_never_leak_a_snapshot ... ok
+test prepared_binding_owns_bytes_and_is_a_distinct_handle_kind ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_clipboard_publication.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\layer_clipboard_publication-f376445aa98ddf0c.exe)
+
+running 2 tests
+test backup_budget_checks_cumulative_bytes_and_format_count ... ok
+test rollback_only_restores_this_publication_and_never_a_newer_owner ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_codec.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\layer_codec-a35f34e82d0b62e5.exe)
+
+running 4 tests
+test generation_has_a_lossless_canonical_decimal_wire_value ... ok
+test invalid_native_facts_cannot_be_encoded_or_received_through_json ... ok
+test metadata_rejects_unknown_version_duplicate_fields_truncation_and_geometry ... ok
+test metadata_roundtrip_is_owned_preserves_empty_palette_and_local_flags ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_codec_ffi.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\layer_codec_ffi-4acacf07328e83f7.exe)
+
+running 2 tests
+test json_abi_resets_output_on_error_and_checks_oversized_views_before_reading ... ok
+test json_abi_owns_input_and_copies_results_without_partial_buffer_writes ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_document.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\layer_document-6822ce9393865a93.exe)
+
+running 9 tests
+test current_layer_requires_visible_unlocked_hierarchy ... ok
+test assign_is_whole_selection_guarded_and_keeps_by_object_override ... ok
+test assignment_unknown_duplicate_empty_and_overlong_input_are_rejected ... ok
+test command_json_is_strict_typed_and_does_not_coerce_or_ignore_fields ... ok
+test layer_color_updates_by_layer_projection_only_and_rejects_stale_plan ... ok
+test explicit_child_toggle_records_desired_persistent_state_under_parent ... ok
+test no_op_is_generation_stable_and_real_change_overflow_rejects ... ok
+test locking_last_usable_layer_creates_unique_fallback_without_unlocking_palette ... ok
+test parent_lock_and_visibility_changes_preserve_child_and_object_own_state ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_exchange.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\layer_exchange-58a0689b44653027.exe)
+
+running 8 tests
+test generation_overflow_rejects_instead_of_reusing_stale_generation ... ok
+test wrong_and_duplicate_selected_ids_fail_in_preflight ... ok
+test palette_only_transfer_is_valid_and_active_layer_fallback_never_unlocks_source ... ok
+test session_includes_hidden_locked_geometry_and_preserves_by_object_color ... ok
+test checks_generation_document_and_same_generation_metadata_before_commit ... ok
+test preserves_distinct_parent_paths_and_remaps_colliding_source_uuids ... ok
+test selected_transfer_keeps_empty_palette_source_wins_and_existing_object_state ... ok
+test repeat_paste_adds_new_objects_without_uuid_merge_and_preserves_destination_only_layers ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_ffi.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\layer_ffi-a80146d641180a5b.exe)
+
+running 8 tests
+test null_oversized_version_and_misaligned_views_reject_before_dereference ... ok
+test invalid_native_boolean_and_utf8_reject_without_creating_handle ... ok
+test mutation_batch_abi_uses_effective_lock_and_validates_all_ids ... ok
+test snapshot_abi_copies_caller_data_and_expired_handle_is_rejected ... ok
+test result_copy_reports_required_size_and_never_returns_internal_pointers ... ok
+test document_plan_abi_rejects_invalid_inputs_without_output_or_state_mutation ... ok
+test document_plan_abi_copies_command_and_survives_input_snapshot_release ... ok
+test plan_after_snapshot_and_mapping_are_owned_and_stale_destination_rejects ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_legacy.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\layer_legacy-b663d5825f81db94.exe)
+
+running 5 tests
+test explicit_normalization_never_repairs_unrelated_invalid_paths_or_cycles ... ok
+test flat_aliases_and_malformed_native_ancestry_are_rejected ... ok
+test flat_native_names_gain_parents_without_changing_object_identity_or_own_flags ... ok
+test genuine_prefix_and_children_keep_their_native_ids_and_states ... ok
+test valid_canonical_snapshot_is_exactly_unchanged ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_retained.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\layer_retained-deb73f127b316952.exe)
+
+running 6 tests
+test malformed_or_unmatched_retained_binding_rejects_without_partial_plan ... ok
+test retained_subset_keeps_full_palette_and_original_own_ids_and_context ... ok
+test retained_subset_rejects_unknown_duplicate_and_invalid_source ... ok
+test palette_only_retained_overlay_accepts_no_geometry_and_chooses_work_layer ... ok
+test retained_overlay_requires_a_palette_destination_and_resolves_uuid_collisions ... ok
+test retained_overlay_merges_full_palette_and_own_state_without_appending_objects ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_retained_ffi.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\layer_retained_ffi-51ed34276cbc8aae.exe)
+
+running 3 tests
+test retained_subset_ffi_owns_partition_and_rejects_invalid_inputs ... ok
+test retained_ffi_clears_outputs_and_rejects_invalid_handles_counts_and_bindings ... ok
+test retained_ffi_returns_owned_rebound_snapshot_with_full_palette ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\layer_state.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\layer_state-bef32c17de015cfc.exe)
+
+running 7 tests
+test indexed_queries_are_metadata_only_and_membership_is_exact ... ok
+test assignment_rejects_locked_destination_and_unknown_input_atomically ... ok
+test unlock_parent_keeps_child_and_object_own_locks ... ok
+test rejects_cycles_missing_parents_and_ambiguous_paths_but_allows_same_leaf ... ok
+test validates_full_path_and_object_identity_without_normalizing_distinct_rgb_layers ... ok
+test locked_visible_objects_snap_and_export_but_cannot_mutate ... ok
+test visibility_and_color_are_inherited_without_changing_object_values ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\menu_state.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\menu_state-595a6ca60be70cac.exe)
+
+running 5 tests
+test history_is_successful_only_latest_first_and_bounded ... ok
+test section_visibility_and_collapse_are_independent_and_resettable ... ok
+test bom_crlf_and_unicode_titles_are_preserved ... ok
+test reference_catalog_has_18_groups_and_11_quick_icons ... ok
+test malformed_catalog_has_section_and_key_diagnostics ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\modeling_exchange_policy.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\modeling_exchange_policy-989bc9637249e301.exe)
+
+running 4 tests
+test display_mesh_is_not_a_reason_to_scan_cad_or_cloud_vertices ... ok
+test geometry_only_scope_does_not_require_history_or_render ... ok
+test sixty_percent_uses_available_threads_without_four_thread_cap ... ok
+test unknown_geometry_cannot_be_silently_omitted ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\modeling_snap_policy.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\modeling_snap_policy-2627c08dfae8780c.exe)
+
+running 3 tests
+test cad_with_render_mesh_remains_cad ... ok
+test mesh_and_cloud_default_snap_reads_zero_points_policy ... ok
+test curve_cv_edit_capability_is_scoped_to_native_curve_kind ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\phase2_curve_core.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\phase2_curve_core-e1c0b2009e8ff45d.exe)
+
+running 6 tests
+test complete_nonbranching_traversal_is_required ... ok
+test draft_is_atomic_and_stale_cancelled_requests_fail ... ok
+test rational_owned_basis_preserves_exact_fields ... ok
+test rebuild_options_dependencies_and_all_witnesses_are_rust_owned ... ok
+test invalid_numeric_basis_is_rejected ... ok
+test exact_budget_and_periodic_relation_are_checked ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\phase2_ffi_contract.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\phase2_ffi_contract-22038bd2f435c873.exe)
+
+running 4 tests
+test malformed_ffi_rejects_before_dereferencing_invalid_buffers ... ok
+test ffi_session_copies_buffers_and_dropped_handles_are_not_reused ... ok
+test owned_draft_copy_reports_capacity_and_never_writes_short_buffers ... ok
+test raw_degree_multiplicity_and_xyz_shapes_are_not_truncated ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\phase2_rebuild_core.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\phase2_rebuild_core-8ea82f1abdfb3a6e.exe)
+
+running 4 tests
+test dependent_preview_and_delete_no_preserve_sources ... ok
+test join_unique_native_tokens_are_required_before_topology_read ... ok
+test ffi_returns_owned_options_and_rejects_invalid_flag_and_input_count ... ok
+test sixteen_distinct_sources_and_maximum_options_preserve_owned_request ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\phase2_snap_core.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\phase2_snap_core-690e7a4d21b97932.exe)
+
+running 9 tests
+test aborted_rebuild_never_publishes_partial_clean_index ... ok
+test cache_key_contains_mode_residual_budget_and_generation ... ok
+test missing_requested_mode_cannot_certify_a_partial_query ... ok
+test nearest_ties_depth_radius_and_native_failure_are_checked ... ok
+test stale_query_and_invalid_numeric_inputs_never_publish_cache ... ok
+test failed_row_poisoning_prevents_accidental_finish ... ok
+test object_and_candidate_caps_precede_candidate_acceptance ... ok
+test candidate_cap_clears_object_lookup_and_rebuild_has_no_stale_hits ... ok
+test tiles_filter_ten_thousand_remote_objects ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests\phase2_snap_ffi.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\phase2_snap_ffi-b7ad5111eee4f51a.exe)
+
+running 2 tests
+test partial_build_and_malformed_ffi_never_certify_a_point ... ok
+test snap_ffi_copies_rows_and_bounds_caller_output_and_drops_children ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\phase3_ffi.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\phase3_ffi-fcf40442b5adeab9.exe)
+
+running 4 tests
+test abi_bounds_utf8_and_invalid_identity_do_not_allocate_a_request ... ok
+test abi_registry_owns_snapshots_and_cancel_releases_handle ... ok
+test abi_rejects_invalid_flags_null_arrays_and_open_shell ... ok
+test native_reason_text_is_owned_and_bounded ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\phase3_modeling.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\phase3_modeling-d4025190a4e7de8a.exe)
+
+running 11 tests
+test closed_solid_boolean_and_open_shell_rejection ... ok
+test cancelled_request_never_becomes_committable_again ... ok
+test join_routes_by_native_kind_in_rust_without_geometry_arrays ... ok
+test numeric_surface_options_have_rust_policy ... ok
+test requests_reject_duplicate_empty_or_oversized_identity ... ok
+test empty_kernel_output_is_never_committable ... ok
+test invalid_or_preservation_protected_inputs_fail_before_kernel ... ok
+test request_owns_snapshots_and_rejects_changed_placement_shape_or_identity ... ok
+test curve_and_face_join_have_separate_type_policies ... ok
+test surface_input_order_cardinality_and_heavy_types ... ok
+test trim_faces_explode_components_and_numeric_validation ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\spline_geometry.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\spline_geometry-b760932392359a3f.exe)
+
+running 5 tests
+test invalid_geometry_and_options_are_rejected_before_fitting ... ok
+test om9_curve_003_smooth_close_interpolates_and_matches_seam_tangents ... ok
+test om9_curve_003_interpolates_irregular_3d_points_in_all_parameterizations ... ok
+test om9_curve_009_periodic_rebuild_preserves_a_circle_and_exact_pole_count ... ok
+test om9_curve_009_has_exact_requested_structure_and_preserves_line_endpoints ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\surface_commands.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\surface_commands-2b56b4e384906d50.exe)
+
+running 1 test
+test surface_commands_have_document_permissions_and_useful_captions ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\surface_refit.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\surface_refit-a345eb3b5ab42812.exe)
+
+running 4 tests
+test tolerance_and_sample_inputs_are_bounded ... ok
+test smooth_closed_samples_produce_a_periodic_candidate ... ok
+test tighter_tolerance_adapts_the_fit_and_preserves_open_endpoints ... ok
+test ffi_rejects_unattainable_tolerance_and_clears_the_published_candidate ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.05s
+
+     Running tests\surface_session.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\surface_session-ab8b59525695b777.exe)
+
+running 11 tests
+test om9_surface_001_003_chain_is_one_rail_and_undo_does_not_remove_other_inputs ... ok
+test om9_surface_003_requires_two_distinct_rails_and_matching_profiles ... ok
+test om9_surface_003_height_and_width_are_independent_when_requested ... ok
+test om9_surface_003_transport_scales_a_section_to_the_two_rails ... ok
+test om9_surface_additional_loft_styles_and_closed_sweeps_have_explicit_policies ... ok
+test om9_surface_001_rails_precede_profiles_and_cancel_discards_state ... ok
+test om9_surface_009_needs_two_sections_and_preserves_selection_order ... ok
+test om9_surface_003_avoids_unsupported_occt_border_contact_with_multiple_sections ... ok
+test slash_mapping_drives_correspondence_and_rejects_crossings ... ok
+test surface_command_identity_and_options_are_explicit ... ok
+test uniform_loft_net_interpolates_constant_rows_and_uniform_knots ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\viewport_title.rs (C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-rust-target\debug\deps\viewport_title-cd9fcc87c420e56f.exe)
+
+running 2 tests
+test original_display_names_require_a_real_adapter ... ok
+test viewport_label_toggles_only_the_selected_slot ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests openmatrix9_rust
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

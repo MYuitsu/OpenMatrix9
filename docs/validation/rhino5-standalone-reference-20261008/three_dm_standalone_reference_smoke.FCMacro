@@ -1,0 +1,40 @@
+"""Actual host retention/owner inventory of standalone native references and Rhino failures."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,hashlib,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        root=Path('H:/FreeCAD-src/build/om9-dev/docs/validation/rhino5-standalone-reference-20261008')
+        oracle=json.loads((root/'oracle.json').read_text());proof=json.loads((root/'rhino5-gui-profile-results.json').read_text())
+        check('actual Rhino12 failures bind source oracle and revised probe',not proof['ok'] and len(proof['cases'])==len(oracle['cases'])==12 and proof['oracle_sha256']==sha(root/'oracle.json') and proof['probe_sha256']==sha(root/'rhino5-standalone-reference-gui-probe.py'))
+        for expected,row in zip(oracle['cases'],proof['cases']):
+            uuid=expected['objects'][1]['uuid'];owner_id=expected['objects'][0]['uuid']
+            for source in [root/row['fixture'],root/Path(row['saved_fixture']).name]:
+                label=source.name;manifest=json.loads(native.inspect3dm(str(source)));records={r['source_uuid']:r for r in manifest['records']};record=records[uuid]
+                check(label+' full native root inventory/owner closure is linked and retained',not manifest['issues'] and record['class_name'] in ('ON_PolyEdgeCurve','ON_PolyEdgeSegment') and record['capability']=='retained' and record['poly_edge_native']['object_references']==[owner_id] and owner_id in record['dependencies'] and record['native_reference_analysis']['status']=='linked')
+                external=out/label;external.write_bytes(source.read_bytes());doc=App.newDocument('StandaloneRef')
+                objects=ThreeDm.import_file(str(external),doc,mode='preserve');objects_by_id={json.loads(obj.OM9SourceRecord)['source_uuid']:obj for obj in objects};obj=objects_by_id[uuid];baseline=obj.OM9SourceRecord;name=obj.Name
+                check(label+' public preservation import retains root and editable owner with exact source record',len(objects)==2 and owner_id in objects_by_id and json.loads(baseline)==record and obj.OM9Capability=='retained' and not hasattr(obj,'Shape'))
+                protected=out/(label+'-protected.3dm');protected.write_bytes(b'keep-target');count=len(doc.Objects);error=''
+                try:ThreeDm.export_file(str(protected),[obj])
+                except Exception as exc:error=str(exc)
+                check(label+' unsafe target export is refused atomically with source and document intact',bool(error) and ('standalone PolyEdge' in error or 'Opaque plugin table dependencies' in error) and protected.read_bytes()==b'keep-target' and len(doc.Objects)==count and obj.OM9SourceRecord==baseline)
+                project=out/(label+'.FCStd');doc.saveAs(str(project));external.unlink();App.closeDocument(doc.Name);doc=App.openDocument(str(project));obj=doc.getObject(name)
+                check(label+' source-deleted FCStd retains complete source/GUI bytes and exact native fields',sha(Path(obj.OM9ArchiveOwner.OM9SourceArchive))==sha(source) and obj.OM9SourceRecord==baseline and obj.OM9Capability=='retained')
+                current=json.loads(native.inspect3dm(obj.OM9ArchiveOwner.OM9SourceArchive));restored=next(r for r in current['records'] if r['source_uuid']==uuid)
+                check(label+' reopened graph resolves owner and preserves native reference fields/CRC',restored['native_reference_analysis']['status']=='linked' and restored['poly_edge_native']==record['poly_edge_native'] and restored['dependencies']==record['dependencies'] and restored['geometry_crc']==record['geometry_crc'])
+                App.closeDocument(doc.Name)
+        result.update(ok=True,rhino_report_sha256=sha(root/'rhino5-gui-profile-results.json'),full_exchange_complete=False)
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

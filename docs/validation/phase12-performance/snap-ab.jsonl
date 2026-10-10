@@ -1,0 +1,12 @@
+{"scenario":"cache4096","pair":0,"queries_per_mode":1000,"baseline_median_us":41.8,"baseline_p95_us":45.800000000000004,"candidate_median_us":0.7,"candidate_p95_us":0.7999999999999999}
+{"scenario":"cache4096","pair":1,"queries_per_mode":1000,"baseline_median_us":42.5,"baseline_p95_us":44.3,"candidate_median_us":0.7,"candidate_p95_us":0.7999999999999999}
+{"scenario":"cache4096","pair":2,"queries_per_mode":1000,"baseline_median_us":42.4,"baseline_p95_us":45.1,"candidate_median_us":0.7,"candidate_p95_us":0.7999999999999999}
+{"scenario":"cache4096","pair":3,"queries_per_mode":1000,"baseline_median_us":42.5,"baseline_p95_us":45.800000000000004,"candidate_median_us":0.7,"candidate_p95_us":0.7999999999999999}
+{"scenario":"cache4096","pair":4,"queries_per_mode":1000,"baseline_median_us":42.6,"baseline_p95_us":45.7,"candidate_median_us":0.7,"candidate_p95_us":0.7999999999999999}
+{"scenario":"cache4096","pair":5,"queries_per_mode":1000,"baseline_median_us":42.1,"baseline_p95_us":45.7,"candidate_median_us":0.7,"candidate_p95_us":0.7999999999999999}
+{"scenario":"dense8192","pair":0,"queries_per_mode":1000,"baseline_median_us":147,"baseline_p95_us":242.9,"candidate_median_us":75.7,"candidate_p95_us":83.9}
+{"scenario":"dense8192","pair":1,"queries_per_mode":1000,"baseline_median_us":92.39999999999999,"baseline_p95_us":201.29999999999998,"candidate_median_us":75.6,"candidate_p95_us":79.4}
+{"scenario":"dense8192","pair":2,"queries_per_mode":1000,"baseline_median_us":90.1,"baseline_p95_us":101.7,"candidate_median_us":75.3,"candidate_p95_us":81}
+{"scenario":"dense8192","pair":3,"queries_per_mode":1000,"baseline_median_us":91.7,"baseline_p95_us":119,"candidate_median_us":74.7,"candidate_p95_us":79.6}
+{"scenario":"dense8192","pair":4,"queries_per_mode":1000,"baseline_median_us":91.19999999999999,"baseline_p95_us":126.69999999999999,"candidate_median_us":74.2,"candidate_p95_us":85.9}
+{"scenario":"dense8192","pair":5,"queries_per_mode":1000,"baseline_median_us":92.39999999999999,"baseline_p95_us":105.4,"candidate_median_us":75.3,"candidate_p95_us":92.89999999999999}

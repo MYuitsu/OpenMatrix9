@@ -1,0 +1,1148 @@
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\core_3dm.rs:1:
+ //! OM9-FILE-012: policy for CAD-preserving Rhino 5 archive exchange.
+ use std::ffi::CStr;
+-pub const ICONS: [&str; 4] = ["FileImport3dm", "FileExport3dm", "FileCopy3dm", "FilePaste3dm"];
++pub const ICONS: [&str; 4] = [
++    "FileImport3dm",
++    "FileExport3dm",
++    "FileCopy3dm",
++    "FilePaste3dm",
++];
+ pub fn command(icon: &str) -> Option<&'static str> {
+     match icon {
+         "FileImport3dm" => Some("Import3dm"),
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\curve.rs:79:
+     pub fn output(&self) -> &[[f64; 3]] {
+         &self.output
+     }
+-    pub fn spline(&self) -> Option<&Spline> { self.spline.as_ref() }
+-    pub fn preview_spline(&self, hover: Option<[f64;3]>) -> Result<Spline,String> {
+-        self.preview_spline_closed(hover,false)
++    pub fn spline(&self) -> Option<&Spline> {
++        self.spline.as_ref()
+     }
+-    pub fn preview_spline_closed(&self, hover: Option<[f64;3]>, close: bool) -> Result<Spline,String> {
+-        let mut points=self.points.clone();
+-        if let Some(p)=hover {if points.last().is_none_or(|&a| spline::distance(a,p)>=spline::TOLERANCE) {points.push(p);}}
+-        let closed=(close || self.persistent_close) && points.len()>=3;
+-        if closed && points.len()>3 && spline::distance(points[0],*points.last().unwrap())<spline::TOLERANCE {points.pop();}
+-        spline::interpolate(&points,self.degree,self.knots,closed)
++    pub fn preview_spline(&self, hover: Option<[f64; 3]>) -> Result<Spline, String> {
++        self.preview_spline_closed(hover, false)
+     }
++    pub fn preview_spline_closed(
++        &self,
++        hover: Option<[f64; 3]>,
++        close: bool,
++    ) -> Result<Spline, String> {
++        let mut points = self.points.clone();
++        if let Some(p) = hover {
++            if points
++                .last()
++                .is_none_or(|&a| spline::distance(a, p) >= spline::TOLERANCE)
++            {
++                points.push(p);
++            }
++        }
++        let closed = (close || self.persistent_close) && points.len() >= 3;
++        if closed
++            && points.len() > 3
++            && spline::distance(points[0], *points.last().unwrap()) < spline::TOLERANCE
++        {
++            points.pop();
++        }
++        spline::interpolate(&points, self.degree, self.knots, closed)
++    }
+     pub fn points(&self) -> &[[f64; 3]] {
+         &self.points
+     }
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\curve.rs:99:
+         self.active = false;
+         self.points.clear();
+         self.output.clear();
+-        self.spline=None;
+-        self.awaiting_option=None;
++        self.spline = None;
++        self.awaiting_option = None;
+         Effect::Cancelled
+     }
+     pub fn prompt(&self) -> String {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\curve.rs:107:
+-        if !self.active {return "Command: ".into();}
+-        if let Some(option)=&self.awaiting_option {return format!("{option} of interpolated curve: ");}
++        if !self.active {
++            return "Command: ".into();
++        }
++        if let Some(option) = &self.awaiting_option {
++            return format!("{option} of interpolated curve: ");
++        }
+         if self.awaiting_length {
+             return "Length of next segment: ".into();
+         }
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\curve.rs:113:
+             return "Command: ".into();
+         }
+         let state = if self.persistent_close { "Yes" } else { "No" };
+-        if self.name=="InterpCrv" {
+-            let knots=match self.knots {Knots::Uniform=>"Uniform",Knots::Chord=>"Chord",Knots::SqrtChord=>"SqrtChrd"};
+-            return format!("{} point of interpolated curve. Enter when done ( Degree={} Knots={} PersistentClose={} Close Sharp Undo ): ",if self.points.is_empty(){"Start"}else{"Next"},self.degree,knots,state);
++        if self.name == "InterpCrv" {
++            let knots = match self.knots {
++                Knots::Uniform => "Uniform",
++                Knots::Chord => "Chord",
++                Knots::SqrtChord => "SqrtChrd",
++            };
++            return format!(
++                "{} point of interpolated curve. Enter when done ( Degree={} Knots={} PersistentClose={} Close Sharp Undo ): ",
++                if self.points.is_empty() {
++                    "Start"
++                } else {
++                    "Next"
++                },
++                self.degree,
++                knots,
++                state
++            );
+         }
+         if self.points.is_empty() {
+             if self.name == "Line" {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\curve.rs:145:
+             return Err("More distinct points are required".into());
+         }
+         let mut points = self.points.clone();
+-        if self.name=="InterpCrv" {
+-            let closed=close || (self.persistent_close && points.len()>=3);
+-            if closed && points.len()>2 && spline::distance(points[0],*points.last().unwrap())<spline::TOLERANCE {points.pop();}
+-            let fitted=spline::interpolate(&points,self.degree,self.knots,closed)?;
+-            self.spline=Some(fitted);self.output=points;self.active=false;
++        if self.name == "InterpCrv" {
++            let closed = close || (self.persistent_close && points.len() >= 3);
++            if closed
++                && points.len() > 2
++                && spline::distance(points[0], *points.last().unwrap()) < spline::TOLERANCE
++            {
++                points.pop();
++            }
++            let fitted = spline::interpolate(&points, self.degree, self.knots, closed)?;
++            self.spline = Some(fitted);
++            self.output = points;
++            self.active = false;
+             return Ok(Effect::Commit);
+         }
+         if close || (self.persistent_close && points.len() > 2) {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\curve.rs:199:
+         if self.awaiting_length {
+             return Err("Enter the numeric length before picking a direction".into());
+         }
+-        if self.awaiting_option.is_some() {return Err("Enter the pending option value before picking a point".into());}
++        if self.awaiting_option.is_some() {
++            return Err("Enter the pending option value before picking a point".into());
++        }
+         if p.iter().any(|x| !x.is_finite() || x.abs() > 1e9) {
+             return Err("Coordinate must be finite and within 1e9 mm".into());
+         }
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\curve.rs:206:
+-        if self.points.len() >= if self.name=="InterpCrv" {spline::MAX_POLES} else {4096} {
++        if self.points.len()
++            >= if self.name == "InterpCrv" {
++                spline::MAX_POLES
++            } else {
++                4096
++            }
++        {
+             return Err("Point limit reached; finish or cancel".into());
+         }
+         if let Some(a) = self.points.last() {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\curve.rs:236:
+         if !self.active {
+             return Err("No active command".into());
+         }
+-        if let Some(option)=self.awaiting_option.clone() {
+-            self.awaiting_option=None;
+-            let result=self.input(&format!("{option}={text}"));
+-            if result.is_err() {self.awaiting_option=Some(option);}
++        if let Some(option) = self.awaiting_option.clone() {
++            self.awaiting_option = None;
++            let result = self.input(&format!("{option}={text}"));
++            if result.is_err() {
++                self.awaiting_option = Some(option);
++            }
+             return result;
+         }
+         if self.awaiting_length {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\curve.rs:259:
+         let (key, value) = lower
+             .split_once('=')
+             .map_or((lower.as_str(), None), |(k, v)| (k.trim(), Some(v.trim())));
+-        if self.name=="InterpCrv" {
++        if self.name == "InterpCrv" {
+             match key {
+-                "degree"|"d"|"knots"|"k" if value.is_none()=>{
+-                    self.awaiting_option=Some(if key=="degree"||key=="d" {"Degree"} else {"Knots"}.into());return Ok(Effect::Waiting);
+-                },
+-                "degree"|"d"=>{
+-                    let degree=value.unwrap().parse::<usize>().map_err(|_|"Enter an odd degree from 1 to 11")?;
+-                    if !(1..=11).contains(&degree)||degree%2==0 {return Err("Enter an odd degree from 1 to 11".into());}
+-                    self.degree=degree;return Ok(Effect::Waiting);
+-                },
+-                "knots"|"k"=>{
+-                    self.knots=match value {Some("uniform"|"u")=>Knots::Uniform,Some("chord"|"c")=>Knots::Chord,Some("sqrtchrd"|"sqrtchord"|"s")=>Knots::SqrtChord,_=>return Err("Knots must be Uniform, Chord or SqrtChrd".into())};return Ok(Effect::Waiting);
+-                },
+-                "persistentclose"|"p"=>{self.persistent_close=option_bool(value,self.persistent_close)?;return Ok(Effect::Waiting);},
+-                "close"|"c" if value.is_none()=>return self.finish(true),
+-                "sharp"|"s" if value.is_none()=>{
+-                    if self.points.len()<3 {return Err("Sharp needs at least 3 points".into());}
+-                    let mut points=self.points.clone();if spline::distance(points[0],*points.last().unwrap())>=spline::TOLERANCE {points.push(points[0]);}
+-                    let fitted=spline::interpolate(&points,self.degree,self.knots,false)?;
+-                    self.output=points;self.spline=Some(fitted);self.active=false;return Ok(Effect::Commit);
+-                },
+-                "undo"|"u" if value.is_none()=>{self.points.pop().ok_or("No point to undo")?;return Ok(Effect::Waiting);},
+-                "starttangent"|"endtangent"=>return Err("Tangent constraints are not implemented".into()),
+-                _=>{},
++                "degree" | "d" | "knots" | "k" if value.is_none() => {
++                    self.awaiting_option = Some(
++                        if key == "degree" || key == "d" {
++                            "Degree"
++                        } else {
++                            "Knots"
++                        }
++                        .into(),
++                    );
++                    return Ok(Effect::Waiting);
++                }
++                "degree" | "d" => {
++                    let degree = value
++                        .unwrap()
++                        .parse::<usize>()
++                        .map_err(|_| "Enter an odd degree from 1 to 11")?;
++                    if !(1..=11).contains(&degree) || degree % 2 == 0 {
++                        return Err("Enter an odd degree from 1 to 11".into());
++                    }
++                    self.degree = degree;
++                    return Ok(Effect::Waiting);
++                }
++                "knots" | "k" => {
++                    self.knots = match value {
++                        Some("uniform" | "u") => Knots::Uniform,
++                        Some("chord" | "c") => Knots::Chord,
++                        Some("sqrtchrd" | "sqrtchord" | "s") => Knots::SqrtChord,
++                        _ => return Err("Knots must be Uniform, Chord or SqrtChrd".into()),
++                    };
++                    return Ok(Effect::Waiting);
++                }
++                "persistentclose" | "p" => {
++                    self.persistent_close = option_bool(value, self.persistent_close)?;
++                    return Ok(Effect::Waiting);
++                }
++                "close" | "c" if value.is_none() => return self.finish(true),
++                "sharp" | "s" if value.is_none() => {
++                    if self.points.len() < 3 {
++                        return Err("Sharp needs at least 3 points".into());
++                    }
++                    let mut points = self.points.clone();
++                    if spline::distance(points[0], *points.last().unwrap()) >= spline::TOLERANCE {
++                        points.push(points[0]);
++                    }
++                    let fitted = spline::interpolate(&points, self.degree, self.knots, false)?;
++                    self.output = points;
++                    self.spline = Some(fitted);
++                    self.active = false;
++                    return Ok(Effect::Commit);
++                }
++                "undo" | "u" if value.is_none() => {
++                    self.points.pop().ok_or("No point to undo")?;
++                    return Ok(Effect::Waiting);
++                }
++                "starttangent" | "endtangent" => {
++                    return Err("Tangent constraints are not implemented".into());
++                }
++                _ => {}
+             }
+         }
+         if self.name == "Polyline" && (key == "close" || key == "c") && value.is_none() {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\curve.rs:353:
+         }
+         self.point(p)
+     }
+-
+ }
+ fn number(text: &str) -> Result<f64, String> {
+     let text = text.trim();
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\curve_ffi.rs:211:
+ 
+ #[unsafe(no_mangle)]
+ pub extern "C" fn om9_curve_spline_publish() -> bool {
+-    let Ok(s)=state().lock() else {return false;};
+-    crate::spline_ffi::publish(s.session.spline().cloned().ok_or("No committed spline".into()))
++    let Ok(s) = state().lock() else {
++        return false;
++    };
++    crate::spline_ffi::publish(
++        s.session
++            .spline()
++            .cloned()
++            .ok_or("No committed spline".into()),
++    )
+ }
+ /// # Safety
+ /// `hover` is null or points to three readable world coordinates.
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\curve_ffi.rs:219:
+ #[unsafe(no_mangle)]
+ pub unsafe extern "C" fn om9_curve_preview_spline(hover: *const f64) -> bool {
+-    unsafe {om9_curve_preview_spline_closed(hover,false)}
++    unsafe { om9_curve_preview_spline_closed(hover, false) }
+ }
+ /// # Safety
+ /// `hover` is null or points to three readable world coordinates.
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\curve_ffi.rs:225:
+ #[unsafe(no_mangle)]
+ pub unsafe extern "C" fn om9_curve_preview_spline_closed(hover: *const f64, close: bool) -> bool {
+-    let Ok(s)=state().lock() else {return false;};
+-    let point=if hover.is_null() {None} else {let p=unsafe{std::slice::from_raw_parts(hover,3)};Some([p[0],p[1],p[2]])};
+-    crate::spline_ffi::publish(s.session.preview_spline_closed(point,close))
++    let Ok(s) = state().lock() else {
++        return false;
++    };
++    let point = if hover.is_null() {
++        None
++    } else {
++        let p = unsafe { std::slice::from_raw_parts(hover, 3) };
++        Some([p[0], p[1], p[2]])
++    };
++    crate::spline_ffi::publish(s.session.preview_spline_closed(point, close))
+ }
+ 
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\ffi.rs:185:
+ }
+ #[unsafe(no_mangle)]
+ pub extern "C" fn om9_command_permissions(i: usize) -> u32 {
+-    if command(i).and_then(|c| c.icon.to_str().ok()).and_then(crate::curve::name).is_some() {
++    if command(i)
++        .and_then(|c| c.icon.to_str().ok())
++        .and_then(crate::curve::name)
++        .is_some()
++    {
+         return 1;
+     }
+     match crate::core_3dm::om9_3dm_operation(i) {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\modeling_exchange.rs:9:
+ }
+ 
+ #[unsafe(no_mangle)]
+-pub extern "C" fn om9_modeling_worker_target(available: u32) -> u32 { worker_target(available) }
++pub extern "C" fn om9_modeling_worker_target(available: u32) -> u32 {
++    worker_target(available)
++}
+ 
+ #[unsafe(no_mangle)]
+ pub extern "C" fn om9_modeling_workers(available: u32, tasks: u32, ram_slots: u32) -> u32 {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\modeling_exchange.rs:80:
+ }
+ 
+ pub fn snap_allowed(kind: GeometryKind, native_cad: bool, preview: bool, mode: u32) -> bool {
+-    native_cad && !preview && match mode {
+-        2 | 4 => matches!(kind, GeometryKind::CadCurve | GeometryKind::CadBrep),
+-        8 => matches!(kind, GeometryKind::CadPoint | GeometryKind::CadBrep),
+-        _ => false,
+-    }
++    native_cad
++        && !preview
++        && match mode {
++            2 | 4 => matches!(kind, GeometryKind::CadCurve | GeometryKind::CadBrep),
++            8 => matches!(kind, GeometryKind::CadPoint | GeometryKind::CadBrep),
++            _ => false,
++        }
+ }
+ 
+ #[unsafe(no_mangle)]
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\modeling_exchange.rs:91:
+-pub extern "C" fn om9_modeling_snap_allowed(kind: u32, native_cad: bool, preview: bool, mode: u32) -> bool {
++pub extern "C" fn om9_modeling_snap_allowed(
++    kind: u32,
++    native_cad: bool,
++    preview: bool,
++    mode: u32,
++) -> bool {
+     snap_allowed(kind.into(), native_cad, preview, mode)
+ }
+ 
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\spline.rs:4:
+ pub const MAX_SAMPLES: usize = 4096;
+ pub const TOLERANCE: f64 = 1e-7;
+ #[derive(Clone, Copy, Debug, Default, PartialEq)]
+-pub enum Knots { #[default] Uniform, Chord, SqrtChord }
++pub enum Knots {
++    #[default]
++    Uniform,
++    Chord,
++    SqrtChord,
++}
+ #[derive(Clone, Debug)]
+ pub struct Spline {
+     pub poles: Vec<[f64; 3]>,
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\spline.rs:14:
+     pub periodic: bool,
+ }
+ pub fn distance(a: [f64; 3], b: [f64; 3]) -> f64 {
+-    a.iter().zip(b).map(|(x,y)| (x-y).powi(2)).sum::<f64>().sqrt()
++    a.iter()
++        .zip(b)
++        .map(|(x, y)| (x - y).powi(2))
++        .sum::<f64>()
++        .sqrt()
+ }
+-fn validate(points: &[[f64;3]], limit: usize) -> Result<(), String> {
+-    if !(2..=limit).contains(&points.len()) { return Err(format!("Use 2 to {limit} distinct points")); }
+-    if points.iter().flatten().any(|x| !x.is_finite() || x.abs()>1e9) {
++fn validate(points: &[[f64; 3]], limit: usize) -> Result<(), String> {
++    if !(2..=limit).contains(&points.len()) {
++        return Err(format!("Use 2 to {limit} distinct points"));
++    }
++    if points
++        .iter()
++        .flatten()
++        .any(|x| !x.is_finite() || x.abs() > 1e9)
++    {
+         return Err("Coordinates must be finite and within 1e9 mm".into());
+     }
+-    if points.windows(2).any(|p| distance(p[0],p[1])<TOLERANCE) {
++    if points.windows(2).any(|p| distance(p[0], p[1]) < TOLERANCE) {
+         return Err("Consecutive points must differ by at least 1e-7 mm".into());
+     }
+     Ok(())
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\spline.rs:28:
+ }
+ pub fn rebuild_options(count: usize, degree: usize) -> Result<(), String> {
+-    if !(1..=11).contains(&degree) || !(degree+1..=MAX_POLES).contains(&count) {
+-        return Err("Degree must be 1 to 11; PointCount must exceed Degree and be at most 256".into());
++    if !(1..=11).contains(&degree) || !(degree + 1..=MAX_POLES).contains(&count) {
++        return Err(
++            "Degree must be 1 to 11; PointCount must exceed Degree and be at most 256".into(),
++        );
+     }
+     Ok(())
+ }
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\spline.rs:35:
+-pub fn parameters(points: &[[f64;3]], mode: Knots, closed: bool) -> Vec<f64> {
+-    let mut params=vec![0.];
+-    let segments=points.len()-usize::from(!closed);
++pub fn parameters(points: &[[f64; 3]], mode: Knots, closed: bool) -> Vec<f64> {
++    let mut params = vec![0.];
++    let segments = points.len() - usize::from(!closed);
+     for i in 0..segments {
+-        let d=distance(points[i],points[(i+1)%points.len()]);
+-        let step=match mode { Knots::Uniform=>1., Knots::Chord=>d, Knots::SqrtChord=>d.sqrt() };
+-        params.push(params.last().unwrap()+step);
++        let d = distance(points[i], points[(i + 1) % points.len()]);
++        let step = match mode {
++            Knots::Uniform => 1.,
++            Knots::Chord => d,
++            Knots::SqrtChord => d.sqrt(),
++        };
++        params.push(params.last().unwrap() + step);
+     }
+-    let total=*params.last().unwrap();
+-    params.iter_mut().for_each(|u| *u/=total);
++    let total = *params.last().unwrap();
++    params.iter_mut().for_each(|u| *u /= total);
+     params
+ }
+ fn periodic_knots(params: &[f64], degree: usize) -> Vec<f64> {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\spline.rs:48:
+-    let n=params.len()-1;
+-    (0..n+2*degree+1).map(|i| {
+-        let j=i as isize-degree as isize;
+-        params[j.rem_euclid(n as isize) as usize]+j.div_euclid(n as isize) as f64
+-    }).collect()
++    let n = params.len() - 1;
++    (0..n + 2 * degree + 1)
++        .map(|i| {
++            let j = i as isize - degree as isize;
++            params[j.rem_euclid(n as isize) as usize] + j.div_euclid(n as isize) as f64
++        })
++        .collect()
+ }
+ impl Spline {
+     pub fn basis(&self, u: f64) -> Vec<f64> {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\spline.rs:56:
+-        let n=self.poles.len();
+-        let extended=n+if self.periodic {self.degree} else {0};
+-        let u=if self.periodic {u.rem_euclid(1.)} else {u.clamp(0.,1.)};
+-        if !self.periodic && u==1. {
+-            let mut out=vec![0.;n];out[n-1]=1.;return out;
++        let n = self.poles.len();
++        let extended = n + if self.periodic { self.degree } else { 0 };
++        let u = if self.periodic {
++            u.rem_euclid(1.)
++        } else {
++            u.clamp(0., 1.)
++        };
++        if !self.periodic && u == 1. {
++            let mut out = vec![0.; n];
++            out[n - 1] = 1.;
++            return out;
+         }
+-        let mut basis=vec![0.;self.knots.len()-1];
+-        for (i,b) in basis.iter_mut().enumerate() {
+-            *b=f64::from(self.knots[i]<=u && u<self.knots[i+1]);
++        let mut basis = vec![0.; self.knots.len() - 1];
++        for (i, b) in basis.iter_mut().enumerate() {
++            *b = f64::from(self.knots[i] <= u && u < self.knots[i + 1]);
+         }
+         for d in 1..=self.degree {
+-            for i in 0..basis.len()-d {
+-                let left=self.knots[i+d]-self.knots[i];
+-                let right=self.knots[i+d+1]-self.knots[i+1];
+-                basis[i]=if left>0. {(u-self.knots[i])/left*basis[i]} else {0.}
+-                    +if right>0. {(self.knots[i+d+1]-u)/right*basis[i+1]} else {0.};
++            for i in 0..basis.len() - d {
++                let left = self.knots[i + d] - self.knots[i];
++                let right = self.knots[i + d + 1] - self.knots[i + 1];
++                basis[i] = if left > 0. {
++                    (u - self.knots[i]) / left * basis[i]
++                } else {
++                    0.
++                } + if right > 0. {
++                    (self.knots[i + d + 1] - u) / right * basis[i + 1]
++                } else {
++                    0.
++                };
+             }
+         }
+-        let mut out=vec![0.;n];
+-        for i in 0..extended {out[i%n]+=basis[i];}
++        let mut out = vec![0.; n];
++        for i in 0..extended {
++            out[i % n] += basis[i];
++        }
+         out
+     }
+-    pub fn value(&self, u: f64) -> [f64;3] {
+-        let b=self.basis(u);
+-        std::array::from_fn(|axis| self.poles.iter().zip(&b).map(|(p,w)| p[axis]*w).sum())
++    pub fn value(&self, u: f64) -> [f64; 3] {
++        let b = self.basis(u);
++        std::array::from_fn(|axis| self.poles.iter().zip(&b).map(|(p, w)| p[axis] * w).sum())
+     }
+     /// OCCT consumes distinct knots/multiplicities on [0,1] for a periodic spline.
+     pub fn host_knots(&self) -> (Vec<f64>, Vec<usize>) {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\spline.rs:84:
+-        let source=if self.periodic {&self.knots[self.degree..self.degree+self.poles.len()+1]} else {&self.knots};
+-        let mut knots=Vec::new();let mut mults=Vec::new();
++        let source = if self.periodic {
++            &self.knots[self.degree..self.degree + self.poles.len() + 1]
++        } else {
++            &self.knots
++        };
++        let mut knots = Vec::new();
++        let mut mults = Vec::new();
+         for &u in source {
+-            if knots.last()==Some(&u) {*mults.last_mut().unwrap()+=1;} else {knots.push(u);mults.push(1);}
++            if knots.last() == Some(&u) {
++                *mults.last_mut().unwrap() += 1;
++            } else {
++                knots.push(u);
++                mults.push(1);
++            }
+         }
+-        (knots,mults)
++        (knots, mults)
+     }
+ }
+ /// Partial pivoting solves XYZ together; reject ill-conditioned systems instead of outputting NaNs.
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\spline.rs:93:
+-fn solve(mut a: Vec<Vec<f64>>, mut rhs: Vec<[f64;3]>) -> Result<Vec<[f64;3]>,String> {
+-    let n=a.len();
++fn solve(mut a: Vec<Vec<f64>>, mut rhs: Vec<[f64; 3]>) -> Result<Vec<[f64; 3]>, String> {
++    let n = a.len();
+     for k in 0..n {
+-        let pivot=(k..n).max_by(|&i,&j| a[i][k].abs().total_cmp(&a[j][k].abs())).unwrap();
+-        if a[pivot][k].abs()<1e-12 {return Err("Points produce an ill-conditioned spline; change spacing, degree or point count".into());}
+-        a.swap(k,pivot);rhs.swap(k,pivot);
+-        for i in k+1..n {
+-            let f=a[i][k]/a[k][k];
+-            for j in k..n {a[i][j]-=f*a[k][j];}
+-            for axis in 0..3 {rhs[i][axis]-=f*rhs[k][axis];}
++        let pivot = (k..n)
++            .max_by(|&i, &j| a[i][k].abs().total_cmp(&a[j][k].abs()))
++            .unwrap();
++        if a[pivot][k].abs() < 1e-12 {
++            return Err(
++                "Points produce an ill-conditioned spline; change spacing, degree or point count"
++                    .into(),
++            );
+         }
++        a.swap(k, pivot);
++        rhs.swap(k, pivot);
++        for i in k + 1..n {
++            let f = a[i][k] / a[k][k];
++            for j in k..n {
++                a[i][j] -= f * a[k][j];
++            }
++            for axis in 0..3 {
++                rhs[i][axis] -= f * rhs[k][axis];
++            }
++        }
+     }
+-    let mut x=vec![[0.;3];n];
++    let mut x = vec![[0.; 3]; n];
+     for i in (0..n).rev() {
+-        for axis in 0..3 {x[i][axis]=(rhs[i][axis]-(i+1..n).map(|j| a[i][j]*x[j][axis]).sum::<f64>())/a[i][i];}
++        for axis in 0..3 {
++            x[i][axis] =
++                (rhs[i][axis] - (i + 1..n).map(|j| a[i][j] * x[j][axis]).sum::<f64>()) / a[i][i];
++        }
+     }
+-    if x.iter().flatten().any(|v| !v.is_finite() || v.abs()>1e9) {return Err("Spline poles exceed coordinate limits".into());}
++    if x.iter().flatten().any(|v| !v.is_finite() || v.abs() > 1e9) {
++        return Err("Spline poles exceed coordinate limits".into());
++    }
+     Ok(x)
+ }
+-pub fn interpolate(points: &[[f64;3]], requested_degree: usize, mode: Knots, periodic: bool) -> Result<Spline,String> {
+-    validate(points,MAX_POLES)?;
+-    if !(1..=11).contains(&requested_degree) || requested_degree%2==0 {
++pub fn interpolate(
++    points: &[[f64; 3]],
++    requested_degree: usize,
++    mode: Knots,
++    periodic: bool,
++) -> Result<Spline, String> {
++    validate(points, MAX_POLES)?;
++    if !(1..=11).contains(&requested_degree) || requested_degree % 2 == 0 {
+         return Err("InterpCrv supports odd degrees 1, 3, 5, 7, 9 and 11".into());
+     }
+-    if periodic && (points.len()<3 || distance(points[0],*points.last().unwrap())<TOLERANCE) {
+-        return Err("A smooth closed curve needs at least 3 distinct points without a repeated endpoint".into());
++    if periodic && (points.len() < 3 || distance(points[0], *points.last().unwrap()) < TOLERANCE) {
++        return Err(
++            "A smooth closed curve needs at least 3 distinct points without a repeated endpoint"
++                .into(),
++        );
+     }
+-    let n=points.len();
+-    let mut degree=requested_degree.min(n-1);
+-    if periodic && degree%2==0 {degree-=1;}
+-    let params=parameters(points,mode,periodic);
+-    let knots=if periodic {periodic_knots(&params,degree)} else {
+-        let mut knots=vec![0.;degree+1];
+-        for j in 1..n-degree {knots.push(params[j..j+degree].iter().sum::<f64>()/degree as f64);}
+-        knots.extend(vec![1.;degree+1]);knots
++    let n = points.len();
++    let mut degree = requested_degree.min(n - 1);
++    if periodic && degree % 2 == 0 {
++        degree -= 1;
++    }
++    let params = parameters(points, mode, periodic);
++    let knots = if periodic {
++        periodic_knots(&params, degree)
++    } else {
++        let mut knots = vec![0.; degree + 1];
++        for j in 1..n - degree {
++            knots.push(params[j..j + degree].iter().sum::<f64>() / degree as f64);
++        }
++        knots.extend(vec![1.; degree + 1]);
++        knots
+     };
+-    let mut spline=Spline {poles:vec![[0.;3];n],knots,degree,periodic};
+-    let matrix=params[..n].iter().map(|&u| spline.basis(u)).collect();
+-    spline.poles=solve(matrix,points.to_vec())?;
++    let mut spline = Spline {
++        poles: vec![[0.; 3]; n],
++        knots,
++        degree,
++        periodic,
++    };
++    let matrix = params[..n].iter().map(|&u| spline.basis(u)).collect();
++    spline.poles = solve(matrix, points.to_vec())?;
+     Ok(spline)
+ }
+ /// Fit equal arc-length samples to a uniformly knotted spline, preserving open endpoints.
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\spline.rs:135:
+ /// Closed samples include the duplicated last endpoint, which is removed from the solve.
+-pub fn rebuild(samples: &[[f64;3]], count: usize, degree: usize, periodic: bool) -> Result<Spline,String> {
+-    rebuild_options(count,degree)?;
+-    validate(samples,MAX_SAMPLES)?;
+-    if periodic && distance(samples[0],*samples.last().unwrap())>TOLERANCE {
++pub fn rebuild(
++    samples: &[[f64; 3]],
++    count: usize,
++    degree: usize,
++    periodic: bool,
++) -> Result<Spline, String> {
++    rebuild_options(count, degree)?;
++    validate(samples, MAX_SAMPLES)?;
++    if periodic && distance(samples[0], *samples.last().unwrap()) > TOLERANCE {
+         return Err("Closed samples must end at their start point".into());
+     }
+-    let samples=if periodic {&samples[..samples.len()-1]} else {samples};
+-    if samples.len()<count*2 {return Err("Rebuild needs at least twice PointCount samples".into());}
+-    let knots=if periodic {
+-        let params=(0..=count).map(|i| i as f64/count as f64).collect::<Vec<_>>();
+-        periodic_knots(&params,degree)
++    let samples = if periodic {
++        &samples[..samples.len() - 1]
+     } else {
+-        let mut knots=vec![0.;degree+1];
+-        knots.extend((1..count-degree).map(|i| i as f64/(count-degree) as f64));
+-        knots.extend(vec![1.;degree+1]);knots
++        samples
+     };
+-    let mut spline=Spline {poles:vec![[0.;3];count],knots,degree,periodic};
+-    let first=if periodic {0} else {1};let end=if periodic {count} else {count-1};
+-    if !periodic {spline.poles[0]=samples[0];spline.poles[count-1]=*samples.last().unwrap();}
+-    let unknowns=end-first;
+-    if unknowns==0 {return Ok(spline);}
+-    let mut normal=vec![vec![0.;unknowns];unknowns];let mut rhs=vec![[0.;3];unknowns];
+-    for (i,&point) in samples.iter().enumerate() {
+-        let u=i as f64/(samples.len()-usize::from(!periodic)) as f64;
+-        let b=spline.basis(u);
+-        let target: [f64;3]=std::array::from_fn(|axis| point[axis]-if periodic {0.} else {b[0]*spline.poles[0][axis]+b[count-1]*spline.poles[count-1][axis]});
++    if samples.len() < count * 2 {
++        return Err("Rebuild needs at least twice PointCount samples".into());
++    }
++    let knots = if periodic {
++        let params = (0..=count)
++            .map(|i| i as f64 / count as f64)
++            .collect::<Vec<_>>();
++        periodic_knots(&params, degree)
++    } else {
++        let mut knots = vec![0.; degree + 1];
++        knots.extend((1..count - degree).map(|i| i as f64 / (count - degree) as f64));
++        knots.extend(vec![1.; degree + 1]);
++        knots
++    };
++    let mut spline = Spline {
++        poles: vec![[0.; 3]; count],
++        knots,
++        degree,
++        periodic,
++    };
++    let first = if periodic { 0 } else { 1 };
++    let end = if periodic { count } else { count - 1 };
++    if !periodic {
++        spline.poles[0] = samples[0];
++        spline.poles[count - 1] = *samples.last().unwrap();
++    }
++    let unknowns = end - first;
++    if unknowns == 0 {
++        return Ok(spline);
++    }
++    let mut normal = vec![vec![0.; unknowns]; unknowns];
++    let mut rhs = vec![[0.; 3]; unknowns];
++    for (i, &point) in samples.iter().enumerate() {
++        let u = i as f64 / (samples.len() - usize::from(!periodic)) as f64;
++        let b = spline.basis(u);
++        let target: [f64; 3] = std::array::from_fn(|axis| {
++            point[axis]
++                - if periodic {
++                    0.
++                } else {
++                    b[0] * spline.poles[0][axis] + b[count - 1] * spline.poles[count - 1][axis]
++                }
++        });
+         for j in first..end {
+-            for k in first..end {normal[j-first][k-first]+=b[j]*b[k];}
+-            for axis in 0..3 {rhs[j-first][axis]+=b[j]*target[axis];}
++            for k in first..end {
++                normal[j - first][k - first] += b[j] * b[k];
++            }
++            for axis in 0..3 {
++                rhs[j - first][axis] += b[j] * target[axis];
++            }
+         }
+     }
+-    let fit=solve(normal,rhs)?;spline.poles[first..end].copy_from_slice(&fit);Ok(spline)
++    let fit = solve(normal, rhs)?;
++    spline.poles[first..end].copy_from_slice(&fit);
++    Ok(spline)
+ }
+ 
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\spline_ffi.rs:1:
+ use crate::spline::{self, Spline};
+-use std::{ffi::c_char,sync::{Mutex,OnceLock}};
++use std::{
++    ffi::c_char,
++    sync::{Mutex, OnceLock},
++};
+ #[derive(Default)]
+-struct State {curve: Option<Spline>, message: String}
+-fn state()-> &'static Mutex<State> {static S:OnceLock<Mutex<State>>=OnceLock::new();S.get_or_init(||Mutex::new(State::default()))}
+-pub(crate) fn publish(result: Result<Spline,String>)->bool {
+-    let Ok(mut s)=state().lock() else {return false;};
+-    match result {Ok(curve)=>{s.curve=Some(curve);s.message.clear();true},Err(e)=>{s.curve=None;s.message=e;false}}
++struct State {
++    curve: Option<Spline>,
++    message: String,
+ }
++fn state() -> &'static Mutex<State> {
++    static S: OnceLock<Mutex<State>> = OnceLock::new();
++    S.get_or_init(|| Mutex::new(State::default()))
++}
++pub(crate) fn publish(result: Result<Spline, String>) -> bool {
++    let Ok(mut s) = state().lock() else {
++        return false;
++    };
++    match result {
++        Ok(curve) => {
++            s.curve = Some(curve);
++            s.message.clear();
++            true
++        }
++        Err(e) => {
++            s.curve = None;
++            s.message = e;
++            false
++        }
++    }
++}
+ /// # Safety
+ /// `xyz` points to `count*3` readable doubles for the duration of this call.
+ #[unsafe(no_mangle)]
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\spline_ffi.rs:13:
+-pub unsafe extern "C" fn om9_spline_rebuild(xyz:*const f64,count:usize,poles:usize,degree:usize,closed:bool)->bool {
+-    if xyz.is_null() || !(2..=spline::MAX_SAMPLES).contains(&count) {return publish(Err("Invalid rebuild samples".into()));}
+-    let input=unsafe {std::slice::from_raw_parts(xyz,count*3)};
+-    let points=input.chunks_exact(3).map(|p|[p[0],p[1],p[2]]).collect::<Vec<_>>();
+-    publish(spline::rebuild(&points,poles,degree,closed))
++pub unsafe extern "C" fn om9_spline_rebuild(
++    xyz: *const f64,
++    count: usize,
++    poles: usize,
++    degree: usize,
++    closed: bool,
++) -> bool {
++    if xyz.is_null() || !(2..=spline::MAX_SAMPLES).contains(&count) {
++        return publish(Err("Invalid rebuild samples".into()));
++    }
++    let input = unsafe { std::slice::from_raw_parts(xyz, count * 3) };
++    let points = input
++        .chunks_exact(3)
++        .map(|p| [p[0], p[1], p[2]])
++        .collect::<Vec<_>>();
++    publish(spline::rebuild(&points, poles, degree, closed))
+ }
+ #[unsafe(no_mangle)]
+-pub extern "C" fn om9_spline_options(poles:usize,degree:usize)->bool {spline::rebuild_options(poles,degree).is_ok()}
++pub extern "C" fn om9_spline_options(poles: usize, degree: usize) -> bool {
++    spline::rebuild_options(poles, degree).is_ok()
++}
+ #[unsafe(no_mangle)]
+-pub extern "C" fn om9_spline_degree()->usize {state().lock().ok().and_then(|s|s.curve.as_ref().map(|c|c.degree)).unwrap_or(0)}
++pub extern "C" fn om9_spline_degree() -> usize {
++    state()
++        .lock()
++        .ok()
++        .and_then(|s| s.curve.as_ref().map(|c| c.degree))
++        .unwrap_or(0)
++}
+ #[unsafe(no_mangle)]
+-pub extern "C" fn om9_spline_periodic()->bool {state().lock().ok().is_some_and(|s|s.curve.as_ref().is_some_and(|c|c.periodic))}
++pub extern "C" fn om9_spline_periodic() -> bool {
++    state()
++        .lock()
++        .ok()
++        .is_some_and(|s| s.curve.as_ref().is_some_and(|c| c.periodic))
++}
+ #[unsafe(no_mangle)]
+-pub extern "C" fn om9_spline_pole_count()->usize {state().lock().ok().and_then(|s|s.curve.as_ref().map(|c|c.poles.len())).unwrap_or(0)}
++pub extern "C" fn om9_spline_pole_count() -> usize {
++    state()
++        .lock()
++        .ok()
++        .and_then(|s| s.curve.as_ref().map(|c| c.poles.len()))
++        .unwrap_or(0)
++}
+ #[unsafe(no_mangle)]
+-pub extern "C" fn om9_spline_pole(i:usize,axis:usize)->f64 {state().lock().ok().and_then(|s|s.curve.as_ref().and_then(|c|c.poles.get(i).and_then(|p|p.get(axis)).copied())).unwrap_or(f64::NAN)}
++pub extern "C" fn om9_spline_pole(i: usize, axis: usize) -> f64 {
++    state()
++        .lock()
++        .ok()
++        .and_then(|s| {
++            s.curve
++                .as_ref()
++                .and_then(|c| c.poles.get(i).and_then(|p| p.get(axis)).copied())
++        })
++        .unwrap_or(f64::NAN)
++}
+ #[unsafe(no_mangle)]
+-pub extern "C" fn om9_spline_knot_count()->usize {state().lock().ok().and_then(|s|s.curve.as_ref().map(|c|c.host_knots().0.len())).unwrap_or(0)}
++pub extern "C" fn om9_spline_knot_count() -> usize {
++    state()
++        .lock()
++        .ok()
++        .and_then(|s| s.curve.as_ref().map(|c| c.host_knots().0.len()))
++        .unwrap_or(0)
++}
+ #[unsafe(no_mangle)]
+-pub extern "C" fn om9_spline_knot(i:usize)->f64 {state().lock().ok().and_then(|s|s.curve.as_ref().and_then(|c|c.host_knots().0.get(i).copied())).unwrap_or(f64::NAN)}
++pub extern "C" fn om9_spline_knot(i: usize) -> f64 {
++    state()
++        .lock()
++        .ok()
++        .and_then(|s| {
++            s.curve
++                .as_ref()
++                .and_then(|c| c.host_knots().0.get(i).copied())
++        })
++        .unwrap_or(f64::NAN)
++}
+ #[unsafe(no_mangle)]
+-pub extern "C" fn om9_spline_multiplicity(i:usize)->usize {state().lock().ok().and_then(|s|s.curve.as_ref().and_then(|c|c.host_knots().1.get(i).copied())).unwrap_or(0)}
++pub extern "C" fn om9_spline_multiplicity(i: usize) -> usize {
++    state()
++        .lock()
++        .ok()
++        .and_then(|s| {
++            s.curve
++                .as_ref()
++                .and_then(|c| c.host_knots().1.get(i).copied())
++        })
++        .unwrap_or(0)
++}
+ #[unsafe(no_mangle)]
+-pub extern "C" fn om9_spline_value(u:f64,axis:usize)->f64 {if !u.is_finite(){return f64::NAN;}state().lock().ok().and_then(|s|s.curve.as_ref().and_then(|c|c.value(u).get(axis).copied())).unwrap_or(f64::NAN)}
++pub extern "C" fn om9_spline_value(u: f64, axis: usize) -> f64 {
++    if !u.is_finite() {
++        return f64::NAN;
++    }
++    state()
++        .lock()
++        .ok()
++        .and_then(|s| s.curve.as_ref().and_then(|c| c.value(u).get(axis).copied()))
++        .unwrap_or(f64::NAN)
++}
+ /// # Safety
+ /// `buffer` is writable for `capacity` bytes, or null when capacity is zero.
+ #[unsafe(no_mangle)]
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\src\spline_ffi.rs:40:
+-pub unsafe extern "C" fn om9_spline_message(buffer:*mut c_char,capacity:usize)->usize {
+-    let Ok(s)=state().lock() else {return 0;};let bytes=s.message.as_bytes();
+-    if !buffer.is_null() && capacity>0 {let n=bytes.len().min(capacity-1);unsafe{std::ptr::copy_nonoverlapping(bytes.as_ptr(),buffer.cast::<u8>(),n);*buffer.add(n)=0;}}
++pub unsafe extern "C" fn om9_spline_message(buffer: *mut c_char, capacity: usize) -> usize {
++    let Ok(s) = state().lock() else {
++        return 0;
++    };
++    let bytes = s.message.as_bytes();
++    if !buffer.is_null() && capacity > 0 {
++        let n = bytes.len().min(capacity - 1);
++        unsafe {
++            std::ptr::copy_nonoverlapping(bytes.as_ptr(), buffer.cast::<u8>(), n);
++            *buffer.add(n) = 0;
++        }
++    }
+     bytes.len()
+ }
+ 
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\tests\core_3dm.rs:32:
+ #[test]
+ fn clipboard_commands_share_catalog_dispatch() {
+     use openmatrix9_rust::core_3dm;
+-    assert_eq!(core_3dm::command("FileCopy3dm"),Some("Copy3dm"));
+-    assert_eq!(core_3dm::command("FilePaste3dm"),Some("Paste3dm"));
++    assert_eq!(core_3dm::command("FileCopy3dm"), Some("Copy3dm"));
++    assert_eq!(core_3dm::command("FilePaste3dm"), Some("Paste3dm"));
+     assert!(openmatrix9_rust::command_completion::names().contains(&"Copy3dm"));
+     assert!(openmatrix9_rust::command_completion::names().contains(&"Paste3dm"));
+ }
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\tests\modeling_exchange_policy.rs:2:
+ 
+ #[test]
+ fn sixty_percent_uses_available_threads_without_four_thread_cap() {
+-    use openmatrix9_rust::modeling_exchange::{worker_target, bounded_workers};
+-    for (n, expected) in [(0,1),(1,1),(2,1),(4,2),(8,4),(12,7),(16,9),(24,14),(32,19)] {
+-        assert_eq!(worker_target(n),expected);
++    use openmatrix9_rust::modeling_exchange::{bounded_workers, worker_target};
++    for (n, expected) in [
++        (0, 1),
++        (1, 1),
++        (2, 1),
++        (4, 2),
++        (8, 4),
++        (12, 7),
++        (16, 9),
++        (24, 14),
++        (32, 19),
++    ] {
++        assert_eq!(worker_target(n), expected);
+     }
+-    assert_eq!(worker_target(u32::MAX),2_576_980_377);
+-    assert_eq!(bounded_workers(32,40,40),19);
+-    assert_eq!(bounded_workers(32,3,40),3);
+-    assert_eq!(bounded_workers(32,40,2),2);
+-    assert_eq!(bounded_workers(32,0,40),0);
+-    assert_eq!(bounded_workers(32,40,0),0);
++    assert_eq!(worker_target(u32::MAX), 2_576_980_377);
++    assert_eq!(bounded_workers(32, 40, 40), 19);
++    assert_eq!(bounded_workers(32, 3, 40), 3);
++    assert_eq!(bounded_workers(32, 40, 2), 2);
++    assert_eq!(bounded_workers(32, 0, 40), 0);
++    assert_eq!(bounded_workers(32, 40, 0), 0);
+ }
+ 
+ #[test]
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\tests\modeling_snap_policy.rs:1:
+-use openmatrix9_rust::modeling_exchange::{snap_allowed, GeometryKind::*};
++use openmatrix9_rust::modeling_exchange::{GeometryKind::*, snap_allowed};
+ 
+ #[test]
+ fn mesh_and_cloud_default_snap_reads_zero_points_policy() {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\tests\modeling_snap_policy.rs:26:
+ fn curve_cv_edit_capability_is_scoped_to_native_curve_kind() {
+     use openmatrix9_rust::modeling_exchange::capabilities;
+     assert!(capabilities(CadCurve).curve_edit);
+-    for kind in [CadPoint,CadBrep,Mesh,PointCloud,SubD,Mixed,Retained,Unknown] {
++    for kind in [
++        CadPoint, CadBrep, Mesh, PointCloud, SubD, Mixed, Retained, Unknown,
++    ] {
+         assert!(!capabilities(kind).curve_edit);
+     }
+ }
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\tests\spline_geometry.rs:1:
+ use openmatrix9_rust::spline::{self, Knots};
+-fn near(a: [f64;3], b: [f64;3], tol: f64) {assert!(spline::distance(a,b)<tol,"{a:?} != {b:?}");}
++fn near(a: [f64; 3], b: [f64; 3], tol: f64) {
++    assert!(spline::distance(a, b) < tol, "{a:?} != {b:?}");
++}
+ #[test]
+ fn om9_curve_003_interpolates_irregular_3d_points_in_all_parameterizations() {
+-    let points=[[0.,0.,0.],[0.1,2.,3.],[5.,-1.,2.],[12.,4.,-3.],[14.,0.,0.],[16.,2.,1.]];
+-    for degree in [1,3,5] {for mode in [Knots::Uniform,Knots::Chord,Knots::SqrtChord] {
+-        let curve=spline::interpolate(&points,degree,mode,false).unwrap();
+-        for (&u,&p) in spline::parameters(&points,mode,false).iter().zip(&points) {near(curve.value(u),p,1e-8);}
+-        assert_eq!(curve.degree,degree);assert!(!curve.periodic);
+-    }}
++    let points = [
++        [0., 0., 0.],
++        [0.1, 2., 3.],
++        [5., -1., 2.],
++        [12., 4., -3.],
++        [14., 0., 0.],
++        [16., 2., 1.],
++    ];
++    for degree in [1, 3, 5] {
++        for mode in [Knots::Uniform, Knots::Chord, Knots::SqrtChord] {
++            let curve = spline::interpolate(&points, degree, mode, false).unwrap();
++            for (&u, &p) in spline::parameters(&points, mode, false).iter().zip(&points) {
++                near(curve.value(u), p, 1e-8);
++            }
++            assert_eq!(curve.degree, degree);
++            assert!(!curve.periodic);
++        }
++    }
+ }
+ #[test]
+ fn om9_curve_003_smooth_close_interpolates_and_matches_seam_tangents() {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\tests\spline_geometry.rs:14:
+-    let points=[[0.,0.,0.],[3.,0.,1.],[4.,4.,0.],[0.,2.,-1.],[-2.,1.,0.]];
+-    for mode in [Knots::Uniform,Knots::Chord,Knots::SqrtChord] {
+-        let curve=spline::interpolate(&points,3,mode,true).unwrap();
+-        for (&u,&p) in spline::parameters(&points,mode,true).iter().zip(&points) {near(curve.value(u),p,1e-8);}
+-        near(curve.value(0.),curve.value(1.),1e-10);
+-        let eps=1e-6;
+-        let a=curve.value(eps);let b=curve.value(1.-eps);let seam=curve.value(0.);
+-        near(std::array::from_fn(|i| (a[i]-seam[i])/eps),std::array::from_fn(|i| (seam[i]-b[i])/eps),1e-3);
++    let points = [
++        [0., 0., 0.],
++        [3., 0., 1.],
++        [4., 4., 0.],
++        [0., 2., -1.],
++        [-2., 1., 0.],
++    ];
++    for mode in [Knots::Uniform, Knots::Chord, Knots::SqrtChord] {
++        let curve = spline::interpolate(&points, 3, mode, true).unwrap();
++        for (&u, &p) in spline::parameters(&points, mode, true).iter().zip(&points) {
++            near(curve.value(u), p, 1e-8);
++        }
++        near(curve.value(0.), curve.value(1.), 1e-10);
++        let eps = 1e-6;
++        let a = curve.value(eps);
++        let b = curve.value(1. - eps);
++        let seam = curve.value(0.);
++        near(
++            std::array::from_fn(|i| (a[i] - seam[i]) / eps),
++            std::array::from_fn(|i| (seam[i] - b[i]) / eps),
++            1e-3,
++        );
+     }
+ }
+ #[test]
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\tests\spline_geometry.rs:25:
+ fn om9_curve_009_has_exact_requested_structure_and_preserves_line_endpoints() {
+-    let samples=(0..=128).map(|i| {let u=i as f64/128.;[10.+30.*u,4.-12.*u,9.*u]}).collect::<Vec<_>>();
+-    for degree in [1,2,3,5,11] {
+-        let curve=spline::rebuild(&samples,16,degree,false).unwrap();
+-        assert_eq!(curve.degree,degree);assert_eq!(curve.poles.len(),16);
+-        near(curve.value(0.),[10.,4.,0.],1e-10);near(curve.value(1.),[40.,-8.,9.],1e-10);
+-        for i in 0..=32 {let u=i as f64/32.;near(curve.value(u),[10.+30.*u,4.-12.*u,9.*u],1e-6);}
+-        let (knots,mults)=curve.host_knots();assert_eq!(mults[0],degree+1);assert_eq!(*mults.last().unwrap(),degree+1);
+-        assert!(knots.windows(3).all(|k| ((k[1]-k[0])-(k[2]-k[1])).abs()<1e-12));
++    let samples = (0..=128)
++        .map(|i| {
++            let u = i as f64 / 128.;
++            [10. + 30. * u, 4. - 12. * u, 9. * u]
++        })
++        .collect::<Vec<_>>();
++    for degree in [1, 2, 3, 5, 11] {
++        let curve = spline::rebuild(&samples, 16, degree, false).unwrap();
++        assert_eq!(curve.degree, degree);
++        assert_eq!(curve.poles.len(), 16);
++        near(curve.value(0.), [10., 4., 0.], 1e-10);
++        near(curve.value(1.), [40., -8., 9.], 1e-10);
++        for i in 0..=32 {
++            let u = i as f64 / 32.;
++            near(curve.value(u), [10. + 30. * u, 4. - 12. * u, 9. * u], 1e-6);
++        }
++        let (knots, mults) = curve.host_knots();
++        assert_eq!(mults[0], degree + 1);
++        assert_eq!(*mults.last().unwrap(), degree + 1);
++        assert!(
++            knots
++                .windows(3)
++                .all(|k| ((k[1] - k[0]) - (k[2] - k[1])).abs() < 1e-12)
++        );
+     }
+ }
+ #[test]
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\tests\spline_geometry.rs:37:
+ fn om9_curve_009_periodic_rebuild_preserves_a_circle_and_exact_pole_count() {
+-    let samples=(0..=256).map(|i| {let t=std::f64::consts::TAU*i as f64/256.;[5.*t.cos(),5.*t.sin(),2.]}).collect::<Vec<_>>();
+-    let curve=spline::rebuild(&samples,16,3,true).unwrap();
+-    assert_eq!(curve.poles.len(),16);assert!(curve.periodic);
+-    for i in 0..=128 {let p=curve.value(i as f64/128.);assert!((p[0].hypot(p[1])-5.).abs()<0.001);assert!((p[2]-2.).abs()<1e-8);}
+-    let (knots,mults)=curve.host_knots();assert_eq!(knots.len(),17);assert!(mults.iter().all(|&m| m==1));
++    let samples = (0..=256)
++        .map(|i| {
++            let t = std::f64::consts::TAU * i as f64 / 256.;
++            [5. * t.cos(), 5. * t.sin(), 2.]
++        })
++        .collect::<Vec<_>>();
++    let curve = spline::rebuild(&samples, 16, 3, true).unwrap();
++    assert_eq!(curve.poles.len(), 16);
++    assert!(curve.periodic);
++    for i in 0..=128 {
++        let p = curve.value(i as f64 / 128.);
++        assert!((p[0].hypot(p[1]) - 5.).abs() < 0.001);
++        assert!((p[2] - 2.).abs() < 1e-8);
++    }
++    let (knots, mults) = curve.host_knots();
++    assert_eq!(knots.len(), 17);
++    assert!(mults.iter().all(|&m| m == 1));
+ }
+ #[test]
+ fn invalid_geometry_and_options_are_rejected_before_fitting() {
+Diff in \\?\H:\FreeCAD-src\build\om9-dev\rust\tests\spline_geometry.rs:46:
+-    assert!(spline::interpolate(&[[0.;3],[0.;3]],3,Knots::Uniform,false).is_err());
+-    assert!(spline::interpolate(&[[0.;3],[f64::NAN,1.,2.]],3,Knots::Chord,false).is_err());
+-    assert!(spline::rebuild_options(3,3).is_err());assert!(spline::rebuild_options(257,3).is_err());
+-    assert!(spline::rebuild_options(12,12).is_err());
+-    assert!(spline::rebuild(&[[0.;3],[1.;3]],4,3,false).is_err());
++    assert!(spline::interpolate(&[[0.; 3], [0.; 3]], 3, Knots::Uniform, false).is_err());
++    assert!(spline::interpolate(&[[0.; 3], [f64::NAN, 1., 2.]], 3, Knots::Chord, false).is_err());
++    assert!(spline::rebuild_options(3, 3).is_err());
++    assert!(spline::rebuild_options(257, 3).is_err());
++    assert!(spline::rebuild_options(12, 12).is_err());
++    assert!(spline::rebuild(&[[0.; 3], [1.; 3]], 4, 3, false).is_err());
+ }
+ 

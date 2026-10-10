@@ -1,0 +1,97 @@
+{
+  "fixture_sha256": "2ca463b90bf449e57bd53356ce1f357be77e56cdffbdf87d7a312dcc35d879fb",
+  "rhino_version": "5.14.522.8390",
+  "source_report": "H:\\FreeCAD-src\\build\\rhino5-manual-20261007-120314\\application-test-20261007-122618\\results.json",
+  "source_report_sha256": "b7bd09fbe13a888cd37dcb5eeb0079aa35275e87e6c5d99ab980de4a753c4830",
+  "note": "Actual original Rhino5 measurements; duplicate source UUID placements distinguished by physical bounds.",
+  "placements": [
+    {
+      "validity_log": "",
+      "nonmanifold_edges": 0,
+      "name": "Diamond_Marquise",
+      "source_uuid": "8fb04ca0-f109-4111-9f70-e3c5b4492a56",
+      "solid": true,
+      "naked_edges": 0,
+      "valid": true,
+      "faces": 101,
+      "class": "Brep",
+      "volume": -1.257183756390893,
+      "bounds": [
+        -8.099628744867518,
+        0.3956019166463889,
+        6.010430731240258,
+        -6.028769501418955,
+        2.028053736824274,
+        8.010686431633438
+      ],
+      "edges": 184,
+      "area": 7.684017265296742
+    },
+    {
+      "validity_log": "",
+      "nonmanifold_edges": 0,
+      "name": "Diamond_Marquise",
+      "source_uuid": "8fb04ca0-f109-4111-9f70-e3c5b4492a56",
+      "solid": true,
+      "naked_edges": 0,
+      "valid": true,
+      "faces": 101,
+      "class": "Brep",
+      "volume": 1.2571837563099104,
+      "bounds": [
+        -6.236470300919622,
+        -2.1236340144196237,
+        7.885189212202436,
+        -3.8897953381165573,
+        -0.3593564871659431,
+        9.23600284747117
+      ],
+      "edges": 184,
+      "area": 7.6840172652967365
+    },
+    {
+      "validity_log": "",
+      "nonmanifold_edges": 0,
+      "name": "Diamond_Marquise",
+      "source_uuid": "8fb04ca0-f109-4111-9f70-e3c5b4492a56",
+      "solid": true,
+      "naked_edges": 0,
+      "valid": true,
+      "faces": 101,
+      "class": "Brep",
+      "volume": 1.2571837563099104,
+      "bounds": [
+        3.8897953381165573,
+        0.3593564871659431,
+        7.885189212202436,
+        6.236470300919622,
+        2.1236340144196237,
+        9.23600284747117
+      ],
+      "edges": 184,
+      "area": 7.6840172652967365
+    },
+    {
+      "validity_log": "",
+      "nonmanifold_edges": 0,
+      "name": "Diamond_Marquise",
+      "source_uuid": "8fb04ca0-f109-4111-9f70-e3c5b4492a56",
+      "solid": true,
+      "naked_edges": 0,
+      "valid": true,
+      "faces": 101,
+      "class": "Brep",
+      "volume": -1.257183756390893,
+      "bounds": [
+        6.028769501418955,
+        -2.028053736824274,
+        6.010430731240258,
+        8.099628744867518,
+        -0.3956019166463889,
+        8.010686431633438
+      ],
+      "edges": 184,
+      "area": 7.684017265296742
+    }
+  ]
+}

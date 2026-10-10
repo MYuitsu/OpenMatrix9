@@ -2,7 +2,13 @@
 name = "openmatrix9_rust"
 version = "0.1.0"
 edition = "2024"
-license = "LGPL-2.1-or-later"
+
+[workspace]
+
+[dependencies]
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.150"
+sha2 = "=0.10.9"
 
 [lib]
 name = "openmatrix9_rust"

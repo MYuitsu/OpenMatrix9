@@ -10,8 +10,7 @@ def run():
     try:
         import ThreeDm,Part,OpenMatrix9Gui as native
         Gui.activateWorkbench('OpenMatrix9Workbench')
-        fixtures=Path(os.environ.get('OM9_MODELING_FIXTURES','H:/FreeCAD-src/build/3dm-preserve-native/modeling-fixtures'))
-        source=fixtures/'blocks.3dm';cases=[]
+        source=Path('H:/FreeCAD-src/build/3dm-preserve-native/modeling-fixtures/blocks.3dm');cases=[]
         for workers in [1,4]:
             os.environ['OM9_3DM_WORKERS']=str(workers);doc=App.newDocument('WorkingBlocks')
             objects=ThreeDm.import_file(str(source),doc,mode='modeling');rows=[]
@@ -32,16 +31,19 @@ def run():
             App.closeDocument(layout_doc.Name)
         doc=App.newDocument('WorkingFailure');sentinel=doc.addObject('Part::Feature','Sentinel');sentinel.Shape=Part.makeBox(1,2,3);before=[o.Name for o in doc.Objects]
         worker=Path(native.__file__).parent/'OM9ThreeDmImportWorker.exe';hidden=worker.with_suffix('.modeling-test-disabled')
+        failure_worker=Path(os.environ.get('OM9_3DM_FAILURE_WORKER','H:/FreeCAD-src/build/rcore-native/ThreeDmImportFailureWorker.exe'))
+        if not failure_worker.is_file():raise RuntimeError('Missing dedicated failure fixture: '+str(failure_worker))
+        report['failure_worker']={'path':str(failure_worker),'sha256':hashlib.sha256(failure_worker.read_bytes()).hexdigest()}
         def failure_case(replace=False):
             failed=False;worker.rename(hidden);start=time.perf_counter()
             try:
-                if replace:shutil.copyfile(os.environ.get('OM9_MODELING_FAILURE_WORKER',str(fixtures.parent/'ThreeDmImportFailureWorker.exe')),worker)
-                try:ThreeDm.import_file(str(source),doc,mode='modeling')
+                if replace:shutil.copyfile(failure_worker,worker)
+                try:ThreeDm.import_file(str(source),doc,mode='preserve')
                 except RuntimeError:failed=True
             finally:
                 if replace and worker.exists():worker.unlink()
                 hidden.rename(worker)
-            check(('nonzero' if replace else 'missing')+' worker rolls back before document mutation',failed and [o.Name for o in doc.Objects]==before and abs(sentinel.Shape.Volume-6)<1e-9 and time.perf_counter()-start<15)
+            check('preservation '+('nonzero' if replace else 'missing')+' worker rolls back before document mutation',failed and [o.Name for o in doc.Objects]==before and abs(sentinel.Shape.Volume-6)<1e-9 and time.perf_counter()-start<15)
         failure_case();failure_case(True)
         check('failed workers joined before return',not subprocess.run(['tasklist','/FI','IMAGENAME eq OM9ThreeDmImportWorker.exe','/FO','CSV'],capture_output=True,text=True).stdout.count('"OM9ThreeDmImportWorker.exe"'))
         report.update(ok=True,module=native.__file__,cases=cases)

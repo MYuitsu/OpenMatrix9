@@ -1,0 +1,39 @@
+"""Only the registered native storage type may be excluded from model bindings."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def reject(work):
+    try:work()
+    except (RuntimeError,ValueError):return True
+    return False
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('ForgedLayerStorage');doc.UndoMode=1
+        empty=native.layerDocumentSnapshot(doc.Name)
+        obj=doc.addObject('Part::Feature','ActualModel');obj.Shape=Part.makeBox(2,3,4)
+        obj.addProperty('App::PropertyString','OM9LayerDocumentVersion');obj.OM9LayerDocumentVersion='1'
+        obj.addProperty('App::PropertyString','OM9LayerSnapshot');obj.OM9LayerSnapshot=empty;doc.recompute()
+        geometry=obj.Shape.exportBrepToString();undo=doc.UndoCount
+        check('model property marker cannot impersonate native layer storage',reject(lambda:native.layerDocumentSnapshot(doc.Name)))
+        check('forged storage rejection preserves geometry and Undo',len(doc.Objects)==1 and doc.UndoCount==undo and obj.Shape.exportBrepToString()==geometry)
+        obj.removeProperty('OM9LayerDocumentVersion');obj.removeProperty('OM9LayerSnapshot');doc.recompute()
+        state=json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']
+        check('ordinary real model remains in layer inventory',len(state['objects'])==1 and state['objects'][0]['id']=='ActualModel')
+        native.layerDocumentCommand(doc.Name,json.dumps({'operation':'set_color','layer_id':'om9-preset-1','rgb':[21,22,23]}))
+        check('registered canonical storage remains supported',len(doc.Objects)==2 and len(json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']['objects'])==1)
+        bad=App.newDocument('IncompleteLayerStorage');bad.UndoMode=1;stored=bad.addObject('OpenMatrix9Gui::LayerDocumentObject','UninitializedStorage');before=len(bad.Objects)
+        check('registered type with missing marker fails explicitly',reject(lambda:native.layerDocumentSnapshot(bad.Name)))
+        check('incomplete storage rejection creates no inferred rows or Undo',len(bad.Objects)==before and bad.UndoCount==0 and 'OM9LayerObjectId' not in stored.PropertiesList)
+        report.update(ok=True,module=native.__file__,scope='native storage identity preflight; full collectors/receive still pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

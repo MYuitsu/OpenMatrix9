@@ -1,0 +1,74 @@
+"""Same candidate binary: legacy Python binder vs bulk binder, and 1/30%/60% pool."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,time,tempfile,traceback,statistics,importlib.util,hashlib,ctypes
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'runs':[],'mesh_bind':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def memory():
+    class Counters(ctypes.Structure):
+        _fields_=[('cb',ctypes.c_ulong),('PageFaultCount',ctypes.c_ulong)]+[(name,ctypes.c_size_t) for name in ['PeakWorkingSetSize','WorkingSetSize','QuotaPeakPagedPoolUsage','QuotaPagedPoolUsage','QuotaPeakNonPagedPoolUsage','QuotaNonPagedPoolUsage','PagefileUsage','PeakPagefileUsage']]
+    counters=Counters();counters.cb=ctypes.sizeof(counters)
+    kernel=ctypes.WinDLL('kernel32');kernel.GetCurrentProcess.restype=ctypes.c_void_p
+    psapi=ctypes.WinDLL('psapi');psapi.GetProcessMemoryInfo.argtypes=[ctypes.c_void_p,ctypes.c_void_p,ctypes.c_ulong]
+    if not psapi.GetProcessMemoryInfo(kernel.GetCurrentProcess(),ctypes.byref(counters),counters.cb):raise RuntimeError('Cannot measure process memory')
+    return {'working_set_bytes':counters.WorkingSetSize,'process_peak_working_set_bytes':counters.PeakWorkingSetSize}
+def run():
+    try:
+        import OpenMatrix9Gui as native,ThreeDm,Mesh,Part
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        backup=Path('H:/FreeCAD-src/build/clipboard-source-backup-20261009/ThreeDm.py')
+        spec=importlib.util.spec_from_file_location('oldbinder',backup);old=importlib.util.module_from_spec(spec);spec.loader.exec_module(old)
+        doc=App.newDocument('ProfileMesh');mesh=doc.addObject('Mesh::Feature','Mesh')
+        mesh.Mesh=Mesh.Mesh([[(i%200,i//200,0),(i%200+.8,i//200,0),(i%200,i//200+.8,0)] for i in range(20000)])
+        doc.recompute();source=out/'mesh20k.3dm';ThreeDm.export_file(str(source),[mesh]);App.closeDocument(doc.Name)
+        expected=None
+        # Alternating runs reduce order/cache bias; first run of each is warm-up.
+        for i in range(6):
+            for mode,module in [('baseline',old),('candidate',ThreeDm)]:
+                with tempfile.TemporaryDirectory() as staging:
+                    data=json.loads(native.prepareModeling3dm(str(source),staging))
+                    original=module.prepare_modeling if hasattr(module,'prepare_modeling') else None
+                    import ThreeDmModeling
+                    prepare=ThreeDmModeling.prepare_modeling;ThreeDmModeling.prepare_modeling=lambda *args,**kw:data
+                    try:
+                        start=time.perf_counter();prepared=module._prepare_import(source,staging,0,'modeling');elapsed=time.perf_counter()-start
+                    finally:ThreeDmModeling.prepare_modeling=prepare
+                    geometry=prepared[0][1]
+                    signature=sorted(tuple(sorted(tuple(round(v,9) for v in point) for point in [f.Points[0],f.Points[1],f.Points[2]])) for f in geometry.Facets)
+                    if expected is None:expected=signature
+                    check('mesh20k canonical facets '+mode+' '+str(i),signature==expected and geometry.CountFacets==20000)
+                    report['mesh_bind'].append({'mode':mode,'warmup':i==0,'seconds':elapsed})
+        check('bulk Mesh constructor implemented',hasattr(ThreeDm,'_mesh_from_rows'))
+        mixed=ThreeDm._mesh_from_rows({'vertices':[[0,0,0],[1,0,0],[1,1,0],[0,1,0]],'faces':[[0,1,2,3],[0,2,1,1]]})
+        check('quad split and reverse triangle winding',mixed.CountFacets==3 and mixed.Facets[0].Normal.z>0 and mixed.Facets[2].Normal.z<0)
+        ring=Path('C:/Users/nguye/Downloads/nhan oval 11.91x8.37x4.97.3dm');ring_sha=hashlib.sha256(ring.read_bytes()).hexdigest();expected=None;limits=None
+        for mode in ['serial','thirty','sixty']:
+            for i in range(6):
+                with tempfile.TemporaryDirectory() as staging:
+                    if mode=='sixty':os.environ.pop('OM9_MODELING_WORKERS',None)
+                    else:os.environ['OM9_MODELING_WORKERS']=str(1 if mode=='serial' else max(1,int(limits['available']*.3)))
+                    cpu_start=time.process_time();start=time.perf_counter();data=json.loads(native.prepareModeling3dm(str(ring),staging));elapsed=time.perf_counter()-start;cpu_seconds=time.process_time()-cpu_start;limits=data['workers']
+                    signature=[]
+                    for row in data['items']:
+                        shape=Part.Shape();shape.read(row['brep']);box=shape.optimalBoundingBox(False,False)
+                        signature.append((row['name'],row['root_uuid'],tuple(round(v,7) for v in [box.XMin,box.YMin,box.ZMin,box.XMax,box.YMax,box.ZMax]),len(shape.Faces),len(shape.Edges)))
+                    if expected is None:expected=signature
+                    check('ring serial equivalence '+mode+' '+str(i),signature==expected)
+                    report['runs'].append({'mode':mode,'warmup':i==0,'seconds':elapsed,'workers':data['workers'],'timings':data['timings'],'cpu_seconds':cpu_seconds,'cpu_percent_of_available':100*cpu_seconds/elapsed/limits['available'],'memory':memory()})
+        os.environ.pop('OM9_MODELING_WORKERS',None)
+        check('ring immutable source unchanged',hashlib.sha256(ring.read_bytes()).hexdigest()==ring_sha)
+        for field in ['mesh_bind','runs']:
+            report[field+'_summary']={}
+            for mode in sorted({r['mode'] for r in report[field]}):
+                times=[r['seconds'] for r in report[field] if r['mode']==mode and not r['warmup']]
+                report[field+'_summary'][mode]={'median':statistics.median(times),'max':max(times),'runs':len(times)}
+        check('native pool actually overlaps jobs',max(r['workers']['peak'] for r in report['runs'] if r['mode']=='sixty')>1)
+        report.update(ok=True,module=native.__file__,source_sha256=ring_sha)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

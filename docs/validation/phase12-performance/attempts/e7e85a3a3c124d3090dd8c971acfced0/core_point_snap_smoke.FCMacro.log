@@ -1,0 +1,54 @@
+{
+  "checks": [
+    {
+      "name": "OM9-SNAP-007 original Point menu and sidebar registered",
+      "passed": true
+    },
+    {
+      "name": "CMD enables Point independently",
+      "passed": true
+    },
+    {
+      "name": "master off disables Point geometry",
+      "passed": true
+    },
+    {
+      "name": "mouse snaps exact spatial point object",
+      "passed": true
+    },
+    {
+      "name": "Point excludes curve endpoint when point object hidden",
+      "passed": true
+    },
+    {
+      "name": "Point uses object world placement",
+      "passed": true
+    },
+    {
+      "name": "Point compound chooses nearest projected point",
+      "passed": true
+    },
+    {
+      "name": "menu disables Point and sidebar together",
+      "passed": true
+    },
+    {
+      "name": "sidebar mouse restores shared Point mode",
+      "passed": true
+    },
+    {
+      "name": "master off preserves Point mode",
+      "passed": true
+    },
+    {
+      "name": "point snapping creates no geometry selection or Undo",
+      "passed": true
+    },
+    {
+      "name": "Point-only state survives workbench reactivation",
+      "passed": true
+    }
+  ],
+  "ok": true
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\core_point_snap_smoke-1\97e9da3d26744daa85701b2351ea5044

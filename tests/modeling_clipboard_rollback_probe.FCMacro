@@ -1,0 +1,48 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets
+from pathlib import Path
+import json,os,traceback,ctypes,types,sys
+sys.path.insert(0,str(Path(__file__).parent))
+from clipboard_text_support import windows_text
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'probes':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(200,loop.quit);loop.exec()
+def run():
+    try:
+        import ThreeDmClipboard as clip,OpenMatrix9Gui as native
+        payload=Path('H:/FreeCAD-src/build/3dm-preserve-native/modeling-fixtures/mm-current.3dm').read_bytes()
+        _,user,kernel,_=clip._win32()
+        for n in range(20):
+            expected='OM9 rollback probe '+str(n);QtWidgets.QApplication.clipboard().setText(expected);ctypes.WinDLL('ole32').OleFlushClipboard();settle()
+            diagnostic={'iteration':n,'before_sequence':int(user.GetClipboardSequenceNumber()),'initial_text_matches':QtWidgets.QApplication.clipboard().text()==expected}
+            old_ole=ctypes.OleDLL;old_verify=clip._capture_published
+            def captured():
+                diagnostic['published_sequence']=int(user.GetClipboardSequenceNumber())
+                return payload
+            clip._capture_published=captured;ctypes.OleDLL=lambda name:types.SimpleNamespace(OleFlushClipboard=lambda:1)
+            rejected=False
+            try:clip.publish_payload(payload)
+            except RuntimeError as error:rejected='retain' in str(error).lower();diagnostic['failure']=str(error)
+            finally:ctypes.OleDLL=old_ole;clip._capture_published=old_verify
+            restored_text=QtWidgets.QApplication.clipboard().text()
+            diagnostic.update(after_sequence=int(user.GetClipboardSequenceNumber()),restored=restored_text==expected,restored_text_length=len(restored_text),restored_expected_prefix=restored_text.startswith(expected),restored_nul_suffix=restored_text.startswith(expected) and not restored_text[len(expected):].strip('\x00'),native_geometry=clip.has_geometry());report['probes'].append(diagnostic)
+            if user.OpenClipboard(None):
+                try:
+                    handle=user.GetClipboardData(13)
+                    if handle:
+                        size=kernel.GlobalSize(handle);pointer=kernel.GlobalLock(handle)
+                        if pointer:
+                            try:
+                                raw=ctypes.string_at(pointer,min(size,4096));diagnostic['unicode_size']=int(size);diagnostic['native_unicode_matches']=raw.decode('utf-16-le').split('\x00',1)[0]==expected
+                            finally:kernel.GlobalUnlock(handle)
+                finally:user.CloseClipboard()
+            check('controlled persistence failure reported '+str(n),rejected)
+            check('controlled clipboard rollback preserved '+str(n),diagnostic['initial_text_matches'] and windows_text(clip)==expected)
+            settle()
+        report.update(ok=True,module=native.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2));QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

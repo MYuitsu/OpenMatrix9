@@ -1,0 +1,7 @@
+Smoke process 72056 did not finish within 120 seconds; inspect its logs/window.
+At H:\FreeCAD-src\build\om9-dev\tests\run_menu_smoke.ps1:25 char:61
++ ... onds*1000)){throw "Smoke process $($process.Id) did not finish within ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Smoke process 7...ts logs/window.:String) [], RuntimeException
+    + FullyQualifiedErrorId : Smoke process 72056 did not finish within 120 seconds; inspect its logs/window.
+ 

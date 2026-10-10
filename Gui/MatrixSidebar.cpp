@@ -1,10 +1,12 @@
 #include "MatrixSidebar.h"
 #include "RustBridge.h"
-#include "CoreSnaps.h"
-#include "CoreKeyboard.h"
-#include "CoreLayers.h"
-#include <App/Application.h>
-#include <App/Document.h>
+#include "LayerRustAbi.h"
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QColorDialog>
+#include <QMouseEvent>
+#include <stdexcept>
 #include <QMainWindow>
 #include <QScrollArea>
 #include <QToolButton>
@@ -23,13 +25,41 @@
 #include <QVBoxLayout>
 #include <QGridLayout>
 #include <QRegularExpression>
-#include <QColorDialog>
 #include <algorithm>
 #include <limits>
 #include <utility>
-#include <exception>
 
 namespace {
+class ClickableLabel final : public QLabel {
+public:
+    using QLabel::QLabel;
+    std::function<void()> clicked;
+protected:
+    void mouseReleaseEvent(QMouseEvent* event) override {
+        if(isEnabled() && event->button()==Qt::LeftButton && rect().contains(event->pos()) && clicked)clicked();
+        QLabel::mouseReleaseEvent(event);
+    }
+};
+QString defaultLayerFrame() {
+    const std::string id="om9-sidebar-preview";
+    std::uint64_t handle=0;
+    Om9LayerByteView bytes{reinterpret_cast<const unsigned char*>(id.data()),id.size()};
+    if(om9_layer_document_default(bytes,&handle)!=0)throw std::runtime_error("Rust default palette unavailable");
+    struct Owner {std::uint64_t handle;~Owner(){om9_layer_snapshot_free(handle);}} owner{handle};
+    std::size_t size=0;
+    if(om9_layer_document_panel(handle,nullptr,0,&size)!=15)throw std::runtime_error("Rust default panel size failed");
+    std::string json(size,'\0');
+    if(om9_layer_document_panel(handle,reinterpret_cast<unsigned char*>(json.data()),size,&size)!=0)throw std::runtime_error("Rust default panel failed");
+    return QString::fromUtf8(json.data(),int(size));
+}
+QString layerColor(const QJsonObject& row) {
+    const auto rgb=row.value("rgb").toArray();
+    return QColor(rgb.at(0).toInt(),rgb.at(1).toInt(),rgb.at(2).toInt()).name();
+}
+QString quotedPath(const QString& path) {
+    const auto json=QString::fromUtf8(QJsonDocument(QJsonArray{path}).toJson(QJsonDocument::Compact));
+    return json.mid(1,json.size()-2);
+}
 class TitleButton final : public QToolButton {
 public:
     using QToolButton::QToolButton;
@@ -176,7 +206,7 @@ MatrixSidebar::MatrixSidebar(QMainWindow* window,const QString& resourceRoot,Hos
     const QStringList snapLabels={"Perp","Tan","Int","Point","Near","Quad","Cen","Mid","End"};
     const QStringList snapKeys={"ToolsObjectSnapPerpendicularTo","ToolsObjectSnapTangentTo","ToolsObjectSnapIntersection","ToolsObjectSnapPoint","ToolsObjectSnapNear","ToolsObjectSnapQuadrant","ToolsObjectSnapCenter","ToolsObjectSnapMidpoint","ToolsObjectSnapEnd"};
     for(int i=0;i<snapKeys.size();++i)snapFlow->addWidget(iconButton(snapRow,snapKeys[i],"OM9Snap"+snapLabels[i]));
-    auto* osnap=textButton(snapRow,"I",QSize(50,23));osnap->setObjectName("OM9OsnapMaster");osnap->setCheckable(true);osnap->setToolTip("O-Snap On/Off");connect(osnap,&QToolButton::clicked,this,[]{CoreSnaps::submit("Osnap Toggle");});osnap->setStyleSheet("QToolButton{background:#789de9;border:1px solid #c5d7ff;color:#162f54;}QToolButton:checked{background:#b6d584;}");snapFlow->addWidget(osnap);snapsLayout->addWidget(snapRow);
+    auto* osnap=textButton(snapRow,"I",QSize(50,23));osnap->setObjectName("OM9OsnapMaster");osnap->setCheckable(true);osnap->setToolTip("O-Snap On/Off");connect(osnap,&QToolButton::clicked,this,[this]{if(this->host.submitText)this->host.submitText("Osnap Toggle");});osnap->setStyleSheet("QToolButton{background:#789de9;border:1px solid #c5d7ff;color:#162f54;}QToolButton:checked{background:#b6d584;}");snapFlow->addWidget(osnap);snapsLayout->addWidget(snapRow);
     auto* stepRow=new QWidget(snaps);auto* stepFlow=new FlowLayout(stepRow);
     const QStringList stepKeys={"SnapOnSurface","SnapOnPolysurface","SnapBetween","OrthoSnapON","PlanarSnapON","ProjectSnapON"};
     for(int i=0;i<stepKeys.size();++i)stepFlow->addWidget(iconButton(stepRow,stepKeys[i],QString("OM9SnapExtra%1").arg(i)));
@@ -194,30 +224,34 @@ MatrixSidebar::MatrixSidebar(QMainWindow* window,const QString& resourceRoot,Hos
     auto* lights=new QWidget(layers);auto* lightsLayout=new QHBoxLayout(lights);lightsLayout->setContentsMargins(0,0,0,0);lightsLayout->setSpacing(1);auto* lightsLabel=new QLabel("Lights",lights);lightsLabel->setFixedWidth(51);lightsLayout->addWidget(lightsLabel);
     lightsLayout->addWidget(iconButton(lights,"LayerArrow","OM9LightsArrow",QSize(15,15)));auto* lightColor=new QLabel(lights);lightColor->setFixedSize(21,15);lightColor->setStyleSheet("background:white;border:1px solid #bbbbbb;");lightsLayout->addWidget(lightColor);
     lightsLayout->addWidget(iconButton(lights,"LayerLock","OM9LightsLock",QSize(18,15)));lightsLayout->addWidget(iconButton(lights,"LayerVisibility","OM9LightsVisibility",QSize(26,15)));lightsLayout->addStretch();lightsLayout->addWidget(textButton(lights,"Hide ◉",QSize(55,15)));lightsLayout->addWidget(textButton(lights,"Show ◉",QSize(58,15)));layersLayout->addWidget(lights);
+    defaultLayers=defaultLayerFrame();
+    const auto presets=QJsonDocument::fromJson(defaultLayers.toUtf8()).object().value("layers").toArray();
+    auto layerButton=[this](QWidget* parent,const QString& key,const QString& name,const QSize& size,const QString& operation) {
+        auto* button=new QToolButton(parent);button->setObjectName(name);button->setFixedSize(size);button->setIconSize(size);
+        button->setIcon(iconForKey(key,size));button->setEnabled(false);
+        button->setToolTip(operation);button->setCheckable(operation=="Lock" || operation=="Visible");
+        connect(button,&QToolButton::clicked,this,[this,button,operation]{invokeLayer(button,operation);});return button;
+    };
     for(int block=0;block<2;++block){if(block)layersLayout->addWidget(separator(layers));auto* rows=new QWidget(layers);auto* gridLayout=new QGridLayout(rows);gridLayout->setContentsMargins(0,0,0,0);gridLayout->setSpacing(1);
         for(int j=0;j<16;++j){int i=block*16+j;auto* row=new QWidget(rows);auto* rowLayout=new QHBoxLayout(row);rowLayout->setContentsMargins(0,0,0,0);rowLayout->setSpacing(0);
-            auto* label=new QLabel(QString("Layer %1").arg(i+1),row);label->setObjectName(QString("OM9LayerName%1").arg(i));label->setFixedSize(51,15);rowLayout->addWidget(label);
-            const auto layerButton=[this,row,i](const QString& key,const QString& role,const QSize& size){
-                auto* button=new QToolButton(row);button->setObjectName(QString("OM9Layer%1%2").arg(role).arg(i));button->setFixedSize(size);button->setIcon(iconForKey(key,size-QSize(1,1)));button->setIconSize(size-QSize(1,1));button->setCheckable(true);return button;
-            };
-            auto* arrow=layerButton("LayerArrow","Arrow",QSize(15,15));rowLayout->addWidget(arrow);
-            connect(arrow,&QToolButton::clicked,this,[this,i]{CoreLayers::select(i+1);refreshLayers();});
-            auto* swatch=new QToolButton(row);swatch->setObjectName(QString("OM9LayerSwatch%1").arg(i));swatch->setFixedSize(21,15);rowLayout->addWidget(swatch);
-            connect(swatch,&QToolButton::clicked,this,[this,i]{
-                auto* original=App::GetApplication().getActiveDocument();if(!original)return;const std::string uid=original->Uid.getValueStr();
-                try {
-                    const auto s=CoreLayers::state(i+1);const auto chosen=QColorDialog::getColor(QColor::fromRgbF(s.color[0],s.color[1],s.color[2]),this,tr("Layer color"),QColorDialog::DontUseNativeDialog);
-                    auto* current=App::GetApplication().getActiveDocument();
-                    if(chosen.isValid()&&current==original&&current->Uid.getValueStr()==uid)CoreLayers::setColor(i+1,{chosen.redF(),chosen.greenF(),chosen.blueF()});
-                }catch(const std::exception&){}
-                refreshLayers();
-            });
-            auto* lock=layerButton("LayerLock","Lock",QSize(18,15));rowLayout->addWidget(lock);
-            connect(lock,&QToolButton::clicked,this,[this,i]{CoreLayers::toggleLocked(i+1);refreshLayers();});
-            auto* visibility=new QToolButton(row);visibility->setText("I");visibility->setFixedSize(26,15);visibility->setCheckable(true);visibility->setObjectName(QString("OM9LayerVisibility%1").arg(i));rowLayout->addWidget(visibility);
-            connect(visibility,&QToolButton::clicked,this,[this,i]{CoreLayers::toggleVisible(i+1);refreshLayers();});gridLayout->addWidget(row,j%8,j/8);}
+            const auto preset=presets.at(i).toObject();
+            auto* label=new ClickableLabel(preset.value("name").toString(),row);label->setObjectName(QString("OM9LayerName%1").arg(i));label->setFixedSize(51,15);rowLayout->addWidget(label);
+            label->clicked=[this,label]{invokeLayer(label,"Current");};
+            rowLayout->addWidget(layerButton(row,"LayerArrow",QString("OM9LayerArrow%1").arg(i),QSize(15,15),"Assign"));
+            auto* swatch=new ClickableLabel(row);swatch->setObjectName(QString("OM9LayerSwatch%1").arg(i));swatch->setFixedSize(21,15);rowLayout->addWidget(swatch);
+            swatch->clicked=[this,swatch]{invokeLayer(swatch,"Color");};
+            rowLayout->addWidget(layerButton(row,"LayerLock",QString("OM9LayerLock%1").arg(i),QSize(18,15),"Lock"));
+            rowLayout->addWidget(layerButton(row,"LayerVisibility",QString("OM9LayerVisibility%1").arg(i),QSize(26,15),"Visible"));gridLayout->addWidget(row,j%8,j/8);}
         layersLayout->addWidget(rows);}
-    layersLayout->addWidget(separator(layers));layout->addWidget(section(5,"LAYERS",layers));
+    auto* allRow=new QWidget(layers);auto* allLayout=new QHBoxLayout(allRow);allLayout->setContentsMargins(0,1,0,1);allLayout->setSpacing(1);
+    auto* all=new QComboBox(allRow);all->setObjectName("OM9LayerAll");all->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);all->setMinimumContentsLength(10);allLayout->addWidget(all,1);
+    for(const auto& operation:QStringList{"Current","Assign","Lock","Visible","Color"}){
+        auto* button=new QToolButton(allRow);button->setObjectName("OM9LayerAll"+operation);button->setText(operation.left(1));button->setToolTip(operation+" selected layer");button->setFixedSize(20,20);
+        button->setCheckable(operation=="Lock" || operation=="Visible");allLayout->addWidget(button);
+        connect(button,&QToolButton::clicked,this,[this,button,operation]{invokeLayer(button,operation);});
+    }
+    connect(all,&QComboBox::currentIndexChanged,this,[this]{refreshLayers();});
+    layersLayout->addWidget(allRow);layersLayout->addWidget(separator(layers));layout->addWidget(section(5,"LAYERS",layers));
 
     auto* projects=new QWidget(content);auto* projectLayout=new QVBoxLayout(projects);projectLayout->setContentsMargins(1,1,1,1);projectLayout->setSpacing(1);
     auto* mainProjects=new QWidget(projects);auto* mainProjectsLayout=new QHBoxLayout(mainProjects);mainProjectsLayout->setContentsMargins(0,0,0,0);mainProjectsLayout->setSpacing(2);
@@ -302,18 +336,14 @@ void MatrixSidebar::refreshState() {
     populateGrid();populateHistory();refreshAvailability();
 }
 void MatrixSidebar::refreshAvailability() {
-    refreshLayers();
     std::vector<std::size_t> currentHistory;
     for(std::size_t i=0;i<om9_sidebar_history_count();++i)currentHistory.push_back(om9_sidebar_history_command(i));
     if(currentHistory!=renderedHistory)populateHistory();
     for(auto* button:findChildren<QToolButton*>())if(button->property("om9Command").isValid()) {
         const auto command=std::size_t(button->property("om9Command").toULongLong());
         bool enabled=host.available && host.available(command);button->setEnabled(enabled);
-        if(CoreSnaps::handles(command)){
-            const QSignalBlocker blocker(button);button->setCheckable(true);button->setChecked(CoreSnaps::checked(command));
-        }
-        if(QString::fromUtf8(om9_command_id(command))=="Ortho"){
-            const QSignalBlocker blocker(button);button->setCheckable(true);button->setChecked(CoreKeyboard::checked(command));
+        if(host.checked)if(const auto value=host.checked(command)){
+            const QSignalBlocker blocker(button);button->setCheckable(true);button->setChecked(*value);
         }
         button->setToolTip(tooltip(command)+(enabled?QString():QString(" — chưa hỗ trợ hoặc chưa có tài liệu")));
     }
@@ -324,31 +354,63 @@ void MatrixSidebar::refreshAvailability() {
         viewsAvailable|=enabled;
     }
     findChild<QToolButton*>("OM9WorkspaceViews")->setEnabled(viewsAvailable);
+    findChild<QToolButton*>("OM9OsnapMaster")->setEnabled(host.submitText && findChild<QToolButton*>("OM9SnapEnd")->isEnabled());
+    refreshLayers();
+}
+void MatrixSidebar::invokeLayer(QWidget* control,const QString& operation) {
+    if(!control->isEnabled() || !host.submitText)return;
+    QString path=control->property("om9LayerPath").toString();
+    if(path.isEmpty())return;
+    QString input="Layer "+operation+" "+quotedPath(path);
+    if(operation=="Lock" || operation=="Visible")input+=" Toggle";
+    if(operation=="Color") {
+        const auto color=QColorDialog::getColor(QColor(control->property("om9LayerRGB").toString()),this,"Layer color");
+        if(!color.isValid())return;
+        input+=" "+color.name();
+    }
+    host.submitText(input);refreshLayers();
 }
 void MatrixSidebar::refreshLayers() {
-    const bool editable=CoreLayers::available();
-    for(int i=0;i<32;++i) {
-        auto* label=findChild<QLabel*>(QString("OM9LayerName%1").arg(i));
-        auto* arrow=findChild<QToolButton*>(QString("OM9LayerArrow%1").arg(i));
-        auto* lock=findChild<QToolButton*>(QString("OM9LayerLock%1").arg(i));
-        auto* visible=findChild<QToolButton*>(QString("OM9LayerVisibility%1").arg(i));
-        auto* swatch=findChild<QToolButton*>(QString("OM9LayerSwatch%1").arg(i));
-        if(!label||!arrow||!lock||!visible||!swatch)continue;
-        for(auto* button:{arrow,lock,visible,swatch})button->setEnabled(editable);
-        try {
-            const auto s=CoreLayers::state(i+1);label->setText(s.name);
-            label->setStyleSheet(s.active?"font-size:10px;background:#759df0;":"font-size:10px;");
-            const QSignalBlocker a(arrow),l(lock),v(visible);arrow->setChecked(s.active);lock->setChecked(s.locked);visible->setChecked(s.visible);visible->setText(s.visible?"I":"—");
-            arrow->setToolTip(tr("Set active layer for new Circles: %1 (Layer=%2)").arg(s.name).arg(i+1));
-            lock->setToolTip(s.locked?tr("Unlock %1 for new Circles").arg(s.name):tr("Lock %1 against new Circles").arg(s.name));
-            visible->setToolTip(s.visible?tr("Hide %1 and its members").arg(s.name):tr("Show %1 and its members; new Circles inherit visibility").arg(s.name));
-            visible->setStyleSheet(s.visible?"background:#789de9;border:1px solid #c5d7ff;color:#162f54;":"background:#555555;border:1px solid #939393;");
-            swatch->setStyleSheet("QToolButton{background:"+QColor::fromRgbF(s.color[0],s.color[1],s.color[2]).name()+";border:1px solid #bbbbbb;}");
-            swatch->setToolTip(tr("Set %1 color for its OM9 Circle outputs").arg(s.name));
-        }catch(const std::exception& e) {
-            for(auto* button:{arrow,lock,visible,swatch}){button->setEnabled(false);button->setToolTip(QString::fromUtf8(e.what()));}
+    const QString live=host.layerSnapshot?host.layerSnapshot():QString();
+    auto frame=QJsonDocument::fromJson(live.toUtf8()).object();
+    const bool editable=host.submitText && frame.value("editable").toBool();
+    const bool assignable=editable && frame.value("selection_count").toInt()>0;
+    auto rows=frame.value("layers").toArray();
+    if(rows.isEmpty())rows=QJsonDocument::fromJson(defaultLayers.toUtf8()).object().value("layers").toArray();
+    const auto defaults=QJsonDocument::fromJson(defaultLayers.toUtf8()).object().value("layers").toArray();
+    auto apply=[&](QWidget* widget,const QJsonObject& row,bool present,const QString& operation){
+        const auto path=row.value("path").toString();const auto rgb=layerColor(row);
+        widget->setProperty("om9LayerPath",path);widget->setProperty("om9LayerRGB",rgb);
+        widget->setEnabled(present && editable && (operation!="Current" || row.value("can_current").toBool()) && (operation!="Assign" || assignable));
+        widget->setToolTip(path+(row.value("effective_locked").toBool()?" — locked":"")+(!row.value("effective_visible").toBool()?" — hidden":""));
+        if(auto* button=qobject_cast<QToolButton*>(widget)){
+            const QSignalBlocker blocker(button);
+            if(operation=="Lock")button->setChecked(row.value("locked").toBool());
+            if(operation=="Visible")button->setChecked(row.value("visible").toBool());
         }
+        if(auto* label=qobject_cast<QLabel*>(widget)){
+            if(operation=="Color")label->setStyleSheet("background:"+rgb+";border:1px solid #bbbbbb;");
+            if(operation=="Current"){
+                label->setText(row.value("name").toString());label->setStyleSheet(row.value("current").toBool()?"font-size:10px;background:#759df0;":"font-size:10px;");
+            }
+        }
+    };
+    for(int i=0;i<32;++i){QJsonObject row=defaults.at(i).toObject();bool present=false;
+        for(const auto& value:rows){const auto candidate=value.toObject();if(candidate.value("preset_index").toInt(-1)==i){row=candidate;present=true;break;}}
+        for(const auto& pair:std::vector<std::pair<QString,QString>>{{"Name","Current"},{"Arrow","Assign"},{"Swatch","Color"},{"Lock","Lock"},{"Visibility","Visible"}})
+            apply(findChild<QWidget*>(QString("OM9Layer%1%2").arg(pair.first).arg(i)),row,present,pair.second);
     }
+    auto* all=findChild<QComboBox*>("OM9LayerAll");
+    const auto encoded=QString::fromUtf8(QJsonDocument(rows).toJson(QJsonDocument::Compact));
+    if(encoded!=renderedLayers){
+        const auto selected=all->currentData().toString();const QSignalBlocker blocker(all);all->clear();int active=0;
+        for(const auto& value:rows){const auto row=value.toObject();if(row.value("current").toBool())active=all->count();all->addItem(row.value("path").toString(),row.value("path").toString());}
+        const auto old=all->findData(selected);all->setCurrentIndex(old>=0?old:active);renderedLayers=encoded;
+    }
+    all->setEnabled(editable);
+    QJsonObject current;
+    for(const auto& value:rows){const auto row=value.toObject();if(row.value("path").toString()==all->currentData().toString()){current=row;break;}}
+    for(const auto& operation:QStringList{"Current","Assign","Lock","Visible","Color"})apply(findChild<QWidget*>("OM9LayerAll"+operation),current,!current.isEmpty(),operation);
 }
 void MatrixSidebar::activate() {
     if(active)return;active=true;alteredDocks.clear();

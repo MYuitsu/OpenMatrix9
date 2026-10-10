@@ -1,0 +1,50 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import Part,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('SnapCache');doc.UndoMode=1
+        line=doc.addObject('Part::Feature','Line');line.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0))
+        parent=doc.addObject('App::Part','Parent');parent.addObject(line);doc.recompute()
+        view=Gui.activeDocument().activeView();view.viewTop();view.fitAll();Gui.updateGui()
+        initial=json.loads(native.querySnap3dm(0,0,2));height=initial['viewport_height']
+        def query(point,mode=2,per=2048,total=8192):
+            pixel=view.getPointOnScreen(point);return json.loads(native.querySnap3dm(pixel[0],height-pixel[1],mode,64,per,total))
+        first=query(App.Vector(0,0,0));check('native End picks projected CAD endpoint',first['complete'] and first['picked'] and first['point']==[0,0,0])
+        second=query(App.Vector(0,0,0));check('unchanged query reuses screen index',not second['index_rebuilt'])
+        doc.openTransaction('Move');line.Placement.Base=App.Vector(2,0,0);doc.recompute();doc.commitTransaction()
+        moved=query(App.Vector(2,0,0));report['moved_query']=moved
+        check('placement invalidates index and native candidate cache',moved['index_rebuilt'] and moved['picked'] and moved['point']==[2,0,0])
+        doc.undo();undo=query(App.Vector(0,0,0));check('Undo invalidates snap cache',undo['index_rebuilt'] and undo['picked'] and undo['point']==[0,0,0])
+        doc.redo();redo=query(App.Vector(2,0,0));check('Redo invalidates snap cache',redo['index_rebuilt'] and redo['picked'] and redo['point']==[2,0,0])
+        parent.ViewObject.Visibility=False;Gui.updateGui();hidden=query(App.Vector(2,0,0));check('hidden parent excluded',hidden['index_rebuilt'] and hidden['visited_objects']==0 and not hidden['picked'])
+        parent.ViewObject.Visibility=True;Gui.updateGui();shown=query(App.Vector(2,0,0));check('visibility restore invalidates cache',shown['index_rebuilt'] and shown['picked'])
+        camera=view.getCameraOrientation();view.viewAxonometric();Gui.updateGui();changed=query(App.Vector(2,0,0));check('camera invalidates projected index',changed['index_rebuilt'])
+        small=query(App.Vector(2,0,0),14,2);check('combined per-object candidate budget',not small['complete'] and not small['picked'] and len(small['candidates'])<=2)
+        restored=query(App.Vector(2,0,0),14,2048);check('larger budget does not reuse truncated cache',restored['complete'] and restored['picked'])
+        total=query(App.Vector(2,0,0),14,2048,1);check('total budget incomplete not certified',not total['complete'] and not total['picked'] and len(total['candidates'])<=1)
+        check('native allocations obey total cap before output',total['generated_candidates']<=1 and total['visited_topology']<=2)
+        line.Shape=Part.makeLine(App.Vector(1,1,0),App.Vector(7,1,0));doc.recompute()
+        expected_shape=line.getSubObject('').Vertexes[0].Point
+        changed_shape=query(expected_shape);check('Shape edits invalidate native candidate cache',changed_shape['index_rebuilt'] and changed_shape['picked'] and all(abs(a-b)<1e-7 for a,b in zip(changed_shape['point'],list(expected_shape))))
+        source=doc.addObject('Part::Feature','LinkSource');source.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(1,0,0));source.ViewObject.Visibility=False
+        link=doc.addObject('App::Link','Link');link.setLink(source);link.LinkPlacement.Base=App.Vector(3,1,0);doc.recompute()
+        query(App.Vector(3,1,0));source.Shape=Part.makeLine(App.Vector(0.2,0,0),App.Vector(1.2,0,0));doc.recompute()
+        linked=query(App.Vector(3.2,1,0));check('linked source edit invalidates instance candidates',linked['index_rebuilt'] and linked['picked'] and all(abs(a-b)<1e-7 for a,b in zip(linked['point'],[3.2,1,0])))
+        old_name=doc.Name;App.closeDocument(old_name);doc=App.newDocument(old_name);fresh=doc.addObject('Part::Feature','Fresh');fresh.Shape=Part.makeLine(App.Vector(4,1,0),App.Vector(5,1,0));doc.recompute()
+        view=Gui.activeDocument().activeView();view.viewTop();view.fitAll();Gui.updateGui();height=json.loads(native.querySnap3dm(0,0,2))['viewport_height']
+        reopened=query(App.Vector(4,1,0));check('document replacement has no dangling snap rows',reopened['complete'] and reopened['picked'] and reopened['point']==[4,1,0])
+        window=Gui.getMainWindow();window.resize(window.width()+80,window.height()+40);Gui.updateGui()
+        resized=json.loads(native.querySnap3dm(0,0,2));check('viewport resize invalidates projected index',resized['index_rebuilt'] and (resized['viewport_width'],resized['viewport_height'])!=(reopened['viewport_width'],reopened['viewport_height']))
+        report.update(ok=True,module=native.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

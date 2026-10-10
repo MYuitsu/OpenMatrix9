@@ -1,0 +1,417 @@
+[
+  {
+    "path": "Gui/CMakeLists.txt",
+    "candidate_sha256": "967e41ce6d8fbad1417291112301f4bd3db46229960cdbbb6b0ac91a232352fc",
+    "base_sha256": "070da66c729d5004d9e141d25a811ffba6b25a0f222374bf3b90455eed69cbc4"
+  },
+  {
+    "path": "Gui/Command.cpp",
+    "candidate_sha256": "3dbe059768e404b0381a91724167ef5934222d1a5a7439f91b47c0e2ed193c93",
+    "base_sha256": "ba274b74d2116cf983c01ae2464b3ed57edb08fc0711fa41a88e346a15d86feb"
+  },
+  {
+    "path": "Gui/CurveController.cpp",
+    "candidate_sha256": "a4b6ba2c33e703e1f50898f93a0a731fa02e2b21fd35bc8d20a9f47881ac90d7",
+    "base_sha256": "42ca112e0bcf68e9c4e66a652ef602e64b26df2a131b794fd9e81fb9c8fcab8c"
+  },
+  {
+    "path": "Gui/EditController.cpp",
+    "candidate_sha256": "e65f7629f172282cb640f527b12a8ba3a6beb79db5f23a3ab96ff2de5bac8f7a",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/EditController.h",
+    "candidate_sha256": "ab71fa531f1eeb789fe188087fdbc1dbbf0b3791ab3dafd20d0a8b90e0b3edc9",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/EditCurveOptions.cpp",
+    "candidate_sha256": "240521306055ea9082b2d91eeb2a5a16b62d7d8d5bf703ae249169a18764e2be",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/EditGeometry.cpp",
+    "candidate_sha256": "05a5476407fada659ab47c2aaebf8f0f2c114b9048f518b76e8d96fa61d31713",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/EditGeometry.h",
+    "candidate_sha256": "9a5676a045d91c803b99782ba272d1ee1fefbcec3cec296cd8a784526d508217",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/EditMesh.cpp",
+    "candidate_sha256": "1822b0cb0661eeb059c728be0571459e730c15b95cce7509508d1f9ee185ad5d",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/EditSpecialTypes.cpp",
+    "candidate_sha256": "dc7f7acea15cf15859020e521626b52a5926990d76cd51a6adc9930c27f1fe18",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/EditSpecialTypes.h",
+    "candidate_sha256": "58c8f814fabdabc2f1998e22b57781d1192b904d41061f22ea3e8f5535af8b50",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/Phase3Inputs.cpp",
+    "candidate_sha256": "727f1a10a63f3842da9d0454b73fd6134d083d03e1b9da78bb61b4a782725d25",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/Phase3Inputs.h",
+    "candidate_sha256": "1fe8bfe1437994ffbabe18bb1a1a68b636530b0eb4dc5a4f82f2fd59e5e31dc0",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/Phase3RustBridge.h",
+    "candidate_sha256": "e25cadb05ee321aff5a72e1892bcd5fa4a373b01e1b971319a5276443e3ccd3f",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/RustBridge.h",
+    "candidate_sha256": "113d8cd2e4cdfa9efc4bcab44d5fbf6473089b5001147202eaacfa0eee62438f",
+    "base_sha256": "b948defd33e9b5d769b220df052956c139640f5472f1841f42c9caaf3fa19f70"
+  },
+  {
+    "path": "Gui/SurfaceConstraints.cpp",
+    "candidate_sha256": "9ef22ba90aa06937f81895a5343912c57e24acb273698df9252eddcc00994b79",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/SurfaceConstraints.h",
+    "candidate_sha256": "7aa544b5ba6fedef2a0a6108778c78d54f86c5b6553b81c3edc1cbbba89c4ace",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/SurfaceController.cpp",
+    "candidate_sha256": "6338395dc137bc4c80f6206d4b139b4714267364e05e34779858ffc85f2b7bf2",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/SurfaceController.h",
+    "candidate_sha256": "329e5ba2451277a88bf65e2cba4923f40e7037f5b9dcd3f4beb9db961d5d79aa",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/SurfaceGeometry.cpp",
+    "candidate_sha256": "8422944f19f92da01b97dff009db0fd04ee74476a7a584186975dc4c445fb845",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/SurfaceGeometry.h",
+    "candidate_sha256": "26d552de27724675f99a5b51976bb2ef02e68ed04aee60d0d5a50aeec6ac4154",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/SurfaceLoft.cpp",
+    "candidate_sha256": "1695ec73b80bfb68bb5afa32080ec74d1199f611d32b4882cfb65ba9b96b964d",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/SurfaceLoft.h",
+    "candidate_sha256": "777989a119bef4aae37174fd2127608277cad1bc8fb24f5a2dc160101a8f5ad0",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/SurfaceRefit.cpp",
+    "candidate_sha256": "ae8c4efb32cf0420908233d672386b1b9865d6bc30243b3463ff8c1c1b258ac0",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/SurfaceRefit.h",
+    "candidate_sha256": "d1c26937215c773dcc453ce9b1359efcf9a0546fcfda93fe6b2a75a9523f93ad",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/SurfaceSeams.cpp",
+    "candidate_sha256": "ac0cc1b6496ea12d02f859b6a24ee6a632c62a4f771b0b5633e7431d540f5548",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/SurfaceSeams.h",
+    "candidate_sha256": "6b113435a2df2f258c4e37a40a8991c30afa6623639453355416eb4525904917",
+    "base_sha256": null
+  },
+  {
+    "path": "Gui/Workbench.cpp",
+    "candidate_sha256": "a581a6beebee9e9de8fd6461f3b1cc4545f80c91dde716125799ec4ddf28b181",
+    "base_sha256": "8aac52f105eba16eda26b13cb08d461a2cc8364d13c229c20d3607c0ec799518"
+  },
+  {
+    "path": "rust/src/core_3dm.rs",
+    "candidate_sha256": "08701f3fe55c291b51d83fc5dd4774dfedce10489cc5a01bdf4732b08f07cd24",
+    "base_sha256": "8481154ac80f64b345280e31692e274b5691a69e63b72dc028a682194d37269f"
+  },
+  {
+    "path": "rust/src/core_snaps.rs",
+    "candidate_sha256": "ac6b3cde7daf387978e63b2afec5228e2d64e33c6353dee006fe5e4a78d51f5b",
+    "base_sha256": "0b8d0e654fb4097b36e35bfdbe7127291cc9912a7555f01c594a44d66b76083c"
+  },
+  {
+    "path": "rust/src/curve.rs",
+    "candidate_sha256": "7d398cc9b706dd9b5e4fa3a74e751296a769313edba2dfd69fb339719ea7bd40",
+    "base_sha256": "f196430658168e432cbaf99d087b2d058e8fa74bbe5133f91b9ca8e79f0211d4"
+  },
+  {
+    "path": "rust/src/curve_ffi.rs",
+    "candidate_sha256": "9a9e046a12bb7f7defe25641077f055e3b02e3106b226db121c4ea58706a44a6",
+    "base_sha256": "c8dd54371f4b8cb4eb4904981b13f8613f211a484ab79117f28d39ff903f7615"
+  },
+  {
+    "path": "rust/src/edit.rs",
+    "candidate_sha256": "f63b42742a3e81c8b85b065c487a5d28f8672f471e20264aa50fcec04cdc3c7f",
+    "base_sha256": null
+  },
+  {
+    "path": "rust/src/ffi.rs",
+    "candidate_sha256": "0eebc71f8a5e45c4b906473b284cfd35173f4ab135c31d56c7c238c567431a2b",
+    "base_sha256": "c76c7d606761290f3370a43fbf3da499293aa842154b30885036b567a75f1788"
+  },
+  {
+    "path": "rust/src/lib.rs",
+    "candidate_sha256": "70bb932d423beecc592ee45a37db7ca9897ffe5896eb885f779b5560079c0de8",
+    "base_sha256": "7904a422a622730dfb863eabc8e5b56c2e0602d7c5f36e0fce1728ed7b8e221d"
+  },
+  {
+    "path": "rust/src/modeling_exchange.rs",
+    "candidate_sha256": "75b9c10a81a73700ebd6e2324950d80df923ff88f5ca8a56751fd206a51d3104",
+    "base_sha256": "cd82960a0cc5bc23b1135c2b417df7926a5bf8cdc3cc3d63c493d7e68c8fae02"
+  },
+  {
+    "path": "rust/src/phase2_curve.rs",
+    "candidate_sha256": "0ab9a27d853209a91d3fe2fab0e3a9b9da19079bf05edcdf4ad196cb5944f5be",
+    "base_sha256": "01887f488c14d4fa037d2662ef2d4e71e10719450021849b3d378984fc50ee24"
+  },
+  {
+    "path": "rust/src/phase2_ffi.rs",
+    "candidate_sha256": "f5be87030833272059cedd5bbdab98f990f2cbe17e55a85bd6330579877e6800",
+    "base_sha256": "b7fb6c8ee8100b59c121521cee65e90d349d8d47aa0fac4586dff59c762a8325"
+  },
+  {
+    "path": "rust/src/phase2_snap_ffi.rs",
+    "candidate_sha256": "eedea0ab8c78302f7cbd6ef0361b3f5510d20519ffc161fceba1683f5228728d",
+    "base_sha256": "4bd1c1133e009b2d4855676ba106256e5f3b17edd70747b9b6d17425cf68cab6"
+  },
+  {
+    "path": "rust/src/phase3_ffi.rs",
+    "candidate_sha256": "a264459f4d650786a8817b8d49196cb8f0e5a0cfc9fac36d1bb25110d835a5af",
+    "base_sha256": null
+  },
+  {
+    "path": "rust/src/phase3_modeling.rs",
+    "candidate_sha256": "0d5492167723254e2578dc76a769f1ac9dce628c29e78537ffe9a78d343079bd",
+    "base_sha256": null
+  },
+  {
+    "path": "rust/src/spline.rs",
+    "candidate_sha256": "c569d015ce016dafa3bcfd828a3c285a1da80c0ea697c7e79d493bfd22f33e71",
+    "base_sha256": "d51c2e05711a25ff0126588b3d90e0a59f5e8f63edc04254d0ee6505fbf3e40d"
+  },
+  {
+    "path": "rust/src/spline_ffi.rs",
+    "candidate_sha256": "d62a46c4e7879e75414f85de17c12c23fc9ff96ccb1f9027771c40bfc3b42bf6",
+    "base_sha256": "7c24bdfa5717c9c12804ec7b7216f002d9c176fcdb91f0acb3badc1e5d5ab79b"
+  },
+  {
+    "path": "rust/src/surface.rs",
+    "candidate_sha256": "e0e8a20f860ab5774f0db3df52403601627d5fa8b57e1ecdc6f8997708ed3895",
+    "base_sha256": null
+  },
+  {
+    "path": "rust/src/surface_refit.rs",
+    "candidate_sha256": "974fe24a2ea0c49b3104b7f009f5c97e9369c141b57b1fb186d8a6e0c6c54fe7",
+    "base_sha256": null
+  },
+  {
+    "path": "rust/tests/core_3dm.rs",
+    "candidate_sha256": "c098cfca3ffe63e4bdb1736afdfc69fd430f2621c0e7612733a13cd7b0d4e9c3",
+    "base_sha256": "5c7ceeb6a7c9264a033709f5cd79ae0e9666050ff25150028659009e875a3be7"
+  },
+  {
+    "path": "rust/tests/edit_commands.rs",
+    "candidate_sha256": "b05d12b5c726c65a09da96741e1211fcc79d12ce01ade4baa250345f73a51642",
+    "base_sha256": null
+  },
+  {
+    "path": "rust/tests/edit_session.rs",
+    "candidate_sha256": "aef9c6ed576ff5202e29b785ef5bf7c0504c806c56286b066cabb4706f92b00d",
+    "base_sha256": null
+  },
+  {
+    "path": "rust/tests/modeling_exchange_policy.rs",
+    "candidate_sha256": "e87dfe155737ff4d5db3d9e6fdef058e293a759590e646415a7114eb6d26631f",
+    "base_sha256": "fe00c47a71e0a1314fac6abcf595fb1c1e39cfa648947110c3e51352cc958ca2"
+  },
+  {
+    "path": "rust/tests/modeling_snap_policy.rs",
+    "candidate_sha256": "ed928ebb31c88fca067fea884db6375580d42d1c8215b1d7d8d14d3df80e9819",
+    "base_sha256": "a1f7a1d15c465e9183bc49eeb2f2ae02afe64fff0a79a18c0eb7dce8d82b3ff9"
+  },
+  {
+    "path": "rust/tests/phase2_curve_core.rs",
+    "candidate_sha256": "fd18a1b590541333b0f0145e4c7f99247c6f3f53d2b44ee6fb940c067d3bcca0",
+    "base_sha256": "2ec4904744c66e6cc5c470c209497481708a0e827c460ce05f82c030b957cda2"
+  },
+  {
+    "path": "rust/tests/phase2_ffi_contract.rs",
+    "candidate_sha256": "4ff49fddcfad29eeb6ff23d53321bb49ff889fc2f171fc8d832e3953adc849f9",
+    "base_sha256": "67b930c1e436a71af0be24b7979cda9a9e80e90b7ea8ec8d5f6cb6c610e0c36a"
+  },
+  {
+    "path": "rust/tests/phase2_snap_core.rs",
+    "candidate_sha256": "05268f37b3db88f0de195b0478cd8cc63843c517644fc3b581a88b59055ebcae",
+    "base_sha256": "2698cf5a98c0fceb41f47b1b920a1c1c7d50ef71257a14b5e1224ba234f80ea0"
+  },
+  {
+    "path": "rust/tests/phase3_ffi.rs",
+    "candidate_sha256": "f6218161c7c3ea55403dd911f5a75217d97fd5839186c420dd7d496f3a971e2a",
+    "base_sha256": null
+  },
+  {
+    "path": "rust/tests/phase3_modeling.rs",
+    "candidate_sha256": "d9d1f2bef310cdd6b4d87959142c8cf1694d75024a83d717844ffdd03dcb1035",
+    "base_sha256": null
+  },
+  {
+    "path": "rust/tests/spline_geometry.rs",
+    "candidate_sha256": "acc7693da13d7e37329f129a28a6c378c7d847922212b9540ceaab7929a1d6fc",
+    "base_sha256": "1bfc4962ed25a820e49f6beb5221006ce0383a439966978431353810c96f6609"
+  },
+  {
+    "path": "rust/tests/surface_commands.rs",
+    "candidate_sha256": "55d39496fe8fce015efc70355f2943b7cdd45dd701ad60739ba491829825d81d",
+    "base_sha256": null
+  },
+  {
+    "path": "rust/tests/surface_refit.rs",
+    "candidate_sha256": "4eb5317d0906e99be6aba147c84d15922369ba778da514cff75c45bf77e43158",
+    "base_sha256": null
+  },
+  {
+    "path": "rust/tests/surface_session.rs",
+    "candidate_sha256": "85b454e82527121b8e11a33548287a4df476bdf2753369ed4d8491927d831392",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/clipboard_text_support.py",
+    "candidate_sha256": "2d38fc05d655c8832d4879e53b59fa72649318e3e8a12efee5eca2b23739d212",
+    "base_sha256": "ff8ca2b4d00f9be36c5198508e2d589adcbe5b313b51a33174deebf37545abaa"
+  },
+  {
+    "path": "tests/modeling_brep_smoke.FCMacro",
+    "candidate_sha256": "01b39471f5062e6d6f73fe76eea64e670255baf4b1d0cab1e908388f2ec3a83c",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/modeling_clipboard_saved_reimport.FCMacro",
+    "candidate_sha256": "be4e4a9c6826989d63ac764ea70ee44962194b4ea62905f978898e2b13cfe3c5",
+    "base_sha256": "9a4d4e539b427bf4419da38b156d2950f37cfbdbddd5d60fcea6cbd889cc7188"
+  },
+  {
+    "path": "tests/modeling_phase3_clipboard_roundtrip.FCMacro",
+    "candidate_sha256": "ef450db8c43f9d26eb834f29c007572899a7270416a8b743458d5ef380aa37ef",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/modeling_phase3_lifecycle_smoke.FCMacro",
+    "candidate_sha256": "bafacb2e05c4d3288b6dfe7942e227d2ec6528e9126e6e07851b34c236af6a3d",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/modeling_phase3_rhino_reimport.FCMacro",
+    "candidate_sha256": "d00963d5e1c0dc6897e1dc611cff1e35c2b424aeae027b605e36dedb1f8484c4",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/modeling_phase3_saved_reopen.FCMacro",
+    "candidate_sha256": "2e95785c10023822951d933ffaabf303f6145ca8cb30a978a88b716317d287a2",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/modeling_phase3_singular_smoke.FCMacro",
+    "candidate_sha256": "a4ff267b2099d9c663e0b4824ebeef13bc2e6bdc949a7d7cb2644d95927a15f5",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/modeling_ring_workflow_smoke.FCMacro",
+    "candidate_sha256": "61d3c15ce90bbf08b6388da2cc4ec32ba76f27a062f6808e099cb7eee89640d0",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/modeling_surface_edit_smoke.FCMacro",
+    "candidate_sha256": "0bf53c37d9eac5cd88d57f9c304e154a7c3341ad38d41e26d48b25d2eb129d38",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/native/CMakeLists.txt",
+    "candidate_sha256": "48e8bf274b277e0a3f4cb47957dc7753b8176bf93b42fab84dbbae95388effaa",
+    "base_sha256": "3d39892e27315beef6fe2eabd25418d3f0b77c7c5df1151511904e942ff74aa1"
+  },
+  {
+    "path": "tests/native/phase3_rust_abi.cpp",
+    "candidate_sha256": "a7eef63afe4dc108005bff45043e9fcc0783b80b149773bec99bfab965f482cc",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/native/three_dm_modeling_brep.cpp",
+    "candidate_sha256": "8ea272d665f8c25b7879192f10be35adf118cd13d1de00c97753aadc41dce737",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/phase3_oracle.py",
+    "candidate_sha256": "be4f5ca62ef6780cc41bea46bd93051a426b1f99fa3f5959018706d1eeb1f111",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/rhino5_phase3_clipboard_bootstrap.py",
+    "candidate_sha256": "3d2cbda86fef56bbb0d8502339bd5d20038d6fab0dc3a2a1ea1442cd458513b6",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/rhino5_phase3_clipboard_user.py",
+    "candidate_sha256": "edb228f3c50d372ac2d3a16db9e21eefc7e70cba3354a264f198381debd71624",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/rhino5_phase3_roundtrip.py",
+    "candidate_sha256": "6e83ab5ba30f2ce881b33dd6c420bc5b87198a3245d36e0fd07b43df0dac992a",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/rhino5_verify_phase3.py",
+    "candidate_sha256": "0880ee8923401ca693c63aac20acf94e4def34fcf7fe5c13be960a716caec176",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/run_menu_smoke.ps1",
+    "candidate_sha256": "12868e3caf31ec101fa0ed0e4f2e34204e834ab7ff0c936f163bbb257d21ccb7",
+    "base_sha256": "061c7a363c954cd397c1ee60b9a4db5886800883724eb6d2e2b033b37c84e870"
+  },
+  {
+    "path": "tests/run_modeling_phase.ps1",
+    "candidate_sha256": "e2e39242451c1ec19030cb2dfdfdc6f1f3aca4e633bd84e7a941f9c4857895ff",
+    "base_sha256": "137dd1ff99bfa575903f53d54598b442bca08793bea67a5d573bde789bc2f799"
+  },
+  {
+    "path": "tests/run_rhino5_phase3_clipboard.ps1",
+    "candidate_sha256": "47d6142b5dd3bc358533753887458951b42d0743d4dba8bc84e8c530592feccd",
+    "base_sha256": null
+  },
+  {
+    "path": "tests/run_rhino5_phase3_verify.ps1",
+    "candidate_sha256": "88c796ee0ae7a416be253ac1bb953a037ed34b224898013b24d14c2e1daa2a96",
+    "base_sha256": null
+  },
+  {
+    "path": "tools/phase3_evidence.py",
+    "candidate_sha256": "9c5fa8a5ea2b88619a40a97fa68085c7a7bbfc7d71e9665b2ba6b18dbbc89700",
+    "base_sha256": null
+  },
+  {
+    "path": "tools/tests/test_clipboard_text_retry.py",
+    "candidate_sha256": "43368abba106049a4a2fbe03537ee4a3825e548dd7fc1f2c1c09ce65d49295e8",
+    "base_sha256": null
+  }
+]

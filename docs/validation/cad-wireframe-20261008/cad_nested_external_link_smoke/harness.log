@@ -1,0 +1,43 @@
+{
+    "checks":  [
+                   {
+                       "name":  "foreign container child receives isocurves",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "nested external link contains isocurves",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "foreign model geometry unchanged",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "container and forwarding links restore source override",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "all foreign transient nodes removed",
+                       "passed":  true
+                   }
+               ],
+    "switches_before":  [
+                            1,
+                            0,
+                            -1,
+                            0,
+                            -1,
+                            -1
+                        ],
+    "switches_after":  [
+                           1,
+                           0,
+                           -1,
+                           0,
+                           -1,
+                           -1
+                       ],
+    "ok":  true
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\cad_nested_external_link_smoke-1\6ada6a8facd64849ab448e5c959186d5
+

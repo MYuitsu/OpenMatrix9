@@ -1,0 +1,35 @@
+{
+  "checks": [
+    {
+      "name": "native Rebuild uses Rust-owned options and session",
+      "passed": true
+    },
+    {
+      "name": "Qt Rebuild has independent Rust session and default DeleteInput",
+      "passed": true
+    },
+    {
+      "name": "native preview measures whole-chain without Python Part",
+      "passed": true
+    },
+    {
+      "name": "Rust decision and native commit retain full curve endpoints",
+      "passed": true
+    },
+    {
+      "name": "native Rebuild Undo restores original input",
+      "passed": true
+    },
+    {
+      "name": "Rust dependent DeleteInput guard rejects atomically",
+      "passed": true
+    },
+    {
+      "name": "Rust DeleteInput No permits independent output and keeps links",
+      "passed": true
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_rust_rebuild_ownership_smoke-1\92c1a1af879c44c7a49f0f4a4298c81a

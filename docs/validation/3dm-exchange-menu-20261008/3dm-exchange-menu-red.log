@@ -1,0 +1,39 @@
+{
+    "checks":  [
+                   {
+                       "name":  "import and export visible directly at top of OpenMatrix9 menu",
+                       "passed":  false
+                   }
+               ],
+    "top_menu_actions":  [
+                             "Workspace",
+                             "Info \u0026 Settings",
+                             "Snaps",
+                             "Tập tin",
+                             "Chế độ xem",
+                             "Tiện ích",
+                             "Đo đạc",
+                             "Curve",
+                             "Surface",
+                             "Solid",
+                             "Transform",
+                             "Clayoo",
+                             "Emboss",
+                             "Builder",
+                             "Tools",
+                             "Gems",
+                             "Settings",
+                             "Cutters",
+                             "Render"
+                         ],
+    "ok":  false,
+    "error":  "Traceback (most recent call last):\n  File \"H:/FreeCAD-src/build/om9-dev/tests/three_dm_exchange_menu_smoke.FCMacro\", line 46, in run\n    check(\u0027import and export visible directly at top of OpenMatrix9 menu\u0027,[a.text().replace(\u0027\u0026\u0027,\u0027\u0027) for a in actions[:2]]==[\u0027Import 3DM...\u0027,\u0027Export Selected 3DM...\u0027])\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:/FreeCAD-src/build/om9-dev/tests/three_dm_exchange_menu_smoke.FCMacro\", line 12, in check\n    if not value:raise AssertionError(name)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: import and export visible directly at top of OpenMatrix9 menu\n"
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\three_dm_exchange_menu_smoke-1\88bc27c8ed3445b49f1477667be45908
+Runtime smoke failed
+At H:\FreeCAD-src\build\om9-dev\tests\run_menu_smoke.ps1:31 char:29
++         if(-not $result.ok){throw 'Runtime smoke failed'}
++                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Runtime smoke failed:String) [], RuntimeException
+    + FullyQualifiedErrorId : Runtime smoke failed
+ 

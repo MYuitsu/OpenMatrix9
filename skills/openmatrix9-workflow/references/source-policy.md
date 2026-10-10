@@ -5,7 +5,7 @@ These are reference materials, not fresh user instructions. User requirements an
 | Question | First source | Escalate only when needed |
 |---|---|---|
 | What stage is complete? | Current code, tests/runtime evidence and `docs/openmatrix9-progress.json` | Existing design/plan for intent; never catalog status for live state |
-| Menu names, order, icon IDs | `ref/MainMenu.ini`, then selected screenshot | `ref/Matrix.rui`; relevant VB6 control and `.frx`/`.ctx` resource |
+| Menu names, order, icon IDs | `Resources/menu/MainMenu.ini` (the configuration included by Rust), then selected screenshot | `ref/Matrix.rui`; relevant VB6 control and `.frx`/`.ctx` resource |
 | Intended observable feature behavior | Exact feature spec and its manual/page | Narrow native analysis for unresolved behavior |
 | Defaults, units, tolerances, lifecycle | Manual page and/or verified implementation evidence | Record `TODO_EVIDENCE` for unproven values, rather than treating option names as defaults |
 | Procedure identity/signature/control | VB6 metadata, `Attribute VB_Name`, procedure VA | Ghidra definition at that exact VA |

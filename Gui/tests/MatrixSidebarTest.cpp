@@ -7,12 +7,53 @@
 #include <QFrame>
 #include <QSettings>
 #include <QMenu>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 #include "MatrixSidebar.h"
 #include "RustBridge.h"
+#include "LayerRustAbi.h"
 using namespace OpenMatrix9Gui;
 class MatrixSidebarTest : public QObject {
     Q_OBJECT
 private slots:
+    void liveLayerRowsUseRustPaletteAndDispatchFullPaths() {
+        const QByteArray id="sidebar-test";
+        std::uint64_t snapshot=0;
+        QCOMPARE(om9_layer_document_default({reinterpret_cast<const unsigned char*>(id.data()),std::size_t(id.size())},&snapshot),0U);
+        std::size_t size=0;QCOMPARE(om9_layer_snapshot_json(snapshot,nullptr,0,&size),15U);
+        QByteArray data(int(size),Qt::Uninitialized);
+        QCOMPARE(om9_layer_snapshot_json(snapshot,reinterpret_cast<unsigned char*>(data.data()),size,&size),0U);
+        QCOMPARE(om9_layer_snapshot_free(snapshot),0U);
+        auto envelope=QJsonDocument::fromJson(data).object();auto state=envelope.value("snapshot").toObject();
+        auto layers=state.value("layers").toArray();auto first=layers.at(0).toObject();first.insert("rgb",QJsonArray{201,202,203});layers[0]=first;
+        auto custom=first;custom.insert("source_id","custom");custom.insert("name","Custom");custom.insert("path_components",QJsonArray{"Custom"});layers.append(custom);
+        auto other=custom;other.insert("source_id","other");other.insert("name","Other");other.insert("path_components",QJsonArray{"Other"});layers.append(other);
+        state.insert("layers",layers);envelope.insert("snapshot",state);data=QJsonDocument(envelope).toJson(QJsonDocument::Compact);
+        QCOMPARE(om9_layer_snapshot_from_json({reinterpret_cast<const unsigned char*>(data.data()),std::size_t(data.size())},&snapshot),0U);
+        QCOMPARE(om9_layer_document_panel(snapshot,nullptr,0,&size),15U);data.resize(int(size));
+        QCOMPARE(om9_layer_document_panel(snapshot,reinterpret_cast<unsigned char*>(data.data()),size,&size),0U);
+        QCOMPARE(om9_layer_snapshot_free(snapshot),0U);
+        auto frame=QJsonDocument::fromJson(data).object();frame.insert("editable",true);frame.insert("selection_count",2);
+        QString sent;
+        QMainWindow window;MatrixSidebar sidebar(&window,QStringLiteral(OM9_RESOURCE_DIR),
+            {{},{},{},[&](const QString& text){sent=text;return true;},[&]{return QString::fromUtf8(QJsonDocument(frame).toJson(QJsonDocument::Compact));}});
+        auto* swatch=sidebar.findChild<QLabel*>("OM9LayerSwatch0");QVERIFY(swatch);QCOMPARE(swatch->property("om9LayerRGB").toString(),QString("#c9cacb"));
+        auto* lock=sidebar.findChild<QToolButton*>("OM9LayerLock0");QVERIFY(lock->isEnabled());lock->click();QCOMPARE(sent,QString("Layer Lock \"Metal 01\" Toggle"));
+        auto* assign=sidebar.findChild<QToolButton*>("OM9LayerArrow4");QVERIFY(assign->isEnabled());assign->click();QCOMPARE(sent,QString("Layer Assign \"Gem 01\""));
+        auto* combo=sidebar.findChild<QComboBox*>("OM9LayerAll");QCOMPARE(combo->count(),34);
+        combo->setCurrentIndex(combo->findData("Other"));sidebar.findChild<QToolButton*>("OM9LayerAllCurrent")->click();QCOMPARE(sent,QString("Layer Current \"Other\""));
+        frame.insert("editable",false);sidebar.refreshAvailability();QVERIFY(!lock->isEnabled());QVERIFY(!assign->isEnabled());
+        auto* label=sidebar.findChild<QLabel*>("OM9LayerName0");QVERIFY(!label->isEnabled());
+        const auto before=sent;lock->click();QCOMPARE(sent,before);
+    }
+    void checkedHostStatesAndOsnapDispatchAreInjected() {
+        QMainWindow window;QString sent;
+        MatrixSidebar sidebar(&window,QStringLiteral(OM9_RESOURCE_DIR),
+            {[](std::size_t){return true;},{},[](std::size_t)->std::optional<bool>{return true;},[&](const QString& text){sent=text;return true;},{}});
+        auto* snap=sidebar.findChild<QToolButton*>("OM9SnapEnd");QVERIFY(snap->isCheckable());QVERIFY(snap->isChecked());
+        sidebar.findChild<QToolButton*>("OM9OsnapMaster")->click();QCOMPARE(sent,QString("Osnap Toggle"));
+    }
     void workspaceControlsDispatchAndRefreshAvailability() {
         QMainWindow window; bool available=false;std::size_t executed=std::size_t(-1);
         MatrixSidebar sidebar(&window,QStringLiteral(OM9_RESOURCE_DIR),

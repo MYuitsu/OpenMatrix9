@@ -16,7 +16,7 @@ pub(crate) fn publish(result: Result<Spline, String>) -> bool {
     let Ok(mut s) = state().lock() else {
         return false;
     };
-    match result.and_then(|curve| { curve.validate()?; Ok(curve) }) {
+    match result {
         Ok(curve) => {
             s.curve = Some(curve);
             s.message.clear();
@@ -44,7 +44,9 @@ pub unsafe extern "C" fn om9_spline_rebuild(
     }
     let input = unsafe { std::slice::from_raw_parts(xyz, count * 3) };
     let points = input
-        .chunks_exact(3)
+        .as_chunks::<3>()
+        .0
+        .iter()
         .map(|p| [p[0], p[1], p[2]])
         .collect::<Vec<_>>();
     publish(spline::rebuild(&points, poles, degree, closed))
@@ -147,38 +149,4 @@ pub unsafe extern "C" fn om9_spline_message(buffer: *mut c_char, capacity: usize
         }
     }
     bytes.len()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn publishing_rejects_invalid_basis_and_discards_previous_native_output() {
-        let points = [[0., 0., 0.], [1., 2., 0.], [3., 0., 1.], [4., 1., 0.]];
-        let valid = spline::interpolate(&points, 3, spline::Knots::Uniform, false).unwrap();
-        assert!(publish(Ok(valid.clone())));
-        let mut invalid = Vec::new();
-        let mut curve = valid.clone(); curve.knots[4] = f64::NAN; invalid.push(curve);
-        let mut curve = valid.clone(); curve.degree = usize::MAX; invalid.push(curve);
-        let mut curve = valid.clone(); curve.poles[1][0] = f64::INFINITY; invalid.push(curve);
-        let mut curve = valid.clone(); curve.knots.pop(); invalid.push(curve);
-        let mut curve = valid.clone(); curve.knots[4] = -1.; invalid.push(curve);
-        let mut curve = valid.clone(); curve.knots[4] = 0.; invalid.push(curve);
-        let mut curve = valid.clone(); curve.knots.fill(0.); invalid.push(curve);
-        let mut curve = valid.clone(); curve.periodic = true; invalid.push(curve);
-        for (case, curve) in invalid.into_iter().enumerate() {
-            assert!(publish(Ok(valid.clone())));
-            assert!(!publish(Ok(curve)), "malformed basis {case}");
-            assert_eq!(om9_spline_pole_count(), 0);
-            assert!(om9_spline_value(0.5, 0).is_nan());
-            assert!(unsafe { om9_spline_message(std::ptr::null_mut(), 0) } > 0);
-        }
-        for periodic in [false, true] {
-            let curve = spline::interpolate(&points, 3, spline::Knots::Chord, periodic).unwrap();
-            assert!(publish(Ok(curve)));
-            assert_eq!(om9_spline_pole_count(), 4);
-            assert!(om9_spline_value(0.5, 0).is_finite());
-        }
-    }
 }

@@ -1,0 +1,99 @@
+"""Redistributable torus: CAD snap, new cutter, actual Difference/Loft, Undo/Redo."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtTest
+from pathlib import Path
+import os,json,traceback,math,hashlib,tempfile,sys,time
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input
+from phase3_oracle import measure
+from phase3_ring_expectations import expected_ring,matches
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);(out/'temp').mkdir(exist_ok=True);tempfile.tempdir=str(out/'temp')
+report={'checks':[],'command_timings':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    (out/'progress.json').write_text(json.dumps(report,indent=2))
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(200,loop.quit);loop.exec()
+    QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def enter(text=''):
+    f=command_input(Gui.getMainWindow());f.setText(text);QtTest.QTest.keyClick(f,QtCore.Qt.Key_Return);settle()
+def select(objects):
+    Gui.Selection.clearSelection()
+    for o in objects:Gui.Selection.addSelection(o)
+    settle()
+def accept(name):
+    d=next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,name) if d.isVisible()),None)
+    check(name+' available',d is not None)
+    ok=d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok)
+    check(name+' valid preview',ok.isEnabled());start=time.perf_counter();ok.click();settle()
+    report['command_timings'].append({'operation':name+' commit','seconds':time.perf_counter()-start,'scope':'native commit plus 200ms UI settle'})
+def metrics(shape,path):
+    m=measure(shape,path);b=shape.optimalBoundingBox(False,False)
+    return dict(m,bounds=[b.XMin,b.YMin,b.ZMin,b.XMax,b.YMax,b.ZMax],valid=shape.isValid(),solids=len(shape.Solids),faces=len(shape.Faces))
+def run():
+    try:
+        import ThreeDm,Part,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('Phase3Ring');doc.UndoMode=1
+        source=Path('H:/FreeCAD-src/build/om9-phase3-native/modeling-brep-fixtures/torus.3dm')
+        copy=out/'independent-ring-source.3dm';copy.write_bytes(source.read_bytes());ring=ThreeDm.import_file(str(copy),doc,mode='modeling')[0]
+        check('independent ring imports native editable CAD',ring.OM9Representation=='native-cad' and ring.Shape.isValid() and len(ring.Shape.Solids)==1)
+        view=Gui.activeDocument().activeView();view.viewTop();view.fitAll();Gui.updateGui();settle()
+        vertex=ring.Shape.Vertexes[0].Point;pixel=view.getPointOnScreen(vertex);height=json.loads(native.querySnap3dm(0,0,2))['viewport_height']
+        snap=json.loads(native.querySnap3dm(pixel[0],height-pixel[1],2,64,2048,8192));report['snap']=snap
+        check('actual native CAD snap on imported ring',snap['complete'] and snap['picked'] and (App.Vector(*snap['point'])-vertex).Length<1e-7)
+        p=App.Vector(*snap['point']);check('independent torus seam location',abs(p.x-12)<1e-6 and abs(p.y)<1e-6 and abs(p.z)<1e-6)
+        Gui.Selection.clearSelection();enter('Line');enter(','.join(str(x) for x in snap['point']));enter('12,0,5')
+        guide=next(o for o in doc.Objects if o.Name.startswith('Line'))
+        check('new Line uses exact CAD snap coordinates',any((v.Point-p).Length<1e-7 for v in guide.Shape.Vertexes))
+        guide_name=guide.Name;doc.undo();check('Line Undo',doc.getObject(guide_name) is None);doc.redo();check('Line Redo',doc.getObject(guide_name) is not None)
+        Gui.getMainWindow().show();Gui.getMainWindow().resize(1500,1000);settle()
+        Gui.activateWorkbench('PartWorkbench');Gui.runCommand('Part_Primitives');settle()
+        report['primitive_widgets']=[{'name':w.objectName(),'class':w.metaObject().className(),'visible':w.isVisible()} for w in Gui.getMainWindow().findChildren(QtWidgets.QWidget) if 'rimitive' in w.objectName() or 'boxLength' in w.objectName()]
+        combo=Gui.getMainWindow().findChild(QtWidgets.QComboBox,'PrimitiveTypeCB');check('actual native primitive task panel opened',combo is not None)
+        combo.setCurrentIndex(combo.findText('Box'));QtCore.QMetaObject.invokeMethod(combo,'activated',QtCore.Q_ARG(int,combo.currentIndex()));settle()
+        for name,value in [('boxLength',28),('boxWidth',14),('boxHeight',6),('XPositionQSB',p.x-26),('YPositionQSB',p.y),('ZPositionQSB',p.z-3)]:
+            widget=Gui.getMainWindow().findChild(QtWidgets.QWidget,name);check('native primitive field '+name,widget is not None and widget.isVisible())
+            check('native primitive numeric entry '+name,widget.setProperty('rawValue',value));settle()
+        buttonbox=next(b for b in Gui.getMainWindow().findChildren(QtWidgets.QDialogButtonBox) if b.isVisible() and b.button(QtWidgets.QDialogButtonBox.Ok) and 'reate' in b.button(QtWidgets.QDialogButtonBox.Ok).text())
+        start=time.perf_counter();buttonbox.button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        report['command_timings'].append({'operation':'Part_Primitives Box Create','seconds':time.perf_counter()-start,'scope':'native command plus 200ms UI settle'})
+        buttonbox.button(QtWidgets.QDialogButtonBox.Close).click();settle();Gui.activateWorkbench('OpenMatrix9Workbench');settle()
+        report['primitive_objects']=[{'name':o.Name,'type':o.TypeId,'volume':o.Shape.Volume if o.isDerivedFrom('Part::Feature') else None} for o in doc.Objects]
+        cutter=next(o for o in doc.Objects if o.TypeId=='Part::Box');cutter_name=cutter.Name
+        check('cutter constructed by actual native primitive command',cutter.TypeId=='Part::Box' and abs(cutter.Shape.Volume-2352)<1e-6)
+        b=cutter.Shape.BoundBox
+        check('native cutter uses snap based placement and dimensions',max(abs(x-y) for x,y in zip([b.XMin,b.YMin,b.ZMin,b.XMax,b.YMax,b.ZMax],[-14,0,-3,14,14,3]))<1e-6)
+        doc.undo();check('new cutter Undo',doc.getObject(cutter_name) is None);doc.redo();cutter=doc.getObject(cutter_name);check('new cutter Redo',cutter.Shape.isValid())
+        select([ring]);enter('BooleanDifference');enter();enter(cutter.Name);enter();accept('OM9EditOptions')
+        cut=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SOLID-001');cut_name=cut.Name
+        cut_metrics=metrics(cut.Shape,out/'cut.brep');report['cut']=cut_metrics
+        check('half torus independent analytic material',matches(cut_metrics,expected_ring()[0]))
+        check('Difference keeps independently specified negative Y region',cut.Shape.isInside(App.Vector(0,-10,0),1e-7,True) and not cut.Shape.isInside(App.Vector(0,10,0),1e-7,True))
+        doc.undo();check('Difference Undo restores imported ring',doc.getObject(cut_name) is None and any(getattr(o,'OM9WorkingUUID','') for o in doc.Objects))
+        doc.redo();cut=doc.getObject(cut_name);check('Difference Redo material',abs(metrics(cut.Shape,out/'cut-redo.brep')['volume']-40*math.pi*math.pi)<1e-5)
+        profile_source=App.newDocument('DetailSource');o=profile_source.addObject('Part::Feature','ImportedDetailProfile');o.Shape=Part.makeLine(App.Vector(0,-10,0),App.Vector(2,-10,0));profile_source.recompute()
+        profile_file=out/'detail-profile-source.3dm';ThreeDm.export_file(str(profile_file),[o],modeling=True);App.closeDocument(profile_source.Name);App.setActiveDocument(doc.Name)
+        imported=ThreeDm.import_file(str(profile_file),doc,mode='modeling')[0]
+        check('detail consumes imported native CAD profile',imported.OM9Representation=='native-cad' and abs(imported.Shape.Length-2)<1e-7)
+        prior_names={o.Name for o in doc.Objects};Gui.Selection.clearSelection();enter('Line');enter('0,-10,3');enter('2,-10,3')
+        drawn=next(o for o in doc.Objects if o.Name not in prior_names and o.isDerivedFrom('Part::Feature'));drawn_name=drawn.Name
+        check('detail consumes newly drawn CMD profile',abs(drawn.Shape.Length-2)<1e-7)
+        doc.undo();check('drawn detail profile Undo',doc.getObject(drawn_name) is None);doc.redo();drawn=doc.getObject(drawn_name)
+        check('drawn detail profile Redo',drawn.Shape.isValid());profiles=[imported,drawn]
+        select(profiles);enter('Loft');enter();accept('OM9SurfaceOptions')
+        detail=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SURFACE-009');detail_name=detail.Name
+        detail_metrics=metrics(detail.Shape,out/'detail.brep');report['detail']=detail_metrics
+        check('new detail independent analytic area',matches(detail_metrics,expected_ring()[1]))
+        doc.undo();check('detail Loft Undo',doc.getObject(detail_name) is None);doc.redo();detail=doc.getObject(detail_name)
+        check('detail Loft Redo area',abs(metrics(detail.Shape,out/'detail-redo.brep')['area']-6)<1e-5)
+        selected=[cut,detail];target=out/'ring-modified-and-new-v5.3dm';ThreeDm.export_file(str(target),selected,modeling=True)
+        check('modified and new selected V5 only',json.loads(native.inspect3dm(str(target)))['source_version']==50 and len(json.loads(native.inspect3dm(str(target)))['records'])==2)
+        saved=out/'source-independent-ring.FCStd';doc.saveAs(str(saved));App.closeDocument(doc.Name);copy.unlink();profile_file.unlink()
+        check('source deleted before fresh process gate',not copy.exists() and not profile_file.exists() and saved.exists())
+        report.update(ok=True,module=native.__file__,python_module=ThreeDm.__file__,fcstd=str(saved),selected_names=[cut_name,detail_name],output=str(target),output_sha256=hashlib.sha256(target.read_bytes()).hexdigest(),expected=expected_ring(),source_sha256=hashlib.sha256(source.read_bytes()).hexdigest())
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for n in list(App.listDocuments()):App.closeDocument(n)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

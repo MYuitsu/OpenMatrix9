@@ -1,0 +1,185 @@
+   Compiling openmatrix9_rust v0.1.0 (H:\FreeCAD-src\build\om9-dev\rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.34s
+     Running unittests src\lib.rs (rust\target\debug\deps\openmatrix9_rust-908b2f3029ddc2ce.exe)
+
+running 2 tests
+test core_view_tabs::tests::alignment_preserves_visibility_and_rejects_invalid_options_atomically ... ok
+test core_view_tabs::tests::visibility_is_idempotent_and_toggle_changes_it ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\command_completion.rs (rust\target\debug\deps\command_completion-8d117b7b543253f0.exe)
+
+running 1 test
+test original_names_and_match_order ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_3dm.rs (rust\target\debug\deps\core_3dm-6a85e4d906b30af7.exe)
+
+running 2 tests
+test units_never_guess_or_accept_invalid_scale ... ok
+test import_export_share_catalog_policy_and_completion ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\core_3dm_archive.rs (rust\target\debug\deps\core_3dm_archive-fb21669fb37f18e5.exe)
+
+running 9 tests
+test closure_ffi_checks_capacity_and_preserves_output_on_failure ... ok
+test closure_selects_only_reachable_unique_records ... ok
+test closure_rejects_malformed_cycles_and_limits ... ok
+test identities_are_scoped_and_canonical ... ok
+test member_copy_budget_bounds_total_and_arithmetic ... ok
+test modes_and_capabilities_reject_unknown_values ... ok
+test native_geometry_transform_policy_requires_known_non_instance_payload ... ok
+test overlay_policy_rejects_unsupported_edits_and_unknown_references ... ok
+test closure_handles_long_component_chains_without_recursion ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\core_angle.rs (rust\target\debug\deps\core_angle-ee3c4686244efc83.exe)
+
+running 4 tests
+test om9_measure_001_four_points_allow_distinct_line_origins ... ok
+test om9_measure_001_invalid_and_degenerate_lines_are_rejected ... ok
+test om9_measure_001_native_bridge_uses_four_xyz_points ... ok
+test om9_measure_001_parallel_opposite_and_scale_invariance ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_distance.rs (rust\target\debug\deps\core_distance-5bdbaf3ab45c5f40.exe)
+
+running 4 tests
+test om9_measure_002_bridge_rejects_invalid_unit_and_coordinates ... ok
+test om9_measure_002_rejects_nonfinite_or_unsupported_coordinates ... ok
+test om9_measure_002_reports_spatial_distance_and_coincident_points ... ok
+test om9_measure_002_units_convert_result_without_changing_points ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_keyboard.rs (rust\target\debug\deps\core_keyboard-29673a43be3142d8.exe)
+
+running 3 tests
+test mouse_ortho_uses_cplane_axes_and_leaves_typed_points_exact ... ok
+test shift_temporarily_inverts_ortho_without_changing_saved_mode ... ok
+test original_shortcuts_are_unique_and_keep_matrix_targets ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_mouse.rs (rust\target\debug\deps\core_mouse-86ca8c87a9cab957.exe)
+
+running 2 tests
+test a_click_never_becomes_navigation_and_window_requires_full_containment ... ok
+test rhino_navigation_and_matrix_override_keep_selection_clicks ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_notes.rs (rust\target\debug\deps\core_notes-7412e11367c63702.exe)
+
+running 2 tests
+test om9_file_008_and_info_006_preserve_unicode_and_multiline_text ... ok
+test invalid_notes_are_rejected_before_commit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_picture_frame.rs (rust\target\debug\deps\core_picture_frame-c4844b528d51380b.exe)
+
+running 5 tests
+test om9_view_001_ffi_is_atomic_and_agrees_with_native_array_layout ... ok
+test om9_view_001_shift_and_vertical_use_construction_plane_axes ... ok
+test om9_view_001_cmd_width_is_positive_and_aspect_is_validated ... ok
+test om9_view_001_validates_every_corner_not_only_diagonal ... ok
+test om9_view_001_two_points_preserve_source_aspect_and_corner ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_snaps.rs (rust\target\debug\deps\core_snaps-3dbbe6a379106d37.exe)
+
+running 6 tests
+test om9_snap_002_master_preserves_mode_and_state_roundtrips ... ok
+test om9_snap_002_selects_nearest_projected_candidate_within_aperture ... ok
+test om9_snap_002_rejects_invalid_projection_world_and_aperture ... ok
+test om9_snap_003_mid_mode_is_independent_and_preserved_by_master ... ok
+test om9_snap_007_point_mode_preserves_other_choices ... ok
+test om9_snap_002_native_state_and_packed_candidates ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_view_controls.rs (rust\target\debug\deps\core_view_controls-ba54e0dc9a843df4.exe)
+
+running 5 tests
+test dynamic_zoom_preserves_projection_scale_and_bounds ... ok
+test invalid_drag_does_not_corrupt_session ... ok
+test om9_view_004_incremental_dynamic_drag_and_cancel ... ok
+test om9_view_003_perspective_focal_plane_scale_is_finite ... ok
+test om9_view_008_window_accepts_reverse_drag_and_rejects_tiny_pick ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\core_views.rs (rust\target\debug\deps\core_views-c18104f4603b0f91.exe)
+
+running 5 tests
+test matrix_grid_subdivides_major_cells_and_keeps_axes_separate ... ok
+test om9_view_003_preserves_original_command_name ... ok
+test om9_view_005_preserves_original_capture_command ... ok
+test om9_view_006_007_preserve_original_zoom_commands ... ok
+test om9_viewport_001_four_named_views_have_normalized_frames ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\curve_session.rs (rust\target\debug\deps\curve_session-f1c6ccd541ef2603.exe)
+
+running 14 tests
+test cancel_has_no_output_and_restart_clears_options ... ok
+test om9_curve_001_polyline_enter_and_close ... ok
+test matrix_prompt_options_and_initial_letter_inputs ... ok
+test om9_curve_001_preview_keeps_clicks_and_applies_constraints_without_commit ... ok
+test mouse_points_and_typed_coordinates_share_geometry ... ok
+test mouse_cannot_append_a_point_while_length_value_is_pending ... ok
+test invalid_input_keeps_session_and_no_partial_commit ... ok
+test om9_curve_002_both_sides_uses_first_point_as_midpoint ... ok
+test om9_curve_002_line_commits_two_distinct_points ... ok
+test om9_viewport_001_typed_coordinates_use_active_plane ... ok
+test polyline_length_option_prompts_for_value_then_direction ... ok
+test polyline_short_enter_and_close_do_not_finish ... ok
+test relative_points_and_units_are_explicitly_parsed ... ok
+test unavailable_initial_letter_does_not_mutate_polyline ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\ffi.rs (rust\target\debug\deps\ffi-4b8048f6d6124ee8.exe)
+
+running 4 tests
+test catalog_indices_strings_and_lifetimes_are_valid ... ok
+test command_history_requires_the_observed_effect_of_that_command ... ok
+test state_bounds_failure_history_and_reset ... ok
+test workspace_commands_are_supported_without_enabling_subd_selection ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\menu_state.rs (rust\target\debug\deps\menu_state-6687b05001cb5789.exe)
+
+running 5 tests
+test history_is_successful_only_latest_first_and_bounded ... ok
+test section_visibility_and_collapse_are_independent_and_resettable ... ok
+test reference_catalog_has_18_groups_and_11_quick_icons ... ok
+test bom_crlf_and_unicode_titles_are_preserved ... ok
+test malformed_catalog_has_section_and_key_diagnostics ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\viewport_title.rs (rust\target\debug\deps\viewport_title-12eb07d51c3d0ff4.exe)
+
+running 2 tests
+test original_display_names_require_a_real_adapter ... ok
+test viewport_label_toggles_only_the_selected_slot ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests openmatrix9_rust
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

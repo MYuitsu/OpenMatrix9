@@ -1,0 +1,131 @@
+"""Completed actual Rhino5 cases -> working FreeCAD import/save/reopen/export."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os, json, hashlib, traceback, shutil, tempfile, struct
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+proof_path = Path(os.environ['OM9_RHINO5_MODELING_REPORT'])
+report = {'checks': [], 'cases': [], 'ok': False, 'rhino_report': str(proof_path)}
+
+def digest(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+    (out / 'progress.json').write_text(json.dumps(report, indent=2))
+    if not value:
+        raise AssertionError(name)
+
+def measurements(objects):
+    rows = []
+    for obj in objects:
+        kind = obj.OM9GeometryKind
+        if kind == 5:
+            points = [[p.x, p.y, p.z] for p in obj.OM9CloudPoints]
+            row = {'kind': kind, 'points': points}
+        elif kind == 4:
+            # Explicit mesh fidelity check only; classification/snap must not read topology.
+            vertices, faces = obj.Mesh.Topology
+            triangles = sorted(tuple(sorted(struct.pack('<fff', vertices[i].x, vertices[i].y, vertices[i].z)
+                                             for i in face)) for face in faces)
+            signature = hashlib.sha256(b''.join(b''.join(triangle) for triangle in triangles)).hexdigest()
+            box = obj.Mesh.BoundBox
+            row = {'kind': kind, 'vertices': obj.Mesh.CountPoints, 'faces': obj.Mesh.CountFacets,
+                   'mesh_geometry_sha256': signature,
+                   'bounds': [box.XMin, box.YMin, box.ZMin, box.XMax, box.YMax, box.ZMax]}
+        else:
+            shape = obj.Shape
+            check('working CAD valid ' + obj.Label, shape.isValid())
+            box = shape.optimalBoundingBox(False, False)
+            row = {'kind': kind, 'edges': len(shape.Edges), 'faces': len(shape.Faces), 'solids': len(shape.Solids),
+                   'bounds': [box.XMin, box.YMin, box.ZMin, box.XMax, box.YMax, box.ZMax]}
+            if shape.Faces:
+                import OpenMatrix9Gui as native
+                with tempfile.TemporaryDirectory() as staging:
+                    path = Path(staging) / 'measurement.brep'
+                    shape.exportBrep(str(path))
+                    measures = native.measure3dmBrep(str(path), 1e-10)
+                row.update(area=measures['area'], volume=measures['volume'])
+            else:
+                row['length'] = shape.Length
+        row.update(label=obj.Label, layer=getattr(obj, 'OM9LayerPath', ''),
+                   visible=obj.ViewObject.Visibility, locked=getattr(obj, 'OM9Locked', False))
+        rows.append(row)
+    return sorted(rows, key=lambda row: (row['kind'], row['label'], row['layer'], repr(row.get('bounds', row.get('points')))))
+
+def equal(before, after):
+    if len(before) != len(after):
+        return False
+    for a, b in zip(before, after):
+        if any(a.get(key) != b.get(key) for key in ['kind', 'label', 'layer', 'visible', 'locked', 'edges', 'faces', 'solids', 'vertices', 'mesh_geometry_sha256']):
+            return False
+        if 'points' in a:
+            if a['points'] != b.get('points'):
+                return False
+        else:
+            if any(abs(x-y) > .001 for x, y in zip(a['bounds'], b['bounds'])):
+                return False
+            if 'length' in a and abs(a['length']-b['length']) >= 1e-6:
+                return False
+            for field in ['area', 'volume']:
+                if field in a and abs(a[field]-b[field]) > max(.001, .0001*abs(a[field])):
+                    return False
+    return True
+
+def run():
+    try:
+        import ThreeDm, OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        proof = json.loads(proof_path.read_text())
+        cases = [case for case in proof['cases'] if case.get('ok')]
+        check('actual Rhino5 version and completed subset available',
+              proof['rhino_version'].startswith('5.') and len(cases) > 0)
+        check('same bound native module', digest(native.__file__) == proof['source_bindings']['host_module_sha256'])
+        report['module_sha256'] = digest(native.__file__)
+        report['application_gate_scope'] = 'Completed Rhino cases only; whole Phase1 gate remains pending when Rhino report is not ok.'
+        for case in cases:
+            label = case['name'];source = Path(case['input']);saved = Path(case['output'])
+            check(label + ' bound input/output hashes', digest(source) == case['input_sha256'] and digest(saved) == case['output_sha256'])
+            original_doc = App.newDocument('BeforeRhino')
+            before = measurements(ThreeDm.import_file(str(source), original_doc, mode='modeling'))
+            App.closeDocument(original_doc.Name)
+            copy_path = out / (label + '-rhino-copy.3dm');shutil.copyfile(saved, copy_path)
+            doc = App.newDocument('AfterRhino')
+            objects = ThreeDm.import_file(str(copy_path), doc, mode='modeling')
+            after = measurements(objects)
+            check(label + ' Rhino saved geometry reimports equivalently', equal(before, after))
+            names = [obj.Name for obj in objects]
+            fcstd = out / (label + '.FCStd');doc.saveAs(str(fcstd));App.closeDocument(doc.Name)
+            copy_path.unlink()
+            reopened = App.openDocument(str(fcstd))
+            objects = [reopened.getObject(name) for name in names]
+            restored = measurements(objects)
+            check(label + ' FCStd survives removal of its own source copy', equal(after, restored))
+            target = out / (label + '-current.3dm')
+            ThreeDm.export_file(str(target), objects, modeling=True)
+            App.closeDocument(reopened.Name)
+            current = App.newDocument('CurrentReimport')
+            check(label + ' current export remains editable geometry', equal(restored, measurements(ThreeDm.import_file(str(target), current, mode='modeling'))))
+            App.closeDocument(current.Name)
+            check(label + ' original input and Rhino output unchanged', digest(source) == case['input_sha256'] and digest(saved) == case['output_sha256'])
+            if case.get('rhino_export_selected'):
+                selected_path = Path(case['rhino_export_selected'])
+                check(label + ' Rhino Selected output checksum', digest(selected_path) == case['rhino_export_selected_sha256'])
+                selected_doc = App.newDocument('RhinoSelectedReimport')
+                selected_objects = ThreeDm.import_file(str(selected_path), selected_doc, mode='modeling')
+                selected_expected = [row for row in after if row['label'] in case['selected_names']]
+                check(label + ' Rhino Selected subset matches expected count', len(selected_expected) == len(case['selected_rows']))
+                check(label + ' Rhino Export Selected geometry reimports equivalently', equal(selected_expected, measurements(selected_objects)))
+                App.closeDocument(selected_doc.Name)
+            report['cases'].append({'name': label, 'before': before, 'after': after, 'rhino_saved_sha256': case['output_sha256'], 'fcstd': str(fcstd)})
+        report['ok'] = True
+    except Exception:
+        report['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(report, indent=2))
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1000, run)

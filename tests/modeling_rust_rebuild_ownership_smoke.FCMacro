@@ -1,0 +1,37 @@
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtGui
+import json,os,traceback
+from pathlib import Path
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(250,loop.quit);loop.exec()
+    QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def run():
+    old_vertex=Part.Vertex;old_spline=Part.BSplineCurve
+    try:
+        import OpenMatrix9Gui as native
+        ownership=json.loads(native.phase2Ownership3dm());check('native Rebuild uses Rust-owned options and session',ownership['rebuild']=='rust')
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('RustRebuild');doc.UndoMode=1
+        obj=doc.addObject('Part::Feature','Chain');obj.Shape=Part.makePolygon([App.Vector(0,0,0),App.Vector(10,0,0),App.Vector(10,10,0)]);doc.recompute();Gui.Selection.addSelection(obj);settle()
+        def blocked(*a,**k):raise AssertionError('Python Part Rebuild production adapter used')
+        Part.Vertex=blocked;Part.BSplineCurve=blocked
+        window=Gui.getMainWindow();window.findChild(QtGui.QAction,'Rebuild').trigger();settle();dialog=window.findChild(QtWidgets.QDialog,'OM9RebuildDialog')
+        check('Qt Rebuild has independent Rust session and default DeleteInput',dialog is not None and int(dialog.property('om9RustSession'))>0 and dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').isChecked())
+        dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(12);dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree').setValue(3)
+        dialog.findChild(QtWidgets.QPushButton,'OM9RebuildPreview').click();settle();check('native preview measures whole-chain without Python Part',not dialog.findChild(QtWidgets.QLabel,'OM9RebuildError').text() and 'sampled' in dialog.findChild(QtWidgets.QLabel,'OM9RebuildDeviation').text())
+        dialog.findChild(QtWidgets.QPushButton,'OM9RebuildOK').click();settle();output=doc.getObject('Rebuild')
+        check('Rust decision and native commit retain full curve endpoints',output is not None and output.Shape.isValid() and len(doc.UndoNames)==1 and doc.getObject('Chain') is None and (output.Shape.Edges[0].valueAt(output.Shape.Edges[0].FirstParameter)-App.Vector(0,0,0)).Length<1e-8 and (output.Shape.Edges[0].valueAt(output.Shape.Edges[0].LastParameter)-App.Vector(10,10,0)).Length<1e-8)
+        doc.undo();settle();check('native Rebuild Undo restores original input',doc.getObject('Chain') is not None and doc.getObject('Rebuild') is None)
+        obj=doc.getObject('Chain');dependent=doc.addObject('App::Link','Dependent');dependent.LinkedObject=obj;doc.recompute();Gui.Selection.clearSelection();Gui.Selection.addSelection(obj);settle();window.findChild(QtGui.QAction,'Rebuild').trigger();settle();dialog=window.findChild(QtWidgets.QDialog,'OM9RebuildDialog');before=len(doc.UndoNames)
+        dialog.findChild(QtWidgets.QPushButton,'OM9RebuildOK').click();settle();check('Rust dependent DeleteInput guard rejects atomically',dialog.isVisible() and bool(dialog.findChild(QtWidgets.QLabel,'OM9RebuildError').text()) and len(doc.UndoNames)==before and doc.getObject('Chain') is not None)
+        dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(False);dialog.findChild(QtWidgets.QPushButton,'OM9RebuildOK').click();settle();check('Rust DeleteInput No permits independent output and keeps links',doc.getObject('Chain') is obj and dependent.LinkedObject is obj and doc.getObject('Rebuild') is not None)
+        report.update(ok=True,module=native.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:Part.Vertex=old_vertex;Part.BSplineCurve=old_spline
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

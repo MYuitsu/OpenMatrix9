@@ -83,13 +83,13 @@ static bool exactPlaneCurveParameters(const ON_Surface& source,const Handle(Geom
 static int classifiedSolidOrientation(const TopoDS_Shape& shape,double tolerance){
     return classifiedBrepSolidOrientation(shape,tolerance);
 }
-TopoDS_Shape importBrep(const ON_Brep& source,double tolerance){
+BrepAssembly prepareBrepAssembly(const ON_Brep& source,double tolerance){
     // Const SDK topology/proxy queries may populate serialized caches. Work on
     // an independent native copy so a retained archive remains authoritative.
     ON_Brep native(source);const ON_Brep& b=native;
     if(!b.IsValid())throw ExchangeError("Invalid input BRep topology");
     const double constructionTolerance=std::min(tolerance,1e-7);
-    BRepBuilderAPI_Sewing sew(tolerance);int faces=0;bool nativeRevolution=false;
+    BrepAssembly prepared;prepared.tolerance=tolerance;prepared.solid=b.IsSolid();prepared.orientation=b.SolidOrientation();bool nativeRevolution=false;
     for(int fi=0;fi<b.m_F.Count();++fi){const auto& f=b.m_F[fi];auto surface=importSurface(*b.m_S[f.m_si]);
         bool transposed=false;if(auto rev=ON_RevSurface::Cast(b.m_S[f.m_si])){transposed=rev->m_bTransposed;nativeRevolution=true;}
         BRepBuilderAPI_MakeFace make(surface,constructionTolerance);if(!make.IsDone())throw ExchangeError("Cannot construct BRep face");
@@ -140,24 +140,31 @@ TopoDS_Shape importBrep(const ON_Brep& source,double tolerance){
             // entire loop so periodic analytic surfaces retain its interior.
             if(transposed)boundary.Reverse();builder.Add(face,boundary);
         }
-        if(f.m_bRev!=transposed)face.Reverse();sew.Add(face);++faces;
+        if(f.m_bRev!=transposed)face.Reverse();prepared.faces.push_back(face);
     }
-    if(!faces)throw ExchangeError("BRep contains no faces");sew.Perform();auto shape=sew.SewedShape();
+    if(prepared.faces.empty())throw ExchangeError("BRep contains no faces");
+    prepared.revolution=nativeRevolution;return prepared;
+}
+TopoDS_Shape assembleBrep(BrepAssembly& prepared){
+    const auto tolerance=prepared.tolerance;
+    BRepBuilderAPI_Sewing sew(tolerance);for(const auto& face:prepared.faces)sew.Add(face);
+    sew.Perform();auto shape=sew.SewedShape();
     ShapeFix_Shape fix(shape);fix.SetPrecision(std::min(tolerance,1e-7));fix.SetMaxTolerance(tolerance);fix.Perform();shape=fix.Shape();
-    if(b.IsSolid()){
+    if(prepared.solid){
         // Retain shell winding; nested odd-depth shells are cavities, even-depth
         // islands are separate material solids. SDK +2 is not presumed outward.
-        shape=assembleClosedBrepShells(shape,b.SolidOrientation(),tolerance);
+        shape=assembleClosedBrepShells(shape,prepared.orientation,tolerance);
     }
     if(!BRepCheck_Analyzer(shape).IsValid())throw ExchangeError("Converted BRep has invalid topology");
     // Convert the assembled analytic faces and their mapped pcurves together.
     // The host and export then use the same finite NURBS representation, with
     // consistent trim extrema despite representation-dependent kernel bounds.
-    if(nativeRevolution)shape=BRepBuilderAPI_NurbsConvert(shape,true).Shape();
+    if(prepared.revolution)shape=BRepBuilderAPI_NurbsConvert(shape,true).Shape();
     if(!BRepCheck_Analyzer(shape).IsValid())throw ExchangeError("Converted NURBS BRep has invalid topology");
-    if(b.SolidOrientation()==2)(void)classifiedSolidOrientation(shape,tolerance);
+    if(prepared.orientation==2)(void)classifiedSolidOrientation(shape,tolerance);
     return shape;
 }
+TopoDS_Shape importBrep(const ON_Brep& source,double tolerance){auto prepared=prepareBrepAssembly(source,tolerance);return assembleBrep(prepared);}
 int resolvedBrepOrientation(const ON_Brep& source,double tolerance){
     // Even const SDK queries lazily update native caches. Classification of a
     // preserved archive must therefore operate on an independent working copy.

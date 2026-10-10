@@ -1,0 +1,40 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtGui,QtTest
+from pathlib import Path
+import json,os,traceback,sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(200,loop.quit);loop.exec()
+    QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def run():
+    try:
+        import Part,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('CVUI');doc.UndoMode=1
+        curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(3,4,0),App.Vector(7,2,0),App.Vector(10,0,0)],[4,4],[0.,1.],False,3,[1.,2.,0.7,1.])
+        obj=doc.addObject('Part::Feature','Rational');obj.Shape=curve.toShape();doc.recompute();Gui.Selection.addSelection(obj);settle()
+        window=Gui.getMainWindow();action=window.findChild(QtGui.QAction,'PointsOn');check('original PointsOn menu available for selected owning curve',action is not None and action.isEnabled())
+        action.trigger();settle();dialog=window.findChild(QtWidgets.QDialog,'OM9CurveCVDialog');check('PointsOn opens typed CV editor only for selection',dialog is not None and dialog.isVisible())
+        poles=dialog.findChild(QtWidgets.QTableWidget,'OM9CurveCVPoles');check('typed CV numeric fields',poles.rowCount()==4 and isinstance(poles.cellWidget(1,1),QtWidgets.QDoubleSpinBox))
+        poles.cellWidget(1,1).setValue(6)
+        buttons=dialog.findChild(QtWidgets.QDialogButtonBox);buttons.button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        check('UI CV edit commits native shape',abs(obj.Shape.Edges[0].Curve.getPole(2).y-6)<1e-9 and len(doc.UndoNames)==1)
+        field=command_input(window);field.setText('PointsOn');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+        report['cmd_diagnostic']={'selected':[o.Name for o in Gui.Selection.getSelection()], 'dialogs':[(d.objectName(),d.isVisible()) for d in window.findChildren(QtWidgets.QDialog)],'prompt':field.property('om9Prompt')}
+        dialog=window.findChild(QtWidgets.QDialog,'OM9CurveCVDialog');check('CMD PointsOn shares editor',dialog is not None and dialog.isVisible())
+        poles=dialog.findChild(QtWidgets.QTableWidget,'OM9CurveCVPoles');poles.cellWidget(1,3).setValue(-1)
+        old=obj.Shape.exportBrepToString();buttons=dialog.findChild(QtWidgets.QDialogButtonBox);buttons.button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        check('UI invalid weight stays open without mutation',dialog.isVisible() and bool(dialog.findChild(QtWidgets.QLabel,'OM9CurveCVError').text()) and obj.Shape.exportBrepToString()==old and len(doc.UndoNames)==1)
+        buttons.button(QtWidgets.QDialogButtonBox.Cancel).click();settle();check('UI Cancel no transaction',len(doc.UndoNames)==1 and obj.Shape.exportBrepToString()==old)
+        action.trigger();settle();Gui.activateWorkbench('PartWorkbench');settle()
+        check('workbench change cancels CV dialog',not any(d.isVisible() for d in window.findChildren(QtWidgets.QDialog,'OM9CurveCVDialog')))
+        report.update(ok=True,module=native.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

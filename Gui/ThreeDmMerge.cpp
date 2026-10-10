@@ -27,6 +27,14 @@ namespace OpenMatrix9Gui::ThreeDm {
 enum class ArchivePurpose { Rhino5Preservation, GeometryStaging };
 static void writeSelectedArchive(const QJsonObject&,const std::filesystem::path&,ArchivePurpose);
 static bool writeSelectedModel(ONX_Model&,const std::filesystem::path&,ArchivePurpose);
+static void verifyRetainedPalette(const NativeLayerTable& expected,const ONX_Model& model){
+    const auto actual=readNativeLayerTable(model);std::map<std::string,const NativeLayerRow*> palette;
+    for(const auto& row:actual.rows)palette.emplace(row.id,&row);
+    if(actual.rows.size()!=expected.rows.size()||actual.activeId!=expected.activeId)throw ExchangeError("Native write changed retained palette size or active layer");
+    for(const auto& row:expected.rows){auto found=palette.find(row.id);if(found==palette.end())throw ExchangeError("Native write dropped retained layer identity");const auto& native=*found->second;
+        if(row.parentId!=native.parentId||row.name!=native.name||row.path!=native.path||row.rgb!=native.rgb||row.locked!=native.locked||row.visible!=native.visible||(row.persistentLocked&&row.persistentLocked!=native.persistentLocked)||(row.persistentVisible&&row.persistentVisible!=native.persistentVisible))throw ExchangeError("Native write changed retained layer state: "+row.id);
+    }
+}
 static QString id(const ON_UUID& value){char text[37]{};ON_UuidToString(value,text);return QString::fromLatin1(text);}
 static QJsonArray matrixJson(const ON_Xform& transform){QJsonArray values;for(int i=0;i<16;++i)values.append(transform[i/4][i%4]);return values;}
 static bool hasNativeFields(const QJsonObject& overlay){return overlay.contains("hatch_fields")||overlay.contains("text_dot")||overlay.contains("point_cloud_fields")||overlay.contains("point_cloud_sha256");}
@@ -62,6 +70,14 @@ static QByteArray objectDigest(const ON_Object& object){
     // Negative built-in indices stay exact and cannot become a custom pattern.
     std::unique_ptr<ON_Hatch> canonical;if(auto hatch=ON_Hatch::Cast(&object)){canonical=std::make_unique<ON_Hatch>(*hatch);if(canonical->PatternIndex()>=0)canonical->SetPatternIndex(0);}
     ON_Write3dmBufferArchive archive(0,512ULL*1024*1024,50,ON::Version());if(!archive.WriteObject(canonical?static_cast<const ON_Object&>(*canonical):object))throw ExchangeError("Cannot serialize bounded Rhino5 native object");return QCryptographicHash::hash(QByteArrayView(static_cast<const char*>(archive.Buffer()),static_cast<qsizetype>(archive.SizeOfArchive())),QCryptographicHash::Sha256);}
+static QByteArray retainedLayerDigest(const ON_Layer& layer){
+    // Archive selection compacts table indices. UUID edges and palette facts are
+    // checked separately; all other native layer fields/userdata stay exact.
+    ON_Layer normalized(layer);normalized.SetIndex(0);
+    if(normalized.RenderMaterialIndex()>=0)normalized.SetRenderMaterialIndex(0);
+    if(normalized.LinetypeIndex()>=0)normalized.SetLinetypeIndex(0);
+    return objectDigest(normalized);
+}
 static std::size_t objectBytes(const ON_Object& object){ON_Write3dmBufferArchive archive(0,512ULL*1024*1024,50,ON::Version());if(!archive.WriteObject(object))throw ExchangeError("Cannot measure bounded Rhino5 member data");return static_cast<std::size_t>(archive.SizeOfArchive());}
 static void retainSerializationCopyCounts(const ON_Geometry& source,ON_Geometry& target,unsigned depth,size_t& nodes){
     if(depth>=64||++nodes>16384||source.ClassId()!=target.ClassId())throw ExchangeError("Current UV serialization owning-tree limit or class mismatch");
@@ -179,30 +195,57 @@ static std::unique_ptr<ON_Geometry> replacementGeometry(const QJsonObject& selec
         }
     return mesh;
 }
-static void safeMergedIdentityText(const ON_Object& object,const std::map<QString,ON_UUID>& aliases){
+static void safeMergedIdentityText(const ON_Object& object,const std::map<QString,ON_UUID>& aliases,bool canonicalBinding=false){
     ON_ClassArray<ON_UserString> strings;object.GetUserStrings(strings);
     const QRegularExpression pattern("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
-    for(int i=0;i<strings.Count();++i)for(auto text:{strings[i].m_key,strings[i].m_string_value}){
+    for(int i=0;i<strings.Count();++i){
+        // This one tag is a logical Rust binding, deliberately independent of
+        // native UUID remaps. Final exact global binding validates it below.
+        if(canonicalBinding&&strings[i].m_key==L"OpenMatrix9.LayerObjectId")continue;
+        for(auto text:{strings[i].m_key,strings[i].m_string_value}){
         ON_String utf8(text);auto matches=pattern.globalMatch(QString::fromUtf8(utf8.Array()));
         while(matches.hasNext()){auto identity=matches.next().captured().toLower();auto found=aliases.find(identity);
             if(found!=aliases.end()&&id(found->second)!=identity)throw ExchangeError("Merged user text identity reference requires explicit remapping");}
-    }
+    }}
 }
 static void writeMultipleSources(const QJsonObject& request,const std::filesystem::path& destination,ArchivePurpose purpose){
+    const bool canonical=request["schema_version"].toInt()==2;NativeLayerSnapshot globalLayers;
+    if(canonical)globalLayers=nativeLayerSnapshotFromJson(QJsonDocument(request["layer_session"].toObject()).toJson(QJsonDocument::Compact).toStdString());
     auto sources=request["sources"].toArray();if(sources.size()>128)throw ExchangeError("Too many source archives");
-    auto first=sources[0].toObject();for(auto value:sources)if(value.toObject()["archive_sha256"]!=first["archive_sha256"])throw ExchangeError("Different source document metadata requires an explicit document merge policy");
+    auto first=sources[0].toObject();if(!canonical)for(auto value:sources)if(value.toObject()["archive_sha256"]!=first["archive_sha256"])throw ExchangeError("Different source document metadata requires an explicit document merge policy");
     QTemporaryDir staging;if(!staging.isValid())throw ExchangeError("Cannot stage source merge");
-    struct Context{ArchiveInventory archive;ON_ManifestMap references;std::map<QString,ON_UUID> aliases;std::vector<ON_ModelComponentReference> added;QString name;};
-    std::vector<std::unique_ptr<Context>> contexts;std::set<QString> namespaces,usedIds;ONX_Model output;std::uintmax_t inputBytes=0;
+    struct Context{ArchiveInventory archive;ON_ManifestMap references;std::map<QString,ON_UUID> aliases;std::vector<ON_ModelComponentReference> added,nativeLayers;std::set<QString> bindings;QString name;};
+    std::vector<std::unique_ptr<Context>> contexts;std::set<QString> namespaces,usedIds;ONX_Model output;std::uintmax_t inputBytes=0;std::optional<std::vector<QString>> documentRdk;
     int sourceIndex=0;
     for(auto value:sources){auto source=value.toObject();auto name=source["namespace"].toString();if(name.isEmpty()||!namespaces.insert(name).second)throw ExchangeError("Duplicate or empty source namespace");auto sourcePath=std::filesystem::path(source["snapshot"].toString().toStdWString());inputBytes+=std::filesystem::file_size(sourcePath);if(inputBytes>512ULL*1024*1024)throw ExchangeError("Combined source archives exceed512MiB");
         QJsonArray selection;for(auto selected:request["selected"].toArray())if(selected.toObject()["namespace"]==name)selection.append(selected);
         bool newRoots=false;for(auto key:{"new_geometry","new_instances"})for(auto geometry:request[key].toArray())if(geometry.toObject()["namespace"]==name&&geometry.toObject()["role"]=="top-level")newRoots=true;
-        if(selection.isEmpty()&&!newRoots){for(auto key:{"dependency_overlays","definition_overlays","new_geometry","member_copies","new_definitions","new_instances"})for(auto overlay:request[key].toArray())if(overlay.toObject()["namespace"]==name)throw ExchangeError("Overlay source has no selected roots");continue;}
-        auto subset=std::filesystem::path(staging.path().toStdWString())/(std::to_wstring(sourceIndex++)+L".3dm");auto subrequest=request;subrequest["sources"]=QJsonArray{source};subrequest["selected"]=selection;for(auto key:{"dependency_overlays","definition_overlays","new_geometry","member_copies","new_definitions","new_instances"}){QJsonArray scoped;for(auto overlay:request[key].toArray())if(overlay.toObject()["namespace"]==name)scoped.append(overlay);subrequest[key]=scoped;}writeSelectedArchive(subrequest,subset,purpose);
-        auto context=std::make_unique<Context>();context->archive=inspectArchive(subset);context->name=name;
-        if(contexts.empty()){output.m_properties=context->archive.nativeModel->m_properties;output.m_settings=context->archive.nativeModel->m_settings;}
+        if(selection.isEmpty()&&!newRoots&&!canonical){for(auto key:{"dependency_overlays","definition_overlays","new_geometry","member_copies","new_definitions","new_instances"})for(auto overlay:request[key].toArray())if(overlay.toObject()["namespace"]==name)throw ExchangeError("Overlay source has no selected roots");continue;}
+        auto subset=std::filesystem::path(staging.path().toStdWString())/(std::to_wstring(sourceIndex++)+L".3dm");auto subrequest=request;subrequest["sources"]=QJsonArray{source};subrequest["selected"]=selection;for(auto key:{"dependency_overlays","definition_overlays","new_geometry","member_copies","new_definitions","new_instances"}){QJsonArray scoped;for(auto overlay:request[key].toArray())if(overlay.toObject()["namespace"]==name)scoped.append(overlay);subrequest[key]=scoped;}
+        std::set<QString> namespaceBindings;
+        if(canonical){
+            std::vector<QByteArray> ids;
+            auto bindingId=[&](QJsonObject row){if(!row["layer_object_id"].isString()||row["layer_object_id"].toString().isEmpty())throw ExchangeError("Canonical namespace root requires exact logical binding");ids.push_back(row["layer_object_id"].toString().toUtf8());namespaceBindings.insert(row["layer_object_id"].toString());};
+            for(auto entry:selection)bindingId(entry.toObject());
+            for(auto key:{"new_geometry","new_instances"})for(auto entry:subrequest[key].toArray())if(entry.toObject()["role"]=="top-level")bindingId(entry.toObject());
+            std::vector<Om9LayerByteView> views;views.reserve(ids.size());for(const auto& value:ids)views.push_back({reinterpret_cast<const unsigned char*>(value.constData()),static_cast<std::size_t>(value.size())});
+            std::uint64_t handle=0;auto error=om9_layer_snapshot_subset(globalLayers.get(),views.data(),views.size(),&handle);if(error)throw ExchangeError("Rust namespace metadata partition rejected; code="+std::to_string(error));NativeLayerSnapshot partition(handle);
+            subrequest["layer_session"]=QJsonDocument::fromJson(QByteArray::fromStdString(nativeLayerSnapshotJson(partition.get()))).object();
+        }
+        writeSelectedArchive(subrequest,subset,purpose);
+        auto context=std::make_unique<Context>();context->archive=inspectArchive(subset);context->name=name;context->bindings=std::move(namespaceBindings);
+        if(canonical){
+            // SDK writes a default RDK document table even for a plain point.
+            // Reuse the existing resource-free validator; opaque/plugin or
+            // conflicting document settings remain explicit unsupported input.
+            std::vector<QString> rdk;auto& tables=context->archive.nativeModel->m_userdata_table;
+            for(int i=0;i<tables.Count();++i)if(auto table=tables[i]){safeRdkTable(*table);ON_wString xml;if(!ONX_Model::GetRDKDocumentInformation(*table,xml))throw ExchangeError("Cannot read verified native RDK document settings");rdk.push_back(QString::fromWCharArray(xml.Array()));}
+            if(documentRdk&&*documentRdk!=rdk)throw ExchangeError("Different native RDK document settings require an explicit merge policy");documentRdk=std::move(rdk);
+        }
+        if(contexts.empty()){output.m_properties=context->archive.nativeModel->m_properties;output.m_settings=context->archive.nativeModel->m_settings;if(canonical){output.m_settings.SetCurrentLayerId(ON_nil_uuid);output.m_settings.SetV5CurrentLayerIndex(-1);}}
+        if(canonical){auto layerAliases=mergeRetainedNativePalette(output,readNativeLayerTable(*context->archive.nativeModel));for(const auto& [from,to]:layerAliases){auto uuid=ON_UuidFromString(to.c_str());context->aliases[QString::fromStdString(from)]=uuid;usedIds.insert(id(uuid));}}
         for(unsigned type=1;type<static_cast<unsigned>(ON_ModelComponent::Type::NumOf);++type){if(type==16)continue;ONX_ModelComponentIterator it(*context->archive.nativeModel,static_cast<ON_ModelComponent::Type>(type));for(auto component=it.FirstComponent();component;component=it.NextComponent()){
+            if(canonical&&component->ComponentType()==ON_ModelComponent::Type::Layer)continue;
             auto uuid=component->Id();
             if(usedIds.contains(id(uuid))){
                 // Keep collision aliases stable for this ordered source set.
@@ -219,11 +262,22 @@ static void writeMultipleSources(const QJsonObject& request,const std::filesyste
         contexts.push_back(std::move(context));
     }
     if(contexts.empty())throw ExchangeError("No selected source records");
+    std::set<QString> retainedNativeLayers;
     for(unsigned type=1;type<static_cast<unsigned>(ON_ModelComponent::Type::NumOf);++type){if(type==16)continue;auto kind=static_cast<ON_ModelComponent::Type>(type);
         for(auto& context:contexts){auto& model=*context->archive.nativeModel;ONX_ModelComponentIterator it(model,kind);for(auto component=it.FirstComponent();component;component=it.NextComponent()){
+            if(canonical&&kind==ON_ModelComponent::Type::Layer){
+                auto stored=output.ComponentFromId(kind,context->aliases.at(id(component->Id())));ON_ManifestMapItem mapping;if(stored.IsEmpty()||!mapping.SetSourceIdentification(component)||!mapping.SetDestinationIdentification(stored.ModelComponent())||!context->references.AddMapItem(mapping))throw ExchangeError("Cannot map canonical shared layer references");
+                if(retainedNativeLayers.insert(id(stored.ModelComponent()->Id())).second){
+                    safeMergedIdentityText(*component,context->aliases);auto sourceLayer=ON_Layer::Cast(component);auto targetLayer=const_cast<ON_Layer*>(ON_Layer::Cast(stored.ModelComponent()));
+                    const auto nativeId=targetLayer->Id(),parent=targetLayer->ParentId();const auto index=targetLayer->Index();const auto name=targetLayer->Name();
+                    *targetLayer=*sourceLayer;targetLayer->SetId(nativeId);targetLayer->SetIndex(index);targetLayer->SetName(name);targetLayer->SetParentId(parent);
+                    context->nativeLayers.push_back(stored);
+                }
+                continue;
+            }
             safeMergedIdentityText(*component,context->aliases);
             std::unique_ptr<ON_ModelComponent> copy;
-            if(auto geometry=ON_ModelGeometryComponent::Cast(component)){safeMergedIdentityText(*geometry->Geometry(nullptr),context->aliases);safeMergedIdentityText(*geometry->Attributes(nullptr),context->aliases);auto attributes=*geometry->Attributes(nullptr);attributes.m_uuid=context->aliases.at(id(component->Id()));copy.reset(ON_ModelGeometryComponent::Create(*geometry->Geometry(nullptr),&attributes,nullptr));}
+            if(auto geometry=ON_ModelGeometryComponent::Cast(component)){safeMergedIdentityText(*geometry->Geometry(nullptr),context->aliases);safeMergedIdentityText(*geometry->Attributes(nullptr),context->aliases,canonical);auto attributes=*geometry->Attributes(nullptr);attributes.m_uuid=context->aliases.at(id(component->Id()));copy.reset(ON_ModelGeometryComponent::Create(*geometry->Geometry(nullptr),&attributes,nullptr));}
             else copy.reset(ON_ModelComponent::Cast(component->Duplicate()));
             if(!copy||!copy->SetId(context->aliases.at(id(component->Id()))))throw ExchangeError("Cannot allocate merged component identity");
             if(ON_ModelComponent::UniqueNameRequired(kind)&&context.get()!=contexts[0].get()){auto name=copy->Name();name+=L" [";name+=ON_wString(context->name.left(8).toStdWString().c_str());name+=L"]";if(!copy->SetName(name))throw ExchangeError("Cannot resolve source component name collision");}
@@ -243,15 +297,44 @@ static void writeMultipleSources(const QJsonObject& request,const std::filesyste
                 remapDeferredNativeReferences(*curve,context->aliases);
         }
     }
+    for(const auto& context:contexts)for(const auto& reference:context->nativeLayers)if(!const_cast<ON_ModelComponent*>(reference.ModelComponent())->UpdateReferencedComponents(context->archive.nativeModel->Manifest(),output.Manifest(),context->references))throw ExchangeError("Cannot remap retained native layer references");
+    std::optional<NativeLayerTable> expectedPalette;
+    if(canonical){
+        std::vector<NativeLayerObjectBinding> bindings;
+        for(const auto& context:contexts)for(auto entry:context->archive.document["records"].toArray()){
+            auto row=entry.toObject();if(row["role"]!="top-level")continue;
+            auto component=ON_ModelGeometryComponent::Cast(context->archive.nativeModel->ComponentFromId(ON_ModelComponent::Type::ModelGeometry,ON_UuidFromString(row["source_uuid"].toString().toLatin1().constData())).ModelComponent());ON_wString logical;
+            if(component&&component->Attributes(nullptr)&&component->Attributes(nullptr)->GetUserString(L"OpenMatrix9.LayerObjectId",logical)){
+                auto sourceId=QString::fromWCharArray(logical.Array());if(context->bindings.contains(sourceId))bindings.push_back({id(context->aliases.at(row["source_uuid"].toString())).toStdString(),sourceId.toStdString()});
+            }
+        }
+        // Final global exact binding rejects duplicate/unused/missing metadata
+        // across namespaces. Partition success alone cannot prove whole transfer.
+        applyRetainedLayerOverlay(output,globalLayers.get(),bindings);expectedPalette=readNativeLayerTable(output);
+    }
+    std::map<QString,QByteArray> mergedLayerDigests;
+    if(canonical){ONX_ModelComponentIterator layers(output,ON_ModelComponent::Type::Layer);for(auto component=layers.FirstComponent();component;component=layers.NextComponent())mergedLayerDigests.emplace(id(component->Id()),retainedLayerDigest(*ON_Layer::Cast(component)));}
+    std::map<QString,QByteArray> mergedAttributeDigests;
+    if(canonical)for(const auto& context:contexts)for(const auto& reference:context->added)if(auto geometry=ON_ModelGeometryComponent::Cast(reference.ModelComponent()))mergedAttributeDigests.emplace(id(geometry->Id()),objectDigest(*geometry->Attributes(nullptr)));
     auto mergedGraph=currentSurfaceReferenceGraph(output);
     auto file=std::filesystem::path(staging.path().toStdWString())/L"merged.3dm";if(!writeSelectedModel(output,file,purpose))throw ExchangeError("Cannot write merged Rhino5 archive");auto checked=inspectArchive(file);
     if(!checked.document["issues"].toArray().isEmpty()||checked.document["records"].toArray().size()!=output.ActiveComponentCount(ON_ModelComponent::Type::ModelGeometry)+output.ActiveComponentCount(ON_ModelComponent::Type::RenderLight))throw ExchangeError("Merged Rhino5 graph validation failed");
+    if(expectedPalette)verifyRetainedPalette(*expectedPalette,*checked.nativeModel);
+    if(canonical)for(const auto& [uuid,digest]:mergedLayerDigests){auto layer=ON_Layer::Cast(checked.nativeModel->ComponentFromId(ON_ModelComponent::Type::Layer,ON_UuidFromString(uuid.toLatin1().constData())).ModelComponent());if(!layer||retainedLayerDigest(*layer)!=digest)throw ExchangeError("Merged native layer fields changed: "+uuid.toStdString());}
     auto checkedGraph=currentSurfaceReferenceGraph(*checked.nativeModel);
-    for(auto& context:contexts)for(auto& reference:context->added){auto component=reference.ModelComponent();auto reread=checked.nativeModel->ComponentFromId(component->ComponentType(),component->Id());if(reread.IsEmpty()||reread.ModelComponent()->ClassId()->Uuid()!=component->ClassId()->Uuid())throw ExchangeError("Merged Rhino5 component dropped or changed type");if(auto geometry=ON_ModelGeometryComponent::Cast(component)){auto target=ON_ModelGeometryComponent::Cast(reread.ModelComponent());if(!target||currentObjectDigest(*geometry->Geometry(nullptr),id(component->Id()),*mergedGraph)!=currentObjectDigest(*target->Geometry(nullptr),id(component->Id()),*checkedGraph))throw ExchangeError("Merged native geometry payload changed");}}
+    for(auto& context:contexts)for(auto& reference:context->added){auto component=reference.ModelComponent();auto reread=checked.nativeModel->ComponentFromId(component->ComponentType(),component->Id());if(reread.IsEmpty()||reread.ModelComponent()->ClassId()->Uuid()!=component->ClassId()->Uuid())throw ExchangeError("Merged Rhino5 component dropped or changed type");if(auto geometry=ON_ModelGeometryComponent::Cast(component)){auto target=ON_ModelGeometryComponent::Cast(reread.ModelComponent());if(!target||currentObjectDigest(*geometry->Geometry(nullptr),id(component->Id()),*mergedGraph)!=currentObjectDigest(*target->Geometry(nullptr),id(component->Id()),*checkedGraph))throw ExchangeError("Merged native geometry payload changed");if(canonical&&(!target->Attributes(nullptr)||mergedAttributeDigests.at(id(component->Id()))!=objectDigest(*target->Attributes(nullptr))))throw ExchangeError("Merged native object attributes changed");}}
     QFile input(QString::fromStdWString(file.wstring()));QSaveFile target(QString::fromStdWString(destination.wstring()));if(!input.open(QIODevice::ReadOnly)||!target.open(QIODevice::WriteOnly))throw ExchangeError("Cannot stage merged output");while(!input.atEnd()){auto bytes=input.read(1024*1024);if(bytes.isEmpty()&&input.error()!=QFile::NoError)throw ExchangeError("Cannot read merged output");if(target.write(bytes)!=bytes.size())throw ExchangeError("Cannot write merged output");}input.close();if(!target.commit())throw ExchangeError("Cannot replace merged output atomically");
 }
 static void writeSelectedArchive(const QJsonObject& request,const std::filesystem::path& destination,ArchivePurpose purpose){
-    if(request["schema_version"].toInt()!=1)throw ExchangeError("Invalid preservation export schema");
+    const auto schema=request["schema_version"].toInt();
+    if(schema!=1&&schema!=2)throw ExchangeError("Invalid preservation export schema");
+    const bool canonical=schema==2;
+    if(canonical!=request.contains("layer_session"))throw ExchangeError("Preservation schema requires its matching layer metadata contract");
+    NativeLayerSnapshot layerSnapshot;
+    if(canonical){
+        if(!request["layer_session"].isObject())throw ExchangeError("Invalid canonical preservation layer metadata");
+        layerSnapshot=nativeLayerSnapshotFromJson(QJsonDocument(request["layer_session"].toObject()).toJson(QJsonDocument::Compact).toStdString());
+    }
     if(!request["sources"].isArray()||!request["selected"].isArray())throw ExchangeError("Invalid preservation source or selection table");
     if(request.contains("new_geometry")&&!request["new_geometry"].isArray())throw ExchangeError("Invalid new geometry table");
     for(auto key:{"new_definitions","new_instances"})if(request.contains(key)&&!request[key].isArray())throw ExchangeError("Invalid new block table");
@@ -263,10 +346,13 @@ static void writeSelectedArchive(const QJsonObject& request,const std::filesyste
     for(auto key:{"selected","dependency_overlays"})for(auto value:request[key].toArray())fieldBudget(value.toObject());
     for(auto value:request["member_copies"].toArray()){auto copy=value.toObject();if(copy.contains("independent_overlay"))fieldBudget(copy["independent_overlay"].toObject());}
     auto sources=request["sources"].toArray(),selected=request["selected"].toArray();
-    if(sources.isEmpty()&&(!request["new_geometry"].toArray().isEmpty()||!request["new_instances"].toArray().isEmpty())){
+    if(!canonical)for(auto key:{"selected","new_geometry","new_instances","member_copies","dependency_overlays"})for(auto value:request[key].toArray())if(value.toObject().contains("layer_object_id"))throw ExchangeError("Canonical object binding cannot silently downgrade to legacy preservation");
+    if(sources.isEmpty()&&(canonical||!request["new_geometry"].toArray().isEmpty()||!request["new_instances"].toArray().isEmpty())){
         if(!selected.isEmpty())throw ExchangeError("Source selection requires an archive");
         auto name=request["document_namespace"].toString();QUuid uuid(name);if(uuid.isNull()||uuid.toString(QUuid::WithoutBraces)!=name)throw ExchangeError("Invalid new document namespace");
-        QTemporaryDir staging;if(!staging.isValid())throw ExchangeError("Cannot stage new document");ONX_Model model;model.m_settings.m_ModelUnitsAndTolerances.m_unit_system=ON_UnitSystem(ON::LengthUnitSystem::Millimeters);ON_Layer layer;layer.SetName(L"OpenMatrix9");model.AddModelComponent(layer);
+        QTemporaryDir staging;if(!staging.isValid())throw ExchangeError("Cannot stage new document");ONX_Model model;model.m_settings.m_ModelUnitsAndTolerances.m_unit_system=ON_UnitSystem(ON::LengthUnitSystem::Millimeters);
+        if(canonical)writeNativeLayerTable(model,nativeLayerTableFromSnapshot(layerSnapshot.get()));
+        else{ON_Layer layer;layer.SetName(L"OpenMatrix9");model.AddModelComponent(layer);}
         auto file=std::filesystem::path(staging.path().toStdWString())/L"new-document.3dm";if(!writeModelRhino5(model,file))throw ExchangeError("Cannot prepare new mm document");auto inventory=inspectArchive(file).document;auto scoped=request;scoped["sources"]=QJsonArray{QJsonObject{{"namespace",name},{"snapshot",QString::fromStdWString(file.wstring())},{"archive_sha256",inventory["archive_sha256"]},{"scale_mm",1.0}}};writeSelectedArchive(scoped,destination,purpose);return;
     }
     if(request.contains("dependency_overlays")&&!request["dependency_overlays"].isArray())throw ExchangeError("Invalid dependency overlay table");
@@ -281,7 +367,7 @@ static void writeSelectedArchive(const QJsonObject& request,const std::filesyste
     for(auto key:{"new_definitions","new_instances"})for(auto value:request[key].toArray())if(!sourceNames.contains(value.toObject()["namespace"].toString()))throw ExchangeError("New block has no document namespace");
     if(sources.size()>1){writeMultipleSources(request,destination,purpose);return;}
     if(sources.size()!=1)throw ExchangeError("No preservation source archive");
-    if(selected.isEmpty()&&request["new_geometry"].toArray().isEmpty()&&request["new_instances"].toArray().isEmpty())throw ExchangeError("Select whole objects to export");
+    if(!canonical&&selected.isEmpty()&&request["new_geometry"].toArray().isEmpty()&&request["new_instances"].toArray().isEmpty())throw ExchangeError("Select whole objects to export");
     auto source=sources[0].toObject();auto path=std::filesystem::path(source["snapshot"].toString().toStdWString());
     auto sourceNamespace=source["namespace"].toString();QUuid namespaceId(sourceNamespace);if(namespaceId.isNull()||namespaceId.toString(QUuid::WithoutBraces)!=sourceNamespace)throw ExchangeError("Invalid source import namespace");
     auto inventory=inspectArchive(path,source["scale_mm"].toDouble());auto manifest=inventory.document;
@@ -333,7 +419,7 @@ static void writeSelectedArchive(const QJsonObject& request,const std::filesyste
     for(auto value:request["new_geometry"].toArray()){
         if(!value.isObject())throw ExchangeError("Invalid new geometry record");auto row=value.toObject();auto uuid=row["source_uuid"].toString(),host=row["host_id"].toString(),role=row["role"].toString();QUuid parsed(uuid);
         if(parsed.isNull()||parsed.toString(QUuid::WithoutBraces)!=uuid||host.isEmpty()||!hostIds.insert(host).second||row["namespace"]!=source["namespace"]||(role!="top-level"&&role!="definition-member"))throw ExchangeError("Invalid new geometry identity or role");
-        for(auto key:row.keys())if(key!="source_uuid"&&key!="host_id"&&key!="namespace"&&key!="role"&&key!="brep"&&key!="vertices"&&key!="faces"&&key!="metadata")throw ExchangeError("Unsupported new geometry field");
+        for(auto key:row.keys())if(key!="source_uuid"&&key!="host_id"&&key!="namespace"&&key!="role"&&key!="brep"&&key!="vertices"&&key!="faces"&&key!="metadata"&&!(canonical&&key=="layer_object_id"))throw ExchangeError("Unsupported new geometry field");
         if(!occupiedIds.insert(uuid).second)throw ExchangeError("New geometry UUID collides with source or another new record");
         auto layerReference=model.ComponentFromId(ON_ModelComponent::Type::Layer,model.m_settings.CurrentLayerId());auto layer=ON_Layer::Cast(layerReference.ModelComponent());if(!layer){ONX_ModelComponentIterator layers(model,ON_ModelComponent::Type::Layer);layer=ON_Layer::Cast(layers.FirstComponent());}if(!layer)throw ExchangeError("New geometry requires a document layer");
         ON_3dmObjectAttributes attributes;attributes.m_uuid=ON_UuidFromString(uuid.toLatin1().constData());attributes.m_layer_index=layer->Index();if(role=="definition-member")attributes.SetMode(ON::idef_object);ON_Point placeholder(0,0,0);auto added=model.AddModelGeometryComponent(&placeholder,&attributes);if(added.IsEmpty()||id(added.ModelComponent()->Id())!=uuid)throw ExchangeError("Cannot allocate new geometry UUID");ON_wString type=ON_ModelComponent::ComponentTypeToString(ON_ModelComponent::Type::ModelGeometry);
@@ -374,7 +460,7 @@ static void writeSelectedArchive(const QJsonObject& request,const std::filesyste
     manifest["components"]=components;
     for(auto value:request["new_instances"].toArray()){
         if(!value.isObject())throw ExchangeError("Invalid new instance record");auto row=value.toObject();auto uuid=row["source_uuid"].toString(),host=row["host_id"].toString(),role=row["role"].toString(),target=row["instance_definition_uuid"].toString();QUuid parsed(uuid),targetId(target);
-        for(auto key:row.keys())if(key!="namespace"&&key!="source_uuid"&&key!="host_id"&&key!="role"&&key!="instance_definition_uuid"&&key!="instance_matrix"&&key!="metadata")throw ExchangeError("Unsupported new instance field");
+        for(auto key:row.keys())if(key!="namespace"&&key!="source_uuid"&&key!="host_id"&&key!="role"&&key!="instance_definition_uuid"&&key!="instance_matrix"&&key!="metadata"&&!(canonical&&key=="layer_object_id"))throw ExchangeError("Unsupported new instance field");
         if(row["namespace"]!=source["namespace"]||parsed.isNull()||parsed.toString(QUuid::WithoutBraces)!=uuid||host.isEmpty()||!hostIds.insert(host).second||!occupiedIds.insert(uuid).second||(role!="top-level"&&role!="definition-member")||targetId.isNull()||targetId.toString(QUuid::WithoutBraces)!=target||!ON_InstanceDefinition::Cast(model.ComponentFromId(ON_ModelComponent::Type::InstanceDefinition,ON_UuidFromString(target.toLatin1().constData())).ModelComponent()))throw ExchangeError("Invalid new instance identity or target");
         auto matrix=row["instance_matrix"].toArray();if(matrix.size()!=16)throw ExchangeError("New instance requires a4x4 matrix");ON_InstanceRef instance;for(int i=0;i<16;++i){if(!matrix[i].isDouble()||!std::isfinite(matrix[i].toDouble()))throw ExchangeError("Invalid new instance matrix number");instance.m_xform[i/4][i%4]=matrix[i].toDouble();}
         if(!instance.m_xform.IsValid()||!instance.m_xform.IsAffine()||!std::isfinite(instance.m_xform.Determinant())||instance.m_xform.Determinant()==0||!om9_3dm_overlay_allowed(3,2,true,true))throw ExchangeError("Invalid or singular new instance transform");instance.m_instance_definition_uuid=ON_UuidFromString(target.toLatin1().constData());
@@ -487,6 +573,9 @@ static void writeSelectedArchive(const QJsonObject& request,const std::filesyste
     };
     auto applyMetadata=[&](const QJsonArray& entries){for(auto value:entries){auto selection=value.toObject();if(!selection.contains("metadata"))continue;if(!selection["metadata"].isObject())throw ExchangeError("Invalid preservation metadata overlay");auto metadata=selection["metadata"].toObject();
         for(auto key:metadata.keys())if(key!="name"&&key!="color"&&key!="visible"&&key!="locked"&&key!="layer")throw ExchangeError("Unsupported preservation metadata overlay");
+        // Canonical roots carry own state in Rust, while flat UI projections
+        // contain inherited state. Only their current name is a flat edit.
+        if(canonical&&selection.contains("layer_object_id"))for(auto key:{"layer","color","locked","visible"})metadata.remove(key);
         auto uuid=selection["source_uuid"].toString();if(!geometryIds.contains(uuid))throw ExchangeError("Missing metadata source record");auto reference=model.ComponentFromId(ON_ModelComponent::Type::ModelGeometry,ON_UuidFromString(uuid.toLatin1().constData()));auto component=ON_ModelGeometryComponent::Cast(reference.ModelComponent());auto attributes=component?component->ExclusiveAttributes():nullptr;if(!attributes)throw ExchangeError("Cannot update source attributes");
         if(metadata.contains("name")){if(!metadata["name"].isString())throw ExchangeError("Invalid source name");auto name=metadata["name"].toString().toStdWString();attributes->m_name=name.c_str();if(!const_cast<ON_ModelGeometryComponent*>(component)->SetName(name.c_str()))throw ExchangeError("Cannot update source component name");rows[indices.at(uuid)]["name"]=metadata["name"];}
         if(metadata.contains("layer")){auto layer=layerForPath(metadata["layer"]);attributes->m_layer_index=layer->Index();auto& row=rows[indices.at(uuid)];QJsonArray dependencies;dependencies.append(id(layer->Id()));for(auto dependency:row["dependencies"].toArray())if(rows[indices.at(dependency.toString())]["class_name"]!="ON_Layer")dependencies.append(dependency);row["dependencies"]=dependencies;}
@@ -500,7 +589,7 @@ static void writeSelectedArchive(const QJsonObject& request,const std::filesyste
     for(auto value:overlays){auto row=value.toObject();auto uuid=row["source_uuid"].toString();auto action=row["action"].toString();if(row["namespace"]!=source["namespace"]||(action!="unchanged"&&action!="instance"&&action!="replace"&&action!="transform")||!geometryIds.contains(uuid)||!selectedIds.insert(uuid).second)throw ExchangeError("Invalid or unsupported source overlay");
         validateNativeFields(row);
         if(action=="transform"){
-            for(auto key:row.keys())if(key!="namespace"&&key!="host_id"&&key!="source_uuid"&&key!="action"&&key!="metadata"&&key!="geometry_matrix"&&key!="hatch_fields"&&key!="text_dot"&&key!="point_cloud_fields"&&key!="point_cloud_sha256")throw ExchangeError("Ambiguous native geometry transform overlay field");
+            for(auto key:row.keys())if(key!="namespace"&&key!="host_id"&&key!="source_uuid"&&key!="action"&&key!="metadata"&&key!="geometry_matrix"&&key!="hatch_fields"&&key!="text_dot"&&key!="point_cloud_fields"&&key!="point_cloud_sha256"&&!(canonical&&key=="layer_object_id"))throw ExchangeError("Ambiguous native geometry transform overlay field");
             auto reference=model.ComponentFromId(ON_ModelComponent::Type::ModelGeometry,ON_UuidFromString(uuid.toLatin1().constData()));auto component=ON_ModelGeometryComponent::Cast(reference.ModelComponent());auto geometry=component?component->ExclusiveGeometry():nullptr;
             if(!geometry||!om9_3dm_overlay_allowed(rows[indices.at(uuid)]["capability"]=="editable"?1:3,4,true,ON_InstanceRef::Cast(geometry)!=nullptr))throw ExchangeError("Native geometry transform requires a supported non-instance payload");
             safeUserdata(rows[indices.at(uuid)]);auto matrix=row["geometry_matrix"].toArray();if(matrix.size()!=16)throw ExchangeError("Native geometry transform requires a4x4 matrix");ON_Xform transform;
@@ -550,6 +639,33 @@ static void writeSelectedArchive(const QJsonObject& request,const std::filesyste
         auto component=ON_ModelGeometryComponent::Cast(model.ComponentFromId(ON_ModelComponent::Type::ModelGeometry,ON_UuidFromString(row["source_uuid"].toString().toLatin1().constData())).ModelComponent());auto hatch=component?ON_Hatch::Cast(component->Geometry(nullptr)):nullptr;if(!hatch)throw ExchangeError("Missing current native hatch");QJsonArray dependencies;
         for(auto dependency:row["dependencies"].toArray()){auto found=indices.find(dependency.toString());if(found==indices.end()||rows[found->second]["class_name"]!="ON_HatchPattern")dependencies.append(dependency);}
         if(hatch->PatternIndex()>=0){auto pattern=model.ComponentFromIndex(ON_ModelComponent::Type::HatchPattern,hatch->PatternIndex()).ModelComponent();if(!pattern||!indices.contains(id(pattern->Id())))throw ExchangeError("Missing current native hatch pattern dependency");dependencies.append(id(pattern->Id()));}row["dependencies"]=dependencies;
+    }
+    std::optional<NativeLayerTable> retainedPalette;
+    if(canonical){
+        std::vector<NativeLayerObjectBinding> bindings;bindings.reserve(selected.size());
+        for(auto value:selected){auto entry=value.toObject();if(!entry["layer_object_id"].isString()||entry["layer_object_id"].toString().isEmpty())throw ExchangeError("Canonical selected object requires its exact layer object binding");bindings.push_back({entry["source_uuid"].toString().toStdString(),entry["layer_object_id"].toString().toStdString()});}
+        auto applied=applyRetainedLayerOverlay(model,layerSnapshot.get(),bindings);
+        auto userStrings=[](const ON_Object& object){QJsonArray result;ON_ClassArray<ON_UserString> values;object.GetUserStrings(values);for(int i=0;i<values.Count();++i)result.append(QJsonObject{{"key",QString::fromWCharArray(values[i].m_key.Array())},{"value",QString::fromWCharArray(values[i].m_string_value.Array())}});return result;};
+        auto userData=[](const ON_Object& object){QJsonArray result;for(auto data=object.FirstUserData();data;data=data->Next())result.append(QJsonObject{{"class_uuid",id(data->ClassId()->Uuid())},{"class_name",data->ClassId()->ClassName()},{"capability","retained"}});return result;};
+        ONX_ModelComponentIterator layers(model,ON_ModelComponent::Type::Layer);
+        for(auto component=layers.FirstComponent();component;component=layers.NextComponent()){
+            auto layer=ON_Layer::Cast(component);if(!layer)throw ExchangeError("Invalid current retained layer");auto uuid=id(layer->Id());QJsonArray dependencies;
+            if(layer->ParentId()!=ON_nil_uuid)dependencies.append(id(layer->ParentId()));
+            if(layer->RenderMaterialIndex()>=0){auto material=model.ComponentFromIndex(ON_ModelComponent::Type::Material,layer->RenderMaterialIndex()).ModelComponent();if(!material)throw ExchangeError("Missing retained layer material");dependencies.append(id(material->Id()));}
+            if(layer->LinetypeIndex()>=0){auto pattern=model.ComponentFromIndex(ON_ModelComponent::Type::LinePattern,layer->LinetypeIndex()).ModelComponent();if(!pattern)throw ExchangeError("Missing retained layer line pattern");dependencies.append(id(pattern->Id()));}
+            QJsonObject row{{"source_uuid",uuid},{"class_uuid",id(layer->ClassId()->Uuid())},{"class_name","ON_Layer"},{"component_type",QString::fromWCharArray(ON_ModelComponent::ComponentTypeToString(ON_ModelComponent::Type::Layer).Array())},{"name",QString::fromWCharArray(layer->Name().Array())},{"role","top-level"},{"dependencies",dependencies},{"capability","retained"},{"user_strings",userStrings(*layer)},{"userdata",userData(*layer)},{"attribute_user_strings",QJsonArray{}},{"attribute_userdata",QJsonArray{}}};
+            if(indices.contains(uuid))rows[indices.at(uuid)]=row;else{indices[uuid]=rows.size();rows.push_back(row);}
+            // Empty layers belong to the session palette, so selection closure
+            // retains them even when no selected geometry references them.
+            roots.push_back(indices.at(uuid));
+        }
+        for(const auto& object:applied.objects){
+            auto uuid=QString::fromStdString(object.id);auto component=ON_ModelGeometryComponent::Cast(model.ComponentFromId(ON_ModelComponent::Type::ModelGeometry,ON_UuidFromString(object.id.c_str())).ModelComponent());auto attributes=component?component->Attributes(nullptr):nullptr;if(!attributes)throw ExchangeError("Missing canonical retained attributes");
+            auto& row=rows[indices.at(uuid)];QJsonArray dependencies;dependencies.append(QString::fromStdString(object.layerId));
+            for(auto dependency:row["dependencies"].toArray())if(rows[indices.at(dependency.toString())]["class_name"]!="ON_Layer")dependencies.append(dependency);
+            row["dependencies"]=dependencies;row["attribute_user_strings"]=userStrings(*attributes);row["attribute_userdata"]=userData(*attributes);
+        }
+        retainedPalette=readNativeLayerTable(model);
     }
     if(rows.size()>1000000)throw ExchangeError("Generated component count exceeds preservation limit");
     QJsonArray currentRows;for(auto& row:rows)currentRows.append(row);if(QJsonDocument(currentRows).toJson(QJsonDocument::Compact).size()>32*1024*1024)throw ExchangeError("Current generated component manifest exceeds32MiB");
@@ -606,6 +722,7 @@ static void writeSelectedArchive(const QJsonObject& request,const std::filesyste
         if(!writeSelectedModel(model,staged,purpose))throw ExchangeError("Cannot write selected native graph");
         auto checked=inspectArchive(staged);auto checkedGraph=currentSurfaceReferenceGraph(*checked.nativeModel);auto verified=checked.document;auto version=verified["source_version"].toInt();if(purpose==ArchivePurpose::GeometryStaging?version!=80:(version!=50&&version!=5))throw ExchangeError("Selected archive version does not match its purpose");
         if(!verified["issues"].toArray().isEmpty())throw ExchangeError("Written archive has unresolved references");
+        if(retainedPalette)verifyRetainedPalette(*retainedPalette,*checked.nativeModel);
         std::map<QString,QJsonObject> output;for(auto collection:{verified["records"].toArray(),verified["components"].toArray()})for(auto value:collection){auto row=value.toObject();output[row["source_uuid"].toString()]=row;}
         if(output.size()!=keep.size()){std::string details;for(auto& [uuid,row]:output)if(!keep.contains(uuid))details+=" added "+uuid.toStdString()+" "+row["class_name"].toString().toStdString();for(auto& uuid:keep)if(!output.contains(uuid))details+=" missing "+uuid.toStdString();throw ExchangeError("Rhino5 write dropped or added source components:"+details);}
         for(auto index:closure){auto original=rows[index];auto found=output.find(original["source_uuid"].toString());if(found==output.end()||found->second!=original){std::string fields;if(found!=output.end()){for(auto key:original.keys())if(original[key]!=found->second[key])fields+=" "+key.toStdString();for(auto key:found->second.keys())if(!original.contains(key))fields+=" added:"+key.toStdString();}throw ExchangeError("Rhino5 write changed retained component semantics: "+original["source_uuid"].toString().toStdString()+fields);}}

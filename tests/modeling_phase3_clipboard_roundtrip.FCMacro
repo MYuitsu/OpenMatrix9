@@ -1,0 +1,83 @@
+"""Owned FreeCAD half of actual Rhino Copy -> Paste -> edit -> Copy -> Rhino Paste."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets
+from pathlib import Path
+import os,json,traceback,hashlib,tempfile,struct,time,sys
+sys.path.insert(0,str(Path(__file__).parent))
+from phase12_timing import Timing,clipboard_bindings
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);config=json.loads(Path(os.environ['OM9_CLIPBOARD_CASE_JSON']).read_text());report={'checks':[],'pid':os.getpid()}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+helper=Path('H:/FreeCAD-src/build/om9-phase3-dev/tests/modeling_rhino5_saved_reimport.FCMacro').read_text()
+helpers=dict(App=App,Gui=Gui,Path=Path,os=os,json=json,hashlib=hashlib,tempfile=tempfile,struct=struct,check=check)
+exec(helper[helper.index('def measurements('):helper.index('\ndef run(')],helpers)
+measurements=helpers['measurements'];equal=helpers['equal']
+
+def observe_payload(capture, stage):
+    # Only the test observer retries. copy_selection/paste_selection are unchanged.
+    retries = 0
+    while True:
+        try:
+            payload = capture()
+            report.setdefault('observer_retries', []).append({'stage': stage, 'retries': retries})
+            return payload
+        except RuntimeError as error:
+            if str(error) != 'Windows clipboard is busy; try Paste again' or retries >= 5:
+                raise
+            retries += 1
+            loop = QtCore.QEventLoop()
+            QtCore.QTimer.singleShot(20, loop.quit)
+            loop.exec()
+
+def run():
+    try:
+        import OpenMatrix9Gui as native,ThreeDm,ThreeDmClipboard as clip,Part
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        payload=observe_payload(clip.capture_payload, "Rhino source");check('clipboard bound to actual Rhino Copy',hashlib.sha256(payload).hexdigest()==config['rhino_payload_sha256'])
+        doc=App.newDocument('RhinoClipboard');doc.UndoMode=1
+        trace=Timing(report,config['name'],'Rhino -> OM9','Paste')
+        with trace.wrappers(clipboard_bindings(clip,ThreeDm,native)):
+            objects=trace.call('total',clip.paste_selection)
+        report['paste_seconds']=report['timings'][-1]['seconds']
+        before=measurements(objects);check('actual Rhino selection count',len(objects)==config['source_count'])
+        oracle=App.newDocument('FileOracle');file_objects=ThreeDm.import_file(config['rhino_payload_file'],oracle,mode='modeling')
+        check('native clipboard geometry equals captured archive',equal(before,measurements(file_objects)))
+        App.closeDocument(oracle.Name);App.setActiveDocument(doc.Name)
+        # Current geometry and newly drawn geometry both return to Rhino.
+        editable=next((o for o in objects if hasattr(o,'Shape')),None)
+        if editable is not None:editable.Placement.Base+=App.Vector(3,0,0)
+        new=doc.addObject('Part::Feature','ClipboardNewCircle');new.Shape=Part.makeCircle(1.25)
+        new.addProperty('App::PropertyInteger','OM9GeometryKind');new.OM9GeometryKind=2
+        new.addProperty('App::PropertyString','OM9LayerPath');new.OM9LayerPath='Default'
+        doc.recompute();objects.append(new)
+        current=measurements(objects);Gui.Selection.clearSelection()
+        for obj in objects:Gui.Selection.addSelection(obj)
+        trace=Timing(report,config['name'],'OM9 -> Rhino','Copy')
+        with trace.wrappers(clipboard_bindings(clip,ThreeDm,native)):
+            trace.call('total',clip.copy_selection)
+        report['copy_seconds']=report['timings'][-1]['seconds']
+        copied=observe_payload(clip.capture_payload, "OM9 current copy");target=out/'om9-copy.3dm';target.write_bytes(copied)
+        copied_hash=hashlib.sha256(copied).hexdigest()
+        saved=out/'working.FCStd';doc.saveAs(str(saved));App.closeDocument(doc.Name)
+        QtWidgets.QApplication.clipboard().clear();reopened=App.openDocument(str(saved))
+        reopened_objects=[o for o in reopened.Objects if hasattr(o,'OM9GeometryKind')]
+        check('FCStd reopen independent of clipboard/source staging',equal(current,measurements(reopened_objects)))
+        copied_doc=App.newDocument('CopiedOracle');exported=ThreeDm.import_file(str(target),copied_doc,mode='modeling')
+        report['current_oracle']=current;report['reread_oracle']=measurements(exported)
+        check('current selected export reread',equal(current,report['reread_oracle']))
+        # Restored owned clipboard is materialized before this source app exits.
+        clip.publish_payload(copied)
+        _,clipboard_user,_,clipboard_format=clip._win32()
+        report['published_clipboard_sequence']=int(clipboard_user.GetClipboardSequenceNumber())
+        report['published_format_available']=bool(clipboard_user.IsClipboardFormatAvailable(clipboard_format))
+        report.update(ok=True,module=native.__file__,module_sha256=hashlib.sha256(Path(native.__file__).read_bytes()).hexdigest(),expected=current,payload_file=str(target),payload_sha256=copied_hash,source_measurements=before)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    if 'clipboard_user' in locals():
+        report['closed_documents_clipboard_sequence']=int(clipboard_user.GetClipboardSequenceNumber())
+        report['closed_documents_format_available']=bool(clipboard_user.IsClipboardFormatAvailable(clipboard_format))
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

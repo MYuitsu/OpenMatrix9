@@ -1,0 +1,70 @@
+"""Measure the actual saved ring without treating a failed Rhino probe as accepted."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os, json, hashlib, traceback, shutil
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+proof_path = Path(os.environ['OM9_RHINO5_MODELING_REPORT'])
+report = {'checks': [], 'cases': [], 'ok': False,
+          'rhino_report': str(proof_path),
+          'scope': 'Saved ring geometry diagnostic only; Rhino acceptance remains pending.'}
+
+def digest(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+    (out / 'progress.json').write_text(json.dumps(report, indent=2))
+    if not value:
+        raise AssertionError(name)
+
+def run():
+    try:
+        import ThreeDm, OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        helper = Path('H:/FreeCAD-src/build/om9-dev/tests/modeling_rhino5_saved_reimport.FCMacro')
+        scope = {'__name__': 'measurement_helpers'}
+        exec(compile(helper.read_text().split('QtCore.QTimer.singleShot(1000, run)')[0], str(helper), 'exec'), scope, scope)
+        scope['check'] = check
+        proof = json.loads(proof_path.read_text())
+        check('same bound native module', digest(native.__file__) == proof['source_bindings']['host_module_sha256'])
+        check('actual Rhino5 ring diagnostic available', proof['rhino_version'].startswith('5.'))
+        case = next(case for case in proof['cases'] if case['name'] == 'current-ring')
+        source = Path(case['input']); saved = Path(case['output'])
+        saved_hash = digest(saved)
+        check('bound original input checksum', digest(source) == case['input_sha256'])
+        before_doc = App.newDocument('RingBeforeRhino')
+        before_objects = ThreeDm.import_file(str(source), before_doc, mode='modeling')
+        check('original ring has all 29 roots', len(before_objects) == 29)
+        before = scope['measurements'](before_objects)
+        App.closeDocument(before_doc.Name)
+        owned_copy = out / 'ring-rhino-copy.3dm'; shutil.copyfile(saved, owned_copy)
+        doc = App.newDocument('RingAfterRhino')
+        objects = ThreeDm.import_file(str(owned_copy), doc, mode='modeling')
+        check('Rhino saved ring has all 29 roots', len(objects) == 29)
+        after = scope['measurements'](objects)
+        report['cases'].append({'name': 'current-ring', 'before': before, 'after': after,
+                                'rhino_saved_sha256': saved_hash, 'rhino_probe_ok': proof['ok']})
+        check('all saved CAD topology bounds area volume and attributes equivalent', scope['equal'](before, after))
+        names = [obj.Name for obj in objects]
+        fcstd = out / 'ring.FCStd'; doc.saveAs(str(fcstd)); App.closeDocument(doc.Name)
+        owned_copy.unlink()
+        reopened = App.openDocument(str(fcstd))
+        restored = [reopened.getObject(name) for name in names]
+        check('ring FCStd survives removal of its own source copy', scope['equal'](after, scope['measurements'](restored)))
+        target = out / 'ring-current.3dm'; ThreeDm.export_file(str(target), restored, modeling=True)
+        App.closeDocument(reopened.Name)
+        current = App.newDocument('RingCurrentReimport')
+        check('ring current export retains editable geometry', scope['equal'](after, scope['measurements'](ThreeDm.import_file(str(target), current, mode='modeling'))))
+        App.closeDocument(current.Name)
+        check('original input and actual Rhino output unchanged', digest(source) == case['input_sha256'] and digest(saved) == saved_hash)
+        report.update(ok=True, module_sha256=digest(native.__file__))
+    except Exception:
+        report['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(report, indent=2))
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1000, run)

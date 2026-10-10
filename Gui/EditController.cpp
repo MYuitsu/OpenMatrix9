@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "EditController.h"
+#include "SurfaceController.h"
 #include "EditSpecialTypes.h"
 #include "RustBridge.h"
 #include "CurveController.h"
@@ -60,8 +61,8 @@ bool EditController::matches(std::size_t i,const QString& text){return handles(i
 void EditController::activate(){enabled=true;qApp->installEventFilter(this);}
 void EditController::deactivate(){enabled=false;cancel();}
 bool EditController::active()const{return document&&om9_edit_phase()!=0;}
-bool EditController::available(std::size_t i)const{auto* d=App::GetApplication().getActiveDocument();auto* g=Gui::Application::Instance->activeDocument();return enabled&&handles(i)&&d&&g&&!g->isAboutToClose()&&!g->getInEdit()&&!dialog&&dynamic_cast<Gui::View3DInventor*>(g->getActiveView())&&Gui::Control().isAllowedAlterDocument(d);}
-bool EditController::valid()const{auto* g=Gui::Application::Instance->activeDocument();return enabled&&document==App::GetApplication().getActiveDocument()&&g&&!g->isAboutToClose()&&!g->getInEdit()&&Gui::Control().isAllowedAlterDocument(document);}
+bool EditController::available(std::size_t i)const{auto* d=App::GetApplication().getActiveDocument();auto* g=Gui::Application::Instance->activeDocument();return enabled&&handles(i)&&d&&!d->isReadOnlyFile()&&!d->testStatus(App::Document::Restoring)&&g&&!g->isAboutToClose()&&!g->getInEdit()&&!dialog&&dynamic_cast<Gui::View3DInventor*>(g->getActiveView())&&Gui::Control().isAllowedAlterDocument(d);}
+bool EditController::valid()const{auto* g=Gui::Application::Instance->activeDocument();return enabled&&document&&document==App::GetApplication().getActiveDocument()&&!document->isReadOnlyFile()&&!document->testStatus(App::Document::Restoring)&&g&&!g->isAboutToClose()&&!g->getInEdit()&&Gui::Control().isAllowedAlterDocument(document);}
 void EditController::prompt(const QString& s){CurveController::instance().setPrompt(s);CurveController::instance().logMessage(s);}
 void EditController::refresh(){QString text=QString::fromUtf8(caption(kind))+": ";switch(om9_edit_phase()){
     case 1:text+=(kind==4?"Select objects to subtract from":kind==5?"Select first set":kind==7?"Select exactly two solid objects":"Select objects");text+="; Enter / Undo / Cancel";break;
@@ -70,15 +71,19 @@ void EditController::refresh(){QString text=QString::fromUtf8(caption(kind))+": 
     case 4:text+="Click segments or surface regions to remove; Enter accepts / Undo / Cancel";break;
 }prompt(text);}
 bool EditController::start(std::size_t i,bool fromCommand){
+    if(available(i))SurfaceController::instance().cancel();
     if(!available(i))return false;CoreDistance::instance().cancel();CorePictureFrame::instance().cancel();CoreViewControls::instance().cancel();CurveController::instance().cancel();cancel();
     kind=om9_edit_kind(om9_command_id(i));allowBlocks=fromCommand;command=i;document=App::GetApplication().getActiveDocument();om9_edit_start(om9_command_id(i));qApp->installEventFilter(this);refresh();
     if(kind==3){auto* view=dynamic_cast<Gui::View3DInventor*>(Gui::Application::Instance->activeDocument()->getActiveView());auto* camera=view->getViewer()->getSoRenderManager()->getCamera();const auto eye=camera->position.getValue();SbVec3f right,up,forward;camera->orientation.getValue().multVec(SbVec3f(1,0,0),right);camera->orientation.getValue().multVec(SbVec3f(0,1,0),up);camera->orientation.getValue().multVec(SbVec3f(0,0,-1),forward);for(unsigned k=0;k<3;++k){projection.eye[k]=eye[k];projection.right[k]=right[k];projection.up[k]=up[k];projection.forward[k]=forward[k];}projection.perspective=camera->isOfType(SoPerspectiveCamera::getClassTypeId());}
-    for(const auto& sel:Gui::Selection().getSelection(document->getName())){if(sel.SubName&&*sel.SubName){prompt("Edit operates on whole native objects; clear subelement selection and reselect");continue;}add(sel.FeatName);}return false;
+    for(const auto& sel:Gui::Selection().getSelection(document->getName())){
+        if(sel.SubName&&*sel.SubName){cancel();prompt("Edit operates on whole native objects; clear subelement selection and reselect");break;}
+        if(!add(sel.FeatName)){cancel();prompt("Preselection rejected as a whole; correct the selection and restart");break;}
+    }return false;
 }
 void EditController::clearPreview(){for(auto [root,node]:previews){if(root->findChild(node)>=0)root->removeChild(node);root->unref();}previews.clear();trimPreviewSources.clear();for(auto [node,mode]:hidden){if(node->whichChild.getValue()==SO_SWITCH_NONE)node->whichChild=mode;node->unref();}hidden.clear();}
 void EditController::cancel(){om9_edit_cancel();document=nullptr;clearPreview();{Base::PyGILStateLocker lock;output.clear();inputs.clear();fragments.clear();}removed.clear();trimUndo.clear();if(dialog){auto* old=dialog.data();dialog=nullptr;old->disconnect(this);old->hide();old->deleteLater();}status=nullptr;buttons=nullptr;}
 void EditController::error(const std::exception& e){Base::PyGILStateLocker lock;if(PyErr_Occurred())PyErr_Clear();prompt(QString::fromUtf8(e.what()));if(status)status->setText(QString::fromUtf8(e.what()));if(buttons)buttons->button(QDialogButtonBox::Ok)->setEnabled(false);Base::Console().warning("OpenMatrix9 Edit: {}\n",e.what());}
-void EditController::add(const std::string& name){if(!active()||!valid()||om9_edit_phase()>2)return;try{Base::PyGILStateLocker lock;auto input=editInput(*document,name,kind,allowBlocks);if(!om9_edit_add(name.c_str()))throw std::runtime_error("Input already selected or this step is full");inputs.push_back(std::move(input));refresh();}catch(const std::exception& e){error(e);}}
+bool EditController::add(const std::string& name){if(!active()||!valid()||om9_edit_phase()>2)return false;try{Base::PyGILStateLocker lock;auto input=editInput(*document,name,kind,allowBlocks);if(!om9_edit_add(name.c_str()))throw std::runtime_error("Input already selected or this step is full");inputs.push_back(std::move(input));refresh();return true;}catch(const std::exception& e){error(e);return false;}}
 void EditController::submit(const QString& text){
     if(!active())return;if(!valid()){cancel();return;}const auto s=text.trimmed();
     if(s.compare("Cancel",Qt::CaseInsensitive)==0||s.compare("Esc",Qt::CaseInsensitive)==0){cancel();prompt("Edit cancelled. Command:");return;}
@@ -118,6 +123,7 @@ void EditController::preview(){
     clearPreview();try{Base::PyGILStateLocker lock;verifyEditInputs(*document,inputs);output.clear();
         if(kind==3){for(std::size_t i=0;i<fragments.size();++i)for(std::size_t j=0;j<fragments[i].size();++j)if(!removed[i].contains(j))output.push_back(fragments[i][j]);}
         else output=buildEdit(inputs,kind,om9_edit_count(1),om9_edit_mode(),om9_edit_tolerance());
+        phase3Require(om9_phase3_result_count(output.size()));
         CurvePyRef part(PyImport_ImportModule("Part"));auto* g=Gui::Application::Instance->activeDocument();
         // Transient Coin switches hide inputs without writing Visibility or adding objects.
         for(const auto& i:inputs)if(auto* provider=g->getViewProvider(document->getObject(i.name.c_str()))){auto* node=provider->getModeSwitch();const int mode=node->whichChild.getValue();node->ref();hidden.emplace_back(node,mode);node->whichChild=SO_SWITCH_NONE;}

@@ -1,0 +1,85 @@
+"""Real native Part creation/copy receives current layer inside its native Undo."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtTest
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():Gui.updateGui();QtTest.QTest.qWait(300)
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('NativeLayerCreate');doc.UndoMode=1;settle()
+        def snapshot():return json.loads(native.layerDocumentSnapshot(doc.Name))
+        def command(**kw):native.layerDocumentCommand(doc.Name,json.dumps(kw))
+        command(operation='set_current',layer_id='om9-preset-7');before=snapshot();undo=doc.UndoCount
+        other=App.newDocument('OtherLayerDraft');other.UndoMode=1
+        native.layerDocumentCommand(other.Name,json.dumps({'operation':'set_current','layer_id':'om9-preset-3'}))
+        otherOwner=next(o for o in other.Objects if o.TypeId=='OpenMatrix9Gui::LayerDocumentObject');outsideBefore=otherOwner.OM9LayerSnapshot
+        other.openTransaction('Foreign native draft');draft=other.addObject('Part::Feature','ForeignDraft');draft.Shape=Part.makeBox(1,1,1);other.recompute()
+        App.setActiveDocument(doc.Name);Gui.setActiveDocument(doc.Name)
+        doc.openTransaction('Native feature');box=doc.addObject('Part::Feature','NativeBox');box.Shape=Part.makeBox(2,3,4);doc.recompute();doc.commitTransaction()
+        check('native feature gets current layer and immutable native anchor',getattr(box,'OM9LayerId',None)=='om9-preset-7' and box.OM9LayerHostName==box.Name)
+        after=snapshot();row=next(r for r in after['snapshot']['objects'] if r['id']==box.OM9LayerObjectId)
+        check('native creation is current ByLayer with independent own flags',row['color_source']=='ByLayer' and not row['locked'] and row['visible'] and row['rgb']==[122,167,206])
+        check('native creation metadata shares exactly one Undo',doc.UndoCount==undo+1)
+        check('unrelated pending document receives no projection or metadata',other.HasPendingTransaction and otherOwner.OM9LayerSnapshot==outsideBefore and 'OM9LayerId' not in draft.PropertiesList)
+        doc.undo();check('one native Undo removes geometry and restores exact layer state',doc.getObject('NativeBox') is None and snapshot()==before)
+        doc.redo();settle();box=doc.getObject('NativeBox');check('one native Redo restores geometry and exact layer state',box is not None and snapshot()==after)
+        command(operation='set_current',layer_id='om9-preset-5');old=snapshot();undo=doc.UndoCount
+        doc.openTransaction('Native duplicate');duplicate=doc.copyObject(box,False);doc.recompute();doc.commitTransaction()
+        duplicated=snapshot();rows=duplicated['snapshot']['objects']
+        report['native_copy']={'name':duplicate.Name,'logical_id':getattr(duplicate,'OM9LayerObjectId',None),'anchor':getattr(duplicate,'OM9LayerHostName',None),'layer':getattr(duplicate,'OM9LayerId',None),'rows':rows,'facts':native.layerDocumentTransactionFacts(doc.Name)}
+        check('native copy never aliases original logical ID',duplicate.OM9LayerObjectId!=box.OM9LayerObjectId and len({r['id'] for r in rows})==2)
+        check('native duplicate gets new current layer instead of copied anchor',duplicate.OM9LayerId=='om9-preset-5' and duplicate.OM9LayerHostName==duplicate.Name and box.OM9LayerId=='om9-preset-7')
+        check('native duplicate shares one Undo with layer projection',doc.UndoCount==undo+1)
+        name=duplicate.Name;doc.undo();check('native duplicate Undo restores original state',doc.getObject(name) is None and snapshot()==old)
+        doc.redo();check('native duplicate Redo restores exact state',doc.getObject(name) is not None and snapshot()==duplicated)
+        # Actual native UI route, including changing workbench while OM9 remains loaded.
+        Gui.getMainWindow().show();Gui.getMainWindow().resize(1500,1000)
+        Gui.activateWorkbench('PartWorkbench');Gui.runCommand('Part_Primitives');settle()
+        combo=Gui.getMainWindow().findChild(QtWidgets.QComboBox,'PrimitiveTypeCB');check('actual native primitive panel opened',combo is not None)
+        combo.setCurrentIndex(combo.findText('Box'));QtCore.QMetaObject.invokeMethod(combo,'activated',QtCore.Q_ARG(int,combo.currentIndex()));settle()
+        before=snapshot();undo=doc.UndoCount
+        buttons=next(b for b in Gui.getMainWindow().findChildren(QtWidgets.QDialogButtonBox) if b.isVisible() and b.button(QtWidgets.QDialogButtonBox.Ok) and 'reate' in b.button(QtWidgets.QDialogButtonBox.Ok).text())
+        buttons.button(QtWidgets.QDialogButtonBox.Ok).click();settle();buttons.button(QtWidgets.QDialogButtonBox.Close).click();settle()
+        primitive=next(o for o in doc.Objects if o.TypeId=='Part::Box')
+        check('actual native Part primitive inherits current layer/color',primitive.OM9LayerId=='om9-preset-5' and tuple(round(c*255) for c in primitive.ViewObject.ShapeColor[:3])==(89,139,194))
+        after=snapshot();name=primitive.Name
+        check('actual primitive layer state shares native Undo',doc.UndoCount==undo+1)
+        doc.undo();check('actual primitive Undo restores exact metadata',doc.getObject(name) is None and snapshot()==before)
+        doc.redo();check('actual primitive Redo restores exact metadata',doc.getObject(name) is not None and snapshot()==after)
+        # Imported objects have exchange provenance; they are not newly drawn
+        # geometry and must never be reset to current creation defaults.
+        import ThreeDm
+        source=App.newDocument('LegacyExchangeSource')
+        importedSource=source.addObject('Part::Feature','ImportOwn');importedSource.Shape=Part.makeBox(3,4,5)
+        importedSource.addProperty('App::PropertyString','OM9LayerPath');importedSource.OM9LayerPath='Incoming::Detail'
+        importedSource.addProperty('App::PropertyBool','OM9Locked');importedSource.OM9Locked=True
+        importedSource.ViewObject.Visibility=False;importedSource.ViewObject.ShapeColor=(43/255.,44/255.,45/255.);source.recompute()
+        file=output/'legacy-own-state.3dm';ThreeDm.export_file(str(file),[importedSource],modeling=True)
+        App.closeDocument(source.Name);App.setActiveDocument(doc.Name);Gui.setActiveDocument(doc.Name)
+        doc.openTransaction('Unrelated current user draft');box=doc.getObject('NativeBox');box.Label='Keep current user work';undo=doc.UndoCount
+        rejected=False
+        try:native.commit3dm(doc.Name,[])
+        except RuntimeError:rejected=True
+        check('import refuses current foreign transaction without closing it',rejected and doc.HasPendingTransaction and box.Label=='Keep current user work' and doc.UndoCount==undo)
+        doc.abortTransaction()
+        imported=ThreeDm.import_file(str(file),doc,mode='modeling')[0]
+        check('legacy exchange never takes native creation defaults',imported.OM9Locked and not imported.ViewObject.Visibility and tuple(round(c*255) for c in imported.ViewObject.ShapeColor[:3])==(43,44,45))
+        check('legacy incoming own state is conservatively readable',imported.OM9LayerHostName==imported.Name and next(r for r in snapshot()['snapshot']['objects'] if r['id']==imported.OM9LayerObjectId)['color_source']=='ByObject')
+        after=snapshot()
+        other.abortTransaction();check('foreign abort restores only its own draft',other.getObject('ForeignDraft') is None and otherOwner.OM9LayerSnapshot==outsideBefore and snapshot()==after)
+        saved=output/'native-create.FCStd';doc.saveAs(str(saved));App.closeDocument(doc.Name);doc=App.openDocument(str(saved));settle()
+        check('FCStd native creation bindings survive reopen',snapshot()==after and doc.getObject(name).OM9LayerHostName==name)
+        report.update(ok=True,module=native.__file__,scope='native feature/copy/actual Part UI creation and Undo; general mutation guards and receive still pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for doc in list(App.listDocuments().values()):
+            if doc.HasPendingTransaction:doc.abortTransaction()
+            App.closeDocument(doc.Name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

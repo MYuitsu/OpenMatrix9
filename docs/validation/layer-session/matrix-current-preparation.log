@@ -1,0 +1,42 @@
+native-current-sdk-build
+Current Matrix native diagnostic built: H:\FreeCAD-src\build\om9-layer-edits\tests\bin\current\Rhino5LayerCurrentProbe.dll; actual current-session execution pending.
+
+python-host-boundaries
+Failed to find real location of H:\FreeCAD-src\.pixi\envs\default\python.exe
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.040s
+
+OK
+
+registry-ownership
+Registry ownership guard PASS6; no registry mutation or native runtime acceptance.
+Current-session registry ownership guard PASS3; no registry mutation or native runtime acceptance.
+
+installed-ironpython-sdk
+SDK readable property: Int32 DocumentId
+SDK readable property: Boolean Modified
+SDK readable property: Rhino.DocObjects.Tables.LayerTable Layers
+SDK readable property: Int32 Count
+SDK readable property: Int32 CurrentLayerIndex
+SDK readable property: System.String CommandHistoryWindowText
+SDK native dynamic-command registration available; actual command runtime still pending.
+Installed Rhino5 IronPython syntax PASS: H:\FreeCAD-src\build\om9-layer-edits\tests\rhino5_verify_layer_api.py
+Installed Rhino5 IronPython syntax PASS: H:\FreeCAD-src\build\om9-layer-edits\tests\rhino5_layer_api_prerequisite.py
+Installed Rhino5 IronPython syntax PASS: H:\FreeCAD-src\build\om9-layer-edits\tests\rhino5_verify_layer_command_api.py
+Installed Rhino5 IronPython syntax PASS: H:\FreeCAD-src\build\om9-layer-edits\tests\rhino5_verify_matrix_current.py
+SDK/compile checks only; actual Matrix runtime and full handoff remain separate.
+
+powershell-syntax
+PowerShell syntax PASS: H:/FreeCAD-src/build/om9-layer-edits/tests/run_rhino5_layer_api_prerequisite.ps1
+PowerShell syntax PASS: H:/FreeCAD-src/build/om9-layer-edits/tools/build-rhino5-layer-command-probe.ps1
+PowerShell syntax PASS: H:/FreeCAD-src/build/om9-layer-edits/tests/register_matrix_current_probe.ps1
+PowerShell syntax PASS: H:/FreeCAD-src/build/om9-layer-edits/tools/build-matrix-current-probe.ps1
+
+installed-ironpython-utf8
+Installed Rhino5 IronPython UTF8 launcher log PASS
+
+native-rollback-boundary
+Actual before-image rollback boundary PASS: constrained native flags and desired own flags restored separately.
+Failed to find real location of H:\FreeCAD-src\.pixi\envs\default\python.exe
+

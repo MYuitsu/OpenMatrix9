@@ -6,8 +6,9 @@ https://github.com/FreeCAD/FreeCAD. Preserve copyright and license notices when
 copying or modifying any upstream code.
 
 FreeCAD and its SDK bring their own dependencies, including Qt, Open CASCADE,
-Coin, Python and others. This repository does not redistribute their binaries;
-their licenses apply when building or distributing a combined application.
+Coin, Python and others. Release 0.0.1 provides a separate matching FreeCAD portable host. Its component
+licenses and package metadata are included in that archive; FreeCAD source is
+provided as a separate release asset. Their respective licenses apply.
 
 3DM exchange uses the open-source openNURBS toolkit from Robert McNeel &
 Associates, fetched at the pinned revision in `cmake/OpenNURBS.cmake`:

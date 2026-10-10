@@ -1,0 +1,43 @@
+"""Reread this run's exact Rhino SaveAs and Export Selected outputs in OM9."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,sys,traceback,tempfile,hashlib
+sys.path.insert(0,str(Path(__file__).parent))
+from phase3_oracle import measure
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);(out/'temp').mkdir(exist_ok=True);tempfile.tempdir=str(out/'temp')
+report={'checks':[],'cases':[]}
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        path=Path(os.environ['OM9_PHASE3_RHINO_REPORT']);prior=json.loads(path.read_text(encoding='utf-8-sig'))
+        check('actual completed Rhino5 report',prior['ok'] and prior['rhino_version'].startswith('5.') and len(prior['cases'])==15)
+        for case in prior['cases']:
+            for index,output in enumerate(case['outputs']):
+                label=case['name']+'-'+str(index);check(label+' output hash',sha(output['path'])==output['sha256'])
+                doc=App.newDocument('RhinoSaved');objects=ThreeDm.import_file(output['path'],doc,mode='modeling')
+                check(label+' selected object set',len(objects)==len(case['expected']))
+                lookup={o.Label:o for o in objects};wanted=[row['object_name'] for row in case['expected']]
+                check(label+' exact unique object names',len(lookup)==len(objects) and len(set(wanted))==len(wanted) and set(lookup)==set(wanted))
+                objects=[lookup[name] for name in wanted]
+                for i,(o,before) in enumerate(zip(objects,case['expected'])):
+                    s=o.Shape;m=measure(s,out/(label+'-'+str(i)+'.brep'));box=s.optimalBoundingBox(False,False)
+                    bounds=m['bounds']
+                    report['current_measurement']={'case':label,'object':o.Label,'bounds':bounds,'expected':before,'mass':m}
+                    check(label+' '+str(i)+' native CAD valid',o.OM9Representation=='native-cad' and s.isValid())
+                    check(label+' '+str(i)+' native open/solid',bool(s.Solids)==bool(before['solids']))
+                    check(label+' '+str(i)+' current bounds',max(abs(x-y) for x,y in zip(bounds,before['bounds']))<=.001)
+                    check(label+' '+str(i)+' current material area',abs(m['area']-before['area'])<=max(.001,.0001*abs(before['area'])))
+                    if before['solids']:check(label+' '+str(i)+' current volume',abs(m['volume']-before['volume'])<=max(.001,.0001*abs(before['volume'])))
+                report['cases'].append({'name':label,'path':output['path'],'sha256':output['sha256']});App.closeDocument(doc.Name)
+        report.update(ok=True,module=native.__file__,python_module=ThreeDm.__file__,rhino_report=str(path),rhino_report_sha256=sha(path))
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for n in list(App.listDocuments()):App.closeDocument(n)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

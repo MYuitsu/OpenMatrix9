@@ -40,6 +40,8 @@ def invoke(token,text,finish='done',cmd=False,close_document=None):
 def run():
     global window
     try:
+        import OpenMatrix9Gui as native
+        result['module']=native.__file__
         Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('NotesTest');doc.UndoMode=1;doc.Meta={'unrelated':'preserved'};settle();window=Gui.getMainWindow();window.show()
         check('Notes menu actions enabled',all(window.findChild(QtGui.QAction,n).isEnabled() for n in ('OM9_FileNotes','OM9_ProjectNotes')))
         notes='Ghi chú nhẫn\nSize 12 — 金'

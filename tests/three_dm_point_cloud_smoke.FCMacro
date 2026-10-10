@@ -11,6 +11,7 @@ def run():
     try:
         Gui.activateWorkbench('OpenMatrix9Workbench')
         import ThreeDm,ThreeDmArchiveState as state,ThreeDmPointCloud as adapter,OpenMatrix9Gui as native
+        result['module']=native.__file__
         source=Path(tempfile.gettempdir())/'om9-native-point-cloud-mm.3dm';original=source.read_bytes();external=out/'source.3dm';external.write_bytes(original)
         doc=App.newDocument('NativePointCloud');doc.UndoMode=1;roots=ThreeDm.import_file(str(external),doc,mode='preserve');cloud=next(o for o in roots if o.OM9SourceClass=='ON_PointCloud' and not o.OM9CloudValues);intensity=next(o for o in roots if o.OM9SourceClass=='ON_PointCloud' and o.OM9CloudValues);member=next(o for o in doc.Objects if getattr(o,'OM9SourceClass','')=='ON_PointCloud' and o not in roots);block=next(o for o in roots if o.OM9SourceClass=='ON_InstanceRef')
         check('native PointCloud uses persistent double properties without Shape or float kernel',adapter.is_adapter(cloud) and adapter.is_adapter(member) and not hasattr(cloud,'Shape') and cloud.getTypeIdOfProperty('OM9CloudPoints')=='App::PropertyVectorList' and cloud.getTypeIdOfProperty('OM9CloudNormals')=='App::PropertyVectorList')

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="10"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="32"
+	timestamp="2026-10-08T21:55:28"
+	>
+	<testcase name="OM9-FILE-012.ModelingExchange" classname="OM9-FILE-012.ModelingExchange" time="0.676888" status="run">
+		<properties/>
+		<system-out>Modeling native: mm/cm, NURBS/arc/trimmed BRep/cloud, current selection and opaque preflight PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.PointCloud" classname="OM9-FILE-012.PointCloud" time="0.676821" status="run">
+		<properties/>
+		<system-out>Native PointCloud fields, identity, dormant plane, mm/cm member/copy and atomic gates passed
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.CloudGeometry" classname="OM9-FILE-012.CloudGeometry" time="0.476097" status="run">
+		<properties/>
+		<system-out>mm: cloud mixed nested affine native doubles and intensity atomic gate PASS
+cm: cloud mixed nested affine native doubles and intensity atomic gate PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Preservation" classname="OM9-FILE-012.Preservation" time="0.441768" status="run">
+		<properties/>
+		<system-out>preservation PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Inventory" classname="OM9-FILE-012.Inventory" time="0.462683" status="run">
+		<properties/>
+		<system-out>inventory PASS; fixture "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-inventory.3dm"
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Geometry" classname="OM9-FILE-012.Geometry" time="0.448008" status="run">
+		<properties/>
+		<system-out>curved volumes 502.655 502.655
+curved volumes 268.083 268.083
+OM9-FILE-012 geometry PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Archive" classname="OM9-FILE-012.Archive" time="0.802406" status="run">
+		<properties/>
+		<system-out>metadata PASS
+inch written
+extrusion volume 502.65482465286311 expected 502.6548245743669
+OM9-FILE-012 archive PASS; fixtures "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-3dm-native"
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.UserRing" classname="OM9-FILE-012.UserRing" time="6.53713" status="run">
+		<properties/>
+		<system-out>OM9-FILE-012 user ring PASS: 101 objects
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Blocks" classname="OM9-FILE-012.Blocks" time="0.574237" status="run">
+		<properties/>
+		<system-out>nested and mixed shear blocks PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Unmeshed" classname="OM9-FILE-012.Unmeshed" time="21.1346" status="run">
+		<properties/>
+		<system-out>count 135 tolerance 0.001 scale 1
+Accurate volume object 5: 59.44329333599798 -&gt; 59.44329333778601 difference 1.788031056548789e-09
+Accurate volume object 6: 59.44329333599798 -&gt; 59.44329333778601 difference 1.788031056548789e-09
+unmeshed fixture PASS
+</system-out>
+	</testcase>
+</testsuite>

@@ -4,9 +4,6 @@
 #include "CoreDistance.h"
 #include "CorePictureFrame.h"
 #include "CurveController.h"
-#include "SurfaceController.h"
-#include "EditController.h"
-#include "SolidController.h"
 #include "NativeCommands.h"
 #include "RustBridge.h"
 #include "CameraState.h"
@@ -45,7 +42,7 @@ Gui::View3DInventor* containing(QObject* object){
     for(auto* mdi:doc->getMDIViews())if(auto* view=dynamic_cast<Gui::View3DInventor*>(mdi);view&&(widget==view->getViewer()||view->getViewer()->isAncestorOf(widget)))return view;
     return nullptr;
 }
-bool pointTool(){return om9_curve_active()||OpenMatrix9Gui::EditController::instance().active()||OpenMatrix9Gui::SolidController::instance().active()||OpenMatrix9Gui::SurfaceController::instance().active()||OpenMatrix9Gui::CoreDistance::instance().active()||OpenMatrix9Gui::CorePictureFrame::instance().active();}
+bool pointTool(){return om9_curve_active()||OpenMatrix9Gui::CoreDistance::instance().active()||OpenMatrix9Gui::CorePictureFrame::instance().active();}
 unsigned int mods(Qt::KeyboardModifiers value){return (value.testFlag(Qt::ShiftModifier)?1U:0U)|(value.testFlag(Qt::ControlModifier)?2U:0U)|(value.testFlag(Qt::AltModifier)?4U:0U)|(value.testFlag(Qt::MetaModifier)?8U:0U);}
 SbVec3f direction(SoCamera* camera){SbVec3f result;camera->orientation.getValue().multVec(SbVec3f(0,0,-1),result);return result;}
 SbVec3f focal(SoCamera* camera){return camera->position.getValue()+direction(camera)*camera->focalDistance.getValue();}
@@ -120,8 +117,7 @@ void CoreMouse::select(const QPoint& point,bool rectangle){
 }
 void CoreMouse::confirm(){
     if(pointTool()||CurveController::instance().pendingInput()){CurveController::instance().acceptInput();return;}
-    const auto command=om9_command_repeat_candidate();
-    if(command<om9_command_count()&&om9NativeCommandAvailable(command))om9ExecuteNativeCommand(command);
+    if(om9_sidebar_history_count()){const auto command=om9_sidebar_history_command(0);if(om9NativeCommandAvailable(command))om9_sidebar_record_execution(command,om9ExecuteNativeCommand(command));}
 }
 void CoreMouse::recent(){
     if(popup)delete popup.data();popup=new QMenu(Gui::getMainWindow());popup->setObjectName("OM9MouseHistory");

@@ -1,0 +1,42 @@
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+from pivy import coin
+from pathlib import Path
+import json,os,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def nodes(node):
+    yield node
+    if node.isOfType(coin.SoGroup.getClassTypeId()):
+        for child in node.getChildren():yield from nodes(child)
+def finish():
+    try:
+        check('inactive external curved source receives isocurves',any(str(n.getName())=='OM9CadIsocurves' for n in nodes(shape.ViewObject.RootNode)))
+        check('external reflected link contains source isocurves',any(str(n.getName())=='OM9CadIsocurves' for n in nodes(link.ViewObject.RootNode)))
+        Gui.activeDocument().activeView().viewAxonometric();Gui.activeDocument().activeView().fitAll();Gui.activeDocument().activeView().saveImage(str(out/'external-link-wire.png'),800,800,'Current')
+        check('external model shape remains unchanged',shape.Shape.hashCode()==before)
+        Gui.activateWorkbench('PartWorkbench')
+        result['switches_before']=override;result['switches_after']=switches()
+        check('workbench exit restores external provider override',switches()==override)
+        check('workbench exit removes external transient nodes',not any(str(n.getName()).startswith('OM9Cad') for n in nodes(shape.ViewObject.RootNode)))
+        result['ok']=True
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in reversed(list(App.listDocuments())):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+def switches():return [n.whichChild.getValue() for n in nodes(shape.ViewObject.RootNode) if n.isOfType(coin.SoSwitch.getClassTypeId())]
+def start():
+    global shape,link,before,override
+    try:
+        Gui.activateWorkbench('PartWorkbench');source=App.newDocument('ExternalSource');shape=source.addObject('Part::Feature','CurveSource');shape.Shape=Part.makeCylinder(5,10);shape.ViewObject.LineColor=(1.,.5,.5);source.recompute();before=shape.Shape.hashCode()
+        Gui.runCommand('Std_DrawStyle',5);override=switches();source.saveAs(str(out/'external-source.FCStd'))
+        target=App.newDocument('ExternalTarget');target.saveAs(str(out/'external-target.FCStd'));link=target.addObject('App::Link','ReflectedLink');link.setLink(shape);link.LinkTransform=True;link.ScaleVector=App.Vector(-1,1,1);link.Placement.Base=App.Vector(15,0,0);target.recompute()
+        override=switches() # Native Link setup can already forward its own mode.
+        Gui.activateWorkbench('OpenMatrix9Workbench');QtCore.QTimer.singleShot(1200,finish)
+    except Exception:
+        result.update(ok=False,error=traceback.format_exc());(out/'results.json').write_text(json.dumps(result,indent=2))
+        for name in reversed(list(App.listDocuments())):App.closeDocument(name)
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1000,start)

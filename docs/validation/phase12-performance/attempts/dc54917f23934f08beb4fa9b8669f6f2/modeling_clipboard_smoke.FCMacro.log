@@ -1,0 +1,145 @@
+{
+  "checks": [
+    {
+      "name": "clipboard commands registered",
+      "passed": true
+    },
+    {
+      "name": "menu Copy native Windows format",
+      "passed": true
+    },
+    {
+      "name": "Copy leaves source geometry and object count unchanged",
+      "passed": true
+    },
+    {
+      "name": "Copy keeps GUI event loop alive",
+      "passed": true
+    },
+    {
+      "name": "clipboard includes only current selected objects",
+      "passed": true
+    },
+    {
+      "name": "menu Paste creates independent editable objects",
+      "passed": true
+    },
+    {
+      "name": "current placement survives Copy and source close",
+      "passed": true
+    },
+    {
+      "name": "Command Paste shares handler and creates fresh UUIDs",
+      "passed": true
+    },
+    {
+      "name": "one Undo removes one Paste",
+      "passed": true
+    },
+    {
+      "name": "Redo restores whole Paste",
+      "passed": true
+    },
+    {
+      "name": "Command Copy shares native format",
+      "passed": true
+    },
+    {
+      "name": "unsupported Copy fails before publication",
+      "passed": true
+    },
+    {
+      "name": "failed Copy preserves clipboard",
+      "passed": true
+    },
+    {
+      "name": "text path is not imported",
+      "passed": true
+    },
+    {
+      "name": "failed Paste leaves document unchanged",
+      "passed": true
+    },
+    {
+      "name": "truncated archive fails before commit",
+      "passed": true
+    },
+    {
+      "name": "truncated archive leaves document unchanged",
+      "passed": true
+    },
+    {
+      "name": "Command input keeps text shortcuts",
+      "passed": true
+    },
+    {
+      "name": "Ctrl+C in text field copies text",
+      "passed": true
+    },
+    {
+      "name": "viewport shortcut context exists",
+      "passed": true
+    },
+    {
+      "name": "viewport Ctrl+V uses modeling Paste",
+      "passed": true
+    },
+    {
+      "name": "FCStd reopen survives clipboard/staging deletion",
+      "passed": true
+    },
+    {
+      "name": "clipboard unavailable after clear",
+      "passed": true
+    }
+  ],
+  "filter_installed": true,
+  "shortcut_focus": "Gui::View3DInventorViewer",
+  "viewers": [
+    {
+      "class": "Gui::View3DInventor",
+      "name": "",
+      "focus_policy": 0
+    },
+    {
+      "class": "Gui::View3DInventorViewer",
+      "name": "",
+      "focus_policy": 11
+    },
+    {
+      "class": "Gui::View3DInventor",
+      "name": "",
+      "focus_policy": 0
+    },
+    {
+      "class": "Gui::View3DInventorViewer",
+      "name": "",
+      "focus_policy": 11
+    },
+    {
+      "class": "Gui::View3DInventor",
+      "name": "",
+      "focus_policy": 0
+    },
+    {
+      "class": "Gui::View3DInventorViewer",
+      "name": "",
+      "focus_policy": 11
+    },
+    {
+      "class": "Gui::View3DInventor",
+      "name": "",
+      "focus_policy": 0
+    },
+    {
+      "class": "Gui::View3DInventorViewer",
+      "name": "",
+      "focus_policy": 11
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd",
+  "payload_bytes": 8185,
+  "payload_sha256": "4270017b5f7ac5c123db081ba444ec3ad98f8cab61f7af18e4a0b68656f711fd"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_clipboard_smoke-1\6e9aa765aa4b4772bbeaa4333a2f9d4f

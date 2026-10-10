@@ -1,0 +1,50 @@
+"""Actual FreeCAD measurement preflight for remaining Rhino candidates; no Rhino proof."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os, json, traceback, hashlib
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'checks': [], 'cases': [], 'ok': False,
+          'scope': 'FreeCAD candidate and measurement preflight only. Actual Rhino application acceptance pending.'}
+
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+    (out / 'progress.json').write_text(json.dumps(report, indent=2))
+    if not value:
+        raise AssertionError(name)
+
+def run():
+    try:
+        import ThreeDm, OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        helper_path = Path('H:/FreeCAD-src/build/om9-dev/tests/modeling_rhino5_saved_reimport.FCMacro')
+        helper_source = helper_path.read_text().split('QtCore.QTimer.singleShot(1000, run)')[0]
+        scope = {'__name__': 'measurement_helpers'}
+        exec(compile(helper_source, str(helper_path), 'exec'), scope, scope)
+        scope['check'] = check
+        config = json.loads(Path('H:/FreeCAD-src/build/modeling-acceptance-preflight-config.json').read_text())
+        for entry in config['files']:
+            path = Path(entry['input'])
+            check(entry['name'] + ' immutable candidate checksum', hashlib.sha256(path.read_bytes()).hexdigest() == entry['input_sha256'])
+            doc = App.newDocument('AcceptancePreflight')
+            objects = ThreeDm.import_file(str(path), doc, mode='modeling')
+            check(entry['name'] + ' working root count', len(objects) == entry['count'])
+            measured = scope['measurements'](objects)
+            if entry['name'] == 'current-mesh':
+                check('current mesh native 20000 facets and geometry signature available', measured[0]['kind'] == 4 and measured[0]['faces'] == 20000 and bool(measured[0]['mesh_geometry_sha256']))
+            elif entry['name'] == 'current-point':
+                check('current point remains CAD point', measured[0]['kind'] == 1)
+            elif entry['name'] == 'current-extrusion':
+                check('current extrusion adaptive solid measurement available', measured[0]['kind'] == 3 and measured[0]['solids'] == 1 and measured[0]['volume'] > 0)
+            report['cases'].append({'name': entry['name'], 'input': str(path), 'input_sha256': entry['input_sha256'], 'measured': measured})
+            App.closeDocument(doc.Name)
+        report.update(ok=True, module_sha256=hashlib.sha256(Path(native.__file__).read_bytes()).hexdigest())
+    except Exception:
+        report['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(report, indent=2))
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1000, run)

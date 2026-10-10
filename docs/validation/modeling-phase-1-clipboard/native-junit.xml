@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="48"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="88"
+	timestamp="2026-10-09T02:20:43"
+	>
+	<testcase name="OM9-FILE-012.NativeThreadPool" classname="OM9-FILE-012.NativeThreadPool" time="10.2347" status="run">
+		<properties/>
+		<system-out>Native thread pool: concurrency, join-on-error, ordered CAD equivalence PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.ModelingExchange" classname="OM9-FILE-012.ModelingExchange" time="0.628767" status="run">
+		<properties/>
+		<system-out>Modeling native: mm/cm, NURBS/arc/trimmed BRep/cloud, current selection and opaque preflight PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.CoverageRuntime" classname="OM9-FILE-012.CoverageRuntime" time="0.414004" status="run">
+		<properties/>
+		<system-out>Coverage runtime PASS: 128 registered classes
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.TrimInteriorMapping" classname="OM9-FILE-012.TrimInteriorMapping" time="0.388546" status="run">
+		<properties/>
+		<system-out>Native nonlinear trim mapping PASS 152 checks
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.MultiShellSolid" classname="OM9-FILE-012.MultiShellSolid" time="2.90438" status="run">
+		<properties/>
+		<system-out>Multi-shell fixture kind=0 direction=1 positive_valid=1
+Multi-shell fixture kind=0 direction=-1 positive_valid=1
+Multi-shell fixture kind=1 direction=1 positive_valid=1
+Multi-shell fixture kind=1 direction=-1 positive_valid=1
+Multi-shell fixture kind=2 direction=1 positive_valid=1
+Multi-shell fixture kind=2 direction=-1 positive_valid=1
+Multi-shell BRep PASS 32 checks
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.CoherentReferenceTarget" classname="OM9-FILE-012.CoherentReferenceTarget" time="0.479722" status="run">
+		<properties/>
+		<system-out>Inspect coherent fixture 0
+Basic read passed
+Inspect coherent fixture 1
+Basic read passed
+Inspect coherent fixture 2
+Basic read passed
+Inspect coherent fixture 3
+Basic read passed
+Coherent reference target fixtures PASS4 coherent and12 standalone native controls
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.SurfaceCurveTargetMatrix" classname="OM9-FILE-012.SurfaceCurveTargetMatrix" time="0.946723" status="run">
+		<properties/>
+		<system-out>Surface-curve target matrix PASS30 coherent,6 original nested and90 expanded native profiles
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.CurvedShells" classname="OM9-FILE-012.CurvedShells" time="1.37485" status="run">
+		<properties/>
+		<system-out>Curved shell kind=0 faces=6
+Imported valid=1 volume=395.84067406027793 expected=395.84067435231395
+Curved shell kind=1 faces=6
+Imported valid=1 volume=615.75215964932136 expected=615.75216010359941
+Curved shell kind=2 faces=2
+Imported valid=1 volume=410.5014396147883 expected=410.50144006906629
+Curved shell kind=3 faces=2
+Imported valid=1 volume=592.17626341002142 expected=592.17626406536147
+Four independent curved shell profiles PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.SourceRingOrientation" classname="OM9-FILE-012.SourceRingOrientation" time="8.1097" status="run">
+		<properties/>
+		<system-out>diamond source direction=1
+Diamond_Marquise/Diamond_Marquise placement=3 signed volume=-1.25718
+Diamond_Marquise/Diamond_Marquise placement=2 signed volume=1.25718
+Diamond_Marquise/Diamond_Marquise placement=1 signed volume=1.25718
+Diamond_Marquise/Diamond_Marquise placement=0 signed volume=-1.25718
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.SignedSolidOrientation" classname="OM9-FILE-012.SignedSolidOrientation" time="2.13522" status="run">
+		<properties/>
+		<system-out>Signed solid orientation PASS including unknown SDK +2
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.RevolutionParameterization" classname="OM9-FILE-012.RevolutionParameterization" time="2.02862" status="run">
+		<properties/>
+		<system-out>Analytic area transpose=0 arc=0 span=0 expected=4.3800000000000008 actual=4.3800000000000203
+BRep path transpose=0 arc=0 span=0 expected=4.3800000000000008 import=4.3800000000000203 reimport=4.3800000000000203
+Analytic area transpose=0 arc=0 span=1 expected=25.98 actual=25.980000650655665
+BRep path transpose=0 arc=0 span=1 expected=25.98 import=25.980000650655665 reimport=25.980000650655661
+Analytic area transpose=0 arc=1 span=0 expected=1.5765232724050269 actual=1.576523272405022
+BRep path transpose=0 arc=1 span=0 expected=1.5765232724050269 import=1.576523272405022 reimport=1.5765232724050202
+Analytic area transpose=0 arc=1 span=1 expected=9.3511585883750215 actual=9.3511588225699533
+BRep path transpose=0 arc=1 span=1 expected=9.3511585883750215 import=9.3511588225699533 reimport=9.3511588225699676
+Analytic area transpose=1 arc=0 span=0 expected=4.3800000000000008 actual=4.3800000000000203
+BRep path transpose=1 arc=0 span=0 expected=4.3800000000000008 import=4.3800000000000203 reimport=4.3800000000000203
+An...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.TrimDomains" classname="OM9-FILE-012.TrimDomains" time="0.567122" status="run">
+		<properties/>
+		<system-out>Trim domains PASS32 domain +5 tolerance cases
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.ReferenceGraphIntegrity" classname="OM9-FILE-012.ReferenceGraphIntegrity" time="0.421169" status="run">
+		<properties/>
+		<system-out>Reference graph integrity PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.NativeReferenceResolution" classname="OM9-FILE-012.NativeReferenceResolution" time="0.479216" status="run">
+		<properties/>
+		<system-out>Native source-model reference resolution PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.StandaloneReferences" classname="OM9-FILE-012.StandaloneReferences" time="0.903868" status="run">
+		<properties/>
+		<system-out>Standalone native reference/target guard PASS 825 checks
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.MixedReferences" classname="OM9-FILE-012.MixedReferences" time="0.640512" status="run">
+		<properties/>
+		<system-out>Mixed reference native retention PASS 363 checks
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.ReferenceRemap" classname="OM9-FILE-012.ReferenceRemap" time="7.57041" status="run">
+		<properties/>
+		<system-out>2611 reference remap checks passed
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.SeamProfiles" classname="OM9-FILE-012.SeamProfiles" time="0.513777" status="run">
+		<properties/>
+		<system-out>229 seam profile checks passed
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.SeamRhino5" classname="OM9-FILE-012.SeamRhino5" time="0.443632" status="run">
+		<properties/>
+		<system-out>200 actual seam target checks passed
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.UvReferenceRemap" classname="OM9-FILE-012.UvReferenceRemap" time="1.03225" status="run">
+		<properties/>
+		<system-out>895 UV reference remap checks passed
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.UvReferenceRhino5" classname="OM9-FILE-012.UvReferenceRhino5" time="0.443833" status="run">
+		<properties/>
+		<system-out>507 UV actual target/refusal checks passed
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.SeamTrimApplicability" classname="OM9-FILE-012.SeamTrimApplicability" time="0.588058" status="run">
+		<properties/>
+		<system-out>211 seam/singular BRep applicability checks passed
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.SeamTrimRhino5" classname="OM9-FILE-012.SeamTrimRhino5" time="0.64635" status="run">
+		<properties/>
+		<system-out>1800 actual BRep seam/pole/edit checks passed
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.CurveOnSurfaceSchema" classname="OM9-FILE-012.CurveOnSurfaceSchema" time="0.489466" status="run">
+		<properties/>
+		<system-out>CurveOnSurface native schema 10 direct/model field paths, 8 reference paths, 7 refusals PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.CurveOnSurfaceTransform.Nurbs" classname="OM9-FILE-012.CurveOnSurfaceTransform.Nurbs" time="0.440545" status="run">
+		<properties/>
+		<system-out>surface=0 variant=0 dimension=3 optional=1 arc=1 transform=0
+surface=0 variant=0 dimension=3 optional=1 arc=1 transform=1
+surface=0 variant=0 dimension=3 optional=1 arc=1 transform=2
+surface=0 variant=0 dimension=3 optional=1 arc=1 transform=3
+surface=0 variant=0 dimension=3 optional=1 arc=0 transform=0
+surface=0 variant=0 dimension=3 optional=1 arc=0 transform=1
+surface=0 variant=0 dimension=3 optional=1 arc=0 transform=2
+surface=0 variant=0 dimension=3 optional=1 arc=0 transform=3
+surface=0 variant=0 dimension=3 optional=1 arc=0 transform=4
+surface=0 variant=0 dimension=3 optional=0 arc=1 transform=0
+surface=0 variant=0 dimension=3 optional=0 arc=1 transform=1
+surface=0 variant=0 dimension=3 optional=0 arc=1 transform=2
+surface=0 variant=0 dimension=3 optional=0 arc=1 transform=3
+surface=0 variant=0 dimension=3 optional=0 arc=1 transform=4
+surface=0 variant=0 dimension=2 optional=1 arc=1 transform=0
+surface=0 variant=0 dimension=2 optional=1 arc=1 transform=1
+surface=0 variant=0 dimension=2 optional=1 arc=1...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.CurveOnSurfaceTransform.Plane" classname="OM9-FILE-012.CurveOnSurfaceTransform.Plane" time="0.3831" status="run">
+		<properties/>
+		<system-out>surface=1 variant=0 dimension=3 optional=1 arc=1 transform=0
+surface=1 variant=0 dimension=3 optional=1 arc=1 transform=1
+surface=1 variant=0 dimension=3 optional=1 arc=1 transform=2
+surface=1 variant=0 dimension=3 optional=1 arc=1 transform=3
+surface=1 variant=0 dimension=3 optional=1 arc=0 transform=0
+surface=1 variant=0 dimension=3 optional=1 arc=0 transform=1
+surface=1 variant=0 dimension=3 optional=1 arc=0 transform=2
+surface=1 variant=0 dimension=3 optional=1 arc=0 transform=3
+surface=1 variant=0 dimension=3 optional=0 arc=1 transform=0
+surface=1 variant=0 dimension=3 optional=0 arc=1 transform=1
+surface=1 variant=0 dimension=3 optional=0 arc=1 transform=2
+surface=1 variant=0 dimension=3 optional=0 arc=1 transform=3
+Coupled CurveOnSurface 12 native transform paths and 6 atomic refusals PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.CurveOnSurfaceTransform.Rev" classname="OM9-FILE-012.CurveOnSurfaceTransform.Rev" time="0.382514" status="run">
+		<properties/>
+		<system-out>surface=2 variant=0 dimension=3 optional=1 arc=1 transform=0
+surface=2 variant=0 dimension=3 optional=1 arc=1 transform=1
+surface=2 variant=0 dimension=3 optional=1 arc=1 transform=2
+surface=2 variant=0 dimension=3 optional=1 arc=1 transform=3
+surface=2 variant=0 dimension=3 optional=1 arc=0 transform=0
+surface=2 variant=0 dimension=3 optional=1 arc=0 transform=1
+surface=2 variant=0 dimension=3 optional=1 arc=0 transform=2
+surface=2 variant=0 dimension=3 optional=1 arc=0 transform=3
+surface=2 variant=0 dimension=3 optional=0 arc=1 transform=0
+surface=2 variant=0 dimension=3 optional=0 arc=1 transform=1
+surface=2 variant=0 dimension=3 optional=0 arc=1 transform=2
+surface=2 variant=0 dimension=3 optional=0 arc=1 transform=3
+Coupled CurveOnSurface 12 native transform paths and 6 atomic refusals PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.CurveOnSurfaceTransform.Sum" classname="OM9-FILE-012.CurveOnSurfaceTransform.Sum" time="0.383944" status="run">
+		<properties/>
+		<system-out>surface=3 variant=0 dimension=3 optional=1 arc=1 transform=0
+surface=3 variant=0 dimension=3 optional=1 arc=1 transform=1
+surface=3 variant=0 dimension=3 optional=1 arc=1 transform=2
+surface=3 variant=0 dimension=3 optional=1 arc=1 transform=3
+surface=3 variant=0 dimension=3 optional=1 arc=0 transform=0
+surface=3 variant=0 dimension=3 optional=1 arc=0 transform=1
+surface=3 variant=0 dimension=3 optional=1 arc=0 transform=2
+surface=3 variant=0 dimension=3 optional=1 arc=0 transform=3
+surface=3 variant=0 dimension=3 optional=1 arc=0 transform=4
+surface=3 variant=0 dimension=3 optional=0 arc=1 transform=0
+surface=3 variant=0 dimension=3 optional=0 arc=1 transform=1
+surface=3 variant=0 dimension=3 optional=0 arc=1 transform=2
+surface=3 variant=0 dimension=3 optional=0 arc=1 transform=3
+surface=3 variant=0 dimension=3 optional=0 arc=1 transform=4
+Coupled CurveOnSurface 14 native transform paths and 5 atomic refusals PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.CurveOnSurfaceTransform.Extrusion" classname="OM9-FILE-012.CurveOnSurfaceTransform.Extrusion" time="0.487751" status="run">
+		<properties/>
+		<system-out>surface=4 variant=0 dimension=3 optional=1 arc=1 transform=0
+surface=4 variant=0 dimension=3 optional=1 arc=1 transform=1
+surface=4 variant=0 dimension=3 optional=1 arc=1 transform=2
+surface=4 variant=0 dimension=3 optional=1 arc=0 transform=0
+surface=4 variant=0 dimension=3 optional=1 arc=0 transform=1
+surface=4 variant=0 dimension=3 optional=1 arc=0 transform=2
+surface=4 variant=0 dimension=3 optional=0 arc=1 transform=0
+surface=4 variant=0 dimension=3 optional=0 arc=1 transform=1
+surface=4 variant=0 dimension=3 optional=0 arc=1 transform=2
+Coupled CurveOnSurface 9 native transform paths and 6 atomic refusals PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.CurveOnSurfaceArchive" classname="OM9-FILE-012.CurveOnSurfaceArchive" time="0.517235" status="run">
+		<properties/>
+		<system-out>CurveOnSurface exact archive recovery12 valid,2 deferred references,0 independent legacy and 117 malformed/truncated cases PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Merge" classname="OM9-FILE-012.Merge" time="2.95561" status="run">
+		<properties/>
+		<system-out>File was not written with this version of the topology
+merge selection and atomic rejection PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.SurfaceCurveV5Profile" classname="OM9-FILE-012.SurfaceCurveV5Profile" time="4.01892" status="run">
+		<properties/>
+		<system-out>CurveOnSurface scoped V5 profile PASS 359 checks
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.NativeTransform" classname="OM9-FILE-012.NativeTransform" time="0.801448" status="run">
+		<properties/>
+		<system-out>Native retained transforms and selected members passed: rational2D/3D, TextDot and point cloud coordinates, normals, colors, userdata, mm/cm, atomic invalid matrices
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.TextDot" classname="OM9-FILE-012.TextDot" time="0.657908" status="run">
+		<properties/>
+		<system-out>Native TextDot fields mm/cm, member/copy, Unicode, exact setters, userdata and atomic guards passed
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.PointCloud" classname="OM9-FILE-012.PointCloud" time="0.586729" status="run">
+		<properties/>
+		<system-out>Native PointCloud fields, identity, dormant plane, mm/cm member/copy and atomic gates passed
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.CloudGeometry" classname="OM9-FILE-012.CloudGeometry" time="0.436106" status="run">
+		<properties/>
+		<system-out>mm: cloud mixed nested affine native doubles and intensity atomic gate PASS
+cm: cloud mixed nested affine native doubles and intensity atomic gate PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Hatch" classname="OM9-FILE-012.Hatch" time="0.446868" status="run">
+		<properties/>
+		<system-out>mm: selected native hatch rational loops, exact pattern reference and spacing PASS
+cm: selected native hatch rational loops, exact pattern reference and spacing PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Preservation" classname="OM9-FILE-012.Preservation" time="0.438061" status="run">
+		<properties/>
+		<system-out>preservation PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Inventory" classname="OM9-FILE-012.Inventory" time="0.447824" status="run">
+		<properties/>
+		<system-out>inventory PASS; fixture "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-inventory.3dm"
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Geometry" classname="OM9-FILE-012.Geometry" time="0.443146" status="run">
+		<properties/>
+		<system-out>curved volumes 502.655 502.655
+curved volumes 268.083 268.083
+OM9-FILE-012 geometry PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Archive" classname="OM9-FILE-012.Archive" time="0.812419" status="run">
+		<properties/>
+		<system-out>metadata PASS
+inch written
+extrusion volume 502.65482465286311 expected 502.6548245743669
+OM9-FILE-012 archive PASS; fixtures "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-3dm-native"
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.UserRing" classname="OM9-FILE-012.UserRing" time="6.20486" status="run">
+		<properties/>
+		<system-out>OM9-FILE-012 user ring PASS: 101 objects
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Blocks" classname="OM9-FILE-012.Blocks" time="0.504538" status="run">
+		<properties/>
+		<system-out>nested and mixed shear blocks PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.HatchAffine" classname="OM9-FILE-012.HatchAffine" time="1.56087" status="run">
+		<properties/>
+		<system-out>tilt0 unit1 affine0 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit1 affine1 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit1 affine2 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit1 affine3 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit1 affine4 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit10 affine0 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit10 affine1 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit10 affine2 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit10 affine3 exact world loops/pattern/sibling/stable IDs PASS
+tilt0 unit10 affine4 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit1 affine0 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit1 affine1 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit1 affine2 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit1 affine3 exact world loops/pattern/sibling/stable IDs PASS
+tilt1 unit1 affine4 exact world loops/p...
+[This part of the test output was removed since it exceeds the threshold of 1024 bytes.]
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.HatchCurrent" classname="OM9-FILE-012.HatchCurrent" time="0.522573" status="run">
+		<properties/>
+		<system-out>current native hatch fields/plane/pattern/tiny scale mm/cm PASS
+current native hatch fields/plane/pattern/tiny scale mm/cm PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.HatchLoops" classname="OM9-FILE-012.HatchLoops" time="0.49493" status="run">
+		<properties/>
+		<system-out>unsafe preflight: Unsafe native Hatch loop userdata [ON_PolyCurve / LoopPluginData]
+unsafe preflight: Unsafe native Hatch loop userdata [ON_PolyCurve / LoopPluginData]
+Hatch loop8 subtype mm/cm roundtrips; recursive userdata/refs/inactive gradients/atomic guards PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.HatchLoopEdit" classname="OM9-FILE-012.HatchLoopEdit" time="0.678229" status="run">
+		<properties/>
+		<system-out>native typed loop edit8 cases/topology PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Unmeshed" classname="OM9-FILE-012.Unmeshed" time="19.5231" status="run">
+		<properties/>
+		<system-out>count 135 tolerance 0.001 scale 1
+Accurate volume object 5: 59.44329333599798 -&gt; 59.44329333778601 difference 1.788031056548789e-09
+Accurate volume object 6: 59.44329333599798 -&gt; 59.44329333778601 difference 1.788031056548789e-09
+unmeshed fixture PASS
+</system-out>
+	</testcase>
+</testsuite>

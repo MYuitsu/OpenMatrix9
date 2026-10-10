@@ -1,0 +1,96 @@
+"""Native CV/Join layer guards, stale drafts, Undo and foreign transaction ownership."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtGui,QtTest
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def reject(work):
+    try:work()
+    except (RuntimeError,ValueError):return True
+    return False
+def settle():Gui.updateGui();QtTest.QTest.qWait(350)
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('LayerCurveGuards');doc.UndoMode=1
+        def curve(name,x):
+            basis=Part.BSplineCurve();basis.buildFromPolesMultsKnots([App.Vector(x,0,0),App.Vector(x+1,2,0),App.Vector(x+3,2,0),App.Vector(x+4,0,0)],[4,4],[0.,1.],False,3)
+            obj=doc.addObject('Part::Feature',name);obj.Shape=basis.toShape();return obj
+        a=curve('A',0);b=curve('B',4);doc.recompute()
+        def snapshot():return json.loads(native.layerDocumentSnapshot(doc.Name))
+        def command(**kw):return json.loads(native.layerDocumentCommand(doc.Name,json.dumps(kw)))
+        command(operation='assign',layer_id='om9-preset-5',object_ids=['A'])
+        command(operation='assign',layer_id='om9-preset-6',object_ids=['B'])
+        def basis(obj):return json.loads(native.curveBasis3dm(doc.Name,obj.Name))
+        def request(original):
+            result=dict(original);result['poles']=[p[:] for p in original['poles']];result['poles'][1][2]+=1;return result
+        initial=basis(a);draft=request(initial);command(operation='set_locked',layer_id='om9-preset-5',locked=True)
+        old=snapshot();geometry=[o.Shape.exportBrepToString() for o in [a,b]];undo=doc.UndoCount
+        check('locked layer blocks direct CV basis entry',reject(lambda:basis(a)))
+        check('locked layer blocks captured CV draft',reject(lambda:native.editModelingCurve3dm(doc.Name,a.Name,json.dumps(draft))))
+        check('mixed locked Join rejects entire batch',reject(lambda:native.joinModelingCurves3dm(doc.Name,[b.Name,a.Name])))
+        check('rejected operations change no geometry state or Undo',snapshot()==old and geometry==[o.Shape.exportBrepToString() for o in [a,b]] and doc.UndoCount==undo)
+        command(operation='set_locked',layer_id='om9-preset-5',locked=False)
+        check('unlock never revives stale pre-lock draft',reject(lambda:native.editModelingCurve3dm(doc.Name,a.Name,json.dumps(draft))))
+        command(operation='set_visible',layer_id='om9-preset-6',visible=False);old=snapshot();undo=doc.UndoCount
+        check('hidden layer blocks direct basis and mixed Join',reject(lambda:basis(b)) and reject(lambda:native.joinModelingCurves3dm(doc.Name,[a.Name,b.Name])))
+        check('hidden rejection is atomic',snapshot()==old and doc.UndoCount==undo)
+        command(operation='set_visible',layer_id='om9-preset-6',visible=True)
+        command(operation='set_locked',layer_id='om9-preset-5',locked=True)
+        # Force a native selection to exercise the guard even if a caller bypasses Selectable.
+        a.ViewObject.Selectable=True;Gui.Selection.clearSelection();Gui.Selection.addSelection(a);settle()
+        check('fixture forces selected canonical locked curve',Gui.Selection.getSelection()==[a])
+        old=snapshot();undo=doc.UndoCount;rebuild=Gui.getMainWindow().findChild(QtGui.QAction,'Rebuild');rebuild.trigger();settle()
+        dialog=Gui.getMainWindow().findChild(QtWidgets.QDialog,'OM9RebuildDialog')
+        check('Rebuild rejects canonical lock despite native selection bypass',dialog is None)
+        check('Rebuild locked entry leaves state and Undo intact',snapshot()==old and doc.UndoCount==undo)
+        command(operation='set_locked',layer_id='om9-preset-5',locked=False)
+        original=basis(a);old=snapshot();undo=doc.UndoCount;draft=request(original)
+        native.editModelingCurve3dm(doc.Name,a.Name,json.dumps(draft));settle()
+        check('fresh unlocked CV edit commits one Undo',doc.UndoCount==undo+1 and abs(a.Shape.Edges[0].Curve.getPole(2).z-1)<1e-9)
+        check('geometry-only CV edit preserves canonical rows and ByObject colors',snapshot()==old and old['snapshot']['objects'][0]['color_source']=='ByObject')
+        doc.undo();check('CV Undo restores basis and exact layer state',basis(a)['poles']==original['poles'] and snapshot()==old)
+        doc.redo();check('CV Redo restores geometry and exact layer state',abs(a.Shape.Edges[0].Curve.getPole(2).z-1)<1e-9 and snapshot()==old)
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(a);settle()
+        action=Gui.getMainWindow().findChild(QtGui.QAction,'PointsOn');check('PointsOn actual command exists',action is not None)
+        action.trigger();settle();dialog=Gui.getMainWindow().findChild(QtWidgets.QDialog,'OM9CurveCVDialog')
+        check('unlocked native CV dialog opens',dialog is not None)
+        command(operation='set_locked',layer_id='om9-preset-5',locked=True);settle()
+        check('layer lock invalidates actual pending CV dialog',Gui.getMainWindow().findChild(QtWidgets.QDialog,'OM9CurveCVDialog') is None)
+        command(operation='set_locked',layer_id='om9-preset-5',locked=False)
+        draft=request(basis(a));command(operation='set_color',layer_id='om9-preset-5',rgb=[31,32,33])
+        check('metadata-only palette change invalidates captured CV draft',reject(lambda:native.editModelingCurve3dm(doc.Name,a.Name,json.dumps(draft))))
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(a);settle();rebuild.trigger();settle()
+        dialog=Gui.getMainWindow().findChild(QtWidgets.QDialog,'OM9RebuildDialog');check('unlocked Rebuild draft opens',dialog is not None)
+        dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(False)
+        command(operation='set_color',layer_id='om9-preset-5',rgb=[41,42,43]);old=snapshot();undo=doc.UndoCount;geometry=a.Shape.exportBrepToString()
+        preview=next(p for p in dialog.findChildren(QtWidgets.QPushButton) if p.text()=='Preview');preview.click();settle()
+        check('metadata-only palette change rejects stale Rebuild preview',bool(dialog.findChild(QtWidgets.QLabel,'OM9RebuildError').text()))
+        dialog.findChild(QtWidgets.QPushButton,'OM9RebuildOK').click();settle()
+        check('stale retain-input Rebuild commits no geometry or Undo',doc.getObject('Rebuild') is None and snapshot()==old and doc.UndoCount==undo and a.Shape.exportBrepToString()==geometry)
+        dialog.findChild(QtWidgets.QPushButton,'OM9RebuildCancel').click();settle()
+        doc.openTransaction('Unrelated user edit');a.Label='Keep user edit';undo=doc.UndoCount;old=snapshot();draft=request(basis(a))
+        check('CV and Join refuse unrelated transaction',reject(lambda:native.editModelingCurve3dm(doc.Name,a.Name,json.dumps(draft))) and reject(lambda:native.joinModelingCurves3dm(doc.Name,[a.Name,b.Name])))
+        check('foreign transaction remains pending and untouched',doc.HasPendingTransaction and a.Label=='Keep user edit' and doc.UndoCount==undo and snapshot()==old);doc.commitTransaction()
+        command(operation='set_current',layer_id='om9-preset-7');old=snapshot();undo=doc.UndoCount
+        joined=doc.getObject(native.joinModelingCurves3dm(doc.Name,[b.Name,a.Name]));state=snapshot()['snapshot']
+        row=next(r for r in state['objects'] if r['id']==joined.Name)
+        check('Join output takes current layer and ByLayer color',joined.OM9LayerId=='om9-preset-7' and row['color_source']=='ByLayer' and all(abs(x-y/255.)<1e-6 for x,y in zip(joined.ViewObject.LineColor,[122,167,206])))
+        check('Join has one Undo for geometry and layer binding',doc.UndoCount==undo+1 and len(state['objects'])==3 and joined.Shape.isValid() and len(joined.Shape.Edges)==2)
+        name=joined.Name;doc.undo();check('Join Undo restores exact existing layers and objects',doc.getObject(name) is None and snapshot()==old)
+        doc.redo();check('Join Redo restores canonical binding',doc.getObject(name).OM9LayerId=='om9-preset-7' and len(snapshot()['snapshot']['objects'])==3)
+        final=snapshot();file=output/'layer-curve-guards.FCStd';doc.saveAs(str(file));App.closeDocument(doc.Name);doc=App.openDocument(str(file));settle()
+        check('FCStd keeps guarded Join output and own source flags',snapshot()==final and doc.getObject(name).OM9LayerId=='om9-preset-7')
+        own=App.newDocument('OwnCurveGuard');own.UndoMode=1;obj=own.addObject('Part::Feature','OwnLocked');obj.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(2,0,0));obj.addProperty('App::PropertyBool','OM9Locked');obj.OM9Locked=True;own.recompute()
+        check('conservative legacy own lock also blocks direct CV entry',reject(lambda:native.curveBasis3dm(own.Name,obj.Name)))
+        report.update(ok=True,module=native.__file__,scope='native CV and Join guards/lifecycle; other mutation routes and unbound external geometry remain pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)
+

@@ -1,0 +1,3 @@
+Actual x64 C# -> Rust ABI PASS: validation, full palette, source-wins, generation, binding, stale and altered-byte rejection. Native Rhino commit unverified.
+
+Managed/native ABI output semantic assertions PASS; native two-app run pending.

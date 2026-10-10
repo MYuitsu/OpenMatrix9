@@ -1,0 +1,16 @@
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- OM9 audited PolyEdgeSegment Read reversed flag repair; original SDK source unchanged
+-- OM9 audited CurveOnSurface child Read repair for opennurbsStatic; original SDK source unchanged
+-- OM9 audited resource-free Rhino5 RDK3 writer; original SDK source unchanged
+-- Configuring done (0.5s)
+-- Generating done (0.1s)
+-- Build files have been written to: H:/FreeCAD-src/build/openmatrix9-preservation
+[0/2] Re-checking globbed directories...
+[1/6] Building OpenMatrix9 Rust core
+   Compiling openmatrix9_rust v0.1.0 (H:\FreeCAD-src\build\om9-dev\rust)
+    Finished `release` profile [optimized] target(s) in 3.69s
+[2/6] Running utility command for OpenMatrix9Scripts
+[3/6] Building CXX object Gui\CMakeFiles\OpenMatrix9Gui.dir\Workbench.cpp.obj
+[4/6] Building CXX object Gui\CMakeFiles\OpenMatrix9Gui.dir\Command.cpp.obj
+[5/6] Linking CXX shared library H:\FreeCAD-src\build\om9-ui-3dm-sdk\bin\OpenMatrix9Gui.pyd

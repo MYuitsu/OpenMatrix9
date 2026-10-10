@@ -1,0 +1,23 @@
+{
+  "checks": [
+    {
+      "name": "native snap delegates index cache budget and ranking to Rust",
+      "passed": true
+    },
+    {
+      "name": "Rust index publishes complete native snapshot and picks endpoint",
+      "passed": true
+    },
+    {
+      "name": "Rust candidate cache reuses only matching geometry generation",
+      "passed": true
+    },
+    {
+      "name": "Rust rejects unsupported query before native extraction",
+      "passed": true
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_rust_snap_ownership_smoke-1\af2a2c978bda42debb9c0b3e69d85c24

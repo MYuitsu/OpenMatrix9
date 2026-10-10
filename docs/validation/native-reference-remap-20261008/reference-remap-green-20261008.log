@@ -1,0 +1,11 @@
+-- OM9 audited PolyEdgeSegment Read reversed flag repair; original SDK source unchanged
+-- OM9 audited CurveOnSurface child Read repair for opennurbsStatic; original SDK source unchanged
+-- OM9 audited resource-free Rhino5 RDK3 writer; original SDK source unchanged
+-- Configuring done (0.1s)
+-- Generating done (0.2s)
+-- Build files have been written to: H:/FreeCAD-src/build/3dm-preserve-native
+[0/2] Re-checking globbed directories...
+[1/4] Building CXX object CMakeFiles\ThreeDmReferenceRemapTests.dir\three_dm_reference_remap.cpp.obj
+[2/4] Building CXX object CMakeFiles\ThreeDmReferenceRemapTests.dir\H_\FreeCAD-src\build\om9-dev\Gui\ThreeDmMerge.cpp.obj
+[3/4] Linking CXX executable ThreeDmReferenceRemapTests.exe
+2611 reference remap checks passed

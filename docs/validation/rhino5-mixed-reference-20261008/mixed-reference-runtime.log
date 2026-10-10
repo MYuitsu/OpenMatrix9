@@ -1,0 +1,264 @@
+{
+    "checks":  [
+                   {
+                       "name":  "actual Rhino6 target failures bind source oracle and probe",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm complete typed parent/child owner closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm bounded native owner graph is linked with no issues",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm public preservation import retains exact parent and independent editable owner",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm selected unsafe V5 export is refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm FCStd survives source deletion with exact archive/tree",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-0.3dm reopened graph/owner dependencies/CRC remain exact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-0-reversed-0.3dm complete typed parent/child owner closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-0-reversed-0.3dm bounded native owner graph is linked with no issues",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-0-reversed-0.3dm public preservation import retains exact parent and independent editable owner",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-0-reversed-0.3dm selected unsafe V5 export is refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-0-reversed-0.3dm FCStd survives source deletion with exact archive/tree",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-0-reversed-0.3dm reopened graph/owner dependencies/CRC remain exact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm complete typed parent/child owner closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm bounded native owner graph is linked with no issues",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm public preservation import retains exact parent and independent editable owner",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm selected unsafe V5 export is refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm FCStd survives source deletion with exact archive/tree",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-0-reversed-1.3dm reopened graph/owner dependencies/CRC remain exact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-0-reversed-1.3dm complete typed parent/child owner closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-0-reversed-1.3dm saved direction loss is explicit invalid native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-0-reversed-1.3dm corrupt SaveAs import refuses without changing document",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm complete typed parent/child owner closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm bounded native owner graph is linked with no issues",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm public preservation import retains exact parent and independent editable owner",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm selected unsafe V5 export is refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm FCStd survives source deletion with exact archive/tree",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-0.3dm reopened graph/owner dependencies/CRC remain exact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-1-reversed-0.3dm complete typed parent/child owner closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-1-reversed-0.3dm bounded native owner graph is linked with no issues",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-1-reversed-0.3dm public preservation import retains exact parent and independent editable owner",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-1-reversed-0.3dm selected unsafe V5 export is refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-1-reversed-0.3dm FCStd survives source deletion with exact archive/tree",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-1-reversed-0.3dm reopened graph/owner dependencies/CRC remain exact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm complete typed parent/child owner closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm bounded native owner graph is linked with no issues",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm public preservation import retains exact parent and independent editable owner",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm selected unsafe V5 export is refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm FCStd survives source deletion with exact archive/tree",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-1-reversed-1.3dm reopened graph/owner dependencies/CRC remain exact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-1-reversed-1.3dm complete typed parent/child owner closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-1-reversed-1.3dm saved direction loss is explicit invalid native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-1-reversed-1.3dm corrupt SaveAs import refuses without changing document",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm complete typed parent/child owner closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm bounded native owner graph is linked with no issues",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm public preservation import retains exact parent and independent editable owner",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm selected unsafe V5 export is refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm FCStd survives source deletion with exact archive/tree",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-0.3dm reopened graph/owner dependencies/CRC remain exact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-2-reversed-0.3dm complete typed parent/child owner closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-2-reversed-0.3dm bounded native owner graph is linked with no issues",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-2-reversed-0.3dm public preservation import retains exact parent and independent editable owner",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-2-reversed-0.3dm selected unsafe V5 export is refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-2-reversed-0.3dm FCStd survives source deletion with exact archive/tree",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-2-reversed-0.3dm reopened graph/owner dependencies/CRC remain exact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm complete typed parent/child owner closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm bounded native owner graph is linked with no issues",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm public preservation import retains exact parent and independent editable owner",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm selected unsafe V5 export is refused atomically",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm FCStd survives source deletion with exact archive/tree",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "mixed-polycurve-owner-2-reversed-1.3dm reopened graph/owner dependencies/CRC remain exact",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-2-reversed-1.3dm complete typed parent/child owner closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-2-reversed-1.3dm saved direction loss is explicit invalid native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "gui-resaved-mixed-polycurve-owner-2-reversed-1.3dm corrupt SaveAs import refuses without changing document",
+                       "passed":  true
+                   }
+               ],
+    "ok":  true,
+    "rhino_report_sha256":  "809aaf4db29fb01c1a9cf668a1da5ce0272b2f3125b65d43fed2955c1fa0f4de",
+    "full_exchange_complete":  false
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\three_dm_mixed_reference_smoke-1\c5e211ce13784323a3cac3ea7d2e6929

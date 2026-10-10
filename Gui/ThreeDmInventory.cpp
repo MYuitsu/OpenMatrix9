@@ -1,4 +1,5 @@
 #include "ThreeDmInventory.h"
+#include "ThreeDmThreadPool.h"
 #include "ThreeDmPointCloud.h"
 #include "ThreeDmHatch.h"
 #include "ThreeDmCurveOnSurface.h"
@@ -23,6 +24,7 @@ QJsonObject nativeGeometryFacts(const ON_Geometry& geometry){
     return facts;
 }
 ArchiveInventory inspectArchive(const std::filesystem::path& path,double custom){
+    std::lock_guard sdkLock(sdkArchiveMutex());
     if(std::filesystem::file_size(path)>512ULL*1024*1024)throw ExchangeError("3DM archive exceeds the 512 MiB import limit");
     ON::Begin();auto nativeModel=std::make_shared<ONX_Model>();auto& model=*nativeModel;
     if(!model.Read(path.c_str(),nullptr))throw ExchangeError("Cannot read 3DM archive");
@@ -58,7 +60,7 @@ ArchiveInventory inspectArchive(const std::filesystem::path& path,double custom)
             if(auto def=ON_InstanceDefinition::Cast(c)){const auto& ids=def->InstanceGeometryIdList();for(int i=0;i<ids.Count();++i)dependencies.append(uuid(ids[i]));}
             if(auto annotation=ON_Annotation::Cast(object)){auto id=annotation->DimensionStyleId();if(id!=ON_nil_uuid)dependencies.append(uuid(id));}
             if(auto hatch=ON_Hatch::Cast(object))indexedDependency(ON_ModelComponent::Type::HatchPattern,hatch->PatternIndex());
-            if(auto layer=ON_Layer::Cast(c)){if(layer->ParentId()!=ON_nil_uuid)dependencies.append(uuid(layer->ParentId()));indexedDependency(ON_ModelComponent::Type::Material,layer->RenderMaterialIndex());}
+            if(auto layer=ON_Layer::Cast(c)){if(layer->ParentId()!=ON_nil_uuid)dependencies.append(uuid(layer->ParentId()));indexedDependency(ON_ModelComponent::Type::Material,layer->RenderMaterialIndex());indexedDependency(ON_ModelComponent::Type::LinePattern,layer->LinetypeIndex());}
             if(auto style=ON_DimStyle::Cast(c))if(style->ParentId()!=ON_nil_uuid)dependencies.append(uuid(style->ParentId()));
             ON_ClassArray<ON_UserString> userStrings;object->GetUserStrings(userStrings);
             for(int i=0;i<userStrings.Count();++i)strings.append(QJsonObject{{"key",string(userStrings[i].m_key)},{"value",string(userStrings[i].m_string_value)}});

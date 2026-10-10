@@ -1,0 +1,71 @@
+"""Actual native curve creation, Rebuild, legacy preview and one-Undo lifecycle."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtGui,QtTest
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():Gui.updateGui();QtTest.QTest.qWait(300)
+def reject(work):
+    try:work()
+    except RuntimeError:return True
+    return False
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('LayerLifecycle');doc.UndoMode=1;settle()
+        field=command_input(Gui.getMainWindow())
+        def cmd(text):field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+        def snapshot():return json.loads(native.layerDocumentSnapshot(doc.Name))
+        def command(**kw):return json.loads(native.layerDocumentCommand(doc.Name,json.dumps(kw)))
+        command(operation='set_current',layer_id='om9-preset-5');before=snapshot();undo=doc.UndoCount
+        for text in ['Line','0,0,0','5,0,0']:cmd(text)
+        line=doc.getObject('Line')
+        check('actual CMD new curve inherits current layer',line is not None and 'OM9LayerId' in line.PropertiesList and line.OM9LayerId=='om9-preset-5')
+        state=snapshot()['snapshot'];row=state['objects'][0]
+        check('new curve is Rust ByLayer with own unlocked visible state',row['color_source']=='ByLayer' and not row['locked'] and row['visible'])
+        check('new curve line and shape colors follow current palette',all(abs(a-b/255.)<1e-6 for a,b in zip(line.ViewObject.LineColor,[89,139,194])) and all(abs(a-b/255.)<1e-6 for a,b in zip(line.ViewObject.ShapeColor,[89,139,194])))
+        check('creation adds one Undo for geometry and canonical state',doc.UndoCount==undo+1 and len(state['objects'])==1 and state['generation']==str(int(before['snapshot']['generation'])+1))
+        doc.undo();settle();check('creation Undo restores exact before state',snapshot()==before and doc.getObject('Line') is None)
+        doc.redo();settle();line=doc.getObject('Line');check('creation Redo restores native line and binding',line is not None and line.OM9LayerId=='om9-preset-5' and abs(line.Shape.Length-5)<1e-9)
+        before=snapshot();undo=doc.UndoCount;cmd('Polyline');cmd('1,0,0');cmd('Cancel')
+        check('cancel adds no metadata row or Undo',snapshot()==before and doc.UndoCount==undo)
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(line);settle()
+        Gui.getMainWindow().findChild(QtGui.QAction,'Rebuild').trigger();settle()
+        dialog=Gui.getMainWindow().findChild(QtWidgets.QDialog,'OM9RebuildDialog');check('Rebuild actual native dialog exists',dialog is not None)
+        dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(8);dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree').setValue(3)
+        dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(True)
+        dialog.findChild(QtWidgets.QPushButton,'OM9RebuildOK').click();settle()
+        rebuilt=doc.getObject('Rebuild');state=snapshot()['snapshot']
+        check('Rebuild removes input row and adds current-layer output',rebuilt is not None and doc.getObject('Line') is None and len(state['objects'])==1 and state['objects'][0]['id']==rebuilt.Name and rebuilt.OM9LayerId=='om9-preset-5')
+        check('Rebuild one Undo encompasses input deletion and layer rows',doc.UndoCount==undo+1)
+        doc.undo();settle();check('Rebuild Undo restores input and exact canonical state',snapshot()==before and doc.getObject('Line') is not None and doc.getObject('Rebuild') is None)
+        doc.redo();settle();check('Rebuild Redo restores layer output',doc.getObject('Line') is None and doc.getObject('Rebuild').OM9LayerId=='om9-preset-5')
+        final=snapshot();file=output/'layer-lifecycle.FCStd';doc.saveAs(str(file));App.closeDocument(doc.Name);doc=App.openDocument(str(file));settle()
+        check('FCStd reopen keeps new output canonical state',snapshot()==final and doc.getObject('Rebuild').OM9LayerId=='om9-preset-5')
+        doc.openTransaction('User pending');doc.Rebuild.Label='Keep user work';before=snapshot();undo=doc.UndoCount
+        for text in ['Line','10,0,0','15,0,0']:cmd(text)
+        check('creation refuses unrelated transaction without abort',doc.HasPendingTransaction and doc.Rebuild.Label=='Keep user work' and doc.getObject('Line') is None and snapshot()==before and doc.UndoCount==undo);doc.commitTransaction()
+        doc=App.newDocument('LegacyLayerLifecycle');doc.UndoMode=1
+        a=doc.addObject('Part::Feature','LegacyA');a.Shape=Part.makeBox(1,2,3);a.addProperty('App::PropertyString','OM9LayerPath');a.OM9LayerPath='Custom::Detail';a.addProperty('App::PropertyBool','OM9Locked');a.OM9Locked=True;a.ViewObject.ShapeColor=(11/255.,22/255.,33/255.)
+        b=doc.addObject('Part::Feature','LegacyB');b.Shape=Part.makeLine(App.Vector(0,1,0),App.Vector(2,1,0));b.addProperty('App::PropertyString','OM9LayerPath');b.OM9LayerPath='Other::Detail';b.ViewObject.Visibility=False
+        doc.recompute();geometry=[a.Shape.hashCode(),b.Shape.hashCode()];beforeCount=len(doc.Objects);state=snapshot()['snapshot']
+        check('legacy preview is geometry-free and does not create metadata',len(doc.Objects)==beforeCount and 'OM9LayerObjectId' not in a.PropertiesList and len(state['layers'])==36)
+        rows={r['id']:r for r in state['objects']};check('legacy flat own lock and hidden flags stay conservative',rows['LegacyA']['locked'] and not rows['LegacyB']['visible'] and rows['LegacyA']['color_source']=='ByObject' and rows['LegacyA']['rgb']==[11,22,33])
+        check('legacy duplicate leaf fullpaths remain distinct',rows['LegacyA']['layer_id']!=rows['LegacyB']['layer_id'])
+        target=rows['LegacyA']['layer_id'];undo=doc.UndoCount
+        command(operation='set_color',layer_id=target,rgb=[200,201,202]);settle()
+        check('first legacy command persists in one Undo preserving own ByObject',doc.UndoCount==undo+1 and a.OM9Locked and all(abs(x-y/255.)<1e-6 for x,y in zip(a.ViewObject.ShapeColor,[11,22,33])))
+        doc.undo();settle();check('legacy Undo removes metadata without losing original facts',len(doc.Objects)==beforeCount and a.OM9Locked and not b.ViewObject.Visibility and 'OM9LayerObjectId' not in a.PropertiesList)
+        check('legacy migration never changes geometry',[a.Shape.hashCode(),b.Shape.hashCode()]==geometry)
+        report.update(ok=True,module=native.__file__,scope='explicit curve creation/Rebuild lifecycle and conservative observed legacy metadata; all creation routes and complete provenance/guards/Matrix pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

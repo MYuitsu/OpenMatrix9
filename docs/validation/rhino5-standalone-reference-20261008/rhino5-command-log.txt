@@ -1,0 +1,56 @@
+Command: _Paste
+Command: _-RunPythonScript
+Python Script <H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\rhino5-standalone-reference-gui-probe.py> ( ResetEngine ): "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\rhino5-standalone-reference-gui-probe.py"
+OM9 Rhino5 GUI exchange acceptance started (opens test documents)
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\standalone-kind-0-owner-0-reversed-0.3dm" successfully read
+1 curve added to selection.
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\gui-output-20261008-091950\gui-resaved-standalone-kind-0-owner-0-reversed-0.3dm" successfully read
+OM9 GUI profile standalone-kind-0-owner-0-reversed-0.3dm: False
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\standalone-kind-0-owner-0-reversed-1.3dm" successfully read
+1 curve added to selection.
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\gui-output-20261008-091950\gui-resaved-standalone-kind-0-owner-0-reversed-1.3dm" successfully read
+OM9 GUI profile standalone-kind-0-owner-0-reversed-1.3dm: False
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\standalone-kind-0-owner-1-reversed-0.3dm" successfully read
+1 curve added to selection.
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\gui-output-20261008-091950\gui-resaved-standalone-kind-0-owner-1-reversed-0.3dm" successfully read
+OM9 GUI profile standalone-kind-0-owner-1-reversed-0.3dm: False
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\standalone-kind-0-owner-1-reversed-1.3dm" successfully read
+1 curve added to selection.
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\gui-output-20261008-091950\gui-resaved-standalone-kind-0-owner-1-reversed-1.3dm" successfully read
+OM9 GUI profile standalone-kind-0-owner-1-reversed-1.3dm: False
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\standalone-kind-0-owner-2-reversed-0.3dm" successfully read
+1 curve added to selection.
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\gui-output-20261008-091950\gui-resaved-standalone-kind-0-owner-2-reversed-0.3dm" successfully read
+OM9 GUI profile standalone-kind-0-owner-2-reversed-0.3dm: False
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\standalone-kind-0-owner-2-reversed-1.3dm" successfully read
+1 curve added to selection.
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\gui-output-20261008-091950\gui-resaved-standalone-kind-0-owner-2-reversed-1.3dm" successfully read
+OM9 GUI profile standalone-kind-0-owner-2-reversed-1.3dm: False
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\standalone-kind-1-owner-0-reversed-0.3dm" successfully read
+1 curve added to selection.
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\gui-output-20261008-091950\gui-resaved-standalone-kind-1-owner-0-reversed-0.3dm" successfully read
+OM9 GUI profile standalone-kind-1-owner-0-reversed-0.3dm: False
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\standalone-kind-1-owner-0-reversed-1.3dm" successfully read
+1 curve added to selection.
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\gui-output-20261008-091950\gui-resaved-standalone-kind-1-owner-0-reversed-1.3dm" successfully read
+OM9 GUI profile standalone-kind-1-owner-0-reversed-1.3dm: False
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\standalone-kind-1-owner-1-reversed-0.3dm" successfully read
+1 curve added to selection.
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\gui-output-20261008-091950\gui-resaved-standalone-kind-1-owner-1-reversed-0.3dm" successfully read
+OM9 GUI profile standalone-kind-1-owner-1-reversed-0.3dm: False
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\standalone-kind-1-owner-1-reversed-1.3dm" successfully read
+1 curve added to selection.
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\gui-output-20261008-091950\gui-resaved-standalone-kind-1-owner-1-reversed-1.3dm" successfully read
+OM9 GUI profile standalone-kind-1-owner-1-reversed-1.3dm: False
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\standalone-kind-1-owner-2-reversed-0.3dm" successfully read
+1 curve added to selection.
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\gui-output-20261008-091950\gui-resaved-standalone-kind-1-owner-2-reversed-0.3dm" successfully read
+OM9 GUI profile standalone-kind-1-owner-2-reversed-0.3dm: False
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\standalone-kind-1-owner-2-reversed-1.3dm" successfully read
+1 curve added to selection.
+File "H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\gui-output-20261008-091950\gui-resaved-standalone-kind-1-owner-2-reversed-1.3dm" successfully read
+OM9 GUI profile standalone-kind-1-owner-2-reversed-1.3dm: False
+OM9 Rhino5 GUI exchange output: H:\FreeCAD-src\build\opennurbs-standalone-reference-acceptance-20261008\gui-output-20261008-091950
+OM9 Rhino5 GUI exchange acceptance completed: False
+Command: '_SelAll
+1 curve, 1 polysurface added to selection.

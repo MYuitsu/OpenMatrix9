@@ -1,0 +1,97 @@
+{
+  "checks": [
+    {
+      "name": "cad_with_render_mesh_remains_cad",
+      "passed": true
+    },
+    {
+      "name": "Mesh default snap ineligible",
+      "passed": true
+    },
+    {
+      "name": "Mesh zero heavy reads mode2",
+      "passed": true
+    },
+    {
+      "name": "Mesh zero heavy reads mode4",
+      "passed": true
+    },
+    {
+      "name": "Mesh zero heavy reads mode8",
+      "passed": true
+    },
+    {
+      "name": "Cloud default snap ineligible",
+      "passed": true
+    },
+    {
+      "name": "Cloud zero heavy reads mode2",
+      "passed": true
+    },
+    {
+      "name": "Cloud zero heavy reads mode4",
+      "passed": true
+    },
+    {
+      "name": "Cloud zero heavy reads mode8",
+      "passed": true
+    },
+    {
+      "name": "native topology caps before materialization",
+      "passed": true
+    },
+    {
+      "name": "standalone CAD Point mode",
+      "passed": true
+    },
+    {
+      "name": "nested parent placement once",
+      "passed": true
+    },
+    {
+      "name": "nested links native transform exactly once",
+      "passed": true
+    },
+    {
+      "name": "reflected nested Link native transform exactly once",
+      "passed": true
+    },
+    {
+      "name": "large CAD topology bounded before Python materialization",
+      "passed": true
+    },
+    {
+      "name": "partial tessellation not certified absent",
+      "passed": true
+    }
+  ],
+  "reflection": {
+    "actual": [
+      [
+        -1,
+        58,
+        -3
+      ],
+      [
+        -4,
+        55,
+        -6
+      ]
+    ],
+    "expected": [
+      [
+        -1.0,
+        58.0,
+        -3.0
+      ],
+      [
+        -4.0,
+        55.0,
+        -6.0
+      ]
+    ]
+  },
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_snap_smoke-1\2d30caff61644f7a92c2dd82bc37c664

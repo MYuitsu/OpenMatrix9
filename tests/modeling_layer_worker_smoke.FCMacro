@@ -1,0 +1,59 @@
+"""Detached clipboard preparation in native API and isolated native worker."""
+import json,os,subprocess,traceback,uuid
+from pathlib import Path
+import FreeCADGui as Gui
+from PySide6 import QtCore
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        fixtures=Path(native.__file__).parents[2]/'layer-abi'/'archive-fixtures'
+        # Exact native-fixture/Rust-bound bytes isolate worker preparation from
+        # the separately tested OS clipboard carrier and unrelated clipboard owners.
+        captured=output/'captured.3dm';metadata=output/'captured.layer.json'
+        captured.write_bytes((fixtures/'layer-staging-clipboard.3dm').read_bytes())
+        metadata.write_bytes((fixtures/'layer-staging-clipboard.bound.json').read_bytes())
+        directDir=output/'direct';directDir.mkdir()
+        direct=json.loads(native.prepareModeling3dm(str(captured),str(directDir),0,str(metadata)))
+        check('native API retains source context',direct['layer_session']['snapshot']['document_id']=='generation-lossless' and direct['layer_session']['snapshot']['generation']==str(2**64-1))
+        check('native API declares extended Session evidence',direct['clipboard']['evidence']==2 and direct['clipboard']['scope']==2)
+        worker=Path(native.__file__).parent/'OM9ThreeDmImportWorker.exe'
+        def launch(label,**changes):
+            folder=output/label;folder.mkdir()
+            row={'source':str(captured),'staging':str(folder),'scale':0,'working':True,'members':False,'ids':[],'layer_transfer':True,'layer_metadata':str(metadata)}
+            row.update(changes);request=folder/'request.json';result=folder/'result.json'
+            request.write_text(json.dumps(row),encoding='utf-8')
+            proc=subprocess.run([str(worker),str(request),str(result)],capture_output=True,timeout=120)
+            (folder/'worker.stdout.log').write_bytes(proc.stdout);(folder/'worker.stderr.log').write_bytes(proc.stderr)
+            return proc,result,folder
+        proc,result,folder=launch('worker-extended')
+        check('worker process succeeds',proc.returncode==0)
+        state=json.loads(result.read_text(encoding='utf-8'))
+        check('worker emits schema 2 full transfer',state.get('schema_version')==2 and len(state.get('items',[]))==2)
+        check('worker retains exact source context',state['layer_session']['snapshot']['document_id']==direct['layer_session']['snapshot']['document_id'] and state['layer_session']['snapshot']['generation']==str(2**64-1))
+        check('worker carries full palette',len(state['layer_session']['snapshot']['layers'])==4)
+        check('worker records bound Session scope',state['clipboard']['evidence']==2 and state['clipboard']['scope']==2)
+        check('worker geometry and metadata bindings agree',{r['layer_object_id'] for r in state['items']}=={r['id'] for r in state['layer_session']['snapshot']['objects']})
+        bad=output/'bad.json';bad.write_bytes(metadata.read_bytes()[:-1])
+        proc,result,folder=launch('worker-bad-metadata',layer_metadata=str(bad))
+        check('worker rejects malformed metadata before result/staging',proc.returncode!=0 and not result.exists() and not (folder/'geometry').exists())
+        proc,result,folder=launch('worker-digest-mismatch',source=str(fixtures/'layer-source.3dm'))
+        check('worker rejects unmatched geometry before result/staging',proc.returncode!=0 and not result.exists() and not (folder/'geometry').exists())
+        proc,result,folder=launch('worker-no-mode',layer_transfer=False)
+        check('metadata cannot be silently ignored in legacy mode',proc.returncode!=0 and not result.exists() and not (folder/'geometry').exists())
+        proc,result,folder=launch('worker-illegal-subset',ids=[str(uuid.uuid4())])
+        check('extended whole snapshot rejects independent subset request',proc.returncode!=0 and not result.exists() and not (folder/'geometry').exists())
+        proc,result,folder=launch('worker-native',layer_metadata='')
+        check('native-only worker succeeds',proc.returncode==0)
+        state=json.loads(result.read_text(encoding='utf-8'))
+        check('native-only worker declares reduced evidence',state['clipboard']['evidence']==1 and state['clipboard']['scope']==0)
+        check('native-only ignores transfer tags for identity',{r['source_uuid'] for r in state['items']}=={r['id'] for r in state['layer_session']['snapshot']['objects']})
+        report.update(ok=True,module=native.__file__,scope='detached worker preparation only; document commit and Matrix acceptance pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

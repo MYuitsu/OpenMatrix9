@@ -1,0 +1,52 @@
+"""Ordinary point and extrusion working import/current export in native host."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os, json, tempfile, math, traceback
+out = Path(os.environ['OM9_SMOKE_OUTPUT']); report = {'checks': []}
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+    if not value: raise AssertionError(name)
+def accurate(shape):
+    import OpenMatrix9Gui as native
+    with tempfile.TemporaryDirectory() as staging:
+        path=Path(staging)/'measurement.brep';shape.exportBrep(str(path))
+        return native.measure3dmBrep(str(path),1e-10)
+def run():
+    try:
+        import ThreeDm, Part, OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc = App.newDocument('PointSource')
+        point = doc.addObject('Part::Feature', 'Point'); point.Shape = Part.Vertex(App.Vector(7,8,9));doc.recompute()
+        source = out/'point.3dm';ThreeDm.export_file(str(source), [point], modeling=True)
+        work = App.newDocument('WorkingPrimitives')
+        rows = ThreeDm.import_file(str(source), work, mode='modeling');point = rows[0]
+        check('point imports as CadPoint native CAD', len(rows)==1 and point.OM9GeometryKind==1 and point.OM9Representation=='native-cad')
+        check('point native coordinates exact', (point.Shape.Vertexes[0].Point-App.Vector(7,8,9)).Length<1e-9)
+        point.Placement.Base = App.Vector(10,20,30)
+        target = out/'point-current.3dm';ThreeDm.export_file(str(target),[point],modeling=True)
+        with tempfile.TemporaryDirectory() as staging:
+            row = json.loads(native.read3dm(str(target), staging))['items'][0];shape=Part.Shape();shape.read(row['brep'])
+            check('point current placement exports exactly once', (shape.Vertexes[0].Point-App.Vector(17,28,39)).Length<1e-9)
+        fixture = Path(tempfile.gettempdir())/'om9-3dm-native/extrusion.3dm'
+        rows = ThreeDm.import_file(str(fixture),work,mode='modeling');extrusion=rows[0]
+        check('extrusion imports as valid native BRep solid', len(rows)==1 and extrusion.OM9GeometryKind==3 and extrusion.Shape.isValid() and len(extrusion.Shape.Solids)==1)
+        measured=accurate(extrusion.Shape)
+        report['extrusion_diagnostic']={'host_default_volume':extrusion.Shape.Volume,'adaptive_measurement':measured,'reference_volume':160*math.pi,'scale_mm':json.loads(native.inspect3dm(str(fixture))).get('scale_mm')}
+        check('extrusion analytical volume preserved by adaptive integration', abs(measured['volume']-160*math.pi)<0.0001)
+        extrusion.ViewObject.DisplayMode='Shaded'
+        check('native CAD Shaded display applies', extrusion.ViewObject.DisplayMode=='Shaded')
+        extrusion.Placement.Base=App.Vector(11,12,13)
+        target=out/'extrusion-current.3dm';ThreeDm.export_file(str(target),[extrusion],modeling=True)
+        with tempfile.TemporaryDirectory() as staging:
+            row=json.loads(native.read3dm(str(target),staging))['items'][0];shape=Part.Shape();shape.read(row['brep'])
+            bounds=shape.optimalBoundingBox(False,False)
+            report['current_extrusion']={'measurement':accurate(shape),'bounds':[bounds.XMin,bounds.YMin,bounds.ZMin,bounds.XMax,bounds.YMax,bounds.ZMax]}
+            check('extrusion current BRep volume and placement preserved',shape.isValid() and abs(report['current_extrusion']['measurement']['volume']-160*math.pi)<0.0001 and abs(bounds.XMin-7)<1e-6 and abs(bounds.YMin-8)<1e-6 and abs(bounds.ZMin-13)<1e-6)
+        check('extrusion current output V5',json.loads(native.inspect3dm(str(target)))['source_version']==50)
+        report.update(ok=True,module=native.__file__,extrusion_fixture_sha256=__import__('hashlib').sha256(fixture.read_bytes()).hexdigest())
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

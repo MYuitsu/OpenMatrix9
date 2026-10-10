@@ -1,0 +1,479 @@
+{
+  "checks": [
+    {
+      "name": "JSON preserves every value baseline0",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline0",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate0",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate0",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate1",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate1",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline1",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline1",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline2",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline2",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate2",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate2",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate3",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate3",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline3",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline3",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline4",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline4",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate4",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate4",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate5",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate5",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline5",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline5",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline6",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline6",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate6",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate6",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate7",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate7",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline7",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline7",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh baseline0",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh candidate0",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh candidate1",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh baseline1",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh baseline2",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh candidate2",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh candidate3",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh baseline3",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh baseline4",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh candidate4",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh candidate5",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh baseline5",
+      "passed": true
+    },
+    {
+      "name": "request bytes reduced",
+      "passed": true
+    }
+  ],
+  "runs": [
+    {
+      "mode": "baseline",
+      "pair": 0,
+      "warmup": true,
+      "bytes": 2285668,
+      "encode_seconds": 0.048299400019459426,
+      "write_seconds": 0.8183458999847062,
+      "total_seconds": 0.8666453000041656
+    },
+    {
+      "mode": "candidate",
+      "pair": 0,
+      "warmup": true,
+      "bytes": 2025652,
+      "encode_seconds": 0.04961200000252575,
+      "write_seconds": 0.8164453000063077,
+      "total_seconds": 0.8660573000088334
+    },
+    {
+      "mode": "candidate",
+      "pair": 1,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.048197299998719245,
+      "write_seconds": 0.8472073000157252,
+      "total_seconds": 0.8954046000144444
+    },
+    {
+      "mode": "baseline",
+      "pair": 1,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.04900699999416247,
+      "write_seconds": 0.8884791000164114,
+      "total_seconds": 0.9374861000105739
+    },
+    {
+      "mode": "baseline",
+      "pair": 2,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.049281999992672354,
+      "write_seconds": 0.83455969998613,
+      "total_seconds": 0.8838416999788024
+    },
+    {
+      "mode": "candidate",
+      "pair": 2,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.0539170999545604,
+      "write_seconds": 0.8807772999862209,
+      "total_seconds": 0.9346943999407813
+    },
+    {
+      "mode": "candidate",
+      "pair": 3,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.04884569998830557,
+      "write_seconds": 0.8176482999697328,
+      "total_seconds": 0.8664939999580383
+    },
+    {
+      "mode": "baseline",
+      "pair": 3,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.04879049997543916,
+      "write_seconds": 0.8393551000044681,
+      "total_seconds": 0.8881455999799073
+    },
+    {
+      "mode": "baseline",
+      "pair": 4,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.04928400000790134,
+      "write_seconds": 0.821281699987594,
+      "total_seconds": 0.8705656999954954
+    },
+    {
+      "mode": "candidate",
+      "pair": 4,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.04940809996332973,
+      "write_seconds": 0.8461713999859057,
+      "total_seconds": 0.8955794999492355
+    },
+    {
+      "mode": "candidate",
+      "pair": 5,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.05806559999473393,
+      "write_seconds": 0.8339643999934196,
+      "total_seconds": 0.8920299999881536
+    },
+    {
+      "mode": "baseline",
+      "pair": 5,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.05414570000721142,
+      "write_seconds": 0.8448156000231393,
+      "total_seconds": 0.8989613000303507
+    },
+    {
+      "mode": "baseline",
+      "pair": 6,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.05138309998437762,
+      "write_seconds": 0.8318264999543317,
+      "total_seconds": 0.8832095999387093
+    },
+    {
+      "mode": "candidate",
+      "pair": 6,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.05119790002936497,
+      "write_seconds": 0.864432799979113,
+      "total_seconds": 0.915630700008478
+    },
+    {
+      "mode": "candidate",
+      "pair": 7,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.05743630003416911,
+      "write_seconds": 0.8638921999954619,
+      "total_seconds": 0.921328500029631
+    },
+    {
+      "mode": "baseline",
+      "pair": 7,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.05203660001279786,
+      "write_seconds": 0.851011400052812,
+      "total_seconds": 0.9030480000656098
+    }
+  ],
+  "pid": 57096,
+  "macro_sha256": "513da483e48fe5b2aeecf9d80064335e4cbf5b1589d4f04e211df1e1d8428f80",
+  "clipboard_runs": [
+    {
+      "mode": "baseline",
+      "pair": 0,
+      "warmup": true,
+      "copy_seconds": 1.9678270000149496,
+      "paste_seconds": 0.5380056999856606,
+      "copy_retries": 0,
+      "paste_retries": 0
+    },
+    {
+      "mode": "candidate",
+      "pair": 0,
+      "warmup": true,
+      "copy_seconds": 1.1714662000304088,
+      "paste_seconds": 0.42124929995043203,
+      "copy_retries": 0,
+      "paste_retries": 0
+    },
+    {
+      "mode": "candidate",
+      "pair": 1,
+      "warmup": false,
+      "copy_seconds": 1.161167900019791,
+      "paste_seconds": 0.45735029998468235,
+      "copy_retries": 0,
+      "paste_retries": 0
+    },
+    {
+      "mode": "baseline",
+      "pair": 1,
+      "warmup": false,
+      "copy_seconds": 1.1814269999740645,
+      "paste_seconds": 0.5557438000105321,
+      "copy_retries": 0,
+      "paste_retries": 0
+    },
+    {
+      "mode": "baseline",
+      "pair": 2,
+      "warmup": false,
+      "copy_seconds": 1.1332918999833055,
+      "paste_seconds": 0.4793965000426397,
+      "copy_retries": 0,
+      "paste_retries": 0
+    },
+    {
+      "mode": "candidate",
+      "pair": 2,
+      "warmup": false,
+      "copy_seconds": 1.0898321999702603,
+      "paste_seconds": 0.43105489999288693,
+      "copy_retries": 0,
+      "paste_retries": 0
+    },
+    {
+      "mode": "candidate",
+      "pair": 3,
+      "warmup": false,
+      "copy_seconds": 1.08286180003779,
+      "paste_seconds": 0.438054199970793,
+      "copy_retries": 0,
+      "paste_retries": 0
+    },
+    {
+      "mode": "baseline",
+      "pair": 3,
+      "warmup": false,
+      "copy_seconds": 1.1094835000112653,
+      "paste_seconds": 0.41926559997955337,
+      "copy_retries": 0,
+      "paste_retries": 0
+    },
+    {
+      "mode": "baseline",
+      "pair": 4,
+      "warmup": false,
+      "copy_seconds": 1.056071700004395,
+      "paste_seconds": 0.42389899998670444,
+      "copy_retries": 0,
+      "paste_retries": 0
+    },
+    {
+      "mode": "candidate",
+      "pair": 4,
+      "warmup": false,
+      "copy_seconds": 1.104893300042022,
+      "paste_seconds": 0.4501859999727458,
+      "copy_retries": 0,
+      "paste_retries": 0
+    },
+    {
+      "mode": "candidate",
+      "pair": 5,
+      "warmup": false,
+      "copy_seconds": 1.094174500030931,
+      "paste_seconds": 0.4529979999642819,
+      "copy_retries": 0,
+      "paste_retries": 0
+    },
+    {
+      "mode": "baseline",
+      "pair": 5,
+      "warmup": false,
+      "copy_seconds": 1.079766099981498,
+      "paste_seconds": 0.44950560003053397,
+      "copy_retries": 0,
+      "paste_retries": 0
+    }
+  ],
+  "summaries": {
+    "runs": {
+      "baseline": {
+        "bytes": 2285668,
+        "encode_seconds": 0.04928400000790134,
+        "write_seconds": 0.8393551000044681,
+        "total_seconds": 0.8881455999799073
+      },
+      "candidate": {
+        "bytes": 2025652,
+        "encode_seconds": 0.05119790002936497,
+        "write_seconds": 0.8472073000157252,
+        "total_seconds": 0.8955794999492355
+      }
+    },
+    "clipboard_runs": {
+      "baseline": {
+        "copy_seconds": 1.1094835000112653,
+        "paste_seconds": 0.44950560003053397
+      },
+      "candidate": {
+        "copy_seconds": 1.094174500030931,
+        "paste_seconds": 0.4501859999727458
+      }
+    }
+  },
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd",
+  "fixture": {
+    "mesh_facets": 20000,
+    "placement": [
+      13,
+      17,
+      2
+    ]
+  }
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_perf_json_ab-1\c2962ff560654757af8e6449127154ce

@@ -1,0 +1,26 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,hashlib,traceback,tempfile,struct
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);case=Path('H:/FreeCAD-src/build/rhino5-clipboard/99e4a3594e1940acab4d00357013c499/current-ring');report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+helper=Path('H:/FreeCAD-src/build/om9-dev/tests/modeling_rhino5_saved_reimport.FCMacro').read_text()
+helpers=dict(App=App,Gui=Gui,Path=Path,os=os,json=json,hashlib=hashlib,tempfile=tempfile,struct=struct,check=check)
+exec(helper[helper.index('def measurements('):helper.index('\ndef run(')],helpers)
+def run():
+    try:
+        import ThreeDm
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        expected=json.loads((case/'results.json').read_text())['expected']
+        doc=App.newDocument('RhinoSavedDiagnostic')
+        actual=helpers['measurements'](ThreeDm.import_file(str(case/'rhino-pasted-saved.3dm'),doc,mode='modeling'))
+        report.update(expected=expected,actual=actual)
+        check('Rhino actual Paste SaveAs exact geometry oracle',helpers['equal'](expected,actual))
+        report['ok']=True
+    except:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -22,7 +22,6 @@
 #include <QRegularExpression>
 #include <QTimer>
 #include <cmath>
-#include <exception>
 namespace {
 Gui::View3DInventor* view(){auto* doc=Gui::Application::Instance->activeDocument();return doc?dynamic_cast<Gui::View3DInventor*>(doc->getActiveView()):nullptr;}
 const char* units[]={"mm","cm","m","in","ft"};
@@ -42,14 +41,12 @@ bool CoreDistance::active()const{return running;}
 bool CoreDistance::valid()const{return document==App::GetApplication().getActiveDocument()&&available();}
 void CoreDistance::activate(){enabled=true;}
 void CoreDistance::deactivate(){enabled=false;cancel();}
-void CoreDistance::cancel(){if(running)CoreSnaps::clearTransient();running=false;hasFirst=false;angleCount=0;document=nullptr;}
+void CoreDistance::cancel(){running=false;hasFirst=false;angleCount=0;document=nullptr;}
 void CoreDistance::prompt(const QString& message){CurveController::instance().setPrompt(message);CurveController::instance().logMessage(message);}
 bool CoreDistance::start(std::size_t index){
     if(!handles(index)||!available())return false;
     cancel();CorePictureFrame::instance().cancel();CoreViewControls::instance().cancel();CurveController::instance().cancel();
-    try {plane=CoreWorkspace::instance().plane(view());}
-    catch(const std::exception& error){cancel();CoreSnaps::clearTransient();prompt(QString::fromUtf8(error.what()));return false;}
-    document=App::GetApplication().getActiveDocument();command=index;unit=0;running=true;
+    document=App::GetApplication().getActiveDocument();plane=CoreWorkspace::instance().plane(view());command=index;unit=0;running=true;
     measuringAngle=QString::fromUtf8(om9_command_id(index))=="Angle";
     qApp->installEventFilter(this);CoreMouse::instance().prioritize();prompt(measuringAngle?"Angle: Start of first line":"Distance: Pick first point or enter x,y,z; Unit=mm/cm/m/in/ft; Esc cancels");return false;
 }
@@ -60,14 +57,14 @@ void CoreDistance::point(const Base::Vector3d& value){
         if(angleCount==1||angleCount==3){const auto& start=anglePoints[angleCount-1];if(om9_measure_distance(start.x,start.y,start.z,value.x,value.y,value.z,0)<=1e-12){prompt("Angle: Line must have a nonzero length; pick its end again");return;}}
         anglePoints[angleCount++]=value;
         const char* messages[]={"Angle: Start of first line","Angle: End of first line","Angle: Start of second line","Angle: End of second line"};
-        if(angleCount<4){CoreSnaps::acceptedPoint(true);prompt(messages[angleCount]);return;}
+        if(angleCount<4){prompt(messages[angleCount]);return;}
         double points[12];for(unsigned int i=0;i<4;++i)for(unsigned int j=0;j<3;++j)points[i*3+j]=anglePoints[i][j];
         const auto angle=om9_measure_angle(points);
         if(!std::isfinite(angle)){--angleCount;prompt("Angle: Invalid line; pick its end again");return;}
         const auto message=QString("Angle: %1 degrees").arg(angle,0,'g',15);
         Base::Console().message("{}\n",message.toUtf8().constData());om9_sidebar_record_execution(command,true);cancel();prompt(message);return;
     }
-    if(!hasFirst){first=value;hasFirst=true;CoreSnaps::acceptedPoint(true);prompt("Distance: Pick second point or enter x,y,z; Unit=mm/cm/m/in/ft");return;}
+    if(!hasFirst){first=value;hasFirst=true;prompt("Distance: Pick second point or enter x,y,z; Unit=mm/cm/m/in/ft");return;}
     const auto distance=om9_measure_distance(first.x,first.y,first.z,value.x,value.y,value.z,unit);
     if(!std::isfinite(distance)){prompt("Distance: Invalid measurement");return;}
     const auto message=QString("Distance: %1 %2").arg(distance,0,'g',15).arg(units[unit]);

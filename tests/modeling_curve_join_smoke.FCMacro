@@ -1,0 +1,37 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import Part,ThreeDm,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('CurveJoin');doc.UndoMode=1
+        a=doc.addObject('Part::Feature','A');a.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(5,0,0))
+        b=doc.addObject('Part::Feature','B');b.Shape=Part.makeLine(App.Vector(5,0,0),App.Vector(5,6,0));doc.recompute()
+        def model_count():return sum(o.TypeId!='OpenMatrix9Gui::LayerDocumentObject' for o in doc.Objects)
+        name=native.joinModelingCurves3dm(doc.Name,[b.Name,a.Name]);joined=doc.getObject(name)
+        check('native curve Join creates independent connected wire',joined.Shape.isValid() and len(joined.Shape.Edges)==2 and abs(joined.Shape.Length-11)<1e-9 and model_count()==3)
+        doc.undo();check('Join Undo atomic retains inputs',model_count()==2);doc.redo();check('Join Redo restores result',model_count()==3)
+        before=len(doc.Objects);b.Placement.Base=App.Vector(100,0,0);doc.recompute();failed=False
+        try:native.joinModelingCurves3dm(doc.Name,[a.Name,b.Name])
+        except (ValueError,RuntimeError):failed=True
+        check('disconnected curves rejected without mutation',failed and len(doc.Objects)==before)
+        export=out/'joined-curve-v5.3dm';ThreeDm.export_file(str(export),[joined],modeling=True)
+        target=App.newDocument('JoinedReread');objects=ThreeDm.import_file(str(export),target,mode='modeling')
+        check('joined curve current V5 reimport',len(objects)==1 and abs(objects[0].Shape.Length-11)<1e-8)
+        doc=App.newDocument('ClosedJoin');doc.UndoMode=1
+        closed=doc.addObject('Part::Feature','Closed');closed.Shape=Part.makeCircle(2,App.Vector(0,2,0));tail=doc.addObject('Part::Feature','Tail');tail.Shape=Part.makeLine(App.Vector(2,2,0),App.Vector(2,2,3));doc.recompute()
+        before=len(doc.Objects);undos=len(doc.UndoNames);failed=False
+        try:native.joinModelingCurves3dm(doc.Name,[closed.Name,tail.Name])
+        except (RuntimeError,ValueError):failed=True
+        check('closed curve Join rejected before mutation',failed and len(doc.Objects)==before and len(doc.UndoNames)==undos)
+        report.update(ok=True,module=native.__file__,exported=str(export))
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

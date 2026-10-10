@@ -1,0 +1,59 @@
+"""Native metadata identity must never hide a geometry-bearing marker spoof."""
+import os,json,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]};docs=[]
+def check(name,value):
+    report['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(200,loop.quit);loop.exec()
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('LayerHelperIdentity');docs.append(doc.Name);doc.UndoMode=1
+        real=doc.addObject('Part::Feature','RealRing');real.Shape=Part.makeBox(2,3,4)
+        spoof=doc.addObject('Part::Feature','GeometryWithNotesMarker');spoof.Shape=Part.makeBox(1,2,3)
+        spoof.addProperty('App::PropertyString','OM9NotesSchema');spoof.OM9NotesSchema='1';spoof.addProperty('App::PropertyString','Notes');spoof.Notes='not an internal helper';doc.recompute()
+        Gui.runCommand('OM9_SelectAll');settle()
+        check('geometry notes-marker spoof is never silently excluded',set(o.Name for o in Gui.Selection.getSelection())=={real.Name,spoof.Name})
+        def enter():
+            dialog=Gui.getMainWindow().findChild(QtWidgets.QDialog,'OM9ProjectNotes')
+            if dialog is None:report['callback_error']='notes dialog absent';return
+            dialog.findChild(QtWidgets.QPlainTextEdit,'OM9NotesText').setPlainText('Owned project notes')
+            dialog.findChild(QtWidgets.QPushButton,'OM9NotesDone').click()
+        QtCore.QTimer.singleShot(200,enter);Gui.runCommand('OM9_ProjectNotes');settle()
+        if report.get('callback_error'):raise AssertionError(report['callback_error'])
+        owner=next(o for o in doc.Objects if getattr(o,'Notes','')=='Owned project notes')
+        check('notes storage uses a dedicated persisted native type',owner.TypeId=='OpenMatrix9Gui::ProjectNotesObject')
+        check('native helper has no geometry and immutable identity fields',not hasattr(owner,'Shape') and 'ReadOnly' in owner.getTypeOfProperty('OM9NotesSchema'))
+        try:native.exportLayerSelection3dm(doc.Name,[owner]);reject=False
+        except RuntimeError:reject=True
+        check('native notes cannot be sent as selected model geometry',reject)
+        state=json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']
+        check('layer model inventory excludes native notes but includes geometry spoof',set(row['id'] for row in state['objects'])=={real.Name,spoof.Name})
+        Gui.runCommand('OM9_SelectAll');settle()
+        check('selection excludes only real metadata',set(o.Name for o in Gui.Selection.getSelection())=={real.Name,spoof.Name})
+        volumes={o.Name:o.Shape.Volume for o in (real,spoof)}
+        native.layerDocumentCommand(doc.Name,json.dumps(dict(operation='set_locked',layer_id=state['layers'][0]['source_id'],locked=True)))
+        check('layer projection cannot reveal native notes',not owner.ViewObject.Visibility and not owner.ViewObject.ShowInTree)
+        check('layer metadata operation leaves both geometry volumes intact',all(doc.getObject(name).Shape.Volume==value for name,value in volumes.items()))
+        doc.undo();check('one layer Undo preserves project notes',owner.Notes=='Owned project notes' and doc.Meta.get('OpenMatrix9.ProjectNotes')=='Owned project notes')
+        path=out/'native-helper.FCStd';doc.saveAs(str(path));savedName=doc.Name;App.closeDocument(savedName);docs.remove(savedName)
+        loaded=App.openDocument(str(path));docs.append(loaded.Name);settle()
+        restored=next(o for o in loaded.Objects if o.TypeId=='OpenMatrix9Gui::ProjectNotesObject')
+        check('native notes identity and text survive FCStd',restored.Notes=='Owned project notes' and not restored.ViewObject.Visibility)
+        state=json.loads(native.layerDocumentSnapshot(loaded.Name))['snapshot']
+        check('reopened inventory still contains both models only',len(state['objects'])==2)
+        restored.addProperty('Part::PropertyPartShape','Shape');restored.Shape=Part.makeBox(3,4,5)
+        state=json.loads(native.layerDocumentSnapshot(loaded.Name))['snapshot']
+        check('geometry-bearing native helper is never silently excluded',any(row['id']==restored.Name for row in state['objects']))
+        report.update(ok=True,module=native.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in docs:
+            if name in App.listDocuments():App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

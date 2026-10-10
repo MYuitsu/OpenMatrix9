@@ -1,0 +1,46 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,traceback,hashlib
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'cases':[]}
+def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import Part,ThreeDm,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');result_path=Path(os.environ['OM9_RHINO_PHASE2_RESULT']);rhino=json.loads(result_path.read_text())
+        check('actual Rhino5 three fixtures completed',rhino['ok'] and len(rhino['cases'])==3 and rhino['rhino_version'].startswith('5.'))
+        for case in rhino['cases']:
+            host_path=Path(case['host_report']);host=json.loads(host_path.read_text());check('host binary same as saved reread '+case['name'],host['module_sha256']==sha(native.__file__))
+            doc=App.newDocument('RhinoSaved');objects=ThreeDm.import_file(case['saved'],doc,mode='modeling');expected=host['expected']
+            check('saved selection exact '+case['name'],len(objects)==len(expected) and {o.Label for o in objects}==set(expected))
+            for obj in objects:
+                wanted=expected[obj.Label];edges=obj.Shape.Edges;wanted_edges=wanted.get('segments',[wanted])
+                if 'segments' in wanted and len(edges)==1:
+                    target=case['rows'][obj.Label];edge=edges[0];curve=edge.Curve
+                    check('saved PolyCurve native equivalent NURBS '+case['name'],obj.Shape.isValid() and curve.Degree==target['degree'] and abs(edge.Length-target['length'])<=0.001)
+                    samples=[list(edge.valueAt(edge.FirstParameter+(edge.LastParameter-edge.FirstParameter)*j/64)) for j in range(65)]
+                    check('saved PolyCurve complete current geometry '+case['name'],all(abs(a-b)<=0.001 for p,q in zip(samples,target['full_samples']) for a,b in zip(p,q)))
+                    check('saved PolyCurve rational shape '+case['name'],curve.isRational()==any(abs(w-1)>1e-12 for segment in wanted['segments'] for w in segment['weights']))
+                    continue
+                check('actual SaveAs native CAD selection '+case['name']+'/'+obj.Label,obj.Shape.isValid() and len(edges)==len(wanted_edges) and abs(sum(e.Length for e in edges)-wanted['length'])<=0.001)
+                for i,(edge,target) in enumerate(zip(edges,wanted_edges)):
+                    curve=edge.Curve
+                    if not hasattr(curve,'getWeights'):curve=edge.toNurbs().Edges[0].Curve
+                    label=case['name']+'/'+obj.Label+'/'+str(i)
+                    check('actual SaveAs native CAD basis '+label,curve.Degree==target['degree'] and curve.isPeriodic()==target['periodic'])
+                    samples=[list(edge.valueAt(edge.FirstParameter+(edge.LastParameter-edge.FirstParameter)*j/32)) for j in range(33)]
+                    check('actual SaveAs current geometry '+label,all(abs(a-b)<=0.001 for p,q in zip(samples,target['samples']) for a,b in zip(p,q)))
+                    weights=curve.getWeights();check('actual SaveAs rational basis '+label,len(weights)==len(target['weights']) and all(abs(a-b)<1e-9 for a,b in zip(weights,target['weights'])))
+            exported=out/(case['name']+'-reread-current-v5.3dm');ThreeDm.export_file(str(exported),objects,modeling=True)
+            check('saved reread exports current native CAD '+case['name'],exported.is_file())
+            report['cases'].append({'name':case['name'],'saved':case['saved'],'saved_sha256':sha(case['saved']),'input_sha256':sha(case['input']),'host_report_sha256':sha(host_path),'host_output_sha256':sha(host['output']),'reexport':str(exported),'reexport_sha256':sha(exported)})
+            App.closeDocument(doc.Name)
+        report.update(ok=True,module=native.__file__,module_sha256=sha(native.__file__),freecad_version=App.Version(),rhino_report=str(result_path),rhino_report_sha256=sha(result_path))
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

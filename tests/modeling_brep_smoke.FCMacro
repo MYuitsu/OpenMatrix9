@@ -1,0 +1,41 @@
+"""Actual 3DM/native-CAD bridge against independent analytic BRep fixtures."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,traceback,tempfile,hashlib,sys
+sys.path.insert(0,str(Path(__file__).parent))
+from phase3_oracle import measure
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);(out/'temp').mkdir(exist_ok=True);tempfile.tempdir=str(out/'temp')
+report={'checks':[],'fixtures':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import Part,ThreeDm,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        folder=Path('H:/FreeCAD-src/build/om9-phase3-native/modeling-brep-fixtures')
+        for case in json.loads((folder/'expected.json').read_text())['cases']:
+            path=Path(case['input']);digest=hashlib.sha256(path.read_bytes()).hexdigest()
+            check(case['name']+' fixture binding',digest==case['sha256'])
+            doc=App.newDocument('Brep');doc.UndoMode=1
+            objects=ThreeDm.import_file(str(path),doc,mode='modeling')
+            check(case['name']+' native CAD valid',len(objects)==1 and objects[0].OM9Representation=='native-cad' and objects[0].Shape.isValid())
+            s=objects[0].Shape; expected_name=objects[0].Label
+            exact=measure(s,out/(case['name']+'.brep'))
+            report['measurement']=exact
+            check(case['name']+' analytic area',abs(exact['area']-case['area'])<1e-5)
+            check(case['name']+' native topology',len(s.Faces)==case['faces'] and bool(s.Solids)==case['closed'])
+            if case['closed']:check(case['name']+' analytic material',abs(exact['volume']-case['volume'])<1e-5)
+            target=out/(case['name']+'-current.3dm');ThreeDm.export_file(str(target),objects,modeling=True)
+            saved=out/(case['name']+'.FCStd');doc.saveAs(str(saved));name=doc.Name;App.closeDocument(name)
+            reopened=App.openDocument(str(saved));o=next(o for o in reopened.Objects if hasattr(o,'OM9WorkingUUID'))
+            check(case['name']+' FCStd retains current native CAD',o.Shape.isValid() and abs(measure(o.Shape,out/(case['name']+'-reopened.brep'))['area']-case['area'])<1e-5)
+            report['fixtures'].append(dict(case,object_name=expected_name,output=str(target),output_sha256=hashlib.sha256(target.read_bytes()).hexdigest()))
+            App.closeDocument(reopened.Name)
+        report.update(ok=True,module=native.__file__,python_module=ThreeDm.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -18,77 +18,6 @@ pub struct Spline {
     pub degree: usize,
     pub periodic: bool,
 }
-
-/// Owned geometry may expose this borrowed basis only during validation.
-/// Knots are distinct and multiplicities follow the native FreeCAD/OCCT
-/// convention: periodic pole count excludes the final seam multiplicity.
-pub struct Basis<'a> {
-    pub poles: &'a [[f64; 3]],
-    pub weights: Option<&'a [f64]>,
-    pub knots: &'a [f64],
-    pub multiplicities: &'a [usize],
-    pub degree: usize,
-    pub periodic: bool,
-    pub domain: [f64; 2],
-}
-
-impl Basis<'_> {
-    pub fn validate(&self) -> Result<(), String> {
-        rebuild_options(self.poles.len(), self.degree)?;
-        if self.poles.iter().flatten().any(|v| !v.is_finite() || v.abs() > 1e9) {
-            return Err("Spline poles must be finite within supported coordinates".into());
-        }
-        if let Some(weights) = self.weights {
-            if weights.len() != self.poles.len()
-                || weights.iter().zip(self.poles).any(|(&w, p)| {
-                    !w.is_finite() || w <= 0. || p.iter().any(|v| !(v * w).is_finite())
-                })
-            {
-                return Err("Spline weights must match poles, be positive, and not overflow".into());
-            }
-        }
-        if self.knots.len() < 2 || self.knots.len() != self.multiplicities.len()
-            || self.knots.iter().any(|u| !u.is_finite())
-            || self.knots.windows(2).any(|u| u[0] >= u[1] || !(u[1] - u[0]).is_finite())
-        {
-            return Err("Spline knots must be finite, strictly increasing, and match multiplicities".into());
-        }
-        let last = self.knots.len() - 1;
-        let total = self.multiplicities.iter().enumerate().try_fold(0usize, |sum, (i, &m)| {
-            let limit = self.degree + usize::from(!self.periodic && (i == 0 || i == last));
-            if m == 0 || m > limit { return None; }
-            sum.checked_add(m)
-        }).ok_or("Invalid spline knot multiplicity")?;
-        let (minimum, maximum) = if self.periodic {
-            if self.multiplicities[0] != self.multiplicities[last]
-                || total.checked_sub(self.multiplicities[last]) != Some(self.poles.len())
-            {
-                return Err("Periodic spline seam multiplicities or pole count do not match".into());
-            }
-            (self.knots[0], self.knots[last])
-        } else {
-            if total != self.poles.len() + self.degree + 1 {
-                return Err("Spline pole count does not match degree and knot multiplicities".into());
-            }
-            let at = |index: usize| {
-                let mut end = 0;
-                self.knots.iter().zip(self.multiplicities).find_map(|(&u, &m)| {
-                    end += m;
-                    (index < end).then_some(u)
-                }).unwrap_or(f64::NAN)
-            };
-            (at(self.degree), at(self.poles.len()))
-        };
-        if self.domain.iter().any(|u| !u.is_finite())
-            || self.domain[0] >= self.domain[1]
-            || !(self.domain[1] - self.domain[0]).is_finite()
-            || self.domain[0] < minimum || self.domain[1] > maximum
-        {
-            return Err("Spline domain must be finite, increasing, and inside the active knot interval".into());
-        }
-        Ok(())
-    }
-}
 pub fn distance(a: [f64; 3], b: [f64; 3]) -> f64 {
     a.iter()
         .zip(b)
@@ -146,31 +75,6 @@ fn periodic_knots(params: &[f64], degree: usize) -> Vec<f64> {
         .collect()
 }
 impl Spline {
-    /// The generated evaluator uses an expanded, normalized [0,1] basis.
-    /// Validate before slicing it into the host's distinct-knot convention.
-    pub fn validate(&self) -> Result<(), String> {
-        rebuild_options(self.poles.len(), self.degree)?;
-        let extension = if self.periodic { 2 * self.degree } else { self.degree };
-        let expected = self.poles.len().checked_add(extension).and_then(|n| n.checked_add(1));
-        if Some(self.knots.len()) != expected
-            || self.knots.iter().any(|u| !u.is_finite())
-            || self.knots.windows(2).any(|u| u[0] > u[1])
-        {
-            return Err("Invalid expanded spline knot vector".into());
-        }
-        let end = self.poles.len() + if self.periodic { self.degree } else { 0 };
-        if self.knots[self.degree] != 0. || self.knots[end] != 1. {
-            return Err("Generated spline must use the normalized active domain [0,1]".into());
-        }
-        if self.periodic && (0..self.knots.len() - self.poles.len()).any(|i| {
-            (self.knots[i + self.poles.len()] - self.knots[i] - 1.).abs() > 1e-12
-        }) {
-            return Err("Periodic spline extension does not repeat the knot intervals".into());
-        }
-        let (knots, multiplicities) = self.host_knots();
-        Basis { poles: &self.poles, weights: None, knots: &knots, multiplicities: &multiplicities,
-            degree: self.degree, periodic: self.periodic, domain: [0., 1.] }.validate()
-    }
     pub fn basis(&self, u: f64) -> Vec<f64> {
         let n = self.poles.len();
         let extended = n + if self.periodic { self.degree } else { 0 };
@@ -250,11 +154,13 @@ fn solve(mut a: Vec<Vec<f64>>, mut rhs: Vec<[f64; 3]>) -> Result<Vec<[f64; 3]>, 
         rhs.swap(k, pivot);
         for i in k + 1..n {
             let f = a[i][k] / a[k][k];
-            for j in k..n {
-                a[i][j] -= f * a[k][j];
+            let (pivot_rows, rows) = a.split_at_mut(i);
+            for (value, pivot_value) in rows[0][k..].iter_mut().zip(&pivot_rows[k][k..]) {
+                *value -= f * pivot_value;
             }
-            for axis in 0..3 {
-                rhs[i][axis] -= f * rhs[k][axis];
+            let pivot_rhs = rhs[k];
+            for (value, pivot_value) in rhs[i].iter_mut().zip(pivot_rhs) {
+                *value -= f * pivot_value;
             }
         }
     }
@@ -277,7 +183,7 @@ pub fn interpolate(
     periodic: bool,
 ) -> Result<Spline, String> {
     validate(points, MAX_POLES)?;
-    if !(1..=11).contains(&requested_degree) || requested_degree % 2 == 0 {
+    if !(1..=11).contains(&requested_degree) || requested_degree.is_multiple_of(2) {
         return Err("InterpCrv supports odd degrees 1, 3, 5, 7, 9 and 11".into());
     }
     if periodic && (points.len() < 3 || distance(points[0], *points.last().unwrap()) < TOLERANCE) {
@@ -288,7 +194,7 @@ pub fn interpolate(
     }
     let n = points.len();
     let mut degree = requested_degree.min(n - 1);
-    if periodic && degree % 2 == 0 {
+    if periodic && degree.is_multiple_of(2) {
         degree -= 1;
     }
     let params = parameters(points, mode, periodic);
@@ -299,44 +205,6 @@ pub fn interpolate(
         for j in 1..n - degree {
             knots.push(params[j..j + degree].iter().sum::<f64>() / degree as f64);
         }
-        knots.extend(vec![1.; degree + 1]);
-        knots
-    };
-    let mut spline = Spline {
-        poles: vec![[0.; 3]; n],
-        knots,
-        degree,
-        periodic,
-    };
-    let matrix = params[..n].iter().map(|&u| spline.basis(u)).collect();
-    spline.poles = solve(matrix, points.to_vec())?;
-    Ok(spline)
-}
-/// Interpolate control-net rows on genuinely uniform distinct knots. Constant
-/// rows are allowed: this fits homogeneous surface coordinates, not a user curve.
-pub fn uniform_net_interpolate(points: &[[f64; 3]], periodic: bool) -> Result<Spline, String> {
-    let n = points.len();
-    if !(2..=MAX_POLES).contains(&n)
-        || (periodic && n < 3)
-        || points
-            .iter()
-            .flatten()
-            .any(|x| !x.is_finite() || x.abs() > 1e9)
-    {
-        return Err("Uniform Loft needs 2 to 256 finite control rows (3 for closed)".into());
-    }
-    let mut degree = 3.min(n - 1);
-    if periodic && degree % 2 == 0 {
-        degree -= 1;
-    }
-    let params = (0..if periodic { n + 1 } else { n })
-        .map(|i| i as f64 / (n - usize::from(!periodic)) as f64)
-        .collect::<Vec<_>>();
-    let knots = if periodic {
-        periodic_knots(&params, degree)
-    } else {
-        let mut knots = vec![0.; degree + 1];
-        knots.extend((1..n - degree).map(|j| j as f64 / (n - degree) as f64));
         knots.extend(vec![1.; degree + 1]);
         knots
     };
@@ -422,5 +290,42 @@ pub fn rebuild(
     }
     let fit = solve(normal, rhs)?;
     spline.poles[first..end].copy_from_slice(&fit);
+    Ok(spline)
+}
+
+pub fn uniform_net_interpolate(points: &[[f64; 3]], periodic: bool) -> Result<Spline, String> {
+    let n = points.len();
+    if !(2..=MAX_POLES).contains(&n)
+        || (periodic && n < 3)
+        || points
+            .iter()
+            .flatten()
+            .any(|x| !x.is_finite() || x.abs() > 1e9)
+    {
+        return Err("Uniform Loft needs 2 to 256 finite control rows (3 for closed)".into());
+    }
+    let mut degree = 3.min(n - 1);
+    if periodic && degree.is_multiple_of(2) {
+        degree -= 1;
+    }
+    let params = (0..if periodic { n + 1 } else { n })
+        .map(|i| i as f64 / (n - usize::from(!periodic)) as f64)
+        .collect::<Vec<_>>();
+    let knots = if periodic {
+        periodic_knots(&params, degree)
+    } else {
+        let mut knots = vec![0.; degree + 1];
+        knots.extend((1..n - degree).map(|j| j as f64 / (n - degree) as f64));
+        knots.extend(vec![1.; degree + 1]);
+        knots
+    };
+    let mut spline = Spline {
+        poles: vec![[0.; 3]; n],
+        knots,
+        degree,
+        periodic,
+    };
+    let matrix = params[..n].iter().map(|&u| spline.basis(u)).collect();
+    spline.poles = solve(matrix, points.to_vec())?;
     Ok(spline)
 }

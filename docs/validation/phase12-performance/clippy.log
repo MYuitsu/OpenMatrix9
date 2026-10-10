@@ -1,0 +1,157 @@
+    Checking openmatrix9_rust v0.1.0 (H:\FreeCAD-src\build\om9-perf-dev\rust)
+warning: this looks like you are trying to use `.. *= ..`, but you really are doing `.. = (* ..)`
+   --> src\spline.rs:154:67
+    |
+154 |     if !periodic {spline.poles[0]=samples[0];spline.poles[count-1]=*samples.last().unwrap();}
+    |                                                                   ^^
+    |
+    = note: to remove this lint, use either `*=` or `= *`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#suspicious_assignment_formatting
+    = note: `#[warn(clippy::suspicious_assignment_formatting)]` on by default
+
+warning: using `chunks_exact` with a constant chunk size
+  --> src\core_snaps.rs:86:29
+   |
+86 |     let candidates = values.chunks_exact(5).map(|v| Candidate {
+   |                             ^^^^^^^^^^^^^^^ help: consider using `as_chunks` instead: `as_chunks::<5>().0.iter()`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#chunks_exact_to_as_chunks
+   = note: `#[warn(clippy::chunks_exact_to_as_chunks)]` on by default
+
+warning: this `if` statement can be collapsed
+  --> src\curve.rs:88:9
+   |
+88 |         if let Some(p)=hover {if points.last().is_none_or(|&a| spline::distance(a,p)>=spline::TOLERANCE) {points.push(p);}}
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+   = note: `#[warn(clippy::collapsible_if)]` on by default
+help: collapse nested if block
+   |
+88 -         if let Some(p)=hover {if points.last().is_none_or(|&a| spline::distance(a,p)>=spline::TOLERANCE) {points.push(p);}}
+88 +         if let Some(p)=hover&& points.last().is_none_or(|&a| spline::distance(a,p)>=spline::TOLERANCE) {points.push(p);}
+   |
+
+warning: the loop variable `j` is only used to index `a`
+   --> src\spline.rs:101:22
+    |
+101 |             for j in k..n {a[i][j]-=f*a[k][j];}
+    |                      ^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+    = note: `#[warn(clippy::needless_range_loop)]` on by default
+help: consider using an iterator
+    |
+101 -             for j in k..n {a[i][j]-=f*a[k][j];}
+101 +             for <item> in a.iter_mut().take(n).skip(k) {a[i][j]-=f*a[k][j];}
+    |
+
+warning: the loop variable `axis` is only used to index `rhs`
+   --> src\spline.rs:102:25
+    |
+102 |             for axis in 0..3 {rhs[i][axis]-=f*rhs[k][axis];}
+    |                         ^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_range_loop
+help: consider using an iterator
+    |
+102 -             for axis in 0..3 {rhs[i][axis]-=f*rhs[k][axis];}
+102 +             for <item> in rhs.iter_mut().take(3) {rhs[i][axis]-=f*rhs[k][axis];}
+    |
+
+warning: manual implementation of `.is_multiple_of()`
+   --> src\spline.rs:114:49
+    |
+114 |     if !(1..=11).contains(&requested_degree) || requested_degree%2==0 {
+    |                                                 ^^^^^^^^^^^^^^^^^^^^^ help: replace with: `requested_degree.is_multiple_of(2)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#manual_is_multiple_of
+    = note: `#[warn(clippy::manual_is_multiple_of)]` on by default
+
+warning: manual implementation of `.is_multiple_of()`
+   --> src\spline.rs:122:20
+    |
+122 |     if periodic && degree%2==0 {degree-=1;}
+    |                    ^^^^^^^^^^^ help: replace with: `degree.is_multiple_of(2)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#manual_is_multiple_of
+
+warning: using `chunks_exact` with a constant chunk size
+  --> src\spline_ffi.rs:16:22
+   |
+16 |     let points=input.chunks_exact(3).map(|p|[p[0],p[1],p[2]]).collect::<Vec<_>>();
+   |                      ^^^^^^^^^^^^^^^ help: consider using `as_chunks` instead: `as_chunks::<3>().0.iter()`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#chunks_exact_to_as_chunks
+
+warning: using `contains()` instead of `iter().any()` is more efficient
+  --> src\phase2_curve.rs:91:12
+   |
+91 |         || ordered_edges.iter().any(|id| *id == 0)
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `ordered_edges.contains(&0)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#manual_contains
+   = note: `#[warn(clippy::manual_contains)]` on by default
+
+warning: using `chunks_exact` with a constant chunk size
+   --> src\phase2_ffi.rs:163:10
+    |
+163 |         .chunks_exact(3)
+    |          ^^^^^^^^^^^^^^^ help: consider using `as_chunks` instead: `as_chunks::<3>().0.iter()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#chunks_exact_to_as_chunks
+
+warning: the following explicit lifetimes could be elided: 'a
+  --> src\phase2_snap_ffi.rs:67:10
+   |
+67 | fn query<'a>(s: &'a mut Store, h: u64) -> Result<&'a mut SnapQuery, String> {
+   |          ^^      ^^                               ^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_lifetimes
+   = note: `#[warn(clippy::needless_lifetimes)]` on by default
+help: elide the lifetimes
+   |
+67 - fn query<'a>(s: &'a mut Store, h: u64) -> Result<&'a mut SnapQuery, String> {
+67 + fn query(s: &mut Store, h: u64) -> Result<&mut SnapQuery, String> {
+   |
+
+warning: `openmatrix9_rust` (lib test) generated 11 warnings (1 duplicate) (run `cargo clippy --fix --lib -p openmatrix9_rust --tests -- ` to apply 8 suggestions)
+warning: `openmatrix9_rust` (lib) generated 11 warnings (10 duplicates)
+warning: value assigned to `p` is never read
+   --> tests\phase2_ffi_contract.rs:110:9
+    |
+110 |         p[0] = 0.;
+    |         ^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: manual creation of a dangling pointer
+  --> tests\phase2_ffi_contract.rs:63:19
+   |
+63 |         b.poles = 1usize as *const f64;
+   |                   ^^^^^^^^^^^^^^^^^^^^ help: use: `std::ptr::dangling::<f64>()`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#manual_dangling_ptr
+   = note: `#[warn(clippy::manual_dangling_ptr)]` on by default
+
+warning: `openmatrix9_rust` (test "phase2_ffi_contract") generated 2 warnings (run `cargo clippy --fix --test "phase2_ffi_contract" -p openmatrix9_rust -- ` to apply 1 suggestion)
+warning: unnecessary use of `clone` to create a slice from a reference
+   --> tests\phase2_curve_core.rs:139:33
+    |
+139 |     assert_eq!(s.commit_request(&[input.clone()]).unwrap(), options);
+    |                                 ^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&input)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#cloned_ref_to_slice_refs
+    = note: `#[warn(clippy::cloned_ref_to_slice_refs)]` on by default
+
+warning: unnecessary use of `clone` to create a slice from a reference
+   --> tests\phase2_curve_core.rs:146:33
+    |
+146 |     assert_eq!(s.commit_request(&[input.clone()]).unwrap(), options);
+    |                                 ^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&input)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#cloned_ref_to_slice_refs
+
+warning: `openmatrix9_rust` (test "phase2_curve_core") generated 2 warnings (run `cargo clippy --fix --test "phase2_curve_core" -p openmatrix9_rust -- ` to apply 2 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.11s

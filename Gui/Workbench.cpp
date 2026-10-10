@@ -1,17 +1,18 @@
+#include "SurfaceController.h"
+#include "EditController.h"
+#include "Phase3Inputs.h"
 #include "Workbench.h"
 #include "RustBridge.h"
 #include "MatrixSidebar.h"
 #include "NativeCommands.h"
 #include "CurveController.h"
-#include "SurfaceController.h"
-#include "EditController.h"
-#include "SolidController.h"
 #include "CoreWorkspace.h"
 #include "CoreViewControls.h"
 #include "CoreNotes.h"
 #include "CorePictureFrame.h"
 #include "CoreDistance.h"
 #include "CoreSnaps.h"
+#include "LayerController.h"
 #include "CoreKeyboard.h"
 #include "CoreMouse.h"
 #include <App/Application.h>
@@ -43,13 +44,18 @@ void Workbench::activated()
     om9_workbench_activated();
     if(!sidebar) {
         const QString resources=QDir(QString::fromStdString(App::Application::getHomePath())).filePath("Mod/OpenMatrix9/Resources");
-        sidebar=new MatrixSidebar(Gui::getMainWindow(),resources,{om9NativeCommandAvailable,om9ExecuteNativeCommand});
+        sidebar=new MatrixSidebar(Gui::getMainWindow(),resources,{om9NativeCommandAvailable,om9ExecuteNativeCommand,
+            [](std::size_t command)->std::optional<bool>{
+                if(CoreSnaps::handles(command))return CoreSnaps::checked(command);
+                if(QString::fromUtf8(om9_command_id(command))=="Ortho")return CoreKeyboard::checked(command);
+                return std::nullopt;
+            },
+            [](const QString& input){return LayerController::submit(input)||CoreSnaps::submit(input)||CoreKeyboard::instance().submit(input);},
+            []{return LayerController::panel();}});
     }
     static_cast<MatrixSidebar*>(sidebar.data())->activate();
+    SurfaceController::instance().activate();EditController::instance().activate();
     CurveController::instance().activate();
-    SurfaceController::instance().activate();
-    EditController::instance().activate();
-    SolidController::instance().activate();
     CoreWorkspace::instance().activate();
     CoreViewControls::instance().activate();
     CoreNotes::activate();
@@ -63,9 +69,6 @@ void Workbench::activated()
 
 void Workbench::deactivated()
 {
-    SurfaceController::instance().deactivate();
-    EditController::instance().deactivate();
-    SolidController::instance().deactivate();
     CoreMouse::instance().deactivate();
     CoreKeyboard::instance().deactivate();
     CoreSnaps::deactivate();
@@ -75,6 +78,7 @@ void Workbench::deactivated()
     CoreNotes::deactivate();
     CoreViewControls::instance().deactivate();
     CoreWorkspace::instance().deactivate();
+    SurfaceController::instance().deactivate();EditController::instance().deactivate();
     CurveController::instance().deactivate();
     if(sidebar)static_cast<MatrixSidebar*>(sidebar.data())->deactivate();
 
@@ -94,7 +98,7 @@ Gui::MenuItem* Workbench::setupMenuBar() const
     openMatrixMenu->setCommand(
         "&OpenMatrix9"
     );
-    *openMatrixMenu << "Import3dm" << "Export3dm" << "Separator";
+    *openMatrixMenu << "Import3dm" << "Export3dm" << "Copy3dm" << "Paste3dm" << "ExportLayerSelection3dm" << "ExportSession3dm" << "CopySession3dm" << "Separator";
     auto* workspaceMenu=new Gui::MenuItem();workspaceMenu->setCommand("Workspace");
     for(std::size_t i=0;i<om9_workspace_command_count();++i)
         *workspaceMenu << om9_command_id(om9_workspace_command(i));
@@ -123,8 +127,8 @@ Gui::MenuItem* Workbench::setupMenuBar() const
             new Gui::MenuItem();
 
         submenu->setCommand(title);
-        if(std::string(title)=="File")*submenu << "Import3dm" << "Export3dm";
-        if(std::string(title)=="Transform")*submenu << "OM9_ReleaseFromCage";
+        if(std::string(title)=="File")*submenu << "Import3dm" << "Export3dm" << "Copy3dm" << "Paste3dm" << "ExportLayerSelection3dm" << "ExportSession3dm" << "CopySession3dm";
+        if(std::string(title)=="Curve")*submenu << "PointsOn" << "Join";
 
         const std::size_t commandCount =
             om9_menu_group_command_count(
@@ -161,7 +165,7 @@ Gui::ToolBarItem* Workbench::setupToolBars() const
     auto* root=Gui::StdWorkbench::setupToolBars();
     auto* exchange=new Gui::ToolBarItem(root);
     exchange->setCommand("3DM");
-    *exchange << "Import3dm" << "Export3dm";
+    *exchange << "Import3dm" << "Export3dm" << "Copy3dm" << "Paste3dm" << "ExportLayerSelection3dm" << "ExportSession3dm" << "CopySession3dm";
     return root;
 }
 

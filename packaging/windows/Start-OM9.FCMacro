@@ -1,0 +1,11 @@
+import os,sys
+from pathlib import Path
+root=Path(os.environ['OM9_RELEASE_PLUGIN'])
+sys.path.insert(0,str(root/'bin'))
+sys.path.insert(0,str(root))
+import FreeCADGui as Gui
+if 'OpenMatrix9Workbench' in Gui.listWorkbenches(): Gui.removeWorkbench('OpenMatrix9Workbench')
+exec(compile((root/'InitGui.py').read_bytes(),str(root/'InitGui.py'),'exec'),dict(__name__='__main__',__file__=str(root/'InitGui.py')))
+Gui.activateWorkbench('OpenMatrix9Workbench')
+test=os.environ.get('OM9_RELEASE_TEST_MACRO')
+if test: exec(compile(Path(test).read_bytes(),test,'exec'),dict(__name__='__main__',__file__=test))

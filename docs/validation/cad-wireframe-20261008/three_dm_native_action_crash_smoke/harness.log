@@ -1,0 +1,57 @@
+{
+    "checks":  [
+                   {
+                       "name":  "same user source imports through Python API",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "native QAction queued without Gui.runCommand",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "native menu imports same geometry count as API",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "native menu imported CAD valid",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "native QAction queued without Gui.runCommand",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "native export file written",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "native export target Rhino5 valid",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "source remains unchanged",
+                       "passed":  true
+                   }
+               ],
+    "source":  "C:\\Users\\nguye\\Downloads\\nhan oval 11.91x8.37x4.97.3dm",
+    "phase":  "native-export",
+    "inventory":  {
+                      "source_version":  50,
+                      "issues":  [
+
+                                 ],
+                      "record_count":  31
+                  },
+    "api_geometry_count":  52,
+    "dialogs":  [
+                    "native-import-file",
+                    "preserve-mode",
+                    "native-export-file"
+                ],
+    "imported_geometry_count":  52,
+    "ok":  true,
+    "module":  "H:\\FreeCAD-src\\build\\om9-cad-wire-sdk\\bin\\OpenMatrix9Gui.pyd",
+    "source_sha256":  "5cdd84533c2dca20ef441fcbe2f1edd0226cc3ab02805caa4af60ef3dbba9997"
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\three_dm_native_action_crash_smoke-1\aa1b382955ff40d1a38721470a90c9b8
+

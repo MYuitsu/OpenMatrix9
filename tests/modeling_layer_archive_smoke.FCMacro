@@ -1,0 +1,39 @@
+"""Actual native preparation metadata; this does not claim layer-panel acceptance."""
+import json,os,traceback,tempfile
+from pathlib import Path
+import FreeCADGui as Gui
+from PySide6 import QtCore
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        fixtures=Path(native.__file__).parents[2]/'layer-abi'/'archive-fixtures'
+        check('real source and palette native fixtures exist',all((fixtures/name).is_file() for name in ('layer-source.3dm','layer-palette.3dm')))
+        for name,count in [('layer-source.3dm',2),('layer-palette.3dm',0)]:
+            with tempfile.TemporaryDirectory() as staging:
+                prepared=json.loads(native.prepareModeling3dm(str(fixtures/name),staging))
+                check(name+' schema2',prepared['schema_version']==2)
+                state=prepared['layer_session']['snapshot']
+                check(name+' full independent palette',len(state['layers'])==4)
+                check(name+' selected object inventory',len(state['objects'])==count and len(prepared['items'])==count)
+                check(name+' lossless generation wire',state['generation']=='0')
+                layers={tuple(row['path_components']):row for row in state['layers']}
+                check(name+' exact empty-layer source RGB',layers[('Empty',)]['rgb']==[7,89,143])
+                check(name+' parent lock remains layer-owned',layers[('Parent',)]['locked'] and not layers[('Parent','Child')]['locked'])
+                check(name+' child persistent desired unlock',layers[('Parent','Child')]['persistent_locked'] is False)
+                if count:
+                    objects={row['id']:row for row in state['objects']}
+                    inherited=next(row for row in prepared['items'] if row['name']=='inherited')
+                    own=next(row for row in prepared['items'] if row['name']=='own')
+                    check('native row binds separate own metadata',inherited['layer_object_id'] in objects and own['layer_object_id'] in objects)
+                    check('object on locked layer stays own-unlocked',inherited['locked'] and not objects[inherited['layer_object_id']]['locked'])
+                    check('own hidden and lock retained',objects[own['layer_object_id']]['locked'] and not objects[own['layer_object_id']]['visible'])
+                    check('ByLayer/ByObject exact',objects[inherited['layer_object_id']]['color_source']=='ByLayer' and objects[own['layer_object_id']]['color_source']=='ByObject')
+        report.update(ok=True,module=native.__file__,scope='native schema2 preparation; UI/clipboard/Matrix handoff pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

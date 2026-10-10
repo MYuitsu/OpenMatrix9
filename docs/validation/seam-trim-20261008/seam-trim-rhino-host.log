@@ -1,0 +1,350 @@
+{
+    "checks":  [
+                   {
+                       "name":  "four actual GUI and native graph results bind original analytical oracle",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-0.3dm source/saved hashes and native complete-basis decode bound",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-0.3dm actual GUI valid solid analytical volume at original threshold",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-0.3dm decoded UUID/class/native geometry CRC and complete reference closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-0.3dm editable exact saved native record imported",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-0.3dm-initial valid closed complete single solid",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-0.3dm-initial independent analytical signed volume",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-0.3dm source-deleted FCStd keeps full actual archive and record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-0.3dm-reopened valid closed complete single solid",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-0.3dm-reopened independent analytical signed volume",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-0.3dm opaque GUI plugin dependencies keep atomic export guard",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-0.3dm source and actual saved archives remain immutable",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-0.3dm source/saved hashes and native complete-basis decode bound",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-0.3dm actual GUI valid solid analytical volume at original threshold",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-0.3dm decoded UUID/class/native geometry CRC and complete reference closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-0.3dm editable exact saved native record imported",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-0.3dm-initial valid closed complete single solid",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-0.3dm-initial independent analytical signed volume",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-0.3dm source-deleted FCStd keeps full actual archive and record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-0.3dm-reopened valid closed complete single solid",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-0.3dm-reopened independent analytical signed volume",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-0.3dm opaque GUI plugin dependencies keep atomic export guard",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-0.3dm source and actual saved archives remain immutable",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-1.3dm source/saved hashes and native complete-basis decode bound",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-1.3dm actual GUI valid solid analytical volume at original threshold",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-1.3dm decoded UUID/class/native geometry CRC and complete reference closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-1.3dm editable exact saved native record imported",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-1.3dm-initial valid closed complete single solid",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-1.3dm-initial independent analytical signed volume",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-1.3dm source-deleted FCStd keeps full actual archive and record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-1.3dm-reopened valid closed complete single solid",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-1.3dm-reopened independent analytical signed volume",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-1.3dm opaque GUI plugin dependencies keep atomic export guard",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "seam-trim-owner-1.3dm source and actual saved archives remain immutable",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-1.3dm source/saved hashes and native complete-basis decode bound",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-1.3dm actual GUI valid solid analytical volume at original threshold",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-1.3dm decoded UUID/class/native geometry CRC and complete reference closure retained",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-1.3dm editable exact saved native record imported",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-1.3dm-initial valid closed complete single solid",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-1.3dm-initial independent analytical signed volume",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-1.3dm source-deleted FCStd keeps full actual archive and record",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-1.3dm-reopened valid closed complete single solid",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-1.3dm-reopened independent analytical signed volume",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-1.3dm opaque GUI plugin dependencies keep atomic export guard",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "edited-seam-trim-owner-1.3dm source and actual saved archives remain immutable",
+                       "passed":  true
+                   }
+               ],
+    "cases":  [
+                  {
+                      "fixture":  "seam-trim-owner-0.3dm",
+                      "saved_sha256":  "9959559a25757976472e62bfacbf4a5f86820667420f8fd473de5c5752c69bc5",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "edited-seam-trim-owner-0.3dm",
+                      "saved_sha256":  "1dda6f5a86df857cb3a691d4e948a0bfafb26591b5dfb5a6cc456996424ebbe9",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "seam-trim-owner-1.3dm",
+                      "saved_sha256":  "5c60af27755818b64322f825c5bcec823a4cde8c661b428e1b771eebd8ab78e1",
+                      "passed":  true
+                  },
+                  {
+                      "fixture":  "edited-seam-trim-owner-1.3dm",
+                      "saved_sha256":  "ef005bd890031d5b5cb2e58b58c0b863703400ee1e429416da380faab401af8d",
+                      "passed":  true
+                  }
+              ],
+    "host_metrics":  [
+                         {
+                             "fixture":  "seam-trim-owner-0.3dm",
+                             "stage":  "-initial",
+                             "analytical_volume":  113.09733552923255,
+                             "adaptive_metrics":  {
+                                                      "volume":  113.09733540407427,
+                                                      "area":  113.09733540407429,
+                                                      "volume_error":  2.2204460517075522E-16,
+                                                      "area_error":  2.2204460517075522E-16
+                                                  }
+                         },
+                         {
+                             "fixture":  "seam-trim-owner-0.3dm",
+                             "stage":  "-reopened",
+                             "analytical_volume":  113.09733552923255,
+                             "adaptive_metrics":  {
+                                                      "volume":  113.09733540407427,
+                                                      "area":  113.09733540407429,
+                                                      "volume_error":  2.2204460517075522E-16,
+                                                      "area_error":  2.2204460517075522E-16
+                                                  }
+                         },
+                         {
+                             "fixture":  "edited-seam-trim-owner-0.3dm",
+                             "stage":  "-initial",
+                             "analytical_volume":  150.53255358940854,
+                             "adaptive_metrics":  {
+                                                      "volume":  150.53255342282284,
+                                                      "area":  136.84777583892986,
+                                                      "volume_error":  2.7804233054189237E-16,
+                                                      "area_error":  2.4467725087686526E-16
+                                                  }
+                         },
+                         {
+                             "fixture":  "edited-seam-trim-owner-0.3dm",
+                             "stage":  "-reopened",
+                             "analytical_volume":  150.53255358940854,
+                             "adaptive_metrics":  {
+                                                      "volume":  150.53255342282284,
+                                                      "area":  136.84777583892986,
+                                                      "volume_error":  2.7804233054189237E-16,
+                                                      "area_error":  2.4467725087686526E-16
+                                                  }
+                         },
+                         {
+                             "fixture":  "seam-trim-owner-1.3dm",
+                             "stage":  "-initial",
+                             "analytical_volume":  197.92033717615698,
+                             "adaptive_metrics":  {
+                                                      "volume":  197.92033771375696,
+                                                      "area":  188.49555965531715,
+                                                      "volume_error":  7.0343200453282819E-14,
+                                                      "area_error":  8.5555416088901073E-14
+                                                  }
+                         },
+                         {
+                             "fixture":  "seam-trim-owner-1.3dm",
+                             "stage":  "-reopened",
+                             "analytical_volume":  197.92033717615698,
+                             "adaptive_metrics":  {
+                                                      "volume":  197.92033771375696,
+                                                      "area":  188.49555965531715,
+                                                      "volume_error":  7.0343200453282819E-14,
+                                                      "area_error":  8.5555416088901073E-14
+                                                  }
+                         },
+                         {
+                             "fixture":  "edited-seam-trim-owner-1.3dm",
+                             "stage":  "-initial",
+                             "analytical_volume":  263.43196878146495,
+                             "adaptive_metrics":  {
+                                                      "volume":  263.43196949704503,
+                                                      "area":  228.07962718299555,
+                                                      "volume_error":  4.7137071225782819E-14,
+                                                      "area_error":  8.91970386258204E-14
+                                                  }
+                         },
+                         {
+                             "fixture":  "edited-seam-trim-owner-1.3dm",
+                             "stage":  "-reopened",
+                             "analytical_volume":  263.43196878146495,
+                             "adaptive_metrics":  {
+                                                      "volume":  263.43196949704503,
+                                                      "area":  228.07962718299555,
+                                                      "volume_error":  4.7137071225782819E-14,
+                                                      "area_error":  8.91970386258204E-14
+                                                  }
+                         }
+                     ],
+    "gui_plugin_tables":  {
+                              "seam-trim-owner-0.3dm":  [
+                                                            {
+                                                                "capability":  "retained",
+                                                                "source_uuid":  "16592d58-4a2f-401d-bf5e-3b87741c1b1b",
+                                                                "source_version":  50
+                                                            },
+                                                            {
+                                                                "capability":  "retained",
+                                                                "source_uuid":  "5dc0192d-73dc-44f5-9141-8e72542e792d",
+                                                                "source_version":  50
+                                                            }
+                                                        ],
+                              "edited-seam-trim-owner-0.3dm":  [
+                                                                   {
+                                                                       "capability":  "retained",
+                                                                       "source_uuid":  "16592d58-4a2f-401d-bf5e-3b87741c1b1b",
+                                                                       "source_version":  50
+                                                                   },
+                                                                   {
+                                                                       "capability":  "retained",
+                                                                       "source_uuid":  "5dc0192d-73dc-44f5-9141-8e72542e792d",
+                                                                       "source_version":  50
+                                                                   }
+                                                               ],
+                              "seam-trim-owner-1.3dm":  [
+                                                            {
+                                                                "capability":  "retained",
+                                                                "source_uuid":  "16592d58-4a2f-401d-bf5e-3b87741c1b1b",
+                                                                "source_version":  50
+                                                            },
+                                                            {
+                                                                "capability":  "retained",
+                                                                "source_uuid":  "5dc0192d-73dc-44f5-9141-8e72542e792d",
+                                                                "source_version":  50
+                                                            }
+                                                        ],
+                              "edited-seam-trim-owner-1.3dm":  [
+                                                                   {
+                                                                       "capability":  "retained",
+                                                                       "source_uuid":  "16592d58-4a2f-401d-bf5e-3b87741c1b1b",
+                                                                       "source_version":  50
+                                                                   },
+                                                                   {
+                                                                       "capability":  "retained",
+                                                                       "source_uuid":  "5dc0192d-73dc-44f5-9141-8e72542e792d",
+                                                                       "source_version":  50
+                                                                   }
+                                                               ]
+                          },
+    "ok":  true,
+    "rhino_report_sha256":  "73c6081761caf1cef3965df5fa55edb25d0cd1744f2a0bbe88040cd44a33d8fe",
+    "full_exchange_complete":  false
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\three_dm_rhino5_seam_trim_reimport_smoke-1\60f979da39544cbf9286a98548424bf7

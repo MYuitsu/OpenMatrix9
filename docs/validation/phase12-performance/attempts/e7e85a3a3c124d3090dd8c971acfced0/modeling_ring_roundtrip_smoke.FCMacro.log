@@ -1,0 +1,1315 @@
+{
+  "checks": [
+    {
+      "name": "actual ring imports all 29 native CAD objects",
+      "passed": true
+    },
+    {
+      "name": "native subelement selection Edge1",
+      "passed": true
+    },
+    {
+      "name": "native subelement selection Face1",
+      "passed": true
+    },
+    {
+      "name": "native CAD display mode available Wireframe",
+      "passed": true
+    },
+    {
+      "name": "native CAD display mode applied Wireframe",
+      "passed": true
+    },
+    {
+      "name": "native CAD display mode available Flat Lines",
+      "passed": true
+    },
+    {
+      "name": "native CAD display mode applied Flat Lines",
+      "passed": true
+    },
+    {
+      "name": "current selection has valid moved imported and new geometry",
+      "passed": true
+    },
+    {
+      "name": "actual ring FCStd has no deleted object or source dependency",
+      "passed": true
+    },
+    {
+      "name": "current ring output targets V5",
+      "passed": true
+    },
+    {
+      "name": "selected ring output includes exactly 29 current objects",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 0",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 1",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 2",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 3",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 4",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 5",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 6",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 7",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 8",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 9",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 10",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 11",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 12",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 13",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 14",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 15",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 16",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 17",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 18",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 19",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 20",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 21",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 22",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 23",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 24",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 25",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 26",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 27",
+      "passed": true
+    },
+    {
+      "name": "current selected object fidelity 28",
+      "passed": true
+    },
+    {
+      "name": "new ring circle exact geometric radius",
+      "passed": true
+    },
+    {
+      "name": "original user ring remains immutable",
+      "passed": true
+    }
+  ],
+  "geometry": [
+    {
+      "index": 0,
+      "name": "RhinoObject",
+      "expected": {
+        "bounds": [
+          1.989333427008838,
+          -4.1707083642494895,
+          11.901163329563033,
+          2.977132969146059,
+          -3.098780737057553,
+          12.822125491204643
+        ],
+        "area": 2.9211004054463143,
+        "volume": -0.3679142378251062,
+        "valid": true,
+        "edges": 286,
+        "faces": 127,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          1.989333427008838,
+          -4.1707083642494895,
+          11.901163329563033,
+          2.977132969146059,
+          -3.098780737057553,
+          12.822125491204643
+        ],
+        "area": 2.921100405446299,
+        "volume": -0.36791423782510396,
+        "valid": true,
+        "edges": 286,
+        "faces": 127,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 1.554312234475219E-14,
+      "volume_error_mm3": 2.220446049250313E-15
+    },
+    {
+      "index": 1,
+      "name": "RhinoObject002",
+      "expected": {
+        "bounds": [
+          -3.7368700998673665,
+          -5.501310528191356,
+          12.866330771494743,
+          3.736868761824296,
+          5.501303298940371,
+          14.16633097149479
+        ],
+        "area": 107.32459342408389,
+        "volume": 26.74142778200872,
+        "valid": true,
+        "edges": 10,
+        "faces": 5,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          -3.7368700998673665,
+          -5.501310528191356,
+          12.866330771494743,
+          3.736868761824296,
+          5.501303298940371,
+          14.16633097149479
+        ],
+        "area": 107.32459342408389,
+        "volume": 26.74142778200872,
+        "valid": true,
+        "edges": 10,
+        "faces": 5,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 2,
+      "name": "RhinoObject003",
+      "expected": {
+        "bounds": [
+          5.73686856175799,
+          1.9999999,
+          13.866330771494768,
+          6.736868761361647,
+          2.0000001,
+          15.166330971494768
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          5.73686856175799,
+          1.9999999,
+          13.866330771494768,
+          6.736868761361647,
+          2.0000001,
+          15.166330971494768
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 3,
+      "name": "RhinoObject004",
+      "expected": {
+        "bounds": [
+          -0.5987286466014466,
+          0.043944177309656676,
+          10.011742834023313,
+          4.702367686107176,
+          4.808593344183954,
+          17.16648199070756
+        ],
+        "area": 47.31571932905921,
+        "volume": 12.256759430873563,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          -0.5987286466014466,
+          0.043944177309656676,
+          10.011742834023313,
+          4.702367686107176,
+          4.808593344183954,
+          17.16648199070756
+        ],
+        "area": 47.31567557675817,
+        "volume": 12.256766543472958,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 4.3752301046140474E-05,
+      "volume_error_mm3": 7.112599394787367E-06
+    },
+    {
+      "index": 4,
+      "name": "RhinoObject005",
+      "expected": {
+        "bounds": [
+          0.1488848573833285,
+          -0.6424463636248441,
+          10.024444694334612,
+          4.702819914050733,
+          4.807607464961974,
+          17.167777180565437
+        ],
+        "area": 46.66690842810703,
+        "volume": 12.27296769766711,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          0.1488848573833285,
+          -0.6424463636248441,
+          10.024444694334612,
+          4.702819914050733,
+          4.807607464961974,
+          17.167777180565437
+        ],
+        "area": 46.66690252523384,
+        "volume": 12.272968451608728,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 5.902873191132585E-06,
+      "volume_error_mm3": 7.539416184698666E-07
+    },
+    {
+      "index": 5,
+      "name": "RhinoObject006",
+      "expected": {
+        "bounds": [
+          -4.702819914050733,
+          -0.6424463636248441,
+          10.024444694334612,
+          -0.1488848573833285,
+          4.807607464961974,
+          17.167777180565437
+        ],
+        "area": 46.66690842810703,
+        "volume": 12.27296769766711,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          -4.702819914050733,
+          -0.6424463636248441,
+          10.024444694334612,
+          -0.1488848573833285,
+          4.807607464961974,
+          17.167777180565437
+        ],
+        "area": 46.66690252523384,
+        "volume": 12.272968451608728,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 5.902873191132585E-06,
+      "volume_error_mm3": 7.539416184698666E-07
+    },
+    {
+      "index": 6,
+      "name": "RhinoObject007",
+      "expected": {
+        "bounds": [
+          -4.702367686107176,
+          0.043944177309656676,
+          10.011742834023313,
+          0.5987286466014466,
+          4.808593344183954,
+          17.16648199070756
+        ],
+        "area": 47.31571932905921,
+        "volume": 12.256759430873563,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          -4.702367686107176,
+          0.043944177309656676,
+          10.011742834023313,
+          0.5987286466014466,
+          4.808593344183954,
+          17.16648199070756
+        ],
+        "area": 47.31567557675817,
+        "volume": 12.256766543472958,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 4.3752301046140474E-05,
+      "volume_error_mm3": 7.112599394787367E-06
+    },
+    {
+      "index": 7,
+      "name": "RhinoObject008",
+      "expected": {
+        "bounds": [
+          -4.702367686107176,
+          -4.808593344183954,
+          10.011742834023313,
+          0.5987286466014466,
+          -0.043944177309656676,
+          17.16648199070756
+        ],
+        "area": 47.31571932905921,
+        "volume": 12.256759430873563,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          -4.702367686107176,
+          -4.808593344183954,
+          10.011742834023313,
+          0.5987286466014466,
+          -0.043944177309656676,
+          17.16648199070756
+        ],
+        "area": 47.31567557675817,
+        "volume": 12.256766543472958,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 4.3752301046140474E-05,
+      "volume_error_mm3": 7.112599394787367E-06
+    },
+    {
+      "index": 8,
+      "name": "RhinoObject009",
+      "expected": {
+        "bounds": [
+          -4.702819914050733,
+          -4.807607464961974,
+          10.024444694334612,
+          -0.1488848573833285,
+          0.6424463636248441,
+          17.167777180565437
+        ],
+        "area": 46.66690842810703,
+        "volume": 12.27296769766711,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          -4.702819914050733,
+          -4.807607464961974,
+          10.024444694334612,
+          -0.1488848573833285,
+          0.6424463636248441,
+          17.167777180565437
+        ],
+        "area": 46.66690252523384,
+        "volume": 12.272968451608728,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 5.902873191132585E-06,
+      "volume_error_mm3": 7.539416184698666E-07
+    },
+    {
+      "index": 9,
+      "name": "RhinoObject010",
+      "expected": {
+        "bounds": [
+          0.1488848573833285,
+          -4.807607464961974,
+          10.024444694334612,
+          4.702819914050733,
+          0.6424463636248441,
+          17.167777180565437
+        ],
+        "area": 46.66690842810703,
+        "volume": 12.27296769766711,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          0.1488848573833285,
+          -4.807607464961974,
+          10.024444694334612,
+          4.702819914050733,
+          0.6424463636248441,
+          17.167777180565437
+        ],
+        "area": 46.66690252523384,
+        "volume": 12.272968451608728,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 5.902873191132585E-06,
+      "volume_error_mm3": 7.539416184698666E-07
+    },
+    {
+      "index": 10,
+      "name": "RhinoObject011",
+      "expected": {
+        "bounds": [
+          -0.5987286466014466,
+          -4.808593344183954,
+          10.011742834023313,
+          4.702367686107176,
+          -0.043944177309656676,
+          17.16648199070756
+        ],
+        "area": 47.31571932905921,
+        "volume": 12.256759430873563,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          -0.5987286466014466,
+          -4.808593344183954,
+          10.011742834023313,
+          4.702367686107176,
+          -0.043944177309656676,
+          17.16648199070756
+        ],
+        "area": 47.31567557675817,
+        "volume": 12.256766543472958,
+        "valid": true,
+        "edges": 21,
+        "faces": 9,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 4.3752301046140474E-05,
+      "volume_error_mm3": 7.112599394787367E-06
+    },
+    {
+      "index": 11,
+      "name": "RhinoObject012",
+      "expected": {
+        "bounds": [
+          -4.892070452849712,
+          -6.646991276677118,
+          9.661422682518344,
+          4.892070452849715,
+          6.646991276677118,
+          13.99206182189812
+        ],
+        "area": 294.2633618999919,
+        "volume": 49.03529086482945,
+        "valid": true,
+        "edges": 2,
+        "faces": 3,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          -4.892070452849712,
+          -6.646991276677118,
+          9.661422682518344,
+          4.892070452849715,
+          6.646991276677118,
+          13.99206182189812
+        ],
+        "area": 294.2634160226394,
+        "volume": 49.03529086482945,
+        "valid": true,
+        "edges": 2,
+        "faces": 3,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 5.412264749793394E-05,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 12,
+      "name": "RhinoObject013",
+      "expected": {
+        "bounds": [
+          -0.6754173274048615,
+          -4.88946223830678,
+          9.036811251648949,
+          5.100113548198342,
+          -0.05184862763127211,
+          17.07947689563446
+        ],
+        "area": 51.07071640070853,
+        "volume": 16.27012444514063,
+        "valid": true,
+        "edges": 4,
+        "faces": 3,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          -0.6754173274048614,
+          -4.889462238306781,
+          9.036811251648949,
+          5.100113548198342,
+          -0.05184862763127211,
+          17.07947689563446
+        ],
+        "area": 51.07071640070853,
+        "volume": 16.270124445140628,
+        "valid": true,
+        "edges": 4,
+        "faces": 3,
+        "solids": 1
+      },
+      "bounds_error_mm": 1.7763568394002505E-15,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 3.552713678800501E-15
+    },
+    {
+      "index": 13,
+      "name": "RhinoObject014",
+      "expected": {
+        "bounds": [
+          0.2130201700221523,
+          -4.888403590867677,
+          9.054557208714906,
+          5.100576202246339,
+          0.6795964913977826,
+          17.079641849919362
+        ],
+        "area": 48.722575776727204,
+        "volume": 15.477744045313239,
+        "valid": true,
+        "edges": 4,
+        "faces": 3,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          0.2130201700221523,
+          -4.888403590867677,
+          9.054557208714906,
+          5.100576202246339,
+          0.6795964913977826,
+          17.079641849919362
+        ],
+        "area": 48.722575776727204,
+        "volume": 15.477744045313239,
+        "valid": true,
+        "edges": 4,
+        "faces": 3,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 14,
+      "name": "RhinoObject015",
+      "expected": {
+        "bounds": [
+          0.2818665668794868,
+          -4.2151517455942615,
+          9.726048421712347,
+          4.430549849711103,
+          0.00459155801891834,
+          16.984528024718845
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          0.2818665668794868,
+          -4.2151517455942615,
+          9.726048421712347,
+          4.430549849711103,
+          0.004591558018918333,
+          16.984528024718845
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "bounds_error_mm": 6.938893903907228E-18,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 15,
+      "name": "RhinoObject016",
+      "expected": {
+        "bounds": [
+          -0.0004188711566497597,
+          -4.2162751849525035,
+          9.711760073122143,
+          4.429998704865303,
+          -0.060659889468527725,
+          16.984528025494114
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          -0.00041887115664975775,
+          -4.2162751849525035,
+          9.711760073122143,
+          4.429998704865303,
+          -0.060659889468527725,
+          16.984528025494114
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "bounds_error_mm": 1.951563910473908E-18,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 16,
+      "name": "RhinoObject017",
+      "expected": {
+        "bounds": [
+          -3.8869979058927595,
+          -5.651422542644537,
+          14.16633077149475,
+          3.8869965683115764,
+          5.651433245536921,
+          14.16633097149479
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          -3.8869979058927595,
+          -5.651422542644537,
+          14.16633077149475,
+          3.8869965683115764,
+          5.651433245536921,
+          14.16633097149479
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 17,
+      "name": "RhinoObject018",
+      "expected": {
+        "bounds": [
+          -9.810740716694363,
+          -1E-07,
+          -9.55000010096943,
+          9.810736852913548,
+          1E-07,
+          10.073656878368913
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          -9.810740716694363,
+          -1E-07,
+          -9.55000010096943,
+          9.810736852913548,
+          1E-07,
+          10.073656878368913
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 18,
+      "name": "RhinoObject019",
+      "expected": {
+        "bounds": [
+          -7.849128347598955,
+          -1E-07,
+          -7.8500001,
+          7.849128347598954,
+          1E-07,
+          7.850000100000002
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          -7.849128347598955,
+          -1E-07,
+          -7.8500001,
+          7.849128347598954,
+          1E-07,
+          7.850000100000002
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 19,
+      "name": "RhinoObject020",
+      "expected": {
+        "bounds": [
+          -4.185000100000001,
+          -5.955000099999994,
+          11.673540993604634,
+          4.185000100000001,
+          5.955000099999994,
+          16.643541089203318
+        ],
+        "area": 190.9691568673095,
+        "volume": 174.10691335375228,
+        "valid": true,
+        "edges": 178,
+        "faces": 93,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          -4.185000100000001,
+          -5.955000099999994,
+          11.673540993604634,
+          4.185000100000001,
+          5.955000099999994,
+          16.643541089203318
+        ],
+        "area": 190.96915686636106,
+        "volume": 174.1069133528802,
+        "valid": true,
+        "edges": 178,
+        "faces": 93,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 9.484324436925817E-10,
+      "volume_error_mm3": 8.720633104530862E-10
+    },
+    {
+      "index": 20,
+      "name": "RhinoObject021",
+      "expected": {
+        "bounds": [
+          0.27945802878289444,
+          -4.751655595802651,
+          9.304507513484682,
+          4.0434737265792675,
+          -0.6450584445479227,
+          16.98839733975576
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          0.27945802878289444,
+          -4.751655595802651,
+          9.304507513484682,
+          4.0434737265792675,
+          -0.6450584445479227,
+          16.98839733975576
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 21,
+      "name": "RhinoObject022",
+      "expected": {
+        "bounds": [
+          4.043473526579267,
+          -4.751655595802651,
+          16.988397139755758,
+          4.597129190351076,
+          -3.575838550578668,
+          16.98862402128223
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          4.043473526579267,
+          -4.751655595802651,
+          16.988397139755758,
+          4.597129190351076,
+          -3.575838550578668,
+          16.98862402128223
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 22,
+      "name": "RhinoObject023",
+      "expected": {
+        "bounds": [
+          0.28427510497607306,
+          -3.575838750578667,
+          9.307657427472508,
+          4.597129190351076,
+          0.654541247413494,
+          16.98862402128223
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          0.28427510497607306,
+          -3.575838750578667,
+          9.307657427472508,
+          4.597129190351076,
+          0.654541247413494,
+          16.98862402128223
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 23,
+      "name": "RhinoObject024",
+      "expected": {
+        "bounds": [
+          -0.5462085374265186,
+          -4.751655595802651,
+          9.29142460986321,
+          4.0434737265792675,
+          -0.060659889468525505,
+          16.98839733975576
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          -0.5462085374265186,
+          -4.751655595802651,
+          9.29142460986321,
+          4.0434737265792675,
+          -0.060659889468525505,
+          16.98839733975576
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 24,
+      "name": "RhinoObject025",
+      "expected": {
+        "bounds": [
+          0.5436928121337309,
+          -3.575838750578667,
+          9.298623550935108,
+          4.597129190351076,
+          -0.06065988946852552,
+          16.98862402128223
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          0.5436928121337309,
+          -3.575838750578667,
+          9.298623550935108,
+          4.597129190351076,
+          -0.06065988946852552,
+          16.98862402128223
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 25,
+      "name": "RhinoObject026",
+      "expected": {
+        "bounds": [
+          -0.5462062838109054,
+          -4.751655595802651,
+          9.291429562085291,
+          4.597129190351076,
+          -0.060659889468527795,
+          16.98862402128223
+        ],
+        "area": 14.868163963754206,
+        "volume": -11.391456516234214,
+        "valid": true,
+        "edges": 4,
+        "faces": 1,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          -0.5462062838109054,
+          -4.751655595802651,
+          9.291429562085291,
+          4.597129190351076,
+          -0.060659889468527795,
+          16.98862402128223
+        ],
+        "area": 14.868163963754206,
+        "volume": -11.391456516234214,
+        "valid": true,
+        "edges": 4,
+        "faces": 1,
+        "solids": 0
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 26,
+      "name": "RhinoObject027",
+      "expected": {
+        "bounds": [
+          0.279458028782899,
+          -4.751655595802652,
+          9.304507513484682,
+          4.597129190351077,
+          0.6545436458908943,
+          16.988624021282234
+        ],
+        "area": 14.592478071371632,
+        "volume": 9.58580579528569,
+        "valid": true,
+        "edges": 4,
+        "faces": 1,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          0.279458028782899,
+          -4.751655595802652,
+          9.304507513484682,
+          4.597129190351077,
+          0.6545436458908943,
+          16.988624021282234
+        ],
+        "area": 14.592478071371632,
+        "volume": 9.58580579528569,
+        "valid": true,
+        "edges": 4,
+        "faces": 1,
+        "solids": 0
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 27,
+      "name": "RhinoObject028",
+      "expected": {
+        "bounds": [
+          -9.810740716694363,
+          -0.7000000999999999,
+          -9.55000010096943,
+          9.810736852913548,
+          0.7000000999999999,
+          10.073656878368913
+        ],
+        "area": 373.0310734290418,
+        "volume": 152.3752905149605,
+        "valid": true,
+        "edges": 6,
+        "faces": 4,
+        "solids": 1
+      },
+      "actual": {
+        "bounds": [
+          -9.810740716694363,
+          -0.7000000999999999,
+          -9.55000010096943,
+          9.810736852913548,
+          0.7000000999999999,
+          10.073656878368913
+        ],
+        "area": 373.03107342904167,
+        "volume": 152.3752905149605,
+        "valid": true,
+        "edges": 6,
+        "faces": 4,
+        "solids": 1
+      },
+      "bounds_error_mm": 0.0,
+      "area_error_mm2": 1.1368683772161603E-13,
+      "volume_error_mm3": 0.0
+    },
+    {
+      "index": 28,
+      "name": "NewRingCircle",
+      "expected": {
+        "bounds": [
+          15.0,
+          2.0,
+          1.0,
+          19.0,
+          6.0,
+          1.0
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "actual": {
+        "bounds": [
+          14.999999900000002,
+          1.9999998999999995,
+          0.9999999,
+          19.000000100000005,
+          6.0000001,
+          1.0000001
+        ],
+        "area": 0.0,
+        "volume": 0.0,
+        "valid": true,
+        "edges": 1,
+        "faces": 0,
+        "solids": 0
+      },
+      "bounds_error_mm": 1.0000000472132342E-07,
+      "area_error_mm2": 0.0,
+      "volume_error_mm3": 0.0
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd",
+  "source_sha256": "5cdd84533c2dca20ef441fcbe2f1edd0226cc3ab02805caa4af60ef3dbba9997",
+  "measurement": "OCCT AddOptimal without triangulation; adaptive native GProp integration precision 1e-10",
+  "tolerance": {
+    "bounds_mm": 0.001,
+    "area_volume_absolute": 0.001,
+    "area_volume_relative": 0.0001
+  }
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_ring_roundtrip_smoke-1\b5d2c62907824ebb99151e0bedbd641f
