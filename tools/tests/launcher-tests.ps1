@@ -19,6 +19,11 @@ $script:checks=@()
 function Check($name,$value){$script:checks+=@{name=$name;passed=[bool]$value};if(-not $value){throw $name}}
 function Refuses($name,[scriptblock]$operation){$failed=$false;try{&$operation|Out-Null}catch{$failed=$true};Check $name $failed}
 Write-Manifest
+$future=Get-Content -LiteralPath (Join-Path $bundle 'launcher-manifest.json') -Raw|ConvertFrom-Json
+$future.version='0.0.3'
+$future|ConvertTo-Json -Depth 5|Set-Content -LiteralPath (Join-Path $bundle 'launcher-manifest.json') -Encoding UTF8
+Check 'new release manifest is accepted for a matching supported host' ((Read-OM9Manifest (Join-Path $bundle 'launcher-manifest.json')).version -eq '0.0.3')
+Write-Manifest
 Check 'different host without this module does not block installation' (-not (Test-OM9HostProcess ([pscustomobject]@{Path='H:\dev\FreeCAD.exe';Modules=@()}) 'C:\stock\FreeCAD.exe' 'C:\profile\OpenMatrix9Gui.pyd'))
 Check 'target host process blocks update' (Test-OM9HostProcess ([pscustomobject]@{Path='C:\stock\FreeCAD.exe';Modules=@()}) 'C:\stock\FreeCAD.exe')
 function Get-OM9RunningFreeCAD {return @(123)}

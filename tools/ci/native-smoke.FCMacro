@@ -1,0 +1,38 @@
+import os,json,traceback,sys
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtSvg,QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import Part,OpenMatrix9Gui as native
+        root=Path(os.environ['OM9_TEST_PLUGIN'])
+        check('uses verified official FreeCAD 1.1.4',App.Version()[:3]==['1','1','4'] and Path(App.getHomePath()).resolve()==Path(os.environ['OM9_TEST_HOST']).resolve())
+        check('uses installed Python 3.11',sys.version_info[:2]==(3,11))
+        check('exact compatible plugin loaded',Path(native.__file__).resolve()==(root/'bin/OpenMatrix9Gui.pyd').resolve())
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        check('OM9 workbench activated',Gui.activeWorkbench().name()=='OpenMatrix9Workbench')
+        check('OM9 sidebar present',Gui.getMainWindow().findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar') is not None)
+        check('resources discovered in user plugin',Path(os.environ['OM9_PLUGIN_ROOT']).resolve()==root.resolve())
+        icon=next((root/'Resources/icons').rglob('*.svg'))
+        check('authored SVG renders',QtSvg.QSvgRenderer(str(icon)).isValid())
+        check('plugin-local import worker',(root/'bin/OM9ThreeDmImportWorker.exe').is_file())
+        doc=App.newDocument('OM9StockCompatibility');doc.UndoMode=1
+        check('default palette32',len(json.loads(native.layerDocumentPanel(doc.Name))['layers'])==32)
+        doc.openTransaction('Stock ring')
+        ring=doc.addObject('Part::Feature','Ring');ring.Shape=Part.makeTorus(10,1.5);doc.recompute();doc.commitTransaction()
+        check('stock OCCT ring valid',ring.Shape.isValid())
+        doc.undo();check('stock host Undo removes ring',doc.getObject('Ring') is None)
+        doc.redo();check('stock host Redo restores ring',doc.getObject('Ring').Shape.isValid())
+        Gui.activeDocument().activeView().fitAll();Gui.updateGui();QtTest.QTest.qWait(800)
+        Gui.getMainWindow().grab().save(str(out/'FreeCAD-1.1.4-OM9.png'))
+        report.update(ok=True,module=native.__file__,version=App.Version(),python=sys.version,user_data=App.getUserAppDataDir(),user_addons=App.ConfigGet('UserAddonDir'),module_search=sys.path)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

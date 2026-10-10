@@ -1,0 +1,98 @@
+{
+  "checks": [
+    {
+      "name": "stock host is FreeCAD 1.1.4",
+      "passed": true
+    },
+    {
+      "name": "OpenMatrix9 starts with a document",
+      "passed": true
+    },
+    {
+      "name": "redundant 3DM toolbar hidden",
+      "passed": true
+    },
+    {
+      "name": "empty Tasks dock hidden",
+      "passed": true
+    },
+    {
+      "name": "standard menu bar remains visible",
+      "passed": true
+    },
+    {
+      "name": "3DM commands remain accessible in menus",
+      "passed": true
+    }
+  ],
+  "module": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\bundle-r2c\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+  "version": [
+    "1",
+    "1",
+    "4",
+    "20260928 (Git shallow)",
+    "Unknown",
+    "2026/09/28 13:46:34",
+    "(HEAD detached at 4fd3bf320)",
+    "4fd3bf320d9566a27e60069fc8387448aaa3a094"
+  ],
+  "docks": [
+    {
+      "name": "Selection view",
+      "title": "Selection View",
+      "hidden": true,
+      "visible": false,
+      "kind": "QDockWidget"
+    },
+    {
+      "name": "Model",
+      "title": "Model",
+      "hidden": true,
+      "visible": false,
+      "kind": "QDockWidget"
+    },
+    {
+      "name": "Python console",
+      "title": "Python Console",
+      "hidden": true,
+      "visible": false,
+      "kind": "QDockWidget"
+    },
+    {
+      "name": "Report view",
+      "title": "Report View",
+      "hidden": true,
+      "visible": false,
+      "kind": "QDockWidget"
+    },
+    {
+      "name": "OpenMatrix9Sidebar",
+      "title": "OpenMatrix9",
+      "hidden": false,
+      "visible": true,
+      "kind": "QDockWidget"
+    },
+    {
+      "name": "OM9CommandFrame",
+      "title": "Command",
+      "hidden": false,
+      "visible": true,
+      "kind": "QDockWidget"
+    },
+    {
+      "name": "OM9ViewportTabsDock",
+      "title": "Viewport Tabs",
+      "hidden": false,
+      "visible": true,
+      "kind": "QDockWidget"
+    },
+    {
+      "name": "Tasks",
+      "title": "Tasks",
+      "hidden": true,
+      "visible": false,
+      "kind": "QDockWidget"
+    }
+  ],
+  "ok": true
+}

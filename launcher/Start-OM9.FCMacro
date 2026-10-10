@@ -2,7 +2,18 @@
 import json,os,traceback,sys
 from pathlib import Path
 import FreeCAD as App,FreeCADGui as Gui
-from PySide6 import QtCore
+from PySide6 import QtCore,QtWidgets
+
+def clean_workspace():
+    # Qt bootstrap for the packaged native plugin; no model state is changed.
+    window=Gui.getMainWindow()
+    for toolbar in window.findChildren(QtWidgets.QToolBar):
+        if toolbar.objectName()=='3DM' or toolbar.windowTitle()=='3DM':
+            toolbar.hide()
+    if not Gui.Control.activeDialog():
+        for dock in window.findChildren(QtWidgets.QDockWidget):
+            if dock.objectName()=='Tasks':
+                dock.hide()
 
 def activate():
     report={}
@@ -11,6 +22,8 @@ def activate():
         import OpenMatrix9Gui as native
         if App.ActiveDocument is None:
             App.newDocument('OpenMatrix9')
+        clean_workspace()
+        QtCore.QTimer.singleShot(0,clean_workspace)
         report=dict(ok=True,workbench=Gui.activeWorkbench().name(),module=native.__file__,
                     version=App.Version(),user_data=App.getUserAppDataDir())
         App.Console.PrintMessage('OpenMatrix9 ready.\n')

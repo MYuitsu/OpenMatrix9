@@ -1,0 +1,36 @@
+import os,json,traceback,subprocess
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(n,v):
+    report['checks'].append({'name':n,'passed':bool(v)})
+    if not v:raise AssertionError(n)
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('StockWorker')
+        ring=doc.addObject('Part::Feature','Ring');ring.Shape=Part.makeTorus(10,1)
+        curve=doc.addObject('Part::Feature','Curve');curve.Shape=Part.makeCircle(2);doc.recompute()
+        source=out/'current.3dm';ThreeDm.export_file(str(source),[ring,curve],modeling=True)
+        direct=out/'direct';direct.mkdir();expected=json.loads(native.prepareModeling3dm(str(source),str(direct),0))
+        worker=Path(native.__file__).parent/'OM9ThreeDmImportWorker.exe';stage=out/'worker';stage.mkdir()
+        req=out/'request.json';res=out/'worker.json'
+        request=dict(source=str(source),staging=str(stage),scale=0,working=True,members=False,ids=[],layer_transfer=True,layer_metadata='')
+        req.write_text(json.dumps(request),encoding='utf8')
+        proc=subprocess.run([str(worker),str(req),str(res)],capture_output=True,timeout=90)
+        report['worker_exit']=proc.returncode
+        (out/'worker.stderr.log').write_bytes(proc.stderr)
+        check('plugin-local worker runs with only installed host DLL search path',proc.returncode==0 and res.is_file())
+        actual=json.loads(res.read_text(encoding='utf8'))
+        check('worker imports same current object count',len(actual['items'])==len(expected['items'])==2)
+        check('worker preserves full palette',actual['layer_session']['snapshot']['layers']==expected['layer_session']['snapshot']['layers'])
+        for item in actual['items']:
+            shape=Part.Shape();shape.read(item['brep']);check('worker stages valid editable BRep '+item['name'],shape.isValid())
+        report.update(ok=True,module=native.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf8')
+        for n in list(App.listDocuments()):App.closeDocument(n)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

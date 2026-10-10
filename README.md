@@ -1,10 +1,10 @@
-> **OpenMatrix9 0.0.2 (experimental, Windows x64)**: [Download release](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.2) · [Cài đặt tiếng Việt](INSTALL.vi.md) · [English installation](INSTALL.en.md). This native package targets **official FreeCAD 1.1.4** and installs in the versioned user Mod folder. See [fresh compatibility evidence and limits](docs/validation/2026-10-10-stock-freecad-1.1.4.md). Historical development-host reports below do not certify every feature on this stock host. The [0.0.1 release](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.1) remains available for its separate development 27.1 portable host.
+> **OpenMatrix9 0.0.3 (experimental, Windows x64)**: [Download release](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.3) · [Cài đặt tiếng Việt](INSTALL.vi.md) · [English installation](INSTALL.en.md). This native package targets **official FreeCAD 1.1.4** and installs in the versioned user Mod folder. See [fresh compatibility evidence and limits](docs/validation/2026-10-10-stock-freecad-1.1.4.md). Historical development-host reports below do not certify every feature on this stock host. The [0.0.1 release](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.1) remains available for its separate development 27.1 portable host.
 
 # OpenMatrix9
 
 Workbench FreeCAD lấy giao diện Matrix9 làm tham chiếu. Rust quản lý danh mục và trạng thái; C++/Qt dựng giao diện và tích hợp lệnh FreeCAD.
 
-## Cài OpenMatrix9 0.0.2 cho FreeCAD chính thức
+## Cài OpenMatrix9 0.0.3 cho FreeCAD chính thức
 
 Bản thử nghiệm này dành cho **Windows x64, FreeCAD 1.1.4 chính thức** (Python 3.11, Qt 6.8.3, OCCT 7.8.1). Không cần source FreeCAD, Rust hay Visual Studio để sử dụng.
 
@@ -16,16 +16,16 @@ Ví dụ chương trình đã cài: `C:\Program Files\FreeCAD 1.1\bin\FreeCAD.ex
 
 ### 2. Tải OM9 và đặt đúng thư mục
 
-**Cách tự cài, khuyến nghị:** tải [OpenMatrix9-0.0.2-SetupLauncher-r2-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-SetupLauncher-r2-Windows-x64.zip), giải nén toàn bộ rồi bấm **Start-OM9.cmd**. Script tự chép/cập nhật plugin vào AppData, tạo icon **OpenMatrix9** trên Desktop và Start Menu rồi mở đúng workbench. Các lần sau bấm icon Desktop hoặc tìm OpenMatrix9 trong Start Menu; có thể di chuyển/xóa thư mục giải nén sau khi cài xong. Không cần Administrator.
+**Cách tự cài, khuyến nghị:** tải [OpenMatrix9-0.0.3-SetupLauncher-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.3/OpenMatrix9-0.0.3-SetupLauncher-Windows-x64.zip), giải nén toàn bộ rồi bấm **Start-OM9.cmd**. Script tự chép/cập nhật plugin vào AppData, tạo icon **OpenMatrix9** trên Desktop và Start Menu rồi mở đúng workbench. Các lần sau bấm icon Desktop hoặc tìm OpenMatrix9 trong Start Menu; có thể di chuyển/xóa thư mục giải nén sau khi cài xong. Không cần Administrator.
 
-Khi cập nhật, chạy `Start-OM9.cmd` trong gói mới. Script giữ bản cũ ở `%APPDATA%\FreeCAD\v1-1\OM9-backups`, bỏ qua chép plugin nếu không đổi và yêu cầu lưu/đóng FreeCAD đang dùng plugin nếu cần thay bản. Log ở `%APPDATA%\FreeCAD\v1-1\OM9-launcher`. Gói thiếu/hỏng hoặc cập nhật thất bại sẽ không thay bản đang dùng. Kiểm tra ZIP này bằng **Launcher-r2-SHA256SUMS.txt** trên release.
+Khi cập nhật, chạy `Start-OM9.cmd` trong gói mới. Script giữ bản cũ ở `%APPDATA%\FreeCAD\v1-1\OM9-backups`, bỏ qua chép plugin nếu không đổi và yêu cầu lưu/đóng FreeCAD đang dùng plugin nếu cần thay bản. Log ở `%APPDATA%\FreeCAD\v1-1\OM9-launcher`. Gói thiếu/hỏng hoặc cập nhật thất bại sẽ không thay bản đang dùng. Kiểm tra ZIP này bằng **SHA256SUMS.txt** trên release.
 
 Khi mở, launcher tự kiểm tra release mới trên GitHub ở tiến trình nền. Có phiên bản/plugin hoặc revision launcher mới thì báo link tải, mỗi bản chỉ báo một lần; mất mạng vẫn mở OM9. Tải gói mới, giải nén và chạy lại `Start-OM9.cmd` để cập nhật. Launcher không tự tải/cài plugin. Nếu chỉ đổi launcher, không chép lại plugin và không cần đóng OM9. Kết quả kiểm tra nằm trong `OM9-launcher\update-check.json`.
 
 **Cài thủ công** nếu muốn tự quản lý thư mục:
 
 1. Đóng các cửa sổ FreeCAD trước khi thay plugin.
-2. Tải [OpenMatrix9-0.0.2-FreeCAD-1.1.4-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-FreeCAD-1.1.4-Windows-x64.zip).
+2. Tải [OpenMatrix9-0.0.3-FreeCAD-1.1.4-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.3/OpenMatrix9-0.0.3-FreeCAD-1.1.4-Windows-x64.zip).
 3. Giải nén; bên trong có thư mục **OpenMatrix9**.
 4. Nhấn **Win + R**, dán `%APPDATA%\FreeCAD\v1-1\Mod` rồi Enter. Nếu chưa có thư mục này, tạo nó.
 5. Chép thư mục **OpenMatrix9** vào đó. Nếu đã có bản cũ, chuyển bản cũ ra ngoài thư mục `Mod` trước để có thể khôi phục.
@@ -58,17 +58,17 @@ Giữ clipboard yên khi trao đổi. Các script kiểm chứng Matrix trong so
 
 ### Phạm vi bản thử nghiệm
 
-- `0.0.2` bổ sung tương thích FreeCAD chính thức; bộ kiểm tra mới đo trực tiếp host 1.1.4. Bằng chứng Rhino/Matrix của các nhánh dev trước không phải chứng nhận lại toàn bộ bản stock này.
+- `0.0.3` bổ sung tương thích FreeCAD chính thức; bộ kiểm tra mới đo trực tiếp host 1.1.4. Bằng chứng Rhino/Matrix của các nhánh dev trước không phải chứng nhận lại toàn bộ bản stock này.
 - Chỉnh curve, bảng layer, Copy/Paste, BRep trong các mẫu đã kiểm tra, worker import và thao tác viewport có báo cáo kèm release. Full openNURBS, mọi thuật toán trang sức và chuyển đầy đủ bảng màu/khóa bằng thao tác Matrix sản phẩm vẫn chưa được nghiệm thu toàn bộ.
 - Làm việc trên **một tài liệu active** khi đang vẽ. FreeCAD 1.1 có thể commit draft của tài liệu trước khi bắt đầu transaction ở tài liệu khác; bản dev mới có API khác. Hãy hoàn tất hoặc hủy lệnh trước khi chuyển tài liệu.
 - Các luồng nâng cao phụ thuộc bản sửa core FreeCAD dev, như copy dữ liệu Hatch dùng `PropertyFileIncluded`, chưa được chứng nhận trên host stock.
-- Binary của `0.0.1` dành cho FreeCAD dev 27.1; không dùng chung với binary stock `0.0.2`. Hãy giữ plugin và host đúng phiên bản.
+- Binary của `0.0.1` dành cho FreeCAD dev 27.1; không dùng chung với binary stock `0.0.3`. Hãy giữ plugin và host đúng phiên bản.
 
 ### Khi không thấy workbench hoặc có lỗi tải module
 
 Kiểm tra lại phiên bản FreeCAD, đường dẫn versioned `v1-1\Mod`, cấu trúc giải nén và đủ hai file trong `bin`. Khởi động lại sau khi thay plugin. Mở View → Panels → Report view và gửi thông báo nếu vẫn lỗi. Không lấy DLL từ bản FreeCAD khác để chép đè.
 
-Để gỡ OM9: đóng FreeCAD, chuyển `OpenMatrix9` ra ngoài `Mod`. Dự án đã lưu vẫn còn nguyên. Để kiểm tra tải xuống, so SHA256 với `SHA256SUMS.txt` của [release 0.0.2](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.2).
+Để gỡ OM9: đóng FreeCAD, chuyển `OpenMatrix9` ra ngoài `Mod`. Dự án đã lưu vẫn còn nguyên. Để kiểm tra tải xuống, so SHA256 với `SHA256SUMS.txt` của [release 0.0.3](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.3).
 
 ## Tiến độ và bằng chứng phát triển
 
@@ -259,3 +259,16 @@ Actual 01fe run:20 checks,16 PASS; geometry/full palette/locks/active pass BOTH 
 User 2026-10-10 narrowed Undo/Redo to OM9 only; Matrix transfer remains required. Removed custom Matrix Undo callbacks/test commands and active-cursor code; bootstrap detaches only old owned diagnostic hooks. Historical117f report is preserved FAIL under its original broader scope; explicit reassessment passes all16 now-required native checks (both transfers, OM9 Undo/Redo, two rollback faults, cleanup). New transfer-only adapter SDK build/Rust9/ABI/harness12/witness5/recovery5/IronPython4 pass; fresh native candidate replay and OM9 UI deployment remain pending. [Scope evidence](docs/validation/layer-session/om9-only-undo-scope.json).
 
 Native7c9 run: all16 required application checks PASS on exact current managed/Rust/OM9 candidate runtime. Both transfer directions preserve full palette, locks/visibility/current and geometry; actual OM9 Undo/Redo, two rollback injections and cleanup PASS. Original false terminal FAIL is preserved; separate handoff-verification.json confirms scoped acceptance using current evaluator. Cached old criteria reproduced under installed Rhino5 IronPython; fresh module loader resolves summary-only bug and rejects real OM9 Undo failure. No new native run, no full Tasks1-5 closure, no primary UI deployment claim. [Scoped native acceptance](docs/validation/layer-session/palette-native-acceptance.json).
+
+
+## Build công khai và kiểm tra ZIP
+
+Từ v0.0.3, [GitHub Actions](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml) biên dịch OM9 từ source của tag release, chạy test rồi xuất hai ZIP và một `SHA256SUMS.txt`. Dùng ZIP SetupLauncher để cài tự động; ZIP FreeCAD dành cho cài thủ công. FreeCAD được tải từ release chính thức và kiểm tra checksum; không build lại FreeCAD hay đưa binary OM9 cũ vào gói mới.
+
+Kiểm tra ZIP bằng PowerShell `Get-FileHash <tên-file.zip> -Algorithm SHA256` và đối chiếu `SHA256SUMS.txt`. Có GitHub CLI thì kiểm chứng nguồn build bằng:
+
+```powershell
+gh attestation verify OpenMatrix9-0.0.3-SetupLauncher-Windows-x64.zip --repo MYuitsu/OpenMatrix9
+```
+
+Xem [luồng build và phạm vi kiểm tra](tools/ci/README.md). Chứng thực xác nhận nguồn gốc/hash, không thay thế quét bảo mật hay bảo đảm antivirus chấp nhận.

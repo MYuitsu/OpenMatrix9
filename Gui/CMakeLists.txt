@@ -61,8 +61,10 @@ add_custom_command(
         ${CARGO_EXECUTABLE}
         build
         --release
+        --locked
         --manifest-path
         "${OPENMATRIX9_RUST_DIR}/Cargo.toml"
+        "${OPENMATRIX9_RUST_DIR}/Cargo.lock"
 
     DEPENDS
         "${OPENMATRIX9_RUST_DIR}/Cargo.toml"

@@ -32,7 +32,7 @@ function Get-OM9SafeFile([string]$Root,[string]$Relative) {
 }
 function Read-OM9Manifest([string]$Path) {
  $manifest=[IO.File]::ReadAllText($Path)|ConvertFrom-Json
- if($manifest.version -ne '0.0.2' -or $manifest.freecad -ne '1.1.4' -or @($manifest.files).Count -gt 10000){throw 'Unsupported or incomplete OM9 bundle manifest'}
+ if([string]$manifest.version -cnotmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' -or $manifest.freecad -ne '1.1.4' -or @($manifest.files).Count -gt 10000){throw 'Unsupported or incomplete OM9 bundle manifest'}
  $seen=@{}
  foreach($row in $manifest.files){
   $key=([string]$row.path).Replace('\','/').ToLowerInvariant()

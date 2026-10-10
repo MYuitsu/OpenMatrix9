@@ -1,4 +1,5 @@
 import configparser
+import hashlib
 import json
 from pathlib import Path
 import shutil
@@ -6,14 +7,17 @@ import sys
 import tempfile
 import unittest
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from export_menu_assets import export_assets
 from public_source_audit import audit
 
 
 class PublicSourceAuditTests(unittest.TestCase):
     def make(self,root):
-        menu=root/'input';menu.mkdir();(menu/'MainMenu.ini').write_text('[Menu1]\nIcon1=FileNew\n')
-        export_assets(menu,root/'Resources')
+        # Audit fixtures are authored public SVGs, independent of private Matrix.rui.
+        resources=root/'Resources';(resources/'menu').mkdir(parents=True);(resources/'icons').mkdir()
+        svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M4 4 L28 28"/></svg>'
+        (resources/'icons/FileNew.svg').write_text(svg,encoding='utf8')
+        (resources/'menu/icons.ini').write_text('[FileNew]\nimage=icons/FileNew.svg\nsource=OpenMatrix9-authored-svg\n')
+        (resources/'menu/source-manifest.json').write_text(json.dumps({'authored_symbols':{'FileNew':{'sha256':hashlib.sha256(svg.encode()).hexdigest()}}}))
 
     def copy_public_guide(self,root):
         source=Path(__file__).resolve().parents[2]/'ref/rhino5/windows_pdf_user_s_guide.pdf'
