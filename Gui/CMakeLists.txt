@@ -64,10 +64,10 @@ add_custom_command(
         --locked
         --manifest-path
         "${OPENMATRIX9_RUST_DIR}/Cargo.toml"
-        "${OPENMATRIX9_RUST_DIR}/Cargo.lock"
 
     DEPENDS
         "${OPENMATRIX9_RUST_DIR}/Cargo.toml"
+        "${OPENMATRIX9_RUST_DIR}/Cargo.lock"
         "${CMAKE_CURRENT_SOURCE_DIR}/../Resources/menu/MainMenu.ini"
         "${CMAKE_CURRENT_SOURCE_DIR}/../Resources/menu/CommandNames.txt"
         ${OPENMATRIX9_RUST_SOURCES}
