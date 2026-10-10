@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-10T21:58:16.980652+00:00",
+  "updated_at": "2026-10-10T22:00:04.036088+00:00",
   "implementation_target": "Safe Rust is priority1 for portable logic/state/data/validation/index/cache/workers; native C++/Qt/OCCT/openNURBS adapters only; Python bootstrap/tests/tools when required.",
   "active_item": "release-0.0.2-windows-launcher",
   "items": [
@@ -3322,7 +3322,7 @@
     {
       "key": "release-0.0.2-windows-launcher",
       "stage": "deployment",
-      "status": "validated",
+      "status": "published",
       "feature_ids": [],
       "procedure_va": null,
       "outputs": [
@@ -3333,12 +3333,14 @@
         "tools/build-launcher-bundle.py",
         "tools/tests/launcher-tests.ps1",
         "README.md",
-        "docs/validation/2026-10-11-windows-launcher.md"
+        "docs/validation/2026-10-11-windows-launcher.md",
+        "docs/validation/launcher-0.0.2/publication.json"
       ],
       "evidence": [
         "20 installer tests and 11 actual stock FreeCAD launcher checks passed; persistent Desktop shortcut and ICO verified.",
         "Actual user OneDrive Desktop shortcut created; default user startup passed; physical-volume hashes match 541 plugin files and four launcher cache files.",
-        "Auxiliary preflight and failed-cache rollback regression added after independent review; native Rust/plugin binaries unchanged."
+        "Auxiliary preflight and failed-cache rollback regression added after independent review; native Rust/plugin binaries unchanged.",
+        "Launcher source/README pushed as a25b0f7; supplementary ZIP and checksum published on existing v0.0.2, both GitHub digests verified, original six assets unchanged."
       ],
       "tests": [
         {
@@ -3354,7 +3356,7 @@
         "Existing experimental stock-host limitations remain; no new Rhino/Matrix modeling certification."
       ],
       "next_document": "docs/validation/2026-10-11-windows-launcher.md",
-      "next_action": "Publish supplementary launcher ZIP and checksum on existing v0.0.2 without replacing original assets."
+      "next_action": "User requested Start Menu and automatic update check; short additional design awaits approval."
     }
   ],
   "publication_push_20261008": {
