@@ -4,6 +4,8 @@ Bản thử nghiệm này dành cho **Windows x64, FreeCAD 1.1.4 chính thức**
 
 ## 1. Cài FreeCAD
 
+**Cách tự cài OM9, khuyến nghị:** sau khi cài FreeCAD 1.1.4, tải [gói setup launcher](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-SetupLauncher-Windows-x64.zip), giải nén toàn bộ và bấm **Start-OM9.cmd**. Script tự cài/cập nhật plugin trong AppData, tạo icon **OpenMatrix9** trên Desktop rồi mở OM9. Những lần sau bấm icon Desktop; không cần giữ thư mục giải nén. Cập nhật bằng Start-OM9.cmd của gói mới. Bản cũ được giữ ngoài Mod trong `v1-1\OM9-backups`; nếu cần thay plugin đang được dùng, lưu và đóng FreeCAD rồi chạy lại. Không cần Administrator, không tự tải mạng hay đóng ứng dụng. Log ở `v1-1\OM9-launcher`; checksum của ZIP này nằm trong **Launcher-SHA256SUMS.txt**. Các bước phía dưới dành cho cài thủ công.
+
 Tải bộ cài Windows x64 từ [release FreeCAD 1.1.4 chính thức](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4), cài và mở một lần. Vào Help → About FreeCAD để kiểm tra phiên bản **1.1.4**; tên thư mục cài có thể chỉ ghi `FreeCAD 1.1`.
 
 Ví dụ chương trình đã cài: `C:\Program Files\FreeCAD 1.1\bin\FreeCAD.exe`.

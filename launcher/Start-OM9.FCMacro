@@ -1,0 +1,30 @@
+# FreeCAD's mandatory Python startup API; no modeling logic lives in this macro.
+import json,os,traceback,sys
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+
+def activate():
+    report={}
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui as native
+        if App.ActiveDocument is None:
+            App.newDocument('OpenMatrix9')
+        report=dict(ok=True,workbench=Gui.activeWorkbench().name(),module=native.__file__,
+                    version=App.Version(),user_data=App.getUserAppDataDir())
+        App.Console.PrintMessage('OpenMatrix9 ready.\n')
+    except Exception:
+        report=dict(ok=False,error=traceback.format_exc(),user_data=App.getUserAppDataDir(),
+                    user_addon=App.ConfigGet('UserAddonDir'),module_search=sys.path,
+                    user_home=os.environ.get('FREECAD_USER_HOME'))
+        App.Console.PrintError(report['error'])
+    path=os.environ.get('OM9_LAUNCH_REPORT')
+    if path:
+        Path(path).write_text(json.dumps(report,indent=2),encoding='utf8')
+    if os.environ.get('OM9_LAUNCH_TEST_CLOSE')=='1':
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        QtCore.QTimer.singleShot(200,Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1000,activate)

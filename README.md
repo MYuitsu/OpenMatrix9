@@ -16,6 +16,12 @@ Ví dụ chương trình đã cài: `C:\Program Files\FreeCAD 1.1\bin\FreeCAD.ex
 
 ### 2. Tải OM9 và đặt đúng thư mục
 
+**Cách tự cài, khuyến nghị:** tải [OpenMatrix9-0.0.2-SetupLauncher-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-SetupLauncher-Windows-x64.zip), giải nén toàn bộ rồi bấm **Start-OM9.cmd**. Script tự chép/cập nhật plugin vào AppData, tạo icon **OpenMatrix9** trên Desktop và mở đúng workbench. Các lần sau chỉ cần bấm icon Desktop; có thể di chuyển/xóa thư mục giải nén sau khi cài xong. Không cần Administrator.
+
+Khi cập nhật, chạy `Start-OM9.cmd` trong gói mới. Script giữ bản cũ ở `%APPDATA%\FreeCAD\v1-1\OM9-backups`, bỏ qua chép plugin nếu không đổi và yêu cầu lưu/đóng FreeCAD đang dùng plugin nếu cần thay bản. Log ở `%APPDATA%\FreeCAD\v1-1\OM9-launcher`. Gói thiếu/hỏng hoặc cập nhật thất bại sẽ không thay bản đang dùng. Kiểm tra ZIP này bằng **Launcher-SHA256SUMS.txt** trên release.
+
+**Cài thủ công** nếu muốn tự quản lý thư mục:
+
 1. Đóng các cửa sổ FreeCAD trước khi thay plugin.
 2. Tải [OpenMatrix9-0.0.2-FreeCAD-1.1.4-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-FreeCAD-1.1.4-Windows-x64.zip).
 3. Giải nén; bên trong có thư mục **OpenMatrix9**.
