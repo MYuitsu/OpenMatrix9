@@ -1,4 +1,5 @@
 #include "RustBridge.h"
+#include "GumballController.h"
 #include "CoreThreeDm.h"
 #include "NativeCommands.h"
 #include "CurveController.h"
@@ -64,8 +65,8 @@ public:
     }
     const char* className() const override{return "OpenMatrix9Gui::RustCommand";}
     void activated(int) override{om9_sidebar_record_execution(index,om9ExecuteNativeCommand(index));}
-    bool isActive() override{if(_pcAction){if(OpenMatrix9Gui::CoreSnaps::handles(index))_pcAction->setBlockedChecked(OpenMatrix9Gui::CoreSnaps::checked(index));if(OpenMatrix9Gui::CoreKeyboard::handles(index))_pcAction->setBlockedChecked(OpenMatrix9Gui::CoreKeyboard::checked(index));}return om9NativeCommandAvailable(index);}
-    Gui::Action* createAction() override{auto* action=Gui::Command::createAction();if(OpenMatrix9Gui::CoreSnaps::handles(index)||std::string(om9_command_id(index))=="Ortho")action->setCheckable(true);return action;}
+    bool isActive() override{if(_pcAction){if(OpenMatrix9Gui::GumballController::handles(index))_pcAction->setBlockedChecked(OpenMatrix9Gui::GumballController::checked(index));if(OpenMatrix9Gui::CoreSnaps::handles(index))_pcAction->setBlockedChecked(OpenMatrix9Gui::CoreSnaps::checked(index));if(OpenMatrix9Gui::CoreKeyboard::handles(index))_pcAction->setBlockedChecked(OpenMatrix9Gui::CoreKeyboard::checked(index));}return om9NativeCommandAvailable(index);}
+    Gui::Action* createAction() override{auto* action=Gui::Command::createAction();if(OpenMatrix9Gui::CoreSnaps::handles(index)||std::string(om9_command_id(index))=="Ortho"||std::string(om9_command_id(index))=="OM9_Gumball")action->setCheckable(true);return action;}
 private:std::size_t index;std::string accelerator;
 };
 }
@@ -85,6 +86,7 @@ bool om9NativeCommandAvailable(std::size_t index) {
     if(OpenMatrix9Gui::isCurveCommand(index))return OpenMatrix9Gui::CurveController::instance().available(index);
     if(OpenMatrix9Gui::CoreWorkspace::handles(index))return OpenMatrix9Gui::CoreWorkspace::instance().available(index);
     if(OpenMatrix9Gui::CoreViewControls::handles(index))return OpenMatrix9Gui::CoreViewControls::instance().available(index);
+    if(OpenMatrix9Gui::GumballController::handles(index))return OpenMatrix9Gui::GumballController::instance().available(index);
     const char* native=om9_command_native_id(index);if(!native)return false;
     auto* doc=App::GetApplication().getActiveDocument();
     const std::string id=native;
@@ -105,6 +107,7 @@ bool om9NativeCommandAvailable(std::size_t index) {
     return command && command->isActive();
 }
 bool om9ExecuteNativeCommand(std::size_t index) {
+    if(OpenMatrix9Gui::GumballController::handles(index))return OpenMatrix9Gui::GumballController::instance().execute(index);
     if(OpenMatrix9Gui::HistoryController::handles(index))return OpenMatrix9Gui::HistoryController::instance().start(index);
     if(OpenMatrix9Gui::CageController::handles(index))return OpenMatrix9Gui::CageController::instance().start(index);
     if(OpenMatrix9Gui::EditController::handles(index))return OpenMatrix9Gui::EditController::instance().start(index);

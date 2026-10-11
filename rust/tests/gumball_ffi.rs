@@ -147,3 +147,20 @@ fn frame_observation_abi_rejects_invalid_basis_atomically() {
         assert_eq!(om9_gumball_destroy(h), 0);
     }
 }
+
+#[test]
+fn command_abi_owns_only_exact_commands_and_preserves_outputs_on_error() {
+    unsafe {
+        let (mut kind, mut value) = (77, 88);
+        let text = b"_GumballAlignment World";
+        assert_eq!(om9_gumball_command(text.as_ptr(), text.len(), &mut kind, &mut value), 0);
+        assert_eq!((kind, value), (2, 2));
+        for text in [b"Line".as_slice(), b"Gumball garbage", &[255u8]] {
+            kind = 77; value = 88;
+            assert_ne!(om9_gumball_command(text.as_ptr(), text.len(), &mut kind, &mut value), 0);
+            assert_eq!((kind, value), (77, 88));
+        }
+        assert_eq!(om9_gumball_command(std::ptr::null(), 1, &mut kind, &mut value), 2);
+        assert_eq!(om9_gumball_command(text.as_ptr(), text.len(), std::ptr::null_mut(), &mut value), 2);
+    }
+}

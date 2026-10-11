@@ -9,6 +9,7 @@
 #include "SolidController.h"
 #include "NativeCommands.h"
 #include "RustBridge.h"
+#include "GumballController.h"
 #include "CameraState.h"
 #include <App/Application.h>
 #include <App/Document.h>
@@ -132,6 +133,7 @@ bool CoreMouse::eventFilter(QObject* object,QEvent* event){
     if(!Gui::Application::Instance)return false;
     if(event->type()==QEvent::MouseButtonRelease&&releaseView&&unsigned(static_cast<QMouseEvent*>(event)->button())==releaseButton&&containing(object)==releaseView){releaseView=nullptr;releaseButton=0;return true;}
     if(!enabled||Gui::Application::Instance->isClosing())return false;
+    if(GumballController::instance().processEvent(object,event))return true;
     if(target&&(event->type()==QEvent::ApplicationDeactivate||(event->type()==QEvent::UngrabMouse&&containing(object)==target))){cancel(false);return false;}
     if(event->type()==QEvent::FocusIn){if(containing(object))prioritize();return false;}
     if(target&&(target->getGuiDocument()!=Gui::Application::Instance->activeDocument()))cancel();

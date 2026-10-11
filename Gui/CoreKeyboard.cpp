@@ -1,5 +1,6 @@
 #include "CoreKeyboard.h"
 #include "RustBridge.h"
+#include "GumballController.h"
 #include "NativeCommands.h"
 #include "CoreWorkspace.h"
 #include "CurveController.h"
@@ -111,6 +112,7 @@ void CoreKeyboard::contextMenu(){
 }
 bool CoreKeyboard::eventFilter(QObject* receiver,QEvent* event){
     if(!enabled||Gui::Application::Instance->isClosing()||(event->type()!=QEvent::ShortcutOverride&&event->type()!=QEvent::KeyPress))return false;
+    if(GumballController::instance().processEvent(receiver,event))return true;
     if(!inputContext(receiver))return false;
     const auto* key=static_cast<QKeyEvent*>(event);const auto modifiers=key->modifiers()&~Qt::KeypadModifier;const auto sequence=QKeySequence(key->key()|int(modifiers)).toString(QKeySequence::PortableText);
     QString target;for(std::size_t i=0;i<om9_keyboard_count();++i)if(sequence==QString::fromUtf8(om9_keyboard_key(i))){target=QString::fromUtf8(om9_keyboard_target(i));break;}

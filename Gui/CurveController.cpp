@@ -2,6 +2,7 @@
 #include "CoreUnits.h"
 #include "CommandConsole.h"
 #include "RustBridge.h"
+#include "GumballController.h"
 #include "NativeCommands.h"
 #include "CoreWorkspace.h"
 #include "CoreViewControls.h"
@@ -169,7 +170,7 @@ void CurveController::activate() {
         auto* title=new QWidget(dock);title->setFixedHeight(0);dock->setTitleBarWidget(title);
         auto* body=new QWidget(dock);auto* layout=new QVBoxLayout(body);layout->setContentsMargins(4,2,4,2);layout->setSpacing(0);
         console=new CommandConsole(body);layout->addWidget(console,1);
-        console->completionEnabled=[this]{return enabled&&!CageController::instance().active()&&!HistoryController::instance().active()&&!om9_curve_active()&&!CoreRebuild::instance().active()&&!EditController::instance().active()&&!SolidController::instance().active()&&!SurfaceController::instance().active()&&!CoreDistance::instance().active()&&!CorePictureFrame::instance().active()&&!CoreViewControls::instance().toolActive();};
+        console->completionEnabled=[this]{return enabled&&!GumballController::instance().active()&&!CageController::instance().active()&&!HistoryController::instance().active()&&!om9_curve_active()&&!CoreRebuild::instance().active()&&!EditController::instance().active()&&!SolidController::instance().active()&&!SurfaceController::instance().active()&&!CoreDistance::instance().active()&&!CorePictureFrame::instance().active()&&!CoreViewControls::instance().toolActive();};
         console->completionAvailable=[](const QString& name){for(std::size_t i=0;i<om9_command_count();++i)if(CageController::matches(i,name)||HistoryController::matches(i,name)||EditController::matches(i,name)||SolidController::matches(i,name)||SurfaceController::matches(i,name)||name.compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0)return om9NativeCommandAvailable(i);return false;};
         console->accepted=[this]{acceptInput();};
         console->cancelled=[this]{cancelInput();};
@@ -204,7 +205,7 @@ bool CurveController::start(std::size_t index) {
         if(!ok){cancel();return false;}updateInputFrame();refresh();qApp->installEventFilter(this);CoreMouse::instance().prioritize();return true;
     }catch(const std::exception& error){cancel();setPrompt(QString::fromUtf8(error.what()));return false;}
 }
-void CurveController::cancel(){if(om9_curve_active()||!document.empty())CoreSnaps::clearTransient();unitsSnapshot.clear();CageController::instance().cancel();HistoryController::instance().cancel();CoreRebuild::instance().cancel();EditController::instance().cancel();SurfaceController::instance().cancel();SolidController::instance().cancel();clearPreview();clearCircleReferences();clearEllipseReferences();om9_curve_cancel();document.clear();documentIdentity=nullptr;refresh();}
+void CurveController::cancel(){GumballController::instance().cancel();if(om9_curve_active()||!document.empty())CoreSnaps::clearTransient();unitsSnapshot.clear();CageController::instance().cancel();HistoryController::instance().cancel();CoreRebuild::instance().cancel();EditController::instance().cancel();SurfaceController::instance().cancel();SolidController::instance().cancel();clearPreview();clearCircleReferences();clearEllipseReferences();om9_curve_cancel();document.clear();documentIdentity=nullptr;refresh();}
 void CurveController::cancelInput(){if(console)console->setInputText({});historyPosition=-1;CoreDistance::instance().cancel();CorePictureFrame::instance().cancel();cancel();}
 void CurveController::acceptInput(){submit(console?console->takeInput():QString());}
 bool CurveController::pendingInput()const{return console&&!console->inputText().trimmed().isEmpty();}
@@ -267,6 +268,7 @@ void CurveController::submit(const QString& text) {
     const auto input=text.trimmed();
     if(!input.isEmpty()){if(inputHistory.isEmpty()||inputHistory.back()!=input)inputHistory.append(input);if(inputHistory.size()>1000)inputHistory.removeFirst();}
     historyPosition=-1;historyDraft.clear();
+    if(GumballController::instance().submit(input))return;
     QString layerError;if(CoreLayers::submit(input,layerError)){if(!layerError.isEmpty()){setPrompt(layerError);logMessage(layerError);}else if(om9_curve_active())refresh();else setPrompt("Current layer updated");return;}
     if(SolidController::instance().active()){SolidController::instance().submit(input);return;}
     for(std::size_t i=0;i<om9_command_count();++i)if(SolidController::matches(i,input)){SolidController::instance().start(i);return;}
@@ -348,6 +350,7 @@ bool CurveController::eventFilter(QObject* watched,QEvent* event) {
     }
     if(event->type()==QEvent::MouseButtonRelease&&releaseTarget==watched&&static_cast<QMouseEvent*>(event)->button()==Qt::LeftButton){releaseTarget.clear();return true;}
     if(!enabled||Gui::Application::Instance->isClosing())return false;
+    if(GumballController::instance().processEvent(watched,event))return true;
     if(event->type()==QEvent::KeyPress&&CoreKeyboard::inputContext(watched)){
         auto* key=static_cast<QKeyEvent*>(event);
         auto* gui=Gui::Application::Instance->activeDocument();auto* view=gui?dynamic_cast<Gui::View3DInventor*>(gui->getActiveView()):nullptr;auto* widget=qobject_cast<QWidget*>(watched);

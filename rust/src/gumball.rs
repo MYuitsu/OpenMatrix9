@@ -14,6 +14,41 @@ pub enum CommandKind {
     Alignment,
     Relocate,
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct CommandInput {
+    pub kind: CommandKind,
+    pub value: Option<u32>,
+}
+pub fn parse_command(text: &str) -> Result<Option<CommandInput>, GumballError> {
+    let mut words = text.split_whitespace();
+    let Some(name) = words.next() else {
+        return Ok(None);
+    };
+    let Some(command) = kind(name) else {
+        return Ok(None);
+    };
+    let value = if let Some(option) = words.next() {
+        if words.next().is_some() {
+            return Err(GumballError::InvalidInput);
+        }
+        let option = option.to_ascii_lowercase();
+        Some(match (command, option.as_str()) {
+            (CommandKind::Gumball, "off") => 0,
+            (CommandKind::Gumball, "on") => 1,
+            (CommandKind::Gumball, "toggle") => 2,
+            (CommandKind::Alignment, "cplane") => 0,
+            (CommandKind::Alignment, "object") => 1,
+            (CommandKind::Alignment, "world") => 2,
+            _ => return Err(GumballError::InvalidInput),
+        })
+    } else {
+        None
+    };
+    Ok(Some(CommandInput {
+        kind: command,
+        value,
+    }))
+}
 pub fn command(icon: &str) -> Option<&'static str> {
     match icon {
         "InfoSettingsGumballON" => Some("OM9_Gumball"),

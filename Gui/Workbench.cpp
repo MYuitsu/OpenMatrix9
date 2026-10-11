@@ -1,5 +1,6 @@
 #include "Workbench.h"
 #include "RustBridge.h"
+#include "GumballController.h"
 #include "MatrixSidebar.h"
 #include "NativeCommands.h"
 #include "CurveController.h"
@@ -57,12 +58,14 @@ void Workbench::activated()
     CoreDistance::instance().activate();
     CoreSnaps::activate();
     CoreKeyboard::instance().activate();
+    GumballController::instance().activate();
     CoreMouse::instance().activate();
 }
 
 
 void Workbench::deactivated()
 {
+    GumballController::instance().deactivate();
     SurfaceController::instance().deactivate();
     EditController::instance().deactivate();
     SolidController::instance().deactivate();
@@ -100,7 +103,7 @@ Gui::MenuItem* Workbench::setupMenuBar() const
         *workspaceMenu << om9_command_id(om9_workspace_command(i));
     *openMatrixMenu << workspaceMenu;
     auto* infoMenu=new Gui::MenuItem();infoMenu->setCommand("Info & Settings");
-    *infoMenu << "OM9_ProjectNotes" << "ViewportTabs" << "CommandHistory" << "Properties" << "F6";*openMatrixMenu << infoMenu;
+    *infoMenu << "OM9_Gumball" << "OM9_GumballAlignment" << "OM9_RelocateGumball" << "Separator" << "OM9_ProjectNotes" << "ViewportTabs" << "CommandHistory" << "Properties" << "F6";*openMatrixMenu << infoMenu;
     auto* snapMenu=new Gui::MenuItem();snapMenu->setCommand("Snaps");*snapMenu << "Osnap E" << "Osnap M" << "Osnap P" << "Ortho";*openMatrixMenu << snapMenu;
 
     const std::size_t groupCount =

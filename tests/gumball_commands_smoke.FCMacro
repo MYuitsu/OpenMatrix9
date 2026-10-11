@@ -1,0 +1,42 @@
+"""Gumball command routing and lifecycle through actual command-console input."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def cmd(text):
+    console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+    console.setFocus();QtTest.QTest.keyClicks(console,text);QtTest.QTest.keyClick(console,QtCore.Qt.Key_Return)
+    QtWidgets.QApplication.processEvents()
+def run():
+    try:
+        import OpenMatrix9Gui as native;report['module']=native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('GumballCommands');doc.UndoMode=1
+        box=doc.addObject('Part::Feature','Box');box.Shape=Part.makeBox(2,3,4);doc.recompute()
+        QtWidgets.QApplication.processEvents();Gui.Selection.addSelection(box);QtWidgets.QApplication.processEvents()
+        count,undo=len(doc.Objects),doc.UndoCount
+        check('new profile starts Off',not native.gumballState()['enabled'])
+        Gui.runCommand('OM9_Gumball');check('menu toggles On',native.gumballState()['enabled'])
+        Gui.runCommand('OM9_Gumball');check('menu toggles Off',not native.gumballState()['enabled'])
+        cmd('Gumball On');check('CMD On',native.gumballState()['enabled'])
+        cmd('GumballAlignment World');check('CMD World alignment',native.gumballState()['alignment']==2)
+        cmd('GumballAlignment CPlane');check('CMD CPlane alignment',native.gumballState()['alignment']==0)
+        cmd('GumballAlignment Object');check('CMD Object alignment',native.gumballState()['alignment']==1)
+        for alias in ('RelocateGumball','GumballRelocate'):
+            cmd(alias);check(alias+' starts relocate',native.gumballState()['phase']==4)
+            cmd('w10,20,30');cmd('w11,20,30');cmd('')
+            state=native.gumballState();check(alias+' accepts origin and X',state['phase']==1 and state['frame'][:3]==[10,20,30])
+        cmd('Gumball Toggle');check('CMD Toggle',not native.gumballState()['enabled'])
+        cmd('Gumball On');Gui.activateWorkbench('PartWorkbench');check('deactivate cancels interaction',not native.gumballState()['workbench_active'])
+        Gui.activateWorkbench('OpenMatrix9Workbench');check('reactivate keeps enable preference',native.gumballState()['enabled'])
+        check('view commands create no geometry or Undo',(len(doc.Objects),doc.UndoCount)==(count,undo))
+        App.closeDocument(doc.Name);QtWidgets.QApplication.processEvents();check('closed document owns no gesture',native.gumballState()['phase'] in (0,1))
+        report['ok']=True
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2));Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

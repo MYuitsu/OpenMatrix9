@@ -130,6 +130,8 @@ set(
     GumballFrame.cpp
     GumballFrame.h
     GumballRust.h
+    GumballController.cpp
+    GumballController.h
     CoreUnits.cpp
     CoreUnits.h
     CoreObjects.cpp

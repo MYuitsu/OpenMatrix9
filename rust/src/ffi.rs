@@ -70,6 +70,7 @@ fn data() -> Option<&'static Bundle> {
             .chain(crate::core_3dm::ICONS)
             .chain(crate::history::ICONS)
             .chain(crate::cage_commands::ICONS)
+            .chain(crate::gumball::ICONS.iter().copied())
         {
             if index.contains_key(icon) {
                 continue;
@@ -86,6 +87,7 @@ fn data() -> Option<&'static Bundle> {
                         .or_else(|| crate::core_keyboard::command(icon))
                         .or_else(|| crate::history::command(icon))
                         .or_else(|| crate::cage_commands::command(icon))
+                        .or_else(|| crate::gumball::command(icon))
                         .map(str::to_owned)
                         .unwrap_or_else(|| format!("OM9_{icon}")),
                 )
@@ -106,6 +108,7 @@ fn data() -> Option<&'static Bundle> {
                         .or_else(|| crate::core_notes::caption(icon))
                         .or_else(|| crate::history::caption(icon))
                         .or_else(|| crate::cage_commands::caption(icon))
+                        .or_else(|| crate::gumball::command(icon).map(|s|s.trim_start_matches("OM9_")))
                         .unwrap_or_else(|| crate::workspace::caption(icon)),
                 )
                 .ok()?,
@@ -194,6 +197,7 @@ pub extern "C" fn om9_command_success(i: usize, effects: u32) -> bool {
 }
 #[unsafe(no_mangle)]
 pub extern "C" fn om9_command_permissions(i: usize) -> u32 {
+    if command(i).and_then(|c|c.icon.to_str().ok()).and_then(crate::gumball::command).is_some(){return 2;}
     if command(i).and_then(|c|c.icon.to_str().ok()).and_then(crate::cage_commands::command).is_some() { return 5; }
     if command(i).is_some_and(|c| unsafe { crate::history::om9_history_command_kind(c.icon.as_ptr()) } != 0) {
         return 1;

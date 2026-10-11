@@ -76,6 +76,37 @@ fn registry() -> &'static Mutex<Registry> {
 fn call(f: impl FnOnce() -> u32) -> u32 {
     catch_unwind(AssertUnwindSafe(f)).unwrap_or(1)
 }
+/// # Safety
+/// Text is readable for length bytes, both outputs writable for one u32.
+/// 0 recognized, 1 another command, 2 invalid; failure leaves outputs untouched.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_gumball_command(
+    text: *const u8,
+    length: usize,
+    kind_out: *mut u32,
+    value_out: *mut u32,
+) -> u32 {
+    call(|| {
+        if text.is_null() || length > 1024 || kind_out.is_null() || value_out.is_null() {
+            return 2;
+        }
+        let Ok(raw) = std::str::from_utf8(unsafe { std::slice::from_raw_parts(text, length) })
+        else {
+            return 2;
+        };
+        match parse_command(raw) {
+            Ok(Some(command)) => {
+                unsafe {
+                    *kind_out = 1 + command.kind as u32;
+                    *value_out = command.value.unwrap_or(u32::MAX);
+                }
+                0
+            }
+            Ok(None) => 1,
+            Err(_) => 2,
+        }
+    })
+}
 fn update(id: u64, event: Event) -> u32 {
     let Ok(mut r) = registry().lock() else {
         return 1;
