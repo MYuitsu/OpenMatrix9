@@ -1,4 +1,5 @@
 #pragma once
+#include "GumballRust.h"
 #include <cstddef>
 #include <cstdint>
 extern "C" {
