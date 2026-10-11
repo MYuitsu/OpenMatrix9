@@ -2453,7 +2453,7 @@
       "status": "validated",
       "scope": "approved_om9_gumball_core_complete",
       "specification_status": "approved_scope_complete_native_gates_passed",
-      "updated_at": "2026-10-12T05:39:00+07:00",
+      "updated_at": "2026-10-12T06:06:00+07:00",
       "outputs": [
         "OpenMatrix9_Codex_Spec_v1/FEATURES.json",
         "OpenMatrix9_Codex_Spec_v1/FEATURES.yaml",
@@ -2507,9 +2507,9 @@
       "stock_ci_status": "pending",
       "native_processes": 30,
       "native_checks": 955,
-      "plugin_sha256": "77fa3d086a1ed9a388d81e3dd3fa1fe6ff813bad758a5954e4e9d1880c28fda3",
+      "plugin_sha256": "559e0dca08e3535174879dd81c598d4a894e70e43989d22dba8b6d77a8db6b20",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
-      "version_label": "0.3.4-202610120539"
+      "version_label": "0.3.4-202610120606"
     }
   ],
   "merge_context": {

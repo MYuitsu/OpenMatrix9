@@ -70,7 +70,7 @@ std::optional<GumballParametricScale> planGumballParametricScale(
         if(info.expression){
             change.beforeExpression=info.expression->toString(true);
             change.expressionText="("+change.beforeExpression+") * "+number(multiplier);
-            change.expression=App::Expression::parse(&object,change.expressionText);
+            change.expression=std::shared_ptr<App::Expression>(App::Expression::parse(&object,change.expressionText));
         }
         plan.edits.push_back(std::move(change));return true;
     };
@@ -96,7 +96,7 @@ std::optional<GumballParametricScale> planGumballParametricScale(
             change.key="Radius3";change.before=radius3->getValue();
             change.value=radius2->getValue()*factor[1];
             change.expressionText="Radius2 * "+number(factor[1]/factor[0]);
-            change.expression=App::Expression::parse(&object,change.expressionText);
+            change.expression=std::shared_ptr<App::Expression>(App::Expression::parse(&object,change.expressionText));
             plan.edits.push_back(std::move(change));
         }
     }else if(type=="Part::Wedge"){

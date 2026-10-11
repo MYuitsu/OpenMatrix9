@@ -110,7 +110,16 @@ void GumballController::clearOverlays(){for(auto& row:views)row.overlay->detach(
 GumballOverlay* GumballController::overlayFor(Gui::View3DInventor* native)const{for(const auto& row:views)if(row.view==native)return row.overlay.get();return nullptr;}
 void GumballController::syncViews(){
     auto* gui=Gui::Application::Instance?Gui::Application::Instance->activeDocument():nullptr;
-    std::vector<Gui::View3DInventor*> live;if(gui)for(auto* candidate:gui->getMDIViews(true))if(auto* native=dynamic_cast<Gui::View3DInventor*>(candidate))live.push_back(native);
+    std::vector<Gui::View3DInventor*> live;
+    if(gui){
+#if defined(OM9_STOCK_FREECAD)
+        const auto candidates=gui->getMDIViews();
+#else
+        const auto candidates=gui->getMDIViews(true);
+#endif
+        for(auto* candidate:candidates)
+            if(auto* native=dynamic_cast<Gui::View3DInventor*>(candidate))live.push_back(native);
+    }
     const bool lostOwner=active()&&(!view||std::find(live.begin(),live.end(),view.data())==live.end());
     if(lostOwner)cancel();
     std::erase_if(views,[&](const auto& row){return !row.view||std::find(live.begin(),live.end(),row.view.data())==live.end();});
@@ -189,7 +198,13 @@ void GumballController::orbitAroundPivot(){
     if(!view||!inputs)return;auto* navigation=view->getViewer()->navigationStyle();if(!navigation)return;
     Om9GumballSettings current{};om9_gumball_settings(session,nullptr,&current);const auto state=snapshot();
     if(current.orbit)navigation->setRotationCenter(SbVec3f(float(state.frame[0]),float(state.frame[1]),float(state.frame[2])));
-    else navigation->setRotationCenter(view->getViewer()->getFocalPoint());
+    else {
+#if defined(OM9_STOCK_FREECAD)
+        navigation->setRotationCenter(navigation->getFocalPoint());
+#else
+        navigation->setRotationCenter(view->getViewer()->getFocalPoint());
+#endif
+    }
 }
 void GumballController::settingsDialog(){
     if(active())return;
