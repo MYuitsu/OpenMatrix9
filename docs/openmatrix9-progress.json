@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-11T10:37:37+07:00",
+  "updated_at": "2026-10-11T22:43:47+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -2384,6 +2384,62 @@
       ],
       "next_document": "docs/validation/2026-10-11-gumball-core.md",
       "next_action": "Supported slice accepted after one fresh review and one TDD fix pass; next work is explicitly deferred native capability/paired Matrix parity adapters."
+    },
+    {
+      "key": "gumball-four-view-spec-20261011",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "procedure_va": null,
+      "status": "validated_supported_slice",
+      "scope": "native_four_view_completion_supported_slice",
+      "specification_status": "reviewed_and_document_checks_passed",
+      "updated_at": "2026-10-11T22:43:47+07:00",
+      "outputs": [
+        "OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-info-020-gumball.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-info-021-gumball-alignment.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-info-022-relocate-gumball.md",
+        "docs/features/OM9-INFO-020.md",
+        "docs/features/OM9-INFO-021.md",
+        "docs/features/OM9-INFO-022.md",
+        "docs/validation/2026-10-11-gumball-four-view-spec-review.md",
+        "README.md",
+        "OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md",
+        "docs/gumball-user-guide.md",
+        "docs/validation/2026-10-11-gumball-four-view-completion.md",
+        "docs/superpowers/plans/2026-10-11-gumball-four-view-completion.md",
+        "docs/validation/2026-10-11-gumball-four-view-completion.json"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-11-gumball-four-view-completion.md"
+      ],
+      "tests": [
+        {
+          "command": "rtk cargo test --locked --release --manifest-path rust/Cargo.toml",
+          "result": "exit0; 874 checks / 125 suites"
+        },
+        {
+          "command": "tests/run_gumball_smoke.ps1 -Scope All",
+          "result": "exit0; 29 native processes / 781 checks; plugin SHA FF0427D720EC8CFD5D24EEDFB32FBA7E538CFB65F98E06398404DAF42284D69F"
+        },
+        {
+          "command": "Scoped metadata/link/manifest verification, public_source_audit and diff --check",
+          "result": "Final verification recorded in validation report"
+        }
+      ],
+      "uncertainties": [
+        "Generic/expression parametric Scale, Link shear/externaldoc and Mesh edge/vertex/light/camera Object adapters remain unsupported.",
+        "Shared host failed posttransaction callback abort loses old Redo.",
+        "Widget cache process-local; no full original-host parity or clean release closure claim."
+      ],
+      "next_document": "docs/validation/2026-10-11-gumball-four-view-completion.md",
+      "next_action": "Close remaining owner/frame parity gaps and coordinate clean RCORE/Curve dependency closure before a reproducible release; bb remains unchanged.",
+      "native_processes": 29,
+      "native_checks": 781,
+      "plugin_sha256": "FF0427D720EC8CFD5D24EEDFB32FBA7E538CFB65F98E06398404DAF42284D69F"
     }
   ],
   "merge_context": {

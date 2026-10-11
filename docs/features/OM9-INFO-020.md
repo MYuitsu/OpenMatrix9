@@ -22,8 +22,10 @@ Qt/Coin/FreeCAD/OCCT/Mesh/Points và transaction native.
 Selection editable cùng document; parent+child chuẩn hóa thành một root,
 group có private geometry của members, App::Link cùng document giữ shared
 definition. Move/Rotate dùng Placement nên giữ native parametric owner.
-Scale affine chỉ plain Part::Feature/Mesh::Feature/Points::Feature, hệ số
-khác 0, cho phép âm; circle nonuniform có thể thành rational BSpline exact.
+Scale affine giữ plain Part::Feature/Mesh::Feature/Points::Feature; Box positive
+đúng owner axes dùng dimensions, Sphere positive uniform dùng Radius, Link
+occurrence biểu diễn được dùng Placement/ScaleVector và giữ definition.
+Circle nonuniform có thể thành rational BSpline exact; uniform giữ analytic.
 Extrude arrows hỗ trợ planar Edge/Wire/Face, kể cả Shell/Compound một child
 và face có hole. Không thay geometry nguồn khi Copy/Extrude.
 
@@ -48,8 +50,9 @@ input raw/unit/frame/source stamps và affine; giữ material/layer/parent/retai
 definition. Không tạo associative History graph mới; existing native parametric
 dependencies vẫn recompute. Provenance/successful geometry lưu trong FCStd.
 
-Giới hạn rõ trước transaction: Scale parametric/Link, external-document Link,
-unresolved geometry/capability. Không có fallback mesh. Callback synchronous
+Giới hạn rõ trước transaction: generic/expression-driven parametric Scale,
+Link shear, external-document Link và unresolved geometry/capability.
+Không có fallback mesh. Callback synchronous
 sửa nguồn trong publication abort cả batch. Mesh/Points được so sánh với
 staged output sau setter callbacks, trước khi ghi nhớ expected state.
 **FreeCAD xóa Redo khi mở
@@ -63,5 +66,32 @@ Không nới tolerance của solver để hợp thức kết quả.
 
 [Evidence và lệnh tái kiểm](../validation/2026-10-11-gumball-core.md).
 [Giao diện Rhino và kiểm tra native](../validation/2026-10-11-gumball-rhino-visual.md).
-Tiếp theo: native owner adapters cho scale parametric/Link, multi-document
-atomic publication và host Redo-preserving transaction API.
+
+## Revision yêu cầu bốn viewport — 2026-10-11
+
+User yêu cầu spec giống ảnh Rhino/Matrix đã cung cấp: bật qua Command rồi
+hiện đồng thời bốn ô. [Spec020](../../OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-info-020-gumball.md)
+quy định một frame/session chung, preview bốn ô và một transaction, Scale
+neo biên bounds, plane hai màu/cross, menu vòng trắng/đuôi chấm và profile
+logical px. Arrow/arc và màu theo ảnh; background/selection thuộc workspace.
+
+Đã triển khai một Rust session và collection native overlay cho cả bốn ô.
+First click ở ô chưa active bắt handle cùng event; geometry preview stage một
+lần và fan-out mọi ô, một batch/Undo. Scale theo bounds trong basis; plane
+hai màu/cross, menu vòng trắng/đuôi chấm, projection cull cả hình lẫn pick.
+Pixel profile và stroke dùng DPI thực; zoom không đổi geometry reference.
+Tiny Scale trong bounds giữ đúng biên; fallback12px chỉ outside/zero.
+
+Menu có Snappy/Smooth(default Smooth), Strength100%, settings màu/size/stroke/
+offset, zero hide group, Restore Defaults và orbit. Snappy dùng native Osnap;
+Strength nhân pointer, không nhân numeric. Orbit source view theo pivot mới.
+Owner property guards và kiểm solid intersection trước commit chặn callback
+thay topology. Link native replay dùng transient User3, bounded131072 value
+owner IDs giữ qua reversible deletion tới document close; native journal
+vẫn sở hữu giá trị, không giữ object pointer hoặc serialize flag.
+
+Native multi-view/owner/settings proof mới nằm tại
+[báo cáo triển khai](../validation/2026-10-11-gumball-four-view-completion.md).
+Bản PDF hiện tại3trang/printed35–37; [đối chiếu nguồn lịch sử](../validation/2026-10-11-gumball-four-view-spec-review.md).
+Generic owners, Link shear/externaldoc và failed-transaction Redo cũ của shared
+host vẫn là giới hạn. Chưa nhận full original-host parity hoặc tăng version bb.

@@ -19,6 +19,7 @@ struct GumballInputs {
     std::vector<GumballReadDependency> definitions;
     std::vector<Om9GumballSource> sources;
     std::shared_ptr<const GumballNativeData> native;
+    bool ambiguousComponents=false;
 };
 struct GumballStagedBatch {std::shared_ptr<GumballNativeData> native;QJsonObject facts;std::string report;std::function<void()> beforeCommit;};
 GumballInputs captureGumballInputs(App::Document&,const std::vector<Gui::SelectionObject>&,const CoordinateContext&);
@@ -27,6 +28,7 @@ GumballStagedBatch stageGumballBatch(const GumballInputs&,const Om9GumballSnapsh
 void publishGumballBatch(App::Document&,const GumballInputs&,const Om9GumballSnapshot&,GumballStagedBatch&&);
 std::vector<std::vector<Base::Vector3d>> gumballPreviewLines(const GumballStagedBatch&);
 QJsonObject gumballInputFacts(const GumballInputs&);
+std::vector<std::array<double,3>> gumballExtentPoints(const GumballInputs&,const double* frame);
 QJsonObject gumballObjectFrameFacts(const GumballInputs&);
 void addGumballGeometryMethods(_object*);
 }

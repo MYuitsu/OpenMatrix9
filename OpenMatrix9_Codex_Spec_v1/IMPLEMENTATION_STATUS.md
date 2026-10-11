@@ -210,3 +210,12 @@ chỉ vì một phần hoặc một icon đã hoạt động.
 ## Hướng dẫn mẫu — 2026-10-07
 
 607 contract có mẫu Rust độc lập và kiểm thử validator. Kết quả này không thay đổi trạng thái native hoặc supported slice của các feature.
+
+<!-- gumball-four-view-spec-20261011:start -->
+2026-10-11: đã triển khai Gumball đồng bộ bốn viewport: Command On/Off,
+first-click handles, shared preview/batch, bounds Scale, plane hai màu và menu
+ring; core settings/Snappy/Strength/orbit và native Box/Sphere/Link property Scale.
+Giữ ba ID `partially_implemented`: generic owners, Mesh edge/vertex/light/camera
+frames và host old-Redo rollback còn mở; chưa claim full original-host parity.
+[Cách dùng Gumball](../docs/gumball-user-guide.md) · [Native evidence](../docs/validation/2026-10-11-gumball-four-view-completion.md).
+<!-- gumball-four-view-spec-20261011:end -->

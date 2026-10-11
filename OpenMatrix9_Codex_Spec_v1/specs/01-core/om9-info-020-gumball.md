@@ -19,7 +19,152 @@ Alias tương thích: `Gumball`. Nhóm: `01-core`. Trạng thái: `partially_imp
 
 **Hợp đồng thiết kế `OM9-INFO-020` — Gumball.**
 
-Gumball toggle hiển thị move/scale/rotate widgets khi object selected. X đỏ, Y xanh lá, Z xanh dương theo chỉnh giao diện Rhino 5 được user duyệt ngày 2026-10-11; arrows move một axis, plane handle move hai axes, origin free move; arcs rotate, outline squares scale một axis ở phía đối diện arrows. Menu ball cạnh tâm mở Relocate/Reset và CPlane/Object/World; numeric editor gọn, giữ trong viewport. Numeric edit nhận distance/góc/scale factor. Alt trong drag toggle Copy, Alt khi click numeric làm copy. Trong drag nhập số+Enter ràng buộc distance hoặc bước góc. Ctrl khi nhả arrow drag của planar curve/surface tạo extrude, có thể nhập distance trước; không coi Ctrl drag mọi object là extrude. Giữ đúng pivot/frame và capability, hủy trả preview.
+Gumball là lệnh bật/tắt bộ tay nắm Move/Scale/Rotate của selection. Khi bật,
+cùng một Gumball phải hiện đồng thời trong cả bốn viewport của document;
+mọi bản hiển thị dùng chung origin, hệ trục, operation và preview. Mũi tên
+dịch một trục, ô mặt phẳng dịch hai trục, tâm dịch tự do, cung xoay quanh tâm
+và ô vuông Scale một trục. X đỏ, Y xanh lá, Z xanh dương theo ảnh Rhino/Matrix
+người dùng cung cấp. Hình thức và thao tác chi tiết dưới đây là mục tiêu
+nghiệm thu; implementation notes chỉ ghi phạm vi đã chạy được.
+
+### Nguồn và phạm vi revision 2026-10-11
+
+- Ảnh bốn viewport do người dùng gửi là ảnh tham chiếu Rhino 5/Matrix,
+  không phải bằng chứng OM9 đã đạt. Ảnh xác nhận hiển thị đồng thời, Scale
+  ở biên selection, ô mặt phẳng hai màu và menu ball vòng trắng có đuôi chấm.
+- Bản trích Matrix 8 Book 1 gồm PDF 1–3 / trang in 35–37 đã đọc cả chữ và
+  hình. Nó mô tả axes/planes/free origin, arcs, Scale, nhập số, Alt Copy,
+  Ctrl Extrude, Relocate và Alignment. Số PDF45–47 trong evidence cũ thuộc
+  quyển đầy đủ; không dùng chúng để mở bản trích ba trang.
+- PDF dùng X đỏ/Y xanh lam hoặc cyan/Z vàng; mục tiêu màu OM9 lấy theo ảnh
+  X đỏ/Y xanh lá/Z xanh dương. Không coi khác biệt hai nguồn là lỗi đọc PDF.
+- [Rhino 5 Gumball Help](https://docs.mcneel.com/rhino/5/help/en-us/commands/gumball.htm)
+  và [Gumball Options](https://docs.mcneel.com/rhino/5/help/en-us/options/modeling_aids_gumball.htm)
+  bổ sung Shift Scale3D, menu và các tùy chọn hiển thị. Các kích thước dưới
+  đây là lựa chọn OM9 để tái hiện ảnh, không phải default Rhino đã xác minh.
+- Chỉ ba spec lõi `OM9-INFO-020/021/022`; Smart Targets/Smart MSR và các mode
+  riêng của Clayoo/SubD nằm ngoài revision này. Không đổi nền, màu selection,
+  tên hoặc thứ tự viewport qua spec Gumball.
+
+### Bật/tắt và hiển thị đồng thời
+
+1. `Gumball On` bật, `Gumball Off` tắt, `Gumball Toggle` hoặc `Gumball` đổi
+   trạng thái. Menu/icon hiện có đi qua cùng handler và cùng trạng thái checked.
+   Profile mới mặc định Off; profile đã có giữ Enabled đã lưu. Chọn object
+   khi Off không tự bật. Khi On nhưng selection rỗng thì ẩn tay nắm, vẫn giữ On.
+2. Khi có selection hợp lệ, cả bốn native viewport đang tồn tại đều có overlay.
+   Không đợi kích hoạt từng ô; không chỉ gắn overlay vào active view. Các camera
+   nhìn cùng một frame thế giới, không tạo bốn pivot hoặc bốn phiên biến đổi.
+3. Một lần nhấn tay nắm ở ô chưa active phải vừa chọn ô thao tác vừa bắt đúng
+   tay nắm trong cùng sự kiện; không cần click lần hai hoặc chờ timer refresh.
+4. Drag ở bất kỳ ô nào đồng bộ preview sang mọi ô còn mở. Mouse capture,
+   editor số và menu chỉ thuộc ô phát sinh; một gesture chỉ commit một batch
+   và một transaction Undo. Copy/Extrude không nhân kết quả theo số viewport.
+5. Off, deselect, permission/source change hoặc document/workbench close
+   dọn mọi overlay/editor/preview và mouse capture phù hợp. Đổi active view
+   khi idle giữ widget xuất hiện ở tất cả ô. Đổi view/navigation trong drag
+   hủy phiên thống nhất, không để preview hoặc capture ở ô khác.
+6. Maximize rồi trở lại bốn ô giữ selection, frame và Enabled; không thay
+   geometry, Undo hoặc camera ngoài thao tác view được yêu cầu. Đóng một ô
+   dọn đúng overlay của nó; nếu đó là ô đang sở hữu gesture thì hủy gesture.
+
+### Hình dáng và bố trí tay nắm
+
+| Thành phần | Mục tiêu theo ảnh | Quy tắc OM9 để nghiệm thu |
+|---|---|---|
+| Move | Mũi tên thanh, đầu nhọn, nằm phía dương của trục | X đỏ/Y xanh lá/Z xanh dương; màu theo trục Gumball đã chọn, không theo tọa độ màn hình |
+| Rotate | Cung khoảng một phần tư vòng ở phía âm | Màu của trục xoay; nhìn Top/Front/Right ở World không để cung vuông góc chồng tâm |
+| Scale | Ô vuông rỗng, nối tâm bằng nét chấm, ở biên phía âm | Vị trí theo bounds selection trong frame Gumball, không dùng độ dài cố định của mũi tên |
+| Plane | Ô hai màu có dấu chia ở giữa, tách khỏi tâm | Hai màu đúng cặp XY/YZ/ZX; hình nằm trên mặt phẳng đó và project theo camera |
+| Origin | Ô rất nhỏ tương phản trắng/đen | Free Move độc lập; không nhầm với menu ball hoặc trục nhìn thẳng vào camera |
+| Menu ball | Vòng trắng rỗng phía dưới-trái tâm, có đuôi chấm | Theo camera, không xoay theo frame object; mở menu, không bắt đầu transform |
+
+Profile hình thức OM9 ở DPI100%: từ tâm đến đầu Move và bán kính cung khoảng
+80 logical px; nét axes/arcs 1–2 px; đầu mũi tên khoảng 18×9 px; Scale square
+8 px; origin 4 px; plane square 20 px, cách tâm khoảng 50 px trên mỗi trục
+phẳng; menu ring đường kính 10 px, offset màn hình khoảng (-30,+30) px.
+Các trị số này chuẩn hóa ảnh tham chiếu để có fixture đo được; mọi kích thước
+screen-space phải giữ theo logical px khi zoom và DPI thay đổi. Chúng không
+ấn định khoảng cách Scale tới tâm, vì khoảng đó phụ thuộc geometry.
+
+Bounds dùng selection thực sự và world placement, gồm group/instance theo
+capability đã hỗ trợ. Rust nhận bounds/extent độc lập từ adapter, tính theo
+frame Gumball. Với pivot nằm trong bounds, Scale mỗi trục neo tại biên âm
+của extent trục đó, hai tọa độ còn lại theo pivot; nét chấm nối về pivot.
+Đây là thuật toán OM9 tái hiện vị trí trong ảnh, chưa phải thuật toán nội bộ
+Rhino đã chứng minh cho mọi representation.
+
+Pivot ngoài bounds hoặc extent bằng zero cần fallback được ghi rõ: giữ phía
+âm và ít nhất 12 logical px tách khỏi origin để có thể pick; offset hiển thị
+không được đổi pivot, factor hay geometry. Tại Begin phải có reference extent
+hữu hạn và factor ban đầu bằng 1; trường hợp không đủ dữ liệu thì báo lý do
+và không mở transaction. Grip ngoài viewport được camera clip, không kéo cả
+bộ Scale về gần tâm. Relocate phải cập nhật lại bounds/frame/leader ở mọi ô.
+
+Ở World và camera orthographic chuẩn, hiển thị như sau; xét camera thực tế,
+không suy từ tên hoặc vị trí ô trong workspace:
+
+| Góc nhìn | Move/Scale | Rotate | Plane |
+|---|---|---|---|
+| Top (XY) | X, Y | Z | XY |
+| Front (XZ) | X, Z | Y | XZ |
+| Right (YZ) | Y, Z | X | YZ |
+| Perspective | Các trục/cung có projection dùng được | Các cung không suy biến | Các mặt phẳng không suy biến |
+
+Object/CPlane xoay thì chọn handles theo projection của basis hiện hành,
+không hard-code bảng World. Trục/cung/mặt phẳng suy biến khi chiếu phải ẩn
+cả hình lẫn hit target; không để chúng bắt nhầm Origin. Guides và preview
+không pickable, không góp vào FitAll bounds. Hình nhỏ có vùng pick khoảng
+5 logical px; khi chồng nhau ưu tiên menu/origin rồi Scale, Move, Plane,
+Rotate. ID operation vẫn ổn định dù một số handle bị ẩn ở camera cụ thể.
+
+### Chuột, phím và nhập số
+
+| Tương tác | Kết quả yêu cầu |
+|---|---|
+| Drag mũi tên / plane / origin | Move theo một trục / hai trục / tự do; preview đồng bộ bốn ô |
+| Drag cung / ô Scale | Rotate quanh pivot / Scale1D; kéo Scale ra xa pivot làm nở, kéo gần làm co |
+| Giữ Shift khi Scale | Scale3D đồng đều theo cùng pivot; nhả Shift trở lại Scale1D trong cùng phiên |
+| Click tay nắm | Editor số gọn cạnh điểm click, nằm trong ô đó; distance theo unit document, góc độ, factor không đơn vị |
+| Alt tap sau khi bắt đầu drag | Toggle Copy; tap lần nữa tắt, bỏ qua auto-repeat; giữ nguyên nguồn khi Copy |
+| Alt + click rồi nhập số | Áp dụng trị số cho bản sao; chỉ một batch Copy |
+| Gõ số + Enter khi đang giữ drag | Ràng buộc distance hoặc bước góc trên Command, tiếp tục preview; mouse release mới commit |
+| Ctrl có từ mouse-down | Chỉnh widget theo `OM9-INFO-022`, không dịch/scale/xoay geometry |
+| Ctrl thêm sau khi drag arrow, còn giữ lúc release | Extrude planar curve/surface có capability; không áp dụng ngầm cho solid, arc hoặc Scale handle |
+| Esc | Đóng numeric editor trước nếu có; Esc tiếp hủy phiên và trả trạng thái trước gesture ở mọi ô |
+
+Distance/angle/factor phải hữu hạn, factor khác zero; dấu âm và unit theo
+parser/operation policy hiện hữu. Input sai không commit. Thay selection,
+source incarnation/revision, units, permission hoặc frame trong gesture
+hủy hoặc reject batch trước publication; không commit theo snapshot stale.
+
+### Menu và tùy chọn Gumball lõi
+
+Menu ring có Relocate, Reset và Align CPlane/Object/World; trạng thái checked
+đồng bộ giữa menu và Command. Reset trả placement/orientation mặc định của
+selection theo alignment, không reset toàn bộ settings hoặc geometry.
+Popup nhận mouse release đúng chủ; đóng popup không nuốt click transform sau.
+
+Mục tiêu bổ sung trong `OM9-INFO-020`: Snappy/Smooth Dragging, Drag Strength
+(100% bình thường; finite >0, Reset về 100), Settings và Rotate View Around
+Gumball. Snappy dùng Osnap đã bật, Smooth bỏ qua Osnap; default Smooth là
+lựa chọn OM9 giữ drag không snap hiện hành, không suy từ ảnh. Rotate View
+Around Gumball chỉ đổi tâm orbit của camera thao tác, không tạo Undo geometry.
+Settings quản lý màu, kích thước screen-space, độ dày, vị trí plane/menu;
+zero ở kích thước Scale/Plane/Menu hoặc độ dày Move/Rotate tắt đúng nhóm đó.
+Restore Defaults chỉ reset settings Gumball. Tùy chọn chưa có adapter phải
+disabled có lý do, không dựng menu hoạt động rỗng rồi coi là đã hỗ trợ.
+
+### Ranh giới triển khai
+
+Một Rust session sở hữu Enabled, alignment/frame, extents, modifiers,
+validation và operation plan. Native Qt/Coin giữ collection overlay theo
+identity/generation của từng view, capture camera/ray/pick và dựng primitives
+từ cùng snapshot; FreeCAD/OCCT adapters giữ geometry/transaction. Không giữ
+raw native pointer quá lifetime trong Rust hoặc viết lại transform policy
+riêng cho từng viewport. Áp dụng `RCORE-01/02/03/04/05/06/10/12` theo phạm vi
+owner, units, coordinates, command, pick, selection, persistence và display;
+một slice đạt không chứng nhận toàn bộ các chapter đó.
 
 ## Vai trò đầu vào của mẫu
 
@@ -35,13 +180,13 @@ Mẫu không tự điền default, không kiểm tra miền số hay tập enum 
 
 | Option key | Kiểu mẫu | Ý nghĩa / đơn vị | Default / trạng thái |
 |---|---|---|---|
-| `Enabled` | `boolean` | Hiện gizmo | Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành. |
-| `Operation` | `choice` | Move, Rotate, Scale hoặc Extrude | Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành. |
-| `Axis` | `choice` | X, Y, Z, Plane hoặc Free | Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành. |
-| `Distance` | `number` | Dịch/extrude theo unit document | Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành. |
-| `Angle` | `number` | Góc, độ tại UI | Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành. |
-| `Scale Factor` | `number` | Hệ số không đơn vị | Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành. |
-| `Copy` | `boolean` | Giữ originals | Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành. |
+| `Enabled` | `boolean` | Hiện gizmo đồng thời ở các viewport | Default OM9 Off cho profile mới; giữ preference đã lưu; Command/menu cùng handler. |
+| `Operation` | `choice` | Move, Rotate, Scale hoặc Extrude | Theo tay nắm và modifiers; không tự Extrude object không có capability. |
+| `Axis` | `choice` | X, Y, Z, Plane hoặc Free | Theo tay nắm trong frame chung; không có trục mặc định độc lập camera. |
+| `Distance` | `number` | Dịch/extrude theo unit document | Hữu hạn, có dấu; input không có unit dùng document units; không tự điền distance. |
+| `Angle` | `number` | Góc, độ tại UI | Hữu hạn; khi giữ drag là bước góc; không tự điền góc. |
+| `Scale Factor` | `number` | Hệ số không đơn vị | Hữu hạn, khác zero; Begin factor=1, cho phép âm theo capability; numeric phải nhập rõ. |
+| `Copy` | `boolean` | Giữ originals | Off khi bắt đầu gesture thường; Alt toggle/Alt numeric theo bảng thao tác. |
 
 ## Hướng dẫn triển khai
 
@@ -93,29 +238,38 @@ Các ca trên là yêu cầu kiểm thử geometry/state của feature; kết qu
 ## OpenMatrix9 implementation notes
 
 Ngày 2026-10-11: `partially_implemented` / `validated_supported_slice`.
-13 native handles; Move/Rotate Placement, plain BRep/Mesh/Points affine Scale, planar Extrude, Alt Copy, held Ctrl and native Qt input. Parametric/Link Scale and external-document Link remain unsupported; failed posttransaction callback rollback loses old Redo in the shared host.
+Shared four-view Rust session/preview, first-click native picks, bounds Scale, projection culling and DPI profile. Core menu/settings/Snappy/Strength/orbit; Box dimensions, uniform Sphere Radius and representable Link ScaleVector with native Undo/Redo. Generic/expression owners, Link shear/externaldoc and failed-transaction old Redo remain explicit limits.
 
-Rhino-style visual revision adds a separate native menu target (14 scene paths
-including the unchanged 13 Rust operation handles), camera-facing outline scale
-squares and compact Qt numeric editor. Rendering and popup ownership use native
-Coin/Qt; operation math/state/publication remain Rust-owned or native adapters
-from the core slice. [Visual evidence](../../../docs/validation/2026-10-11-gumball-rhino-visual.md).
-
-Source evidence: Matrix 8 Book 1 PDF45–47 / printed35–37, continuation inspected
-until History PDF48. Source Y cyan/blue; approved OM9 Y green is a design choice.
-[Inputs, parameters/defaults/units, outputs, lifecycle, dependencies, errors and tolerances](../../../docs/features/OM9-INFO-020.md).
-[Native/Rust verification and limits](../../../docs/validation/2026-10-11-gumball-core.md).
-No new associative History graph; existing native owner dependencies retained.
-Geometry/report metadata persists in FCStd; widget cache is session view state.
+[Evidence mới](../../../docs/validation/2026-10-11-gumball-four-view-completion.md).
+[Hợp đồng inputs/units/output/lifecycle và giới hạn](../../../docs/features/OM9-INFO-020.md).
+Nguồn bản trích Matrix8 Book1 PDF1–3/printed35–37; ảnh Rhino5 bốn view.
+Cache widget process-local; geometry/report native giữ FCStd, không thêm History graph.
 
 ## Acceptance checklist
 
-- [ ] Hợp đồng feature và điều kiện hình học được kiểm chứng trước khi triển khai.
+Các mục `[x]` đã có native evidence trong cohort29processes; mục `[ ]` còn
+mở được ghi rõ bên dưới, không xác nhận mọi representation của Rhino.
+
+- [x] Command `Gumball On/Off` bật/tắt trên binary visual đã kiểm; không đổi geometry/Undo.
+- [x] On với selection hợp lệ tạo overlay đồng thời ở cả bốn view; Off dọn cả bốn, không đợi focus.
+- [x] Click handle ở ô chưa active bắt đúng ngay lần đầu; giữ operation IDs qua mọi camera.
+- [x] Drag/Copy/Extrude ở từng ô đồng bộ preview tất cả ô và chỉ một transaction/batch kết quả.
+- [x] Scale neo biên âm bounds trong frame; đổi kích thước object/zoom không biến thành fixed-offset widget.
+- [x] Plane hai màu/dấu chia, origin tương phản và menu vòng trắng/đuôi chấm đúng profile ảnh.
+- [x] Top/Front/Right/rotated basis/Perspective lọc handles suy biến và pick đúng mục tiêu.
+- [x] Kích thước logical px, pick và numeric/menu đúng ở DPI100%/150%/200%, zoom in/out và maximize/restore.
+- [x] Numeric Move/Rotate/Scale, Alt Copy, Shift Scale3D và hai thời điểm Ctrl được replay ở mọi ô.
+- [x] Relocate/Reset/Alignment ở một ô đồng bộ frame, extents, leaders và hit targets ở các ô còn lại.
+- [x] Close view/document, navigation, stale source/units/permission dọn mọi overlay/preview/editor/capture.
+- [x] Snappy/Smooth, Drag Strength, Settings/Restore Defaults và orbit around pivot có native evidence.
+- [ ] Bổ sung Scale parametric/Link và owner adapters thiếu trước khi nhận full core parity.
+
+- [x] Hợp đồng và điều kiện hình học được kiểm chứng trong supported native slice; adapter gaps ghi riêng.
 - [x] Inputs and selection state documented.
 - [x] Parameters/defaults/units documented.
 - [x] Output geometry documented.
 - [x] Preview/commit/cancel behavior tested if applicable.
-- [ ] History/dependencies tested if applicable.
+- [x] Existing native Part::Cut dependency recomputes after Box property Scale and Undo; no new associative History graph.
 - [x] Undo/redo tested for successful gestures; failed posttransaction callback loses old Redo (host limitation).
 - [x] Save/reload persistence tested for native geometry/report/layer/Link/retained 3DM.
 - [x] Automated tests use feature ID `OM9-INFO-020`.

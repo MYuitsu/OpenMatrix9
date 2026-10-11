@@ -12,7 +12,7 @@ CPlane theo native viewport frame; World theo XYZ. Object dùng native Placement
 của một whole owner hoặc curve tangent / surface tangent-normal native.
 Wire/Shell/Compound đúng một child được unwrap, bounded 64 levels. Multiple
 owners không có frame duy nhất báo unresolved và giữ alignment trước.
-Mesh/Points whole-owner dùng Placement; Mesh component frame, light/camera
+Mesh/Points whole-owner dùng Placement; Native planar oriented Mesh Segment dùng actual world facet tangent/normal; Mesh edge/vertex, light/camera
 và mọi frame không có native adapter vẫn unsupported, không ngầm chọn World.
 Selected BRep Vertex hoặc component không có tangent/surface frame cũng báo
 `UnsupportedFrame`; giữ alignment và frame trước, không dùng owner axes ngầm.
@@ -27,4 +27,17 @@ Native checks: object 30° / rotated one-edge Wire, rotated CPlane, menu states,
 World, unsupported Mesh component, unchanged Shape/count/Undo và reselect.
 Final-review regression kiểm Vertex1 giữ rotated CPlane và không tạo Undo.
 [Evidence](../validation/2026-10-11-gumball-core.md).
-Tiếp theo: Mesh face/edge/vertex, light/camera frame adapters và source fixtures.
+Planar oriented Mesh Segment frame và Scale Segment retention/Undo/Redo/cache có native13checks.
+Nonplanar/degenerate/multiple components reject; Mesh edge/vertex và light/camera frame adapters còn mở.
+
+Revision spec ngày 2026-10-11 yêu cầu một frame dùng chung cho cả bốn
+overlays: World/Object giữ qua idle focus/camera; CPlane active recapture
+đồng bộ khi idle, frozen trong gesture; relocated frame giữ tới explicit
+Reset/Alignment/source invalidation. Default CPlane được giữ, World dùng
+so ảnh. Menu/CMD và Scale bounds/hit targets phải cập nhật mọi ô.
+Đã triển khai một frame và collection overlay đồng bộ cho mọi ô. Native fixtures
+kiểm World qua focus, Ctrl widget-only từng ô, Relocate basis/optional Y, zoom,
+maximize/restore, source/passive view close và preview/cancel. Relocated transient
+group frame giữ trong selection đó, không nhận cache single-owner khác.
+[Evidence mới](../validation/2026-10-11-gumball-four-view-completion.md).
+[Đối chiếu nguồn lịch sử](../validation/2026-10-11-gumball-four-view-spec-review.md).

@@ -27,6 +27,9 @@ private:
     bool applyCommand(unsigned,unsigned);bool event(const Om9GumballEvent&);
     void alignmentMenu();void message(const QString&);void persist();
     void widgetMenu(const QPoint&);
+    void syncViews();void clearOverlays();void clearPreviews();
+    void loadSettings();bool applySettings(const Om9GumballSettings&);void settingsDialog();void orbitAroundPivot();
+    GumballOverlay* overlayFor(Gui::View3DInventor*)const;
     void updateOverlay();void updatePreview();void finishGesture();void releaseMouse();
     Om9GumballSnapshot snapshot()const;
     std::uint64_t session=0;bool workbench=false,relocated=false,publishing=false;
@@ -34,7 +37,12 @@ private:
     QString error,selectionKey,documentName;
     QPointer<Gui::View3DInventor> view;
     QPointer<QMenu> popup;
-    std::unique_ptr<GumballOverlay> overlay;
+    struct ViewOverlay {QPointer<Gui::View3DInventor> view;std::unique_ptr<GumballOverlay> overlay;};
+    std::vector<ViewOverlay> views;
+    GumballOverlay* overlay=nullptr;
+    std::vector<std::array<double,3>> extentPoints;
+    std::array<double,12> extentFrame{};
+    QJsonArray gestureCamera;
     QPointer<QWidget> mouseOwner;
     QPoint pressPosition;
     bool mouseDown=false,moved=false,widgetRelocate=false,suppressRelease=false;

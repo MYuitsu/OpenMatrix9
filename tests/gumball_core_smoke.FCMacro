@@ -39,7 +39,8 @@ def run():
                 elif c.blue()>220 and c.red()<100 and c.green()<150:pixels[2]+=1
         report['handle_color_pixels']=pixels
         check('rendered planar handles stay within a compact widget',all(20<n<2500 for n in pixels))
-        viewport=next(w for w in Gui.getMainWindow().findChildren(QtWidgets.QWidget) if w.property('om9GumballViewport'))
+        area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
+        viewport=next(w for w in area.activeSubWindow().widget().findChildren(QtWidgets.QWidget) if w.property('om9GumballViewport'))
         h=next(h for h in handles if h['name']=='MoveX' and h['hit_verified'])
         QtTest.QTest.mouseClick(viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,QtCore.QPoint(h['x'],h['y']));events()
         check('pointer hit begins Rust gesture',native.gumballState()['phase']==2)
@@ -135,11 +136,11 @@ def run():
         end=drag('MoveX');native.setUnitContext(doc.Name,25.4,1.0,0.001,0.01,0.01);undo=doc.UndoCount;release(end)
         check('unit change invalidates preview without a transform transaction',abs(box.Shape.BoundBox.XMin)<1e-10 and doc.UndoCount==undo)
         native.setUnitContext(doc.Name,1.0,1.0,0.001,0.01,0.01);select(box)
-        param=doc.addObject('Part::Box','Parametric');doc.recompute();select(box,param)
+        param=doc.addObject('Part::Cylinder','Parametric');doc.recompute();select(box,param)
         numeric('MoveX','1 mm');doc.undo();events();redo=doc.RedoCount;undo=doc.UndoCount;numeric('ScaleX','2')
-        check('second unsupported scale owner rejects the entire batch',abs(box.Shape.BoundBox.XLength-2)<1e-9 and abs(param.Length.Value-10)<1e-9 and doc.UndoCount==undo and 'UnsupportedOwner' in native.gumballState()['unresolved'])
+        check('second unsupported scale owner rejects the entire batch',abs(box.Shape.BoundBox.XLength-2)<1e-9 and abs(param.Radius.Value-2)<1e-9 and doc.UndoCount==undo and 'UnsupportedOwner' in native.gumballState()['unresolved'])
         check('pretransaction capability rejection preserves an existing Redo',redo==1 and doc.RedoCount==redo)
-        select(param);numeric('MoveX','3 mm');doc.recompute();check('rigid move survives parametric recompute',abs(param.Shape.BoundBox.XMin-3)<1e-9);doc.undo();events()
+        select(param);before=param.Shape.BoundBox.XMin;numeric('MoveX','3 mm');doc.recompute();check('rigid move survives parametric recompute',abs(param.Shape.BoundBox.XMin-before-3)<1e-9);doc.undo();events()
         face=doc.addObject('Part::Feature','HoledFace');face.Shape=Part.Face(Part.Wire(Part.makeCircle(5))).cut(Part.Face(Part.Wire(Part.makeCircle(2))));doc.recompute();select(face)
         report['extrude_source']={'type':face.Shape.ShapeType,'faces':len(face.Shape.Faces),'shells':len(face.Shape.Shells),'area':face.Shape.Area,'selection':[o.Name for o in Gui.Selection.getSelection()]}
         try:report['extrude_staging']=native.gumballGeometryFacts(doc.Name,[face.Name],'ExtrudeZ','5 mm','World')

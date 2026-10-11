@@ -25,7 +25,25 @@ static_assert(sizeof(Om9GumballSource)==176);
 static_assert(sizeof(Om9GumballBegin)==280);
 static_assert(sizeof(Om9GumballEvent)==88);
 static_assert(sizeof(Om9GumballSnapshot)==272);
+struct Om9GumballSettings {
+    double colors[9],move_length,move_thickness,rotate_radius,rotate_thickness;
+    double arrow_length,arrow_width,scale_size,origin_size,plane_size,plane_offset;
+    double menu_size,menu_x,menu_y,pick_radius,strength;
+    unsigned snappy,orbit;
+};
+struct Om9GumballProjection {double right[3],up[3],forward[3],world_per_pixel;};
+struct Om9GumballLayout {unsigned visible[14];double anchors[3][3],reference[3];};
+static_assert(sizeof(Om9GumballSettings)==200);
+static_assert(sizeof(Om9GumballProjection)==80);
+static_assert(sizeof(Om9GumballLayout)==152);
+struct Om9GumballOwnerScale {double placement[16],factors[3];};
 extern "C" {
+unsigned om9_gumball_owner_scale(const double*,const double*,const double*,unsigned,Om9GumballOwnerScale*);
+unsigned om9_gumball_mesh_directions(const double(*)[3],std::size_t,double*);
+unsigned om9_gumball_settings(std::uint64_t,const Om9GumballSettings*,Om9GumballSettings*);
+unsigned om9_gumball_restore_defaults(std::uint64_t);
+unsigned om9_gumball_extents(std::uint64_t,const double(*)[3],std::size_t);
+unsigned om9_gumball_layout(std::uint64_t,const Om9GumballProjection*,const double(*)[3],std::size_t,Om9GumballLayout*);
 std::uint32_t om9_gumball_owner_frame(std::uint64_t,const Om9GumballSource*,const double*,const double*);
 std::uint64_t om9_gumball_create();
 unsigned om9_gumball_command(const unsigned char*,std::size_t,unsigned*,unsigned*);

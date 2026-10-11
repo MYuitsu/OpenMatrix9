@@ -40,6 +40,37 @@ fn world_move_x() -> GumballSession {
     started(begin(Handle::MoveAxis(Axis::X)))
 }
 #[test]
+fn relocate_points_preview_shared_origin_and_axes_before_accept(){
+    let mut s=GumballSession::new();s.apply(Event::Enable(true)).unwrap();s.apply(Event::BeginRelocate).unwrap();
+    s.apply(Event::RelocatePoint([10.,20.,30.])).unwrap();assert_eq!(s.snapshot().frame.origin,[10.,20.,30.]);
+    s.apply(Event::RelocatePoint([10.,21.,30.])).unwrap();near(s.snapshot().frame.axes[0],[0.,1.,0.]);
+    assert_eq!(s.snapshot().phase,Phase::Relocate);
+    s.apply(Event::Cancel).unwrap();assert_eq!(s.snapshot().frame,Frame::default());
+}
+#[test]
+fn presentation_fallback_does_not_change_scale_reference_or_numeric_input() {
+    let mut s=GumballSession::new();s.apply(Event::Enable(true)).unwrap();
+    s.set_extents(&[[-0.1,-1.,-1.],[0.1,1.,1.]]).unwrap();
+    let mut settings=s.settings;settings.strength=50.;s.set_settings(settings).unwrap();
+    let mut b=begin(Handle::Scale(Axis::X));b.start_ray.origin=[-1.2,0.,10.];
+    s.apply(Event::Begin(b)).unwrap();assert_eq!(s.plan().unwrap().matrix,IDENTITY);
+    s.apply(Event::Motion(PointerRay{origin:[-1.3,0.,10.],direction:[0.,0.,-1.]})).unwrap();
+    assert!((s.plan().unwrap().matrix[0]-1.5).abs()<1e-12);
+    s.apply(Event::Numeric("2".into())).unwrap();assert_eq!(s.plan().unwrap().matrix[0],2.);
+}
+#[test]
+fn pointer_strength_and_snap_respect_axis_and_atomic_settings() {
+    let mut s=GumballSession::new();s.apply(Event::Enable(true)).unwrap();
+    let mut settings=s.settings;settings.strength=50.;s.set_settings(settings).unwrap();
+    s.apply(Event::Begin(begin(Handle::MoveAxis(Axis::X)))).unwrap();
+    s.apply(Event::Motion(PointerRay{origin:[5.,1.,10.],direction:[0.,0.,-1.]})).unwrap();
+    assert_eq!(s.plan().unwrap().matrix[3],2.);
+    let before=s.snapshot();assert!(s.set_settings(settings).is_err());assert_eq!(s.snapshot(),before);
+    s.apply(Event::SnappedMotion([9.,18.,4.])).unwrap();
+    assert_eq!(point(s.plan().unwrap().matrix,[0.;3]),[4.,0.,0.]);
+    s.apply(Event::Numeric("7".into())).unwrap();assert_eq!(s.plan().unwrap().matrix[3],7.);
+}
+#[test]
 fn relocate_pointer_uses_cplane_when_no_native_snap_and_rejects_parallel_ray() {
     let mut s=GumballSession::new();s.apply(Event::Enable(true)).unwrap();
     let cp=Frame{origin:[0.,0.,3.],..Frame::default()};

@@ -31,7 +31,8 @@ def run():
         Gui.Selection.addSelection(box)
         Gui.runCommand('OM9_Gumball')
         events()
-        viewport = next(w for w in Gui.getMainWindow().findChildren(QtWidgets.QWidget)
+        area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
+        viewport = next(w for w in area.activeSubWindow().widget().findChildren(QtWidgets.QWidget)
                         if w.property('om9GumballViewport'))
         handles = native.gumballHandles()
         report['handles'] = handles

@@ -1,6 +1,8 @@
 pub mod circle;
 pub mod gumball;
 pub mod gumball_ffi;
+pub mod gumball_owner;
+pub mod gumball_view;
 pub mod circle_history;
 pub mod circle_tangent;
 pub mod coordinates;

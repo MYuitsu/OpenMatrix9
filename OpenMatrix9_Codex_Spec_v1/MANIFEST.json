@@ -21,13 +21,13 @@
   },
   {
     "path": "FEATURES.json",
-    "bytes": 1814020,
-    "sha256": "9e18abae5dab5c5c113f355191b42e37b87b41a4e771e094862bd376930aa82b"
+    "bytes": 1814356,
+    "sha256": "25427f3fa17b6598822dc07f08a4ac68b2d5d7947b8f19935e802812fafe8810"
   },
   {
     "path": "FEATURES.yaml",
-    "bytes": 1452085,
-    "sha256": "e1549589bcd91612fa2234bb8a94bb4e97a9a11deec16aa1c90a22239594a60e"
+    "bytes": 1452439,
+    "sha256": "7280bdbf2776d1352a97ab0a51e88bba061f65911c5badc58f37d2299a102635"
   },
   {
     "path": "FEATURE_LOOKUP.json",
@@ -46,8 +46,8 @@
   },
   {
     "path": "IMPLEMENTATION_STATUS.md",
-    "bytes": 25407,
-    "sha256": "97c5a71b121df2d98f77497567210a0c89386787de7b1c8ee768e502ff0c8d64"
+    "bytes": 26054,
+    "sha256": "5ff28567242f21f407f8339eb2dd7a53b0336f0e1e85db1f07088e62f5fc3129"
   },
   {
     "path": "INDEX.md",
@@ -411,18 +411,18 @@
   },
   {
     "path": "specs/01-core/om9-info-020-gumball.md",
-    "bytes": 8848,
-    "sha256": "f0718b63b2061740218ae43633bc7d9291ef7eb48d7d52deb40958c36f2c4302"
+    "bytes": 21174,
+    "sha256": "b87e6f1691523ca3edd42e0af731e93eafaa565518296e60734fe7ce2e11559c"
   },
   {
     "path": "specs/01-core/om9-info-021-gumball-alignment.md",
-    "bytes": 7140,
-    "sha256": "e7b166f0b5fe462e0bb5236de69598bcf05780c5e904c43ae5070eec2fd70f7c"
+    "bytes": 10406,
+    "sha256": "2259c84da093135d868336e9f095445bbf9174e0de8f90a950c3490e39ab6ba9"
   },
   {
     "path": "specs/01-core/om9-info-022-relocate-gumball.md",
-    "bytes": 7360,
-    "sha256": "cb2c07b496dea4726fe9d6683f0fca37905340e06721e2d080128e5b6a0a2692"
+    "bytes": 10943,
+    "sha256": "4d4a210206e53bcdadf8a90d48c423cc5c6b731316da9dcac75a80e5be4424a2"
   },
   {
     "path": "specs/01-core/om9-layer-001-layer-management.md",

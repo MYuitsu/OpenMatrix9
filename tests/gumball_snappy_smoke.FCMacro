@@ -1,0 +1,51 @@
+"""Real pointer candidates and strength, with independent native bounds."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtTest
+from pivy import coin
+sys.path.insert(0,str(Path(__file__).parent));from gumball_fixture import GumballUI
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-020']}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    doc=None
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('GumballSnappy');doc.UndoMode=1
+        box=doc.addObject('Part::Feature','Box');box.Shape=Part.makeBox(12,8,6)
+        target=doc.addObject('Part::Feature','SnapTarget');target.Shape=Part.makeLine(App.Vector(20,4,3),App.Vector(20,10,3));doc.recompute()
+        ui=GumballUI(native);ui.settle();area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
+        area.setActiveSubWindow(next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0 and s.widget().property('om9DocumentName')==doc.Name))
+        ui.select(box);ui.command('Gumball On');ui.command('GumballAlignment World');ui.command('Osnap Only End')
+        def configure(snappy,strength=100):
+            pos=ui.target('MenuBall');QtTest.QTest.mouseClick(ui.viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,pos);ui.settle()
+            menu=Gui.getMainWindow().findChild(QtWidgets.QMenu,'OM9GumballWidgetMenu')
+            next(a for a in menu.actions() if a.text()==('Snappy dragging' if snappy else 'Smooth dragging')).trigger();menu.close();ui.settle()
+            pos=ui.target('MenuBall');QtTest.QTest.mouseClick(ui.viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,pos);ui.settle()
+            menu=Gui.getMainWindow().findChild(QtWidgets.QMenu,'OM9GumballWidgetMenu');next(a for a in menu.actions() if a.text()=='Settings…').trigger();menu.close();ui.settle()
+            dialog=Gui.getMainWindow().findChild(QtWidgets.QDialog,'OM9GumballSettings');dialog.findChild(QtWidgets.QDoubleSpinBox,'DragStrength').setValue(strength)
+            dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();ui.settle()
+        def drag(snappy,strength=100):
+            configure(snappy,strength);view=Gui.activeDocument().activeView();port=ui.viewport
+            volume=view.getCameraNode().getViewVolume(float(port.width())/port.height());screen=volume.projectToScreen(coin.SbVec3f(20,4,3))
+            end=QtCore.QPoint(round(screen[0]*port.width())+3,round((1-screen[1])*port.height()))
+            start=ui.target('MoveX');port.setFocus();QtTest.QTest.mousePress(port,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,start)
+            QtTest.QTest.mouseMove(port,start+QtCore.QPoint(1,0));QtTest.QTest.mouseMove(port,end);ui.settle()
+            check('pointer preview is shared',all(v['preview_vertices']>0 for v in native.gumballState()['views']))
+            QtTest.QTest.mouseRelease(port,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,end);ui.settle()
+            delta=box.Shape.BoundBox.XMin;doc.undo();ui.settle();return delta
+        smooth=drag(False);snapped=drag(True);half=drag(False,50)
+        report['distances']={'smooth':smooth,'snappy':snapped,'half_strength':half}
+        check('Snappy consumes the enabled native endpoint candidate',abs(smooth-snapped)>1e-5)
+        check('Smooth pointer strength scales displacement exactly',abs(half-smooth/2)<1e-6)
+        check('each native drag is one Undo and restores source',doc.UndoCount==0 and abs(box.Shape.BoundBox.XMin)<1e-8)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        if doc is not None:App.closeDocument(doc.Name)
+        QtCore.QTimer.singleShot(100,QtWidgets.QApplication.quit)
+QtCore.QTimer.singleShot(1500,run)

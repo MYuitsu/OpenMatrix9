@@ -1,7 +1,7 @@
 param(
  [string]$PluginRuntime='H:/FreeCAD-src/build/gumball-core-runtime-20261011',
  [Parameter(Mandatory=$true)][string]$OutputDirectory,
- [ValidateSet('Core','Persistence','Regression','All')][string]$Scope='All'
+ [ValidateSet('Core','Views','Persistence','Regression','All')][string]$Scope='All'
 )
 $ErrorActionPreference='Stop'
 function Get-GumballPluginHash([string]$LiteralPath){
@@ -23,6 +23,21 @@ if($Scope -in @('Core','All')){
   @{Name='cancel-publication';Macro='gumball_reentrancy_smoke.FCMacro';Cancel='1'},
   @{Name='core-dpi1';Macro='gumball_core_smoke.FCMacro';Dpi='1'},
   @{Name='core-dpi150';Macro='gumball_core_smoke.FCMacro';Dpi='1.5'}
+ )
+}
+if($Scope -in @('Views','All')){
+ foreach($dpi in @('1','1.5','2')){
+  $cases+=@{Name="four-view-dpi$dpi";Macro='gumball_four_view_smoke.FCMacro';Dpi=$dpi}
+  $cases+=@{Name="view-lifecycle-dpi$dpi";Macro='gumball_view_lifecycle_smoke.FCMacro';Dpi=$dpi}
+ }
+ $cases+=@(
+  @{Name='settings';Macro='gumball_settings_smoke.FCMacro'},
+  @{Name='snappy';Macro='gumball_snappy_smoke.FCMacro'},
+  @{Name='relocate-pointer';Macro='gumball_relocate_pointer_smoke.FCMacro'},
+  @{Name='owner-scale';Macro='gumball_owner_scale_smoke.FCMacro'},
+  @{Name='owner-callback';Macro='gumball_owner_callback_smoke.FCMacro'},
+  @{Name='mesh-frame';Macro='gumball_mesh_frame_smoke.FCMacro'},
+  @{Name='visual';Macro='gumball_visual_smoke.FCMacro'}
  )
 }
 if($Scope -in @('Persistence','All')){

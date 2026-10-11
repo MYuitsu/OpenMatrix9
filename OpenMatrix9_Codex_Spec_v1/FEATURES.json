@@ -1639,7 +1639,7 @@
     "module_index": 7,
     "module_slug": "info-settings",
     "kind": "command",
-    "description": "Gumball toggle hiển thị move/scale/rotate widgets khi object selected. X đỏ, Y xanh, Z vàng theo nhận diện tương thích; arrows move một axis, plane handle move hai axes, origin free move; arcs rotate, squares scale một axis. Numeric edit nhận distance/góc/scale factor. Alt trong drag toggle Copy, Alt khi click numeric làm copy. Trong drag nhập số+Enter ràng buộc distance hoặc bước góc. Ctrl khi nhả arrow drag của planar curve/surface tạo extrude, có thể nhập distance trước; không coi Ctrl drag mọi object là extrude. Giữ đúng pivot/frame và capability, hủy trả preview.",
+    "description": "Gumball toggle hiển thị move/scale/rotate widgets khi object selected. OM9 chọn X đỏ, Y xanh lá, Z xanh dương theo ảnh Rhino5 được duyệt; arrows move một axis, plane handle move hai axes, origin free move; arcs rotate, squares scale một axis. Numeric edit nhận distance/góc/scale factor. Alt trong drag toggle Copy, Alt khi click numeric làm copy. Trong drag nhập số+Enter ràng buộc distance hoặc bước góc. Ctrl khi nhả arrow drag của planar curve/surface tạo extrude, có thể nhập distance trước; không coi Ctrl drag mọi object là extrude. Giữ đúng pivot/frame và capability, hủy trả preview.",
     "access": "Access this command from Info and Settings > Gumball",
     "spec_path": "specs/01-core/om9-info-020-gumball.md",
     "implementation_status": "partially_implemented",
@@ -1670,7 +1670,7 @@
           "kind": "boolean",
           "required": false,
           "meaning": "Hiện gizmo",
-          "default": "Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành."
+          "default": "OM9 Off cho profile mới; giữ Enabled đã lưu; Command/menu cùng handler."
         },
         {
           "name": "Operation",
@@ -1712,7 +1712,7 @@
           "kind": "boolean",
           "required": false,
           "meaning": "Giữ originals",
-          "default": "Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành."
+          "default": "Off ở Begin; Alt toggle hoặc Alt numeric bật Copy."
         }
       ],
       "effect": "document_write",
@@ -1723,8 +1723,8 @@
     },
     "native_implementation_status": "validated_supported_slice",
     "implementation_date": "2026-10-11",
-    "implementation_notes": "13 native handles; Move/Rotate Placement, plain BRep/Mesh/Points affine Scale, planar Extrude, Alt Copy, held Ctrl and native Qt input. Parametric/Link Scale and external-document Link remain unsupported; failed posttransaction callback rollback loses old Redo in the shared host.",
-    "validation_report": "../docs/validation/2026-10-11-gumball-core.md"
+    "implementation_notes": "Shared four-view Rust session/preview, first-click native picks, bounds Scale, projection culling and DPI profile. Core menu/settings/Snappy/Strength/orbit; Box dimensions, uniform Sphere Radius and representable Link ScaleVector with native Undo/Redo. Generic/expression owners, Link shear/externaldoc and failed-transaction old Redo remain explicit limits.",
+    "validation_report": "../docs/validation/2026-10-11-gumball-four-view-completion.md"
   },
   {
     "id": "OM9-INFO-021",
@@ -1766,7 +1766,7 @@
           "kind": "choice",
           "required": false,
           "meaning": "C-Plane, Object hoặc World",
-          "default": "Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành."
+          "default": "OM9 CPlane cho profile mới; giữ preference; World/Object khi chọn rõ."
         }
       ],
       "effect": "view_state",
@@ -1777,8 +1777,8 @@
     },
     "native_implementation_status": "validated_supported_slice",
     "implementation_date": "2026-10-11",
-    "implementation_notes": "Native CPlane/World and one unambiguous whole-object/curve/face frame; menu/CMD preserve geometry. Mesh component/light/camera frames remain unsupported explicitly.",
-    "validation_report": "../docs/validation/2026-10-11-gumball-core.md"
+    "implementation_notes": "One shared World/Object/CPlane frame, idle CPlane recapture, frozen gesture and relocated override across focus/maximize. Native whole-owner/curve/face frames; Planar oriented Mesh Segments; Mesh edge/vertex/light/camera or ambiguous frames remain explicit UnsupportedFrame.",
+    "validation_report": "../docs/validation/2026-10-11-gumball-four-view-completion.md"
   },
   {
     "id": "OM9-INFO-022",
@@ -1838,8 +1838,8 @@
     },
     "native_implementation_status": "validated_supported_slice",
     "implementation_date": "2026-10-11",
-    "implementation_notes": "Native CMD origin/X/optional Y/Enter and Ctrl-start widget-only gestures; view-state owner cache, no document object/Undo. All pointer snap modes and cold pivot persistence are not claimed.",
-    "validation_report": "../docs/validation/2026-10-11-gumball-core.md"
+    "implementation_notes": "Shared four-view origin/X/optional-Y Relocate preview/accept/cancel, Ctrl-start numeric widget-only and native End/Mid/Point pointer picks in each view. Captured CPlane/document units and w world. Process-local owner cache256; no cold FCStd widget persistence or full original-host parity claim.",
+    "validation_report": "../docs/validation/2026-10-11-gumball-four-view-completion.md"
   },
   {
     "id": "OM9-HISTORY-001",

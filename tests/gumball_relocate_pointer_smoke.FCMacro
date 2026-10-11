@@ -1,0 +1,42 @@
+"""Relocate uses native End/Mid/Point picks in each viewport, one shared frame."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtTest
+from pivy import coin
+sys.path.insert(0,str(Path(__file__).parent));from gumball_fixture import GumballUI
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-022']}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    doc=None
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('GumballRelocatePicks');doc.UndoMode=1
+        box=doc.addObject('Part::Feature','Box');box.Shape=Part.makeBox(12,8,6)
+        line=doc.addObject('Part::Feature','LineTarget');line.Shape=Part.makeLine(App.Vector(20,30,40),App.Vector(25,35,45))
+        point=doc.addObject('Part::Feature','PointTarget');point.Shape=Part.Vertex(App.Vector(30,20,25));doc.recompute()
+        ui=GumballUI(native);Gui.getMainWindow().resize(1600,1050);ui.settle();area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
+        subs={int(s.widget().property('om9ViewSlot')):s for s in area.subWindowList() if s.widget().property('om9DocumentName')==doc.Name and s.widget().property('om9ViewSlot') is not None}
+        ui.select(box);ui.command('Gumball On');ui.command('GumballAlignment World')
+        for slot,sub in sorted(subs.items()):
+            area.setActiveSubWindow(sub);ui.settle();view=Gui.activeDocument().activeView();view.fitAll();ui.settle()
+            for mode,xyz in [('End',[20,30,40]),('Mid',[22.5,32.5,42.5]),('Point',[30,20,25])]:
+                ui.command('GumballAlignment World');before=native.gumballState()['frame']
+                ui.command('Osnap Only '+mode);ui.command('RelocateGumball');port=ui.viewport
+                volume=view.getCameraNode().getViewVolume(float(port.width())/port.height());screen=volume.projectToScreen(coin.SbVec3f(*xyz))
+                pos=QtCore.QPoint(round(screen[0]*port.width())+3,round((1-screen[1])*port.height()))
+                QtTest.QTest.mouseClick(port,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,pos);ui.settle();state=native.gumballState()
+                check('%s pointer origin shared in view%d'%(mode,slot),state['phase']==4 and state['frame'][:3]==xyz and all(v['frame']==state['frame'] for v in state['views']) and doc.UndoCount==0)
+                ui.escape();state=native.gumballState()
+                check('%s cancel restores every frame in view%d'%(mode,slot),state['phase']==1 and state['frame']==before and all(v['frame']==before for v in state['views']) and doc.UndoCount==0)
+        check('pointer workflow preserves all native sources',len(doc.Objects)==3 and abs(box.Shape.Volume-576)<1e-8 and doc.UndoCount==0)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        if doc is not None:App.closeDocument(doc.Name)
+        QtCore.QTimer.singleShot(100,QtWidgets.QApplication.quit)
+QtCore.QTimer.singleShot(1500,run)

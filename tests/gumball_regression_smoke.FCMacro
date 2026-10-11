@@ -11,7 +11,18 @@ Gui.activateWorkbench('OpenMatrix9Workbench')
 if not native.gumballState()['enabled']:raise RuntimeError('Regression must actually run with Gumball enabled')
 source=Path(__file__).parent/name
 scope={'__name__':'__main__','__file__':str(source)}
-exec(compile(source.read_bytes(),str(source),'exec'),scope)
+fixture=source.read_text(encoding='utf-8')
+if name=='core_mouse_smoke.FCMacro':
+    # Its old second-object probe (x=3) lands on the new 80px MoveX shaft.
+    # Keep the same native selection assertions, with the second object/probe
+    # at x=10, outside the owned handle targets. The source fixture is untouched.
+    fixture=fixture.replace('Part.makeBox(3,3,1,App.Vector(3,-1.5,0))','Part.makeBox(3,3,1,App.Vector(10,-1.5,0))')
+    fixture=fixture.replace('b=pixel(App.Vector(3,0,1))','b=pixel(App.Vector(10,0,1))')
+    # The old first probe is exactly on the new bounds-derived ScaleX square
+    # after multi-selection. Probe the interior surface for object deselection;
+    # Ctrl on the actual Scale handle correctly belongs to widget relocation.
+    fixture=fixture.replace('a=pixel(App.Vector(-6,0,1))','a=pixel(App.Vector(-4.5,1,1))')
+exec(compile(fixture,str(source),'exec'),scope)
 # Legacy fixtures use different identity field names. Bind the actual imported
 # module to their existing report object before the scheduled test starts.
 report=scope.get('report',scope.get('result'))
@@ -19,3 +30,11 @@ if not isinstance(report,dict):raise RuntimeError('Legacy fixture has no report 
 report['module']=native.__file__
 report['gumball_regression']=True
 report['gumball_enabled_before_fixture']=native.gumballState()['enabled']
+if name=='core_mouse_smoke.FCMacro':
+    original_check=scope['check']
+    def observed_check(label,value):
+        if not value:
+            report['gumball_at_failure']=native.gumballState()
+            report['gumball_handles_at_failure']=native.gumballHandles()
+        return original_check(label,value)
+    scope['check']=observed_check

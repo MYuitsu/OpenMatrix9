@@ -19,7 +19,47 @@ Alias tương thích: `RelocateGumball`. Nhóm: `01-core`. Trạng thái: `parti
 
 **Hợp đồng thiết kế `OM9-INFO-022` — Relocate Gumball.**
 
-RelocateGumball đổi origin và hướng X của widgets; CMD nhận world point (qua parser coordinate) rồi direction, Enter hoàn tất. Ctrl-click widget rồi thả Ctrl và kéo là cách tương tác thứ hai. Việc di chuyển pivot không dịch geometry; hướng zero/đồng tuyến không đủ frame phải báo rõ.
+RelocateGumball đổi origin và hướng của frame Gumball dùng chung trong cả bốn
+viewport. Chỉ di chuyển/xoay widget, không dịch geometry hoặc tạo Undo geometry.
+CMD và pointer dùng parser/coordinate context đã capture; input không có prefix
+không mặc nhiên là world point.
+
+### Relocate trong bốn viewport — revision 2026-10-11
+
+1. Gumball phải On và selection có capability hợp lệ. `RelocateGumball`,
+   alias `GumballRelocate` hoặc menu ring của bất kỳ ô nào vào cùng workflow.
+   Prompts trên Command: origin mới → point xác định hướng X → Y point hoặc
+   Enter. Origin/point theo document units và captured CPlane; prefix `w`
+   chọn world theo coordinate parser hiện hữu.
+2. Sau origin và X point, Enter xác lập Y/Z từ captured CPlane khi đủ hướng.
+   Y point tùy chọn giải hướng còn lại, đặc biệt X song song CPlane normal.
+   Đây là lựa chọn OM9 đã có, được đối chiếu thêm Rhino 5; ảnh tĩnh không chứng
+   minh thuật toán frame hoặc thứ tự pick.
+3. Ctrl có từ mouse-down trên handle bắt đầu widget-only gesture. Sau đó thả
+   Ctrl và drag vẫn Relocate widget; Ctrl numeric Move/Rotate/Scale chỉ chỉnh
+   origin/basis/độ dài điều khiển. Không đổi kích thước geometry. Ctrl thêm
+   sau motion trên Move arrow thuộc Extrude của `OM9-INFO-020`, không Relocate.
+4. Origin và basis preview được hiển thị đồng thời trong cả bốn view. Camera
+   nơi thao tác sinh ray/pick, nhưng world frame và preview là state chung.
+   Numeric editor chỉ ở ô nguồn; không tạo một editor hoặc pivot riêng mỗi ô.
+5. Osnap dùng native candidates có capability và state hợp lệ; khi không có
+   candidate, Rust giao ray với captured CPlane. Ray song song, hướng zero,
+   đồng tuyến hoặc NaN/Infinity bị reject, giữ phase/frame trước và báo lý do;
+   không chọn điểm chiếu tùy ý để có vẻ thao tác đã thành công.
+6. Khi chấp nhận origin/basis mới, tính lại Scale anchors, dotted leaders,
+   plane handles và hit targets ở mọi ô theo `OM9-INFO-020`. Đổi focus khi
+   idle/maximize/restore giữ relocated frame; source stamp đổi, Reset hoặc
+   explicit Alignment áp dụng chính sách invalidation chung `OM9-INFO-021`.
+7. Esc, foreign command, navigation/view change trong gesture hoặc ô nguồn
+   đóng hủy toàn bộ phiên và trả frame trước. Ô không sở hữu gesture đóng
+   chỉ dọn copy overlay của ô đó; document/workbench close dọn cả collection.
+8. Single-owner cache vẫn process-local theo identity/incarnation/revision.
+   Multi-selection/group/control-point selection không tự nhận pivot cache
+   của một owner. Không tuyên bố pivot bền qua cold FCStd khi chưa có evidence.
+
+Nguồn: bản trích Matrix 8 Book 1 PDF3/trang in37; Ctrl timing và optional Y
+đối chiếu [Rhino 5 Help](https://docs.mcneel.com/rhino/5/help/en-us/commands/gumball.htm).
+Ảnh bốn viewport quy định kết quả hiển thị chung, không xác lập defaults parser.
 
 ## Vai trò đầu vào của mẫu
 
@@ -35,8 +75,8 @@ Mẫu không tự điền default, không kiểm tra miền số hay tập enum 
 
 | Option key | Kiểu mẫu | Ý nghĩa / đơn vị | Default / trạng thái |
 |---|---|---|---|
-| `Origin` | `reference` | Point world của pivot | Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành. |
-| `XDirection` | `reference` | Hướng trục X | Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành. |
+| `Origin` | `reference` | Point của pivot trong captured coordinate context | Input/pick rõ, document units; `w` chọn world; không tự thay bằng centroid khi input lỗi. |
+| `XDirection` | `reference` | X point tương đối origin để xác định hướng | Hữu hạn, khác origin; cùng coordinate context; Enter/Y point theo workflow trên. |
 
 ## Hướng dẫn triển khai
 
@@ -83,23 +123,27 @@ Các ca trên là yêu cầu kiểm thử geometry/state của feature; kết qu
 ## OpenMatrix9 implementation notes
 
 Ngày 2026-10-11: `partially_implemented` / `validated_supported_slice`.
-Native CMD origin/X/optional Y/Enter and Ctrl-start widget-only gestures; view-state owner cache, no document object/Undo. All pointer snap modes and cold pivot persistence are not claimed.
+Shared four-view origin/X/optional-Y Relocate preview/accept/cancel, Ctrl-start numeric widget-only and native End/Mid/Point pointer picks in each view. Captured CPlane/document units and w world. Process-local owner cache256; no cold FCStd widget persistence or full original-host parity claim.
 
-Source evidence: Matrix 8 Book 1 PDF45–47 / printed35–37, continuation inspected
-until History PDF48. Source Y cyan/blue; approved OM9 Y green is a design choice.
-[Inputs, parameters/defaults/units, outputs, lifecycle, dependencies, errors and tolerances](../../../docs/features/OM9-INFO-022.md).
-[Native/Rust verification and limits](../../../docs/validation/2026-10-11-gumball-core.md).
-No new associative History graph; existing native owner dependencies retained.
-Geometry/report metadata persists in FCStd; widget cache is session view state.
+[Evidence mới](../../../docs/validation/2026-10-11-gumball-four-view-completion.md).
+[Hợp đồng inputs/units/output/lifecycle và giới hạn](../../../docs/features/OM9-INFO-022.md).
+Nguồn bản trích Matrix8 Book1 PDF1–3/printed35–37; ảnh Rhino5 bốn view.
+Cache widget process-local; geometry/report native giữ FCStd, không thêm History graph.
 
 ## Acceptance checklist
 
-- [ ] Hợp đồng feature và điều kiện hình học được kiểm chứng trước khi triển khai.
+- [x] Relocate bằng Command và Ctrl-start ở mỗi ô đồng bộ origin/basis/Scale anchors sang bốn ô.
+- [x] Default coordinate input và `w` world cho kết quả đúng; đổi camera không đổi parser giữa phiên.
+- [x] Ctrl-start/thả Ctrl và late-Ctrl Extrude được replay riêng; widget-only không đổi geometry/Undo.
+- [x] Relocate numeric/pointer/Osnap, optional Y và invalid axes giữ đúng preview/phase ở tất cả ô.
+- [x] Idle focus/maximize/restore giữ pivot; Reset/Alignment recapture đồng bộ; cancel/close không để stale targets.
+
+- [x] Hợp đồng và điều kiện hình học được kiểm chứng trong supported native slice; adapter gaps ghi riêng.
 - [x] Inputs and selection state documented.
 - [x] Parameters/defaults/units documented.
 - [x] Output geometry documented.
 - [x] Preview/commit/cancel behavior tested if applicable.
-- [ ] History/dependencies tested if applicable.
+- [x] Alignment/Relocate are view state; no dependency mutation or new associative History graph (native unchanged geometry/count/Undo evidence).
 - [x] No document geometry/count/Undo writes for view-state changes; successful geometry uses OM9-INFO-020 transaction.
 - [ ] Full original-host view/pivot persistence not claimed; owner cache is process-local by approved design.
 - [x] Automated tests use feature ID `OM9-INFO-022`.

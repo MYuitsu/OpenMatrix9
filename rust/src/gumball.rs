@@ -220,6 +220,7 @@ pub enum Event {
     RelocatePoint(Point),
     RelocateRay(PointerRay),
     CommitSucceeded,
+    SnappedMotion(Point),
 }
 #[repr(u32)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -312,6 +313,7 @@ struct Gesture {
     copy: bool,
     extrude: bool,
     relocate: bool,
+    scale_reference: Option<f64>,
 }
 #[derive(Clone)]
 pub struct GumballSession {
@@ -326,6 +328,8 @@ pub struct GumballSession {
     old_frame: Frame,
     owner: Option<Stamp>,
     owner_frames: HashMap<(u64,u64,u64,u64),(Stamp,Frame)>,
+    pub settings: crate::gumball_view::ViewSettings,
+    extent_points: Vec<Point>,
 }
 impl Default for GumballSession {
     fn default() -> Self {
@@ -346,6 +350,8 @@ impl GumballSession {
             old_frame: Frame::default(),
             owner: None,
             owner_frames: HashMap::new(),
+            settings: crate::gumball_view::ViewSettings::default(),
+            extent_points: Vec::new(),
         }
     }
     pub fn snapshot(&self) -> Snapshot {
@@ -360,6 +366,16 @@ impl GumballSession {
             generation: self.generation,
             preview: self.plan().ok(),
         }
+    }
+    pub fn set_settings(&mut self,s:crate::gumball_view::ViewSettings)->Result<(),GumballError> {
+        s.validate()?;
+        if !matches!(self.phase,Phase::Off|Phase::Ready){return Err(GumballError::InvalidState);}
+        self.settings=s;Ok(())
+    }
+    pub fn set_extents(&mut self,points:&[Point])->Result<(),GumballError> {
+        crate::gumball_view::extents(self.frame,points)?;
+        if !matches!(self.phase,Phase::Off|Phase::Ready){return Err(GumballError::InvalidState);}
+        self.extent_points=points.to_vec();Ok(())
     }
     /// Errors are atomic, including checkpoints and accepted input provenance.
     pub fn apply(&mut self, event: Event) -> Result<Effect, GumballError> {
@@ -421,6 +437,13 @@ impl GumballSession {
                 c.sources = roots(&c.sources, c.document)?;
                 self.generation = self.generation.checked_add(1).ok_or(GumballError::Limit)?;
                 let start = project(&c, c.start_ray).unwrap_or(c.frame.origin);
+                let scale_reference=if let Handle::Scale(a)=c.handle {
+                    if c.modifiers&2==0&&!self.extent_points.is_empty() {
+                        let reference=crate::gumball_view::scale_reference(c.frame,&self.extent_points)?[a as usize];
+                        if reference.abs()<1e-12 {return Err(GumballError::Projection);}
+                        Some(reference)
+                    } else {None}
+                } else {None};
                 self.old_frame = c.frame;
                 self.frame = c.frame;
                 self.cplane = c.cplane;
@@ -440,6 +463,7 @@ impl GumballSession {
                     },
                     history: Vec::new(),
                     extrude: false,
+                    scale_reference,
                 });
                 if matches!(
                     self.gesture.as_ref().unwrap().context.handle,
@@ -455,7 +479,7 @@ impl GumballSession {
                 validate_ray(ray)?;
                 let g = self.gesture.as_mut().ok_or(GumballError::InvalidState)?;
                 let hit = project(&g.context, ray)?;
-                let delta = sub(hit, g.start);
+                let delta = mul(sub(hit, g.start),self.settings.strength/100.);
                 let f = g.context.frame;
                 match g.context.handle {
                     Handle::MoveAxis(a) => {
@@ -482,20 +506,20 @@ impl GumballSession {
                         if g.relocate {
                             g.value.vector = delta;
                         } else {
-                        let start = dot(sub(g.start, f.origin), f.axes[a as usize]);
+                        let start = g.scale_reference.unwrap_or(dot(sub(g.start, f.origin), f.axes[a as usize]));
                         if start.abs() < 1e-12 {
                             return Err(GumballError::Projection);
                         }
                         g.value.amount = g
                             .value
                             .constraint
-                            .unwrap_or(dot(sub(hit, f.origin), f.axes[a as usize]) / start);
+                            .unwrap_or(1.+dot(delta,f.axes[a as usize])/start);
                         }
                     }
                     Handle::Rotate(a) => {
                         let u = unit(sub(g.start, f.origin))?;
                         let v = unit(sub(hit, f.origin))?;
-                        let angle = dot(cross(u, v), f.axes[a as usize]).atan2(dot(u, v));
+                        let angle = dot(cross(u, v), f.axes[a as usize]).atan2(dot(u, v))*self.settings.strength/100.;
                         g.value.amount = if let Some(step) = g.value.constraint {
                             if step == 0. {
                                 0.
@@ -522,6 +546,26 @@ impl GumballSession {
                     self.plan()?;
                 }
                 return Ok(Effect::Preview);
+            }
+            Event::SnappedMotion(p) => {
+                bounded(&p)?;
+                let g=self.gesture.as_ref().ok_or(GumballError::InvalidState)?;
+                let f=g.context.frame;
+                // A ray through the candidate in the captured projection plane
+                // lets the same operation constraints consume snapped input.
+                let normal=match g.context.handle {
+                    Handle::MovePlane(Plane::XY)=>f.axes[2],
+                    Handle::MovePlane(Plane::YZ)=>f.axes[0],
+                    Handle::MovePlane(Plane::ZX)=>f.axes[1],
+                    Handle::Rotate(a)=>f.axes[a as usize],
+                    Handle::MoveFree=>g.context.cplane.axes[2],
+                    Handle::MoveAxis(a)|Handle::Scale(a)=> {
+                        let axis=f.axes[a as usize];
+                        let view=unit(g.context.start_ray.direction)?;
+                        unit(sub(view,mul(axis,dot(view,axis))))?
+                    }
+                };
+                return self.update(Event::Motion(PointerRay{origin:add(p,normal),direction:mul(normal,-1.)}));
             }
             Event::Modifier(e) => {
                 if e.auto_repeat {
@@ -663,6 +707,15 @@ impl GumballSession {
                     ))?;
                 }
                 self.relocate.push(p);
+                // Preview one shared frame; old_frame remains the cancel target.
+                self.frame.origin=self.relocate[0];
+                if self.relocate.len()==2 {
+                    let x=unit(sub(self.relocate[1],self.relocate[0]))?;
+                    let normal=self.cplane.axes[2];
+                    if norm(cross(x,normal))>1e-12 {
+                        self.frame=Frame::from_directions(self.relocate[0],x,normal)?;
+                    }
+                }
                 if self.relocate.len() == 3 {
                     return self.finish_relocate();
                 }

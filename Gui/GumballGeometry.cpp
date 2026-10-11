@@ -15,6 +15,8 @@
 #include <App/GeoFeatureGroupExtension.h>
 #include <App/PropertyGeo.h>
 #include <App/PropertyStandard.h>
+#include <App/PropertyUnits.h>
+#include <App/ObjectIdentifier.h>
 #include <App/Material.h>
 #include <Gui/Control.h>
 #include <Gui/ViewProviderGeometryObject.h>
@@ -32,6 +34,7 @@
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepCheck_Analyzer.hxx>
 #include <BRepGProp.hxx>
+#include <BRepAlgoAPI_Common.hxx>
 #include <GProp_GProps.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
@@ -51,6 +54,7 @@
 #include <map>
 #include <variant>
 #include <stdexcept>
+#include <charconv>
 namespace OpenMatrix9Gui {
 struct GumballNativeItem {
     ObjectSnapshot snapshot;
@@ -63,6 +67,15 @@ namespace {
 constexpr double identityFrame[12]={0,0,0,1,0,0,0,1,0,0,0,1};
 Base::Matrix4D matrix(const double* values){Base::Matrix4D m;for(unsigned r=0;r<4;++r)for(unsigned c=0;c<4;++c)m[r][c]=values[4*r+c];return m;}
 void guiThread(){if(!qApp||QThread::currentThread()!=qApp->thread())throw std::runtime_error("Gumball requires the GUI thread");}
+template<class Geometry>void transformGumballGeometry(Geometry& geometry,const Base::Matrix4D& affine){geometry.transformGeometry(affine);}
+void transformGumballGeometry(Mesh::MeshObject& mesh,const Base::Matrix4D& affine){
+    // Native transformGeometry swaps the kernel and drops Segment metadata.
+    // An affine transform preserves facet indices, names, colors and ownership.
+    meshInputBudget(mesh);std::vector<Mesh::Segment> segments;segments.reserve(mesh.countSegments());
+    for(unsigned long i=0;i<mesh.countSegments();++i)segments.push_back(mesh.getSegment(i));
+    mesh.transformGeometry(affine);
+    for(const auto& segment:segments)mesh.addSegment(segment);
+}
 bool samePoints(const Points::PointKernel& actual,const Points::PointKernel& expected){
     if(actual.getBasicPoints()!=expected.getBasicPoints())return false;
     const auto a=actual.getTransform(),b=expected.getTransform();
@@ -79,6 +92,37 @@ App::PropertyString* ownedString(App::DocumentObject& object,const char* name,co
 }
 Om9GumballSource source(const ObjectSnapshot& s){Om9GumballSource v{};v.document=s.stamp.document;v.object=s.stamp.object;v.generation=s.stamp.generation;v.revision=s.stamp.revision;v.epoch=s.stamp.epoch;std::copy(s.world.begin(),s.world.end(),v.world);return v;}
 struct Session {std::uint64_t id=om9_gumball_create();Session(){if(!id)throw std::runtime_error("Gumball session budget exhausted");Om9GumballEvent e{};e.pressed=1;if(om9_gumball_event(id,&e))throw std::runtime_error("Cannot enable gumball session");}~Session(){om9_gumball_destroy(id);}};
+// App::Link couples a uniform ScaleVector back to Scale. During Undo that
+// incidental same-value Scalar write enters the reverse journal; unordered
+// replay can then overwrite an anisotropic vector on Redo. ScaleVector is the
+// authoritative geometry property. Suppress only its scalar synchronization
+// during native replay for occurrences admitted by this adapter. All native
+// property values still come from the host journal, and transient User3 bits
+// are restored at the end of the same notification, never persisted.
+class LinkScaleReplay {
+    using Owner=std::pair<std::string,std::uint64_t>;
+    std::set<Owner> owners;
+    struct ReplayBit {Owner owner;bool previous;};
+    std::map<const App::Property*,std::vector<ReplayBit>> bits;
+    fastsignals::scoped_connection before,after,deleted,closed;
+    static Owner key(const App::DocumentObject& o){return {o.getDocument()->Uid.getValueStr(),std::uint64_t(o.getID())};}
+public:
+    LinkScaleReplay(){
+        before=App::GetApplication().signalBeforeChangeObject.connect([this](const App::DocumentObject& o,const App::Property& p){
+            if(!o.getDocument()||!o.getDocument()->isPerformingTransaction()||!owners.contains(key(o)))return;
+            auto* name=o.getPropertyName(&p);if(!name||std::string(name)!="ScaleVector")return;
+            bits[&p].push_back({key(o),p.testStatus(App::Property::User3)});const_cast<App::Property&>(p).setStatus(App::Property::User3,true);
+        });
+        after=App::GetApplication().signalChangedObject.connect([this](const App::DocumentObject&,const App::Property& p){auto found=bits.find(&p);if(found==bits.end())return;const auto old=found->second.back().previous;found->second.pop_back();const_cast<App::Property&>(p).setStatus(App::Property::User3,old);if(found->second.empty())bits.erase(found);});
+        // Undo retains deleted occurrences for reattachment. Keep value-only
+        // owner IDs until document close so a later Undo/Redo of Scale still
+        // suppresses incidental scalar synchronization after resurrection.
+        deleted=App::GetApplication().signalDeletedObject.connect([this](const App::DocumentObject& o){if(auto* p=o.getPropertyByName("ScaleVector"))bits.erase(p);});
+        closed=App::GetApplication().signalDeleteDocument.connect([this](const App::Document& d){const auto uid=d.Uid.getValueStr();std::erase_if(owners,[&](const auto& owner){return owner.first==uid;});std::erase_if(bits,[&](const auto& entry){return !entry.second.empty()&&entry.second.front().owner.first==uid;});});
+    }
+    void observe(const App::DocumentObject& object){const auto owner=key(object);if(!owners.contains(owner)&&owners.size()>=131072)throw std::runtime_error("Gumball native Link replay owner budget exhausted");owners.insert(owner);}
+};
+LinkScaleReplay& linkScaleReplay(){static auto* adapter=new LinkScaleReplay;return *adapter;}
 // Observe synchronous native callbacks while publishing. Only the exact native
 // property setter owned by this adapter may write a captured source at a time.
 class GumballPublicationGuard {
@@ -120,7 +164,14 @@ public:
             if(key=="_GroupTouched"||key=="_LinkTouched")return;
             const bool geometryField=field=="Placement"||field=="LinkPlacement"||field=="Shape"||field=="Mesh"||field=="Points";
             const bool geometryKey=key=="Placement"||key=="LinkPlacement"||key=="Shape"||key=="Mesh"||key=="Points";
-            if(id==writer&&(key==field||(geometryField&&geometryKey))){
+            // Native Part primitives execute synchronously inside a dimension
+            // setter, before the dimension's ChangedObject notification. Only
+            // that writer's native recompute owns the resulting Shape event.
+            const bool dimensionField=field=="Length"||field=="Width"||field=="Height"||field=="Radius";
+            if(id==writer&&dimensionField&&key=="Shape"&&o.isRecomputing()){
+                written.insert(id);return;
+            }
+            if(id==writer&&(key==field||(geometryField&&geometryKey)||(field=="ScaleVector"&&key=="Scale"))){
                 // Placement may synchronize the native geometry location, but
                 // cannot legitimately replace its captured topology/vertices.
                 if((field=="Placement"||field=="LinkPlacement")&&key=="Shape"){
@@ -173,7 +224,7 @@ void collect(App::Document& doc,App::DocumentObject& object,std::uint64_t root,G
     GumballNativeItem item{guard,root,sourceAttributes(object,guard),Part::TopoShape()};
     if(auto* mesh=dynamic_cast<Mesh::Feature*>(&object)){
         meshInputBudget(mesh->Mesh.getValue());meshSnapshot(mesh->Mesh.getValue());
-        auto owned=mesh->Mesh.getValue();owned.transformGeometry(parent);item.geometry=std::move(owned);
+        auto owned=mesh->Mesh.getValue();transformGumballGeometry(owned,parent);item.geometry=std::move(owned);
     }else if(auto* points=dynamic_cast<Points::Feature*>(&object)){
         discreteSnapshot(object,false);auto owned=points->Points.getValue();owned.transformGeometry(parent);item.geometry=std::move(owned);
     }else{
@@ -222,7 +273,7 @@ PyObject* factsAPI(PyObject*,PyObject* args){
 }
 GumballInputs captureGumballInputs(App::Document& doc,const std::vector<Gui::SelectionObject>& selection,const CoordinateContext& cp){
     guiThread();verifyCoordinateContext(doc,cp);GumballInputs inputs;inputs.coordinates=cp;std::vector<ObjectSnapshot> raw;std::set<std::uint64_t> ids;
-    for(const auto& s:selection){auto* object=doc.getObject(s.getFeatName());if(!object||object->getDocument()!=&doc||!CoreLayers::objectEditable(object))throw std::runtime_error("Select editable objects in the active document");auto snapshot=captureObject(doc,object->getNameInDocument(),s.getSubNames().empty()?std::string():s.getSubNames().front());if(ids.insert(snapshot.stamp.object).second)raw.push_back(std::move(snapshot));}
+    for(const auto& s:selection){auto* object=doc.getObject(s.getFeatName());if(!object||object->getDocument()!=&doc||!CoreLayers::objectEditable(object))throw std::runtime_error("Select editable objects in the active document");auto snapshot=captureObject(doc,object->getNameInDocument(),s.getSubNames().empty()?std::string():s.getSubNames().front());if(s.getSubNames().size()>1)inputs.ambiguousComponents=true;if(ids.insert(snapshot.stamp.object).second)raw.push_back(std::move(snapshot));else if(std::any_of(raw.begin(),raw.end(),[&](const auto& old){return old.stamp.object==snapshot.stamp.object&&old.subelement!=snapshot.subelement;}))inputs.ambiguousComponents=true;}
     for(const auto& snap:raw){auto row=source(snap);for(const auto& parent:snap.ancestors)if(ids.contains(parent.object)){row.parent=parent.object;break;}inputs.sources.push_back(row);}
     const auto roots=selectedRoots(inputs.sources,cp);auto data=std::make_shared<GumballNativeData>();std::set<std::string> visited;
     for(const auto id:roots){const auto found=std::find_if(raw.begin(),raw.end(),[id](const auto& s){return s.stamp.object==id;});inputs.roots.push_back(*found);collect(doc,*doc.getObject(found->objectName.c_str()),id,inputs,*data,visited,0);}
@@ -244,14 +295,30 @@ GumballStagedBatch stageGumballBatch(const GumballInputs& inputs,const Om9Gumbal
                 }
             }
             if(plan.operation==3){if(shape->getShape().ShapeType()!=TopAbs_EDGE&&shape->getShape().ShapeType()!=TopAbs_WIRE&&shape->getShape().ShapeType()!=TopAbs_FACE)throw std::runtime_error("Gumball extrusion requires a planar curve or face");if(!shape->isPlanar())throw std::runtime_error("Gumball extrusion requires planar input");const gp_Vec displacement(plan.matrix[3],plan.matrix[7],plan.matrix[11]);if(displacement.SquareMagnitude()==0)throw std::runtime_error("Gumball extrusion distance is zero");*shape=Part::TopoShape(BRepPrimAPI_MakePrism(shape->getShape(),displacement,true,true).Shape());}
-            else if(plan.operation==2)*shape=Part::TopoShape(shape->transformGShape(affine,true));else shape->transformShape(affine,true);
+            else shape->transformShape(affine,true,plan.operation==2);
             ThreeDm::InputTree::validate(shape->getShape());if(!BRepCheck_Analyzer(shape->getShape()).IsValid())throw std::runtime_error("Gumball produced invalid native BRep");
-        }else {if(plan.operation==3)throw std::runtime_error("Gumball extrusion requires native planar BRep geometry");std::visit([&](auto& geometry){geometry.transformGeometry(affine);},item.geometry);}
+        }else {if(plan.operation==3)throw std::runtime_error("Gumball extrusion requires native planar BRep geometry");std::visit([&](auto& geometry){transformGumballGeometry(geometry,affine);},item.geometry);}
         rows.append(geometryFacts(item));
     }
     QJsonArray roots;for(const auto& root:inputs.roots)roots.append(QString::fromStdString(root.objectName));return {data,{{"selected_roots",roots},{"staged",rows}}};
 }
 QJsonObject gumballInputFacts(const GumballInputs& inputs){QJsonArray rows;for(const auto& item:inputs.native->items)rows.append(geometryFacts(item));return {{"items",rows}};}
+std::vector<std::array<double,3>> gumballExtentPoints(const GumballInputs& inputs,const double* frame){
+    // OCCT/native bounds observations in the requested basis. Rust owns pivot,
+    // extent admission and Scale anchor/reference policy.
+    guiThread();std::vector<std::array<double,3>> points;if(!inputs.native)return points;
+    Base::Matrix4D local;for(unsigned r=0;r<3;++r){for(unsigned c=0;c<3;++c)local[r][c]=frame[3+3*r+c];local[r][3]=-(local[r][0]*frame[0]+local[r][1]*frame[1]+local[r][2]*frame[2]);}
+    auto world=local;world.inverse();
+    for(const auto& item:inputs.native->items){
+        Base::BoundBox3d box;
+        if(const auto* shape=std::get_if<Part::TopoShape>(&item.geometry)){auto observed=*shape;observed.transformShape(local,true);box=observed.getBoundBoxOptimal();}
+        else if(const auto* mesh=std::get_if<Mesh::MeshObject>(&item.geometry)){for(unsigned i=0;i<mesh->countPoints();++i)box.Add(local*mesh->getPoint(i));}
+        else {const auto& cloud=std::get<Points::PointKernel>(item.geometry);for(unsigned i=0;i<cloud.size();++i)box.Add(local*Base::Vector3d(cloud.getPoint(i)));}
+        if(!box.IsValid())throw std::runtime_error("Gumball source has no finite extent observations");
+        for(unsigned i=0;i<8;++i){auto p=world*Base::Vector3d(i&1?box.MaxX:box.MinX,i&2?box.MaxY:box.MinY,i&4?box.MaxZ:box.MinZ);points.push_back({p.x,p.y,p.z});}
+    }
+    return points;
+}
 std::vector<std::vector<Base::Vector3d>> gumballPreviewLines(const GumballStagedBatch& batch){
     std::vector<std::vector<Base::Vector3d>> lines;std::size_t count=0;
     for(const auto& item:batch.native->items){
@@ -271,7 +338,22 @@ void publishGumballBatch(App::Document& doc,const GumballInputs& inputs,const Om
     guiThread();verifyGumballInputs(doc,inputs);if(plan.phase!=5||!batch.native||batch.report.empty()||!Gui::Control().isAllowedAlterDocument(&doc))throw std::runtime_error("Gumball publication is not allowed");
     // Shape assignment is durable only for plain native geometry owners. Rigid
     // Placement edits preserve parametric owners and individual Link occurrences.
-    if(plan.operation>=2)for(const auto& item:batch.native->items){auto* object=doc.getObject(item.snapshot.objectName.c_str());const auto type=std::string(object->getTypeId().getName());if(plan.operation==2&&type!="Part::Feature"&&type!="Mesh::Feature"&&type!="Points::Feature")throw std::runtime_error("UnsupportedOwner: affine scale requires a plain BRep, Mesh or Points owner; parametric/Link geometry cannot be overwritten");}
+    struct PropertyScale {Om9GumballOwnerScale value{};unsigned kind=0;};
+    std::map<std::string,PropertyScale> propertyScales;
+    if(plan.operation==2)for(const auto& item:batch.native->items){
+        auto* object=doc.getObject(item.snapshot.objectName.c_str());const auto type=std::string(object->getTypeId().getName());
+        if(type=="Part::Feature"||type=="Mesh::Feature"||type=="Points::Feature")continue;
+        const unsigned kind=type=="Part::Box"?1:type=="Part::Sphere"?2:object->isDerivedFrom(Base::Type::fromName("App::Link"))?3:0;
+        if(!kind)throw std::runtime_error("UnsupportedOwner: this parametric owner has no exact native Scale property adapter");
+        if(!object->ExpressionEngine.getExpressions().empty())throw std::runtime_error("UnsupportedOwner: expression-driven Scale properties must remain governed by their expressions");
+        double oldScale[3]={1,1,1};
+        if(kind==3){auto* property=object->getPropertyByName<App::PropertyVector>("ScaleVector");if(!property||property->getContainer()!=object)throw std::runtime_error("UnsupportedOwner: Link occurrence has no owned ScaleVector");auto value=property->getValue();oldScale[0]=value.x;oldScale[1]=value.y;oldScale[2]=value.z;}
+        const auto world=App::GeoFeature::getGlobalPlacement(object).toMatrix();double packed[16];for(unsigned r=0;r<4;++r)for(unsigned c=0;c<4;++c)packed[4*r+c]=world[r][c];
+        PropertyScale scale;scale.kind=kind;
+        if(om9_gumball_owner_scale(plan.matrix,packed,oldScale,kind,&scale.value))throw std::runtime_error("UnsupportedOwner: requested Scale contains shear, reflection or anisotropy that this native owner cannot represent");
+        propertyScales[item.snapshot.objectName]=scale;
+        if(kind==3)linkScaleReplay().observe(*object);
+    }
     for(const auto& root:inputs.roots){auto* object=doc.getObject(root.objectName.c_str());if(plan.operation<2&&!object->getPropertyByName<App::PropertyPlacement>("Placement"))throw std::runtime_error("UnsupportedOwner: source has no editable native Placement");}
     if(plan.operation==3)for(const auto& root:inputs.roots)if(doc.getObject(root.objectName.c_str())->getExtension<App::GroupExtension>())throw std::runtime_error("UnsupportedOwner: select planar curves or faces directly for extrusion");
     const auto affine=matrix(plan.matrix);std::map<std::string,App::DocumentObject*> outputs;GumballPublicationGuard guard(doc,inputs);
@@ -292,6 +374,16 @@ void publishGumballBatch(App::Document& doc,const GumballInputs& inputs,const Om
         }else for(auto& item:batch.native->items){
             guard.check();auto* original=doc.getObject(item.snapshot.objectName.c_str());App::DocumentObject* output=plan.copy&&plan.operation!=3?outputs.at(item.snapshot.objectName):original;
             auto global=App::GeoFeature::getGlobalPlacement(original);auto* placement=original->getPropertyByName<App::PropertyPlacement>("Placement");auto parent=placement?global.toMatrix()*placement->getValue().inverse().toMatrix():Base::Matrix4D();parent.inverse();
+            if(plan.operation==2&&propertyScales.contains(item.snapshot.objectName)){
+                const auto& scale=propertyScales.at(item.snapshot.objectName);
+                auto setNumber=[&](const char* key,double factor){auto* property=output->getPropertyByName<App::PropertyFloat>(key);if(!property||property->getContainer()!=output)throw std::runtime_error("UnsupportedOwner: native dimension is missing");const double expected=property->getValue()*factor;guard.start(output,key);property->setValue(expected);guard.finish();if(property->getValue()!=expected)throw std::runtime_error("Gumball native dimension changed during publication");};
+                if(scale.kind==1){setNumber("Length",scale.value.factors[0]);setNumber("Width",scale.value.factors[1]);setNumber("Height",scale.value.factors[2]);}
+                else if(scale.kind==2)setNumber("Radius",scale.value.factors[0]);
+                else {auto* property=output->getPropertyByName<App::PropertyVector>("ScaleVector");const Base::Vector3d expected(scale.value.factors[0],scale.value.factors[1],scale.value.factors[2]);guard.start(output,"ScaleVector");property->setValue(expected);guard.finish();if(property->getValue()!=expected)throw std::runtime_error("Gumball Link ScaleVector changed during publication");}
+                Base::Placement local;local.fromMatrix(parent*matrix(scale.value.placement));
+                auto* property=output->getPropertyByName<App::PropertyPlacement>("Placement");guard.start(output,"Placement");property->setValue(local);guard.finish();if(property->getValue()!=local)throw std::runtime_error("Gumball owner Placement changed during publication");
+                continue;
+            }
             if(plan.operation==3){
                 output=doc.addObject("Part::Feature","GumballExtrusion");outputs[item.snapshot.objectName]=output;output->Label.setValue((std::string(original->Label.getValue())+" extrusion").c_str());CoreLayers::inheritLayer(*output,*original);
                 auto* from=dynamic_cast<Gui::ViewProviderGeometryObject*>(Gui::Application::Instance->getViewProvider(original));auto* to=dynamic_cast<Gui::ViewProviderGeometryObject*>(Gui::Application::Instance->getViewProvider(output));if(from&&to)to->ShapeAppearance.setValues(from->ShapeAppearance.getValues());
@@ -299,18 +391,39 @@ void publishGumballBatch(App::Document& doc,const GumballInputs& inputs,const Om
                 CoreLayers::inheritLayer(*output,*original);
             }
             if(auto* shape=std::get_if<Part::TopoShape>(&item.geometry)){shape->transformShape(parent,true);guard.start(output,"Shape");dynamic_cast<Part::Feature*>(output)->Shape.setValue(*shape);guard.finish();if(!dynamic_cast<Part::Feature*>(output)->Shape.getValue().IsEqual(shape->getShape()))throw std::runtime_error("Gumball BRep changed during publication");}
-            else if(auto* mesh=std::get_if<Mesh::MeshObject>(&item.geometry)){mesh->transformGeometry(parent);const auto expected=meshSnapshot(*mesh);guard.start(output,"Mesh");dynamic_cast<Mesh::Feature*>(output)->Mesh.setValue(*mesh);if(discreteSnapshot(*output,true)!=expected)throw std::runtime_error("Gumball Mesh changed during publication");guard.finish();}
+            else if(auto* mesh=std::get_if<Mesh::MeshObject>(&item.geometry)){transformGumballGeometry(*mesh,parent);const auto expected=meshSnapshot(*mesh);guard.start(output,"Mesh");dynamic_cast<Mesh::Feature*>(output)->Mesh.setValue(*mesh);if(discreteSnapshot(*output,true)!=expected)throw std::runtime_error("Gumball Mesh changed during publication");guard.finish();}
             else{auto& points=std::get<Points::PointKernel>(item.geometry);points.transformGeometry(parent);guard.start(output,"Points");auto* native=dynamic_cast<Points::Feature*>(output);native->Points.setValue(points);if(!samePoints(native->Points.getValue(),points))throw std::runtime_error("Gumball Points changed during publication");guard.finish();}
         }
         guard.recompute(true);doc.recompute();guard.recompute(false);guard.check();for(const auto& root:inputs.roots){auto* object=plan.copy&&plan.operation!=3?outputs.at(root.objectName):doc.getObject(root.objectName.c_str());if(object&&object->isError())throw std::runtime_error("Gumball native owner recompute failed");}
         for(const auto& root:inputs.roots){auto* output=plan.copy||plan.operation==3?outputs.at(root.objectName):doc.getObject(root.objectName.c_str());guard.start(output,"OM9GumballReport");auto* report=ownedString(*output,"OM9GumballReport","Owned Rust transform/input provenance",App::Prop_ReadOnly);report->setValue(batch.report.c_str());guard.finish();guard.start(output,"OM9UnitContext");if(!inputs.coordinates.unitContext.empty())ownedString(*output,"OM9UnitContext","Input units/tolerances snapshot",App::Prop_ReadOnly);addUnitContextProvenance(*output,inputs.coordinates.unitContext);guard.finish();}
         for(const auto& item:inputs.native->items)if(sourceAttributes(*doc.getObject(item.snapshot.objectName.c_str()),item.snapshot)!=item.attributes)throw std::runtime_error("Gumball source attributes changed during publication");guard.check();
         if(batch.beforeCommit)batch.beforeCommit();
+        // Parametric setters execute native Shape regeneration synchronously.
+        // A callback can replace topology inside that same notification, so
+        // successful setters/recompute alone do not prove the requested solid.
+        // Compare both volumes with their exact kernel intersection before the
+        // journal is committed; this also catches a replacement of equal volume.
+        for(const auto& item:batch.native->items){
+            const auto scale=propertyScales.find(item.snapshot.objectName);
+            if(scale==propertyScales.end()||scale->second.kind==3)continue;
+            auto* output=plan.copy?outputs.at(item.snapshot.objectName):doc.getObject(item.snapshot.objectName.c_str());
+            auto* owner=dynamic_cast<Part::Feature*>(output);const auto* expected=std::get_if<Part::TopoShape>(&item.geometry);
+            if(!owner||!expected)throw std::runtime_error("Gumball parametric output owner was replaced");
+            Part::TopoShape actual(owner->Shape.getValue());const auto local=output->getPropertyByName<App::PropertyPlacement>("Placement")->getValue();
+            actual.transformShape(App::GeoFeature::getGlobalPlacement(output).toMatrix()*local.inverse().toMatrix(),true);
+            BRepAlgoAPI_Common common(actual.getShape(),expected->getShape());
+            if(!common.IsDone()||common.HasErrors()||!BRepCheck_Analyzer(actual.getShape()).IsValid())throw std::runtime_error("Gumball parametric output validation failed");
+            auto volume=[](const TopoDS_Shape& shape){GProp_GProps props;BRepGProp::VolumeProperties(shape,props);return std::abs(props.Mass());};
+            const auto a=volume(actual.getShape()),b=volume(expected->getShape()),c=volume(common.Shape());
+            const double tolerance=std::max(1e-9,1e-8*std::max(a,b));
+            if(!std::isfinite(a)||!std::isfinite(b)||!std::isfinite(c)||a<=0||b<=0||std::abs(a-c)>tolerance||std::abs(b-c)>tolerance)throw std::runtime_error("Gumball parametric output geometry changed during publication");
+        }
+        guard.check();
         doc.commitTransaction();
     }catch(...){if(guard.live())doc.abortTransaction();throw;}
 }
 QJsonObject gumballObjectFrameFacts(const GumballInputs& inputs){
-    if(inputs.roots.size()!=1)throw std::runtime_error("Object alignment requires one unambiguous object frame");
+    if(inputs.roots.size()!=1||inputs.ambiguousComponents)throw std::runtime_error("UnsupportedFrame: Object alignment requires one unambiguous object or component frame");
     const auto& root=inputs.roots.front();Base::Vector3d x(root.world[0],root.world[4],root.world[8]),normal(root.world[2],root.world[6],root.world[10]);
     if(!inputs.native->items.empty())if(const auto* shape=std::get_if<Part::TopoShape>(&inputs.native->items.front().geometry)){
         auto sub=root.subelement.empty()?shape->getShape():shape->getSubShape(root.subelement.c_str());
@@ -320,7 +433,25 @@ QJsonObject gumballObjectFrameFacts(const GumballInputs& inputs){
         if(sub.ShapeType()==TopAbs_FACE){BRepAdaptor_Surface surface(TopoDS::Face(sub));double u=(surface.FirstUParameter()+surface.LastUParameter())/2,v=(surface.FirstVParameter()+surface.LastVParameter())/2;gp_Pnt p;gp_Vec du,dv;surface.D1(u,v,p,du,dv);x=Base::Vector3d(du.X(),du.Y(),du.Z());auto n=du.Crossed(dv);normal=Base::Vector3d(n.X(),n.Y(),n.Z());}
         else if(sub.ShapeType()==TopAbs_EDGE){BRepAdaptor_Curve curve(TopoDS::Edge(sub));gp_Pnt p;gp_Vec tangent,second;curve.D2((curve.FirstParameter()+curve.LastParameter())/2,p,tangent,second);x=Base::Vector3d(tangent.X(),tangent.Y(),tangent.Z());auto n=tangent.Crossed(second);if(n.SquareMagnitude()>0)normal=Base::Vector3d(n.X(),n.Y(),n.Z());}
         else if(!root.subelement.empty())throw std::runtime_error("UnsupportedFrame: selected BRep component has no native tangent or surface frame; use whole-object, CPlane or World alignment");
-    }else if(!root.subelement.empty())throw std::runtime_error("UnsupportedFrame: native Mesh/Points component tangent frame is unavailable; use whole-object, CPlane or World alignment");
+    }else if(!root.subelement.empty()){
+        const auto* mesh=std::get_if<Mesh::MeshObject>(&inputs.native->items.front().geometry);
+        const auto& name=root.subelement;std::size_t index=0;
+        if(!mesh||!name.starts_with("Segment"))throw std::runtime_error("UnsupportedFrame: selected component has no native Mesh segment frame; use whole-object, CPlane or World alignment");
+        const auto number=name.data()+7;auto parsed=std::from_chars(number,name.data()+name.size(),index);
+        if(parsed.ec!=std::errc()||parsed.ptr!=name.data()+name.size()||!index||index>mesh->countSegments())throw std::runtime_error("UnsupportedFrame: selected native Mesh segment is missing");
+        const auto& facets=mesh->getSegment(index-1).getIndices();
+        if(facets.empty()||facets.size()>131072/3)throw std::runtime_error("UnsupportedFrame: Mesh segment is empty or exceeds frame observation budget");
+        std::vector<std::array<double,3>> points;points.reserve(facets.size()*3);
+        const auto& kernel=mesh->getKernel();
+        for(auto facet:facets){
+            if(facet>=kernel.CountFacets())throw std::runtime_error("UnsupportedFrame: Mesh segment references a missing facet");
+            const auto& face=kernel.GetFacets()[facet];
+            for(auto point:face._aulPoints){if(point>=kernel.CountPoints())throw std::runtime_error("UnsupportedFrame: Mesh facet references a missing vertex");auto p=mesh->getPoint(point);points.push_back({p.x,p.y,p.z});}
+        }
+        double directions[6];
+        if(om9_gumball_mesh_directions(reinterpret_cast<const double(*)[3]>(points.data()),points.size(),directions))throw std::runtime_error("UnsupportedFrame: Mesh segment is degenerate, nonplanar or inconsistently oriented");
+        x=Base::Vector3d(directions[0],directions[1],directions[2]);normal=Base::Vector3d(directions[3],directions[4],directions[5]);
+    }
     return {{"x",QJsonArray{x.x,x.y,x.z}},{"normal",QJsonArray{normal.x,normal.y,normal.z}}};
 }
 void addGumballGeometryMethods(PyObject* module){static PyMethodDef methods[]={{"gumballGeometryFacts",factsAPI,METH_VARARGS,"Read private native staging facts; no document mutation or UI proof."},{nullptr,nullptr,0,nullptr}};PyModule_AddFunctions(module,methods);}

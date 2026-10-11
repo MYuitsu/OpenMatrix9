@@ -28,3 +28,15 @@ matrix tests pin parallel X, invalid axes, cancel and owner cache.
 Các pointer snap modes và toàn bộ original-host interaction chưa có parity proof.
 [Evidence](../validation/2026-10-11-gumball-core.md).
 Tiếp theo: Matrix/Rhino comparison fixtures cho mọi snap mode và ambiguous owners.
+
+Revision spec ngày 2026-10-11 yêu cầu Relocate preview/accept/cancel dùng
+chung origin/basis ở cả bốn ô, tính lại Scale anchors/leader/hit targets,
+phân biệt Ctrl-start widget-only và late-Ctrl Extrude. Input thường theo
+captured CPlane/document units; `w` chọn world, không gọi mọi typed point
+là world point. Default/cache scope và giới hạn native cũ được giữ.
+Đã triển khai origin/X preview đồng thời ở mọi view; optional Y accepts frame
+chung, bounds Scale/leader/picks cập nhật theo basis. Ctrl numeric widget-only
+và late Ctrl Extrude replay ở từng ô; idle focus giữ pivot, source close hủy
+gesture và mọi preview/capture. Không tạo geometry/Undo cho Relocate.
+[Evidence mới](../validation/2026-10-11-gumball-four-view-completion.md).
+[Đối chiếu nguồn lịch sử](../validation/2026-10-11-gumball-four-view-spec-review.md).

@@ -1,0 +1,73 @@
+"""Native parametric/Link Scale must survive recompute without baking Shape."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtTest
+sys.path.insert(0,str(Path(__file__).parent));from gumball_fixture import GumballUI
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-020','OM9-INFO-021']}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    doc=None
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('GumballOwnerScale');doc.UndoMode=1
+        box=doc.addObject('Part::Box','ParametricBox');box.Length=12;box.Width=8;box.Height=6
+        tool=doc.addObject('Part::Sphere','DependencyTool');tool.Radius=1;tool.Placement.Base=App.Vector(6,4,3)
+        dependent=doc.addObject('Part::Cut','DependentCut');dependent.Base=box;dependent.Tool=tool;doc.recompute()
+        box.ViewObject.Visibility=True;tool.ViewObject.Visibility=False;dependent.ViewObject.Visibility=False
+        Gui.activeDocument().activeView().viewAxonometric();ui=GumballUI(native);ui.select(box);ui.command('Gumball On');ui.command('GumballAlignment World')
+        class Observer:
+            def slotChangedObject(self,obj,prop):
+                if obj==box:report.setdefault('box_writes',[]).append({'property':prop,'state':list(obj.State),'length':obj.Length.Value,'bounds':[obj.Shape.BoundBox.XMin,obj.Shape.BoundBox.XLength]})
+        observer=Observer();App.addDocumentObserver(observer)
+        ui.numeric('ScaleX','2');doc.recompute();ui.settle();App.removeDocumentObserver(observer)
+        report['box_after']={'length':box.Length.Value,'width':box.Width.Value,'bounds':[box.Shape.BoundBox.XMin,box.Shape.BoundBox.XLength],'undo':doc.UndoCount,'state':native.gumballState(),'transcript':ui.transcript()}
+        check('Box scales through durable native dimensions',abs(box.Length.Value-24)<1e-9 and abs(box.Shape.BoundBox.XLength-24)<1e-8 and abs(box.Shape.BoundBox.XMin+6)<1e-8 and box.Width.Value==8 and doc.UndoCount==1)
+        check('native downstream dependency recomputes after Gumball Scale',dependent.Base==box and dependent.Tool==tool and dependent.Shape.isValid() and abs(dependent.Shape.Volume-box.Shape.cut(tool.Shape).Volume)<1e-7 and dependent.Shape.Volume>1000)
+        doc.undo();doc.recompute();ui.settle();check('Box Undo restores native parameters',box.Length.Value==12 and abs(box.Placement.Base.x)<1e-9)
+        check('Undo restores existing native dependency result',dependent.Base==box and dependent.Shape.isValid() and abs(dependent.Shape.Volume-box.Shape.cut(tool.Shape).Volume)<1e-7 and dependent.Shape.Volume<576)
+        doc.redo();doc.recompute();ui.settle();check('Box Redo remains parametric',box.Length.Value==24 and box.TypeId=='Part::Box');doc.undo();ui.settle()
+        sphere=doc.addObject('Part::Sphere','ParametricSphere');sphere.Radius=3;doc.recompute();ui.select(sphere)
+        ui.numeric('ScaleX','2',QtCore.Qt.ShiftModifier);doc.recompute();ui.settle()
+        report['sphere_after']={'radius':sphere.Radius.Value,'width':sphere.Shape.BoundBox.XLength,'state':native.gumballState(),'transcript':ui.transcript()}
+        # Gui tessellation is not an exact sphere-bound oracle. Query the
+        # kernel's analytical bounds without triangulation or added tolerance.
+        check('uniform Sphere scale uses Radius',sphere.Radius.Value==6 and abs(sphere.Shape.optimalBoundingBox(False,False).XLength-12)<1e-7)
+        doc.undo();ui.settle();before=(sphere.Radius.Value,doc.UndoCount,doc.RedoCount)
+        ui.numeric('ScaleX','2');ui.settle()
+        check('anisotropic Sphere rejects before transaction',(sphere.Radius.Value,doc.UndoCount,doc.RedoCount)==before and 'UnsupportedOwner' in native.gumballState()['unresolved'])
+        source=doc.addObject('Part::Feature','Definition');source.Shape=Part.makeBox(2,3,4)
+        link=doc.addObject('App::Link','Occurrence');link.setLink(source);link.Placement.Base=App.Vector(20,0,0);doc.recompute();ui.select(link)
+        bounds=source.Shape.BoundBox;ui.numeric('ScaleX','2');doc.recompute();ui.settle()
+        check('Link scales occurrence properties',abs(link.ScaleVector.x-2)<1e-9 and abs(link.Shape.BoundBox.XLength-4)<1e-7 and source.Shape.BoundBox.XLength==bounds.XLength)
+        check('Link definition and ownership preserved',link.LinkedObject==source and source.TypeId=='Part::Feature')
+        doc.undo();doc.recompute();ui.settle();check('Link Undo restores ScaleVector',link.ScaleVector==App.Vector(1,1,1))
+        doc.redo();doc.recompute();ui.settle();report['link_redo']={'scale':link.Scale,'vector':list(link.ScaleVector),'bounds':link.Shape.BoundBox.XLength,'undo':doc.UndoCount,'redo':doc.RedoCount,'transcript':ui.transcript()};check('Link Redo survives recompute',abs(link.ScaleVector.x-2)<1e-9);doc.undo();ui.settle()
+        doc.redo();ui.settle();name=link.Name
+        doc.openTransaction('Delete scaled occurrence');doc.removeObject(name);doc.commitTransaction()
+        doc.undo();doc.recompute();ui.settle();link=doc.getObject(name)
+        check('Undo deletion restores scaled Link',link is not None and link.ScaleVector==App.Vector(2,1,1))
+        doc.undo();doc.recompute();ui.settle();check('Undo Scale after restoration returns original vector',link.ScaleVector==App.Vector(1,1,1))
+        doc.redo();doc.recompute();ui.settle();check('Redo Scale after restoration preserves anisotropy',link.ScaleVector==App.Vector(2,1,1))
+        doc.undo();ui.select(link)
+        ui.numeric('ScaleX','2',QtCore.Qt.AltModifier);doc.recompute();ui.settle()
+        copied=next(o for o in doc.Objects if o.TypeId=='App::Link' and o!=link);copied_name=copied.Name
+        check('Alt Link Scale preserves source and creates scaled occurrence',link.ScaleVector==App.Vector(1,1,1) and copied.ScaleVector==App.Vector(2,1,1) and copied.LinkedObject==source)
+        doc.undo();doc.recompute();ui.settle();check('Alt Link Scale Undo removes only new occurrence',doc.getObject(copied_name) is None and link.ScaleVector==App.Vector(1,1,1))
+        doc.redo();doc.recompute();ui.settle();copied=doc.getObject(copied_name)
+        check('Alt Link Scale Redo restores anisotropic occurrence',copied is not None and copied.ScaleVector==App.Vector(2,1,1) and abs(copied.Shape.BoundBox.XLength-4)<1e-7)
+        doc.undo();ui.settle()
+        link.Placement.Rotation=App.Rotation(App.Vector(0,0,1),45);doc.recompute();ui.select(link)
+        before=(link.Placement,link.ScaleVector,doc.UndoCount,doc.RedoCount)
+        ui.numeric('ScaleX','2');ui.settle()
+        check('unrepresentable Link shear rejects without owner writes',(link.Placement,link.ScaleVector,doc.UndoCount,doc.RedoCount)==before and 'UnsupportedOwner' in native.gumballState()['unresolved'])
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        if doc is not None:App.closeDocument(doc.Name)
+        QtCore.QTimer.singleShot(100,QtWidgets.QApplication.quit)
+QtCore.QTimer.singleShot(1500,run)

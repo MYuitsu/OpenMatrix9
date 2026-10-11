@@ -995,3 +995,12 @@ unsupported owners/frames and shared-host failed-transaction Redo loss remain ex
 [Evidence, reproducible suite and limits](docs/validation/2026-10-11-gumball-core.md).
 Final fresh review: three Important findings fixed by TDD; native432/16 and Rust808/115 passed.
 <!-- gumball-core-20261011:end -->
+
+<!-- gumball-four-view-spec-20261011:start -->
+2026-10-11: đã triển khai Gumball đồng bộ bốn viewport: Command On/Off,
+first-click handles, shared preview/batch, bounds Scale, plane hai màu và menu
+ring; core settings/Snappy/Strength/orbit và native Box/Sphere/Link property Scale.
+Giữ ba ID `partially_implemented`: generic owners, Mesh edge/vertex/light/camera
+frames và host old-Redo rollback còn mở; chưa claim full original-host parity.
+[Cách dùng Gumball](docs/gumball-user-guide.md) · [Native evidence](docs/validation/2026-10-11-gumball-four-view-completion.md).
+<!-- gumball-four-view-spec-20261011:end -->

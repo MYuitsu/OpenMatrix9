@@ -14,7 +14,13 @@ class GumballUI:
 
     @property
     def viewport(self):
-        return next(w for w in Gui.getMainWindow().findChildren(QtWidgets.QWidget)
+        area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
+        sub=area.activeSubWindow()
+        if sub is None:
+            import FreeCAD as App
+            state=self.native.gumballState()
+            sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==state['source_slot'] and s.widget().property('om9DocumentName')==App.ActiveDocument.Name)
+        return next(w for w in sub.widget().findChildren(QtWidgets.QWidget)
                     if w.property('om9GumballViewport'))
 
     def command(self, text):

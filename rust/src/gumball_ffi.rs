@@ -77,6 +77,17 @@ fn call(f: impl FnOnce() -> u32) -> u32 {
     catch_unwind(AssertUnwindSafe(f)).unwrap_or(1)
 }
 /// # Safety
+/// Matrices and old factors are readable; output writable, aligned and nonoverlapping.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_gumball_owner_scale(affine:*const f64,world:*const f64,old_scale:*const f64,kind:u32,out:*mut crate::gumball_owner::OwnerScale)->u32 {
+    call(|| {
+        if affine.is_null()||world.is_null()||old_scale.is_null()||out.is_null(){return 1;}
+        let read=|p,n|unsafe{std::slice::from_raw_parts(p,n)};
+        let Ok(value)=crate::gumball_owner::owner_scale(read(affine,16).try_into().unwrap(),read(world,16).try_into().unwrap(),read(old_scale,3).try_into().unwrap(),kind)else{return 2;};
+        unsafe{*out=value};0
+    })
+}
+/// # Safety
 /// Text is readable for length bytes, both outputs writable for one u32.
 /// 0 recognized, 1 another command, 2 invalid; failure leaves outputs untouched.
 #[unsafe(no_mangle)]
@@ -209,6 +220,18 @@ pub unsafe extern "C" fn om9_gumball_frame_from_directions(
             std::ptr::copy_nonoverlapping(packed(f).as_ptr(), out, 12);
         }
         0
+    })
+}
+/// # Safety
+/// Points contains count readable triples, output six writable doubles,
+/// aligned and nonoverlapping. Nothing borrowed is retained.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_gumball_mesh_directions(points:*const Point,count:usize,out:*mut f64)->u32 {
+    call(|| {
+        if points.is_null()||count==0||count>131072||count%3!=0||out.is_null(){return 1;}
+        let Ok((x,n))=crate::gumball_view::mesh_directions(unsafe{std::slice::from_raw_parts(points,count)})else{return 2;};
+        let values=[x[0],x[1],x[2],n[0],n[1],n[2]];
+        unsafe{std::ptr::copy_nonoverlapping(values.as_ptr(),out,6)};0
     })
 }
 impl From<GumballSource> for Source {
@@ -371,9 +394,46 @@ pub unsafe extern "C" fn om9_gumball_event(id: u64, input: *const GumballEvent) 
             9 => Event::RelocatePoint(e.world_point),
             10 => Event::CommitSucceeded,
             12 => Event::RelocateRay(PointerRay {origin:e.ray_origin,direction:e.ray_direction}),
+            13 => Event::SnappedMotion(e.world_point),
             _ => return 1,
         };
         update(id, event)
+    })
+}
+/// # Safety
+/// Optional input/output are aligned, valid nonoverlapping records. No pointer is retained.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_gumball_settings(id:u64,input:*const crate::gumball_view::ViewSettings,out:*mut crate::gumball_view::ViewSettings)->u32 {
+    call(|| {
+        if input.is_null()&&out.is_null(){return 1;}
+        let Ok(mut r)=registry().lock()else{return 1;};let Some(s)=r.sessions.get_mut(&id)else{return 1;};
+        if !input.is_null()&&s.set_settings(unsafe{*input}).is_err(){return 2;}
+        if !out.is_null(){unsafe{*out=s.settings};}0
+    })
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_gumball_restore_defaults(id:u64)->u32 {
+    call(|| {let Ok(mut r)=registry().lock()else{return 1;};let Some(s)=r.sessions.get_mut(&id)else{return 1;};match s.set_settings(Default::default()){Ok(())=>0,Err(_)=>2}})
+}
+/// # Safety
+/// Points contains count triples (at most 131072), readable for this call.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_gumball_extents(id:u64,points:*const Point,count:usize)->u32 {
+    call(|| {
+        if points.is_null()||count==0||count>131072{return 1;}
+        let Ok(mut r)=registry().lock()else{return 1;};let Some(s)=r.sessions.get_mut(&id)else{return 1;};
+        match s.set_extents(unsafe{std::slice::from_raw_parts(points,count)}){Ok(())=>0,Err(_)=>2}
+    })
+}
+/// # Safety
+/// Projection and points are readable; output is writable and nonoverlapping.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_gumball_layout(id:u64,projection:*const crate::gumball_view::ViewProjection,points:*const Point,count:usize,out:*mut crate::gumball_view::ViewLayout)->u32 {
+    call(|| {
+        if projection.is_null()||points.is_null()||count==0||count>131072||out.is_null(){return 1;}
+        let Ok(r)=registry().lock()else{return 1;};let Some(s)=r.sessions.get(&id)else{return 1;};
+        let Ok(value)=crate::gumball_view::layout(s.snapshot().frame,unsafe{std::slice::from_raw_parts(points,count)},unsafe{*projection},s.settings)else{return 2;};
+        unsafe{*out=value};0
     })
 }
 /// # Safety
