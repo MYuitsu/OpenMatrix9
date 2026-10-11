@@ -20,20 +20,27 @@ runtime `H:/FreeCAD-src/build/gumball-core-runtime-20261011`, cache
 Build helper giữ per-cache mutex/configure runtime đúng; host runner kiểm
 actual module path, report ok/all checks và actual exit code.
 
+Mở shared host với đúng plugin đã nghiệm thu, rồi chọn object và nhập
+`Gumball On` trong CMD (hoặc dùng menu Gumball):
+
+```powershell
+rtk proxy powershell -NoProfile -ExecutionPolicy Bypass -File H:/FreeCAD-src/build/run-om9-plugin.ps1 -PluginRuntime H:/FreeCAD-src/build/gumball-core-runtime-20261011
+```
+
 ## Verification
 
-Final results được ghi tại `H:/FreeCAD-src/build/shared-host-tests/gumball-final-20261011/`.
+Final results được ghi tại `H:/FreeCAD-src/build/shared-host-tests/gumball-post-review-final-20261011/`.
 Full suite command:
 
 ```powershell
-rtk proxy powershell -NoProfile -ExecutionPolicy Bypass -File tests/run_gumball_smoke.ps1 -Scope All -OutputDirectory H:/FreeCAD-src/build/shared-host-tests/gumball-final-20261011
+rtk proxy powershell -NoProfile -ExecutionPolicy Bypass -File tests/run_gumball_smoke.ps1 -Scope All -OutputDirectory H:/FreeCAD-src/build/shared-host-tests/gumball-post-review-final-20261011
 rtk cargo test --manifest-path rust/Cargo.toml
 rtk proxy python tools/public_source_audit.py
 ```
 
 Core: independent OCCT staging; canonical/legacy commands; object/group/Link/
 Mesh/Points ownership; lifecycle; synchronous read-only/cancel callbacks;
-actual QTest pointer/editor/input at DPI 1 and 1.5: 201 checks / 8 processes.
+actual QTest pointer/editor/input at DPI 1 and 1.5: 210 checks / 9 processes.
 Native picking proves all 13 paths; Move XYZ/three planes/origin, Rotate XYZ,
 Scale1D/Shift3D/negative, numeric doubles, angle-step drag, Alt repeat/Copy,
 Ctrl-start relocation versus held-Ctrl extrusion. Native IME commit/focus
@@ -49,9 +56,9 @@ Regression runs existing Curve, CoreMouse, layer permission, History and 3DM
 preservation with native Gumball state actually enabled in fresh profiles.
 
 Current standalone plugin SHA256:
-`8DDF092F2F406107BC20F383CF491C3796ED916A99344E995AFCBBD4300851F4`.
-Split-suite total 423 checks / 15 processes, actual exits0; final combined
-run recorded by Task5 verification. Full Rust806 / 115 suites; source audit
+`3107FFC7FF0087DED9902C066C4B026F67090291EAAB0F1C590772C19FB5CD29`.
+Final combined suite: 432 checks / 16 processes, all actual exits0.
+Full Rust808 / 115 suites; source audit
 zero errors. Native checks run on the authorized dirty-source baseline;
 Gumball commits intentionally exclude unrelated family edits.
 
@@ -73,7 +80,15 @@ Gumball commits intentionally exclude unrelated family edits.
 - Holed Boolean face was a one-Face Shell; bounded exact-one-child unwrap
   permits native prism, preserves source/hole and negative volume orientation.
 - Object alignment single-edge rotated Wire now uses native tangent, unresolved
-  Mesh component retains prior alignment.
+  Mesh component and BRep Vertex retain prior alignment.
+- Same-field Mesh/Points callback overwrite now compares immutable staged output
+  before remembering state; a mixed batch restores both owners and Undo count.
+- Numeric axis distance follows the pointer side after Enter, including signed
+  input and negative extrusion; the exact press point keeps the last side.
+- First post-review regression stopped at the old Ctrl-release MoveZ fixture:
+  downward pointer motion expected positive distance because the former code
+  ignored direction. The fixture now drags upward in its fixed axonometric
+  view and independently observes ZMin=3; both DPI runs pass after correction.
 - Export fixture used conservative bbox while saved geometry used optimal bounds;
   both independent native observations now use optimalBoundingBox(False,False).
 
@@ -100,7 +115,12 @@ which is preserved and observed, not replaced by a tessellation.
 
 ## Review and decisions
 
-One fresh final reviewer and rulings ledger are pending. Final proof/ledger
-will be retained outside transient `.superpowers` workspace before cleanup.
+One fresh final reviewer identified three Important findings; all three
+received author TDD fixes, with 9 native and 2 Rust regressions RED→GREEN.
+The final 432-check native suite and full Rust suite passed after these fixes.
+No second review was dispatched. [Review and resolution](2026-10-11-gumball-final-review.md)
+and [exhaustive rulings](2026-10-11-gumball-rulings.md) preserve the decisions.
+Build/Rust logs and the author ledger are retained alongside the final suite.
+Current branch/checkout is retained as approved; unsupported capabilities remain partial.
 [Gumball](../features/OM9-INFO-020.md), [Alignment](../features/OM9-INFO-021.md),
 [Relocate](../features/OM9-INFO-022.md) separate source statements from OM9 decisions.

@@ -14,6 +14,8 @@ Wire/Shell/Compound đúng một child được unwrap, bounded 64 levels. Multi
 owners không có frame duy nhất báo unresolved và giữ alignment trước.
 Mesh/Points whole-owner dùng Placement; Mesh component frame, light/camera
 và mọi frame không có native adapter vẫn unsupported, không ngầm chọn World.
+Selected BRep Vertex hoặc component không có tangent/surface frame cũng báo
+`UnsupportedFrame`; giữ alignment và frame trước, không dùng owner axes ngầm.
 
 Frame là view state; không tạo object/property/Undo. Preference alignment lưu
 profile, shared with menu/CMD. Bộ frame/pivot theo incarnation/revision của
@@ -23,5 +25,6 @@ xóa giá trị cũ. Multi-selection không dùng single-owner cache.
 
 Native checks: object 30° / rotated one-edge Wire, rotated CPlane, menu states,
 World, unsupported Mesh component, unchanged Shape/count/Undo và reselect.
+Final-review regression kiểm Vertex1 giữ rotated CPlane và không tạo Undo.
 [Evidence](../validation/2026-10-11-gumball-core.md).
 Tiếp theo: Mesh face/edge/vertex, light/camera frame adapters và source fixtures.

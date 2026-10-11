@@ -63,6 +63,12 @@ namespace {
 constexpr double identityFrame[12]={0,0,0,1,0,0,0,1,0,0,0,1};
 Base::Matrix4D matrix(const double* values){Base::Matrix4D m;for(unsigned r=0;r<4;++r)for(unsigned c=0;c<4;++c)m[r][c]=values[4*r+c];return m;}
 void guiThread(){if(!qApp||QThread::currentThread()!=qApp->thread())throw std::runtime_error("Gumball requires the GUI thread");}
+bool samePoints(const Points::PointKernel& actual,const Points::PointKernel& expected){
+    if(actual.getBasicPoints()!=expected.getBasicPoints())return false;
+    const auto a=actual.getTransform(),b=expected.getTransform();
+    for(unsigned r=0;r<4;++r)for(unsigned c=0;c<4;++c)if(a[r][c]!=b[r][c])return false;
+    return true;
+}
 App::PropertyString* ownedString(App::DocumentObject& object,const char* name,const char* documentation="",short flags=0){
     // App::Link forwards unknown getPropertyByName() lookups to its definition.
     // Gesture provenance and copy identity belong to this occurrence itself.
@@ -293,8 +299,8 @@ void publishGumballBatch(App::Document& doc,const GumballInputs& inputs,const Om
                 CoreLayers::inheritLayer(*output,*original);
             }
             if(auto* shape=std::get_if<Part::TopoShape>(&item.geometry)){shape->transformShape(parent,true);guard.start(output,"Shape");dynamic_cast<Part::Feature*>(output)->Shape.setValue(*shape);guard.finish();if(!dynamic_cast<Part::Feature*>(output)->Shape.getValue().IsEqual(shape->getShape()))throw std::runtime_error("Gumball BRep changed during publication");}
-            else if(auto* mesh=std::get_if<Mesh::MeshObject>(&item.geometry)){mesh->transformGeometry(parent);guard.start(output,"Mesh");dynamic_cast<Mesh::Feature*>(output)->Mesh.setValue(*mesh);guard.finish();}
-            else{auto& points=std::get<Points::PointKernel>(item.geometry);points.transformGeometry(parent);guard.start(output,"Points");dynamic_cast<Points::Feature*>(output)->Points.setValue(points);guard.finish();}
+            else if(auto* mesh=std::get_if<Mesh::MeshObject>(&item.geometry)){mesh->transformGeometry(parent);const auto expected=meshSnapshot(*mesh);guard.start(output,"Mesh");dynamic_cast<Mesh::Feature*>(output)->Mesh.setValue(*mesh);if(discreteSnapshot(*output,true)!=expected)throw std::runtime_error("Gumball Mesh changed during publication");guard.finish();}
+            else{auto& points=std::get<Points::PointKernel>(item.geometry);points.transformGeometry(parent);guard.start(output,"Points");auto* native=dynamic_cast<Points::Feature*>(output);native->Points.setValue(points);if(!samePoints(native->Points.getValue(),points))throw std::runtime_error("Gumball Points changed during publication");guard.finish();}
         }
         guard.recompute(true);doc.recompute();guard.recompute(false);guard.check();for(const auto& root:inputs.roots){auto* object=plan.copy&&plan.operation!=3?outputs.at(root.objectName):doc.getObject(root.objectName.c_str());if(object&&object->isError())throw std::runtime_error("Gumball native owner recompute failed");}
         for(const auto& root:inputs.roots){auto* output=plan.copy||plan.operation==3?outputs.at(root.objectName):doc.getObject(root.objectName.c_str());guard.start(output,"OM9GumballReport");auto* report=ownedString(*output,"OM9GumballReport","Owned Rust transform/input provenance",App::Prop_ReadOnly);report->setValue(batch.report.c_str());guard.finish();guard.start(output,"OM9UnitContext");if(!inputs.coordinates.unitContext.empty())ownedString(*output,"OM9UnitContext","Input units/tolerances snapshot",App::Prop_ReadOnly);addUnitContextProvenance(*output,inputs.coordinates.unitContext);guard.finish();}
@@ -313,6 +319,7 @@ QJsonObject gumballObjectFrameFacts(const GumballInputs& inputs){
         for(unsigned depth=0;depth<64&&(sub.ShapeType()==TopAbs_COMPOUND||sub.ShapeType()==TopAbs_WIRE||sub.ShapeType()==TopAbs_SHELL);++depth){TopoDS_Iterator children(sub);if(!children.More())break;const auto child=children.Value();children.Next();if(children.More())break;sub=child;}
         if(sub.ShapeType()==TopAbs_FACE){BRepAdaptor_Surface surface(TopoDS::Face(sub));double u=(surface.FirstUParameter()+surface.LastUParameter())/2,v=(surface.FirstVParameter()+surface.LastVParameter())/2;gp_Pnt p;gp_Vec du,dv;surface.D1(u,v,p,du,dv);x=Base::Vector3d(du.X(),du.Y(),du.Z());auto n=du.Crossed(dv);normal=Base::Vector3d(n.X(),n.Y(),n.Z());}
         else if(sub.ShapeType()==TopAbs_EDGE){BRepAdaptor_Curve curve(TopoDS::Edge(sub));gp_Pnt p;gp_Vec tangent,second;curve.D2((curve.FirstParameter()+curve.LastParameter())/2,p,tangent,second);x=Base::Vector3d(tangent.X(),tangent.Y(),tangent.Z());auto n=tangent.Crossed(second);if(n.SquareMagnitude()>0)normal=Base::Vector3d(n.X(),n.Y(),n.Z());}
+        else if(!root.subelement.empty())throw std::runtime_error("UnsupportedFrame: selected BRep component has no native tangent or surface frame; use whole-object, CPlane or World alignment");
     }else if(!root.subelement.empty())throw std::runtime_error("UnsupportedFrame: native Mesh/Points component tangent frame is unavailable; use whole-object, CPlane or World alignment");
     return {{"x",QJsonArray{x.x,x.y,x.z}},{"normal",QJsonArray{normal.x,normal.y,normal.z}}};
 }

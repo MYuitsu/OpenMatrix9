@@ -17,6 +17,7 @@ if($Scope -in @('Core','All')){
   @{Name='geometry';Macro='gumball_geometry_smoke.FCMacro'},
   @{Name='commands';Macro='gumball_commands_smoke.FCMacro'},
   @{Name='ownership';Macro='gumball_ownership_smoke.FCMacro'},
+  @{Name='final-review';Macro='gumball_review_smoke.FCMacro'},
   @{Name='lifecycle';Macro='gumball_lifecycle_smoke.FCMacro'},
   @{Name='reentrancy';Macro='gumball_reentrancy_smoke.FCMacro'},
   @{Name='cancel-publication';Macro='gumball_reentrancy_smoke.FCMacro';Cancel='1'},

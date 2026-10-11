@@ -73,9 +73,12 @@ def run():
             QtTest.QTest.keyClicks(field,value);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);events();report['last_numeric']=native.gumballState();report['transcript']=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript').toPlainText()
         def drag(name,mods=QtCore.Qt.NoModifier):
             pos=target(name);viewport.setFocus();QtTest.QTest.mousePress(viewport,QtCore.Qt.LeftButton,mods,pos)
-            QtTest.QTest.mouseMove(viewport,pos+QtCore.QPoint(18,12));events()
+            # This fixture keeps the axonometric camera: upward screen motion
+            # is positive world Z. Numeric distance now follows drag direction.
+            end=pos+(QtCore.QPoint(0,-24) if name=='MoveZ' else QtCore.QPoint(18,12))
+            QtTest.QTest.mouseMove(viewport,end);events()
             check(name+' pointer motion owns dragging',native.gumballState()['phase']==3)
-            return pos+QtCore.QPoint(18,12)
+            return end
         def release(pos,mods=QtCore.Qt.NoModifier):QtTest.QTest.mouseRelease(viewport,QtCore.Qt.LeftButton,mods,pos);events()
         for name,coordinate in [('MoveY','YMin'),('MoveZ','ZMin')]:
             numeric(name,'3 mm');check(name+' exact numeric axis',abs(getattr(box.Shape.BoundBox,coordinate)-3)<1e-9);doc.undo();events()
@@ -142,6 +145,7 @@ def run():
         try:report['extrude_staging']=native.gumballGeometryFacts(doc.Name,[face.Name],'ExtrudeZ','5 mm','World')
         except Exception as stage_error:report['extrude_staging_error']=str(stage_error)
         count=len(doc.Objects);end=drag('MoveZ');QtTest.QTest.keyPress(viewport,QtCore.Qt.Key_Control);QtTest.QTest.keyRelease(viewport,QtCore.Qt.Key_Control);command('3 mm');release(end)
+        report['ctrl_release_move_z']=face.Shape.BoundBox.ZMin
         check('Ctrl released before mouse-up returns to Move',len(doc.Objects)==count and abs(face.Shape.BoundBox.ZMin-3)<1e-8);doc.undo();events();select(face)
         end=drag('MoveZ');QtTest.QTest.keyPress(viewport,QtCore.Qt.Key_Control);command('5 mm');release(end,QtCore.Qt.ControlModifier);QtTest.QTest.keyRelease(viewport,QtCore.Qt.Key_Control)
         extrusion=doc.getObject('GumballExtrusion');check('Ctrl-after-motion extrudes a holed face',extrusion is not None and extrusion.Shape.isValid() and abs(extrusion.Shape.Volume-105*3.141592653589793)<1e-7 and abs(face.Shape.Area-21*3.141592653589793)<1e-7)

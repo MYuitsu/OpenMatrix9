@@ -25,8 +25,11 @@ và face có hole. Không thay geometry nguồn khi Copy/Extrude.
 
 13 tay nắm là native picked scene paths; preview bounds-excluded/unpickable,
 không thêm document object/Undo. Click mở numeric editor; Enter khi đang
-drag chỉ ràng buộc distance/bước góc, release mới commit. Alt tap toggle,
-auto-repeat bỏ qua, Alt numeric tạo Copy có UUID riêng. Ctrl có từ mouse-down
+drag chỉ ràng buộc distance/bước góc, release mới commit. Distance khi giữ drag
+theo phía con trỏ so với điểm press; số âm đảo chiều
+đó. Đúng tại điểm press giữ chiều cuối; numeric click vẫn dùng dấu theo trục.
+Move và Extrude đều kiểm kéo qua hai phía sau Enter bằng Qt thật.
+Alt tap toggle, auto-repeat bỏ qua, Alt numeric tạo Copy có UUID riêng. Ctrl có từ mouse-down
 chỉ chỉnh widget; Ctrl thêm sau motion và còn giữ ở release mới Extrude.
 Esc đầu đóng numeric editor, Esc tiếp hủy gesture. Navigation/foreign editor,
 source delete/replace/permission/unit/CPlane/document/view changes dọn phiên.
@@ -39,7 +42,9 @@ dependencies vẫn recompute. Provenance/successful geometry lưu trong FCStd.
 
 Giới hạn rõ trước transaction: Scale parametric/Link, external-document Link,
 unresolved geometry/capability. Không có fallback mesh. Callback synchronous
-sửa nguồn trong publication abort cả batch. **FreeCAD xóa Redo khi mở
+sửa nguồn trong publication abort cả batch. Mesh/Points được so sánh với
+staged output sau setter callbacks, trước khi ghi nhớ expected state.
+**FreeCAD xóa Redo khi mở
 transaction; abort sau callback không phục hồi Redo cũ.** Model/Undo được rollback;
 input/capability rejection trước transaction giữ Redo. Chưa xác nhận mọi owner,
 mọi native application/IME và parity Matrix/Rhino cho mọi representation.

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-11T10:14:46+07:00",
+  "updated_at": "2026-10-11T10:37:37+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -2354,22 +2354,26 @@
         "docs/features/OM9-INFO-020.md",
         "docs/features/OM9-INFO-021.md",
         "docs/features/OM9-INFO-022.md",
-        "docs/validation/2026-10-11-gumball-core.md"
+        "docs/validation/2026-10-11-gumball-core.md",
+        "docs/validation/2026-10-11-gumball-final-review.md",
+        "docs/validation/2026-10-11-gumball-rulings.md",
+        "tests/gumball_review_smoke.FCMacro"
       ],
       "evidence": [
         "Matrix Book1 PDF45-47/printed35-37; PDF48 next History heading.",
-        "Native 201 Core checks/8 processes; persistence37/2; regression185/5, actual exits0 and selected module.",
-        "Runtime H:/FreeCAD-src/build/gumball-core-runtime-20261011; shared SDK only; plugin SHA256 8DDF092F2F406107BC20F383CF491C3796ED916A99344E995AFCBBD4300851F4.",
-        "Full Rust806/115 suites; source audit zero errors."
+        "Final native432/16: Core210/9, persistence37/2, regression185/5; all actual exits0 and selected module.",
+        "Runtime H:/FreeCAD-src/build/gumball-core-runtime-20261011; shared SDK only; plugin SHA256 3107FFC7FF0087DED9902C066C4B026F67090291EAAB0F1C590772C19FB5CD29.",
+        "Full Rust808/115 suites; focused Gumball36/3; source audit zero errors.",
+        "Exactly one fresh final review; three Important findings fixed with RED→GREEN, no minors."
       ],
       "tests": [
         {
           "command": "tests/run_gumball_smoke.ps1 -Scope All",
-          "result": "423 native checks in three scopes; final combined run pending"
+          "result": "432 passed /16 native processes, actual exits0"
         },
         {
           "command": "rtk cargo test --manifest-path rust/Cargo.toml",
-          "result": "806 passed /115 suites"
+          "result": "808 passed /115 suites"
         }
       ],
       "uncertainties": [
@@ -2379,7 +2383,7 @@
         "Pivot cache process-local, preferences persist; no new associative History graph."
       ],
       "next_document": "docs/validation/2026-10-11-gumball-core.md",
-      "next_action": "One fresh final review; preserve unsupported capability scope and final native evidence."
+      "next_action": "Supported slice accepted after one fresh review and one TDD fix pass; next work is explicitly deferred native capability/paired Matrix parity adapters."
     }
   ],
   "merge_context": {

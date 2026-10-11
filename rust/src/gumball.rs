@@ -297,6 +297,7 @@ pub struct Snapshot {
 #[derive(Clone)]
 struct Value {
     amount: f64,
+    axis_direction: f64,
     vector: Point,
     constraint: Option<f64>,
     numeric: Option<String>,
@@ -432,6 +433,7 @@ impl GumballSession {
                     start,
                     value: Value {
                         amount: 0.,
+                        axis_direction: 1.,
                         vector: [0.; 3],
                         constraint: None,
                         numeric: None,
@@ -457,8 +459,15 @@ impl GumballSession {
                 let f = g.context.frame;
                 match g.context.handle {
                     Handle::MoveAxis(a) => {
-                        g.value.amount =
-                            g.value.constraint.unwrap_or(dot(delta, f.axes[a as usize]));
+                        let projected = dot(delta, f.axes[a as usize]);
+                        // A distance constraint follows the pointer's side of
+                        // the press point. Keep its last side exactly at zero;
+                        // a signed input reverses that direction deliberately.
+                        if projected != 0. {
+                            g.value.axis_direction = if projected < 0. { -1. } else { 1. };
+                        }
+                        g.value.amount = g.value.constraint
+                            .map_or(projected, |n| n * g.value.axis_direction);
                         g.value.vector = mul(f.axes[a as usize], g.value.amount);
                     }
                     Handle::MovePlane(_) | Handle::MoveFree => {
@@ -567,10 +576,11 @@ impl GumballSession {
                     return Err(GumballError::Limit);
                 }
                 g.history.push(g.value.clone());
-                g.value.amount = n;
+                let axis_drag = self.phase == Phase::Dragging && matches!(g.context.handle, Handle::MoveAxis(_));
+                g.value.amount = if axis_drag { n * g.value.axis_direction } else { n };
                 g.value.numeric = Some(raw);
                 g.value.vector = match g.context.handle {
-                    Handle::MoveAxis(a) | Handle::Scale(a) if g.relocate || matches!(g.context.handle,Handle::MoveAxis(_)) => mul(g.context.frame.axes[a as usize], n),
+                    Handle::MoveAxis(a) | Handle::Scale(a) if g.relocate || matches!(g.context.handle,Handle::MoveAxis(_)) => mul(g.context.frame.axes[a as usize], g.value.amount),
                     Handle::MoveFree | Handle::MovePlane(_) => {
                         let fallback=match g.context.handle {Handle::MovePlane(Plane::YZ)=>g.context.frame.axes[1],_=>g.context.frame.axes[0]};
                         mul(unit(g.value.vector).unwrap_or(fallback), n)
@@ -596,7 +606,9 @@ impl GumballSession {
                     if g.value.numeric.is_none() {
                         return Err(GumballError::InvalidState);
                     }
-                    g.value.constraint = Some(g.value.amount);
+                    g.value.constraint = Some(if matches!(g.context.handle,Handle::MoveAxis(_)) {
+                        g.value.amount * g.value.axis_direction
+                    } else { g.value.amount });
                     return Ok(Effect::Preview);
                 }
                 return self.commit();

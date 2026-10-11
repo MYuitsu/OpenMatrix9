@@ -13,6 +13,8 @@ OM9 dùng coordinate parser hiện hữu (document units, CPlane hoặc `w` worl
 native CoreSnaps pointer pick; optional Y point giải frame khi X song song
 CPlane normal. Rust Gram-Schmidt chuẩn hóa frame; zero/collinear/nonfinite
 reject, giữ phase/frame trước. Optional Y là lựa chọn OM9/Rhino được duyệt.
+Nếu native snap tắt hoặc không có candidate, Rust giao world ray với captured
+CPlane; ray song song bị từ chối, không dùng một điểm chiếu tùy ý.
 Ctrl numeric Move/Rotate/Scale chỉ đổi pivot/basis, không scale geometry.
 
 Pivot/frame là view state, không object/property/Undo hay associative History.

@@ -219,6 +219,35 @@ fn numeric_enter_during_drag_constrains_and_release_requests_commit() {
     assert_eq!(s.snapshot().phase, Phase::Ready);
 }
 #[test]
+fn constrained_axis_distance_follows_pointer_side_and_signed_input() {
+    for input in [5., -5.] {
+        let mut s = world_move_x();
+        let ray = |x| PointerRay { origin: [x, 1., 10.], direction: [0., 0., -1.] };
+        s.apply(Event::Motion(ray(-2.))).unwrap();
+        s.apply(Event::Numeric(format!("{input} mm"))).unwrap();
+        s.apply(Event::Accept).unwrap();
+        assert_eq!(s.plan().unwrap().matrix[3], -input, "entry uses current drag side");
+        for (x, direction) in [(4., 1.), (-2., -1.), (1., -1.), (5., 1.)] {
+            s.apply(Event::Motion(ray(x))).unwrap();
+            assert_eq!(s.plan().unwrap().matrix[3], input * direction);
+        }
+        s.apply(Event::Release).unwrap();
+        assert_eq!(s.plan().unwrap().matrix[3], input);
+    }
+}
+#[test]
+fn constrained_extrusion_can_cross_start_to_negative_distance() {
+    let mut s = world_move_x();
+    s.apply(Event::Motion(PointerRay { origin: [4., 1., 10.], direction: [0., 0., -1.] })).unwrap();
+    s.apply(Event::Numeric("5 mm".into())).unwrap();
+    s.apply(Event::Accept).unwrap();
+    modifier(&mut s, ModifierKey::Ctrl, true, false);
+    s.apply(Event::Motion(PointerRay { origin: [-2., 1., 10.], direction: [0., 0., -1.] })).unwrap();
+    s.apply(Event::Release).unwrap();
+    assert_eq!(s.plan().unwrap().operation, Operation::Extrude);
+    assert_eq!(point(s.plan().unwrap().matrix, [0.; 3]), [-5., 0., 0.]);
+}
+#[test]
 fn numeric_click_enter_requests_commit() {
     let mut s = world_move_x();
     s.apply(Event::Numeric("5".into())).unwrap();

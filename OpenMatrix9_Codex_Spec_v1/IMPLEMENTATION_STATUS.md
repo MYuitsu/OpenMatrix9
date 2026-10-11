@@ -7,6 +7,7 @@ CPlane/Object/World, Relocate and single-owner view-state cache implemented.
 Actual Qt/DPI, batch callback rollback and FCStd/retained 3DM cold proof;
 unsupported owners/frames and shared-host failed-transaction Redo loss remain explicit.
 [Evidence, reproducible suite and limits](../docs/validation/2026-10-11-gumball-core.md).
+Final fresh review: three Important findings fixed by TDD; native432/16 and Rust808/115 passed.
 <!-- gumball-core-20261011:end -->
 
 

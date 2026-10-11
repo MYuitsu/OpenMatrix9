@@ -330,7 +330,7 @@ expected geometry/ownership/preservation facts, không tham chiếu live host ob
 Feature records phân biệt evidence, OM9 defaults, unsupported representations
 và next action; không dùng một aggregate pass để tick mọi requirement.
 
-- [ ] **Step 1 — RED:** Warm fixture commit Move/Rotate/Scale/Copy/Extrude rồi
+- [x] **Step 1 — RED:** Warm fixture commit Move/Rotate/Scale/Copy/Extrude rồi
   Undo/Redo và save. Cold process reopen đo geometry/frame-independent bounds,
   actual curve/surface representation, signed orientation, group/layer/materials,
   independent copy IDs, instance source và retained 3DM export/reimport facts.
@@ -355,17 +355,17 @@ và next action; không dùng một aggregate pass để tick mọi requirement.
   Không so sánh native TShape pointer/identity giữa hai process. Các helpers
   đọc object/layer identity và export preservation bằng API native hiện có;
   cold process không nhập module state hoặc live object từ warm process.
-- [ ] **Step 2 — Verify RED:** Chạy warm/cold fixtures trước sửa persistence issue;
+- [x] **Step 2 — Verify RED:** Chạy warm/cold fixtures trước sửa persistence issue;
   xác định failure thuộc code hay harness; giữ actual process exits.
-- [ ] **Step 3 — Implement:** Sửa đúng persistence/publication/lifecycle defect
+- [x] **Step 3 — Implement:** Sửa đúng persistence/publication/lifecycle defect
   từ RED, không mở thêm family. Bổ sung feature records và traceability từng
   acceptance item -> fixture/evidence; giữ item chưa chứng minh chưa hoàn tất.
-- [ ] **Step 4 — Verify:** Chạy Rust suites/full Rust một lần sau integration,
+- [x] **Step 4 — Verify:** Chạy Rust suites/full Rust một lần sau integration,
   native command/geometry/core/cold; regression theo files bị đổi: Line/Polyline,
   repeat, mouse navigation, layers/History, retained 3DM. Chạy public source audit
   và whitespace checks. Independent whole-change review theo method đã chọn;
   xử lý actionable findings, chỉ re-run suites liên quan tới fix.
-- [ ] **Step 5 — Sync/commit:** Đồng bộ spec/checklists/catalog/status/manifest/
+- [x] **Step 5 — Sync/commit:** Đồng bộ spec/checklists/catalog/status/manifest/
   README/ledger với đúng evidence. Không ghi complete nếu required behavior còn
   missing. Commit scoped changes, không commit user models hoặc source khác.
 
@@ -397,9 +397,9 @@ test step được chỉ định. Các interface tên/type dùng cùng tên gi�
 
 Đề xuất **Native**: tôi triển khai trong session này trên baseline đã kiểm tra,
 giữ scoped patches tại checkout hiện tại, rồi một reviewer kiểm toàn bộ thay đổi.
-Các tasks phụ thuộc chặt vào cùng session/ABI và event routing, nên cách này
-tránh trao đổi interface qua nhiều implementers. Người dùng đã duyệt Native inline/current checkout. Tasks1–4 đã commit và
-nghiệm thu; Task5 có warm/cold/regression/source audit đạt, final combined
-run và một fresh final review là gate còn lại. Xem validation record để biết
+Các tasks phụ thuộc chặt vào cùng session/ABI và event routing. Người dùng
+đã duyệt Native inline/current checkout. Tasks1–5 và một fresh final review
+đã thực hiện; ba Important findings có RED→GREEN và final combined suite
+432 native checks/16 processes, full Rust808/115 suites đạt. Xem validation record để biết
 exact supported slice và các capability/host limitations, không hiểu tick bước
 triển khai là toàn bộ Matrix/Rhino parity.
