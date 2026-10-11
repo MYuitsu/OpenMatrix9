@@ -1,0 +1,75 @@
+"""Real Gumball publication on native occurrences, groups and discrete owners."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part, Mesh, Points
+from PySide6 import QtCore, QtWidgets, QtTest
+sys.path.insert(0, 'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+from gumball_fixture import GumballUI
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'checks': [],'feature_ids':['OM9-INFO-020','OM9-INFO-021','OM9-INFO-022']}
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+    if not value: raise AssertionError(name)
+def near(a, b): return abs(a-b) < 1e-8
+def run():
+    ui = None
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc = App.newDocument('GumballOwnership'); doc.UndoMode = 1
+        source = doc.addObject('Part::Feature','Definition'); source.Shape = Part.makeBox(2,3,4)
+        first = doc.addObject('App::Link','First'); first.setLink(source)
+        second = doc.addObject('App::Link','Second'); second.setLink(source)
+        first.LinkPlacement.Base = App.Vector(10,0,0); second.LinkPlacement.Base = App.Vector(20,0,0)
+        doc.recompute(); source.Visibility = False
+        Gui.activeDocument().activeView().viewAxonometric()
+        ui = GumballUI(native); ui.select(first,second); ui.command('Gumball On')
+        undo = doc.UndoCount
+        ui.numeric('MoveX','3 mm')
+        check('two occurrences move once without modifying definition',near(first.LinkPlacement.Base.x,13) and near(second.LinkPlacement.Base.x,23) and near(source.Shape.BoundBox.XMin,0) and doc.UndoCount==undo+1)
+        doc.undo(); ui.settle(); check('occurrence Undo is atomic',near(first.LinkPlacement.Base.x,10) and near(second.LinkPlacement.Base.x,20))
+        ui.select(first);end=ui.drag('MoveX');ui.command('4 mm');undo=doc.UndoCount
+        class DefinitionCallback:
+            fired=False
+            def slotChangedObject(self,obj,prop):
+                if obj==first and prop in ('Placement','LinkPlacement') and not self.fired:
+                    self.fired=True;source.Shape=Part.makeBox(7,3,4)
+        observer=DefinitionCallback();App.addDocumentObserver(observer)
+        try:ui.release(end)
+        finally:App.removeDocumentObserver(observer)
+        check('definition callback aborts occurrence and definition together',observer.fired and near(first.LinkPlacement.Base.x,10) and near(source.Shape.Volume,24) and doc.UndoCount==undo)
+        ui.select(first); end=ui.drag('MoveX'); ui.command('4 mm')
+        source.Shape=Part.makeBox(7,3,4); doc.recompute(); undo=doc.UndoCount
+        ui.release(end)
+        check('definition mutation invalidates captured Link gesture',near(first.LinkPlacement.Base.x,10) and doc.UndoCount==undo)
+        source.Shape=Part.makeBox(2,3,4);doc.recompute();ui.select(first)
+        ui.numeric('MoveX','4 mm',QtCore.Qt.AltModifier)
+        copies=[o for o in doc.Objects if o.TypeId=='App::Link' and o.Name not in ('First','Second')]
+        check('Link copy retains shared definition and independent occurrence',len(copies)==1 and copies[0].LinkedObject==source and near(copies[0].LinkPlacement.Base.x,14) and near(first.LinkPlacement.Base.x,10) and bool(copies[0].OM9GumballIdentity))
+        doc.undo();ui.settle()
+        group=doc.addObject('App::Part','PlacedGroup'); child=doc.addObject('Part::Feature','Member');child.Shape=Part.makeBox(2,3,4);group.addObject(child);group.Placement.Base=App.Vector(30,0,0);doc.recompute()
+        ui.select(group,child);ui.numeric('MoveX','5 mm')
+        check('selected parent and child transform once',near(group.Placement.Base.x,35) and near(child.Placement.Base.x,0));doc.undo();ui.settle()
+        ui.numeric('MoveX','5 mm',QtCore.Qt.AltModifier)
+        copiedgroup=next(o for o in doc.Objects if o.TypeId=='App::Part' and o!=group)
+        check('group copy owns independent native members',len(copiedgroup.Group)==1 and copiedgroup.Group[0]!=child and copiedgroup.Group[0] not in group.Group and near(copiedgroup.Placement.Base.x,35) and near(group.Placement.Base.x,30));doc.undo();ui.settle()
+        mesh=doc.addObject('Mesh::Feature','NativeMesh');mesh.Mesh=Mesh.Mesh([[App.Vector(0,0,0),App.Vector(2,0,0),App.Vector(0,3,0)]])
+        points=doc.addObject('Points::Feature','NativePoints');points.Points=Points.Points([App.Vector(0,0,0),App.Vector(2,3,4)]);doc.recompute()
+        ui.select(mesh,points);ui.numeric('MoveX','2 mm')
+        check('native Mesh and Points rigid batch commits',near(mesh.Mesh.BoundBox.XMin,2) and near(points.Points.BoundBox.XMin,2));doc.undo();ui.settle()
+        ui.numeric('ScaleX','2')
+        check('native Mesh and Points affine batch keeps representations',near(mesh.Mesh.BoundBox.XLength,4) and near(points.Points.BoundBox.XLength,4) and mesh.Mesh.CountFacets==1 and len(points.Points.Points)==2);doc.undo();ui.settle()
+        ui.select(child);before=child.Shape.BoundBox.XMin;undo=doc.UndoCount;oldframe=native.gumballState()['frame']
+        ui.numeric('MoveX','2 mm',QtCore.Qt.ControlModifier)
+        check('Ctrl numeric click moves widget only',near(child.Shape.BoundBox.XMin,before) and doc.UndoCount==undo and near(native.gumballState()['frame'][0],oldframe[0]+2))
+        ui.command('GumballAlignment World');Gui.Selection.clearSelection();Gui.Selection.addSelection(mesh,'Segment1');ui.settle()
+        ui.command('GumballAlignment Object')
+        check('unsupported Mesh component frame keeps prior alignment explicitly',native.gumballState()['alignment']==2 and 'UnsupportedFrame' in native.gumballState()['unresolved'])
+        report['ok']=True
+    except Exception: report.update(ok=False,error=traceback.format_exc())
+    finally:
+        if ui:report['transcript']=ui.transcript();report['state']=ui.native.gumballState()
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2));Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

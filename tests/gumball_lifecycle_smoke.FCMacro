@@ -1,0 +1,79 @@
+"""Gumball frame, invalidation, modifier and native event ownership contracts."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh
+from PySide6 import QtCore,QtWidgets,QtTest,QtGui
+sys.path.insert(0,'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+from gumball_fixture import GumballUI
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-020','OM9-INFO-021','OM9-INFO-022']}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    ui=None
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('GumballLifecycle');doc.UndoMode=1
+        box=doc.addObject('Part::Feature','Box');box.Shape=Part.makeBox(2,3,4);doc.recompute();Gui.activeDocument().activeView().viewAxonometric()
+        ui=GumballUI(native);ui.select(box);ui.command('Gumball On')
+        for alias in ('OM9_InfoSettingsGumballON','OM9_InfoSettingsGumballAlignment','OM9_InfoSettingsRelocateGumball'):
+            check('legacy command registered '+alias,alias in Gui.listCommands())
+        count,undo=len(doc.Objects),doc.UndoCount
+        ui.command('RelocateGumball');ui.command('w0,0,0');ui.command('w0,1,0');ui.command('w-1,0,0')
+        check('three points give rigid rotated frame',native.gumballState()['frame']==[0,0,0,0,1,0,-1,0,0,0,0,1])
+        ui.numeric('MoveX','5 mm');check('relocated axis moves along its world direction',abs(box.Shape.BoundBox.YMin-5)<1e-8 and abs(box.Shape.BoundBox.XMin)<1e-8);doc.undo();ui.settle()
+        ui.command('RelocateGumball');ui.command('w10,20,30');ui.command('w11,20,30');ui.command('')
+        frame=native.gumballState()['frame'];ui.select();ui.select(box)
+        check('single object keeps relocated frame across reselect',native.gumballState()['frame']==frame)
+        ui.command('GumballAlignment World')
+        shape=box.Shape;count=len(doc.Objects);undo=doc.UndoCount;origin=ui.target('MoveFree')
+        ui.command('RelocateGumball');QtTest.QTest.mouseClick(ui.viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,origin);ui.settle()
+        ui.command('w20,20,20');ui.command('')
+        check('native Relocate pointer origin and CMD direction change only widget',native.gumballState()['phase']==1 and len(doc.Objects)==count and doc.UndoCount==undo and box.Shape.isSame(shape))
+        ui.command('GumballAlignment World')
+        original=[native.cplane(doc.Name,slot) for slot in range(4)]
+        rotated=[10,20,30,0,1,0,-1,0,0,0,0,1]
+        for slot in range(4):native.setCPlane(doc.Name,slot,rotated)
+        ui.command('GumballAlignment CPlane');ui.numeric('MoveX','3 mm')
+        check('rotated CPlane move uses native frame',abs(box.Shape.BoundBox.YMin-3)<1e-8 and abs(box.Shape.BoundBox.XMin)<1e-8);doc.undo();ui.settle()
+        for slot in range(4):native.setCPlane(doc.Name,slot,original[slot])
+        ui.command('GumballAlignment World');ui.select(box)
+        pos=ui.target('ScaleX');QtTest.QTest.mouseClick(ui.viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,pos);ui.settle()
+        field=next(w for w in Gui.getMainWindow().findChildren(QtWidgets.QLineEdit,'OM9GumballNumeric') if w.isVisible());undo=doc.UndoCount
+        QtTest.QTest.keyClicks(field,'0');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);ui.settle()
+        check('invalid factor keeps native editor and model',field.isVisible() and native.gumballState()['phase']==2 and abs(box.Shape.Volume-24)<1e-8 and doc.UndoCount==undo)
+        QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);ui.escape()
+        end=ui.drag('MoveX');ui.command('2 mm');before=len(doc.Objects)
+        QtTest.QTest.keyPress(ui.viewport,QtCore.Qt.Key_Alt);QtTest.QTest.keyRelease(ui.viewport,QtCore.Qt.Key_Alt)
+        repeat=QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Alt,QtCore.Qt.AltModifier,'',True,1);QtWidgets.QApplication.sendEvent(ui.viewport,repeat)
+        check('Alt copy drag shows native copy cursor',ui.viewport.cursor().shape()==QtCore.Qt.DragCopyCursor)
+        ui.release(end)
+        check('Alt tap and auto-repeat copy exactly once',len(doc.Objects)==before+1 and abs(box.Shape.BoundBox.XMin)<1e-8);doc.undo();ui.settle()
+        end=ui.drag('MoveX');ui.command('2 mm')
+        for unused in range(2):QtTest.QTest.keyPress(ui.viewport,QtCore.Qt.Key_Alt);QtTest.QTest.keyRelease(ui.viewport,QtCore.Qt.Key_Alt)
+        ui.release(end);check('two Alt taps return to move',len(doc.Objects)==before and abs(box.Shape.BoundBox.XMin-2)<1e-8);doc.undo();ui.settle()
+        end=ui.drag('MoveX');undo=doc.UndoCount
+        QtTest.QTest.mousePress(ui.viewport,QtCore.Qt.MiddleButton,QtCore.Qt.NoModifier,end);QtTest.QTest.mouseRelease(ui.viewport,QtCore.Qt.MiddleButton,QtCore.Qt.NoModifier,end);ui.release(end)
+        check('navigation cancels gesture without commit',doc.UndoCount==undo and abs(box.Shape.BoundBox.XMin)<1e-8 and native.gumballState()['phase']==1)
+        for mutation in ('appearance','delete','replacement'):
+            ui.select(box);end=ui.drag('MoveX');ui.command('2 mm');undo=doc.UndoCount
+            if mutation=='appearance':box.ViewObject.ShapeColor=(1.,0.,0.)
+            else:
+                doc.removeObject(box.Name)
+                if mutation=='replacement':box=doc.addObject('Part::Feature','Box');box.Shape=Part.makeBox(2,3,4);doc.recompute()
+            ui.release(end)
+            check(mutation+' invalidates pending gesture',doc.UndoCount==undo and native.gumballState()['phase']==1 and (mutation=='delete' or abs(box.Shape.BoundBox.XMin)<1e-8))
+            if mutation=='delete':box=doc.addObject('Part::Feature','Box');box.Shape=Part.makeBox(2,3,4);doc.recompute()
+        ui.select(box);end=ui.drag('MoveX');ui.command('2 mm');undo=doc.UndoCount
+        Gui.activateWorkbench('PartWorkbench');ui.release(end)
+        check('workbench switch releases gesture ownership',doc.UndoCount==undo and abs(box.Shape.BoundBox.XMin)<1e-8 and native.gumballState()['phase']==1)
+        Gui.activateWorkbench('OpenMatrix9Workbench');ui.select(box);end=ui.drag('MoveX');App.closeDocument(doc.Name);ui.settle()
+        check('document close clears native overlay and gesture',native.gumballState()['phase']==1 and not any(w.property('om9GumballViewport') for w in Gui.getMainWindow().findChildren(QtWidgets.QWidget)))
+        report['ok']=True
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        if ui:report['transcript']=ui.transcript()
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2));Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

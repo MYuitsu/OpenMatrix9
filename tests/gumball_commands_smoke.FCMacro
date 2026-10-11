@@ -3,7 +3,7 @@ import json,os,traceback
 from pathlib import Path
 import FreeCAD as App,FreeCADGui as Gui,Part
 from PySide6 import QtCore,QtWidgets,QtTest
-out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-020','OM9-INFO-021','OM9-INFO-022']}
 def check(name,value):
     report['checks'].append({'name':name,'passed':bool(value)})
     if not value:raise AssertionError(name)

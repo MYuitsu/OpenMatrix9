@@ -207,6 +207,7 @@ pub enum Event {
     Enable(bool),
     Align(Alignment),
     ObserveFrame(Frame, Frame),
+    ObserveOwner(Option<Stamp>, Frame, Frame),
     Begin(BeginContext),
     Motion(PointerRay),
     Modifier(ModifierEvent),
@@ -217,6 +218,7 @@ pub enum Event {
     Cancel,
     BeginRelocate,
     RelocatePoint(Point),
+    RelocateRay(PointerRay),
     CommitSucceeded,
 }
 #[repr(u32)]
@@ -321,6 +323,8 @@ pub struct GumballSession {
     gesture: Option<Gesture>,
     relocate: Vec<Point>,
     old_frame: Frame,
+    owner: Option<Stamp>,
+    owner_frames: HashMap<(u64,u64,u64,u64),(Stamp,Frame)>,
 }
 impl Default for GumballSession {
     fn default() -> Self {
@@ -339,6 +343,8 @@ impl GumballSession {
             gesture: None,
             relocate: Vec::new(),
             old_frame: Frame::default(),
+            owner: None,
+            owner_frames: HashMap::new(),
         }
     }
     pub fn snapshot(&self) -> Snapshot {
@@ -373,6 +379,7 @@ impl GumballSession {
                     return Err(GumballError::InvalidState);
                 }
                 self.alignment = a;
+                if let Some(s)=self.owner {self.owner_frames.remove(&(s.document,s.object,s.generation,s.epoch));}
             }
             Event::ObserveFrame(f, cp) => {
                 if self.gesture.is_some() || self.phase == Phase::Relocate {
@@ -382,6 +389,17 @@ impl GumballSession {
                 cp.validate()?;
                 self.frame = f;
                 self.cplane = cp;
+            }
+            Event::ObserveOwner(owner,f,cp) => {
+                if self.gesture.is_some()||self.phase==Phase::Relocate {return Err(GumballError::InvalidState);}
+                f.validate()?;cp.validate()?;
+                if owner.is_some_and(|s|[s.document,s.object,s.generation,s.revision,s.epoch].contains(&0)){return Err(GumballError::InvalidInput);}
+                self.owner=owner;self.frame=f;self.cplane=cp;
+                if let Some(s)=owner {
+                    if let Some((captured,frame))=self.owner_frames.get(&(s.document,s.object,s.generation,s.epoch)) {
+                        if *captured==s {self.frame=*frame;}
+                    }
+                }
             }
             Event::Begin(mut c) => {
                 if !self.enabled || self.gesture.is_some() || self.phase == Phase::Relocate {
@@ -452,6 +470,9 @@ impl GumballSession {
                         g.value.amount = norm(g.value.vector);
                     }
                     Handle::Scale(a) => {
+                        if g.relocate {
+                            g.value.vector = delta;
+                        } else {
                         let start = dot(sub(g.start, f.origin), f.axes[a as usize]);
                         if start.abs() < 1e-12 {
                             return Err(GumballError::Projection);
@@ -460,6 +481,7 @@ impl GumballSession {
                             .value
                             .constraint
                             .unwrap_or(dot(sub(hit, f.origin), f.axes[a as usize]) / start);
+                        }
                     }
                     Handle::Rotate(a) => {
                         let u = unit(sub(g.start, f.origin))?;
@@ -478,7 +500,14 @@ impl GumballSession {
                 }
                 self.phase = Phase::Dragging;
                 if g.relocate {
-                    self.frame.origin = add(f.origin, g.value.vector);
+                    self.frame = f;
+                    if let Handle::Rotate(a) = g.context.handle {
+                        let u=f.axes[a as usize];let (sin,cos)=g.value.amount.sin_cos();
+                        for i in 0..3 {
+                            let v=f.axes[i];
+                            self.frame.axes[i]=add(add(mul(v,cos),mul(cross(u,v),sin)),mul(u,dot(u,v)*(1.-cos)));
+                        }
+                    } else {self.frame.origin = add(f.origin, g.value.vector);}
                     self.frame.validate()?;
                 } else {
                     self.plan()?;
@@ -501,12 +530,11 @@ impl GumballSession {
                     g.copy = !g.copy;
                 }
                 if e.key == ModifierKey::Ctrl
-                    && e.pressed
                     && self.phase == Phase::Dragging
                     && !g.relocate
                     && matches!(g.context.handle, Handle::MoveAxis(_))
                 {
-                    g.extrude = true;
+                    g.extrude = e.pressed;
                 }
                 if !g.relocate {
                     self.plan()?;
@@ -518,9 +546,6 @@ impl GumballSession {
                     return Err(GumballError::InvalidState);
                 }
                 let g = self.gesture.as_mut().ok_or(GumballError::InvalidState)?;
-                if g.relocate {
-                    return Err(GumballError::InvalidState);
-                }
                 if raw.len() > 1024 || raw.contains('\0') {
                     return Err(GumballError::Limit);
                 }
@@ -528,14 +553,14 @@ impl GumballSession {
                     Handle::Rotate(_) => {
                         units::parse_angle(&raw).map_err(|_| GumballError::InvalidInput)?
                     }
-                    Handle::Scale(_) => raw
+                    Handle::Scale(_) if !g.relocate => raw
                         .trim()
                         .parse::<f64>()
                         .map_err(|_| GumballError::InvalidInput)?,
                     _ => units::parse_length(&raw, g.context.mm_per_unit)
                         .map_err(|_| GumballError::InvalidInput)?,
                 };
-                if !n.is_finite() || matches!(g.context.handle, Handle::Scale(_)) && n == 0. {
+                if !n.is_finite() || !g.relocate && matches!(g.context.handle, Handle::Scale(_)) && n == 0. {
                     return Err(GumballError::InvalidInput);
                 }
                 if g.history.len() == crate::coordinate_input::MAX_INPUTS {
@@ -545,13 +570,21 @@ impl GumballSession {
                 g.value.amount = n;
                 g.value.numeric = Some(raw);
                 g.value.vector = match g.context.handle {
-                    Handle::MoveAxis(a) => mul(g.context.frame.axes[a as usize], n),
+                    Handle::MoveAxis(a) | Handle::Scale(a) if g.relocate || matches!(g.context.handle,Handle::MoveAxis(_)) => mul(g.context.frame.axes[a as usize], n),
                     Handle::MoveFree | Handle::MovePlane(_) => {
-                        mul(unit(g.value.vector).unwrap_or(g.context.frame.axes[0]), n)
+                        let fallback=match g.context.handle {Handle::MovePlane(Plane::YZ)=>g.context.frame.axes[1],_=>g.context.frame.axes[0]};
+                        mul(unit(g.value.vector).unwrap_or(fallback), n)
                     }
                     _ => [0.; 3],
                 };
-                self.plan()?;
+                if g.relocate {
+                    let f=g.context.frame;self.frame=f;
+                    if let Handle::Rotate(a)=g.context.handle {
+                        let u=f.axes[a as usize];let (sin,cos)=n.sin_cos();
+                        for i in 0..3 {let v=f.axes[i];self.frame.axes[i]=add(add(mul(v,cos),mul(cross(u,v),sin)),mul(u,dot(u,v)*(1.-cos)));}
+                    } else {self.frame.origin=add(f.origin,g.value.vector);}
+                    self.frame.validate()?;
+                } else {self.plan()?;}
                 return Ok(Effect::Preview);
             }
             Event::Accept => {
@@ -595,6 +628,14 @@ impl GumballSession {
                 self.phase = Phase::Relocate;
                 self.relocate.clear();
             }
+            Event::RelocateRay(ray) => {
+                validate_ray(ray)?;
+                let direction=unit(ray.direction)?;
+                let normal=self.cplane.axes[2];let denominator=dot(normal,direction);
+                if denominator.abs()<1e-12 {return Err(GumballError::Projection);}
+                let t=dot(normal,sub(self.cplane.origin,ray.origin))/denominator;
+                return self.update(Event::RelocatePoint(add(ray.origin,mul(direction,t))));
+            }
             Event::RelocatePoint(p) => {
                 if self.phase != Phase::Relocate || self.relocate.len() >= 3 {
                     return Err(GumballError::InvalidState);
@@ -635,6 +676,7 @@ impl GumballSession {
             return Err(GumballError::InvalidState);
         }
         if self.gesture.as_ref().is_some_and(|g| g.relocate) {
+            self.remember_owner_frame();
             self.gesture = None;
             self.phase = Phase::Ready;
             return Ok(Effect::FrameChanged);
@@ -660,15 +702,25 @@ impl GumballSession {
             if norm(cross(x, normal)) > 1e-12 {
                 cross(normal, x)
             } else {
-                self.cplane.axes[1]
+                return Err(GumballError::InvalidInput);
             }
         };
         let z = unit(cross(x, hint))?;
         let y = cross(z, x);
         self.frame = Frame::new(o, [x, y, z])?;
+        self.remember_owner_frame();
         self.phase = Phase::Ready;
         self.relocate.clear();
         Ok(Effect::FrameChanged)
+    }
+    fn remember_owner_frame(&mut self) {
+        if let Some(s)=self.owner {
+            let key=(s.document,s.object,s.generation,s.epoch);
+            if self.owner_frames.len()>=256&&!self.owner_frames.contains_key(&key) {
+                if let Some(old)=self.owner_frames.keys().min().copied(){self.owner_frames.remove(&old);}
+            }
+            self.owner_frames.insert(key,(s,self.frame));
+        }
     }
     pub fn plan(&self) -> Result<TransformPlan, GumballError> {
         let g = self.gesture.as_ref().ok_or(GumballError::InvalidState)?;
@@ -740,7 +792,15 @@ impl GumballSession {
             provenance: g.value.numeric.clone(),
         })
     }
+    pub fn report(&self) -> Result<String,GumballError> {
+        let plan=self.plan()?;let gesture=self.gesture.as_ref().ok_or(GumballError::InvalidState)?;
+        let sources=plan.sources.iter().map(|s|format!("{{\"document\":{},\"object\":{},\"generation\":{},\"revision\":{},\"epoch\":{},\"parent\":{}}}",s.stamp.document,s.stamp.object,s.stamp.generation,s.stamp.revision,s.stamp.epoch,s.parent)).collect::<Vec<_>>().join(",");
+        let numeric=plan.provenance.as_deref().map(json_text).unwrap_or_else(||"null".into());let c=&gesture.context;
+        let report=format!("{{\"schema_version\":1,\"feature_id\":\"OM9-INFO-020\",\"operation\":{},\"copy\":{},\"generation\":{},\"numeric\":{},\"mm_per_unit\":{},\"frame\":{{\"origin\":{:?},\"axes\":{:?}}},\"cplane\":{{\"origin\":{:?},\"axes\":{:?}}},\"matrix\":{:?},\"sources\":[{}]}}",plan.operation as u32,plan.copy,plan.generation,numeric,c.mm_per_unit,c.frame.origin,c.frame.axes,c.cplane.origin,c.cplane.axes,plan.matrix,sources);
+        if report.len()>4*1024*1024{return Err(GumballError::Limit);}Ok(report)
+    }
 }
+fn json_text(raw:&str)->String{let mut out=String::from("\"");for c in raw.chars(){match c{'"'=>out.push_str("\\\""),'\\'=>out.push_str("\\\\"),c if c.is_control()=>out.push_str(&format!("\\u{:04x}",c as u32)),c=>out.push(c)}}out.push('"');out}
 fn roots(sources: &[Source], document: u64) -> Result<Vec<Source>, GumballError> {
     if sources.is_empty() || sources.len() > crate::native_input_tree::MAX_NODES {
         return Err(GumballError::InvalidSources);
@@ -769,6 +829,7 @@ fn roots(sources: &[Source], document: u64) -> Result<Vec<Source>, GumballError>
         let mut chain = HashSet::new();
         let mut owned = false;
         while p != 0 {
+            if chain.len() >= crate::native_input_tree::MAX_DEPTH {return Err(GumballError::Limit);}
             if !chain.insert(p) || p == s.stamp.object {
                 return Err(GumballError::InvalidSources);
             }

@@ -52,7 +52,8 @@ std::set<std::string> documents() {
 }
 class RustCommand final:public Gui::Command {
 public:
-    RustCommand(std::size_t i,const char* id):Gui::Command(id),index(i) {
+    RustCommand(std::size_t i,const char* id):Gui::Command(id),index(i),ownedName(id) {
+        sName=ownedName.c_str();
         sAppModule="OpenMatrix9";sGroup="OpenMatrix9";sMenuText=om9_command_menu_text(i);sToolTipText=om9_command_tooltip(i);sStatusTip=sToolTipText;sWhatsThis=sToolTipText;sPixmap="";
         if(const auto exchange=om9_3dm_operation(i))sPixmap=exchange==1?"Std_Import":"Std_Export";
         for(std::size_t key=0;key<om9_keyboard_count();++key)if(std::string(id)==om9_keyboard_target(key)){accelerator=om9_keyboard_key(key);sAccel=accelerator.c_str();break;}
@@ -67,7 +68,7 @@ public:
     void activated(int) override{om9_sidebar_record_execution(index,om9ExecuteNativeCommand(index));}
     bool isActive() override{if(_pcAction){if(OpenMatrix9Gui::GumballController::handles(index))_pcAction->setBlockedChecked(OpenMatrix9Gui::GumballController::checked(index));if(OpenMatrix9Gui::CoreSnaps::handles(index))_pcAction->setBlockedChecked(OpenMatrix9Gui::CoreSnaps::checked(index));if(OpenMatrix9Gui::CoreKeyboard::handles(index))_pcAction->setBlockedChecked(OpenMatrix9Gui::CoreKeyboard::checked(index));}return om9NativeCommandAvailable(index);}
     Gui::Action* createAction() override{auto* action=Gui::Command::createAction();if(OpenMatrix9Gui::CoreSnaps::handles(index)||std::string(om9_command_id(index))=="Ortho"||std::string(om9_command_id(index))=="OM9_Gumball")action->setCheckable(true);return action;}
-private:std::size_t index;std::string accelerator;
+private:std::size_t index;std::string ownedName,accelerator;
 };
 }
 bool om9NativeCommandAvailable(std::size_t index) {
@@ -163,5 +164,7 @@ bool om9ExecuteNativeCommand(std::size_t index) {
 }
 void CreateOpenMatrix9Commands() {
     auto& manager=Gui::Application::Instance->commandManager();
-    for(std::size_t i=0;i<om9_command_count();++i)if(const char* id=om9_command_id(i);id && !manager.getCommandByName(id))manager.addCommand(new RustCommand(i,id));
+    for(std::size_t i=0;i<om9_command_count();++i){if(const char* id=om9_command_id(i);id && !manager.getCommandByName(id))manager.addCommand(new RustCommand(i,id));
+        if(OpenMatrix9Gui::GumballController::handles(i)){const auto alias=std::string("OM9_")+om9_command_icon(i);if(!manager.getCommandByName(alias.c_str()))manager.addCommand(new RustCommand(i,alias.c_str()));}
+    }
 }

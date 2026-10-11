@@ -119,6 +119,17 @@ fn update(id: u64, event: Event) -> u32 {
         Err(_) => 2,
     }
 }
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_gumball_report(id:u64,out:*mut u8,capacity:usize,needed:*mut usize)->u32 {
+    call(||{
+        if needed.is_null()||capacity>4*1024*1024||out.is_null()&&capacity!=0{return 1;}
+        let Ok(registry)=registry().lock() else{return 1;};let Some(session)=registry.sessions.get(&id) else{return 1;};
+        let Ok(report)=session.report() else{return 2;};
+        if out.is_null(){unsafe{*needed=report.len()};return 0;}
+        if capacity<report.len(){return 1;}
+        unsafe{std::ptr::copy_nonoverlapping(report.as_ptr(),out,report.len());*needed=report.len();}0
+    })
+}
 fn frame(raw: [f64; 12]) -> Result<Frame, GumballError> {
     Frame::new(
         [raw[0], raw[1], raw[2]],
@@ -162,6 +173,19 @@ pub unsafe extern "C" fn om9_gumball_frame(id: u64, f: *const f64, cp: *const f6
             return 2;
         };
         update(id, Event::ObserveFrame(f, cp))
+    })
+}
+/// # Safety
+/// Source is null for transient/multiple selection or readable for one record.
+/// Both frames are readable for twelve doubles; nothing borrowed is retained.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_gumball_owner_frame(id:u64,source:*const GumballSource,f:*const f64,cp:*const f64)->u32 {
+    call(|| {
+        if f.is_null()||cp.is_null(){return 1;}
+        let Ok(f)=frame(unsafe{std::slice::from_raw_parts(f,12)}.try_into().unwrap()) else{return 2;};
+        let Ok(cp)=frame(unsafe{std::slice::from_raw_parts(cp,12)}.try_into().unwrap()) else{return 2;};
+        let owner=if source.is_null(){None}else{Some(Source::from(unsafe{*source}).stamp)};
+        update(id,Event::ObserveOwner(owner,f,cp))
     })
 }
 /// # Safety
@@ -346,6 +370,7 @@ pub unsafe extern "C" fn om9_gumball_event(id: u64, input: *const GumballEvent) 
             8 => Event::BeginRelocate,
             9 => Event::RelocatePoint(e.world_point),
             10 => Event::CommitSucceeded,
+            12 => Event::RelocateRay(PointerRay {origin:e.ray_origin,direction:e.ray_direction}),
             _ => return 1,
         };
         update(id, event)

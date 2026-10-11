@@ -5,6 +5,7 @@
 #include <QPointer>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QPoint>
 #include <optional>
 #include <fastsignals/signal.h>
 class QMenu;class QLineEdit;class QWidget;class QEvent;
@@ -25,13 +26,19 @@ private:
     GumballController();
     bool applyCommand(unsigned,unsigned);bool event(const Om9GumballEvent&);
     void alignmentMenu();void message(const QString&);void persist();
+    void updateOverlay();void updatePreview();void finishGesture();void releaseMouse();
     Om9GumballSnapshot snapshot()const;
-    std::uint64_t session=0;bool workbench=false,relocated=false;
+    std::uint64_t session=0;bool workbench=false,relocated=false,publishing=false;
     std::optional<GumballInputs> inputs;
     QString error,selectionKey,documentName;
     QPointer<Gui::View3DInventor> view;
     QPointer<QMenu> popup;
+    std::unique_ptr<GumballOverlay> overlay;
+    QPointer<QWidget> mouseOwner;
+    QPoint pressPosition;
+    bool mouseDown=false,moved=false,widgetRelocate=false,suppressRelease=false;
     std::vector<CoordinateInput> relocateInputs;
+    unsigned relocatePointCount=0;
     fastsignals::scoped_connection deleteConnection,activeConnection;
 };
 }

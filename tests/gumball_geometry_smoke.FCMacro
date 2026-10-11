@@ -3,7 +3,7 @@ import json, os, traceback
 from pathlib import Path
 import FreeCAD as App, FreeCADGui as Gui, Part, Mesh, Points
 from PySide6 import QtCore, QtWidgets
-out=Path(os.environ['OM9_SMOKE_OUTPUT']); report={'checks':[]}
+out=Path(os.environ['OM9_SMOKE_OUTPUT']); report={'checks':[],'feature_ids':['OM9-INFO-020','OM9-INFO-021']}
 def check(name,passed):
     report['checks'].append({'name':name,'passed':bool(passed)})
     if not passed: raise AssertionError(name)
@@ -24,6 +24,8 @@ def run():
         face=doc.addObject('Part::Feature','HoledFace')
         outer=Part.Wire(Part.makeCircle(5));inner=Part.Wire(Part.makeCircle(2));inner.reverse()
         face.Shape=Part.Face([outer,inner])
+        wire=doc.addObject('Part::Feature','WireCircle');wire.Shape=Part.Wire(Part.makeCircle(5))
+        wire.Placement=App.Placement(App.Vector(),App.Rotation(App.Vector(0,0,1),30))
         doc.recompute();QtWidgets.QApplication.processEvents()
         count=len(doc.Objects); undo=doc.UndoCount
         before=circle.Shape.exportBrepToString()
@@ -34,6 +36,8 @@ def run():
         check('scale retains exact native curve',f['staged'][0]['curve_type'] in ('Geom_Ellipse','Geom_BSplineCurve'))
         f=native.gumballGeometryFacts(doc.Name,[circle.Name],'MoveX','5','Object')
         check('curve Object alignment follows native tangent',abs(f['frame'][3])<1e-8 and abs(f['frame'][4]+1)<1e-8)
+        f=native.gumballGeometryFacts(doc.Name,[wire.Name],'MoveX','5','Object')
+        check('single-edge wire Object alignment follows rotated native tangent',abs(f['frame'][3]-.5)<1e-8 and abs(f['frame'][4]+3**.5/2)<1e-8)
         try:native.gumballGeometryFacts(doc.Name,[circle.Name,box.Name],'MoveX','5','Object')
         except RuntimeError:check('ambiguous Object alignment reports unresolved',True)
         else:check('ambiguous Object alignment reports unresolved',False)

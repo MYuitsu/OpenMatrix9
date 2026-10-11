@@ -351,6 +351,7 @@ bool CurveController::eventFilter(QObject* watched,QEvent* event) {
     if(event->type()==QEvent::MouseButtonRelease&&releaseTarget==watched&&static_cast<QMouseEvent*>(event)->button()==Qt::LeftButton){releaseTarget.clear();return true;}
     if(!enabled||Gui::Application::Instance->isClosing())return false;
     if(GumballController::instance().processEvent(watched,event))return true;
+    if(watched->property("om9GumballEditor").toBool())return false;
     if(event->type()==QEvent::KeyPress&&CoreKeyboard::inputContext(watched)){
         auto* key=static_cast<QKeyEvent*>(event);
         auto* gui=Gui::Application::Instance->activeDocument();auto* view=gui?dynamic_cast<Gui::View3DInventor*>(gui->getActiveView()):nullptr;auto* widget=qobject_cast<QWidget*>(watched);

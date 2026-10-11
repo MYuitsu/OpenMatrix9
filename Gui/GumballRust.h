@@ -26,6 +26,7 @@ static_assert(sizeof(Om9GumballBegin)==280);
 static_assert(sizeof(Om9GumballEvent)==88);
 static_assert(sizeof(Om9GumballSnapshot)==272);
 extern "C" {
+std::uint32_t om9_gumball_owner_frame(std::uint64_t,const Om9GumballSource*,const double*,const double*);
 std::uint64_t om9_gumball_create();
 unsigned om9_gumball_command(const unsigned char*,std::size_t,unsigned*,unsigned*);
 unsigned om9_gumball_destroy(std::uint64_t);
@@ -33,6 +34,7 @@ unsigned om9_gumball_begin(std::uint64_t,const Om9GumballBegin*,const Om9Gumball
 unsigned om9_gumball_event(std::uint64_t,const Om9GumballEvent*);
 unsigned om9_gumball_input(std::uint64_t,const unsigned char*,std::size_t);
 unsigned om9_gumball_snapshot(std::uint64_t,Om9GumballSnapshot*);
+unsigned om9_gumball_report(std::uint64_t,unsigned char*,std::size_t,std::size_t*);
 unsigned om9_gumball_sources(std::uint64_t,Om9GumballSource*,std::size_t,std::size_t*);
 unsigned om9_gumball_frame(std::uint64_t,const double*,const double*);
 unsigned om9_gumball_frame_from_directions(const double*,const double*,const double*,double*);

@@ -134,6 +134,7 @@ bool CoreMouse::eventFilter(QObject* object,QEvent* event){
     if(event->type()==QEvent::MouseButtonRelease&&releaseView&&unsigned(static_cast<QMouseEvent*>(event)->button())==releaseButton&&containing(object)==releaseView){releaseView=nullptr;releaseButton=0;return true;}
     if(!enabled||Gui::Application::Instance->isClosing())return false;
     if(GumballController::instance().processEvent(object,event))return true;
+    if(object->property("om9GumballEditor").toBool())return false;
     if(target&&(event->type()==QEvent::ApplicationDeactivate||(event->type()==QEvent::UngrabMouse&&containing(object)==target))){cancel(false);return false;}
     if(event->type()==QEvent::FocusIn){if(containing(object))prioritize();return false;}
     if(target&&(target->getGuiDocument()!=Gui::Application::Instance->activeDocument()))cancel();

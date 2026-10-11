@@ -39,6 +39,19 @@ fn started(context: BeginContext) -> GumballSession {
 fn world_move_x() -> GumballSession {
     started(begin(Handle::MoveAxis(Axis::X)))
 }
+#[test]
+fn relocate_pointer_uses_cplane_when_no_native_snap_and_rejects_parallel_ray() {
+    let mut s=GumballSession::new();s.apply(Event::Enable(true)).unwrap();
+    let cp=Frame{origin:[0.,0.,3.],..Frame::default()};
+    s.apply(Event::ObserveFrame(Frame::default(),cp)).unwrap();
+    s.apply(Event::BeginRelocate).unwrap();
+    s.apply(Event::RelocateRay(PointerRay{origin:[2.,4.,10.],direction:[0.,0.,-1.]})).unwrap();
+    s.apply(Event::RelocateRay(PointerRay{origin:[3.,4.,10.],direction:[0.,0.,-1.]})).unwrap();
+    let before=s.snapshot();
+    assert!(s.apply(Event::RelocateRay(PointerRay{origin:[0.;3],direction:[1.,0.,0.]})).is_err());
+    assert_eq!(s.snapshot(),before);
+    s.apply(Event::Accept).unwrap();near(s.snapshot().frame.origin,[2.,4.,3.]);
+}
 fn point(m: [f64; 16], p: [f64; 3]) -> [f64; 3] {
     std::array::from_fn(|r| {
         m[4 * r + 3] + m[4 * r] * p[0] + m[4 * r + 1] * p[1] + m[4 * r + 2] * p[2]
@@ -63,6 +76,39 @@ fn world_axis_numeric_move_is_exact() {
     let mut s = world_move_x();
     s.apply(Event::Numeric("5 mm".into())).unwrap();
     assert_eq!(point(s.plan().unwrap().matrix, [0.; 3]), [5., 0., 0.]);
+}
+
+#[test]
+fn ctrl_rotation_changes_widget_axes_and_cancel_restores_frame() {
+    let mut b=begin(Handle::Rotate(Axis::Z));b.modifiers=2;
+    b.start_ray.origin=[1.,0.,10.];
+    let mut s=started(b);
+    s.apply(Event::Motion(PointerRay {origin:[0.,1.,10.],direction:[0.,0.,-1.]})).unwrap();
+    near(s.snapshot().frame.axes[0],[0.,1.,0.]);
+    near(s.snapshot().frame.origin,[0.;3]);
+    assert!(s.plan().is_err());
+    s.apply(Event::Cancel).unwrap();assert_eq!(s.snapshot().frame,Frame::default());
+}
+#[test]
+fn numeric_yz_move_without_motion_stays_in_its_plane() {
+    let mut s=started(begin(Handle::MovePlane(Plane::YZ)));
+    s.apply(Event::Numeric("5 mm".into())).unwrap();
+    near(point(s.plan().unwrap().matrix,[0.;3]),[0.,5.,0.]);
+}
+#[test]
+fn source_ancestry_is_bounded_before_begin_changes_the_session() {
+    let mut b=begin(Handle::MoveAxis(Axis::X));let prototype=b.sources[0].clone();
+    b.sources=(1..=66).map(|i|{let mut row=prototype.clone();row.stamp.object=i;row.parent=i-1;row}).collect();
+    let mut s=GumballSession::new();s.apply(Event::Enable(true)).unwrap();let before=s.snapshot();
+    assert!(s.apply(Event::Begin(b)).is_err());assert_eq!(s.snapshot(),before);
+}
+#[test]
+fn committed_report_keeps_exact_input_frame_units_and_source_identity() {
+    let mut s=world_move_x();s.apply(Event::Numeric("5.123456789123 mm".into())).unwrap();s.apply(Event::Accept).unwrap();
+    let report=s.report().unwrap();
+    assert!(report.contains("\"numeric\":\"5.123456789123 mm\""));assert!(report.contains("5.123456789123"));
+    assert!(report.contains("\"mm_per_unit\":1"));assert!(report.contains("\"sources\":[{\"document\":1,\"object\":1,"));
+    s.apply(Event::Cancel).unwrap();assert!(s.report().is_err());
 }
 #[test]
 fn object_axis_moves_in_world_direction() {
@@ -148,8 +194,9 @@ fn ctrl_at_start_relocates_widget_but_ctrl_after_motion_extrudes() {
     }))
     .unwrap();
     modifier(&mut s, ModifierKey::Ctrl, true, false);
-    modifier(&mut s, ModifierKey::Ctrl, false, false);
     assert_eq!(s.plan().unwrap().operation, Operation::Extrude);
+    modifier(&mut s, ModifierKey::Ctrl, false, false);
+    assert_eq!(s.plan().unwrap().operation, Operation::Move);
 }
 #[test]
 fn numeric_enter_during_drag_constrains_and_release_requests_commit() {
@@ -176,6 +223,41 @@ fn numeric_click_enter_requests_commit() {
     let mut s = world_move_x();
     s.apply(Event::Numeric("5".into())).unwrap();
     assert_eq!(s.apply(Event::Accept).unwrap(), Effect::Commit);
+}
+#[test]
+fn ctrl_numeric_click_changes_frame_and_never_has_geometry_plan() {
+    for handle in [Handle::MoveAxis(Axis::X),Handle::Rotate(Axis::Z),Handle::Scale(Axis::X)] {
+        let mut b=begin(handle);b.modifiers=2;
+        let mut s=started(b);
+        s.apply(Event::Numeric(if matches!(handle,Handle::Rotate(_)){"90"}else{"5 mm"}.into())).unwrap();
+        assert!(s.plan().is_err());
+        if matches!(handle,Handle::Rotate(_)) {
+            assert!(s.snapshot().frame.axes[0][1]>0.999999);
+        } else { assert_eq!(s.snapshot().frame.origin,[5.,0.,0.]); }
+        assert_eq!(s.apply(Event::Accept).unwrap(),Effect::FrameChanged);
+        assert_eq!(s.snapshot().phase,Phase::Ready);
+    }
+}
+#[test]
+fn relocate_x_parallel_to_cplane_normal_requires_explicit_y() {
+    let mut s=GumballSession::new();s.apply(Event::Enable(true)).unwrap();s.apply(Event::BeginRelocate).unwrap();
+    s.apply(Event::RelocatePoint([0.;3])).unwrap();s.apply(Event::RelocatePoint([0.,0.,1.])).unwrap();
+    let before=s.snapshot();assert!(s.apply(Event::Accept).is_err());assert_eq!(s.snapshot(),before);
+    s.apply(Event::RelocatePoint([0.,1.,0.])).unwrap();assert_eq!(s.snapshot().phase,Phase::Ready);
+}
+#[test]
+fn single_owner_relocate_survives_reselect_but_replacement_does_not() {
+    let stamp=begin(Handle::MoveAxis(Axis::X)).sources[0].stamp;
+    let mut s=GumballSession::new();s.apply(Event::Enable(true)).unwrap();
+    s.apply(Event::ObserveOwner(Some(stamp),Frame::default(),Frame::default())).unwrap();
+    s.apply(Event::BeginRelocate).unwrap();s.apply(Event::RelocatePoint([10.,20.,30.])).unwrap();s.apply(Event::RelocatePoint([11.,20.,30.])).unwrap();s.apply(Event::Accept).unwrap();
+    let relocated=s.snapshot().frame;
+    s.apply(Event::ObserveOwner(None,Frame::default(),Frame::default())).unwrap();
+    s.apply(Event::ObserveOwner(Some(stamp),Frame::default(),Frame::default())).unwrap();assert_eq!(s.snapshot().frame,relocated);
+    s.apply(Event::Align(Alignment::World)).unwrap();s.apply(Event::ObserveOwner(Some(stamp),Frame::default(),Frame::default())).unwrap();assert_eq!(s.snapshot().frame,Frame::default());
+    s.apply(Event::BeginRelocate).unwrap();s.apply(Event::RelocatePoint([10.,20.,30.])).unwrap();s.apply(Event::RelocatePoint([11.,20.,30.])).unwrap();s.apply(Event::Accept).unwrap();
+    let mut replacement=stamp;replacement.generation+=1;
+    s.apply(Event::ObserveOwner(Some(replacement),Frame::default(),Frame::default())).unwrap();assert_eq!(s.snapshot().frame,Frame::default());
 }
 #[test]
 fn hover_does_not_consume_undo_checkpoint() {

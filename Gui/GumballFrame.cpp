@@ -4,6 +4,8 @@
 #include <QJsonArray>
 #include <algorithm>
 #include <limits>
+#include <Standard_Failure.hxx>
+#include <Base/Exception.h>
 namespace OpenMatrix9Gui {
 GumballFrameObservations captureGumballFrame(const GumballInputs& inputs,Gui::View3DInventor*,unsigned alignment){
     GumballFrameObservations result;
@@ -16,7 +18,7 @@ GumballFrameObservations captureGumballFrame(const GumballInputs& inputs,Gui::Vi
         else if(alignment==1){const auto facts=gumballObjectFrameFacts(inputs);auto tangent=facts["x"].toArray(),n=facts["normal"].toArray();for(unsigned i=0;i<3;++i){x[i]=tangent[i].toDouble();normal[i]=n[i].toDouble();}}
         else if(alignment!=2)throw std::runtime_error("Invalid gumball alignment");
         if(om9_gumball_frame_from_directions(origin,x,normal,result.frame.data()))throw std::runtime_error("Object tangent/normal does not resolve a gumball frame");
-    }catch(const std::exception& e){result.unresolved=QString::fromUtf8(e.what());}
+    }catch(const std::exception& e){result.unresolved=QString::fromUtf8(e.what());}catch(const Base::Exception& e){result.unresolved=QString::fromUtf8(e.what());}catch(const Standard_Failure& e){result.unresolved=QString::fromUtf8(e.GetMessageString());}
     return result;
 }
 }

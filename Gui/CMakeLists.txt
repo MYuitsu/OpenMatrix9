@@ -132,6 +132,8 @@ set(
     GumballRust.h
     GumballController.cpp
     GumballController.h
+    GumballOverlay.cpp
+    GumballOverlay.h
     CoreUnits.cpp
     CoreUnits.h
     CoreObjects.cpp
