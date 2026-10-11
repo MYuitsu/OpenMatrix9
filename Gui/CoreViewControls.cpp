@@ -20,6 +20,12 @@
 #include <Inventor/SbBox2s.h>
 #include <Inventor/nodes/SoOrthographicCamera.h>
 #include <Inventor/nodes/SoPerspectiveCamera.h>
+#if defined(OM9_STOCK_FREECAD)
+#include <Gui/Inventor/SoFCBoundingBox.h>
+#include <Inventor/actions/SoSearchAction.h>
+#include <vector>
+#include <utility>
+#endif
 #include <QApplication>
 #include <QRubberBand>
 #include <QMouseEvent>
@@ -36,6 +42,44 @@
 #include <limits>
 
 namespace {
+#if defined(OM9_STOCK_FREECAD)
+// Stock viewAll resets Perspective heightAngle and every skip-group mode.
+// Observe the native scene bounds while preserving those independent states.
+bool stockSceneBounds(Gui::View3DInventorViewer* viewer,SbBox3f& bounds){
+    SoSearchAction search;search.setType(Gui::SoSkipBoundingGroup::getClassTypeId());
+    search.setInterest(SoSearchAction::ALL);search.setSearchingAll(true);
+    search.apply(viewer->getSoRenderManager()->getSceneGraph());
+    struct RestoreModes {
+        std::vector<std::pair<Gui::SoSkipBoundingGroup*,int>> groups;
+        ~RestoreModes(){for(auto it=groups.rbegin();it!=groups.rend();++it){
+            it->first->mode=it->second;it->first->unref();
+        }}
+    } restore;
+    const auto& paths=search.getPaths();restore.groups.reserve(std::size_t(paths.getLength()));
+    for(int i=0;i<paths.getLength();++i){
+        auto* group=static_cast<Gui::SoSkipBoundingGroup*>(paths[i]->getTail());
+        restore.groups.emplace_back(group,group->mode.getValue());group->ref();
+        // Keep Coin notifications so ancestor bounding-box caches invalidate.
+        group->mode=Gui::SoSkipBoundingGroup::EXCLUDE_BBOX;
+    }
+    bounds=viewer->getBoundingBox();if(bounds.isEmpty())return false;
+    const auto size=bounds.getSize();
+    if(std::abs(size[0])<1e-7f&&std::abs(size[1])<1e-7f&&std::abs(size[2])<1e-7f)
+        bounds.setBounds(bounds.getMin()-SbVec3f(.1f,.1f,.1f),bounds.getMax()+SbVec3f(.1f,.1f,.1f));
+    return true;
+}
+void stockFitBounds(Gui::View3DInventorViewer* viewer,const SbBox3f& bounds){
+    auto* camera=viewer->getSoRenderManager()->getCamera();if(!camera)return;
+    float aspect=viewer->getSoRenderManager()->getViewportRegion().getViewportAspectRatio();
+    switch(camera->viewportMapping.getValue()){
+        case SoCamera::CROP_VIEWPORT_FILL_FRAME:
+        case SoCamera::CROP_VIEWPORT_LINE_FRAME:
+        case SoCamera::CROP_VIEWPORT_NO_FRAME:aspect=1.f;break;
+        default:break;
+    }
+    camera->viewBoundingBox(bounds,aspect,1.f);
+}
+#endif
 class CrosshairOverlay final:public QWidget {
 public:
     explicit CrosshairOverlay(QWidget* viewport):QWidget(viewport) {
@@ -80,7 +124,11 @@ bool CoreViewControls::available(std::size_t command)const {
     if(!enabled||!handles(command)||!active())return false;
     if(id(command)=="ViewCaptureToFile")return true;
     if(!om9AlterView(App::GetApplication().getActiveDocument()))return false;
+#if defined(OM9_STOCK_FREECAD)
+    return id(command)!="Zoom_Selected"||!Gui::Selection().getSelection(App::GetApplication().getActiveDocument()->getName(),Gui::ResolveMode::NoResolve).empty();
+#else
     return id(command)!="Zoom_Selected"||!Gui::Selection().getSelectionT(App::GetApplication().getActiveDocument()->getName(),Gui::ResolveMode::NoResolve).empty();
+#endif
 }
 void CoreViewControls::activate(){
     qApp->installEventFilter(this);
@@ -106,7 +154,13 @@ void CoreViewControls::startTool(unsigned int value,std::size_t command,Gui::Vie
     CorePictureFrame::instance().cancel();
     CoreDistance::instance().cancel();
     stopTool(true);if(!view||!om9_view_tool_start(value))return;
-    kind=value;toolCommand=command;toolView=view;originalCamera=view->getCamera();originalCursor=view->getViewer()->viewport()->cursor();
+    kind=value;toolCommand=command;toolView=view;
+#if defined(OM9_STOCK_FREECAD)
+    originalCamera=cameraState(view->getViewer());
+#else
+    originalCamera=view->getCamera();
+#endif
+    originalCursor=view->getViewer()->viewport()->cursor();
     // FreeCAD may install its dock-overlay filter after this controller was created.
     // Give the explicitly started tool first refusal for its own viewport events.
     qApp->installEventFilter(this);
@@ -123,7 +177,25 @@ bool CoreViewControls::execute(std::size_t command) {
     if(!available(command))return false;
     if(id(command)=="ViewCaptureToFile")return capture();
     if(id(command)=="Zoom_Extents"||id(command)=="Zoom_Selected") {
-        cancel();auto* view=active();auto* viewer=view->getViewer();const auto before=view->getCamera();
+        cancel();auto* view=active();auto* viewer=view->getViewer();
+#if defined(OM9_STOCK_FREECAD)
+        const auto before=cameraState(viewer);
+        SbBox3f bounds;
+        if(id(command)=="Zoom_Extents"){
+            if(!stockSceneBounds(viewer,bounds))return false;
+        }else{
+            // Match getSelectionT's unreduced native target/path inventory.
+            Base::BoundBox3d selectedBounds;auto* gui=view->getGuiDocument();
+            for(const auto& target:Gui::Selection().getSelection(App::GetApplication().getActiveDocument()->getName(),Gui::ResolveMode::NoResolve))
+                if(auto* provider=dynamic_cast<Gui::ViewProviderDocumentObject*>(gui->getViewProvider(target.pObject)))
+                    selectedBounds.Add(provider->getBoundingBox(target.SubName));
+            if(!selectedBounds.IsValid())return false;
+            bounds.setBounds(float(selectedBounds.MinX),float(selectedBounds.MinY),float(selectedBounds.MinZ),
+                             float(selectedBounds.MaxX),float(selectedBounds.MaxY),float(selectedBounds.MaxZ));
+        }
+        stockFitBounds(viewer,bounds);
+#else
+        const auto before=view->getCamera();
         if(id(command)=="Zoom_Extents") {
             SbBox3f bounds;if(!viewer->getSceneBoundBox(bounds))return false;
             viewer->viewBoundBox(bounds);
@@ -136,6 +208,7 @@ bool CoreViewControls::execute(std::size_t command) {
             if(!valid)return false;
             viewer->viewObjects(targets,false);
         }
+#endif
         if(auto* camera=dynamic_cast<SoPerspectiveCamera*>(viewer->getSoRenderManager()->getCamera())) {
             // Coin fits a bounding sphere using radius/tan(halfAngle). The
             // tangent to that sphere needs radius/sin(halfAngle), otherwise
@@ -150,7 +223,11 @@ bool CoreViewControls::execute(std::size_t command) {
             camera->nearDistance=camera->nearDistance.getValue()+delta;
             camera->farDistance=camera->farDistance.getValue()+delta;
         }
+#if defined(OM9_STOCK_FREECAD)
+        return before!=cameraState(viewer);
+#else
         return before!=view->getCamera();
+#endif
     }
     if(id(command)=="Crosshairs"){om9_core_crosshairs_toggle();refreshCrosshairs();return true;}
     startTool(id(command)=="Zoom_Window"?1:2,command,active());return false; // history waits for completed drag
@@ -210,7 +287,14 @@ bool CoreViewControls::eventFilter(QObject* object,QEvent* event) {
             viewport->setProperty("om9ZoomViewportPixels",QSize(pixels[0],pixels[1]));
             view->getViewer()->boxZoom(SbBox2s(short(qRound(om9_view_tool_value(0)*ratio)),short(qRound(om9_view_tool_value(1)*ratio)),short(qRound(om9_view_tool_value(2)*ratio)),short(qRound(om9_view_tool_value(3)*ratio))));
         }
-        if(effect==1||effect==3){const bool changed=view->getCamera()!=originalCamera;om9_sidebar_record_execution(toolCommand,changed);stopTool(false);}
+        if(effect==1||effect==3){
+#if defined(OM9_STOCK_FREECAD)
+            const bool changed=cameraState(view->getViewer())!=originalCamera;
+#else
+            const bool changed=view->getCamera()!=originalCamera;
+#endif
+            om9_sidebar_record_execution(toolCommand,changed);stopTool(false);
+        }
         return true;
     }
     return false;

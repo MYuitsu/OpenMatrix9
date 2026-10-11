@@ -2,7 +2,9 @@
 
 The three approved core Gumball specifications (OM9-INFO-020/021/022) are implemented: parametric object Scale, Object Alignment and Relocate Gumball. Primitive dimensions and supported expressions remain editable. Associative Scale preserves admitted source definitions and dependencies; native Compound-derived helpers keep their appearance through Undo/Redo and fresh-process FCStd reopening. Mesh alignment uses actual vertex, edge and planar-facet input. All four viewports share the Gumball frame.
 
-Local validation after the stock API corrections: **30 native processes / 955 checks**, one plugin SHA256 `559e0dca08e3535174879dd81c598d4a894e70e43989d22dba8b6d77a8db6b20` and one host SHA256 `98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8`. [Detailed checks and supported limits](docs/validation/2026-10-12-gumball-core-completion.md).
+Development-host validation after the Gumball expression and viewport API corrections: **30 native processes / 955 checks**, one plugin SHA256 `559e0dca08e3535174879dd81c598d4a894e70e43989d22dba8b6d77a8db6b20` and one host SHA256 `98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8`. [Detailed checks and supported limits](docs/validation/2026-10-12-gumball-core-completion.md).
+
+Stock GUI compatibility also passes syntax checks for all 94 GUI translation units and the four changed development-host branches. Those syntax checks follow the recorded local native cohort; the exact Action run verifies the final stock binary and runtime.
 
 Version accounting starts from 0.0.3: `aa` stays 0, `bb` increases by three completed specifications, and `cc` increases by one completed task. The suffix records Asia/Saigon time after the passing local cohort. The patch counter is retained when the specification counter increases.
 

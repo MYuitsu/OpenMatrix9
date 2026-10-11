@@ -4412,5 +4412,30 @@
       "All eight Gumball translation units pass MSVC syntax checking against the cached official 1.1.4 headers."
     ],
     "stock_ci_status": "pending"
+  },
+  "stock_gui_adapter_regression": {
+    "ok": true,
+    "syntax_only": true,
+    "initial_failed_action": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/38183085601",
+    "stock_translation_units": 94,
+    "stock_syntax_report_sha256": "71ec1ca7f1677a5fb3337072460897def4892f7c61fd1b9dfd081fd96eecdf47",
+    "dev_adapter_translation_units": 4,
+    "dev_syntax_report_sha256": "8879c5391ea9a1691ad68fc2f7e060d6cf7de8f549552f8f73bce05f744af893",
+    "adapter_source_sha256": {
+      "Gui/CoreKeyboard.cpp": "3f4284683ffaf2885604f9930f652cce5756e146b74e2ba57521abcba834407c",
+      "Gui/CoreMouse.cpp": "5e2ad5ea5326493e7afa3f9bb5013cff63c188ac6d4dcdcff9bdf43e536e2af6",
+      "Gui/CoreViewControls.cpp": "996db7e24178e35fe3f394752583e6c8ff8f58a477d47151f4b915fcee8c08ee",
+      "Gui/CoreWorkspace.cpp": "4d9cd004321164c54b4443488de3847db0727d46ae52392170273604617deef1",
+      "compat/freecad11/fastsignals/signal.h": "a1c709d98bfdf2ab2166ef3af4fb6785b4c76e897e78970a177f68bead43c0f0"
+    },
+    "checks": [
+      "Stock signal connection types match native Boost signals.",
+      "Selection snapshots preserve unreduced native object and subelement paths.",
+      "Camera capture and cancellation use native Coin state.",
+      "Model fit excludes guide bounds, preserves prior skip-group modes and invalidates Coin caches.",
+      "Optional camera tracing owns and detaches its native sensor with the viewport."
+    ],
+    "native_checkpoint_note": "The 30-process development-host cohort above predates these stock GUI adapters. Development API branches are preserved; syntax checks do not prove stock ABI or runtime. The exact-commit GitHub Actions native cohort is authoritative for the final stock build.",
+    "stock_ci_status": "pending"
   }
 }

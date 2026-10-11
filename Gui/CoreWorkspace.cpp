@@ -30,6 +30,9 @@
 #include <Inventor/nodes/SoOrthographicCamera.h>
 #include <Inventor/nodes/SoPerspectiveCamera.h>
 #include <Inventor/actions/SoSearchAction.h>
+#if defined(OM9_STOCK_FREECAD)
+#include <Inventor/sensors/SoFieldSensor.h>
+#endif
 #include <QApplication>
 #include <QMdiArea>
 #include <QMdiSubWindow>
@@ -53,6 +56,45 @@
 #include <string>
 
 namespace {
+#if defined(OM9_STOCK_FREECAD)
+// The stock viewer lacks cameraChanged(). This opt-in diagnostic observes only
+// the real Perspective heightAngle, with ownership tied to the native view.
+class StockCameraTrace final:public QObject {
+public:
+    StockCameraTrace(Gui::View3DInventor* target,int slot):QObject(target),view(target),slot(slot),sensor(changed,this){
+        setObjectName("OM9StockCameraTrace");target->installEventFilter(this);
+        target->getViewer()->installEventFilter(this);target->getViewer()->viewport()->installEventFilter(this);observe();
+    }
+    ~StockCameraTrace() override {detach();}
+    void observe(){
+        if(!view||!view->getGuiDocument()||view->getGuiDocument()->isAboutToClose()){detach();return;}
+        auto* current=view->getViewer()->getSoRenderManager()->getCamera();
+        if(current==camera)return;
+        detach();camera=current;if(!camera)return;camera->ref();
+        if(auto* perspective=dynamic_cast<SoPerspectiveCamera*>(camera)){
+            sensor.attach(&perspective->heightAngle);OpenMatrix9Gui::traceCameraChange(slot,perspective->heightAngle.getValue());
+        }
+    }
+protected:
+    bool eventFilter(QObject* object,QEvent* event) override {
+        if(object==view&&event->type()==QEvent::Close)detach();
+        else if(event->type()==QEvent::Paint||event->type()==QEvent::UpdateRequest||event->type()==QEvent::Resize)observe();
+        return false;
+    }
+private:
+    static void changed(void* data,SoSensor*){
+        auto* self=static_cast<StockCameraTrace*>(data);self->observe();
+        auto* gui=self->view?self->view->getGuiDocument():nullptr;
+        if(gui&&!gui->isAboutToClose())
+            if(auto* perspective=dynamic_cast<SoPerspectiveCamera*>(self->camera))OpenMatrix9Gui::traceCameraChange(self->slot,perspective->heightAngle.getValue());
+    }
+    void detach(){sensor.detach();if(camera){camera->unref();camera=nullptr;}}
+    QPointer<Gui::View3DInventor> view;
+    int slot;
+    SoFieldSensor sensor;
+    SoCamera* camera=nullptr;
+};
+#endif
 class ViewportLabel final:public QLabel {
 public:
     using QLabel::QLabel;
@@ -143,7 +185,12 @@ CoreWorkspace::CoreWorkspace():QObject(qApp) {
     saveConnection=App::GetApplication().signalStartSaveDocument.connect([this](const App::Document& doc,const std::string&) {
         auto values=doc.Meta.getValues();auto views=slots(Gui::Application::Instance->getDocument(&doc));
         for(int slot=0;slot<4;++slot)if(auto* view=views[slot]) {
-            auto suffix=std::to_string(slot);values["OpenMatrix9.ViewCamera."+suffix]=view->getCamera();
+            auto suffix=std::to_string(slot);
+#if defined(OM9_STOCK_FREECAD)
+            values["OpenMatrix9.ViewCamera."+suffix]=cameraState(view->getViewer());
+#else
+            values["OpenMatrix9.ViewCamera."+suffix]=view->getCamera();
+#endif
             if(auto* node=grid(view))values["OpenMatrix9.ViewGrid."+suffix]=(enabled?node->whichChild.getValue()!=SO_SWITCH_NONE:!view->property("om9GridHidden").toBool())?"1":"0";
         }
         if(values!=doc.Meta.getValues())const_cast<App::Document&>(doc).Meta.setValues(std::move(values));
@@ -214,7 +261,9 @@ void CoreWorkspace::ensure(bool restore) {
         ensureTitle(view);auto* node=grid(view,true);if(node&&(fresh||restore))node->whichChild=SO_SWITCH_ALL;
         if(!viewer->property("om9PreviousBackground").isValid()){viewer->setProperty("om9PreviousBackground",viewer->backgroundColor());viewer->setProperty("om9PreviousGradient",int(viewer->getGradientBackground()));}
         viewer->setBackgroundColor(QColor(0,0,0));viewer->setGradientBackground(Gui::View3DInventorViewer::Background::NoGradient);
+#if !defined(OM9_STOCK_FREECAD)
         if(!qgetenv("OM9_TRACE_CAMERA").isEmpty()&&!viewer->property("om9CameraTrace").toBool()){viewer->setProperty("om9CameraTrace",true);QObject::connect(viewer,&Gui::View3DInventorViewer::cameraChanged,this,[view,i]{if(auto* camera=dynamic_cast<SoPerspectiveCamera*>(view->getViewer()->getSoRenderManager()->getCamera()))traceCameraChange(i,camera->heightAngle.getValue());});}
+#endif
         if(fresh||restore) {
             viewer->setAnimationEnabled(false);
             viewer->setCameraType(om9_core_view_perspective(i)?SoPerspectiveCamera::getClassTypeId():SoOrthographicCamera::getClassTypeId());
@@ -230,6 +279,14 @@ void CoreWorkspace::ensure(bool restore) {
                 if(auto entry=metadata.find("OpenMatrix9.ViewGrid."+suffix);node&&entry!=metadata.end()) {node->whichChild=entry->second=="0"?SO_SWITCH_NONE:SO_SWITCH_ALL;view->setProperty("om9GridHidden",entry->second=="0");}
             }
         }
+#if defined(OM9_STOCK_FREECAD)
+        // Observe after fresh/restore projection replacement; later redraws
+        // reattach to a replaced camera without adding another timer.
+        if(!qgetenv("OM9_TRACE_CAMERA").isEmpty()){
+            auto* trace=dynamic_cast<StockCameraTrace*>(view->findChild<QObject*>("OM9StockCameraTrace"));
+            if(trace)trace->observe();else new StockCameraTrace(view,i);
+        }
+#endif
     }
     // Keep faces and native edges available for rendering and Wireframe edge picking.
     adaptCadProviders(doc,previousDisplay);
