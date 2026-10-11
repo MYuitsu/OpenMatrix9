@@ -272,3 +272,5 @@ gh attestation verify OpenMatrix9-0.0.3-SetupLauncher-Windows-x64.zip --repo MYu
 ```
 
 Xem [luồng build và phạm vi kiểm tra](tools/ci/README.md). Chứng thực xác nhận nguồn gốc/hash, không thay thế quét bảo mật hay bảo đảm antivirus chấp nhận.
+
+[Kết quả xác minh v0.0.3](docs/validation/2026-10-11-release003-published.json): hai ZIP đã được tải lại, kiểm tra checksum/chứng thực đúng tag và 541 file plugin giống nhau. Bản tải về qua 14 kiểm tra native, 5 worker trên GPU desktop và 21 kiểm tra launcher/icon/Start Menu. CI còn giới hạn hiển thị viewport trên renderer phần mềm; xem [phạm vi và giới hạn](docs/validation/2026-10-11-release003-ci.md).
