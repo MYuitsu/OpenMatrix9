@@ -1,0 +1,21 @@
+"""Run existing native regression fixtures with Gumball enabled in a fresh profile."""
+import os
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+import OpenMatrix9Gui as native
+allowed={'curve_smoke.FCMacro','core_mouse_smoke.FCMacro','layer_visibility_permission_smoke.FCMacro','history_smoke.FCMacro','three_dm_preservation_smoke.FCMacro'}
+name=os.environ['OM9_GUMBALL_REGRESSION']
+if name not in allowed:raise RuntimeError('Unknown Gumball regression fixture')
+App.ParamGet('User parameter:BaseApp/Preferences/Mod/OpenMatrix9/Gumball').SetBool('Enabled',True)
+Gui.activateWorkbench('OpenMatrix9Workbench')
+if not native.gumballState()['enabled']:raise RuntimeError('Regression must actually run with Gumball enabled')
+source=Path(__file__).parent/name
+scope={'__name__':'__main__','__file__':str(source)}
+exec(compile(source.read_bytes(),str(source),'exec'),scope)
+# Legacy fixtures use different identity field names. Bind the actual imported
+# module to their existing report object before the scheduled test starts.
+report=scope.get('report',scope.get('result'))
+if not isinstance(report,dict):raise RuntimeError('Legacy fixture has no report object')
+report['module']=native.__file__
+report['gumball_regression']=True
+report['gumball_enabled_before_fixture']=native.gumballState()['enabled']

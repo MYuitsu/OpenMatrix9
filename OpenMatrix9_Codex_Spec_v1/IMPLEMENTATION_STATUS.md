@@ -1,5 +1,15 @@
 # Implementation status — 2026-10-09
 
+<!-- gumball-core-20261011:start -->
+OM9-INFO-020/021/022: `partially_implemented` / `validated_supported_slice`.
+Native 13 handles, Move/Rotate/Scale/Copy/planar Extrude, numeric/modifiers,
+CPlane/Object/World, Relocate and single-owner view-state cache implemented.
+Actual Qt/DPI, batch callback rollback and FCStd/retained 3DM cold proof;
+unsupported owners/frames and shared-host failed-transaction Redo loss remain explicit.
+[Evidence, reproducible suite and limits](../docs/validation/2026-10-11-gumball-core.md).
+<!-- gumball-core-20261011:end -->
+
+
 <!-- rhino-core-host-parameter-dependency:start -->
 Đã nghiệm thu fixture T10 cho điểm phụ thuộc Circle/Line: dùng map openNURBS/OCCT
 có sẵn, Rust kiểm điểm với source thật và chặn raw parameter chưa được chứng minh.

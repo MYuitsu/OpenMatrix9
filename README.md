@@ -835,9 +835,9 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 | Libraries | `InfoSettingsLibraries` | Quản lý thư viện. | 🔴 |
 | Selection Filter | `InfoSettingsSelectionFilter` | Lọc loại đối tượng được chọn. | 🔴 |
 | Design Report | `InfoSettingsDesignReport` | Tạo báo cáo thiết kế. | 🔴 |
-| Gumball Alignment | `InfoSettingsGumballAlignment` | Căn hệ trục gizmo thao tác. | 🔴 |
-| Relocate Gumball | `InfoSettingsRelocateGumball` | Di chuyển tâm gizmo thao tác. | 🔴 |
-| Gumball ON | `InfoSettingsGumballON` | Bật gizmo thao tác. | 🔴 |
+| Gumball Alignment | `InfoSettingsGumballAlignment` | Căn hệ trục gizmo thao tác. | 🟡 |
+| Relocate Gumball | `InfoSettingsRelocateGumball` | Di chuyển tâm gizmo thao tác. | 🟡 |
+| Gumball ON | `InfoSettingsGumballON` | Bật gizmo thao tác. | 🟡 |
 | Smart Targets Gumball ON | `InfoSettingsSmartTargetsGumballON` | Bật gizmo cho Smart Targets. | 🔴 |
 | Rhino Smart Track ON | `RhinoSmartTrackON` | Bật tracking thông minh theo catalog. | 🔴 |
 | Rhino History ON | `RhinoHistoryON` | [History policy](docs/features/history-native-contract.md): Record/Update/Lock/warning trên Join/Surface/Builder; Cage bindings cập nhật độc lập Record/Update. [Reusable validation](docs/validation/2026-10-09-reusable-builder-cage.md). | 🟢 |
@@ -985,3 +985,12 @@ Command Help và các bước kiểm chứng sang 12 chương
 Đọc nguồn theo phần chức năng trước khi triển khai và chạy fixture trước khi
 xác nhận tương đương. Đây là ngoại lệ cho tài liệu Rhino 5 được người dùng
 cho phép; code decompile, tài nguyên và tài liệu Matrix vẫn ở kho riêng.
+
+<!-- gumball-core-20261011:start -->
+OM9-INFO-020/021/022: `partially_implemented` / `validated_supported_slice`.
+Native 13 handles, Move/Rotate/Scale/Copy/planar Extrude, numeric/modifiers,
+CPlane/Object/World, Relocate and single-owner view-state cache implemented.
+Actual Qt/DPI, batch callback rollback and FCStd/retained 3DM cold proof;
+unsupported owners/frames and shared-host failed-transaction Redo loss remain explicit.
+[Evidence, reproducible suite and limits](docs/validation/2026-10-11-gumball-core.md).
+<!-- gumball-core-20261011:end -->

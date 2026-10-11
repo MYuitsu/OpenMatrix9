@@ -1289,7 +1289,7 @@
   description: Gumball toggle hiển thị move/scale/rotate widgets khi object selected. X đỏ, Y xanh, Z vàng theo nhận diện tương thích; arrows move một axis, plane handle move hai axes, origin free move; arcs rotate, squares scale một axis. Numeric edit nhận distance/góc/scale factor. Alt trong drag toggle Copy, Alt khi click numeric làm copy. Trong drag nhập số+Enter ràng buộc distance hoặc bước góc. Ctrl khi nhả arrow drag của planar curve/surface tạo extrude, có thể nhập distance trước; không coi Ctrl drag mọi object là extrude. Giữ đúng pivot/frame và capability, hủy trả preview.
   access: Access this command from Info and Settings > Gumball
   spec_path: specs/01-core/om9-info-020-gumball.md
-  implementation_status: not_started
+  implementation_status: partially_implemented
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -1347,7 +1347,11 @@
     date: '2026-10-07'
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
-    native_implementation_status: not_started
+    native_implementation_status: validated_supported_slice
+  native_implementation_status: validated_supported_slice
+  implementation_date: '2026-10-11'
+  implementation_notes: "13 native handles; Move/Rotate Placement, plain BRep/Mesh/Points affine Scale, planar Extrude, Alt Copy, held Ctrl and native Qt input. Parametric/Link Scale and external-document Link remain unsupported; failed posttransaction callback rollback loses old Redo in the shared host."
+  validation_report: ../docs/validation/2026-10-11-gumball-core.md
 - id: OM9-INFO-021
   name: Gumball Alignment
   command: GumballAlignment
@@ -1359,7 +1363,7 @@
   description: GumballAlignment chọn C-Plane, Object hoặc World. CPlane theo frame viewport, World theo XYZ, Object theo định hướng curve/extrusion/light/mesh face-edge-vertex/planar subobject/camera mà adapter có thể xác định. Không có frame object duy nhất thì báo unresolved thay vì lấy world ngầm. Chỉ đổi gizmo frame, không xoay shape.
   access: Access this command from Info and Settings>Gumball Alignment
   spec_path: specs/01-core/om9-info-021-gumball-alignment.md
-  implementation_status: not_started
+  implementation_status: partially_implemented
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -1387,7 +1391,11 @@
     date: '2026-10-07'
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
-    native_implementation_status: not_started
+    native_implementation_status: validated_supported_slice
+  native_implementation_status: validated_supported_slice
+  implementation_date: '2026-10-11'
+  implementation_notes: "Native CPlane/World and one unambiguous whole-object/curve/face frame; menu/CMD preserve geometry. Mesh component/light/camera frames remain unsupported explicitly."
+  validation_report: ../docs/validation/2026-10-11-gumball-core.md
 - id: OM9-INFO-022
   name: Relocate Gumball
   command: RelocateGumball
@@ -1399,7 +1407,7 @@
   description: RelocateGumball đổi origin và hướng X của widgets; CMD nhận world point (qua parser coordinate) rồi direction, Enter hoàn tất. Ctrl-click widget rồi thả Ctrl và kéo là cách tương tác thứ hai. Việc di chuyển pivot không dịch geometry; hướng zero/đồng tuyến không đủ frame phải báo rõ.
   access: Access this command from Info and Settings>Relocate Gumball
   spec_path: specs/01-core/om9-info-022-relocate-gumball.md
-  implementation_status: not_started
+  implementation_status: partially_implemented
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -1432,7 +1440,11 @@
     date: '2026-10-07'
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
-    native_implementation_status: not_started
+    native_implementation_status: validated_supported_slice
+  native_implementation_status: validated_supported_slice
+  implementation_date: '2026-10-11'
+  implementation_notes: "Native CMD origin/X/optional Y/Enter and Ctrl-start widget-only gestures; view-state owner cache, no document object/Undo. All pointer snap modes and cold pivot persistence are not claimed."
+  validation_report: ../docs/validation/2026-10-11-gumball-core.md
 - id: OM9-HISTORY-001
   name: History Workflow
   command: null

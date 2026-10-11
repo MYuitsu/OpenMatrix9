@@ -29,9 +29,9 @@
 | [OM9-INFO-017](om9-info-017-matrix-history-record.md) | Matrix History Record | `—` | Info & Settings | `not_started` |
 | [OM9-INFO-018](om9-info-018-matrix-history-update.md) | Matrix History Update | `—` | Info & Settings | `not_started` |
 | [OM9-INFO-019](om9-info-019-smart-target-msr.md) | Smart Target MSR | `gvSmartMSR` | Info & Settings | `not_started` |
-| [OM9-INFO-020](om9-info-020-gumball.md) | Gumball | `Gumball` | Info & Settings | `not_started` |
-| [OM9-INFO-021](om9-info-021-gumball-alignment.md) | Gumball Alignment | `GumballAlignment` | Info & Settings | `not_started` |
-| [OM9-INFO-022](om9-info-022-relocate-gumball.md) | Relocate Gumball | `RelocateGumball` | Info & Settings | `not_started` |
+| [OM9-INFO-020](om9-info-020-gumball.md) | Gumball | `Gumball` | Info & Settings | `partially_implemented` |
+| [OM9-INFO-021](om9-info-021-gumball-alignment.md) | Gumball Alignment | `GumballAlignment` | Info & Settings | `partially_implemented` |
+| [OM9-INFO-022](om9-info-022-relocate-gumball.md) | Relocate Gumball | `RelocateGumball` | Info & Settings | `partially_implemented` |
 | [OM9-HISTORY-001](om9-history-001-history-workflow.md) | History Workflow | `—` | History | `not_started` |
 | [OM9-LAYER-001](om9-layer-001-layer-management.md) | Layer Management | `—` | Layers | `not_started` |
 | [OM9-PROJECT-001](om9-project-001-project-manager-workflow.md) | Project Manager Workflow | `—` | Project Manager | `not_started` |

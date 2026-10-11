@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-10T05:16:42+07:00",
+  "updated_at": "2026-10-11T10:14:46+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -2334,6 +2334,52 @@
       "next_document": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
       "next_action": "Complete remaining T07 shared malformed input/allocation boundaries, then remaining P0 contracts.",
       "updated_at": "2026-10-10T05:16:42+07:00"
+    },
+    {
+      "key": "gumball-core-20261011",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "outputs": [
+        "Gui/GumballController.cpp",
+        "Gui/GumballOverlay.cpp",
+        "Gui/GumballGeometry.cpp",
+        "rust/src/gumball.rs",
+        "rust/src/gumball_ffi.rs",
+        "docs/features/OM9-INFO-020.md",
+        "docs/features/OM9-INFO-021.md",
+        "docs/features/OM9-INFO-022.md",
+        "docs/validation/2026-10-11-gumball-core.md"
+      ],
+      "evidence": [
+        "Matrix Book1 PDF45-47/printed35-37; PDF48 next History heading.",
+        "Native 201 Core checks/8 processes; persistence37/2; regression185/5, actual exits0 and selected module.",
+        "Runtime H:/FreeCAD-src/build/gumball-core-runtime-20261011; shared SDK only; plugin SHA256 8DDF092F2F406107BC20F383CF491C3796ED916A99344E995AFCBBD4300851F4.",
+        "Full Rust806/115 suites; source audit zero errors."
+      ],
+      "tests": [
+        {
+          "command": "tests/run_gumball_smoke.ps1 -Scope All",
+          "result": "423 native checks in three scopes; final combined run pending"
+        },
+        {
+          "command": "rtk cargo test --manifest-path rust/Cargo.toml",
+          "result": "806 passed /115 suites"
+        }
+      ],
+      "uncertainties": [
+        "Validated supported slice only; parametric/Link affine Scale and external-document Link unsupported.",
+        "Object Mesh-component/light/camera frames and full Matrix/Rhino representation/snap parity remain open.",
+        "FreeCAD clears old Redo on opening a transaction; posttransaction callback abort rolls model/Undo back but loses that old Redo.",
+        "Pivot cache process-local, preferences persist; no new associative History graph."
+      ],
+      "next_document": "docs/validation/2026-10-11-gumball-core.md",
+      "next_action": "One fresh final review; preserve unsupported capability scope and final native evidence."
     }
   ],
   "merge_context": {

@@ -1,6 +1,6 @@
 # Thiết kế Gumball lõi OpenMatrix9
 
-Ngày: 2026-10-11. Trạng thái: người dùng đã duyệt thiết kế; đang duyệt kế hoạch, chưa triển khai.
+Ngày: 2026-10-11. Trạng thái: người dùng đã duyệt thiết kế và Native inline execution; code và native supported slice đã triển khai.
 
 ## Mục tiêu và phạm vi đã chốt
 
@@ -272,10 +272,10 @@ nhật ba spec/checklist, FEATURES JSON/YAML, IMPLEMENTATION_STATUS, domain READ
 MANIFEST, README dự án và progress ledger. Các mục chưa có evidence vẫn mở;
 không nâng trạng thái do thiết kế, validator hoặc compilation đơn thuần.
 
-## Điều kiện bắt đầu implementation
+## Trạng thái execution
 
-Người dùng đã duyệt thiết kế ngày 2026-10-11 bằng yêu cầu tiếp tục. Đã lập
-[implementation plan](../plans/2026-10-11-gumball-core.md) với interfaces/tests
-và đề xuất execution method Native. Kế hoạch cần được duyệt trước execution
-theo writing-plans. Chưa có product code, build hay native tests được thực hiện
-trong các bước thiết kế và lập kế hoạch.
+Người dùng duyệt thiết kế, kế hoạch và current-checkout Native inline execution
+ngày 2026-10-11; yêu cầu tiếp tục được giữ xuyên suốt. Tasks1–5 và evidence theo
+[validation record](../../validation/2026-10-11-gumball-core.md).
+Unsupported representation/capability, cold pivot và failed-transaction Redo
+limitation được ghi riêng; không nâng toàn bộ Matrix/Rhino parity.
