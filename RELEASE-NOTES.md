@@ -1,8 +1,8 @@
-# OpenMatrix9 0.3.4-202610120508
+# OpenMatrix9 0.3.4-202610120539
 
 The three approved core Gumball specifications (OM9-INFO-020/021/022) are implemented: parametric object Scale, Object Alignment and Relocate Gumball. Primitive dimensions and supported expressions remain editable. Associative Scale preserves admitted source definitions and dependencies; native Compound-derived helpers keep their appearance through Undo/Redo and fresh-process FCStd reopening. Mesh alignment uses actual vertex, edge and planar-facet input. All four viewports share the Gumball frame.
 
-Local validation: **30 native processes / 955 checks**, one plugin SHA256 `d2da3db05211a12e5455725fb0007d313ae8d4729b50b1a81b48fc4b2787f1a1` and one host SHA256 `98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8`. [Detailed checks and supported limits](docs/validation/2026-10-12-gumball-core-completion.md).
+Local validation after the stock-header correction: **30 native processes / 955 checks**, one plugin SHA256 `77fa3d086a1ed9a388d81e3dd3fa1fe6ff813bad758a5954e4e9d1880c28fda3` and one host SHA256 `98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8`. [Detailed checks and supported limits](docs/validation/2026-10-12-gumball-core-completion.md).
 
 Version accounting starts from 0.0.3: `aa` stays 0, `bb` increases by three completed specifications, and `cc` increases by one completed task. The suffix records Asia/Saigon time after the passing local cohort. The patch counter is retained when the specification counter increases.
 

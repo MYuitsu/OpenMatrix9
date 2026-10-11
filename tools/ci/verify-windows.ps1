@@ -26,10 +26,12 @@ $vc=Join-Path $vs 'VC/Auxiliary/Build/vcvars64.bat'
 $toolEnv=& cmd.exe /d /s /c "`"$vc`" >nul && set"
 if($LASTEXITCODE -ne 0){throw 'Cannot initialize MSVC'}
 foreach($line in $toolEnv){if($line -match '^([^=]+)=(.*)$'){[Environment]::SetEnvironmentVariable($matches[1],$matches[2],'Process')}}
-& cmake --build $paths.build --target ThreeDmModelingBrepTests --parallel $paths.workers
+& cmake --build $paths.build --target ThreeDmModelingBrepTests OM9ThreeDmHeaderOrderTest --parallel $paths.workers
 if($LASTEXITCODE -ne 0){throw 'Native oracle build failed'}
 $env:PATH="$($paths.host)/bin;$env:SystemRoot/System32;$env:SystemRoot"
 foreach($key in @('PYTHONHOME','PYTHONPATH','QT_PLUGIN_PATH','QT_QPA_PLATFORM_PLUGIN_PATH')){Remove-Item -LiteralPath "Env:$key" -ErrorAction SilentlyContinue}
+& (Join-Path $paths.build 'OM9ThreeDmHeaderOrderTest.exe')
+if($LASTEXITCODE -ne 0){throw 'Stock host/kernel header order or system zlib regression failed'}
 & (Join-Path $paths.build 'ThreeDmModelingBrepTests.exe') *> (Join-Path $evidence 'brep.log')
 if($LASTEXITCODE -ne 0){Get-Content -LiteralPath (Join-Path $evidence 'brep.log');throw 'Eight independent analytic BRep fixtures failed'}
 $reports=@()

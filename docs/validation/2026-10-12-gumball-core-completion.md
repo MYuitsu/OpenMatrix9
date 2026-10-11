@@ -5,17 +5,17 @@
 processes / 955 checks passed against one plugin/host.
 Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Stock GitHub Actions CI is pending.
 
-Version label: `0.3.4-202610120508`; documentation finalization does not edit release.json or publish a release.
+Version label: `0.3.4-202610120539`; this evidence record does not create a tag or publish a GitHub Release.
 
-Plugin SHA256: `d2da3db05211a12e5455725fb0007d313ae8d4729b50b1a81b48fc4b2787f1a1`.
+Plugin SHA256: `77fa3d086a1ed9a388d81e3dd3fa1fe6ff813bad758a5954e4e9d1880c28fda3`.
 Host SHA256: `98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8`.
-Suite SHA256: `5f7253f388523b2a5cb36b860a00d68931e2893219b8da4e707f0e28f686a855`.
+Suite SHA256: `3ccc42b7848404a193e6407749e39e4a86c1e2f52c5986234786a70ee2fd0943`.
 
 | Native case | Checks | DPI | Report SHA256 |
 |---|---:|---|---|
 | geometry | 15 | 1 | `f025abe6bd088477634e222d452badf21be53e288c782acab518e9168101294d` |
 | commands | 16 | 1 | `b95d5db8a0a9fb335ef37a4252d3512a7aaa830b23f1e4ea32a1395da5483489` |
-| ownership | 24 | 1 | `54b35fec2f26814fa46c2bd285acd1941159447b5205d1044ef58848637de86c` |
+| ownership | 24 | 1 | `0b8cc9e16228891478e2197e8646f0cc53171a9a69bcc2285e039b52fd220cf7` |
 | review | 9 | 1 | `dcd28d23c3f8bb1e301e221e17480e3cf882bae19e15a911dda599b05c267b6f` |
 | lifecycle | 18 | 1 | `40a301c9fe059db15927b75025340e5a43cac9c23f450723d91e2588c9173ca1` |
 | reentrancy | 3 | 1 | `fd467cbee2b2f4979289b7edd6dfcfd6b882d4b35e1bffa7dc5762137a7a6d42` |
@@ -36,10 +36,10 @@ Suite SHA256: `5f7253f388523b2a5cb36b860a00d68931e2893219b8da4e707f0e28f686a855`
 | mesh_frame | 13 | 1 | `ed94181cfa95c56002f3caf35ebbb7803f3a011ebecad0deee8a7a21f3122b9b` |
 | visual | 23 | 1 | `fd40b1c6e23a678f229ff4094451785ccd6fe2dfebfc2d9b4376629ff5f7308e` |
 | warm | 20 | 1 | `f964b03f019b71fd36e8a9fd3148136298dbb469f7c92bf8b0c18956544fb632` |
-| cold | 17 | 1 | `8afa62e5563aec5be267b6954b801bd271a30725d3ec858f7ad0ce12bf42ea07` |
-| parametric | 22 | 1 | `dd3dd3365102ed696d14cc4410c28917a9eb964e433546121bec68b7801bb871` |
+| cold | 17 | 1 | `21bb0d4826e8fe0fc647e1ceb6b3d01ce285f685a71334c6990db09161bbe3d5` |
+| parametric | 22 | 1 | `04059787f03d19ba862604c5645996017720d3f039203198705366716ddc5f54` |
 | component-pointer | 85 | 1 | `6fb373753db659bd3bea0e4acc8354c6fbcbb7795ab25a309007cb673a5cb737` |
-| associative-warm | 127 | 1 | `b48becc3d6d06c3052c425207e02990830116bac977d53ec2cda81890b497d73` |
+| associative-warm | 127 | 1 | `69c6f79e3b35f1135fc8a9daad1424252be107506b5d353916d8fb544b5d5f6e` |
 | associative-cold | 63 | 1 | `bcc8e0732b8a985129cff11a359a5535acfde66b25cfa0393b3a1486383fe294` |
 | frame-objects-warm | 24 | 1 | `baa4b9c42813494ecde3f069233f6b512aa1a58f880c598e4a347fc7e3a76a83` |
 | frame-objects-cold | 16 | 1 | `5e58e518c6d837d79a59e515f0f4ddda982e5236763d96635daaccaf69df23ae` |
@@ -52,3 +52,5 @@ Native Camera/Light and associative graphs survive fresh-process FCStd. Pivot ca
 Stock FreeCAD1.1.4 GitHub Actions build/replay is **pending**. Earlier v0.0.3 Actions results do not validate this source or binary. The local suite establishes only the recorded host/plugin combination.
 
 Direct native Cylinder radial/axial Scale is admitted; it is not an unsupported-owner rejection fixture. Protected incoming native links reject before publication. Alt Copy selects the new copy; Undo can remove that selection, so Ctrl Relocate fixtures explicitly reselect the original before the view-only operation.
+
+Stock-header regression: the first candidate Action failed before native verification because the stock compatibility prelude left Windows FAR pointing to the removed far macro, and the bundled openNURBS zlib include path shadowed FreeCAD’s system header. The old prelude reproduced the native compiler failure. The corrected prelude and private bundled-header boundary now compile and pass the independent unprefixed CRC32 oracle. The 30-case cohort above was rerun after this plugin rebuild. The exact stock Action result remains separate from this local evidence.

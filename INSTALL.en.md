@@ -6,7 +6,7 @@ This experimental package targets **Windows x64 and official FreeCAD 1.1.4**, wi
 
 1. Install the Windows x64 build from the **[official FreeCAD 1.1.4 release](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4)** and open FreeCAD once. Check Help → About FreeCAD for **1.1.4**; its folder may simply be named `FreeCAD 1.1`.
 2. Open the **[Gumball candidate workflow](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml?query=branch%3Acodex%2Fgumball-release-0.3.4)**. Choose a **successful** run of `codex/gumball-release-0.3.4` for the intended commit, then download **om9-release-files** under Artifacts. GitHub may require sign-in. A queued, failed or older run is not the candidate package. Until the Action passes, its stock-host build remains unverified.
-3. Extract the downloaded artifact ZIP. From it, extract **OpenMatrix9-…-SetupLauncher…-Windows-x64.zip** into a folder, keeping every bundled file together. Double-click **Start-OM9.cmd**. Keep the plugin ZIP beside the launcher intact; the launcher reads it itself.
+3. Extract the downloaded artifact ZIP. From it, extract **OpenMatrix9-…-SetupLauncher…-Windows-x64.zip** into a folder. Keep the bundled **OpenMatrix9** folder, **launcher-manifest.json** and **Start-OM9** files together, then double-click **Start-OM9.cmd**. The launcher reads the extracted OpenMatrix9 folder.
 
 The launcher installs or updates OM9 in `%APPDATA%\FreeCAD\v1-1\Mod\OpenMatrix9`, creates **OpenMatrix9** shortcuts on Desktop and in Start Menu, and opens the workbench. Use the Desktop icon afterwards; the extracted folder is no longer needed. No Administrator access, FreeCAD source, Rust or Visual Studio is required.
 
@@ -46,7 +46,7 @@ The Matrix diagnostic scripts in the source are development tools, not installat
 
 ## Historical v0.0.3 scope and continuing host limits
 
-The following limits describe the published v0.0.3 checkpoint. The Gumball candidate has its own native validation and pending stock CI; these historical notes do not certify that candidate.
+The following limits describe the published v0.0.3 checkpoint. The Gumball candidate has its own native validation; consult the exact commit's Action for its stock CI result. These historical notes do not certify that candidate.
 
 - v0.0.3 adds the public CI build and latest launcher to the official-host compatibility introduced in v0.0.2. CI scope and remaining historical tooling failures are documented in [build validation](docs/validation/2026-10-11-release003-ci.md). Earlier Rhino/Matrix development reports are historical evidence, not a full recertification of this stock build.
 - Full openNURBS, all jewelry algorithms and production Matrix palette/lock handoff are not fully accepted yet.

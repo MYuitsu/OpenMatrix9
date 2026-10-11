@@ -4,10 +4,7 @@
 // OM9 uses UTF-8 string literals throughout its Qt adapter. This is a source
 // conversion option, not a Qt binary ABI change.
 #undef QT_NO_CAST_FROM_ASCII
-#include <windows.h>
-// Legacy Win32 distance modifiers collide with CAD variables named near/far.
-#undef near
-#undef far
+#include "WindowsDistanceMacros.h"
 #include <fastsignals/signal.h>
 #include <App/Application.h>
 #include <App/Document.h>

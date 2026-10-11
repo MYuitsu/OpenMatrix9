@@ -3,11 +3,11 @@
   "native_processes": 30,
   "native_checks": 955,
   "plugin": "H:\\FreeCAD-src\\build\\gumball-clean-runtime-20261012\\bin\\OpenMatrix9Gui.pyd",
-  "plugin_sha256": "d2da3db05211a12e5455725fb0007d313ae8d4729b50b1a81b48fc4b2787f1a1",
+  "plugin_sha256": "77fa3d086a1ed9a388d81e3dd3fa1fe6ff813bad758a5954e4e9d1880c28fda3",
   "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
   "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
-  "native_suite": "H:\\FreeCAD-src\\build\\gumball-final-candidate-24-20261012\\suite.json",
-  "suite_sha256": "5f7253f388523b2a5cb36b860a00d68931e2893219b8da4e707f0e28f686a855",
+  "native_suite": "H:\\FreeCAD-src\\gumball-final-candidate-25-20261012\\suite.json",
+  "suite_sha256": "3ccc42b7848404a193e6407749e39e4a86c1e2f52c5986234786a70ee2fd0943",
   "runs": [
     {
       "name": "geometry",
@@ -19,7 +19,7 @@
         "OM9-INFO-021"
       ],
       "report_sha256": "f025abe6bd088477634e222d452badf21be53e288c782acab518e9168101294d",
-      "launch_sha256": "1b8ea413c2033ede9d64f71bc68f8c018ef306f872e0c2e765ae8fff5d9f841c",
+      "launch_sha256": "8f73790c6c4c534d51149bf9955da9d520296a823b64430d2739884521dfc5ae",
       "macro_sha256": "e4e19bd189351759898325e8ba3271f1c00ca65d38c08ff53ec39848767c784a",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -96,7 +96,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "b95d5db8a0a9fb335ef37a4252d3512a7aaa830b23f1e4ea32a1395da5483489",
-      "launch_sha256": "4f7d59c98968eba2895f0578ff91042ed1b2a3c1aee16b4661e640fbac434e07",
+      "launch_sha256": "b50434655502633b402e7501396a009821ce5cbe5f2e058f4877f08c667b8434",
       "macro_sha256": "9c8e22c3ab1d53618abb6470bc74c9186a2f9943360d9328fac02238661dcf04",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -176,8 +176,8 @@
         "OM9-INFO-021",
         "OM9-INFO-022"
       ],
-      "report_sha256": "54b35fec2f26814fa46c2bd285acd1941159447b5205d1044ef58848637de86c",
-      "launch_sha256": "1f7fa3860d8f550b31f1c5b2575b311b59c93156305a0f3de68709612a80138d",
+      "report_sha256": "0b8cc9e16228891478e2197e8646f0cc53171a9a69bcc2285e039b52fd220cf7",
+      "launch_sha256": "90da42b9698611fb5df15932991c12091af59f46294bb612d8a8cea70269c5ea",
       "macro_sha256": "a114d841d9fa378fc10518e318aa2e98f6fb99f267e8fa67e4c6b5b8e0bfd83d",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -290,7 +290,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "dcd28d23c3f8bb1e301e221e17480e3cf882bae19e15a911dda599b05c267b6f",
-      "launch_sha256": "035d8e3616c444157074f01f0e7036c218c9521a18e3c9eecedacf5949c6fcb1",
+      "launch_sha256": "b355722ba76fd097ab46380b7750c1802ff3964c60748f98610111f54954e312",
       "macro_sha256": "06162565504cfb91cdafc02de369df91d6c14eb1822b1984fb6282fac8a86213",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -343,7 +343,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "40a301c9fe059db15927b75025340e5a43cac9c23f450723d91e2588c9173ca1",
-      "launch_sha256": "527094a2f21aea4fd76420479fca6d38e36c0cfbe72bb44315464f8bceebac8a",
+      "launch_sha256": "30d9ed742ad9a3d756c9a8ea006183be13a3b00d0fac0e5e2775782090e8aacb",
       "macro_sha256": "61d165285ac077643c872fb7ebcae38ad29d3eec6a9b258d1b3d86e05f435710",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -430,7 +430,7 @@
         "OM9-INFO-020"
       ],
       "report_sha256": "fd467cbee2b2f4979289b7edd6dfcfd6b882d4b35e1bffa7dc5762137a7a6d42",
-      "launch_sha256": "357b5cd20504d420e7f22135efea987714553297143a6d1afbc185a9502c375f",
+      "launch_sha256": "c4056a3b1b67320298071e31c39d1d70ba24a9ea841f2e4beffe0da80dbde242",
       "macro_sha256": "7979bd5962d514bfbbf84c35f52650ad4a6959cbd4c420af8ba17c1ff237ce60",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -457,7 +457,7 @@
         "OM9-INFO-020"
       ],
       "report_sha256": "7f7886e9f75d1e4cc0c6ca6f0cee6e9d26f0debf217e8caa7c437625a704400d",
-      "launch_sha256": "f9b08bb0e03ccc83b7e23754e2e662692c35453452749a23a366b06241727eaa",
+      "launch_sha256": "d78e8e5313960ffd8b9e934ec56f23256290f7f11d98b3904eecfb3e10af8b1a",
       "macro_sha256": "7979bd5962d514bfbbf84c35f52650ad4a6959cbd4c420af8ba17c1ff237ce60",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -481,7 +481,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "a9879c7348216f55456b9e09282f1c76356e389332b927f7aed0eb06f1ca2d0e",
-      "launch_sha256": "984b0df6e495ba5675281f86c25f15a8e367a28cb73225a763e823adbdc4ab70",
+      "launch_sha256": "3e9254d15e5dc8b3c994b27e771c5dcb6b68b607f528e34e50afa46545f8061d",
       "macro_sha256": "f3e430fa0a59c68b197c3ac93444b36354fd0b3d2e44e9d6bc689343c153ce1a",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -769,7 +769,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "1e3c2c9db94d31c28eeb51b755e35da9dd197c47eee2db78cc0100a31adeb77e",
-      "launch_sha256": "20933eba2c82ead7128b5adc7be814b375d3abb37178ce9b6cac608c5714afd0",
+      "launch_sha256": "5e241d8393652d78df545c831994d3a18c12e88224403c67fa7aaa3a5beced5d",
       "macro_sha256": "f3e430fa0a59c68b197c3ac93444b36354fd0b3d2e44e9d6bc689343c153ce1a",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -1058,7 +1058,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "f49db0ec76720e3d545664606b8cd406070fe6ab96bac29019465042316802d6",
-      "launch_sha256": "f0fb496f8fc082bb75787aedc3e65de8b78d756456825110a18c76e5379d0364",
+      "launch_sha256": "2e77d7d516ae7eecec1291603e85d7fb3145e1675d826e4dc3132ef4807bb61d",
       "macro_sha256": "5258a96ade5a432cc9c37cd545ee2c8a6fb3ec5b15f390e68c9a9771752ad562",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -1335,7 +1335,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "50adfc7a1c185a53e7e5ba1821d7fb4127ca23795545e1b3c5e7d355f019377d",
-      "launch_sha256": "40111733e1abd31b86a635d6276b48ee7df42100741a41a1c1b72699b79f0eec",
+      "launch_sha256": "4e000c0d4cd01292f212b299377ba11b7e5ae3792176048cf73782867bb0a1a2",
       "macro_sha256": "f6610b8393a8e2dc1da2a4cf1b9810769d6c9e4056b99f1c1bddf9969595ed24",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -1428,7 +1428,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "dfe99dd0878c941616f0b9e8e7d6f0ed517d8724c176bf0b71c3fd2f7dfa1e21",
-      "launch_sha256": "d8ed2e1474d126239ad007a1580c113723edf48fba7b80c1d0ac2ccc1b7b188d",
+      "launch_sha256": "5b78e4cf08b7b53a3ab71e7325d8af85e63fb2e024e53e0136954ffa9595263c",
       "macro_sha256": "5258a96ade5a432cc9c37cd545ee2c8a6fb3ec5b15f390e68c9a9771752ad562",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -1705,7 +1705,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "99f5fe438dcf8669ff51dc9b9358d0073f11f012c5580a42c6543c531abd52a8",
-      "launch_sha256": "cefaf3642b1cf34a3947fb67e796ac9885c974800c357e06c63ec07ee07bd6a6",
+      "launch_sha256": "4f977b71f988c4edfca2002cd94143a2e97fcf047b533cc045693f8c614f7c8c",
       "macro_sha256": "f6610b8393a8e2dc1da2a4cf1b9810769d6c9e4056b99f1c1bddf9969595ed24",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -1798,7 +1798,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "bc1821c4644725faefd170de4f702b6d76a8882aab2207aca886aa417d256f82",
-      "launch_sha256": "a514ac4009d66264d07b91f2137c7c798d6351102e1a34d89f41ef19b639204c",
+      "launch_sha256": "37270fca97504d9839d323736981bfb6d5f83a266fce031bf93e8f9a55eca505",
       "macro_sha256": "5258a96ade5a432cc9c37cd545ee2c8a6fb3ec5b15f390e68c9a9771752ad562",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -2075,7 +2075,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "60e9e93d351f06bcddf7ba2472f1e3da8eb9f165dbe8be8d33986c3027e51222",
-      "launch_sha256": "b88f4823c5359252f2bbb92de8e63cf90dfc13599072370788e02843fe2d4815",
+      "launch_sha256": "19c0f6e0251f73544023a147471bc683dc75e77748a39bc902c67c1d8f338b75",
       "macro_sha256": "f6610b8393a8e2dc1da2a4cf1b9810769d6c9e4056b99f1c1bddf9969595ed24",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -2166,7 +2166,7 @@
         "OM9-INFO-020"
       ],
       "report_sha256": "59090546f1a4de39c936f170557363145c8d98d3bbe7add2d6002aeb611914a2",
-      "launch_sha256": "e04b77122e0d03170e3dd2e45dc37a9f34a072239fca070202735328ddd460e0",
+      "launch_sha256": "c02951486616a869f6caec120b4ee330a4be62d548a5fac4993f0e8d27f41229",
       "macro_sha256": "dc6cce864dccf3b134b97149e549185baa3c5348e437970065fe377a69571a22",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -2221,7 +2221,7 @@
         "OM9-INFO-020"
       ],
       "report_sha256": "a33bcf87a00cb202d746bd681b33cbeebf482a3169ff3cdb0947e831427b5859",
-      "launch_sha256": "7540d6505943d2234a14aa1eff9d0f91f98a148d019373cc3a035ff01d221ddd",
+      "launch_sha256": "c7d36f27bd13066b1ea5b50a1fc46a37528a217e0fd0df8a06f0b4e97c3d35b3",
       "macro_sha256": "85f77d032cc6c3561f69d20c7c8f920d7df39979e952bda500ab51bc17f97c08",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -2260,7 +2260,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "b037a34863346276ef5d43f92da85a99b4d5322d648b89cee69584c8c63521c6",
-      "launch_sha256": "a937c32dc5facc1f72b25335ca3eba92c8b8798386dca11d44c238435abae558",
+      "launch_sha256": "eb83271fe6a828ab776b6fb9e7cba309ff49514ad51f850310a145d29eb77ffa",
       "macro_sha256": "332eff6390c000f1691104b6a309ee5a4741deb86a2cc05c45e36d4ffcf91867",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -2376,7 +2376,7 @@
         "OM9-INFO-021"
       ],
       "report_sha256": "01a57437b8a4d77d3ebcc3df3a50511c24728abf452a0eb3344ef48973f28390",
-      "launch_sha256": "52b7b20d4fd12030037c055e3d1be7d75792905fa25ddb01a091d2df6df28507",
+      "launch_sha256": "9331588c822276f3897e3489f9b280c15ec15ada3e797d293ebea687c8dcb8af",
       "macro_sha256": "85532df02c9b69a9f9ee3d5a7cad740effb72903a965337a73d9bcb81f33bd29",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -2499,7 +2499,7 @@
         "OM9-INFO-020"
       ],
       "report_sha256": "d70c723432d7324261f55ebe08630098ce5a5bc34c38778a317b803654dcb8ce",
-      "launch_sha256": "ae86867f5c59c601be2941d56176c2f7e13cae5c5aa1bbbdcd33ab14d77a38c4",
+      "launch_sha256": "d670ff8c07ea0afd6a58115e5582f3e013ad3d6f842d6d7e203a15d9383ccda4",
       "macro_sha256": "9236978cd3c38cd283e26c69c727b691d3243c3db1f34c5e8c9dcb15115a50fd",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -2522,7 +2522,7 @@
         "OM9-INFO-021"
       ],
       "report_sha256": "ed94181cfa95c56002f3caf35ebbb7803f3a011ebecad0deee8a7a21f3122b9b",
-      "launch_sha256": "9de3ae7741c7bf6a95c50ffa742c33bc74db26be732aae62a1f1170e26e6909a",
+      "launch_sha256": "f9444981bc81787a29391185d4e528d42eb634aa402c4102d7543a89f82237ea",
       "macro_sha256": "204d607ebaa2d5500584b611b43754a75cf3d5d56247df2c40defa3ac14c4502",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -2591,7 +2591,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "fd40b1c6e23a678f229ff4094451785ccd6fe2dfebfc2d9b4376629ff5f7308e",
-      "launch_sha256": "1c3fcfe715f31a129a696bd2ab827220eeb64bc7c3f1e3723f51b032aa3f4a41",
+      "launch_sha256": "63742785ab34697b1add998a736ac26f85f7ddef0e9ebd13435b57243d52a117",
       "macro_sha256": "bd1f9a38758629c9f7951aa293845d9c416a2984e7ca7802d587637b1720aa1f",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -2698,7 +2698,7 @@
         "OM9-INFO-020"
       ],
       "report_sha256": "f964b03f019b71fd36e8a9fd3148136298dbb469f7c92bf8b0c18956544fb632",
-      "launch_sha256": "db3f04d0d42e3e5b9e112a5c7364afd8cb8c32e3dd3d096638378bfe225d2898",
+      "launch_sha256": "cb35be6f029ccfdcc5657f8d490d2feebe0614b90206353dcbb554287dc45f1d",
       "macro_sha256": "7504c4ee3f68e916039fabef7652b886ea4c61c2d84466e94977871026db9c4e",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -2792,8 +2792,8 @@
       "feature_ids": [
         "OM9-INFO-020"
       ],
-      "report_sha256": "8afa62e5563aec5be267b6954b801bd271a30725d3ec858f7ad0ce12bf42ea07",
-      "launch_sha256": "92b05a64143746e9e1143c7b0163c15d50f82363f54b998de8c27190f001b8d3",
+      "report_sha256": "21bb0d4826e8fe0fc647e1ceb6b3d01ce285f685a71334c6990db09161bbe3d5",
+      "launch_sha256": "0414d1cba00dde0fdcb92e819afa695872af6dba4b29c1f6f314e291ef38590e",
       "macro_sha256": "69da6c6e7e097c614c8a7a282d021f5fef0a24cc3ae81c322d53c5eb5043cd77",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -2875,8 +2875,8 @@
       "feature_ids": [
         "OM9-INFO-020"
       ],
-      "report_sha256": "dd3dd3365102ed696d14cc4410c28917a9eb964e433546121bec68b7801bb871",
-      "launch_sha256": "3c818342772ec863fff13f451f313238cf82a7f2ce03571ff1d7d0c9347f2eac",
+      "report_sha256": "04059787f03d19ba862604c5645996017720d3f039203198705366716ddc5f54",
+      "launch_sha256": "45cf9a5b1474743912ec1f24ae31cfa8fd70cd6554fe8f8f561b68f8d98bad8c",
       "macro_sha256": "5b5e904fa39ba2ce7600f67875a8280cb316122c52449625b306f4202778f1e8",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -2979,7 +2979,7 @@
         "OM9-INFO-021"
       ],
       "report_sha256": "6fb373753db659bd3bea0e4acc8354c6fbcbb7795ab25a309007cb673a5cb737",
-      "launch_sha256": "4fd62c18f183764aeaadcd644a5481b33ebdaa845c50945e8eb234047b471305",
+      "launch_sha256": "3d5a8666887089b76b3881460cd982273b269dbadf24321897c6594c27d5ad3d",
       "macro_sha256": "0171484090b83b276ee5efc6fe1da96b443654f759b6a78f38d2a9fc450dff7d",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -3333,8 +3333,8 @@
       "feature_ids": [
         "OM9-INFO-020"
       ],
-      "report_sha256": "b48becc3d6d06c3052c425207e02990830116bac977d53ec2cda81890b497d73",
-      "launch_sha256": "71c4ff230a0afcd9795ed24220288fa1a802a1e8e38b8af27aca112ba36970ae",
+      "report_sha256": "69c6f79e3b35f1135fc8a9daad1424252be107506b5d353916d8fb544b5d5f6e",
+      "launch_sha256": "769303453c95468d0df72376ca0f800912637f20028fd92bb37e10b89b76ba2d",
       "macro_sha256": "7466acfe34fbfdad493cee808e19578031502e08da48748be7acad2d78e60389",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -3857,7 +3857,7 @@
         "OM9-INFO-020"
       ],
       "report_sha256": "bcc8e0732b8a985129cff11a359a5535acfde66b25cfa0393b3a1486383fe294",
-      "launch_sha256": "794df94a67f42ab1c914423810d54f4d88581a9633b0dc0d03849671fd698be9",
+      "launch_sha256": "aa008a040f8e6b3fbb755553d9d052258728a5882a7f15aa55d20cad1bbb6e36",
       "macro_sha256": "7466acfe34fbfdad493cee808e19578031502e08da48748be7acad2d78e60389",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -4126,7 +4126,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "baa4b9c42813494ecde3f069233f6b512aa1a58f880c598e4a347fc7e3a76a83",
-      "launch_sha256": "25726195cb12f4649d9c07f03511bacf676c3ccc5b83a991883eb0f482422a5c",
+      "launch_sha256": "f6a6f26d108d96bccc3a31afe14cd6d17849db50adcbcf466f2958461dfe572e",
       "macro_sha256": "70d86171a284083291e4fb2a6b67914b3bfc517bea8a0977f247578830d37015",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -4239,7 +4239,7 @@
         "OM9-INFO-022"
       ],
       "report_sha256": "5e58e518c6d837d79a59e515f0f4ddda982e5236763d96635daaccaf69df23ae",
-      "launch_sha256": "aa15fdab836be07c198df646f0dc5d96a4617a20b2559899083a69cc7067ba32",
+      "launch_sha256": "d8736f1a965f8de8398098883db4036f04dee2613359ad3e8e761ad038d8df93",
       "macro_sha256": "ce5e9deea3aa7d90c5d8a4ac8794a66694f6737761e276c3f7878d24e2429772",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "checks_detail": [
@@ -4318,7 +4318,21 @@
   "implementation_status": "implemented",
   "approved_scope_complete": true,
   "stock_ci_status": "pending",
-  "version": "0.3.4-202610120508",
-  "completed_at": "2026-10-12T05:08:00+07:00",
-  "approved_scope": "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Stock GitHub Actions CI is pending."
+  "version": "0.3.4-202610120539",
+  "completed_at": "2026-10-12T05:39:00+07:00",
+  "approved_scope": "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Stock GitHub Actions CI is pending.",
+  "stock_header_regression": {
+    "ok": true,
+    "initial_failed_action": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/38179645945",
+    "native_red_log_sha256": "f39331e1c83533a8b4b7ff29eede68de86cc9b1b0e47eca0f9a43794d4ab4c54",
+    "native_green_log_sha256": "dc1f17c91f0cffa52fb329bdf8bb5b12d1c2dddcdf563049147a3c27d4e2fd6a",
+    "fixture_sha256": "12b199a7db71ec07139fa613340a147510e63605c2e5a66e864308ea48c860b1",
+    "checks": [
+      "Old stock distance-macro prelude reproduces the actual zconf.h315 C2146 failure.",
+      "Windows x64 FAR remains empty after removing the near/far CAD-name collisions.",
+      "FreeCAD consumes its unprefixed system zlib header; bundled openNURBS headers remain private.",
+      "Native unprefixed CRC32 of 123456789 equals independent canonical 0xcbf43926."
+    ],
+    "stock_ci_status": "pending"
+  }
 }

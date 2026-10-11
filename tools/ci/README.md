@@ -13,6 +13,12 @@ CMake builds only OpenMatrix9Gui and its module dependencies, using 60% of logic
 CPUs, rounded down with a minimum of one. The native BRep oracle is a separate
 test target. No OM9 binary from a previous release is a build input.
 
+The native header-order regression loads the stock Windows distance-macro prelude
+before the kernel headers and host zlib. It requires flat x64 FAR, no near/far
+CAD-name collisions and an unprefixed system-zlib CRC32 oracle. The bundled
+openNURBS zlib retains its private includes and static linkage; its header search
+path is not exported into FreeCAD/zipios++ consumers.
+
 CI runs public package/source-audit and installer/updater regression, Rust regression, eight independent
 analytic BRep fixtures and actual FreeCAD GUI/native/worker tests with an isolated
 profile. Evidence is retained as a workflow artifact; the current test summary and
