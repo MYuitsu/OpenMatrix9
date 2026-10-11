@@ -126,7 +126,7 @@ bool CoreRebuild::handles(std::size_t index){auto* id=om9_command_id(index);retu
 bool CoreRebuild::active()const{return state->selecting||state->dialog;}
 bool CoreRebuild::valid()const {
     auto* gui=Gui::Application::Instance->activeDocument();
-    return state->document&&state->document==App::GetApplication().getActiveDocument()&&gui&&!gui->getInEdit()&&!gui->isAboutToClose()&&Gui::Control().isAllowedAlterDocument(state->document);
+    return state->document&&state->document==App::GetApplication().getActiveDocument()&&gui&&!gui->getInEdit()&&!gui->isAboutToClose()&&om9AlterDocument(state->document);
 }
 void CoreRebuild::clearPreview(){for(auto [root,node]:state->previews){if(root->findChild(node)>=0)root->removeChild(node);root->unref();}state->previews.clear();}
 void CoreRebuild::cancel(){
@@ -292,7 +292,7 @@ void CoreRebuild::publish(const std::shared_ptr<Result>& result){
             throw std::runtime_error(staleReason);
         const auto& outputs=result->outputs;
         if(result->commit){
-            document->openTransaction("Rebuild Curve");
+            om9OpenTransaction(*document,"Rebuild Curve");
             try{
                 for(std::size_t i=0;i<outputs.size();++i){
                     auto object=createCurveFeature(*document,outputs[i].value,"Rebuild");
@@ -301,8 +301,8 @@ void CoreRebuild::publish(const std::shared_ptr<Result>& result){
                     for(const char* attr:{"LineColor","PointColor","LineWidth"}){CurvePyRef property(PyObject_GetAttrString(oldView.value,attr));if(PyObject_SetAttrString(newView.value,attr,property.value)<0)throw std::runtime_error("Cannot copy curve appearance");}
                 }
                 if(result->remove)for(const auto& guard:result->guards)document->removeObject(guard.objectName.c_str());
-                document->recompute();document->commitTransaction();
-            }catch(...){document->abortTransaction();throw;}
+                document->recompute();om9CommitTransaction(*document);
+            }catch(...){om9AbortTransaction(*document);throw;}
             state->lastOutcome="committed";const auto command=result->command;cancel();om9_sidebar_record_execution(command,true);CurveController::instance().setPrompt("Command: ");CurveController::instance().logMessage("Rebuild completed");return;
         }
         attaching=true;

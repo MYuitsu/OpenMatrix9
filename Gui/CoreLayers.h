@@ -35,6 +35,12 @@ public:
     static bool toggleLocked(int index);
     static bool toggleVisible(int index);
     static bool setColor(int index,const std::array<double,3>& color);
+    // Native visibility/selectability observations and owning-layer permission.
+    static bool objectEditable(App::DocumentObject* object,bool requireVisible=true);
+    static bool selectionEditable();
+    // Copy only layer metadata/appearance in the caller's existing transaction.
+    // The caller owns containing-group mutation and its publication guard.
+    static void inheritLayer(App::DocumentObject& output,App::DocumentObject& source);
     // Must be called BEFORE Circle's openTransaction. Throws on lock/corrupt state.
     static CircleLayerSnapshot captureCircle(App::Document& document);
     // Must be inside caller's existing Circle transaction, after native output

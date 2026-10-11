@@ -180,6 +180,18 @@ pub extern "C" fn om9_layer_default_color(index: i32, channel: usize) -> f64 {
 pub extern "C" fn om9_layer_root_color(channel: usize) -> f64 {
     ROOT_COLOR.get(channel).copied().unwrap_or(f64::NAN)
 }
+
+/// Native adapters supply observed host permissions; the independent decision
+/// remains in Rust and never retains document or view-provider ownership.
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_layer_effective_selectable(
+    visible: bool,
+    explicit_selectable: bool,
+    hidden: bool,
+    locked: bool,
+) -> bool {
+    visible && explicit_selectable && !hidden && !locked
+}
 #[unsafe(no_mangle)]
 pub extern "C" fn om9_layer_output_status(
     index: i32,

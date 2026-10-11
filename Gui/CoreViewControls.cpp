@@ -79,7 +79,7 @@ bool CoreViewControls::handles(std::size_t command){auto name=id(command);return
 bool CoreViewControls::available(std::size_t command)const {
     if(!enabled||!handles(command)||!active())return false;
     if(id(command)=="ViewCaptureToFile")return true;
-    if(!Gui::Control().isAllowedAlterView(App::GetApplication().getActiveDocument()))return false;
+    if(!om9AlterView(App::GetApplication().getActiveDocument()))return false;
     return id(command)!="Zoom_Selected"||!Gui::Selection().getSelectionT(App::GetApplication().getActiveDocument()->getName(),Gui::ResolveMode::NoResolve).empty();
 }
 void CoreViewControls::activate(){
@@ -185,7 +185,7 @@ bool CoreViewControls::eventFilter(QObject* object,QEvent* event) {
     auto* mouse=static_cast<QMouseEvent*>(event);auto* viewport=view->getViewer()->viewport();
     const auto position=viewport->mapFrom(widget,mouse->position().toPoint());
     if(event->type()==QEvent::MouseMove&&om9_core_crosshairs())if(auto* lines=overlay(view,true))lines->track(position);
-    const bool allowed=Gui::Control().isAllowedAlterView(App::GetApplication().getActiveDocument());
+    const bool allowed=om9AlterView(App::GetApplication().getActiveDocument());
     if(!kind)return false;
     if(!allowed||view!=toolView){stopTool(true);return false;}
     const QPoint point(std::clamp(position.x(),0,std::max(0,viewport->width()-1)),std::clamp(position.y(),0,std::max(0,viewport->height()-1)));

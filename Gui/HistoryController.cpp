@@ -39,8 +39,8 @@ HistoryController::HistoryController():QObject(qApp){
 bool HistoryController::handles(std::size_t i){return om9_history_command_kind(om9_command_id(i))!=0;}
 bool HistoryController::matches(std::size_t i,const QString& text){return handles(i)&&om9_history_command_kind(text.toUtf8().constData())==om9_history_command_kind(om9_command_id(i));}
 bool HistoryController::active()const{return document&&kind!=0;}
-bool HistoryController::valid()const{auto* g=Gui::Application::Instance->activeDocument();return document==App::GetApplication().getActiveDocument()&&document&&g&&!g->isAboutToClose()&&!g->getInEdit()&&Gui::Control().isAllowedAlterDocument(document);}
-bool HistoryController::available(std::size_t i)const{auto* d=App::GetApplication().getActiveDocument();auto* g=Gui::Application::Instance->activeDocument();return handles(i)&&d&&g&&!g->getInEdit()&&!g->isAboutToClose()&&Gui::Control().isAllowedAlterDocument(d);}
+bool HistoryController::valid()const{auto* g=Gui::Application::Instance->activeDocument();return document==App::GetApplication().getActiveDocument()&&document&&g&&!g->isAboutToClose()&&!g->getInEdit()&&om9AlterDocument(document);}
+bool HistoryController::available(std::size_t i)const{auto* d=App::GetApplication().getActiveDocument();auto* g=Gui::Application::Instance->activeDocument();return handles(i)&&d&&g&&!g->getInEdit()&&!g->isAboutToClose()&&om9AlterDocument(d);}
 void HistoryController::prompt(const QString& s){CurveController::instance().setPrompt(s);CurveController::instance().logMessage(s);}
 void HistoryController::cancel(){document=nullptr;kind=0;{Base::PyGILStateLocker lock;inputs.clear();}if(dialog){auto* d=dialog.data();dialog=nullptr;status=nullptr;d->hide();d->deleteLater();}}
 bool HistoryController::start(std::size_t i){
@@ -49,22 +49,22 @@ bool HistoryController::start(std::size_t i){
         if(kind==1){settingsOptions();return false;}
         if(kind==5){prompt("JoinHistory: Select separate curves; Enter / Undo / Cancel. Tolerance=mm");Base::PyGILStateLocker lock;
             for(const auto& s:Gui::Selection().getSelection(document->getName())){if(s.SubName&&*s.SubName)throw std::runtime_error("Join History requires whole curves");add(s.FeatName);}return false;}
-        document->openTransaction(kind==2?"Clear Object History":kind==3?"History Record":"History Update");
+        om9OpenTransaction(*document,kind==2?"Clear Object History":kind==3?"History Record":"History Update");
         try{
             if(kind==2){auto selection=Gui::Selection().getSelection(document->getName());if(selection.empty())throw std::runtime_error("Select objects whose History should be cleared");for(const auto& s:selection){if(s.SubName&&*s.SubName)throw std::runtime_error("Clear Object History requires whole objects");detachObjectHistory(document->getObject(s.FeatName));}}
             else{auto* s=historySettings(*document);auto& p=kind==3?s->Record:s->Update;p.setValue(!p.getValue());document->recompute();}
-            document->commitTransaction();
-        }catch(...){document->abortTransaction();throw;}
+            om9CommitTransaction(*document);
+        }catch(...){om9AbortTransaction(*document);throw;}
         auto* s=historySettings(*document,false);prompt(QString("History: Record=%1 Update=%2. Command:").arg(!s||s->Record.getValue()?"Yes":"No").arg(!s||s->Update.getValue()?"Yes":"No"));cancel();return true;
     }catch(const std::exception& e){prompt(QString("History: ")+e.what());cancel();return false;}
 }
 void HistoryController::add(const std::string& name){for(const auto& i:inputs)if(i.name==name)return;inputs.push_back(editInput(*document,name,1));}
 void HistoryController::setOption(unsigned option,bool value){
-    document->openTransaction("History policy");try{auto* s=historySettings(*document);App::PropertyBool* p=option==1?&s->Record:option==2?&s->Update:option==3?&s->Lock:option==4?&s->BrokenHistoryWarning:nullptr;
-        if(!p)throw std::runtime_error("Unknown History option");p->setValue(value);document->recompute();document->commitTransaction();
+    om9OpenTransaction(*document,"History policy");try{auto* s=historySettings(*document);App::PropertyBool* p=option==1?&s->Record:option==2?&s->Update:option==3?&s->Lock:option==4?&s->BrokenHistoryWarning:nullptr;
+        if(!p)throw std::runtime_error("Unknown History option");p->setValue(value);document->recompute();om9CommitTransaction(*document);
         if(dialog)if(auto* box=dialog->findChild<QCheckBox*>(QString("OM9HistoryOption%1").arg(option))){QSignalBlocker block(box);box->setChecked(value);}
         prompt(QString("History: %1=%2. Record / Update / Lock / BrokenHistoryWarning = Yes/No; Enter closes").arg(option==1?"Record":option==2?"Update":option==3?"Lock":"BrokenHistoryWarning").arg(value?"Yes":"No"));
-    }catch(...){document->abortTransaction();throw;}
+    }catch(...){om9AbortTransaction(*document);throw;}
 }
 void HistoryController::settingsOptions(){
     auto* s=historySettings(*document,false);dialog=new QDialog(Gui::getMainWindow());dialog->setObjectName("OM9HistoryOptions");dialog->setWindowTitle("History");auto* layout=new QVBoxLayout(dialog);

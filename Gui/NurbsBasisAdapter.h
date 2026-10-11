@@ -5,6 +5,9 @@
 #include <Geom_BSplineCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom_BSplineSurface.hxx>
+#include <Geom_BezierCurve.hxx>
+#include <Geom2d_BezierCurve.hxx>
+#include <Geom_BezierSurface.hxx>
 #include <array>
 #include <cstddef>
 #include <vector>
@@ -59,4 +62,19 @@ SurfaceBasisData checkedBasis(const ON_NurbsSurface&);
 CurveBasisData checkedBasis(const Handle(Geom_BSplineCurve)&);
 CurveBasisData checkedBasis(const Handle(Geom2d_BSplineCurve)&);
 SurfaceBasisData checkedBasis(const Handle(Geom_BSplineSurface)&);
+CurveBasisData checkedBasis(const Handle(Geom_BezierCurve)&);
+CurveBasisData checkedBasis(const Handle(Geom2d_BezierCurve)&);
+SurfaceBasisData checkedBasis(const Handle(Geom_BezierSurface)&);
+CurveBasisData checkedBasis(const ON_PolylineCurve&);
+// Bounds counts/storage and returns Rust-calculated logical extraction bytes
+// before any pole/weight/knot extraction vector is allocated.
+std::size_t logicalBytes(const ON_NurbsCurve&);
+std::size_t logicalBytes(const ON_NurbsSurface&);
+std::size_t logicalBytes(const ON_PolylineCurve&);
+std::size_t logicalBytes(const Handle(Geom_BSplineCurve)&);
+std::size_t logicalBytes(const Handle(Geom2d_BSplineCurve)&);
+std::size_t logicalBytes(const Handle(Geom_BSplineSurface)&);
+std::size_t logicalBytes(const Handle(Geom_BezierCurve)&);
+std::size_t logicalBytes(const Handle(Geom2d_BezierCurve)&);
+std::size_t logicalBytes(const Handle(Geom_BezierSurface)&);
 }

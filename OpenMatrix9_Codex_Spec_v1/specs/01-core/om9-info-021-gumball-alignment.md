@@ -5,7 +5,9 @@ command: GumballAlignment
 domain: 01-core
 module: Info & Settings
 kind: command
-implementation_status: partially_implemented
+implementation_status: implemented
+approved_scope_complete: true
+stock_ci_status: pending
 guide_date: '2026-10-07'
 guide_scope: engineering_contract_and_request_planner
 sample_status: compiled_and_validation_tests_passed
@@ -13,7 +15,7 @@ sample_status: compiled_and_validation_tests_passed
 
 # OM9-INFO-021 — Gumball Alignment
 
-Alias tương thích: `GumballAlignment`. Nhóm: `01-core`. Trạng thái: `partially_implemented`.
+Alias tương thích: `GumballAlignment`. Nhóm: `01-core`. Trạng thái: `implemented` trong approved OM9 scope.
 
 ## Hợp đồng thiết kế
 
@@ -114,22 +116,44 @@ Các ca trên là yêu cầu kiểm thử geometry/state của feature; kết qu
 
 ## OpenMatrix9 implementation notes
 
-Ngày 2026-10-11: `partially_implemented` / `validated_supported_slice`.
-One shared World/Object/CPlane frame, idle CPlane recapture, frozen gesture and relocated override across focus/maximize. Native whole-owner/curve/face frames; Planar oriented Mesh Segments; Mesh edge/vertex/light/camera or ambiguous frames remain explicit UnsupportedFrame.
+2026-10-12: `implemented` / `validated_supported_slice`; `approved_scope_complete=true`.
+Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Stock GitHub Actions CI is pending.
 
-[Evidence mới](../../../docs/validation/2026-10-11-gumball-four-view-completion.md).
-[Hợp đồng inputs/units/output/lifecycle và giới hạn](../../../docs/features/OM9-INFO-021.md).
-Nguồn bản trích Matrix8 Book1 PDF1–3/printed35–37; ảnh Rhino5 bốn view.
-Cache widget process-local; geometry/report native giữ FCStd, không thêm History graph.
+Plugin SHA256 `d2da3db05211a12e5455725fb0007d313ae8d4729b50b1a81b48fc4b2787f1a1`; host SHA256 `98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8`.
+[Final native evidence](../../../docs/validation/2026-10-12-gumball-core-completion.md).
+
+### Approved core closure — 2026-10-12, final native gates passed
+
+Object alignment adds real Ctrl+Shift pointer selection of Mesh vertex, edge and
+planar facet identities in the source viewport, including an initially empty
+selection. The shared frame must use the native picked component and its world
+coordinates; hidden/locked/stale, degenerate, nonplanar and ambiguous inputs
+must reject without an implicit World frame. This is component selection and
+frame derivation, not a mesh vertex deformation or Clayoo/SmartTargets command.
+
+Typed document Camera/Light objects supply their physical origin and native
+orientation. Camera FocalDistance/Height/HeightAngle/AspectRatio/Perspective and
+Light SizeU/SizeV/Reach/Power remain typed source properties through FCStd.
+Selecting or aligning them must leave Placement, properties, count and Undo
+unchanged. Warm/cold native object and actual pointer gates passed;
+this does not claim renderer output or the host's live camera-widget parity.
+
+[Validated baseline](../../../docs/validation/2026-10-11-gumball-four-view-completion.md).
+[Candidate scope and applicability](../../../docs/validation/2026-10-12-gumball-core-release-candidate.md).
+[Inputs/units/output/lifecycle and limits](../../../docs/features/OM9-INFO-021.md).
+Source design sections and compiled request-planner examples above remain unchanged.
 
 ## Acceptance checklist
+
+Checked native items refer to the dated 2026-10-11 baseline. New approved-scope items are validated by the final native cohort.
 
 - [x] World/Object dùng cùng frame trong bốn ô; idle focus/camera không đổi pivot hoặc geometry.
 - [x] CPlane của active view cập nhật tất cả overlays; không recapture giữa gesture.
 - [x] Menu/CMD Alignment và Reset đồng bộ basis, Scale extents, colors, pick và checked state ở mọi ô.
 - [x] Relocated override giữ qua focus và maximize/restore; explicit Alignment reset đúng selection.
 - [x] Native planar oriented Mesh Segment Object frame, rotated Placement và ambiguous/degenerate/nonplanar/cache rejection có evidence riêng.
-- [ ] Mesh edge/vertex và light/camera frame adapters còn thiếu trước full original-host parity.
+- [x] Candidate Mesh vertex/edge/planar facet Object frames from actual Ctrl+Shift pointer events in all four views, including empty selection. Final evidence: [exact30 native cohort](../../../docs/validation/2026-10-12-gumball-core-completion.md).
+- [x] Typed document Camera/Light physical Object frames and native property/view-provider warm/cold checks. Final evidence: [exact30 native cohort](../../../docs/validation/2026-10-12-gumball-core-completion.md).
 - [x] Mọi case trên giữ object count, placement/shape và Undo; cancel trả frame cũ ở cả bốn ô.
 
 - [x] Hợp đồng và điều kiện hình học được kiểm chứng trong supported native slice; adapter gaps ghi riêng.
@@ -139,22 +163,24 @@ Cache widget process-local; geometry/report native giữ FCStd, không thêm His
 - [x] Preview/commit/cancel behavior tested if applicable.
 - [x] Alignment/Relocate are view state; no dependency mutation or new associative History graph (native unchanged geometry/count/Undo evidence).
 - [x] No document geometry/count/Undo writes for view-state changes; successful geometry uses OM9-INFO-020 transaction.
-- [ ] Full original-host view/pivot persistence not claimed; owner cache is process-local by approved design.
+- [x] N/A for cold widget-cache persistence: bounded256 single-owner cache is process-local by approved design; native object FCStd persistence is tested separately.
+- [x] Recheck view-only behavior and cleanup on final-source expanded owner/typed frame fixtures. Final evidence: [exact30 native cohort](../../../docs/validation/2026-10-12-gumball-core-completion.md).
 - [x] Automated tests use feature ID `OM9-INFO-021`.
 
 ## Hợp đồng kỹ thuật chung
 
-Áp dụng có điều kiện theo workflow; mỗi mục cần evidence riêng hoặc lý do không áp dụng.
+Applicability is explicit below. Dated baseline and passing final native gates are
+mapped in the [candidate report](../../../docs/validation/2026-10-12-gumball-core-release-candidate.md).
 
-- [x] [OM9-CMD](../../ENGINEERING_CONTRACTS.md#om9-cmd): native supported slice; evidence/limitations in feature record.
-- [ ] [OM9-OBJECT](../../ENGINEERING_CONTRACTS.md#om9-object): kiểm chứng cho `OM9-INFO-021` hoặc ghi lý do không áp dụng.
-- [x] [OM9-SELECT](../../ENGINEERING_CONTRACTS.md#om9-select): native supported slice; evidence/limitations in feature record.
-- [x] [OM9-VIEW](../../ENGINEERING_CONTRACTS.md#om9-view): native supported slice; evidence/limitations in feature record.
-- [ ] [OM9-DISPLAY](../../ENGINEERING_CONTRACTS.md#om9-display): kiểm chứng cho `OM9-INFO-021` hoặc ghi lý do không áp dụng.
-- [x] [OM9-PICK](../../ENGINEERING_CONTRACTS.md#om9-pick): native supported slice; evidence/limitations in feature record.
-- [x] [OM9-COORD](../../ENGINEERING_CONTRACTS.md#om9-coord): native supported slice; evidence/limitations in feature record.
-- [ ] [OM9-ORGANIZE](../../ENGINEERING_CONTRACTS.md#om9-organize): kiểm chứng cho `OM9-INFO-021` hoặc ghi lý do không áp dụng.
-- [ ] [OM9-ANNOTATE](../../ENGINEERING_CONTRACTS.md#om9-annotate): kiểm chứng cho `OM9-INFO-021` hoặc ghi lý do không áp dụng.
-- [ ] [OM9-ANALYSIS](../../ENGINEERING_CONTRACTS.md#om9-analysis): kiểm chứng cho `OM9-INFO-021` hoặc ghi lý do không áp dụng.
-
-- [x] Ghi rõ supported slice, tolerance, options còn thiếu và kết quả native theo exact feature ID.
+- [x] [OM9-CMD](../../ENGINEERING_CONTRACTS.md#om9-cmd): Menu/CMD, numeric input, cancel and modifier timing: dated 2026-10-11 four-view native evidence; final-source replay passed.
+- [x] [OM9-OBJECT](../../ENGINEERING_CONTRACTS.md#om9-object): Applicable: native identity/topology, typed owner properties and FCStd; baseline evidence exists, new primitive/associative/Camera-Light gates passed. Final evidence: [exact30 native cohort](../../../docs/validation/2026-10-12-gumball-core-completion.md).
+- [x] [OM9-SELECT](../../ENGINEERING_CONTRACTS.md#om9-select): Same-document editable ownership, canonical roots and layer permissions: dated ownership/review evidence. New Mesh Ctrl+Shift and dependency graph checks passed.
+- [x] [OM9-VIEW](../../ENGINEERING_CONTRACTS.md#om9-view): Shared frame, first-click picks, focus/maximize and source/passive-view cleanup: dated four-view/lifecycle evidence; new-owner replay passed.
+- [x] [OM9-DISPLAY](../../ENGINEERING_CONTRACTS.md#om9-display): Unpickable preview, colors/logical pixels and DPI: dated visual/four-view evidence. New typed Camera/Light view-provider checks passed.
+- [x] [OM9-PICK](../../ENGINEERING_CONTRACTS.md#om9-pick): Native End/Mid/Point and source-view rays: dated Relocate pointer evidence. New Mesh Ctrl+Shift identities passed; no full snap-combination claim.
+- [x] [OM9-COORD](../../ENGINEERING_CONTRACTS.md#om9-coord): Document units, captured CPlane, w-world, world placement and invalid axes: dated core/four-view evidence; new physical-source frame checks passed.
+- [x] [OM9-ORGANIZE](../../ENGINEERING_CONTRACTS.md#om9-organize): Read-only permission/hierarchy lookup applies (dated ownership evidence). N/A for layer/group/Link/Body mutation: Alignment/Relocate writes only widget view state.
+- [x] [OM9-ANNOTATE](../../ENGINEERING_CONTRACTS.md#om9-annotate): N/A for document annotations: Gumball creates no text/dimension annotation. Numeric editors are transient viewport UI, with dated DPI evidence.
+- [x] [OM9-ANALYSIS](../../ENGINEERING_CONTRACTS.md#om9-analysis): N/A for a measurement/diagnostic command: no independent analysis output is created. Fixture geometry/volume checks validate transforms only.
+- [x] [OM9-TRANSFORM](../../ENGINEERING_CONTRACTS.md#om9-transform): N/A for geometry transforms in this command; frame changes are view state. Geometry transforms belong to OM9-INFO-020.
+- [x] Remaining engineering contracts have explicit N/A reasons in the candidate report; Camera/Light names do not certify a renderer.

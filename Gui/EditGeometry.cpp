@@ -154,7 +154,7 @@ void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const Ed
         if(dependent->isDerivedFrom(Base::Type::fromName("App::Part"))||dependent->isDerivedFrom(Base::Type::fromName("App::DocumentObjectGroup"))||hasRecordedHistory(dependent))continue;
         throw std::runtime_error("DeleteInput is unsafe for referenced objects; retain inputs or detach their dependents");
     }}
-    doc.openTransaction(name(kind));
+    om9OpenTransaction(doc,name(kind));
     try{breakHistoryForEdit(doc,deleting);Ref pyDoc(doc.getPyObject()),id(PyUnicode_FromString(feature(kind))),command(PyUnicode_FromString(name(kind))),sources(PyList_New(0));
         for(const auto& i:inputs){Ref n(PyUnicode_FromString(i.name.c_str()));append(sources.value,n.value);}
         std::vector<std::size_t> owners;if(kind==2)for(std::size_t i=0;i<inputs.size();++i){auto pieces=buildEdit({inputs[i]},2,0,0,tolerance);owners.insert(owners.end(),pieces.size(),i);}
@@ -171,7 +171,7 @@ void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const Ed
                 if(projection){Ref frame(PyList_New(0));for(const auto& row:{projection->eye,projection->right,projection->up,projection->forward})for(double value:row){Ref v(PyFloat_FromDouble(value));append(frame.value,v.value);}property(o.value,"App::PropertyFloatList","TrimProjectionFrame",frame.value);property(o.value,"App::PropertyBool","TrimPerspectiveProjection",projection->perspective?Py_True:Py_False);}}
             if(kind==2){Ref sv(PyObject_GetAttrString(source.value,"ViewObject")),ov(PyObject_GetAttrString(o.value,"ViewObject"));for(const char* key:{"ShapeColor","LineColor","PointColor","Transparency","LineWidth","PointSize","DisplayMode","TextColor"})if(PyObject_HasAttrString(sv.value,key)&&PyObject_HasAttrString(ov.value,key)){Ref style(PyObject_GetAttrString(sv.value,key));if(std::string(key)=="DisplayMode"){Ref modes(PyObject_CallMethod(ov.value,"listDisplayModes",nullptr));if(PySequence_Contains(modes.value,style.value)!=1)continue;}set(ov.value,key,style.value);}for(auto& group:groups){Ref added(PyObject_CallMethod(group->value,"addObject","O",o.value));}applyExplodeMetadata(o.value,shapes[index]);}
         }
-        for(const auto& n:deleting)doc.removeObject(n.c_str());doc.recompute();doc.commitTransaction();
-    }catch(...){doc.abortTransaction();throw;}
+        for(const auto& n:deleting)doc.removeObject(n.c_str());doc.recompute();om9CommitTransaction(doc);
+    }catch(...){om9AbortTransaction(doc);throw;}
 }
 }

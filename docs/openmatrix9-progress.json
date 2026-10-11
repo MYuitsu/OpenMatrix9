@@ -2440,6 +2440,76 @@
       "native_processes": 29,
       "native_checks": 781,
       "plugin_sha256": "FF0427D720EC8CFD5D24EEDFB32FBA7E538CFB65F98E06398404DAF42284D69F"
+    },
+    {
+      "key": "gumball-core-release-candidate-20261012",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "procedure_va": null,
+      "status": "validated",
+      "scope": "approved_om9_gumball_core_complete",
+      "specification_status": "approved_scope_complete_native_gates_passed",
+      "updated_at": "2026-10-12T05:08:00+07:00",
+      "outputs": [
+        "OpenMatrix9_Codex_Spec_v1/FEATURES.json",
+        "OpenMatrix9_Codex_Spec_v1/FEATURES.yaml",
+        "OpenMatrix9_Codex_Spec_v1/FEATURE_LOOKUP.json",
+        "OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md",
+        "OpenMatrix9_Codex_Spec_v1/MANIFEST.json",
+        "OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-info-020-gumball.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-info-021-gumball-alignment.md",
+        "OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-info-022-relocate-gumball.md",
+        "README.md",
+        "docs/features/OM9-INFO-020.md",
+        "docs/features/OM9-INFO-021.md",
+        "docs/features/OM9-INFO-022.md",
+        "docs/gumball-user-guide.md",
+        "docs/openmatrix9-progress.json",
+        "docs/validation/2026-10-12-gumball-core-completion.json",
+        "docs/validation/2026-10-12-gumball-core-completion.md",
+        "docs/validation/2026-10-12-gumball-core-release-candidate.md"
+      ],
+      "evidence": [
+        "docs/validation/2026-10-12-gumball-core-completion.md",
+        "docs/validation/2026-10-12-gumball-core-completion.json",
+        "docs/validation/2026-10-12-gumball-core-release-candidate.md"
+      ],
+      "tests": [
+        {
+          "command": "Scoped Gumball candidate metadata/links/manifest verification",
+          "result": "pass; JSON/YAML607 equal,604 unrelated entries unchanged,3 source designs/code guides and partial statuses preserved,6 manifest hashes,30 links; historical ledger/release.json unchanged. Native gates pending."
+        },
+        {
+          "command": "rtk proxy python tools/public_source_audit.py --project-root H:/FreeCAD-src/build/om9-gumball-release-0.3.4",
+          "result": "exit0; source_files2284, icon_bindings511, svg_files510, errors0. Documentation/source audit only."
+        },
+        {
+          "command": "rtk git diff --check",
+          "result": "exit0. No native verification claim."
+        },
+        {
+          "command": "Exact30 native cohort guard",
+          "result": "pass;30 unique expected cases / 955 nonempty passing checks; one initial/current plugin and host SHA; per-case exit0/reports/bootstrap/feature identity checked."
+        }
+      ],
+      "uncertainties": [
+        "Stock FreeCAD1.1.4 GitHub Actions remains pending for this exact source; no published release claim.",
+        "Approved process-local pivot cache and FreeCAD failed posttransaction old-Redo loss remain host limits.",
+        "Unsupported native graph/geometry or ambiguous frames reject. Clayoo/SmartTargets, Rhino internal roll, full Render/live host camera widgets and exact original-host parity excluded."
+      ],
+      "next_document": "docs/validation/2026-10-12-gumball-core-completion.md",
+      "next_action": "Run exact committed source through stock FreeCAD1.1.4 GitHub Actions; preserve native host limits and record actual Action result separately.",
+      "approved_scope_complete": true,
+      "stock_ci_status": "pending",
+      "native_processes": 30,
+      "native_checks": 955,
+      "plugin_sha256": "d2da3db05211a12e5455725fb0007d313ae8d4729b50b1a81b48fc4b2787f1a1",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "version_label": "0.3.4-202610120508"
     }
   ],
   "merge_context": {

@@ -5,7 +5,9 @@ command: Gumball
 domain: 01-core
 module: Info & Settings
 kind: command
-implementation_status: partially_implemented
+implementation_status: implemented
+approved_scope_complete: true
+stock_ci_status: pending
 guide_date: '2026-10-07'
 guide_scope: engineering_contract_and_request_planner
 sample_status: compiled_and_validation_tests_passed
@@ -13,7 +15,7 @@ sample_status: compiled_and_validation_tests_passed
 
 # OM9-INFO-020 — Gumball
 
-Alias tương thích: `Gumball`. Nhóm: `01-core`. Trạng thái: `partially_implemented`.
+Alias tương thích: `Gumball`. Nhóm: `01-core`. Trạng thái: `implemented` trong approved OM9 scope.
 
 ## Hợp đồng thiết kế
 
@@ -237,18 +239,47 @@ Các ca trên là yêu cầu kiểm thử geometry/state của feature; kết qu
 
 ## OpenMatrix9 implementation notes
 
-Ngày 2026-10-11: `partially_implemented` / `validated_supported_slice`.
-Shared four-view Rust session/preview, first-click native picks, bounds Scale, projection culling and DPI profile. Core menu/settings/Snappy/Strength/orbit; Box dimensions, uniform Sphere Radius and representable Link ScaleVector with native Undo/Redo. Generic/expression owners, Link shear/externaldoc and failed-transaction old Redo remain explicit limits.
+2026-10-12: `implemented` / `validated_supported_slice`; `approved_scope_complete=true`.
+Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Stock GitHub Actions CI is pending.
 
-[Evidence mới](../../../docs/validation/2026-10-11-gumball-four-view-completion.md).
-[Hợp đồng inputs/units/output/lifecycle và giới hạn](../../../docs/features/OM9-INFO-020.md).
-Nguồn bản trích Matrix8 Book1 PDF1–3/printed35–37; ảnh Rhino5 bốn view.
-Cache widget process-local; geometry/report native giữ FCStd, không thêm History graph.
+Plugin SHA256 `d2da3db05211a12e5455725fb0007d313ae8d4729b50b1a81b48fc4b2787f1a1`; host SHA256 `98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8`.
+[Final native evidence](../../../docs/validation/2026-10-12-gumball-core-completion.md).
+
+### Approved core closure — 2026-10-12, final native gates passed
+
+Native primitive Scale keeps native types and edits their dimensional properties
+when the affine transform is representable: Box/Plane/Ellipsoid/Wedge by owner
+axes, Sphere/Torus uniformly, and Cylinder/Cone/Prism with equal radial factors
+and a separate axial factor. A bound dimension retains its expression and
+dependency by multiplying the expression; coupled changed dimensions,
+attachment/bound Placement, oblique primitive limits and unrepresentable owner
+frames use an admitted associative result instead of overwriting definitions.
+
+The fallback uses standard FreeCAD `App::Link` and `Part::Scale`, with native
+`OpenMatrix9Gui::GumballScaleCompound` helpers derived from `Part::Compound`
+for occurrence normalization and legacy Part owners. The helper fixes its
+stock non-hiding Part view provider so native Undo/Redo and FCStd reopening
+retain the same presentation. It retains source definitions,
+supported incoming native links/subelements, group coordinates and Body/Tip
+trees. The visible result recomputes from that native graph; Alt creates a
+private result while keeping the original and its consumers intact. This is
+FreeCAD dependency preservation, not full Matrix History or Clayoo/SmartTargets.
+Read-only/foreign-document/unresolved graph cases must reject before mutation;
+publication callbacks must abort the whole batch. Native warm/cold checks passed for the final compiled plugin in the exact30 cohort.
+
+Typed `OpenMatrix9Gui::GumballCamera` and `GumballLight` are document objects with
+physical Placement and unit-bearing dimensions. Gumball moves/rotates those
+objects and scales admitted camera/light parameters. This does not establish
+renderer support or parity with the host's live modeling-camera widgets.
+
+[Validated baseline](../../../docs/validation/2026-10-11-gumball-four-view-completion.md).
+[Candidate scope and applicability](../../../docs/validation/2026-10-12-gumball-core-release-candidate.md).
+[Inputs/units/output/lifecycle and limits](../../../docs/features/OM9-INFO-020.md).
+Source design sections and compiled request-planner examples above remain unchanged.
 
 ## Acceptance checklist
 
-Các mục `[x]` đã có native evidence trong cohort29processes; mục `[ ]` còn
-mở được ghi rõ bên dưới, không xác nhận mọi representation của Rhino.
+Các mục `[x]` dưới đây có evidence baseline ngày 2026-10-11 và đã được chạy lại trong cohort30processes cuối ngày 2026-10-12. Các mục mới dẫn trực tiếp đến evidence cuối; không xác nhận mọi representation của Rhino.
 
 - [x] Command `Gumball On/Off` bật/tắt trên binary visual đã kiểm; không đổi geometry/Undo.
 - [x] On với selection hợp lệ tạo overlay đồng thời ở cả bốn view; Off dọn cả bốn, không đợi focus.
@@ -262,31 +293,34 @@ mở được ghi rõ bên dưới, không xác nhận mọi representation củ
 - [x] Relocate/Reset/Alignment ở một ô đồng bộ frame, extents, leaders và hit targets ở các ô còn lại.
 - [x] Close view/document, navigation, stale source/units/permission dọn mọi overlay/preview/editor/capture.
 - [x] Snappy/Smooth, Drag Strength, Settings/Restore Defaults và orbit around pivot có native evidence.
-- [ ] Bổ sung Scale parametric/Link và owner adapters thiếu trước khi nhận full core parity.
+- [x] Final compiled native primitive dimensions/expressions and associative Link/Scale/Compound graphs: parametric and associative warm/cold fixtures; approved scope complete; exact Rhino parity remains excluded. Final evidence: [exact30 native cohort](../../../docs/validation/2026-10-12-gumball-core-completion.md).
+- [x] Typed Camera/Light native Move/Rotate/Scale, Object frames, property types and warm/cold FCStd gates. Final evidence: [exact30 native cohort](../../../docs/validation/2026-10-12-gumball-core-completion.md).
 
 - [x] Hợp đồng và điều kiện hình học được kiểm chứng trong supported native slice; adapter gaps ghi riêng.
 - [x] Inputs and selection state documented.
 - [x] Parameters/defaults/units documented.
 - [x] Output geometry documented.
 - [x] Preview/commit/cancel behavior tested if applicable.
-- [x] Existing native Part::Cut dependency recomputes after Box property Scale and Undo; no new associative History graph.
+- [x] Dated baseline: native Part::Cut recomputes after Box property Scale and Undo.
+- [x] Candidate native associative result preserves definitions/dependencies/subelements/Body trees through recompute, Undo/Redo and fresh-process FCStd; Matrix History is outside this scope. Final evidence: [exact30 native cohort](../../../docs/validation/2026-10-12-gumball-core-completion.md).
 - [x] Undo/redo tested for successful gestures; failed posttransaction callback loses old Redo (host limitation).
 - [x] Save/reload persistence tested for native geometry/report/layer/Link/retained 3DM.
 - [x] Automated tests use feature ID `OM9-INFO-020`.
 
 ## Hợp đồng kỹ thuật chung
 
-Áp dụng có điều kiện theo workflow; mỗi mục cần evidence riêng hoặc lý do không áp dụng.
+Applicability is explicit below. Dated baseline and passing final native gates are
+mapped in the [candidate report](../../../docs/validation/2026-10-12-gumball-core-release-candidate.md).
 
-- [x] [OM9-CMD](../../ENGINEERING_CONTRACTS.md#om9-cmd): native supported slice; evidence/limitations in feature record.
-- [ ] [OM9-OBJECT](../../ENGINEERING_CONTRACTS.md#om9-object): kiểm chứng cho `OM9-INFO-020` hoặc ghi lý do không áp dụng.
-- [x] [OM9-SELECT](../../ENGINEERING_CONTRACTS.md#om9-select): native supported slice; evidence/limitations in feature record.
-- [x] [OM9-VIEW](../../ENGINEERING_CONTRACTS.md#om9-view): native supported slice; evidence/limitations in feature record.
-- [ ] [OM9-DISPLAY](../../ENGINEERING_CONTRACTS.md#om9-display): kiểm chứng cho `OM9-INFO-020` hoặc ghi lý do không áp dụng.
-- [x] [OM9-PICK](../../ENGINEERING_CONTRACTS.md#om9-pick): native supported slice; evidence/limitations in feature record.
-- [x] [OM9-COORD](../../ENGINEERING_CONTRACTS.md#om9-coord): native supported slice; evidence/limitations in feature record.
-- [ ] [OM9-ORGANIZE](../../ENGINEERING_CONTRACTS.md#om9-organize): kiểm chứng cho `OM9-INFO-020` hoặc ghi lý do không áp dụng.
-- [ ] [OM9-ANNOTATE](../../ENGINEERING_CONTRACTS.md#om9-annotate): kiểm chứng cho `OM9-INFO-020` hoặc ghi lý do không áp dụng.
-- [ ] [OM9-ANALYSIS](../../ENGINEERING_CONTRACTS.md#om9-analysis): kiểm chứng cho `OM9-INFO-020` hoặc ghi lý do không áp dụng.
-
-- [x] Ghi rõ supported slice, tolerance, options còn thiếu và kết quả native theo exact feature ID.
+- [x] [OM9-CMD](../../ENGINEERING_CONTRACTS.md#om9-cmd): Menu/CMD, numeric input, cancel and modifier timing: dated 2026-10-11 four-view native evidence; final-source replay passed.
+- [x] [OM9-OBJECT](../../ENGINEERING_CONTRACTS.md#om9-object): Applicable: native identity/topology, typed owner properties and FCStd; baseline evidence exists, new primitive/associative/Camera-Light gates passed. Final evidence: [exact30 native cohort](../../../docs/validation/2026-10-12-gumball-core-completion.md).
+- [x] [OM9-SELECT](../../ENGINEERING_CONTRACTS.md#om9-select): Same-document editable ownership, canonical roots and layer permissions: dated ownership/review evidence. New Mesh Ctrl+Shift and dependency graph checks passed.
+- [x] [OM9-VIEW](../../ENGINEERING_CONTRACTS.md#om9-view): Shared frame, first-click picks, focus/maximize and source/passive-view cleanup: dated four-view/lifecycle evidence; new-owner replay passed.
+- [x] [OM9-DISPLAY](../../ENGINEERING_CONTRACTS.md#om9-display): Unpickable preview, colors/logical pixels and DPI: dated visual/four-view evidence. New typed Camera/Light view-provider checks passed.
+- [x] [OM9-PICK](../../ENGINEERING_CONTRACTS.md#om9-pick): Native End/Mid/Point and source-view rays: dated Relocate pointer evidence. New Mesh Ctrl+Shift identities passed; no full snap-combination claim.
+- [x] [OM9-COORD](../../ENGINEERING_CONTRACTS.md#om9-coord): Document units, captured CPlane, w-world, world placement and invalid axes: dated core/four-view evidence; new physical-source frame checks passed.
+- [x] [OM9-ORGANIZE](../../ENGINEERING_CONTRACTS.md#om9-organize): Applicable: permission, layer/group ownership, native Link definitions, subelements and Body trees; baseline ownership evidence, new graph warm/cold gates passed. Final evidence: [exact30 native cohort](../../../docs/validation/2026-10-12-gumball-core-completion.md).
+- [x] [OM9-ANNOTATE](../../ENGINEERING_CONTRACTS.md#om9-annotate): N/A for document annotations: Gumball creates no text/dimension annotation. Numeric editors are transient viewport UI, with dated DPI evidence.
+- [x] [OM9-ANALYSIS](../../ENGINEERING_CONTRACTS.md#om9-analysis): N/A for a measurement/diagnostic command: no independent analysis output is created. Fixture geometry/volume checks validate transforms only.
+- [x] [OM9-TRANSFORM](../../ENGINEERING_CONTRACTS.md#om9-transform): Applicable: positive admitted owner transforms, exact affine result, Copy ownership and one atomic batch; final primitive/graph native gates passed. Final evidence: [exact30 native cohort](../../../docs/validation/2026-10-12-gumball-core-completion.md).
+- [x] Remaining engineering contracts have explicit N/A reasons in the candidate report; Camera/Light names do not certify a renderer.

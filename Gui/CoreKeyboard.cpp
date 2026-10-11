@@ -66,9 +66,9 @@ bool CoreKeyboard::available(std::size_t command)const{
     if(!enabled||!handles(command)||Gui::Application::Instance->isClosing())return false;
     if(id(command)=="CommandHistory")return true;
     auto* document=App::GetApplication().getActiveDocument();if(!document)return false;
-    if(id(command)=="Ortho")return Gui::Control().isAllowedAlterView(document);
-    if(id(command)=="Properties")return !Gui::Selection().getSelection(document->getName()).empty()&&Gui::Control().isAllowedAlterSelection(document);
-    return Gui::Control().isAllowedAlterSelection(document);
+    if(id(command)=="Ortho")return om9AlterView(document);
+    if(id(command)=="Properties")return !Gui::Selection().getSelection(document->getName()).empty()&&om9AlterSelection(document);
+    return om9AlterSelection(document);
 }
 void CoreKeyboard::record(const QString& text){if(enabled&&!text.trimmed().isEmpty()){inputs.append("Command: "+text);if(inputs.size()>10000)inputs.removeFirst();}}
 bool CoreKeyboard::submit(const QString& text){const auto command=find(text.trimmed());if(!handles(command))return false;om9_sidebar_record_execution(command,execute(command));return true;}

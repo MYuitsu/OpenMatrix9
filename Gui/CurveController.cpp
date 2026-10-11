@@ -116,7 +116,7 @@ void commit(App::Document& doc,const char* label) {
     PyRef valid(PyObject_CallMethod(shape.value,"isValid",nullptr));
     if(PyObject_IsTrue(valid.value)!=1)throw std::runtime_error("Part produced invalid geometry");
     const auto circleLayer=std::string(label)=="Circle"?OpenMatrix9Gui::CoreLayers::captureCircle(doc):OpenMatrix9Gui::CircleLayerSnapshot{};
-    doc.openTransaction(std::string(label));
+    om9OpenTransaction(doc,std::string(label));
     try {
         bool historyCreated=false;
         PyRef pyDoc(doc.getPyObject());PyRef object([&]()->PyObject*{
@@ -150,8 +150,8 @@ void commit(App::Document& doc,const char* label) {
         auto* nativeOutput=doc.getObject(PyUnicode_AsUTF8(outputName.value));
         if(!nativeOutput)throw std::runtime_error("Curve output identity missing");
         OpenMatrix9Gui::addUnitContextProvenance(*nativeOutput,OpenMatrix9Gui::unitContextSnapshot(doc));
-        doc.recompute();doc.commitTransaction();
-    }catch(...){doc.abortTransaction();throw;}
+        doc.recompute();om9CommitTransaction(doc);
+    }catch(...){om9AbortTransaction(doc);throw;}
 }
 }
 namespace OpenMatrix9Gui {
@@ -189,7 +189,7 @@ void CurveController::activate() {
 void CurveController::deactivate(){enabled=false;cancel();if(dock)dock->hide();}
 bool CurveController::available(std::size_t index)const {
     auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
-    return enabled&&isCurveCommand(index)&&doc&&gui&&!gui->getInEdit()&&dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())&&Gui::Control().isAllowedAlterDocument(doc);
+    return enabled&&isCurveCommand(index)&&doc&&gui&&!gui->getInEdit()&&dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())&&om9AlterDocument(doc);
 }
 bool CurveController::validDocument()const {
     auto* doc=App::GetApplication().getActiveDocument();

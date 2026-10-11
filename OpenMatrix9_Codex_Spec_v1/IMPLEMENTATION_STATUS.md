@@ -215,7 +215,15 @@ chỉ vì một phần hoặc một icon đã hoạt động.
 2026-10-11: đã triển khai Gumball đồng bộ bốn viewport: Command On/Off,
 first-click handles, shared preview/batch, bounds Scale, plane hai màu và menu
 ring; core settings/Snappy/Strength/orbit và native Box/Sphere/Link property Scale.
-Giữ ba ID `partially_implemented`: generic owners, Mesh edge/vertex/light/camera
-frames và host old-Redo rollback còn mở; chưa claim full original-host parity.
+Tại baseline ngày 2026-10-11, ba ID còn `partially_implemented`: generic
+owners, Mesh edge/vertex/light/camera frames và host old-Redo rollback còn mở.
 [Cách dùng Gumball](../docs/gumball-user-guide.md) · [Native evidence](../docs/validation/2026-10-11-gumball-four-view-completion.md).
 <!-- gumball-four-view-spec-20261011:end -->
+
+<!-- gumball-core-completion-20261012:start -->
+2026-10-12: OM9-INFO-020/021/022 `implemented` / `validated_supported_slice`;
+`approved_scope_complete=true` for the approved OM9 core scope. Exact30 native
+processes / 955 checks passed against one plugin/host.
+Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Stock GitHub Actions CI is pending.
+[Final native evidence](../docs/validation/2026-10-12-gumball-core-completion.md).
+<!-- gumball-core-completion-20261012:end -->

@@ -75,7 +75,7 @@ bool om9NativeCommandAvailable(std::size_t index) {
     if(!Gui::Application::Instance || !qApp || QThread::currentThread()!=qApp->thread())return false;
     if(OpenMatrix9Gui::HistoryController::handles(index))return OpenMatrix9Gui::HistoryController::instance().available(index);
     if(OpenMatrix9Gui::CageController::handles(index))return OpenMatrix9Gui::CageController::instance().available(index);
-    if(auto operation=om9_3dm_operation(index)) {auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();return doc&&gui&&!gui->getInEdit()&&Gui::Control().isAllowedAlterDocument(doc)&&(operation==1||Gui::Selection().hasSelection(doc->getName()));}
+    if(auto operation=om9_3dm_operation(index)) {auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();return doc&&gui&&!gui->getInEdit()&&om9AlterDocument(doc)&&(operation==1||Gui::Selection().hasSelection(doc->getName()));}
     if(OpenMatrix9Gui::CoreKeyboard::handles(index))return OpenMatrix9Gui::CoreKeyboard::instance().available(index);
     if(OpenMatrix9Gui::CoreSnaps::handles(index))return OpenMatrix9Gui::CoreSnaps::available();
     if(OpenMatrix9Gui::CoreDistance::handles(index))return OpenMatrix9Gui::CoreDistance::instance().available();
@@ -92,9 +92,9 @@ bool om9NativeCommandAvailable(std::size_t index) {
     auto* doc=App::GetApplication().getActiveDocument();
     const std::string id=native;
     const auto permissions=om9_command_permissions(index);
-    if((permissions&1U) && !Gui::Control().isAllowedAlterDocument(doc))return false;
-    if((permissions&2U) && !Gui::Control().isAllowedAlterView(doc))return false;
-    if((permissions&4U) && !Gui::Control().isAllowedAlterSelection(doc))return false;
+    if((permissions&1U) && !om9AlterDocument(doc))return false;
+    if((permissions&2U) && !om9AlterView(doc))return false;
+    if((permissions&4U) && !om9AlterSelection(doc))return false;
     if(id=="OM9_SelectAllObjects" || id=="OM9_ClearSelection" || id=="Std_Delete" || id=="Std_ViewFitSelection") {
         if(!doc)return false;
         auto* guiDoc=Gui::Application::Instance->activeDocument();

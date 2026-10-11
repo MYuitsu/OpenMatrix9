@@ -92,7 +92,7 @@ void CoreMouse::motion(const QPoint& point){
     last=point;
 }
 void CoreMouse::select(const QPoint& point,bool rectangle){
-    auto* doc=App::GetApplication().getActiveDocument();if(!doc||!Gui::Control().isAllowedAlterSelection(doc))return;
+    auto* doc=App::GetApplication().getActiveDocument();if(!doc||!om9AlterSelection(doc))return;
     auto* viewer=target->getViewer();const char* name=doc->getName();
     if(rectangle){
         const auto previous=Gui::Selection().getSelectionT(name,Gui::ResolveMode::NoResolve);
@@ -144,7 +144,7 @@ bool CoreMouse::eventFilter(QObject* object,QEvent* event){
     if(!CoreKeyboard::inputContext(object)){return false;}
     auto* doc=App::GetApplication().getActiveDocument();if(!doc)return false;
     if(event->type()==QEvent::Wheel){
-        auto* wheel=static_cast<QWheelEvent*>(event);if(!Gui::Control().isAllowedAlterView(doc))return true;
+        auto* wheel=static_cast<QWheelEvent*>(event);if(!om9AlterView(doc))return true;
         Gui::getMainWindow()->setActiveWindow(view);auto* camera=view->getViewer()->getSoRenderManager()->getCamera();if(!camera)return true;
         const double steps=wheel->angleDelta().y()?double(wheel->angleDelta().y())/120.:double(wheel->pixelDelta().y())/40.;
         if(wheel->modifiers()==Qt::AltModifier)camera->position=camera->position.getValue()+direction(camera)*float(steps*camera->focalDistance.getValue()*0.1);
@@ -175,7 +175,7 @@ bool CoreMouse::eventFilter(QObject* object,QEvent* event){
         if(longClick)return true;
         if(!dragging&&!om9_mouse_moved(anchor.x(),anchor.y(),point.x(),point.y(),4.))return true;
         dragging=true;hold->stop();
-        if((action==1&&!Gui::Control().isAllowedAlterSelection(doc))||(action!=1&&!Gui::Control().isAllowedAlterView(doc))){cancel();return true;}
+        if((action==1&&!om9AlterSelection(doc))||(action!=1&&!om9AlterView(doc))){cancel();return true;}
         motion(point);return true;
     }
     if(unsigned(mouse->button())!=button)return true;
@@ -183,7 +183,7 @@ bool CoreMouse::eventFilter(QObject* object,QEvent* event){
     if(dragging&&action==1)select(point,true);else if(clicked&&released==1&&!pointTool())select(point,false);
     cancel(false);
     releaseView=nullptr;releaseButton=0;
-    if(clicked&&released==2&&Gui::Control().isAllowedAlterDocument(doc))confirm();
+    if(clicked&&released==2&&om9AlterDocument(doc))confirm();
     if(clicked&&released==4&&operation==8)recent();return true;
 }
 }

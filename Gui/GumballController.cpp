@@ -2,6 +2,8 @@
 #include "GumballController.h"
 #include "GumballFrame.h"
 #include "GumballOverlay.h"
+#include "GumballMeshComponents.h"
+#include "GumballFrameObjects.h"
 #include "RustBridge.h"
 #include "CoreLayers.h"
 #include "CoreSnaps.h"
@@ -47,6 +49,7 @@
 #include <App/DocumentObjectGroup.h>
 #include <algorithm>
 #include <limits>
+#include <stdexcept>
 namespace OpenMatrix9Gui {
 namespace {
 auto prefs(){return App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Mod/OpenMatrix9/Gumball");}
@@ -77,6 +80,14 @@ QJsonObject settingsFacts(const Om9GumballSettings& s){
 bool parse(const QString& text,unsigned& kind,unsigned& value){const auto raw=text.toUtf8();return om9_gumball_command(reinterpret_cast<const unsigned char*>(raw.constData()),raw.size(),&kind,&value)==0;}
 bool foreignActive(){return om9_curve_active()||SurfaceController::instance().active()||SolidController::instance().active()||EditController::instance().active()||HistoryController::instance().active()||CageController::instance().active()||CoreDistance::instance().active()||CorePictureFrame::instance().active()||CoreViewControls::instance().toolActive();}
 QString keyOf(const std::vector<Gui::SelectionObject>& selection){QStringList keys;for(const auto& s:selection){QString row=QString::fromUtf8(s.getDocName())+"/"+QString::fromUtf8(s.getFeatName());for(const auto& sub:s.getSubNames())row+="/"+QString::fromStdString(sub);keys<<row;}keys.sort();return keys.join('|');}
+std::vector<Gui::SelectionObject> nativeSelection(App::Document& doc){
+    auto selected=Gui::Selection().getSelectionEx(doc.getName(),App::DocumentObject::getClassTypeId(),Gui::ResolveMode::NoResolve);
+    // Preserve an explicitly selected whole parent alongside its child path.
+    const auto count=selected.size();
+    for(std::size_t i=0;i<count;++i)if(selected[i].hasSubNames()&&Gui::Selection().isSelected(doc.getName(),selected[i].getFeatName(),"",Gui::ResolveMode::NoResolve))
+        selected.emplace_back(doc.getObject(selected[i].getFeatName()));
+    return selected;
+}
 PyObject* stateAPI(PyObject*,PyObject*){try{auto json=QJsonDocument(GumballController::instance().state()).toJson(QJsonDocument::Compact);PyObject* module=PyImport_ImportModule("json");if(!module)return nullptr;auto* value=PyObject_CallMethod(module,"loads","s",json.constData());Py_DECREF(module);return value;}catch(const std::exception& e){PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}}
 PyObject* handlesAPI(PyObject*,PyObject*){auto json=QJsonDocument(GumballController::instance().handlePositions()).toJson(QJsonDocument::Compact);PyObject* module=PyImport_ImportModule("json");if(!module)return nullptr;auto* value=PyObject_CallMethod(module,"loads","s",json.constData());Py_DECREF(module);return value;}
 }
@@ -117,7 +128,7 @@ bool GumballController::matches(std::size_t index,const QString& name){unsigned 
 bool GumballController::checked(std::size_t index){unsigned kind=0,value=0;auto* name=om9_command_id(index);return name&&parse(QString::fromUtf8(name),kind,value)&&kind==1&&instance().snapshot().enabled;}
 bool GumballController::available(std::size_t index)const{
     if(!workbench||!handles(index)||!Gui::Application::Instance||Gui::Application::Instance->isClosing())return false;auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
-    if(!doc||!gui||gui->getInEdit()||!Gui::Control().isAllowedAlterView(doc))return false;unsigned kind=0,value=0;parse(QString::fromUtf8(om9_command_id(index)),kind,value);
+    if(!doc||!gui||gui->getInEdit()||!om9AlterView(doc))return false;unsigned kind=0,value=0;parse(QString::fromUtf8(om9_command_id(index)),kind,value);
     return kind!=3||(snapshot().enabled&&Gui::Selection().hasSelection(doc->getName())&&CoreLayers::selectionEditable());
 }
 bool GumballController::execute(std::size_t index){if(!available(index))return false;unsigned kind=0,value=0;parse(QString::fromUtf8(om9_command_id(index)),kind,value);applyCommand(kind,value);return false;}
@@ -128,7 +139,8 @@ void GumballController::refresh(){
     auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
     auto* current=gui?dynamic_cast<Gui::View3DInventor*>(gui->getActiveView()):nullptr;
     if(!doc||!current||gui->getInEdit()||foreignActive()){if(active())cancel();clearOverlays();return;}
-    const auto selected=Gui::Selection().getSelectionEx(doc->getName(),App::DocumentObject::getClassTypeId(),Gui::ResolveMode::NoResolve);const auto key=keyOf(selected);
+    auto selected=nativeSelection(*doc);
+    const auto key=keyOf(selected);
     const bool changed=documentName!=QString::fromUtf8(doc->getName())||selectionKey!=key;
     const auto cp=captureCoordinateContext(*doc,current);
     if(active()){
@@ -224,6 +236,7 @@ void GumballController::widgetMenu(const QPoint& position){
     popup->popup(view->getViewer()->viewport()->mapToGlobal(position));
 }
 bool GumballController::submit(const QString& text){
+    if(text.compare("GumballCamera",Qt::CaseInsensitive)==0||text.compare("GumballLight",Qt::CaseInsensitive)==0){try{cancel();const auto name=createGumballFrameObject(text.endsWith("Camera",Qt::CaseInsensitive)?"Camera":"Light");auto* doc=App::GetApplication().getActiveDocument();Gui::Selection().clearSelection();Gui::Selection().addSelection(doc->getName(),name.c_str());refresh();message("Created selectable camera/light frame");}catch(const std::exception& e){message(QString::fromUtf8(e.what()));}return true;}
     unsigned kind=0,value=0;const auto raw=text.toUtf8();const auto status=om9_gumball_command(reinterpret_cast<const unsigned char*>(raw.constData()),raw.size(),&kind,&value);
     if(status==0)return applyCommand(kind,value);if(status==2){message("Gumball: expected On/Off/Toggle or CPlane/Object/World");return true;}
     if(!active())return false;
@@ -243,7 +256,8 @@ void GumballController::updateOverlay(){
         extentPoints=gumballExtentPoints(*inputs,state.frame);std::copy(std::begin(state.frame),std::end(state.frame),extentFrame.begin());
     }
     if(state.phase<=1&&om9_gumball_extents(session,reinterpret_cast<const double(*)[3]>(extentPoints.data()),extentPoints.size()))throw std::runtime_error("Invalid Gumball extent observations");
-    for(auto& row:views)if(row.view){row.overlay->attach(row.view);row.overlay->render(state,session,settings,extentPoints);}
+    const auto component=gumballComponentHighlight(*inputs);
+    for(auto& row:views)if(row.view){row.overlay->attach(row.view);row.overlay->render(state,session,settings,extentPoints);row.overlay->componentHighlight(component?&*component:nullptr);}
     overlay=overlayFor(view);
     if(settings.orbit)orbitAroundPivot();
 }
@@ -270,12 +284,14 @@ void GumballController::finishGesture(){
             const auto current=snapshot();
             if(!workbench||current.phase!=5||current.generation!=generation)throw std::runtime_error("Gumball interaction cancelled during publication");
         };
+        std::vector<std::string> selectedOutputs;
         {
             QScopedValueRollback<bool> committing(publishing,true);
-            publishGumballBatch(*doc,captured,plan,std::move(staged));
+            selectedOutputs=publishGumballBatch(*doc,captured,plan,std::move(staged));
         }
         Om9GumballEvent done{};done.kind=10;
         if(!event(done))throw std::runtime_error("Gumball commit acknowledgement failed");
+        {QScopedValueRollback<bool> selecting(publishing,true);Gui::Selection().clearSelection();for(const auto& name:selectedOutputs)Gui::Selection().addSelection(doc->getName(),name.c_str());}
         for(std::size_t i=0;i<om9_command_count();++i)if(QString::fromUtf8(om9_command_id(i))=="OM9_Gumball"){om9_sidebar_record_execution(i,true);break;}
         if(overlay)overlay->closeEditor();clearPreviews();inputs.reset();selectionKey.clear();relocated=false;refresh();message("Gumball transform committed");
     }catch(const std::exception& e){cancel();message(QString::fromUtf8(e.what()));}
@@ -283,7 +299,7 @@ void GumballController::finishGesture(){
     catch(...){cancel();message("Gumball native commit failed; transaction aborted");}
 }
 bool GumballController::processEvent(QObject* receiver,QEvent* e){
-    if(!workbench)return false;
+    if(!workbench||publishing)return false;
     auto* widget=qobject_cast<QWidget*>(receiver);
     Gui::View3DInventor* receivingView=nullptr;
     for(const auto& row:views)if(row.view&&widget&&(widget==row.view->getViewer()||row.view->getViewer()->isAncestorOf(widget))){receivingView=row.view;break;}
@@ -309,6 +325,20 @@ bool GumballController::processEvent(QObject* receiver,QEvent* e){
         if(e->type()==QEvent::KeyPress&&(key->key()==Qt::Key_Return||key->key()==Qt::Key_Enter)&&(ownEditor||viewport)){submit(ownEditor?overlay->editor()->text():QString());return true;}
     }
     if(ownEditor)return false;
+    // Mesh component picking also works with an empty selection, when there
+    // is intentionally no Gumball overlay attached to this viewport yet.
+    if(receivingView&&snapshot().enabled&&!active()&&!foreignActive()&&e->type()==QEvent::MouseButtonPress){
+        auto* mouse=static_cast<QMouseEvent*>(e);
+        if(mouse->button()==Qt::LeftButton&&(mouse->modifiers()&Qt::ControlModifier)&&(mouse->modifiers()&Qt::ShiftModifier)){
+            const auto point=receivingView->getViewer()->viewport()->mapFrom(widget,mouse->position().toPoint());
+            if(!overlay||!overlay->hit(point)){
+                Om9GumballSettings settings{};om9_gumball_settings(session,nullptr,&settings);
+                if(const auto component=pickGumballMeshComponent(receivingView,point,settings.pick_radius)){
+                    Gui::Selection().clearSelection();Gui::Selection().addSelection(component->documentName.c_str(),component->objectName.c_str(),component->subelement.c_str());refresh();suppressRelease=true;return true;
+                }
+            }
+        }
+    }
     if(active()&&viewport&&(e->type()==QEvent::Wheel||(e->type()==QEvent::MouseButtonPress&&static_cast<QMouseEvent*>(e)->button()!=Qt::LeftButton))){cancel();return false;}
     if(snapshot().phase==4&&viewport&&e->type()==QEvent::MouseButtonPress){
         auto* mouse=static_cast<QMouseEvent*>(e);
@@ -334,9 +364,38 @@ bool GumballController::processEvent(QObject* receiver,QEvent* e){
     if(e->type()!=QEvent::MouseButtonPress&&e->type()!=QEvent::MouseMove&&e->type()!=QEvent::MouseButtonRelease)return false;
     auto* mouse=static_cast<QMouseEvent*>(e);const auto pos=view->getViewer()->viewport()->mapFrom(widget,mouse->position().toPoint());
     if(e->type()==QEvent::MouseButtonPress){
-        if(mouse->button()!=Qt::LeftButton)return false;refresh();auto picked=overlay->hit(pos);if(!picked||!inputs||active())return false;
+        if(mouse->button()!=Qt::LeftButton)return false;refresh();
+        if(!overlay||!inputs||active())return false;const auto candidate=overlay->hit(pos);
+        if(!candidate)return false;
+        if(candidate->handle==13){suppressRelease=true;widgetMenu(pos);return true;}
+        try{
+            auto* doc=App::GetApplication().getActiveDocument();
+            if(!doc||!om9AlterDocument(doc))return false;
+            const std::string name=doc->getName(),uid=doc->Uid.getValueStr();
+            const auto observed=*inputs;const auto ownerView=view;const auto camera=overlay->cameraState();
+            const auto initial=snapshot();const auto selectedKey=keyOf(nativeSelection(*doc));
+            bool settled=false;
+            {QScopedValueRollback<bool> admitting(publishing,true);settled=settleGumballInputs(*doc,observed);}
+            auto* current=App::GetApplication().getDocument(name.c_str());
+            auto* gui=Gui::Application::Instance?Gui::Application::Instance->activeDocument():nullptr;
+            const auto now=snapshot();
+            if(current!=doc||!current||current->Uid.getValueStr()!=uid||App::GetApplication().getActiveDocument()!=current||
+               !workbench||!now.enabled||now.phase!=initial.phase||now.generation!=initial.generation||active()||foreignActive()||
+               !ownerView||view!=ownerView||!gui||gui->getDocument()!=current||gui->getInEdit()||gui->getActiveView()!=ownerView||
+               keyOf(nativeSelection(*current))!=selectedKey||!overlay||overlay->cameraState()!=camera)
+                throw std::runtime_error("Gumball document, selection or interaction changed during gesture admission");
+            const auto coordinates=captureCoordinateContext(*current,ownerView);
+            if(coordinates.frame!=observed.coordinates.frame||coordinates.frameRevision!=observed.coordinates.frameRevision||
+               coordinates.logicalViewSlot!=observed.coordinates.logicalViewSlot)
+                throw std::runtime_error("Gumball coordinate context changed during gesture admission");
+            if(settled){inputs.reset();refresh();}
+        }catch(const std::exception& ex){cancel();inputs.reset();clearOverlays();message(QString::fromUtf8(ex.what()));return true;}
+        // The first hit only qualified a Gumball press. Native recompute can
+        // replace Shape/extent observations, so pick again from the fresh frame.
+        if(!overlay||!inputs||active())return false;auto picked=overlay->hit(pos);
+        if(!picked||!inputs||active())return false;
         if(picked->handle==13){suppressRelease=true;widgetMenu(pos);return true;}
-        try{auto* doc=App::GetApplication().getActiveDocument();if(!doc||!Gui::Control().isAllowedAlterDocument(doc))return false;verifyGumballInputs(*doc,*inputs);Om9GumballBegin begin{};begin.document=inputs->coordinates.documentOwner;begin.view_generation=std::max(std::uint64_t(1),inputs->coordinates.frameRevision);begin.unit_generation=1;begin.mm_per_unit=unitInputScale(*doc);auto state=snapshot();std::copy(std::begin(state.frame),std::end(state.frame),begin.frame);std::copy(inputs->coordinates.frame.begin(),inputs->coordinates.frame.end(),begin.cplane);std::copy(picked->origin.begin(),picked->origin.end(),begin.ray_origin);std::copy(picked->direction.begin(),picked->direction.end(),begin.ray_direction);begin.handle=picked->handle;begin.modifiers=(mouse->modifiers()&Qt::ShiftModifier?1:0)|(mouse->modifiers()&Qt::ControlModifier?2:0)|(mouse->modifiers()&Qt::AltModifier?4:0);if(om9_gumball_begin(session,&begin,inputs->sources.data(),inputs->sources.size()))throw std::runtime_error("Cannot begin gumball gesture");gestureCamera=overlay->cameraState();mouseOwner=view->getViewer()->viewport();mouseDown=true;moved=false;widgetRelocate=begin.modifiers&2;pressPosition=pos;mouseOwner->grabMouse();mouseOwner->setCursor(snapshot().copy?Qt::DragCopyCursor:Qt::CrossCursor);message("Gumball: drag or click to enter a value");return true;}catch(const std::exception& ex){cancel();message(QString::fromUtf8(ex.what()));return true;}
+        try{auto* doc=App::GetApplication().getActiveDocument();if(!doc||!om9AlterDocument(doc))return false;verifyGumballInputs(*doc,*inputs);Om9GumballBegin begin{};begin.document=inputs->coordinates.documentOwner;begin.view_generation=std::max(std::uint64_t(1),inputs->coordinates.frameRevision);begin.unit_generation=1;begin.mm_per_unit=unitInputScale(*doc);auto state=snapshot();std::copy(std::begin(state.frame),std::end(state.frame),begin.frame);std::copy(inputs->coordinates.frame.begin(),inputs->coordinates.frame.end(),begin.cplane);std::copy(picked->origin.begin(),picked->origin.end(),begin.ray_origin);std::copy(picked->direction.begin(),picked->direction.end(),begin.ray_direction);begin.handle=picked->handle;begin.modifiers=(mouse->modifiers()&Qt::ShiftModifier?1:0)|(mouse->modifiers()&Qt::ControlModifier?2:0)|(mouse->modifiers()&Qt::AltModifier?4:0);if(om9_gumball_begin(session,&begin,inputs->sources.data(),inputs->sources.size()))throw std::runtime_error("Cannot begin gumball gesture");gestureCamera=overlay->cameraState();mouseOwner=view->getViewer()->viewport();mouseDown=true;moved=false;widgetRelocate=begin.modifiers&2;pressPosition=pos;mouseOwner->grabMouse();mouseOwner->setCursor(snapshot().copy?Qt::DragCopyCursor:Qt::CrossCursor);message("Gumball: drag or click to enter a value");return true;}catch(const std::exception& ex){cancel();message(QString::fromUtf8(ex.what()));return true;}
     }
     if(!mouseDown)return false;
     if(e->type()==QEvent::MouseMove){if((pos-pressPosition).manhattanLength()<3&&!moved)return true;moved=true;auto ray=overlay->ray(pos);Om9GumballEvent motion{};motion.kind=2;std::copy(ray.origin.begin(),ray.origin.end(),motion.ray_origin);std::copy(ray.direction.begin(),ray.direction.end(),motion.ray_direction);Om9GumballSettings settings{};om9_gumball_settings(session,nullptr,&settings);Base::Vector3d snapped;if(settings.snappy&&CoreSnaps::pick(view,pos,snapped)){motion.kind=13;motion.world_point[0]=snapped.x;motion.world_point[1]=snapped.y;motion.world_point[2]=snapped.z;}if(event(motion))updatePreview();return true;}

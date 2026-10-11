@@ -42,6 +42,10 @@ struct NativeSurface {
 struct SurfaceCounts {
     std::size_t degrees[2], u_count, v_count, pole_count, weight_count, knot_counts[2];
 };
+struct CountSummary {std::uint32_t status,reserved;std::size_t bytes;};
+static_assert(sizeof(CountSummary)==16 && alignof(CountSummary)==8 && offsetof(CountSummary,bytes)==8);
+extern "C" CountSummary om9_basis_curve_payload(std::size_t,std::size_t,std::size_t,std::size_t,Limits);
+extern "C" CountSummary om9_basis_surface_payload(SurfaceCounts,Limits);
 extern "C" std::uint32_t om9_basis_curve_counts(std::size_t, std::size_t, std::size_t, std::size_t, Limits);
 extern "C" std::uint32_t om9_basis_surface_counts(SurfaceCounts, Limits);
 extern "C" std::uint32_t om9_basis_curve_validate(NativeCurve, Limits);
@@ -81,6 +85,7 @@ void requireStatus(std::uint32_t status)
     if (status != 0) throw ExchangeError("Native NURBS basis rejected by Rust contract (status " +
                                          std::to_string(status) + ")");
 }
+std::size_t payload(CountSummary summary){requireStatus(summary.status);if(summary.reserved)throw ExchangeError("Invalid basis payload ABI");return summary.bytes;}
 std::size_t nativeCount(int count)
 {
     return count > 0 ? static_cast<std::size_t>(count) : 0;
@@ -208,20 +213,32 @@ template<class Curve> OnCurveCounts counts(const Curve& curve)
 {
     if (curve.IsNull()) throw ExchangeError("Null native NURBS curve");
     OnCurveCounts c{nativeCount(curve->Degree()), nativeCount(curve->NbPoles()),
-                   curve->IsRational() ? nativeCount(curve->NbPoles()) : 0, 0, nativeCount(curve->NbKnots())};
+                   curve->IsRational() ? nativeCount(curve->NbPoles()) : 0, 0, 2};
+    if constexpr(requires {curve->NbKnots();})c.knots=nativeCount(curve->NbKnots());
     requireStatus(om9_basis_curve_counts(c.degree, c.poles, c.weights, c.knots, nativeLimits));
     return c;
 }
-SurfaceCounts counts(const Handle(Geom_BSplineSurface)& surface)
+template<class Surface> SurfaceCounts surfaceCounts(const Surface& surface)
 {
     if (surface.IsNull()) throw ExchangeError("Null native NURBS surface");
     SurfaceCounts c{{nativeCount(surface->UDegree()), nativeCount(surface->VDegree())},
                     nativeCount(surface->NbUPoles()), nativeCount(surface->NbVPoles()), 0, 0,
-                    {nativeCount(surface->NbUKnots()), nativeCount(surface->NbVKnots())}};
+                    {2,2}};
+    if constexpr(requires {surface->NbUKnots();}){c.knot_counts[0]=nativeCount(surface->NbUKnots());c.knot_counts[1]=nativeCount(surface->NbVKnots());}
     c.pole_count = c.u_count * c.v_count;
     c.weight_count = surface->IsURational() || surface->IsVRational() ? c.pole_count : 0;
     requireStatus(om9_basis_surface_counts(c, nativeLimits));
     return c;
+}
+SurfaceCounts counts(const Handle(Geom_BSplineSurface)& s){return surfaceCounts(s);}
+SurfaceCounts counts(const Handle(Geom_BezierSurface)& s){return surfaceCounts(s);}
+OnCurveCounts counts(const ON_PolylineCurve& curve){
+    OnCurveCounts c{1,nativeCount(curve.m_pline.Count()),0,0,nativeCount(curve.m_t.Count())};
+    requireStatus(om9_basis_curve_counts(c.degree,c.poles,0,c.knots,nativeLimits));
+    nativeStorage((curve.m_dim==2||curve.m_dim==3)&&c.poles==c.knots&&curve.m_pline.Capacity()>=curve.m_pline.Count()&&curve.m_t.Capacity()>=curve.m_t.Count());
+    const auto address=reinterpret_cast<std::uintptr_t>(curve.m_pline.Array());
+    nativeStorage(address&&address%alignof(ON_3dPoint)==0&&address<=std::numeric_limits<std::uintptr_t>::max()-c.poles*sizeof(ON_3dPoint));
+    nativeAddress(curve.m_t.Array(),c.knots);return c;
 }
 template<class Curve> CurveBasisData occtCurve(const Curve& curve)
 {
@@ -238,10 +255,12 @@ template<class Curve> CurveBasisData occtCurve(const Curve& curve)
         basis.poles.push_back({point.X(), point.Y(), z});
         if (c.weights) basis.weights.push_back(curve->Weight(i));
     }
-    for (int i = 1; i <= curve->NbKnots(); ++i) {
-        basis.axis.knots.push_back(curve->Knot(i));
-        basis.axis.multiplicities.push_back(nativeCount(curve->Multiplicity(i)));
-    }
+    if constexpr(requires {curve->NbKnots();}){
+        for (int i = 1; i <= curve->NbKnots(); ++i) {
+            basis.axis.knots.push_back(curve->Knot(i));
+            basis.axis.multiplicities.push_back(nativeCount(curve->Multiplicity(i)));
+        }
+    }else{basis.axis.knots={0,1};basis.axis.multiplicities={c.degree+1,c.degree+1};}
     validate(basis);
     return basis;
 }
@@ -288,7 +307,7 @@ SurfaceBasisData checkedBasis(const ON_NurbsSurface& surface)
 }
 CurveBasisData checkedBasis(const Handle(Geom_BSplineCurve)& curve) { return occtCurve(curve); }
 CurveBasisData checkedBasis(const Handle(Geom2d_BSplineCurve)& curve) { return occtCurve(curve); }
-SurfaceBasisData checkedBasis(const Handle(Geom_BSplineSurface)& surface)
+template<class Surface> SurfaceBasisData occtSurface(const Surface& surface)
 {
     const auto c = counts(surface);
     SurfaceBasisData basis;
@@ -306,12 +325,35 @@ SurfaceBasisData checkedBasis(const Handle(Geom_BSplineSurface)& surface)
         }
     for (int d = 0; d < 2; ++d) {
         basis.axes[d].knots.reserve(c.knot_counts[d]); basis.axes[d].multiplicities.reserve(c.knot_counts[d]);
-        for (int i = 1; i <= static_cast<int>(c.knot_counts[d]); ++i) {
-            basis.axes[d].knots.push_back(d == 0 ? surface->UKnot(i) : surface->VKnot(i));
-            basis.axes[d].multiplicities.push_back(nativeCount(d == 0 ? surface->UMultiplicity(i) : surface->VMultiplicity(i)));
-        }
+        if constexpr(requires {surface->NbUKnots();}){
+            for (int i = 1; i <= static_cast<int>(c.knot_counts[d]); ++i) {
+                basis.axes[d].knots.push_back(d == 0 ? surface->UKnot(i) : surface->VKnot(i));
+                basis.axes[d].multiplicities.push_back(nativeCount(d == 0 ? surface->UMultiplicity(i) : surface->VMultiplicity(i)));
+            }
+        }else{basis.axes[d].knots={0,1};basis.axes[d].multiplicities={c.degrees[d]+1,c.degrees[d]+1};}
     }
     validate(basis);
     return basis;
 }
+SurfaceBasisData checkedBasis(const Handle(Geom_BSplineSurface)& surface){return occtSurface(surface);}
+SurfaceBasisData checkedBasis(const Handle(Geom_BezierSurface)& surface){return occtSurface(surface);}
+CurveBasisData checkedBasis(const Handle(Geom_BezierCurve)& curve){return occtCurve(curve);}
+CurveBasisData checkedBasis(const Handle(Geom2d_BezierCurve)& curve){return occtCurve(curve);}
+CurveBasisData checkedBasis(const ON_PolylineCurve& curve){
+    const auto c=counts(curve);CurveBasisData basis;basis.axis.degree=1;basis.axis.domain={curve.m_t[0],curve.m_t[curve.m_t.Count()-1]};
+    basis.poles.reserve(c.poles);basis.axis.knots.reserve(c.knots);basis.axis.multiplicities.reserve(c.knots);
+    for(int i=0;i<curve.m_pline.Count();++i){const auto& p=curve.m_pline[i];basis.poles.push_back({p.x,p.y,p.z});basis.axis.knots.push_back(curve.m_t[i]);basis.axis.multiplicities.push_back(i==0||i==curve.m_pline.Count()-1?2:1);}
+    validate(basis);return basis;
+}
+template<class Curve> std::size_t curveBytes(const Curve& curve){const auto c=counts(curve);return payload(om9_basis_curve_payload(c.degree,c.poles,c.weights,c.knots,nativeLimits));}
+template<class Surface> std::size_t surfaceBytes(const Surface& surface){const auto c=counts(surface);return payload(om9_basis_surface_payload(c,nativeLimits));}
+std::size_t logicalBytes(const ON_NurbsCurve& c){return curveBytes(c);}
+std::size_t logicalBytes(const ON_PolylineCurve& c){return curveBytes(c);}
+std::size_t logicalBytes(const ON_NurbsSurface& s){return payload(om9_basis_surface_payload(counts(s).ffi,nativeLimits));}
+std::size_t logicalBytes(const Handle(Geom_BSplineCurve)& c){return curveBytes(c);}
+std::size_t logicalBytes(const Handle(Geom2d_BSplineCurve)& c){return curveBytes(c);}
+std::size_t logicalBytes(const Handle(Geom_BezierCurve)& c){return curveBytes(c);}
+std::size_t logicalBytes(const Handle(Geom2d_BezierCurve)& c){return curveBytes(c);}
+std::size_t logicalBytes(const Handle(Geom_BSplineSurface)& s){return surfaceBytes(s);}
+std::size_t logicalBytes(const Handle(Geom_BezierSurface)& s){return surfaceBytes(s);}
 }

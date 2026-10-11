@@ -190,17 +190,17 @@ static PyObject* writeGeometryStaging3dm(PyObject*,PyObject* args){PyObject* req
 }
 static PyObject* commit3dm(PyObject*,PyObject* args){const char* name;PyObject* prepared;if(!PyArg_ParseTuple(args,"sO",&name,&prepared))return nullptr;
     auto* doc=App::GetApplication().getDocument(name);auto* gui=Gui::Application::Instance->activeDocument();
-    if(!doc||doc!=App::GetApplication().getActiveDocument()||!gui||gui->getInEdit()||!Gui::Control().isAllowedAlterDocument(doc)){PyErr_SetString(PyExc_RuntimeError,"The active project is not editable");return nullptr;}
-    doc->openTransaction(std::string("Import Rhino 5 3DM"));
+    if(!doc||doc!=App::GetApplication().getActiveDocument()||!gui||gui->getInEdit()||!om9AlterDocument(doc)){PyErr_SetString(PyExc_RuntimeError,"The active project is not editable");return nullptr;}
+    om9OpenTransaction(*doc,std::string("Import Rhino 5 3DM"));
     auto* module=PyImport_ImportModule("ThreeDm");auto* result=module?PyObject_CallMethod(module,"_insert_prepared","sO",name,prepared):nullptr;Py_XDECREF(module);
     if(!result){
         // Rollback invokes Python document observers. Preserve the binding
         // exception while those callbacks run, then return its original type.
         PyObject *type=nullptr,*value=nullptr,*trace=nullptr;PyErr_Fetch(&type,&value,&trace);
-        doc->abortTransaction();PyErr_Restore(type,value,trace);return nullptr;
-    }doc->commitTransaction();return result;
+        om9AbortTransaction(*doc);PyErr_Restore(type,value,trace);return nullptr;
+    }om9CommitTransaction(*doc);return result;
 }
-static bool ready3dm(const char* name){auto* doc=App::GetApplication().getDocument(name);auto* gui=Gui::Application::Instance->activeDocument();if(doc&&doc==App::GetApplication().getActiveDocument()&&gui&&!gui->getInEdit()&&Gui::Control().isAllowedAlterDocument(doc))return true;PyErr_SetString(PyExc_RuntimeError,"The active project is not editable");return false;}
+static bool ready3dm(const char* name){auto* doc=App::GetApplication().getDocument(name);auto* gui=Gui::Application::Instance->activeDocument();if(doc&&doc==App::GetApplication().getActiveDocument()&&gui&&!gui->getInEdit()&&om9AlterDocument(doc))return true;PyErr_SetString(PyExc_RuntimeError,"The active project is not editable");return false;}
 static PyObject* validateDocument(PyObject*,PyObject* args){const char* name;if(!PyArg_ParseTuple(args,"s",&name)||!ready3dm(name))return nullptr;Py_RETURN_NONE;}
 static PyObject* import3dm(PyObject*,PyObject* args){const char *path,*name;double scale=0;if(!PyArg_ParseTuple(args,"ss|d",&path,&name,&scale)||!ready3dm(name))return nullptr;auto* module=PyImport_ImportModule("ThreeDm");auto* result=module?PyObject_CallMethod(module,"import_file","sOd",path,Py_None,scale):nullptr;Py_XDECREF(module);return result;}
 static PyObject* export3dm(PyObject*,PyObject* args){const char *path,*name;PyObject* names;if(!PyArg_ParseTuple(args,"ssO",&path,&name,&names)||!ready3dm(name))return nullptr;auto* module=PyImport_ImportModule("ThreeDm");auto* result=module?PyObject_CallMethod(module,"export_named","ssO",path,name,names):nullptr;Py_XDECREF(module);return result;}

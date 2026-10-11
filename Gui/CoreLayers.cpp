@@ -13,6 +13,7 @@
 #include <Gui/Application.h>
 #include <Gui/Control.h>
 #include <Gui/Document.h>
+#include <Gui/Selection/Selection.h>
 #include <Gui/ViewProviderDocumentObject.h>
 #include <algorithm>
 #include <stdexcept>
@@ -27,6 +28,7 @@ double om9_layer_default_color(int index,std::size_t channel);
 double om9_layer_root_color(std::size_t channel);
 int om9_layer_output_status(int index,bool exists,bool locked,bool visible,double r,double g,double b);
 int om9_layer_parse_selection(const unsigned char* text,std::size_t length);
+bool om9_layer_effective_selectable(bool visible,bool selectable,bool hidden,bool locked);
 }
 namespace {
 template<class T> T* property(App::DocumentObject* object,const char* name) {
@@ -120,13 +122,26 @@ App::DocumentObject* ensureSettings(App::Document& document) {
     if(auto* provider=view(*s)){provider->ShowInTree.setValue(false);provider->Visibility.setValue(false);}
     return s;
 }
-bool mayEdit(App::Document* document) {return document&&Gui::Control().isAllowedAlterDocument(document);}
+bool mayEdit(App::Document* document) {return document&&om9AlterDocument(document);}
+int memberIndex(App::DocumentObject& object) {
+    int result=0;
+    for(auto* parent:object.getInList())if(tag(parent,"OM9LayerSchema")) {
+        auto* owner=dynamic_cast<App::DocumentObjectGroup*>(parent);
+        auto* index=property<App::PropertyInteger>(parent,"OM9LayerIndex");
+        if(!owner||!index||!object.getDocument()||owner->getDocument()!=object.getDocument()
+           ||index->getValue()<1||index->getValue()>32
+           ||group(*object.getDocument(),int(index->getValue()))!=owner||!owner->hasObject(&object)||result)
+            throw std::runtime_error("Invalid or ambiguous native layer membership");
+        result=int(index->getValue());
+    }
+    return result;
+}
 template<class F> bool transaction(const char* label,F&& change) {
     auto* doc=App::GetApplication().getActiveDocument();if(!mayEdit(doc))return false;
     bool opened=false;
-    try {doc->openTransaction(std::string(label));opened=true;change(*doc);doc->recompute();doc->commitTransaction();return true;}
-    catch(const std::exception& e){if(opened)doc->abortTransaction();Base::Console().error("OpenMatrix9 Layers: %s\n",e.what());return false;}
-    catch(...){if(opened)doc->abortTransaction();Base::Console().error("OpenMatrix9 Layers: native operation failed\n");return false;}
+    try {om9OpenTransaction(*doc,std::string(label));opened=true;change(*doc);doc->recompute();om9CommitTransaction(*doc);return true;}
+    catch(const std::exception& e){if(opened)om9AbortTransaction(*doc);Base::Console().error("OpenMatrix9 Layers: %s\n",e.what());return false;}
+    catch(...){if(opened)om9AbortTransaction(*doc);Base::Console().error("OpenMatrix9 Layers: native operation failed\n");return false;}
 }
 void lineColor(App::DocumentObject& object,const std::array<double,3>& rgb,bool required) {
     auto* provider=view(object);
@@ -140,6 +155,39 @@ void lineColor(App::DocumentObject& object,const std::array<double,3>& rgb,bool 
 }
 namespace OpenMatrix9Gui {
 bool CoreLayers::available() {return mayEdit(App::GetApplication().getActiveDocument());}
+bool CoreLayers::objectEditable(App::DocumentObject* object,bool requireVisible) {
+    if(!object||!object->getDocument()||tag(object,"OM9LayerSchema")||tag(object,"OM9LayerStateSchema"))return false;
+    try {
+        auto* provider=view(*object);if(!provider)return false;
+        const int index=memberIndex(*object);
+        const auto layer=index?read(*object->getDocument(),index):SidebarLayerState{};
+        const auto* hidden=property<App::PropertyBool>(object,"OM9ObjectHidden");
+        const bool visible=requireVisible?provider->Visibility.getValue():true;
+        return om9_layer_effective_selectable(visible&&(!index||layer.visible),
+            provider->isSelectable(),hidden&&hidden->getValue(),index&&layer.locked);
+    }catch(...){return false;}
+}
+bool CoreLayers::selectionEditable() {
+    auto* doc=App::GetApplication().getActiveDocument();if(!doc)return false;
+    for(const auto& selected:Gui::Selection().getCompleteSelection())
+        if(selected.pDoc!=doc||!selected.FeatName||!objectEditable(doc->getObject(selected.FeatName)))return false;
+    return true;
+}
+void CoreLayers::inheritLayer(App::DocumentObject& output,App::DocumentObject& source) {
+    if(!source.getDocument()||source.getDocument()!=output.getDocument())
+        throw std::runtime_error("Gumball output layer document changed");
+    const int index=memberIndex(source);if(!index)return;
+    auto& doc=*source.getDocument();auto* owner=group(doc,index);const auto layer=read(doc,index);
+    requirePlan(index,owner!=nullptr,layer.locked,layer.visible,layer.color);
+    if(auto* containing=App::GroupExtension::getGroupOfObject(&output);containing&&containing!=owner)
+        throw std::runtime_error("Gumball output has a different layer owner");
+    auto* propertyIndex=property<App::PropertyInteger>(&output,"OM9OutputLayerIndex");
+    if(!propertyIndex)propertyIndex=add<App::PropertyInteger>(output,"App::PropertyInteger","OM9OutputLayerIndex");
+    propertyIndex->setValue(index);
+    lineColor(output,layer.color,false);
+    auto* provider=view(output);if(!provider)throw std::runtime_error("Gumball output view provider unavailable");
+    provider->Visibility.setValue(layer.visible);
+}
 bool CoreLayers::select(int index) {
     if((index!=0&&!om9_layer_name(index))||!available())return false;
     try {auto& doc=*App::GetApplication().getActiveDocument();if(activeIndex(doc)==index&&(!index||group(doc,index))) {

@@ -74,7 +74,7 @@ PyObject* setAPI(PyObject*,PyObject* args) {
         &next.relative_ratio,&next.angular_rad,&mode)) return nullptr;
     return api([&]() -> PyObject* {
         auto& doc=document(name);
-        if (!Gui::Control().isAllowedAlterDocument(&doc) || doc.hasPendingTransaction())
+        if (!om9AlterDocument(&doc) || doc.hasPendingTransaction())
             throw std::runtime_error("Unit changes require an editable document without an active transaction");
         const auto previous=unitContextSnapshot(doc);
         next.revision=previous.empty()?1:decode(previous).revision;
@@ -98,14 +98,14 @@ PyObject* setAPI(PyObject*,PyObject* args) {
         if (om9_units_encode(&next,buffer.data(),buffer.size())!=count) throw std::runtime_error("Cannot encode unit context");
         const std::string raw(buffer.data());
         decode(raw); // Serialization must be readable before any document mutation.
-        doc.openTransaction("OpenMatrix9 document units");
+        om9OpenTransaction(doc,"OpenMatrix9 document units");
         try {
             auto* target=settings(doc);
             if (!target) target=dynamic_cast<UnitSettings*>(doc.addObject("OpenMatrix9Gui::UnitSettings","OM9Units"));
             if (!target) throw std::runtime_error("Cannot create document unit context");
             target->Context.setValue(raw);
-            doc.commitTransaction();
-        } catch(...) { doc.abortTransaction(); throw; }
+            om9CommitTransaction(doc);
+        } catch(...) { om9AbortTransaction(doc); throw; }
         return asDict(raw);
     });
 }

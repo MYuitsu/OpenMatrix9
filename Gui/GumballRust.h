@@ -2,6 +2,7 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+extern "C" std::int32_t om9_gumball_component_frame(const double(*)[3],std::size_t,const std::uint32_t(*)[3],std::size_t,std::uint32_t,std::uint32_t,std::uint32_t,double*);
 // Value records only; native owners remain on the GUI thread. Mirrors repr(C).
 struct Om9GumballSource {
     std::uint64_t document,object,generation,revision,epoch,parent;

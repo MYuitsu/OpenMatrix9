@@ -127,6 +127,14 @@ set(
     OpenMatrix9Gui_SRCS
     GumballGeometry.cpp
     GumballGeometry.h
+    GumballAssociativeScale.h
+    GumballAssociativeScale.cpp
+    GumballMeshComponents.h
+    GumballMeshComponents.cpp
+    GumballParametric.h
+    GumballParametric.cpp
+    GumballFrameObjects.h
+    GumballFrameObjects.cpp
     GumballFrame.cpp
     GumballFrame.h
     GumballRust.h
@@ -144,6 +152,10 @@ set(
     CoreTolerance.h
     CoreCoordinates.cpp
     CoreCoordinates.h
+    CoreSourceAttributes.cpp
+    CoreSourceAttributes.h
+    CoreDiscreteSnapshot.cpp
+    CoreDiscreteSnapshot.h
     CoreCPlanes.cpp
     CoreCPlanes.h
 
@@ -322,6 +334,16 @@ if(MSVC)
     target_link_options(OpenMatrix9Gui PRIVATE "/DELAYLOAD:Points.pyd")
     target_link_libraries(OpenMatrix9Gui PRIVATE delayimp)
 endif()
+if(TARGET Mesh)
+    target_link_libraries(OpenMatrix9Gui PRIVATE Mesh)
+else()
+    find_library(OM9_MESH_LIBRARY NAMES Mesh
+        HINTS "${FREECAD_SDK_BUILD}/src/Mod/Mesh/App" REQUIRED)
+    target_link_libraries(OpenMatrix9Gui PRIVATE "${OM9_MESH_LIBRARY}")
+endif()
+if(MSVC)
+    target_link_options(OpenMatrix9Gui PRIVATE "/DELAYLOAD:Mesh.pyd")
+endif()
 if(WIN32)
     target_link_libraries(OpenMatrix9Gui PRIVATE ws2_32 userenv ntdll bcrypt)
 endif()
@@ -332,7 +354,17 @@ foreach(om9_occ_lib TKGeomAlgo TKGeomBase TKG2d TKG3d TKMath TKernel)
     target_link_libraries(OpenMatrix9Gui PRIVATE "${OM9_${om9_occ_lib}_LIBRARY}")
 endforeach()
 if(MSVC)
-    target_compile_options(OpenMatrix9Gui PRIVATE /utf-8 /FIFCGlobal.h /FIFCConfig.h)
+    target_compile_options(OpenMatrix9Gui PRIVATE /utf-8 /FIFCGlobal.h /FIFCConfig.h /FIHostCompatibility.h)
+else()
+    target_compile_options(OpenMatrix9Gui PRIVATE -include HostCompatibility.h)
+endif()
+target_include_directories(OpenMatrix9Gui PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../compat")
+if(OPENMATRIX9_STOCK_HOST)
+    target_compile_definitions(OpenMatrix9Gui PRIVATE OM9_STOCK_FREECAD=1)
+    add_executable(ThreeDmModelingBrepTests EXCLUDE_FROM_ALL ../tests/native/three_dm_modeling_brep.cpp)
+    target_link_libraries(ThreeDmModelingBrepTests PRIVATE OM9ThreeDm)
+    target_compile_definitions(ThreeDmModelingBrepTests PRIVATE OM9_BREP_FIXTURES="${CMAKE_BINARY_DIR}/modeling-brep-fixtures")
+    set_target_properties(ThreeDmModelingBrepTests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 endif()
 
 

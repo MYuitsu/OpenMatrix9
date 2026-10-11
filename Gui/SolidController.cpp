@@ -84,7 +84,7 @@ void SolidController::deactivate(){enabled=false;cancel();}
 bool SolidController::active()const{return document&&om9_solid_phase()!=0;}
 bool SolidController::available(std::size_t i)const{
     auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
-    return enabled&&handles(i)&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&activeView()&&Gui::Control().isAllowedAlterDocument(doc);
+    return enabled&&handles(i)&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&activeView()&&om9AlterDocument(doc);
 }
 bool SolidController::valid()const{return document==App::GetApplication().getActiveDocument()&&available(command);}
 void SolidController::frame(Gui::View3DInventor* view){
@@ -164,14 +164,14 @@ void SolidController::preview(const double* point,bool ortho){
 void SolidController::commit(){
     if(!valid())throw std::runtime_error("Document is no longer editable");double b[15];if(!om9_solid_geometry(b,false,0,0,0,false))throw std::runtime_error("No solid output");
     Base::PyGILStateLocker lock;verifySolidReferences(*document,tangentReferences,pathReference);Ref shape(buildSolid(kind,b));const char* name=kind==1?"Box":"Sphere";
-    document->openTransaction(name);
+    om9OpenTransaction(*document,name);
     try{
         Ref doc(document->getPyObject()),object(PyObject_CallMethod(doc.p,"addObject","ss","Part::Feature",name));set(object.p,"Shape",shape.p);
         addStringProperty(object.p,"OM9FeatureId",kind==1?"OM9-SOLID-012":"OM9-SOLID-014");addStringProperty(object.p,"OM9Command",name);
         std::ostringstream settings;settings<<std::setprecision(17)<<"mm;mode="<<om9_solid_mode_name()<<";origin="<<b[0]<<","<<b[1]<<","<<b[2]<<";dimensions="<<b[12]<<","<<b[13]<<","<<b[14]<<";axes=";for(unsigned i=3;i<12;++i)settings<<b[i]<<",";if(pathReference)settings<<";path="<<pathReference->input.name<<"."<<pathReference->sub;for(const auto& [i,ref]:tangentReferences)settings<<";tangent"<<i<<"="<<ref.input.name<<"."<<ref.sub;addStringProperty(object.p,"SolidParameters",settings.str().c_str());
         Ref view(PyObject_GetAttrString(object.p,"ViewObject")),color(Py_BuildValue("(ddd)",166./255.,104./255.,209./255.));set(view.p,"ShapeColor",color.p);set(view.p,"LineColor",color.p);
-        document->recompute();document->commitTransaction();
-    }catch(...){document->abortTransaction();throw;}
+        document->recompute();om9CommitTransaction(*document);
+    }catch(...){om9AbortTransaction(*document);throw;}
 }
 bool SolidController::eventFilter(QObject* watched,QEvent* event){
     if(event->type()==QEvent::MouseButtonRelease&&releaseTarget==watched&&static_cast<QMouseEvent*>(event)->button()==releaseButton){releaseTarget=nullptr;return true;}

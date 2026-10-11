@@ -26,6 +26,7 @@ add_library(OM9ThreeDm STATIC
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/PolycurveContract.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmSurfaces.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/NurbsBasisAdapter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/NativeInputTree.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmMeshes.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmBrep.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmArchive.cpp

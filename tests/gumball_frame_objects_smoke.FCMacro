@@ -1,0 +1,52 @@
+"""Real document camera/light frames: native commands, transforms and persistence."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+sys.path.insert(0,str(Path(__file__).parent));from gumball_fixture import GumballUI
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-020','OM9-INFO-021','OM9-INFO-022']}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    ui=None
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('GumballFrameObjects');doc.UndoMode=1;ui=GumballUI(native)
+        check('native frame-object creation bridge exists',hasattr(native,'createGumballFrameObject'))
+        for kind in ['Camera','Light']:
+            name=native.createGumballFrameObject(kind);obj=doc.getObject(name)
+            obj.Placement=App.Placement(App.Vector(7,11,13),App.Rotation(App.Vector(1,2,3),37))
+            doc.recompute();ui.select(obj);ui.command('Gumball On');ui.command('GumballAlignment World')
+            baseline=(obj.Placement,doc.UndoCount,len(doc.Objects));ui.command('GumballAlignment Object');state=native.gumballState()
+            x=obj.Placement.Rotation.multVec(App.Vector(1,0,0));z=obj.Placement.Rotation.multVec(App.Vector(0,0,1))
+            check(kind+' physical origin and native orientation',not state['unresolved'] and state['alignment']==1 and state['frame'][:3]==[7,11,13] and all(abs(a-b)<1e-6 for a,b in zip(state['frame'][3:6],x)) and all(abs(a-b)<1e-6 for a,b in zip(state['frame'][9:12],z)))
+            check(kind+' alignment is read-only',(obj.Placement,doc.UndoCount,len(doc.Objects))==baseline)
+            check(kind+' visible in four native views',len(state['views'])==4 and all(v['attached'] for v in state['views']) and obj.ViewObject.Visibility)
+            ui.numeric('MoveX','5');check(kind+' native placement moves',abs((obj.Placement.Base-baseline[0].Base).Length-5)<1e-6)
+            doc.undo();ui.settle();check(kind+' Move Undo',obj.Placement==baseline[0])
+            doc.redo();ui.settle();check(kind+' Move Redo',abs((obj.Placement.Base-baseline[0].Base).Length-5)<1e-6)
+            doc.undo();ui.settle();ui.select(obj);ui.command('GumballAlignment Object');ui.numeric('ScaleX','2')
+            check(kind+' native parameter Scale',(kind=='Camera' and abs(obj.AspectRatio-2)<1e-9) or (kind=='Light' and abs(obj.SizeU.Value-8)<1e-9))
+            doc.undo();ui.settle();check(kind+' parameter Scale Undo',obj.Placement==baseline[0] and ((kind=='Camera' and obj.AspectRatio==1) or (kind=='Light' and obj.SizeU.Value==4)))
+            key='AspectRatio' if kind=='Camera' else 'SizeU'
+            for protection in ['ReadOnly','Immutable']:
+                obj.setPropertyStatus(key,protection);ui.select(obj);ui.command('GumballAlignment Object')
+                before=(obj.Placement,doc.UndoCount,doc.RedoCount,len(doc.Objects),obj.getPropertyByName(key))
+                ui.numeric('ScaleX','2');ui.settle()
+                check(kind+' protected '+protection+' parameter rejects before transaction',
+                      (obj.Placement,doc.UndoCount,doc.RedoCount,len(doc.Objects),obj.getPropertyByName(key))==before and
+                      protection in obj.getPropertyStatus(key) and 'read only' in native.gumballState()['unresolved'])
+                obj.setPropertyStatus(key,'-'+protection)
+            ui.select(obj);ui.command('RelocateGumball');ui.command('w20,30,40');ui.command('w21,30,40');ui.command('')
+            check(kind+' relocation leaves native properties intact',obj.Placement==baseline[0] and native.gumballState()['frame'][:3]==[20,30,40])
+        doc.recompute();path=out/'frame-objects.FCStd';doc.saveAs(str(path));App.closeDocument(doc.Name);opened=App.openDocument(str(path));ui.settle()
+        check('FCStd retains two typed frame objects',sum(o.TypeId in ['OpenMatrix9Gui::GumballCamera','OpenMatrix9Gui::GumballLight'] for o in opened.Objects)==2)
+        report['ok']=True
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        if ui:report['transcript']=ui.transcript()
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2));Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

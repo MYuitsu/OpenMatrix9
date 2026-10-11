@@ -222,13 +222,13 @@ void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceI
     const char* name=options.kind==1?"Sweep1":options.kind==2?"Sweep2":"Loft";
     const char* feature=options.kind==1?"OM9-SURFACE-001":options.kind==2?"OM9-SURFACE-003":"OM9-SURFACE-009";
     for(const auto& input:inputs)verifySurfaceInput(doc,input);
-    doc.openTransaction(name);
+    om9OpenTransaction(doc,name);
     try {
         if(options.history){
             auto* feature=createSurfaceHistory(doc,shape,inputs,options);Ref object(feature->getPyObject());
             Ref view(PyObject_GetAttrString(object.p,"ViewObject")),color(Py_BuildValue("(ddd)",0.0,130.0/255.0,85.0/255.0));set(view.p,"ShapeColor",color.p);set(view.p,"LineColor",color.p);
             doc.recompute();if(!feature->isValid()||feature->Shape.getShape().isNull())throw std::runtime_error("Surface History recompute failed before commit");
-            doc.commitTransaction();return;
+            om9CommitTransaction(doc);return;
         }
         Ref pyDoc(doc.getPyObject()),object(PyObject_CallMethod(pyDoc.p,"addObject","ss","Part::Feature",name));set(object.p,"Shape",shape);
         Ref id(PyUnicode_FromString(feature)),command(PyUnicode_FromString(name));property(object.p,"App::PropertyString","OM9FeatureId",id.p);property(object.p,"App::PropertyString","OM9Command",command.p);
@@ -241,7 +241,7 @@ void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceI
         }
         property(object.p,"App::PropertyLinkSubList","SourceCurves",sources.p);Ref config(PyUnicode_FromString(settings.str().c_str()));property(object.p,"App::PropertyString","SurfaceOptions",config.p);
         Ref view(PyObject_GetAttrString(object.p,"ViewObject")),color(Py_BuildValue("(ddd)",0.0,130.0/255.0,85.0/255.0));set(view.p,"ShapeColor",color.p);set(view.p,"LineColor",color.p);
-        doc.recompute();doc.commitTransaction();
-    }catch(...){doc.abortTransaction();throw;}
+        doc.recompute();om9CommitTransaction(doc);
+    }catch(...){om9AbortTransaction(doc);throw;}
 }
 }

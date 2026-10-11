@@ -13,6 +13,7 @@
 class SoSeparator;class SoNode;class SoTransform;class SoBaseColor;class SoRotation;class QLineEdit;
 namespace Gui {class View3DInventor;}
 namespace OpenMatrix9Gui {
+struct GumballMeshComponentPick;
 struct HandlePick {unsigned handle;std::array<double,3> origin,direction;QPoint screen;};
 class GumballOverlay {
 public:
@@ -24,9 +25,10 @@ public:
     QLineEdit* numericEditor(const HandlePick&,bool);void closeEditor();
     QLineEdit* editor()const;void clearPreview();
     void preview(const std::vector<std::vector<Base::Vector3d>>&);
+    void componentHighlight(const GumballMeshComponentPick*);
 private:
     QPointer<Gui::View3DInventor> view;QPointer<QLineEdit> field;
-    SoSeparator *owner=nullptr,*root=nullptr,*previewNode=nullptr;
+    SoSeparator *owner=nullptr,*root=nullptr,*previewNode=nullptr,*componentNode=nullptr;
     SoSeparator* widgetNode=nullptr;
     SoTransform *pose=nullptr,*menuPose=nullptr;
     // Thirteen Rust operation handles, plus the native view-menu target.

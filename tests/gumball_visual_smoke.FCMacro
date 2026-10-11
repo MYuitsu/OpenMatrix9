@@ -1,8 +1,10 @@
 """Rhino-style native handles must remain usable through real Qt input."""
-import json, os, traceback
+import json, os, sys, traceback
 from pathlib import Path
 import FreeCAD as App, FreeCADGui as Gui, Part
 from PySide6 import QtCore, QtWidgets, QtTest
+sys.path.insert(0,str(Path(__file__).parent));from gumball_capture import capture_view
+from gumball_fixture import GumballUI
 
 out = Path(os.environ['OM9_SMOKE_OUTPUT'])
 report = {'checks': [], 'feature_ids': ['OM9-INFO-020', 'OM9-INFO-021', 'OM9-INFO-022']}
@@ -31,15 +33,18 @@ def run():
         Gui.Selection.addSelection(box)
         Gui.runCommand('OM9_Gumball')
         events()
-        area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
-        viewport = next(w for w in area.activeSubWindow().widget().findChildren(QtWidgets.QWidget)
-                        if w.property('om9GumballViewport'))
-        handles = native.gumballHandles()
+        ui=GumballUI(native);viewport=ui.viewport
+        def current_handles():
+            # Undo invalidates the frame immediately; the idle refresh timer
+            # need not have fired before this test's next pointer operation.
+            native.gumballState();events()
+            return native.gumballHandles()
+        handles = current_handles()
         report['handles'] = handles
         targets = {h['name']: QtCore.QPoint(h['x'], h['y']) for h in handles if h['hit_verified']}
         check('all thirteen transform handles stay native-pickable',
               len([h for h in handles if h['handle'] < 13]) == 13)
-        image = view.getViewer().renderToImage(width=1024, height=768, samples=0)
+        image = capture_view(view,1024,768)
         image.save(str(out / 'gumball-render.png'))
         colors = [0, 0, 0]
         for y in range(image.height()):
@@ -61,7 +66,7 @@ def run():
                   move.x() * scale.x() + move.y() * scale.y() < 0)
 
         def numeric(name, value):
-            row = next(h for h in native.gumballHandles() if h['name'] == name)
+            row = next(h for h in current_handles() if h['name'] == name and h['hit_verified'])
             viewport.setFocus()
             QtTest.QTest.mouseClick(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier,
                                    QtCore.QPoint(row['x'], row['y']))
@@ -83,7 +88,7 @@ def run():
               abs(box.Shape.BoundBox.XLength - 4) < 1e-8 and abs(box.Shape.BoundBox.XMin + 1) < 1e-8 and abs(box.Shape.BoundBox.YLength - 3) < 1e-8)
         doc.undo()
         events()
-        positions = {h['name']: QtCore.QPoint(h['x'], h['y']) for h in native.gumballHandles()}
+        positions = {h['name']: QtCore.QPoint(h['x'], h['y']) for h in current_handles()}
         start = positions['ScaleX']
         away = start + (start - positions['MoveFree']) / 2
         viewport.setFocus()
@@ -104,7 +109,7 @@ def run():
               abs(box.Shape.BoundBox.XLength - 3) < 1e-8 and abs(box.Shape.BoundBox.YLength - 2) < 1e-8 and abs(box.Shape.Volume - 24) < 1e-8)
         doc.undo()
         events()
-        rows = native.gumballHandles()
+        rows = current_handles()
         menu_target = next((h for h in rows if h['name'] == 'MenuBall'), None)
         check('menu ball is a separate native pointer target', menu_target is not None)
         if menu_target:
@@ -124,7 +129,7 @@ def run():
                 QtTest.QTest.mouseClick(popup, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier, popup.actionGeometry(action).center())
                 events()
                 check('menu alignment uses the existing Rust state', native.gumballState()['alignment'] == 2)
-            move_target = next(h for h in native.gumballHandles() if h['name'] == 'MoveY')
+            move_target = next(h for h in current_handles() if h['name'] == 'MoveY')
             QtTest.QTest.mouseClick(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier,
                                    QtCore.QPoint(move_target['x'], move_target['y']))
             events()
@@ -142,7 +147,7 @@ def run():
                 QtTest.QTest.keyClick(viewport, QtCore.Qt.Key_Escape)
                 events()
             def menu_action(label):
-                target = next(h for h in native.gumballHandles() if h['name'] == 'MenuBall')
+                target = next(h for h in current_handles() if h['name'] == 'MenuBall')
                 QtTest.QTest.mouseClick(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier,
                                        QtCore.QPoint(target['x'], target['y']))
                 events()
@@ -168,6 +173,10 @@ def run():
             report['error'] = ', '.join(c['name'] for c in report['checks'] if not c['passed'])
     except Exception:
         report.update(ok=False, error=traceback.format_exc())
+        if 'native' in locals():report['failure_state']=native.gumballState()
+        if 'doc' in locals():report['failure_model']={'undo':doc.UndoCount,'redo':doc.RedoCount,'state':list(box.State),'placement':str(box.Placement),'shape_bounds':[box.Shape.BoundBox.XMin,box.Shape.BoundBox.XLength]}
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        if console:report['failure_transcript']=console.toPlainText()
     finally:
         for name in list(App.listDocuments()):
             App.closeDocument(name)

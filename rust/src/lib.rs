@@ -58,3 +58,33 @@ pub mod workspace;
 pub mod worker_budget;
 
 pub mod viewport_title;
+
+pub mod geometry_frame;
+
+pub mod geometry_frame_ffi;
+
+pub mod native_input_tree;
+
+pub mod native_input_tree_ffi;
+
+pub mod source_attributes;
+
+pub mod source_attributes_ffi;
+
+pub mod support_snapshot;
+
+pub mod support_snapshot_ffi;
+
+pub mod analytic_support;
+
+pub mod discrete_snapshot;
+
+pub mod discrete_snapshot_ffi;
+
+pub mod prepared_cad;
+
+pub mod gumball_component;
+
+pub mod gumball_component_ffi;
+
+pub mod gumball_associative;

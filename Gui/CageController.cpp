@@ -86,9 +86,9 @@ CageController::CageController():QObject(qApp){
 }
 bool CageController::handles(std::size_t i){return om9_cage_command_kind(om9_command_id(i))!=0;}
 bool CageController::matches(std::size_t i,const QString& s){return handles(i)&&om9_cage_command_kind(s.toUtf8().constData())==om9_cage_command_kind(om9_command_id(i));}
-bool CageController::available(std::size_t i)const{auto* d=App::GetApplication().getActiveDocument();auto* g=Gui::Application::Instance->activeDocument();return handles(i)&&om9_cage_command_available(d!=nullptr,g!=nullptr,g&&!g->getInEdit()&&!g->isAboutToClose(),d&&Gui::Control().isAllowedAlterDocument(d));}
+bool CageController::available(std::size_t i)const{auto* d=App::GetApplication().getActiveDocument();auto* g=Gui::Application::Instance->activeDocument();return handles(i)&&om9_cage_command_available(d!=nullptr,g!=nullptr,g&&!g->getInEdit()&&!g->isAboutToClose(),d&&om9AlterDocument(d));}
 bool CageController::active()const{return document&&session;}
-bool CageController::valid()const{auto* g=Gui::Application::Instance->activeDocument();return document&&document==App::GetApplication().getActiveDocument()&&g&&g->getDocument()==document&&!g->getInEdit()&&!g->isAboutToClose()&&Gui::Control().isAllowedAlterDocument(document);}
+bool CageController::valid()const{auto* g=Gui::Application::Instance->activeDocument();return document&&document==App::GetApplication().getActiveDocument()&&g&&g->getDocument()==document&&!g->getInEdit()&&!g->isAboutToClose()&&om9AlterDocument(document);}
 void CageController::prompt(const QString& s){CurveController::instance().setPrompt(s);CurveController::instance().logMessage(s);}
 void CageController::check(int result)const{if(result<0)throw std::runtime_error(om9_cage_session_error(session));}
 void CageController::closeDialog(){if(dialog){auto* d=dialog.data();dialog=nullptr;status=nullptr;d->hide();d->deleteLater();}}

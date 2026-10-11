@@ -1,5 +1,21 @@
 # OpenMatrix9
 
+<!-- om9-install-entry:start -->
+**Jewelry CAD for FreeCAD · Windows x64**
+
+### Cài đặt nhanh / Install in 3 steps
+
+1. Cài **[FreeCAD 1.1.4 chính thức](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4)** / Install official FreeCAD 1.1.4 and open it once.
+2. Mở **[build Gumball trên GitHub Actions](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml?query=branch%3Acodex%2Fgumball-release-0.3.4)**, chọn lần chạy thành công của nhánh `codex/gumball-release-0.3.4`, rồi tải artifact **om9-release-files**. GitHub có thể yêu cầu đăng nhập. / Choose the successful candidate branch run and download its artifact; sign in to GitHub if required.
+3. Giải nén ZIP artifact, rồi giải nén ZIP **OpenMatrix9-…-SetupLauncher…-Windows-x64.zip** bên trong. Bấm **Start-OM9.cmd**: launcher cài OM9, tạo icon **OpenMatrix9** trên Desktop và mở workbench. / Extract both ZIP layers, then run Start-OM9.cmd. Use the Desktop icon afterwards.
+
+Giữ các file đi kèm launcher trong cùng thư mục, kể cả ZIP plugin bên trong; launcher tự đọc gói này. Kiểm tra hai ZIP bằng **SHA256SUMS.txt** trong artifact. Không cần Rust, Visual Studio hay quyền Administrator để dùng OM9.
+
+**Candidate build:** nhánh Gumball cung cấp artifact sau khi CI đạt; đây chưa phải tag hay GitHub Release đã phát hành. Bằng chứng native local không thay cho kiểm thử trên FreeCAD stock trong Action. Các bản đã phát hành nằm ở [Releases](https://github.com/MYuitsu/OpenMatrix9/releases), gồm prerelease.
+
+[Hướng dẫn tiếng Việt](INSTALL.vi.md) · [English install guide](INSTALL.en.md) · [Tiến độ](README.vi.md) · [Build from source](docs/build-windows.md)
+<!-- om9-install-entry:end -->
+
 <!-- rhino-core-host-parameter-dependency:start -->
 Đã nghiệm thu fixture T10 cho điểm phụ thuộc Circle/Line: dùng map openNURBS/OCCT
 có sẵn, Rust kiểm điểm với source thật và chặn raw parameter chưa được chứng minh.
@@ -835,9 +851,9 @@ Mục xuất hiện trong nhiều nhóm có thể lặp lại, cùng mã luôn c
 | Libraries | `InfoSettingsLibraries` | Quản lý thư viện. | 🔴 |
 | Selection Filter | `InfoSettingsSelectionFilter` | Lọc loại đối tượng được chọn. | 🔴 |
 | Design Report | `InfoSettingsDesignReport` | Tạo báo cáo thiết kế. | 🔴 |
-| Gumball Alignment | `InfoSettingsGumballAlignment` | Căn hệ trục gizmo thao tác. | 🟡 |
-| Relocate Gumball | `InfoSettingsRelocateGumball` | Di chuyển tâm gizmo thao tác. | 🟡 |
-| Gumball ON | `InfoSettingsGumballON` | Bật gizmo thao tác. | 🟡 |
+| Gumball Alignment | `InfoSettingsGumballAlignment` | Căn hệ trục gizmo thao tác. | 🟢 |
+| Relocate Gumball | `InfoSettingsRelocateGumball` | Di chuyển tâm gizmo thao tác. | 🟢 |
+| Gumball ON | `InfoSettingsGumballON` | Bật gizmo thao tác. | 🟢 |
 | Smart Targets Gumball ON | `InfoSettingsSmartTargetsGumballON` | Bật gizmo cho Smart Targets. | 🔴 |
 | Rhino Smart Track ON | `RhinoSmartTrackON` | Bật tracking thông minh theo catalog. | 🔴 |
 | Rhino History ON | `RhinoHistoryON` | [History policy](docs/features/history-native-contract.md): Record/Update/Lock/warning trên Join/Surface/Builder; Cage bindings cập nhật độc lập Record/Update. [Reusable validation](docs/validation/2026-10-09-reusable-builder-cage.md). | 🟢 |
@@ -1000,7 +1016,15 @@ Final fresh review: three Important findings fixed by TDD; native432/16 and Rust
 2026-10-11: đã triển khai Gumball đồng bộ bốn viewport: Command On/Off,
 first-click handles, shared preview/batch, bounds Scale, plane hai màu và menu
 ring; core settings/Snappy/Strength/orbit và native Box/Sphere/Link property Scale.
-Giữ ba ID `partially_implemented`: generic owners, Mesh edge/vertex/light/camera
-frames và host old-Redo rollback còn mở; chưa claim full original-host parity.
+Tại baseline ngày 2026-10-11, ba ID còn `partially_implemented`: generic
+owners, Mesh edge/vertex/light/camera frames và host old-Redo rollback còn mở.
 [Cách dùng Gumball](docs/gumball-user-guide.md) · [Native evidence](docs/validation/2026-10-11-gumball-four-view-completion.md).
 <!-- gumball-four-view-spec-20261011:end -->
+
+<!-- gumball-core-completion-20261012:start -->
+2026-10-12: OM9-INFO-020/021/022 `implemented` / `validated_supported_slice`;
+`approved_scope_complete=true` for the approved OM9 core scope. Exact30 native
+processes / 955 checks passed against one plugin/host.
+Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Stock GitHub Actions CI is pending.
+[Final native evidence](docs/validation/2026-10-12-gumball-core-completion.md).
+<!-- gumball-core-completion-20261012:end -->

@@ -1,5 +1,9 @@
 # OM9-INFO-022 — Relocate Gumball
 
+Current 2026-10-12: `implemented` / `validated_supported_slice`; approved OM9 scope complete; stock CI pending.
+[Final native evidence](../validation/2026-10-12-gumball-core-completion.md).
+The dated 2026-10-11 implementation/evidence below is the validated baseline.
+
 Ngày 2026-10-11; `partially_implemented` / `validated_supported_slice`.
 Command `RelocateGumball`, alias `GumballRelocate`, `OM9_RelocateGumball`,
 legacy `OM9_InfoSettingsRelocateGumball`.
@@ -40,3 +44,18 @@ và late Ctrl Extrude replay ở từng ô; idle focus giữ pivot, source close
 gesture và mọi preview/capture. Không tạo geometry/Undo cho Relocate.
 [Evidence mới](../validation/2026-10-11-gumball-four-view-completion.md).
 [Đối chiếu nguồn lịch sử](../validation/2026-10-11-gumball-four-view-spec-review.md).
+
+### Approved core closure — 2026-10-12, native gates passed
+
+The same origin/X/optional-Y and Ctrl-start view-state workflow must operate on
+the expanded owner and typed document-frame selection without changing native
+definitions, dimensions, dependencies, Placement or Undo. Cancel restores the
+shared frame. Typed Camera/Light object FCStd restoration is distinct from
+widget persistence: the bounded256 single-owner pivot cache remains deliberately
+process-local. Reset, explicit Alignment and source-stamp invalidation clear the
+override; groups/multiple owners do not inherit another owner's cached pivot.
+Final-source native view-only and cleanup gates passed. Rhino internal
+roll, complete snap parity and cold persistence of the widget are outside the
+approved scope.
+
+[Candidate fixture map, applicability and gate status](../validation/2026-10-12-gumball-core-release-candidate.md).

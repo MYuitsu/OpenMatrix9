@@ -143,7 +143,7 @@ void commitEllipse(App::Document& doc){
         }
     }
     const auto layer=CoreLayers::captureCircle(doc);verifyEllipseReferences(doc);
-    doc.openTransaction("Ellipse");
+    om9OpenTransaction(doc,"Ellipse");
     try {
         auto object=createCurveFeature(doc,shape.value,"Ellipse");
         stringProperty(object.value,"OM9FeatureId","OM9-CURVE-006");stringProperty(object.value,"OM9Role","Ellipse");
@@ -162,7 +162,7 @@ void commitEllipse(App::Document& doc){
             applyLayer(doc,focusObject.value,layer);
             if(!units.empty())stringProperty(focusObject.value,"OM9UnitContext",units.c_str());
         }
-        doc.recompute();doc.commitTransaction();
-    }catch(...){doc.abortTransaction();throw;}
+        doc.recompute();om9CommitTransaction(doc);
+    }catch(...){om9AbortTransaction(doc);throw;}
 }
 }

@@ -1,8 +1,9 @@
 """Actual Qt pointer/editor gumball contract; observations never mutate geometry."""
-import json,os,traceback
+import json,os,sys,traceback
 from pathlib import Path
 import FreeCAD as App,FreeCADGui as Gui,Part
 from PySide6 import QtCore,QtWidgets,QtTest,QtGui
+sys.path.insert(0,str(Path(__file__).parent));from gumball_capture import capture_view
 out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-020','OM9-INFO-022']}
 def check(name,value):
     report['checks'].append({'name':name,'passed':bool(value)})
@@ -25,7 +26,7 @@ def run():
         try:
             Gui.activeDocument().activeView().saveImage(str(out/'gumball.png'),1024,768,'Current')
             Gui.activeDocument().activeView().getViewer().grabFramebuffer().save(str(out/'gumball-viewer.png'))
-            image=Gui.activeDocument().activeView().getViewer().renderToImage(width=1024,height=768,samples=0)
+            image=capture_view(Gui.activeDocument().activeView(),1024,768)
             image.save(str(out/'gumball-render.png'))
         except Exception as image_error:report['image_error']=str(image_error)
         # Count the actual rendered handle colors: a small screen-space widget
@@ -113,7 +114,7 @@ def run():
         before=len(doc.Objects);numeric('MoveX','4 mm',QtCore.Qt.AltModifier)
         App.removeDocumentObserver(observer)
         copied=next(o for o in doc.Objects if o.TypeId=='Part::Feature' and o.Name!=box.Name)
-        check('Alt numeric copy has independent identity and preserves source',len(doc.Objects)==before+1 and copied.Name!=box.Name and bool(copied.OM9GumballIdentity) and abs(box.Shape.BoundBox.XMin)<1e-10 and abs(copied.Shape.BoundBox.XMin-4)<1e-10);doc.undo();events()
+        check('Alt numeric copy has independent identity and preserves source',len(doc.Objects)==before+1 and copied.Name!=box.Name and bool(copied.OM9GumballIdentity) and abs(box.Shape.BoundBox.XMin)<1e-10 and abs(copied.Shape.BoundBox.XMin-4)<1e-10);doc.undo();events();select(box)
         count,undo=len(doc.Objects),doc.UndoCount;oldframe=native.gumballState()['frame'];end=drag('MoveX',QtCore.Qt.ControlModifier);release(end)
         check('Ctrl-start relocates only widget',native.gumballState()['frame']!=oldframe and abs(box.Shape.BoundBox.XMin)<1e-10 and (len(doc.Objects),doc.UndoCount)==(count,undo))
         select();select(box)
@@ -136,10 +137,15 @@ def run():
         end=drag('MoveX');native.setUnitContext(doc.Name,25.4,1.0,0.001,0.01,0.01);undo=doc.UndoCount;release(end)
         check('unit change invalidates preview without a transform transaction',abs(box.Shape.BoundBox.XMin)<1e-10 and doc.UndoCount==undo)
         native.setUnitContext(doc.Name,1.0,1.0,0.001,0.01,0.01);select(box)
-        param=doc.addObject('Part::Cylinder','Parametric');doc.recompute();select(box,param)
+        param=doc.addObject('Part::Cylinder','Parametric');doc.recompute()
+        # Nonuniform Cylinder Scale now has a native associative result. Use
+        # an actual protected incoming property for the preflight rejection.
+        second.addProperty('App::PropertyLinkGlobal','ScaleDependency');second.ScaleDependency=param
+        second.setEditorMode('ScaleDependency',1);select(box,param)
         numeric('MoveX','1 mm');doc.undo();events();redo=doc.RedoCount;undo=doc.UndoCount;numeric('ScaleX','2')
-        check('second unsupported scale owner rejects the entire batch',abs(box.Shape.BoundBox.XLength-2)<1e-9 and abs(param.Radius.Value-2)<1e-9 and doc.UndoCount==undo and 'UnsupportedOwner' in native.gumballState()['unresolved'])
+        check('second protected scale dependency rejects the entire batch',abs(box.Shape.BoundBox.XLength-2)<1e-9 and abs(param.Radius.Value-2)<1e-9 and doc.UndoCount==undo and second.ScaleDependency==param and 'UnsupportedOwner' in native.gumballState()['unresolved'])
         check('pretransaction capability rejection preserves an existing Redo',redo==1 and doc.RedoCount==redo)
+        second.removeProperty('ScaleDependency')
         select(param);before=param.Shape.BoundBox.XMin;numeric('MoveX','3 mm');doc.recompute();check('rigid move survives parametric recompute',abs(param.Shape.BoundBox.XMin-before-3)<1e-9);doc.undo();events()
         face=doc.addObject('Part::Feature','HoledFace');face.Shape=Part.Face(Part.Wire(Part.makeCircle(5))).cut(Part.Face(Part.Wire(Part.makeCircle(2))));doc.recompute();select(face)
         report['extrude_source']={'type':face.Shape.ShapeType,'faces':len(face.Shape.Faces),'shells':len(face.Shape.Shells),'area':face.Shape.Area,'selection':[o.Name for o in Gui.Selection.getSelection()]}

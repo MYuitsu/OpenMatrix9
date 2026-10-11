@@ -83,21 +83,21 @@ Evaluation evaluate(App::Document& doc,App::DocumentObject* source,const std::st
     auto point=BRepBuilderAPI_MakeVertex(gp_Pnt(dependent.point[0],dependent.point[1],dependent.point[2])).Vertex();
     return {std::move(guard),Part::TopoShape(observed.shape),Part::TopoShape(point),std::move(report)};
 }
-void editable(App::Document& doc){auto* gui=Gui::Application::Instance->activeDocument();if(App::GetApplication().getActiveDocument()!=&doc||!gui||gui->getInEdit()||gui->isAboutToClose()||!Gui::Control().isAllowedAlterDocument(&doc))throw std::runtime_error("The active parameter dependency document is not editable");}
+void editable(App::Document& doc){auto* gui=Gui::Application::Instance->activeDocument();if(App::GetApplication().getActiveDocument()!=&doc||!gui||gui->getInEdit()||gui->isAboutToClose()||!om9AlterDocument(&doc))throw std::runtime_error("The active parameter dependency document is not editable");}
 PyObject* createAPI(PyObject*,PyObject* args){
     const char *docName,*sourceName,*sub;double parameter,lengthTolerance,parameterTolerance;int raw=0;
     if(!PyArg_ParseTuple(args,"sssddd|p",&docName,&sourceName,&sub,&parameter,&lengthTolerance,&parameterTolerance,&raw))return nullptr;
     try{
         auto* doc=App::GetApplication().getDocument(docName);if(!doc)throw std::runtime_error("Parameter source document is missing");editable(*doc);
         auto* source=doc->getObject(sourceName);auto result=evaluate(*doc,source,sub,parameter,lengthTolerance,parameterTolerance,raw);
-        verifyObject(*doc,result.guard);doc->openTransaction("Record Curve Parameter Point");
+        verifyObject(*doc,result.guard);om9OpenTransaction(*doc,"Record Curve Parameter Point");
         try{
             auto* point=dynamic_cast<CurveParameterPoint*>(doc->addObject("OpenMatrix9Gui::CurveParameterPoint","CurveParameterPoint"));
             if(!point)throw std::runtime_error("Cannot create native parameter point");
             point->initialize(source,sub,parameter,lengthTolerance,parameterTolerance,raw);doc->recompute();
             if(point->isError())throw std::runtime_error("Parameter point initial recompute failed");
-            auto* py=point->getPyObject();doc->commitTransaction();return py;
-        }catch(...){doc->abortTransaction();throw;}
+            auto* py=point->getPyObject();om9CommitTransaction(*doc);return py;
+        }catch(...){om9AbortTransaction(*doc);throw;}
     }catch(const Base::Exception& e){PyErr_SetString(PyExc_RuntimeError,e.what());}
     catch(const std::exception& e){PyErr_SetString(PyExc_ValueError,e.what());}
     catch(...){PyErr_SetString(PyExc_RuntimeError,"Native parameter dependency failed");}return nullptr;
