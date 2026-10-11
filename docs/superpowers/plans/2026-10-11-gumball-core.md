@@ -44,13 +44,13 @@ Cache được đọc ngày 2026-10-11: `build/openmatrix9-history-cage` trỏ �
 plugin và shared SDK, output hiện là `build/surface-history-admission-runtime1-20261011`.
 Phải đọc lại cache khi bắt đầu vì các chat khác có thể đang đổi output này.
 
-- [ ] Trước Task 1, kiểm tra Git dir/common dir/superproject, trạng thái staged,
+- [x] Trước Task 1, kiểm tra Git dir/common dir/superproject, trạng thái staged,
   source hashes và cache. Lưu manifest baseline ở report directory, gồm changed
   tracked files và untracked public source cần thiết; không commit/ghi đè thay đổi
   khác, không copy ignored private inputs/build/runtime.
-- [ ] Chạy một Rust baseline trên đúng working source; ghi exit/report riêng.
+- [x] Chạy một Rust baseline trên đúng working source; ghi exit/report riêng.
   Failure đã có trước được phân biệt với regression, không tự gộp vào Gumball.
-- [ ] Execution method/workspace được người dùng chọn ở handoff cuối plan. Nếu
+- [x] Execution method/workspace được người dùng chọn ở handoff cuối plan. Nếu
   chọn làm tại checkout hiện tại, giữ scoped patches và kiểm file mới thay đổi
   trước edit. Nếu chọn isolation, dùng worktree tools theo skill và bảo toàn
   working-source baseline; không khởi đầu từ default branch cũ thiếu code mới.
@@ -107,7 +107,7 @@ dùng RTK. Adapter build chỉ dùng cache đã xác nhận đúng checkout.
   Shift=1, Ctrl=2, Alt=4, Meta=8 của CoreMouse. Header khai báo cùng enums/layout;
   trường không áp dụng cho event không được đọc như số geometry.
 
-- [ ] **Step 1 — RED:** Viết semantic tests theo exact IDs: X Move 5 từ frame
+- [x] **Step 1 — RED:** Viết semantic tests theo exact IDs: X Move 5 từ frame
   World dịch `[5,0,0]`; frame O=(10,20,30), X=(0,1,0) dịch thành `[0,5,0]`;
   pivot (3,4,0), point (5,4,0) quay 90° thành (3,6,0); Scale X factor 2 giữ Y/Z
   và pivot; Shift factor 2 scale đủ ba trục; zero/NaN/Infinity reject giữ snapshot.
@@ -132,16 +132,16 @@ dùng RTK. Adapter build chỉ dùng cache đã xác nhận đúng checkout.
       assert_eq!(kind("GumballRelocate"), Some(CommandKind::Relocate));
   }
   ```
-- [ ] **Step 2 — Verify RED:** `rtk cargo test --manifest-path rust/Cargo.toml --test gumball_session --test gumball_ffi`.
+- [x] **Step 2 — Verify RED:** `rtk cargo test --manifest-path rust/Cargo.toml --test gumball_session --test gumball_ffi`.
   Xác nhận failure do API/behavior chưa có; không coi lỗi môi trường là RED.
-- [ ] **Step 3 — Implement:** Viết pure Rust session/math, reuse coordinate/frame,
+- [x] **Step 3 — Implement:** Viết pure Rust session/math, reuse coordinate/frame,
   units và source/ancestor observations. Kiểm frame affine/rigid, singularity và
   checked finite math bằng contracts hiện có. Define FFI record layout/asserts ở
   cả Rust/C++; invalid call không mutate session/output và không unwind qua ABI.
   Map command aliases/captions; metadata này chưa bật executor native.
-- [ ] **Step 4 — GREEN:** Chạy lại hai suites; thêm pointer-null, bad enum/count,
+- [x] **Step 4 — GREEN:** Chạy lại hai suites; thêm pointer-null, bad enum/count,
   short/invalid UTF-8, stale session handle, session independence và destroy cleanup.
-- [ ] **Step 5 — Commit:** Commit chỉ files của task đã kiểm chứng; tách additions
+- [x] **Step 5 — Commit:** Commit chỉ files của task đã kiểm chứng; tách additions
   trong files đang dirty bằng scoped hunks, không stage cả working tree.
 
 ## Task 2: Native geometry, selection ownership và Object frame
@@ -173,7 +173,7 @@ dùng RTK. Adapter build chỉ dùng cache đã xác nhận đúng checkout.
   selected_roots, source_signatures_before/after, staged bounds/type/orientation,
   frame/capability/error; không dùng hook này làm chứng cứ UI hoặc persistence.
 
-- [ ] **Step 1 — RED:** Native tests độc lập đo box ở nested App::Part, parent+child,
+- [x] **Step 1 — RED:** Native tests độc lập đo box ở nested App::Part, parent+child,
   hai links chung definition, mesh/points và plain/retained 3DM objects. Kiểm
   stage không mutation; Copy có kế hoạch identity riêng; Scale X
   circle thành ellipse, reflected solid orientation hợp lệ; hole face extrusion
@@ -192,20 +192,20 @@ dùng RTK. Adapter build chỉ dùng cache đã xác nhận đúng checkout.
 
   Fixture tạo circle ở World origin với radius=5 mm trước observation. Native
   facts đo private output bằng OCCT/Mesh/Points API, không lấy đáp án từ matrix.
-- [ ] **Step 2 — Verify RED:** Build plugin-only matching source và chạy fixture
+- [x] **Step 2 — Verify RED:** Build plugin-only matching source và chạy fixture
   bằng shared-host runner. Failure phải là chưa có adapter/behavior, ghi report và exit.
-- [ ] **Step 3 — Implement:** Capture immutable sources, dùng Rust để deduplicate/
+- [x] **Step 3 — Implement:** Capture immutable sources, dùng Rust để deduplicate/
   normalize selected roots từ ancestor observations. Stage BRep/Mesh/Points/
   instance transform và planar extrusion bằng native adapters đúng representation.
   Giữ group/layer/material/metadata và retained archive state. Parametric family
   chỉ sửa property/placement được owner hỗ trợ; từ chối thay Shape không bền vững.
   Verify source/lock/units trước và sau staging; sai một source/output phải hủy
   toàn bộ private batch. Publication/transaction chưa thuộc task này.
-- [ ] **Step 4 — GREEN:** Chạy geometry suite; thêm source deleted/replaced, layer
+- [x] **Step 4 — GREEN:** Chạy geometry suite; thêm source deleted/replaced, layer
   locked, unit change, bad copy/extrusion output và second-object failure. Đo
   source signatures/object count/Undo trước-sau để pin no mutation. Kiểm retained
   archive observations; actual export/commit/Undo/Redo được pin ở Tasks 4–5.
-- [ ] **Step 5 — Commit:** Scoped native geometry/frame và fixture evidence.
+- [x] **Step 5 — Commit:** Scoped native geometry/frame và fixture evidence.
 
 ## Task 3: Controller, menu/CMD, preference và lifecycle
 
@@ -225,7 +225,7 @@ and `matches(std::size_t,const QString&)`; instance `available(std::size_t) cons
 CurveController; read-only native Python observations `gumballState()` và
 `gumballHandles()` để fixture tìm handle screen position, không API sửa geometry.
 
-- [ ] **Step 1 — RED:** Native menu/CMD fixtures cho On/Off/Toggle, CPlane/Object/
+- [x] **Step 1 — RED:** Native menu/CMD fixtures cho On/Off/Toggle, CPlane/Object/
   World và hai Relocate aliases. Kiểm default/restore preference, selection
   change, empty/locked/mixed selection và command availability. Pin scene clear
   khi Line/Surface/Edit bắt đầu, deactivate/document close/view destroyed; enable
@@ -243,19 +243,19 @@ CurveController; read-only native Python observations `gumballState()` và
 
   Fixture bắt đầu ở profile mới default Off; command ID lấy từ Rust icon mapping
   đã kiểm chứng Task 1, không hardcode caption hoặc command name suy đoán.
-- [ ] **Step 2 — Verify RED:** Chạy `gumball_commands_smoke.FCMacro`; fixture phải
+- [x] **Step 2 — Verify RED:** Chạy `gumball_commands_smoke.FCMacro`; fixture phải
   fail tại command/session requirement, không pass từ icon/metadata.
-- [ ] **Step 3 — Implement:** Nối router/caption/permissions và Workbench lifecycle.
+- [x] **Step 3 — Implement:** Nối router/caption/permissions và Workbench lifecycle.
   Menu toggle/alignment/relocate là view state; geometry gesture kiểm AlterDoc
   và source locks riêng. Không ghi successful geometry history tại drag-start.
   Exclude toggle/alignment/relocate khỏi repeat candidate; successful geometry
   commit mới ghi execution. Suspend/hide Ready overlay khi family khác hoạt động,
   cancel gesture trước transition; tránh recursion của `CurveController::cancel`.
   Route numeric/relocate input trước parser của command khác khi Gumball owns input.
-- [ ] **Step 4 — GREEN:** Test CMD keyboard từ viewport/console, Enter theo phase,
+- [x] **Step 4 — GREEN:** Test CMD keyboard từ viewport/console, Enter theo phase,
   Esc editor trước rồi gesture, no empty Undo và workbench/document switch cleanup.
   Re-run command repeat/Line slice khi routing/filter thay đổi.
-- [ ] **Step 5 — Commit:** Scoped controller/router và command fixture.
+- [x] **Step 5 — Commit:** Scoped controller/router và command fixture.
 
 ## Task 4: Handles, pointer/numeric gestures, Alignment và Relocate UI
 
@@ -273,7 +273,7 @@ const Om9GumballSnapshot&, GumballStagedBatch&&) -> void`: verify lại source,
 ownership, lock và units; publish toàn batch trong một transaction, abort đầy đủ
 nếu bất kỳ source/output thất bại. Consume capture/stage của Task 2.
 
-- [ ] **Step 1 — RED:** Fixture gửi actual Qt pointer press/move/release tới từng
+- [x] **Step 1 — RED:** Fixture gửi actual Qt pointer press/move/release tới từng
   handle. Đo Move axis/plane/origin, Rotate pivot, Scale1D/Shift3D, click numeric
   exact distance/angle/factor, Alt-copy numeric/drag, Ctrl extrusion và Ctrl-start
   relocate. Native handle coordinates chỉ dùng để nhắm pointer, không thay event.
@@ -295,10 +295,10 @@ nếu bất kỳ source/output thất bại. Consume capture/stage của Task 2.
   Helpers gửi Qt events tới viewport ở handle position từ native observations;
   fixture dùng box World, mm units. Assert hit handle trước nhập; không gọi API
   geometry mutation. Thêm batch second-source failure và Copy IDs ở cùng suite.
-- [ ] **Step 2 — Verify RED:** Chạy core fixture trên shared host, giữ failure
+- [x] **Step 2 — Verify RED:** Chạy core fixture trên shared host, giữ failure
   report/source/plugin hash và screenshot. Pointer chưa đến handle là harness
   failure cần sửa, không bỏ hit-test assertion.
-- [ ] **Step 3 — Implement:** Ghép exported native translation/planar/rotation
+- [x] **Step 3 — Implement:** Ghép exported native translation/planar/rotation
   draggers, square scale và origin handles trong scene overlay; set màu OM9 và
   auto-size theo DPI/camera. Handle identity lấy từ picked scene path.
   World rays dùng camera API; math/constraints ở Rust. Native float fields chỉ
@@ -310,11 +310,11 @@ nếu bất kỳ source/output thất bại. Consume capture/stage của Task 2.
   Enter hoàn tất theo CPlane khi frame đủ, invalid giữ phase và frame trước.
   Nối publisher vào release/accept geometry; verify toàn source batch ngay trước
   commit, cập nhật copied identities và retained archive theo owner contract.
-- [ ] **Step 4 — GREEN:** Chạy core fixture DPI 1 và 1.5; pin no float rounding
+- [x] **Step 4 — GREEN:** Chạy core fixture DPI 1 và 1.5; pin no float rounding
   của typed values, pan/zoom/orbit không commit, selection không mất, Copy cursor,
   Cancel khôi phục frame/geometry và multiple-selection pivot reset. Numeric
   Ctrl-click chỉ đổi widget; no document count/Undo change cho Alignment/Relocate.
-- [ ] **Step 5 — Commit:** Scoped overlay/events và genuine pointer evidence.
+- [x] **Step 5 — Commit:** Scoped overlay/events và genuine pointer evidence.
 
 ## Task 5: Persistence, regression, review và cập nhật completion
 
@@ -398,5 +398,8 @@ test step được chỉ định. Các interface tên/type dùng cùng tên gi�
 Đề xuất **Native**: tôi triển khai trong session này trên baseline đã kiểm tra,
 giữ scoped patches tại checkout hiện tại, rồi một reviewer kiểm toàn bộ thay đổi.
 Các tasks phụ thuộc chặt vào cùng session/ABI và event routing, nên cách này
-tránh trao đổi interface qua nhiều implementers. Chưa bắt đầu product code;
-người dùng cần duyệt plan và chọn method trước execution theo writing-plans.
+tránh trao đổi interface qua nhiều implementers. Người dùng đã duyệt Native inline/current checkout. Tasks1–4 đã commit và
+nghiệm thu; Task5 có warm/cold/regression/source audit đạt, final combined
+run và một fresh final review là gate còn lại. Xem validation record để biết
+exact supported slice và các capability/host limitations, không hiểu tick bước
+triển khai là toàn bộ Matrix/Rhino parity.
