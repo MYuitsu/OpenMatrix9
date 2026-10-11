@@ -21,7 +21,7 @@ def run():
         Gui.Selection.addSelection(box);Gui.runCommand('OM9_Gumball');events();QtTest.QTest.qWait(220)
         report['state']=native.gumballState();handles=native.gumballHandles();report['handles']=handles
         check('native scene exposes actual picked handles',bool(handles) and any(h['name']=='MoveX' and h['hit_verified'] for h in handles))
-        check('all thirteen handle identities are pickable',len(handles)==13)
+        check('all thirteen transform handle identities are pickable',len([h for h in handles if h['handle']<13])==13)
         try:
             Gui.activeDocument().activeView().saveImage(str(out/'gumball.png'),1024,768,'Current')
             Gui.activeDocument().activeView().getViewer().grabFramebuffer().save(str(out/'gumball-viewer.png'))
@@ -36,7 +36,7 @@ def run():
                 c=image.pixelColor(x,y)
                 if c.red()>220 and c.green()<100 and c.blue()<100:pixels[0]+=1
                 elif c.green()>150 and c.red()<100 and c.blue()<120:pixels[1]+=1
-                elif c.red()>220 and c.green()>170 and c.blue()<100:pixels[2]+=1
+                elif c.blue()>220 and c.red()<100 and c.green()<150:pixels[2]+=1
         report['handle_color_pixels']=pixels
         check('rendered planar handles stay within a compact widget',all(20<n<2500 for n in pixels))
         viewport=next(w for w in Gui.getMainWindow().findChildren(QtWidgets.QWidget) if w.property('om9GumballViewport'))

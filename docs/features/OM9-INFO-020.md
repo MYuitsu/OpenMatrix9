@@ -9,8 +9,12 @@ Nguồn: Matrix 8 Book 1, PDF 45–47 / trang in 35–37; trang PDF 48 bắt đ�
 rotate arcs, scale squares, numeric, Alt toggle Copy và Ctrl giữ tới khi nhả
 chuột để extrude. Không lưu artwork/manual riêng trong source public.
 
-Quyết định OM9 đã duyệt: default Off/CPlane, X đỏ/Y xanh lá/Z vàng; màu Y
-manual là xanh lam/cyan nên màu OM9 không phải bằng chứng visual parity Matrix.
+Quyết định OM9 hiện hành: default Off/CPlane, X đỏ/Y xanh lá/Z xanh dương.
+Ngày 2026-10-11 user duyệt chỉnh giao diện theo Rhino 5, thay Z vàng của
+thiết kế lõi trước đó: arrows và quarter arcs thanh, outline Scale squares
+phía đối diện arrows, dashed guides không pickable, menu ball cạnh tâm,
+numeric editor gọn và nằm trong viewport. Màu Y manual là xanh lam/cyan;
+đây là lựa chọn OM9 theo Rhino, không phải bằng chứng visual parity Matrix.
 Shift scale cả ba chiều theo Rhino 5. Safe Rust giữ session/frame/ray math,
 input hữu hạn, length/angle/factor, copy và operation plan. C++ chỉ giữ
 Qt/Coin/FreeCAD/OCCT/Mesh/Points và transaction native.
@@ -23,7 +27,11 @@ khác 0, cho phép âm; circle nonuniform có thể thành rational BSpline exac
 Extrude arrows hỗ trợ planar Edge/Wire/Face, kể cả Shell/Compound một child
 và face có hole. Không thay geometry nguồn khi Copy/Extrude.
 
-13 tay nắm là native picked scene paths; preview bounds-excluded/unpickable,
+13 tay nắm transform và menu ball riêng là native picked scene paths;
+menu mở Relocate/Reset và CPlane/Object/World bằng các handler hiện hữu,
+không mở geometry transaction. Reset recapture tâm selection theo alignment
+hiện hành. Popup nhận mouse release không nuốt click tay nắm kế tiếp.
+Preview bounds-excluded/unpickable,
 không thêm document object/Undo. Click mở numeric editor; Enter khi đang
 drag chỉ ràng buộc distance/bước góc, release mới commit. Distance khi giữ drag
 theo phía con trỏ so với điểm press; số âm đảo chiều
@@ -54,5 +62,6 @@ ellipse optimal bounds có native edge tolerance 1e-7 mỗi phía, kiểm 1e-6 m
 Không nới tolerance của solver để hợp thức kết quả.
 
 [Evidence và lệnh tái kiểm](../validation/2026-10-11-gumball-core.md).
+[Giao diện Rhino và kiểm tra native](../validation/2026-10-11-gumball-rhino-visual.md).
 Tiếp theo: native owner adapters cho scale parametric/Link, multi-document
 atomic publication và host Redo-preserving transaction API.

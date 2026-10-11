@@ -104,6 +104,23 @@ bool GumballController::applyCommand(unsigned kind,unsigned value){
     return false;
 }
 void GumballController::alignmentMenu(){if(popup)delete popup.data();popup=new QMenu(Gui::getMainWindow());popup->setObjectName("OM9GumballAlignmentMenu");const char* labels[]={"CPlane","Object","World"};for(unsigned i=0;i<3;++i){auto* action=popup->addAction(labels[i]);action->setCheckable(true);action->setChecked(snapshot().alignment==i);if(i==1&&inputs){const auto frame=captureGumballFrame(*inputs,view,i);if(!frame.unresolved.isEmpty()){action->setEnabled(false);action->setToolTip(frame.unresolved);}}connect(action,&QAction::triggered,this,[this,i]{applyCommand(2,i);});}popup->popup(QCursor::pos());}
+void GumballController::widgetMenu(const QPoint& position){
+    if(!view||!inputs||active())return;
+    if(popup)delete popup.data();
+    popup=new QMenu(Gui::getMainWindow());popup->setObjectName("OM9GumballWidgetMenu");
+    auto* relocate=popup->addAction("Relocate gumball");
+    connect(relocate,&QAction::triggered,this,[this]{applyCommand(3,0);});
+    auto* reset=popup->addAction("Reset gumball");
+    connect(reset,&QAction::triggered,this,[this]{applyCommand(2,snapshot().alignment);});
+    popup->addSeparator();
+    const char* labels[]={"Align to CPlane","Align to Object","Align to World"};
+    for(unsigned i=0;i<3;++i){
+        auto* action=popup->addAction(labels[i]);action->setCheckable(true);action->setChecked(snapshot().alignment==i);
+        if(i==1){const auto frame=captureGumballFrame(*inputs,view,i);if(!frame.unresolved.isEmpty()){action->setEnabled(false);action->setToolTip(frame.unresolved);}}
+        connect(action,&QAction::triggered,this,[this,i]{applyCommand(2,i);});
+    }
+    popup->popup(view->getViewer()->viewport()->mapToGlobal(position));
+}
 bool GumballController::submit(const QString& text){
     unsigned kind=0,value=0;const auto raw=text.toUtf8();const auto status=om9_gumball_command(reinterpret_cast<const unsigned char*>(raw.constData()),raw.size(),&kind,&value);
     if(status==0)return applyCommand(kind,value);if(status==2){message("Gumball: expected On/Off/Toggle or CPlane/Object/World");return true;}
@@ -152,7 +169,8 @@ bool GumballController::processEvent(QObject* receiver,QEvent* e){
     auto* widget=qobject_cast<QWidget*>(receiver);
     const bool viewport=view&&widget&&(widget==view->getViewer()||view->getViewer()->isAncestorOf(widget));
     const bool ownEditor=overlay->editor()&&receiver==overlay->editor();
-    if(e->type()==QEvent::MouseButtonRelease&&suppressRelease&&viewport&&static_cast<QMouseEvent*>(e)->button()==Qt::LeftButton){suppressRelease=false;return true;}
+    // A menu popup can own the release of the viewport press that opened it.
+    if(e->type()==QEvent::MouseButtonRelease&&suppressRelease&&(viewport||receiver==popup.data())&&static_cast<QMouseEvent*>(e)->button()==Qt::LeftButton){suppressRelease=false;if(viewport)return true;}
     if(active()&&(e->type()==QEvent::ApplicationDeactivate||(e->type()==QEvent::UngrabMouse&&mouseOwner&&receiver==mouseOwner))){cancel();return false;}
     const bool keyboardOwner=viewport||ownEditor||receiver->objectName()=="OM9CommandTranscript";
     if(active()&&keyboardOwner&&(e->type()==QEvent::KeyPress||e->type()==QEvent::KeyRelease||e->type()==QEvent::ShortcutOverride)){
@@ -191,6 +209,7 @@ bool GumballController::processEvent(QObject* receiver,QEvent* e){
     auto* mouse=static_cast<QMouseEvent*>(e);const auto pos=view->getViewer()->viewport()->mapFrom(widget,mouse->position().toPoint());
     if(e->type()==QEvent::MouseButtonPress){
         if(mouse->button()!=Qt::LeftButton)return false;refresh();auto picked=overlay->hit(pos);if(!picked||!inputs||active())return false;
+        if(picked->handle==13){suppressRelease=true;widgetMenu(pos);return true;}
         try{auto* doc=App::GetApplication().getActiveDocument();if(!doc||!Gui::Control().isAllowedAlterDocument(doc))return false;verifyGumballInputs(*doc,*inputs);Om9GumballBegin begin{};begin.document=inputs->coordinates.documentOwner;begin.view_generation=std::max(std::uint64_t(1),inputs->coordinates.frameRevision);begin.unit_generation=1;begin.mm_per_unit=unitInputScale(*doc);auto state=snapshot();std::copy(std::begin(state.frame),std::end(state.frame),begin.frame);std::copy(inputs->coordinates.frame.begin(),inputs->coordinates.frame.end(),begin.cplane);std::copy(picked->origin.begin(),picked->origin.end(),begin.ray_origin);std::copy(picked->direction.begin(),picked->direction.end(),begin.ray_direction);begin.handle=picked->handle;begin.modifiers=(mouse->modifiers()&Qt::ShiftModifier?1:0)|(mouse->modifiers()&Qt::ControlModifier?2:0)|(mouse->modifiers()&Qt::AltModifier?4:0);if(om9_gumball_begin(session,&begin,inputs->sources.data(),inputs->sources.size()))throw std::runtime_error("Cannot begin gumball gesture");mouseOwner=view->getViewer()->viewport();mouseDown=true;moved=false;widgetRelocate=begin.modifiers&2;pressPosition=pos;mouseOwner->grabMouse();mouseOwner->setCursor(snapshot().copy?Qt::DragCopyCursor:Qt::CrossCursor);message("Gumball: drag or click to enter a value");return true;}catch(const std::exception& ex){cancel();message(QString::fromUtf8(ex.what()));return true;}
     }
     if(!mouseDown)return false;

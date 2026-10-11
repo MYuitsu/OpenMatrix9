@@ -26,6 +26,7 @@ private:
     GumballController();
     bool applyCommand(unsigned,unsigned);bool event(const Om9GumballEvent&);
     void alignmentMenu();void message(const QString&);void persist();
+    void widgetMenu(const QPoint&);
     void updateOverlay();void updatePreview();void finishGesture();void releaseMouse();
     Om9GumballSnapshot snapshot()const;
     std::uint64_t session=0;bool workbench=false,relocated=false,publishing=false;

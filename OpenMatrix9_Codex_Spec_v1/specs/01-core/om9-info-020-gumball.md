@@ -19,7 +19,7 @@ Alias tương thích: `Gumball`. Nhóm: `01-core`. Trạng thái: `partially_imp
 
 **Hợp đồng thiết kế `OM9-INFO-020` — Gumball.**
 
-Gumball toggle hiển thị move/scale/rotate widgets khi object selected. X đỏ, Y xanh, Z vàng theo nhận diện tương thích; arrows move một axis, plane handle move hai axes, origin free move; arcs rotate, squares scale một axis. Numeric edit nhận distance/góc/scale factor. Alt trong drag toggle Copy, Alt khi click numeric làm copy. Trong drag nhập số+Enter ràng buộc distance hoặc bước góc. Ctrl khi nhả arrow drag của planar curve/surface tạo extrude, có thể nhập distance trước; không coi Ctrl drag mọi object là extrude. Giữ đúng pivot/frame và capability, hủy trả preview.
+Gumball toggle hiển thị move/scale/rotate widgets khi object selected. X đỏ, Y xanh lá, Z xanh dương theo chỉnh giao diện Rhino 5 được user duyệt ngày 2026-10-11; arrows move một axis, plane handle move hai axes, origin free move; arcs rotate, outline squares scale một axis ở phía đối diện arrows. Menu ball cạnh tâm mở Relocate/Reset và CPlane/Object/World; numeric editor gọn, giữ trong viewport. Numeric edit nhận distance/góc/scale factor. Alt trong drag toggle Copy, Alt khi click numeric làm copy. Trong drag nhập số+Enter ràng buộc distance hoặc bước góc. Ctrl khi nhả arrow drag của planar curve/surface tạo extrude, có thể nhập distance trước; không coi Ctrl drag mọi object là extrude. Giữ đúng pivot/frame và capability, hủy trả preview.
 
 ## Vai trò đầu vào của mẫu
 
@@ -94,6 +94,12 @@ Các ca trên là yêu cầu kiểm thử geometry/state của feature; kết qu
 
 Ngày 2026-10-11: `partially_implemented` / `validated_supported_slice`.
 13 native handles; Move/Rotate Placement, plain BRep/Mesh/Points affine Scale, planar Extrude, Alt Copy, held Ctrl and native Qt input. Parametric/Link Scale and external-document Link remain unsupported; failed posttransaction callback rollback loses old Redo in the shared host.
+
+Rhino-style visual revision adds a separate native menu target (14 scene paths
+including the unchanged 13 Rust operation handles), camera-facing outline scale
+squares and compact Qt numeric editor. Rendering and popup ownership use native
+Coin/Qt; operation math/state/publication remain Rust-owned or native adapters
+from the core slice. [Visual evidence](../../../docs/validation/2026-10-11-gumball-rhino-visual.md).
 
 Source evidence: Matrix 8 Book 1 PDF45–47 / printed35–37, continuation inspected
 until History PDF48. Source Y cyan/blue; approved OM9 Y green is a design choice.

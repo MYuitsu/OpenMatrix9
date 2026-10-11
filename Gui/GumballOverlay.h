@@ -9,8 +9,8 @@
 #include <array>
 #include <vector>
 #include <Base/Vector3D.h>
-class SoSeparator;class SoNode;class SoTransform;class SoScale;class QLineEdit;
-namespace Gui {class View3DInventor;class SoTransformDragger;}
+class SoSeparator;class SoNode;class SoTransform;class SoBaseColor;class SoRotation;class QLineEdit;
+namespace Gui {class View3DInventor;}
 namespace OpenMatrix9Gui {
 struct HandlePick {unsigned handle;std::array<double,3> origin,direction;QPoint screen;};
 class GumballOverlay {
@@ -25,8 +25,10 @@ public:
 private:
     QPointer<Gui::View3DInventor> view;QPointer<QLineEdit> field;
     SoSeparator *owner=nullptr,*root=nullptr,*previewNode=nullptr;
-    SoTransform* pose=nullptr;SoScale* extraScale=nullptr;
-    Gui::SoTransformDragger* dragger=nullptr;
-    std::array<SoNode*,13> handles{};
+    SoTransform *pose=nullptr,*menuPose=nullptr;
+    // Thirteen Rust operation handles, plus the native view-menu target.
+    std::array<SoNode*,14> handles{};
+    std::array<SoBaseColor*,13> colors{};
+    std::array<SoRotation*,4> facing{};
 };
 }
