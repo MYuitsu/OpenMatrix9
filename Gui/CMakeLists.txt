@@ -125,6 +125,11 @@ endif()
 
 set(
     OpenMatrix9Gui_SRCS
+    GumballGeometry.cpp
+    GumballGeometry.h
+    GumballFrame.cpp
+    GumballFrame.h
+    GumballRust.h
     CoreUnits.cpp
     CoreUnits.h
     CoreObjects.cpp
@@ -300,6 +305,18 @@ else()
     find_library(OM9_PART_LIBRARY NAMES Part
         HINTS "${FREECAD_SDK_BUILD}/src/Mod/Part/App" REQUIRED)
     target_link_libraries(OpenMatrix9Gui PRIVATE "${OM9_PART_LIBRARY}")
+endif()
+
+if(TARGET Points)
+    target_link_libraries(OpenMatrix9Gui PRIVATE Points)
+else()
+    find_library(OM9_POINTS_LIBRARY NAMES Points
+        HINTS "${FREECAD_SDK_BUILD}/src/Mod/Points/App" REQUIRED)
+    target_link_libraries(OpenMatrix9Gui PRIVATE "${OM9_POINTS_LIBRARY}")
+endif()
+if(MSVC)
+    target_link_options(OpenMatrix9Gui PRIVATE "/DELAYLOAD:Points.pyd")
+    target_link_libraries(OpenMatrix9Gui PRIVATE delayimp)
 endif()
 if(WIN32)
     target_link_libraries(OpenMatrix9Gui PRIVATE ws2_32 userenv ntdll bcrypt)
