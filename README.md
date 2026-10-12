@@ -11,7 +11,9 @@
 
 Giữ thư mục **OpenMatrix9**, **launcher-manifest.json** và các file **Start-OM9** cùng nhau sau khi giải nén gói SetupLauncher. Kiểm tra hai ZIP bằng **SHA256SUMS.txt** trong artifact. Không cần Rust, Visual Studio hay quyền Administrator để dùng OM9. / Keep the bundled OpenMatrix9 folder, manifest and Start-OM9 files together.
 
-**Candidate build:** nhánh Gumball cung cấp artifact sau khi CI đạt; đây chưa phải tag hay GitHub Release đã phát hành. Bằng chứng native local không thay cho kiểm thử trên FreeCAD stock trong Action. Các bản đã phát hành nằm ở [Releases](https://github.com/MYuitsu/OpenMatrix9/releases), gồm prerelease.
+**Kiểm thử và build:** Gumball đã đạt **30 ca / 955 kiểm tra trên máy** với FreeCAD stock. Theo yêu cầu ngày 12/10/2026, GitHub Actions chỉ build và đóng gói; CI không chạy lại bộ test. Gói tải xuống ghi rõ commit, SHA256 và `tests_executed: false`. [Bằng chứng và quy trình](docs/validation/2026-10-12-local-tests-ci-build-only.md).
+
+**Candidate build:** nhánh Gumball cung cấp artifact sau khi build CI đạt; đây chưa phải tag hay GitHub Release đã phát hành. Các bản đã phát hành nằm ở [Releases](https://github.com/MYuitsu/OpenMatrix9/releases), gồm prerelease.
 
 [Hướng dẫn tiếng Việt](INSTALL.vi.md) · [English install guide](INSTALL.en.md) · [Tiến độ](README.vi.md) · [Build from source](docs/build-windows.md)
 <!-- om9-install-entry:end -->

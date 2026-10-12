@@ -7,7 +7,7 @@ module: Info & Settings
 kind: command
 implementation_status: implemented
 approved_scope_complete: true
-stock_ci_status: exact_commit_action_authoritative
+stock_ci_status: build_only_action_authoritative
 guide_date: '2026-10-07'
 guide_scope: engineering_contract_and_request_planner
 sample_status: compiled_and_validation_tests_passed
@@ -117,7 +117,7 @@ Các ca trên là yêu cầu kiểm thử geometry/state của feature; kết qu
 ## OpenMatrix9 implementation notes
 
 2026-10-12: `implemented` / `validated_supported_slice`; `approved_scope_complete=true`.
-Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. At the local evidence checkpoint, stock GitHub Actions CI is pending; the exact-commit Action result is authoritative.
+Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Tests run locally (30 processes / 955 checks); at the user's request, GitHub Actions only builds/packages. Its exact-commit Action is authoritative for build status and records tests_executed false. See the local-tests/CI-build-only policy report.
 
 Development-host checkpoint plugin SHA256 `559e0dca08e3535174879dd81c598d4a894e70e43989d22dba8b6d77a8db6b20`; host SHA256 `98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8`.
 [Final native evidence](../../../docs/validation/2026-10-12-gumball-core-completion.md).

@@ -1,6 +1,6 @@
 # OM9-INFO-021 — Gumball Alignment
 
-Current 2026-10-12: `implemented` / `validated_supported_slice`; approved OM9 scope complete. Stock build/test status is recorded by the exact commit's [GitHub Action](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml).
+Current 2026-10-12: `implemented` / `validated_supported_slice`; approved OM9 scope complete. [Tests run locally](../validation/2026-10-12-local-tests-ci-build-only.md); the exact commit's [GitHub Action](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml) records build/package status only.
 [Final native evidence](../validation/2026-10-12-gumball-core-completion.md).
 The dated 2026-10-11 implementation/evidence below is the validated baseline.
 

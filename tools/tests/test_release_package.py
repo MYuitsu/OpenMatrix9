@@ -36,7 +36,7 @@ class ReleasePackageTests(unittest.TestCase):
                 self.assertEqual(evidence['version'],metadata['version'])
                 self.assertEqual(evidence['release_metadata_sha256'],hashlib.sha256((ROOT/'release.json').read_bytes()).hexdigest())
 
-    def package_ci_fixture(self,validation_change=None,metadata_change=None):
+    def package_ci_fixture(self,validation_change=None,metadata_change=None,build_only=False):
         (ROOT/'build').mkdir(exist_ok=True)
         temporary=tempfile.TemporaryDirectory(dir=ROOT/'build')
         root=Path(temporary.name).resolve()
@@ -64,7 +64,9 @@ class ReleasePackageTests(unittest.TestCase):
             (source/'release.json').write_text(json.dumps(release))
         (plugin/'release-validation.json').write_text(json.dumps(validation))
         (root/'build-paths.json').write_text(json.dumps({'plugin':str(plugin)}))
-        result=subprocess.run([sys.executable,str(source/'tools/ci/package_release.py'),'--root',str(root)],capture_output=True,text=True)
+        command=[sys.executable,str(source/'tools/ci/package_release.py'),'--root',str(root)]
+        if build_only:command.append('--build-only')
+        result=subprocess.run(command,capture_output=True,text=True)
         return result,root,release
 
     def test_ci_packager_retains_matching_version_evidence(self):
@@ -87,6 +89,45 @@ class ReleasePackageTests(unittest.TestCase):
         result,root,_=self.package_ci_fixture(metadata_change=lambda release:release.update(launcher_revision=release['launcher_revision']+1))
         self.assertNotEqual(result.returncode,0)
         self.assertIn('release metadata changed after validation',result.stderr)
+        self.assertFalse((root/'packages').exists())
+
+    @staticmethod
+    def build_only_record(validation):
+        validation.pop('gumball')
+        validation.update(validation_kind='build_only',tests_executed=False,
+                          build={'ok':True,'target':'OpenMatrix9Gui'},
+                          source_commit='a'*40,build_url='https://github.com/MYuitsu/OpenMatrix9/actions/runs/123')
+
+    def test_explicit_build_only_packages_without_test_claims(self):
+        result,root,_=self.package_ci_fixture(validation_change=self.build_only_record,build_only=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertEqual(len(list((root/'packages').glob('*.zip'))),2)
+        for path in (root/'packages').glob('*.zip'):
+            with zipfile.ZipFile(path) as package:
+                record=json.loads(package.read('OpenMatrix9/release-validation.json'))
+                self.assertEqual(record['validation_kind'],'build_only')
+                self.assertIs(record['tests_executed'],False)
+                self.assertNotIn('gumball',record)
+
+    def test_build_only_record_requires_explicit_package_mode(self):
+        result,root,_=self.package_ci_fixture(validation_change=self.build_only_record)
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('All native Gumball cases must pass',result.stderr)
+        self.assertFalse((root/'packages').exists())
+
+    def test_build_only_refuses_runtime_test_claims(self):
+        result,root,_=self.package_ci_fixture(build_only=True)
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('runtime test claims are forbidden',result.stderr)
+        self.assertFalse((root/'packages').exists())
+
+    def test_build_only_refuses_changed_binary(self):
+        def change(validation):
+            self.build_only_record(validation)
+            validation['plugin_sha256']='0'*64
+        result,root,_=self.package_ci_fixture(validation_change=change,build_only=True)
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('integrity-verified build',result.stderr)
         self.assertFalse((root/'packages').exists())
 
 if __name__=='__main__':unittest.main()

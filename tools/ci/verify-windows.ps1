@@ -4,7 +4,7 @@ $source=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $paths=Get-Content -LiteralPath (Join-Path $Root 'build-paths.json') -Raw|ConvertFrom-Json
 $evidence=Join-Path $Root 'evidence';New-Item -ItemType Directory -Path $evidence -Force|Out-Null
 $python=Join-Path $source 'tools/ci/.pixi/envs/default/python.exe'
-foreach($test in @('test_release_package.py','test_timestamp_release.py','test_public_source_audit.py')){
+foreach($test in @('test_release_package.py','test_ci_build_record.py','test_timestamp_release.py','test_public_source_audit.py')){
  & $python -m unittest discover -s (Join-Path $source 'tools/tests') -p $test
  if($LASTEXITCODE -ne 0){throw "Public release tooling regression failed: $test"}
 }

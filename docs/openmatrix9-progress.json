@@ -2600,6 +2600,42 @@
       "stock_ci_status": "exact_commit_action_authoritative",
       "next_document": "docs/validation/2026-10-12-gumball-ci-window-fixture.md",
       "next_action": "Verify the reviewed pushed commit through its actual GitHub Action, native evidence and both packaged ZIP files."
+    },
+    {
+      "id": "gumball-local-tests-ci-build-only-20261012",
+      "date": "2026-10-12",
+      "status": "validated",
+      "scope": "release_build_policy",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "summary": "User requested local tests and CI build/package only. Native code unchanged; local30/955 stock cohort retained. CI packages explicit build-only provenance and forbids runtime-test claims.",
+      "evidence": [
+        "docs/validation/2026-10-12-local-tests-ci-build-only.md"
+      ],
+      "tests": [
+        {
+          "command": "Local native report integrity inspection",
+          "result": "30 processes/955 passing checks; exact suite hash; existing native implementation unchanged"
+        },
+        {
+          "command": "Local release packaging/build-record tests",
+          "result": "8 package +4 build-record checks pass"
+        }
+      ],
+      "native_processes": 30,
+      "native_checks": 955,
+      "plugin_sha256": "71f8431d71f6abfb36c45e9fd2a128f1d8f232368e2e5c1faf5dd3a6ff58b987",
+      "suite_sha256": "eb8e76a4698e17e7ffccf895d6f510bc761af48bf6a3fba3b32858c054b679f1",
+      "version_label": "0.3.4-202610120606",
+      "stock_ci_status": "build_only_action_authoritative",
+      "uncertainties": [
+        "Previous CI component-pointer fixture failure retained as a runner evidence gap; no CI runtime-test success is claimed."
+      ],
+      "next_document": "docs/validation/2026-10-12-local-tests-ci-build-only.md",
+      "next_action": "Push reviewed source; verify exact-commit build-only Action and both actual ZIP artifacts."
     }
   ],
   "merge_context": {
