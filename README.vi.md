@@ -1,196 +1,184 @@
-> **OpenMatrix9 0.0.2 (thử nghiệm, Windows x64)**: [Tải release](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.2) · [Hướng dẫn cài](INSTALL.vi.md). Dùng **FreeCAD 1.1.4 chính thức**, đặt OM9 trong thư mục Mod của người dùng. [Bằng chứng tương thích và giới hạn](docs/validation/2026-10-10-stock-freecad-1.1.4.md); các báo cáo dev cũ bên dưới chưa nghiệm thu mọi luồng trên bản stock.
+# OpenMatrix9
 
-[Tải launcher r2](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-SetupLauncher-r2-Windows-x64.zip): giải nén rồi chạy **Start-OM9.cmd** để tự cài/cập nhật và tạo icon Desktop + Start Menu. Launcher tự kiểm tra bản mới; cập nhật bằng script trong gói mới.
+**CAD trang sức nguồn mở trên FreeCAD.** Rust xử lý logic; FreeCAD cung cấp hình học và giao diện.
 
-# OpenMatrix9 — Tiếng Việt
+[English](README.en.md) · [Cài đặt](#installation) · [Releases](https://github.com/MYuitsu/OpenMatrix9/releases)
 
-<!-- rhino-core-object-foundations:start -->
-Checkpoint P0 mới: định danh/vòng đời đối tượng và guard lựa chọn dùng chung
-cho Edit/Boolean, Rebuild, Surface đã được kiểm chứng. **P0 chưa hoàn tất.**
-Xem [bằng chứng và giới hạn](docs/validation/2026-10-09-rhino-core-object-foundations.md).
-<!-- rhino-core-object-foundations:end -->
-
-[English](README.en.md) · [Danh sách chi tiết từng lệnh](README.md)
-
-![OpenMatrix9 — Workbench CAD trang sức nguồn mở](Resources/branding/introduction.png)
-
-OpenMatrix9 là workbench CAD trang sức đang phát triển cho FreeCAD, lấy Matrix9
-làm tham chiếu chức năng. Rust quản lý danh mục lệnh, trạng thái và hành vi;
-C++/Qt tích hợp hình học và giao diện native FreeCAD; Python đăng ký workbench.
+![OpenMatrix9](Resources/branding/introduction.png)
 
 ## Mục lục
 
-- [Tổng quan](#overview)
-- [Ủng hộ phát triển / Donate](#donate)
-- [Quy ước tính hoàn thành](#completion-rules)
-- [Bảng theo dõi theo nhóm lớn](#group-progress)
-- [Chức năng đang sử dụng được](#supported-workflows)
-- [Tương thích Rhino 3DM / openNURBS](#three-dm)
-- [Build và cài đặt](#build)
-- [Kiểm tra](#checks)
-- [Tài liệu và cập nhật tiến độ](#documentation)
-- [Giấy phép](#support-license)
-
-<a id="overview"></a>
-## Tổng quan
-
-Giao diện tổ chức lệnh theo nhóm CAD và trang sức, có vùng CMD, bốn viewport,
-menu F6 và các điều khiển hiển thị. Lệnh chưa được hỗ trợ vẫn hiển thị nhưng
-bị vô hiệu hóa. Dự án có **510 liên kết icon SVG tự thiết kế**; số icon
-không phải số chức năng đã hoàn thành.
+- [Donate](#donate)
+- [Cài đặt chi tiết](#installation)
+- [Tiến độ](#progress)
+- [Release notes](#release-notes)
+- [Giấy phép](#license)
 
 <a id="donate"></a>
-## Ủng hộ phát triển / Donate
+## Donate
 
-Nếu OpenMatrix9 hữu ích với bạn, bạn có thể donate để hỗ trợ phát triển và kiểm
-thử các chức năng CAD, import/export 3DM và tương thích openNURBS.
-Mọi đóng góp đều tự nguyện. Cảm ơn bạn đã hỗ trợ dự án!
+Ủng hộ phát triển CAD, 3DM và công cụ trang sức. Mọi đóng góp đều tự nguyện. Cảm ơn bạn!
 
 - **PayPal:** gửi tới **`nguyenthaiduy277@gmail.com`** trong PayPal.
-- **MoMo:** quét mã QR dưới đây. Tên người nhận: **NGUYEN THAI DUY**.
+- **MoMo:** người nhận **NGUYEN THAI DUY**; quét mã dưới đây.
 
-![Mã QR MoMo donate cho NGUYEN THAI DUY](docs/images/donate/momo-qr.png)
+<img src="docs/images/donate/momo-qr.png" alt="MoMo — NGUYEN THAI DUY" width="240">
 
-<a id="completion-rules"></a>
-## Quy ước tính hoàn thành
+<a id="installation"></a>
+## Cài đặt
 
-Cập nhật cho source gộp ngày **2026-10-09**, gồm nhánh CAD/P0 và phần 3DM
-nâng cao từ main. Các báo cáo kiểm chứng giữ nguyên phiên bản và phạm vi
-kiểm thử ban đầu; số kiểm thử trước đây không xác nhận phiên bản sau gộp.
-Nền tảng P0 và tương thích đầy đủ Matrix9/Rhino vẫn chưa hoàn tất.
+### 1. Chuẩn bị FreeCAD
 
-Bảng dưới đây tổng hợp
-[bảng chi tiết từng lệnh](README.md#tiến-độ-lệnh--command-progress), đối chiếu với
-[hồ sơ kiểm chứng](docs/openmatrix9-progress.json) và
-[trạng thái Spec v1](OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md).
+Gói phát hành hiện tại dành cho **Windows x64 và FreeCAD 1.1.4 chính thức**.
+Bạn không cần source FreeCAD, Rust hoặc Visual Studio để cài và sử dụng.
 
-- **Hoàn thành phạm vi hiện tại:** mục 🟢 trong bảng chi tiết, có đường thực thi
-  và kiểm tra cho phạm vi được ghi rõ. Các tùy chọn còn thiếu vẫn được giữ trong
-  tài liệu từng lệnh; trạng thái này không xác nhận đầy đủ tương thích Matrix9/Rhino.
-- **Một phần:** mục 🟡, đã có nền tảng nhưng còn giới hạn hoặc phần chờ tích hợp.
-  Không cộng mục này vào số hoàn thành.
-- **Chưa hoàn thành:** mục 🔴, chưa có đường thực thi được xác nhận trong bảng nguồn.
-- **Tổng:** số mục catalog hoặc lệnh bổ sung được liệt kê trong từng nhóm.
-  Tỷ lệ = số hoàn thành phạm vi hiện tại / tổng của nhóm × 100, làm tròn một chữ số.
+1. Mở [Release FreeCAD 1.1.4](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4),
+   tải bộ cài **Windows x64** và cài FreeCAD theo hướng dẫn của bộ cài.
+2. Mở FreeCAD một lần. Vào **Help → About FreeCAD**, kiểm tra phiên bản **1.1.4**.
+   Thư mục cài đặt có thể mang tên `FreeCAD 1.1` dù phiên bản là 1.1.4.
+3. Lưu bản vẽ và đóng FreeCAD trước khi cài hoặc thay plugin OM9.
 
-Một mã có thể xuất hiện ở nhiều nhóm. Không cộng các dòng để tính tiến độ toàn
-dự án: danh sách có **514 mã duy nhất**, gồm **64 🟢, 5 🟡, 445 🔴**.
-Editor dùng chung danh mục Curve; Custom và Reset là điều khiển sidebar,
-không được tính thêm thành nhóm chức năng CAD.
+### 2. Tải SetupLauncher
 
-Spec v1 dùng đơn vị khác: **607 feature**, hiện ghi **32 `partially_implemented`** và **575 `not_started`**. Một feature có thể
-đã kiểm chứng phần hỗ trợ nhưng vẫn triển khai một phần theo toàn bộ spec.
+Mở **[Release 0.3.4-202610120606](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.4-202610120606)**, bấm **Assets** và tải gói **SetupLauncher**:
 
-<a id="group-progress"></a>
-## Bảng theo dõi theo nhóm lớn
+| File | Tải xuống |
+|---|---|
+| **Launcher — khuyên dùng** | [OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.3.4-202610120606/OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip) |
+| Đối chiếu SHA256 | [SHA256SUMS.txt](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.3.4-202610120606/SHA256SUMS.txt) |
 
-Mỗi dòng là một nhóm lớn. Nhấn tên nhóm để xem từng lệnh, phạm vi hỗ trợ và giới hạn.
+Bản **Source code** dùng cho phát triển; cài OM9 bằng ZIP **SetupLauncher** ở trên. Bản phát hành này được đánh dấu **Pre-release**.
 
-| STT | Nhóm chức năng lớn | Hoàn thành phạm vi hiện tại / Tổng | Tỷ lệ | Một phần | Chưa hoàn thành |
-|---:|---|---:|---:|---:|---:|
-| 1 | [Thao tác nhanh (Quick tools)](README.md#quick-tools--thao-tác-nhanh) | **3/11** | 27.3% | 0 | 8 |
-| 2 | [Tệp (File)](README.md#file) | **5/13** | 38.5% | 0 | 8 |
-| 3 | [Khung nhìn (View)](README.md#view) | **10/15** | 66.7% | 0 | 5 |
-| 4 | [Tiện ích (Utilities)](README.md#utilities) | **0/22** | 0.0% | 0 | 22 |
-| 5 | [Đo lường (Measure)](README.md#measure) | **2/17** | 11.8% | 0 | 15 |
-| 6 | [Đường cong (Curve)](README.md#curve) | **7/58** | 12.1% | 0 | 51 |
-| 7 | [Bề mặt (Surface)](README.md#surface) | **3/40** | 7.5% | 0 | 37 |
-| 8 | [Khối đặc (Solid)](README.md#solid) | **6/30** | 20.0% | 0 | 24 |
-| 9 | [Biến đổi (Transform)](README.md#transform) | **0/40** | 0.0% | 0 | 40 |
-| 10 | [Clayoo / SubD](README.md#clayoo--subd) | **0/58** | 0.0% | 0 | 58 |
-| 11 | [Chạm nổi (Emboss)](README.md#emboss) | **0/7** | 0.0% | 0 | 7 |
-| 12 | [Bộ dựng (Builder)](README.md#builder) | **0/16** | 0.0% | 0 | 16 |
-| 13 | [Công cụ trang sức (Tools)](README.md#tools) | **1/31** | 3.2% | 0 | 30 |
-| 14 | [Đá quý (Gems)](README.md#gems) | **0/35** | 0.0% | 0 | 35 |
-| 15 | [Ổ đá và chấu (Settings)](README.md#settings--ổ-đá-và-chấu) | **0/12** | 0.0% | 0 | 12 |
-| 16 | [Công cụ cắt (Cutters)](README.md#cutters) | **0/11** | 0.0% | 0 | 11 |
-| 17 | [Kết xuất (Render)](README.md#render) | **0/23** | 0.0% | 0 | 23 |
-| 18 | [Lõi / dự án / chọn đối tượng](README.md#core--project--selection) | **5/11** | 45.5% | 0 | 6 |
-| 19 | [Khung nhìn và hiển thị bổ sung](README.md#view-và-display-bổ-sung) | **10/22** | 45.5% | 0 | 12 |
-| 20 | [Bắt điểm / ràng buộc](README.md#snap--ràng-buộc) | **4/17** | 23.5% | 0 | 13 |
-| 21 | [Thuộc tính / lịch sử / thiết lập / lớp](README.md#properties--history--settings--layers) | **7/26** | 26.9% | 0 | 19 |
-| 22 | [Lệnh 3DM chuyên biệt / bàn phím](README.md#3dm-chuyên-biệt--keyboard) | **1/3** | 33.3% | 2 | 0 |
+### 3. Cài bằng launcher
 
+1. Nhấp phải ZIP **SetupLauncher** → **Extract All / Giải nén tất cả**.
+   Giải nén toàn bộ trước khi mở launcher.
+2. Trong thư mục đã giải nén, giữ **`OpenMatrix9`**, **`launcher-manifest.json`**
+   và các file **`Start-OM9`** cùng nhau.
+3. Nhấp đúp **`Start-OM9.cmd`**.
+4. Launcher cài OM9 vào `%APPDATA%\FreeCAD\v1-1\Mod\OpenMatrix9`, tạo icon
+   **OpenMatrix9** trên **Desktop** và **Start Menu**, rồi mở workbench.
+5. Những lần sau, mở bằng icon **OpenMatrix9**. Sau khi cài thành công, bạn có
+   thể bỏ thư mục ZIP đã giải nén; plugin đã được cài trong AppData.
 
-Join/Surface History policy native và Explode adapters đã kiểm chứng supported slice trên SDK; xem hợp đồng [History](docs/features/history-native-contract.md) và [Edit](docs/features/edit-native-contract.md).
+OM9 được cài trong thư mục người dùng; không cần chạy launcher hoặc FreeCAD bằng
+quyền Administrator. Nếu launcher báo plugin đang được dùng, lưu và đóng FreeCAD
+rồi chạy lại; launcher giữ ứng dụng đang mở của bạn.
 
-<a id="supported-workflows"></a>
-## Chức năng đang sử dụng được
+### 4. Mở và kiểm tra lần đầu
 
-- **Dự án và giao diện:** New, Open, Save, Save As, Notes, Undo/Redo, chọn/xóa
-  đối tượng, bốn viewport, các view cơ bản, zoom, ảnh tham chiếu và menu F6.
-- **Đường cong:** Line, Polyline, Interp Curve, Rebuild, Rectangle, Circle và Ellipse
-  trong phạm vi được ghi tại [tài liệu chức năng](docs/features/).
-- **Bề mặt và khối:** Sweep1, Sweep2, Loft, Box, Sphere và bốn lệnh Boolean;
-  xem [trạng thái triển khai](OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md).
-- **Chỉnh sửa và đo:** Trim, Join, Explode, Distance, Angle; bắt điểm End,
-  Point, Midpoint và ràng buộc Ortho trong các công cụ được hỗ trợ.
+1. Mở **OpenMatrix9** bằng icon đã tạo, hoặc mở FreeCAD 1.1.4 và chọn
+   **OpenMatrix9** trong danh sách workbench.
+2. Tạo tài liệu mới bằng **File → New**.
+3. Chọn **Line**, đặt hai điểm, rồi thử **Undo** và **Redo**.
+4. Kiểm tra sidebar, vùng **Command**, viewport và bảng **Layers**.
+   Các mục menu bị vô hiệu hóa là chức năng đang được phát triển.
+5. Lưu thử dự án `.FCStd`. Hoàn tất hoặc hủy lệnh vẽ trước khi chuyển tài liệu.
 
-Các nhánh nâng cao, History liên kết, lớp và những adapter đặc biệt còn giới
-hạn riêng. Xem [hợp đồng Edit](docs/features/edit-native-contract.md) và
-[các báo cáo kiểm chứng](docs/validation/) trước khi dựa vào một tùy chọn cụ thể.
+Để xác nhận đúng plugin, mở **View → Panels → Python console**, nhập:
 
-<a id="three-dm"></a>
-## Tương thích Rhino 3DM / openNURBS
-
-Import/export 3DM đang được triển khai một phần. Phạm vi hiện có gồm chuyển đổi
-points/curves, surface/BRep và mesh được hỗ trợ, metadata hình học cơ bản,
-snapshot nguồn trong FCStd và xuất hình học nhắm archive Rhino 5.
-
-Giữ dữ liệu trong snapshot không đồng nghĩa đã hiển thị, chỉnh sửa hoặc xuất lại
-đầy đủ. Structural block preservation, materials/textures, annotation và
-History/plugin userdata còn giới hạn. Xem phần trao đổi 3DM trong
-[README chi tiết](README.md) để đối chiếu phạm vi nâng cao đã hỗ trợ,
-bằng chứng ứng dụng Rhino 5 riêng và các phần còn thiếu.
-
-<a id="build"></a>
-## Build và cài đặt
-
-Đọc [hướng dẫn Windows](docs/build-windows.md) để chọn build FreeCAD cùng OM9,
-build OM9 riêng với SDK, hoặc dùng binary tương thích với bản FreeCAD đã cài.
-Module cần SDK/ABI khớp; chỉ clone vào `Mod` chưa đủ để sử dụng.
-
-Baseline tài liệu là Windows x64, MSVC và Qt6, với Rust hỗ trợ edition 2024,
-CMake, Python và dependencies của đúng FreeCAD SDK. Linux/macOS chưa được
-kiểm chứng cho module này. Chi tiết tích hợp: [build và validation](docs/build.md).
-
-<a id="checks"></a>
-## Kiểm tra
-
-Chạy tại thư mục OpenMatrix9, trong môi trường build tương ứng:
-
-```powershell
-cargo test --manifest-path rust/Cargo.toml
-python -m unittest discover -s tools/tests
-python tools/public_source_audit.py
+```python
+import OpenMatrix9Gui
+print(OpenMatrix9Gui.__file__)
 ```
 
-Các macro native và cách chọn executable/dependencies được mô tả trong
-[hướng dẫn kiểm tra](docs/build.md). Số test đã qua xác nhận phạm vi kiểm thử,
-không thay thế số chức năng hoàn thành. Workspace hiện còn artifact tham chiếu
-riêng được source audit ghi nhận; xem kết quả audit và hồ sơ tiến độ trước khi phát hành.
+Với cách cài trên, đường dẫn phải trỏ tới `v1-1\Mod\OpenMatrix9\bin\OpenMatrix9Gui.pyd`.
 
-<a id="documentation"></a>
-## Tài liệu và cập nhật tiến độ
+### 5. Cập nhật, khôi phục và gỡ cài đặt
 
-- [README chi tiết](README.md): từng mã catalog, ý nghĩa, trạng thái và giới hạn.
-- [Ledger tiến độ](docs/openmatrix9-progress.json): bằng chứng, lần chạy test,
-  phần chưa kiểm chứng và bước tiếp theo.
-- [Chỉ mục Spec v1](OpenMatrix9_Codex_Spec_v1/INDEX.md): tra cứu feature theo nhóm và ID.
-- [Báo cáo native](docs/validation/): phạm vi kiểm chứng của từng đợt triển khai.
-- [Build Windows](docs/build-windows.md) và [build/validation](docs/build.md).
+- **Cập nhật:** tải SetupLauncher của Release mới, giải nén toàn bộ, lưu và đóng
+  FreeCAD, rồi chạy `Start-OM9.cmd`. Launcher báo bản mới ở nền nhưng việc tải và
+  cài vẫn do bạn chủ động thực hiện.
+- **Bản sao cũ:** launcher lưu trong `%APPDATA%\FreeCAD\v1-1\OM9-backups`.
+  Khi cần khôi phục, đóng FreeCAD, chuyển plugin hiện tại ra ngoài `Mod`, rồi đặt
+  bản sao đã chọn trở lại `Mod\OpenMatrix9`, giữ đúng tên thư mục `OpenMatrix9`.
+- **Log launcher:** `%APPDATA%\FreeCAD\v1-1\OM9-launcher`.
+- **Gỡ plugin:** đóng FreeCAD và chuyển `OpenMatrix9` ra ngoài `Mod`.
+  Nếu đã dùng launcher, bỏ các shortcut OM9 khi không còn dùng launcher.
+  Các dự án `.FCStd` bạn đã lưu vẫn được giữ.
 
-Sau khi triển khai và kiểm tra một chức năng, cập nhật ledger, spec liên quan
-và bảng chi tiết trong `README.md`; sau đó đồng bộ số liệu, ngày và giới hạn
-trong cả `README.vi.md` và `README.en.md`. Giữ cùng đơn vị đếm và cùng trạng thái
-ở hai bản; không nâng trạng thái chỉ vì có icon, tên lệnh hoặc test validator.
+### 6. Kiểm tra file tải về và lỗi thường gặp
 
-<a id="support-license"></a>
+Tải `SHA256SUMS.txt` từ cùng Release. Trong PowerShell tại thư mục Downloads:
+
+```powershell
+Get-FileHash -LiteralPath '.\OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip' -Algorithm SHA256
+Get-Content -LiteralPath '.\SHA256SUMS.txt'
+```
+
+So giá trị `Hash` với dòng đúng tên ZIP trong `SHA256SUMS.txt`.
+
+| Hiện tượng | Cách kiểm tra |
+|---|---|
+| Không thấy OpenMatrix9 | Kiểm tra FreeCAD 1.1.4, `v1-1\Mod`, `InitGui.py`, rồi khởi động lại. |
+| `No module named OpenMatrix9Gui` | Chạy lại `Start-OM9.cmd` từ gói SetupLauncher đã giải nén đầy đủ. |
+| `DLL load failed` | Dùng gói Windows x64 đúng FreeCAD 1.1.4; lấy thông báo từ **Report view**. |
+| Thiếu icon hoặc menu | Kiểm tra thư mục `Resources` và giữ toàn bộ nội dung của gói. |
+| `3DM import worker is missing` | Kiểm tra `bin\OM9ThreeDmImportWorker.exe`; giải nén lại từ cùng ZIP nếu thiếu. |
+| Launcher không cài | Giữ `OpenMatrix9`, manifest và các file Start-OM9 cùng nhau; xem log ở bước 5. |
+| Cập nhật báo file đang dùng | Lưu và đóng FreeCAD đang dùng OM9, rồi chạy lại launcher. |
+
+Mở **View → Panels → Report view** để đọc lỗi. Khi báo lỗi, gửi phiên bản FreeCAD,
+tên ZIP và thông báo trong panel. Giữ plugin và host đúng bản; không chép DLL từ
+một phiên bản FreeCAD khác để chữa lỗi tải module.
+
+**Dành cho phát triển:** [build riêng OM9 với SDK chung](docs/build-windows.md).
+
+<a id="progress"></a>
+## Tiến độ
+
+**Đang làm:** Core/History — vòng đời đối tượng, rollback và giới hạn tài nguyên.
+
+```mermaid
+flowchart LR
+    A["Core & History<br/>Đang phát triển"] --> B["CAD & 3DM<br/>Có phạm vi hỗ trợ"]
+    B --> C["Builders & Gems<br/>Chưa hoàn tất"]
+    classDef active fill:#e8f2ff,stroke:#2563eb,color:#17376b
+    classDef available fill:#e6f6ef,stroke:#20845c,color:#14543b
+    classDef planned fill:#f3f4f6,stroke:#9ca3af,color:#4b5563
+    class A active
+    class B available
+    class C planned
+```
+
+**Snapshot workspace: 2026-10-12.** Đếm phạm vi hỗ trợ đã kiểm chứng, không xác nhận
+toàn bộ feature. Một mã có thể xuất hiện ở nhiều nhóm. Phạm vi binary xem Release.
+
+| Nhóm | Đã làm / Tổng | Tiến độ |
+|---|---:|---|
+| [Thao tác nhanh](docs/releases/2026-10-12-development.md#quick-tools--thao-tác-nhanh) | **3/11** | ▰▰▰▱▱▱▱▱▱▱ 27.3% |
+| [Tệp](docs/releases/2026-10-12-development.md#file) | **5/13** | ▰▰▰▰▱▱▱▱▱▱ 38.5% |
+| [Khung nhìn](docs/releases/2026-10-12-development.md#view) | **10/15** | ▰▰▰▰▰▰▰▱▱▱ 66.7% |
+| [Tiện ích](docs/releases/2026-10-12-development.md#utilities) | **0/22** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Đo lường](docs/releases/2026-10-12-development.md#measure) | **2/17** | ▰▱▱▱▱▱▱▱▱▱ 11.8% |
+| [Đường cong](docs/releases/2026-10-12-development.md#curve) | **7/58** | ▰▱▱▱▱▱▱▱▱▱ 12.1% |
+| [Bề mặt](docs/releases/2026-10-12-development.md#surface) | **3/40** | ▰▱▱▱▱▱▱▱▱▱ 7.5% |
+| [Khối đặc](docs/releases/2026-10-12-development.md#solid) | **6/30** | ▰▰▱▱▱▱▱▱▱▱ 20.0% |
+| [Biến đổi](docs/releases/2026-10-12-development.md#transform) | **0/41** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Clayoo / SubD](docs/releases/2026-10-12-development.md#clayoo--subd) | **0/58** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Chạm nổi](docs/releases/2026-10-12-development.md#emboss) | **0/7** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Bộ dựng](docs/releases/2026-10-12-development.md#builder) | **0/16** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Công cụ trang sức](docs/releases/2026-10-12-development.md#tools) | **1/31** | ▱▱▱▱▱▱▱▱▱▱ 3.2% |
+| [Đá quý](docs/releases/2026-10-12-development.md#gems) | **0/35** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Ổ đá và chấu](docs/releases/2026-10-12-development.md#settings--ổ-đá-và-chấu) | **0/12** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Công cụ cắt](docs/releases/2026-10-12-development.md#cutters) | **0/11** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Kết xuất](docs/releases/2026-10-12-development.md#render) | **0/23** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Lõi / dự án / chọn](docs/releases/2026-10-12-development.md#core--project--selection) | **5/11** | ▰▰▰▰▰▱▱▱▱▱ 45.5% |
+| [Hiển thị bổ sung](docs/releases/2026-10-12-development.md#view-và-display-bổ-sung) | **10/22** | ▰▰▰▰▰▱▱▱▱▱ 45.5% |
+| [Bắt điểm / ràng buộc](docs/releases/2026-10-12-development.md#snap--ràng-buộc) | **4/17** | ▰▰▱▱▱▱▱▱▱▱ 23.5% |
+| [Thuộc tính / lịch sử / lớp](docs/releases/2026-10-12-development.md#properties--history--settings--layers) | **7/26** | ▰▰▰▱▱▱▱▱▱▱ 26.9% |
+| [3DM / bàn phím](docs/releases/2026-10-12-development.md#3dm-chuyên-biệt--keyboard) | **1/3** | ▰▰▰▱▱▱▱▱▱▱ 33.3% |
+
+<a id="release-notes"></a>
+## Release notes
+
+- [Release 0.3.4-202610120606](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.4-202610120606): thay đổi, gói tải xuống và giới hạn của bản phát hành.
+- [Checkpoint phát triển](docs/releases/2026-10-12-development.md): bảng từng lệnh, lịch sử và bằng chứng đã chuyển từ README.
+- [Ledger](docs/openmatrix9-progress.json) · [Báo cáo native](docs/validation/) · [Spec](OpenMatrix9_Codex_Spec_v1/INDEX.md).
+
+<a id="license"></a>
 ## Giấy phép
 
-Dự án khai báo **LGPL-2.1-or-later**: xem [LICENSE](LICENSE) và
-[thông báo bên thứ ba](THIRD_PARTY_NOTICES.md). OpenMatrix9 là dự án độc lập;
-không tuyên bố liên kết với nhà cung cấp Matrix9, phát triển clean-room hoặc
-đã được xác nhận pháp lý cho việc triển khai. Bối cảnh nguồn và publication
-audit được ghi trong [README chi tiết](README.md) và
-[source review](docs/public-source-review.md).
+[LGPL-2.1-or-later](LICENSE) · [Thông báo bên thứ ba](THIRD_PARTY_NOTICES.md).
+OpenMatrix9 là dự án độc lập, dùng Matrix9 làm tham chiếu chức năng; không tuyên bố
+liên kết nhà cung cấp, clean-room hoặc xác nhận pháp lý. [Bối cảnh nguồn](docs/public-source-review.md).
