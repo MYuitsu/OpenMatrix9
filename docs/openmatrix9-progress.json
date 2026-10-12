@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T13:31:55+07:00",
+  "updated_at": "2026-10-12T08:45:37.466491+00:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
-  "active_item": null,
+  "active_item": "launcher-startup-update",
   "items": [
     {
       "key": "public-source-snapshot",
@@ -2670,6 +2670,45 @@
       "stock_ci_status": "build_only_action_authoritative",
       "next_document": "docs/validation/2026-10-12-gumball-main-release.md",
       "next_action": "Push reviewed merge on main; publish matching version tag; verify actual Action ZIPs and public Release digests separately."
+    },
+    {
+      "key": "launcher-startup-update",
+      "stage": "build-validation",
+      "feature_ids": [],
+      "procedure_va": null,
+      "status": "validated",
+      "outputs": [
+        "launcher/Start-OM9.ps1",
+        ".github/workflows/launcher-windows.yml",
+        "tools/ci/package-launcher-only.ps1",
+        "docs/validation/2026-10-12-startup-update.json",
+        "skills/openmatrix9-workflow/SKILL.md",
+        "docs/validation/2026-10-12-startup-update-skill.md"
+      ],
+      "evidence": [
+        "Human approved startup-only check and Update download/install on 2026-10-12.",
+        "Hosted CI https://github.com/MYuitsu/OpenMatrix9/actions/runs/38222547986; strict source/workflow/ref/commit and GitHub-hosted provenance verified.",
+        "80 PowerShell installer/update/auto-update checks; 8 packaging and 11 public audit tests pass; 6 live GitHub/FreeCAD reopen checks and 21 downloaded-CI launcher checks pass.",
+        "2026-10-12 human approved saving startup-only/automatic install/save-close/rollback business contract in workflow skill; source and installed added sections match, both quick_validate pass, five baseline gaps resolved in independent forward pressure scenarios."
+      ],
+      "tests": [
+        {
+          "command": "powershell -File tools/tests/launcher-auto-update-tests.ps1",
+          "result": "24 passed including real Update/Cancel/wait/apply UI"
+        },
+        {
+          "command": "python -m unittest discover -s tools/tests",
+          "result": "113 tests; 37 historical failures, 5 errors, named in validation receipt"
+        }
+      ],
+      "uncertainties": [
+        "Existing published releases are unchanged; new launcher requires one-time installation.",
+        "Native payload reused from the exact public 0.3.4-202610120606 release; original build_only validation is preserved, not promoted to a complete CAD regression.",
+        "installed means atomic install and restart dispatch; application startup is verified by start-*.json.",
+        "Full Python tooling retains 37 historical failures and 5 errors; scoped launcher/release CI checks pass."
+      ],
+      "next_document": "launcher/README.md",
+      "next_action": "Install verified r2 bundle once; future release builds include this startup-only updater. No feature catalog IDs promoted for infrastructure."
     }
   ],
   "merge_context": {

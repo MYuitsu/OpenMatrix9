@@ -1,0 +1,259 @@
+{
+  "updated_at": "2026-10-12T08:23:49.812659+00:00",
+  "scope": "Startup-only release checking and user-triggered automatic download/install/reopen",
+  "ci": {
+    "ok": true,
+    "run": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/38222547986",
+    "source_commit": "8c9232461b75f206108f8d9fbcab4252f8490df1",
+    "archive": "C:\\Users\\nguye\\.codex\\OM9Validation\\startup-update-20261012\\ci-artifact\\om9-launcher-package\\OpenMatrix9-0.3.4-202610120606-SetupLauncher-r2-Windows-x64.zip",
+    "sha256": "ff0cfe46b9fcd1f14c096dc462789e1f988b2a3869207d893e12f7f491ff7ebb",
+    "provenance_verified": true,
+    "ci_checks": [
+      {
+        "path": "launcher-update-tests\\2b0c181615c44fd6ae6fe6964a50faca\\results.json",
+        "checks": 29
+      },
+      {
+        "path": "launcher-tests\\1b8726b729ef40ba93f8b9a6b71f924c\\results.json",
+        "checks": 27
+      },
+      {
+        "path": "launcher-auto-update-tests\\2b998c59dd8244b88d6dab3d06976695\\results.json",
+        "checks": 24
+      }
+    ]
+  },
+  "live_update": {
+    "release": {
+      "version": "0.3.4-202610120606",
+      "revision": 1,
+      "prerelease": true,
+      "release_url": "https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.4-202610120606",
+      "download_url": "https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.3.4-202610120606/OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip",
+      "checksum_url": "https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.3.4-202610120606/SHA256SUMS.txt",
+      "asset_name": "OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip",
+      "digest": "sha256:aaacc3e17798a0eb6b0d5c8618d3f75918a03200245a58b20d5bedbc31c80ced",
+      "key": "0.3.4-202610120606/r1"
+    },
+    "ok": true,
+    "startup": {
+      "ok": true,
+      "workbench": "OpenMatrix9Workbench",
+      "module": "C:\\Users\\nguye\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Local\\OM9Validation\\startup-update-20261012\\live\\b305c804f1a5466984bd701fdacea3e3\\profile\\v1-1\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+      "version": [
+        "1",
+        "1",
+        "4",
+        "20260928 (Git shallow)",
+        "Unknown",
+        "2026/09/28 13:46:34",
+        "(HEAD detached at 4fd3bf320)",
+        "4fd3bf320d9566a27e60069fc8387448aaa3a094"
+      ],
+      "user_data": "C:\\Users\\nguye\\AppData\\Local\\OM9Validation\\startup-update-20261012\\live\\b305c804f1a5466984bd701fdacea3e3\\profile\\v1-1\\"
+    },
+    "checks": [
+      {
+        "name": "GitHub startup query finds an official newer release with checksum",
+        "passed": true
+      },
+      {
+        "name": "actual Update button offers automatic download",
+        "passed": true
+      },
+      {
+        "name": "public HTTPS archive downloads verifies and installs automatically",
+        "passed": true
+      },
+      {
+        "name": "automatic updater starts real FreeCAD after installing",
+        "passed": true
+      },
+      {
+        "name": "reopened application activates OM9 from the isolated updated profile",
+        "passed": true
+      },
+      {
+        "name": "reopened host uses official FreeCAD 1.1.4",
+        "passed": true
+      }
+    ],
+    "receipt": {
+      "status": "installed",
+      "version": "0.3.4-202610120606",
+      "revision": 1,
+      "backup": null
+    }
+  },
+  "downloaded_ci_launcher": {
+    "ok": true,
+    "update_status": "current",
+    "checks": [
+      {
+        "name": "actual GUI activates OM9 workbench",
+        "passed": true
+      },
+      {
+        "name": "actual host version remains 1.1.4",
+        "passed": true
+      },
+      {
+        "name": "module loads from installed isolated user directory",
+        "passed": true
+      },
+      {
+        "name": "icon shortcut is created",
+        "passed": true
+      },
+      {
+        "name": "shortcut points to persistent installed launcher",
+        "passed": true
+      },
+      {
+        "name": "shortcut has OM9 icon",
+        "passed": true
+      },
+      {
+        "name": "Start Menu icon shortcut is created",
+        "passed": true
+      },
+      {
+        "name": "Start Menu and Desktop target the same cached launcher",
+        "passed": true
+      },
+      {
+        "name": "Windows decodes the ICO image",
+        "passed": true
+      },
+      {
+        "name": "installed native hash matches package",
+        "passed": true
+      },
+      {
+        "name": "actual GUI activates OM9 workbench",
+        "passed": true
+      },
+      {
+        "name": "actual host version remains 1.1.4",
+        "passed": true
+      },
+      {
+        "name": "module loads from installed isolated user directory",
+        "passed": true
+      },
+      {
+        "name": "actual GUI activates OM9 workbench",
+        "passed": true
+      },
+      {
+        "name": "actual host version remains 1.1.4",
+        "passed": true
+      },
+      {
+        "name": "module loads from installed isolated user directory",
+        "passed": true
+      },
+      {
+        "name": "rerunning extracted bundle does not recopy unchanged plugin",
+        "passed": true
+      },
+      {
+        "name": "automatic background update check completes without interrupting GUI",
+        "passed": true
+      },
+      {
+        "name": "actual GUI activates OM9 workbench",
+        "passed": true
+      },
+      {
+        "name": "actual host version remains 1.1.4",
+        "passed": true
+      },
+      {
+        "name": "module loads from installed isolated user directory",
+        "passed": true
+      }
+    ],
+    "startup": [
+      {
+        "workbench": "OpenMatrix9Workbench",
+        "module": "C:\\Users\\nguye\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Local\\OM9Validation\\startup-update-20261012\\native-b3afefeb4cf44c50aa3d41ea883e4ad1\\profile\\v1-1\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+        "report": "C:\\Users\\nguye\\AppData\\Local\\OM9Validation\\startup-update-20261012\\native-b3afefeb4cf44c50aa3d41ea883e4ad1\\profile\\v1-1\\OM9-launcher\\start-a3ecd38aadce4c3e9f5c7d70831e5deb.json"
+      },
+      {
+        "workbench": "OpenMatrix9Workbench",
+        "module": "C:\\Users\\nguye\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Local\\OM9Validation\\startup-update-20261012\\native-b3afefeb4cf44c50aa3d41ea883e4ad1\\profile\\v1-1\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+        "report": "C:\\Users\\nguye\\AppData\\Local\\OM9Validation\\startup-update-20261012\\native-b3afefeb4cf44c50aa3d41ea883e4ad1\\profile\\v1-1\\OM9-launcher\\start-5721cf8bfaf142259cd456a54c6d78fe.json"
+      },
+      {
+        "workbench": "OpenMatrix9Workbench",
+        "module": "C:\\Users\\nguye\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Local\\OM9Validation\\startup-update-20261012\\native-b3afefeb4cf44c50aa3d41ea883e4ad1\\profile\\v1-1\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+        "report": "C:\\Users\\nguye\\AppData\\Local\\OM9Validation\\startup-update-20261012\\native-b3afefeb4cf44c50aa3d41ea883e4ad1\\profile\\v1-1\\OM9-launcher\\start-b058d8acb9db41a4bac91a97a2bf4d4f.json"
+      },
+      {
+        "workbench": "OpenMatrix9Workbench",
+        "module": "C:\\Users\\nguye\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Local\\OM9Validation\\startup-update-20261012\\native-b3afefeb4cf44c50aa3d41ea883e4ad1\\profile\\v1-1\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+        "report": "C:\\Users\\nguye\\AppData\\Local\\OM9Validation\\startup-update-20261012\\native-b3afefeb4cf44c50aa3d41ea883e4ad1\\profile\\v1-1\\OM9-launcher\\start-8c46db0f94e8423e8e66898c1da0cfa5.json"
+      }
+    ],
+    "output": "C:\\Users\\nguye\\AppData\\Local\\OM9Validation\\startup-update-20261012\\native-b3afefeb4cf44c50aa3d41ea883e4ad1"
+  },
+  "launcher_sha256": "b144029f9a59220f3fe2dee9d578ec7683ac9a00bf07a4c21efc5bf48ae3e8e5",
+  "broader_tooling": {
+    "tests": 113,
+    "failures": 37,
+    "errors": 5,
+    "failed_test_names": [
+      "test_builder_icons.BuilderExportTests.test_redraw_wins_over_legacy_images",
+      "test_curve_icons.CurveIconExportTests.test_curve_svg_survives_reexport_with_legacy_images_enabled",
+      "test_cutters_icons.CuttersExportTests.test_authored_cutters_precede_legacy_png (key='BuilderGemCutter')",
+      "test_cutters_icons.CuttersExportTests.test_authored_cutters_precede_legacy_png (key='BuilderChannelBuilder')",
+      "test_cutters_icons.CuttersExportTests.test_authored_cutters_precede_legacy_png (key='BuilderMicroProngCutter')",
+      "test_cutters_icons.CuttersExportTests.test_authored_cutters_precede_legacy_png (key='BuilderQuadFlip')",
+      "test_emboss_icons.EmbossExportTests.test_redraw_wins_over_legacy_images",
+      "test_gems_icons.GemsExportTests.test_authored_gems_and_special_accents_precede_legacy_png (key='BuilderGemLoader')",
+      "test_gems_icons.GemsExportTests.test_authored_gems_and_special_accents_precede_legacy_png (key='BuilderGemOnCrv')",
+      "test_gems_icons.GemsExportTests.test_authored_gems_and_special_accents_precede_legacy_png (key='BuilderCustomGem')",
+      "test_gems_icons.GemsExportTests.test_authored_gems_and_special_accents_precede_legacy_png (key='BuilderGemMap')",
+      "test_gems_icons.GemsExportTests.test_authored_gems_and_special_accents_precede_legacy_png (key='OthersSaveStyle')",
+      "test_render_icons.RenderExportTests.test_render_color_roles_precede_legacy_png (key='BuilderRenderEditor')",
+      "test_render_icons.RenderExportTests.test_render_color_roles_precede_legacy_png (key='RenderCreatePointLight')",
+      "test_render_icons.RenderExportTests.test_render_color_roles_precede_legacy_png (key='AnalyzeSurfaceEnvironmentMap')",
+      "test_render_icons.RenderExportTests.test_render_color_roles_precede_legacy_png (key='RenderSaveRenderWindowAs')",
+      "test_settings_icons.SettingsExportTests.test_setting_symbols_and_palette_precede_legacy_png (key='BuilderHead')",
+      "test_settings_icons.SettingsExportTests.test_setting_symbols_and_palette_precede_legacy_png (key='BuilderBezelCutter')",
+      "test_settings_icons.SettingsExportTests.test_setting_symbols_and_palette_precede_legacy_png (key='BuilderBeadOnCrv')",
+      "test_settings_icons.SettingsExportTests.test_setting_symbols_and_palette_precede_legacy_png (key='BuilderBezel')",
+      "test_skill_reference_index.ReferenceIndexTests.test_exact_feature_resolves_source_page_and_existing_spec",
+      "test_skill_reference_index.ReferenceIndexTests.test_search_keeps_subd_distinct_from_tsplines",
+      "test_skill_reference_index.ReferenceIndexTests.test_ui_route_does_not_require_full_ghidra_export",
+      "test_skill_reference_index.ReferenceIndexTests.test_unknown_feature_is_a_clear_error",
+      "test_solid_icons.SolidIconExportTests.test_solid_redraw_precedes_legacy_art_on_reexport",
+      "test_subd_icons.SubDExportTests.test_redraw_and_special_colors_win_over_legacy_images (key='ClayooEditDivide')",
+      "test_subd_icons.SubDExportTests.test_redraw_and_special_colors_win_over_legacy_images (key='ClayooEditCrease')",
+      "test_subd_icons.SubDExportTests.test_redraw_and_special_colors_win_over_legacy_images (key='ClayooSelectionSelectNaked')",
+      "test_subd_icons.SubDExportTests.test_redraw_and_special_colors_win_over_legacy_images (key='ClayooCreationFromTSplines')",
+      "test_subd_icons.SubDExportTests.test_shared_ring_artwork_remains_the_builder_asset",
+      "test_surface_icons.SurfaceExportTests.test_redraw_wins_over_legacy_images",
+      "test_tools_icons.ToolsExportTests.test_authored_tools_and_command_colors_win_over_legacy_png (key='BuilderRingRail')",
+      "test_tools_icons.ToolsExportTests.test_authored_tools_and_command_colors_win_over_legacy_png (key='gvSmartTarget')",
+      "test_tools_icons.ToolsExportTests.test_authored_tools_and_command_colors_win_over_legacy_png (key='BuilderImageTrace')",
+      "test_tools_icons.ToolsExportTests.test_authored_tools_and_command_colors_win_over_legacy_png (key='BuilderProfile')",
+      "test_tools_icons.ToolsExportTests.test_authored_tools_and_command_colors_win_over_legacy_png (key='gvJoinHistory')",
+      "test_transform_icons.TransformExportTests.test_redraw_wins_over_legacy_images"
+    ],
+    "error_test_names": [
+      "test_curved_exchange_evidence.CurvedEvidenceTests.test_actual_reports_bind_without_rewriting_failed_raw_comparison",
+      "test_curved_exchange_evidence.CurvedEvidenceTests.test_changed_numeric_measurement_is_rejected_even_when_passed_flag_true",
+      "test_curved_exchange_evidence.CurvedEvidenceTests.test_modified_saved_bytes_are_rejected",
+      "test_opennurbs_coverage.CoverageTests.test_actual_sdk_catalog_matches_runtime_without_promoting_exchange",
+      "setUpClass (test_rhino5_gui_mass_measurement.MassMeasurementTests)"
+    ]
+  },
+  "limits": [
+    "Existing published releases are unchanged; new launcher requires one-time installation.",
+    "Native payload reused from the exact public 0.3.4-202610120606 release; original build_only validation is preserved, not promoted to a complete CAD regression.",
+    "installed means atomic install and restart dispatch; application startup is verified by start-*.json.",
+    "Full Python tooling retains 37 historical failures and 5 errors; scoped launcher/release CI checks pass."
+  ]
+}

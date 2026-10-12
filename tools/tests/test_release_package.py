@@ -25,6 +25,7 @@ class ReleasePackageTests(unittest.TestCase):
             manifest=json.loads((root/'bundle/launcher-manifest.json').read_text())
             metadata=json.loads((ROOT/'release.json').read_text())
             self.assertEqual(manifest['version'],metadata['version'],'must package the selected source version')
+            self.assertEqual(manifest['launcher_revision'],metadata['launcher_revision'])
             suffix=f"-r{metadata['launcher_revision']}" if metadata['launcher_revision']>1 else ''
             archive=root/f"OpenMatrix9-{metadata['version']}-SetupLauncher{suffix}-Windows-x64.zip"
             self.assertTrue(archive.is_file(),'versioned name must be discoverable by the updater')

@@ -86,7 +86,9 @@ Với cách cài trên, đường dẫn phải trỏ tới `v1-1\Mod\OpenMatrix9
 
 ### 5. Cập nhật, khôi phục và gỡ cài đặt
 
-- **Cập nhật:** tải SetupLauncher của Release mới, giải nén toàn bộ, lưu và đóng
+**Launcher r2 mới:** chỉ kiểm tra GitHub khi mở OM9 bằng icon hoặc `Start-OM9.cmd`, không kiểm tra định kỳ. Nhấn **Update** để tự tải gói chính thức, kiểm tra checksum và cài. Nếu OM9 đang mở, lưu và đóng rồi bộ cập nhật tự cài và mở lại; không buộc đóng ứng dụng. **Later** cho phép cập nhật ở lần mở sau; **Cancel** giữ bản đang dùng. Các ZIP đã phát hành giữ launcher gốc; cần cài gói r2 mới một lần để có luồng này. Xem [hướng dẫn launcher](launcher/README.md).
+
+- **Cập nhật bằng gói tải thủ công:** tải SetupLauncher của Release mới, giải nén toàn bộ, lưu và đóng
   FreeCAD, rồi chạy `Start-OM9.cmd`. Launcher báo bản mới ở nền nhưng việc tải và
   cài vẫn do bạn chủ động thực hiện.
 - **Bản sao cũ:** launcher lưu trong `%APPDATA%\FreeCAD\v1-1\OM9-backups`.

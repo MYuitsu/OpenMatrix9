@@ -27,6 +27,8 @@ Support CAD, 3DM and jewelry tools. Contributions are voluntary. Thank you!
 <a id="installation"></a>
 ## Installation
 
+**New launcher r2:** checks GitHub only when opening OM9 through its icon or `Start-OM9.cmd`, once per launch. Click **Update** to download, verify and install automatically. Save and close OM9 when asked; the updater waits, installs and reopens the same host/profile. **Later** keeps the offer for the next launch; **Cancel** retains the installed version. There is no periodic monitoring. See [launcher instructions](launcher/README.md). Existing published ZIPs keep their original launcher; install the new r2 bundle once to enable automatic download/install.
+
 ### 1. Prepare FreeCAD
 
 The current release targets **Windows x64 and official FreeCAD 1.1.4**.
