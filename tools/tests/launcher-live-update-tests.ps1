@@ -33,7 +33,11 @@ try{
  }while([DateTime]::UtcNow -lt $deadline)
  Check 'automatic updater starts real FreeCAD after installing' ($reports.Count -gt 0)
  $startup=Get-Content -LiteralPath $reports[0].FullName -Raw|ConvertFrom-Json
- Check 'reopened application activates OM9 from the isolated updated profile' ($startup.ok -and $startup.workbench -eq 'OpenMatrix9Workbench' -and $startup.module.StartsWith($profile,[StringComparison]::OrdinalIgnoreCase))
+ $expectedData=(Join-Path $profile 'v1-1').TrimEnd('\','/')
+ $actualData=[IO.Path]::GetFullPath($startup.user_data).TrimEnd('\','/')
+ # Packaged Windows apps may resolve Local AppData into LocalCache. Match
+ # FreeCAD's selected profile plus installed bytes rather than that alias.
+ Check 'reopened application activates OM9 from the isolated updated profile' ($startup.ok -and $startup.workbench -eq 'OpenMatrix9Workbench' -and [string]::Equals($expectedData,$actualData,[StringComparison]::OrdinalIgnoreCase) -and (Get-OM9Hash $startup.module) -eq (Get-OM9Hash (Join-Path $profile 'v1-1/Mod/OpenMatrix9/bin/OpenMatrix9Gui.pyd')))
  Check 'reopened host uses official FreeCAD 1.1.4' (($startup.version[0..2] -join '.') -eq '1.1.4')
  @{ok=$true;checks=$checks;release=$update;receipt=$receipt;startup=$startup}|ConvertTo-Json -Depth 7|Set-Content (Join-Path $run 'results.json')
  Write-Output "Live Update + FreeCAD reopen PASS: $($checks.Count); $run"
