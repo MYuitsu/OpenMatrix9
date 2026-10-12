@@ -45,12 +45,23 @@ init_gui = module_root / 'InitGui.py'
 exec(compile(init_gui.read_bytes(), str(init_gui), 'exec'), dict(__name__='__main__', __file__=str(init_gui)))
 # A hidden Win32 launch can leave Qt's window unexposed while isVisible is true.
 # Expose the owned test window before fixtures take handle/viewport snapshots.
-from PySide6 import QtTest
+from PySide6 import QtTest, QtWidgets
 main_window = Gui.getMainWindow()
 main_window.hide()
-main_window.show()
+# Fixed FBO captures reuse geometry sized from the live viewport. Give the
+# owned fixture the same logical client size on local and hosted desktops;
+# keep QT_SCALE_FACTOR independent so the DPI cases still exercise Qt scaling.
+main_window.setFixedSize(1800, 1000)
+main_window.showNormal()
 if not QtTest.QTest.qWaitForWindowExposed(main_window, 5000):
     raise RuntimeError('The isolated native test window was never exposed')
+QtWidgets.QApplication.processEvents()
+fixture = dict(requested=[1800, 1000], actual=[main_window.width(), main_window.height()],
+               device_pixel_ratio=main_window.devicePixelRatioF(), exposed=main_window.windowHandle().isExposed())
+import json
+(Path(os.environ['OM9_SMOKE_OUTPUT']) / 'window-fixture.json').write_text(json.dumps(fixture), encoding='utf-8')
+if fixture['actual'] != fixture['requested'] or not fixture['exposed']:
+    raise RuntimeError('The isolated native fixture did not reach its requested client size')
 script = Path($macroLiteral)
 sys.path.insert(0, str(script.parent))
 exec(compile(script.read_bytes(), str(script), 'exec'), dict(__name__='__main__', __file__=str(script)))

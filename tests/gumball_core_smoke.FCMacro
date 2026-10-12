@@ -4,6 +4,7 @@ from pathlib import Path
 import FreeCAD as App,FreeCADGui as Gui,Part
 from PySide6 import QtCore,QtWidgets,QtTest,QtGui
 sys.path.insert(0,str(Path(__file__).parent));from gumball_capture import capture_view
+from gumball_fixture import GumballUI
 out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-020','OM9-INFO-022']}
 def check(name,value):
     report['checks'].append({'name':name,'passed':bool(value)})
@@ -40,8 +41,9 @@ def run():
                 elif c.blue()>220 and c.red()<100 and c.green()<150:pixels[2]+=1
         report['handle_color_pixels']=pixels
         check('rendered planar handles stay within a compact widget',all(20<n<2500 for n in pixels))
-        area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
-        viewport=next(w for w in area.activeSubWindow().widget().findChildren(QtWidgets.QWidget) if w.property('om9GumballViewport'))
+        # Capture/window exposure can leave Qt without an active MDI wrapper.
+        # Use the shared native source-slot lookup and retain its ancestor chain.
+        ui=GumballUI(native);viewport=ui.viewport
         h=next(h for h in handles if h['name']=='MoveX' and h['hit_verified'])
         QtTest.QTest.mouseClick(viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,QtCore.QPoint(h['x'],h['y']));events()
         check('pointer hit begins Rust gesture',native.gumballState()['phase']==2)

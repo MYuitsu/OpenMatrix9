@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T08:24:29+07:00",
+  "updated_at": "2026-10-12T09:32:13+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -2563,6 +2563,43 @@
       ],
       "next_document": "docs/validation/2026-10-12-gumball-stock-rendering.md",
       "next_action": "Push the reviewed candidate and verify the exact commit GitHub Action and packaged plugin/SetupLauncher artifacts."
+    },
+    {
+      "id": "gumball-ci-logical-window-fixture-20261012",
+      "date": "2026-10-12",
+      "status": "validated",
+      "scope": "approved_gumball_core_ci_fixture_repair",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "summary": "Controlled owned logical window geometry fixes desktop-dependent FBO magnification. The unchanged complete stock native suite passes at DPI100/150/200; production Gumball geometry and pixel bounds are unchanged.",
+      "evidence": [
+        "docs/validation/2026-10-12-gumball-ci-window-fixture.md"
+      ],
+      "tests": [
+        {
+          "command": "Small-window native core reproduction",
+          "result": "red: same compact-widget assertion at1024x726; green:68 checks at1800x1000"
+        },
+        {
+          "command": "tools/ci/run-gumball.ps1 against isolated official stock host",
+          "result": "pass;30 native processes/955 checks; recorded client geometry and actual DPI; one host/plugin"
+        },
+        {
+          "command": "Private exact-head Actions evidence inspector regressions",
+          "result": "15 guards pass; missing window metadata, wrong geometry/exposure/DPI are rejected"
+        }
+      ],
+      "native_processes": 30,
+      "native_checks": 955,
+      "suite_sha256": "eb8e76a4698e17e7ffccf895d6f510bc761af48bf6a3fba3b32858c054b679f1",
+      "plugin_sha256": "71f8431d71f6abfb36c45e9fd2a128f1d8f232368e2e5c1faf5dd3a6ff58b987",
+      "version_label": "0.3.4-202610120606",
+      "stock_ci_status": "exact_commit_action_authoritative",
+      "next_document": "docs/validation/2026-10-12-gumball-ci-window-fixture.md",
+      "next_action": "Verify the reviewed pushed commit through its actual GitHub Action, native evidence and both packaged ZIP files."
     }
   ],
   "merge_context": {
