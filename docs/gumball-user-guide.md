@@ -3,6 +3,13 @@
 Chọn object, gõ **`Gumball On`** ở Command rồi nhấn Enter. Gumball xuất hiện
 đồng thời ở cả bốn ô. Bạn có thể thao tác ngay ở bất kỳ ô nào.
 
+Muốn thao tác cả cụm, giữ **Shift** và click thêm object, hoặc kéo khung chọn
+quanh nhiều object. Cả selection dùng **một Gumball chung**; không cần tạo
+Group. Move dịch cả cụm, Rotate xoay cả cụm quanh tâm chung, Scale đổi cả kích
+thước object và khoảng cách tới tâm chung. Một Ctrl+Z hoàn tác cả thao tác.
+Ở Object Alignment, selection nhiều whole object dùng trục của CPlane active
+và tâm bounds của cả cụm; một object riêng vẫn dùng frame Object của nó.
+
 | Tay nắm | Thao tác |
 |---|---|
 | Mũi tên đỏ / xanh lá / xanh dương | Di chuyển theo X / Y / Z |

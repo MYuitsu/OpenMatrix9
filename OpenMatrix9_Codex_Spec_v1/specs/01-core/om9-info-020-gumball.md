@@ -69,6 +69,12 @@ nghiệm thu; implementation notes chỉ ghi phạm vi đã chạy được.
 6. Maximize rồi trở lại bốn ô giữ selection, frame và Enabled; không thay
    geometry, Undo hoặc camera ngoài thao tác view được yêu cầu. Đóng một ô
    dọn đúng overlay của nó; nếu đó là ô đang sở hữu gesture thì hủy gesture.
+7. Chọn nhiều whole object bằng Shift-click hoặc quét khung tạo **một Gumball
+   chung**, không cần Group/Compound. Pivot và Scale bounds bao cả selection;
+   Move/Scale/Rotate dùng cùng một affine transform quanh pivot đó cho mọi
+   owner, với một transaction Undo. Áp dụng policy multi-selection trong
+   `OM9-INFO-021` cả khi preference đang ở Object Alignment. Đổi/deselect
+   cụm không thừa hưởng relocated pivot của selection trước.
 
 ### Hình dáng và bố trí tay nắm
 
@@ -324,3 +330,10 @@ mapped in the [candidate report](../../../docs/validation/2026-10-12-gumball-cor
 - [x] [OM9-ANALYSIS](../../ENGINEERING_CONTRACTS.md#om9-analysis): N/A for a measurement/diagnostic command: no independent analysis output is created. Fixture geometry/volume checks validate transforms only.
 - [x] [OM9-TRANSFORM](../../ENGINEERING_CONTRACTS.md#om9-transform): Applicable: positive admitted owner transforms, exact affine result, Copy ownership and one atomic batch; final primitive/graph native gates passed. Final evidence: [exact30 native cohort](../../../docs/validation/2026-10-12-gumball-core-completion.md).
 - [x] Remaining engineering contracts have explicit N/A reasons in the candidate report; Camera/Light names do not certify a renderer.
+
+## Multi-selection regression — 2026-10-12
+
+- [x] Whole-object Shift/window selection, common frame/extents and MSR from all four views.
+- [x] One Undo/Redo batch, transient multi-selection Relocate and retained component guards.
+
+[Final local31/1099 evidence](../../../docs/validation/2026-10-12-gumball-multi-selection.md); new regression143 checks, Rust848 tests; CI build/package only.

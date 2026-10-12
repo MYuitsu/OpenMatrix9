@@ -10,6 +10,7 @@ $cases=@(
  @{name='commands';macro='gumball_commands_smoke.FCMacro'},
  @{name='ownership';macro='gumball_ownership_smoke.FCMacro'},
  @{name='review';macro='gumball_review_smoke.FCMacro'},
+ @{name='multi-selection';macro='gumball_multi_selection_smoke.FCMacro'},
  @{name='lifecycle';macro='gumball_lifecycle_smoke.FCMacro'},
  @{name='reentrancy';macro='gumball_reentrancy_smoke.FCMacro'},
  @{name='cancel-publication';macro='gumball_reentrancy_smoke.FCMacro';cancel='1'},

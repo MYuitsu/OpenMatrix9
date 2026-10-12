@@ -15,7 +15,7 @@ Menu native và typed CMD cùng Rust policy; default OM9 CPlane đã được du
 CPlane theo native viewport frame; World theo XYZ. Object dùng native Placement
 của một whole owner hoặc curve tangent / surface tangent-normal native.
 Wire/Shell/Compound đúng một child được unwrap, bounded 64 levels. Multiple
-owners không có frame duy nhất báo unresolved và giữ alignment trước.
+owners: baseline này từng reject Object frame; bản 0.3.5 dùng frame chung theo CPlane cho whole-object multi-selection, với tâm bounds của cả cụm. Component mơ hồ vẫn reject.
 Baseline 2026-10-11: Mesh/Points whole-owner dùng Placement; Native planar oriented Mesh Segment dùng actual world facet tangent/normal; Mesh edge/vertex, light/camera
 và mọi frame không có native adapter vẫn unsupported, không ngầm chọn World.
 Selected BRep Vertex hoặc component không có tangent/surface frame cũng báo
@@ -63,3 +63,7 @@ unchanged. Warm/cold native object and actual pointer gates passed;
 this does not claim renderer output or the host's live camera-widget parity.
 
 [Candidate fixture map, applicability and gate status](../validation/2026-10-12-gumball-core-release-candidate.md).
+
+## Multi-selection correction — 2026-10-12
+
+Shift/window whole-owner selection shares one Gumball; Object mode uses the construction basis and union-bounds center while retaining Object preference. MSR affects all owners around that common pivot. Single-owner/component frames and transaction protection remain intact. Multi-selection relocation does not persist after deselect. [143 regression checks and final31/1099 suite](../validation/2026-10-12-gumball-multi-selection.md).

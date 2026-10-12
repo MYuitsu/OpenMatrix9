@@ -2670,6 +2670,59 @@
       "stock_ci_status": "build_only_action_authoritative",
       "next_document": "docs/validation/2026-10-12-gumball-main-release.md",
       "next_action": "Push reviewed merge on main; publish matching version tag; verify actual Action ZIPs and public Release digests separately."
+    },
+    {
+      "id": "gumball-multi-selection-20261012",
+      "date": "2026-10-12",
+      "status": "validated",
+      "stage": "feature-port",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "scope": "whole_object_multi_selection_gumball",
+      "summary": "Whole-object Shift/window selection shares one Gumball in every view, including Object Alignment; common-pivot MSR, Undo/Redo and component protection verified.",
+      "evidence": [
+        "docs/validation/2026-10-12-gumball-multi-selection.md",
+        "docs/validation/2026-10-12-gumball-multi-selection.json"
+      ],
+      "outputs": [
+        "Gui/GumballFrame.cpp",
+        "Gui/GumballRust.h",
+        "rust/src/gumball.rs",
+        "rust/src/gumball_ffi.rs",
+        "rust/tests/gumball_ffi.rs",
+        "tests/gumball_geometry_smoke.FCMacro",
+        "tests/gumball_multi_selection_smoke.FCMacro",
+        "tools/ci/run-gumball.ps1"
+      ],
+      "tests": [
+        {
+          "command": "cargo test --locked",
+          "result": "848 passing tests"
+        },
+        {
+          "command": "tools/ci/run-gumball.ps1 (local only)",
+          "result": "31 processes / 1099 passing checks; multi-selection143"
+        }
+      ],
+      "native_processes": 31,
+      "native_checks": 1099,
+      "rust_tests": 848,
+      "plugin_sha256": "c013417b56abe9cc2613d88047161660fbb7957cba5aace3578889440aa1af33",
+      "host_sha256": "7b38c5d5aa2c74f830539c1c5c44cbf6e3e8e157292c718f9ee24ac6d3e12cf6",
+      "version_label": "0.3.5-202610121520",
+      "stock_ci_status": "build_only_action_authoritative",
+      "uncertainties": [
+        "Object multi-owner CPlane basis is an explicit OM9 policy, not Rhino internals certification.",
+        "Ambiguous/mixed components retain native UnsupportedFrame protection.",
+        "Local tests do not assert runtime execution of the distinct CI binary.",
+        "Known stock host save/transaction and unsupported graph limits remain as documented.",
+        "Existing Rust SourceAttributes::decode dead-code warning remains."
+      ],
+      "next_document": "docs/validation/2026-10-12-gumball-multi-selection.md",
+      "next_action": "Verify exact-source build-only Action packages and public Release, then install/launch the matching bundle."
     }
   ],
   "merge_context": {

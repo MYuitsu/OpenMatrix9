@@ -5,7 +5,7 @@ Bản thử nghiệm này dành cho **Windows x64, FreeCAD 1.1.4 chính thức**
 ## 1. Cài FreeCAD và mở OM9 bằng launcher
 
 1. Cài Windows x64 từ **[release FreeCAD 1.1.4 chính thức](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4)**, rồi mở FreeCAD một lần. Kiểm tra Help → About FreeCAD: **1.1.4**; tên thư mục có thể chỉ ghi `FreeCAD 1.1`.
-2. Mở **[trang Releases](https://github.com/MYuitsu/OpenMatrix9/releases)**. Chọn bản **0.3.4-202610120606**, mở **Assets** và tải **OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip**.
+2. Mở **[trang Releases](https://github.com/MYuitsu/OpenMatrix9/releases)**. Chọn bản **0.3.5-202610121520**, mở **Assets** và tải **OpenMatrix9-0.3.5-202610121520-SetupLauncher-Windows-x64.zip**.
 3. Giải nén ZIP SetupLauncher vào một thư mục. Giữ thư mục **OpenMatrix9**, **launcher-manifest.json** và các file **Start-OM9** cùng nhau, rồi bấm **Start-OM9.cmd**. Launcher đọc thư mục OpenMatrix9 đã giải nén.
 
 Launcher tự cài/cập nhật trong `%APPDATA%\FreeCAD\v1-1\Mod\OpenMatrix9`, tạo icon **OpenMatrix9** trên Desktop và Start Menu rồi mở workbench. Những lần sau dùng icon Desktop; không cần giữ thư mục giải nén. Không cần Administrator, source FreeCAD, Rust hay Visual Studio.
@@ -21,7 +21,7 @@ Ví dụ FreeCAD đã cài: `C:\Program Files\FreeCAD 1.1\bin\FreeCAD.exe`. Các
 ## 2. Tải OM9 và đặt đúng thư mục
 
 1. Đóng các cửa sổ FreeCAD trước khi thay plugin.
-2. Tải **OpenMatrix9-0.3.4-202610120606-FreeCAD-1.1.4-Windows-x64.zip** trong **Assets** ở [trang Releases](https://github.com/MYuitsu/OpenMatrix9/releases).
+2. Tải **OpenMatrix9-0.3.5-202610121520-FreeCAD-1.1.4-Windows-x64.zip** trong **Assets** ở [trang Releases](https://github.com/MYuitsu/OpenMatrix9/releases).
 3. Giải nén; bên trong có thư mục **OpenMatrix9**.
 4. Nhấn **Win + R**, dán `%APPDATA%\FreeCAD\v1-1\Mod` rồi Enter. Nếu chưa có thư mục này, tạo nó.
 5. Chép thư mục **OpenMatrix9** vào đó. Nếu đã có bản cũ, chuyển bản cũ ra ngoài thư mục `Mod` trước để có thể khôi phục.

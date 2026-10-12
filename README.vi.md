@@ -40,12 +40,12 @@ Bạn không cần source FreeCAD, Rust hoặc Visual Studio để cài và sử
 
 ### 2. Tải SetupLauncher
 
-Mở **[Release 0.3.4-202610120606](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.4-202610120606)**, bấm **Assets** và tải gói **SetupLauncher**:
+Mở **[Release 0.3.5-202610121520](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.5-202610121520)**, bấm **Assets** và tải gói **SetupLauncher**:
 
 | File | Tải xuống |
 |---|---|
-| **Launcher — khuyên dùng** | [OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.3.4-202610120606/OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip) |
-| Đối chiếu SHA256 | [SHA256SUMS.txt](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.3.4-202610120606/SHA256SUMS.txt) |
+| **Launcher — khuyên dùng** | [OpenMatrix9-0.3.5-202610121520-SetupLauncher-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.3.5-202610121520/OpenMatrix9-0.3.5-202610121520-SetupLauncher-Windows-x64.zip) |
+| Đối chiếu SHA256 | [SHA256SUMS.txt](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.3.5-202610121520/SHA256SUMS.txt) |
 
 Bản **Source code** dùng cho phát triển; cài OM9 bằng ZIP **SetupLauncher** ở trên. Bản phát hành này được đánh dấu **Pre-release**.
 
@@ -102,7 +102,7 @@ Với cách cài trên, đường dẫn phải trỏ tới `v1-1\Mod\OpenMatrix9
 Tải `SHA256SUMS.txt` từ cùng Release. Trong PowerShell tại thư mục Downloads:
 
 ```powershell
-Get-FileHash -LiteralPath '.\OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip' -Algorithm SHA256
+Get-FileHash -LiteralPath '.\OpenMatrix9-0.3.5-202610121520-SetupLauncher-Windows-x64.zip' -Algorithm SHA256
 Get-Content -LiteralPath '.\SHA256SUMS.txt'
 ```
 
@@ -126,6 +126,9 @@ một phiên bản FreeCAD khác để chữa lỗi tải module.
 
 <a id="progress"></a>
 ## Tiến độ
+
+**Gumball 0.3.5**: Giữ **Shift** rồi click thêm object hoặc kéo khung chọn để dùng một Gumball chung trong cả bốn view. Move, Scale và Rotate áp dụng quanh tâm cả cụm; một Undo hoàn tác cả thao tác. Đã kiểm tra tại máy: **848 test Rust**, **31 ca native / 1.099 kiểm tra**. [Bằng chứng](docs/validation/2026-10-12-gumball-multi-selection.md). GitHub Actions chỉ build và đóng gói.
+
 
 **Đang làm:** Core/History — vòng đời đối tượng, rollback và giới hạn tài nguyên.
 
@@ -172,7 +175,7 @@ toàn bộ feature. Một mã có thể xuất hiện ở nhiều nhóm. Phạm 
 <a id="release-notes"></a>
 ## Release notes
 
-- [Release 0.3.4-202610120606](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.4-202610120606): thay đổi, gói tải xuống và giới hạn của bản phát hành.
+- [Release 0.3.5-202610121520](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.5-202610121520): thay đổi, gói tải xuống và giới hạn của bản phát hành.
 - [Checkpoint phát triển](docs/releases/2026-10-12-development.md): bảng từng lệnh, lịch sử và bằng chứng đã chuyển từ README.
 - [Ledger](docs/openmatrix9-progress.json) · [Báo cáo native](docs/validation/) · [Spec](OpenMatrix9_Codex_Spec_v1/INDEX.md).
 

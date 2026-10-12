@@ -59,3 +59,7 @@ roll, complete snap parity and cold persistence of the widget are outside the
 approved scope.
 
 [Candidate fixture map, applicability and gate status](../validation/2026-10-12-gumball-core-release-candidate.md).
+
+## Multi-selection correction — 2026-10-12
+
+Shift/window whole-owner selection shares one Gumball; Object mode uses the construction basis and union-bounds center while retaining Object preference. MSR affects all owners around that common pivot. Single-owner/component frames and transaction protection remain intact. Multi-selection relocation does not persist after deselect. [143 regression checks and final31/1099 suite](../validation/2026-10-12-gumball-multi-selection.md).

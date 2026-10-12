@@ -5,7 +5,7 @@ This experimental package targets **Windows x64 and official FreeCAD 1.1.4**, wi
 ## Automatic installation and Desktop icon (recommended)
 
 1. Install the Windows x64 build from the **[official FreeCAD 1.1.4 release](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4)** and open FreeCAD once. Check Help → About FreeCAD for **1.1.4**; its folder may simply be named `FreeCAD 1.1`.
-2. Open the **[Releases page](https://github.com/MYuitsu/OpenMatrix9/releases)**. Find **0.3.4-202610120606**, expand **Assets**, and download **OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip**.
+2. Open the **[Releases page](https://github.com/MYuitsu/OpenMatrix9/releases)**. Find **0.3.5-202610121520**, expand **Assets**, and download **OpenMatrix9-0.3.5-202610121520-SetupLauncher-Windows-x64.zip**.
 3. Extract the SetupLauncher ZIP into a folder. Keep the bundled **OpenMatrix9** folder, **launcher-manifest.json** and **Start-OM9** files together, then double-click **Start-OM9.cmd**. The launcher reads the extracted OpenMatrix9 folder.
 
 The launcher installs or updates OM9 in `%APPDATA%\FreeCAD\v1-1\Mod\OpenMatrix9`, creates **OpenMatrix9** shortcuts on Desktop and in Start Menu, and opens the workbench. Use the Desktop icon afterwards; the extracted folder is no longer needed. No Administrator access, FreeCAD source, Rust or Visual Studio is required.
@@ -20,7 +20,7 @@ The launcher checks published GitHub releases in the background at startup. It p
 
 1. Download the Windows x64 installer from the [official FreeCAD 1.1.4 release](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4). Install and start FreeCAD once. Check Help → About FreeCAD: **1.1.4**. The installation directory may simply be named `FreeCAD 1.1`.
 2. Close FreeCAD before replacing a plugin.
-3. Download **OpenMatrix9-0.3.4-202610120606-FreeCAD-1.1.4-Windows-x64.zip** under **Assets** on the [Releases page](https://github.com/MYuitsu/OpenMatrix9/releases) and extract its **OpenMatrix9** folder.
+3. Download **OpenMatrix9-0.3.5-202610121520-FreeCAD-1.1.4-Windows-x64.zip** under **Assets** on the [Releases page](https://github.com/MYuitsu/OpenMatrix9/releases) and extract its **OpenMatrix9** folder.
 4. Press **Win + R**, enter `%APPDATA%\FreeCAD\v1-1\Mod` and create the directory if needed. Place **OpenMatrix9** inside it. Move an older installation outside `Mod` as a backup first.
 5. Restart your installed FreeCAD and select **OpenMatrix9** from the workbench selector.
 

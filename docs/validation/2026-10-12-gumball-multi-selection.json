@@ -1,0 +1,197 @@
+{
+  "ok": true,
+  "version": "0.3.5-202610121520",
+  "scope": "whole_object_multi_selection_gumball",
+  "feature_ids": [
+    "OM9-INFO-020",
+    "OM9-INFO-021",
+    "OM9-INFO-022"
+  ],
+  "base_commit": "4e3a1b6aded09737afe7c1b4c25979758450e271",
+  "plugin_sha256": "c013417b56abe9cc2613d88047161660fbb7957cba5aace3578889440aa1af33",
+  "host_sha256": "7b38c5d5aa2c74f830539c1c5c44cbf6e3e8e157292c718f9ee24ac6d3e12cf6",
+  "native_processes": 31,
+  "native_checks": 1099,
+  "multi_selection_checks": 143,
+  "rust_tests": 848,
+  "rust_log_sha256": "bd3fa0ceb6887819bba6df90eeb5575e483e5b6d2da2cb33fc64a885ad20647d",
+  "suite_sha256": "cbd769475183d867877862d3dde4c9efa9d654a7eb82d953ed609dca193bc96b",
+  "cases": [
+    {
+      "name": "geometry",
+      "checks": 16,
+      "report_sha256": "b08d38fa7542b10c985be755f6ca06cde0b203355fa43b77c91ecb8a03a15c21"
+    },
+    {
+      "name": "commands",
+      "checks": 16,
+      "report_sha256": "4ef929c929c2b88d0341f704336757d6ffa5ca44a73eb6b8a190dc59c2a9f491"
+    },
+    {
+      "name": "ownership",
+      "checks": 24,
+      "report_sha256": "9ce42a589b544664b34211ae47971480bf2cccce7ce1f0b56182a417e8f432ba"
+    },
+    {
+      "name": "review",
+      "checks": 9,
+      "report_sha256": "6e501f747ca9a4e6b7ceda4187d6b33aae4c6ccee49e2dfb9ec43bf7d713aef4"
+    },
+    {
+      "name": "multi-selection",
+      "checks": 143,
+      "report_sha256": "0bb2535e88dc65cdf5285812aac9aaf034d9ca04a7c559cfbcf4ed7244720e1d"
+    },
+    {
+      "name": "lifecycle",
+      "checks": 18,
+      "report_sha256": "09f1aa1128472684eff14f6f15d4770788f8333e043c6d342a7c81e9a6721834"
+    },
+    {
+      "name": "reentrancy",
+      "checks": 3,
+      "report_sha256": "ef8fa8aa1c2f54cad76ca99ad30b042bd41d9b2426011faacb0161ddf5afd9e9"
+    },
+    {
+      "name": "cancel-publication",
+      "checks": 2,
+      "report_sha256": "8abcb066f2da99144cc824d35a538a94ba2f532f072afca2717e25091c2ee002"
+    },
+    {
+      "name": "core-dpi1",
+      "checks": 68,
+      "report_sha256": "b04df2fa611d4a8c4552d50c1d40da730d0d6480e7944d1a5b1c37999ee6b4bb"
+    },
+    {
+      "name": "core-dpi150",
+      "checks": 68,
+      "report_sha256": "e574f994fc4aeff9df59317b5faff9363445f4ac2a454cc9996e3127ac16e6f3"
+    },
+    {
+      "name": "four-view-dpi1",
+      "checks": 65,
+      "report_sha256": "8a7c9f1439686514f3a8d521ce9c6ff36a03af510536409f16547d86e588a902"
+    },
+    {
+      "name": "view-lifecycle-dpi1",
+      "checks": 19,
+      "report_sha256": "a28b69070b3a4cdaa772140ac1b028b1e96ef7f5a96c36d60bcab0e4f91f03dc"
+    },
+    {
+      "name": "four-view-dpi1.5",
+      "checks": 65,
+      "report_sha256": "8a7c9f1439686514f3a8d521ce9c6ff36a03af510536409f16547d86e588a902"
+    },
+    {
+      "name": "view-lifecycle-dpi1.5",
+      "checks": 19,
+      "report_sha256": "bad17aa660e544f590c29ce2f46afac45432d78c78fab2da37333e3f1daf9aae"
+    },
+    {
+      "name": "four-view-dpi2",
+      "checks": 65,
+      "report_sha256": "8a7c9f1439686514f3a8d521ce9c6ff36a03af510536409f16547d86e588a902"
+    },
+    {
+      "name": "view-lifecycle-dpi2",
+      "checks": 19,
+      "report_sha256": "00ee620e519c900e36cbdf05d37c945e006864fc9136981da48effe9cec7b1c3"
+    },
+    {
+      "name": "settings",
+      "checks": 10,
+      "report_sha256": "e071393ae73b9285831d5c1ae11a9f8e5f286599158b79ba35a58487f3a43997"
+    },
+    {
+      "name": "snappy",
+      "checks": 6,
+      "report_sha256": "f4801dc59c240553fffd31a9533d6ebd7a14d09f52a21c70b97d8a937535b707"
+    },
+    {
+      "name": "relocate_pointer",
+      "checks": 25,
+      "report_sha256": "d4eaa280e630f4bd8cba41a8d16ee778a5df61a14a795f9c2df8624e7475962d"
+    },
+    {
+      "name": "owner_scale",
+      "checks": 27,
+      "report_sha256": "02dd94210d512c5184ba34d9052b41dd80eb1b91cd0d9793bf88ea8578299e18"
+    },
+    {
+      "name": "owner_callback",
+      "checks": 2,
+      "report_sha256": "982f14ae1f5d74bd85b30a4aa38daba35c8f465b9d295b6659de8299c29a7b8b"
+    },
+    {
+      "name": "mesh_frame",
+      "checks": 13,
+      "report_sha256": "9d9636f37cf7913b93439e708b33cc9b4ccd3db1a763320c734ac48e25902d38"
+    },
+    {
+      "name": "visual",
+      "checks": 23,
+      "report_sha256": "b225aadb4942375a3e5ce473810a93b2afe284930afa12bfc988c627b88e41b2"
+    },
+    {
+      "name": "warm",
+      "checks": 20,
+      "report_sha256": "53e0916e056b31bbeec87a9964b7e44b5d79cba257f8e00af773ee43fc9a88dd"
+    },
+    {
+      "name": "cold",
+      "checks": 17,
+      "report_sha256": "1869dabb837033e113dc1df5e53db47201ea26438b05b20c6a66c196d3ec53aa"
+    },
+    {
+      "name": "parametric",
+      "checks": 22,
+      "report_sha256": "4f60b41baa68f7eb076634ec883432ca4a31ea8ea775677215c1abe77259a39b"
+    },
+    {
+      "name": "component-pointer",
+      "checks": 85,
+      "report_sha256": "3ade9148f52ded8b718205b703b63504693856ab4bbb88c4977b9aa3b49c9d45"
+    },
+    {
+      "name": "associative-warm",
+      "checks": 127,
+      "report_sha256": "3e5a87d927689ec3ef41d6f582cfa10862779335df8f7a3e39a1b88f4b50f641"
+    },
+    {
+      "name": "associative-cold",
+      "checks": 63,
+      "report_sha256": "a317e306fc1f3d529bed622c285b7228844524c895b224fe1a29fab3f122ce50"
+    },
+    {
+      "name": "frame-objects-warm",
+      "checks": 24,
+      "report_sha256": "7a189147eafdd7b194f8c9d5d9a4289d62f37f7f7b40a2c2a8ae9c7072bf8c1b"
+    },
+    {
+      "name": "frame-objects-cold",
+      "checks": 16,
+      "report_sha256": "7d5a20b0d0bb8079f2f4e7d347a74628c530d7ec7a4bd81d73dc0466b6577d4f"
+    }
+  ],
+  "source_sha256": {
+    "Gui/GumballFrame.cpp": "1eb784494b3225963d64a1dc08f6ec9ed0924665f19fd3e6221ba2814554f20f",
+    "Gui/GumballRust.h": "8d13b96d8d52f50bdb8d8faaa32f89d4507d452be8b9bb09daa8ed417a42f3c2",
+    "rust/src/gumball.rs": "92846f50a0d610646ac321e7d40c756eeb3c038bcbbde3181623d8107852d1cd",
+    "rust/src/gumball_ffi.rs": "fb5cf3c42e40a6e26f9f9de2320e2ffd1f711782840cf3a58a0ebad93fb72406",
+    "rust/tests/gumball_ffi.rs": "28828fcb12d7b66382dcf4eaca77df3cedb87b98a1751f4421f028fd6e8b3ead",
+    "tests/gumball_geometry_smoke.FCMacro": "d392a8cf0874185a9a5075b950785b8656af74dda6e9ef5ca74ff07359ee1dcc",
+    "tests/gumball_multi_selection_smoke.FCMacro": "9e22b775e9ef0c69f867c530c51721734cb5899ff329f1bf74f110ccc08a5308",
+    "tools/ci/run-gumball.ps1": "b328a66e08527ce8eb6bf738d8ea0f22c9410db2d86a5c437727a65c243c7644"
+  },
+  "ci_policy": {
+    "validation_kind": "build_only",
+    "tests_executed": false
+  },
+  "limits": [
+    "Object multi-owner CPlane basis is an explicit OM9 policy, not Rhino internals certification.",
+    "Ambiguous/mixed components retain native UnsupportedFrame protection.",
+    "Local tests do not assert runtime execution of the distinct CI binary.",
+    "Known stock host save/transaction and unsupported graph limits remain as documented.",
+    "Existing Rust SourceAttributes::decode dead-code warning remains."
+  ]
+}

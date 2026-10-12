@@ -78,6 +78,21 @@ pub enum Alignment {
     Object,
     World,
 }
+impl Alignment {
+    /// Whole owners share the active construction basis instead of choosing an
+    /// arbitrary owner's orientation. Component ambiguity still needs its exact
+    /// native frame and must not be admitted through this whole-selection rule.
+    pub fn for_selection(self, roots: usize, has_components: bool) -> Result<Self, GumballError> {
+        if roots == 0 || roots > crate::native_input_tree::MAX_NODES {
+            return Err(GumballError::InvalidSources);
+        }
+        Ok(if self == Self::Object && roots > 1 && !has_components {
+            Self::CPlane
+        } else {
+            self
+        })
+    }
+}
 #[repr(u32)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Axis {

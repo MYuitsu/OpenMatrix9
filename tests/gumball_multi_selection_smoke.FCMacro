@@ -1,0 +1,191 @@
+# OM9-INFO-020/021: real pointer selection and common-pivot batch transforms.
+import os, sys, json, traceback, math
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore, QtWidgets, QtTest, QtGui
+sys.path.insert(0, str(Path(__file__).parent))
+from gumball_fixture import GumballUI
+import OpenMatrix9Gui as native
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'checks': [], 'observations': [], 'module': native.__file__,
+          'feature_ids':['OM9-INFO-020','OM9-INFO-021','OM9-INFO-022']}
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+def run():
+    doc = None
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc = App.newDocument('GumballMultiSelectionProbe')
+        doc.UndoMode = 1
+        boxes = []
+        for name, pos in [('A', (-15,-9,-4)), ('B', (9,3,2)), ('C', (-3,15,10))]:
+            obj = doc.addObject('Part::Box', name)
+            obj.Length, obj.Width, obj.Height = 3,4,5
+            obj.Placement.Base = App.Vector(*pos)
+            obj.ViewObject.DisplayMode = 'Flat Lines'
+            boxes.append(obj)
+        doc.recompute()
+        ui = GumballUI(native)
+        ui.settle()
+        area = Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
+        views = {int(s.widget().property('om9ViewSlot')): s for s in area.subWindowList()
+                 if s.widget().property('om9DocumentName') == doc.Name}
+        ui.command('Gumball On')
+        for slot in range(4):
+            area.setActiveSubWindow(views[slot]); ui.settle()
+            view = Gui.activeDocument().activeView()
+            view.fitAll(); ui.settle()
+            viewport = next(w for w in views[slot].widget().findChildren(QtWidgets.QWidget)
+                            if w.metaObject().className() == 'Gui::View3DInventorViewer').viewport()
+            def pixel(p):
+                x,y = view.getPointOnScreen(p)[:2]
+                ratio = viewport.devicePixelRatioF()
+                return QtCore.QPoint(round(x/ratio),round(viewport.height()-y/ratio-1/ratio))
+            def pointer(obj, modifiers):
+                handles = native.gumballHandles()
+                for edge in obj.Shape.Edges:
+                    p = pixel(edge.valueAt((edge.FirstParameter+edge.LastParameter)/2))
+                    if any((p.x()-h['x'])**2+(p.y()-h['y'])**2 < 144 for h in handles): continue
+                    info = view.getObjectInfo((p.x(), viewport.height()-p.y()-1))
+                    if info and info.get('Object') == obj.Name:
+                        viewport.setFocus(); ui.settle()
+                        QtTest.QTest.mouseClick(viewport, QtCore.Qt.LeftButton, modifiers, p)
+                        ui.settle(); return
+                raise AssertionError('No native pointer target: '+obj.Name+' slot '+str(slot))
+            for alignment in ['CPlane', 'World', 'Object']:
+                Gui.Selection.clearSelection(); Gui.Selection.addSelection(boxes[0]); ui.settle()
+                ui.command('GumballAlignment '+alignment)
+                pointer(boxes[1], QtCore.Qt.ShiftModifier)
+                pointer(boxes[2], QtCore.Qt.ShiftModifier)
+                selected = sorted(o.Name for o in Gui.Selection.getSelection())
+                state = native.gumballState()
+                check('Shift pointer selects all three owners / '+alignment+' / view '+str(slot), selected == ['A','B','C'])
+                check('shared Gumball remains visible / '+alignment+' / view '+str(slot),
+                      state['has_selection'] and len(state['views']) == 4 and
+                      all(v['attached'] and v['in_owner'] for v in state['views']))
+                report['observations'].append({'slot':slot, 'alignment':alignment,
+                                                'selection':selected, 'state':state})
+            bounds = [pixel(v.Point) for obj in boxes for v in obj.Shape.Vertexes]
+            a = QtCore.QPoint(min(p.x() for p in bounds)-20, min(p.y() for p in bounds)-20)
+            b = QtCore.QPoint(max(p.x() for p in bounds)+20, max(p.y() for p in bounds)+20)
+            for alignment in ['CPlane','World','Object']:
+                Gui.Selection.clearSelection(); ui.settle()
+                ui.command('GumballAlignment '+alignment)
+                viewport.setFocus(); ui.settle()
+                QtTest.QTest.mousePress(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier, a)
+                move = QtGui.QMouseEvent(QtCore.QEvent.MouseMove, QtCore.QPointF(b),
+                        QtCore.QPointF(viewport.mapToGlobal(b)), QtCore.Qt.NoButton,
+                        QtCore.Qt.LeftButton, QtCore.Qt.NoModifier)
+                QtWidgets.QApplication.sendEvent(viewport, move)
+                QtTest.QTest.mouseRelease(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier, b)
+                ui.settle()
+                selected = sorted(o.Name for o in Gui.Selection.getSelection())
+                state = native.gumballState()
+                check('window pointer selects all owners / '+alignment+' / view '+str(slot), selected == ['A','B','C'])
+                check('window selection displays common Gumball / '+alignment+' / view '+str(slot),
+                      state['has_selection'] and all(v['attached'] and v['in_owner'] for v in state['views']))
+                report['observations'].append({'slot':slot,'alignment':'window '+alignment,'selection':selected,'state':state})
+            ui.command('GumballAlignment Object')
+            state = native.gumballState()
+            check('Object selection keeps its chosen alignment / view '+str(slot), state['alignment'] == 1)
+            check('common pivot covers all owners / view '+str(slot),
+                  max(abs(a-b) for a,b in zip(state['frame'][:3],(-1.5,5,5.5))) < 1e-9)
+            expected_axes = {0:(1,0,0,0,1,0,0,0,1), 1:(1,0,0,0,1,0,0,0,1),
+                             2:(0,1,0,0,0,1,1,0,0), 3:(1,0,0,0,0,1,0,-1,0)}[slot]
+            check('multi-owner Object frame uses the active construction basis / view '+str(slot),
+                  tuple(state['frame'][3:]) == expected_axes)
+            check('all four overlays remain attached to their native scenes / view '+str(slot),
+                  len(state['views']) == 4 and all(v['attached'] and v['current_scene'] and v['in_owner']
+                                                  for v in state['views']))
+            if not state['has_selection']:
+                raise AssertionError('Common selection frame unavailable in Object mode')
+            def points():
+                return [[tuple(v.Point) for v in obj.Shape.Vertexes] for obj in boxes]
+            def same(actual, expected):
+                if len(actual) != len(expected): return False
+                for a,b in zip(actual,expected):
+                    if len(a) != len(b): return False
+                    unmatched = list(b)
+                    for point in a:
+                        index = next((i for i,p in enumerate(unmatched)
+                                      if max(abs(x-y) for x,y in zip(point,p)) < 1e-6),None)
+                        if index is None: return False
+                        unmatched.pop(index)
+                return True
+            pivot = (-1.5,5,5.5)
+            xaxis, zaxis = expected_axes[:3], expected_axes[6:]
+            before = points()
+            axes = [expected_axes[i:i+3] for i in range(0,9,3)]
+            anchors = []
+            for axis in axes:
+                extent = min(sum((p[i]-pivot[i])*axis[i] for i in range(3))
+                             for owner in before for p in owner)
+                anchors.append(tuple(pivot[i]+extent*axis[i] for i in range(3)))
+            check('Scale grips cover the whole selection / view '+str(slot),
+                  all(max(abs(x-y) for x,y in zip(a,b)) < 1e-8
+                      for row in state['views'] for a,b in zip(row['scale_anchors'],anchors)))
+            def transform(p, operation):
+                if operation == 'MoveX': return tuple(p[i]+5*xaxis[i] for i in range(3))
+                relative = tuple(p[i]-pivot[i] for i in range(3))
+                if operation == 'ScaleX':
+                    along = sum(relative[i]*xaxis[i] for i in range(3))
+                    return tuple(p[i]+0.5*along*xaxis[i] for i in range(3))
+                cosine, sine = math.sqrt(0.5), math.sqrt(0.5)
+                cross = (zaxis[1]*relative[2]-zaxis[2]*relative[1],
+                         zaxis[2]*relative[0]-zaxis[0]*relative[2],
+                         zaxis[0]*relative[1]-zaxis[1]*relative[0])
+                along = sum(relative[i]*zaxis[i] for i in range(3))
+                return tuple(pivot[i]+relative[i]*cosine+cross[i]*sine+
+                             zaxis[i]*along*(1-cosine) for i in range(3))
+            for operation, value in [('MoveX','5 mm'),('ScaleX','1.5'),('RotateZ','45')]:
+                undo = doc.UndoCount
+                ui.numeric(operation, value)
+                expected = [[transform(p,operation) for p in owner] for owner in before]
+                check('all owners '+operation+' around common pivot / view '+str(slot),same(points(),expected))
+                check('one Undo for the whole '+operation+' batch / view '+str(slot),doc.UndoCount == undo+1)
+                check('primitive types and selection retained / '+operation+' / view '+str(slot),
+                      all(obj.TypeId == 'Part::Box' for obj in boxes) and
+                      sorted(obj.Name for obj in Gui.Selection.getSelection()) == ['A','B','C'])
+                doc.undo(); doc.recompute(); ui.settle()
+                check('Undo restores all owners / '+operation+' / view '+str(slot),same(points(),before))
+                doc.redo(); doc.recompute(); ui.settle()
+                check('Redo restores the whole batch / '+operation+' / view '+str(slot),same(points(),expected))
+                doc.undo(); doc.recompute(); ui.settle()
+            undo = doc.UndoCount
+            ui.numeric('MoveX','2 mm',QtCore.Qt.ControlModifier)
+            relocated = native.gumballState()
+            check('Ctrl relocates only the common widget / view '+str(slot),
+                  same(points(),before) and doc.UndoCount == undo and
+                  max(abs(relocated['frame'][i]-(pivot[i]+2*xaxis[i])) for i in range(3)) < 1e-8)
+            Gui.Selection.clearSelection(); ui.settle()
+            for obj in boxes: Gui.Selection.addSelection(obj)
+            ui.settle()
+            check('multi-selection does not inherit a deselected relocated pivot / view '+str(slot),
+                  max(abs(native.gumballState()['frame'][i]-pivot[i]) for i in range(3)) < 1e-8)
+            undo = doc.UndoCount
+            end = ui.drag('MoveX'); ui.escape(); ui.release(end)
+            check('Esc cancels the common drag / view '+str(slot),same(points(),before) and doc.UndoCount == undo)
+            Gui.getMainWindow().grab().save(str(out/('multi-selection-view-'+str(slot)+'.png')))
+        for label, selections in [
+            ('mixed whole and face',[(boxes[0],'Face1'),(boxes[1],'')]),
+            ('faces from multiple owners',[(boxes[0],'Face1'),(boxes[1],'Face1')]),
+            ('ambiguous faces on one owner',[(boxes[0],'Face1'),(boxes[0],'Face2')]),
+        ]:
+            ui.command('GumballAlignment World'); Gui.Selection.clearSelection()
+            for obj, sub in selections: Gui.Selection.addSelection(obj,sub)
+            ui.settle(); undo=doc.UndoCount
+            ui.command('GumballAlignment Object')
+            rejected=native.gumballState()
+            check('whole-selection fallback does not admit '+label,
+                  rejected['alignment']==2 and 'UnsupportedFrame' in rejected['unresolved'] and
+                  same(points(),before) and doc.UndoCount==undo)
+        report['ok'] = all(row['passed'] for row in report['checks'])
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        if doc is not None and doc.Name in App.listDocuments(): App.closeDocument(doc.Name)
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(500, run)

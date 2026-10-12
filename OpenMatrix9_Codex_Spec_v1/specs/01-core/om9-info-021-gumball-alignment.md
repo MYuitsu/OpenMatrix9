@@ -35,6 +35,15 @@ camera của mình; lệnh alignment không xoay shape hoặc tạo Undo geometr
   Một frame thế giới được capture rồi project ra mọi camera; không lấy frame
   object riêng theo từng view. Không có frame duy nhất thì báo unresolved,
   giữ frame/alignment trước; không chọn World ngầm.
+- Với **nhiều whole object** được chọn bằng Shift-click hoặc quét khung,
+  Object Alignment dựng một frame chung: tâm tại tâm bounds của cả selection,
+  basis theo CPlane active. Không lấy ngẫu nhiên hướng của object đầu tiên,
+  không yêu cầu Group/Compound và không đổi preference Object sang CPlane.
+  Đây là policy OM9 bổ sung ngày 2026-10-12 để thực hiện yêu cầu chọn chung
+  của người dùng; Rhino 5 Help xác nhận selection nhiều object dùng Gumball
+  và không giữ relocated widget sau deselect, nhưng không chứng minh thuật
+  toán basis cho mọi cụm. Một component mơ hồ vẫn phải reject theo adapter;
+  không dùng quy tắc whole-object để bỏ qua kiểm tra component.
 - `GumballAlignment CPlane`: idle frame theo CPlane của viewport đang active.
   Khi đổi active view/CPlane, recapture một frame và cập nhật tất cả overlays
   cùng lúc; không để bốn ô có bốn hướng khác nhau. Basis đã capture phải được
@@ -184,3 +193,10 @@ mapped in the [candidate report](../../../docs/validation/2026-10-12-gumball-cor
 - [x] [OM9-ANALYSIS](../../ENGINEERING_CONTRACTS.md#om9-analysis): N/A for a measurement/diagnostic command: no independent analysis output is created. Fixture geometry/volume checks validate transforms only.
 - [x] [OM9-TRANSFORM](../../ENGINEERING_CONTRACTS.md#om9-transform): N/A for geometry transforms in this command; frame changes are view state. Geometry transforms belong to OM9-INFO-020.
 - [x] Remaining engineering contracts have explicit N/A reasons in the candidate report; Camera/Light names do not certify a renderer.
+
+## Multi-selection regression — 2026-10-12
+
+- [x] Whole-object Shift/window selection, common frame/extents and MSR from all four views.
+- [x] One Undo/Redo batch, transient multi-selection Relocate and retained component guards.
+
+[Final local31/1099 evidence](../../../docs/validation/2026-10-12-gumball-multi-selection.md); new regression143 checks, Rust848 tests; CI build/package only.

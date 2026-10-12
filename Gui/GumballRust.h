@@ -57,4 +57,5 @@ unsigned om9_gumball_report(std::uint64_t,unsigned char*,std::size_t,std::size_t
 unsigned om9_gumball_sources(std::uint64_t,Om9GumballSource*,std::size_t,std::size_t*);
 unsigned om9_gumball_frame(std::uint64_t,const double*,const double*);
 unsigned om9_gumball_frame_from_directions(const double*,const double*,const double*,double*);
+unsigned om9_gumball_selection_alignment(unsigned,std::size_t,unsigned,unsigned*);
 }
