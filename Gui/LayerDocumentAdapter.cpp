@@ -2,9 +2,11 @@
 #include "LayerDocumentAdapter.h"
 #include "LayerExchangeAdapter.h"
 #include "CoreNotes.h"
+#include "HistoryFeature.h"
 #include <App/Application.h>
 #include <App/Document.h>
 #include <App/DocumentObject.h>
+#include <App/DocumentObjectGroup.h>
 #include <App/PropertyStandard.h>
 #include <Base/Console.h>
 #include <Gui/Application.h>
@@ -34,10 +36,57 @@ public:
 PROPERTY_SOURCE(OpenMatrix9Gui::LayerDocumentObject,App::DocumentObject)
 namespace { void initializeNativeLayerObserver(); }
 void registerLayerDocumentTypes() { LayerDocumentObject::init();initializeNativeLayerObserver(); }
+
+// Shared native factory witness for canonical inventory and collection. A
+// marker on geometry or an augmented helper never establishes metadata identity.
+bool isLegacyLayerHelper(const App::DocumentObject* object) {
+    if(!object || !object->getDocument() || !object->getInList().empty())return false;
+    auto* groupTag=dynamic_cast<App::PropertyString*>(object->getPropertyByName("OM9LayerSchema"));
+    auto* settingsTag=dynamic_cast<App::PropertyString*>(object->getPropertyByName("OM9LayerStateSchema"));
+    const bool group=groupTag && std::string(groupTag->getValue())=="1";
+    const bool settings=settingsTag && std::string(settingsTag->getValue())=="1";
+    if(group==settings)return false;
+    const std::set<std::string> bindings{"OM9LayerObjectId","OM9LayerHostName","OM9LayerId","OM9Locked"};
+    const std::set<std::string> fields=group
+        ?std::set<std::string>{"OM9LayerSchema","OM9LayerIndex","OM9LayerLocked","OM9LayerColor"}
+        :std::set<std::string>{"OM9LayerStateSchema","OM9ActiveLayer"};
+    for(const auto& name:object->getDynamicPropertyNames())if(!fields.count(name)&&!bindings.count(name))return false;
+    for(const auto* name:{"OM9LayerObjectId","OM9LayerHostName","OM9LayerId"})
+        if(auto* raw=object->getPropertyByName(name);raw&&!dynamic_cast<App::PropertyString*>(raw))return false;
+    if(auto* raw=object->getPropertyByName("OM9Locked");raw&&!dynamic_cast<App::PropertyBool*>(raw))return false;
+    if(group) {
+        auto* index=dynamic_cast<App::PropertyInteger*>(object->getPropertyByName("OM9LayerIndex"));
+        auto* native=dynamic_cast<const App::DocumentObjectGroup*>(object);
+        if(!native || object->getTypeId()!=App::DocumentObjectGroup::getClassTypeId() || !index || index->getValue()<1 || index->getValue()>32
+           || std::string(object->getNameInDocument())!="OM9Layer"+std::to_string(index->getValue())
+           || !dynamic_cast<App::PropertyBool*>(object->getPropertyByName("OM9LayerLocked"))
+           || !dynamic_cast<App::PropertyColor*>(object->getPropertyByName("OM9LayerColor")))return false;
+        for(auto* member:native->getObjects())if(!member || member->getDocument()!=object->getDocument())return false;
+        return true;
+    }
+    auto* current=dynamic_cast<App::PropertyInteger*>(object->getPropertyByName("OM9ActiveLayer"));
+    return object->getTypeId()==App::DocumentObject::getClassTypeId() && std::string(object->getNameInDocument())=="OM9LayerSettings"
+        && current && current->getValue()>=0 && current->getValue()<=32;
+}
+// History's registered factory owns four static policy Bools and deliberately
+// has no view provider. An augmented instance or matching fields on geometry
+// cannot establish this metadata identity.
+bool isNativeHistorySettingsHelper(const App::DocumentObject* object) {
+    auto* settings=dynamic_cast<const HistorySettings*>(object);
+    if(!settings || !object->getDocument() || object->getTypeId()!=HistorySettings::getClassTypeId()
+       || !object->getInList().empty() || !object->getDynamicPropertyNames().empty())return false;
+    for(const auto* name:{"Shape","Mesh","Group","Placement","OM9PointCloudSchema"})
+        if(object->getPropertyByName(name))return false;
+    return object->getPropertyByName("Record")==&settings->Record
+        && object->getPropertyByName("Update")==&settings->Update
+        && object->getPropertyByName("Lock")==&settings->Lock
+        && object->getPropertyByName("BrokenHistoryWarning")==&settings->BrokenHistoryWarning;
+}
 namespace {
 using namespace ThreeDm;
 constexpr const char* markerName="OM9LayerDocumentVersion";
 constexpr const char* snapshotName="OM9LayerSnapshot";
+constexpr const char* selectableName="OM9LayerExplicitSelectable";
 std::map<std::string,std::size_t> receivingScopes;
 std::string documentKey(const App::Document& doc){return std::string(doc.getName())+":"+doc.Uid.getValueStr();}
 void requireStatus(std::uint32_t code) {
@@ -71,6 +120,19 @@ template<class T> T& ensureProperty(App::PropertyContainer& container,const char
         App::Prop_NoRecompute|App::Prop_ReadOnly|App::Prop_Hidden,true,true));
     if(!created) throw std::runtime_error(std::string("Cannot create layer property: ")+name);
     return *created;
+}
+const App::DocumentObjectGroup* legacyOutputOwner(const App::DocumentObject& object) {
+    auto* index=dynamic_cast<App::PropertyInteger*>(object.getPropertyByName("OM9OutputLayerIndex"));
+    if(!index)return nullptr;
+    const App::DocumentObjectGroup* result=nullptr;
+    for(auto* parent:object.getInList())if(isLegacyLayerHelper(parent)) {
+        auto* owner=dynamic_cast<const App::DocumentObjectGroup*>(parent);
+        auto* slot=dynamic_cast<App::PropertyInteger*>(parent->getPropertyByName("OM9LayerIndex"));
+        if(!owner || !slot || slot->getValue()!=index->getValue() || !owner->hasObject(&object))continue;
+        if(result)throw std::runtime_error("Ambiguous legacy layer output ownership");
+        result=owner;
+    }
+    return result;
 }
 App::DocumentObject* storage(App::Document& doc) {
     App::DocumentObject* result=nullptr;
@@ -118,7 +180,7 @@ std::vector<Binding> bindObjects(App::Document& doc,std::uint64_t snapshot) {
     std::map<std::string,App::DocumentObject*> actual;
     auto* metadata=storage(doc);
     for(auto* object:doc.getObjects()) {
-        if(object==metadata || CoreNotes::isStorageObject(object)) continue;
+        if(object==metadata || CoreNotes::isStorageObject(object) || isLegacyLayerHelper(object) || isNativeHistorySettingsHelper(object)) continue;
         const auto id=nativeLayerObjectId(*object);
         if(!actual.emplace(id,object).second) throw std::runtime_error("Duplicate native layer object binding");
     }
@@ -135,6 +197,7 @@ std::vector<Binding> bindObjects(App::Document& doc,std::uint64_t snapshot) {
         // Check property types before any mutation/transaction.
         property<App::PropertyString>(*object,"OM9LayerId");
         property<App::PropertyBool>(*object,"OM9Locked");
+        property<App::PropertyBool>(*object,selectableName);
         result.push_back({object,view,row});
     }
     return result;
@@ -161,6 +224,18 @@ void project(const std::vector<Binding>& bindings,std::uint64_t snapshot) {
     for(const auto& binding:bindings) {
         Om9LayerEffective state{};
         requireStatus(om9_layer_snapshot_effective(snapshot,bytes(binding.row.id),&state));
+        auto* geometry=dynamic_cast<Gui::ViewProviderGeometryObject*>(binding.view);
+        bool explicitSelectable=true;
+        if(geometry) {
+            auto* captured=property<App::PropertyBool>(*binding.object,selectableName);
+            auto* previousLock=property<App::PropertyBool>(*binding.object,"OM9Locked");
+            explicitSelectable=captured?captured->getValue():geometry->Selectable.getValue();
+            // An unmasked native change is the user's new explicit permission.
+            // A false value while locked is only the projection mask.
+            if(captured && (!previousLock || !previousLock->getValue()))explicitSelectable=geometry->Selectable.getValue();
+            auto& intent=ensureProperty<App::PropertyBool>(*binding.object,selectableName,"App::PropertyBool");
+            if(intent.getValue()!=explicitSelectable)intent.setValue(explicitSelectable);
+        }
         auto& logical=ensureProperty<App::PropertyString>(*binding.object,"OM9LayerObjectId","App::PropertyString");
         if(std::string(logical.getValue())!=binding.row.id) logical.setValue(binding.row.id.c_str());
         auto& anchor=ensureProperty<App::PropertyString>(*binding.object,"OM9LayerHostName","App::PropertyString");
@@ -169,9 +244,13 @@ void project(const std::vector<Binding>& bindings,std::uint64_t snapshot) {
         if(std::string(layer.getValue())!=binding.row.layerId) layer.setValue(binding.row.layerId.c_str());
         auto& locked=ensureProperty<App::PropertyBool>(*binding.object,"OM9Locked","App::PropertyBool");
         if(locked.getValue()!=static_cast<bool>(state.locked)) locked.setValue(state.locked!=0);
+        // The caller already committed the legacy owner's group/style/Off and
+        // native pick permission. Canonical metadata does not own that projection.
+        if(legacyOutputOwner(*binding.object))continue;
         if(binding.view->Visibility.getValue()!=static_cast<bool>(state.visible)) binding.view->Visibility.setValue(state.visible!=0);
-        if(auto* geometry=dynamic_cast<Gui::ViewProviderGeometryObject*>(binding.view)) {
-            if(geometry->Selectable.getValue()!=static_cast<bool>(state.selectable)) geometry->Selectable.setValue(state.selectable!=0);
+        if(geometry) {
+            const bool selectable=explicitSelectable&&!state.locked;
+            if(geometry->Selectable.getValue()!=selectable) geometry->Selectable.setValue(selectable);
             const Base::Color color(state.rgb[0]/255.0F,state.rgb[1]/255.0F,state.rgb[2]/255.0F);
             if(geometry->ShapeAppearance.getDiffuseColor()!=color) geometry->ShapeAppearance.setDiffuseColor(color);
             if(auto* line=property<App::PropertyColor>(*geometry,"LineColor"))if(line->getValue()!=color)line->setValue(color);
@@ -184,27 +263,35 @@ struct OwnedPlan {
 };
 NativeLayerSnapshot stateOrDefault(App::Document& doc,const std::set<std::string>& excludedNames={}) {
     auto* metadata=storage(doc);
-    struct Fact {std::string id,path;bool hasPath,locked,visible;std::array<unsigned char,3> rgb;};
+    struct Fact {std::string id,path;bool hasPath,locked,visible;std::array<unsigned char,3> rgb;bool legacyOwned;};
     std::vector<Fact> facts;facts.reserve(doc.countObjects());
     std::vector<std::string> verifiedHelpers;
     auto* gui=Gui::Application::Instance->getDocument(&doc);
     if(!gui)throw std::runtime_error("Missing GUI legacy document");
     for(auto* object:doc.getObjects()) {
         if(object==metadata)continue;
-        if(CoreNotes::isStorageObject(object)){verifiedHelpers.push_back(nativeLayerObjectId(*object));continue;}
+        if(CoreNotes::isStorageObject(object) || isLegacyLayerHelper(object) || isNativeHistorySettingsHelper(object)){verifiedHelpers.push_back(nativeLayerObjectId(*object));continue;}
         if(excludedNames.count(object->getNameInDocument()))continue;
         auto* view=dynamic_cast<Gui::ViewProviderDocumentObject*>(gui->getViewProvider(object));
         if(!view)throw std::runtime_error("Missing legacy object view provider");
         auto* path=property<App::PropertyString>(*object,"OM9LayerPath");
         auto* locked=property<App::PropertyBool>(*object,"OM9Locked");
+        property<App::PropertyBool>(*object,selectableName);
+        const auto* legacyOwner=legacyOutputOwner(*object);
         Base::Color color(180/255.F,180/255.F,180/255.F);
         if(auto* geometry=dynamic_cast<Gui::ViewProviderGeometryObject*>(view))color=geometry->ShapeAppearance.getDiffuseColor();
         // Native topology kind is O(1), not BRep serialization/point-array access.
-        // Curves display LineColor; solids/mesh use their diffuse object color.
+        // Curves display LineColor; verified legacy vertex outputs (Ellipse
+        // focus markers) display PointColor. Solids/mesh retain diffuse color.
         if(auto* shape=property<Part::PropertyPartShape>(*object,"Shape")) {
             const auto& value=shape->getValue();
-            if(!value.IsNull() && (value.ShapeType()==TopAbs_EDGE || value.ShapeType()==TopAbs_WIRE))
-                if(auto* line=property<App::PropertyColor>(*view,"LineColor"))color=line->getValue();
+            if(!value.IsNull()) {
+                if(legacyOwner && value.ShapeType()==TopAbs_VERTEX) {
+                    if(auto* point=property<App::PropertyColor>(*view,"PointColor"))color=point->getValue();
+                }
+                else if(value.ShapeType()==TopAbs_EDGE || value.ShapeType()==TopAbs_WIRE)
+                    if(auto* line=property<App::PropertyColor>(*view,"LineColor"))color=line->getValue();
+            }
         }
         std::array<unsigned char,3> rgb{};
         const std::array<float,3> channels{color.r,color.g,color.b};
@@ -213,8 +300,14 @@ NativeLayerSnapshot stateOrDefault(App::Document& doc,const std::set<std::string
             if(!std::isfinite(channel) || channel<0 || channel>1)throw std::runtime_error("Invalid legacy object color");
             rgb[i]=static_cast<unsigned char>(std::lround(channel*255));
         }
-        facts.push_back({nativeLayerObjectId(*object),path?path->getValue():"",path!=nullptr,
-            locked && locked->getValue(),view->Visibility.getValue(),rgb});
+        const auto* legacyLock=legacyOwner?dynamic_cast<App::PropertyBool*>(legacyOwner->getPropertyByName("OM9LayerLocked")):nullptr;
+        auto* legacyView=legacyOwner?dynamic_cast<Gui::ViewProviderDocumentObject*>(gui->getViewProvider(legacyOwner)):nullptr;
+        if(legacyOwner && !legacyView)throw std::runtime_error("Missing legacy owner view provider");
+        // OM9Locked may be our previous canonical projection. A verified
+        // legacy output's owner remains the authority for its own lock mask.
+        facts.push_back({nativeLayerObjectId(*object),legacyOwner?legacyOwner->Label.getValue():path?path->getValue():"",legacyOwner||path,
+            legacyOwner?legacyLock->getValue():(locked && locked->getValue()),
+            view->Visibility.getValue() && (!legacyView || legacyView->Visibility.getValue()),rgb,legacyOwner!=nullptr});
     }
     std::vector<Om9LayerLegacyObjectView> views;views.reserve(facts.size());
     for(const auto& fact:facts) {
@@ -234,6 +327,17 @@ NativeLayerSnapshot stateOrDefault(App::Document& doc,const std::set<std::string
         }
         requireStatus(om9_layer_document_reconcile(current.get(),views.data(),views.size(),&plan.handle));
         requireStatus(om9_layer_plan_after_snapshot(plan.handle,&handle));
+        NativeLayerSnapshot reconciled(handle);
+        std::vector<Om9LayerByteView> verifiedIds;
+        std::vector<Om9LayerLegacyObjectView> ownViews;
+        for(std::size_t i=0;i<facts.size();++i)if(facts[i].legacyOwned) {
+            verifiedIds.push_back(bytes(facts[i].id));
+            auto own=views[i];own.path={};own.path_present=0;ownViews.push_back(own);
+        }
+        if(verifiedIds.empty())return reconciled;
+        OwnedPlan refresh;
+        requireStatus(om9_layer_document_refresh_verified_legacy(reconciled.get(),verifiedIds.data(),verifiedIds.size(),ownViews.data(),ownViews.size(),&refresh.handle));
+        handle=0;requireStatus(om9_layer_plan_after_snapshot(refresh.handle,&handle));
         return NativeLayerSnapshot(handle);
     }
     const std::string id=doc.Uid.getValueStr();
@@ -274,6 +378,7 @@ void supplementNativeCreation(App::Document& doc,int transactionId,const std::se
     requireGuiThread();
     if(doc.isPerformingTransaction() || !doc.hasPendingTransaction() || doc.getTransactionID(true)!=transactionId)return;
     auto* metadata=storage(doc);
+    if(!metadata)return;
     std::string rawBefore;
     std::set<std::string> known;
     if(metadata) {
@@ -281,16 +386,20 @@ void supplementNativeCreation(App::Document& doc,int transactionId,const std::se
         for(const auto& row:nativeObjectLayersFromSnapshot(state.get()))known.insert(row.id);
     }
     std::set<std::string> unboundNames;
+    bool legacyCreated=false;
     for(const auto& name:createdNames) {
         auto* object=doc.getObject(name.c_str());
-        if(object && !isLayerStorageObject(object) && !CoreNotes::isStorageObject(object) && !known.count(nativeLayerObjectId(*object)))unboundNames.insert(name);
+        if(object && !isLayerStorageObject(object) && !CoreNotes::isStorageObject(object) && !isLegacyLayerHelper(object) && !isNativeHistorySettingsHelper(object) && !known.count(nativeLayerObjectId(*object))) {
+            if(legacyOutputOwner(*object))legacyCreated=true;
+            else unboundNames.insert(name);
+        }
     }
     // Explicit OM9 transactions already completed their layer plan. Never
     // replace received own flags or ByObject state with a creation default.
-    if(unboundNames.empty())return;
+    if(unboundNames.empty()&&!legacyCreated)return;
     auto before=stateOrDefault(doc,unboundNames);
     std::vector<std::string> live;
-    for(auto* object:doc.getObjects())if(object!=metadata && !CoreNotes::isStorageObject(object))live.push_back(nativeLayerObjectId(*object));
+    for(auto* object:doc.getObjects())if(object!=metadata && !CoreNotes::isStorageObject(object) && !isLegacyLayerHelper(object) && !isNativeHistorySettingsHelper(object))live.push_back(nativeLayerObjectId(*object));
     std::vector<Om9LayerByteView> ids;ids.reserve(live.size());for(const auto& id:live)ids.push_back(bytes(id));
     OwnedPlan plan;requireStatus(om9_layer_document_observed(before.get(),ids.data(),ids.size(),&plan.handle));
     std::uint64_t handle=0;requireStatus(om9_layer_plan_after_snapshot(plan.handle,&handle));
@@ -320,7 +429,7 @@ class NativeLayerObserver final {
     void record(const App::DocumentObject& object) noexcept {
         try {
             auto* doc=object.getDocument();
-            if(supplementing || !doc || doc->isPerformingTransaction() || isLayerStorageObject(&object) || CoreNotes::isStorageObject(&object) || !doc->hasPendingTransaction())return;
+            if(supplementing || !doc || doc->isPerformingTransaction() || isLayerStorageObject(&object) || CoreNotes::isStorageObject(&object) || isLegacyLayerHelper(&object) || isNativeHistorySettingsHelper(&object) || !doc->hasPendingTransaction())return;
             if(receivingScopes.count(key(*doc)))return;
             // Native copy/merge imports set both Restoring and Importing. They
             // create new model objects; FCStd reopen sets Restoring alone.
@@ -414,7 +523,7 @@ LayerExportSelection layerDocumentExportSelection(App::Document& doc,const std::
     LayerExportSelection result;result.objectIds.reserve(names.size());
     for(const auto& name:names) {
         auto* object=doc.getObject(name.c_str());
-        if(!object || isLayerStorageObject(object) || CoreNotes::isStorageObject(object))throw std::runtime_error("Select native model objects for layer export");
+        if(!object || isLayerStorageObject(object) || CoreNotes::isStorageObject(object) || isLegacyLayerHelper(object) || isNativeHistorySettingsHelper(object))throw std::runtime_error("Select native model objects for layer export");
         result.objectIds.push_back(nativeLayerObjectId(*object));
     }
     std::vector<Om9LayerByteView> ids;ids.reserve(result.objectIds.size());for(const auto& id:result.objectIds)ids.push_back(bytes(id));
@@ -432,6 +541,7 @@ bool isLayerStorageObject(const App::DocumentObject* object) {
     return object && object->isDerivedFrom(LayerDocumentObject::getClassTypeId());
 }
 void requireLayerGeometryEditable(App::Document& doc){requireEditable(doc);}
+bool hasCanonicalLayerDocument(App::Document& doc){requireGuiThread();return storage(doc)!=nullptr;}
 LayerNativeReceiveScope::LayerNativeReceiveScope(App::Document& doc):identity(documentKey(doc)) {
     requireGuiThread();++receivingScopes[identity];
 }
@@ -444,7 +554,14 @@ std::uint64_t layerMutationGeneration(App::Document& doc,const std::vector<std::
     std::vector<std::string> owned;owned.reserve(names.size());
     for(const auto& name:names) {
         auto* object=doc.getObject(name.c_str());
-        if(!object || isLayerStorageObject(object) || CoreNotes::isStorageObject(object))throw std::runtime_error("Missing layer mutation object");
+        if(!object || isLayerStorageObject(object) || CoreNotes::isStorageObject(object) || isLegacyLayerHelper(object) || isNativeHistorySettingsHelper(object))throw std::runtime_error("Missing layer mutation object");
+        if(operation!=5) {
+            auto* gui=Gui::Application::Instance->getDocument(&doc);
+            auto* view=gui?dynamic_cast<Gui::ViewProviderGeometryObject*>(gui->getViewProvider(object)):nullptr;
+            auto* intent=property<App::PropertyBool>(*object,selectableName);
+            if(view && (!(intent?intent->getValue():view->Selectable.getValue()) || !view->Selectable.getValue()))
+                throw std::runtime_error("Native object is explicitly non-selectable");
+        }
         owned.emplace_back(nativeLayerObjectId(*object));
     }
     std::vector<Om9LayerByteView> ids;ids.reserve(owned.size());for(const auto& id:owned)ids.push_back(bytes(id));
@@ -492,11 +609,11 @@ void LayerDocumentReceivePlan::finish(int transactionId,const std::vector<std::s
     // foreign layer change cannot be hidden by the incoming source IDs.
     auto current=stateOrDefault(doc,added);requireStatus(om9_layer_plan_validate(plan,current.get()));
     std::set<std::string> oldNames;
-    for(auto* object:doc.getObjects())if(object!=metadata && !CoreNotes::isStorageObject(object) && !added.count(object->getNameInDocument()))oldNames.insert(object->getNameInDocument());
+    for(auto* object:doc.getObjects())if(object!=metadata && !CoreNotes::isStorageObject(object) && !isLegacyLayerHelper(object) && !isNativeHistorySettingsHelper(object) && !added.count(object->getNameInDocument()))oldNames.insert(object->getNameInDocument());
     std::vector<App::DocumentObject*> objects;objects.reserve(names.size());
     for(const auto& name:names) {
         auto* object=doc.getObject(name.c_str());
-        if(!object || object==metadata || CoreNotes::isStorageObject(object) || oldNames.count(name))throw std::runtime_error("Missing received geometry object");
+        if(!object || object==metadata || CoreNotes::isStorageObject(object) || isLegacyLayerHelper(object) || isNativeHistorySettingsHelper(object) || oldNames.count(name))throw std::runtime_error("Missing received geometry object");
         property<App::PropertyString>(*object,"OM9LayerObjectId");property<App::PropertyString>(*object,"OM9LayerHostName");
         objects.push_back(object);
     }
@@ -528,16 +645,26 @@ void LayerGeometryTransaction::finish() {
         throw std::runtime_error("Layer geometry transaction became stale");
     std::vector<std::string> owned;
     auto* metadata=storage(doc);
-    for(auto* object:doc.getObjects())if(object!=metadata && !CoreNotes::isStorageObject(object)) {
-        owned.emplace_back(nativeLayerObjectId(*object));
+    std::set<std::string> known,canonicalNew;
+    for(const auto& row:nativeObjectLayersFromSnapshot(before))known.insert(row.id);
+    bool legacyCreated=false;
+    for(auto* object:doc.getObjects())if(object!=metadata && !CoreNotes::isStorageObject(object) && !isLegacyLayerHelper(object) && !isNativeHistorySettingsHelper(object)) {
+        const auto id=nativeLayerObjectId(*object);owned.push_back(id);
+        if(!known.count(id)) {
+            if(legacyOutputOwner(*object))legacyCreated=true;
+            else canonicalNew.insert(object->getNameInDocument());
+        }
     }
     std::vector<Om9LayerByteView> ids;ids.reserve(owned.size());for(const auto& id:owned)ids.push_back(bytes(id));
-    OwnedPlan plan;requireStatus(om9_layer_document_observed(before,ids.data(),ids.size(),&plan.handle));
+    NativeLayerSnapshot observedBefore;
+    if(legacyCreated)observedBefore=stateOrDefault(doc,canonicalNew);
+    const auto base=observedBefore.get()?observedBefore.get():before;
+    OwnedPlan plan;requireStatus(om9_layer_document_observed(base,ids.data(),ids.size(),&plan.handle));
     if(hadState) {
         if(!metadata)throw std::runtime_error("Layer metadata removed during geometry creation");
         auto* payload=property<App::PropertyString>(*metadata,snapshotName);
         if(!payload || std::string(payload->getValue())!=canonicalBefore)throw std::runtime_error("Layer metadata changed during geometry creation");
-        requireStatus(om9_layer_plan_validate(plan.handle,before));
+        requireStatus(om9_layer_plan_validate(plan.handle,base));
     }
     else if(metadata)throw std::runtime_error("Layer metadata changed during geometry creation");
     std::uint64_t handle=0;requireStatus(om9_layer_plan_after_snapshot(plan.handle,&handle));

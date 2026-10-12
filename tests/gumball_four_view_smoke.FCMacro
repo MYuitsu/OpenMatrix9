@@ -1,0 +1,142 @@
+"""OM9-INFO-020/021/022: one session, real native handles in four views."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtWidgets, QtTest, QtGui
+from pivy import coin
+sys.path.insert(0,str(Path(__file__).parent));from gumball_capture import capture_view
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'checks': [], 'feature_ids': ['OM9-INFO-020','OM9-INFO-021','OM9-INFO-022']}
+def settle():
+    QtWidgets.QApplication.processEvents()
+    QtTest.QTest.qWait(180)
+    QtWidgets.QApplication.processEvents()
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+    if not value: raise AssertionError(name)
+def overlay(view):
+    s=coin.SoSearchAction();s.setSearchingAll(True);s.setName('OM9GumballOverlay')
+    s.apply(view.getSceneGraph());return s.getPath() is not None
+def run():
+    doc=None
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('GumballFourView');doc.UndoMode=1
+        box=doc.addObject('Part::Feature','Box');box.Shape=Part.makeBox(12,8,6)
+        doc.recompute();settle()
+        window=Gui.getMainWindow();window.resize(1600,1050);settle()
+        area=window.findChild(QtWidgets.QMdiArea)
+        subs={int(s.widget().property('om9ViewSlot')):s for s in area.subWindowList()
+              if s.widget().property('om9ViewSlot') is not None
+              and s.widget().property('om9DocumentName')==doc.Name}
+        check('four native views exist',sorted(subs)==[0,1,2,3])
+        views={};ports={}
+        for slot,sub in sorted(subs.items()):
+            area.setActiveSubWindow(sub);settle()
+            views[slot]=Gui.activeDocument().activeView();views[slot].fitAll()
+        console=window.findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        def command(text):
+            console.setFocus();QtTest.QTest.keyClicks(console,text)
+            QtTest.QTest.keyClick(console,QtCore.Qt.Key_Return);settle()
+        command('Gumball Off');Gui.Selection.addSelection(box);settle()
+        check('selection does not enable an Off widget',not any(overlay(v) for v in views.values()))
+        command('GumballAlignment World');command('Gumball On')
+        check('On attaches all four overlays without visiting them',all(overlay(v) for v in views.values()))
+        for slot,sub in sorted(subs.items()):
+            ports[slot]=next(w for w in sub.widget().findChildren(QtWidgets.QWidget)
+                             if w.property('om9GumballViewport'))
+        initial=native.gumballState()['frame']
+        targets={}
+        sets={0:{0,1,3,6,9,10,11,13},2:{1,2,4,6,7,11,12,13},3:{0,2,5,6,8,10,12,13}}
+        for slot,sub in sorted(subs.items()):
+            area.setActiveSubWindow(sub);settle()
+            state=native.gumballState();check('World frame remains shared in view %d'%slot,state['frame']==initial)
+            rows=native.gumballHandles();targets[slot]={r['name']:r for r in rows}
+            report.setdefault('handles',{})[slot]=rows
+            if slot in sets: check('orthographic projection filters native hits %d'%slot,{r['handle'] for r in rows}==sets[slot])
+        # Press a known target after activating another view; no refresh call
+        # after activation can conceal a two-click/timer dependency.
+        for slot in [0,1,2,3]:
+            name='MoveY' if slot==2 else 'MoveX'
+            row=targets[slot][name]
+            area.setActiveSubWindow(subs[(slot+1)%4]);settle()
+            QtTest.QTest.mouseClick(ports[slot],QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,QtCore.QPoint(row['x'],row['y']))
+            settle()
+            fields=[f for f in window.findChildren(QtWidgets.QLineEdit,'OM9GumballNumeric') if f.isVisible()]
+            check('inactive view first click owns exactly one editor %d'%slot,len(fields)==1 and ports[slot].isAncestorOf(fields[0]))
+            fields[0].setText('2 mm');QtTest.QTest.keyClick(fields[0],QtCore.Qt.Key_Return);settle()
+            axis=box.Shape.BoundBox.YMin if slot==2 else box.Shape.BoundBox.XMin
+            check('numeric commit once in view %d'%slot,abs(axis-2)<1e-9 and doc.UndoCount==1)
+            doc.undo();settle()
+            check('Undo restores geometry %d'%slot,abs(box.Shape.BoundBox.XMin)<1e-9 and abs(box.Shape.BoundBox.YMin)<1e-9)
+        def numeric(slot,name,text,modifier=QtCore.Qt.NoModifier):
+            area.setActiveSubWindow(subs[slot]);settle();native.gumballState()
+            row=next(r for r in native.gumballHandles() if r['name']==name)
+            QtTest.QTest.mouseClick(ports[slot],QtCore.Qt.LeftButton,modifier,QtCore.QPoint(row['x'],row['y']));settle()
+            field=next(f for f in window.findChildren(QtWidgets.QLineEdit,'OM9GumballNumeric') if f.isVisible())
+            field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+        for slot in [0,1,2,3]:
+            scale='ScaleY' if slot==2 else 'ScaleX'
+            numeric(slot,scale,'2');bounds=box.Shape.BoundBox
+            check('Scale has one batch and correct axis %d'%slot,doc.UndoCount==1 and abs((bounds.YLength if slot==2 else bounds.XLength)-(16 if slot==2 else 24))<1e-8)
+            doc.undo();settle()
+            rotate={0:'RotateZ',1:'RotateZ',2:'RotateX',3:'RotateY'}[slot]
+            numeric(slot,rotate,'90');bounds=box.Shape.BoundBox
+            expected={0:(8,12,6),1:(8,12,6),2:(12,6,8),3:(6,8,12)}[slot]
+            check('Rotate uses camera-visible world axis %d'%slot,doc.UndoCount==1 and all(abs(v-e)<1e-7 for v,e in zip((bounds.XLength,bounds.YLength,bounds.ZLength),expected)))
+            doc.undo();settle()
+            move='MoveY' if slot==2 else 'MoveX'
+            numeric(slot,move,'2 mm',QtCore.Qt.AltModifier)
+            copies=[o for o in doc.Objects if o!=box]
+            check('Alt Copy commits once and preserves source %d'%slot,doc.UndoCount==1 and len(copies)==1 and abs(box.Shape.BoundBox.XMin)<1e-9 and abs(box.Shape.BoundBox.YMin)<1e-9 and abs((copies[0].Shape.BoundBox.YMin if slot==2 else copies[0].Shape.BoundBox.XMin)-2)<1e-9)
+            doc.undo();settle()
+            # Pick a face whose normal is a visible move axis in this camera.
+            normal=App.Vector(0,1,0) if slot==2 else App.Vector(1,0,0)
+            face=doc.addObject('Part::Feature','PlanarFace');face.Shape=Part.Face(Part.Wire(Part.makeCircle(3,App.Vector(),normal)));doc.recompute()
+            Gui.Selection.clearSelection();Gui.Selection.addSelection(face);settle();native.gumballState()
+            row=next(r for r in native.gumballHandles() if r['name']==move);start=QtCore.QPoint(row['x'],row['y']);end=start+QtCore.QPoint(14,10)
+            QtTest.QTest.mousePress(ports[slot],QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,start)
+            QtTest.QTest.mouseMove(ports[slot],end);settle()
+            check('drag preview is present in all view scenes %d'%slot,native.gumballState()['phase']==3 and all(v['preview_vertices']>0 for v in native.gumballState()['views']))
+            command('2 mm')
+            QtTest.QTest.mouseRelease(ports[slot],QtCore.Qt.LeftButton,QtCore.Qt.ControlModifier,end);settle()
+            outputs=[o for o in doc.Objects if o not in [box,face]]
+            check('late Ctrl Extrude has one native output %d'%slot,len(outputs)==1 and doc.UndoCount==1 and abs(outputs[0].Shape.Volume-18*3.141592653589793)<1e-7 and abs(face.Shape.Area-9*3.141592653589793)<1e-7)
+            doc.undo();settle();doc.removeObject(face.Name);Gui.Selection.clearSelection();Gui.Selection.addSelection(box);settle()
+            numeric(slot,scale,'2',QtCore.Qt.ShiftModifier);bounds=box.Shape.BoundBox
+            check('Shift Scale3D affects all dimensions once %d'%slot,doc.UndoCount==1 and all(abs(v-e)<1e-7 for v,e in zip((bounds.XLength,bounds.YLength,bounds.ZLength),(24,16,12))))
+            doc.undo();settle()
+            numeric(slot,move,'2 mm',QtCore.Qt.ControlModifier)
+            state=native.gumballState();expected=[6.,6.,3.] if slot==2 else [8.,4.,3.]
+            check('Ctrl-start numeric changes only shared widget %d'%slot,state['frame'][:3]==expected and all(v['frame']==state['frame'] for v in state['views']) and doc.UndoCount==0 and box.Shape.BoundBox.XLength==12)
+            command('GumballAlignment World')
+            command('RelocateGumball');command('w20,20,20')
+            state=native.gumballState();check('Relocate origin preview is shared %d'%slot,state['phase']==4 and state['frame'][:3]==[20,20,20] and all(v['frame']==state['frame'] for v in state['views']))
+            command('w20,21,20');command('w19,20,20')
+            state=native.gumballState();check('Relocate optional Y accepts shared rotated frame %d'%slot,state['phase']==1 and state['frame'][3:9]==[0,1,0,-1,0,0] and all(v['frame']==state['frame'] for v in state['views']) and doc.UndoCount==0)
+            command('GumballAlignment World')
+        command('RelocateGumball');command('w20,20,20');command('w21,20,20');command('')
+        relocated=native.gumballState()['frame'];check('relocate world input changes only widget',relocated[:3]==[20.,20.,20.] and doc.UndoCount==0)
+        for slot,sub in sorted(subs.items()):
+            area.setActiveSubWindow(sub);settle()
+            check('relocated frame survives focus %d'%slot,native.gumballState()['frame']==relocated and all(overlay(v) for v in views.values()))
+        command('GumballAlignment World')
+        canvas=QtGui.QImage(1280,960,QtGui.QImage.Format_RGB32);canvas.fill(QtGui.QColor(100,100,100))
+        painter=QtGui.QPainter(canvas)
+        for slot,view in sorted(views.items()):
+            image=capture_view(view,640,480)
+            image.save(str(out/('view-%d.png'%slot)));painter.drawImage((slot%2)*640,(slot//2)*480,image)
+        painter.end();canvas.save(str(out/'four-views.png'))
+        command('Gumball Off');check('Off removes every overlay',not any(overlay(v) for v in views.values()))
+        check('view operations preserve native owner and Undo',len(doc.Objects)==1 and doc.UndoCount==0 and box.Shape.BoundBox.XLength==12)
+        report['ok']=True
+    except Exception:
+        report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        if doc is not None: App.closeDocument(doc.Name)
+        QtCore.QTimer.singleShot(100,QtWidgets.QApplication.quit)
+QtCore.QTimer.singleShot(1500,run)

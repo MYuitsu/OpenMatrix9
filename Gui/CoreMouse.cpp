@@ -1,15 +1,21 @@
+#include <Mod/Part/App/PartFeature.h>
 #include "CoreMouse.h"
 #include "CoreKeyboard.h"
 #include "CoreViewControls.h"
 #include "CoreDistance.h"
 #include "CorePictureFrame.h"
 #include "CurveController.h"
+#include "SurfaceController.h"
+#include "EditController.h"
+#include "SolidController.h"
 #include "NativeCommands.h"
 #include "RustBridge.h"
+#include "GumballController.h"
 #include "CameraState.h"
 #include <App/Application.h>
 #include <App/Document.h>
 #include <App/DocumentObject.h>
+#include <App/DocumentObserver.h>
 #include <Gui/Application.h>
 #include <Gui/Document.h>
 #include <Gui/MainWindow.h>
@@ -20,7 +26,6 @@
 #include <Gui/View3DInventor.h>
 #include <Gui/View3DInventorViewer.h>
 #include <Gui/ViewProviderDocumentObject.h>
-#include <Mod/Part/App/PartFeature.h>
 #include <Inventor/SoPickedPoint.h>
 #include <Inventor/SoRenderManager.h>
 #include <Inventor/nodes/SoCamera.h>
@@ -37,14 +42,23 @@
 #include <algorithm>
 #include <memory>
 #include <limits>
-#include <set>
 namespace {
+std::vector<App::SubObjectT> selectionTargets(const char* document){
+#if defined(OM9_STOCK_FREECAD)
+    const auto selections=Gui::Selection().getSelection(document,Gui::ResolveMode::NoResolve);
+    std::vector<App::SubObjectT> targets;targets.reserve(selections.size());
+    for(const auto& selection:selections)targets.emplace_back(selection.pObject,selection.SubName);
+    return targets;
+#else
+    return Gui::Selection().getSelectionT(document,Gui::ResolveMode::NoResolve);
+#endif
+}
 Gui::View3DInventor* containing(QObject* object){
     auto* widget=qobject_cast<QWidget*>(object);auto* doc=Gui::Application::Instance->activeDocument();if(!widget||!doc)return nullptr;
     for(auto* mdi:doc->getMDIViews())if(auto* view=dynamic_cast<Gui::View3DInventor*>(mdi);view&&(widget==view->getViewer()||view->getViewer()->isAncestorOf(widget)))return view;
     return nullptr;
 }
-bool pointTool(){return om9_curve_active()||OpenMatrix9Gui::CoreDistance::instance().active()||OpenMatrix9Gui::CorePictureFrame::instance().active();}
+bool pointTool(){return om9_curve_active()||OpenMatrix9Gui::EditController::instance().active()||OpenMatrix9Gui::SolidController::instance().active()||OpenMatrix9Gui::SurfaceController::instance().active()||OpenMatrix9Gui::CoreDistance::instance().active()||OpenMatrix9Gui::CorePictureFrame::instance().active();}
 unsigned int mods(Qt::KeyboardModifiers value){return (value.testFlag(Qt::ShiftModifier)?1U:0U)|(value.testFlag(Qt::ControlModifier)?2U:0U)|(value.testFlag(Qt::AltModifier)?4U:0U)|(value.testFlag(Qt::MetaModifier)?8U:0U);}
 SbVec3f direction(SoCamera* camera){SbVec3f result;camera->orientation.getValue().multVec(SbVec3f(0,0,-1),result);return result;}
 SbVec3f focal(SoCamera* camera){return camera->position.getValue()+direction(camera)*camera->focalDistance.getValue();}
@@ -93,25 +107,25 @@ void CoreMouse::select(const QPoint& point,bool rectangle){
     auto* doc=App::GetApplication().getActiveDocument();if(!doc||!om9AlterSelection(doc))return;
     auto* viewer=target->getViewer();const char* name=doc->getName();
     if(rectangle){
-        std::set<std::pair<App::DocumentObject*,std::string>> previous;
-        for(const auto& item:Gui::Selection().getSelection(name,Gui::ResolveMode::NoResolve))previous.emplace(item.pObject,item.SubName);
+        const auto previous=selectionTargets(name);
         // Native crossing tests geometry. Its window mode tests centers; remove
         // partial objects to obtain Rhino's full-window containment behavior.
         Gui::applyBoxSelection(viewer,{viewer->fromQPoint(anchor),viewer->fromQPoint(point)},(modifiers&3)==3,(modifiers&1)!=0);
         if(point.x()>=anchor.x()){
-            const QRect rect=QRect(anchor,point).normalized();std::vector<std::pair<App::DocumentObject*,std::string>> selected;
-            for(const auto& item:Gui::Selection().getSelection(name,Gui::ResolveMode::NoResolve))selected.emplace_back(item.pObject,item.SubName);
-            for(const auto& selection:selected){if((modifiers&1)&&previous.count(selection))continue;auto* object=selection.first;if(!object)continue;auto* provider=dynamic_cast<Gui::ViewProviderDocumentObject*>(target->getGuiDocument()->getViewProvider(object));if(!provider)continue;
-                // Stock Coin's detail path bounds include the whole edge-set.
-                // Use the exact transformed CAD subshape for window containment.
-                auto bounds=provider->getBoundingBox(selection.second.c_str(),true,target);
-                if(!selection.second.empty() && Part::Feature::hasShapeOwner(object,selection.second.c_str()))
-                    bounds=Part::Feature::getTopoShape(object,Part::ShapeOption::NeedSubElement|Part::ShapeOption::ResolveLink|Part::ShapeOption::Transform,selection.second.c_str()).getBoundBox();
+            const QRect rect=QRect(anchor,point).normalized();auto selected=selectionTargets(name);
+            for(const auto& selection:selected){if((modifiers&1)&&std::find(previous.begin(),previous.end(),selection)!=previous.end())continue;auto* object=selection.getObject();if(!object)continue;auto* provider=dynamic_cast<Gui::ViewProviderDocumentObject*>(target->getGuiDocument()->getViewProvider(object));if(!provider)continue;
+#if defined(OM9_STOCK_FREECAD)
+                auto bounds=provider->getBoundingBox(selection.getSubName().c_str(),true,target);
+                if(!selection.getSubName().empty() && Part::Feature::hasShapeOwner(object,selection.getSubName().c_str()))
+                    bounds=Part::Feature::getTopoShape(object,Part::ShapeOption::NeedSubElement|Part::ShapeOption::ResolveLink|Part::ShapeOption::Transform,selection.getSubName().c_str()).getBoundBox();
+#else
+                const auto bounds=provider->getBoundingBox(selection.getSubName().c_str(),nullptr,true,viewer);
+#endif
                 if(!bounds.IsValid())continue;
                 const auto volume=viewer->getSoRenderManager()->getCamera()->getViewVolume(float(viewer->viewport()->width())/std::max(1,viewer->viewport()->height()));
                 double x0=1e20,y0=1e20,x1=-1e20,y1=-1e20;
                 for(int c=0;c<8;++c){SbVec3f p;volume.projectToScreen(SbVec3f(float(c&1?bounds.MaxX:bounds.MinX),float(c&2?bounds.MaxY:bounds.MinY),float(c&4?bounds.MaxZ:bounds.MinZ)),p);double x=p[0]*(viewer->viewport()->width()-1),y=(1-p[1])*(viewer->viewport()->height()-1);x0=std::min(x0,x);x1=std::max(x1,x);y0=std::min(y0,y);y1=std::max(y1,y);}
-                if(!om9_mouse_window_contains(rect.left(),rect.top(),rect.right(),rect.bottom(),x0,y0,x1,y1))Gui::Selection().rmvSelection(name,object->getNameInDocument(),selection.second.c_str());
+                if(!om9_mouse_window_contains(rect.left(),rect.top(),rect.right(),rect.bottom(),x0,y0,x1,y1))Gui::Selection().rmvSelection(name,object->getNameInDocument(),selection.getSubName().c_str());
             }
         }
         return;
@@ -126,7 +140,8 @@ void CoreMouse::select(const QPoint& point,bool rectangle){
 }
 void CoreMouse::confirm(){
     if(pointTool()||CurveController::instance().pendingInput()){CurveController::instance().acceptInput();return;}
-    if(om9_sidebar_history_count()){const auto command=om9_sidebar_history_command(0);if(om9NativeCommandAvailable(command))om9_sidebar_record_execution(command,om9ExecuteNativeCommand(command));}
+    const auto command=om9_command_repeat_candidate();
+    if(command<om9_command_count()&&om9NativeCommandAvailable(command))om9ExecuteNativeCommand(command);
 }
 void CoreMouse::recent(){
     if(popup)delete popup.data();popup=new QMenu(Gui::getMainWindow());popup->setObjectName("OM9MouseHistory");
@@ -137,6 +152,8 @@ bool CoreMouse::eventFilter(QObject* object,QEvent* event){
     if(!Gui::Application::Instance)return false;
     if(event->type()==QEvent::MouseButtonRelease&&releaseView&&unsigned(static_cast<QMouseEvent*>(event)->button())==releaseButton&&containing(object)==releaseView){releaseView=nullptr;releaseButton=0;return true;}
     if(!enabled||Gui::Application::Instance->isClosing())return false;
+    if(GumballController::instance().processEvent(object,event))return true;
+    if(object->property("om9GumballEditor").toBool())return false;
     if(target&&(event->type()==QEvent::ApplicationDeactivate||(event->type()==QEvent::UngrabMouse&&containing(object)==target))){cancel(false);return false;}
     if(event->type()==QEvent::FocusIn){if(containing(object))prioritize();return false;}
     if(target&&(target->getGuiDocument()!=Gui::Application::Instance->activeDocument()))cancel();
@@ -166,7 +183,12 @@ bool CoreMouse::eventFilter(QObject* object,QEvent* event){
         if(buttons==4){const auto prefs=App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Mod/OpenMatrix9/Mouse");const auto mode=prefs->GetInt("MiddleButtonAction",0);if(mode==1)selected=keys==2?4:keys==4?3:2;else if(mode==2)selected=keys==2?4:keys==1?2:3;else if(mode==3)return false;}
         if(buttons==1&&pointTool()&&selected!=4)return false;
         if(selected==0)return false;
-        cancel(false);target=view;action=selected;button=buttons;modifiers=keys;anchor=last=point;originalCamera=cameraState(view->getViewer());
+        cancel(false);target=view;action=selected;button=buttons;modifiers=keys;anchor=last=point;
+#if defined(OM9_STOCK_FREECAD)
+        originalCamera=cameraState(view->getViewer());
+#else
+        originalCamera=view->getCamera();
+#endif
         view->getViewer()->viewport()->grabMouse();
         if(button==2){const auto prefs=App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Mod/OpenMatrix9/Mouse");hold->start(std::clamp(int(prefs->GetInt("ContextMenuDelay",500)),100,5000));}
         return true;

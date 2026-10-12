@@ -24,7 +24,19 @@
         "RCORE-01.T11"
       ],
       "runtime_validation": "partial_native_validation",
-      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
+      "implementation_followup_evidence": [
+        "../../../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+        "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+        "../../../docs/validation/2026-10-10-rhino-core-curve-parameters.md",
+        "../../../docs/validation/2026-10-10-rhino-core-polycurve-partition.md",
+        "../../../docs/validation/2026-10-10-rhino-core-instance-isolation.md",
+        "../../../docs/validation/2026-10-10-rhino-core-hatch-input-gate.md",
+        "../../../docs/validation/2026-10-10-rhino-core-periodic-persistence.md",
+        "../../../docs/validation/2026-10-10-rhino-core-subobject-ownership.md",
+        "../../../docs/validation/2026-10-10-rhino-core-delayed-publication.md",
+        "../../../docs/validation/2026-10-10-rhino-core-host-parameter-dependency.md"
+      ]
     },
     {
       "id": "RCORE-02",
@@ -89,7 +101,10 @@
         "RCORE-04.T13"
       ],
       "runtime_validation": "partial_native_validation",
-      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
+      "implementation_followup_evidence": [
+        "../../../docs/validation/2026-10-09-rhino-core-object-foundations.md"
+      ]
     },
     {
       "id": "RCORE-05",
@@ -136,7 +151,10 @@
         "RCORE-06.T14",
         "RCORE-06.T15"
       ],
-      "runtime_validation": "not_run"
+      "runtime_validation": "not_run",
+      "implementation_followup_evidence": [
+        "../../../docs/validation/2026-10-09-rhino-core-object-foundations.md"
+      ]
     },
     {
       "id": "RCORE-07",
@@ -159,7 +177,10 @@
         "RCORE-07.T14"
       ],
       "runtime_validation": "partial_native_validation",
-      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
+      "implementation_followup_evidence": [
+        "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md"
+      ]
     },
     {
       "id": "RCORE-08",
@@ -222,7 +243,10 @@
         "RCORE-10.T12"
       ],
       "runtime_validation": "partial_native_validation",
-      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md"
+      "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
+      "implementation_followup_evidence": [
+        "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md"
+      ]
     },
     {
       "id": "RCORE-11",
@@ -1625,5 +1649,111 @@
     "status": "partially_implemented",
     "report": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
     "scope": "Bounded P0 foundations only. Original capability rows are source-audit claims; not_run on a row means its complete acceptance has not been established. See the report for actual assertions and remaining requirements."
-  }
+  },
+  "implementation_followups": [
+    {
+      "id": "rhino-core-object-foundations-20261009",
+      "date": "2026-10-09",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01",
+        "RCORE-04",
+        "RCORE-06"
+      ],
+      "evidence": "../../../docs/validation/2026-10-09-rhino-core-object-foundations.md",
+      "scope": "Shared runtime object sessions/generations/revisions and stale selection guards in Edit, Rebuild and interactive Surface. No full chapter or original fixture completion; durable subelement mapping, all-family permissions/capabilities and worker cancellation remain open."
+    },
+    {
+      "id": "rhino-core-kernel-contract",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01",
+        "RCORE-07",
+        "RCORE-10"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+      "scope": "Selected shared basis/descriptor/working-exchange gates and exact fixtures; no complete chapter or all-P0 closure."
+    },
+    {
+      "id": "rhino-core-curve-parameters",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-curve-parameters.md",
+      "scope": "Finite full-domain native curve parameter queries and T01 sampled fixture; broader T10/History and all P0 remain open."
+    },
+    {
+      "id": "rhino-core-polycurve-partition",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-polycurve-partition.md",
+      "scope": "Authored T05 open line/rational-arc wire, reversal, working V5 partition, precommit copied report, Undo/Redo and fresh FCStd; all P0 remains open."
+    },
+    {
+      "id": "rhino-core-instance-isolation",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-instance-isolation.md",
+      "scope": "Authored T06 shared definition, mirror/nonuniform affine coordinates, B-only isolation and named atomic transform rejections; all P0 remains open."
+    },
+    {
+      "id": "rhino-core-hatch-input-gate",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-hatch-input-gate.md",
+      "scope": "Owned current Hatch NURBS preflight before covered source/copy/construction entries; full T07 and P0 remain open."
+    },
+    {
+      "id": "rhino-core-periodic-persistence",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-periodic-persistence.md",
+      "scope": "Authored RCORE-01.T09 true periodic curve plus seam/hole FCStd fixture verified; all P0 remains in progress."
+    },
+    {
+      "id": "rhino-core-subobject-ownership",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-subobject-ownership.md",
+      "scope": "Authored RCORE-01.T11 detached native support mutation owners, explicit deep-copy publication and guarded subobject lifecycle; complete P0 stays open."
+    },
+    {
+      "id": "rhino-core-delayed-publication",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-delayed-publication.md",
+      "scope": "Authored RCORE-01.T08 actual Rebuild result-publication boundary, owned outputs/source guards, GUI queue cancellation/close/options/newer request and shutdown discard; broader worker lifecycle/P0 stays open."
+    },
+    {
+      "id": "rhino-core-host-parameter-dependency",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-host-parameter-dependency.md",
+      "scope": "Authored T10 Circle/Line native durable parameter consumer with fresh guarded observed conversion, source/point/target query/basis persistence, History and lifecycle; broader conversion/P0 stays open."
+    }
+  ]
 }

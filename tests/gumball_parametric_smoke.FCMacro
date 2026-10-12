@@ -1,0 +1,217 @@
+"""Native Gumball parameter adapters retain feature type and expressions."""
+import json, math, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtWidgets, QtTest
+from pivy import coin
+sys.path.insert(0, str(Path(__file__).parent))
+from gumball_fixture import GumballUI
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'checks': [], 'feature_ids': ['OM9-INFO-020']}
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+    if not value:
+        raise AssertionError(name)
+def close(a, b, tolerance=1e-8):
+    return abs(a-b) < tolerance
+def run():
+    doc = None
+    try:
+        import OpenMatrix9Gui as native
+        report['module'] = native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc = App.newDocument('GumballParametric')
+        doc.UndoMode = 1
+        Gui.activeDocument().activeView().viewAxonometric()
+        ui = GumballUI(native)
+        ui.command('Gumball On')
+        ui.command('GumballAlignment World')
+        area = Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
+        perspective = next(sub for sub in area.subWindowList() if sub.widget().property('om9ViewSlot') == 1)
+        area.setActiveSubWindow(perspective)
+        ui.settle()
+        Gui.activeDocument().activeView().viewAxonometric()
+        cylinder = doc.addObject('Part::Cylinder', 'Cylinder')
+        cylinder.Radius = 3
+        cylinder.Height = 4
+        doc.recompute()
+        ui.select(cylinder)
+        before_undo = doc.UndoCount
+        ui.numeric('ScaleZ', '2')
+        doc.recompute()
+        report['cylinder_state'] = native.gumballState()
+        report['cylinder_observation']={'height':cylinder.Height.Value,'radius':cylinder.Radius.Value,'volume':cylinder.Shape.Volume,'undo':doc.UndoCount,'before_undo':before_undo,'transcript':ui.transcript()}
+        check('Cylinder axial scale updates durable Height and preserves Radius/type',
+              cylinder.TypeId == 'Part::Cylinder' and close(cylinder.Height.Value, 8) and
+              close(cylinder.Radius.Value, 3) and close(cylinder.Shape.Volume, math.pi*72, 1e-6) and
+              doc.UndoCount == before_undo+1)
+        doc.undo(); doc.recompute(); ui.settle()
+        check('Cylinder Undo restores dimensions', cylinder.Height.Value == 4 and cylinder.Radius.Value == 3)
+        doc.redo(); doc.recompute(); ui.settle()
+        check('Cylinder Redo survives recompute', cylinder.Height.Value == 8)
+        doc.undo(); ui.select(cylinder)
+        ui.numeric('ScaleX', '2', QtCore.Qt.ShiftModifier)
+        doc.recompute()
+        check('Cylinder Shift uniform changes Radius and Height', cylinder.Radius.Value == 6 and cylinder.Height.Value == 8)
+        cases = [
+            ('Part::Cone', {'Radius1': 2, 'Radius2': 4, 'Height': 6}, 'ScaleZ', False, {'Radius1': 2, 'Radius2': 4, 'Height': 12}),
+            ('Part::Prism', {'Circumradius': 3, 'Height': 6}, 'ScaleZ', False, {'Circumradius': 3, 'Height': 12}),
+            ('Part::Ellipsoid', {'Radius1': 2, 'Radius2': 3, 'Radius3': 4}, 'ScaleX', False, {'Radius1': 2, 'Radius2': 6, 'Radius3': 4}),
+            ('Part::Torus', {'Radius1': 8, 'Radius2': 2}, 'ScaleX', True, {'Radius1': 16, 'Radius2': 4}),
+            ('Part::Plane', {'Length': 3, 'Width': 4}, 'ScaleX', False, {'Length': 6, 'Width': 4}),
+        ]
+        for type_name, initial, handle, uniform, expected in cases:
+            obj = doc.addObject(type_name, type_name.split('::')[-1])
+            for key, value in initial.items():
+                setattr(obj, key, value)
+            doc.recompute(); ui.select(obj)
+            if type_name == 'Part::Ellipsoid':
+                # The host adjusts clipping while repainting curved geometry.
+                # Clip-plane updates must not count as navigation and dismiss
+                # the real numeric editor before it commits native parameters.
+                pos = ui.target(handle); viewport = ui.viewport; viewport.setFocus()
+                QtTest.QTest.mouseClick(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier, pos)
+                camera = Gui.activeDocument().activeView().getCameraNode()
+                camera.nearDistance = camera.nearDistance.getValue()*1.1
+                camera.farDistance = camera.farDistance.getValue()*1.1
+                native.gumballState(); ui.settle()
+                fields = [w for w in ui.main_window.findChildren(QtWidgets.QLineEdit, 'OM9GumballNumeric') if w.isVisible()]
+                assert native.gumballState()['phase'] == 2 and len(fields) == 1, 'clip-plane update cancelled numeric Scale'
+                QtTest.QTest.keyClicks(fields[0], '2')
+                QtTest.QTest.keyClick(fields[0], QtCore.Qt.Key_Return); ui.settle()
+            else:
+                ui.numeric(handle, '2', QtCore.Qt.ShiftModifier if uniform else QtCore.Qt.NoModifier)
+            doc.recompute()
+            if type_name == 'Part::Ellipsoid':
+                # Genuine perspective zoom and rotation must still cancel an
+                # uncommitted numeric gesture, without changing the model.
+                for change in ('zoom', 'rotation'):
+                    pos = ui.target(handle); viewport = ui.viewport; viewport.setFocus()
+                    QtTest.QTest.mouseClick(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier, pos)
+                    assert native.gumballState()['phase'] == 2
+                    undo = doc.UndoCount
+                    camera = Gui.activeDocument().activeView().getCameraNode()
+                    angle = camera.heightAngle.getValue(); rotation = camera.orientation.getValue()
+                    if change == 'zoom': camera.heightAngle = angle*1.05
+                    else: camera.orientation = coin.SbRotation(coin.SbVec3f(0,0,1),0.05)*rotation
+                    native.gumballState(); ui.settle()
+                    assert native.gumballState()['phase'] == 1 and doc.UndoCount == undo, change+' did not cancel numeric Scale'
+                    assert not any(w.isVisible() for w in ui.main_window.findChildren(QtWidgets.QLineEdit, 'OM9GumballNumeric'))
+                    camera.heightAngle = angle; camera.orientation = rotation
+                    native.gumballState(); ui.settle()
+            check(type_name+' scales through native parameters', obj.TypeId == type_name and obj.Shape.isValid() and
+                  all(close(getattr(obj, key).Value, value) for key, value in expected.items()))
+        driver = doc.addObject('App::FeaturePython', 'Driver')
+        driver.addProperty('App::PropertyLength', 'Dimension')
+        driver.Dimension = 3
+        box = doc.addObject('Part::Box', 'ExpressionBox')
+        box.setExpression('Length', 'Driver.Dimension')
+        box.Width = 4
+        box.Height = 5
+        # This unrelated binding must not disable length scaling.
+        box.setExpression('Width', '4 mm')
+        tool = doc.addObject('Part::Sphere', 'Tool')
+        tool.Radius = 0.5
+        tool.Placement.Base = App.Vector(1, 1, 1)
+        dependent = doc.addObject('Part::Cut', 'Dependent')
+        dependent.Base = box
+        dependent.Tool = tool
+        doc.recompute()
+        box.ViewObject.Visibility = True
+        tool.ViewObject.Visibility = False
+        dependent.ViewObject.Visibility = False
+        original_expression = box.ExpressionEngine
+        ui.select(box)
+        ui.numeric('ScaleX', '2')
+        doc.recompute()
+        report['expression_observation']={'state':native.gumballState(),'transcript':ui.transcript(),
+              'length':box.Length.Value,'width':box.Width.Value,'height':box.Height.Value,'expressions':box.ExpressionEngine,
+              'out_list':[obj.Name for obj in box.OutList],'box_state':list(box.State),'dependent_state':list(dependent.State),
+              'dependent_base':getattr(dependent.Base,'Name',None),'dependent_tool':getattr(dependent.Tool,'Name',None),
+              'valid':box.Shape.isValid(),'dependent_valid':dependent.Shape.isValid(),'volume':box.Shape.Volume,
+              'dependent_volume':dependent.Shape.Volume,'expected_cut_volume':box.Shape.cut(tool.Shape).Volume,
+              'undo':doc.UndoCount,'redo':doc.RedoCount}
+        check('expression-driven Box stays its native owner and retains dependencies',
+              box.TypeId == 'Part::Box' and box.Length.Value == 6 and driver in box.OutList and
+              dependent.Base == box and dependent.Tool == tool and dependent.Shape.isValid() and
+              close(dependent.Shape.Volume, box.Shape.cut(tool.Shape).Volume, 1e-6))
+        check('only touched expression changes', ('Width', '4 mm') in box.ExpressionEngine)
+        doc.undo(); doc.recompute(); ui.settle()
+        check('expression Scale Undo restores original binding', box.ExpressionEngine == original_expression and box.Length.Value == 3)
+        doc.redo(); doc.recompute(); ui.settle()
+        check('expression Scale Redo restores durable doubled dimension', box.Length.Value == 6)
+        driver.Dimension = 7
+        doc.recompute()
+        check('later expression driver edits retain Gumball scale', box.Length.Value == 14 and box.Width.Value == 4 and box.Shape.isValid())
+        saved_expression=box.ExpressionEngine
+        saved_path=out/'parametric-expression.FCStd'
+        doc.saveAs(str(saved_path));App.closeDocument(doc.Name);doc=None
+        doc=App.openDocument(str(saved_path));doc.UndoMode=1
+        box=doc.getObject('ExpressionBox');driver=doc.getObject('Driver');dependent=doc.getObject('Dependent');tool=doc.getObject('Tool')
+        for obj in doc.Objects:obj.touch()
+        doc.recompute()
+        check('saved expression Scale reopens as native Box with unchanged bound formula and dependency',
+              box.TypeId=='Part::Box' and box.ExpressionEngine==saved_expression and box.Length.Value==14 and
+              dependent.Base==box and dependent.Tool==tool and driver in box.OutList)
+        doc.openTransaction('Edit reopened expression driver');driver.Dimension=9;doc.commitTransaction();doc.recompute()
+        check('reopened expression driver edits retain the native scale factor',box.Length.Value==18 and box.Width.Value==4 and
+              dependent.Shape.isValid() and close(dependent.Shape.Volume,box.Shape.cut(tool.Shape).Volume,1e-6))
+        doc.undo();doc.recompute()
+        check('reopened driver Undo preserves scaled expression',driver.Dimension.Value==7 and box.Length.Value==14 and box.ExpressionEngine==saved_expression)
+        doc.redo();doc.recompute()
+        check('reopened driver Redo preserves scaled expression',driver.Dimension.Value==9 and box.Length.Value==18 and box.ExpressionEngine==saved_expression)
+        # Matching current geometry cannot authorize flattening the future
+        # formula in a callback after recompute and report publication.
+        late_box=doc.addObject('Part::Box','LatePrimitiveExpression')
+        late_box.setExpression('Length','Driver.Dimension');late_box.Width=4;late_box.Height=5
+        doc.recompute();ui.select(late_box)
+        names={obj.Name for obj in doc.Objects};properties=set(late_box.PropertiesList)
+        before=(doc.UndoCount,doc.RedoCount,late_box.ExpressionEngine,late_box.Length.Value,
+                late_box.Width.Value,late_box.Height.Value,late_box.Placement,late_box.Visibility)
+        before_driver=driver.Dimension.Value
+        class LatePrimitiveExpressionObserver:
+            fired=False
+            def slotChangedObject(self,obj,prop):
+                if not self.fired and obj==late_box and prop=='OM9GumballReport':
+                    self.fired=True
+                    report['late_expression_observation']={'length':obj.Length.Value,'expressions':obj.ExpressionEngine}
+                    obj.setExpression('Length',str(obj.Length.Value)+' mm')
+        observer=LatePrimitiveExpressionObserver();App.addDocumentObserver(observer)
+        try:
+            ui.numeric('ScaleX','2')
+            report['late_expression_rejection_state']=native.gumballState()
+            report['late_expression_rejection_transcript']=ui.transcript()
+        finally:App.removeDocumentObserver(observer)
+        doc.recompute();ui.settle()
+        report['late_expression_after']={'undo':doc.UndoCount,'redo':doc.RedoCount,'expected_undo':before[0],
+              'expected_redo':before[1],'names':sorted(obj.Name for obj in doc.Objects),'expected_names':sorted(names),
+              'properties':sorted(late_box.PropertiesList),'expected_properties':sorted(properties),
+              'expressions':late_box.ExpressionEngine,'expected_expressions':before[2],
+              'dimensions':[late_box.Length.Value,late_box.Width.Value,late_box.Height.Value],'expected_dimensions':list(before[3:6]),
+              'placement':list(late_box.Placement.toMatrix().A),'expected_placement':list(before[6].toMatrix().A),
+              'visibility':late_box.Visibility,'expected_visibility':before[7],
+              'driver':driver.Dimension.Value,'expected_driver':before_driver,'out_list':[obj.Name for obj in late_box.OutList]}
+        rejection=report['late_expression_rejection_state'].get('unresolved','')+' '+report['late_expression_rejection_transcript']
+        check('late primitive callback rejects same-value expression flattening after report',observer.fired and
+              'Gumball source changed during publication' in rejection)
+        check('late primitive callback rollback preserves Undo Redo and object properties',
+              {obj.Name for obj in doc.Objects}==names and set(late_box.PropertiesList)==properties and
+              (doc.UndoCount,doc.RedoCount)==before[:2])
+        check('late primitive callback rollback preserves bound formula dimensions and Placement',
+              (late_box.ExpressionEngine,late_box.Length.Value,late_box.Width.Value,late_box.Height.Value,
+               late_box.Placement,late_box.Visibility)==before[2:])
+        check('late primitive callback rollback preserves the future native driver dependency',
+              driver in late_box.OutList and driver.Dimension.Value==before_driver)
+        report['saved']=str(saved_path)
+        report['ok'] = True
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+        if 'ui' in locals():
+            report['failure_state']=native.gumballState();report['failure_transcript']=ui.transcript()
+    finally:
+        (out/'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        if doc is not None:
+            App.closeDocument(doc.Name)
+        QtCore.QTimer.singleShot(100, QtWidgets.QApplication.quit)
+QtCore.QTimer.singleShot(1500, run)

@@ -22,6 +22,10 @@ if(-not (Test-Path -LiteralPath $hostRoot)){
 }
 . (Join-Path $PSScriptRoot 'stock-host.ps1')
 $stock=Find-OM9StockHost $hostRoot
+. (Join-Path $PSScriptRoot 'gui-profile.ps1')
+# Coin/FreeCAD import OPENGL32.dll; Qt must load this same bundled Mesa alias.
+# Deploy only into this run's disposable, checksum-verified host extraction.
+Initialize-OM9CISoftwareRenderer $stock $hostRoot|Out-Null
 $python=Join-Path $source 'tools/ci/.pixi/envs/default/python.exe'
 $prefix=Join-Path $source 'tools/ci/.pixi/envs/default/Library'
 & $python (Join-Path $PSScriptRoot 'prepare_sdk.py') --root $Root --host $stock

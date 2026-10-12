@@ -1,0 +1,667 @@
+{
+  "schema_version": 1,
+  "checkpoint": "rhino-core-hatch-input-gate",
+  "date": "2026-10-10T03:32:43+07:00",
+  "parent_commit": "32a72a6",
+  "p0_status": "in_progress",
+  "complete_fixtures": [],
+  "production_changes": true,
+  "native_module": {
+    "path": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+    "sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+  },
+  "rust": {
+    "passed": 541,
+    "hatch_passed": 18,
+    "exit": 0,
+    "clippy_exit": 0,
+    "clippy_test_warning": "manual_dangling_ptr"
+  },
+  "python": {
+    "passed": 49,
+    "skipped": 1,
+    "exit": 0
+  },
+  "native": {
+    "checks": 27,
+    "regression_suites": [
+      "Merge",
+      "HatchCurrent",
+      "HatchLoops",
+      "HatchLoopEdit",
+      "HatchAffine"
+    ],
+    "build_exit": 0,
+    "run_exit": 0,
+    "ctest_exit": 0,
+    "executable": {
+      "path": "H:\\FreeCAD-src\\build\\rcore-native\\ThreeDmHatchInputGateTests.exe",
+      "sha256": "4015deeed4e1cbbeb8034ae30a18cf880b4e54c9f18cf6ff934197446357b700"
+    },
+    "report": {
+      "cases": [
+        {
+          "error": "Invalid Hatch loop basis input: invalid control points, weights, knots or domain",
+          "name": "bad basis before native source validation"
+        },
+        {
+          "error": "Invalid Hatch loop basis input: invalid control points, weights, knots or domain",
+          "name": "selected bad basis before archive read"
+        },
+        {
+          "error": "Invalid Hatch loop basis input: invalid control points, weights, knots or domain",
+          "name": "duplicate bad basis before archive read"
+        },
+        {
+          "error": "Invalid Hatch loop basis input: invalid control points, weights, knots or domain",
+          "name": "dependency bad basis before archive read"
+        },
+        {
+          "error": "Invalid Hatch loop basis input: invalid control points, weights, knots or domain",
+          "name": "independent copy bad basis before archive read or clone"
+        },
+        {
+          "error": "Invalid Hatch loop basis input: invalid control points, weights, knots or domain",
+          "name": "later bad basis rejects before earlier native reconstruction"
+        },
+        {
+          "error": "Invalid Hatch loop basis input: invalid control points, weights, knots or domain",
+          "name": "multiple-source bad basis before native merge"
+        },
+        {
+          "error": "file_size: The system cannot find the file specified.: \"H:/FreeCAD-src/build/rcore-native-temp/qt_temp-PnzPdT\\absent.3dm\"",
+          "name": "valid basis source access"
+        }
+      ],
+      "checks": [
+        {
+          "name": "isolated native fixture directory",
+          "passed": true
+        },
+        {
+          "name": "existing target created",
+          "passed": true
+        },
+        {
+          "name": "sentinel opened",
+          "passed": true
+        },
+        {
+          "name": "valid native representation passes portable preflight",
+          "passed": true
+        },
+        {
+          "name": "bad basis before native source validation",
+          "passed": true
+        },
+        {
+          "name": "invalid source remains untouched",
+          "passed": true
+        },
+        {
+          "name": "selected bad basis before archive read",
+          "passed": true
+        },
+        {
+          "name": "sentinel opened",
+          "passed": true
+        },
+        {
+          "name": "selected rejection preserves target bytes",
+          "passed": true
+        },
+        {
+          "name": "duplicate bad basis before archive read",
+          "passed": true
+        },
+        {
+          "name": "sentinel opened",
+          "passed": true
+        },
+        {
+          "name": "duplicate rejection preserves target bytes",
+          "passed": true
+        },
+        {
+          "name": "dependency bad basis before archive read",
+          "passed": true
+        },
+        {
+          "name": "sentinel opened",
+          "passed": true
+        },
+        {
+          "name": "dependency rejection preserves target bytes",
+          "passed": true
+        },
+        {
+          "name": "independent copy bad basis before archive read or clone",
+          "passed": true
+        },
+        {
+          "name": "sentinel opened",
+          "passed": true
+        },
+        {
+          "name": "independent rejection preserves target bytes",
+          "passed": true
+        },
+        {
+          "name": "later bad basis rejects before earlier native reconstruction",
+          "passed": true
+        },
+        {
+          "name": "sentinel opened",
+          "passed": true
+        },
+        {
+          "name": "later-row rejection preserves target bytes",
+          "passed": true
+        },
+        {
+          "name": "multiple-source bad basis before native merge",
+          "passed": true
+        },
+        {
+          "name": "sentinel opened",
+          "passed": true
+        },
+        {
+          "name": "multiple-source rejection preserves target bytes",
+          "passed": true
+        },
+        {
+          "name": "valid basis reaches absent source error",
+          "passed": true
+        },
+        {
+          "name": "sentinel opened",
+          "passed": true
+        },
+        {
+          "name": "source absent and destination intact after all native calls",
+          "passed": true
+        }
+      ],
+      "error": ""
+    }
+  },
+  "sdk": {
+    "configure_exit": 0,
+    "build_exit": 0
+  },
+  "accepted_runs": [
+    {
+      "suite": "Hatch gate",
+      "count": 13,
+      "process_exit": 0,
+      "process_exit_evidence": "Observed by primary agent tool completion; no per-run exit manifest",
+      "path": "build/merge_replay-1/a74c75a8338a4b3ba157c8639025dbfd/results.json",
+      "result_sha256": "d5740bc57367c37651292bf25d91a6b41efed3ce039a6abff8313ec4997741f6",
+      "module_proof": "build/merge_replay-1/a74c75a8338a4b3ba157c8639025dbfd/merge-native-module.json",
+      "module_proof_sha256": "dcd38d1f0e9085471e077c6778ff5e69cbf5061c681bf6869a7eec4408e9728b",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\a74c75a8338a4b3ba157c8639025dbfd\\merge-native-module.json",
+          "sha256": "dcd38d1f0e9085471e077c6778ff5e69cbf5061c681bf6869a7eec4408e9728b"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\a74c75a8338a4b3ba157c8639025dbfd\\progress.json",
+          "sha256": "340432a19431a981c3b0ff2b00a0c2a13db359f98b10fdc93e2ee01be8decf95"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\a74c75a8338a4b3ba157c8639025dbfd\\results.json",
+          "sha256": "d5740bc57367c37651292bf25d91a6b41efed3ce039a6abff8313ec4997741f6"
+        }
+      ],
+      "macro": "rhino_core_hatch_input_gate_smoke.FCMacro",
+      "macro_sha256": "7b5e08e55d83886fbd983eeb76ad2f0dc50bbbae3779865532358ef57b7c5413",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+    },
+    {
+      "suite": "Hatch loop edit",
+      "count": 132,
+      "process_exit": 0,
+      "process_exit_evidence": "Observed by primary agent tool completion; no per-run exit manifest",
+      "path": "build/merge_replay-1/a73d079ddc5b4d9a89d9225c27697adb/results.json",
+      "result_sha256": "cfaeb8dd69a6d68c5409ba01858a4905a86aed0fd5ca5c3fcc92150c6b6a2e20",
+      "module_proof": "build/merge_replay-1/a73d079ddc5b4d9a89d9225c27697adb/merge-native-module.json",
+      "module_proof_sha256": "d3390f10508630612894ef1a7137b85e0655ad329d63f3646227ed7d4aa0f577",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\a73d079ddc5b4d9a89d9225c27697adb\\cm.3dm",
+          "sha256": "e71d73e0d73aeb8a53a55ba73a892fedadaa858f3f6ae6d5b41d23b741f2980a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\a73d079ddc5b4d9a89d9225c27697adb\\cm.FCStd",
+          "sha256": "c526ecaa4c165f44aaebca584e4f79decc460489211d3dc19e3c371ec1e8515a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\a73d079ddc5b4d9a89d9225c27697adb\\merge-native-module.json",
+          "sha256": "d3390f10508630612894ef1a7137b85e0655ad329d63f3646227ed7d4aa0f577"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\a73d079ddc5b4d9a89d9225c27697adb\\mm.3dm",
+          "sha256": "5f6cd1f2d23f61fce819b1dbb70a64d47ad5869f22e605abe3d4a15854f731b8"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\a73d079ddc5b4d9a89d9225c27697adb\\mm.FCStd",
+          "sha256": "48810628d52ea88483e9540ea387de37ec57dd5538e616f81088281bde625fa4"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\a73d079ddc5b4d9a89d9225c27697adb\\results.json",
+          "sha256": "cfaeb8dd69a6d68c5409ba01858a4905a86aed0fd5ca5c3fcc92150c6b6a2e20"
+        }
+      ],
+      "macro": "three_dm_hatch_loop_edit_smoke.FCMacro",
+      "macro_sha256": "9fb6b07327a160ceae93aa87e0c3e460e73bbd8dbfe91134bfbc3f3f10f842c2",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+    },
+    {
+      "suite": "Shared Hatch edit",
+      "count": 12,
+      "process_exit": 0,
+      "process_exit_evidence": "Observed by primary agent tool completion; no per-run exit manifest",
+      "path": "build/merge_replay-1/45b4bd21e11a481391bdb27f73669e35/results.json",
+      "result_sha256": "54d141d4addb00b7db69c07ca08f7ad81f01af4a521787278f4274d4ffc6d585",
+      "module_proof": "build/merge_replay-1/45b4bd21e11a481391bdb27f73669e35/merge-native-module.json",
+      "module_proof_sha256": "709e4130d0ad3fa3b0eafe92d4180f4d31ceb4d737629aa9f2b2c8f82fc45f99",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\45b4bd21e11a481391bdb27f73669e35\\cm.3dm",
+          "sha256": "97dcf50994ba4adde78f8c1254dc6355b5ea6f3463b4e9b15bb10e9e93dbee24"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\45b4bd21e11a481391bdb27f73669e35\\cm.FCStd",
+          "sha256": "f79947ce9516e10d5d2a3f0e1daf7107c5db770488baa549d9bd1de3f8c0f988"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\45b4bd21e11a481391bdb27f73669e35\\merge-native-module.json",
+          "sha256": "709e4130d0ad3fa3b0eafe92d4180f4d31ceb4d737629aa9f2b2c8f82fc45f99"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\45b4bd21e11a481391bdb27f73669e35\\mm.3dm",
+          "sha256": "a681e25a4d7b7b2037811ca65cd2ea5848738684e49acc13385f6df74e5b188a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\45b4bd21e11a481391bdb27f73669e35\\mm.FCStd",
+          "sha256": "353c4ccde65167d79b58bed201a6f408a643c1d2c791bfca8e647166a83b01f6"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\45b4bd21e11a481391bdb27f73669e35\\results.json",
+          "sha256": "54d141d4addb00b7db69c07ca08f7ad81f01af4a521787278f4274d4ffc6d585"
+        }
+      ],
+      "macro": "three_dm_hatch_shared_loop_edit_smoke.FCMacro",
+      "macro_sha256": "dcd7f961f1c12a63b190dca3d216d42976408669e70c64c5723fa3d96ae27aed",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+    },
+    {
+      "suite": "Instance isolation",
+      "count": 69,
+      "process_exit": 0,
+      "process_exit_evidence": "Observed by primary agent tool completion; no per-run exit manifest",
+      "path": "build/merge_replay-1/4fcf3558f8d34548a41729e67498aee4/results.json",
+      "result_sha256": "60a4bbfb45b4097f16eedd16276caf0009331b0024f9081240246e3aa1e50ad0",
+      "module_proof": "build/merge_replay-1/4fcf3558f8d34548a41729e67498aee4/merge-native-module.json",
+      "module_proof_sha256": "52f3f2eca01146c148795e5168eef20a1448827f3bbb67a53713634e256c176f",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4fcf3558f8d34548a41729e67498aee4\\edited-structural.3dm",
+          "sha256": "7fe1cd59e765ec096802c61c8452b314a8732a3cf4783e4d502a0fcb989c6a2e"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4fcf3558f8d34548a41729e67498aee4\\initial-structural.3dm",
+          "sha256": "1e241703c1f05d4c38c006405be397735fed808a491553e5a59f576fc5bf77ac"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4fcf3558f8d34548a41729e67498aee4\\merge-native-module.json",
+          "sha256": "52f3f2eca01146c148795e5168eef20a1448827f3bbb67a53713634e256c176f"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4fcf3558f8d34548a41729e67498aee4\\progress.json",
+          "sha256": "94192fe73a4d9ed00cd024ebd2dbe35342261aea92804a9f23a0100e909a5106"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4fcf3558f8d34548a41729e67498aee4\\results.json",
+          "sha256": "60a4bbfb45b4097f16eedd16276caf0009331b0024f9081240246e3aa1e50ad0"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4fcf3558f8d34548a41729e67498aee4\\shared-instances.FCStd",
+          "sha256": "aa0431e3794ba00391a7099aebc7f919835f0d1babc45c7f5a5a792588f211a8"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4fcf3558f8d34548a41729e67498aee4\\working-current.3dm",
+          "sha256": "98c0b466f2a4493d562d0254324fcbc757076a0edd943293a73bcc4c511a5fd1"
+        }
+      ],
+      "macro": "rhino_core_instance_isolation_smoke.FCMacro",
+      "macro_sha256": "96062e6a19e7c14d088c818ba9d68fe64a597bd1282aa5d03d42ae9560e4a9fe",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+    },
+    {
+      "suite": "Builder History",
+      "count": 43,
+      "process_exit": 0,
+      "process_exit_evidence": "Observed by primary agent tool completion; no per-run exit manifest",
+      "path": "build/merge_replay-1/58e93b31e04e4d27bb2af8923ce868f8/results.json",
+      "result_sha256": "ef2250f50c311c735f79b5a6f09739dee14b6cbd009c453437b0c21912791871",
+      "module_proof": "build/merge_replay-1/58e93b31e04e4d27bb2af8923ce868f8/merge-native-module.json",
+      "module_proof_sha256": "a204114782fbf4dec4128afacb06b9441cd1c2ff7b651634ec5882854e85e406",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\58e93b31e04e4d27bb2af8923ce868f8\\builder-history-missing.FCStd",
+          "sha256": "4701557e66e686d5e27fc22001ed1c55d105b016fda0971032e88c2fe5de6db7"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\58e93b31e04e4d27bb2af8923ce868f8\\builder-history.FCStd",
+          "sha256": "3ca6d60acc63d0417b4be4b0e639f1e447e2e1566c78827c4ff1700e5ed06217"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\58e93b31e04e4d27bb2af8923ce868f8\\merge-native-module.json",
+          "sha256": "a204114782fbf4dec4128afacb06b9441cd1c2ff7b651634ec5882854e85e406"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\58e93b31e04e4d27bb2af8923ce868f8\\results.json",
+          "sha256": "ef2250f50c311c735f79b5a6f09739dee14b6cbd009c453437b0c21912791871"
+        }
+      ],
+      "macro": "builder_history_smoke.FCMacro",
+      "macro_sha256": "14065f187101514008cdd2257a621e5b2a64a19152a1c462f1b06be7485980ae",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+    }
+  ],
+  "application_assertions": 269,
+  "source_files": [
+    {
+      "path": "Gui/RustBridge.h",
+      "sha256": "c257949959623fb56b4be879eaa25d1fa83666d8ba3ab3d528f018d1307c2edb"
+    },
+    {
+      "path": "Gui/ThreeDmHatch.cpp",
+      "sha256": "6d037bd43f2cef83f82570a9bc688f836c8f85d32637ba387f9559e72251a70c"
+    },
+    {
+      "path": "Gui/ThreeDmHatch.h",
+      "sha256": "c2c61d22e984312783257b5ca2e13c4bc4e7a8845a606e599aaccd009c963196"
+    },
+    {
+      "path": "Gui/ThreeDmHatchLoopEdit.cpp",
+      "sha256": "d3c038bccabbe2f93974fa553ddb8d5395d5966174473925ea29e1161480976d"
+    },
+    {
+      "path": "Gui/ThreeDmMerge.cpp",
+      "sha256": "775fbc0ead88c3dd23606a640f00fe4dddc585b6bae3f40bf9af12a7d1539ac9"
+    },
+    {
+      "path": "Gui/ThreeDmPython.cpp",
+      "sha256": "52a81df116e41367fd006504bb8d677dd09c30e3f9e49551d3db52b6f8402a11"
+    },
+    {
+      "path": "rust/src/builder_history.rs",
+      "sha256": "836ebdfd672d8114fa421dcb2ab3173006b94a9618de7586a170b4b210d0b1a8"
+    },
+    {
+      "path": "rust/src/core_3dm_archive.rs",
+      "sha256": "faaada334f4f7b4d0a7e1d6c52dedf42eef8965f60dec45fd6b8befc9f60f154"
+    },
+    {
+      "path": "rust/src/hatch_loop_input.rs",
+      "sha256": "41bed3ca4109bd8f032820253b201b469f01f291a27933575f39ae60cd07261d"
+    },
+    {
+      "path": "rust/src/lib.rs",
+      "sha256": "7921d71840ad56279c252d79a327bc851a0e34431bac036e4e9a16f7798a4e2b"
+    },
+    {
+      "path": "rust/tests/hatch_loop_input.rs",
+      "sha256": "99361aed9d613b3270ef7c3ab02547bcddf86c9e0c97a0aeb46829a592f09f6c"
+    },
+    {
+      "path": "tests/native/CMakeLists.txt",
+      "sha256": "507104fefe3472b8bfe2c7dc8f82220d0a12a295851649d9e024a5ced731e2a9"
+    },
+    {
+      "path": "tests/native/rhino_core_hatch_input_gate.cpp",
+      "sha256": "54a9d74c14c00fe22a5bdae6e4a23e5131ec6865c65c9a74e073d052ff2788b4"
+    },
+    {
+      "path": "tests/rhino_core_hatch_input_gate_smoke.FCMacro",
+      "sha256": "7b5e08e55d83886fbd983eeb76ad2f0dc50bbbae3779865532358ef57b7c5413"
+    }
+  ],
+  "source_reviews": [
+    {
+      "path": "docs/reviews/2026-10-10-hatch-input-rust-review.md",
+      "sha256": "05aa17232ce9610fd167f6ad624fb133c70c7c48fed2087aaceeaf0c3c9f2030"
+    },
+    {
+      "path": "docs/reviews/2026-10-10-hatch-input-native-review.md",
+      "sha256": "79cf89eda15c00bead18804690723d8c1d97d79dc095874f96eabaa713c087eb"
+    }
+  ],
+  "review_fingerprints": 56,
+  "artifacts": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-affine-control-build.log",
+      "sha256": "7b07d9647b0d730838bbaa7773b8b5a92871a11b0a7870c3f2f76706a357d5c8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-affine-control-ctest.log",
+      "sha256": "cd59ac199872a6bdf7e7b54043819b8eeee27ddc327dd03654e028534ac5d902"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-affine-control-exits.json",
+      "sha256": "1a9007ee0d1b93d78bcb1a65ee37ec8101b99a7f6501b9d76ff23e197ee89a2b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-clippy.log",
+      "sha256": "2c9f9e17026bf9ef27e71cee643af53d3310f82c9647c71a85468eb4a8471edd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-depth-green-exit.json",
+      "sha256": "8e1c27e07362eb9798b515ea02b0dc3ef4682ff85da284264f0d210e38fd9710"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-depth-green-rust.log",
+      "sha256": "4d4b5c2bbedb8b55728b78975fde9453e7b89cc2b488b11a660e4584db6a064e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-depth-red-exit.json",
+      "sha256": "40f5db64ba3684bacc320ae8f5206b1312a76e2d915be838fe480866f80cff66"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-depth-red-rust.log",
+      "sha256": "10a5fcb95ed9f6e23bd6eba1a6ffcdd83cc532990d4b68f56bba681aca3d95e7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-final-exit.json",
+      "sha256": "8e1c27e07362eb9798b515ea02b0dc3ef4682ff85da284264f0d210e38fd9710"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-final-rust.log",
+      "sha256": "5b212495df0682b0e3f3b5e62329bffcba8196ace91f7d4f367b9c4d27d52fbc"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-full-exit.json",
+      "sha256": "8e1c27e07362eb9798b515ea02b0dc3ef4682ff85da284264f0d210e38fd9710"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-full-rust.log",
+      "sha256": "13ada5773aa94c80d4b9cb58d6bf58d5859495fc02bc2b847f70af084578cea6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-green-exit.json",
+      "sha256": "8e1c27e07362eb9798b515ea02b0dc3ef4682ff85da284264f0d210e38fd9710"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-green-rust.log",
+      "sha256": "08d433ffbeaa470d195d554e5f3022d7e35af12994f957a7fe0fe30f5c91096f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-native-build.log",
+      "sha256": "b7cd0d63e76c6f6954ec03a3402e40e0d10fcc26386002792badf444339232a0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-native-ctest.log",
+      "sha256": "1cbcb2385565052fa0a6391b324c405a4df5f9c2fff5db5b5c2fe9eb04fd1efd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-native-exits.json",
+      "sha256": "3cdb1f83698e3524799b49ef37a930ccd3a7409e736eee3373f128147ad674f3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-native-final-build.log",
+      "sha256": "0408bf9321b46547675eda11889ac3143ab8c1448cf871ce7c49028832ab8233"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-native-final-ctest.log",
+      "sha256": "b27e5c880039ed3cf5214db7c52a278ffc9b662cfb4706bfddd503c55597f705"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-native-final-exits.json",
+      "sha256": "11db90713accd2e22917cf047e0e5408368bbf320fdecf77e30e461480cba241"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-native-final-gate.log",
+      "sha256": "a4505126fa82abbd2f3da17667d1415f954a5e45147ec1ba4797d50208f7743c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-native-final-results.json",
+      "sha256": "58ab92e62065354bce415f722cb2fadbc6217ea5d634840fcae866778165c100"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-native-gate.log",
+      "sha256": "7bd5c6833d21b13b30eb04eba89f929ad1e6645ced141d1445ac0f920fe6738f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-native-results.json",
+      "sha256": "5560fc14d5655ff179926eaec982a60f45ba249e885beece42034646c928233b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-public-audit.log",
+      "sha256": "b5cc6c66344ad493e4ade55fe36717065266c97674b580127dfef395c8f219ff"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-python.log",
+      "sha256": "7439a0cb320ce43c0ff794b56a852be97d6406749299f2c8af6466dbf5d391d2"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-red-exit.json",
+      "sha256": "40f5db64ba3684bacc320ae8f5206b1312a76e2d915be838fe480866f80cff66"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-red-rust.log",
+      "sha256": "b5f720a66144622d3ff8468d0a715fb2949a3b4713eaf8e4d666dfe6be046b42"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-sdk-final-build.log",
+      "sha256": "fd542ca568f006e0eb37479892e31a073410698779c10a7ba9cd42f3597a3bb0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-sdk-final-configure.log",
+      "sha256": "668bd9aa49e39f1d121c3bba199a2243e3014601563fa34ed030382d24d9b7a6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-sdk-final-exits.json",
+      "sha256": "b7c326b7db3d5c25dc367c8d81d5683469405523df279c416ff29d962ddfc7d1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-sdk-green-build.log",
+      "sha256": "66776e4938e38a8b2621dad2fb913d3f4c55a5864e0739aa79fd0204301cf11e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-sdk-green-configure.log",
+      "sha256": "0ffac03e615c105cb2a88fa9fd5e7026caa88997aa0291f5093a1bc8f37dda5b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-sdk-green-exits.json",
+      "sha256": "b7c326b7db3d5c25dc367c8d81d5683469405523df279c416ff29d962ddfc7d1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-hatch-tool-exits.json",
+      "sha256": "400c60c08ff2f168b7512205d121fecb35ba59f4ce500daa42783ceeccb16975"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\rcore-native-temp\\om9-hatch-shared-mm.3dm",
+      "sha256": "583bc82bc47491fc38e4de7e39c25e869fe5abe101290be3b25edfa0936ea642"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\rcore-native-temp\\om9-hatch-shared-cm.3dm",
+      "sha256": "0de750976540491e52d9a217764caa9879b9d4e9c2fb158207686bc01f165e86"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7ab0806026354619863b6b4bd0094a07\\merge-native-module.json",
+      "sha256": "3510e5d70ee498a69c45df813a852b69593b99a8999f89dbb5c24720fd8d392a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7ab0806026354619863b6b4bd0094a07\\progress.json",
+      "sha256": "105c6abbf402e50b2d737c7a6bf8f9f46234cf62904992eb62913992c4ebc237"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\7ab0806026354619863b6b4bd0094a07\\results.json",
+      "sha256": "3695a632de02ff7b7ab892d24525cba30fb2bf05652d84eb995d2742f861c256"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b7a1db268a7f4ae9b3020f93dffee64e\\merge-native-module.json",
+      "sha256": "709e4130d0ad3fa3b0eafe92d4180f4d31ceb4d737629aa9f2b2c8f82fc45f99"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\b7a1db268a7f4ae9b3020f93dffee64e\\results.json",
+      "sha256": "876e398850c262a49ead79335628944ea4f6901d48aeade57d1d5f29cfa84e5c"
+    }
+  ],
+  "failed_runs": [
+    {
+      "path": "build/merge_replay-1/7ab0806026354619863b6b4bd0094a07",
+      "classification": "actual missing input-order RED"
+    },
+    {
+      "path": "build/merge_replay-1/b7a1db268a7f4ae9b3020f93dffee64e",
+      "classification": "excluded missing authored shared archive;0 checks; unchanged macro passed after existing generator ran"
+    },
+    {
+      "artifact": "p0-hatch-native-*",
+      "classification": "introduced optional Qt key insertion regression; retained failed logs"
+    },
+    {
+      "artifact": "p0-hatch-depth-red-*",
+      "classification": "introduced parser-depth regression; native63-parent valid control rejected"
+    },
+    {
+      "artifact": "p0-hatch-red-*",
+      "classification": "portable behavior stub RED13fail3pass"
+    }
+  ],
+  "spec_package": {
+    "manifest_entries": 664,
+    "manifest_sha256": "b6a22914b550785c0839c6e08890513085163271a26d40a9c70d001f00168458",
+    "json_yaml_equal": true,
+    "catalog_status_changes": [],
+    "command_capability_changes": []
+  },
+  "public_source_audit": {
+    "exit": 0,
+    "raw_log": "H:\\FreeCAD-src\\build\\p0-hatch-public-audit.log",
+    "raw_log_sha256": "b5cc6c66344ad493e4ade55fe36717065266c97674b580127dfef395c8f219ff",
+    "result": {
+      "source_files": 2140,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    }
+  },
+  "limits": [
+    "Partial T07 only: raw archive parser, proxy/member/trim wrappers, all native allocation boundaries and other factories remain open.",
+    "Owned JSON/count/logical byte limits are not aggregate native/process/worker budgets.",
+    "Native caller supplies live initialized immutable readable allocation; no pointer retained; ABI guards cannot establish accessibility.",
+    "Existing native non-NURBS numeric/class/source/topology validation is retained; gate certifies only bounded current NURBS admission.",
+    "Expanded ghost-pole positive control and compact periodic preservation are not certified.",
+    "T08 delayed completion/release, T09 true periodic FCStd, T10 durable host query and T11 explicit mutation-owner lifecycle remain open."
+  ]
+}

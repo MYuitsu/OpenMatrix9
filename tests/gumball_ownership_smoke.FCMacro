@@ -1,0 +1,263 @@
+"""Real Gumball publication on native occurrences, groups and discrete owners."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part, Mesh, Points
+from PySide6 import QtCore, QtWidgets, QtTest
+sys.path.insert(0, str(Path(__file__).parent))
+from gumball_fixture import GumballUI
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'checks': [],'feature_ids':['OM9-INFO-020','OM9-INFO-021','OM9-INFO-022']}
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+    if not value: raise AssertionError(name)
+def near(a, b): return abs(a-b) < 1e-8
+def closed_solid_geometry_equivalent(actual, expected):
+    # Native Undo may rebuild the TopoDS identity. Compare the closed solid's
+    # geometry independently, including both native Boolean intersections.
+    if actual.isNull() or expected.isNull() or not actual.isValid() or not expected.isValid():return False
+    if actual.ShapeType!='Solid' or expected.ShapeType!='Solid' or not actual.isClosed() or not expected.isClosed():return False
+    topology=('Solids','Shells','Faces','Wires','Edges','Vertexes')
+    if any(len(getattr(actual,key))!=len(getattr(expected,key)) for key in topology):return False
+    bounds=('XMin','YMin','ZMin','XMax','YMax','ZMax','XLength','YLength','ZLength')
+    if any(not near(getattr(actual.BoundBox,key),getattr(expected.BoundBox,key)) for key in bounds):return False
+    if any(not near(getattr(actual,key),getattr(expected,key)) for key in ('Volume','Area','Length')):return False
+    actual_vertices=sorted([list(vertex.Point) for vertex in actual.Vertexes])
+    expected_vertices=sorted([list(vertex.Point) for vertex in expected.Vertexes])
+    if any(not near(a,b) for actual_vertex,expected_vertex in zip(actual_vertices,expected_vertices)
+           for a,b in zip(actual_vertex,expected_vertex)):return False
+    forward=actual.common(expected);reverse=expected.common(actual)
+    return (not forward.isNull() and not reverse.isNull() and forward.isValid() and reverse.isValid() and
+            near(forward.Volume,actual.Volume) and near(forward.Volume,expected.Volume) and
+            near(reverse.Volume,actual.Volume) and near(reverse.Volume,expected.Volume))
+def shape_diagnostic(shape):
+    bounds=shape.BoundBox
+    result={'null':shape.isNull(),'valid':shape.isValid(),'shape_type':shape.ShapeType,
+            'volume':shape.Volume,'area':shape.Area,'length':shape.Length,
+            'bounds':[bounds.XMin,bounds.YMin,bounds.ZMin,bounds.XMax,bounds.YMax,bounds.ZMax,
+                      bounds.XLength,bounds.YLength,bounds.ZLength],
+            'topology':{'solids':len(shape.Solids),'shells':len(shape.Shells),'faces':len(shape.Faces),
+                        'wires':len(shape.Wires),'edges':len(shape.Edges),'vertices':len(shape.Vertexes)},
+            'vertices':sorted([list(vertex.Point) for vertex in shape.Vertexes]),
+            'placement':{'base':list(shape.Placement.Base),'rotation':list(shape.Placement.Rotation.Q)}}
+    try:result['hash_code']=shape.hashCode()
+    except Exception as exc:result['hash_code_error']=str(exc)
+    return result
+def ownership_diagnostic(label, ui, doc, group, child):
+    def placement_facts(placement):
+        return None if placement is None else {'base':list(placement.Base),'rotation':list(placement.Rotation.Q)}
+    def owner(obj):
+        placement = getattr(obj,'Placement',None)
+        global_placement = obj.getGlobalPlacement() if hasattr(obj,'getGlobalPlacement') else None
+        return {'name':obj.Name,'id':obj.ID,'type':obj.TypeId,
+                'placement':placement_facts(placement),'global_placement':placement_facts(global_placement),
+                'parent':getattr(obj.getParentGeoFeatureGroup(),'Name',None),
+                'members':[[member.Name,member.ID] for member in getattr(obj,'Group',[])],
+                'shape':None if not hasattr(obj,'Shape') else {'volume':obj.Shape.Volume,
+                    'bounds':[obj.Shape.BoundBox.XMin,obj.Shape.BoundBox.XLength,obj.Shape.BoundBox.YLength,obj.Shape.BoundBox.ZLength]}}
+    def selection(resolve):
+        return [{'name':item.Object.Name,'id':item.Object.ID,'document':item.DocumentName,
+                 'subnames':list(item.SubElementNames)}
+                for item in Gui.Selection.getSelectionEx(doc.Name,resolve)]
+    report.setdefault('ownership_selection_diagnostics',[]).append({
+        'label':label,'group':owner(group),'child':owner(child),
+        'undo':doc.UndoCount,'redo':doc.RedoCount,
+        'no_resolve':selection(0),'resolved':selection(1),'new_style':selection(2),
+        'resolved_objects':[[obj.Name,obj.ID] for obj in Gui.Selection.getSelection(doc.Name)],
+        'exact_whole_group_selected':Gui.Selection.isSelected(group,'',0),
+        'exact_child_path_selected':Gui.Selection.isSelected(group,child.Name+'.',0),
+        'state':ui.native.gumballState(),'transcript':ui.transcript()})
+def run():
+    ui = None
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc = App.newDocument('GumballOwnership'); doc.UndoMode = 1
+        source = doc.addObject('Part::Feature','Definition'); source.Shape = Part.makeBox(2,3,4)
+        first = doc.addObject('App::Link','First'); first.setLink(source)
+        second = doc.addObject('App::Link','Second'); second.setLink(source)
+        first.LinkPlacement.Base = App.Vector(10,0,0); second.LinkPlacement.Base = App.Vector(20,0,0)
+        doc.recompute(); source.Visibility = False
+        Gui.activeDocument().activeView().viewAxonometric()
+        ui = GumballUI(native); ui.select(first,second); ui.command('Gumball On')
+        undo = doc.UndoCount
+        ui.numeric('MoveX','3 mm')
+        check('two occurrences move once without modifying definition',near(first.LinkPlacement.Base.x,13) and near(second.LinkPlacement.Base.x,23) and near(source.Shape.BoundBox.XMin,0) and doc.UndoCount==undo+1)
+        doc.undo(); ui.settle(); check('occurrence Undo is atomic',near(first.LinkPlacement.Base.x,10) and near(second.LinkPlacement.Base.x,20))
+        ui.select(first);end=ui.drag('MoveX');ui.command('4 mm');undo=doc.UndoCount
+        class DefinitionCallback:
+            fired=False
+            def slotChangedObject(self,obj,prop):
+                if obj==first and prop in ('Placement','LinkPlacement') and not self.fired:
+                    self.fired=True;source.Shape=Part.makeBox(7,3,4)
+        observer=DefinitionCallback();App.addDocumentObserver(observer)
+        try:ui.release(end)
+        finally:App.removeDocumentObserver(observer)
+        check('definition callback aborts occurrence and definition together',observer.fired and near(first.LinkPlacement.Base.x,10) and near(source.Shape.Volume,24) and doc.UndoCount==undo)
+        ui.select(first); end=ui.drag('MoveX'); ui.command('4 mm')
+        source.Shape=Part.makeBox(7,3,4); doc.recompute(); undo=doc.UndoCount
+        ui.release(end)
+        check('definition mutation invalidates captured Link gesture',near(first.LinkPlacement.Base.x,10) and doc.UndoCount==undo)
+        source.Shape=Part.makeBox(2,3,4);doc.recompute();ui.select(first)
+        ui.numeric('MoveX','4 mm',QtCore.Qt.AltModifier)
+        copies=[o for o in doc.Objects if o.TypeId=='App::Link' and o.Name not in ('First','Second')]
+        check('Link copy retains shared definition and independent occurrence',len(copies)==1 and copies[0].LinkedObject==source and near(copies[0].LinkPlacement.Base.x,14) and near(first.LinkPlacement.Base.x,10) and bool(copies[0].OM9GumballIdentity))
+        doc.undo();ui.settle()
+        group=doc.addObject('App::Part','PlacedGroup'); child=doc.addObject('Part::Feature','Member');child.Shape=Part.makeBox(2,3,4);group.addObject(child);group.Placement.Base=App.Vector(30,0,0);doc.recompute()
+        report['ownership_selection_events']=[]
+        class OwnershipSelectionObserver:
+            def addSelection(self,document,name,subname,point):
+                report['ownership_selection_events'].append({'event':'add','document':document,'name':name,'subname':subname,'point':list(point)})
+            def removeSelection(self,document,name,subname):
+                report['ownership_selection_events'].append({'event':'remove','document':document,'name':name,'subname':subname})
+            def clearSelection(self,document):
+                report['ownership_selection_events'].append({'event':'clear','document':document})
+        selection_observer=OwnershipSelectionObserver();Gui.Selection.addObserver(selection_observer,0)
+        try:
+            ownership_diagnostic('before parent and child selection',ui,doc,group,child)
+            ui.select(group,child)
+            ownership_diagnostic('before parent and child MoveX',ui,doc,group,child)
+            try:ui.numeric('MoveX','5 mm')
+            finally:ownership_diagnostic('after parent and child MoveX',ui,doc,group,child)
+        finally:Gui.Selection.removeObserver(selection_observer)
+        check('selected parent and child transform once',near(group.Placement.Base.x,35) and near(child.Placement.Base.x,0));doc.undo();ui.settle()
+        ui.numeric('MoveX','5 mm',QtCore.Qt.AltModifier)
+        copiedgroup=next(o for o in doc.Objects if o.TypeId=='App::Part' and o!=group)
+        check('group copy owns independent native members',len(copiedgroup.Group)==1 and copiedgroup.Group[0]!=child and copiedgroup.Group[0] not in group.Group and near(copiedgroup.Placement.Base.x,35) and near(group.Placement.Base.x,30));doc.undo();ui.settle()
+        oracle_shape=Part.makeBox(2,3,4);oracle_copy=oracle_shape.copy()
+        check('closed solid oracle accepts copied geometry with different native identity',
+              not oracle_copy.isSame(oracle_shape) and not oracle_copy.isEqual(oracle_shape) and
+              closed_solid_geometry_equivalent(oracle_copy,oracle_shape))
+        oracle_translated=oracle_shape.copy();oracle_translated.translate(App.Vector(1,0,0))
+        check('closed solid oracle rejects a translated box',not closed_solid_geometry_equivalent(oracle_translated,oracle_shape))
+        oracle_missing_face=Part.makeShell(oracle_shape.Faces[:-1])
+        check('closed solid oracle rejects a missing face',not closed_solid_geometry_equivalent(oracle_missing_face,oracle_shape))
+        check('closed solid oracle rejects different solid geometry',not closed_solid_geometry_equivalent(Part.makeCylinder(1,4),oracle_shape))
+        ordinary=doc.addObject('App::DocumentObjectGroup','OrdinarySelectedGroup')
+        ordinary_child=doc.addObject('Part::Feature','OrdinarySelectedMember');ordinary_child.Shape=Part.makeBox(2,3,4)
+        ordinary.addObject(ordinary_child);doc.recompute()
+        ordinary_names={obj.Name for obj in doc.Objects};ordinary_ids=(ordinary.ID,ordinary_child.ID)
+        ordinary_members=list(ordinary.Group);ordinary_placement=ordinary_child.Placement;ordinary_shape=ordinary_child.Shape
+        report['ordinary_scale_shape_before']=shape_diagnostic(ordinary_shape)
+        Gui.Selection.addObserver(selection_observer,0)
+        try:
+            ownership_diagnostic('before ordinary parent and child selection',ui,doc,ordinary,ordinary_child)
+            ui.select(ordinary,ordinary_child);ordinary_undo=doc.UndoCount
+            ownership_diagnostic('before ordinary parent and child ScaleX',ui,doc,ordinary,ordinary_child)
+            try:ui.numeric('ScaleX','2');doc.recompute()
+            finally:ownership_diagnostic('after ordinary parent and child ScaleX',ui,doc,ordinary,ordinary_child)
+        finally:Gui.Selection.removeObserver(selection_observer)
+        ordinary_bounds=ordinary_child.Shape.BoundBox
+        report['ordinary_scale_shape_after']={'current':shape_diagnostic(ordinary_child.Shape),
+                                            'captured_original_now':shape_diagnostic(ordinary_shape)}
+        check('selected ordinary parent and child Scale applies one affine transaction',
+              near(ordinary_bounds.XLength,4) and near(ordinary_bounds.YLength,3) and near(ordinary_bounds.ZLength,4) and
+              near(ordinary_child.Shape.Volume,48) and ordinary_child.Placement==ordinary_placement and doc.UndoCount==ordinary_undo+1 and
+              ordinary.Group==ordinary_members and (ordinary.ID,ordinary_child.ID)==ordinary_ids and {obj.Name for obj in doc.Objects}==ordinary_names and
+              Gui.Selection.getSelection()==[ordinary])
+        doc.undo();doc.recompute();ui.settle()
+        restored_shape=ordinary_child.Shape
+        restored_geometry_equivalent=closed_solid_geometry_equivalent(restored_shape,ordinary_shape)
+        report['ordinary_scale_undo_diagnostic']={
+            'conditions':{'closed_solid_geometry_equivalent':restored_geometry_equivalent,
+                          'shape_isSame':restored_shape.isSame(ordinary_shape),
+                          'placement_equal':ordinary_child.Placement==ordinary_placement,
+                          'membership_equal':ordinary.Group==ordinary_members,
+                          'ids_equal':(ordinary.ID,ordinary_child.ID)==ordinary_ids,
+                          'object_names_equal':{obj.Name for obj in doc.Objects}==ordinary_names},
+            'shape_isEqual':restored_shape.isEqual(ordinary_shape),
+            'original_isSame_restored':ordinary_shape.isSame(restored_shape),
+            'original_isEqual_restored':ordinary_shape.isEqual(restored_shape),
+            'restored_shape':shape_diagnostic(restored_shape),
+            'captured_original_now':shape_diagnostic(ordinary_shape),
+            'undo':doc.UndoCount,'undo_before':ordinary_undo,'redo':doc.RedoCount,
+            'current_ids':[ordinary.ID,ordinary_child.ID],'expected_ids':list(ordinary_ids),
+            'current_members':[[obj.Name,obj.ID] for obj in ordinary.Group],
+            'expected_members':[[obj.Name,obj.ID] for obj in ordinary_members],
+            'current_object_names':sorted(obj.Name for obj in doc.Objects),'expected_object_names':sorted(ordinary_names),
+            'current_placement':{'base':list(ordinary_child.Placement.Base),'rotation':list(ordinary_child.Placement.Rotation.Q)},
+            'expected_placement':{'base':list(ordinary_placement.Base),'rotation':list(ordinary_placement.Rotation.Q)}}
+        ownership_diagnostic('after ordinary parent and child Scale Undo before assertion',ui,doc,ordinary,ordinary_child)
+        check('ordinary parent and child Scale Undo restores geometry and membership',
+              restored_geometry_equivalent and ordinary_child.Placement==ordinary_placement and
+              ordinary.Group==ordinary_members and (ordinary.ID,ordinary_child.ID)==ordinary_ids and {obj.Name for obj in doc.Objects}==ordinary_names)
+        doc.redo();doc.recompute();ui.settle()
+        check('ordinary parent and child Scale Redo restores one affine result',near(ordinary_child.Shape.BoundBox.XLength,4) and
+              near(ordinary_child.Shape.Volume,48) and ordinary.Group==ordinary_members and ordinary_child.Placement==ordinary_placement)
+        doc.undo();doc.recompute();ui.settle()
+        # A physical member can belong directly to its native coordinate Part
+        # and to an ordinary folder inside that Part. This is a valid DAG.
+        dag_part=doc.addObject('App::Part','SharedMemberPart')
+        dag_group=doc.addObject('App::DocumentObjectGroup','SharedMemberFolder')
+        dag_child=doc.addObject('Part::Feature','SharedPhysicalMember');dag_child.Shape=Part.makeBox(2,3,4)
+        dag_part.addObject(dag_group);dag_part.addObject(dag_child);dag_group.addObject(dag_child)
+        dag_part.Placement.Base=App.Vector(40,0,0);doc.recompute()
+        check('whole Part fixture has valid direct and ordinary group membership',
+              dag_group in dag_part.Group and dag_child in dag_part.Group and dag_child in dag_group.Group and
+              dag_child.getParentGeoFeatureGroup()==dag_part)
+        dag_ids=(dag_part.ID,dag_group.ID,dag_child.ID);dag_names={obj.Name for obj in doc.Objects}
+        dag_part_members=list(dag_part.Group);dag_group_members=list(dag_group.Group)
+        dag_part_placement=dag_part.Placement;dag_child_placement=dag_child.Placement;dag_shape=dag_child.Shape
+        def dag_membership_intact():
+            return ((dag_part.ID,dag_group.ID,dag_child.ID)==dag_ids and dag_part.Group==dag_part_members and
+                    dag_group.Group==dag_group_members and dag_child.getParentGeoFeatureGroup()==dag_part and
+                    {obj.Name for obj in doc.Objects}==dag_names)
+        def dag_diagnostic(label):
+            ownership_diagnostic(label,ui,doc,dag_part,dag_child)
+            report.setdefault('shared_member_diagnostics',[]).append({
+                'label':label,'ids':[dag_part.ID,dag_group.ID,dag_child.ID],
+                'part_members':[[obj.Name,obj.ID] for obj in dag_part.Group],
+                'ordinary_group_members':[[obj.Name,obj.ID] for obj in dag_group.Group],
+                'membership_intact':dag_membership_intact(),'shape':shape_diagnostic(dag_child.Shape)})
+        ui.command('GumballAlignment World');ui.select(dag_part);dag_undo=doc.UndoCount
+        dag_diagnostic('before whole Part shared member MoveX')
+        try:ui.numeric('MoveX','5 mm');doc.recompute()
+        finally:dag_diagnostic('after whole Part shared member MoveX')
+        check('whole Part shared member Move applies once in one transaction',
+              near(dag_part.Placement.Base.x,45) and near(dag_part.Placement.Base.y,0) and near(dag_part.Placement.Base.z,0) and
+              dag_child.Placement==dag_child_placement and near(dag_child.getGlobalPlacement().Base.x,45) and
+              closed_solid_geometry_equivalent(dag_child.Shape,dag_shape) and doc.UndoCount==dag_undo+1 and
+              dag_membership_intact() and Gui.Selection.getSelection()==[dag_part])
+        doc.undo();doc.recompute();ui.settle();dag_diagnostic('after whole Part shared member Move Undo')
+        check('whole Part shared member Move Undo restores native ownership and geometry',
+              dag_part.Placement==dag_part_placement and dag_child.Placement==dag_child_placement and
+              closed_solid_geometry_equivalent(dag_child.Shape,dag_shape) and dag_membership_intact())
+        ui.select(dag_part);dag_undo=doc.UndoCount;dag_diagnostic('before whole Part shared member ScaleX')
+        try:ui.numeric('ScaleX','2');doc.recompute()
+        finally:dag_diagnostic('after whole Part shared member ScaleX')
+        dag_bounds=dag_child.Shape.BoundBox
+        check('whole Part shared member Scale applies one affine in one transaction',
+              dag_child.Shape.isValid() and dag_child.Shape.isClosed() and dag_child.Shape.ShapeType=='Solid' and
+              near(dag_bounds.XLength,4) and near(dag_bounds.YLength,3) and near(dag_bounds.ZLength,4) and
+              near(dag_child.Shape.Volume,48) and len(dag_child.Shape.Faces)==6 and len(dag_child.Shape.Edges)==12 and len(dag_child.Shape.Vertexes)==8 and
+              dag_part.Placement==dag_part_placement and dag_child.Placement==dag_child_placement and
+              doc.UndoCount==dag_undo+1 and dag_membership_intact() and Gui.Selection.getSelection()==[dag_part])
+        doc.undo();doc.recompute();ui.settle();dag_diagnostic('after whole Part shared member Scale Undo')
+        check('whole Part shared member Scale Undo restores native ownership and geometry',
+              closed_solid_geometry_equivalent(dag_child.Shape,dag_shape) and dag_part.Placement==dag_part_placement and
+              dag_child.Placement==dag_child_placement and dag_membership_intact())
+        doc.redo();doc.recompute();ui.settle();dag_diagnostic('after whole Part shared member Scale Redo')
+        check('whole Part shared member Scale Redo restores only one affine',
+              near(dag_child.Shape.BoundBox.XLength,4) and near(dag_child.Shape.BoundBox.YLength,3) and
+              near(dag_child.Shape.BoundBox.ZLength,4) and near(dag_child.Shape.Volume,48) and
+              dag_part.Placement==dag_part_placement and dag_child.Placement==dag_child_placement and dag_membership_intact())
+        doc.undo();doc.recompute();ui.settle()
+        mesh=doc.addObject('Mesh::Feature','NativeMesh');mesh.Mesh=Mesh.Mesh([[App.Vector(0,0,0),App.Vector(2,0,0),App.Vector(0,3,0)]])
+        points=doc.addObject('Points::Feature','NativePoints');points.Points=Points.Points([App.Vector(0,0,0),App.Vector(2,3,4)]);doc.recompute()
+        ui.select(mesh,points);ui.numeric('MoveX','2 mm')
+        check('native Mesh and Points rigid batch commits',near(mesh.Mesh.BoundBox.XMin,2) and near(points.Points.BoundBox.XMin,2));doc.undo();ui.settle()
+        ui.numeric('ScaleX','2')
+        check('native Mesh and Points affine batch keeps representations',near(mesh.Mesh.BoundBox.XLength,4) and near(points.Points.BoundBox.XLength,4) and mesh.Mesh.CountFacets==1 and len(points.Points.Points)==2);doc.undo();ui.settle()
+        ui.select(child);before=child.Shape.BoundBox.XMin;undo=doc.UndoCount;oldframe=native.gumballState()['frame']
+        ui.numeric('MoveX','2 mm',QtCore.Qt.ControlModifier)
+        check('Ctrl numeric click moves widget only',near(child.Shape.BoundBox.XMin,before) and doc.UndoCount==undo and near(native.gumballState()['frame'][0],oldframe[0]+2))
+        ui.command('GumballAlignment World');Gui.Selection.clearSelection();Gui.Selection.addSelection(mesh,'Segment1');ui.settle()
+        ui.command('GumballAlignment Object')
+        check('unsupported Mesh component frame keeps prior alignment explicitly',native.gumballState()['alignment']==2 and 'UnsupportedFrame' in native.gumballState()['unresolved'])
+        report['ok']=True
+    except Exception: report.update(ok=False,error=traceback.format_exc())
+    finally:
+        if ui:report['transcript']=ui.transcript();report['state']=ui.native.gumballState()
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2));Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

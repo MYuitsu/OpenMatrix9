@@ -37,3 +37,9 @@ After meaningful verified work, update the live ledger with evidence, uncertaint
 ## User instruction: business rules in skills (2026-10-05)
 
 After finishing and verifying the authorized coding task, if business behavior changed, present the concrete before/after change and proposed skill text, then ask whether to record it in the relevant skill. Do not change business rules in source or installed skills without consent. Explicit prior authorization to update the skill for that exact change is sufficient; do not ask again. Behavior-preserving refactors/build fixes do not trigger this question. Continue recording technical evidence/progress without treating it as approval of reusable business rules. The original five OpenMatrix9 skills link to `skills/openmatrix9-workflow/references/business-rule-updates.md`; the workspace contract includes the same consent policy and records the user's 2026-10-06 approval.
+
+## Public source and publication
+
+Use authored SVG catalogs and tools/export_menu_assets.py. Never import commercial bitmaps, binary resources, Matrix manuals, decompiled source or private models into this repository. The user-approved Rhino5 guide exception is limited to ref/rhino5; preserve its notices. Preserve existing command identifiers and keep unsupported commands visible and disabled.
+
+After changes, run appropriate Rust/Python tests and tools/public_source_audit.py. Native changes require matching SDK and runtime checks. Preserve license notices. Do not publish, force-push or change repository visibility without a human instruction. Follow docs/private-reference-policy.md and never stage ignored private references.

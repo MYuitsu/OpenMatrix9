@@ -12,6 +12,36 @@ openmatrix9_commit: 52e887ab706dcd5d80e23979fb1f1b62d8d869b0
 
 # RCORE-10 — FCStd, trao đổi 3DM và clipboard
 
+<!-- rhino-core-kernel-contract:start -->
+Dùng lại bộ chuyển đổi FreeCAD/OCCT/openNURBS; bổ sung validator basis Rust,
+descriptor chỉ đọc và policy cho inspection/working 3DM. 480 Rust tests;
+504 kiểm tra ứng dụng / 8 lần chạy, gồm mở FCStd trong tiến trình mới.
+**P0 toàn bộ vẫn đang triển khai.** [Bằng chứng và phạm vi](../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md).
+
+Selected shared gates/observations are verified; all-family capability, ownership,
+parameterization and complete chapter acceptance remain open. Historical baseline
+claims below retain their original scope.
+
+<!-- rhino-core-kernel-contract:end -->
+
+<!-- rhino-core-tolerance-workers:start -->
+## Bổ sung đã kiểm chứng — 2026-10-09
+
+Rust đã nối dung sai document/override vào Join curve và surface, lưu cutoff thực tế
+và provenance cùng kết quả; backend không được tự nâng dung sai. Worker nhập 3DM
+dùng 60% logical CPUs, bỏ trần cố định 4, kiểm override trước mutation.
+**444 native checks / 8 runs; 347 Rust tests; 49 Python pass, 1 skip.**
+P0 toàn bộ vẫn đang triển khai; [báo cáo và giới hạn](../../../docs/validation/2026-10-09-rhino-core-tolerance-workers.md) ghi phạm vi chính xác.
+
+- [x] Count policy Rust và serial/parallel equivalence, actual partition counts, override/failure atomicity.
+- [ ] Aggregate CPU/RAM scheduler, cancellation, late-result và toàn ma trận IO.
+
+Ghi chú sau merge: current-state writer đã có trong ThreeDmArchiveState.py và
+ThreeDmMerge.cpp; câu “còn thiếu writer” trong checkpoint baseline bên dưới là lịch sử,
+không phản ánh thiếu toàn bộ writer hiện tại. Các fixture đầy đủ vẫn cần đối soát.
+
+<!-- rhino-core-tolerance-workers:end -->
+
 ## Cập nhật triển khai P0 — 2026-10-09
 
 Metadata/source claims phía dưới là baseline audit ban đầu. Rust nay kiểm bounded

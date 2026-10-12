@@ -1,4 +1,5 @@
 //! Source archive identity and preservation policy. No host or parser dependencies.
+use crate::builder_history::{Json, parse_document};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
 pub enum ArchiveMode {
@@ -204,4 +205,186 @@ pub unsafe extern "C" fn om9_3dm_dependency_closure(
             result.len() as isize
         }
     }
+}
+
+const MAX_MANIFEST_BYTES: usize = 32 * 1024 * 1024;
+const MAX_MANIFEST_NODES: usize = 1_000_000;
+
+/// Validate the owned geometry staging schema before Qt or kernel conversion can
+/// coerce missing/wrongly typed fields to zeros. This is geometry-only export;
+/// unrecognized retained metadata is never silently accepted as exportable.
+pub fn validate_export_manifest(raw: &str) -> Result<(), &'static str> {
+    let Json::Object(root) = parse_document(raw, MAX_MANIFEST_BYTES, MAX_MANIFEST_NODES)? else {
+        return Err("export manifest object required");
+    };
+    let canonical = match root.get("schema_version") {
+        None | Some(Json::Number(1.)) => false,
+        Some(Json::Number(2.)) => true,
+        _ => return Err("unsupported export schema version"),
+    };
+    if root
+        .keys()
+        .any(|key| !matches!(key.as_str(), "items" | "tolerance" | "schema_version")
+            && !(canonical && key == "layer_session"))
+    {
+        return Err("unsupported export manifest field");
+    }
+    if root
+        .get("tolerance")
+        .is_some_and(|value| !matches!(value, Json::Number(n) if *n > 0.))
+    {
+        return Err("positive export tolerance required");
+    }
+    let Some(Json::Array(items)) = root.get("items") else {
+        return Err("export items required");
+    };
+    let layers = if canonical {
+        // The bounded strict parser above rejects duplicate keys before serde
+        // sees the canonical metadata envelope. Preserve geometry validation
+        // below; canonical layer policy never grants malformed geometry access.
+        let value: serde_json::Value = serde_json::from_str(raw)
+            .map_err(|_| "invalid canonical export JSON")?;
+        let encoded = serde_json::to_vec(value.get("layer_session")
+            .ok_or("canonical layer session required")?)
+            .map_err(|_| "invalid canonical layer session")?;
+        Some(crate::layer_codec::decode_snapshot(&encoded)
+            .map_err(|_| "invalid canonical layer session")?)
+    } else { None };
+    if items.is_empty() && layers.as_ref().is_none_or(|state| state.layers.is_empty() || !state.objects.is_empty()) {
+        return Err("no geometry to export");
+    }
+    let mut bindings = std::collections::HashSet::new();
+    for item in items {
+        let Json::Object(item) = item else {
+            return Err("export item object required");
+        };
+        if item.keys().any(|key| {
+            !(canonical && key == "layer_object_id") && !matches!(
+                key.as_str(),
+                "name"
+                    | "layer"
+                    | "visible"
+                    | "locked"
+                    | "color"
+                    | "brep"
+                    | "vertices"
+                    | "faces"
+                    | "point_cloud_fields"
+                    | "point_cloud_sha256"
+                    | "point_cloud_transform"
+            )
+        }) {
+            return Err("unsupported geometry-only item field");
+        }
+        if canonical {
+            let Some(Json::String(id)) = item.get("layer_object_id") else {
+                return Err("canonical geometry object binding required");
+            };
+            if id.is_empty() || id.len() > 1024 || id.contains('\0') || !bindings.insert(id.as_str()) {
+                return Err("invalid or duplicate canonical geometry binding");
+            }
+        }
+        for key in ["name", "layer"] {
+            if let Some(value) = item.get(key) {
+                if !matches!(value, Json::String(s) if s.len() <= 32768 && !s.contains('\0')) {
+                    return Err("invalid export name or layer");
+                }
+            }
+        }
+        for key in ["visible", "locked"] {
+            if item
+                .get(key)
+                .is_some_and(|value| !matches!(value, Json::Boolean(_)))
+            {
+                return Err("export visibility and lock must be boolean");
+            }
+        }
+        // Missing color/tolerance retain the existing native export defaults.
+        // Explicit fields must still be fully typed before Qt conversion.
+        if let Some(color) = item.get("color") {
+            if !matches!(color, Json::Array(values) if values.len()==3 && values.iter().all(|value| matches!(value, Json::Number(n) if n.fract()==0. && (0. ..=255.).contains(n))))
+            {
+                return Err("export color must contain three byte values");
+            }
+        }
+        if [
+            "point_cloud_fields",
+            "point_cloud_sha256",
+            "point_cloud_transform",
+        ]
+        .iter()
+        .any(|key| item.contains_key(*key))
+        {
+            if ["brep", "vertices", "faces"]
+                .iter()
+                .any(|key| item.contains_key(*key))
+            {
+                return Err("exclusive staged PointCloud fields required");
+            }
+            if !matches!(item.get("point_cloud_fields"), Some(Json::String(path)) if !path.is_empty() && path.len() <= 32768 && !path.contains('\0'))
+            {
+                return Err("bounded PointCloud fields path required");
+            }
+            if !matches!(item.get("point_cloud_sha256"), Some(Json::String(hash)) if hash.len()==64 && hash.bytes().all(|byte| byte.is_ascii_hexdigit()))
+            {
+                return Err("PointCloud SHA256 required");
+            }
+            if item.get("point_cloud_transform").is_some_and(|value| !matches!(value, Json::Array(matrix) if matrix.len()==16 && matrix.iter().all(|value| matches!(value, Json::Number(_))))) {
+                return Err("PointCloud transform requires sixteen finite numbers");
+            }
+            continue;
+        }
+        if let Some(brep) = item.get("brep") {
+            if item.contains_key("vertices")
+                || item.contains_key("faces")
+                || !matches!(brep, Json::String(path) if !path.is_empty() && path.len() <= 32768 && !path.contains('\0'))
+            {
+                return Err("exclusive staged BRep path required");
+            }
+            continue;
+        }
+        let (Some(Json::Array(vertices)), Some(Json::Array(faces))) =
+            (item.get("vertices"), item.get("faces"))
+        else {
+            return Err("mesh vertices and faces required");
+        };
+        if vertices.len() < 3 || faces.is_empty() {
+            return Err("empty mesh geometry");
+        }
+        for vertex in vertices {
+            if !matches!(vertex, Json::Array(values) if values.len()==3 && values.iter().all(|value| matches!(value, Json::Number(_))))
+            {
+                return Err("mesh vertex must contain three finite numbers");
+            }
+        }
+        for face in faces {
+            if !matches!(face, Json::Array(values) if values.len()==4 && values.iter().all(|value| matches!(value, Json::Number(n) if *n >= 0. && n.fract()==0. && *n < vertices.len() as f64)))
+            {
+                return Err("mesh face must contain four in-range integer indices");
+            }
+        }
+    }
+    if let Some(state) = layers {
+        if state.objects.len() != bindings.len()
+            || state.objects.iter().any(|object| !bindings.contains(object.id.as_str())) {
+            return Err("canonical geometry and layer inventory disagree");
+        }
+    }
+    Ok(())
+}
+
+/// Validate bounded UTF-8 bytes without retaining native memory.
+///
+/// # Safety
+/// `raw` must be readable for `length` bytes for the duration of this call.
+/// Oversized lengths are rejected before dereferencing the pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_3dm_export_manifest_valid(raw: *const u8, length: usize) -> bool {
+    if raw.is_null() || length == 0 || length > MAX_MANIFEST_BYTES {
+        return false;
+    }
+    let Ok(raw) = std::str::from_utf8(unsafe { std::slice::from_raw_parts(raw, length) }) else {
+        return false;
+    };
+    validate_export_manifest(raw).is_ok()
 }

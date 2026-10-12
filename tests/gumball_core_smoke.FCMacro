@@ -1,0 +1,180 @@
+"""Actual Qt pointer/editor gumball contract; observations never mutate geometry."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtTest,QtGui
+sys.path.insert(0,str(Path(__file__).parent));from gumball_capture import capture_view
+from gumball_fixture import GumballUI
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-020','OM9-INFO-022']}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def events():QtWidgets.QApplication.processEvents()
+def command(text):
+    console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+    console.setFocus();QtTest.QTest.keyClicks(console,text);QtTest.QTest.keyClick(console,QtCore.Qt.Key_Return);events()
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('GumballCore');doc.UndoMode=1
+        box=doc.addObject('Part::Feature','Box');box.Shape=Part.makeBox(2,3,4);doc.recompute();events()
+        Gui.activeDocument().activeView().viewAxonometric();Gui.activeDocument().activeView().fitAll();events()
+        Gui.Selection.addSelection(box);Gui.runCommand('OM9_Gumball');events();QtTest.QTest.qWait(220)
+        report['state']=native.gumballState();handles=native.gumballHandles();report['handles']=handles
+        check('native scene exposes actual picked handles',bool(handles) and any(h['name']=='MoveX' and h['hit_verified'] for h in handles))
+        check('all thirteen transform handle identities are pickable',len([h for h in handles if h['handle']<13])==13)
+        try:
+            Gui.activeDocument().activeView().saveImage(str(out/'gumball.png'),1024,768,'Current')
+            Gui.activeDocument().activeView().getViewer().grabFramebuffer().save(str(out/'gumball-viewer.png'))
+            image=capture_view(Gui.activeDocument().activeView(),1024,768)
+            image.save(str(out/'gumball-render.png'))
+        except Exception as image_error:report['image_error']=str(image_error)
+        # Count the actual rendered handle colors: a small screen-space widget
+        # must not paint planes spanning hundreds of pixels over the model.
+        pixels=[0,0,0]
+        for y in range(image.height()):
+            for x in range(image.width()):
+                c=image.pixelColor(x,y)
+                if c.red()>220 and c.green()<100 and c.blue()<100:pixels[0]+=1
+                elif c.green()>150 and c.red()<100 and c.blue()<120:pixels[1]+=1
+                elif c.blue()>220 and c.red()<100 and c.green()<150:pixels[2]+=1
+        report['handle_color_pixels']=pixels
+        check('rendered planar handles stay within a compact widget',all(20<n<2500 for n in pixels))
+        # Capture/window exposure can leave Qt without an active MDI wrapper.
+        # Use the shared native source-slot lookup and retain its ancestor chain.
+        ui=GumballUI(native);viewport=ui.viewport
+        h=next(h for h in handles if h['name']=='MoveX' and h['hit_verified'])
+        QtTest.QTest.mouseClick(viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,QtCore.QPoint(h['x'],h['y']));events()
+        check('pointer hit begins Rust gesture',native.gumballState()['phase']==2)
+        editor=Gui.getMainWindow().findChild(QtWidgets.QLineEdit,'OM9GumballNumeric')
+        check('handle click opens native numeric editor',editor is not None and editor.isVisible())
+        original_shape=box.Shape
+        class InitialObserver:
+            def slotChangedObject(self,obj,prop):
+                if obj==box:report.setdefault('initial_source_writes',[]).append({'property':prop,'same':obj.Shape.isSame(original_shape),'x':obj.Shape.BoundBox.XMin,'placement':obj.Placement.Base.x})
+        initial_observer=InitialObserver();App.addDocumentObserver(initial_observer)
+        QtTest.QTest.keyClicks(editor,'5.123456789123 mm');QtTest.QTest.keyClick(editor,QtCore.Qt.Key_Return);events();report['last_numeric']=native.gumballState()
+        App.removeDocumentObserver(initial_observer)
+        check('numeric movement keeps double precision',abs(box.Shape.BoundBox.XMin-5.123456789123)<1e-10)
+        check('one gesture creates one Undo',doc.UndoCount==1)
+        doc.undo();events();check('Undo restores original geometry',abs(box.Shape.BoundBox.XMin)<1e-10)
+        doc.redo();events();check('Redo restores movement',abs(box.Shape.BoundBox.XMin-5.123456789123)<1e-10)
+        doc.undo();events()
+        def select(*objects):
+            Gui.Selection.clearSelection()
+            for obj in objects:Gui.Selection.addSelection(obj)
+            Gui.activeDocument().activeView().fitAll();events();native.gumballState();QtTest.QTest.qWait(80)
+        def target(name):
+            native.gumballState();QtTest.QTest.qWait(60);rows=native.gumballHandles()
+            report['last_target']={'state':native.gumballState(),'handles':rows,'camera':Gui.activeDocument().activeView().getCamera()}
+            row=next(h for h in rows if h['name']==name and h['hit_verified'])
+            return QtCore.QPoint(row['x'],row['y'])
+        def numeric(name,value,mods=QtCore.Qt.NoModifier):
+            pos=target(name);viewport.setFocus();QtTest.QTest.mouseClick(viewport,QtCore.Qt.LeftButton,mods,pos);events()
+            check(name+' click owns gesture',native.gumballState()['phase']==2)
+            field=next(w for w in Gui.getMainWindow().findChildren(QtWidgets.QLineEdit,'OM9GumballNumeric') if w.isVisible())
+            QtTest.QTest.keyClicks(field,value);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);events();report['last_numeric']=native.gumballState();report['transcript']=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript').toPlainText()
+        def drag(name,mods=QtCore.Qt.NoModifier):
+            pos=target(name);viewport.setFocus();QtTest.QTest.mousePress(viewport,QtCore.Qt.LeftButton,mods,pos)
+            # This fixture keeps the axonometric camera: upward screen motion
+            # is positive world Z. Numeric distance now follows drag direction.
+            end=pos+(QtCore.QPoint(0,-24) if name=='MoveZ' else QtCore.QPoint(18,12))
+            QtTest.QTest.mouseMove(viewport,end);events()
+            check(name+' pointer motion owns dragging',native.gumballState()['phase']==3)
+            return end
+        def release(pos,mods=QtCore.Qt.NoModifier):QtTest.QTest.mouseRelease(viewport,QtCore.Qt.LeftButton,mods,pos);events()
+        for name,coordinate in [('MoveY','YMin'),('MoveZ','ZMin')]:
+            numeric(name,'3 mm');check(name+' exact numeric axis',abs(getattr(box.Shape.BoundBox,coordinate)-3)<1e-9);doc.undo();events()
+        for name,lengths in [('RotateX',(2,4,3)),('RotateY',(4,3,2)),('RotateZ',(3,2,4))]:
+            numeric(name,'90');bounds=box.Shape.BoundBox
+            check(name+' preserves pivot and native volume',all(abs(a-b)<1e-8 for a,b in zip((bounds.XLength,bounds.YLength,bounds.ZLength),lengths)) and (bounds.Center-App.Vector(1,1.5,2)).Length<1e-8 and abs(box.Shape.Volume-24)<1e-8);doc.undo();events()
+        origin=target('MoveFree');undo=doc.UndoCount;end=drag('RotateZ');command('30');report['angle_after_input']=native.gumballState();check('typed angle step during drag waits for release',doc.UndoCount==undo and abs(box.Placement.Rotation.Angle)<1e-10)
+        opposite=origin*2-(end-QtCore.QPoint(18,12))
+        QtTest.QTest.mouseMove(viewport,opposite);QtTest.QTest.qWait(100);events();report['angle_after_motion']=native.gumballState();release(opposite)
+        angle=box.Placement.Rotation.Angle*180/3.141592653589793
+        report['angle_result']={'angle':angle,'undo_before':undo,'undo_after':doc.UndoCount,'state':native.gumballState()}
+        check('native rotation drag commits a nonzero multiple of angle step',angle>1 and abs(angle/30-round(angle/30))<1e-6 and doc.UndoCount==undo+1);doc.undo();events()
+        numeric('ScaleX','2');check('axis scale is centered native affine geometry',abs(box.Shape.BoundBox.XLength-4)<1e-8 and abs(box.Shape.BoundBox.XMin+1)<1e-8 and abs(box.Shape.BoundBox.YLength-3)<1e-8);doc.undo();events()
+        numeric('ScaleY','2',QtCore.Qt.ShiftModifier);check('Shift scale changes all three dimensions',all(abs(a-b)<1e-8 for a,b in zip((box.Shape.BoundBox.XLength,box.Shape.BoundBox.YLength,box.Shape.BoundBox.ZLength),(4,6,8))));doc.undo();events()
+        numeric('ScaleZ','-2');check('negative factor keeps valid native solid orientation',box.Shape.isValid() and abs(box.Shape.Volume-48)<1e-8 and abs(box.Shape.BoundBox.ZLength-8)<1e-8);doc.undo();events()
+        for name,normal in [('MoveXY','ZMin'),('MoveYZ','XMin'),('MoveZX','YMin')]:
+            start=box.Shape.BoundBox;end=drag(name);release(end)
+            bounds=box.Shape.BoundBox;check(name+' remains in its plane',abs(getattr(bounds,normal))<1e-6 and any(abs(a-b)>1e-5 for a,b in zip((bounds.XMin,bounds.YMin,bounds.ZMin),(start.XMin,start.YMin,start.ZMin))));doc.undo();events()
+        end=drag('MoveFree');release(end);check('origin handle moves geometry',any(abs(v)>1e-5 for v in (box.Shape.BoundBox.XMin,box.Shape.BoundBox.YMin,box.Shape.BoundBox.ZMin)));doc.undo();events()
+        undo=doc.UndoCount;end=drag('MoveX');command('5 mm');check('CMD focus preserves viewport mouse grab',QtWidgets.QWidget.mouseGrabber()==viewport);check('Enter during held drag only sets constraint',abs(box.Shape.BoundBox.XMin)<1e-10 and doc.UndoCount==undo);release(end);check('release commits the typed drag constraint',abs(box.Shape.BoundBox.XMin-5)<1e-10);doc.undo();events()
+        pos=target('MoveX');QtTest.QTest.mouseClick(viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,pos);events()
+        field=next(w for w in Gui.getMainWindow().findChildren(QtWidgets.QLineEdit,'OM9GumballNumeric') if w.isVisible())
+        ime=QtGui.QInputMethodEvent();ime.setCommitString('2 mm');QtWidgets.QApplication.sendEvent(field,ime)
+        report['ime']={'text':field.text(),'active_focus':field.hasFocus(),'window_focus':Gui.getMainWindow().focusWidget().objectName() if Gui.getMainWindow().focusWidget() else None}
+        check('numeric editor retains IME commit and text focus',field.text()=='2 mm' and Gui.getMainWindow().focusWidget()==field)
+        QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);events();check('IME numeric value follows native commit path',abs(box.Shape.BoundBox.XMin-2)<1e-9);doc.undo();events()
+        class CopyObserver:
+            def slotChangedObject(self,obj,prop):
+                if obj.Name==box.Name:report.setdefault('copy_source_writes',[]).append(prop)
+        observer=CopyObserver();App.addDocumentObserver(observer)
+        before=len(doc.Objects);numeric('MoveX','4 mm',QtCore.Qt.AltModifier)
+        App.removeDocumentObserver(observer)
+        copied=next(o for o in doc.Objects if o.TypeId=='Part::Feature' and o.Name!=box.Name)
+        check('Alt numeric copy has independent identity and preserves source',len(doc.Objects)==before+1 and copied.Name!=box.Name and bool(copied.OM9GumballIdentity) and abs(box.Shape.BoundBox.XMin)<1e-10 and abs(copied.Shape.BoundBox.XMin-4)<1e-10);doc.undo();events();select(box)
+        count,undo=len(doc.Objects),doc.UndoCount;oldframe=native.gumballState()['frame'];end=drag('MoveX',QtCore.Qt.ControlModifier);release(end)
+        check('Ctrl-start relocates only widget',native.gumballState()['frame']!=oldframe and abs(box.Shape.BoundBox.XMin)<1e-10 and (len(doc.Objects),doc.UndoCount)==(count,undo))
+        select();select(box)
+        second=doc.addObject('Part::Feature','Second');second.Shape=Part.makeBox(2,3,4,App.Vector(10,0,0));doc.recompute();select(box,second)
+        numeric('MoveX','2 mm');check('multiple source batch transforms each object once',abs(box.Shape.BoundBox.XMin-2)<1e-9 and abs(second.Shape.BoundBox.XMin-12)<1e-9);doc.undo();events()
+        end=drag('MoveX');command('2 mm');undo=doc.UndoCount
+        class Interleave:
+            fired=False
+            def slotChangedObject(self,obj,prop):
+                if not self.fired and obj==box and prop=='Placement':
+                    self.fired=True;second.Placement.Base=App.Vector(99,0,0)
+        report['callback_redo_before']=doc.RedoCount
+        observer=Interleave();App.addDocumentObserver(observer)
+        try:release(end)
+        finally:App.removeDocumentObserver(observer)
+        report['callback_redo_after']=doc.RedoCount
+        check('native callback changing second source aborts the entire transaction',observer.fired and abs(box.Shape.BoundBox.XMin)<1e-9 and abs(second.Shape.BoundBox.XMin-10)<1e-9 and doc.UndoCount==undo)
+        select(box);end=drag('MoveX');second.ViewObject.Selectable=False;Gui.Selection.clearSelection();Gui.Selection.addSelection(second);release(end)
+        check('selection changed before release rejects the whole gesture',abs(box.Shape.BoundBox.XMin)<1e-10 and abs(second.Shape.BoundBox.XMin-10)<1e-10);second.ViewObject.Selectable=True;select(box)
+        end=drag('MoveX');native.setUnitContext(doc.Name,25.4,1.0,0.001,0.01,0.01);undo=doc.UndoCount;release(end)
+        check('unit change invalidates preview without a transform transaction',abs(box.Shape.BoundBox.XMin)<1e-10 and doc.UndoCount==undo)
+        native.setUnitContext(doc.Name,1.0,1.0,0.001,0.01,0.01);select(box)
+        param=doc.addObject('Part::Cylinder','Parametric');doc.recompute()
+        # Nonuniform Cylinder Scale now has a native associative result. Use
+        # an actual protected incoming property for the preflight rejection.
+        second.addProperty('App::PropertyLinkGlobal','ScaleDependency');second.ScaleDependency=param
+        second.setEditorMode('ScaleDependency',1);select(box,param)
+        numeric('MoveX','1 mm');doc.undo();events();redo=doc.RedoCount;undo=doc.UndoCount;numeric('ScaleX','2')
+        check('second protected scale dependency rejects the entire batch',abs(box.Shape.BoundBox.XLength-2)<1e-9 and abs(param.Radius.Value-2)<1e-9 and doc.UndoCount==undo and second.ScaleDependency==param and 'UnsupportedOwner' in native.gumballState()['unresolved'])
+        check('pretransaction capability rejection preserves an existing Redo',redo==1 and doc.RedoCount==redo)
+        second.removeProperty('ScaleDependency')
+        select(param);before=param.Shape.BoundBox.XMin;numeric('MoveX','3 mm');doc.recompute();check('rigid move survives parametric recompute',abs(param.Shape.BoundBox.XMin-before-3)<1e-9);doc.undo();events()
+        face=doc.addObject('Part::Feature','HoledFace');face.Shape=Part.Face(Part.Wire(Part.makeCircle(5))).cut(Part.Face(Part.Wire(Part.makeCircle(2))));doc.recompute();select(face)
+        report['extrude_source']={'type':face.Shape.ShapeType,'faces':len(face.Shape.Faces),'shells':len(face.Shape.Shells),'area':face.Shape.Area,'selection':[o.Name for o in Gui.Selection.getSelection()]}
+        try:report['extrude_staging']=native.gumballGeometryFacts(doc.Name,[face.Name],'ExtrudeZ','5 mm','World')
+        except Exception as stage_error:report['extrude_staging_error']=str(stage_error)
+        count=len(doc.Objects);end=drag('MoveZ');QtTest.QTest.keyPress(viewport,QtCore.Qt.Key_Control);QtTest.QTest.keyRelease(viewport,QtCore.Qt.Key_Control);command('3 mm');release(end)
+        report['ctrl_release_move_z']=face.Shape.BoundBox.ZMin
+        check('Ctrl released before mouse-up returns to Move',len(doc.Objects)==count and abs(face.Shape.BoundBox.ZMin-3)<1e-8);doc.undo();events();select(face)
+        end=drag('MoveZ');QtTest.QTest.keyPress(viewport,QtCore.Qt.Key_Control);command('5 mm');release(end,QtCore.Qt.ControlModifier);QtTest.QTest.keyRelease(viewport,QtCore.Qt.Key_Control)
+        extrusion=doc.getObject('GumballExtrusion');check('Ctrl-after-motion extrudes a holed face',extrusion is not None and extrusion.Shape.isValid() and abs(extrusion.Shape.Volume-105*3.141592653589793)<1e-7 and abs(face.Shape.Area-21*3.141592653589793)<1e-7)
+        select(box);end=drag('MoveX');command('2 mm');undo=doc.UndoCount
+        class SameWriterObserver:
+            fired=False
+            def slotChangedObject(self,obj,prop):
+                if obj==box and prop=='Placement' and not self.fired:
+                    self.fired=True;shape=Part.makeBox(9,3,4);shape.Placement=box.Placement;box.Shape=shape
+        observer=SameWriterObserver();App.addDocumentObserver(observer);release(end);App.removeDocumentObserver(observer)
+        check('same-source callback geometry replacement aborts whole transaction',observer.fired and abs(box.Shape.Volume-24)<1e-8 and abs(box.Shape.BoundBox.XMin)<1e-8 and doc.UndoCount==undo)
+        select(box);pos=target('MoveX');QtTest.QTest.mouseClick(viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,pos);events()
+        field=next(w for w in Gui.getMainWindow().findChildren(QtWidgets.QLineEdit,'OM9GumballNumeric') if w.isVisible());QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);events();check('first Esc closes numeric editor only',native.gumballState()['phase']==2)
+        QtTest.QTest.keyClick(viewport,QtCore.Qt.Key_Escape);events();check('second Esc cancels gesture',native.gumballState()['phase']==1)
+        QtTest.QTest.qWait(120);Gui.activeDocument().activeView().fitAll();QtTest.QTest.qWait(120)
+        report['ok']=True
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        report['transcript']=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript').toPlainText()
+        Gui.getMainWindow().grab().save(str(out/'viewport.png'))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2));Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

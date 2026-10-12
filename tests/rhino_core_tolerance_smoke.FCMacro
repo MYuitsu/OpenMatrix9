@@ -1,0 +1,130 @@
+"""RCORE-02: actual operation tolerance, units provenance and atomic stale rejection."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtWidgets, QtTest
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0, os.environ['OM9_TEST_NATIVE_DIR'])
+sys.path.insert(0, str(Path(__file__).parent))
+from command_console_support import command_input
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+result = {'checks': []}
+
+def check(name, passed):
+    result['checks'].append({'name': name, 'passed': bool(passed)})
+    if not passed:
+        raise AssertionError(name)
+
+def events():
+    QtWidgets.QApplication.processEvents()
+
+def enter(text=''):
+    field.setFocus(); field.setText(text)
+    QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return); events()
+
+def dialog():
+    return next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog, 'OM9EditOptions') if d.isVisible()), None)
+
+def ready():
+    d = dialog()
+    return bool(d and d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+
+def feature(doc, name, shape):
+    obj = doc.addObject('Part::Feature', name); obj.Shape = shape; return obj
+
+def begin(name, gap, surface=False, explicit=True, origin=0.0):
+    doc = App.newDocument(name); doc.UndoMode = 1
+    if explicit:
+        OpenMatrix9Gui.setUnitContext(doc.Name, 1., 1., .01, .001, .02)
+    if surface:
+        a = feature(doc, 'A', Part.makePlane(10, 10))
+        b = feature(doc, 'B', Part.makePlane(10, 10, App.Vector(10 + gap, 0, 0)))
+    else:
+        a = feature(doc, 'A', Part.makeLine(App.Vector(origin, 0, 0), App.Vector(origin + 10, 0, 0)))
+        b = feature(doc, 'B', Part.makeLine(App.Vector(origin + 10 + gap, 0, 0), App.Vector(origin + 20, 0, 0)))
+    doc.recompute(); Gui.Selection.clearSelection(); Gui.Selection.addSelection(a); Gui.Selection.addSelection(b)
+    enter('Join'); enter()
+    return doc
+
+def output(doc):
+    return next((o for o in doc.Objects if getattr(o, 'OM9FeatureId', '') == 'OM9-TOP11-008'), None)
+
+def run():
+    global field, OpenMatrix9Gui
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench'); import OpenMatrix9Gui
+        field = command_input(Gui.getMainWindow())
+        check('requested native module loaded', Path(OpenMatrix9Gui.__file__).parent.resolve() == Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        cold = os.environ.get('OM9_TOLERANCE_RESTORE_REPORT')
+        if cold:
+            source = json.loads(Path(cold).read_text())
+            doc = App.openDocument(source['saved_document'])
+            obj = output(doc); info = json.loads(obj.OM9ToleranceReport)
+            check('cold restore preserves effective rule', info == source['saved_report'])
+            check('cold restore preserves context', obj.OM9UnitContext == OpenMatrix9Gui.unitContext(doc.Name)['snapshot'])
+            check('cold restore preserves joined shell', obj.Shape.isValid() and len(obj.Shape.Faces) == 2 and abs(obj.Shape.Area - 200) < 1e-6)
+        else:
+            doc = begin('ToleranceCurvePass', .005)
+            check('document tolerance accepts curve gap 0.5 tau', ready())
+            before = doc.UndoCount; enter('OK'); obj = output(doc)
+            check('curve commit is one Undo record', obj is not None and doc.UndoCount == before + 1)
+            info = json.loads(obj.OM9ToleranceReport)
+            check('curve report records document rule and actual mm', info['source'] == 'document_absolute' and info['operation'] == 'join_curves' and info['effective_mm'] == .01 and not info['relative_used'] and not info['angular_used'])
+            check('curve context persisted with output', obj.OM9UnitContext == OpenMatrix9Gui.unitContext(doc.Name)['snapshot'])
+            doc.undo(); check('Undo restores inputs and removes result', output(doc) is None and doc.getObject('A') is not None and doc.getObject('B') is not None)
+            doc.redo(); check('Redo restores actual tolerance report', json.loads(output(doc).OM9ToleranceReport) == info)
+            doc = begin('ToleranceCurveFail', .015); before = doc.UndoCount
+            check('document tolerance rejects curve gap 1.5 tau', not ready() and output(doc) is None)
+            enter('OK'); check('failed curve commit leaves objects and Undo intact', output(doc) is None and doc.getObject('A') is not None and doc.UndoCount == before)
+            enter('Tolerance=0.02'); check('explicit tolerance override recovers preview', ready()); enter('OK')
+            info = json.loads(output(doc).OM9ToleranceReport)
+            check('override persists actual cutoff provenance', info['source'] == 'explicit_override_mm' and info['effective_mm'] == .02)
+            doc = begin('LegacyCurveTolerance', .005, explicit=False)
+            check('legacy curve threshold is preserved', not ready()); enter('Cancel')
+            doc = begin('ToleranceSurfacePass', .015, surface=True)
+            check('surface document 2tau reaches the sewing backend', ready())
+            enter('OK'); obj = output(doc); info = json.loads(obj.OM9ToleranceReport)
+            check('surface output remains two exact faces', obj.Shape.ShapeType == 'Shell' and len(obj.Shape.Faces) == 2 and obj.Shape.isValid() and abs(obj.Shape.Area - 200) < 1e-6)
+            check('surface report separates requested and actual tolerance', info['operation'] == 'join_surfaces' and info['requested_mm'] == .01 and info['effective_mm'] == .02)
+            saved = out / 'tolerance.FCStd'; doc.saveAs(str(saved)); result.update(saved_document=str(saved), saved_report=info)
+            doc = begin('ToleranceSurfaceFail', .03, surface=True)
+            check('surface gap beyond 2tau rejects', not ready() and output(doc) is None)
+            enter('Tolerance=0.04'); check('explicit surface cutoff reaches backend', ready()); enter('OK')
+            info = json.loads(output(doc).OM9ToleranceReport)
+            check('explicit surface cutoff is not doubled', info['source'] == 'explicit_override_mm' and info['requested_mm'] == .04 and info['effective_mm'] == .04)
+            doc = begin('LegacySurfaceTolerance', 0., surface=True, explicit=False)
+            check('legacy surface default accepts a shared edge', ready()); enter('OK')
+            info = json.loads(output(doc).OM9ToleranceReport)
+            check('legacy surface records actual host default', info['source'] == 'legacy_operation_default' and info['effective_mm'] == 1e-6)
+            doc = begin('LegacySurfaceGap', .0001, surface=True, explicit=False)
+            check('legacy surface default rejects larger gap', not ready() and output(doc) is None); enter('Cancel')
+            doc = begin('ToleranceSurfaceKernelFloor', 0., surface=True)
+            before = doc.UndoCount
+            enter('Tolerance=0.000000001')
+            check('surface kernel cannot silently raise the requested cutoff', not ready() and output(doc) is None)
+            enter('OK'); check('kernel floor rejection preserves inputs and Undo', output(doc) is None and doc.getObject('A') is not None and doc.getObject('B') is not None and doc.UndoCount == before); enter('Cancel')
+            preferences = App.ParamGet('User parameter:BaseApp/Preferences/Units')
+            precision = preferences.GetInt('Decimals', 2)
+            try:
+                for decimals in (2, 8):
+                    preferences.SetInt('Decimals', decimals)
+                    doc = begin('TolerancePrecision' + str(decimals), .005)
+                    check('display precision leaves preview unchanged ' + str(decimals), ready()); enter('OK')
+                    info = json.loads(output(doc).OM9ToleranceReport)
+                    check('display precision leaves effective cutoff unchanged ' + str(decimals), info['effective_mm'] == .01 and info['requested_mm'] == .01)
+            finally:
+                preferences.SetInt('Decimals', precision)
+            doc = begin('ToleranceStaleContext', .005); before = doc.UndoCount
+            OpenMatrix9Gui.setUnitContext(doc.Name, 1., 1., .1, .001, .02)
+            after = doc.UndoCount; enter('OK')
+            check('changed context cannot commit old preview', output(doc) is None and doc.getObject('A') is not None and doc.UndoCount == after and after == before + 1); enter('Cancel')
+            doc = begin('ToleranceResolution', .005, origin=1e12)
+            enter('Tolerance=0.001')
+            check('below-resolution tolerance rejects before native mutation', not ready() and output(doc) is None); enter('Cancel')
+        result['ok'] = True
+    except Exception:
+        result['ok'] = False; result['error'] = traceback.format_exc()
+    (out / 'results.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+    for name in list(App.listDocuments()): App.closeDocument(name)
+    QtWidgets.QApplication.quit()
+QtCore.QTimer.singleShot(700, run)

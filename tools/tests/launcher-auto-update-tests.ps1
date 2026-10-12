@@ -103,7 +103,9 @@ $timer.Add_Tick({
     $ui.waiting=$true
     if($ui.cancel){@($form.Controls|Where-Object{$_ -is [Windows.Forms.Button] -and $_.Text -eq 'Cancel'})[0].PerformClick()}
    }
-   $form.Hide()
+   # PerformClick cannot activate a button whose parent is hidden. Keep the
+   # cancellation form visible until its real Cancel button has been clicked.
+   if(-not $ui.cancel){$form.Hide()}
   }
  }
 }.GetNewClosure())
@@ -123,6 +125,10 @@ try{
  function Start-OM9UpdatedHost {}
  $completedUpdate=Invoke-OM9Update $update $cache 'C:\stock\FreeCAD.exe'
  Check 'updater waits for owned process exit then installs automatically' ($ui.waiting -and $completedUpdate.status -eq 'installed' -and $script:ownedWait.HasExited -and [IO.File]::ReadAllText((Join-Path $destination 'bin/OpenMatrix9Gui.pyd')) -eq 'new native')
+ $freshCache=Join-Path $run 'fresh-profile/v1-1/OM9-launcher';[IO.Directory]::CreateDirectory($freshCache)|Out-Null
+ function Get-OM9RunningFreeCAD {throw 'Unrelated host must not block a fresh isolated profile'}
+ $freshUpdate=Invoke-OM9Update $update $freshCache 'C:\stock\FreeCAD.exe'
+ Check 'fresh isolated profile does not wait for unrelated FreeCAD sessions' ($freshUpdate.status -eq 'installed')
 }finally{$timer.Stop();$timer.Dispose();if($script:ownedWait -and -not $script:ownedWait.HasExited){$script:ownedWait.Kill()}}
 @{ok=$true;checks=$script:checks}|ConvertTo-Json -Depth 6|Set-Content (Join-Path $run 'results.json')
 Write-Output "Launcher auto-update tests PASS: $($script:checks.Count); $run"

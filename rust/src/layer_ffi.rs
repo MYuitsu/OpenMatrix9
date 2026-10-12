@@ -1247,6 +1247,40 @@ pub unsafe extern "C" fn om9_layer_document_reconcile(
     })
 }
 /// # Safety
+/// Native must prove each ID is owned by its strict legacy output factory.
+/// Complete witness/fact spans readable for this call; out writable u64 plan.
+/// Facts refresh own style/flags only; paths and unknown IDs are rejected.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_layer_document_refresh_verified_legacy(
+    current: u64,
+    ids: *const ByteView,
+    id_count: usize,
+    views: *const LegacyObjectView,
+    fact_count: usize,
+    out: *mut u64,
+) -> u32 {
+    boundary(|| {
+        unsafe { write(out, 0)? };
+        // Reject both oversized spans before attempting to read either pointer.
+        if id_count > MAX_OBJECTS || fact_count > MAX_OBJECTS {
+            return Err(LayerError::LimitExceeded);
+        }
+        let state = snapshot(current)?;
+        let ids = unsafe { selection(ids, id_count)? };
+        let facts = unsafe { legacy_facts(views, fact_count)? };
+        let plan =
+            crate::layer_lifecycle::plan_refresh_verified_legacy(&state.state, &ids, &facts)?;
+        let bytes = plan
+            .before
+            .metadata_bytes()?
+            .checked_add(plan.after.metadata_bytes()?)
+            .and_then(|n| n.checked_mul(4))
+            .ok_or(LayerError::LimitExceeded)?;
+        let handle = insert(Entry::Plan(Arc::new(plan), bytes))?;
+        unsafe { write(out, handle) }
+    })
+}
+/// # Safety
 /// Complete live identity spans readable for this call; out writable u64 plan.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn om9_layer_document_observed(

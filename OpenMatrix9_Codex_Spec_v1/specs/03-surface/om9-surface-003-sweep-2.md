@@ -15,6 +15,18 @@ sample_status: compiled_and_validation_tests_passed
 
 # OM9-SURFACE-003 — Sweep 2
 
+<!-- rhino-core-object-foundations:start -->
+## Bổ sung guard input dùng chung — 2026-10-09
+
+Interactive selection and every Chain Edges member keep the accepted runtime guard; source edits require Cancel/reselect even after geometry restoration. Persistent History reconstructs without session tokens.
+
+Snapshot kiểm document session, native ID/generation/revision, Undo/Redo epoch,
+unit context và world/parent placement trước transaction; đọc snapshot không sửa
+document. [Báo cáo nghiệm thu](../../../docs/validation/2026-10-09-rhino-core-object-foundations.md) ghi kiểm thử consumer và giới hạn.
+Trạng thái toàn feature và supported slice trước đây được giữ nguyên; metadata
+`implementation_followup_evidence` ghi riêng phần nền tảng mới.
+<!-- rhino-core-object-foundations:end -->
+
 Alias tương thích: `Sweep2`. Nhóm: `03-surface`. Trạng thái: `partially_implemented`.
 
 ## Hợp đồng thiết kế

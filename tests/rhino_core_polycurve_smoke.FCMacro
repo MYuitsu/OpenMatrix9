@@ -1,0 +1,167 @@
+"""RCORE-01.T05: existing native partition/reversal plus working exchange."""
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore
+from pathlib import Path
+import hashlib,json,math,os,tempfile,traceback
+
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+report={'checks':[], 'scope':'authored open two-segment fixture; sampled geometry only',
+        'length_unit':'mm', 'length_tolerance':1e-7,
+        'serialization_numeric_tolerance':1e-12,
+        'joint_policy':'preserve_segment_curves_no_heal',
+        'limits':['No new Polyline Arc command, durable History or global deviation certificate.',
+                  'FCStd-native and working 3DM preservation are separate observations.']}
+TOL=report['length_tolerance']
+A=(-5.,0.,0.);J=(0.,0.,0.);B=(10.,10.,0.)
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    (out/'progress.json').write_text(json.dumps(report,indent=2))
+    if not value:raise AssertionError(name)
+def xyz(p):return [p.x,p.y,p.z]
+def distance(a,b):return math.dist(a,b)
+def digest(shape):return hashlib.sha256(shape.exportBrepToString().encode()).hexdigest()
+def same_serialized_ledger(a,b,path=''):
+    if isinstance(a,dict) and isinstance(b,dict):
+        return a.keys()==b.keys() and all(same_serialized_ledger(a[k],b[k],path+'/'+k) for k in a)
+    if isinstance(a,list) and isinstance(b,list):
+        return len(a)==len(b) and all(same_serialized_ledger(x,y,path+'/'+str(i)) for i,(x,y) in enumerate(zip(a,b)))
+    if isinstance(a,float) or isinstance(b,float):
+        delta=abs(a-b)
+        report['max_serialization_numeric_difference']=max(report.get('max_serialization_numeric_difference',0.),delta)
+        return math.isfinite(a) and math.isfinite(b) and delta<=report['serialization_numeric_tolerance']
+    return a==b
+def ledger(shape):
+    # Independent geometry copy prevents read/evaluation caches touching source.
+    copied=shape.copy(True,False)
+    if copied.ShapeType!='Wire':return {'type':copied.ShapeType,'edge_count':len(copied.Edges),'segments':[]}
+    edges=copied.Wires[0].OrderedEdges
+    segments=[]
+    for edge in edges:
+        reverse=edge.Orientation=='Reversed'
+        first,last=edge.FirstParameter,edge.LastParameter
+        curve=edge.Curve
+        basis=None
+        if hasattr(curve,'getPoles'):
+            basis={'degree':curve.Degree,'poles':[xyz(p) for p in curve.getPoles()],
+                   'weights':list(curve.getWeights()),'knots':list(curve.getKnots()),
+                   'multiplicities':list(curve.getMultiplicities()),'periodic':curve.isPeriodic()}
+        start=xyz(edge.valueAt(last if reverse else first))
+        end=xyz(edge.valueAt(first if reverse else last))
+        samples=[xyz(edge.valueAt(first+(last-first)*i/32.)) for i in range(33)]
+        segments.append({'orientation':edge.Orientation,'domain':[first,last],
+                         'start':start,'end':end,'basis':basis,'samples':samples})
+    shared=[v for v in edges[0].Vertexes for other in edges[1].Vertexes if v.isSame(other)] if len(edges)==2 else []
+    return {'type':copied.ShapeType,'edge_count':len(copied.Edges),
+            'ordered_count':len(edges),'closed':copied.isClosed(),'segments':segments,
+            'vertex_count':len(copied.Vertexes),'shared_joint_vertices':[xyz(v.Point) for v in shared]}
+def verify(name,data,reverse):
+    report.setdefault('ledgers',{})[name]=data
+    check(name+' stays open Wire/two complete ordered occurrences',data['type']=='Wire' and data['edge_count']==data.get('ordered_count')==2 and not data['closed'])
+    segments=data['segments'];expected=[(B,J),(J,A)] if reverse else [(A,J),(J,B)]
+    for i,(start,end) in enumerate(expected):
+        check(name+' oriented endpoints '+str(i),distance(segments[i]['start'],start)<=TOL and distance(segments[i]['end'],end)<=TOL)
+    check(name+' unchanged geometric joint',distance(segments[0]['end'],segments[1]['start'])<=TOL and distance(segments[0]['end'],J)<=TOL)
+    check(name+' one native shared joint vertex',data['vertex_count']==3 and len(data['shared_joint_vertices'])==1 and distance(data['shared_joint_vertices'][0],J)<=TOL)
+    arc=segments[0 if reverse else 1]
+    line=segments[1 if reverse else 0]
+    check(name+' straight segment locus',all(abs(p[1])<=TOL and abs(p[2])<=TOL and -5-TOL<=p[0]<=TOL for p in line['samples']))
+    residual=max(abs(math.hypot(p[0],p[1]-10.)-10.) for p in arc['samples'])
+    report.setdefault('sampled_radius_residuals',{})[name]=residual
+    check(name+' rational arc sampled R10 bound',residual<=TOL and all(abs(p[2])<=TOL for p in arc['samples']))
+    check(name+' rational arc retains nonunit weights',arc['basis'] is not None and arc['basis']['degree']==2 and any(abs(w-1.)>1e-5 for w in arc['basis']['weights']))
+def run():
+    documents=[]
+    try:
+        import OpenMatrix9Gui as native, ThreeDm
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        report['native_module']=str(native.__file__)
+        report['module']=str(native.__file__)
+        report['native_sha256']=hashlib.sha256(Path(native.__file__).read_bytes()).hexdigest()
+        cold=os.environ.get('OM9_POLYCURVE_COLD_FILE')
+        if cold:
+            baseline_path=Path(os.environ['OM9_POLYCURVE_COLD_BASELINE'])
+            baseline=json.loads(baseline_path.read_text())
+            report['cold_baseline']=str(baseline_path);report['cold_baseline_sha256']=hashlib.sha256(baseline_path.read_bytes()).hexdigest()
+            report['fcstd']=cold;report['fcstd_sha256']=hashlib.sha256(Path(cold).read_bytes()).hexdigest()
+            check('cold uses same native module',baseline['native_sha256']==report['native_sha256'])
+            doc=App.openDocument(cold);documents.append(doc.Name)
+            verify('cold-forward',ledger(doc.getObject('Source').Shape),False)
+            verify('cold-reversed',ledger(doc.getObject('Reversed').Shape),True)
+            verify('cold-sibling',ledger(doc.getObject('Sibling').Shape),False)
+            check('cold preserves reversed basis and oriented ledger within declared serialization bound',same_serialized_ledger(report['ledgers']['cold-reversed'],baseline['ledgers']['native-reversed']))
+            if baseline.get('exchange_fcstd'):
+                persisted=Path(baseline['exchange_fcstd'])
+                check('cold imported FCStd input hash matches warm proof',hashlib.sha256(persisted.read_bytes()).hexdigest()==baseline['exchange_fcstd_sha256'])
+                exchanged=App.openDocument(str(persisted));documents.append(exchanged.Name)
+                current=next(o for o in exchanged.Objects if o.isDerivedFrom('Part::Feature'))
+                verify('cold-working-import',ledger(current.Shape),True)
+                check('cold imported typed CAD classification persists',current.OM9GeometryKind==2 and current.OM9Representation=='native-cad')
+                check('cold imported basis and ordered ledger match warm proof',same_serialized_ledger(report['ledgers']['cold-working-import'],baseline['ledgers']['working-3dm-committed']))
+        else:
+            doc=App.newDocument('PolycurvePartition');documents.append(doc.Name);doc.UndoMode=1
+            line=Part.makeLine(App.Vector(*A),App.Vector(*J))
+            arc=Part.ArcOfCircle(Part.Circle(App.Vector(0,10,0),App.Vector(0,0,1),10),-math.pi/2,0).toShape().toNurbs()
+            wire=Part.Wire([line,arc])
+            source=doc.addObject('Part::Feature','Source');source.Shape=wire
+            sibling=doc.addObject('Part::Feature','Sibling');sibling.Shape=wire.copy(True,False)
+            doc.recompute();source_hash=digest(source.Shape);sibling_hash=digest(sibling.Shape)
+            verify('native-forward',ledger(source.Shape),False)
+            planned=source.Shape.copy(True,False).reversed()
+            doc.openTransaction('Reverse native polycurve fixture')
+            target=doc.addObject('Part::Feature','Reversed');target.Shape=planned
+            doc.recompute();doc.commitTransaction()
+            verify('native-reversed',ledger(target.Shape),True)
+            check('native reverse leaves source and sibling bytes unchanged',digest(source.Shape)==source_hash and digest(sibling.Shape)==sibling_hash)
+            doc.undo();check('one Undo removes planned reversed output only',doc.getObject('Reversed') is None and doc.getObject('Source') is not None and doc.getObject('Sibling') is not None)
+            doc.redo();target=doc.getObject('Reversed');verify('native-redo',ledger(target.Shape),True)
+            verify('native-double-reversed',ledger(target.Shape.copy(True,False).reversed()),False)
+            saved=out/'mixed-polycurve.FCStd';doc.saveAs(str(saved))
+            report['fcstd']=str(saved);report['fcstd_sha256']=hashlib.sha256(saved.read_bytes()).hexdigest()
+            # Persist the reusable native baseline before the decisive exchange RED.
+            (out/'native-baseline.json').write_text(json.dumps(report,indent=2))
+            archive=out/'reversed-polycurve.3dm';ThreeDm.export_file(str(archive),[target],modeling=True)
+            report['working_3dm']=str(archive);report['working_3dm_sha256']=hashlib.sha256(archive.read_bytes()).hexdigest()
+            with tempfile.TemporaryDirectory() as staging:
+                prepared=json.loads(native.prepareModeling3dm(str(archive),staging))
+                report['prepared_items']=prepared['items']
+                conversion=prepared['items'][0].get('conversion_report',{})
+                check('prepared conversion records complete source and native segment rows',conversion.get('schema_version')==1 and conversion.get('segment_count')==2 and len(conversion.get('segments',[]))==2)
+                check('prepared conversion declares explicit no-heal policy before commit',conversion.get('joint_policy')=='preserve-segment-curves-no-heal' and conversion.get('observed_before_unit_scale') is True and conversion.get('length_unit')=='source-file-unit')
+                check('prepared conversion does not invent global parameter or attribute preservation',all(conversion.get(k) is None for k in ('parameter_map','parameterization_preserved','locus_preserved','topology_preserved','attributes_preserved','global_deviation')))
+                rows=conversion['segments']
+                check('prepared conversion oriented source endpoints match independent oracle',distance(rows[0]['source_start'],B)<=TOL and distance(rows[0]['source_end'],J)<=TOL and distance(rows[1]['source_end'],A)<=TOL)
+                check('prepared conversion reports actual shared native joint',rows[0]['shared_previous'] is None and rows[1]['shared_previous'] is True)
+                shape=Part.Shape();shape.read(prepared['items'][0]['brep'])
+                staged=out/'working-prepared.brep';staged.write_bytes(Path(prepared['items'][0]['brep']).read_bytes())
+                report['prepared_brep']=str(staged);report['prepared_brep_sha256']=hashlib.sha256(staged.read_bytes()).hexdigest()
+                verify('working-3dm-prepared',ledger(shape),True)
+            imported=App.newDocument('PolycurveWorkingImport');documents.append(imported.Name);imported.UndoMode=1
+            objects=ThreeDm.import_file(str(archive),imported,mode='modeling')
+            check('working import is one native CAD curve',len(objects)==1 and objects[0].isDerivedFrom('Part::Feature') and objects[0].OM9GeometryKind==2 and objects[0].OM9Representation=='native-cad')
+            verify('working-3dm-committed',ledger(objects[0].Shape),True)
+            imported_name=objects[0].Name
+            imported.undo();check('working import Undo removes committed output',imported.getObject(imported_name) is None)
+            imported.redo();current=imported.getObject(imported_name);verify('working-import-redo',ledger(current.Shape),True)
+            imported_saved=out/'imported-polycurve.FCStd';imported.saveAs(str(imported_saved))
+            report['exchange_fcstd']=str(imported_saved);report['exchange_fcstd_sha256']=hashlib.sha256(imported_saved.read_bytes()).hexdigest()
+            negative=Path(os.environ['OM9_POLYCURVE_NEGATIVE_ARCHIVE'])
+            report['negative_archive']=str(negative);report['negative_archive_sha256']=hashlib.sha256(negative.read_bytes()).hexdigest()
+            before=(len(imported.Objects),imported.UndoCount,digest(current.Shape))
+            error=None
+            try:ThreeDm.import_file(str(negative),imported,mode='modeling')
+            except Exception as exc:error=str(exc)
+            report['negative_import_error']=error
+            check('nested working import explicitly rejects before commit',error is not None and 'NestedUnsupported' in error)
+            check('nested rejection preserves objects Undo and existing CAD bytes',before==(len(imported.Objects),imported.UndoCount,digest(current.Shape)))
+            check('nested rejection preserves original source and sibling bytes',digest(source.Shape)==source_hash and digest(sibling.Shape)==sibling_hash)
+            check('working exchange leaves original geometry unchanged',digest(source.Shape)==source_hash and digest(sibling.Shape)==sibling_hash)
+            (out/'native-baseline.json').write_text(json.dumps(report,indent=2))
+        report['ok']=True
+    except Exception:
+        report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in documents:
+            if App.getDocument(name):App.closeDocument(name)
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

@@ -9,6 +9,10 @@ FetchContent_MakeAvailable(om9_opennurbs)
 if(NOT TARGET opennurbsStatic)
     add_subdirectory("${om9_opennurbs_SOURCE_DIR}" "${om9_opennurbs_BINARY_DIR}" EXCLUDE_FROM_ALL)
 endif()
+# The bundled zlib has prefixed symbols and belongs to openNURBS. Its public
+# include path otherwise shadows the host zlib used by FreeCAD/zipios++.
+# Keep the library's own include directories and transitive static linkage.
+set_property(TARGET zlib PROPERTY INTERFACE_INCLUDE_DIRECTORIES "")
 set_target_properties(opennurbsStatic PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 include(${CMAKE_CURRENT_LIST_DIR}/PolyEdgeArchive.cmake)
 om9_repair_polyedge_read(opennurbsStatic "${om9_opennurbs_SOURCE_DIR}")
@@ -21,14 +25,20 @@ find_package(Qt6 REQUIRED COMPONENTS Core)
 add_library(OM9ThreeDm STATIC
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmModeling.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmThreadPool.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/LayerExchangeAdapter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmStaging.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmImportJobs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmCurves.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/CurveConversionContract.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/PolycurveContract.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmSurfaces.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/NurbsBasisAdapter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/NativeInputTree.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmMeshes.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmBrep.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmArchive.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../Gui/LayerExchangeAdapter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmExplode.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmCage.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmInventory.cpp)
 target_sources(OM9ThreeDm PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmTransforms.cpp ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmPointCloud.cpp ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmHatch.cpp)
 target_sources(OM9ThreeDm PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmCurveOnSurface.cpp)
@@ -46,4 +56,23 @@ target_link_libraries(OM9ThreeDm PUBLIC Qt6::Core)
 if(MSVC)
     target_compile_options(OM9ThreeDm PRIVATE /utf-8 /bigobj)
     target_compile_definitions(OM9ThreeDm PUBLIC NOMINMAX)
+    find_package(ZLIB REQUIRED)
+    add_executable(OM9ThreeDmHeaderOrderTest EXCLUDE_FROM_ALL
+        ${CMAKE_CURRENT_LIST_DIR}/../tests/native/three_dm_header_order.cpp)
+    target_include_directories(OM9ThreeDmHeaderOrderTest PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../compat)
+    target_link_libraries(OM9ThreeDmHeaderOrderTest PRIVATE OM9ThreeDm ZLIB::ZLIB)
+    set_target_properties(OM9ThreeDmHeaderOrderTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+endif()
+
+add_executable(OM9ThreeDmExplodeTest EXCLUDE_FROM_ALL ${CMAKE_CURRENT_LIST_DIR}/../tests/native/three_dm_explode.cpp)
+target_link_libraries(OM9ThreeDmExplodeTest PRIVATE OM9ThreeDm)
+add_executable(OM9ThreeDmCageTest EXCLUDE_FROM_ALL ${CMAKE_CURRENT_LIST_DIR}/../tests/native/three_dm_cage.cpp)
+target_link_libraries(OM9ThreeDmCageTest PRIVATE OM9ThreeDm)
+add_executable(OM9CageGeometryTest EXCLUDE_FROM_ALL
+    ${CMAKE_CURRENT_LIST_DIR}/../tests/native/cage_geometry.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/CageGeometry.cpp)
+target_include_directories(OM9CageGeometryTest PRIVATE "${CMAKE_SOURCE_DIR}/../../src" "${CMAKE_BINARY_DIR}" "${FREECAD_SDK_BUILD}")
+target_link_libraries(OM9CageGeometryTest PRIVATE OM9ThreeDm FreeCADBase)
+if(MSVC)
+    target_compile_options(OM9CageGeometryTest PRIVATE /utf-8 /FIFCGlobal.h /FIFCConfig.h)
 endif()

@@ -15,6 +15,15 @@ sample_status: compiled_and_validation_tests_passed
 
 # OM9-CURVE-005 — Circle
 
+<!-- rhino-core-extended-input:start -->
+## Extended numeric input — validated slice
+
+Extended typed point input through existing native geometry; no all-option or all-P0 completion. Circle checkpoints retain Radius/Orientation point base, options, frame and native source identities; F4 rejects stale sources before accepting a point.
+
+[Runtime/source evidence](../../../docs/validation/2026-10-09-rhino-core-extended-input.md). Native geometry is reused; live constraints, locale and other missing contracts remain open.
+
+<!-- rhino-core-extended-input:end -->
+
 Alias tương thích: `Circle`. Nhóm: `02-curve`. Trạng thái: `partially_implemented` — phần hỗ trợ đã kiểm chứng ngày 2026-10-09.
 
 ## Hợp đồng thiết kế

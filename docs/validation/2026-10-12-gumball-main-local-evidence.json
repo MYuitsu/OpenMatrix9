@@ -1,0 +1,229 @@
+{
+  "ok": true,
+  "validation_kind": "local_stock_native_and_rust",
+  "version": "0.3.4-202610120606",
+  "plugin_sha256": "e2a65fa874b294ad3e873188d63d1ac6513f7a02b1d4397f6b4fbd49ceb61717",
+  "host_sha256": "7b38c5d5aa2c74f830539c1c5c44cbf6e3e8e157292c718f9ee24ac6d3e12cf6",
+  "rust_tests": 846,
+  "rust_result_groups": 121,
+  "rust_log_sha256": "2c84e6b45dcf4af90047fd1a067e1dd8a593f68d7778b4dad61fcdeb125bf788",
+  "native_cohorts": [
+    {
+      "name": "gumball",
+      "native_processes": 30,
+      "checks": 955,
+      "cases": [
+        {
+          "name": "geometry",
+          "checks": 15
+        },
+        {
+          "name": "commands",
+          "checks": 16
+        },
+        {
+          "name": "ownership",
+          "checks": 24
+        },
+        {
+          "name": "review",
+          "checks": 9
+        },
+        {
+          "name": "lifecycle",
+          "checks": 18
+        },
+        {
+          "name": "reentrancy",
+          "checks": 3
+        },
+        {
+          "name": "cancel-publication",
+          "checks": 2
+        },
+        {
+          "name": "core-dpi1",
+          "checks": 68
+        },
+        {
+          "name": "core-dpi150",
+          "checks": 68
+        },
+        {
+          "name": "four-view-dpi1",
+          "checks": 65
+        },
+        {
+          "name": "view-lifecycle-dpi1",
+          "checks": 19
+        },
+        {
+          "name": "four-view-dpi1.5",
+          "checks": 65
+        },
+        {
+          "name": "view-lifecycle-dpi1.5",
+          "checks": 19
+        },
+        {
+          "name": "four-view-dpi2",
+          "checks": 65
+        },
+        {
+          "name": "view-lifecycle-dpi2",
+          "checks": 19
+        },
+        {
+          "name": "settings",
+          "checks": 10
+        },
+        {
+          "name": "snappy",
+          "checks": 6
+        },
+        {
+          "name": "relocate_pointer",
+          "checks": 25
+        },
+        {
+          "name": "owner_scale",
+          "checks": 27
+        },
+        {
+          "name": "owner_callback",
+          "checks": 2
+        },
+        {
+          "name": "mesh_frame",
+          "checks": 13
+        },
+        {
+          "name": "visual",
+          "checks": 23
+        },
+        {
+          "name": "warm",
+          "checks": 20
+        },
+        {
+          "name": "cold",
+          "checks": 17
+        },
+        {
+          "name": "parametric",
+          "checks": 22
+        },
+        {
+          "name": "component-pointer",
+          "checks": 85
+        },
+        {
+          "name": "associative-warm",
+          "checks": 127
+        },
+        {
+          "name": "associative-cold",
+          "checks": 63
+        },
+        {
+          "name": "frame-objects-warm",
+          "checks": 24
+        },
+        {
+          "name": "frame-objects-cold",
+          "checks": 16
+        }
+      ],
+      "suite_sha256": "8ef2237ba2dc080bf50d307a2e85318c77be5e271c5520e421e31d850c7e7bde"
+    },
+    {
+      "name": "integration",
+      "native_processes": 5,
+      "checks": 160,
+      "cases": [
+        {
+          "name": "gumball_main_layer_coexistence_smoke.FCMacro",
+          "checks": 46
+        },
+        {
+          "name": "modeling_rust_rebuild_ownership_smoke.FCMacro",
+          "checks": 7
+        },
+        {
+          "name": "rhino_core_polycurve_smoke.FCMacro",
+          "checks": 69
+        },
+        {
+          "name": "gumball_main_periodic_exchange_smoke.FCMacro",
+          "checks": 10
+        },
+        {
+          "name": "core_notes_smoke.FCMacro",
+          "checks": 28
+        }
+      ],
+      "suite_sha256": "4ba4e273d4ef442641686b7f950353add3747808f1b7fb63e1ea36827b75faa3"
+    },
+    {
+      "name": "preservation",
+      "native_processes": 11,
+      "checks": 449,
+      "cases": [
+        {
+          "name": "rhino_core_delayed_publication_smoke.FCMacro",
+          "checks": 223
+        },
+        {
+          "name": "modeling_layer_document_smoke.FCMacro",
+          "checks": 33
+        },
+        {
+          "name": "modeling_layer_collection_smoke.FCMacro",
+          "checks": 15
+        },
+        {
+          "name": "modeling_layer_export_smoke.FCMacro",
+          "checks": 16
+        },
+        {
+          "name": "gumball_main_native_creation_stock_smoke.FCMacro",
+          "checks": 21
+        },
+        {
+          "name": "modeling_layer_helper_identity_smoke.FCMacro",
+          "checks": 12
+        },
+        {
+          "name": "modeling_layer_curve_guards_smoke.FCMacro",
+          "checks": 29
+        },
+        {
+          "name": "modeling_layer_phase3_guards_smoke.FCMacro",
+          "checks": 25
+        },
+        {
+          "name": "circle_layers_smoke.FCMacro",
+          "checks": 52
+        },
+        {
+          "name": "native-smoke.FCMacro",
+          "checks": 15
+        },
+        {
+          "name": "worker-smoke.FCMacro",
+          "checks": 8
+        }
+      ],
+      "suite_sha256": "363ed551cb9341f5cd3cc162c0878132f2371864d999649786f53b4805899301"
+    }
+  ],
+  "native_processes": 46,
+  "native_checks": 1564,
+  "scope": "Three approved core Gumball specs and selected post-merge Layer/Rebuild/exchange/worker regressions",
+  "limits": [
+    "Local reports do not certify CI DLL runtime execution. GitHub Actions only builds and packages.",
+    "Selected stock FCStd fixtures record and clear stale Windows CRT errno before save; ordinary stock empty-document reproduction confirms host Writer limitation. No host save fix is claimed.",
+    "Stock FreeCAD automatically commits another document draft before starting a native transaction. The new creation fixture explicitly completes the foreign draft first; the original dev multi-pending fixture remains intact.",
+    "Full P0/core catalog, full Rhino/Matrix parity, Clayoo/SubD and SmartTargets are not part of this acceptance."
+  ]
+}

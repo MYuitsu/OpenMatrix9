@@ -75,6 +75,9 @@ def run():
         for key,value in {'OM9SourceUUID':'11111111-2222-3333-4444-555555555555','OM9SourceClass':'ON_MorphControl','OM9ImportNamespace':'missing_archive_fixture','OM9Capability':'retained_morph_control'}.items():
             retained.addProperty('App::PropertyString',key);setattr(retained,key,value)
         count=len(doc.Objects);select(fresh);enter('CageEdit');enter();enter('Restore=RetainedControl');check('explicit retained restoration option',options() is not None);enter('OK')
+        check('malformed retained namespace rejected before mutation',len(doc.Objects)==count and len(bindings(doc))==capture_count and options() is not None and 'Invalid retained record identity' in options().findChild(QtWidgets.QLabel,'OM9CageStatus').text());enter('Cancel')
+        retained.OM9ImportNamespace='a1111111-2222-4333-8444-555555555555'
+        select(fresh);enter('CageEdit');enter();enter('Restore=RetainedControl');enter('OK')
         check('retained API error preserved before mutation',len(doc.Objects)==count and len(bindings(doc))==capture_count and options() is not None and 'Retained source archive is missing' in options().findChild(QtWidgets.QLabel,'OM9CageStatus').text());enter('Cancel')
         flat=doc.addObject('Part::Feature','Flat');flat.Shape=Part.makePlane(10,10);doc.recompute();count=len(doc.Objects);select(flat);enter('Cage');enter()
         check('flat bbox rejects missing extent with no padding',len(doc.Objects)==count and options() is None and 'positive extents' in console.toPlainText());enter('Cancel')

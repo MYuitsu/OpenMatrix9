@@ -57,6 +57,7 @@ QJsonArray hatchPatternChoices(const ONX_Model& model){
     return choices;
 }
 void applyHatchFields(ON_Geometry& geometry,const QJsonValue& value,ONX_Model& model){
+    if(value.isObject()&&value.toObject().contains("loops"))preflightHatchLoopFields(value.toObject()["loops"]);
     if(auto h=ON_Hatch::Cast(&geometry))validateHatchRhino5Data(*h);
     auto hatch=ON_Hatch::Cast(&geometry);if(!hatch||!value.isObject())throw ExchangeError("Hatch current fields require native ON_Hatch geometry");if(hatch->GetGradientType()!=ON_GradientType::None)throw ExchangeError("Rhino5 cannot retain native Hatch gradient data (requires archive version6 or newer)");const auto fields=value.toObject();
     const QStringList keys{"plane","base_point","rotation","scale","pattern_uuid"};auto scalar=fields;scalar.remove("loops");if(scalar.size()!=keys.size())throw ExchangeError("Hatch overlay requires complete current fields");for(auto key:scalar.keys())if(!keys.contains(key))throw ExchangeError("Unknown Hatch current field");

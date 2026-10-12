@@ -1,198 +1,186 @@
-> **OpenMatrix9 0.0.2 (experimental, Windows x64)**: [Download release](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.2) · [Installation guide](INSTALL.en.md). Use **official FreeCAD 1.1.4**, with OM9 in the versioned user Mod directory. [Fresh compatibility evidence and limits](docs/validation/2026-10-10-stock-freecad-1.1.4.md); older development-host tests below do not certify all stock workflows.
+# OpenMatrix9
 
-[Download launcher r2](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-SetupLauncher-r2-Windows-x64.zip): extract and run **Start-OM9.cmd** to install/update and create Desktop + Start Menu icons. It checks for new versions; update by running the script from a new bundle.
+**Open-source jewelry CAD for FreeCAD.** Rust owns the logic; FreeCAD provides native geometry and UI.
 
-# OpenMatrix9 — English
+[Tiếng Việt](README.vi.md) · [Installation](#installation) · [Releases](https://github.com/MYuitsu/OpenMatrix9/releases)
 
-[Tiếng Việt](README.vi.md) · [Detailed command list](README.md)
+![OpenMatrix9](Resources/branding/introduction.png)
 
-![OpenMatrix9 — Open-source jewelry CAD workbench](Resources/branding/introduction.png)
+## Contents
 
-OpenMatrix9 is an experimental jewelry CAD workbench for FreeCAD, developed
-with Matrix9 as a functional reference. Rust owns the command catalog, state
-and behavior; C++/Qt integrates native FreeCAD geometry and UI; Python registers
-the workbench.
-
-## Table of contents
-
-- [Overview](#overview)
-- [Support development / Donate](#donate)
-- [Completion rules](#completion-rules)
-- [Progress by major group](#group-progress)
-- [Supported workflows](#supported-workflows)
-- [Rhino 3DM / openNURBS compatibility](#three-dm)
-- [Build and installation](#build)
-- [Checks](#checks)
-- [Documentation and progress updates](#documentation)
-- [License](#support-license)
-
-<a id="overview"></a>
-## Overview
-
-The UI organizes CAD and jewelry commands into groups, with a CMD area, four
-viewports, an F6 menu and display controls. Unsupported commands remain visible
-and disabled. The project has **510 independently authored SVG icon bindings**;
-icon counts do not measure completed functionality.
+- [Donate](#donate)
+- [Detailed installation](#installation)
+- [Progress](#progress)
+- [Release notes](#release-notes)
+- [License](#license)
 
 <a id="donate"></a>
-## Support development / Donate
+## Donate
 
-If OpenMatrix9 is useful to you, you can donate to support the development and
-testing of CAD features, 3DM import/export and openNURBS compatibility.
-All contributions are voluntary. Thank you for supporting the project!
+Support CAD, 3DM and jewelry tools. Contributions are voluntary. Thank you!
 
 - **PayPal:** send to **`nguyenthaiduy277@gmail.com`** through PayPal.
-- **MoMo:** scan the QR code below. Recipient: **NGUYEN THAI DUY**.
+- **MoMo:** recipient **NGUYEN THAI DUY**; scan the QR code below.
 
-![MoMo donation QR code for NGUYEN THAI DUY](docs/images/donate/momo-qr.png)
+<img src="docs/images/donate/momo-qr.png" alt="MoMo — NGUYEN THAI DUY" width="240">
 
-<a id="completion-rules"></a>
-## Completion rules
+<a id="installation"></a>
+## Installation
 
-Updated for the combined source dated **2026-10-09**, including the CAD/P0
-work and the advanced 3DM work from main. Linked validation reports retain
-their original revision and test scope; earlier test counts do not certify
-the merged revision. P0 foundations and full Matrix9/Rhino compatibility
-remain incomplete.
+### 1. Prepare FreeCAD
 
-The table below summarizes
-the [detailed command table](README.md#tiến-độ-lệnh--command-progress), cross-checked
-against the [evidence ledger](docs/openmatrix9-progress.json) and
-the [Spec v1 implementation status](OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md).
+The current release targets **Windows x64 and official FreeCAD 1.1.4**.
+Using the package requires no FreeCAD source checkout, Rust or Visual Studio.
 
-- **Completed current scope:** a 🟢 entry in the detailed table, with execution
-  and checks for its documented scope. Missing options remain documented per
-  command; this status does not certify full Matrix9/Rhino compatibility.
-- **Partial:** a 🟡 entry with a working foundation but remaining limitations or
-  integration work. These entries do not contribute to the completed count.
-- **Not completed:** a 🔴 entry without a confirmed execution path in the source table.
-- **Total:** catalog entries or additional commands listed in that group.
-  Rate = completed current scope / group total × 100, rounded to one decimal place.
+1. Open the [FreeCAD 1.1.4 release](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4),
+   download the **Windows x64** installer and follow its installation steps.
+2. Start FreeCAD once. Check **Help → About FreeCAD** for version **1.1.4**.
+   Its installation folder may be called `FreeCAD 1.1` despite the patch version.
+3. Save your projects and close FreeCAD before installing or replacing the OM9 plugin.
 
-The same identifier may occur in multiple groups. Do not add table rows to
-calculate overall project completion: the list contains **514 unique identifiers**, including **64 🟢, 5 🟡 and 445 🔴**. Editor shares
-the Curve catalog; Custom and Reset are sidebar controls and do not add CAD groups.
+### 2. Download SetupLauncher
 
-Spec v1 uses a different unit: **607 features**, currently recording
-**32 `partially_implemented`** and **575 `not_started`**.
-A feature may have a validated supported slice while remaining partially
-implemented against its full specification.
+Open **[Release 0.3.4-202610120606](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.4-202610120606)**, expand **Assets** and download **SetupLauncher**:
 
-<a id="group-progress"></a>
-## Progress by major group
+| File | Download |
+|---|---|
+| **Launcher — recommended** | [OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.3.4-202610120606/OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip) |
+| SHA256 verification | [SHA256SUMS.txt](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.3.4-202610120606/SHA256SUMS.txt) |
 
-Each row represents one major group. Follow its name for individual commands,
-supported scope and limitations.
+**Source code** downloads are for development; install OM9 using the **SetupLauncher** ZIP above. This release is marked **Pre-release**.
 
-| No. | Major feature group | Completed current scope / Total | Rate | Partial | Not completed |
-|---:|---|---:|---:|---:|---:|
-| 1 | [Quick tools](README.md#quick-tools--thao-tác-nhanh) | **3/11** | 27.3% | 0 | 8 |
-| 2 | [File](README.md#file) | **5/13** | 38.5% | 0 | 8 |
-| 3 | [View](README.md#view) | **10/15** | 66.7% | 0 | 5 |
-| 4 | [Utilities](README.md#utilities) | **0/22** | 0.0% | 0 | 22 |
-| 5 | [Measure](README.md#measure) | **2/17** | 11.8% | 0 | 15 |
-| 6 | [Curve](README.md#curve) | **7/58** | 12.1% | 0 | 51 |
-| 7 | [Surface](README.md#surface) | **3/40** | 7.5% | 0 | 37 |
-| 8 | [Solid](README.md#solid) | **6/30** | 20.0% | 0 | 24 |
-| 9 | [Transform](README.md#transform) | **0/40** | 0.0% | 0 | 40 |
-| 10 | [Clayoo / SubD](README.md#clayoo--subd) | **0/58** | 0.0% | 0 | 58 |
-| 11 | [Emboss](README.md#emboss) | **0/7** | 0.0% | 0 | 7 |
-| 12 | [Builder](README.md#builder) | **0/16** | 0.0% | 0 | 16 |
-| 13 | [Jewelry tools](README.md#tools) | **1/31** | 3.2% | 0 | 30 |
-| 14 | [Gems](README.md#gems) | **0/35** | 0.0% | 0 | 35 |
-| 15 | [Gem settings and prongs](README.md#settings--ổ-đá-và-chấu) | **0/12** | 0.0% | 0 | 12 |
-| 16 | [Cutters](README.md#cutters) | **0/11** | 0.0% | 0 | 11 |
-| 17 | [Render](README.md#render) | **0/23** | 0.0% | 0 | 23 |
-| 18 | [Core / project / selection](README.md#core--project--selection) | **5/11** | 45.5% | 0 | 6 |
-| 19 | [Additional view and display controls](README.md#view-và-display-bổ-sung) | **10/22** | 45.5% | 0 | 12 |
-| 20 | [Snaps / constraints](README.md#snap--ràng-buộc) | **4/17** | 23.5% | 0 | 13 |
-| 21 | [Properties / history / settings / layers](README.md#properties--history--settings--layers) | **7/26** | 26.9% | 0 | 19 |
-| 22 | [Dedicated 3DM commands / keyboard](README.md#3dm-chuyên-biệt--keyboard) | **1/3** | 33.3% | 2 | 0 |
+### 3. Install with the launcher
 
+1. Right-click the **SetupLauncher** ZIP → **Extract All**.
+   Extract the entire bundle before opening the launcher.
+2. Keep **`OpenMatrix9`**, **`launcher-manifest.json`** and all **`Start-OM9`**
+   files together in the extracted folder.
+3. Double-click **`Start-OM9.cmd`**.
+4. The launcher installs OM9 in `%APPDATA%\FreeCAD\v1-1\Mod\OpenMatrix9`, creates
+   **OpenMatrix9** shortcuts on **Desktop** and in **Start Menu**, then opens the workbench.
+5. Use the **OpenMatrix9** shortcut afterwards. Once installation succeeds, the
+   extracted download folder can be removed; the plugin is installed in AppData.
 
-Native Join/Surface History policy and special Explode adapters have validated supported SDK slices; see the [History](docs/features/history-native-contract.md) and [Edit](docs/features/edit-native-contract.md) contracts.
+OM9 uses your user directory; Administrator access is unnecessary for the launcher
+or FreeCAD. If the launcher reports that the plugin is in use, save and close
+FreeCAD and retry. It leaves your running application open.
 
-<a id="supported-workflows"></a>
-## Supported workflows
+### 4. Open and check the installation
 
-- **Projects and UI:** New, Open, Save, Save As, Notes, Undo/Redo, object
-  selection/deletion, four viewports, standard views, zoom, reference images and F6.
-- **Curves:** Line, Polyline, Interp Curve, Rebuild, Rectangle, Circle and Ellipse within
-  their [documented feature scope](docs/features/).
-- **Surfaces and solids:** Sweep1, Sweep2, Loft, Box, Sphere and four Boolean
-  commands; see the [implementation status](OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md).
-- **Editing and measurement:** Trim, Join, Explode, Distance, Angle; End, Point
-  and Midpoint snaps, plus Ortho constraints in supported tools.
+1. Use the installed **OpenMatrix9** shortcut, or open FreeCAD 1.1.4 and select
+   **OpenMatrix9** from the workbench selector.
+2. Create a document with **File → New**.
+3. Select **Line**, place two points, then try **Undo** and **Redo**.
+4. Check the sidebar, **Command** area, viewports and **Layers** panel.
+   Disabled menu entries represent functionality still being developed.
+5. Save a `.FCStd` project. Finish or cancel a modeling command before changing documents.
 
-Advanced branches, associative History, layers and specialist adapters retain
-individual limitations. Consult the [Edit contract](docs/features/edit-native-contract.md)
-and [validation reports](docs/validation/) before relying on a particular option.
+To check which plugin was loaded, open **View → Panels → Python console** and enter:
 
-<a id="three-dm"></a>
-## Rhino 3DM / openNURBS compatibility
-
-3DM import/export is partially implemented. Current scope includes supported
-point/curve, surface/BRep and mesh conversion, basic geometry metadata, source
-snapshots in FCStd and geometry export targeting Rhino 5 archives.
-
-Snapshot retention does not establish full display, editing or export support.
-Structural block preservation, materials/textures, annotations and History/plugin
-userdata retain limitations. See the 3DM exchange section in the
-[detailed README](README.md) for the advanced supported slices, separate
-Rhino 5 application evidence and remaining gaps.
-
-<a id="build"></a>
-## Build and installation
-
-Use the [Windows guide](docs/build-windows.md), written in Vietnamese, to choose
-a combined FreeCAD/OM9 build, a standalone OM9 build against a matching SDK, or
-a compatible binary for an installed FreeCAD. The module requires matching
-SDK/ABI components; cloning it into `Mod` alone is insufficient.
-
-The documented baseline is Windows x64, MSVC and Qt6, with Rust supporting
-edition 2024, CMake, Python and dependencies matching the FreeCAD SDK.
-Linux/macOS have not been validated for this module. Integration details:
-[build and validation](docs/build.md).
-
-<a id="checks"></a>
-## Checks
-
-Run from the OpenMatrix9 directory in the matching build environment:
-
-```powershell
-cargo test --manifest-path rust/Cargo.toml
-python -m unittest discover -s tools/tests
-python tools/public_source_audit.py
+```python
+import OpenMatrix9Gui
+print(OpenMatrix9Gui.__file__)
 ```
 
-Native macros and executable/dependency selection are described in the
-[validation guide](docs/build.md). Passing test counts certify tested scope,
-not completed feature counts. The current workspace retains private reference
-artifacts recorded by the source audit; review its results and the progress
-ledger before distribution.
+For this installation, the path should end in `v1-1\Mod\OpenMatrix9\bin\OpenMatrix9Gui.pyd`.
 
-<a id="documentation"></a>
-## Documentation and progress updates
+### 5. Update, restore or uninstall
 
-- [Detailed README](README.md): catalog identifiers, meanings, status and limits.
-- [Progress ledger](docs/openmatrix9-progress.json): evidence, test runs,
-  unverified behavior and next actions.
-- [Spec v1 index](OpenMatrix9_Codex_Spec_v1/INDEX.md): feature lookup by group and ID.
-- [Native reports](docs/validation/): validated scope for implementation work.
-- [Windows build](docs/build-windows.md) and [build/validation](docs/build.md).
+- **Update:** download the next Release's SetupLauncher, extract the complete
+  bundle, save and close FreeCAD, then run `Start-OM9.cmd`. The launcher checks
+  for updates in the background; downloading and installing remain explicit actions.
+- **Previous installations:** the launcher keeps them in
+  `%APPDATA%\FreeCAD\v1-1\OM9-backups`. To restore one, close FreeCAD, move the
+  current plugin outside `Mod`, then place the chosen backup in `Mod\OpenMatrix9`
+  keeping the folder named `OpenMatrix9`.
+- **Launcher logs:** `%APPDATA%\FreeCAD\v1-1\OM9-launcher`.
+- **Uninstall:** close FreeCAD and move `OpenMatrix9` outside `Mod`.
+  Remove OM9 shortcuts if you no longer intend to use the installed launcher.
+  Your saved `.FCStd` projects remain intact.
 
-After implementing and checking a feature, update the ledger, relevant spec and
-detailed table in `README.md`; then synchronize counts, dates and limitations
-in both `README.vi.md` and `README.en.md`. Keep the same counting unit and status
-in both editions. Icons, command names or validator tests alone do not advance
-implementation status.
+### 6. Verify downloads and troubleshoot
 
-<a id="support-license"></a>
+Download `SHA256SUMS.txt` from the same Release. In PowerShell in Downloads:
+
+```powershell
+Get-FileHash -LiteralPath '.\OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip' -Algorithm SHA256
+Get-Content -LiteralPath '.\SHA256SUMS.txt'
+```
+
+Compare `Hash` with the line for that exact ZIP in `SHA256SUMS.txt`.
+
+| Symptom | Check |
+|---|---|
+| OpenMatrix9 is missing | FreeCAD 1.1.4, `v1-1\Mod`, `InitGui.py`, then restart. |
+| `No module named OpenMatrix9Gui` | Rerun `Start-OM9.cmd` from the fully extracted SetupLauncher bundle. |
+| `DLL load failed` | The Windows x64 package for FreeCAD 1.1.4; read the **Report view** message. |
+| Missing icons or menus | The `Resources` directory and the complete package contents. |
+| `3DM import worker is missing` | `bin\OM9ThreeDmImportWorker.exe`; re-extract it from the same ZIP if absent. |
+| Launcher does not install | Keep OpenMatrix9, the manifest and Start-OM9 files together; inspect step 5 logs. |
+| Update says files are in use | Save and close FreeCAD using OM9, then rerun the launcher. |
+
+Open **View → Panels → Report view** for errors. Include the FreeCAD version,
+ZIP filename and panel message when reporting a problem. Match the plugin to
+its host; do not replace dependencies with DLLs from another FreeCAD version.
+
+**For developers:** [build OM9 against the shared SDK](docs/build-windows.md), in Vietnamese.
+
+<a id="progress"></a>
+## Progress
+
+**In progress:** Core/History — object lifecycle, rollback and resource budgets.
+
+```mermaid
+flowchart LR
+    A["Core & History<br/>In development"] --> B["CAD & 3DM<br/>Supported scope available"]
+    B --> C["Builders & Gems<br/>Incomplete"]
+    classDef active fill:#e8f2ff,stroke:#2563eb,color:#17376b
+    classDef available fill:#e6f6ef,stroke:#20845c,color:#14543b
+    classDef planned fill:#f3f4f6,stroke:#9ca3af,color:#4b5563
+    class A active
+    class B available
+    class C planned
+```
+
+**Workspace snapshot: 2026-10-12.** Counts describe validated supported scope,
+rather than full features. Identifiers can repeat across groups. Consult the Release for binary scope.
+
+| Group | Done / Total | Progress |
+|---|---:|---|
+| [Quick tools](docs/releases/2026-10-12-development.md#quick-tools--thao-tác-nhanh) | **3/11** | ▰▰▰▱▱▱▱▱▱▱ 27.3% |
+| [File](docs/releases/2026-10-12-development.md#file) | **5/13** | ▰▰▰▰▱▱▱▱▱▱ 38.5% |
+| [View](docs/releases/2026-10-12-development.md#view) | **10/15** | ▰▰▰▰▰▰▰▱▱▱ 66.7% |
+| [Utilities](docs/releases/2026-10-12-development.md#utilities) | **0/22** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Measure](docs/releases/2026-10-12-development.md#measure) | **2/17** | ▰▱▱▱▱▱▱▱▱▱ 11.8% |
+| [Curve](docs/releases/2026-10-12-development.md#curve) | **7/58** | ▰▱▱▱▱▱▱▱▱▱ 12.1% |
+| [Surface](docs/releases/2026-10-12-development.md#surface) | **3/40** | ▰▱▱▱▱▱▱▱▱▱ 7.5% |
+| [Solid](docs/releases/2026-10-12-development.md#solid) | **6/30** | ▰▰▱▱▱▱▱▱▱▱ 20.0% |
+| [Transform](docs/releases/2026-10-12-development.md#transform) | **0/41** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Clayoo / SubD](docs/releases/2026-10-12-development.md#clayoo--subd) | **0/58** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Emboss](docs/releases/2026-10-12-development.md#emboss) | **0/7** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Builders](docs/releases/2026-10-12-development.md#builder) | **0/16** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Jewelry tools](docs/releases/2026-10-12-development.md#tools) | **1/31** | ▱▱▱▱▱▱▱▱▱▱ 3.2% |
+| [Gems](docs/releases/2026-10-12-development.md#gems) | **0/35** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Settings](docs/releases/2026-10-12-development.md#settings--ổ-đá-và-chấu) | **0/12** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Cutters](docs/releases/2026-10-12-development.md#cutters) | **0/11** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Render](docs/releases/2026-10-12-development.md#render) | **0/23** | ▱▱▱▱▱▱▱▱▱▱ 0.0% |
+| [Core / project / selection](docs/releases/2026-10-12-development.md#core--project--selection) | **5/11** | ▰▰▰▰▰▱▱▱▱▱ 45.5% |
+| [Additional display](docs/releases/2026-10-12-development.md#view-và-display-bổ-sung) | **10/22** | ▰▰▰▰▰▱▱▱▱▱ 45.5% |
+| [Snaps / constraints](docs/releases/2026-10-12-development.md#snap--ràng-buộc) | **4/17** | ▰▰▱▱▱▱▱▱▱▱ 23.5% |
+| [Properties / history / layers](docs/releases/2026-10-12-development.md#properties--history--settings--layers) | **7/26** | ▰▰▰▱▱▱▱▱▱▱ 26.9% |
+| [3DM / keyboard](docs/releases/2026-10-12-development.md#3dm-chuyên-biệt--keyboard) | **1/3** | ▰▰▰▱▱▱▱▱▱▱ 33.3% |
+
+<a id="release-notes"></a>
+## Release notes
+
+- [Release 0.3.4-202610120606](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.4-202610120606): changes, downloads and release-specific limitations.
+- [Development checkpoints](docs/releases/2026-10-12-development.md): command tables, history and evidence moved from the README; includes Vietnamese notes.
+- [Ledger](docs/openmatrix9-progress.json) · [Native reports](docs/validation/) · [Spec](OpenMatrix9_Codex_Spec_v1/INDEX.md).
+
+<a id="license"></a>
 ## License
 
-The project declares **LGPL-2.1-or-later**: see [LICENSE](LICENSE) and
-[third-party notices](THIRD_PARTY_NOTICES.md). OpenMatrix9 is an independent
-project; it does not claim vendor affiliation, clean-room development or legal
-clearance of the implementation. Source context and publication audit are
-documented in the [detailed README](README.md) and
-[source review](docs/public-source-review.md).
+[LGPL-2.1-or-later](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md).
+OpenMatrix9 is an independent project using Matrix9 as a functional reference;
+it does not claim vendor affiliation, clean-room development or legal clearance.
+[Source context](docs/public-source-review.md).

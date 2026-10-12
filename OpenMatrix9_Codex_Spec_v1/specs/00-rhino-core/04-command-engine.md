@@ -10,6 +10,46 @@ date: 2026-10-09
 
 # RCORE-04 — Command engine và vòng đời tương tác
 
+<!-- rhino-core-extended-input:start -->
+## Bổ sung đã kiểm chứng — extended numeric input
+
+Bổ sung nhập polar/spherical/surveyor, fraction/feet-inch và góc DMS bằng Rust,
+dùng lại bộ dựng hình FreeCAD/OM9 hiện có. Sửa mốc tương đối và Undo của Circle/Sphere.
+**421 Rust tests; 1108 native checks / 21 runs; 49 Python pass,1 skip.**
+P0 toàn bộ còn mở; [phạm vi và bằng chứng](../../../docs/validation/2026-10-09-rhino-core-extended-input.md).
+
+- [x] Grammar/routing và retry của supported slice đã kiểm chứng.
+- [ ] Live constraints, locale và toàn bộ yêu cầu xuyên family còn mở.
+
+<!-- rhino-core-extended-input:end -->
+
+<!-- rhino-core-point-consumers:start -->
+## Bổ sung đã kiểm chứng — shared point consumers
+
+Distance, Angle và PictureFrame đã dùng chung parser Rust, giữ tọa độ/đơn vị đầu vào và provenance.
+CPlane sai scale/shear bị từ chối; PictureFrame kiểm giao dịch trước mutation.
+**324 native checks / 9 runs; 364 Rust tests; 49 Python pass, 1 skip.**
+P0 toàn bộ vẫn đang triển khai; [phạm vi và bằng chứng](../../../docs/validation/2026-10-09-rhino-core-point-consumers.md).
+
+Đây là slice Cartesian và lifecycle của ba consumer. Các hợp đồng grammar, session, view identity và History còn lại vẫn mở; không đóng toàn bộ fixture xuyên mọi command.
+
+<!-- rhino-core-point-consumers:end -->
+
+<!-- rhino-core-object-foundations:start -->
+## Bổ sung nền tảng object snapshot — 2026-10-09
+
+Edit, Rebuild và Surface tương tác giữ snapshot tại thời điểm nhận input và
+kiểm lại trước transaction. Snapshot gồm session/generation/revision/epoch,
+unit context, world placement và các placement owner có giới hạn độ sâu.
+Source stale yêu cầu Cancel/chọn lại; chỉnh option không tự làm mới token.
+Fixture kiểm cả commit thật và không có output/Undo dư khi bị từ chối.
+Chưa thống nhất CommandRequest/CommandSession, view/CPlane revision, worker
+cancellation hoặc late-result rejection cho mọi family.
+
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-09-rhino-core-object-foundations.md); P0 vẫn `partially_implemented`.
+Các phần cập nhật cũ và bảng audit bên dưới giữ bằng chứng lịch sử, không phải tổng kết checkpoint này.
+<!-- rhino-core-object-foundations:end -->
+
 ## Cập nhật triển khai P0 — 2026-10-09
 
 Các nhận định nguồn/metadata bên dưới thuộc baseline audit ban đầu. Đợt triển

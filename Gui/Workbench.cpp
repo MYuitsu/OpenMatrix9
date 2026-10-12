@@ -1,18 +1,18 @@
-#include "SurfaceController.h"
-#include "EditController.h"
-#include "Phase3Inputs.h"
 #include "Workbench.h"
 #include "RustBridge.h"
+#include "GumballController.h"
 #include "MatrixSidebar.h"
 #include "NativeCommands.h"
 #include "CurveController.h"
+#include "SurfaceController.h"
+#include "EditController.h"
+#include "SolidController.h"
 #include "CoreWorkspace.h"
 #include "CoreViewControls.h"
 #include "CoreNotes.h"
 #include "CorePictureFrame.h"
 #include "CoreDistance.h"
 #include "CoreSnaps.h"
-#include "LayerController.h"
 #include "CoreKeyboard.h"
 #include "CoreMouse.h"
 #include <App/Application.h>
@@ -45,18 +45,13 @@ void Workbench::activated()
     if(!sidebar) {
         const QString root=qEnvironmentVariable("OM9_PLUGIN_ROOT");
         const QString resources=root.isEmpty()?QDir(QString::fromStdString(App::Application::getHomePath())).filePath("Mod/OpenMatrix9/Resources"):QDir(root).filePath("Resources");
-        sidebar=new MatrixSidebar(Gui::getMainWindow(),resources,{om9NativeCommandAvailable,om9ExecuteNativeCommand,
-            [](std::size_t command)->std::optional<bool>{
-                if(CoreSnaps::handles(command))return CoreSnaps::checked(command);
-                if(QString::fromUtf8(om9_command_id(command))=="Ortho")return CoreKeyboard::checked(command);
-                return std::nullopt;
-            },
-            [](const QString& input){return LayerController::submit(input)||CoreSnaps::submit(input)||CoreKeyboard::instance().submit(input);},
-            []{return LayerController::panel();}});
+        sidebar=new MatrixSidebar(Gui::getMainWindow(),resources,{om9NativeCommandAvailable,om9ExecuteNativeCommand});
     }
     static_cast<MatrixSidebar*>(sidebar.data())->activate();
-    SurfaceController::instance().activate();EditController::instance().activate();
     CurveController::instance().activate();
+    SurfaceController::instance().activate();
+    EditController::instance().activate();
+    SolidController::instance().activate();
     CoreWorkspace::instance().activate();
     CoreViewControls::instance().activate();
     CoreNotes::activate();
@@ -64,12 +59,17 @@ void Workbench::activated()
     CoreDistance::instance().activate();
     CoreSnaps::activate();
     CoreKeyboard::instance().activate();
+    GumballController::instance().activate();
     CoreMouse::instance().activate();
 }
 
 
 void Workbench::deactivated()
 {
+    GumballController::instance().deactivate();
+    SurfaceController::instance().deactivate();
+    EditController::instance().deactivate();
+    SolidController::instance().deactivate();
     CoreMouse::instance().deactivate();
     CoreKeyboard::instance().deactivate();
     CoreSnaps::deactivate();
@@ -79,7 +79,6 @@ void Workbench::deactivated()
     CoreNotes::deactivate();
     CoreViewControls::instance().deactivate();
     CoreWorkspace::instance().deactivate();
-    SurfaceController::instance().deactivate();EditController::instance().deactivate();
     CurveController::instance().deactivate();
     if(sidebar)static_cast<MatrixSidebar*>(sidebar.data())->deactivate();
 
@@ -105,7 +104,7 @@ Gui::MenuItem* Workbench::setupMenuBar() const
         *workspaceMenu << om9_command_id(om9_workspace_command(i));
     *openMatrixMenu << workspaceMenu;
     auto* infoMenu=new Gui::MenuItem();infoMenu->setCommand("Info & Settings");
-    *infoMenu << "OM9_ProjectNotes" << "ViewportTabs" << "CommandHistory" << "Properties" << "F6";*openMatrixMenu << infoMenu;
+    *infoMenu << "OM9_Gumball" << "OM9_GumballAlignment" << "OM9_RelocateGumball" << "Separator" << "OM9_ProjectNotes" << "ViewportTabs" << "CommandHistory" << "Properties" << "F6";*openMatrixMenu << infoMenu;
     auto* snapMenu=new Gui::MenuItem();snapMenu->setCommand("Snaps");*snapMenu << "Osnap E" << "Osnap M" << "Osnap P" << "Ortho";*openMatrixMenu << snapMenu;
 
     const std::size_t groupCount =
@@ -129,7 +128,8 @@ Gui::MenuItem* Workbench::setupMenuBar() const
 
         submenu->setCommand(title);
         if(std::string(title)=="File")*submenu << "Import3dm" << "Export3dm" << "Copy3dm" << "Paste3dm" << "ExportLayerSelection3dm" << "ExportSession3dm" << "CopySession3dm";
-        if(std::string(title)=="Curve")*submenu << "PointsOn" << "Join";
+        if(std::string(title)=="Curve")*submenu << "PointsOn";
+        if(std::string(title)=="Transform")*submenu << "OM9_ReleaseFromCage";
 
         const std::size_t commandCount =
             om9_menu_group_command_count(

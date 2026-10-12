@@ -1,0 +1,273 @@
+"""RCORE-01 exact fixture acceptance; reuse ThreeDm and run_menu_smoke.
+
+Cold invocation requires BOTH OM9_KERNEL_COLD_FILE and OM9_KERNEL_COLD_BASELINE.
+This macro deliberately does not certify area from default Shape.Area.
+"""
+import hashlib, json, math, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore
+
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0, os.environ['OM9_TEST_NATIVE_DIR'])
+output = Path(os.environ['OM9_SMOKE_OUTPUT'])
+output.mkdir(parents=True, exist_ok=True)
+TOL = 1e-7
+NAMES = {'CircleR10', 'Square20HoleR3', 'OpenCylinderR4H7'}
+report = {'schema_version': 1, 'candidate_status': 'unrun_until_executed',
+          'units': 'mm', 'length_bound_mm': TOL, 'checks': [], 'snapshots': {},
+          'unfulfilled': [
+              'T01 residual is sampled; no certified global deviation or T10 parameter map',
+              'T02 exact adaptive area is the separate native candidate; default Shape.Area is observation only',
+              'Shared Rust descriptor/capability/conversion-report contracts are not exercised',
+              'T07 malformed/allocation rejection and asynchronous T08 lifecycle are not covered',
+              'Cold checks cover these three objects, not full T09 periodic curve plus seam/hole face',
+              'Source immutability covers transfer; full T11 shallow/subcurve/face/sibling lifecycle is not covered',
+              'No Rhino runtime or cross-backend parity evidence']}
+
+def check(clause, condition):
+    report['checks'].append({'name': clause, 'passed': bool(condition)})
+    if not condition:
+        raise AssertionError(clause)
+
+def digest(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+def shape_digest(shape):
+    data = shape.exportBrepToString()
+    if isinstance(data, str):
+        data = data.encode('utf-8')
+    return hashlib.sha256(data).hexdigest()
+
+def xyz(point):
+    return [point.x, point.y, point.z]
+
+def curve_basis(edge):
+    c = edge.Curve
+    data = {'native_class': type(c).__name__, 'edge_domain': [edge.FirstParameter, edge.LastParameter],
+            'orientation': str(edge.Orientation), 'periodic': c.isPeriodic(), 'closed': c.isClosed()}
+    if isinstance(c, Part.BSplineCurve):
+        data.update(degree=c.Degree, poles_xyz=[xyz(p) for p in c.getPoles()],
+                    weights=c.getWeights(), knots=c.getKnots(), multiplicities=c.getMultiplicities(),
+                    rational=c.isRational())
+    return data
+
+def surface_basis(face):
+    s = face.Surface
+    data = {'native_class': type(s).__name__, 'face_domain': list(face.ParameterRange),
+            'u_periodic': s.isUPeriodic(), 'v_periodic': s.isVPeriodic(),
+            'u_closed': s.isUClosed(), 'v_closed': s.isVClosed(), 'orientation': str(face.Orientation)}
+    if isinstance(s, Part.BSplineSurface):
+        data.update(u_degree=s.UDegree, v_degree=s.VDegree,
+                    poles_u_major=[[xyz(p) for p in row] for row in s.getPoles()],
+                    weights_u_major=s.getWeights(), u_knots=s.getUKnots(), v_knots=s.getVKnots(),
+                    u_multiplicities=s.getUMultiplicities(), v_multiplicities=s.getVMultiplicities())
+    return data
+
+def topology(face):
+    # Edges is UNIQUE topology. OrderedEdges is wire USE occurrence order.
+    unique = face.Edges
+    counts = [0] * len(unique)
+    loops = []
+    for wi, wire in enumerate(face.Wires):
+        uses = []
+        for order, edge in enumerate(wire.OrderedEdges):
+            identity = next((i for i, item in enumerate(unique) if edge.isSame(item)), None)
+            check('edge occurrence resolves a unique edge', identity is not None)
+            counts[identity] += 1
+            pc = face.curveOnSurface(edge)
+            check('edge occurrence has a pcurve', pc is not None and len(pc) == 3)
+            uses.append({'edge_identity': identity + 1, 'use_order': order,
+                         'orientation': str(edge.Orientation), 'seam': edge.isSeam(face),
+                         'pcurve_class': type(pc[0]).__name__, 'pcurve_domain': [pc[1], pc[2]]})
+        loops.append({'role': 'outer' if wire.isSame(face.OuterWire) else 'inner',
+                      'loop_index': wi, 'ordered_edge_uses': uses})
+    edges = [{'edge_identity': i + 1, 'uses': n, 'seam': edge.isSeam(face)}
+             for i, (edge, n) in enumerate(zip(unique, counts))]
+    free = [edge for edge, n in zip(unique, counts) if n == 1]
+    return {'unique_edges': len(unique), 'edge_use_count': sum(counts), 'edges': edges, 'loops': loops}, free
+
+def boundary_components(edges):
+    # Connectivity is topology identity; do not join by approximate XYZ.
+    groups, unseen = [], list(range(len(edges)))
+    while unseen:
+        group = [unseen.pop(0)]
+        cursor = 0
+        while cursor < len(group):
+            edge = edges[group[cursor]]
+            adjacent = [j for j in unseen if any(a.isSame(b) for a in edge.Vertexes for b in edges[j].Vertexes)]
+            for j in adjacent:
+                unseen.remove(j)
+                group.append(j)
+            cursor += 1
+        points = [p for j in group for p in edges[j].discretize(129)]
+        groups.append({'edge_segments': len(group), 'length': sum(edges[j].Length for j in group),
+                       'radial_sample_max': max(abs(math.hypot(p.x, p.y) - 4) for p in points),
+                       'z_min': min(p.z for p in points), 'z_max': max(p.z for p in points)})
+    return sorted(groups, key=lambda row: row['z_min'])
+
+def snapshot(objects, stage):
+    rows = {obj.Label: obj for obj in objects}
+    check(stage + ' exact fixture object names/count', len(objects) == 3 and set(rows) == NAMES)
+    data = {}
+    for name, obj in rows.items():
+        shape = obj.Shape
+        # Default bounds follow display triangulation, which can change on cold
+        # reload. Query native geometry bounds without display triangulation or
+        # additional shape-tolerance enlargement; OCCT numerical tolerance remains.
+        box = shape.optimalBoundingBox(False,False)
+        data[name] = {'shape_type': shape.ShapeType, 'shape_sha256': shape_digest(shape),
+                      'valid': shape.isValid(), 'closed': shape.isClosed(),
+                      'face_count': len(shape.Faces), 'solid_count': len(shape.Solids),
+                      'world_bounds_identity_placement': [box.XMin, box.YMin, box.ZMin, box.XMax, box.YMax, box.ZMax],
+                      'placement_base': xyz(obj.Placement.Base), 'placement_rotation_quaternion': list(obj.Placement.Rotation.Q),
+                      'curve_bases': [curve_basis(e) for e in shape.Edges],
+                      'surface_bases': [surface_basis(f) for f in shape.Faces]}
+        check(stage + ' ' + name + ' stays native CAD', obj.isDerivedFrom('Part::Feature') and not obj.isDerivedFrom('Mesh::Feature'))
+        check(stage + ' ' + name + ' geometry is valid', shape.isValid())
+        check(stage + ' ' + name + ' uses explicit identity placement',
+              obj.Placement.Base.Length <= TOL and abs(obj.Placement.Rotation.Angle) <= TOL)
+    circle = rows['CircleR10'].Shape.Edges[0]
+    check(stage + ' T01 full circle remains rational NURBS', isinstance(circle.Curve, Part.BSplineCurve) and circle.Curve.isRational())
+    weights = circle.Curve.getWeights()
+    check(stage + ' T01 positive weights not all one', min(weights) > 0 and max(weights) - min(weights) > 1e-12)
+    samples = circle.discretize(1025)
+    data['CircleR10']['radius_sample_max'] = max(abs(math.hypot(p.x, p.y) - 10) for p in samples)
+    check(stage + ' T01 declared sampled radial/plane bound',
+          data['CircleR10']['radius_sample_max'] <= TOL and max(abs(p.z) for p in samples) <= TOL)
+    check(stage + ' T01 analytic circumference', abs(circle.Length - 20 * math.pi) <= TOL)
+
+    square = rows['Square20HoleR3'].Shape
+    check(stage + ' T02 one face/no solid', len(square.Faces) == 1 and len(square.Solids) == 0)
+    face = square.Faces[0]
+    topo, free = topology(face)
+    data['Square20HoleR3']['topology'] = topo
+    check(stage + ' T02 one outer loop/one inner loop', sorted(x['role'] for x in topo['loops']) == ['inner', 'outer'])
+    uv = face.Surface.parameter(App.Vector(0, 0, 0))
+    check(stage + ' T02 hole center excluded in UV trim classifier', not face.isPartOfDomain(*uv))
+    check(stage + ' T02 hole center-to-face distance R3', abs(square.distToShape(Part.Vertex(App.Vector()))[0] - 3) <= TOL)
+    uv_inside = face.Surface.parameter(App.Vector(5, 0, 0))
+    check(stage + ' T02 retained point belongs to face', face.isPartOfDomain(*uv_inside))
+    bb = square.BoundBox
+    check(stage + ' T02 square 20x20 bounds', abs(bb.XLength - 20) <= TOL and abs(bb.YLength - 20) <= TOL and bb.ZLength <= TOL)
+    data['Square20HoleR3']['default_area_observation'] = square.Area
+    data['Square20HoleR3']['analytic_area_expected'] = 400 - 9 * math.pi
+    data['Square20HoleR3']['area_certificate'] = 'requires matching native adaptive-area candidate; not inferred from Shape.Area'
+
+    cylinder = rows['OpenCylinderR4H7'].Shape
+    check(stage + ' T03 one face/no solid/open shape', len(cylinder.Faces) == 1 and len(cylinder.Solids) == 0 and not cylinder.isClosed())
+    face = cylinder.Faces[0]
+    topo, free = topology(face)
+    data['OpenCylinderR4H7']['topology'] = topo
+    paired = [e for e in topo['edges'] if e['seam'] and e['uses'] == 2]
+    check(stage + ' T03 seam identity has two edge uses', len(paired) >= 1)
+    check(stage + ' T03 occurrence count differs from unique edge count', topo['edge_use_count'] > topo['unique_edges'])
+    components = boundary_components(free)
+    data['OpenCylinderR4H7']['free_boundary_components'] = components
+    check(stage + ' T03 exactly two circular open boundaries', len(components) == 2)
+    for i, component in enumerate(components):
+        check(stage + ' T03 free boundary circle and end plane ' + str(i),
+              component['radial_sample_max'] <= TOL and abs(component['length'] - 8 * math.pi) <= TOL and
+              component['z_max'] - component['z_min'] <= TOL and abs(component['z_min'] - (0 if i == 0 else 7)) <= TOL)
+    u0, u1, v0, v1 = face.ParameterRange
+    points = [face.valueAt(u0 + (u1-u0)*i/64, v0 + (v1-v0)*j/8) for i in range(65) for j in range(9)]
+    check(stage + ' T03 sampled cylinder R4 and height7', max(abs(math.hypot(p.x,p.y)-4) for p in points) <= TOL and
+          abs(min(p.z for p in points)) <= TOL and abs(max(p.z for p in points)-7) <= TOL)
+    # Converted periodicity is recorded, never required to equal analytic source.
+    report['snapshots'][stage] = data
+    return data
+
+def close_numeric_tree(left, right, bound=1e-12):
+    if isinstance(left, bool) or isinstance(right, bool):
+        return left == right
+    if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+        return math.isfinite(left) and math.isfinite(right) and abs(left-right) <= bound
+    if isinstance(left, list) and isinstance(right, list):
+        return len(left) == len(right) and all(close_numeric_tree(a,b,bound) for a,b in zip(left,right))
+    if isinstance(left, dict) and isinstance(right, dict):
+        return left.keys() == right.keys() and all(close_numeric_tree(left[k],right[k],bound) for k in left)
+    return left == right
+
+def run():
+    opened = []
+    try:
+        import OpenMatrix9Gui as OM, ThreeDm
+        report['native_module'] = str(OM.__file__)
+        report['native_sha256'] = digest(OM.__file__)
+        cold = os.environ.get('OM9_KERNEL_COLD_FILE')
+        if cold:
+            baseline_path = os.environ.get('OM9_KERNEL_COLD_BASELINE')
+            if not baseline_path:
+                raise RuntimeError('Cold invocation needs explicit OM9_KERNEL_COLD_BASELINE')
+            baseline = json.loads(Path(baseline_path).read_text(encoding='utf-8'))
+            check('cold invocation uses the same native module hash', baseline['native_sha256'] == report['native_sha256'])
+            check('cold FCStd file matches the first saved hash', digest(cold) == baseline['fcstd_sha256'])
+            doc = App.openDocument(cold)
+            opened.append(doc.Name)
+            current = snapshot([o for o in doc.Objects if o.Label in NAMES], 'cold FCStd')
+            expected = baseline['snapshots']['before FCStd save']
+            for name in NAMES:
+                for key in ['shape_type','valid','closed','face_count','solid_count','world_bounds_identity_placement',
+                            'placement_base','placement_rotation_quaternion','curve_bases','surface_bases']:
+                    check('cold FCStd preserves ' + name + ' ' + key, close_numeric_tree(expected[name][key],current[name][key]))
+                if 'topology' in expected[name]:
+                    check('cold FCStd preserves ' + name + ' use/loop topology', close_numeric_tree(expected[name]['topology'],current[name]['topology']))
+            report['restore_file_sha256'] = digest(cold)
+            report['cold_baseline_sha256'] = digest(baseline_path)
+        else:
+            Gui.activateWorkbench('OpenMatrix9Workbench')
+            source = App.newDocument('ExactKernelSource');opened.append(source.Name);source.UndoMode = 1
+            analytic = Part.makeCircle(10)
+            report['analytic_circle_source'] = {'radius_mm': analytic.Edges[0].Curve.Radius, 'source_kind': 'Part analytic circle'}
+            inputs = []
+            def add(name,shape):
+                obj = source.addObject('Part::Feature',name);obj.Label=name;obj.Shape=shape;inputs.append(obj)
+            add('CircleR10',analytic.toNurbs())
+            outer = Part.makePolygon([App.Vector(-10,-10,0),App.Vector(10,-10,0),App.Vector(10,10,0),App.Vector(-10,10,0),App.Vector(-10,-10,0)])
+            inner = Part.Wire(Part.makeCircle(3));inner.reverse()
+            add('Square20HoleR3',Part.Face([Part.Wire(outer.Edges),inner]))
+            lateral = next(f for f in Part.makeCylinder(4,7).Faces if isinstance(f.Surface,Part.Cylinder))
+            check('T03 analytic source has periodic U', lateral.Surface.isUPeriodic())
+            add('OpenCylinderR4H7',lateral);source.recompute()
+            snapshot(inputs,'authored source')
+            before = {o.Name:shape_digest(o.Shape) for o in inputs}
+            source_count, source_undo = len(source.Objects), source.UndoCount
+            guards = [OM.objectSnapshot(source.Name,o.Name) for o in inputs]
+            archive = output/'exact-kernel-candidate.3dm'
+            ThreeDm.export_file(str(archive),inputs)
+            check('export leaves source shapes/object count/Undo unchanged',
+                  before == {o.Name:shape_digest(o.Shape) for o in inputs} and
+                  (len(source.Objects),source.UndoCount) == (source_count,source_undo))
+            report['archive_sha256'] = digest(archive)
+            target = App.newDocument('ExactKernelGeometry');opened.append(target.Name);target.UndoMode=1
+            before_import = (len(target.Objects),target.UndoCount)
+            objects = ThreeDm.import_file(str(archive),target,mode='geometry')
+            snapshot(objects,'geometry import')
+            check('import commits exactly one Undo entry', target.UndoCount == before_import[1]+1)
+            names = [o.Name for o in objects]
+            target.undo()
+            check('one Undo removes all three imported outputs', len(target.Objects)==before_import[0] and all(target.getObject(n) is None for n in names))
+            target.redo()
+            check('Redo restores the same host output names', all(target.getObject(n) is not None for n in names))
+            objects = [target.getObject(n) for n in names]
+            snapshot(objects,'before FCStd save')
+            check('conversion/Undo/Redo never mutate original sources', before == {o.Name:shape_digest(o.Shape) for o in inputs})
+            check('conversion leaves existing source identity/revision guards valid',
+                  all(OM.validateObjectSnapshot(source.Name,g['token']) for g in guards))
+            save = output/'exact-kernel-candidate.FCStd';target.saveAs(str(save))
+            report['cold_restore_file'] = str(save)
+            report['fcstd_sha256'] = digest(save)
+            report['cold_baseline_file'] = str(output/'results.json')
+        report['ok'] = True
+        report['candidate_status'] = 'executed_partial_fixture_observations'
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        for name in reversed(opened):
+            if name in App.listDocuments():
+                App.closeDocument(name)
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(500,run)

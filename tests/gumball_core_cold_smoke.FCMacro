@@ -1,0 +1,31 @@
+"""A new shared-host process measures saved Gumball outputs independently."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,str(Path(__file__).parent))
+from gumball_fixture import durable_facts
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);warm=Path(os.environ['OM9_GUMBALL_WARM']);report={'checks':[],'feature_ids':['OM9-INFO-020']}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import OpenMatrix9Gui as native,ThreeDm
+        report['module']=native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench');expected=json.loads((warm/'expected.json').read_text());doc=App.openDocument(str(warm/'gumball.FCStd'))
+        for facts in expected['objects']:
+            obj=doc.getObject(facts['name']);observed=durable_facts(obj);report.setdefault('observed',[]).append(observed)
+            check(facts['name']+' cold native geometry ownership and provenance',observed==facts)
+        exported=out/'cold-retained.3dm';ThreeDm.export_preserved(str(exported),[doc.getObject(n) for n in expected['retained']])
+        ids=sorted(r['source_uuid'] for r in json.loads(native.inspect3dm(str(exported)))['records']);check('cold preserved export keeps independent archive UUIDs',ids==expected['archive_ids'])
+        rows=[]
+        for item in json.loads(native.read3dm(str(exported),str(out)))['items']:
+            shape=Part.Shape();shape.read(item['brep']);b=shape.optimalBoundingBox(False,False);rows.append([round(v,9) for v in (b.XMin,b.YMin,b.ZMin,shape.Volume)])
+        check('cold preserved export keeps exact transformed geometry',sorted(rows)==expected['export_geometry'])
+        check('new process starts without gesture',native.gumballState()['phase'] in (0,1));report['ok']=True
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2));Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

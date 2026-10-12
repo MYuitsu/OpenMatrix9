@@ -1,3 +1,7 @@
+extern "C" unsigned om9_geometry_operation(unsigned,unsigned,unsigned,unsigned);
+extern "C" bool om9_retained_dependencies_valid(const unsigned char*,std::size_t);
+extern "C" bool om9_3dm_export_manifest_valid(const unsigned char*,std::size_t);
+#include <cstring>
 #include <Python.h>
 #ifdef _WIN64
 #undef WIN32
@@ -67,6 +71,8 @@ static PyObject* prepare3dmArchive(PyObject*,PyObject* args){const char *path,*d
         auto manifest=inspectArchive(input,scale).document;
         mark("source_inventory");
         if(!manifest["issues"].toArray().isEmpty())throw ExchangeError("3DM archive has unresolved dependencies");
+        const auto manifestBytes=QJsonDocument(manifest).toJson(QJsonDocument::Compact);
+        if(!om9_retained_dependencies_valid(reinterpret_cast<const unsigned char*>(manifestBytes.constData()),manifestBytes.size()))throw ExchangeError("3DM archive has invalid, missing or cyclic source dependencies");
         std::filesystem::copy_file(input,snapshot);
         try{
             auto snapshotInventory=inspectArchive(snapshot,scale);auto snapshotManifest=snapshotInventory.document;
@@ -155,6 +161,7 @@ static PyObject* hatchBoundary3dm(PyObject*,PyObject* args){const char *json,*di
         QJsonParseError error;auto document=QJsonDocument::fromJson(QByteArray(json),&error);if(error.error!=QJsonParseError::NoError||!document.isObject())throw ExchangeError("Invalid Hatch boundary request");auto row=document.object();
         const QStringList keys{"snapshot","archive_sha256","scale_mm","source_uuid","hatch_fields","geometry_matrix"};for(auto key:row.keys())if(!keys.contains(key))throw ExchangeError("Unknown Hatch boundary request field");
         if(!row["snapshot"].isString()||!row["archive_sha256"].isString()||!row["source_uuid"].isString()||!row["scale_mm"].isDouble()||!std::isfinite(row["scale_mm"].toDouble())||row["scale_mm"].toDouble()<=0)throw ExchangeError("Incomplete Hatch boundary source identity");
+        if(row["hatch_fields"].isObject()&&row["hatch_fields"].toObject().contains("loops"))preflightHatchLoopFields(row["hatch_fields"].toObject()["loops"]);
         auto source=inspectArchive(std::filesystem::path(row["snapshot"].toString().toStdWString()),row["scale_mm"].toDouble());if(source.document["archive_sha256"]!=row["archive_sha256"])throw ExchangeError("Hatch boundary source hash differs");
         auto component=ON_ModelGeometryComponent::Cast(source.nativeModel->ComponentFromId(ON_ModelComponent::Type::ModelGeometry,ON_UuidFromString(row["source_uuid"].toString().toLatin1().constData())).ModelComponent());auto original=component?ON_Hatch::Cast(component->Geometry(nullptr)):nullptr;if(!original)throw ExchangeError("Hatch boundary requires verified native ON_Hatch");
         auto current=*original;const double scale=source.document["scale_mm"].toDouble();if(scale!=1)transformHatchNative(current,ON_Xform::DiagonalTransformation(scale),source.nativeModel.get());applyHatchFields(current,row["hatch_fields"],*source.nativeModel);
@@ -167,6 +174,7 @@ static PyObject* hatchBoundary3dm(PyObject*,PyObject* args){const char *json,*di
 static PyObject* write3dm(PyObject*,PyObject* args){const char *json,*path;
     if(!PyArg_ParseTuple(args,"ss",&json,&path))return nullptr;
     try{{
+        if(!om9_3dm_export_manifest_valid(reinterpret_cast<const unsigned char*>(json),std::strlen(json)))throw ExchangeError("Invalid export manifest: typed geometry and exact canonical layer bindings required");
         auto request=QByteArray(json);auto output=std::filesystem::u8path(path);
         struct ReleaseGIL {PyThreadState* state=PyEval_SaveThread();~ReleaseGIL(){PyEval_RestoreThread(state);}} release;
         std::lock_guard sdkLock(sdkArchiveMutex());
@@ -177,6 +185,8 @@ static PyObject* write3dm(PyObject*,PyObject* args){const char *json,*path;
         ExchangeModel model;model.tolerance=doc.object()["tolerance"].toDouble(1e-6);if(!std::isfinite(model.tolerance)||model.tolerance<=0)throw ExchangeError("Invalid export tolerance");
         quint64 cloudBytes=0;for(auto value:doc.object()["items"].toArray()){auto row=value.toObject();if(row.contains("point_cloud_fields")){QFile file(row["point_cloud_fields"].toString());if(!file.exists()||file.size()<=0)throw ExchangeError("Missing PointCloud current-field file");cloudBytes+=static_cast<quint64>(file.size());if(cloudBytes>512ULL*1024*1024)throw ExchangeError("Combined PointCloud current fields exceed512MiB");}}
         for(auto value:doc.object()["items"].toArray()){auto o=value.toObject();ExchangeItem item;
+            const unsigned kind=o.contains("point_cloud_fields")?5:o.contains("brep")?3:4;
+            if(om9_geometry_operation(3,kind,5,1)>=100)throw ExchangeError("Unsupported working geometry export contract");
             item.name=o["name"].toString().toStdString();item.layer=o["layer"].toString().toStdString();item.visible=o["visible"].toBool(true);item.locked=o["locked"].toBool();
             if(canonical){
                 if(!o["layer_object_id"].isString())throw ExchangeError("Canonical export geometry is missing its metadata object ID");

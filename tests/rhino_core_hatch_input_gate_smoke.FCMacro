@@ -1,0 +1,47 @@
+"""RCORE-01.T07: malformed current NURBS rejected before native source access."""
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,copy,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'cases':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    (out/'progress.json').write_text(json.dumps(report,indent=2))
+    if not value:raise AssertionError(name)
+def run():
+    doc=None
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as native
+        doc=App.newDocument('HatchInputGate');doc.UndoMode=1
+        member=doc.addObject('Part::Feature','Sentinel');member.Shape=Part.makeBox(2,3,4);doc.recompute()
+        before=(len(doc.Objects),doc.UndoCount,member.Shape.exportBrepToString())
+        curve={'class_name':'ON_NurbsCurve','dimension':2,'source_index':None,'domain':[0,4],'order':2,'rational':False,'cvs':[[0,0],[10,0],[10,10],[0,10],[0,0]],'knots':[0,1,2,3,4]}
+        loops={'schema_version':1,'loops':[{'type':0,'source_index':None,'curve':curve}]}
+        request={'snapshot':str(out/'absent-source.3dm'),'archive_sha256':'0'*64,'scale_mm':1,'source_uuid':'12345678-1234-1234-1234-123456789abc','hatch_fields':{'loops':loops}}
+        destination=out/'boundary';destination.mkdir();sentinel=destination/'existing.brep';sentinel.write_bytes(b'unchanged-boundary-sentinel')
+        cases=[]
+        bad=copy.deepcopy(curve);bad['knots'].pop();cases.append(('wrong-knot-count',bad))
+        bad=copy.deepcopy(curve);bad['cvs'][2][0]=None;cases.append(('non-number-CV',bad))
+        bad=copy.deepcopy(curve);bad['rational']=True;bad['cvs']=[p+[1] for p in bad['cvs']];bad['cvs'][2][2]=0;cases.append(('zero-weight',bad))
+        bad=copy.deepcopy(curve);bad['knots'][2]=-1;cases.append(('unordered-knots',bad))
+        bad=copy.deepcopy(curve);bad['domain']=[1,4];cases.append(('inconsistent-active-domain',bad))
+        bad=copy.deepcopy(curve);bad['rational']=True;cases.append(('rational-row-width',bad))
+        for name,bad in cases:
+            row=copy.deepcopy(request);row['hatch_fields']['loops']['loops'][0]['curve']=bad;error=None
+            try:native.hatchBoundary3dm(json.dumps(row,allow_nan=False),str(destination))
+            except Exception as exc:error=str(exc)
+            report['cases'].append({'name':name,'error':error})
+            check(name+' rejects before accessing missing archive',error is not None and 'Invalid Hatch loop basis input' in error)
+            check(name+' preserves document Undo geometry and staged sentinel',before==(len(doc.Objects),doc.UndoCount,member.Shape.exportBrepToString()) and sentinel.read_bytes()==b'unchanged-boundary-sentinel' and list(destination.iterdir())==[sentinel])
+        error=None
+        try:native.hatchBoundary3dm(json.dumps(request,allow_nan=False),str(destination))
+        except Exception as exc:error=str(exc)
+        report['valid_source_access_error']=error
+        check('valid basis proceeds to absent source error',error is not None and 'Invalid Hatch loop basis input' not in error)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        if doc:App.closeDocument(doc.Name)
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

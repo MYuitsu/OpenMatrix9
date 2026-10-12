@@ -58,6 +58,11 @@ def run():
         check('fresh Surface is valid and owns one geometry/layer Undo',loft.Shape.isValid() and abs(loft.Shape.Area-40)<1e-7 and doc.UndoCount==undo+1)
         name=loft.Name;doc.undo();settle();check('Surface Undo restores exact layer state and geometry',doc.getObject(name) is None and snapshot()==before)
         doc.redo();settle();check('Surface Redo restores exact layer state and geometry',doc.getObject(name) is not None and snapshot()==after)
+        select([a]);cmd('BooleanDifference');cmd();cmd(b.Name);cmd()
+        check('fresh Boolean preview opens before foreign ownership check',dialog('OM9EditOptions') is not None)
+        doc.openTransaction('Unrelated Boolean user draft');profiles[0].Label='Keep foreign Boolean user draft';count=len(doc.Objects);undo=doc.UndoCount
+        cmd('OK');check('BRep commit refuses foreign transaction without closing it',doc.HasPendingTransaction and profiles[0].Label=='Keep foreign Boolean user draft' and len(doc.Objects)==count and doc.UndoCount==undo and doc.getObject(a.Name) is a and abs(a.Shape.Volume-1000)<1e-7 and abs(b.Shape.Volume-1000)<1e-7)
+        cmd('Cancel');doc.abortTransaction()
         previewLoft();doc.openTransaction('Unrelated user draft');profiles[0].Label='Keep foreign user draft';count=len(doc.Objects);undo=doc.UndoCount
         cmd('OK');check('Surface commit refuses foreign transaction without closing it',doc.HasPendingTransaction and profiles[0].Label=='Keep foreign user draft' and len(doc.Objects)==count and doc.UndoCount==undo)
         cmd('Cancel');doc.abortTransaction()
@@ -70,6 +75,8 @@ def run():
         check('Boolean geometry/deletion/layer share one Undo',doc.UndoCount==undo+1 and doc.getObject(aName) is None)
         cutName=cut.Name;doc.undo();settle();check('Boolean Undo restores complete before state',doc.getObject(aName) is not None and doc.getObject(cutName) is None and snapshot()==before)
         doc.redo();settle();check('Boolean Redo restores complete after state',doc.getObject(aName) is None and doc.getObject(cutName) is not None and snapshot()==after)
+        from stock_save_support import prepare_stock_fcstd_save
+        prepare_stock_fcstd_save(report)
         saved=output/'phase3-layer-guards.FCStd';doc.saveAs(str(saved));App.closeDocument(doc.Name);doc=App.openDocument(str(saved));settle()
         check('FCStd reopens guarded Surface/BRep layer state',snapshot()==after and abs(doc.getObject(cutName).Shape.Volume-500)<1e-7)
         report.update(ok=True,module=native.__file__,scope='supported native Surface/BRep lock/staleness/owned commit; property/tree/Delete and complete receive still pending')

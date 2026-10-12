@@ -1,0 +1,279 @@
+"""Real Mesh component pointer picks in every native OM9 view."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Mesh
+from PySide6 import QtCore, QtWidgets, QtTest
+from pivy import coin
+sys.path.insert(0, str(Path(__file__).parent))
+from gumball_fixture import GumballUI
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'checks': [], 'feature_ids': ['OM9-INFO-021']}
+
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+    if not value:
+        raise AssertionError(name)
+
+def close(a, b):
+    return all(abs(x-y) < 2e-5 for x, y in zip(a, b))
+
+def run():
+    doc = ui = None
+    try:
+        import OpenMatrix9Gui as native
+        report['module'] = native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc = App.newDocument('GumballMeshComponentPointer')
+        doc.UndoMode = 1
+        obj = doc.addObject('Mesh::Feature', 'NativeTriangle')
+        obj.Mesh = Mesh.Mesh([[App.Vector(0,0,0), App.Vector(30,0,0), App.Vector(7,24,0)]])
+        obj.Placement = App.Placement(App.Vector(4,5,6), App.Rotation(App.Vector(0,0,1), 23))
+        doc.recompute()
+        window = Gui.getMainWindow()
+        window.resize(1600,1050)
+        ui = GumballUI(native)
+        ui.select(obj)
+        ui.command('Gumball On')
+        ui.command('GumballAlignment World')
+        ui.settle()
+        area = window.findChild(QtWidgets.QMdiArea)
+        subs = {int(s.widget().property('om9ViewSlot')):s for s in area.subWindowList()
+                if s.widget().property('om9ViewSlot') is not None and
+                s.widget().property('om9DocumentName')==doc.Name}
+        check('four native Mesh pointer viewports exist', sorted(subs)==[0,1,2,3])
+        view = Gui.activeDocument().activeView()
+        # IDs are observed from the stored native topology, not presumed from
+        # the order in which the Python Mesh constructor deduplicates points.
+        points, facets = obj.Mesh.Topology
+        ids = list(facets[0])
+        world = [App.Vector(*p) for p in points]
+        baseline = (obj.Mesh.Topology, obj.Placement, doc.UndoCount, len(doc.Objects))
+        normal = (world[ids[1]]-world[ids[0]]).cross(world[ids[2]]-world[ids[0]])
+        normal.normalize()
+        def current_viewport():
+            sub = area.activeSubWindow()
+            if sub is None:
+                state = native.gumballState()
+                sub = next(s for s in area.subWindowList() if
+                           s.widget().property('om9ViewSlot')==state['source_slot'] and
+                           s.widget().property('om9DocumentName')==doc.Name)
+            return next(w for w in sub.widget().findChildren(QtWidgets.QGraphicsView)
+                        if 'InventorViewer' in w.metaObject().className()).viewport()
+        port = current_viewport()
+
+        def check_view(name, value):
+            check(name+' (view %d)'%slot, value)
+
+        def highlight(count, expected):
+            search = coin.SoSearchAction()
+            search.setName('OM9MeshComponentHighlight')
+            search.setInterest(coin.SoSearchAction.ALL)
+            search.apply(view.getSceneGraph())
+            roots = [p.getTail() for p in search.getPaths()]
+            coordinates = []
+            unpickable = False
+            for root in roots:
+                find = coin.SoSearchAction()
+                find.setType(coin.SoCoordinate3.getClassTypeId())
+                find.setInterest(coin.SoSearchAction.ALL)
+                find.apply(root)
+                coordinates.extend(p.getTail() for p in find.getPaths())
+                find.setType(coin.SoPickStyle.getClassTypeId())
+                find.apply(root)
+                unpickable |= any(p.getTail().style.getValue()==coin.SoPickStyle.UNPICKABLE
+                                  for p in find.getPaths())
+            return unpickable and any(c.point.getNum()==count and
+                all(close(c.point[i].getValue(), expected[i]) for i in range(count))
+                for c in coordinates)
+
+        def pointer(target):
+            nonlocal view, port
+            ui.command('GumballAlignment World')
+            Gui.Selection.clearSelection()
+            ui.settle()
+            view = Gui.activeDocument().activeView()
+            port = current_viewport()
+            volume = view.getCameraNode().getViewVolume(float(port.width())/port.height())
+            screen = volume.projectToScreen(coin.SbVec3f(*target))
+            pos = QtCore.QPoint(round(screen[0]*port.width()), round((1-screen[1])*port.height()-1))
+            diagnostic = {'slot': slot, 'state_before': native.gumballState(),
+                          'position': [pos.x(),pos.y()],
+                          'viewport': [port.width(),port.height(),port.devicePixelRatioF()],
+                          'target': list(target), 'facet_ids': ids,
+                          'projected': list(screen), 'camera': view.getCamera()}
+            try:
+                scene = coin.SoSeparator()
+                scene.addChild(view.getCameraNode())
+                scene.addChild(view.getSceneGraph())
+                dpr = port.devicePixelRatioF()
+                ray = coin.SoRayPickAction(coin.SbViewportRegion(round(port.width()*dpr), round(port.height()*dpr)))
+                ray.setNormalizedPoint(coin.SbVec2f(pos.x()/port.width(),(port.height()-1-pos.y())/port.height()))
+                ray.setRadius(diagnostic['state_before']['settings']['PickRadius']*dpr)
+                ray.setPickAll(False)
+                ray.apply(scene)
+                hit = ray.getPickedPoint()
+                if hit:
+                    path, detail = hit.getPath(), hit.getDetail()
+                    if detail:
+                        detail = coin.cast(detail, detail.getTypeId().getName().getString())
+                    diagnostic['native_ray'] = {'world': list(hit.getPoint()),
+                        'nodes': [str(path.getNode(i).getTypeId().getName()) for i in range(path.getLength())],
+                        'detail': str(detail.getTypeId().getName()) if detail else None}
+                    if detail and hasattr(detail,'getFaceIndex'):
+                        diagnostic['native_ray'].update(facet=detail.getFaceIndex(),
+                            indices=[detail.getPoint(i).getCoordinateIndex() for i in range(detail.getNumPoints())])
+                else:
+                    diagnostic['native_ray'] = None
+            except Exception:
+                diagnostic['ray_error'] = traceback.format_exc()
+            try:
+                manager = view.getViewer().getSoRenderManager()
+                manager_scene = manager.getSceneGraph()
+                probe = coin.SoRayPickAction(coin.SbViewportRegion(round(port.width()*dpr), round(port.height()*dpr)))
+                probe.setNormalizedPoint(coin.SbVec2f(pos.x()/port.width(),(port.height()-1-pos.y())/port.height()))
+                probe.setRadius(diagnostic['state_before']['settings']['PickRadius']*dpr)
+                probe.setPickAll(False)
+                probe.apply(manager_scene)
+                hit = probe.getPickedPoint()
+                diagnostic['render_manager_ray'] = None
+                if hit:
+                    path, detail = hit.getPath(), hit.getDetail()
+                    if detail:
+                        detail = coin.cast(detail, detail.getTypeId().getName().getString())
+                    diagnostic['render_manager_ray'] = {'world':list(hit.getPoint()),
+                        'object':list(hit.getObjectPoint()), 'on_geometry':bool(hit.isOnGeometry()),
+                        'nodes':[str(path.getNode(i).getTypeId().getName()) for i in range(path.getLength())],
+                        'detail':str(detail.getTypeId().getName()) if detail else None,
+                        'contains_owner_root':bool(path.containsNode(obj.ViewObject.RootNode))}
+                    if detail and hasattr(detail,'getFaceIndex'):
+                        diagnostic['render_manager_ray'].update(facet=detail.getFaceIndex(),
+                            indices=[detail.getPoint(i).getCoordinateIndex() for i in range(detail.getNumPoints())])
+                    try:
+                        raw_mesh = obj.Mesh.copy()
+                        raw_mesh.Placement = App.Placement()
+                        raw_points, _ = raw_mesh.Topology
+                        matrix = hit.getObjectToWorld()
+                        observations = []
+                        for index in ids:
+                            placed = matrix.multVecMatrix(coin.SbVec3f(*raw_points[index]))
+                            projected = volume.projectToScreen(placed)
+                            logical = [projected[0]*port.width(),(1-projected[1])*port.height()-1]
+                            observations.append({'id':index,'raw':list(raw_points[index]),
+                                'picked_world':list(placed),'native_mesh_world':list(world[index]),
+                                'projected':list(projected),'logical':logical,
+                                'pixel_distance':((logical[0]-pos.x())**2+(logical[1]-pos.y())**2)**0.5})
+                        diagnostic['native_component_points'] = observations
+                    except Exception:
+                        diagnostic['native_component_points_error'] = traceback.format_exc()
+                diagnostic['native_object_info'] = view.getObjectInfo((pos.x(),port.height()-1-pos.y()))
+            except Exception:
+                diagnostic['render_manager_ray_error'] = traceback.format_exc()
+            class Recorder(QtCore.QObject):
+                def eventFilter(self, receiver, event):
+                    if receiver==port and event.type()==QtCore.QEvent.MouseButtonPress:
+                        diagnostic['qt_press']={'modifiers':event.modifiers().value,
+                            'position':[event.position().x(),event.position().y()],
+                            'viewport_marker':bool(port.property('om9GumballViewport'))}
+                    return False
+            # Focus reinstalls OM9's global mouse filter, which Qt moves first.
+            # Settle that transition before installing our independent observer
+            # so it records the press before the native controller consumes it.
+            port.setFocus()
+            QtWidgets.QApplication.processEvents()
+            recorder = Recorder()
+            QtWidgets.QApplication.instance().installEventFilter(recorder)
+            QtTest.QTest.mouseClick(port, QtCore.Qt.LeftButton,
+                                   QtCore.Qt.ControlModifier | QtCore.Qt.ShiftModifier, pos)
+            QtWidgets.QApplication.instance().removeEventFilter(recorder)
+            ui.settle()
+            diagnostic['state_after'] = native.gumballState()
+            report.setdefault('pointer_events',[]).append(diagnostic)
+            ray_hit = diagnostic.get('native_ray') or {}
+            check_view('independent native Coin query observes actual Mesh facet and point IDs',
+                       ray_hit.get('detail')=='SoFaceDetail' and
+                       ray_hit.get('facet')==0 and ray_hit.get('indices')==ids)
+            press = diagnostic.get('qt_press') or {}
+            modifiers = (QtCore.Qt.ControlModifier | QtCore.Qt.ShiftModifier).value
+            check_view('empty selection receives actual Ctrl Shift pointer in its source viewport',
+                       not diagnostic['state_before']['has_selection'] and
+                       press.get('modifiers')==modifiers and
+                       diagnostic['state_after']['source_slot']==slot)
+            # FreeCAD's default OldStyleElement resolution has no stock Mesh
+            # Edge/Vertex element names and drops the explicit OM9 identity.
+            # Observe native stored selection as the controller does.
+            resolved_selected = Gui.Selection.getSelectionEx()
+            diagnostic['resolved_selection'] = [(s.ObjectName,list(s.SubElementNames)) for s in resolved_selected]
+            selected = Gui.Selection.getSelectionEx(doc.Name,0)
+            report['last_selection'] = [(s.ObjectName, list(s.SubElementNames)) for s in selected]
+            diagnostic['raw_selection'] = report['last_selection']
+            check_view('pointer selects the actual Mesh owner', len(selected)==1 and selected[0].Object==obj)
+            return list(selected[0].SubElementNames)
+
+        center = sum((world[i] for i in ids), App.Vector())/3
+        a, b = sorted(ids[:2])
+        midpoint = (world[a]+world[b])/2
+        direction = world[b]-world[a]
+        direction.normalize()
+        for slot, sub in sorted(subs.items()):
+            area.setActiveSubWindow(sub)
+            ui.settle()
+            view = Gui.activeDocument().activeView()
+            # The front/right defaults see this one triangle edge-on. Give
+            # those real viewports an oblique camera so they can observe a
+            # surface hit, while retaining distinct native source view slots.
+            if slot in (0,2):
+                view.viewTop()
+            else:
+                view.viewAxonometric()
+            view.fitAll()
+            ui.settle()
+            port = current_viewport()
+            # Move a fraction of a logical pixel inside the triangle so
+            # boundary rounding cannot turn a vertex query into empty space.
+            pixel = view.getCameraNode().getViewVolume(float(port.width())/port.height()).getWorldToScreenScale(
+                coin.SbVec3f(*world[ids[0]]), 1.0/port.height())
+            toward = center-world[ids[0]]
+            toward.normalize()
+            names = pointer(world[ids[0]] + toward*(pixel*1.5))
+            check_view('Ctrl Shift vertex click yields native point identity', names == ['OM9MeshVertex:%d'%ids[0]])
+            ui.command('GumballAlignment Object')
+            state = native.gumballState()
+            check_view('vertex origin is the actual placed Mesh point', state['alignment']==1 and
+                       not state['unresolved'] and close(state['frame'][:3], world[ids[0]]))
+            check_view('vertex normal comes from the native triangle', close(state['frame'][9:12], normal))
+            check_view('selected vertex has visible unpickable native point highlight',
+                       highlight(1, [world[ids[0]]]))
+            check_view('vertex frame is shared by all four native views', len(state['views'])==4 and
+                       all(v['attached'] and v['frame']==state['frame'] for v in state['views']))
+
+            inward = center-midpoint
+            inward.normalize()
+            names = pointer(midpoint + inward*(pixel*1.5))
+            check_view('Ctrl Shift edge click yields canonical endpoint identities', names == ['OM9MeshEdge:%d:%d'%(a,b)])
+            ui.command('GumballAlignment Object')
+            state = native.gumballState()
+            check_view('edge frame uses placed midpoint and lower to higher native point IDs',
+                       state['alignment']==1 and not state['unresolved'] and
+                       close(state['frame'][:3], midpoint) and close(state['frame'][3:6], direction))
+            check_view('edge normal is the native triangle normal', close(state['frame'][9:12], normal))
+            check_view('selected edge has visible unpickable native endpoint highlight',
+                       highlight(2, [world[a], world[b]]))
+            check_view('edge frame is shared by all four native views', len(state['views'])==4 and
+                       all(v['attached'] and v['frame']==state['frame'] for v in state['views']))
+            names = pointer(center)
+            check_view('face center outside component radius selects whole Mesh', not names or names==[''])
+            check_view('pointer selection and Object alignment leave source and Undo unchanged',
+                       (obj.Mesh.Topology, obj.Placement, doc.UndoCount, len(doc.Objects)) == baseline)
+        report['ok'] = True
+    except Exception:
+        report.update(ok=False, error=traceback.format_exc())
+    finally:
+        if ui:
+            report['transcript'] = ui.transcript()
+        (out/'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        if doc is not None:
+            App.closeDocument(doc.Name)
+        QtCore.QTimer.singleShot(100, QtWidgets.QApplication.quit)
+
+QtCore.QTimer.singleShot(1500, run)

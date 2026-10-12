@@ -1,5 +1,20 @@
-#include "Workbench.h"
 #include "CoreNotes.h"
+#include "Workbench.h"
+#include "GumballGeometry.h"
+#include "GumballController.h"
+#include "GumballFrameObjects.h"
+#include "GumballAssociativeScale.h"
+#include "HistoryFeature.h"
+#include "EditSpecialTypes.h"
+#include "SurfaceHistory.h"
+#include "BuilderHistory.h"
+#include "CageFeature.h"
+#include "CoreUnits.h"
+#include "CoreObjects.h"
+#include "CoreRebuild.h"
+#include "CurveParameterPoint.h"
+#include "CoreGeometryContract.h"
+#include "CoreCPlanes.h"
 
 #include <Base/Console.h>
 #include <Base/Interpreter.h>
@@ -12,10 +27,10 @@
 void CreateOpenMatrix9Commands();
 void AddThreeDmMethods(PyObject*);
 void AddLayerDocumentMethods(PyObject*);
-void AddThreeDmRegistryMethods(PyObject*);
 void AddModelingSnapMethods(PyObject*);
 void AddSnapQueryMethods(PyObject*);
 void AddModelingCurveMethods(PyObject*);
+void AddThreeDmRegistryMethods(PyObject*);
 
 
 namespace OpenMatrix9Gui
@@ -64,13 +79,42 @@ PyMOD_INIT_FUNC(OpenMatrix9Gui)
 
     PyObject* module =
         OpenMatrix9Gui::initModule();
+    // Register the Part-derived document type only after its base module has
+    // initialized. FreeCAD restores OpenMatrix9Gui::SurfaceHistory by importing
+    // this module even when the workbench has not been selected in this session.
+    PyObject* part = PyImport_ImportModule("Part");
+    if (!part)
+    {
+        PyMOD_Return(nullptr);
+    }
+    Py_DECREF(part);
+    OpenMatrix9Gui::GumballScaleCompound::init();
+    OpenMatrix9Gui::SurfaceHistory::init();
     OpenMatrix9Gui::CoreNotes::registerTypes();
     AddThreeDmMethods(module);
     AddLayerDocumentMethods(module);
-    AddThreeDmRegistryMethods(module);
     AddModelingSnapMethods(module);
     AddSnapQueryMethods(module);
     AddModelingCurveMethods(module);
+    AddThreeDmRegistryMethods(module);
+    OpenMatrix9Gui::initializeHistoryTypes();
+    OpenMatrix9Gui::initializeCurveParameterTypes();
+    OpenMatrix9Gui::addCurveParameterMethods(module);
+    OpenMatrix9Gui::initializeUnitTypes();
+    OpenMatrix9Gui::addUnitMethods(module);
+    OpenMatrix9Gui::addObjectSnapshotMethods(module);
+    OpenMatrix9Gui::addGumballGeometryMethods(module);
+    OpenMatrix9Gui::initializeGumballFrameTypes();
+    OpenMatrix9Gui::addGumballFrameObjectMethods(module);
+    OpenMatrix9Gui::GumballController::instance().addMethods(module);
+    OpenMatrix9Gui::CoreRebuild::addDeliveryTestMethods(module);
+    OpenMatrix9Gui::addGeometryContractMethods(module);
+    OpenMatrix9Gui::addCPlaneMethods(module);
+    OpenMatrix9Gui::initializeEditSpecialTypes();
+    OpenMatrix9Gui::initializeBuilderHistoryTypes();
+    AddBuilderHistoryMethods(module);
+    OpenMatrix9Gui::initializeCageTypes();
+    OpenMatrix9Gui::AddCageMethods(module);
 
     Base::Console().message(
         "Loading OpenMatrix9 GUI...\n"

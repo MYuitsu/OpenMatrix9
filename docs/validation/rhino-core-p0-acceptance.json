@@ -1,0 +1,1144 @@
+{
+  "schema_version": 1,
+  "objective": "Complete all P0 in specs/00-rhino-core",
+  "status": "in_progress",
+  "audit_baseline": "22fecb23661515d4c446aa83e1e2c37500e5381a",
+  "rules": [
+    "A verified increment is not full P0 completion.",
+    "Each explicit contract clause remains required in addition to numbered fixtures.",
+    "Mixed-priority rows need an explicit per-clause P0/P1/P2 ruling before closure.",
+    "Do not equate safe rejection or an enabled command with completion of required behavior.",
+    "Existing reports provide partial evidence; a full fixture stays unverified until every assertion is covered."
+  ],
+  "independent_audits": [
+    "docs/reviews/2026-10-09-p0-full-kernel-audit.md",
+    "docs/reviews/2026-10-09-p0-full-interaction-audit.md",
+    "docs/reviews/2026-10-09-p0-full-history-io-audit.md"
+  ],
+  "chapters": [
+    {
+      "id": "RCORE-01",
+      "source": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
+      "source_sha256_at_inventory": "5ce3a341ac35660af2ffec764660d0573b6b7a2fb3beb799e7174a8d6ead3835",
+      "scope": "all_contracts",
+      "status": "in_progress",
+      "contract_coverage": "See explicit-contract matrices in independent audits; RCORE-02 parent implementation plan and chapter remain authoritative.",
+      "fixtures": [
+        {
+          "id": "RCORE-01.T01",
+          "spec_requirement": "RCORE-01.T01 | Circle rational bán kính 10 mm, chuyển analytic → NURBS → native | Bán kính/độ lệch nằm trong tolerance công bố; weights không bị thay bằng toàn 1; lưu basis và report",
+          "priority": "P0",
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-curve-parameters-evidence.json"
+          ],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+              "scope": "Scoped basis/type/topology/ownership/parameter-policy observations only; all specified assertions not yet established."
+            }
+          ],
+          "verification_scope": "Authored R10 analytic→rationalNURBS→actualOCCT target; nonunitweights/basis/report and declared sampled1e-7mm oracle; no continuous/global deviation certificate."
+        },
+        {
+          "id": "RCORE-01.T02",
+          "spec_requirement": "RCORE-01.T02 | Face phẳng 20 × 20 mm có lỗ tròn bán kính 3 mm | Trim hole còn; điểm giữa lỗ không thuộc face; area gần `400 − 9π` mm² theo bound kiểm tra",
+          "priority": "P0",
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-kernel-contract-evidence.json"
+          ]
+        },
+        {
+          "id": "RCORE-01.T03",
+          "spec_requirement": "RCORE-01.T03 | Mặt trụ periodic U, chưa cap | Không được gắn loại solid chỉ từ periodic/closed U; hai biên tròn hở được nhận diện",
+          "priority": "P0",
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-kernel-contract-evidence.json"
+          ]
+        },
+        {
+          "id": "RCORE-01.T04",
+          "spec_requirement": "RCORE-01.T04 | BRep sphere có display mesh, đổi mesh density và display mode | Type, CAD hash/revision và radius không đổi; routing vẫn CAD",
+          "priority": "P0",
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-kernel-contract-evidence.json"
+          ]
+        },
+        {
+          "id": "RCORE-01.T05",
+          "spec_requirement": "RCORE-01.T05 | Polycurve line + rational arc, đảo hướng rồi save/reload | Thứ tự/hướng đoạn, endpoint và joint policy còn; nếu merge phải báo conversion trước commit",
+          "priority": "P0",
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-polycurve-partition-evidence.json"
+          ],
+          "verification_scope": "Authored open line+rational R10 quarter-arc wire; independent endpoints/radial samples, reversed order/direction/joint, nonunit weights/basis, native FCStd and actual working V5 partition, copied report before commit, importUndoRedo+fresh importedFCStd. No merge/heal is performed."
+        },
+        {
+          "id": "RCORE-01.T06",
+          "spec_requirement": "RCORE-01.T06 | Hai instances cùng definition, một instance mirror và scale không đều | Transform áp đúng một lần; không biến đổi definition của instance kia; unsupported transform phải từ chối rõ",
+          "priority": "P0",
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-instance-isolation-evidence.json"
+          ],
+          "verification_scope": "Authored shared local box definition/two links, once-applied mirror/nonuniform matrices and eight independent world corners; exact local member/definition/A stamps and native serialized payloads, B-only transactionUndoRedo, actual structural+working V5, named singular/projective/nativeNaNInfinity atomic rejections."
+        },
+        {
+          "id": "RCORE-01.T07",
+          "spec_requirement": "RCORE-01.T07 | NURBS chứa NaN, weights sai hoặc knot vector không hợp lệ | Từ chối trước native allocation/commit; không object/undo entry thừa",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+              "scope": "Scoped basis/type/topology/ownership/parameter-policy observations only; all specified assertions not yet established."
+            },
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-curve-parameters.md",
+              "scope": "Direct raw NURBS early storage preflight and finite standalone exact-lineage point queries; full allocation/host/History assertions remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-polycurve-partition.md",
+              "scope": "Raw NURBS child count/null-storage rejected through ordinary polycurve entry before Domain/CRC; full allocation/host/path coverage remains open."
+            },
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-hatch-input-gate.md",
+              "scope": "Whole owned current Hatch NURBS tree gate before covered source archive/copy/construction entries; early malformed basis, atomic sentinel/Undo controls, existing native and host editors retained. Full allocation/archive/wrapper coverage open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-01.T08",
+          "spec_requirement": "RCORE-01.T08 | Preview solver, sửa source hoặc đóng document trước completion | Kết quả stale bị loại; không crash/UAF; preview và handles được giải phóng",
+          "priority": "P0",
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-delayed-publication-evidence.json"
+          ],
+          "verification_scope": "Authored Rebuild existing synchronous fitter produces nativeownedShape, completiondelivery delayedonGUIqueue. RealheldsameBRep/ticket,postsolve source/session/UID/units/ancestors/world/Undo guards and one-shotRust request claim beforeCoin/transaction; edit/restore/replacement/options/newer/cancel/switch/close-recreate stale rejection. Nativeownedrefs/counters exact36,actualCoin4viewsclear,productionshutdownreceiverdiscard/exhaustion/capacity recovery. BroaderC11 workers/thread/sanitizer/allcontrollers/allocation proof remainsopen."
+        },
+        {
+          "id": "RCORE-01.T09",
+          "spec_requirement": "RCORE-01.T09 | Lưu/reload FCStd của curve periodic và face có seam/lỗ | So type, topology, basis, world bounds và deviation; không dùng ảnh shaded làm bằng chứng duy nhất",
+          "priority": "P0",
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-periodic-persistence-evidence.json"
+          ],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+              "scope": "Scoped basis/type/topology/ownership/parameter-policy observations only; all specified assertions not yet established."
+            }
+          ],
+          "verification_scope": "Authored native compact degree2 true-periodic curve with translated world775point cyclic quadratic/extrema oracle; existing rational circle and seam/hole faces. Exact FCStd/module and fresh-process type/topology/full available basis/placement/bounds/inventory/zeroUndo, warm old-session rejection/fresh guards. Sampled1e-7mm only; all-family persistence and delayed-worker lifetime unclaimed."
+        },
+        {
+          "id": "RCORE-01.T10",
+          "spec_requirement": "RCORE-01.T10 | Analytic curve chuyển sang NURBS, dependency lấy điểm theo tham số gốc | Đo locus riêng với parameter mapping; không reuse raw parameter khi conversion chưa chứng minh tương ứng; lưu kết quả query và mapping",
+          "priority": "P0",
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-host-parameter-dependency-evidence.json"
+          ],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+              "scope": "Scoped basis/type/topology/ownership/parameter-policy observations only; all specified assertions not yet established."
+            },
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-curve-parameters.md",
+              "scope": "Direct raw NURBS early storage preflight and finite standalone exact-lineage point queries; full allocation/host/History assertions remain open."
+            }
+          ],
+          "verification_scope": "Authored original analytic full Circle and Line dependency via actual observed ON map/OCCT target. Independent world source-point/locus samples, distinct raw/mapped residuals, Rust host-to-selected bound, per-query form1 raw proof/form2 rejection, persisted original parameter/map/query/basis/native link identity, fresh guards on source/Undo/frames/units/error/deletion/warm+cold FCStd and History update/lock/detach. No global deviation or all-family certificate."
+        },
+        {
+          "id": "RCORE-01.T11",
+          "spec_requirement": "RCORE-01.T11 | Clone/shallow snapshot rồi sửa subcurve hoặc face, giữ source và sibling instance | Xác định owner mutation trước thao tác; source/sibling chỉ đổi khi contract yêu cầu; báo lifecycle khác nhau của standalone và subobject",
+          "priority": "P0",
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-10-rhino-core-subobject-ownership-evidence.json"
+          ],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+              "scope": "Scoped basis/type/topology/ownership/parameter-policy observations only; all specified assertions not yet established."
+            }
+          ],
+          "verification_scope": "Authored native Wire subcurve/untrimmed tensor Face, strong shallow alias vs native deep copy, detached support owner mutations with independent midpoint witnesses, strict source/sibling/snapshot bytes; realtoShapealiasRED/explicitdeep-copy publicationGREEN, singleUndoRedo. Intentional canonical edit follows bothinstances, stale revision/Undo/session guards reject, sameName+equivalent-source recreation rejects oldrequests/freshvalid while standalone owners surviveclose. No general raw borrowed-pointer/worker/all-family certificate."
+        }
+      ]
+    },
+    {
+      "id": "RCORE-02",
+      "source": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/02-units-tolerances.md",
+      "source_sha256_at_inventory": "ff5ce94953cb88cd7ad0ef62c3557810d87c5d426286d48183dabb1d8c2918ae",
+      "scope": "all_contracts",
+      "status": "in_progress",
+      "contract_coverage": "See explicit-contract matrices in independent audits; RCORE-02 parent implementation plan and chapter remain authoritative.",
+      "fixtures": [
+        {
+          "id": "RCORE-02.T01",
+          "spec_requirement": "RCORE-02.T01 | Cùng circle khai báo radius 25.4 mm và 1 inch | World radius bằng nhau trong tolerance fixture; area/volume chuyển đúng dimensions",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-02.T02",
+          "spec_requirement": "RCORE-02.T02 | Đổi precision từ 2 sang 8, chạy cùng Join/Boolean inputs | Shape/tolerance effective và quyết định accept/reject giống nhau; chỉ transcript số hiển thị đổi",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-tolerance-workers.md",
+              "scope": "Join consumer only; other named operations and conditions remain unverified."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-02.T03",
+          "spec_requirement": "RCORE-02.T03 | Hai endpoint gap 0.5τ và 1.5τ, chọn operation Join với rule cụ thể | Report ghi effective τ và decision đúng rule của Join; không dùng test này để gán rule cho mọi solver",
+          "priority": "P0",
+          "status": "verified",
+          "complete_evidence": [
+            "docs/validation/2026-10-09-rhino-core-tolerance-workers.md",
+            "docs/validation/2026-10-09-rhino-core-tolerance-workers-evidence.json"
+          ]
+        },
+        {
+          "id": "RCORE-02.T04",
+          "spec_requirement": "RCORE-02.T04 | Đoạn 25.4 mm đổi khai báo mm → inch trong hai mode | Mode vật lý native dài 25.4 mm; mode giữ số native dài 645.16 mm; Undo/Redo trả cả geometry/context",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-02.T05",
+          "spec_requirement": "RCORE-02.T05 | Import custom unit 2.5 mm/unit và nested instance translation 4 units | Translation vật lý 10 mm, không bị scale hai lần; userdata unitless không tự đổi",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-02.T06",
+          "spec_requirement": "RCORE-02.T06 | Import unitless không có override, và custom scale NaN/0 | Không commit; báo unresolved/invalid scale có thể xử lý; không đoán theo bbox",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-02.T07",
+          "spec_requirement": "RCORE-02.T07 | Preview đang chạy, đổi context tolerance hoặc model units | Kết quả cũ bị invalidate/recompute hoặc stale reject; preview và commit dùng một revision",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-tolerance-workers.md",
+              "scope": "Join consumer only; other named operations and conditions remain unverified."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-02.T08",
+          "spec_requirement": "RCORE-02.T08 | Cold FCStd reload trên máy có preference unit khác | Context document, override, physical size và History giữ nguyên; format tuân policy rõ",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-tolerance-workers.md",
+              "scope": "Join consumer only; other named operations and conditions remain unverified."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-02.T09",
+          "spec_requirement": "RCORE-02.T09 | Refit ở tọa độ world rất lớn với tolerance dưới numerical bound | Lỗi resolution/budget có report; không tự tăng tolerance, không partial mutation",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-tolerance-workers.md",
+              "scope": "Join consumer only; other named operations and conditions remain unverified."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-02.T10",
+          "spec_requirement": "RCORE-02.T10 | Paste từ inch sang mm, source có CV/placement và dimensions | Geometry hiện tại giữ kích thước vật lý; ratio/angle/UV không bị scale như length",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-02.T11",
+          "spec_requirement": "RCORE-02.T11 | Đặt angular tolerance theo degrees rồi đọc radians và đổi ngược | Một giá trị vật lý nhất quán, sai số theo numeric bound; absolute/relative không đổi; thử thêm NaN/âm với policy OM9 riêng",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-02.T12",
+          "spec_requirement": "RCORE-02.T12 | Curve Fit với tolerance âm, zero, dương và document context khác nhau | Log phân biệt sentinel/fallback với giá trị explicit; zero angle giữ ý nghĩa riêng; không dùng fallback ngầm từ document khác khi worker chạy",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-02.T13",
+          "spec_requirement": "RCORE-02.T13 | Rhino reference: property unit setter so với adjust scale true/false, model/page độc lập | Đo geometry, tolerance, annotation và Undo trước-sau để xác nhận coverage native; chưa coi bất kỳ nhánh nào tương đương kế hoạch OM9 chỉ từ chữ ký API",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        }
+      ]
+    },
+    {
+      "id": "RCORE-03",
+      "source": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/03-coordinates-cplanes.md",
+      "source_sha256_at_inventory": "a6dee21ea36027855c36214816cc6484210c92239f7d39d62f29fbb3ea9e84d2",
+      "scope": "all_contracts",
+      "status": "in_progress",
+      "contract_coverage": "See explicit-contract matrices in independent audits; RCORE-02 parent implementation plan and chapter remain authoritative.",
+      "fixtures": [
+        {
+          "id": "RCORE-03.T10",
+          "spec_requirement": "RCORE-03.T10 | Đặt grid spacing khác snap spacing, ẩn grid rồi save/reload: hai spacing và visibility không bị gộp; ghi native settings thực tế, không lấy constructor DTO làm default template",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-03.T11",
+          "spec_requirement": "RCORE-03.T11 | Set/Push/Pop/Previous/Next trên hai viewport và bật/tắt universal mode: ghi stack và propagation thực tế; document geometry/Undo không đổi ngoài policy được duyệt",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-03.T12",
+          "spec_requirement": "RCORE-03.T12 | Named CPlane Add tên rỗng/tên trùng, restore rồi đổi projection với cờ CPlane true/false: đối chiếu replacement và frame; chưa đặt expected UUID Rhino hoặc thời điểm latch từ tên API",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-03.T01",
+          "spec_requirement": "RCORE-03.T01 | `O=(10,20,30), X=(0,1,0), Y=(0,0,1), Z=(1,0,0)`; `1,2,3` → world `(13,21,32)` cho mỗi command có point input",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-03.T02",
+          "spec_requirement": "RCORE-03.T02 | Cùng frame T01, `1,2` → `(10,21,32)`; `w1,2,3` → world `(1,2,3)`; `w0,0,0` → world origin; không suy frame bằng số thành phần",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-03.T03",
+          "spec_requirement": "RCORE-03.T03 | Previous world `(13,21,32)`: mỗi input `r1,2,3`, `R1,2,3`, `@1,2,3` → `(16,22,34)`; `wr1,2,3` → `(14,23,35)`; reset cùng previous trước từng ca, thiếu previous bị từ chối",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-03.T04",
+          "spec_requirement": "RCORE-03.T04 | Chuyển view trước/sau first pick và CPlane dịch/xoay; latch/version đúng policy; preview và commit đồng điểm",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-03.T05",
+          "spec_requirement": "RCORE-03.T05 | Named frame save/reload/rename/restore rồi previous/next; không đổi bounds hoặc placement của geometry",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-03.T06",
+          "spec_requirement": "RCORE-03.T06 | 3Point collinear, NaN, unit sai, locale separator mơ hồ; lỗi không thêm point, object hoặc undo entry",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-03.T07",
+          "spec_requirement": "RCORE-03.T07 | Pick object trong hai tầng placement/link; output world đúng transform một lần, không cộng CPlane origin hai lần",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-03.T08",
+          "spec_requirement": "RCORE-03.T08 | Circle replay record legacy và target trên frame T01; ghi riêng source/binary hash, result và quyết định migration",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-03.T09",
+          "spec_requirement": "RCORE-03.T09 | Esc, Undo điểm, restart, đóng viewport/document trong preview; không còn latch/callback/scene node thuộc session cũ",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RCORE-04",
+      "source": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/04-command-engine.md",
+      "source_sha256_at_inventory": "01e359ed04a51110ff55b3bc9e6c43fc1511b06e3dea79c17e26329df15c0e7b",
+      "scope": "all_contracts",
+      "status": "in_progress",
+      "contract_coverage": "See explicit-contract matrices in independent audits; RCORE-02 parent implementation plan and chapter remain authoritative.",
+      "fixtures": [
+        {
+          "id": "RCORE-04.T10",
+          "spec_requirement": "RCORE-04.T10 | Đang pick chạy transparent view/snap/selection command, rồi quay về phase; kiểm stack và callback owner. Tắt transparent tại getter phải chặn entrypoint đó mà không mất input",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-04.T11",
+          "spec_requirement": "RCORE-04.T11 | Repeat cùng command khi dùng style flag và khi cấu hình NeverRepeatList: ghi nguồn policy thực tế; không repeat lệnh disabled hoặc selection stale",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-04.T12",
+          "spec_requirement": "RCORE-04.T12 | Thay modeless property ngoài command: kiểm BeginUndoRecord trả serial/0, End chỉ record đã mở; Undo phục hồi plugin metadata cùng geometry, AcceptUndo phase không gọi nhầm document Undo",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-04.T13",
+          "spec_requirement": "RCORE-04.T13 | RunScript từ script runner, ngoài command và event watcher: ghi thời điểm completion/commit; nhánh watcher bị từ chối trước native, không ghi dispatch thành success",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-04.T01",
+          "spec_requirement": "RCORE-04.T01 | Cùng Circle/Line input qua menu, CMD, F6 và shortcut cho cùng exact ID, world geometry và một transaction",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-04.T02",
+          "spec_requirement": "RCORE-04.T02 | Esc ở selection/point/option/preview và completion mở; teardown đúng tầng, không output/undo entry dư",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-04.T03",
+          "spec_requirement": "RCORE-04.T03 | Nhập option bằng tên/mnemonic/click trong phase số; không parse nhầm option thành numeric failure hoặc đổi phase",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-04.T04",
+          "spec_requirement": "RCORE-04.T04 | Idle Enter/Space/right-click repeat command được phép; Undo/Delete/error/cancel không thay bằng một “successful command” giả",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-04.T05",
+          "spec_requirement": "RCORE-04.T05 | Undo điểm khác Ctrl+Z document; Redo geometry khôi phục metadata/History; transcript vẫn phản ánh input lỗi",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            },
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-04.T06",
+          "spec_requirement": "RCORE-04.T06 | Preselection sai type, alias Rebuild trùng, backend unavailable: giải thích rõ, không tự chọn family đầu hoặc mutate một phần",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-04.T07",
+          "spec_requirement": "RCORE-04.T07 | Pan/zoom/orbit/chuyển viewport giữa hai điểm: session còn active; navigation không tăng point count",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-04.T08",
+          "spec_requirement": "RCORE-04.T08 | Đóng document/deactivate trong preview hoặc worker, nhận kết quả muộn: không crash, không object mới, không callback còn sống",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-point-consumers.md",
+              "scope": "Three shared Cartesian consumers only; full fixture/all-family requirements remain open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-04.T09",
+          "spec_requirement": "RCORE-04.T09 | IME/text field gõ tên có khoảng trắng và Ctrl+C/V: focus owner đúng, không kích command/repeat/clipboard geometry",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        }
+      ]
+    },
+    {
+      "id": "RCORE-05",
+      "source": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/05-picking-snapping.md",
+      "source_sha256_at_inventory": "45060baeb92ed0d8e0974219e1ef9683dd30664bc1e2e47b7d08e22fb3299ba6",
+      "scope": "all_contracts",
+      "status": "in_progress",
+      "contract_coverage": "See explicit-contract matrices in independent audits; RCORE-02 parent implementation plan and chapter remain authoritative.",
+      "fixtures": [
+        {
+          "id": "RCORE-05.T11",
+          "spec_requirement": "RCORE-05.T11 | Previous point và base point khác nhau do From; bật/tắt Ortho/Planar và permit riêng: marker/accepted point dùng đúng base đã khai báo, không lấy previous ngầm",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-05.T12",
+          "spec_requirement": "RCORE-05.T12 | throughBasePoint true/false × Planar on/off × base có/không, trên CPlane xoay: đo cao độ đúng nhánh SDK mô tả; Project/Osnap conflicts ghi riêng, chưa tự gán precedence",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-05.T13",
+          "spec_requirement": "RCORE-05.T13 | Distance dương/UnsetValue/0 và acceptZero true/false: phân biệt khóa distance, xóa constraint, vô hiệu numeric distance, số 0 và point input; document không đổi khi chỉ thay input policy",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-05.T14",
+          "spec_requirement": "RCORE-05.T14 | SnapToLocked on/off với locked-visible/hidden object, Osnap master và mode mask: giữ edit permission độc lập và ghi setting của lần chạy",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-05.T15",
+          "spec_requirement": "RCORE-05.T15 | Get nhận mouse-down so với mouse-up, kéo chuột và navigation; mỗi phase nhận đúng một điểm, không suy accepted point thành commit cả command",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-05.T01",
+          "spec_requirement": "RCORE-05.T01 | Nhiều End/Mid cùng aperture/distance: chọn ổn định/cycle rõ, commit cùng marker. Cùng hình học/logical-pixel input và quy đổi DPR đúng giữ candidate; đổi aperture/zoom có thể đổi lựa chọn nhưng không đổi tiêu chuẩn residual geometry",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-05.T02",
+          "spec_requirement": "RCORE-05.T02 | Locked visible layer: không edit/select như editable, vẫn snap reference theo policy; hidden parent loại candidate",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-05.T03",
+          "spec_requirement": "RCORE-05.T03 | Face có trim hole: Near/Perp không nhận điểm chỉ nằm trên underlying surface trong lỗ",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-05.T04",
+          "spec_requirement": "RCORE-05.T04 | Hai line lệch Z nhưng cắt trong view: true Intersect không giả thành công; apparent mode ghi loại/điểm chiếu rõ",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-05.T05",
+          "spec_requirement": "RCORE-05.T05 | Ortho+End và Project+3D End trên CPlane xoay: constraint policy công bố, marker/label/commit không mâu thuẫn",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-05.T06",
+          "spec_requirement": "RCORE-05.T06 | Distance `5` và angle `30°` trên frame đã chốt: length 5, angular residual trong tolerance; impossible tangent không nhận point",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": [],
+          "partial_evidence": [
+            {
+              "report": "docs/validation/2026-10-09-rhino-core-extended-input.md",
+              "scope": "Extended grammar, accepted-base and retry slice; complete all-family/locale/live-constraint fixture remains open."
+            }
+          ]
+        },
+        {
+          "id": "RCORE-05.T07",
+          "spec_requirement": "RCORE-05.T07 | One-shot → invalid click → valid click → next pick; override chỉ tiêu thụ sau accept, persistent set khôi phục; suspend khác clear",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-05.T08",
+          "spec_requirement": "RCORE-05.T08 | Ẩn grid và pick ngoài grid hữu hạn: snap theo spacing vô hạn vẫn tồn tại nếu mode bật; bật/tắt display không đổi state snap",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-05.T09",
+          "spec_requirement": "RCORE-05.T09 | Elevator height âm/đổi view/Undo rồi SmartTrack; đúng CPlane Z, không document objects/undo entry tạm sau cancel",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-05.T10",
+          "spec_requirement": "RCORE-05.T10 | Source sửa/xóa giữa hover và click, document close lúc query: re-resolve hoặc stale error, không dùng point cũ/handle hết hạn",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        }
+      ]
+    },
+    {
+      "id": "RCORE-06",
+      "source": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/06-selection-organization-blocks.md",
+      "source_sha256_at_inventory": "097e36db4968f3c8ca5cbffb3322635366a538c34160664fb7427fa19521858b",
+      "scope": "P0_contracts_as_defined_in_chapter_and_audit",
+      "status": "in_progress",
+      "contract_coverage": "See explicit-contract matrices in independent audits; RCORE-02 parent implementation plan and chapter remain authoritative.",
+      "fixtures": [
+        {
+          "id": "RCORE-06.T11",
+          "spec_requirement": "RCORE-06.T11 | Tập preselect gồm đúng/sai type: so ignoreUnacceptable true/false và pre/post enabled; ghi getter result và tập thực sự thao tác, UI không đổi tập âm thầm ngoài policy OM9",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T12",
+          "spec_requirement": "RCORE-06.T12 | Group/subobject/reference flags và max 0/-1/dương, có crossing vượt max: đối chiếu cardinality; reference được chọn không tự có quyền edit",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T13",
+          "spec_requirement": "RCORE-06.T13 | Preselection → option → get tiếp → Esc, bật/tắt clear-on-entry/unselect-on-exit: kiểm list, selected state và highlight riêng; fixture Matrix chỉ là ví dụ policy, không default toàn host",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T14",
+          "spec_requirement": "RCORE-06.T14 | Parent layer off/on, lock/unlock với persistent state true/false/unset; đổi current và index stale: không rơi output sang current layer do fallback index không chủ ý",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T15",
+          "spec_requirement": "RCORE-06.T15 | Query Explode nested true/false: số lượng ba mảng đồng bộ, transform/attributes đúng; chỉ command commit mới tạo độc lập/xóa instance theo policy, query không là bằng chứng đã hoàn tất Explode",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T01",
+          "spec_requirement": "RCORE-06.T01 | Vật có tâm trong nhưng cắt biên window: window không chọn, crossing chọn; bbox rỗng giao window không tự đủ geometry hit",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T02",
+          "spec_requirement": "RCORE-06.T02 | Pre/postselect, Shift-add/Ctrl-remove, ambiguous edge/face/instance path: cùng filter và identity; Esc tháo gate/session đúng owner",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T03",
+          "spec_requirement": "RCORE-06.T03 | Locked visible layer và hidden parent: edit bị chặn, snap/reference đúng policy; không dùng Selectable để vô tình cấm mọi snap",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T04",
+          "spec_requirement": "RCORE-06.T04 | Tạo Circle trên current layer, đổi tên/reorder, layer bị xóa giữa preview/commit: ID bền hoặc lỗi rõ, không rơi layer mặc định im lặng",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T05",
+          "spec_requirement": "RCORE-06.T05 | Nested group/add/remove/ungroup/label trùng: không xóa geometry hay đổi placement; Undo/reload giữ membership đúng policy",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T06",
+          "spec_requirement": "RCORE-06.T06 | Hai instances cùng definition ở transform khác: sửa definition cập nhật cả hai, cancel BlockEdit không thay bất kỳ instance",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T07",
+          "spec_requirement": "RCORE-06.T07 | Nested reflection/nonuniform scale: world geometry đúng transform một lần; unsupported representation reject trước mutation",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T08",
+          "spec_requirement": "RCORE-06.T08 | Explode một instance: independent members đúng world/attributes, instance còn lại không đổi; Undo/reload khôi phục definition links",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T09",
+          "spec_requirement": "RCORE-06.T09 | Missing definition/file hoặc cycle: lỗi/placeholder rõ, không stale geometry thành success; refresh reference invalidate selection đúng revision",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-06.T10",
+          "spec_requirement": "RCORE-06.T10 | Worksession reference dùng làm creation input nhưng Move bị chặn; refresh/close không ghi source, không giữ dangling handles",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        }
+      ]
+    },
+    {
+      "id": "RCORE-07",
+      "source": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/07-nurbs-editing-modeling.md",
+      "source_sha256_at_inventory": "92971dd63398490a409af672f23af8e28ea7cdbdd436f5b626c2770344f170c1",
+      "scope": "P0_contracts_as_defined_in_chapter_and_audit",
+      "status": "in_progress",
+      "contract_coverage": "See explicit-contract matrices in independent audits; RCORE-02 parent implementation plan and chapter remain authoritative.",
+      "fixtures": [
+        {
+          "id": "RCORE-07.T01",
+          "spec_requirement": "RCORE-07.T01 | Rational quarter circle R=10 mm, insert knot rồi elevate degree | Radius và locus giữ trong numerical bound; weights rational còn; report degree/count trước-sau",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-07.T02",
+          "spec_requirement": "RCORE-07.T02 | Periodic closed curve đổi seam, reverse và save/reload | World locus giữ; seam/direction mới có mapping xác định; không duplicate closing segment",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-07.T03",
+          "spec_requirement": "RCORE-07.T03 | B-spline 6 CV, kéo một CV rồi cancel/commit/Undo/Redo | Cancel trả basis gốc không undo rỗng; commit một transaction; Undo/Redo khôi phục đúng poles/weights",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-07.T04",
+          "spec_requirement": "RCORE-07.T04 | Cùng curve bật edit points và CV | Vị trí/identity khác đúng định nghĩa; edit point nằm trên curve, không gắn knot index giả",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-07.T05",
+          "spec_requirement": "RCORE-07.T05 | Trimmed surface có lỗ, Rebuild với retrim | Lỗ còn và trims hợp lệ hoặc fail explicit; không xuất surface phủ kín lỗ mà báo thành công",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-07.T06",
+          "spec_requirement": "RCORE-07.T06 | Hai faces shared edge trong polysurface, PointsOn | Từ chối nhánh không hỗ trợ; không tách ngầm hay làm hở seam",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-07.T07",
+          "spec_requirement": "RCORE-07.T07 | Loft ba profiles kín có seam đảo thứ tự | Profile order/seams/reversal cố định giữa preview/commit/History; không twist bất ngờ",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-07.T08",
+          "spec_requirement": "RCORE-07.T08 | Refit curve với spike hẹp nằm giữa các mẫu coarse | Không báo certified chỉ từ coarse sample; adaptive/bound bắt spike hoặc báo budget exhausted",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-07.T09",
+          "spec_requirement": "RCORE-07.T09 | Ma trận mutation: Join/Boolean fail; Scale matrix singular; Mirror solid; nonuniform scale circle/sphere | Fail giữ input/links/layers; singular bị reject; mirror có orientation hợp lệ; circle thành ellipse và sphere báo representation thật, không giữ tag primitive sai; không heal/fallback mesh âm thầm",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-07.T10",
+          "spec_requirement": "RCORE-07.T10 | Plane pair G0-only, G1 và mặt cong có G2 sai; thêm sphere pole singularity | Report tách G0/G1/G2 và singular/undefined; không suy continuity chỉ từ Zebra/shaded",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-07.T11",
+          "spec_requirement": "RCORE-07.T11 | Reference Curve.Rebuild: degree 0/1/11/12, count 1/2/degree/1000/1001, open/closed và tangent flag | Ghi requested và normalization kỳ vọng theo nhánh managed/native đã đọc; đo output degree/count/closure/tangents để kiểm chứng boundary thực tế còn chưa chạy; lỗi không thay source",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-07.T12",
+          "spec_requirement": "RCORE-07.T12 | Curve domain [2,7], surface U/V domain khác nhau, reverse theo từng overload | Reference kỳ vọng theo API doc là [-7,-2] cho chiều reverse; đo locus/tangent và identity source/result; OM9 giữ mapping đúng trong History và không phụ thuộc index CV cũ",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-07.T13",
+          "spec_requirement": "RCORE-07.T13 | Hai knot vectors cùng intervals nhưng dịch toàn bộ +10; thử insert knot multiplicity 1 và explicit | Comparator khoảng không đủ để chứng nhận domain giống nhau; report absolute knots/domain riêng; đo locus và parameterization sau insert theo numerical bound",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-07.T14",
+          "spec_requirement": "RCORE-07.T14 | Surface Rebuild counts không lớn hơn degree và vượt 1000; Fit với tolerances explicit | Ghi rejection/normalization thực tế; không giả Curve.Rebuild normalization được dùng lại; deviation/retrim phải được đo độc lập với API return value",
+          "priority": "mixed_scope_see_audit",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        }
+      ]
+    },
+    {
+      "id": "RCORE-09",
+      "source": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/09-history-dependencies.md",
+      "source_sha256_at_inventory": "a23567fb8fd5f6289006fac0e87939e56d353e90b810b883b556b31a9e95cac2",
+      "scope": "all_contracts",
+      "status": "in_progress",
+      "contract_coverage": "See explicit-contract matrices in independent audits; RCORE-02 parent implementation plan and chapter remain authoritative.",
+      "fixtures": [
+        {
+          "id": "RCORE-09.T01",
+          "spec_requirement": "RCORE-09.T01 — chain hai thế hệ | Curve → surface → derived output; đổi một pole nguồn. | Dirty lan đúng hai thế hệ, mỗi output dùng revision mới; IDs child giữ nguyên.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-09.T02",
+          "spec_requirement": "RCORE-09.T02 — placement lồng | Dịch parent group 10 mm và xoay 90°, recompute. | Child cập nhật world geometry đúng một lần, không nhân transform hai lần.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-09.T03",
+          "spec_requirement": "RCORE-09.T03 — topology đổi | Tách cạnh nguồn khiến EdgeN cũ khác nghĩa. | Resolve cùng entity có chứng cứ hoặc unresolved; không nối âm thầm sang edge khác.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-09.T04",
+          "spec_requirement": "RCORE-09.T04 — Record/Update | Tắt Record tạo A; bật Record tắt Update tạo B rồi sửa parent. | A snapshot; B dirty với geometry cũ được đánh dấu; manual update tạo kết quả mới đúng.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-09.T05",
+          "spec_requirement": "RCORE-09.T05 — child lock/clear | Khóa child, thử sửa geometry; Clear rồi sửa. | Khóa chặn mutation; Clear theo policy OM9 giữ shape và Undo phục hồi links.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-09.T06",
+          "spec_requirement": "RCORE-09.T06 — parent delete/restore | Xóa parent, Undo, Redo. | Mỗi state đúng policy family; links không trỏ tới object đã chết, không rò callbacks.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-09.T07",
+          "spec_requirement": "RCORE-09.T07 — cycle và lỗi solver | Thêm cạnh A→B→A; gây loft invalid. | Cycle bị từ chối nguyên tử; lỗi solver chỉ rõ node, downstream không clean giả.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-09.T08",
+          "spec_requirement": "RCORE-09.T08 — cold persistence | Save FCStd, đóng tiến trình, mở khi OM9 chưa active. | Schema/IDs/units/options phục hồi; recompute đúng hoặc báo module thiếu rõ ràng.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-09.T09",
+          "spec_requirement": "RCORE-09.T09 — stale job/cancel | Sửa parent/đóng document khi worker chạy. | Output cũ bị bỏ, không commit/undo entry muộn hoặc dereference pointer hết hạn.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-09.T10",
+          "spec_requirement": "RCORE-09.T10 — replay version/typed data | Lưu record version cũ, thiếu ObjRef hoặc một output không cập nhật được. | Không gọi generic replay rồi báo success; migration/failure theo family, output và record giữ nhất quán.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-09.T11",
+          "spec_requirement": "RCORE-09.T11 — Update Off policy | Sửa parent khi Update Off rồi bật lại và gọi manual update. | Kiểm policy dirty giữ lại của OM9; phân biệt với nhánh Rhino xóa pending queue khi Update tắt.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-09.T12",
+          "spec_requirement": "RCORE-09.T12 — metadata ngoài record | Round-trip family cần cả HistoryRecord và object metadata, rồi bỏ riêng một phần. | Replay chỉ bật khi cả schema, references và metadata cần thiết hợp lệ; Count record không đủ.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        }
+      ]
+    },
+    {
+      "id": "RCORE-10",
+      "source": "OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/10-persistence-3dm-clipboard.md",
+      "source_sha256_at_inventory": "d2bbce036154bd6bd86af67858a2d8dcb796aa01ebf36777518436f1c02ba238",
+      "scope": "all_contracts",
+      "status": "in_progress",
+      "contract_coverage": "See explicit-contract matrices in independent audits; RCORE-02 parent implementation plan and chapter remain authoritative.",
+      "fixtures": [
+        {
+          "id": "RCORE-10.T01",
+          "spec_requirement": "RCORE-10.T01 — mixed geometry | Import/export/reimport point, rational arc, face có lỗ, closed BRep và mesh. | Đúng type/count, trim holes/topology/bounds; CAD giữ CAD, không chỉ ảnh giống.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-10.T02",
+          "spec_requirement": "RCORE-10.T02 — units | Cùng geometry source mm và inch; thêm unitless/custom. | Cùng kích thước vật lý; unknown units dừng trước mutation; metadata scale nhất quán.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-10.T03",
+          "spec_requirement": "RCORE-10.T03 — nested blocks | Hai instance dùng chung definition; nested reflection và scale không đều. | Geometry đúng transform, không có definition duplicate; flatten được báo rõ.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-10.T04",
+          "spec_requirement": "RCORE-10.T04 — bad archive | Corrupt file, missing member, cycle, singular transform. | Báo object/dependency lỗi, count/undo stack/document hash không đổi.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-10.T05",
+          "spec_requirement": "RCORE-10.T05 — edited source | Import preserve; sửa A, xóa B, tạo C rồi export. | Writer có capability phải xuất A mới/C và bỏ B; nếu chưa hỗ trợ thì từ chối rõ, không hồi sinh source.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-10.T06",
+          "spec_requirement": "RCORE-10.T06 — paste hai chiều | Rhino 5→OM9 và OM9→Rhino 5 trên supported types. | Đúng selection/current shape/placement/units; ghi kết quả riêng từng chiều và format.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-10.T07",
+          "spec_requirement": "RCORE-10.T07 — clipboard focus/Undo | Copy geometry ở tree rồi paste; Ctrl+V trong text field. | Paste hình học một Undo/Redo; text field chỉ nhận text, không tạo document object.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-10.T08",
+          "spec_requirement": "RCORE-10.T08 — cold FCStd | Save, tắt tiến trình, bỏ source ngoài theo policy rồi mở lại. | Geometry/retained references đúng; missing resource được báo, không dùng pointer hoặc temp file cũ.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-10.T09",
+          "spec_requirement": "RCORE-10.T09 — output/cancel | Disk-full/permission failure; hủy trước commit và khi worker trả về. | File đích tốt còn nguyên, staging dọn, không partial objects/late commits.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-10.T10",
+          "spec_requirement": "RCORE-10.T10 — ứng dụng đích | Mở/edit/save kết quả thực trong Rhino 5 rồi nhập lại. | Đếm/metadata/topology/bounds/deviation đạt ngưỡng fixture; archive version riêng không đủ.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-10.T11",
+          "spec_requirement": "RCORE-10.T11 — write-option separation | Lưu cùng scene theo explicit option giữ/bỏ meshes, userdata và History. | Báo đúng phần dữ liệu đã giữ/bỏ; geometry/readability không chứng minh History replay hoặc default UI.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        },
+        {
+          "id": "RCORE-10.T12",
+          "spec_requirement": "RCORE-10.T12 — tables và unit metadata | Đổi layer/material table cùng model/page units; xuất rồi nhập lại. | Identity/remap và metadata từng field đúng; scale geometry chỉ xảy ra theo policy explicit, không dựa vào setter metadata.",
+          "priority": "P0",
+          "status": "not_fully_verified",
+          "complete_evidence": []
+        }
+      ]
+    }
+  ],
+  "updated_at": "2026-10-10T05:16:42+07:00"
+}

@@ -1,0 +1,55 @@
+"""OM9-INFO-020 core settings use the real menu and native widgets."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-020']}
+def settle():
+    QtWidgets.QApplication.processEvents();QtTest.QTest.qWait(150);QtWidgets.QApplication.processEvents()
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    doc=None
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('GumballSettings');doc.UndoMode=1
+        box=doc.addObject('Part::Feature','Box');box.Shape=Part.makeBox(12,8,6);doc.recompute();settle()
+        area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea);view=Gui.activeDocument().activeView();view.viewAxonometric();view.fitAll()
+        Gui.Selection.addSelection(box)
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        def command(s):
+            console.setFocus();QtTest.QTest.keyClicks(console,s);QtTest.QTest.keyClick(console,QtCore.Qt.Key_Return);settle()
+        command('Gumball On');command('GumballAlignment World')
+        port=next(w for w in area.activeSubWindow().widget().findChildren(QtWidgets.QWidget) if w.property('om9GumballViewport'))
+        def menu():
+            row=next(h for h in native.gumballHandles() if h['name']=='MenuBall')
+            QtTest.QTest.mouseClick(port,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,QtCore.QPoint(row['x'],row['y']));settle()
+            return Gui.getMainWindow().findChild(QtWidgets.QMenu,'OM9GumballWidgetMenu')
+        m=menu();labels={a.text():a for a in m.actions()}
+        check('menu exposes the complete core settings',{'Snappy dragging','Smooth dragging','Drag strength…','Settings…','Rotate view around gumball','Restore defaults'}.issubset(labels))
+        check('new profile uses Smooth',labels['Smooth dragging'].isChecked())
+        labels['Snappy dragging'].trigger();m.close();settle();check('Snappy session setting applies',native.gumballState()['settings']['snappy'])
+        m=menu();next(a for a in m.actions() if a.text()=='Settings…').trigger();m.close();settle()
+        dialog=Gui.getMainWindow().findChild(QtWidgets.QDialog,'OM9GumballSettings')
+        check('Settings opens a real editable dialog',dialog is not None and dialog.isVisible())
+        scale=dialog.findChild(QtWidgets.QDoubleSpinBox,'ScaleSize');scale.setValue(0)
+        strength=dialog.findChild(QtWidgets.QDoubleSpinBox,'DragStrength');strength.setValue(50)
+        dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        check('zero Scale size removes native Scale hits',not any(h['handle'] in [10,11,12] for h in native.gumballHandles()))
+        check('Drag Strength accepted and persisted',native.gumballState()['settings']['strength']==50 and App.ParamGet('User parameter:BaseApp/Preferences/Mod/OpenMatrix9/Gumball').GetFloat('DragStrength')==50)
+        m=menu();next(a for a in m.actions() if a.text()=='Rotate view around gumball').trigger();m.close();settle()
+        check('orbit center follows the shared pivot',native.gumballState()['orbit_center']==native.gumballState()['frame'][:3])
+        command('RelocateGumball');command('w7,4,3');command('w8,4,3');command('')
+        check('enabled orbit follows a newly accepted relocated pivot',native.gumballState()['orbit_center']==[7,4,3])
+        m=menu();next(a for a in m.actions() if a.text()=='Restore defaults').trigger();m.close();settle()
+        settings=native.gumballState()['settings'];check('Restore defaults restores only Gumball preferences',settings['scale_size']==8 and settings['strength']==100 and not settings['snappy'] and native.gumballState()['enabled'])
+        check('settings and orbit do not change geometry or Undo',len(doc.Objects)==1 and doc.UndoCount==0 and box.Shape.BoundBox.XLength==12)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        if doc is not None:App.closeDocument(doc.Name)
+        QtCore.QTimer.singleShot(100,QtWidgets.QApplication.quit)
+QtCore.QTimer.singleShot(1500,run)

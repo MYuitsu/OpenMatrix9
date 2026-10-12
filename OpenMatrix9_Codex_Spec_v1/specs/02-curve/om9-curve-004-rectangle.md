@@ -15,6 +15,15 @@ sample_status: compiled_and_validation_tests_passed
 
 # OM9-CURVE-004 — Rectangle
 
+<!-- rhino-core-extended-input:start -->
+## Extended numeric input — validated slice
+
+Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+
+[Runtime/source evidence](../../../docs/validation/2026-10-09-rhino-core-extended-input.md). Native geometry is reused; live constraints, locale and other missing contracts remain open.
+
+<!-- rhino-core-extended-input:end -->
+
 Alias tương thích: `Rectangle`. Nhóm: `02-curve`. Trạng thái: `partially_implemented` — supported slice đã kiểm chứng ngày 2026-10-09.
 
 ## Hợp đồng thiết kế

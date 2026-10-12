@@ -1,0 +1,186 @@
+"""Rhino-style native handles must remain usable through real Qt input."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtWidgets, QtTest
+sys.path.insert(0,str(Path(__file__).parent));from gumball_capture import capture_view
+from gumball_fixture import GumballUI
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'checks': [], 'feature_ids': ['OM9-INFO-020', 'OM9-INFO-021', 'OM9-INFO-022']}
+
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+
+def events():
+    QtWidgets.QApplication.processEvents()
+    QtTest.QTest.qWait(80)
+
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        report['module'] = native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc = App.newDocument('GumballVisual')
+        doc.UndoMode = 1
+        box = doc.addObject('Part::Feature', 'Box')
+        box.Shape = Part.makeBox(2, 3, 4)
+        doc.recompute()
+        events()
+        view = Gui.activeDocument().activeView()
+        view.viewAxonometric()
+        view.fitAll()
+        Gui.Selection.addSelection(box)
+        Gui.runCommand('OM9_Gumball')
+        events()
+        ui=GumballUI(native);viewport=ui.viewport
+        def current_handles():
+            # Undo invalidates the frame immediately; the idle refresh timer
+            # need not have fired before this test's next pointer operation.
+            native.gumballState();events()
+            return native.gumballHandles()
+        handles = current_handles()
+        report['handles'] = handles
+        targets = {h['name']: QtCore.QPoint(h['x'], h['y']) for h in handles if h['hit_verified']}
+        check('all thirteen transform handles stay native-pickable',
+              len([h for h in handles if h['handle'] < 13]) == 13)
+        image = capture_view(view,1024,768)
+        image.save(str(out / 'gumball-render.png'))
+        colors = [0, 0, 0]
+        for y in range(image.height()):
+            for x in range(image.width()):
+                c = image.pixelColor(x, y)
+                if c.red() > 220 and c.green() < 110 and c.blue() < 110:
+                    colors[0] += 1
+                elif c.green() > 160 and c.red() < 110 and c.blue() < 120:
+                    colors[1] += 1
+                elif c.blue() > 220 and c.red() < 110 and c.green() < 150:
+                    colors[2] += 1
+        report['rendered_axis_pixels'] = colors
+        check('three axis colors are actually rendered', all(20 < n < 2500 for n in colors))
+        origin = targets['MoveFree']
+        for axis in 'XYZ':
+            move = targets['Move' + axis] - origin
+            scale = targets['Scale' + axis] - origin
+            check('Scale' + axis + ' sits opposite its move arrow',
+                  move.x() * scale.x() + move.y() * scale.y() < 0)
+
+        def numeric(name, value):
+            row = next(h for h in current_handles() if h['name'] == name and h['hit_verified'])
+            viewport.setFocus()
+            QtTest.QTest.mouseClick(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier,
+                                   QtCore.QPoint(row['x'], row['y']))
+            events()
+            field = next(w for w in Gui.getMainWindow().findChildren(QtWidgets.QLineEdit, 'OM9GumballNumeric')
+                         if w.isVisible())
+            check(name + ' compact editor stays inside viewport',
+                  field.width() < 150 and field.height() <= 26 and viewport.rect().contains(field.geometry()))
+            field.setText(value)
+            QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return)
+            events()
+
+        numeric('MoveX', '5 mm')
+        check('new move arrow commits one precise movement', abs(box.Shape.BoundBox.XMin - 5) < 1e-9 and doc.UndoCount == 1)
+        doc.undo()
+        events()
+        numeric('ScaleX', '2')
+        check('opposite-side scale square still scales X about pivot',
+              abs(box.Shape.BoundBox.XLength - 4) < 1e-8 and abs(box.Shape.BoundBox.XMin + 1) < 1e-8 and abs(box.Shape.BoundBox.YLength - 3) < 1e-8)
+        doc.undo()
+        events()
+        positions = {h['name']: QtCore.QPoint(h['x'], h['y']) for h in current_handles()}
+        start = positions['ScaleX']
+        away = start + (start - positions['MoveFree']) / 2
+        viewport.setFocus()
+        QtTest.QTest.mousePress(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier, start)
+        QtTest.QTest.mouseMove(viewport, away)
+        events()
+        check('negative-side scale square owns a real drag preview', native.gumballState()['phase'] == 3 and doc.UndoCount == 0)
+        QtTest.QTest.mouseRelease(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier, away)
+        events()
+        bounds = box.Shape.BoundBox
+        check('dragging scale away from pivot expands only X in one Undo',
+              2 < bounds.XLength < 10 and abs(bounds.YLength - 3) < 1e-8 and abs(bounds.ZLength - 4) < 1e-8
+              and (bounds.Center - App.Vector(1, 1.5, 2)).Length < 1e-8 and doc.UndoCount == 1)
+        doc.undo()
+        events()
+        numeric('RotateZ', '90')
+        check('new rotation arc rotates precisely about the same origin',
+              abs(box.Shape.BoundBox.XLength - 3) < 1e-8 and abs(box.Shape.BoundBox.YLength - 2) < 1e-8 and abs(box.Shape.Volume - 24) < 1e-8)
+        doc.undo()
+        events()
+        rows = current_handles()
+        menu_target = next((h for h in rows if h['name'] == 'MenuBall'), None)
+        check('menu ball is a separate native pointer target', menu_target is not None)
+        if menu_target:
+            count, undo = len(doc.Objects), doc.UndoCount
+            menu_point = QtCore.QPoint(menu_target['x'], menu_target['y'])
+            QtTest.QTest.mousePress(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier, menu_point)
+            events()
+            popup = Gui.getMainWindow().findChild(QtWidgets.QMenu, 'OM9GumballWidgetMenu')
+            check('menu ball opens a real popup', popup is not None and popup.isVisible())
+            if popup:
+                # A real popup owns the release of the press that opened it.
+                QtTest.QTest.mouseRelease(popup, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier,
+                                         popup.mapFromGlobal(viewport.mapToGlobal(menu_point)))
+                actions = {a.text(): a for a in popup.actions()}
+                check('menu exposes relocation and reset', 'Relocate gumball' in actions and 'Reset gumball' in actions)
+                action = actions['Align to World']
+                QtTest.QTest.mouseClick(popup, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier, popup.actionGeometry(action).center())
+                events()
+                check('menu alignment uses the existing Rust state', native.gumballState()['alignment'] == 2)
+            move_target = next(h for h in current_handles() if h['name'] == 'MoveY')
+            QtTest.QTest.mouseClick(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier,
+                                   QtCore.QPoint(move_target['x'], move_target['y']))
+            events()
+            editor = next((w for w in Gui.getMainWindow().findChildren(QtWidgets.QLineEdit, 'OM9GumballNumeric')
+                           if w.isVisible()), None)
+            check('popup release does not swallow the next handle click', editor is not None)
+            if editor:
+                editor.setText('3 mm')
+                QtTest.QTest.keyClick(editor, QtCore.Qt.Key_Return)
+                events()
+                check('move after popup commits once', abs(box.Shape.BoundBox.YMin - 3) < 1e-9 and doc.UndoCount == undo + 1)
+                doc.undo()
+                events()
+            else:
+                QtTest.QTest.keyClick(viewport, QtCore.Qt.Key_Escape)
+                events()
+            def menu_action(label):
+                target = next(h for h in current_handles() if h['name'] == 'MenuBall')
+                QtTest.QTest.mouseClick(viewport, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier,
+                                       QtCore.QPoint(target['x'], target['y']))
+                events()
+                menu = Gui.getMainWindow().findChild(QtWidgets.QMenu, 'OM9GumballWidgetMenu')
+                action = next(a for a in menu.actions() if a.text() == label)
+                QtTest.QTest.mouseClick(menu, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier, menu.actionGeometry(action).center())
+                events()
+            menu_action('Relocate gumball')
+            check('menu relocation enters the existing origin prompt', native.gumballState()['phase'] == 4)
+            console = Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript')
+            for text in ('w2,2,3', 'w3,2,3', ''):
+                console.setFocus()
+                QtTest.QTest.keyClicks(console, text)
+                QtTest.QTest.keyClick(console, QtCore.Qt.Key_Return)
+                events()
+            check('menu relocation changes only the widget frame', native.gumballState()['frame'][:3] == [2, 2, 3])
+            menu_action('Reset gumball')
+            check('menu reset restores selection origin and keeps alignment',
+                  native.gumballState()['frame'][:3] == [1, 1.5, 2] and native.gumballState()['alignment'] == 2)
+            check('opening and using view menu creates no geometry or Undo', (len(doc.Objects), doc.UndoCount) == (count, undo))
+        report['ok'] = all(c['passed'] for c in report['checks'])
+        if not report['ok']:
+            report['error'] = ', '.join(c['name'] for c in report['checks'] if not c['passed'])
+    except Exception:
+        report.update(ok=False, error=traceback.format_exc())
+        if 'native' in locals():report['failure_state']=native.gumballState()
+        if 'doc' in locals():report['failure_model']={'undo':doc.UndoCount,'redo':doc.RedoCount,'state':list(box.State),'placement':str(box.Placement),'shape_bounds':[box.Shape.BoundBox.XMin,box.Shape.BoundBox.XLength]}
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        if console:report['failure_transcript']=console.toPlainText()
+    finally:
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        (out / 'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        Gui.getMainWindow().close()
+
+QtCore.QTimer.singleShot(1200, run)

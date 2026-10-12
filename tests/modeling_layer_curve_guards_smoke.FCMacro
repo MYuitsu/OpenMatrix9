@@ -82,6 +82,8 @@ def run():
         check('Join has one Undo for geometry and layer binding',doc.UndoCount==undo+1 and len(state['objects'])==3 and joined.Shape.isValid() and len(joined.Shape.Edges)==2)
         name=joined.Name;doc.undo();check('Join Undo restores exact existing layers and objects',doc.getObject(name) is None and snapshot()==old)
         doc.redo();check('Join Redo restores canonical binding',doc.getObject(name).OM9LayerId=='om9-preset-7' and len(snapshot()['snapshot']['objects'])==3)
+        from stock_save_support import prepare_stock_fcstd_save
+        prepare_stock_fcstd_save(report)
         final=snapshot();file=output/'layer-curve-guards.FCStd';doc.saveAs(str(file));App.closeDocument(doc.Name);doc=App.openDocument(str(file));settle()
         check('FCStd keeps guarded Join output and own source flags',snapshot()==final and doc.getObject(name).OM9LayerId=='om9-preset-7')
         own=App.newDocument('OwnCurveGuard');own.UndoMode=1;obj=own.addObject('Part::Feature','OwnLocked');obj.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(2,0,0));obj.addProperty('App::PropertyBool','OM9Locked');obj.OM9Locked=True;own.recompute()

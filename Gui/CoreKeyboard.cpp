@@ -1,12 +1,13 @@
-#include <Base/Interpreter.h>
 #include "CoreKeyboard.h"
 #include "RustBridge.h"
+#include "GumballController.h"
 #include "NativeCommands.h"
 #include "CoreWorkspace.h"
 #include "CurveController.h"
 #include <App/Application.h>
 #include <App/Document.h>
 #include <App/DocumentObject.h>
+#include <Base/Interpreter.h>
 #include <Base/PyObjectBase.h>
 #include <Gui/Application.h>
 #include <Gui/MainWindow.h>
@@ -96,9 +97,8 @@ void CoreKeyboard::history(){
 }
 void CoreKeyboard::contextMenu(){
     auto* window=Gui::getMainWindow();if(menu){menu->close();delete menu.data();}menu=new QMenu(window);menu->setObjectName("OM9F6Menu");const auto type=selectedType();menu->setProperty("om9SelectionType",type);
-    const auto root=qEnvironmentVariable("OM9_PLUGIN_ROOT");
-    QFile file(root.isEmpty()?QDir(QString::fromStdString(App::Application::getHomePath())).filePath("Mod/OpenMatrix9/Resources/menu/ContextMenu.xml"):QDir(root).filePath("Resources/menu/ContextMenu.xml"));QDomDocument source;if(file.open(QIODevice::ReadOnly))source.setContent(&file);
-    const QStringList names={"General","Curve","Gem","Surface","T-Splines","User","Report","Materials"};const QStringList modes={"ObjectActions","CurveLayout","GemLayout","SurfaceModeling","TSplines","User","Report","Materials"};
+    QFile file(QDir(QString::fromStdString(App::Application::getHomePath())).filePath("Mod/OpenMatrix9/Resources/menu/ContextMenu.xml"));QDomDocument source;if(file.open(QIODevice::ReadOnly))source.setContent(&file);
+    const QStringList names={"General","Curve","Gem","Surface","SubD","User","Report","Materials"};const QStringList modes={"ObjectActions","CurveLayout","GemLayout","SurfaceModeling","TSplines","User","Report","Materials"};
     const auto groups=source.elementsByTagName("ObjectContextMenuGroup");
     for(int mode=0;mode<names.size();++mode){auto* submenu=menu->addMenu(names[mode]);QDomElement chosen;
         for(int pass=0;pass<2&&chosen.isNull();++pass)for(int g=0;g<groups.size();++g){const auto group=groups.at(g).toElement();const auto wanted=pass==0?type:QString("Default");if(group.firstChildElement("Mode").text()==modes[mode]&&group.firstChildElement("EnglishName").text()==wanted){chosen=group;break;}}
@@ -113,6 +113,8 @@ void CoreKeyboard::contextMenu(){
 }
 bool CoreKeyboard::eventFilter(QObject* receiver,QEvent* event){
     if(!enabled||Gui::Application::Instance->isClosing()||(event->type()!=QEvent::ShortcutOverride&&event->type()!=QEvent::KeyPress))return false;
+    if(GumballController::instance().processEvent(receiver,event))return true;
+    if(receiver->property("om9GumballEditor").toBool())return false;
     if(!inputContext(receiver))return false;
     const auto* key=static_cast<QKeyEvent*>(event);const auto modifiers=key->modifiers()&~Qt::KeypadModifier;const auto sequence=QKeySequence(key->key()|int(modifiers)).toString(QKeySequence::PortableText);
     QString target;for(std::size_t i=0;i<om9_keyboard_count();++i)if(sequence==QString::fromUtf8(om9_keyboard_key(i))){target=QString::fromUtf8(om9_keyboard_target(i));break;}

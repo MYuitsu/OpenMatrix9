@@ -1,3 +1,5 @@
+extern "C" unsigned om9_geometry_contract_schema();
+extern "C" unsigned om9_geometry_operation(unsigned,unsigned,unsigned,unsigned);
 #include "ThreeDmModeling.h"
 #include "ThreeDmArchive.h"
 #include "ThreeDmStaging.h"
@@ -16,6 +18,11 @@ QJsonObject modelingCapabilities(unsigned kind){
     QJsonObject result;
     const char* names[]={"select","snap","transform","curve-edit","surface-edit","boolean","export-v5"};
     for(unsigned i=0;i<7;++i){bool allowed=bits&(1u<<i);result[names[i]]=QJsonObject{{"allowed",allowed},{"support",allowed?(i==1||i==5?"scoped":"supported"):"unsupported"},{"reason",allowed?(i==1?"Existing CAD End/Mid/Point snap; bounded queries follow in Phase 2":i==5?"Native Part kernel tools":"Working geometry"):"Not available for this geometry kind in Phase 1"}};}
+    const auto importStatus=om9_geometry_operation(2,kind,5,1),exportStatus=om9_geometry_operation(3,kind,5,1);
+    result["operation_contract"]=QJsonObject{{"schema_version",int(om9_geometry_contract_schema())},
+        {"import_working_v5",QJsonObject{{"allowed",importStatus<100},{"backend_status",int(importStatus)}}},
+        {"export_working_v5",QJsonObject{{"allowed",exportStatus<100},{"backend_status",int(exportStatus)}}},
+        {"preservation_guarantees","uninspected"}};
     return result;
 }
 QJsonObject prepareModelingArchive(const std::filesystem::path& input,const std::filesystem::path& staging,double scale,const std::filesystem::path& layerMetadata){
@@ -79,7 +86,7 @@ QJsonObject prepareModelingArchive(const std::filesystem::path& input,const std:
     if(hash(input)!=sourceHash)throw ExchangeError("Source archive changed during modeling preparation");
     QJsonArray items;
     for(auto value:prepared){auto row=value.toObject();unsigned kind=row["geometry_kind"].toInt(9);
-        if(row["capability"]=="retained"||!(om9_modeling_capabilities(kind)&64))throw ExchangeError("Unsupported independent working geometry: "+row["name"].toString().toStdString()+" ["+row["class_name"].toString().toStdString()+"]");
+        if(row["capability"]=="retained"||!(om9_modeling_capabilities(kind)&64)||om9_geometry_operation(2,kind,5,1)>=100)throw ExchangeError("Unsupported independent working geometry: "+row["name"].toString().toStdString()+" ["+row["class_name"].toString().toStdString()+"]");
         row["working_mode"]=true;items.append(row);
     }
     auto layerSession=encodeExchangeLayers(model,"working-archive",0);

@@ -42,10 +42,30 @@ def run():
         check('OM9-VIEW-001 original command registered',action is not None and action.isEnabled())
         start(cancel=True);check('image-browser cancel creates no object',not doc.Objects)
         start(cmd=True);command('1,2,0');command('-10');check('invalid width keeps session without model object',not doc.Objects and 'PictureFrame' in command_prompt(window).text())
+        # Document::_removeObject holds TransactionLocker while notifying Python.
+        # Submit synchronously here; a nested settle() would process unrelated work.
+        lock_probe=doc.addObject('App::FeaturePython','PictureFrameTransactionLockProbe');doc.recompute()
+        class LockedTransactionProbe:
+            called=False
+            def slotDeletedObject(self,obj):
+                if obj.Document!=doc or obj.Name!=lock_probe.Name:return
+                self.called=True
+                before=([item.Name for item in doc.Objects],doc.UndoCount,doc.HasPendingTransaction)
+                field.setText('20');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return)
+                self.unchanged=before==([item.Name for item in doc.Objects],doc.UndoCount,doc.HasPendingTransaction)
+                self.message=command_prompt(window).text()
+        transaction_probe=LockedTransactionProbe();App.addDocumentObserver(transaction_probe)
+        try:doc.removeObject(lock_probe.Name)
+        finally:App.removeDocumentObserver(transaction_probe)
+        settle()
+        check('locked transaction rejects PictureFrame before image or Undo mutation',transaction_probe.called and transaction_probe.unchanged and not doc.Objects)
+        check('locked transaction gives a recoverable retry diagnostic','Cannot open transaction' in transaction_probe.message and 'retry' in transaction_probe.message)
         command('20');obj=doc.Objects[0]
         check('CMD creates native image with aspect and first-corner placement',obj.TypeId=='Image::ImagePlane' and abs(obj.XSize.Value-20)<1e-9 and abs(obj.YSize.Value-10)<1e-9 and obj.Placement.Base==App.Vector(11,7,0))
         check('native image default self illumination and autoname',obj.ViewObject.DisplayMode=='No shading' and obj.Label=='guide')
+        coordinate_report=obj.OM9CoordinateReport
         doc.undo();settle();check('PictureFrame transaction Undo removes output',not doc.Objects);doc.redo();settle();check('PictureFrame transaction Redo restores output',len(doc.Objects)==1)
+        check('PictureFrame Redo restores the exact accepted coordinate provenance',doc.Objects[0].OM9CoordinateReport==coordinate_report)
         start();command('Vertical=Yes');command('SelfIllumination=No');command('Autoname=No');command('0,0,0');command('10');vertical=doc.Objects[-1]
         check('Vertical CMD uses construction-plane normal for image height',abs(vertical.XSize.Value-10)<1e-9 and abs(vertical.YSize.Value-5)<1e-9 and (vertical.Placement.Rotation.multVec(App.Vector(0,1,0))-App.Vector(0,0,1)).Length<1e-9)
         check('explicit lighting and autoname options applied',vertical.ViewObject.DisplayMode=='Shading' and vertical.Label.startswith('PictureFrame'))
@@ -123,7 +143,7 @@ def run():
         check('guide transform Redo restores moved scaled guide',mouse.Placement.Base==App.Vector(7,8,9) and abs(mouse.XSize.Value-oldWidth*2)<1e-9)
         for slot,xaxis,yaxis in [(2,App.Vector(0,1,0),App.Vector(0,0,1)),(3,App.Vector(1,0,0),App.Vector(0,0,1))]:
             planeSub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==slot);area.setActiveSubWindow(planeSub);settle()
-            start(cmd=True);command('1,2,3');command('12');frame=doc.Objects[-1]
+            start(cmd=True);command('w1,2,3');command('12');frame=doc.Objects[-1]
             expectedCenter=App.Vector(1,2,3)+xaxis*6+yaxis*3
             check('CMD PictureFrame follows native C-plane slot '+str(slot),(frame.Placement.Base-expectedCenter).Length<1e-9 and (frame.Placement.Rotation.multVec(App.Vector(1,0,0))-xaxis).Length<1e-9 and (frame.Placement.Rotation.multVec(App.Vector(0,1,0))-yaxis).Length<1e-9 and abs(frame.XSize.Value-12)<1e-9 and abs(frame.YSize.Value-6)<1e-9)
             doc.undo();settle();check('C-plane test placement remains one undoable output slot '+str(slot),len(doc.Objects)==3)
@@ -153,8 +173,10 @@ def run():
         check('all four cameras remain live before save',len(Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor'))==4 and all(v.getCamera() for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')))
         Gui.activeDocument().activeView().saveImage(str(out/'native-before-reload.png'),600,400,'Current')
         window.grab().save(str(out/'picture-frame-before-reload.png'))
+        saved_coordinate_reports={obj.Name:obj.OM9CoordinateReport for obj in doc.Objects}
         path=out/'picture-frame.FCStd';doc.saveAs(str(path));App.closeDocument(doc.Name);settle();source.unlink();doc=App.openDocument(str(path));settle();settle()
         check('command outputs survive reload without source image',len(doc.Objects)==3 and all(Path(o.ImageFile).is_file() and not QtGui.QImage(o.ImageFile).isNull() for o in doc.Objects))
+        check('FCStd preserves exact accepted coordinate provenance for every image',all(obj.OM9CoordinateReport==saved_coordinate_reports[obj.Name] for obj in doc.Objects))
         moved=doc.getObject(movedName)
         check('reload retains moved guide rotation dimensions and raster',moved.Placement.Base==App.Vector(7,8,9) and abs(moved.XSize.Value-oldWidth*2)<1e-9 and abs(moved.YSize.Value-oldHeight*2)<1e-9 and (moved.Placement.Rotation.multVec(App.Vector(1,0,0))-movedPlacement.Rotation.multVec(App.Vector(1,0,0))).Length<1e-9)
         check('reload restores four live native cameras',len(Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor'))==4 and all(v.getCamera() for v in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor')))

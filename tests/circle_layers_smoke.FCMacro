@@ -69,6 +69,7 @@ def run():
         Gui.activateWorkbench('OpenMatrix9Workbench')
         import OpenMatrix9Gui
         result['native_module'] = OpenMatrix9Gui.__file__
+        result['module'] = str(OpenMatrix9Gui.__file__)
         if os.environ.get('OM9_TEST_NATIVE_DIR'):
             check('Selected native module loaded', Path(OpenMatrix9Gui.__file__).parent.resolve() == Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
         window = Gui.getMainWindow(); window.resize(1400,950)
@@ -159,6 +160,8 @@ def run():
         def float32(value):
             return struct.unpack('f',struct.pack('f',value))[0]
         imported_serialized_color = tuple(float32(math.floor(float32(float32(v)*255.0)+0.5)/255.0) for v in imported_color[:3])
+        from stock_save_support import prepare_stock_fcstd_save
+        prepare_stock_fcstd_save(result)
         name = doc.Name; file = out/'circle-layers.FCStd'; doc.saveAs(str(file)); App.closeDocument(name)
         doc = App.openDocument(str(file)); settle(); g = layer(5)
         check('FCStd restores active layer, group schema, color and visibility', settings().OM9ActiveLayer == 5 and g.Name == group_name and not g.ViewObject.Visibility and rgb_equal(g.OM9LayerColor,(12/255,100/255,180/255)))

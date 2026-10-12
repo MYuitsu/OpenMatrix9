@@ -61,7 +61,9 @@ def run():
         path.Shape=Part.makeLine(App.Vector(1,0,0),App.Vector(21,0,0));doc.recompute();p,n=midpoint(path);check('Source geometry updates parameter-based center',exact(h,3,p,n))
         group.Placement.Rotation=App.Rotation(App.Vector(0,0,1),90);doc.recompute();p,n=midpoint(path);check('Parent rotation updates circle normal',exact(h,3,p,n))
         settings.Update=False;old=h.Shape.copy();group.Placement.Base=App.Vector(25,20,30);doc.recompute();check('Update No preserves previous geometry',(h.Shape.Edges[0].Curve.Center-old.Edges[0].Curve.Center).Length<1e-8);settings.Update=True;doc.recompute();p,n=midpoint(path);check('Update Yes resumes dependency graph',exact(h,3,p,n))
-        settings.Record=False;old=h.Shape.copy();group.Placement.Base=App.Vector(35,20,30);doc.recompute();check('Record No pauses existing record',(h.Shape.Edges[0].Curve.Center-old.Edges[0].Curve.Center).Length<1e-8);settings.Record=True;doc.recompute();p,n=midpoint(path);check('Record Yes resumes Circle dependency',exact(h,3,p,n))
+        settings.Record=False;group.Placement.Base=App.Vector(35,20,30);doc.recompute();p,n=midpoint(path);check('Record No still updates existing Circle record',exact(h,3,p,n))
+        settings.Update=False;old=h.Shape.copy();group.Placement.Base=App.Vector(40,20,30);doc.recompute();check('Record No and Update No pause existing Circle',(h.Shape.Edges[0].Curve.Center-old.Edges[0].Curve.Center).Length<1e-8)
+        settings.Update=True;doc.recompute();p,n=midpoint(path);check('Update Yes resumes Circle while Record remains No',exact(h,3,p,n));settings.Record=True;doc.recompute();check('Record Yes preserves current Circle dependency',exact(h,3,p,n))
         settings.Lock=True;blocked=False
         try:h.Placement=App.Placement(App.Vector(1,0,0),App.Rotation())
         except Exception:blocked=True

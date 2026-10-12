@@ -1,0 +1,853 @@
+"""Real Gumball actions retain native definitions through associative Scale graphs.
+
+Set OM9_ASSOCIATIVE_COLD to the warm report directory for a fresh-process reopen.
+The saved graph uses standard FreeCAD types and the registered native OM9 Compound helper.
+"""
+import json, os, sys, traceback, zipfile
+import xml.etree.ElementTree as XML
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtWidgets
+sys.path.insert(0, str(Path(__file__).parent))
+from gumball_fixture import GumballUI
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+report={'checks':[], 'feature_ids':['OM9-INFO-020']}
+COMPOUND_TYPE='OpenMatrix9Gui::GumballScaleCompound'
+COMPOUND_PROVIDER='PartGui::ViewProviderPartExt'
+def checkpoint(stage):
+    report['last_checkpoint']=stage
+    (out/'progress.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    checkpoint('check: '+name)
+    if not value: raise AssertionError(name)
+def affine(frame,axis=0,factor=2):
+    values=[1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.,0.,0.,0.,0.,1.]
+    direction=frame[3+3*axis:6+3*axis]
+    for row in range(3):
+        for column in range(3):
+            values[4*row+column]=(1. if row==column else 0.)+(factor-1)*direction[row]*direction[column]
+        values[4*row+3]=frame[row]-sum(values[4*row+c]*frame[c] for c in range(3))
+    return App.Matrix(*values)
+def world_shape(obj):
+    shape=Part.getShape(obj)
+    # App::Link inherits DocumentObject, which has no Python GeoFeature
+    # getGlobalPlacement method. Native getShape includes the object's own
+    # transform; apply its actual owning Part/Body coordinate system once.
+    parent=obj.getParentGeoFeatureGroup()
+    if parent is not None:shape=shape.transformGeometry(parent.getGlobalPlacement().toMatrix())
+    return shape
+def shape_facts(shape):
+    b=shape.optimalBoundingBox(False,False)
+    return {'bounds':[getattr(b,k) for k in ('XMin','YMin','ZMin','XMax','YMax','ZMax')],
+            'vertices':[list(vertex.Point) for vertex in shape.Vertexes],
+            'counts':{'vertices':len(shape.Vertexes),'edges':len(shape.Edges),'faces':len(shape.Faces),'solids':len(shape.Solids)},
+            'volume':shape.Volume,'area':shape.Area,'length':shape.Length,
+            'placement':list(shape.Placement.toMatrix().A),'valid':shape.isValid()}
+
+def material_facts(material):
+    return {key:list(getattr(material,key)) for key in ('AmbientColor','DiffuseColor','EmissiveColor','SpecularColor')} | \
+          {key:getattr(material,key) for key in ('Shininess','Transparency')}
+def geometry_compare_facts(actual,expected):
+    facts={'actual':shape_facts(actual),'expected':shape_facts(expected)}
+    def samples(first,second):
+        vertex_distances=[Part.Vertex(vertex.Point).distToShape(second)[0] for vertex in first.Vertexes]
+        edge_distances=[]
+        for edge in first.Edges:
+            for t in (0,.125,.25,.375,.5,.625,.75,.875,1):
+                point=edge.valueAt(edge.FirstParameter+t*(edge.LastParameter-edge.FirstParameter))
+                edge_distances.append(Part.Vertex(point).distToShape(second)[0])
+        return {'max_vertex_distance':max(vertex_distances,default=0),'max_edge_distance':max(edge_distances,default=0)}
+    for name,first,second in (('actual_to_expected',actual,expected),('expected_to_actual',expected,actual)):
+        try:facts[name]=samples(first,second)
+        except Exception:facts[name]={'error':traceback.format_exc()}
+    for name,shape in (('actual_self',actual),('expected_self',expected)):
+        try:facts[name]=samples(shape,shape)
+        except Exception:facts[name]={'error':traceback.format_exc()}
+    facts['edge_placements']={'actual':[list(edge.Placement.toMatrix().A) for edge in actual.Edges],
+          'expected':[list(edge.Placement.toMatrix().A) for edge in expected.Edges]}
+    if len(actual.Edges)==len(expected.Edges):
+        try:
+            facts['corresponding_edge_sample_max']=max((first.valueAt(first.FirstParameter+t*(first.LastParameter-first.FirstParameter))-
+                  second.valueAt(second.FirstParameter+t*(second.LastParameter-second.FirstParameter))).Length
+                  for first,second in zip(actual.Edges,expected.Edges) for t in (0,.125,.25,.375,.5,.625,.75,.875,1))
+        except Exception:facts['corresponding_edge_sample_error']=traceback.format_exc()
+    for name,first,second in (('actual_common_expected',actual,expected),('expected_common_actual',expected,actual)):
+        try:
+            common=first.common(second)
+            facts[name]={'volume':common.Volume,'area':common.Area,'length':common.Length,'valid':common.isValid(),
+                  'counts':{'vertices':len(common.Vertexes),'edges':len(common.Edges),'faces':len(common.Faces),'solids':len(common.Solids)}}
+        except Exception:facts[name]={'error':traceback.format_exc()}
+    return facts
+def topology_counts(shape):return (len(shape.Vertexes),len(shape.Edges),len(shape.Faces),len(shape.Solids))
+def matching_bounds(first,second):
+    a,b=first.optimalBoundingBox(False,False),second.optimalBoundingBox(False,False)
+    return all(abs(getattr(a,key)-getattr(b,key))<=1e-6 for key in ('XMin','YMin','ZMin','XMax','YMax','ZMax'))
+def matching_measures(first,second):
+    return all(abs(getattr(first,key)-getattr(second,key))<=1e-10*max(1,abs(getattr(first,key)),abs(getattr(second,key)))
+          for key in ('Volume','Area','Length'))
+def pure_closed_solids(shape):
+    solids=shape.Solids
+    return bool(solids) and all(solid.Shells and all(shell.isClosed() for shell in solid.Shells) for solid in solids) and \
+          topology_counts(shape)==topology_counts(Part.makeCompound(solids))
+def closed_solid_equivalent(actual,expected):
+    # Native transformed cavity seam samples can be nonzero distance even
+    # from their own solid. For pure closed solids only, require complete
+    # intersection coverage in both operation orders, retaining topology,
+    # bounds and stringent volume/area/length checks. Open geometry keeps the
+    # direct edge-distance oracle below.
+    if not actual.isValid() or not expected.isValid() or not pure_closed_solids(actual) or not pure_closed_solids(expected):return False
+    if topology_counts(actual)!=topology_counts(expected) or not matching_bounds(actual,expected) or not matching_measures(actual,expected):return False
+    try:
+        for first,second in ((actual,expected),(expected,actual)):
+            common=first.common(second)
+            if not common.isValid() or not pure_closed_solids(common) or topology_counts(common)!=topology_counts(first) or \
+                  not matching_bounds(common,first) or not matching_measures(common,first):return False
+        return True
+    except Exception:return False
+def graph_coordinate_facts(source,result):
+    objects=[source]
+    if result is not None:objects.extend([result.LinkedObject.Base,result.LinkedObject,result])
+    facts=[]
+    for obj in objects:
+        parent=obj.getParentGeoFeatureGroup();resolved,matrix,owner=Part.getShape(obj,retType=2)
+        facts.append({'name':obj.Name,'type':obj.TypeId,'parent':getattr(parent,'Name',None),
+              'has_global_method':hasattr(obj,'getGlobalPlacement'),'placement':list(obj.Placement.toMatrix().A),
+              'global_placement':list(obj.getGlobalPlacement().toMatrix().A) if hasattr(obj,'getGlobalPlacement') else None,
+              'parent_global':list(parent.getGlobalPlacement().toMatrix().A) if parent else None,
+              'default':shape_facts(Part.getShape(obj)),'resolved':shape_facts(resolved),
+              'resolved_matrix':list(matrix.A),'resolved_owner':getattr(owner,'Name',None),'world':shape_facts(world_shape(obj))})
+    return facts
+def same_shape(actual,expected):
+    if not actual.isValid() or not expected.isValid() or topology_counts(actual)!=topology_counts(expected):return False
+    if not matching_bounds(actual,expected):return False
+    for vertex in actual.Vertexes:
+        if Part.Vertex(vertex.Point).distToShape(expected)[0]>1e-6:return closed_solid_equivalent(actual,expected)
+    for edge in actual.Edges:
+        for t in (0,.25,.5,.75,1):
+            point=edge.valueAt(edge.FirstParameter+t*(edge.LastParameter-edge.FirstParameter))
+            if Part.Vertex(point).distToShape(expected)[0]>1e-6:return closed_solid_equivalent(actual,expected)
+    return True
+def result_for(doc,source):
+    matches=[obj for obj in doc.Objects if getattr(obj,'OM9GumballScaleSource',None)==source]
+    return matches[-1] if matches else None
+def saved_compound_providers(path,names):
+    with zipfile.ZipFile(path) as archive:objects=XML.fromstring(archive.read('Document.xml')).findall('./Objects/Object')
+    saved={obj.get('name'):dict(obj.attrib) for obj in objects}
+    return [{'name':name,'saved':saved.get(name)} for name in names]
+
+def check_saved_compound_providers(path,helpers,name):
+    facts=saved_compound_providers(path,[helper.Name for helper in helpers])
+    report.setdefault('native_compound_provider_diagnostics',[]).append({'case':name,'saved_objects':facts})
+    # Omitted ViewType means the registered object's native default provider.
+    # A lost stored override on a stock Compound instead saves its stock type.
+    check(name+' saves the durable native Compound provider identity',bool(facts) and all(
+          item['saved'] is not None and item['saved'].get('type')==COMPOUND_TYPE and
+          item['saved'].get('ViewType',COMPOUND_PROVIDER)==COMPOUND_PROVIDER for item in facts))
+
+def check_compound_redo_provider(doc,created,name,filename):
+    helpers=[doc.getObject(key) for key in created if doc.getObject(key) is not None and
+             doc.getObject(key).TypeId==COMPOUND_TYPE]
+    check(name+' retains the non-hiding native Compound provider after Redo',bool(helpers) and all(
+          helper.isDerivedFrom('Part::Compound') and helper.ViewObject.TypeId==COMPOUND_PROVIDER and
+          'Proxy' not in helper.PropertiesList for helper in helpers))
+    path=out/filename;doc.saveCopy(str(path))
+    check_saved_compound_providers(path,helpers,name+' after Redo')
+
+def occurrence_bridge(normalizer,source):
+    if normalizer is None or normalizer.TypeId!=COMPOUND_TYPE or len(normalizer.Links)!=1:return None
+    bridge=normalizer.Links[0]
+    return bridge if bridge.TypeId=='App::Link' and bridge.LinkedObject==source else None
+
+def bridge_is_durable(bridge,normalizer,source):
+    return bridge is not None and bridge.LinkedObject==source and bridge.LinkTransform and bridge.LinkPlacement==App.Placement() and \
+          bridge.Scale==1 and bridge.ScaleVector==App.Vector(1,1,1) and not bridge.ExpressionEngine and \
+          bridge.getParentGeoFeatureGroup()==normalizer.getParentGeoFeatureGroup()
+
+def graph_has_native_local_scopes(result):
+    scale=result.LinkedObject;inp=scale.Base;parent=result.getParentGeoFeatureGroup();normalizer=inp.LinkedObject
+    helpers=[scale,inp]
+    if normalizer.TypeId==COMPOUND_TYPE:
+        helpers.extend([normalizer]+list(normalizer.Links))
+        if any(target.getParentGeoFeatureGroup()!=normalizer.getParentGeoFeatureGroup() for target in normalizer.Links):return False
+    # Input.LinkedObject is a native Global occurrence; its definition may
+    # stay in the original coordinate system when the result is copied.
+    return all(helper.getParentGeoFeatureGroup()==parent for helper in helpers) and scale.Base.getParentGeoFeatureGroup()==scale.getParentGeoFeatureGroup()
+
+def assert_graph(doc,source,expected,name,selected=True):
+    result=result_for(doc,source)
+    input_owner=result.LinkedObject.Base.LinkedObject if result is not None else None
+    bridge=occurrence_bridge(input_owner,source)
+    native_source=input_owner==source or bridge is not None
+    check(name+' creates a native associative result',result is not None and result.TypeId=='App::Link' and
+          result.LinkedObject.TypeId=='Part::Scale' and result.LinkedObject.Base.TypeId=='App::Link' and
+          native_source)
+    if input_owner.TypeId==COMPOUND_TYPE:
+        check(name+' normalizer uses the native non-hiding Part view provider',input_owner.ViewObject.TypeId=='PartGui::ViewProviderPartExt')
+        check(name+' uses a durable native occurrence bridge in the helper coordinate system',bridge_is_durable(bridge,input_owner,source))
+    check(name+' keeps native local graph dependencies within the result coordinate system',graph_has_native_local_scopes(result))
+    actual=world_shape(result);matches=same_shape(actual,expected)
+    if not matches:
+        report.setdefault('geometry_failures',[]).append({'case':name,'source':source.Name,'output':result.Name,
+              'measurements':geometry_compare_facts(actual,expected),'native_graph':graph_coordinate_facts(source,result)})
+        checkpoint('geometry failure: '+name)
+    check(name+' matches the complete affine geometry',matches)
+    if selected:check(name+' selection follows the new result',result in Gui.Selection.getSelection())
+    return result
+def cold_reopen():
+    warm=Path(os.environ['OM9_ASSOCIATIVE_COLD'])
+    manifest=json.loads((warm/'cold-manifest.json').read_text())
+    doc=App.openDocument(str(warm/'associative-scale.FCStd'))
+    try:
+        verify_cold_reopen(doc,manifest)
+    finally:
+        # This fixture owns only its newly reopened document. Close it even
+        # after an assertion, so an isolated failed run cannot prompt on quit.
+        App.closeDocument(doc.Name)
+
+def verify_cold_reopen(doc,manifest):
+    for obj in doc.Objects:obj.touch()
+    doc.recompute()
+    check('cold graph uses registered native FreeCAD and OM9 Compound types',all(obj.TypeId in
+          ('App::FeaturePython','Part::Box','Part::Sphere','Part::Cylinder','Part::Cut','App::Part','App::DocumentObjectGroup',
+           'App::Link','App::Origin','App::Point','App::Line','App::Plane','Part::Scale','Part::Compound',COMPOUND_TYPE,'PartDesign::Body','PartDesign::AdditiveBox','PartDesign::ShapeBinder','PartDesign::SubShapeBinder') for obj in doc.Objects))
+    for item in manifest:
+        source=doc.getObject(item['source']);result=doc.getObject(item['output'])
+        check('cold '+item['output']+' retains original source association',result.OM9GumballScaleSource==source)
+        input_owner=result.LinkedObject.Base.LinkedObject
+        if input_owner.TypeId==COMPOUND_TYPE:
+            check('cold '+item['output']+' normalizer retains the native non-hiding Part view provider',input_owner.ViewObject.TypeId=='PartGui::ViewProviderPartExt')
+            check('cold '+item['output']+' retains its durable native occurrence bridge',bridge_is_durable(occurrence_bridge(input_owner,source),input_owner,source))
+        check('cold '+item['output']+' retains native local dependency coordinate systems',graph_has_native_local_scopes(result))
+        expected=world_shape(source).transformGeometry(App.Matrix(*item['matrix']))
+        check('cold '+item['output']+' recomputes the affine result',same_shape(world_shape(result),expected))
+        if 'appearance' in item:
+            actual_materials=list(result.LinkedObject.ViewObject.ShapeAppearance)
+            report.setdefault('cold_appearance_diagnostics',[]).append({'source':source.Name,'output':result.Name,
+                  'expected_diffuse':item['appearance'],'expected_materials':item.get('material_properties'),
+                  'actual_count':len(actual_materials),'expected_count':len(item['appearance']),
+                  'actual_materials':[material_facts(material) for material in actual_materials],
+                  'source_materials':[material_facts(material) for material in source.ViewObject.ShapeAppearance],
+                  'diffuse_component_deltas':[[a-b for a,b in zip(material.DiffuseColor,color)] for material,color in zip(actual_materials,item['appearance'])]})
+            checkpoint('cold appearance comparison '+item['output'])
+            check('cold '+item['output']+' retains per-face native appearance',
+                  all(abs(a-b)<1e-6 for actual,expected_color in zip(result.LinkedObject.ViewObject.ShapeAppearance,item['appearance'])
+                      for a,b in zip(actual.DiffuseColor,expected_color)) and len(result.LinkedObject.ViewObject.ShapeAppearance)==len(item['appearance']))
+        for consumer_name,subelement in item.get('legacy_consumers',[]):
+            consumer=doc.getObject(consumer_name);target=consumer.Support[0][0]
+            check('cold '+consumer_name+' native Part owner retains the non-hiding Part view provider',target.ViewObject.TypeId=='PartGui::ViewProviderPartExt')
+            check('cold '+consumer_name+' follows native Part result with unchanged subelement',target.TypeId==COMPOUND_TYPE and target.Links==[result] and
+                  same_shape(consumer.Shape,source.Shape.getElement(subelement).transformGeometry(App.Matrix(*item['matrix']))))
+        for consumer_name in item.get('scalar_consumers',[]):
+            consumer=doc.getObject(consumer_name)
+            check('cold '+consumer_name+' retains the original scalar definition reference',
+                  consumer.TypeId=='Part::Box' and consumer.ExpressionEngine==[('Length',source.Name+'.Length')] and
+                  consumer.Length.Value==source.Length.Value and source in consumer.OutList and result not in consumer.OutList)
+    driver=doc.getObject('Driver');driver.Dimension=7;doc.recompute()
+    item=manifest[0];source=doc.getObject(item['source']);result=doc.getObject(item['output'])
+    check('cold expression driver edits remain associative',source.Length.Value==7 and
+          same_shape(world_shape(result),world_shape(source).transformGeometry(App.Matrix(*item['matrix']))))
+    for consumer_name in item.get('scalar_consumers',[]):
+        consumer=doc.getObject(consumer_name)
+        check('cold '+consumer_name+' follows future native dimension edits independently of Scale',
+              consumer.Length.Value==7 and consumer.ExpressionEngine==[('Length',source.Name+'.Length')] and source in consumer.OutList)
+    for consumer_name,subelement in item.get('legacy_consumers',[]):
+        consumer=doc.getObject(consumer_name)
+        check('cold '+consumer_name+' propagates subsequent expression driver edits',same_shape(consumer.Shape,
+              source.Shape.getElement(subelement).transformGeometry(App.Matrix(*item['matrix']))))
+def run():
+    doc=None
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__
+        if os.environ.get('OM9_ASSOCIATIVE_COLD'):
+            cold_reopen();report['ok']=True;return
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('GumballAssociative');doc.UndoMode=1
+        ui=GumballUI(native);ui.command('Gumball On');ui.command('GumballAlignment World')
+        area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
+        area.setActiveSubWindow(next(sub for sub in area.subWindowList() if sub.widget().property('om9ViewSlot')==1))
+        ui.settle();Gui.activeDocument().activeView().viewAxonometric()
+        driver=doc.addObject('App::FeaturePython','Driver');driver.addProperty('App::PropertyLength','Dimension');driver.Dimension=3
+        source=doc.addObject('Part::Box','ExpressionSource');source.setExpression('Length','Driver.Dimension')
+        source.Width=4;source.Height=5
+        source.Placement=App.Placement(App.Vector(7,-2,4),App.Rotation(App.Vector(1,2,3),29))
+        materials=[]
+        for index in range(6):
+            # Native FCStd stores each color channel as an 8-bit value.
+            # Start from six distinct values in that format so warm/cold
+            # appearance checks retain their strict tolerance.
+            material=App.Material();material.DiffuseColor=((26+25*index)/255.,(153-13*index)/255.,(51+13*index)/255.,1.);materials.append(material)
+        source.ViewObject.ShapeAppearance=materials
+        original_colors=[list(material.DiffuseColor) for material in source.ViewObject.ShapeAppearance]
+        original_materials=[material_facts(material) for material in source.ViewObject.ShapeAppearance]
+        tool=doc.addObject('Part::Sphere','Tool');tool.Radius=.3;tool.Placement.Base=App.Vector(20,20,20)
+        dependent=doc.addObject('Part::Cut','Dependent');dependent.Base=source;dependent.Tool=tool
+        face=doc.addObject('PartDesign::SubShapeBinder','FaceConsumer');face.Support=[(source,['Face1'])]
+        edge=doc.addObject('PartDesign::SubShapeBinder','EdgeConsumer');edge.Support=[(source,['Edge1'])]
+        legacy_face=doc.addObject('PartDesign::ShapeBinder','LegacyFaceConsumer');legacy_face.Support=[(source,['Face2'])]
+        legacy_edge=doc.addObject('PartDesign::ShapeBinder','LegacyEdgeConsumer');legacy_edge.Support=[(source,['Edge5'])]
+        scalar_consumer=doc.addObject('Part::Box','UnselectedScalarConsumer');scalar_consumer.setExpression('Length','ExpressionSource.Length')
+        scalar_consumer.Width=2;scalar_consumer.Height=3
+        report['native_support_flags']=[{'owner':obj.Name,'owner_type':obj.TypeId,
+              'property_type':obj.getTypeIdOfProperty('Support'),'static_type':obj.getTypeOfProperty('Support'),
+              'editor_mode':obj.getEditorMode('Support'),'status':obj.getPropertyStatus('Support')} for obj in (face,edge,legacy_face,legacy_edge)]
+        doc.recompute();tool.Visibility=False;dependent.Visibility=False;face.Visibility=False;edge.Visibility=False;legacy_face.Visibility=False;legacy_edge.Visibility=False;scalar_consumer.Visibility=False;source.Visibility=True
+        original=(source.Placement,source.ExpressionEngine,source.Length.Value,source.Width.Value,source.Height.Value)
+        ui.select(source);matrix=affine(native.gumballState()['frame']);expected=world_shape(source).transformGeometry(matrix)
+        report['before_first_state']=native.gumballState();report['before_first_handles']=native.gumballHandles()
+        undo=doc.UndoCount;names={obj.Name for obj in doc.Objects}
+        ui.numeric('ScaleX','2');doc.recompute()
+        report['first_state']=native.gumballState();report['transcript']=ui.transcript()
+        result=assert_graph(doc,source,expected,'rotated expression owner')
+        check('original native type parameters Placement and expressions stay intact',source.TypeId=='Part::Box' and
+              (source.Placement,source.ExpressionEngine,source.Length.Value,source.Width.Value,source.Height.Value)==original)
+        check('unselected scalar expression consumer continues reading the original native definition',
+              scalar_consumer.Length.Value==3 and scalar_consumer.ExpressionEngine==[('Length','ExpressionSource.Length')] and
+              source in scalar_consumer.OutList and result not in scalar_consumer.OutList)
+        check('visible associative result inherits original per-face materials',len(result.LinkedObject.ViewObject.ShapeAppearance)==len(original_colors) and
+              all(abs(a-b)<1e-6 for material,color in zip(result.LinkedObject.ViewObject.ShapeAppearance,original_colors) for a,b in zip(material.DiffuseColor,color)))
+        check('whole geometry and Face1 Edge1 dependencies consume the new result',dependent.Base==result and
+              face.Support[0][0]==result and edge.Support[0][0]==result and
+              same_shape(face.Shape,source.Shape.getElement('Face1').transformGeometry(matrix)) and
+              same_shape(edge.Shape,source.Shape.getElement('Edge1').transformGeometry(matrix)))
+        check('native Support reroute preserves its editor-only ReadOnly flag',all('ReadOnly' in obj.getPropertyStatus('Support') and
+              obj.getTypeOfProperty('Support')==[] and 'Immutable' not in obj.getPropertyStatus('Support') for obj in (face,edge)))
+        legacy_target=legacy_face.Support[0][0]
+        check('legacy native Part result owner uses the non-hiding Part view provider',legacy_target.ViewObject.TypeId=='PartGui::ViewProviderPartExt')
+        check('legacy Face2 Edge5 consumers follow a native Part owner of the visible result',legacy_target.TypeId==COMPOUND_TYPE and
+              legacy_target.Links==[result] and legacy_edge.Support[0][0]==legacy_target and
+              same_shape(legacy_face.Shape,source.Shape.getElement('Face2').transformGeometry(matrix)) and
+              same_shape(legacy_edge.Shape,source.Shape.getElement('Edge5').transformGeometry(matrix)))
+        check('one gesture creates exactly one Undo entry',doc.UndoCount==undo+1)
+        output_name=result.Name;created={obj.Name for obj in doc.Objects}-names
+        doc.undo();doc.recompute();ui.settle()
+        check('Undo removes the native graph and restores all incoming references',all(doc.getObject(name) is None for name in created) and
+              dependent.Base==source and face.Support[0][0]==source and edge.Support[0][0]==source and legacy_face.Support[0][0]==source and legacy_edge.Support[0][0]==source and source.Visibility)
+        doc.redo();doc.recompute();ui.settle();result=doc.getObject(output_name)
+        check('Redo restores the graph geometry and source owner',result.OM9GumballScaleSource==source and same_shape(world_shape(result),expected))
+        check_compound_redo_provider(doc,created,'legacy result owner','native-compound-redo-legacy.FCStd')
+        for _ in range(3):
+            for name in created:doc.getObject(name).touch()
+            doc.recompute()
+        check('repeated recompute applies the Scale exactly once',same_shape(world_shape(result),expected))
+        driver.Dimension=6;doc.recompute()
+        check('future expression driver changes propagate without baking',source.Length.Value==6 and
+              same_shape(world_shape(result),world_shape(source).transformGeometry(matrix)))
+        check('future native dimensions propagate independently to unselected scalar expression consumers',
+              scalar_consumer.Length.Value==6 and scalar_consumer.ExpressionEngine==[('Length','ExpressionSource.Length')] and source in scalar_consumer.OutList)
+        check('legacy consumers propagate future driver changes through their native result owner',
+              same_shape(legacy_face.Shape,source.Shape.getElement('Face2').transformGeometry(matrix)) and
+              same_shape(legacy_edge.Shape,source.Shape.getElement('Edge5').transformGeometry(matrix)))
+        manifest=[{'source':source.Name,'output':result.Name,'matrix':list(matrix.A),'appearance':original_colors,'material_properties':original_materials,
+                   'legacy_consumers':[(legacy_face.Name,'Face2'),(legacy_edge.Name,'Edge5')],'scalar_consumers':[scalar_consumer.Name]}]
+        # A circular primitive needs the general result for an elliptical base.
+        cylinder=doc.addObject('Part::Cylinder','Cylinder');cylinder.Radius=3;cylinder.Height=4;doc.recompute();ui.select(cylinder)
+        cylinder_matrix=affine(native.gumballState()['frame']);expected=world_shape(cylinder).transformGeometry(cylinder_matrix)
+        ui.numeric('ScaleX','-2');doc.recompute()
+        # The negative value uses the same frame with a signed X factor.
+        cylinder_matrix=affine(native.gumballState()['frame'],factor=-2) if result_for(doc,cylinder) is None else cylinder_matrix
+        result_cylinder=result_for(doc,cylinder)
+        check('elliptical primitive preserves its circular native definition',result_cylinder is not None and cylinder.Radius.Value==3 and cylinder.Height.Value==4)
+        # Use the persisted operation matrix because the result gets a new idle pivot.
+        cylinder_matrix=App.Matrix(*json.loads(result_cylinder.OM9GumballReport)['matrix'])
+        assert_graph(doc,cylinder,world_shape(cylinder).transformGeometry(cylinder_matrix),'signed elliptical Cylinder')
+        manifest.append({'source':cylinder.Name,'output':result_cylinder.Name,'matrix':list(cylinder_matrix.A)})
+        # Two nested Parts plus an ordinary group retain one owning coordinate system.
+        outer=doc.addObject('App::Part','Outer');inner=doc.addObject('App::Part','Inner');outer.addObject(inner)
+        outer.Placement=App.Placement(App.Vector(11,13,-5),App.Rotation(App.Vector(1,3,2),17))
+        inner.Placement=App.Placement(App.Vector(-7,2,3),App.Rotation(App.Vector(3,1,-2),31))
+        nested=doc.addObject('Part::Box','NestedSource');nested.Length=3;nested.Width=4;nested.Height=5
+        nested.Placement=App.Placement(App.Vector(2,-3,7),App.Rotation(App.Vector(2,1,3),23));inner.addObject(nested)
+        group=doc.addObject('App::DocumentObjectGroup','OrdinaryGroup');inner.addObject(group);group.addObject(nested);doc.recompute()
+        check('nested fixture retains one native coordinate system and ordinary group membership',
+              group in inner.Group and nested in inner.Group and nested in group.Group and nested.getParentGeoFeatureGroup()==inner)
+        ui.select(nested)
+        nested_matrix=affine(native.gumballState()['frame']);nested_baseline=world_shape(nested);expected=nested_baseline.transformGeometry(nested_matrix)
+        report['nested_before']={'baseline':shape_facts(nested_baseline),'expected':shape_facts(expected),'objects':graph_coordinate_facts(nested,None)}
+        ui.numeric('ScaleX','2');report['nested_after_gesture']=graph_coordinate_facts(nested,result_for(doc,nested))
+        doc.recompute();report['nested_after_recompute']=graph_coordinate_facts(nested,result_for(doc,nested))
+        nested_result=assert_graph(doc,nested,expected,'nested Parts owner')
+        check('result and helpers remain in the native owning Part',nested_result in inner.Group and
+              nested_result.LinkedObject in inner.Group and nested_result.LinkedObject.Base in inner.Group and nested_result in group.Group)
+        manifest.append({'source':nested.Name,'output':nested_result.Name,'matrix':list(nested_matrix.A)})
+        # Alt adds a derived copy while the original source and consumers remain.
+        alt_source=doc.addObject('Part::Box','AltSource');alt_source.Placement.Rotation=App.Rotation(App.Vector(1,2,3),29)
+        doc.recompute();ui.select(alt_source);alt_matrix=affine(native.gumballState()['frame']);alt_expected=world_shape(alt_source).transformGeometry(alt_matrix)
+        baseline=world_shape(alt_source);ui.numeric('ScaleX','2',QtCore.Qt.AltModifier);doc.recompute()
+        alt_result=assert_graph(doc,alt_source,alt_expected,'Alt associative copy')
+        check('Alt leaves its original owner visible and unchanged',alt_source.Visibility and same_shape(world_shape(alt_source),baseline))
+        manifest.append({'source':alt_source.Name,'output':alt_result.Name,'matrix':list(alt_matrix.A)})
+        # Source occurrence scaling can change later, including a rigid transition.
+        definition=doc.addObject('Part::Box','OccurrenceDefinition');definition.Length=3;definition.Width=4;definition.Height=5
+        definition.Placement=App.Placement(App.Vector(2,3,4),App.Rotation(App.Vector(1,2,3),23))
+        occurrence=doc.addObject('App::Link','ScaledOccurrence');occurrence.setLink(definition)
+        occurrence.LinkTransform=True;occurrence.ScaleVector=App.Vector(2,1.5,.5)
+        occurrence.LinkPlacement=App.Placement(App.Vector(7,-2,4),App.Rotation(App.Vector(3,2,1),29))
+        occurrence_face=doc.addObject('PartDesign::SubShapeBinder','OccurrenceFaceConsumer');occurrence_face.Support=[(occurrence,['Face1'])]
+        occurrence_edge=doc.addObject('PartDesign::SubShapeBinder','OccurrenceEdgeConsumer');occurrence_edge.Support=[(occurrence,['Edge1'])]
+        doc.recompute();definition.Visibility=False;occurrence_face.Visibility=False;occurrence_edge.Visibility=False;occurrence.Visibility=True;ui.select(occurrence)
+        occurrence_matrix=affine(native.gumballState()['frame']);expected=world_shape(occurrence).transformGeometry(occurrence_matrix)
+        occurrence_face_expected=Part.getShape(occurrence).getElement('Face1').transformGeometry(occurrence_matrix)
+        occurrence_edge_expected=Part.getShape(occurrence).getElement('Edge1').transformGeometry(occurrence_matrix)
+        timeline=[];report['occurrence_event_timeline']=timeline
+        timeline_path=out/'occurrence-timeline.jsonl'
+        timeline_path.write_text('',encoding='utf-8')
+        def log_event(kind,**values):
+            if len(timeline)>=2000:return
+            event={'order':len(timeline)+1,'kind':kind,**values};timeline.append(event)
+            with timeline_path.open('a',encoding='utf-8') as stream:stream.write(json.dumps(event)+'\n')
+        def track_occurrence(obj):return obj.Name==definition.Name or obj.Name.startswith(occurrence.Name)
+        def append_event(kind,obj,key=''):
+            if not track_occurrence(obj):return
+            log_event(kind+'_enter',object=obj.Name,key=key)
+            event={'object':obj.Name,'type':obj.TypeId,'key':key}
+            if 'Visibility' in obj.PropertiesList:event['model_visibility']=obj.Visibility
+            if getattr(obj,'ViewObject',None) is not None:event['view_visibility']=obj.ViewObject.Visibility
+            if key=='Links':event['targets']=[target.Name for target in obj.Links]
+            elif key=='LinkedObject':event['target']=getattr(getattr(obj,'LinkedObject',None),'Name',None)
+            elif key=='Base':event['target']=getattr(getattr(obj,'Base',None),'Name',None)
+            elif key in ('Placement','LinkPlacement'):event['value']=list(getattr(obj,key).toMatrix().A)
+            log_event(kind,**event)
+        # Native GUI property notifications can occur during a view provider
+        # constructor, before attach. Its Python Object getter dereferences
+        # the not-yet-attached object without a null check. Only resolve
+        # providers registered from existing objects or the post-attach
+        # Created signal; retain all actual published-owner notifications.
+        view_owners={id(obj.ViewObject):(obj.ViewObject,obj) for obj in doc.Objects if obj.ViewObject is not None}
+        class OccurrenceAppTimeline:
+            def slotCreatedObject(self,obj):append_event('app_created',obj)
+            def slotChangedObject(self,obj,prop):append_event('app_changed',obj,prop)
+            def slotDeletedObject(self,obj):append_event('app_deleted',obj)
+        class OccurrenceGuiTimeline:
+            def slotCreatedObject(self,view):
+                log_event('gui_created_enter',view_id=id(view),wrapper_type=type(view).__name__)
+                obj=view.Object;view_owners[id(view)]=(view,obj);append_event('gui_created',obj)
+            def slotChangedObject(self,view,prop):
+                log_event('gui_changed_enter',view_id=id(view),wrapper_type=type(view).__name__,key=prop)
+                registered=view_owners.get(id(view))
+                if registered is not None and registered[0] is view:append_event('gui_changed',registered[1],prop)
+                else:log_event('gui_changed_before_registration',view_id=id(view),key=prop)
+            def slotDeletedObject(self,view):
+                log_event('gui_deleted',view_id=id(view));view_owners.pop(id(view),None)
+        app_timeline=OccurrenceAppTimeline();gui_timeline=OccurrenceGuiTimeline()
+        report['occurrence_before_visibility']={'source':occurrence.Visibility,'source_view':occurrence.ViewObject.Visibility,
+              'definition':definition.Visibility,'definition_view':definition.ViewObject.Visibility}
+        App.addDocumentObserver(app_timeline);Gui.addDocumentObserver(gui_timeline)
+        try:
+            checkpoint('occurrence Scale before numeric')
+            ui.numeric('ScaleX','2')
+            checkpoint('occurrence Scale numeric returned')
+            report['occurrence_after_gesture']={'state':native.gumballState(),'source_visibility':occurrence.Visibility,
+                  'source_view_visibility':occurrence.ViewObject.Visibility,'definition_visibility':definition.Visibility,
+                  'definition_view_visibility':definition.ViewObject.Visibility,'objects':graph_coordinate_facts(occurrence,result_for(doc,occurrence))}
+        finally:
+            checkpoint('occurrence Scale before observer removal')
+            App.removeDocumentObserver(app_timeline);Gui.removeDocumentObserver(gui_timeline)
+            checkpoint('occurrence Scale observers removed')
+        doc.recompute();occurrence_result=assert_graph(doc,occurrence,expected,'scaled Link requiring shear')
+        check('normalized scaled Link preserves incoming Face1 Edge1 topology references',occurrence_face.Support[0][0]==occurrence_result and
+              occurrence_edge.Support[0][0]==occurrence_result and same_shape(occurrence_face.Shape,occurrence_face_expected) and same_shape(occurrence_edge.Shape,occurrence_edge_expected))
+        for vector in (App.Vector(1,1,1),App.Vector(1+1e-9/3,1,1),App.Vector(2,2,2),App.Vector(2,1,.5)):
+            occurrence.ScaleVector=vector;doc.recompute()
+            check('source ScaleVector '+str(vector)+' remains associative',same_shape(world_shape(occurrence_result),
+                  world_shape(occurrence).transformGeometry(occurrence_matrix)))
+        manifest.append({'source':occurrence.Name,'output':occurrence_result.Name,'matrix':list(occurrence_matrix.A)})
+        # Existing self-coupled dimensions keep their original formulas.
+        coupled=doc.addObject('Part::Box','CoupledDimensions');coupled.Length=8;coupled.setExpression('Width','Length / 2');coupled.Height=3
+        doc.recompute();ui.select(coupled);coupled_matrix=affine(native.gumballState()['frame']);expected=world_shape(coupled).transformGeometry(coupled_matrix)
+        ui.numeric('ScaleX','2');doc.recompute();coupled_result=assert_graph(doc,coupled,expected,'coupled expression dimensions')
+        check('coupled dimensions are neither overwritten nor accidentally multiplied twice',coupled.Length.Value==8 and
+              coupled.Width.Value==4 and coupled.ExpressionEngine==[('Width','Length / 2')])
+        manifest.append({'source':coupled.Name,'output':coupled_result.Name,'matrix':list(coupled_matrix.A)})
+        # Selected definitions connected by expressions transform independently
+        # once; the original expression graph remains on its original owners.
+        batch_a=doc.addObject('Part::Box','BatchA');batch_a.Length=3;batch_a.Width=4;batch_a.Height=5
+        batch_b=doc.addObject('Part::Box','BatchB');batch_b.setExpression('Length','BatchA.Length');batch_b.Width=2;batch_b.Height=4
+        batch_b.Placement.Base=App.Vector(13,0,0)
+        shared=doc.addObject('PartDesign::SubShapeBinder','SharedFaceConsumer');shared.Support=[(batch_a,['Face1']),(batch_b,['Face1'])]
+        doc.recompute();shared.Visibility=False;batch_a.Visibility=True;batch_b.Visibility=True
+        batch_original_support=list(shared.Support)
+        def transformed_batch_support(a_output,b_output):
+            return [(a_output if target==batch_a else b_output if target==batch_b else target,subnames)
+                    for target,subnames in batch_original_support]
+        original_batch=(batch_a.Length.Value,batch_b.Length.Value,batch_b.ExpressionEngine,batch_a.Placement,batch_b.Placement)
+        ui.select(batch_a,batch_b);batch_matrix=affine(native.gumballState()['frame'])
+        expected_a=world_shape(batch_a).transformGeometry(batch_matrix);expected_b=world_shape(batch_b).transformGeometry(batch_matrix)
+        names={obj.Name for obj in doc.Objects};undo=doc.UndoCount
+        report['batch_before']={'undo_count':undo,'redo_count':doc.RedoCount,'undo_names':list(doc.UndoNames),
+              'configured_max_undo':App.ParamGet('User parameter:BaseApp/Preferences/Document').GetInt('MaxUndoSize',20),
+              'support':[[entry[0].Name,entry[0].ID,list(entry[1])] for entry in shared.Support],
+              'support_type':shared.getTypeIdOfProperty('Support'),'state':list(shared.State),'valid':shared.Shape.isValid()}
+        checkpoint('batch before numeric')
+        ui.numeric('ScaleX','2');doc.recompute()
+        batch_a_result=assert_graph(doc,batch_a,expected_a,'selected expression source')
+        batch_b_result=assert_graph(doc,batch_b,expected_b,'selected expression dependent')
+        batch_expected_support=transformed_batch_support(batch_a_result,batch_b_result)
+        check('selected connected definitions retain original dimensions expressions and Placements',
+              (batch_a.Length.Value,batch_b.Length.Value,batch_b.ExpressionEngine,batch_a.Placement,batch_b.Placement)==original_batch and batch_a in batch_b.OutList)
+        report['batch_after']={'undo_count':doc.UndoCount,'redo_count':doc.RedoCount,'undo_names':list(doc.UndoNames),
+              'expected_outputs':[target.Name for target,subnames in batch_expected_support],
+              'support':[[entry[0].Name,entry[0].ID,list(entry[1])] for entry in shared.Support],
+              'state':list(shared.State),'valid':shared.Shape.isValid(),
+              'support_matches':shared.Support==batch_expected_support,
+              'undo_increased_once':doc.UndoCount==undo+1}
+        checkpoint('batch before shared consumer gate')
+        check('shared external subelement consumer reroutes both selected sources in one transaction',
+              shared.Support==batch_expected_support and shared.Shape.isValid() and doc.UndoCount==undo+1)
+        check('shared consumer faces transform once',same_shape(shared.Shape,
+              Part.makeCompound([batch_a.Shape.getElement('Face1').transformGeometry(batch_matrix),batch_b.Shape.getElement('Face1').transformGeometry(batch_matrix)])))
+        created={obj.Name for obj in doc.Objects}-names;batch_outputs=(batch_a_result.Name,batch_b_result.Name)
+        doc.undo();doc.recompute();ui.settle()
+        check('batch Undo removes both graphs and restores shared Support',all(doc.getObject(name) is None for name in created) and
+              shared.Support==batch_original_support and batch_a.Visibility and batch_b.Visibility)
+        doc.redo();doc.recompute();ui.settle();batch_a_result,batch_b_result=[doc.getObject(name) for name in batch_outputs]
+        check('batch Redo transforms each selected definition exactly once',same_shape(world_shape(batch_a_result),expected_a) and
+              same_shape(world_shape(batch_b_result),expected_b) and shared.Support==transformed_batch_support(batch_a_result,batch_b_result))
+        for original,output in ((batch_a,batch_a_result),(batch_b,batch_b_result)):
+            manifest.append({'source':original.Name,'output':output.Name,'matrix':list(batch_matrix.A)})
+        # A selected native source plus its Boolean consumer retain their
+        # private definition dependency and each publish one scaled result.
+        cut_source=doc.addObject('Part::Box','SelectedCutSource');cut_source.Length=3;cut_source.Width=4;cut_source.Height=5
+        cut_tool=doc.addObject('Part::Sphere','SelectedCutTool');cut_tool.Radius=.5;cut_tool.Placement.Base=App.Vector(1,1,1)
+        cut=doc.addObject('Part::Cut','SelectedCut');cut.Base=cut_source;cut.Tool=cut_tool
+        doc.recompute();cut_tool.Visibility=False;cut_source.Visibility=True;cut.Visibility=True
+        report['selected_cut_before']={'source_id':cut_source.ID,'source_name':cut_source.Name,
+              'source_dimensions':[cut_source.Length.Value,cut_source.Width.Value,cut_source.Height.Value],
+              'cut_id':cut.ID,'base_id':cut.Base.ID,'base_name':cut.Base.Name,'tool_id':cut.Tool.ID,'tool_name':cut.Tool.Name,
+              'cut_shape':shape_facts(world_shape(cut))}
+        ui.select(cut_source,cut);cut_matrix=affine(native.gumballState()['frame'])
+        cut_source_expected=world_shape(cut_source).transformGeometry(cut_matrix);cut_expected=world_shape(cut).transformGeometry(cut_matrix)
+        ui.numeric('ScaleX','2');doc.recompute()
+        report['selected_cut_after']={'source_id':cut_source.ID,'source_name':cut_source.Name,
+              'source_dimensions':[cut_source.Length.Value,cut_source.Width.Value,cut_source.Height.Value],
+              'cut_id':cut.ID,'base_id':cut.Base.ID,'base_name':cut.Base.Name,'tool_id':cut.Tool.ID,'tool_name':cut.Tool.Name,
+              'cut_state':list(cut.State),'cut_out_list':[obj.Name for obj in cut.OutList],'cut_shape':shape_facts(world_shape(cut))}
+        checkpoint('selected Cut after numeric')
+        cut_source_result=assert_graph(doc,cut_source,cut_source_expected,'selected Cut source')
+        cut_result=assert_graph(doc,cut,cut_expected,'selected Cut consumer')
+        actual_cut=world_shape(cut_result)
+        report['selected_cut_sampling_proof']=geometry_compare_facts(actual_cut,cut_expected)
+        check('native transformed Cut retains full closed-solid intersection coverage',closed_solid_equivalent(actual_cut,cut_expected))
+        shifted_x_cavity=Part.makeBox(3,4,5).cut(Part.makeSphere(.5,App.Vector(1.3,1,1))).transformGeometry(cut_matrix)
+        shifted_y_cavity=Part.makeBox(3,4,5).cut(Part.makeSphere(.5,App.Vector(1,1.3,1))).transformGeometry(cut_matrix)
+        missing_cavity=Part.makeBox(3,4,5).transformGeometry(cut_matrix)
+        report['cut_oracle_negative']={'shifted_x':geometry_compare_facts(shifted_x_cavity,cut_expected),
+              'shifted_y':geometry_compare_facts(shifted_y_cavity,cut_expected),'missing_cavity':shape_facts(missing_cavity)}
+        check('closed-solid oracle rejects shifted cavity despite identical outer bounds topology and measures',
+              topology_counts(shifted_y_cavity)==topology_counts(cut_expected) and matching_bounds(shifted_y_cavity,cut_expected) and
+              matching_measures(shifted_y_cavity,cut_expected) and not closed_solid_equivalent(shifted_y_cavity,cut_expected) and
+              not same_shape(shifted_y_cavity,cut_expected) and not same_shape(shifted_x_cavity,cut_expected))
+        check('closed-solid oracle rejects a missing cavity',not closed_solid_equivalent(missing_cavity,cut_expected) and not same_shape(missing_cavity,cut_expected))
+        check('selected Boolean definition remains connected to the original source',cut.Base==cut_source and cut.Tool==cut_tool and cut_source.Length.Value==3)
+        for original,output in ((cut_source,cut_source_result),(cut,cut_result)):
+            manifest.append({'source':original.Name,'output':output.Name,'matrix':list(cut_matrix.A)})
+        # Alt on an ordinary group and a nested Part creates private copied
+        # membership while preserving the complete original hierarchy.
+        for geo in (False,True):
+            copied_root=doc.addObject('App::Part' if geo else 'App::DocumentObjectGroup','AltNestedPart' if geo else 'AltOrdinaryGroup')
+            copied_parent=None;unselected_sibling=None;baseline_sibling=None
+            if geo:
+                copied_parent=doc.addObject('App::Part','AltOuterPart');copied_parent.addObject(copied_root)
+                copied_parent.Placement=App.Placement(App.Vector(7,-11,3),App.Rotation(App.Vector(2,3,1),19))
+                copied_root.Placement=App.Placement(App.Vector(-4,5,2),App.Rotation(App.Vector(3,1,2),31))
+                unselected_sibling=doc.addObject('Part::Box','AltUnselectedOuterSibling')
+                unselected_sibling.Length=2;unselected_sibling.Width=3;unselected_sibling.Height=4
+                unselected_sibling.Placement.Base=App.Vector(-8,1,0);copied_parent.addObject(unselected_sibling)
+            grouped_box=doc.addObject('Part::Box','AltGroupedBox');grouped_box.Length=3;grouped_box.Width=4;grouped_box.Height=5
+            grouped_box.Placement=App.Placement(App.Vector(1,2,3),App.Rotation(App.Vector(1,2,3),29))
+            grouped_cylinder=doc.addObject('Part::Cylinder','AltGroupedCylinder');grouped_cylinder.Radius=2;grouped_cylinder.Height=4
+            grouped_cylinder.Placement=App.Placement(App.Vector(11,2,3),App.Rotation(App.Vector(3,2,1),23))
+            copied_root.addObject(grouped_box);copied_root.addObject(grouped_cylinder);doc.recompute()
+            grouped_occurrence=None
+            if geo:
+                grouped_definition=doc.addObject('Part::Box','AltGroupedOccurrenceDefinition');grouped_definition.Length=3;grouped_definition.Width=2;grouped_definition.Height=4
+                grouped_definition.Placement=App.Placement(App.Vector(2,-1,3),App.Rotation(App.Vector(1,2,3),17))
+                grouped_occurrence=doc.addObject('App::Link','AltGroupedOccurrence');grouped_occurrence.setLink(grouped_definition)
+                grouped_occurrence.LinkTransform=True;grouped_occurrence.ScaleVector=App.Vector(2,1.5,.5)
+                grouped_occurrence.LinkPlacement=App.Placement(App.Vector(7,-2,3),App.Rotation(App.Vector(3,2,1),29))
+                copied_root.addObject(grouped_occurrence);doc.recompute();grouped_definition.Visibility=False
+            group_diagnostic={'geo':geo,'initial_visibility':{'root':copied_root.Visibility,'box':grouped_box.Visibility,
+                  'cylinder':grouped_cylinder.Visibility,'occurrence':grouped_occurrence.Visibility if grouped_occurrence is not None else None}}
+            copied_root.Visibility=True
+            if copied_parent is not None:copied_parent.Visibility=True
+            grouped_box.Visibility=True;grouped_cylinder.Visibility=True
+            if grouped_occurrence is not None:grouped_occurrence.Visibility=True
+            original_members=list(copied_root.Group);baseline_box=world_shape(grouped_box);baseline_cylinder=world_shape(grouped_cylinder)
+            baseline_occurrence=world_shape(grouped_occurrence) if grouped_occurrence is not None else None
+            if unselected_sibling is not None:baseline_sibling=world_shape(unselected_sibling)
+            group_diagnostic['before']={'root':[copied_root.Name,copied_root.ID],
+                  'members':[[obj.Name,obj.ID] for obj in original_members],'visibility':{'root':copied_root.Visibility,'box':grouped_box.Visibility,'cylinder':grouped_cylinder.Visibility},
+                  'parent':None if copied_parent is None else {'name':copied_parent.Name,'id':copied_parent.ID,'placement':list(copied_parent.Placement.toMatrix().A),
+                        'members':[[obj.Name,obj.ID] for obj in copied_parent.Group]},
+                  'box':shape_facts(baseline_box),'cylinder':shape_facts(baseline_cylinder)}
+            report.setdefault('alt_group_diagnostics',[]).append(group_diagnostic)
+            ui.select(copied_root);group_matrix=affine(native.gumballState()['frame']);names={obj.Name for obj in doc.Objects};undo=doc.UndoCount
+            group_diagnostic['before'].update({'undo':undo,'redo':doc.RedoCount,'selection':[[obj.Name,obj.ID] for obj in Gui.Selection.getSelection()]})
+            no_resolve=Gui.Selection.getSelectionEx(doc.Name,0)
+            group_diagnostic['before']['selection_no_resolve']=[{'object':entry.ObjectName,'subnames':list(entry.SubElementNames)} for entry in no_resolve]
+            if geo:
+                check('nested Part native selection identifies the child through its unselected outer owner',len(no_resolve)==1 and
+                      no_resolve[0].Object==copied_parent and list(no_resolve[0].SubElementNames)==[copied_root.Name+'.'] and Gui.Selection.getSelection()==[copied_root])
+            checkpoint('Alt group before numeric '+str(geo))
+            ui.numeric('ScaleX','2',QtCore.Qt.AltModifier)
+            group_diagnostic['immediate_after']={'state':native.gumballState(),'undo':doc.UndoCount,'redo':doc.RedoCount,
+                  'visibility':{'root':copied_root.Visibility,'box':grouped_box.Visibility,'cylinder':grouped_cylinder.Visibility},
+                  'members':[[obj.Name,obj.ID] for obj in copied_root.Group]}
+            checkpoint('Alt group numeric returned '+str(geo));doc.recompute()
+            group_copy=next(obj for obj in Gui.Selection.getSelection() if obj.TypeId==copied_root.TypeId and obj!=copied_root)
+            box_copy=assert_graph(doc,grouped_box,baseline_box.transformGeometry(group_matrix),'Alt grouped rotated Box',False)
+            cylinder_copy=assert_graph(doc,grouped_cylinder,baseline_cylinder.transformGeometry(group_matrix),'Alt grouped rotated Cylinder',False)
+            occurrence_copy=assert_graph(doc,grouped_occurrence,baseline_occurrence.transformGeometry(group_matrix),'Alt grouped scaled occurrence',False) if grouped_occurrence is not None else None
+            copy_parent=group_copy.getParentGeoFeatureGroup()
+            group_diagnostic['after']={'copy':[group_copy.Name,group_copy.ID],'copy_members':[[obj.Name,obj.ID] for obj in group_copy.Group],
+                  'copy_parent':None if copy_parent is None else {'name':copy_parent.Name,'id':copy_parent.ID,'members':[[obj.Name,obj.ID] for obj in copy_parent.Group]},
+                  'original_members':[[obj.Name,obj.ID] for obj in copied_root.Group],
+                  'box_output':[box_copy.Name,box_copy.ID],'cylinder_output':[cylinder_copy.Name,cylinder_copy.ID],
+                  'visibility':{'root':copied_root.Visibility,'box':grouped_box.Visibility,'cylinder':grouped_cylinder.Visibility},
+                  'undo':doc.UndoCount,'redo':doc.RedoCount,'undo_names':list(doc.UndoNames),
+                  'box':shape_facts(world_shape(grouped_box)),'cylinder':shape_facts(world_shape(grouped_cylinder)),
+                  'conditions':{'box_owned':box_copy in group_copy.Group,'cylinder_owned':cylinder_copy in group_copy.Group,
+                        'original_members_unchanged':copied_root.Group==original_members,'box_visible':grouped_box.Visibility,
+                        'cylinder_visible':grouped_cylinder.Visibility,'box_geometry_unchanged':same_shape(world_shape(grouped_box),baseline_box),
+                        'cylinder_geometry_unchanged':same_shape(world_shape(grouped_cylinder),baseline_cylinder),'one_undo':doc.UndoCount==undo+1}}
+            checkpoint('Alt group before hierarchy gate '+str(geo))
+            check('Alt copied hierarchy owns its results and preserves original members',box_copy in group_copy.Group and cylinder_copy in group_copy.Group and
+                  copied_root.Group==original_members and grouped_box.Visibility and grouped_cylinder.Visibility and
+                  same_shape(world_shape(grouped_box),baseline_box) and same_shape(world_shape(grouped_cylinder),baseline_cylinder) and doc.UndoCount==undo+1)
+            if geo:
+                check('Alt copied nested Part keeps every helper in the copied coordinate system',group_copy in copied_parent.Group and
+                      all(helper in group_copy.Group for output in (box_copy,cylinder_copy) for helper in (output.LinkedObject,output.LinkedObject.Base)))
+                original_parent=group_diagnostic['before']['parent']
+                check('Alt nested Part copies only the selected child under its unchanged outer parent',
+                      copied_parent.Name==original_parent['name'] and copied_parent.ID==original_parent['id'] and
+                      list(copied_parent.Placement.toMatrix().A)==original_parent['placement'] and
+                      all(doc.getObject(name) in copied_parent.Group and doc.getObject(name).ID==identity for name,identity in original_parent['members']) and
+                      len(copied_parent.Group)==len(original_parent['members'])+1 and group_copy.getParentGeoFeatureGroup()==copied_parent and
+                      unselected_sibling.getParentGeoFeatureGroup()==copied_parent and same_shape(world_shape(unselected_sibling),baseline_sibling) and
+                      (unselected_sibling.Length.Value,unselected_sibling.Width.Value,unselected_sibling.Height.Value)==(2,3,4))
+                normalizer=occurrence_copy.LinkedObject.Base.LinkedObject;bridge=occurrence_bridge(normalizer,grouped_occurrence)
+                check('Alt copied nested Part privately owns the native occurrence normalizer and preserves source geometry',
+                      occurrence_copy in group_copy.Group and occurrence_copy.LinkedObject in group_copy.Group and occurrence_copy.LinkedObject.Base in group_copy.Group and
+                      normalizer in group_copy.Group and bridge in group_copy.Group and bridge_is_durable(bridge,normalizer,grouped_occurrence) and
+                      grouped_occurrence.getParentGeoFeatureGroup()==copied_root and grouped_occurrence.Visibility and same_shape(world_shape(grouped_occurrence),baseline_occurrence))
+            created={obj.Name for obj in doc.Objects}-names;copy_names=(group_copy.Name,box_copy.Name,cylinder_copy.Name)
+            doc.undo();doc.recompute();ui.settle()
+            check('Alt group Undo removes only copied hierarchy and graphs',all(doc.getObject(name) is None for name in created) and copied_root.Group==original_members)
+            doc.redo();doc.recompute();ui.settle();group_copy,box_copy,cylinder_copy=[doc.getObject(name) for name in copy_names]
+            check('Alt group Redo restores private ownership and exact affine geometry',box_copy in group_copy.Group and cylinder_copy in group_copy.Group and
+                  same_shape(world_shape(box_copy),baseline_box.transformGeometry(group_matrix)) and same_shape(world_shape(cylinder_copy),baseline_cylinder.transformGeometry(group_matrix)))
+            if geo:check_compound_redo_provider(doc,created,'Alt nested occurrence normalizer','native-compound-redo-alt-group.FCStd')
+            for original,output in ((grouped_box,box_copy),(grouped_cylinder,cylinder_copy)):
+                manifest.append({'source':original.Name,'output':output.Name,'matrix':list(group_matrix.A)})
+            if grouped_occurrence is not None:
+                manifest.append({'source':grouped_occurrence.Name,'output':result_for(doc,grouped_occurrence).Name,'matrix':list(group_matrix.A)})
+        # Body is one result owner, rather than its Tip and Body being scaled
+        # twice. Native Move and Alt Move keep the Tip's private ownership.
+        body=doc.addObject('PartDesign::Body','NativeBody');tip=body.newObject('PartDesign::AdditiveBox','NativeBodyTip')
+        tip.Length=3;tip.Width=4;tip.Height=5;doc.recompute();body.Visibility=True
+        # A native Body-internal selection path is distinct from its final
+        # result or a face token on that result. Reject it at capture without
+        # creating a gesture or a transaction, then restore Body selection.
+        body_internal_before=(set(obj.Name for obj in doc.Objects),doc.UndoCount,doc.RedoCount,body.Placement,tip.Placement,body.Tip)
+        ui.select(tip);body_internal_state=native.gumballState();body_internal_selection=Gui.Selection.getSelectionEx(doc.Name,0)
+        report['body_internal_selection']={'state':body_internal_state,
+              'no_resolve':[{'object':entry.ObjectName,'subnames':list(entry.SubElementNames)} for entry in body_internal_selection]}
+        check('Body internal child path rejects before a transaction and requests its native final result',len(body_internal_selection)==1 and
+              body_internal_selection[0].Object==body and list(body_internal_selection[0].SubElementNames)==[tip.Name+'.'] and
+              'UnsupportedOwner' in body_internal_state['unresolved'] and 'Body final result' in body_internal_state['unresolved'] and
+              not native.gumballHandles() and (set(obj.Name for obj in doc.Objects),doc.UndoCount,doc.RedoCount,body.Placement,tip.Placement,body.Tip)==body_internal_before)
+        ui.select(body);baseline=world_shape(body);before_tip=(body.Tip,tip.Placement,tip.Length.Value)
+        ui.numeric('MoveX','5');doc.recompute()
+        check('Body Move transforms its actual Tip result once',body.Tip==tip and tip.getParentGeoFeatureGroup()==body and
+              tip.Placement==before_tip[1] and same_shape(world_shape(body),baseline.transformGeometry(App.Placement(App.Vector(5,0,0),App.Rotation()).toMatrix())))
+        doc.undo();doc.recompute();ui.settle();check('Body Move Undo restores final result and ownership',body.Tip==tip and same_shape(world_shape(body),baseline))
+        ui.select(body);names={obj.Name for obj in doc.Objects};ui.numeric('MoveX','5',QtCore.Qt.AltModifier);doc.recompute()
+        body_copy=next(obj for obj in Gui.Selection.getSelection() if obj.TypeId=='PartDesign::Body' and obj!=body)
+        check('Body Alt Move copies its private Tip definition',body_copy.Tip!=tip and body_copy.Tip in body_copy.Group and body.Tip==tip and
+              same_shape(world_shape(body),baseline) and same_shape(world_shape(body_copy),baseline.transformGeometry(App.Placement(App.Vector(5,0,0),App.Rotation()).toMatrix())))
+        created={obj.Name for obj in doc.Objects}-names;doc.undo();doc.recompute();ui.settle()
+        check('Body Alt Move Undo removes copied Body and its private Tip',all(doc.getObject(name) is None for name in created) and body.Tip==tip and tip in body.Group and same_shape(world_shape(body),baseline))
+        ui.select(body);body_matrix=affine(native.gumballState()['frame']);expected=baseline.transformGeometry(body_matrix);names={obj.Name for obj in doc.Objects}
+        ui.numeric('ScaleX','2');doc.recompute();body_result=assert_graph(doc,body,expected,'native Body final result')
+        check('Body fallback Scale preserves Tip type dimensions and native ownership',body.Tip==tip and tip.Length.Value==3 and tip in body.Group and tip.TypeId=='PartDesign::AdditiveBox')
+        created={obj.Name for obj in doc.Objects}-names;body_output_name=body_result.Name
+        doc.undo();doc.recompute();ui.settle()
+        check('Body fallback Scale Undo restores native Tip result and removes graph',all(doc.getObject(name) is None for name in created) and body.Tip==tip and tip in body.Group and body.Visibility and same_shape(world_shape(body),baseline))
+        doc.redo();doc.recompute();ui.settle();body_result=doc.getObject(body_output_name)
+        check('Body fallback Scale Redo restores exact affine result with original Tip',body_result.OM9GumballScaleSource==body and body.Tip==tip and same_shape(world_shape(body_result),expected))
+        manifest.append({'source':body.Name,'output':body_result.Name,'matrix':list(body_matrix.A)})
+        # A late native input edit can leave a stale, apparently correct Shape.
+        # Verify the recipe's durable inputs again after report callbacks.
+        late_source=doc.addObject('Part::Box','LateScaleInputSource');late_source.Length=3;late_source.Width=4;late_source.Height=5
+        late_source.Placement.Rotation=App.Rotation(App.Vector(1,2,3),29);doc.recompute();ui.select(late_source)
+        names={obj.Name for obj in doc.Objects};before=(doc.UndoCount,doc.RedoCount,late_source.Placement,late_source.Length.Value,late_source.Visibility)
+        class LateScaleObserver:
+            fired=False
+            def slotChangedObject(self,obj,prop):
+                if not self.fired and prop=='OM9GumballReport' and getattr(obj,'OM9GumballScaleSource',None)==late_source:
+                    self.fired=True;obj.LinkedObject.XScale=3
+        observer=LateScaleObserver();App.addDocumentObserver(observer);prior_transcript=ui.transcript()
+        try:
+            ui.numeric('ScaleX','2')
+            rejection_state=native.gumballState();rejection_transcript=ui.transcript()[len(prior_transcript):]
+            report['late_scale_rejection']={'state':rejection_state,'transcript':rejection_transcript}
+        finally:App.removeDocumentObserver(observer)
+        doc.recompute();ui.settle()
+        check('late Scale factor callback aborts atomically despite stale matching Shape',observer.fired and {obj.Name for obj in doc.Objects}==names and
+              (doc.UndoCount,doc.RedoCount,late_source.Placement,late_source.Length.Value,late_source.Visibility)==before and result_for(doc,late_source) is None and
+              'changed during publication' in rejection_state.get('unresolved','')+' '+rejection_transcript)
+        late_support_source=doc.addObject('Part::Box','LateSupportSource');late_support_source.Length=3;late_support_source.Width=4;late_support_source.Height=5
+        late_support_source.Placement.Rotation=App.Rotation(App.Vector(1,2,3),29)
+        late_support=doc.addObject('PartDesign::SubShapeBinder','LateSupportConsumer');late_support.Support=[(late_support_source,['Face1'])]
+        doc.recompute();late_support.Visibility=False;late_support_source.Visibility=True;ui.select(late_support_source)
+        names={obj.Name for obj in doc.Objects};before=(doc.UndoCount,doc.RedoCount,late_support_source.Placement,late_support_source.Length.Value,late_support_source.Visibility)
+        class LateSupportObserver:
+            fired=False
+            def slotChangedObject(self,obj,prop):
+                if not self.fired and prop=='OM9GumballReport' and getattr(obj,'OM9GumballScaleSource',None)==late_support_source:
+                    self.fired=True;late_support.Support=[(late_support_source,['Face1'])]
+        observer=LateSupportObserver();App.addDocumentObserver(observer);prior_transcript=ui.transcript()
+        try:
+            ui.numeric('ScaleX','2')
+            rejection_state=native.gumballState();rejection_transcript=ui.transcript()[len(prior_transcript):]
+            report['late_support_rejection']={'state':rejection_state,'transcript':rejection_transcript}
+        finally:App.removeDocumentObserver(observer)
+        doc.recompute();ui.settle()
+        check('late external Support callback aborts atomically and restores original dependency',observer.fired and {obj.Name for obj in doc.Objects}==names and
+              (doc.UndoCount,doc.RedoCount,late_support_source.Placement,late_support_source.Length.Value,late_support_source.Visibility)==before and
+              late_support.Support[0][0]==late_support_source and result_for(doc,late_support_source) is None and
+              'changed during publication' in rejection_state.get('unresolved','')+' '+rejection_transcript)
+        # A copied native XLink keeps durable names but loses its resolved
+        # pointer. Recreating an untouched Support target under the same name
+        # must not satisfy the final dependency identity check.
+        identity_source=doc.addObject('Part::Box','LateIdentitySource');identity_source.Length=3;identity_source.Width=4;identity_source.Height=5
+        identity_source.Placement.Rotation=App.Rotation(App.Vector(1,2,3),29)
+        identity_target=doc.addObject('Part::Box','UnselectedSupportTarget');identity_target.Length=2;identity_target.Width=3;identity_target.Height=4
+        identity_target.Placement.Base=App.Vector(9,2,1)
+        identity_support=doc.addObject('PartDesign::SubShapeBinder','IdentitySupportConsumer')
+        identity_support.Support=[(identity_source,['Face1']),(identity_target,['Face1'])]
+        doc.recompute();identity_target.Visibility=False;identity_support.Visibility=False;identity_source.Visibility=True;ui.select(identity_source)
+        target_name=identity_target.Name;target_id=identity_target.ID
+        original_identity_support=[(entry[0].Name,entry[0].ID,tuple(entry[1])) for entry in identity_support.Support]
+        target_before=(identity_target.Placement,identity_target.Length.Value,identity_target.Width.Value,identity_target.Height.Value,identity_target.Visibility)
+        names={obj.Name for obj in doc.Objects};baseline=world_shape(identity_source)
+        before=(doc.UndoCount,doc.RedoCount,identity_source.Placement,identity_source.Length.Value,identity_source.Visibility)
+        class SameNameSupportObserver:
+            fired=False
+            replacement_id=None
+            def slotChangedObject(self,obj,prop):
+                if not self.fired and prop=='OM9GumballReport' and getattr(obj,'OM9GumballScaleSource',None)==identity_source:
+                    self.fired=True
+                    doc.removeObject(target_name)
+                    replacement=doc.addObject('Part::Box',target_name);self.replacement_id=replacement.ID
+                    replacement.Placement=target_before[0];replacement.Length=target_before[1];replacement.Width=target_before[2];replacement.Height=target_before[3]
+                    replacement.Visibility=target_before[4]
+                    identity_support.Support=[(obj,['Face1']),(replacement,['Face1'])]
+        observer=SameNameSupportObserver();App.addDocumentObserver(observer);prior_transcript=ui.transcript()
+        try:
+            ui.numeric('ScaleX','2')
+            rejection_state=native.gumballState();rejection_transcript=ui.transcript()[len(prior_transcript):]
+            report['same_name_support_rejection']={'original_id':target_id,'replacement_id':observer.replacement_id,
+                  'state':rejection_state,'transcript':rejection_transcript}
+        finally:App.removeDocumentObserver(observer)
+        doc.recompute();ui.settle();restored_target=doc.getObject(target_name)
+        check('same-name untouched Support replacement aborts and restores original identities',observer.fired and observer.replacement_id!=target_id and
+              {obj.Name for obj in doc.Objects}==names and
+              (doc.UndoCount,doc.RedoCount,identity_source.Placement,identity_source.Length.Value,identity_source.Visibility)==before and
+              restored_target is not None and restored_target.ID==target_id and
+              (restored_target.Placement,restored_target.Length.Value,restored_target.Width.Value,restored_target.Height.Value,restored_target.Visibility)==target_before and
+              [(entry[0].Name,entry[0].ID,tuple(entry[1])) for entry in identity_support.Support]==original_identity_support and
+              [entry[0] for entry in identity_support.Support]==[doc.getObject(name) for name,target_id,subnames in original_identity_support] and
+              result_for(doc,identity_source) is None and same_shape(world_shape(identity_source),baseline) and
+              'incoming dependency changed during publication' in rejection_state.get('unresolved','')+' '+rejection_transcript)
+        # Presentation callbacks run after the first shape validation. Editing
+        # a generated Part shape must still roll the complete gesture back.
+        for normalized in (False,True):
+            definition=doc.addObject('Part::Box','LateNormalizerDefinition' if normalized else 'LatePresentationSource')
+            definition.Length=3;definition.Width=4;definition.Height=5
+            if normalized:
+                presentation_source=doc.addObject('App::Link','LateNormalizerSource');presentation_source.setLink(definition)
+                presentation_source.LinkTransform=True;presentation_source.ScaleVector=App.Vector(2,1.5,.5)
+                presentation_source.LinkPlacement=App.Placement(App.Vector(2,3,4),App.Rotation(App.Vector(1,2,3),29))
+                definition.Visibility=False
+            else:
+                presentation_source=definition;presentation_source.Placement.Rotation=App.Rotation(App.Vector(1,2,3),29)
+            doc.recompute();presentation_source.Visibility=True;ui.select(presentation_source)
+            names={obj.Name for obj in doc.Objects};properties=set(presentation_source.PropertiesList)
+            baseline=world_shape(presentation_source)
+            before=(doc.UndoCount,doc.RedoCount,presentation_source.Placement,presentation_source.Visibility)
+            class LatePresentationObserver:
+                fired=False
+                def slotChangedObject(self,view,prop):
+                    if not self.fired and prop=='Visibility' and view is presentation_source.ViewObject and not view.Visibility:
+                        result=result_for(doc,presentation_source)
+                        if result is not None:
+                            self.fired=True
+                            helper=result.LinkedObject.Base.LinkedObject if normalized else result.LinkedObject
+                            report.setdefault('late_presentation_observations',[]).append({'source':presentation_source.Name,'helper':helper.Name,'type':helper.TypeId})
+                            helper.Shape=Part.makeBox(9,8,7)
+            observer=LatePresentationObserver();Gui.addDocumentObserver(observer);prior_transcript=ui.transcript()
+            try:
+                ui.numeric('ScaleX','2')
+                rejection_state=native.gumballState();rejection_transcript=ui.transcript()[len(prior_transcript):]
+                report.setdefault('late_presentation_rejections',[]).append({'state':rejection_state,'transcript':rejection_transcript})
+            finally:Gui.removeDocumentObserver(observer)
+            doc.recompute();ui.settle()
+            check('late '+('normalizer' if normalized else 'Scale')+' Shape callback aborts atomically after presentation',
+                  observer.fired and {obj.Name for obj in doc.Objects}==names and set(presentation_source.PropertiesList)==properties and
+                  (doc.UndoCount,doc.RedoCount,presentation_source.Placement,presentation_source.Visibility)==before and
+                  same_shape(world_shape(presentation_source),baseline) and result_for(doc,presentation_source) is None and
+                  'native graph geometry changed before commit' in rejection_state.get('unresolved','')+' '+rejection_transcript)
+        # The native binder exception never grants access to immutable inputs
+        # or user-protected read-only properties on other geometry consumers.
+        protected_source=doc.addObject('Part::Box','ProtectedSource');protected_source.Placement.Rotation=App.Rotation(App.Vector(1,2,3),29)
+        protected_binder=doc.addObject('PartDesign::SubShapeBinder','ProtectedBinder');protected_binder.Support=[(protected_source,['Face1'])]
+        protected_binder.setPropertyStatus('Support','Immutable');doc.recompute();protected_binder.Visibility=False;protected_source.Visibility=True
+        ui.select(protected_source);names={obj.Name for obj in doc.Objects};before=(doc.UndoCount,doc.RedoCount,protected_source.Placement,protected_source.Length.Value)
+        prior_transcript=ui.transcript();ui.numeric('ScaleX','2')
+        rejection=native.gumballState().get('unresolved','')+' '+ui.transcript()[len(prior_transcript):];doc.recompute()
+        check('immutable native Support rejects before transaction and retains protection',{obj.Name for obj in doc.Objects}==names and
+              (doc.UndoCount,doc.RedoCount,protected_source.Placement,protected_source.Length.Value)==before and
+              protected_binder.Support[0][0]==protected_source and 'Immutable' in protected_binder.getPropertyStatus('Support') and
+              'read only' in rejection)
+        protected_binder.setPropertyStatus('Support','-Immutable');protected_binder.Support=[]
+        protected_cut=doc.addObject('Part::Cut','ProtectedCut');protected_cut.Base=protected_source;protected_cut.Tool=tool
+        protected_cut.setEditorMode('Base',1);doc.recompute();protected_cut.Visibility=False;protected_source.Visibility=True
+        ui.select(protected_source);names={obj.Name for obj in doc.Objects};before=(doc.UndoCount,doc.RedoCount,protected_source.Placement,protected_source.Length.Value)
+        prior_transcript=ui.transcript();ui.numeric('ScaleX','2')
+        rejection=native.gumballState().get('unresolved','')+' '+ui.transcript()[len(prior_transcript):];doc.recompute()
+        check('ordinary read-only dependency rejects without clearing its protection',{obj.Name for obj in doc.Objects}==names and
+              (doc.UndoCount,doc.RedoCount,protected_source.Placement,protected_source.Length.Value)==before and protected_cut.Base==protected_source and
+              'ReadOnly' in protected_cut.getPropertyStatus('Base') and 'read only' in rejection)
+        geometry_source=doc.addObject('Part::Box','GeometryExpressionSource');geometry_source.Length=3
+        geometry_source.Placement.Rotation=App.Rotation(App.Vector(1,2,3),29)
+        geometry_consumer=doc.addObject('Part::Box','GeometryExpressionConsumer')
+        geometry_consumer.setExpression('Placement.Base.x','GeometryExpressionSource.Length')
+        doc.recompute();geometry_consumer.Visibility=False;geometry_source.Visibility=True;ui.select(geometry_source)
+        names={obj.Name for obj in doc.Objects};before=(doc.UndoCount,doc.RedoCount,geometry_source.Placement,geometry_source.Length.Value,geometry_consumer.ExpressionEngine)
+        prior_transcript=ui.transcript();ui.numeric('ScaleX','2')
+        rejection=native.gumballState().get('unresolved','')+' '+ui.transcript()[len(prior_transcript):];doc.recompute()
+        check('expression governed Placement consumers reject explicitly before publication',
+              {obj.Name for obj in doc.Objects}==names and
+              (doc.UndoCount,doc.RedoCount,geometry_source.Placement,geometry_source.Length.Value,geometry_consumer.ExpressionEngine)==before and
+              'expression governed geometry' in rejection)
+        doc.saveAs(str(out/'associative-scale.FCStd'))
+        check_saved_compound_providers(out/'associative-scale.FCStd',
+              [obj for obj in doc.Objects if obj.TypeId==COMPOUND_TYPE],'final associative graph')
+        (out/'cold-manifest.json').write_text(json.dumps(manifest,indent=2))
+        report['saved']=str(out/'associative-scale.FCStd');report['ok']=True
+    except Exception:
+        report['ok']=False;report['error']=traceback.format_exc()
+        if 'ui' in locals():
+            report['failure_state']=native.gumballState();report['failure_transcript']=ui.transcript()
+        if doc is not None:
+            report['failure_objects']=[{'name':obj.Name,'type':obj.TypeId,'state':list(obj.State),
+                  'members':[member.Name for member in getattr(obj,'Group',[])],
+                  'source':getattr(getattr(obj,'OM9GumballScaleSource',None),'Name',None),
+                  'linked':getattr(getattr(obj,'LinkedObject',None),'Name',None)} for obj in doc.Objects]
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        if doc is not None:App.closeDocument(doc.Name)
+        QtCore.QTimer.singleShot(100,QtWidgets.QApplication.quit)
+QtCore.QTimer.singleShot(1500,run)

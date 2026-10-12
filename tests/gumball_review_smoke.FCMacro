@@ -1,0 +1,86 @@
+"""Native regressions for the three final-review findings; no output test hooks."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part, Mesh, Points
+from PySide6 import QtCore, QtTest
+sys.path.insert(0, str(Path(__file__).parent))
+from gumball_fixture import GumballUI
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'checks': [], 'feature_ids': ['OM9-INFO-020', 'OM9-INFO-021', 'OM9-INFO-022']}
+
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+
+def vectors(points): return [tuple(p) for p in points]
+def near(a, b): return abs(a-b) < 1e-8
+
+def run():
+    ui = None
+    try:
+        import OpenMatrix9Gui as native
+        report['module'] = native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc = App.newDocument('GumballFinalReview'); doc.UndoMode = 1
+        box = doc.addObject('Part::Feature', 'Box'); box.Shape = Part.makeBox(2,3,4)
+        mesh = doc.addObject('Mesh::Feature', 'Mesh')
+        mesh.Mesh = Mesh.Mesh([[App.Vector(0,0,0), App.Vector(2,0,0), App.Vector(0,3,0)]])
+        points = doc.addObject('Points::Feature', 'Cloud')
+        points.Points = Points.Points([App.Vector(0,0,0), App.Vector(2,3,4)])
+        doc.recompute(); Gui.activeDocument().activeView().viewAxonometric()
+        ui = GumballUI(native); ui.command('Gumball On'); ui.command('GumballAlignment World')
+        for owner, field in [(mesh,'Mesh'), (points,'Points')]:
+            ui.select(mesh,points)
+            before = ((vectors(mesh.Mesh.Topology[0]), mesh.Mesh.Topology[1]), vectors(points.Points.Points))
+            undo = doc.UndoCount
+            class ReplaceGeometry:
+                fired = False
+                def slotChangedObject(self, obj, prop):
+                    if obj==owner and prop==field and not self.fired:
+                        self.fired = True
+                        if field=='Mesh': obj.Mesh = Mesh.Mesh([[App.Vector(900,0,0),App.Vector(902,0,0),App.Vector(900,3,0)]])
+                        else: obj.Points = Points.Points([App.Vector(900,0,0),App.Vector(902,3,4)])
+            observer = ReplaceGeometry(); App.addDocumentObserver(observer)
+            try: ui.numeric('ScaleX','2')
+            finally: App.removeDocumentObserver(observer)
+            after = ((vectors(mesh.Mesh.Topology[0]), mesh.Mesh.Topology[1]), vectors(points.Points.Points))
+            check(field+' same-field callback rejects complete publication', observer.fired and after==before and doc.UndoCount==undo)
+            if doc.UndoCount>undo: doc.undo(); ui.settle()
+        Gui.activeDocument().activeView().viewTop(); ui.command('GumballAlignment World')
+        for input_value in [5,-5]:
+            for direction in [1,-1]:
+                ui.select(box); start=ui.target('MoveX'); ui.viewport.setFocus()
+                QtTest.QTest.mousePress(ui.viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,start)
+                QtTest.QTest.mouseMove(ui.viewport,start+QtCore.QPoint(40,0));ui.settle()
+                assert native.gumballState()['phase']==3
+                ui.command(str(input_value)+' mm'); undo=doc.UndoCount
+                end=start+QtCore.QPoint(direction*60,0)
+                QtTest.QTest.mouseMove(ui.viewport,end);ui.settle();ui.release(end)
+                check('axis constraint '+str(input_value)+' follows pointer side '+str(direction),near(box.Shape.BoundBox.XMin,input_value*direction) and doc.UndoCount==undo+1)
+                if doc.UndoCount>undo:doc.undo();ui.settle()
+        face=doc.addObject('Part::Feature','Face');face.Shape=Part.makePlane(2,3,App.Vector(0,0,0),App.Vector(1,0,0));doc.recompute()
+        for direction in [1,-1]:
+            ui.select(face);start=ui.target('MoveX');ui.viewport.setFocus()
+            QtTest.QTest.mousePress(ui.viewport,QtCore.Qt.LeftButton,QtCore.Qt.NoModifier,start)
+            QtTest.QTest.mouseMove(ui.viewport,start+QtCore.QPoint(40,0));ui.settle();ui.command('5 mm')
+            end=start+QtCore.QPoint(direction*60,0);QtTest.QTest.mouseMove(ui.viewport,end);ui.settle()
+            undo=doc.UndoCount;count=len(doc.Objects);ui.release(end,QtCore.Qt.ControlModifier)
+            generated=[obj for obj in doc.Objects if obj.Name.startswith('GumballExtrusion')]
+            good=len(doc.Objects)==count+1 and len(generated)==1 and doc.UndoCount==undo+1
+            if generated:
+                b=generated[0].Shape.BoundBox
+                good=good and near(generated[0].Shape.Volume,30) and near(b.XMin,min(0,5*direction)) and near(b.XMax,max(0,5*direction))
+            check('extrusion constraint follows pointer side '+str(direction),good)
+            if doc.UndoCount>undo:doc.undo();ui.settle()
+        rotated=[10,20,30,0,1,0,-1,0,0,0,0,1]
+        for slot in range(4):native.setCPlane(doc.Name,slot,rotated)
+        ui.command('GumballAlignment CPlane');Gui.Selection.clearSelection();Gui.Selection.addSelection(box,'Vertex1');ui.settle()
+        before=native.gumballState();undo=doc.UndoCount;ui.command('GumballAlignment Object');after=native.gumballState()
+        check('unsupported BRep vertex retains rotated CPlane frame',after['alignment']==before['alignment'] and after['frame']==before['frame'] and 'UnsupportedFrame' in after['unresolved'] and doc.UndoCount==undo)
+        report['ok']=all(c['passed'] for c in report['checks'])
+        if not report['ok']:report['error']='Final-review regression assertion failed'
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        if ui:report['transcript']=ui.transcript();report['state']=ui.native.gumballState()
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2));Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

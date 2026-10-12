@@ -1,0 +1,52 @@
+"""OM9-INFO-020/021/022 native projection size, zoom and view lifetime."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtTest
+from pivy import coin
+sys.path.insert(0,str(Path(__file__).parent));from gumball_fixture import GumballUI
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-020','OM9-INFO-021','OM9-INFO-022']}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    doc=None
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('GumballViewLifetime');doc.UndoMode=1
+        box=doc.addObject('Part::Feature','Box');box.Shape=Part.makeBox(12,8,6);doc.recompute()
+        ui=GumballUI(native);window=Gui.getMainWindow();window.resize(1600,1050);ui.settle()
+        area=window.findChild(QtWidgets.QMdiArea)
+        subs={int(s.widget().property('om9ViewSlot')):s for s in area.subWindowList() if s.widget().property('om9ViewSlot') is not None and s.widget().property('om9DocumentName')==doc.Name}
+        area.setActiveSubWindow(subs[0]);ui.select(box);ui.command('Gumball On');ui.command('GumballAlignment World')
+        view=Gui.activeDocument().activeView();camera=view.getCameraNode();height=camera.height.getValue();frame=native.gumballState()['frame']
+        search=coin.SoSearchAction();search.setType(coin.SoDrawStyle.getClassTypeId());search.setInterest(coin.SoSearchAction.ALL);search.setSearchingAll(True)
+        root_search=coin.SoSearchAction();root_search.setName('OM9GumballOverlay');root_search.setSearchingAll(True);root_search.apply(view.getSceneGraph());search.apply(root_search.getPath().getTail())
+        widths=[p.getTail().lineWidth.getValue() for p in search.getPaths()]
+        check('native stroke widths preserve configured logical pixels',widths and all(abs(w-1.5*ui.viewport.devicePixelRatioF())<1e-6 for w in widths))
+        for factor in [.5,1.,2.]:
+            camera.height=height*factor;ui.settle();native.gumballState();rows={r['name']:r for r in native.gumballHandles()}
+            origin=rows['MoveFree'];menu=rows['MenuBall'];move=rows['MoveX'];plane=rows['MoveXY']
+            check('menu logical pixel offset at zoom %s'%factor,abs(menu['center_x']-origin['center_x']+30)<=2 and abs(menu['center_y']-origin['center_y']-30)<=2)
+            check('Move arrow logical profile at zoom %s'%factor,abs(move['center_x']-origin['center_x']-71)<=2)
+            check('Plane center logical profile at zoom %s'%factor,abs(plane['center_x']-origin['center_x']-50)<=2 and abs(plane['center_y']-origin['center_y']+50)<=2)
+            state=native.gumballState();check('world Scale anchors remain native bounds at zoom %s'%factor,all(v['scale_anchors']==[[0,4,3],[6,0,3],[6,4,0]] for v in state['views']))
+        camera.height=height;ui.settle();subs[0].showMaximized();ui.settle()
+        check('maximize preserves shared frame and all scenes',native.gumballState()['frame']==frame and len([v for v in native.gumballState()['views'] if v['attached']])==4)
+        subs[0].showNormal();ui.settle();check('restore keeps frame and geometry',native.gumballState()['frame']==frame and doc.UndoCount==0)
+        # Preview is a separate, unpickable branch in every native scene.
+        end=ui.drag('MoveX');state=native.gumballState();check('one drag preview is shared by four views',state['phase']==3 and all(v['preview_vertices']>0 for v in state['views']) and doc.UndoCount==0)
+        area.setActiveSubWindow(subs[1]);ui.settle();check('view navigation cancels every preview',native.gumballState()['phase']==1 and all(v['preview_vertices']==0 for v in native.gumballState()['views']) and doc.UndoCount==0)
+        ui.gesture_viewport=None
+        area.setActiveSubWindow(subs[0]);ui.settle();subs[3].close();ui.settle()
+        check('closing passive view leaves shared session ready',native.gumballState()['phase']==1 and all(v['attached'] for v in native.gumballState()['views']))
+        end=ui.drag('MoveX');subs[0].close();ui.settle()
+        check('closing source view cancels preview and mouse capture',native.gumballState()['phase']==1 and all(v['preview_vertices']==0 for v in native.gumballState()['views']) and QtWidgets.QWidget.mouseGrabber() is None)
+        report['dpi']=window.devicePixelRatioF();report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        if doc is not None:App.closeDocument(doc.Name)
+        QtCore.QTimer.singleShot(100,QtWidgets.QApplication.quit)
+QtCore.QTimer.singleShot(1500,run)

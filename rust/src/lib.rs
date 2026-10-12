@@ -1,3 +1,16 @@
+pub mod circle;
+pub mod gumball;
+pub mod gumball_ffi;
+pub mod gumball_owner;
+pub mod gumball_view;
+pub mod circle_history;
+pub mod circle_tangent;
+pub mod coordinates;
+pub mod coordinate_input;
+pub mod cplanes;
+pub mod units;
+pub mod tolerances;
+pub mod layers;
 pub mod command_completion;
 pub mod core_3dm;
 pub mod core_3dm_archive;
@@ -6,20 +19,75 @@ pub mod core_distance;
 pub mod core_keyboard;
 pub mod core_mouse;
 pub mod core_notes;
+pub mod core_objects;
+pub mod result_publication;
 pub mod core_picture_frame;
 pub mod core_snaps;
 pub mod core_view_controls;
 pub mod core_view_tabs;
 pub mod core_views;
 pub mod curve;
+pub mod spline;
+pub mod nurbs_basis;
+pub mod nurbs_basis_ffi;
+pub mod geometry_contract;
+pub mod geometry_contract_ffi;
+pub mod curve_conversion;
+pub mod curve_conversion_ffi;
+pub mod polycurve_contract;
+pub mod polycurve_contract_ffi;
+pub mod hatch_loop_input;
+pub mod spline_ffi;
+pub mod ellipse;
 mod curve_ffi;
+pub mod edit;
+pub mod history;
+pub mod builder_history;
+pub mod cage;
+pub mod cage_commands;
+pub mod retained_archive;
 pub mod ffi;
 pub mod menu;
 pub mod modeling_exchange;
 pub mod state;
+pub mod surface;
+pub mod solid;
+pub mod rectangle;
+pub mod surface_refit;
 pub mod workspace;
+pub mod worker_budget;
 
 pub mod viewport_title;
+
+pub mod geometry_frame;
+
+pub mod geometry_frame_ffi;
+
+pub mod native_input_tree;
+
+pub mod native_input_tree_ffi;
+
+pub mod source_attributes;
+
+pub mod source_attributes_ffi;
+
+pub mod support_snapshot;
+
+pub mod support_snapshot_ffi;
+
+pub mod analytic_support;
+
+pub mod discrete_snapshot;
+
+pub mod discrete_snapshot_ffi;
+
+pub mod prepared_cad;
+
+pub mod gumball_component;
+
+pub mod gumball_component_ffi;
+
+pub mod gumball_associative;
 
 pub mod phase2_curve;
 pub mod phase2_ffi;
@@ -28,10 +96,6 @@ pub mod phase2_snap;
 mod phase2_snap_ffi;
 pub mod phase3_ffi;
 pub mod phase3_modeling;
-pub mod spline;
-pub mod spline_ffi;
-
-pub mod edit;
 pub mod layer_clipboard;
 pub mod layer_codec;
 pub mod layer_collection;
@@ -44,5 +108,3 @@ pub mod layer_native;
 pub mod layer_retained;
 pub mod layer_source_payload;
 pub mod layer_state;
-pub mod surface;
-pub mod surface_refit;

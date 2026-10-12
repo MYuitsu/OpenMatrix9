@@ -1,0 +1,138 @@
+"""Cold native Camera/Light restore; import plugin before opening saved types."""
+import json, math, os, sys, traceback
+from pathlib import Path
+from zipfile import ZipFile
+import xml.etree.ElementTree as ET
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore, QtWidgets
+from pivy import coin
+sys.path.insert(0, str(Path(__file__).parent))
+from gumball_fixture import GumballUI
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'checks': [], 'feature_ids': ['OM9-INFO-020','OM9-INFO-021','OM9-INFO-022']}
+
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+    if not value:
+        raise AssertionError(name)
+
+def close(a, b):
+    return all(abs(x-y)<1e-7 for x,y in zip(a,b))
+
+def facts(obj):
+    props = ['FocalDistance','HeightAngle','Height','Perspective','AspectRatio'] if obj.TypeId.endswith('Camera') else ['SizeU','SizeV','Reach','Power']
+    return {'type': obj.TypeId, 'placement': list(obj.Placement.toMatrix().A),
+            'global_placement': list(obj.getGlobalPlacement().toMatrix().A),
+            'properties': {name: getattr(obj,name).Value if hasattr(getattr(obj,name),'Value')
+                           else getattr(obj,name) for name in props},
+            'property_types': {name: obj.getTypeIdOfProperty(name) for name in props},
+            'view_type': obj.ViewObject.TypeId, 'visible': obj.ViewObject.Visibility,
+            'selectable': obj.ViewObject.Selectable}
+
+def symbol_vertices(obj):
+    search = coin.SoSearchAction()
+    search.setType(coin.SoCoordinate3.getClassTypeId())
+    search.setInterest(coin.SoSearchAction.ALL)
+    search.setSearchingAll(True)
+    search.apply(obj.ViewObject.RootNode)
+    return sum(path.getTail().point.getNum() for path in search.getPaths())
+
+def serialized_sources(source):
+    # Read the durable archive independently of the objects restored below.
+    # A constructor default must not silently substitute for a saved value.
+    with ZipFile(source) as archive:
+        xml = ET.fromstring(archive.read('Document.xml'))
+    result = {}
+    for obj in xml.findall('./ObjectData/Object'):
+        props = {prop.attrib['name']:prop for prop in obj.findall('./Properties/Property')}
+        if 'FocalDistance' not in props and 'Reach' not in props:
+            continue
+        names = ['FocalDistance','HeightAngle','Height','Perspective','AspectRatio'] if 'FocalDistance' in props else ['SizeU','SizeV','Reach','Power']
+        values = {}
+        for name in names:
+            prop = props[name]
+            child = list(prop)[0]
+            values[name] = child.attrib['value']=='true' if child.tag=='Bool' else float(child.attrib['value'])
+        pose = props['Placement'].find('PropertyPlacement').attrib
+        result[obj.attrib['name']] = {'properties':values,
+            'property_types':{name:props[name].attrib['type'] for name in names},
+            'base':[float(pose[key]) for key in ('Px','Py','Pz')],
+            'rotation':[float(pose[key]) for key in ('Q0','Q1','Q2','Q3')]}
+    return result
+
+def run():
+    doc = ui = None
+    try:
+        import OpenMatrix9Gui as native
+        report['module'] = native.__file__
+        check('native frame types are registered before cold document open',
+              hasattr(native,'createGumballFrameObject'))
+        warm = Path(os.environ['OM9_GUMBALL_FRAME_WARM'])
+        source = warm/'frame-objects.FCStd' if warm.is_dir() else warm
+        check('warm native frame object file exists', source.is_file())
+        saved = serialized_sources(source)
+        report['serialized_sources'] = saved
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        check('cold process starts without an active gesture', native.gumballState()['phase'] in (0,1))
+        doc = App.openDocument(str(source))
+        ui = GumballUI(native)
+        ui.settle()
+        objects = [o for o in doc.Objects if o.TypeId in
+                   ['OpenMatrix9Gui::GumballCamera','OpenMatrix9Gui::GumballLight']]
+        check('cold restore retains both native Camera and Light classes', len(objects)==2 and
+              {o.TypeId for o in objects}=={'OpenMatrix9Gui::GumballCamera','OpenMatrix9Gui::GumballLight'})
+        baseline = {o.Name:facts(o) for o in objects}
+        count, undo = len(doc.Objects), doc.UndoCount
+        report['restored'] = baseline
+        for obj in objects:
+            kind = 'Camera' if obj.TypeId.endswith('Camera') else 'Light'
+            observed = facts(obj)
+            stored = saved[obj.Name]
+            check(kind+' cold restore matches independently read FCStd source values and pose',
+                  observed['property_types']==stored['property_types'] and
+                  all(abs(float(value)-float(stored['properties'][name]))<1e-7
+                      for name,value in observed['properties'].items()) and
+                  close(obj.Placement.Base,stored['base']) and
+                  close(obj.Placement.Rotation.Q,stored['rotation']))
+            check(kind+' restored native view provider and visible pickable symbol',
+                  observed['view_type']=='OpenMatrix9Gui::ViewProviderGumballFrameObject' and
+                  observed['visible'] and observed['selectable'] and symbol_vertices(obj)>=10)
+            expected_types = {'FocalDistance':'App::PropertyLength','HeightAngle':'App::PropertyAngle',
+                              'Height':'App::PropertyLength','Perspective':'App::PropertyBool',
+                              'AspectRatio':'App::PropertyFloat'} if kind=='Camera' else {
+                              'SizeU':'App::PropertyLength','SizeV':'App::PropertyLength',
+                              'Reach':'App::PropertyLength','Power':'App::PropertyFloat'}
+            check(kind+' source properties retain native unit and scalar types',
+                  observed['property_types']==expected_types and
+                  all(math.isfinite(float(value)) and float(value)>0 for name,value in
+                      observed['properties'].items() if name!='Perspective'))
+            ui.select(obj)
+            ui.command('Gumball On')
+            ui.command('GumballAlignment World')
+            ui.command('GumballAlignment Object')
+            state = native.gumballState()
+            pose = obj.getGlobalPlacement()
+            x = pose.Rotation.multVec(App.Vector(1,0,0))
+            z = pose.Rotation.multVec(App.Vector(0,0,1))
+            check(kind+' cold Object alignment observes physical source origin and native axes',
+                  state['alignment']==1 and not state['unresolved'] and
+                  close(state['frame'][:3], pose.Base) and
+                  close(state['frame'][3:6],x) and close(state['frame'][9:12],z))
+            check(kind+' cold Object frame is shared by every native viewport',
+                  len(state['views'])==4 and all(v['attached'] and v['frame']==state['frame']
+                                               for v in state['views']))
+            check(kind+' cold selection and alignment leave source properties and Undo unchanged',
+                  facts(obj)==baseline[obj.Name] and len(doc.Objects)==count and doc.UndoCount==undo)
+        report['ok'] = True
+    except Exception:
+        report.update(ok=False,error=traceback.format_exc())
+    finally:
+        if ui:
+            report['transcript'] = ui.transcript()
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        if doc is not None:
+            App.closeDocument(doc.Name)
+        QtCore.QTimer.singleShot(100,QtWidgets.QApplication.quit)
+
+QtCore.QTimer.singleShot(1500,run)

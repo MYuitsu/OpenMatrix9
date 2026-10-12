@@ -328,11 +328,33 @@ def run():
         doc.recompute()
         a.setCurrentIndex(1)
         events()
+        check('changed source rejects the captured constrained session',
+              not buttons(d).button(QtWidgets.QDialogButtonBox.Ok).isEnabled() and not outputs(doc))
+        cancel(d)
+        # Select the incompatible geometry afresh so this still exercises the
+        # solver's profile verification, not only the new stale-input guard.
+        d = start(doc, 'OM9_SurfaceSweepSweep2Rails', refs)
+        a = control(d, QtWidgets.QComboBox, 'OM9ContinuityA')
+        b = control(d, QtWidgets.QComboBox, 'OM9ContinuityB')
+        a.setCurrentIndex(1)
+        b.setCurrentIndex(2)
+        events()
         check('incompatible original profile rejects preview without output',
               not buttons(d).button(QtWidgets.QDialogButtonBox.Ok).isEnabled() and not outputs(doc))
         middle.Shape = original
         doc.recompute()
+        undo_before = doc.UndoCount
         a.setCurrentIndex(2)
+        events()
+        check('restoring equal profile bytes does not revive the stale selection',
+              not buttons(d).button(QtWidgets.QDialogButtonBox.Ok).isEnabled()
+              and not outputs(doc) and doc.UndoCount == undo_before)
+        cancel(d)
+        d = start(doc, 'OM9_SurfaceSweepSweep2Rails', refs)
+        a = control(d, QtWidgets.QComboBox, 'OM9ContinuityA')
+        b = control(d, QtWidgets.QComboBox, 'OM9ContinuityB')
+        a.setCurrentIndex(2)
+        b.setCurrentIndex(2)
         events()
         check('corrected profile recovers a valid constrained preview',
               buttons(d).button(QtWidgets.QDialogButtonBox.Ok).isEnabled())

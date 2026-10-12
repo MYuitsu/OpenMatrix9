@@ -1,0 +1,61 @@
+"""Native Mesh Segment Object alignment reads world facets without model writes."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Mesh
+from PySide6 import QtCore,QtWidgets
+sys.path.insert(0,str(Path(__file__).parent));from gumball_fixture import GumballUI
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-021']}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    ui=None
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('GumballMeshFrame');doc.UndoMode=1
+        mesh=doc.addObject('Mesh::Feature','SegmentOwner')
+        data=Mesh.Mesh([[App.Vector(0,0,0),App.Vector(0,2,0),App.Vector(0,2,3)],
+                        [App.Vector(0,0,0),App.Vector(0,2,3),App.Vector(0,0,3)]])
+        data.addSegment([0,1]);data.addSegment([0]);mesh.Mesh=data
+        mesh.Placement=App.Placement(App.Vector(4,5,6),App.Rotation(App.Vector(0,0,1),35))
+        doc.recompute();ui=GumballUI(native);ui.select(mesh);ui.command('Gumball On');ui.command('GumballAlignment World')
+        baseline=(mesh.Mesh.Topology,mesh.Placement,doc.UndoCount,len(doc.Objects))
+        def select(*parts):
+            ui.command('GumballAlignment World');Gui.Selection.clearSelection()
+            for part in parts:Gui.Selection.addSelection(mesh,part)
+            ui.settle();ui.command('GumballAlignment Object');report['last_state']=native.gumballState()
+        select('Segment1');state=native.gumballState()
+        x=mesh.Placement.Rotation.multVec(App.Vector(0,1,0));n=mesh.Placement.Rotation.multVec(App.Vector(1,0,0))
+        check('placed planar Mesh Segment uses actual tangent and normal',state['alignment']==1 and not state['unresolved'] and all(abs(a-b)<1e-6 for a,b in zip(state['frame'][3:6],x)) and all(abs(a-b)<1e-6 for a,b in zip(state['frame'][9:12],n)))
+        check('Mesh component frame shared by all four views',len(state['views'])==4 and all(v['attached'] for v in state['views']))
+        select('Segment2');check('single native facet resolves Object frame',native.gumballState()['alignment']==1)
+        select('Segment1','Segment2');check('multiple selected components reject ambiguous frame',native.gumballState()['alignment']==2 and 'UnsupportedFrame' in native.gumballState()['unresolved'])
+        select('Segment99');check('missing component rejects without fallback',native.gumballState()['alignment']==2 and 'UnsupportedFrame' in native.gumballState()['unresolved'])
+        check('alignment does not mutate Mesh ownership or Undo',(mesh.Mesh.Topology,mesh.Placement,doc.UndoCount,len(doc.Objects))==baseline)
+        ui.select(mesh);ui.command('GumballAlignment World');ui.numeric('ScaleX','2')
+        check('Mesh affine Scale preserves both native segments',mesh.Mesh.countSegments()==2 and mesh.Mesh.getSegment(0)==[0,1] and mesh.Mesh.getSegment(1)==[0] and doc.UndoCount==1)
+        doc.undo();ui.settle();check('Mesh Scale Undo preserves native segment lists',mesh.Mesh.countSegments()==2 and mesh.Mesh.getSegment(0)==[0,1] and doc.UndoCount==0)
+        doc.redo();ui.settle();check('Mesh Scale Redo preserves native segment lists',mesh.Mesh.countSegments()==2 and mesh.Mesh.getSegment(0)==[0,1] and doc.UndoCount==1)
+        doc.undo();ui.settle()
+        ui.select(mesh);ui.command('RelocateGumball');ui.command('w100,0,0');ui.command('w101,0,0');ui.command('')
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(mesh,'Segment1');ui.settle();state=native.gumballState()
+        check('Mesh component does not inherit whole-owner relocated cache',(App.Vector(*state['frame'][:3])-mesh.Mesh.BoundBox.Center).Length<1e-6)
+        ui.command('RelocateGumball');ui.command('w50,0,0');ui.command('w51,0,0');ui.command('')
+        ui.select(mesh);check('component relocation does not replace whole-owner cache',native.gumballState()['frame'][:3]==[100,0,0])
+        # Native host permits degenerate triangles in stored mesh data; the
+        # Gumball frame must reject those and leave World alignment selected.
+        data=Mesh.Mesh([[App.Vector(0,0,0),App.Vector(1,0,0),App.Vector(2,0,0)]])
+        data.addSegment([0]);mesh.Mesh=data;doc.recompute();select('Segment1')
+        check('degenerate facet has explicit unresolved frame',native.gumballState()['alignment']==2 and 'UnsupportedFrame' in native.gumballState()['unresolved'])
+        data=Mesh.Mesh([[App.Vector(0,0,0),App.Vector(0,2,0),App.Vector(0,2,3)],
+                        [App.Vector(0,0,0),App.Vector(0,2,3),App.Vector(1,0,3)]])
+        data.addSegment([0,1]);mesh.Mesh=data;doc.recompute();select('Segment1')
+        check('nonplanar segment rejects ambiguous Object axes',native.gumballState()['alignment']==2 and 'UnsupportedFrame' in native.gumballState()['unresolved'])
+        report['ok']=True
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        if ui:report['transcript']=ui.transcript()
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2));Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

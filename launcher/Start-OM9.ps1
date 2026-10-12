@@ -32,7 +32,7 @@ function Get-OM9SafeFile([string]$Root,[string]$Relative) {
 }
 function Read-OM9Manifest([string]$Path) {
  $manifest=[IO.File]::ReadAllText($Path)|ConvertFrom-Json
- if([string]$manifest.version -cnotmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' -or $manifest.freecad -ne '1.1.4' -or @($manifest.files).Count -gt 10000){throw 'Unsupported or incomplete OM9 bundle manifest'}
+ if($null -eq (ConvertTo-OM9Version ([string]$manifest.version)) -or $manifest.freecad -ne '1.1.4' -or @($manifest.files).Count -gt 10000){throw 'Unsupported or incomplete OM9 bundle manifest'}
  $seen=@{}
  foreach($row in $manifest.files){
   $key=([string]$row.path).Replace('\','/').ToLowerInvariant()
@@ -201,11 +201,32 @@ function New-OM9StartMenuShortcut([string]$Cache,[string]$Menu,[string]$HostPath
  if($knownFolder){$Menu=Join-Path (Get-OM9ProgramsFolder) 'OpenMatrix9'}
  return New-OM9Shortcut $Cache $Menu $HostPath $om9UserRoot $CustomHome -TrustedKnownFolder:$knownFolder
 }
+function ConvertTo-OM9Version([string]$Text) {
+ if($Text -cnotmatch '^(?<base>(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*))(?:-(?<stamp>[0-9]{12}))?$'){return $null}
+ $baseText=$Matches.base;$stampText=$Matches.stamp
+ $base=$null
+ if(-not [version]::TryParse($baseText,[ref]$base)){return $null}
+ $stamp=0L
+ if($stampText){
+  $date=[DateTime]::MinValue
+  if(-not [DateTime]::TryParseExact($stampText,'yyyyMMddHHmm',[Globalization.CultureInfo]::InvariantCulture,[Globalization.DateTimeStyles]::None,[ref]$date)){return $null}
+  $stamp=[long]$stampText
+ }
+ return [pscustomobject]@{text=$Text;base=$base;stamp=$stamp}
+}
+function Compare-OM9Version($Left,$Right) {
+ $order=$Left.base.CompareTo($Right.base)
+ if($order -ne 0){return $order}
+ return $Left.stamp.CompareTo($Right.stamp)
+}
 function Find-OM9Update($Releases,[string]$CurrentVersion,[int]$CurrentRevision) {
- $current=[version]$CurrentVersion;$best=$null
+ $current=ConvertTo-OM9Version $CurrentVersion
+ if($null -eq $current){throw 'Unsupported current OM9 version'}
+ $best=$null;$bestVersion=$null
  foreach($release in $Releases){
-  if($release.draft -or $release.tag_name -notmatch '^v([0-9]+\.[0-9]+\.[0-9]+)$'){continue}
-  $number=$Matches[1];$version=[version]$number
+  if($release.draft -or -not ([string]$release.tag_name).StartsWith('v',[StringComparison]::Ordinal)){continue}
+  $number=([string]$release.tag_name).Substring(1);$version=ConvertTo-OM9Version $number
+  if($null -eq $version){continue}
   $page='https://github.com/MYuitsu/OpenMatrix9/releases/tag/v'+$number
   if($release.html_url -cne $page){continue}
   $checksum='https://github.com/MYuitsu/OpenMatrix9/releases/download/v'+$number+'/SHA256SUMS.txt'
@@ -216,9 +237,12 @@ function Find-OM9Update($Releases,[string]$CurrentVersion,[int]$CurrentRevision)
    $revision=if($Matches[1]){[int]$Matches[1]}else{1}
    $download='https://github.com/MYuitsu/OpenMatrix9/releases/download/v'+$number+'/'+$asset.name
    if($asset.browser_download_url -cne $download){continue}
-   if($version -lt $current -or ($version -eq $current -and $revision -le $CurrentRevision)){continue}
-   if(-not $best -or $version -gt [version]$best.version -or ($version -eq [version]$best.version -and $revision -gt $best.revision)){
+   $currentOrder=Compare-OM9Version $version $current
+   if($currentOrder -lt 0 -or ($currentOrder -eq 0 -and $revision -le $CurrentRevision)){continue}
+   $bestOrder=if($best){Compare-OM9Version $version $bestVersion}else{1}
+   if(-not $best -or $bestOrder -gt 0 -or ($bestOrder -eq 0 -and $revision -gt $best.revision)){
     $best=[pscustomobject]@{version=$number;revision=$revision;prerelease=[bool]$release.prerelease;release_url=$page;download_url=$download;checksum_url=$checksum;asset_name=$asset.name;digest=$asset.digest;key=($number+'/r'+$revision)}
+    $bestVersion=$version
    }
   }
  }
@@ -255,7 +279,7 @@ function Show-OM9Update($Update) {
  try{if($form.ShowDialog() -eq [Windows.Forms.DialogResult]::OK){return 'Update'};return 'Later'}finally{$form.Dispose()}
 }
 function Assert-OM9Update($Update) {
- if([string]$Update.version -cnotmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' -or $Update.revision -lt 1 -or $Update.revision -gt 9999){throw 'Invalid update version'}
+ if($null -eq (ConvertTo-OM9Version ([string]$Update.version)) -or $Update.revision -lt 1 -or $Update.revision -gt 9999){throw 'Invalid update version'}
  $suffix=if($Update.revision -gt 1){'-r'+$Update.revision}else{''}
  $name='OpenMatrix9-'+$Update.version+'-SetupLauncher'+$suffix+'-Windows-x64.zip'
  $base='https://github.com/MYuitsu/OpenMatrix9/releases/download/v'+$Update.version+'/'
@@ -367,7 +391,8 @@ function Install-OM9UpdateBundle([string]$Bundle,$Update,[string]$Cache,[string]
   $oldPath=Join-Path $Cache 'launcher-manifest.json'
   if([IO.File]::Exists($oldPath)){
    $current=Read-OM9Manifest $oldPath
-   if([version]$current.version -gt [version]$Update.version -or ($current.version -eq $Update.version -and [int]$current.launcher_revision -gt $Update.revision)){throw 'A newer version is already installed; downgrade refused'}
+   $order=Compare-OM9Version (ConvertTo-OM9Version $current.version) (ConvertTo-OM9Version $Update.version)
+   if($order -gt 0 -or ($order -eq 0 -and [int]$current.launcher_revision -gt $Update.revision)){throw 'A newer version is already installed; downgrade refused'}
   }
   $manifest=Read-OM9Manifest (Join-Path $Bundle 'launcher-manifest.json')
   if($manifest.version -cne $Update.version -or [int]$manifest.launcher_revision -ne $Update.revision){throw 'Update version changed before installation'}
@@ -394,8 +419,9 @@ function Invoke-OM9Update($Update,[string]$Cache,[string]$HostExecutable) {
   if(-not $HostExecutable){$HostExecutable=Get-OM9Host '' $om9UserRoot}
   $bundle=Get-OM9UpdateBundle $Update $Cache $progress
   $native=Join-Path $om9UserRoot 'v1-1/Mod/OpenMatrix9/bin/OpenMatrix9Gui.pyd'
+  $destination=Join-Path $om9UserRoot 'v1-1/Mod/OpenMatrix9'
   $deadline=[DateTime]::UtcNow.AddMinutes(30)
-  while(@(Get-OM9RunningFreeCAD $HostExecutable $native).Count){
+  while([IO.Directory]::Exists($destination) -and @(Get-OM9RunningFreeCAD $HostExecutable $native).Count){
    &$progress 'Download verified. Save your work and close OM9 / FreeCAD. Installation and reopening will follow automatically.'
    if([DateTime]::UtcNow -gt $deadline){throw 'Update wait timed out; installed version was retained. Retry on the next OM9 launch.'}
    Start-Sleep -Milliseconds 250

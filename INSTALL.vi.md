@@ -1,21 +1,29 @@
-# Cài OpenMatrix9 0.0.3 cho FreeCAD chính thức
+# Cài OpenMatrix9 cho FreeCAD chính thức
 
-**Launcher mới trong source (0.0.3 / r2):** chỉ kiểm tra GitHub khi mở OM9 bằng icon hoặc `Start-OM9.cmd`, không kiểm tra định kỳ. Nhấn **Update** để tự tải, xác minh và cài; nếu OM9/FreeCAD đang mở, lưu và đóng rồi bộ cập nhật tự cài và mở lại. **Later** cho phép cập nhật ở lần mở sau; **Cancel** giữ bản đang dùng. Xem [hướng dẫn launcher mới](launcher/README.md). ZIP v0.0.3 đã phát hành ở link phía dưới vẫn chứa r1 và chỉ mở trang tải; cần cài gói launcher r2 mới một lần để có Update tự tải/cài. ZIP release cũ được giữ nguyên.
+**Launcher mới trong source / r2:** chỉ kiểm tra GitHub khi mở OM9 bằng icon hoặc `Start-OM9.cmd`, không kiểm tra định kỳ. Nhấn **Update** để tự tải, xác minh và cài; nếu OM9/FreeCAD đang mở, lưu và đóng rồi bộ cập nhật tự cài và mở lại. **Later** cho phép cập nhật ở lần mở sau; **Cancel** giữ bản đang dùng. Xem [hướng dẫn launcher mới](launcher/README.md). Các ZIP release đã phát hành giữ launcher gốc; cần cài gói launcher r2 mới một lần để có Update tự tải/cài. ZIP release cũ được giữ nguyên.
 
 Bản thử nghiệm này dành cho **Windows x64, FreeCAD 1.1.4 chính thức** (Python 3.11, Qt 6.8.3, OCCT 7.8.1). Không cần source FreeCAD, Rust hay Visual Studio để sử dụng.
 
-## 1. Cài FreeCAD
+## 1. Cài FreeCAD và mở OM9 bằng launcher
 
-**Cách tự cài OM9, khuyến nghị:** sau khi cài FreeCAD 1.1.4, tải [gói setup launcher](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.3/OpenMatrix9-0.0.3-SetupLauncher-Windows-x64.zip), giải nén toàn bộ và bấm **Start-OM9.cmd**. Script tự cài/cập nhật plugin trong AppData, tạo icon **OpenMatrix9** trên Desktop và Start Menu rồi mở OM9. Những lần sau bấm icon Desktop hoặc tìm OpenMatrix9 trong Start Menu; không cần giữ thư mục giải nén. Cập nhật bằng Start-OM9.cmd của gói mới. Bản cũ được giữ ngoài Mod trong `v1-1\OM9-backups`; nếu cần thay plugin đang được dùng, lưu và đóng FreeCAD rồi chạy lại. Không cần Administrator, không tự tải mạng hay đóng ứng dụng. Log ở `v1-1\OM9-launcher`; checksum của ZIP này nằm trong **SHA256SUMS.txt**. Launcher kiểm tra GitHub ở tiến trình nền mỗi lần mở, báo link tải khi có bản mới hoặc revision launcher mới; mỗi bản chỉ báo một lần. Mất mạng vẫn mở OM9; không tự tải/cài plugin. Tải gói mới và chạy lại Start-OM9.cmd để cập nhật. Nếu chỉ đổi launcher thì không chép lại plugin hoặc cần đóng OM9. Trạng thái lưu ở `OM9-launcher\update-check.json`. Các bước phía dưới dành cho cài thủ công.
+1. Cài Windows x64 từ **[release FreeCAD 1.1.4 chính thức](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4)**, rồi mở FreeCAD một lần. Kiểm tra Help → About FreeCAD: **1.1.4**; tên thư mục có thể chỉ ghi `FreeCAD 1.1`.
+2. Mở **[trang Releases](https://github.com/MYuitsu/OpenMatrix9/releases)**. Chọn bản **0.3.4-202610120606**, mở **Assets** và tải **OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip**.
+3. Giải nén ZIP SetupLauncher vào một thư mục. Giữ thư mục **OpenMatrix9**, **launcher-manifest.json** và các file **Start-OM9** cùng nhau, rồi bấm **Start-OM9.cmd**. Launcher đọc thư mục OpenMatrix9 đã giải nén.
 
-Tải bộ cài Windows x64 từ [release FreeCAD 1.1.4 chính thức](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4), cài và mở một lần. Vào Help → About FreeCAD để kiểm tra phiên bản **1.1.4**; tên thư mục cài có thể chỉ ghi `FreeCAD 1.1`.
+Launcher tự cài/cập nhật trong `%APPDATA%\FreeCAD\v1-1\Mod\OpenMatrix9`, tạo icon **OpenMatrix9** trên Desktop và Start Menu rồi mở workbench. Những lần sau dùng icon Desktop; không cần giữ thư mục giải nén. Không cần Administrator, source FreeCAD, Rust hay Visual Studio.
 
-Ví dụ chương trình đã cài: `C:\Program Files\FreeCAD 1.1\bin\FreeCAD.exe`.
+Tải **SHA256SUMS.txt** từ cùng release để đối chiếu checksum của gói trước khi cài. ZIP SetupLauncher dùng để cài tự động; ZIP FreeCAD-1.1.4 dùng để cài plugin thủ công. Không cần tải Source code hay artifact trong Actions.
+
+Cập nhật bằng Start-OM9.cmd từ gói mới. Bản cũ được giữ ngoài Mod trong `v1-1\OM9-backups`; gói không đổi thì không chép lại plugin. Nếu plugin đang được dùng và cần thay, lưu và đóng FreeCAD rồi chạy lại. Launcher không tự đóng ứng dụng; gói thiếu hoặc lỗi cache giữ lại bản đã cài. Log ở `v1-1\OM9-launcher`.
+
+Launcher kiểm tra **release đã phát hành** ở tiến trình nền mỗi lần mở, báo một lần khi có phiên bản ứng dụng hoặc revision launcher mới. Artifact candidate không xuất hiện qua bộ kiểm tra release này. Mất mạng vẫn mở OM9; tải và cài bản mới là thao tác tường minh. Chỉ đổi launcher thì không chép lại plugin. Trạng thái ở `OM9-launcher\update-check.json`.
+
+Ví dụ FreeCAD đã cài: `C:\Program Files\FreeCAD 1.1\bin\FreeCAD.exe`. Các bước sau dành cho cài thủ công.
 
 ## 2. Tải OM9 và đặt đúng thư mục
 
 1. Đóng các cửa sổ FreeCAD trước khi thay plugin.
-2. Tải [OpenMatrix9-0.0.3-FreeCAD-1.1.4-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.3/OpenMatrix9-0.0.3-FreeCAD-1.1.4-Windows-x64.zip).
+2. Tải **OpenMatrix9-0.3.4-202610120606-FreeCAD-1.1.4-Windows-x64.zip** trong **Assets** ở [trang Releases](https://github.com/MYuitsu/OpenMatrix9/releases).
 3. Giải nén; bên trong có thư mục **OpenMatrix9**.
 4. Nhấn **Win + R**, dán `%APPDATA%\FreeCAD\v1-1\Mod` rồi Enter. Nếu chưa có thư mục này, tạo nó.
 5. Chép thư mục **OpenMatrix9** vào đó. Nếu đã có bản cũ, chuyển bản cũ ra ngoài thư mục `Mod` trước để có thể khôi phục.
@@ -46,7 +54,9 @@ Trong OM9, dùng lệnh **Copy/Paste** cho đối tượng đã chọn; **Copy S
 
 Giữ clipboard yên khi trao đổi. Các script kiểm chứng Matrix trong source là công cụ phát triển; **không cần chạy chúng để cài hoặc mở OM9**, và OM9 là workbench FreeCAD. Bản release này không cài plugin `.rhp` hay adapter sản phẩm vào Matrix.
 
-## Phạm vi bản thử nghiệm
+## Phạm vi v0.0.3 lịch sử và giới hạn host còn áp dụng
+
+Các mục dưới mô tả checkpoint v0.0.3 đã phát hành. Bản Gumball có bằng chứng kiểm thử cục bộ riêng; CI chỉ build/đóng gói theo yêu cầu. Xem [quy trình và bằng chứng](docs/validation/2026-10-12-local-tests-ci-build-only.md). Các ghi chú lịch sử không xác nhận toàn bộ bản mới.
 
 - `0.0.3` bổ sung build công khai trên GitHub và launcher mới, trên nền tương thích FreeCAD chính thức của `0.0.2`. Xem [phạm vi CI và lỗi tooling lịch sử còn lại](docs/validation/2026-10-11-release003-ci.md). Bằng chứng Rhino/Matrix của các nhánh dev trước không phải chứng nhận lại toàn bộ bản stock này.
 - Chỉnh curve, bảng layer, Copy/Paste, BRep trong các mẫu đã kiểm tra, worker import và thao tác viewport có báo cáo kèm release. Full openNURBS, mọi thuật toán trang sức và chuyển đầy đủ bảng màu/khóa bằng thao tác Matrix sản phẩm vẫn chưa được nghiệm thu toàn bộ.
@@ -58,4 +68,6 @@ Giữ clipboard yên khi trao đổi. Các script kiểm chứng Matrix trong so
 
 Kiểm tra lại phiên bản FreeCAD, đường dẫn versioned `v1-1\Mod`, cấu trúc giải nén và đủ hai file trong `bin`. Khởi động lại sau khi thay plugin. Mở View → Panels → Report view và gửi thông báo nếu vẫn lỗi. Không lấy DLL từ bản FreeCAD khác để chép đè.
 
-Để gỡ OM9: đóng FreeCAD, chuyển `OpenMatrix9` ra ngoài `Mod`. Dự án đã lưu vẫn còn nguyên. Để kiểm tra tải xuống, so SHA256 với `SHA256SUMS.txt` của [release 0.0.3](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.3).
+Để gỡ OM9: đóng FreeCAD, chuyển `OpenMatrix9` ra ngoài `Mod`. Dự án đã lưu vẫn còn nguyên. Để kiểm tra tải xuống, so SHA256 với `SHA256SUMS.txt` của [release](https://github.com/MYuitsu/OpenMatrix9/releases).
+
+Phiên bản có dạng `aa.bb.cc-yyyyMMddhhmm`. Launcher so sánh ba số trước, rồi thời gian build, rồi revision launcher của cùng phiên bản ứng dụng. Gói cũ dạng `aa.bb.cc` vẫn được hỗ trợ. Với candidate, chọn ZIP từ đúng commit nhánh đã build thành công; với gói đã phát hành, chọn thời gian khớp tag release. Thời gian dùng múi giờ Asia/Saigon; chỉ đổi `aa` khi người dùng yêu cầu, mỗi đặc tả hoàn tất tăng `bb`, mỗi tác vụ hoàn tất tăng `cc`.

@@ -1,11 +1,11 @@
+#include "LayerDocumentAdapter.h"
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "SurfaceGeometry.h"
-#include "LayerDocumentAdapter.h"
 #include "SurfaceLoft.h"
 #include "SurfaceSeams.h"
 #include "SurfaceRefit.h"
 #include "SurfaceConstraints.h"
-
+#include "SurfaceHistory.h"
 #include "CurveGeometry.h"
 #include "RustBridge.h"
 #include <App/Document.h>
@@ -86,7 +86,8 @@ namespace {
 void verifySurfaceInput(App::Document& doc,const SurfaceInput& input) {
     // Empty guards are intentional for persistent History reconstruction and
     // transient type probes. Accepted interactive selections always carry guards.
-    if(input.guards.empty())phase3Require(10);for(const auto& guard:input.guards)verifyPhase3Object(doc,guard);
+    for(const auto& guard:input.guards)verifyObject(doc,guard);
+    for(const auto& guard:input.phase3Guards)verifyPhase3Object(doc,guard);
 }
 }
 PyObject* surfaceWire(App::Document& doc,const SurfaceInput& input) {
@@ -95,7 +96,7 @@ PyObject* surfaceWire(App::Document& doc,const SurfaceInput& input) {
     Ref part(PyImport_ImportModule("Part"));Ref pyObject(object->getPyObject());Ref original(PyObject_GetAttrString(pyObject.p,"Shape"));Ref shape(PyObject_CallMethod(original.p,"copy","OO",Py_True,Py_False));
     if(!input.chain.empty()){
         Ref edges(PyList_New(0));
-        for(const auto& [name,sub]:input.chain){SurfaceInput element{name,sub};element.guards=input.guards;Ref segment(surfaceWire(doc,element));Ref items(PyObject_GetAttrString(segment.p,"Edges"));
+        for(const auto& [name,sub]:input.chain){Ref segment(surfaceWire(doc,{name,sub}));Ref items(PyObject_GetAttrString(segment.p,"Edges"));
             if(PySequence_Size(items.p)!=1)throw std::runtime_error("Each rail chain reference must contain exactly one edge");
             Ref edge(PySequence_GetItem(items.p,0));if(PyList_Append(edges.p,edge.p)<0)throw std::runtime_error(pythonError());}
         Ref joined(PyObject_CallMethod(part.p,"Wire","O",edges.p));Py_SETREF(shape.p,joined.release());
@@ -141,12 +142,16 @@ PyObject* surfaceWire(App::Document& doc,const SurfaceInput& input) {
 PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& inputs,const SurfaceOptions& options) {
     for(const auto& input:inputs)verifySurfaceInput(doc,input);
     std::vector<Om9Phase3Facts> facts;for(const auto& input:inputs){Ref wire(surfaceWire(doc,input));facts.push_back(phase3ShapeFacts(wire.p));}phase3Validate(options.kind==1?8:options.kind==2?9:10,facts);
+    phase3Require(om9_phase3_surface_options(options.kind,options.style,options.closed,options.sectionMode,options.pointCount,options.tolerance,inputs.size()));
     // Spec: OM9-SURFACE-001, OM9-SURFACE-003, OM9-SURFACE-009.
     const unsigned rails=options.kind==1?1:options.kind==2?2:0;
-    phase3Require(om9_phase3_surface_options(options.kind,options.style,options.closed,options.sectionMode,options.pointCount,options.tolerance,inputs.size()));
+    if(options.kind<1||options.kind>3||inputs.size()<rails+(rails?1:2))throw std::runtime_error("Not enough input curves");
+    if(!om9_surface_options_valid(options.kind,options.style,options.closed))throw std::runtime_error("Unsupported surface options");
+    if(options.closed&&inputs.size()<rails+(rails?2:3))throw std::runtime_error("Closed Sweep needs two profiles; Closed Loft needs three sections");
     if(options.maintainHeight&&(options.kind!=2||inputs.size()!=3))throw std::runtime_error("Maintain Height currently requires exactly one Sweep2 profile; clear it for multiple profiles");
     if(!options.slashes.empty()&&(options.kind!=2||inputs.size()!=3||inputs[0].closed||inputs[1].closed||options.continuityA||options.continuityB))
         throw std::runtime_error("Add Slash currently requires one Sweep2 profile and two open rails, without face continuity constraints");
+    if(options.sectionMode>2||options.pointCount<2||options.pointCount>256||!std::isfinite(options.tolerance)||options.tolerance<=0||options.tolerance>1e6)throw std::runtime_error("Unsupported section fitting options");
     if(options.continuityA||options.continuityB||options.matchStart||options.matchEnd)
         return constrainedSurface(doc,inputs,options);
     Ref part(PyImport_ImportModule("Part")),wires(PyList_New(0));
@@ -178,7 +183,7 @@ PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& input
             if(!fitted){
                 char message[2048]={};om9_spline_message(message,sizeof(message));throw std::runtime_error(message);
             }
-            auto fit=publishedSurfaceSplineShape();Ref rebuilt=wireFromShape(part.p,fit.value);
+            auto fit=publishedSplineShape();Ref rebuilt=wireFromShape(part.p,fit.value);
             if(options.sectionMode==2)certifySurfaceRefit(wire.p,rebuilt.p,options.tolerance);
             Py_SETREF(wire.p,rebuilt.release());
         }
@@ -203,8 +208,7 @@ PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& input
     }else {
         Ref api(PyObject_GetAttrString(part.p,"BRepOffsetAPI"));Ref constructor(PyObject_GetAttrString(api.p,"MakePipeShell"));
         Ref pipe(PyObject_CallFunctionObjArgs(constructor.p,PyList_GetItem(wires.p,0),nullptr));
-        const double accuracy=om9_phase3_kernel_tolerance();
-        Ref precision(PyObject_CallMethod(pipe.p,"setTolerance","ddd",accuracy,accuracy,accuracy));
+        const double accuracy=om9_phase3_kernel_tolerance();Ref precision(PyObject_CallMethod(pipe.p,"setTolerance","ddd",accuracy,accuracy,accuracy));
         Ref mode(PyObject_CallMethod(pipe.p,"setFrenetMode","O",options.frenet?Py_True:Py_False));
         if(rails==2){
             Ref auxiliary(PyObject_CallMethod(pipe.p,"setAuxiliarySpine","OOi",PyList_GetItem(wires.p,1),Py_True,int(om9_surface_sweep2_contact(inputs.size()-rails))));
@@ -224,13 +228,17 @@ void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceI
     const char* name=options.kind==1?"Sweep1":options.kind==2?"Sweep2":"Loft";
     const char* feature=options.kind==1?"OM9-SURFACE-001":options.kind==2?"OM9-SURFACE-003":"OM9-SURFACE-009";
     for(const auto& input:inputs)verifySurfaceInput(doc,input);
-    std::vector<Om9Phase3Facts> facts;for(const auto& input:inputs){Ref wire(surfaceWire(doc,input));facts.push_back(phase3ShapeFacts(wire.p));}phase3Validate(options.kind==1?8:options.kind==2?9:10,facts);
-    if(flag(shape,"isNull")||!flag(shape,"isValid"))throw std::runtime_error("Invalid surface output; inputs are unchanged");
-    const int transactionId=om9OpenTransaction(doc,name);
+    const int transaction=om9OpenTransaction(doc,name);
     try {
-        LayerGeometryTransaction layers(doc,transactionId);
-        for(const auto& input:inputs)verifySurfaceInput(doc,input);
-
+        std::unique_ptr<LayerGeometryTransaction> layers;if(hasCanonicalLayerDocument(doc))layers=std::make_unique<LayerGeometryTransaction>(doc,transaction);
+        if(options.history){
+            auto* feature=createSurfaceHistory(doc,shape,inputs,options);Ref object(feature->getPyObject());
+            Ref view(PyObject_GetAttrString(object.p,"ViewObject")),color(Py_BuildValue("(ddd)",0.0,130.0/255.0,85.0/255.0));set(view.p,"ShapeColor",color.p);set(view.p,"LineColor",color.p);
+            doc.recompute();if(!feature->isValid()||feature->Shape.getShape().isNull())throw std::runtime_error("Surface History recompute failed before commit");
+            if(layers)layers->finish();
+            if(!ownsLayerGeometryTransaction(doc,transaction))throw std::runtime_error("Surface transaction ownership changed");
+            om9CommitTransaction(doc);return;
+        }
         Ref pyDoc(doc.getPyObject()),object(PyObject_CallMethod(pyDoc.p,"addObject","ss","Part::Feature",name));set(object.p,"Shape",shape);
         Ref id(PyUnicode_FromString(feature)),command(PyUnicode_FromString(name));property(object.p,"App::PropertyString","OM9FeatureId",id.p);property(object.p,"App::PropertyString","OM9Command",command.p);
         Ref sources(PyList_New(0));std::ostringstream settings;settings.precision(17);settings<<"style="<<options.style<<";frenet="<<options.frenet<<";closed="<<options.closed<<";maintainHeight="<<options.maintainHeight<<";sectionMode="<<options.sectionMode<<";pointCount="<<options.pointCount<<";preview="<<options.preview<<";tolerance="<<options.tolerance<<";continuityA="<<options.continuityA<<";continuityB="<<options.continuityB<<";matchStart="<<options.matchStart<<";matchEnd="<<options.matchEnd;
@@ -242,9 +250,9 @@ void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceI
         }
         property(object.p,"App::PropertyLinkSubList","SourceCurves",sources.p);Ref config(PyUnicode_FromString(settings.str().c_str()));property(object.p,"App::PropertyString","SurfaceOptions",config.p);
         Ref view(PyObject_GetAttrString(object.p,"ViewObject")),color(Py_BuildValue("(ddd)",0.0,130.0/255.0,85.0/255.0));set(view.p,"ShapeColor",color.p);set(view.p,"LineColor",color.p);
-        doc.recompute();layers.finish();
-        if(!ownsLayerGeometryTransaction(doc,transactionId))throw std::runtime_error("Surface transaction ownership changed");
+        doc.recompute();if(layers)layers->finish();
+        if(!ownsLayerGeometryTransaction(doc,transaction))throw std::runtime_error("Surface transaction ownership changed");
         om9CommitTransaction(doc);
-    }catch(...){if(ownsLayerGeometryTransaction(doc,transactionId))om9AbortTransaction(doc);throw;}
+    }catch(...){if(ownsLayerGeometryTransaction(doc,transaction))om9AbortTransaction(doc);throw;}
 }
 }

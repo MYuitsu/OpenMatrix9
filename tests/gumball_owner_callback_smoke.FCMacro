@@ -1,0 +1,41 @@
+"""A synchronous Shape callback cannot silently replace parametric output."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets
+sys.path.insert(0,str(Path(__file__).parent));from gumball_fixture import GumballUI
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9-INFO-020']}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    doc=None;observer=None
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('GumballOwnerCallback');doc.UndoMode=1
+        box=doc.addObject('Part::Box','Box');box.Length=12;box.Width=8;box.Height=6;doc.recompute()
+        ui=GumballUI(native);ui.select(box);ui.command('Gumball On');ui.command('GumballAlignment World')
+        class Observer:
+            nested=False;count=0
+            def slotChangedObject(self,obj,prop):
+                if obj==box and prop=='Shape' and 'Recompute' in obj.State and not self.nested and obj.Length.Value==24:
+                    self.nested=True;self.count+=1
+                    obj.Shape=Part.makeSphere(1)
+                    self.nested=False
+        observer=Observer();App.addDocumentObserver(observer)
+        before=(doc.UndoCount,box.Length.Value,box.Placement)
+        ui.numeric('ScaleX','2');ui.settle();App.removeDocumentObserver(observer)
+        report['callbacks']=observer.count;report['transcript']=ui.transcript()
+        check('native parametric callback was exercised',observer.count>0)
+        check('foreign topology rejects the complete batch',doc.UndoCount==before[0] and box.Length.Value==before[1] and box.Placement==before[2] and abs(box.Shape.Volume-576)<1e-7)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        if observer is not None:
+            try:App.removeDocumentObserver(observer)
+            except Exception:pass
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        if doc is not None:App.closeDocument(doc.Name)
+        QtCore.QTimer.singleShot(100,QtWidgets.QApplication.quit)
+QtCore.QTimer.singleShot(1500,run)

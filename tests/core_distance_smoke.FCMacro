@@ -25,16 +25,21 @@ def run():
         obj=doc.addObject('Part::Box','Reference');doc.recompute();Gui.Selection.addSelection(obj);settle()
         before=(len(doc.Objects),doc.UndoCount if hasattr(doc,'UndoCount') else len(doc.UndoNames),len(doc.RedoNames),[o.Name for o in Gui.Selection.getSelection()])
         cmd('Distance');cmd('1,2,3');cmd('4,6,15');check('CMD spatial distance reports 13 mm',prompt.text()=='Distance: 13 mm')
+        inputs=json.loads(window.property('om9MeasurementReport'))['inputs']
+        check('completed Distance report retains both typed inputs',len(inputs)==2 and [value['original_text'] for value in inputs]==['1,2,3','4,6,15'])
         action.trigger();settle();cmd('0,0,0');cmd('Unit=in');cmd('304.8,0,0');check('menu session uses same CMD inputs and unit conversion',prompt.text()=='Distance: 12 in')
         cmd('Distance');cmd('0,0,0');cmd('Unit=unknown');check('invalid unit reports error', 'Unit must' in prompt.text());cmd('Unit=ft');cmd('304.8,0,0');check('invalid unit retains first point and valid unit succeeds',prompt.text()=='Distance: 1 ft')
-        cmd('Distance');cmd('nan,0,0');check('nonfinite point rejected','Invalid point' in prompt.text());cmd('0,0,0');cmd('0,0,0');check('coincident points report zero',prompt.text()=='Distance: 0 mm')
+        previous_report=window.property('om9MeasurementReport')
+        cmd('Distance');cmd('nan,0,0');check('nonfinite point rejected',prompt.text()=='Expected a finite length')
+        check('rejected point does not publish a partial measurement report',window.property('om9MeasurementReport')==previous_report)
+        cmd('0,0,0');cmd('0,0,0');check('coincident points report zero',prompt.text()=='Distance: 0 mm')
         cmd('Distance');cmd('0,0,0');QtTest.QTest.keyClick(field,QtCore.Qt.Key_Escape);settle();check('Esc cancels Distance', 'cancelled' in prompt.text().lower())
         area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
         viewer=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport();center=viewer.rect().center()
         height=Gui.activeDocument().activeView().getCameraNode().height.getValue();expected=height*50/viewer.height()
         action.trigger();settle();QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=center-QtCore.QPoint(25,0));settle();QtTest.QTest.mouseClick(viewer,QtCore.Qt.LeftButton,pos=center+QtCore.QPoint(25,0));settle()
         check('two native mouse points report calibrated plane distance',prompt.text().startswith('Distance: ') and abs(float(prompt.text().split()[1])-expected)<1e-4)
-        for slot,normalPoint in [(2,'100,0,0'),(3,'0,100,0')]:
+        for slot,normalPoint in [(2,'w100,0,0'),(3,'w0,100,0')]:
             planeSub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==slot);area.setActiveSubWindow(planeSub);settle()
             planeViewer=next(w for w in planeSub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport();planeCenter=planeViewer.rect().center()
             planeHeight=Gui.activeDocument().activeView().getCameraNode().height.getValue();planeExpected=planeHeight*50/planeViewer.height()
@@ -69,6 +74,16 @@ def run():
         report=next((w for w in editors if w.metaObject().className().endswith('ReportOutput')),None)
         result['report_widgets']=[{'class':w.metaObject().className(),'name':w.objectName(),'text':w.toPlainText()[-2000:]} for w in editors]
         check('distance results remain in native feedback history',report is not None and 'Distance: 13 mm' in report.toPlainText() and 'Distance: 12 in' in report.toPlainText() and 'Distance: 5 cm' in report.toPlainText())
+        lifetime=App.newDocument('DistanceLifetime');lifetime.UndoMode=1;settle()
+        cmd('Distance');cmd('w0,0,0');cmd('w3,4,0')
+        completed_report=window.property('om9MeasurementReport')
+        old_owner=json.loads(completed_report)['inputs'][0]['context']['document']['runtime_owner']
+        cmd('Distance');cmd('w0,0,0');App.closeDocument(lifetime.Name)
+        lifetime=App.newDocument('DistanceLifetime');lifetime.UndoMode=1;settle();cmd('w3,4,0')
+        check('close and reopen same name cannot revive a measurement',window.property('om9MeasurementReport')==completed_report and prompt.text()!='Distance: 5 mm')
+        cmd('Distance');cmd('w0,0,0');cmd('wr3,4,0')
+        fresh=json.loads(window.property('om9MeasurementReport'))
+        check('reopened document uses a new read-only measurement owner',prompt.text()=='Distance: 5 mm' and fresh['inputs'][0]['context']['document']['runtime_owner']!=old_owner and not lifetime.Objects and not lifetime.UndoNames)
         result['ok']=True
     except Exception:result['ok']=False;result['error']=traceback.format_exc()
     finally:

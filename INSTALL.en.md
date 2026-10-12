@@ -1,22 +1,28 @@
-# Install OpenMatrix9 0.0.3 with official FreeCAD
+# Install OpenMatrix9 with official FreeCAD
 
 This experimental package targets **Windows x64 and official FreeCAD 1.1.4**, with Python 3.11, Qt 6.8.3 and OCCT 7.8.1. You do not need the FreeCAD source, Rust or Visual Studio to use it.
 
 ## Automatic installation and Desktop icon (recommended)
 
-Install official FreeCAD 1.1.4, then download [the setup launcher ZIP](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.3/OpenMatrix9-0.0.3-SetupLauncher-Windows-x64.zip). Extract the entire ZIP and double-click **Start-OM9.cmd**. It installs or updates the bundled module in `%APPDATA%\FreeCAD\v1-1\Mod\OpenMatrix9`, creates **OpenMatrix9** shortcuts with its icon on Desktop and in Start Menu, and starts the workbench. No Administrator access is needed.
+1. Install the Windows x64 build from the **[official FreeCAD 1.1.4 release](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4)** and open FreeCAD once. Check Help → About FreeCAD for **1.1.4**; its folder may simply be named `FreeCAD 1.1`.
+2. Open the **[Releases page](https://github.com/MYuitsu/OpenMatrix9/releases)**. Find **0.3.4-202610120606**, expand **Assets**, and download **OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip**.
+3. Extract the SetupLauncher ZIP into a folder. Keep the bundled **OpenMatrix9** folder, **launcher-manifest.json** and **Start-OM9** files together, then double-click **Start-OM9.cmd**. The launcher reads the extracted OpenMatrix9 folder.
 
-Use Desktop or search OpenMatrix9 in Start Menu afterwards; it remains usable after moving or deleting the extracted folder. To update, run Start-OM9.cmd from a new bundle. Previous modules are kept outside Mod in `v1-1\OM9-backups`; an unchanged module is not recopied. Save and close the FreeCAD instance using this installation if an update is required. The launcher never closes your application or downloads a plugin. Incomplete packages and failed cache updates preserve the previous installation. Logs are in `v1-1\OM9-launcher`. Check this ZIP against **SHA256SUMS.txt** on the release page.
+The launcher installs or updates OM9 in `%APPDATA%\FreeCAD\v1-1\Mod\OpenMatrix9`, creates **OpenMatrix9** shortcuts on Desktop and in Start Menu, and opens the workbench. Use the Desktop icon afterwards; the extracted folder is no longer needed. No Administrator access, FreeCAD source, Rust or Visual Studio is required.
 
-The launcher checks GitHub releases in the background whenever OM9 starts. New application versions or launcher revisions prompt once with a download-page link. Network errors do not prevent startup. Download/extract the new bundle and run its Start-OM9.cmd to update; it never installs updates automatically. A launcher-only update does not recopy the plugin or require closing OM9. Check status in `OM9-launcher\update-check.json`.
+Download **SHA256SUMS.txt** from the same release to check package integrity. The SetupLauncher ZIP installs automatically; the FreeCAD-1.1.4 ZIP is for manual plugin installation. Source code downloads and Actions artifacts are unnecessary for installation.
+
+To update, extract a new SetupLauncher bundle and run its Start-OM9.cmd. Previous modules are backed up outside `Mod` in `v1-1\OM9-backups`; an unchanged module is not recopied. Save and close the FreeCAD instance using this installation when its plugin needs replacing. Incomplete packages or failed cache updates preserve the previous installation. Logs are in `v1-1\OM9-launcher`.
+
+The launcher checks published GitHub releases in the background at startup. It prompts once for a newer application version or launcher revision with a download-page link; network errors do not prevent startup. Candidate branch artifacts do not appear through that release checker. Download and install updates explicitly; launcher-only updates do not recopy the plugin. Status is in `OM9-launcher\update-check.json`.
 
 ## Manual installation
 
-**Updated launcher in source (0.0.3 / r2):** checks GitHub only once when opening OM9 through its icon or Start-OM9.cmd. There is no periodic background monitoring. Click **Update** to download, verify checksums and install automatically; save and close OM9 when asked, then it installs and reopens with the same host/profile. **Later** offers the update on the next start; **Cancel** retains the installed version. See [launcher instructions](launcher/README.md). The existing published v0.0.3 ZIP above contains r1 and still opens the download page; install the new r2 launcher bundle once to enable automatic download/install. Existing release assets have not been replaced.
+**Updated launcher in source / r2:** checks GitHub only once when opening OM9 through its icon or Start-OM9.cmd. There is no periodic background monitoring. Click **Update** to download, verify checksums and install automatically; save and close OM9 when asked, then it installs and reopens with the same host/profile. **Later** offers the update on the next start; **Cancel** retains the installed version. See [launcher instructions](launcher/README.md). Existing published ZIPs retain their original launcher; install the new r2 launcher bundle once to enable automatic download/install. Existing release assets have not been replaced.
 
 1. Download the Windows x64 installer from the [official FreeCAD 1.1.4 release](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4). Install and start FreeCAD once. Check Help → About FreeCAD: **1.1.4**. The installation directory may simply be named `FreeCAD 1.1`.
 2. Close FreeCAD before replacing a plugin.
-3. Download [OpenMatrix9-0.0.3-FreeCAD-1.1.4-Windows-x64.zip](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.3/OpenMatrix9-0.0.3-FreeCAD-1.1.4-Windows-x64.zip) and extract its **OpenMatrix9** folder.
+3. Download **OpenMatrix9-0.3.4-202610120606-FreeCAD-1.1.4-Windows-x64.zip** under **Assets** on the [Releases page](https://github.com/MYuitsu/OpenMatrix9/releases) and extract its **OpenMatrix9** folder.
 4. Press **Win + R**, enter `%APPDATA%\FreeCAD\v1-1\Mod` and create the directory if needed. Place **OpenMatrix9** inside it. Move an older installation outside `Mod` as a backup first.
 5. Restart your installed FreeCAD and select **OpenMatrix9** from the workbench selector.
 
@@ -40,7 +46,9 @@ Use Copy/Paste for selected geometry and Copy Session for the full layer table, 
 
 The Matrix diagnostic scripts in the source are development tools, not installation steps. OM9 is a FreeCAD workbench; this package does not install a Matrix `.rhp` or a production Matrix-side receiver.
 
-## Experimental scope
+## Historical v0.0.3 scope and continuing host limits
+
+The following limits describe the published v0.0.3 checkpoint. The Gumball candidate has its own native validation; consult the exact commit's Action for its stock CI result. These historical notes do not certify that candidate.
 
 - v0.0.3 adds the public CI build and latest launcher to the official-host compatibility introduced in v0.0.2. CI scope and remaining historical tooling failures are documented in [build validation](docs/validation/2026-10-11-release003-ci.md). Earlier Rhino/Matrix development reports are historical evidence, not a full recertification of this stock build.
 - Full openNURBS, all jewelry algorithms and production Matrix palette/lock handoff are not fully accepted yet.
@@ -50,4 +58,6 @@ The Matrix diagnostic scripts in the source are development tools, not installat
 
 If the workbench is missing, check the exact host version, the versioned user directory, extracted layout and both binaries in `bin`, then restart FreeCAD. Open View → Panels → Report view for load errors. Do not copy DLLs from another FreeCAD version.
 
-To uninstall, close FreeCAD and move OpenMatrix9 outside `Mod`; saved projects remain untouched. Compare downloaded file hashes with `SHA256SUMS.txt` on the [0.0.3 release page](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.3).
+To uninstall, close FreeCAD and move OpenMatrix9 outside `Mod`; saved projects remain untouched. Compare downloaded file hashes with `SHA256SUMS.txt` from the same candidate artifact, or on the published [release page](https://github.com/MYuitsu/OpenMatrix9/releases).
+
+Versions use `aa.bb.cc-yyyyMMddhhmm`. The launcher compares the numeric triplet first, then the build timestamp, then a launcher revision for the identical application version. Legacy `aa.bb.cc` bundles remain supported. For candidate artifacts, choose the timestamped ZIP from the intended successful branch commit; for published bundles, match the release tag. The timestamp uses Asia/Saigon time; `aa` changes only at the user’s request, each completed specification increments `bb`, and each completed task increments `cc`.

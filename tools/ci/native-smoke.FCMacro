@@ -25,7 +25,9 @@ def run():
         check('authored SVG renders',QtSvg.QSvgRenderer(str(icon)).isValid())
         check('plugin-local import worker',(root/'bin/OM9ThreeDmImportWorker.exe').is_file())
         doc=App.newDocument('OM9StockCompatibility');doc.UndoMode=1
-        check('default palette32',len(json.loads(native.layerDocumentPanel(doc.Name))['layers'])==32)
+        check('native Gumball APIs available',all(callable(getattr(native,name,None)) for name in ('gumballState','gumballHandles')))
+        sidebar=Gui.getMainWindow().findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar')
+        check('native layer controls available',all(sidebar.findChild(QtWidgets.QToolButton,'OM9LayerSwatch%d'%index) is not None for index in range(32)))
         doc.openTransaction('Stock ring')
         ring=doc.addObject('Part::Feature','Ring');ring.Shape=Part.makeTorus(10,1.5);doc.recompute();doc.commitTransaction()
         check('stock OCCT ring valid',ring.Shape.isValid())

@@ -2,7 +2,7 @@ name: Build and release Windows OM9
 
 on:
   push:
-    branches: [codex/release-0.0.3]
+    branches: [main, 'codex/release-*', 'codex/gumball-release-*']
     tags: ['v*']
   workflow_dispatch:
   pull_request:
@@ -56,25 +56,25 @@ jobs:
       - name: Compile plugin, Rust core, openNURBS and worker against stock FreeCAD
         shell: pwsh
         run: ./tools/ci/build-windows.ps1
-      - name: Test native ABI, CAD, worker, Rust and launcher
+      - name: Record build identity and binary SHA256 (tests run locally)
         shell: pwsh
-        run: ./tools/ci/verify-windows.ps1
+        run: python tools/ci/record-build.py --root "$env:OM9_CI_ROOT"
       - name: Produce two ZIPs and shared SHA256SUMS
         shell: pwsh
-        run: python tools/ci/package_release.py --root "$env:OM9_CI_ROOT"
+        run: python tools/ci/package_release.py --root "$env:OM9_CI_ROOT" --build-only
       - name: Attest ZIP provenance
         if: github.event_name != 'pull_request'
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-path: build/ci/packages/*.zip
-      - name: Keep tested release files
+      - name: Keep built release files
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: om9-release-files
           path: build/ci/packages/*
           if-no-files-found: error
           retention-days: 30
-      - name: Keep build and test evidence
+      - name: Keep build provenance
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -97,7 +97,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - name: Download the tested artifacts from this run
+      - name: Download the built artifacts from this run
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name om9-release-files --dir dist

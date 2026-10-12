@@ -9,6 +9,19 @@ function Release($version,$revision=1,$draft=$false){
  $name="OpenMatrix9-$version-SetupLauncher";if($revision -gt 1){$name+="-r$revision"};$name+='-Windows-x64.zip'
  return [pscustomobject]@{tag_name="v$version";draft=$draft;prerelease=$true;html_url="https://github.com/MYuitsu/OpenMatrix9/releases/tag/v$version";assets=@([pscustomobject]@{name=$name;browser_download_url="https://github.com/MYuitsu/OpenMatrix9/releases/download/v$version/$name"},[pscustomobject]@{name='SHA256SUMS.txt';browser_download_url="https://github.com/MYuitsu/OpenMatrix9/releases/download/v$version/SHA256SUMS.txt"})}
 }
+$timestamped=Find-OM9Update @((Release '0.3.4-202610121234')) '0.0.3' 1
+Check 'timestamp version is offered to a legacy installation' ($timestamped.version -eq '0.3.4-202610121234')
+Check 'later build timestamp is offered' ((Find-OM9Update @((Release '0.3.4-202610121235')) '0.3.4-202610121234' 1).version -eq '0.3.4-202610121235')
+Check 'earlier build timestamp cannot downgrade' ($null -eq (Find-OM9Update @((Release '0.3.4-202610121233')) '0.3.4-202610121234' 1))
+Check 'numeric spec revision sorts before timestamp' ((Find-OM9Update @((Release '0.3.9-202610131234'),(Release '0.3.10-202610121234')) '0.0.3' 1).version -eq '0.3.10-202610121234')
+Check 'legacy same-triplet release sorts before timestamp build' ((Find-OM9Update @((Release '0.3.4-202610121234')) '0.3.4' 9).version -eq '0.3.4-202610121234')
+Check 'same timestamp launcher revision update is offered' ((Find-OM9Update @((Release '0.3.4-202610121234' 2)) '0.3.4-202610121234' 1).revision -eq 2)
+foreach($invalid in @('0.3.4-202602291200','0.3.4-202613011200','0.3.4-202610122460','0.3.4-20261012','00.3.4-202610121234')){
+ Check ('malformed timestamp release is ignored: '+$invalid) ($null -eq (Find-OM9Update @((Release $invalid)) '0.0.3' 1))
+}
+$manifest=Join-Path $run 'timestamp-manifest.json'
+@{version='0.3.4-202610121234';freecad='1.1.4';files=@(@{path='InitGui.py';sha256=('a'*64)},@{path='bin/OpenMatrix9Gui.pyd';sha256=('b'*64)},@{path='bin/OM9ThreeDmImportWorker.exe';sha256=('c'*64)})}|ConvertTo-Json -Depth 4|Set-Content -LiteralPath $manifest
+Check 'timestamp bundle manifest is accepted' ((Read-OM9Manifest $manifest).version -eq '0.3.4-202610121234')
 $same=Release '0.0.2' 2
 Check 'installed release has no update' ($null -eq (Find-OM9Update @($same) '0.0.2' 2))
 Check 'older development release cannot trigger downgrade' ($null -eq (Find-OM9Update @((Release '0.0.1')) '0.0.2' 2))

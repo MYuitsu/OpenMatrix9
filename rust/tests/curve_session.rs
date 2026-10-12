@@ -1,5 +1,92 @@
 use openmatrix9_rust::curve::{CurveSession, Effect};
 #[test]
+fn om9_curve_005_starts_the_original_circle_command() {
+    let mut s = CurveSession::default();
+    assert!(s.start("Circle").is_ok());
+    assert!(s.active());
+}
+#[test]
+fn om9_curve_003_typed_repeated_endpoint_preview_matches_sharp_commit() {
+    let mut session = CurveSession::default();
+    session.start("InterpCrv").unwrap();
+    for p in [
+        [0., 0., 0.],
+        [5., 0., 0.],
+        [6., 4., 0.],
+        [1., 6., 0.],
+        [-2., 2., 0.],
+        [0., 0., 0.],
+    ] {
+        session.point(p).unwrap();
+    }
+    let preview = session.preview_spline(None).unwrap();
+    session.input("").unwrap();
+    let committed = session.spline().unwrap();
+    assert_eq!(preview.periodic, committed.periodic);
+    for i in 0..=32 {
+        assert!(
+            openmatrix9_rust::spline::distance(
+                preview.value(i as f64 / 32.),
+                committed.value(i as f64 / 32.)
+            ) < 1e-8
+        );
+    }
+}
+#[test]
+fn om9_curve_003_autoclose_preview_matches_periodic_commit() {
+    let mut session = CurveSession::default();
+    session.start("InterpCrv").unwrap();
+    for p in [
+        [0., 0., 0.],
+        [5., 0., 0.],
+        [6., 4., 0.],
+        [1., 6., 0.],
+        [-2., 2., 0.],
+    ] {
+        session.point(p).unwrap();
+    }
+    let preview = session
+        .preview_spline_closed(Some([0., 0., 0.]), true)
+        .unwrap();
+    assert!(preview.periodic);
+    session.input("Close").unwrap();
+    let committed = session.spline().unwrap();
+    for i in 0..=32 {
+        assert!(
+            openmatrix9_rust::spline::distance(
+                preview.value(i as f64 / 32.),
+                committed.value(i as f64 / 32.)
+            ) < 1e-8
+        );
+    }
+}
+#[test]
+fn om9_curve_003_accepts_points_options_and_commit() {
+    let mut s = CurveSession::default();
+    s.start("InterpCrv").unwrap();
+    s.input("Degree=3").unwrap();
+    s.input("Knots=Chord").unwrap();
+    for point in ["0,0,0", "1,2,0", "3,-1,1", "4,0,0"] {
+        s.input(point).unwrap();
+    }
+    assert_eq!(s.input("").unwrap(), Effect::Commit);
+    assert_eq!(s.output().len(), 4);
+}
+
+#[test]
+fn om9_curve_003_close_undo_and_cancel_are_non_destructive() {
+    let mut s = CurveSession::default();
+    s.start("InterpCrv").unwrap();
+    s.input("0,0").unwrap();
+    s.input("1,2").unwrap();
+    s.input("Undo").unwrap();
+    assert_eq!(s.points().len(), 1);
+    assert!(s.input("Close").is_err());
+    assert!(s.active());
+    assert_eq!(s.input("Cancel").unwrap(), Effect::Cancelled);
+    assert!(s.output().is_empty());
+}
+#[test]
 fn mouse_cannot_append_a_point_while_length_value_is_pending() {
     let mut s = CurveSession::default();
     s.start("Polyline").unwrap();

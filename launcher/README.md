@@ -15,4 +15,6 @@ Không cần Administrator, source FreeCAD hay Rust. Bản này dành cho FreeCA
 
 Log nằm ở `%APPDATA%\FreeCAD\v1-1\OM9-launcher\launcher.log`; mỗi lần mở có thêm file `start-*.json`. Kết quả kiểm tra/cập nhật nằm trong `update-check.json`; gói tải và staging nằm dưới `OM9-launcher\updates`. Khi cài xong, trạng thái `installed` xác nhận cài thành công và đã yêu cầu mở lại; xem `start-*.json` mới để kiểm tra workbench khởi động. Cấu hình và bản vẽ nằm ngoài thư mục plugin không bị thay thế. Icon dùng hình thương hiệu OM9 do chủ dự án cung cấp.
 
+Phiên bản dạng `aa.bb.cc-yyyyMMddhhmm` được so sánh theo ba số, rồi thời gian build. Gói cũ dạng `aa.bb.cc` vẫn được nhận; revision launcher chỉ phân biệt các gói có cùng phiên bản ứng dụng. Xem phiên bản đầy đủ trên tag release và tên ZIP trước khi cài.
+
 Đây là bản thử nghiệm. Hãy hoàn tất/hủy lệnh đang vẽ trước khi chuyển tài liệu. Xem hướng dẫn và giới hạn đầy đủ trong thư mục `OpenMatrix9/INSTALL.vi.md` đi kèm.

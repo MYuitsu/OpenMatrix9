@@ -1,0 +1,176 @@
+{
+  "feature_ids": [
+    "OM9-INFO-020",
+    "OM9-INFO-021",
+    "OM9-INFO-022"
+  ],
+  "status": "validated_supported_slice",
+  "updated_at": "2026-10-11T22:43:47+07:00",
+  "runtime": "H:\\FreeCAD-src\\build\\gumball-four-view-runtime-20261011",
+  "plugin_sha256": "FF0427D720EC8CFD5D24EEDFB32FBA7E538CFB65F98E06398404DAF42284D69F",
+  "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+  "native": {
+    "ok": true,
+    "processes": 29,
+    "checks": 781,
+    "suite": "H:\\FreeCAD-src\\build\\shared-host-tests\\gumball-final-clean-20261011-1d1e1e14\\suite.json",
+    "runs": [
+      {
+        "name": "geometry",
+        "checks": 15,
+        "dpi": "1"
+      },
+      {
+        "name": "commands",
+        "checks": 16,
+        "dpi": "1"
+      },
+      {
+        "name": "ownership",
+        "checks": 11,
+        "dpi": "1"
+      },
+      {
+        "name": "final-review",
+        "checks": 9,
+        "dpi": "1"
+      },
+      {
+        "name": "lifecycle",
+        "checks": 18,
+        "dpi": "1"
+      },
+      {
+        "name": "reentrancy",
+        "checks": 3,
+        "dpi": "1"
+      },
+      {
+        "name": "cancel-publication",
+        "checks": 2,
+        "dpi": "1"
+      },
+      {
+        "name": "core-dpi1",
+        "checks": 68,
+        "dpi": "1"
+      },
+      {
+        "name": "core-dpi150",
+        "checks": 68,
+        "dpi": "1.5"
+      },
+      {
+        "name": "four-view-dpi1",
+        "checks": 65,
+        "dpi": "1"
+      },
+      {
+        "name": "view-lifecycle-dpi1",
+        "checks": 19,
+        "dpi": "1"
+      },
+      {
+        "name": "four-view-dpi1.5",
+        "checks": 65,
+        "dpi": "1.5"
+      },
+      {
+        "name": "view-lifecycle-dpi1.5",
+        "checks": 19,
+        "dpi": "1.5"
+      },
+      {
+        "name": "four-view-dpi2",
+        "checks": 65,
+        "dpi": "2"
+      },
+      {
+        "name": "view-lifecycle-dpi2",
+        "checks": 19,
+        "dpi": "2"
+      },
+      {
+        "name": "settings",
+        "checks": 10,
+        "dpi": "1"
+      },
+      {
+        "name": "snappy",
+        "checks": 6,
+        "dpi": "1"
+      },
+      {
+        "name": "relocate-pointer",
+        "checks": 25,
+        "dpi": "1"
+      },
+      {
+        "name": "owner-scale",
+        "checks": 18,
+        "dpi": "1"
+      },
+      {
+        "name": "owner-callback",
+        "checks": 2,
+        "dpi": "1"
+      },
+      {
+        "name": "mesh-frame",
+        "checks": 13,
+        "dpi": "1"
+      },
+      {
+        "name": "visual",
+        "checks": 23,
+        "dpi": "1"
+      },
+      {
+        "name": "warm",
+        "checks": 20,
+        "dpi": "1"
+      },
+      {
+        "name": "cold",
+        "checks": 17,
+        "dpi": "1"
+      },
+      {
+        "name": "curve_smoke",
+        "checks": 27,
+        "dpi": "1"
+      },
+      {
+        "name": "core_mouse_smoke",
+        "checks": 51,
+        "dpi": "1"
+      },
+      {
+        "name": "layer_visibility_permission_smoke",
+        "checks": 5,
+        "dpi": "1"
+      },
+      {
+        "name": "history_smoke",
+        "checks": 83,
+        "dpi": "1"
+      },
+      {
+        "name": "three_dm_preservation_smoke",
+        "checks": 19,
+        "dpi": "1"
+      }
+    ]
+  },
+  "rust": {
+    "checks": 874,
+    "suites": 125,
+    "exit_code": 0
+  },
+  "limits": [
+    "Generic/expression parametric Scale and unrepresentable Link shear/external-document occurrences.",
+    "Mesh nonplanar/degenerate/multiple components, edge/vertex and light/camera Object frames.",
+    "Process-local pivot cache, no new associative History graph; shared-host posttransaction abort loses old Redo.",
+    "Concurrent RCORE/Curve source closure remains uncommitted; no clean release or push claim."
+  ]
+}

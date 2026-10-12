@@ -1286,10 +1286,10 @@
   module_index: 7
   module_slug: info-settings
   kind: command
-  description: Gumball toggle hiển thị move/scale/rotate widgets khi object selected. X đỏ, Y xanh, Z vàng theo nhận diện tương thích; arrows move một axis, plane handle move hai axes, origin free move; arcs rotate, squares scale một axis. Numeric edit nhận distance/góc/scale factor. Alt trong drag toggle Copy, Alt khi click numeric làm copy. Trong drag nhập số+Enter ràng buộc distance hoặc bước góc. Ctrl khi nhả arrow drag của planar curve/surface tạo extrude, có thể nhập distance trước; không coi Ctrl drag mọi object là extrude. Giữ đúng pivot/frame và capability, hủy trả preview.
+  description: "Gumball toggle hiển thị move/scale/rotate widgets khi object selected. OM9 chọn X đỏ, Y xanh lá, Z xanh dương theo ảnh Rhino5 được duyệt; arrows move một axis, plane handle move hai axes, origin free move; arcs rotate, squares scale một axis. Numeric edit nhận distance/góc/scale factor. Alt trong drag toggle Copy, Alt khi click numeric làm copy. Trong drag nhập số+Enter ràng buộc distance hoặc bước góc. Ctrl khi nhả arrow drag của planar curve/surface tạo extrude, có thể nhập distance trước; không coi Ctrl drag mọi object là extrude. Giữ đúng pivot/frame và capability, hủy trả preview."
   access: Access this command from Info and Settings > Gumball
   spec_path: specs/01-core/om9-info-020-gumball.md
-  implementation_status: not_started
+  implementation_status: "implemented"
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -1312,7 +1312,7 @@
       kind: boolean
       required: false
       meaning: Hiện gizmo
-      default: Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành.
+      default: "OM9 Off cho profile mới; giữ Enabled đã lưu; Command/menu cùng handler."
     - name: Operation
       kind: choice
       required: false
@@ -1342,12 +1342,21 @@
       kind: boolean
       required: false
       meaning: Giữ originals
-      default: Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành.
+      default: "Off ở Begin; Alt toggle hoặc Alt numeric bật Copy."
     effect: document_write
     date: '2026-10-07'
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
-    native_implementation_status: not_started
+    native_implementation_status: validated_supported_slice
+  native_implementation_status: validated_supported_slice
+  implementation_date: "2026-10-12"
+  implementation_notes: "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Tests run locally; exact-commit GitHub Actions records build/package status only, with tests_executed false."
+  validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
+  candidate_status: "validated"
+  candidate_date: '2026-10-12'
+  candidate_validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
+  approved_scope_complete: true
+  stock_ci_status: "build_only_action_authoritative"
 - id: OM9-INFO-021
   name: Gumball Alignment
   command: GumballAlignment
@@ -1356,10 +1365,10 @@
   module_index: 7
   module_slug: info-settings
   kind: command
-  description: GumballAlignment chọn C-Plane, Object hoặc World. CPlane theo frame viewport, World theo XYZ, Object theo định hướng curve/extrusion/light/mesh face-edge-vertex/planar subobject/camera mà adapter có thể xác định. Không có frame object duy nhất thì báo unresolved thay vì lấy world ngầm. Chỉ đổi gizmo frame, không xoay shape.
+  description: "GumballAlignment chọn C-Plane, Object hoặc World. CPlane theo frame viewport, World theo XYZ, Object theo định hướng curve/extrusion/light/mesh face-edge-vertex/planar subobject/camera mà adapter có thể xác định. Không có frame object duy nhất thì báo unresolved thay vì lấy world ngầm. Chỉ đổi gizmo frame, không xoay shape."
   access: Access this command from Info and Settings>Gumball Alignment
   spec_path: specs/01-core/om9-info-021-gumball-alignment.md
-  implementation_status: not_started
+  implementation_status: "implemented"
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -1382,12 +1391,21 @@
       kind: choice
       required: false
       meaning: C-Plane, Object hoặc World
-      default: Chưa xác lập; yêu cầu giao diện hiển thị lựa chọn hiện hành.
+      default: "OM9 CPlane cho profile mới; giữ preference; World/Object khi chọn rõ."
     effect: view_state
     date: '2026-10-07'
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
-    native_implementation_status: not_started
+    native_implementation_status: validated_supported_slice
+  native_implementation_status: validated_supported_slice
+  implementation_date: "2026-10-12"
+  implementation_notes: "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Tests run locally; exact-commit GitHub Actions records build/package status only, with tests_executed false."
+  validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
+  candidate_status: "validated"
+  candidate_date: '2026-10-12'
+  candidate_validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
+  approved_scope_complete: true
+  stock_ci_status: "build_only_action_authoritative"
 - id: OM9-INFO-022
   name: Relocate Gumball
   command: RelocateGumball
@@ -1396,10 +1414,10 @@
   module_index: 7
   module_slug: info-settings
   kind: command
-  description: RelocateGumball đổi origin và hướng X của widgets; CMD nhận world point (qua parser coordinate) rồi direction, Enter hoàn tất. Ctrl-click widget rồi thả Ctrl và kéo là cách tương tác thứ hai. Việc di chuyển pivot không dịch geometry; hướng zero/đồng tuyến không đủ frame phải báo rõ.
+  description: "RelocateGumball đổi origin và hướng X của widgets; CMD nhận world point (qua parser coordinate) rồi direction, Enter hoàn tất. Ctrl-click widget rồi thả Ctrl và kéo là cách tương tác thứ hai. Việc di chuyển pivot không dịch geometry; hướng zero/đồng tuyến không đủ frame phải báo rõ."
   access: Access this command from Info and Settings>Relocate Gumball
   spec_path: specs/01-core/om9-info-022-relocate-gumball.md
-  implementation_status: not_started
+  implementation_status: "implemented"
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -1432,7 +1450,16 @@
     date: '2026-10-07'
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
-    native_implementation_status: not_started
+    native_implementation_status: validated_supported_slice
+  native_implementation_status: validated_supported_slice
+  implementation_date: "2026-10-12"
+  implementation_notes: "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Tests run locally; exact-commit GitHub Actions records build/package status only, with tests_executed false."
+  validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
+  candidate_status: "validated"
+  candidate_date: '2026-10-12'
+  candidate_validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
+  approved_scope_complete: true
+  stock_ci_status: "build_only_action_authoritative"
 - id: OM9-HISTORY-001
   name: History Workflow
   command: null
@@ -2979,6 +3006,10 @@
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
   implementation_scope: "Polycurve edges, polysurface faces, compound children and Mesh connected components; source groups/world placement/display fields preserved. Blocks, font/text, dimensions and cages require dedicated adapters."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-TOP11-006
   name: Move
   command: Move
@@ -3109,7 +3140,16 @@
   implementation_status: "partially_implemented"
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
-  implementation_scope: "Curve endpoint midpoint snapping with explicit bounded tolerance and sewn surface shells; disconnected/mixed/ambiguous inputs rejected. Document-tolerance compatibility and rich History remain unverified."
+  implementation_scope: "Curve endpoint midpoint snapping and sewn surface shells with Rust-resolved document/explicit/legacy cutoff, backend floor rejection and persisted actual tolerance/context. Full topology and rich History remain unverified."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
+  implementation_tolerance_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-tolerance-workers.md
+    scope: Curve endpoint midpoint snapping and sewn surface shells with Rust-resolved document/explicit/legacy cutoff, backend floor rejection and persisted actual tolerance/context. Full topology and rich History remain unverified.
+
 - id: OM9-TOP11-009
   name: Split
   command: Split
@@ -3215,6 +3255,10 @@
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
   implementation_scope: "True 3D curve/surface splitting, ExtendLines and frozen orthographic/perspective ApparentIntersections for curves, GUI/CMD region removal, Undo/reset and persistence. Degenerate/overlapping projections and apparent surfaces reject."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-TOP11-011
   name: Ring Rail
   command: gvRingRail
@@ -3866,7 +3910,7 @@
   description: PictureFrame chọn image file rồi hai điểm/góc và length, giữ aspect ratio; Shift dùng Ortho. Plane có thể move/scale và transparency qua material properties. Vertical theo normal CPlane; SelfIllumination giữ intensity không theo lights/shadows; EmbedBitmap lưu bytes image trong document hoặc external path có missing status; Autoname lấy filename cho object name; AlphaTrasnparency giữ identifier tương thích và chọn hiển thị màu object xuyên alpha hoặc thật trong suốt. Đây là textured plane tham chiếu, không phải bitmap tracing tự tạo geometry.
   access: Access this command from View>Picture Frame
   spec_path: specs/01-core/om9-view-001-picture-frame.md
-  implementation_status: not_started
+  implementation_status: partially_implemented
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -3924,7 +3968,17 @@
     date: '2026-10-07'
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
-    native_implementation_status: not_started
+    native_implementation_status: partially_implemented
+  implementation_validation_status: validated_supported_slice
+  implementation_verified_at: '2026-10-09'
+  implementation_scope: Native aspect-preserving ImagePlane with shared point/length input, transient preview, transaction guard and persisted coordinate/unit provenance. Explicit embedding/external/alpha modes and complete naming/option UI remain open.
+  implementation_followup_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-point-consumers.md
+    scope: Native aspect-preserving ImagePlane with shared point/length input, transient preview, transaction guard and persisted coordinate/unit provenance. Explicit embedding/external/alpha modes and complete naming/option UI remain open.
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-VIEW-002
   name: Restore Viewports
   command: null
@@ -5356,7 +5410,7 @@
   description: Angle thu hai cặp endpoints xác định hai lines rồi báo angle feedback, không tạo annotation. TwoObjects nhận hai planar surfaces hoặc hai lines; dùng normals/hướng có orientation policy rõ để chọn angle chính/supplement. Snaps cho points, vector zero không hợp lệ.
   access: Access this command from Measure>Angle
   spec_path: specs/01-core/om9-measure-001-angle.md
-  implementation_status: not_started
+  implementation_status: partially_implemented
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -5384,7 +5438,17 @@
     date: '2026-10-07'
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
-    native_implementation_status: not_started
+    native_implementation_status: partially_implemented
+  implementation_validation_status: validated_supported_slice
+  implementation_verified_at: '2026-10-09'
+  implementation_scope: Four-point read-only Angle with shared Cartesian/unit input, accepted world-coordinate reports and lifetime guards. TwoObjects and full grammar remain open.
+  implementation_followup_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-point-consumers.md
+    scope: Four-point read-only Angle with shared Cartesian/unit input, accepted world-coordinate reports and lifetime guards. TwoObjects and full grammar remain open.
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-MEASURE-002
   name: Distance
   command: Distance
@@ -5396,7 +5460,7 @@
   description: Distance chọn hai points và báo khoảng 3D trong feedback/history. Unit đổi unit display; Model_Units là khởi tạo được mô tả, ngữ cảnh thường mm nhưng không hardcode model luôn mm. Snaps/ProjectOsnap ảnh hưởng points input nên phải báo coordinates đã nhận.
   access: Access this command from Measure>Distance
   spec_path: specs/01-core/om9-measure-002-distance.md
-  implementation_status: not_started
+  implementation_status: partially_implemented
   engineering_contracts:
   - OM9-CMD
   - OM9-OBJECT
@@ -5424,7 +5488,17 @@
     date: '2026-10-07'
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
-    native_implementation_status: not_started
+    native_implementation_status: partially_implemented
+  implementation_validation_status: validated_supported_slice
+  implementation_verified_at: '2026-10-09'
+  implementation_scope: Two-point read-only Distance with five display units, shared Cartesian/unit input and accepted-coordinate reports. Model_Units choice/default and full grammar remain open.
+  implementation_followup_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-point-consumers.md
+    scope: Two-point read-only Distance with five display units, shared Cartesian/unit input and accepted-coordinate reports. Model_Units choice/default and full grammar remain open.
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-MEASURE-003
   name: Length
   command: Length
@@ -6290,6 +6364,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-CURVE-002
   name: Line
   command: Line
@@ -6385,6 +6463,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-CURVE-003
   name: Interp Curve
   command: InterpCrv
@@ -6460,6 +6542,14 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
+  implementation_kernel_contract_evidence:
+    report: ../docs/validation/2026-10-10-rhino-core-kernel-contract.md
+    scope: Existing generated spline geometry/limits preserved while Basis.validate delegates to the shared Rust validator; native regression replay passed.
+    verified_at: '2026-10-10'
 - id: OM9-CURVE-004
   name: Rectangle
   command: Rectangle
@@ -6535,6 +6625,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-CURVE-005
   name: Circle
   command: Circle
@@ -6650,6 +6744,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion. Circle checkpoints retain Radius/Orientation point base, options, frame and native source identities; F4 rejects stale sources before accepting a point.
+    verified_at: '2026-10-09'
 - id: OM9-CURVE-006
   name: Ellipse
   command: Ellipse
@@ -6730,6 +6828,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+    verified_at: '2026-10-09'
 - id: OM9-CURVE-007
   name: Arc
   command: Arc
@@ -6944,6 +7046,14 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
+  implementation_kernel_contract_evidence:
+    report: ../docs/validation/2026-10-10-rhino-core-kernel-contract.md
+    scope: Existing generated spline geometry/limits preserved while Basis.validate delegates to the shared Rust validator; native regression replay passed.
+    verified_at: '2026-10-10'
 - id: OM9-CURVE-010
   name: Refit to Tolerance
   command: FitCrv
@@ -9389,6 +9499,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Interactive selection and every Chain Edges member keep the accepted runtime guard; source edits require Cancel/reselect even after geometry restoration. Persistent History reconstructs without session tokens.
 - id: OM9-SURFACE-002
   name: Sweep 1 History
   command: gvSweepHistory
@@ -9536,6 +9650,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Interactive selection and every Chain Edges member keep the accepted runtime guard; source edits require Cancel/reselect even after geometry restoration. Persistent History reconstructs without session tokens.
 - id: OM9-SURFACE-004
   name: Sweep 2 History
   command: gvSweep2History
@@ -9929,6 +10047,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Interactive selection and every Chain Edges member keep the accepted runtime guard; source edits require Cancel/reselect even after geometry restoration. Persistent History reconstructs without session tokens.
 - id: OM9-SURFACE-010
   name: Curve Network
   command: null
@@ -11696,6 +11818,10 @@
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
   implementation_scope: "Ordered target/cutter sets for solid BRep, surface-area BRep or closed Mesh via polyhedral OCCT; target replacement and cutter DeleteInput, cavities and persistence. Mixed categories and invalid/empty results reject."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-SOLID-002
   name: Boolean Intersection
   command: BooleanIntersection
@@ -11736,6 +11862,10 @@
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
   implementation_scope: "Ordered solid BRep, surface-area BRep or closed Mesh sets; validated common results and persistence. Mixed categories, edge-only surfaces and invalid/empty results reject."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-SOLID-003
   name: Boolean Union
   command: BooleanUnion
@@ -11772,6 +11902,10 @@
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
   implementation_scope: "Solid BRep, surface-area BRep or closed Mesh union, disconnected components/cavities, DeleteInput and persistence. Mixed categories and invalid results reject."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-SOLID-004
   name: Boolean Two Objects
   command: Boolean2Objects
@@ -11818,6 +11952,10 @@
   implementation_validation_status: "validated_supported_slice"
   implementation_verified_at: "2026-10-09"
   implementation_scope: "Exactly two same-category BRep solid/surface or closed Mesh inputs; five Union/A-B/B-A/Common/XOR modes, DeleteInput and persistence. Exhaustive topology and live History remain unverified."
+  implementation_followup_evidence:
+    date: '2026-10-09'
+    report: ../docs/validation/2026-10-09-rhino-core-object-foundations.md
+    scope: Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged.
 - id: OM9-SOLID-005
   name: Cap Planar
   command: Cap
@@ -12380,6 +12518,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion. Legacy Solid mm/cm/in callback remains; actual accepted relative base and Undo are repaired.
+    verified_at: '2026-10-09'
 - id: OM9-SOLID-013
   name: Ellipsoid
   command: Ellipsoid
@@ -12489,6 +12631,10 @@
     scope: request_validation_and_operation_plan
     sample_status: compiled_and_validation_tests_passed
     native_implementation_status: partially_implemented
+  implementation_numeric_input_evidence:
+    report: ../docs/validation/2026-10-09-rhino-core-extended-input.md
+    scope: Extended typed point input through existing native geometry; no all-option or all-P0 completion. Legacy Solid mm/cm/in callback remains; actual accepted relative base and Undo are repaired.
+    verified_at: '2026-10-09'
 - id: OM9-SOLID-015
   name: Torus
   command: Torus

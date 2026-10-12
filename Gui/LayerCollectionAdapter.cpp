@@ -19,6 +19,9 @@
 #include <limits>
 
 namespace OpenMatrix9Gui {
+// Defined with the canonical document adapter's exact native factory witness.
+bool isLegacyLayerHelper(const App::DocumentObject*);
+bool isNativeHistorySettingsHelper(const App::DocumentObject*);
 namespace {
 bool derived(const App::DocumentObject& obj,const char* name) {return obj.isDerivedFrom(Base::Type::fromName(name));}
 Om9LayerByteView bytes(const std::string& text){return {reinterpret_cast<const unsigned char*>(text.data()),text.size()};}
@@ -62,7 +65,10 @@ std::vector<std::string> collectLayerTransferObjects(App::Document& doc,const st
         Fact fact;fact.id=id;fact.label=label;fact.nativeType=kind;
         auto* shape=dynamic_cast<Part::PropertyPartShape*>(object->getPropertyByName("Shape"));
         auto* mesh=object->getPropertyByName("Mesh");const bool hasCloud=object->getPropertyByName("OM9PointCloudSchema");
-        if(isLayerStorageObject(object) || CoreNotes::isStorageObject(object))fact.role=6;
+        if(isLayerStorageObject(object) || CoreNotes::isStorageObject(object) || isNativeHistorySettingsHelper(object))fact.role=6;
+        // A legacy layer group contributes its geometry children, never a model
+        // wrapper; its settings object is metadata with no transferable payload.
+        else if(isLegacyLayerHelper(object))fact.role=object->getPropertyByName("Group")?2:6;
         else if(origins.count(object))fact.role=originMetadata(*object)?6:7;
         // Archive/definition/instance roles need a separately verified native
         // provenance graph. Markers are not proof; do not omit these records.

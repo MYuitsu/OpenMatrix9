@@ -1,0 +1,283 @@
+"""RCORE-01/04/06 shared object snapshot and real command stale-input checks."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtWidgets, QtTest
+sys.path.insert(0, str(Path(__file__).parent))
+from command_console_support import command_input
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+out.mkdir(parents=True, exist_ok=True)
+result = {'checks': []}
+owned_docs = []
+
+def check(name, ok):
+    result['checks'].append({'name': name, 'passed': bool(ok)})
+    if not ok:
+        raise AssertionError(name)
+
+def events():
+    QtWidgets.QApplication.processEvents()
+
+def enter(text=''):
+    field.setText(text)
+    QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return)
+    events()
+
+def newdoc(name):
+    doc = App.newDocument(name)
+    owned_docs.append(doc.Name)
+    doc.UndoMode = 1
+    return doc
+
+def feature(doc, name, shape):
+    obj = doc.addObject('Part::Feature', name)
+    obj.Shape = shape
+    return obj
+
+def shown(name):
+    return next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog, name)
+                 if d.isVisible()), None)
+
+def rejected(label, callback):
+    try:
+        callback()
+    except (ValueError, RuntimeError):
+        check(label, True)
+    else:
+        check(label, False)
+
+def api_checks():
+    import OpenMatrix9Gui as OM
+    doc = newdoc('ObjectGuardIdentity')
+    a = feature(doc, 'A', Part.makeLine(App.Vector(), App.Vector(5, 0, 0)))
+    b = feature(doc, 'B', Part.makeLine(App.Vector(5, 0, 0), App.Vector(10, 0, 0)))
+    doc.recompute()
+    path = out / 'object-identity.FCStd'
+    doc.saveAs(str(path))
+    Gui.runCommand('Std_Save')
+    events()
+    before = (len(doc.Objects), doc.UndoCount, a.PropertiesList[:], Gui.activeDocument().Modified)
+    original = OM.objectSnapshot(doc.Name, a.Name)
+    again = OM.objectSnapshot(doc.Name, a.Name)
+    keys = ('document_session', 'document_uid', 'object_id', 'generation', 'geometry_revision', 'document_epoch')
+    check('Repeated capture keeps identical object identity and revision', all(original[k] == again[k] for k in keys))
+    check('Snapshot reads do not create objects/properties/Undo/modified state',
+          before == (len(doc.Objects), doc.UndoCount, a.PropertiesList[:], Gui.activeDocument().Modified))
+    check('Fresh token validates', OM.validateObjectSnapshot(doc.Name, original['token']))
+    a.Label = 'Renamed display label'
+    a.ViewObject.LineColor = (0.2, 0.7, 0.4)
+    a.ViewObject.LineWidth = 3.0
+    a.ViewObject.Visibility = False
+    a.ViewObject.Visibility = True
+    check('Labels and display-only changes leave geometric identity intact', OM.validateObjectSnapshot(doc.Name, original['token']))
+    untouched = OM.objectSnapshot(doc.Name, b.Name)
+    old_shape = a.Shape.copy()
+    a.Shape = Part.makeLine(App.Vector(), App.Vector(6, 0, 0))
+    a.Shape = old_shape
+    rejected('Change then restore equal geometry keeps earlier work stale', lambda: OM.validateObjectSnapshot(doc.Name, original['token']))
+    check('Changing one source preserves unrelated object snapshots', OM.validateObjectSnapshot(doc.Name, untouched['token']))
+    original = OM.objectSnapshot(doc.Name, a.Name)
+    doc.openTransaction('Guard shape change')
+    a.Shape = Part.makeLine(App.Vector(), App.Vector(7, 0, 0))
+    doc.commitTransaction()
+    doc.undo()
+    rejected('Undo does not revive a captured token', lambda: OM.validateObjectSnapshot(doc.Name, original['token']))
+    after_undo = OM.objectSnapshot(doc.Name, a.Name)
+    doc.redo()
+    rejected('Redo advances the document epoch', lambda: OM.validateObjectSnapshot(doc.Name, after_undo['token']))
+    old = OM.objectSnapshot(doc.Name, a.Name)
+    doc.openTransaction('Remove source')
+    doc.removeObject('A')
+    doc.commitTransaction()
+    doc.undo()
+    a = doc.getObject('A')
+    restored = OM.objectSnapshot(doc.Name, a.Name)
+    check('Undo resurrection retains native ID but changes incarnation', old['object_id'] == restored['object_id'] and old['generation'] != restored['generation'])
+    rejected('Undo resurrected object cannot validate previous generation', lambda: OM.validateObjectSnapshot(doc.Name, old['token']))
+    parent = doc.addObject('App::Part', 'Parent')
+    parent.addObject(a)
+    doc.recompute()
+    nested = OM.objectSnapshot(doc.Name, a.Name, 'Edge1')
+    a.ViewObject.Visibility = False
+    a.ViewObject.Visibility = True
+    check('Child visibility changes do not invalidate parent geometry ownership', OM.validateObjectSnapshot(doc.Name, nested['token']))
+    placement = parent.Placement
+    parent.Placement = App.Placement(App.Vector(10, 0, 0), App.Rotation())
+    parent.Placement = placement
+    rejected('Parent placement changed and restored still invalidates child snapshot', lambda: OM.validateObjectSnapshot(doc.Name, nested['token']))
+    current = OM.objectSnapshot(doc.Name, a.Name)
+    OM.setUnitContext(doc.Name, 1, 1, 0.001, 0.01, 0.01)
+    rejected('Explicit document context change invalidates old source work', lambda: OM.validateObjectSnapshot(doc.Name, current['token']))
+    current = OM.objectSnapshot(doc.Name, a.Name)
+    check('Recaptured source uses current explicit context', OM.validateObjectSnapshot(doc.Name, current['token']))
+    other = newdoc('ObjectGuardOther')
+    other_source = feature(other, 'A', a.Shape.copy())
+    rejected('Identical name in another document cannot satisfy token', lambda: OM.validateObjectSnapshot(other.Name, current['token']))
+    App.closeDocument(other.Name)
+    App.setActiveDocument(doc.Name)
+    doc.recompute()
+    doc.saveAs(str(path))
+    cold = OM.objectSnapshot(doc.Name, a.Name)
+    result['saved_document'] = str(path)
+    result['saved_uid'] = cold['document_uid']
+    result['saved_object_id'] = cold['object_id']
+    original_name = doc.Name
+    App.closeDocument(doc.Name)
+    doc = App.openDocument(str(path))
+    owned_docs.append(doc.Name)
+    reopened = OM.objectSnapshot(doc.Name, 'A')
+    check('FCStd preserves native ID and document UUID', cold['document_uid'] == reopened['document_uid'] and cold['object_id'] == reopened['object_id'])
+    check('Reopened document gets a fresh runtime session', cold['document_session'] != reopened['document_session'])
+    rejected('Old token rejects after close/reopen despite preserved provenance', lambda: OM.validateObjectSnapshot(doc.Name, cold['token']))
+    check('Newly captured restored source validates', OM.validateObjectSnapshot(doc.Name, reopened['token']))
+    deep = newdoc('ObjectGuardDepth')
+    child = feature(deep, 'Source', Part.makeLine(App.Vector(), App.Vector(1, 0, 0)))
+    previous = child
+    for index in range(258):
+        container = deep.addObject('App::Part', 'Owner' + str(index))
+        container.addObject(previous)
+        previous = container
+    before = (len(deep.Objects), deep.UndoCount)
+    rejected('Excessive ownership depth rejects before recursive placement traversal', lambda: OM.objectSnapshot(deep.Name, child.Name))
+    check('Ownership-depth rejection creates no extra object or Undo', before == (len(deep.Objects), deep.UndoCount))
+
+def cold_restore(report_path):
+    import OpenMatrix9Gui as OM
+    saved = json.loads(Path(report_path).read_text(encoding='utf-8'))
+    doc = App.openDocument(saved['saved_document'])
+    owned_docs.append(doc.Name)
+    a = doc.getObject('A')
+    before = (len(doc.Objects), doc.UndoCount, Gui.activeDocument().Modified)
+    current = OM.objectSnapshot(doc.Name, 'A')
+    check('Separate process restores document UUID', current['document_uid'] == saved['saved_uid'])
+    check('Separate process restores native object ID', current['object_id'] == saved['saved_object_id'])
+    check('Separate process restores current curve geometry', abs(a.Shape.Length - 7) < 1e-9)
+    check('Separate process restores explicit units', OM.unitContext(doc.Name)['absolute_mm'] == 0.001)
+    check('Separate process captured token validates', OM.validateObjectSnapshot(doc.Name, current['token']))
+    check('Cold snapshot reads leave objects, Undo and modified state unchanged', before == (len(doc.Objects), doc.UndoCount, Gui.activeDocument().Modified))
+
+def command_checks():
+    # Edit must reject a same-name replacement before consuming either source.
+    doc = newdoc('ObjectGuardEdit')
+    a = feature(doc, 'A', Part.makeLine(App.Vector(), App.Vector(5, 0, 0)))
+    b = feature(doc, 'B', Part.makeLine(App.Vector(5, 0, 0), App.Vector(10, 0, 0)))
+    doc.recompute()
+    Gui.Selection.clearSelection()
+    Gui.Selection.addSelection(a)
+    Gui.Selection.addSelection(b)
+    enter('Join')
+    enter()
+    d = shown('OM9EditOptions')
+    check('Join native options opened', d is not None)
+    saved = a.Shape.copy()
+    doc.removeObject('A')
+    a = feature(doc, 'A', saved)
+    doc.recompute()
+    before = (len(doc.Objects), doc.UndoCount)
+    d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click()
+    events()
+    check('Join rejects identical replacement without consuming either input or adding Undo',
+          doc.getObject('A') is not None and doc.getObject('B') is not None and
+          (len(doc.Objects), doc.UndoCount) == before and not any(getattr(o, 'OM9FeatureId', '') == 'OM9-TOP11-008' for o in doc.Objects))
+    enter('Cancel')
+    # Delete/Undo can restore the exact wrapper and shape checked by old Rebuild.
+    Gui.Selection.clearSelection()
+    Gui.Selection.addSelection(a)
+    enter('Rebuild')
+    d = shown('OM9RebuildDialog')
+    check('Rebuild native options opened', d is not None)
+    doc.openTransaction('Remove rebuild source')
+    doc.removeObject('A')
+    doc.commitTransaction()
+    doc.undo()
+    before = (len(doc.Objects), doc.UndoCount)
+    d.findChild(QtWidgets.QPushButton, 'OM9RebuildOK').click()
+    events()
+    check('Rebuild rejects deleted/Undo-restored source before transaction',
+          d.isVisible() and (len(doc.Objects), doc.UndoCount) == before and 'changed' in d.findChild(QtWidgets.QLabel, 'OM9RebuildError').text().lower())
+    d.findChild(QtWidgets.QPushButton, 'OM9RebuildCancel').click()
+    events()
+    # Freshly selecting the current source must still succeed.
+    Gui.Selection.clearSelection()
+    Gui.Selection.addSelection(doc.getObject('A'))
+    enter('Rebuild')
+    d = shown('OM9RebuildDialog')
+    d.findChild(QtWidgets.QCheckBox, 'OM9RebuildDeleteInput').setChecked(False)
+    before = len(doc.Objects)
+    d.findChild(QtWidgets.QPushButton, 'OM9RebuildOK').click()
+    events()
+    check('Fresh unchanged Rebuild commits successfully after reselect', len(doc.Objects) == before + 1 and shown('OM9RebuildDialog') is None)
+    # A non-root rail in Chain Edges must keep its own frozen identity.
+    doc = newdoc('ObjectGuardChain')
+    a = feature(doc, 'RailA', Part.makeLine(App.Vector(), App.Vector(0, 0, 4)))
+    b = feature(doc, 'RailB', Part.makeLine(App.Vector(0, 0, 4), App.Vector(0, 0, 10)))
+    section = feature(doc, 'Section', Part.makeCircle(2))
+    doc.recompute()
+    Gui.Selection.clearSelection()
+    enter('Sweep1')
+    for text in ('ChainEdges', a.Name, b.Name, '', section.Name, ''):
+        enter(text)
+    d = shown('OM9SurfaceOptions')
+    check('Chained Sweep opens real native options', d is not None)
+    saved = b.Shape.copy()
+    doc.removeObject('RailB')
+    feature(doc, 'RailB', saved)
+    doc.recompute()
+    before = (len(doc.Objects), doc.UndoCount)
+    d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click()
+    events()
+    check('Replacement of second chained rail rejects before output/Undo',
+          (len(doc.Objects), doc.UndoCount) == before and not any(getattr(o, 'OM9FeatureId', '') == 'OM9-SURFACE-001' for o in doc.Objects))
+    enter('Cancel')
+
+def run():
+    global field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        field = command_input(Gui.getMainWindow())
+        restore = os.environ.get('OM9_CORE_OBJECT_RESTORE_REPORT')
+        if restore:
+            cold_restore(restore)
+            result['ok'] = True
+            return
+        # Regression first: old Surface controller re-resolves identical names
+        # and silently accepts a newly created replacement after the preview.
+        doc = newdoc('ObjectGuardSurface')
+        a = feature(doc, 'A', Part.makeCircle(3))
+        b = feature(doc, 'B', Part.makeCircle(3, App.Vector(0, 0, 8)))
+        doc.recompute()
+        Gui.Selection.clearSelection()
+        Gui.Selection.addSelection(a)
+        Gui.Selection.addSelection(b)
+        enter('Loft')
+        enter()
+        d = shown('OM9SurfaceOptions')
+        check('Loft opens real native options', d is not None)
+        button = d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok)
+        check('Unchanged Loft preview is valid', button.isEnabled())
+        shape = a.Shape.copy()
+        doc.removeObject('A')
+        replacement = feature(doc, 'A', shape)
+        doc.recompute()
+        before = (len(doc.Objects), doc.UndoCount)
+        button.click()
+        events()
+        check('Loft rejects identical geometry under a replacement object identity',
+              not any(getattr(o, 'OM9FeatureId', '') == 'OM9-SURFACE-009' for o in doc.Objects)
+              and len(doc.Objects) == before[0] and doc.UndoCount == before[1])
+        enter('Cancel')
+        command_checks()
+        api_checks()
+        result['ok'] = True
+    except Exception:
+        result['ok'] = False
+        result['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        for name in list(App.listDocuments()):
+            if name in owned_docs:
+                App.closeDocument(name)
+        QtCore.QTimer.singleShot(0, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1000, run)

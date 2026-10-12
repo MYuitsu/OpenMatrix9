@@ -249,6 +249,122 @@ pub fn plan_reconcile_legacy(
         object_mapping: BTreeMap::new(),
     })
 }
+/// Refresh own restrictions/style only after the native factory has proved
+/// legacy output ownership. The exact witness/fact IDs must already exist;
+/// canonical rows outside that witness, palette, paths and bindings stay intact.
+/// Facts deliberately carry no path: this is not a receive/remap operation.
+pub fn plan_refresh_verified_legacy(
+    state: &LayerSnapshotV1,
+    verified_ids: &[ObjectId],
+    facts: &[LegacyObject],
+) -> Result<LayerApplyPlan, LayerError> {
+    refresh_verified_legacy_with_budget(state, verified_ids, facts, MAX_METADATA_BYTES)
+}
+fn refresh_verified_legacy_with_budget(
+    state: &LayerSnapshotV1,
+    verified_ids: &[ObjectId],
+    facts: &[LegacyObject],
+    budget: usize,
+) -> Result<LayerApplyPlan, LayerError> {
+    validate_layers(state)?;
+    if verified_ids.len() > MAX_OBJECTS || facts.len() > MAX_OBJECTS {
+        return Err(LayerError::LimitExceeded);
+    }
+    let mut bytes = 0;
+    let mut verified = HashSet::with_capacity(verified_ids.len());
+    for id in verified_ids {
+        if !valid_identity(id) {
+            return Err(LayerError::InvalidSnapshot);
+        }
+        charge(&mut bytes, id.len() + std::mem::size_of::<String>(), budget)?;
+        if !verified.insert(id) {
+            return Err(LayerError::DuplicateId);
+        }
+    }
+    let mut own = BTreeMap::new();
+    for fact in facts {
+        if !valid_identity(&fact.id) {
+            return Err(LayerError::InvalidSnapshot);
+        }
+        if fact.path.is_some() {
+            return Err(LayerError::InvalidPath);
+        }
+        charge(
+            &mut bytes,
+            fact.id.len() + std::mem::size_of::<LegacyObject>(),
+            budget,
+        )?;
+        if own.insert(&fact.id, fact).is_some() {
+            return Err(LayerError::DuplicateId);
+        }
+    }
+    if verified.len() != own.len() || own.keys().any(|id| !verified.contains(id)) {
+        return Err(LayerError::InvalidSnapshot);
+    }
+    let known: HashSet<_> = state.objects.iter().map(|object| &object.id).collect();
+    if verified.iter().any(|id| !known.contains(id)) {
+        return Err(LayerError::MissingObject);
+    }
+    let mut after = state.clone();
+    for row in &mut after.objects {
+        if let Some(fact) = own.get(&row.id) {
+            row.rgb = fact.rgb;
+            row.locked = fact.locked;
+            row.visible = fact.visible;
+            row.color_source = ColorSource::ByObject;
+        }
+    }
+    if &after != state {
+        after.generation = state
+            .generation
+            .checked_add(1)
+            .ok_or(LayerError::LimitExceeded)?;
+    }
+    validate_layers(&after)?;
+    Ok(LayerApplyPlan {
+        before: state.clone(),
+        after,
+        layer_mapping: BTreeMap::new(),
+        object_mapping: BTreeMap::new(),
+    })
+}
+#[cfg(test)]
+mod verified_legacy_refresh_budget_tests {
+    use super::*;
+    #[test]
+    fn witness_and_facts_share_a_checked_budget_before_state_changes() {
+        let fact = LegacyObject {
+            id: "legacy".into(),
+            path: None,
+            rgb: [1, 2, 3],
+            locked: false,
+            visible: true,
+        };
+        let state = migrate_legacy("budget", &[fact.clone()]).unwrap();
+        let witness_cost = fact.id.len() + std::mem::size_of::<String>();
+        let fact_cost = fact.id.len() + std::mem::size_of::<LegacyObject>();
+        assert_eq!(
+            refresh_verified_legacy_with_budget(
+                &state,
+                &[fact.id.clone()],
+                &[fact.clone()],
+                witness_cost + fact_cost - 1
+            ),
+            Err(LayerError::LimitExceeded)
+        );
+        assert_eq!(
+            refresh_verified_legacy_with_budget(
+                &state,
+                &[fact.id.clone()],
+                &[fact],
+                witness_cost + fact_cost
+            )
+            .unwrap()
+            .after,
+            state
+        );
+    }
+}
 pub fn plan_observed(
     state: &LayerSnapshotV1,
     live_ids: &[ObjectId],

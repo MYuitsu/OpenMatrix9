@@ -33,7 +33,8 @@ def main():
                 target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(tf.extractfile(member).read())
             else:raise RuntimeError('Unsupported source archive link')
     for name,file,rel in [('FreeCADGui',host/'bin/FreeCADGui.dll','src/Gui'),('FreeCADApp',host/'bin/FreeCADApp.dll','src/App'),
-                          ('FreeCADBase',host/'bin/FreeCADBase.dll','src/Base'),('Part',host/'lib/Part.pyd','src/Mod/Part/App')]:
+                          ('FreeCADBase',host/'bin/FreeCADBase.dll','src/Base'),('Part',host/'lib/Part.pyd','src/Mod/Part/App'),
+                          ('Mesh',host/'lib/Mesh.pyd','src/Mod/Mesh/App'),('Points',host/'lib/Points.pyd','src/Mod/Points/App')]:
         dest=sdk/rel;dest.mkdir(parents=True,exist_ok=True)
         output=subprocess.check_output(['dumpbin.exe','/exports',str(file)],text=True)
         table=sections(file);exports=[]

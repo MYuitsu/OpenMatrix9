@@ -1,20 +1,40 @@
 # OM9-MEASURE-002 — Distance
 
-Status: in progress; native menu/mouse/CMD and C-plane picking verified. Shared geometry snapping remains outstanding.
+<!-- rhino-core-extended-input:start -->
+## Extended numeric input — validated slice
 
-Local spec requires two picked points and distance reported to command history or feedback. Preserve original Distance. No model output or document transaction is required for a measurement.
+Extended typed point input through existing native geometry; no all-option or all-P0 completion.
 
-Rust implementation computes world-space Euclidean distance using hypot, accepts coincident points (zero), rejects nonfinite coordinates or coordinates beyond ±1e9 mm. Unit display conversions mm/cm/m/in/ft are OM9 choices; local Unit cue has no recovered ranges/defaults. Internal coordinates stay millimeters. C ABI om9_measure_distance takes six scalar coordinates and unit code 0..4; invalid input returns NaN. No persistent global measurement state yet.
+[Runtime/source evidence](../validation/2026-10-09-rhino-core-extended-input.md). Native geometry is reused; live constraints, locale and other missing contracts remain open.
 
-Plan: docs/superpowers/plans/2026-10-05-core-distance.md. Tests: rust/tests/core_distance.rs, feature IDs embedded in test names. Stub failed semantic tests before implementation, then three math tests passed. Expanded ABI suite and Clippy running in session42197; do not claim native feature complete.
+<!-- rhino-core-extended-input:end -->
 
-Outstanding: native controller, original command registration and shared menu/mouse/CMD, unit/session prompts, feedback/history, cancel and task/document/workbench lifecycle, no object/selection/Undo mutations, native runtime evidence.
-Distance expanded four Rust geometry/unit/ABI tests passed; Clippy --all-targets -- -D warnings passed (only filesystem hard-link fallback warnings). Session42197 completed exit zero. Native Distance integration still outstanding.
+Status: partially_implemented; validated_supported_slice (2026-10-09).
 
-Distance native CoreDistance controller added and compiled successfully. Original AnalyzeDistance icon maps to Distance in Rust; CMake/Command/Workbench/Curve CMD routes added. Two world points, Unit choice, Esc, feedback label and report console; no document transaction or output object. Other tools cancel session; read-only session guards document/viewport/task state. Four Rust tests passed after mapping. Modified integration call sites and release ABI still require compile/link, and native runtime test has not run; do not count feature complete.
+**Supported slice:** native two-point 3D Distance measurement, five explicit display units, shared Cartesian point input and accepted-coordinate reporting. The contract's Model_Units display default remains open.
 
-Distance native integration built and linked in build/distance-runtime/OpenMatrix9Gui.pyd. 11 native checks and exit zero at both 100% build/distance-isolated-1/52535bd8d5f44df38c638502717b71d4/results.json and 200% build/distance-isolated-2/719ac1a5dac14c9892254ec28c48bff2/results.json. Original action, menu/CMD, exact 13mm spatial distance, in/ft conversion, invalid input retention, zero distance, Esc, calibrated mouse points, Line replacement and no objects/Undo/Redo/selection changes verified. First DPI200 run exposed leaked mouse release changing selection; CoreDistance now consumes matching left release even after second point finishes session. QPointer guards release target lifetime. Remaining: task/document/workbench lifecycle, both other units and C-planes, vertex/object snap behavior and feedback history inspection. Feature remains in progress.
+### Inputs
 
-Distance lifecycle/feedback native verification: 20 assertions and process exit zero at build/distance-isolated-1/73fc0670d0f84c579ec6cd74916a13ec/results.json. cm/m conversions, rapid document switch, task view lock cancellation, task unlock without revival, read-only task measurement when view interaction allowed and workbench reactivation all pass. Actual Gui::ReportOutput text retains 13 mm, 12 in and 5 cm measurements after switching workbench. Initial history check selected the wrong Qt widget by objectName; corrected fixture to native ReportOutput meta-class and retained editor diagnostics. No production history change needed. Remaining: non-XY mouse picking and object/vertex snap semantics; current native mouse implementation intersects frozen construction plane.
+Enter or pick two points without requiring geometry selection. The shared Rust parser supports CPlane `x,y` / `x,y,z`, world `wX,Y,Z`, relative CPlane `r`, `R` or `@`, and relative world `wr`. Explicit coordinate units and the command-start document input scale are supported; relative input uses the last accepted world point. Native picks, available snaps and F4 origin arrive in world millimeters and bypass typed-coordinate transforms.
 
-Distance non-XY native tests pass: 24 assertions and exit zero at build/distance-isolated-1/8c7cfc4550c14cca86bcc4dd2f6b6f39/results.json. Calibrated two-mouse-point measurements on Side View YZ and Through Finger XZ match camera scale; mixed CMD point displaced 100mm along plane normal and native mouse point near origin reports expected spatial distance, proving non-XY point handling. Task/document/workbench/unit/history/read-only tests still pass. Generic object snaps remain a shared core dependency and are not implied by C-plane picking.
+### Parameters and defaults
+
+`Unit=mm`, `cm`, `m`, `in` and `ft` select the result display unit only. Each command currently starts in `mm`; changing this option does not change coordinate interpretation or document units. The specified `Model_Units` choice/default is not implemented, so the original default requirement remains unsatisfied. Coordinate components must be finite and within ±`1e9` mm. Coincident points are valid and return zero.
+
+### Output
+
+Rust computes Euclidean 3D distance. The final result and both accepted world coordinates appear in command/report history; a completed owned input report is published in the main-window `om9MeasurementReport` string property. No document object, annotation, geometry edit or Undo entry is created.
+
+### Preview / commit / cancel
+
+The first accepted point is retained through rejected coordinate or display-unit input. Only a valid second point publishes the completed result/report. The CPlane remains latched from command start; document owner/UID and exact unit context are rechecked before acceptance and reporting. Document switch/close, stale context, Esc, command replacement or workbench cancellation clears pending state. A failed attempt does not replace the previous completed report.
+
+### History / dependency model
+
+The coordinate report owns accepted input text, resolved points, units, source kind, frame revision and logical view slot. It is session/UI reporting, not persisted document History or an associative link to measured geometry. Snap object identity is explicitly unavailable; no replay dependency is inferred from the source kind.
+
+### Error / invalid-input behavior
+
+Malformed, ambiguous, non-finite and overflowing coordinates are rejected by the shared Rust parser. Invalid `Unit=` values retain the accepted first point and current supported unit. Final matching-module fixtures verify unit separation, frame latch, same-name document replacement and unchanged model/Undo state. Model_Units and broader grammar remain open.
+
+[Validation and remaining scope](../validation/2026-10-09-rhino-core-point-consumers.md).

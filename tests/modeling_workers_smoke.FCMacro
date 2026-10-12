@@ -10,7 +10,16 @@ def run():
     try:
         import ThreeDm,Part,OpenMatrix9Gui as native
         Gui.activateWorkbench('OpenMatrix9Workbench')
-        source=Path('H:/FreeCAD-src/build/3dm-preserve-native/modeling-fixtures/blocks.3dm');cases=[]
+        # Production resolves workers beside the host executable. An isolated
+        # extension module can live in a different directory; exercise the actual
+        # executable, including failure injection, and require matching bytes.
+        worker=Path(QtCore.QCoreApplication.applicationDirPath())/'OM9ThreeDmImportWorker.exe'
+        built_worker=Path(native.__file__).parent/'OM9ThreeDmImportWorker.exe'
+        worker_sha256=hashlib.sha256(worker.read_bytes()).hexdigest()
+        report['worker']={'path':str(worker),'sha256':worker_sha256,'built_path':str(built_worker)}
+        check('host worker matches isolated native build',worker_sha256==hashlib.sha256(built_worker.read_bytes()).hexdigest())
+        fixtures=Path(os.environ.get('OM9_MODELING_FIXTURES','H:/FreeCAD-src/build/3dm-preserve-native/modeling-fixtures'))
+        source=fixtures/'blocks.3dm';cases=[]
         for workers in [1,4]:
             os.environ['OM9_3DM_WORKERS']=str(workers);doc=App.newDocument('WorkingBlocks')
             objects=ThreeDm.import_file(str(source),doc,mode='modeling');rows=[]
@@ -30,20 +39,17 @@ def run():
             check('modeling excludes page curves and annotations workers'+str(workers),len(objects)==9 and all(o.Label.startswith('Model') for o in objects))
             App.closeDocument(layout_doc.Name)
         doc=App.newDocument('WorkingFailure');sentinel=doc.addObject('Part::Feature','Sentinel');sentinel.Shape=Part.makeBox(1,2,3);before=[o.Name for o in doc.Objects]
-        worker=Path(native.__file__).parent/'OM9ThreeDmImportWorker.exe';hidden=worker.with_suffix('.modeling-test-disabled')
-        failure_worker=Path(os.environ.get('OM9_3DM_FAILURE_WORKER','H:/FreeCAD-src/build/rcore-native/ThreeDmImportFailureWorker.exe'))
-        if not failure_worker.is_file():raise RuntimeError('Missing dedicated failure fixture: '+str(failure_worker))
-        report['failure_worker']={'path':str(failure_worker),'sha256':hashlib.sha256(failure_worker.read_bytes()).hexdigest()}
+        hidden=worker.with_suffix('.modeling-test-disabled')
         def failure_case(replace=False):
             failed=False;worker.rename(hidden);start=time.perf_counter()
             try:
-                if replace:shutil.copyfile(failure_worker,worker)
-                try:ThreeDm.import_file(str(source),doc,mode='preserve')
+                if replace:shutil.copyfile(os.environ.get('OM9_MODELING_FAILURE_WORKER',str(fixtures.parent/'ThreeDmImportFailureWorker.exe')),worker)
+                try:ThreeDm.import_file(str(source),doc,mode='modeling')
                 except RuntimeError:failed=True
             finally:
                 if replace and worker.exists():worker.unlink()
                 hidden.rename(worker)
-            check('preservation '+('nonzero' if replace else 'missing')+' worker rolls back before document mutation',failed and [o.Name for o in doc.Objects]==before and abs(sentinel.Shape.Volume-6)<1e-9 and time.perf_counter()-start<15)
+            check(('nonzero' if replace else 'missing')+' worker rolls back before document mutation',failed and [o.Name for o in doc.Objects]==before and abs(sentinel.Shape.Volume-6)<1e-9 and time.perf_counter()-start<15)
         failure_case();failure_case(True)
         check('failed workers joined before return',not subprocess.run(['tasklist','/FI','IMAGENAME eq OM9ThreeDmImportWorker.exe','/FO','CSV'],capture_output=True,text=True).stdout.count('"OM9ThreeDmImportWorker.exe"'))
         report.update(ok=True,module=native.__file__,cases=cases)

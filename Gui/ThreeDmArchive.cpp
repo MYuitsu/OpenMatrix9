@@ -1,3 +1,4 @@
+#include "PolycurveContract.h"
 #include "ThreeDmArchive.h"
 #include "ThreeDmThreadPool.h"
 #include "ThreeDmPointCloud.h"
@@ -209,8 +210,16 @@ static ExchangeModel readArchiveImpl(const std::filesystem::path& path,double cu
                 g=transformed.get();
             }
             if(g->ClassId()==&ON_CLASS_RTTI(ON_PolyEdgeCurve)||g->ClassId()==&ON_CLASS_RTTI(ON_PolyEdgeSegment))throw GeometryRepresentationUnavailable("Standalone PolyEdge owner graph is retained; no independent editable CAD representation is established");
-            if(auto curve=ON_Curve::Cast(g);curve&&hasPolyEdgeReference(*curve))throw GeometryRepresentationUnavailable("Nested PolyEdge owner graph is retained; no independent editable CAD representation is established");
+            if(auto curve=ON_Curve::Cast(g);curve&&g->ClassId()!=&ON_CLASS_RTTI(ON_PolyCurve)&&hasPolyEdgeReference(*curve))throw GeometryRepresentationUnavailable("Nested PolyEdge owner graph is retained; no independent editable CAD representation is established");
             if(auto p=ON_Point::Cast(g))item.geometry=BRepBuilderAPI_MakeVertex(gp_Pnt(p->point.x,p->point.y,p->point.z)).Shape();
+            else if(g->ClassId()==&ON_CLASS_RTTI(ON_PolyCurve)){
+                auto converted=Polycurve::importPolyCurveObserved(static_cast<const ON_PolyCurve&>(*g),{result.tolerance/factor,1e-10});
+                item.geometry=std::move(converted.wire);item.conversionReport=converted.report.json();
+                item.conversionReport["length_unit"]="source-file-unit";
+                item.conversionReport["source_identity"]=QString::fromStdString(item.sourceUuid);
+                item.conversionReport["scale_to_mm"]=factor;
+                item.conversionReport["observed_before_unit_scale"]=true;
+            }
             else if(auto curve=ON_Curve::Cast(g))item.geometry=importCurve(*curve,result.tolerance/factor);
             else if(auto brep=ON_Brep::Cast(g)){
                 if(deferred)result.pendingBreps.push_back({result.items.size(),prepareBrepAssembly(*brep,result.tolerance/factor)});
@@ -312,7 +321,7 @@ void writeArchive5(const ExchangeModel& source,const std::filesystem::path& path
         if(auto s=std::get_if<TopoDS_Shape>(&item.geometry)){
             if(s->ShapeType()==TopAbs_VERTEX){auto p=BRep_Tool::Pnt(TopoDS::Vertex(*s));geometry=std::make_unique<ON_Point>(p.X(),p.Y(),p.Z());}
             else if(s->ShapeType()==TopAbs_EDGE)geometry=exportCurve(TopoDS::Edge(*s),input.tolerance);
-            else if(s->ShapeType()==TopAbs_WIRE){auto poly=std::make_unique<ON_PolyCurve>();for(BRepTools_WireExplorer edges(TopoDS::Wire(*s));edges.More();edges.Next()){auto curve=exportCurve(edges.Current(),input.tolerance);if(!poly->Append(curve.release()))throw ExchangeError("Cannot append wire curve");}if(!poly->IsValid())throw ExchangeError("Invalid wire curve");geometry=std::move(poly);}
+            else if(s->ShapeType()==TopAbs_WIRE)geometry=Polycurve::exportWireChecked(TopoDS::Wire(*s),{input.tolerance,1e-10});
             else {try{geometry=exportBrep(*s,input.tolerance);}catch(const ExchangeError& e){throw ExchangeError("Export object '"+item.name+"' on layer '"+item.layer+"': "+e.what());}}
         }else if(auto mesh=std::get_if<MeshData>(&item.geometry))geometry=exportMesh(*mesh);
         else {auto cloud=std::make_unique<ON_PointCloud>(std::get<ON_PointCloud>(item.geometry));cloud->PurgeUserData();geometry=std::move(cloud);}
@@ -322,6 +331,11 @@ void writeArchive5(const ExchangeModel& source,const std::filesystem::path& path
     ONX_Model check;if(!check.Read(path.c_str(),&errors)||(check.m_3dm_file_version!=5&&check.m_3dm_file_version!=50))throw ExchangeError("Rhino 5 output validation failed");
     // Validate converted geometry too before the host replaces any destination.
     const auto verified=readArchive(path,1.0);if(verified.items.size()!=input.items.size())throw ExchangeError("Rhino 5 output object count changed");
+    for(std::size_t i=0;i<input.items.size();++i)if(auto before=std::get_if<TopoDS_Shape>(&input.items[i].geometry);before&&before->ShapeType()==TopAbs_WIRE){
+        auto after=std::get_if<TopoDS_Shape>(&verified.items[i].geometry);
+        if(!after||after->ShapeType()!=TopAbs_WIRE)throw ExchangeError("Rhino 5 output lost wire partition");
+        Polycurve::verifyWirePartition(TopoDS::Wire(*before),TopoDS::Wire(*after),{input.tolerance,1e-10});
+    }
     for(std::size_t i=0;i<input.items.size();++i)if(auto cloud=std::get_if<ON_PointCloud>(&input.items[i].geometry)){
         auto reread=std::get_if<ON_PointCloud>(&verified.items[i].geometry);
         if(!reread||pointCloudFields(*reread)!=pointCloudFields(*cloud))throw ExchangeError("Rhino5 output PointCloud current fields changed");

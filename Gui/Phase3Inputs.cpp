@@ -19,11 +19,7 @@
 #include <sstream>
 #include <stdexcept>
 namespace OpenMatrix9Gui {
-CurvePyRef publishedSurfaceSplineShape(){return CurvePyRef(new Part::TopoShapePy(new Part::TopoShape(publishedSplineShape())));}
-std::vector<std::array<double,3>> sampleCurve(PyObject* shape,std::size_t count){
-    if(!PyObject_TypeCheck(shape,&Part::TopoShapePy::Type))throw std::runtime_error("Select native CAD curves");
-    return sampleCurve(static_cast<Part::TopoShapePy*>(shape)->getTopoShapePtr()->getShape(),count);
-}
+CurvePyRef publishedSurfaceSplineShape(){return CurvePyRef(new Part::TopoShapePy(new Part::TopoShape(publishedNativeSplineShape())));}
 struct Phase3SnapshotState {
     std::string name,sub;std::uint64_t handle=0;
     ~Phase3SnapshotState(){om9_phase3_request_cancel(handle);}

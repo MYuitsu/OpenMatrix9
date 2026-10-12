@@ -1,6 +1,7 @@
 """Package the Windows bootstrap around the already verified stock OM9 module."""
 import argparse,hashlib,json,re,shutil,zipfile
 from pathlib import Path
+from release_version import parse_version
 
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -9,7 +10,8 @@ def main():
     source=Path(__file__).resolve().parents[1];plugin=args.plugin.resolve();out=args.output.resolve()
     release=json.loads((source/'release.json').read_text(encoding='utf8'))
     version=release['version'];revision=release['launcher_revision']
-    if not re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)',version) or release['freecad']!='1.1.4' or not isinstance(revision,int) or revision<1:
+    parse_version(version)
+    if release['freecad']!='1.1.4' or not isinstance(revision,int) or isinstance(revision,bool) or revision<1:
         raise RuntimeError('Unsupported release metadata')
     if out.exists():raise RuntimeError('Choose a new output folder; existing files are preserved')
     validation=json.loads((plugin/'release-validation.json').read_text(encoding='utf-8-sig'))

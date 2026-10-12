@@ -85,9 +85,7 @@ pub unsafe extern "C" fn om9_surface_refit(
     }
     let input = unsafe { std::slice::from_raw_parts(xyz, count * 3) };
     let points = input
-        .as_chunks::<3>()
-        .0
-        .iter()
+        .chunks_exact(3)
         .map(|p| [p[0], p[1], p[2]])
         .collect::<Vec<_>>();
     match refit(&points, tolerance, closed) {

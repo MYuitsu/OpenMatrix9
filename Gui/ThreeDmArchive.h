@@ -1,3 +1,4 @@
+#include <QJsonObject>
 #pragma once
 #include "ThreeDmGeometry.h"
 #include "LayerExchangeAdapter.h"
@@ -8,7 +9,7 @@
 namespace OpenMatrix9Gui::ThreeDm {
 // transferObjectId is an untrusted native fact. Only an exact extended payload
 // binding may consume it; regular/native-only imports retain physical UUID IDs.
-struct ExchangeItem {std::string name,layer,sourceUuid,sourceClass,sourceRootUuid,representationIssue,transferObjectId;std::array<int,3> color{180,180,180};int wireDensity=1;double conversionSeconds=0;bool visible=true,locked=false,retained=false;std::variant<TopoDS_Shape,MeshData,ON_PointCloud> geometry;std::optional<NativeObjectLayerRow> ownState;};
+struct ExchangeItem {std::string name,layer,sourceUuid,sourceClass,sourceRootUuid,representationIssue,transferObjectId;std::array<int,3> color{180,180,180};int wireDensity=1;double conversionSeconds=0;bool visible=true,locked=false,retained=false;std::variant<TopoDS_Shape,MeshData,ON_PointCloud> geometry;std::optional<NativeObjectLayerRow> ownState;QJsonObject conversionReport;};
 struct PendingBrep {size_t item;BrepAssembly assembly;};
 struct ExchangeModel {std::vector<ExchangeItem> items;double scaleMm=1.0,tolerance=1e-6;std::vector<PendingBrep> pendingBreps;NativeLayerTable layerTable;std::optional<NativeLayerContext> layerContext;};
 // Caller has verified the extended metadata against these exact archive bytes.

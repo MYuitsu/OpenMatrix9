@@ -1,0 +1,180 @@
+# RCORE-01.T08: real native Rebuild solve held before its publication boundary.
+import hashlib,json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtGui,QtWidgets
+if os.environ.get('OM9_TEST_NATIVE_DIR'):sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[],'cases':[]}
+def check(name,value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(150,loop.quit);loop.exec()
+def stats(action='stats'):return OM.rebuildDeliveryTest(action)
+def inventory(doc):
+    return {'objects':[(o.Name,o.TypeId,sorted(o.PropertiesList)) for o in doc.Objects],
+            'undo':doc.UndoCount,'redo':doc.RedoCount,
+            # Persisted source Shape properties only. App::Part.Shape is a
+            # computed union getter that creates _Part_ShapeCache on read.
+            'shapes':{o.Name:hashlib.sha256(o.Shape.exportBrepToString().encode()).hexdigest() for o in doc.Objects if 'Shape' in o.PropertiesList},
+            'placements':{o.Name:[list(o.Placement.Base),list(o.Placement.Rotation.Q)] for o in doc.Objects if 'Placement' in o.PropertiesList},
+            'groups':{o.Name:[v.Name for v in o.Group] for o in doc.Objects if 'Group' in o.PropertiesList}}
+def actual_preview():
+    from pivy import coin
+    count=0
+    for name in App.listDocuments():
+        for view in Gui.getDocument(name).mdiViewsOfType('Gui::View3DInventor'):
+            search=coin.SoSearchAction();search.setName(coin.SbName('OM9RebuildPreview'));search.setInterest(coin.SoSearchAction.ALL);search.setSearchingAll(True)
+            search.apply(view.getSceneGraph());count+=search.getPaths().getLength()
+    return count
+def begin(source):
+    Gui.Selection.clearSelection();Gui.Selection.addSelection(source)
+    window.findChild(QtGui.QAction,'Rebuild').trigger();settle()
+    dialog=window.findChild(QtWidgets.QDialog,'OM9RebuildDialog')
+    check('existing Rebuild options opens',dialog is not None and dialog.isVisible())
+    dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(8)
+    dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree').setValue(3)
+    dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(False)
+    return dialog
+def click(dialog,name):dialog.findChild(QtWidgets.QPushButton,name).click()
+def authored(name):
+    doc=App.newDocument(name);doc.UndoMode=1
+    source=doc.addObject('Part::Feature','Source')
+    curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(2,4,0),App.Vector(6,0,0)],[3,3],[0,1],False,2)
+    source.Shape=curve.toShape();doc.recompute();Gui.activeDocument().activeView().viewTop();settle()
+    return doc,source
+def prepared(label):
+    doc,source=authored('Delayed'+label);dialog=begin(source)
+    return doc,source,dialog
+def solved(doc,dialog,label):
+    baseline=inventory(doc);before=stats();click(dialog,'OM9RebuildPreview');settle();held=stats()
+    check(label+': real owned native result held',held['held']==1 and held['live_envelopes']==1 and held['shapes_created']==before['shapes_created']+1 and held['shapes_released']==before['shapes_released'])
+    after=inventory(doc);coin_count=actual_preview()
+    result.setdefault('solve_snapshots',[]).append({'name':label,'before':baseline,'after':after,'actual_coin':coin_count,'native_preview_nodes':held['preview_nodes']})
+    check(label+': pending publication leaves Coin/inventory/Undo exact',coin_count==0 and held['preview_nodes']==0 and after==baseline)
+    raw=held['held_results'][0]['breps'][0];(out/(label+'-held.brep')).write_text(raw,encoding='utf-8')
+    native=Part.Shape();native.importBrepFromString(raw);curve=native.Edges[0].Curve
+    check(label+': same existing solver produced valid requested basis',native.isValid() and isinstance(curve,Part.BSplineCurve) and curve.Degree==3 and curve.NbPoles==8 and len(native.Edges)==1)
+    return baseline,before,held
+def delivered_record(label,before,held,delivered,doc,before_delivery,expected='rejected'):
+    expected_row=held['held_results'][0]
+    after=inventory(doc)
+    result['cases'].append({'name':label,'before':before,'held':held,'delivered':delivered,'inventory_before_delivery':before_delivery,'inventory_after_delivery':after,'actual_coin_after':actual_preview()})
+    check(label+': exact held result delivered without another solve',delivered['last_ticket']==expected_row['ticket'] and delivered['last_breps']==expected_row['breps'] and delivered['shapes_created']==held['shapes_created'])
+    for i,raw in enumerate(delivered['last_breps']):(out/(label+'-delivered-'+str(i)+'.brep')).write_text(raw,encoding='utf-8')
+    check(label+': delivery outcome',delivered['last_outcome']==expected)
+    check(label+': owned envelope/native refs released once',delivered['released']==before['released']+1 and delivered['shapes_released']==before['shapes_released']+1 and delivered['live_envelopes']==0 and delivered['held']==0 and delivered['retire_failures']==0)
+    check(label+': document/property/Undo/source stays exact at delivery',after==before_delivery)
+    check(label+': real Coin matches native attachment counter',actual_preview()==delivered['preview_nodes'] and (actual_preview()>0 if expected=='previewed' else actual_preview()==0))
+def finish(doc,dialog=None):
+    if dialog is not None and dialog.isVisible():click(dialog,'OM9RebuildCancel');settle()
+    App.closeDocument(doc.Name);settle()
+def run():
+    global OM,window
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM
+        window=Gui.getMainWindow();result['native_module']=OM.__file__;result['module']=str(OM.__file__)
+        check('exact native module loaded',Path(OM.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        stats('hold')
+        doc,source,dialog=prepared('Unchanged');baseline,before,held=solved(doc,dialog,'unchanged')
+        delivered_record('unchanged',before,held,stats('oldest'),doc,baseline,'previewed')
+        click(dialog,'OM9RebuildCancel');settle();check('cancel clears actually displayed Coin preview',actual_preview()==0 and stats()['preview_nodes']==0 and inventory(doc)==baseline);finish(doc)
+        for label,mutation in [('source-edit','edit'),('edit-restore','restore'),('source-replace','replace'),('undo-epoch','undo'),('unit-context','units'),('options','options'),('degree-option','degree'),('delete-input-option','remove'),('cancel','cancel')]:
+            doc,source,dialog=prepared(label);baseline,before,held=solved(doc,dialog,label)
+            # Retain the exact native topology owner, replace the property only.
+            # A new deep copy can change Free/Checked owner metadata in raw BRep.
+            original=source.Shape
+            if mutation in ('edit','restore','undo'):
+                if mutation=='undo':doc.openTransaction('fixture source edit')
+                source.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(9,1,2));doc.recompute()
+                if mutation=='restore':source.Shape=original;doc.recompute();check('edit-restore: identical source BRep does not erase revision',inventory(doc)['shapes']==baseline['shapes'])
+                if mutation=='undo':doc.commitTransaction();doc.undo();check('undo-epoch: native source geometry restored',inventory(doc)['shapes']==baseline['shapes'])
+            elif mutation=='replace':
+                name=source.Name;doc.removeObject(name);source=doc.addObject('Part::Feature',name);source.Shape=original;doc.recompute()
+            elif mutation=='units':OM.setUnitContext(doc.Name,1,1,0.001,0.01,0.01)
+            elif mutation=='options':dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(10)
+            elif mutation=='degree':dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree').setValue(2)
+            elif mutation=='remove':dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(True)
+            elif mutation=='cancel':click(dialog,'OM9RebuildCancel');settle()
+            changed=inventory(doc);delivered=stats('oldest');delivered_record(label,before,held,delivered,doc,changed)
+            if mutation in ('edit','restore','replace','undo','units'):check(label+': strict source/context rejection reason',delivered['last_reason'].startswith('Source object changed or was replaced:'))
+            finish(doc,None if mutation=='cancel' else dialog)
+        doc,source=authored('DelayedParent');parent=doc.addObject('App::Part','Parent');parent.addObject(source);doc.recompute();dialog=begin(source)
+        baseline,before,held=solved(doc,dialog,'parent-placement');parent.Placement.Base=App.Vector(5,0,0);doc.recompute();changed=inventory(doc)
+        delivered_record('parent-placement',before,held,stats('oldest'),doc,changed);finish(doc,dialog)
+        for label,mutation,nested in [('linked-unchanged','none',False),('linked-target-edit','edit',False),('linked-target-edit-restore','restore',False),('linked-target-placement','target-placement',False),('linked-intermediate-placement','intermediate-placement',True)]:
+            doc,target=authored('Delayed'+label)
+            intermediate=doc.addObject('App::Link','Intermediate') if nested else target
+            if nested:intermediate.LinkedObject=target
+            occurrence=doc.addObject('App::Link','Occurrence');occurrence.LinkedObject=intermediate;doc.recompute();dialog=begin(occurrence)
+            baseline,before,held=solved(doc,dialog,label);original=target.Shape
+            # Target and intermediate events must invalidate a solved occurrence
+            # immediately; no recompute may propagate _LinkTouched to that link.
+            if mutation in ('edit','restore'):
+                target.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(9,1,2))
+                if mutation=='restore':
+                    target.Shape=original
+                    check(label+': target geometry restored without erasing mutation stamp',inventory(doc)['shapes']==baseline['shapes'])
+            elif mutation=='target-placement':target.Placement.Base=App.Vector(5,0,0)
+            elif mutation=='intermediate-placement':intermediate.Placement.Base=App.Vector(5,0,0)
+            changed=inventory(doc);delivered=stats('oldest')
+            delivered_record(label,before,held,delivered,doc,changed,'previewed' if mutation=='none' else 'rejected')
+            if mutation!='none':check(label+': strict resolved-source revision rejection',delivered['last_reason'].startswith('Source object changed or was replaced:'))
+            finish(doc,dialog)
+        doc,source,dialog=prepared('Newer');baseline,before,held=solved(doc,dialog,'older')
+        dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(10);click(dialog,'OM9RebuildPreview');settle();two=stats()
+        check('newer: two distinct native results held in order',two['held']==2 and two['live_envelopes']==2 and two['held_results'][1]['ticket']>two['held_results'][0]['ticket'])
+        newest=stats('newest');newer_nodes=actual_preview();label=dialog.findChild(QtWidgets.QLabel,'OM9RebuildDeviation').text()
+        check('newer result publishes first and retires only its owner',newest['last_outcome']=='previewed' and newer_nodes>0 and newest['released']==before['released']+1 and newest['live_envelopes']==1 and newest['last_breps']==two['held_results'][1]['breps'])
+        older=stats('oldest');result['cases'].append({'name':'newer-overtakes-older','before':before,'held':two,'newest':newest,'older':older,'actual_coin_after':actual_preview(),'inventory_before_delivery':baseline,'inventory_after_delivery':inventory(doc)})
+        check('late older result preserves newer actual Coin and deviation',older['last_outcome']=='rejected' and actual_preview()==newer_nodes and older['preview_nodes']==newest['preview_nodes'] and dialog.findChild(QtWidgets.QLabel,'OM9RebuildDeviation').text()==label)
+        check('both real output owners retire once without regeneration',older['released']==before['released']+2 and older['shapes_released']==before['shapes_released']+2 and older['shapes_created']==two['shapes_created'] and older['live_envelopes']==0 and older['last_breps']==two['held_results'][0]['breps'] and inventory(doc)==baseline)
+        finish(doc,dialog)
+        doc,source,dialog=prepared('Switch');baseline,before,held=solved(doc,dialog,'switch');other=App.newDocument('DelayedOther');other.UndoMode=1;settle();changed=inventory(other)
+        delivered_record('switch',before,held,stats('oldest'),other,changed);check('document switch preserves original source',inventory(doc)==baseline);finish(other);finish(doc)
+        doc,source,dialog=prepared('Missing');baseline,before,held=solved(doc,dialog,'close-missing');name=doc.Name;App.closeDocument(name);settle();missing=stats('oldest')
+        result['cases'].append({'name':'close-missing','before':before,'held':held,'delivered':missing,'document_absent':name not in App.listDocuments(),'actual_coin_after':actual_preview()})
+        check('closed missing document rejects same owned result safely',name not in App.listDocuments() and missing['last_outcome']=='rejected' and missing['last_ticket']==held['held_results'][0]['ticket'] and missing['last_breps']==held['held_results'][0]['breps'] and actual_preview()==0)
+        check('missing-document result refs retire exactly once',missing['released']==before['released']+1 and missing['shapes_released']==before['shapes_released']+1 and missing['live_envelopes']==0 and missing['retire_failures']==0)
+        doc,source,dialog=prepared('SameName');baseline,before,held=solved(doc,dialog,'close-reopen');name=doc.Name;App.closeDocument(name);settle()
+        check('document close removes all actual preview nodes',stats()['preview_nodes']==0 and stats()['live_envelopes']==1)
+        reopened,source=authored(name);dialog=begin(source);changed=inventory(reopened)
+        delivered_record('close-reopen',before,held,stats('oldest'),reopened,changed)
+        check('same-name recreated source rejects old session specifically',stats()['last_reason'].startswith('Source object changed or was replaced:'))
+        baseline,before,held=solved(reopened,dialog,'fresh-session');delivered_record('fresh-session',before,held,stats('oldest'),reopened,baseline,'previewed');finish(reopened,dialog)
+        # Production scheduling, without the deterministic hold hook.
+        stats('normal');doc,source,dialog=prepared('Normal');baseline=inventory(doc);before=stats();click(dialog,'OM9RebuildPreview');queued=stats()
+        check('default preview really queues its owned result',queued['held']==0 and queued['live_envelopes']==1 and actual_preview()==0)
+        settle();done=stats();result['cases'].append({'name':'normal-queued','before':before,'queued':queued,'delivered':done,'inventory_before_delivery':baseline,'inventory_after_delivery':inventory(doc),'actual_coin_after':actual_preview()})
+        check('default queue publishes/releases without test release action',done['last_outcome']=='previewed' and done['live_envelopes']==0 and done['released']==before['released']+1 and done['shapes_released']==before['shapes_released']+1 and actual_preview()==done['preview_nodes']>0 and inventory(doc)==baseline)
+        finish(doc,dialog);stats('hold');doc,source,dialog=prepared('Capacity');baseline=inventory(doc);before=stats()
+        for _ in range(16):click(dialog,'OM9RebuildPreview')
+        full=stats();check('native envelope queue obeys Rust16slot bound',full['held']==16 and full['live_envelopes']==16 and full['shapes_created']==before['shapes_created']+16 and actual_preview()==0)
+        click(dialog,'OM9RebuildPreview');rejected=stats()
+        check('17th request rejects before native result construction',rejected['held']==16 and rejected['created']==full['created'] and rejected['shapes_created']==full['shapes_created'] and 'Too many pending' in dialog.findChild(QtWidgets.QLabel,'OM9RebuildError').text() and inventory(doc)==baseline)
+        for _ in range(16):stats('oldest')
+        drained=stats();check('all16canceled leases retire exactly once',drained['live_envelopes']==0 and drained['released']==before['released']+16 and drained['shapes_released']==before['shapes_released']+16 and drained['retire_failures']==0 and actual_preview()==0)
+        baseline,before,held=solved(doc,dialog,'capacity-recovered');delivered_record('capacity-recovered',before,held,stats('oldest'),doc,baseline,'previewed')
+        result['cases'].append({'name':'capacity','full':full,'rejected':rejected,'drained':drained});finish(doc,dialog)
+        # Same production teardown helper cancels the receiver's queued functors
+        # before controller State/Python teardown, rather than invoking delivery.
+        stats('normal');doc,source,dialog=prepared('Shutdown');baseline=inventory(doc);before=stats();click(dialog,'OM9RebuildPreview');queued=stats()
+        check('shutdown control has actual queued native result',queued['live_envelopes']==1 and queued['held']==0 and actual_preview()==0)
+        discarded=stats('shutdown');settle();after=stats()
+        result['cases'].append({'name':'shutdown-discard','before':before,'queued':queued,'discarded':discarded,'after':after,'inventory_before_delivery':baseline,'inventory_after_delivery':inventory(doc),'actual_coin_after':actual_preview()})
+        check('shutdown discards queued result without publication callback',after['last_ticket']==queued['last_ticket'] and after['live_envelopes']==0 and after['held']==0 and after['preview_nodes']==0 and actual_preview()==0)
+        check('shutdown release counters prove exactly one owned result retirement',after['released']==before['released']+1 and after['shapes_released']==before['shapes_released']+1 and after['retire_failures']==0 and inventory(doc)==baseline)
+        try:stats('normal');check('shutdown rejects new requeue',False)
+        except RuntimeError as error:check('shutdown rejects new requeue','shut down' in str(error))
+        finish(doc)
+        result['final_stats']=stats();check('fixture leaves no preview or owned result refs',result['final_stats']['live_envelopes']==0 and result['final_stats']['held']==0 and result['final_stats']['preview_nodes']==0 and result['final_stats']['created']==result['final_stats']['released'] and result['final_stats']['shapes_created']==result['final_stats']['shapes_released'] and result['final_stats']['retire_failures']==0)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        try:stats('normal')
+        except Exception:pass
+        for name in list(App.listDocuments()):
+            if name.startswith('Delayed'):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        if os.environ.get('OM9_SMOKE_KEEP_OPEN')!='1':QtCore.QTimer.singleShot(0,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1800,run)

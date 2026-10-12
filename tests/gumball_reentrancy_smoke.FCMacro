@@ -1,0 +1,40 @@
+"""Read-only native GUI observations during a publication cannot cancel its owner."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as native
+from PySide6 import QtCore,QtWidgets
+sys.path.insert(0,str(Path(__file__).parent))
+from gumball_fixture import GumballUI as UI
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'module':native.__file__,'feature_ids':['OM9-INFO-020'],'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    observer=None
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('GumballReentrancy');doc.UndoMode=1
+        box=doc.addObject('Part::Feature','Box');box.Shape=Part.makeBox(2,3,4);doc.recompute()
+        Gui.activeDocument().activeView().viewAxonometric()
+        ui=UI(native);ui.select(box);ui.command('Gumball On');ui.command('GumballAlignment World')
+        cancel=os.environ.get('OM9_GUMBALL_REENTRY_CANCEL')=='1'
+        class Observe:
+            fired=False
+            def slotChangedObject(self,obj,prop):
+                if obj==box and prop=='Placement' and not self.fired:
+                    self.fired=True;report['reentrant_state']=native.gumballState()
+                    if cancel:Gui.runCommand('OM9_Gumball')
+        observer=Observe();App.addDocumentObserver(observer);before=doc.UndoCount
+        ui.numeric('MoveX','3 mm');App.removeDocumentObserver(observer);observer=None
+        check('readonly callback actually observed publication',bool(report.get('reentrant_state')))
+        if cancel:
+            check('synchronous user cancellation aborts publication',abs(box.Shape.BoundBox.XMin)<1e-9 and doc.UndoCount==before and not native.gumballState()['enabled'])
+        else:
+            check('readonly callback cannot cancel or free publication inputs',abs(box.Shape.BoundBox.XMin-3)<1e-9 and doc.UndoCount==before+1)
+            doc.undo();check('reentrant publication has one reversible transaction',abs(box.Shape.BoundBox.XMin)<1e-9)
+        report['ok']=True
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        if observer:App.removeDocumentObserver(observer)
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2));Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

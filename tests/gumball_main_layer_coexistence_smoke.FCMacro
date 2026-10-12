@@ -1,0 +1,303 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Merged native layer ownership, metadata inventory and explicit pick intent."""
+import json, os, sys, tempfile, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+if os.environ.get('OM9_TEST_NATIVE_DIR'):
+    sys.path.insert(0, os.environ['OM9_TEST_NATIVE_DIR'])
+sys.path.insert(0, str(Path(__file__).parent))
+from command_console_support import command_input
+out = Path(os.environ['OM9_SMOKE_OUTPUT']); out.mkdir(parents=True, exist_ok=True)
+report = {'checks': []}
+
+def check(name, passed):
+    report['checks'].append({'name': name, 'passed': bool(passed)})
+    (out/'progress.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+
+def settle():
+    Gui.updateGui(); QtTest.QTest.qWait(300)
+
+def enter(text):
+    field.setFocus(); field.setText(text)
+    QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return); settle()
+
+def close_documents():
+    for name in list(App.listDocuments()):
+        App.closeDocument(name)
+
+def snapshot(doc):
+    return json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']
+
+def command(doc, **kw):
+    return native.layerDocumentCommand(doc.Name, json.dumps(kw))
+
+def rgb_equal(left, right):
+    return all(abs(left[i]-right[i]) < 1e-6 for i in range(3))
+
+def create_circle(doc, point, radius):
+    before = {o.Name for o in doc.Objects}
+    enter('Circle'); enter(point); enter(radius)
+    outputs = [o for o in doc.Objects if o.Name not in before and getattr(o, 'OM9FeatureId', '') == 'OM9-CURVE-005']
+    if len(outputs) != 1:
+        raise AssertionError('Circle did not publish one native output')
+    return outputs[0]
+
+def object_row(state, obj):
+    return next(row for row in state['objects'] if row['id'] == getattr(obj, 'OM9LayerObjectId', obj.Name))
+
+def own_state_matches(state, obj, rgb, locked, visible):
+    row = object_row(state, obj)
+    return row['color_source'] == 'ByObject' and row['rgb'] == list(rgb) and row['locked'] == locked and row['visible'] == visible
+
+def export_snapshot(doc, objects):
+    return json.loads(native.exportLayerSelection3dm(doc.Name, objects))['layer_session']['snapshot']
+
+def legacy_click(dock, role):
+    button = dock.findChild(QtWidgets.QToolButton, 'OM9Layer'+role+'4')
+    if button is None or not button.isEnabled():
+        raise AssertionError('legacy layer '+role+' control unavailable')
+    button.click(); settle()
+
+def legacy_coexistence():
+    doc = App.newDocument('MainLegacyLayerCoexistence'); doc.UndoMode = 1; settle()
+    enter('Layer=5')
+    group = next(o for o in doc.Objects if getattr(o, 'OM9LayerSchema', '') == '1' and o.OM9LayerIndex == 5)
+    group_name = group.Name
+    settings = next(o for o in doc.Objects if getattr(o, 'OM9LayerStateSchema', '') == '1')
+    check('legacy current slot remains five', settings.OM9ActiveLayer == 5)
+    command(doc, operation='set_current', layer_id='om9-preset-7')
+    helpers = {group.Name, settings.Name}
+    check('canonical inventory excludes verified legacy layer helpers', not ({r['id'] for r in snapshot(doc)['objects']} & helpers))
+    try:
+        empty = native.collectLayerTransfer3dm(doc.Name, [], 2)
+        check('canonical empty session omits legacy helpers', not empty)
+    except Exception:
+        check('canonical empty session omits legacy helpers', False)
+        report['empty_collection_error'] = traceback.format_exc()
+    circle = create_circle(doc, '1,2,3', '4')
+    circle_name = circle.Name
+    expected = tuple(group.OM9LayerColor)
+    check('Circle keeps legacy slot five membership and color', circle in group.Group and circle.OM9OutputLayerIndex == 5 and rgb_equal(circle.ViewObject.LineColor, expected))
+    # Canonical native creation remains enabled for independently owned geometry.
+    doc.openTransaction('Canonical box')
+    box = doc.addObject('Part::Feature', 'CanonicalBox'); box.Shape = Part.makeBox(2,3,4)
+    doc.recompute(); doc.commitTransaction(); settle()
+    check('canonical native creation still uses selected slot seven', getattr(box, 'OM9LayerId', '') == 'om9-preset-7' and tuple(round(c*255) for c in box.ViewObject.ShapeColor[:3]) == (122,167,206))
+    try:
+        collected = native.collectLayerTransfer3dm(doc.Name, [], 2)
+        names = {o.Name for o in collected}
+        check('canonical session collects model geometry without legacy helpers', names == {circle.Name, box.Name})
+    except Exception:
+        check('canonical session collects model geometry without legacy helpers', False)
+        report['model_collection_error'] = traceback.format_exc()
+    dock = window.findChild(QtWidgets.QDockWidget, 'OpenMatrix9Sidebar')
+    canonical_before = object_row(snapshot(doc), box).copy()
+    palette_before = snapshot(doc)['layers']
+    chosen = QtGui.QColor(12,100,180)
+    dialog_result = {'accepted':False, 'attempts':0}
+    def accept_color():
+        dialog_result['attempts'] += 1
+        dialog = next((w for w in QtWidgets.QApplication.topLevelWidgets() if isinstance(w, QtWidgets.QColorDialog)), None)
+        if dialog is not None:
+            dialog.setCurrentColor(chosen); dialog.accept(); dialog_result['accepted'] = True
+        elif dialog_result['attempts'] < 30:
+            QtCore.QTimer.singleShot(100, accept_color)
+    QtCore.QTimer.singleShot(100, accept_color)
+    legacy_click(dock, 'Swatch')
+    expected = (12/255,100/255,180/255)
+    check('legacy swatch updates native owned Circle color', dialog_result['accepted'] and rgb_equal(circle.ViewObject.LineColor, expected) and rgb_equal(group.OM9LayerColor, expected))
+    check('known legacy RGB refreshes canonical snapshot and export metadata', own_state_matches(snapshot(doc), circle, (12,100,180), False, True) and own_state_matches(export_snapshot(doc, [circle]), circle, (12,100,180), False, True))
+    legacy_click(dock, 'Visibility')
+    check('legacy layer Off hides group and owned Circle', not group.ViewObject.Visibility and not circle.ViewObject.Visibility)
+    check('known legacy Off refreshes canonical snapshot and export metadata', own_state_matches(snapshot(doc), circle, (12,100,180), False, False) and own_state_matches(export_snapshot(doc, [circle]), circle, (12,100,180), False, False))
+    legacy_click(dock, 'Lock')
+    check('known legacy lock refreshes canonical snapshot and export metadata', own_state_matches(snapshot(doc), circle, (12,100,180), True, False) and own_state_matches(export_snapshot(doc, [circle]), circle, (12,100,180), True, False))
+    # Verify actual Rhino5 bytes, including a known canonical-owned row.
+    import ThreeDm
+    target = out/'mixed-panel-own-state-v5.3dm'
+    ThreeDm.export_file(str(target), [circle, box], modeling=True)
+    with tempfile.TemporaryDirectory() as staging:
+        reread = json.loads(native.read3dm(str(target), staging))
+    received = reread['layer_session']['snapshot']
+    item_ids = {item['name']:item['layer_object_id'] for item in reread['items']}
+    legacy_row = next(row for row in received['objects'] if row['id'] == item_ids[circle.Label])
+    canonical_row = next(row for row in received['objects'] if row['id'] == item_ids[box.Label])
+    check('Rhino5 export carries refreshed legacy RGB Off and lock', legacy_row['rgb'] == [12,100,180] and not legacy_row['visible'] and legacy_row['locked'] and legacy_row['color_source'] == 'ByObject')
+    check('Rhino5 export preserves canonical-owned color and own flags', all(canonical_row[key] == canonical_before[key] for key in ('rgb','visible','locked','color_source')))
+    legacy_click(dock, 'Lock')
+    check('legacy unlock clears previous canonical lock projection', own_state_matches(snapshot(doc), circle, (12,100,180), False, False) and own_state_matches(export_snapshot(doc, [circle]), circle, (12,100,180), False, False))
+    check('legacy refresh preserves canonical rows and full palette', object_row(snapshot(doc), box) == canonical_before and snapshot(doc)['layers'] == palette_before)
+    command(doc, operation='set_current', layer_id='om9-preset-8'); settle()
+    check('canonical projection preserves legacy Off and color', not group.ViewObject.Visibility and not circle.ViewObject.Visibility and rgb_equal(circle.ViewObject.LineColor, expected))
+    hidden = create_circle(doc, '0,0', '2')
+    check('new Circle on legacy Off remains hidden with legacy color', hidden in group.Group and hidden.OM9OutputLayerIndex == 5 and not hidden.ViewObject.Visibility and not group.ViewObject.Visibility and rgb_equal(hidden.ViewObject.LineColor, expected))
+    # A genuine model augmented with a helper marker is still inventoried.
+    forged = doc.addObject('Part::Feature', 'ForgedLegacyHelper'); forged.Shape = Part.makeBox(1,1,1)
+    forged.addProperty('App::PropertyString', 'OM9LayerStateSchema'); forged.OM9LayerStateSchema = '1'
+    forged.addProperty('App::PropertyInteger', 'OM9ActiveLayer'); forged.OM9ActiveLayer = 5
+    doc.recompute()
+    check('helper marker cannot hide native model geometry', forged.Name in {r['id'] for r in snapshot(doc)['objects']})
+    doc.removeObject(forged.Name); doc.recompute()
+    saved = out/'legacy-canonical-layers.FCStd'; doc.saveAs(str(saved)); App.closeDocument(doc.Name)
+    doc = App.openDocument(str(saved)); settle()
+    group = doc.getObject(group_name); circle = doc.getObject(circle_name)
+    command(doc, operation='set_current', layer_id='om9-preset-7'); settle()
+    check('FCStd reopen preserves legacy ownership Off and color', circle in group.Group and not group.ViewObject.Visibility and not circle.ViewObject.Visibility and rgb_equal(circle.ViewObject.LineColor, expected))
+    check('FCStd reopen preserves refreshed legacy export truth', own_state_matches(snapshot(doc), circle, (12,100,180), False, False) and own_state_matches(export_snapshot(doc, [circle]), circle, (12,100,180), False, False))
+    App.closeDocument(doc.Name)
+
+def explicit_selectable():
+    doc = App.newDocument('MainExplicitSelectable'); doc.UndoMode = 1
+    protected = doc.addObject('Part::Feature', 'UserNonSelectable'); protected.Shape = Part.makeBox(3,4,5)
+    free = doc.addObject('Part::Feature', 'UserSelectable'); free.Shape = Part.makeBox(1,2,3)
+    protected.ViewObject.Selectable = False; doc.recompute(); settle()
+    command(doc, operation='set_current', layer_id='om9-preset-7')
+    check('canonical initialization preserves explicit native Selectable false', not protected.ViewObject.Selectable)
+    row = next(r for r in snapshot(doc)['objects'] if r['id'] == protected.Name)
+    layer_id = row['layer_id']
+    for operation, field_name in [('set_locked', 'locked'), ('set_visible', 'visible')]:
+        for value in [True, False, True]:
+            command(doc, operation=operation, layer_id=layer_id, **{field_name:value}); settle()
+            check(f'{operation}={value} keeps explicit Selectable false', not protected.ViewObject.Selectable)
+    # Leave the canonical owner unlocked and visible before exercising Tree Show.
+    command(doc, operation='set_locked', layer_id=layer_id, locked=False)
+    command(doc, operation='set_visible', layer_id=layer_id, visible=False); settle()
+    check('canonical visibility masks display without clearing explicit pick intent', free.ViewObject.Selectable and not free.ViewObject.Visibility)
+    command(doc, operation='set_visible', layer_id=layer_id, visible=True)
+    check('canonical Show restores display and prior explicit pick intent', free.ViewObject.Selectable and free.ViewObject.Visibility)
+    protected.ViewObject.Visibility = False; protected.ViewObject.Visibility = True; settle()
+    check('Tree Hide Show preserves explicit Selectable false', not protected.ViewObject.Selectable)
+    saved = out/'explicit-selectable.FCStd'; name = protected.Name
+    doc.saveAs(str(saved)); App.closeDocument(doc.Name); doc = App.openDocument(str(saved)); settle()
+    command(doc, operation='set_current', layer_id='om9-preset-8'); settle()
+    check('FCStd restore and canonical projection preserve explicit Selectable false', not doc.getObject(name).ViewObject.Selectable)
+    App.closeDocument(doc.Name)
+
+def legacy_ellipse_foci_color():
+    doc = App.newDocument('MainLegacyEllipseFociColor'); doc.UndoMode = 1; settle()
+    enter('Layer=5')
+    group = next(o for o in doc.Objects if getattr(o, 'OM9LayerSchema', '') == '1' and o.OM9LayerIndex == 5)
+    group_name = group.Name
+    command(doc, operation='set_current', layer_id='om9-preset-7')
+    before = {o.Name for o in doc.Objects}
+    for text in ['Ellipse', 'FromFoci', 'MarkFoci=Yes', '-4,0', '4,0', '0,3']:
+        enter(text)
+    made = [o for o in doc.Objects if o.Name not in before and getattr(o, 'OM9FeatureId', '') == 'OM9-CURVE-006']
+    foci = [o for o in made if getattr(o, 'OM9Role', '') in ('Focus1', 'Focus2')]
+    focus_names = [o.Name for o in foci]
+    check('MarkFoci publishes two native legacy-owned vertices', len(made) == 3 and len(foci) == 2 and all(o.TypeId == 'Part::Feature' and o.Shape.ShapeType == 'Vertex' and o in group.Group and o.OM9OutputLayerIndex == 5 for o in foci))
+    dock = window.findChild(QtWidgets.QDockWidget, 'OpenMatrix9Sidebar')
+    chosen = QtGui.QColor(23,111,197)
+    dialog_result = {'accepted':False, 'attempts':0}
+    def accept_color():
+        dialog_result['attempts'] += 1
+        dialog = next((w for w in QtWidgets.QApplication.topLevelWidgets() if isinstance(w, QtWidgets.QColorDialog)), None)
+        if dialog is not None:
+            dialog.setCurrentColor(chosen); dialog.accept(); dialog_result['accepted'] = True
+        elif dialog_result['attempts'] < 30:
+            QtCore.QTimer.singleShot(100, accept_color)
+    QtCore.QTimer.singleShot(100, accept_color)
+    legacy_click(dock, 'Swatch')
+    rgb = (23,111,197); expected = tuple(c/255 for c in rgb)
+    check('legacy swatch displays focus PointColor independently from diffuse', dialog_result['accepted'] and all(rgb_equal(o.ViewObject.PointColor, expected) and not rgb_equal(o.ViewObject.ShapeColor, expected) for o in foci))
+    check('legacy focus snapshot RGB matches displayed PointColor', all(own_state_matches(snapshot(doc), o, rgb, False, True) for o in foci))
+    packet = export_snapshot(doc, made)
+    check('legacy focus export metadata RGB matches displayed PointColor', all(own_state_matches(packet, o, rgb, False, True) for o in foci))
+    command(doc, operation='set_current', layer_id='om9-preset-8'); settle()
+    check('canonical projection preserves both legacy focus point colors', all(o in group.Group and rgb_equal(o.ViewObject.PointColor, expected) for o in foci))
+    saved = out/'legacy-canonical-ellipse-foci.FCStd'; doc.saveAs(str(saved)); App.closeDocument(doc.Name)
+    doc = App.openDocument(str(saved)); settle()
+    group = doc.getObject(group_name); foci = [doc.getObject(name) for name in focus_names]
+    command(doc, operation='set_current', layer_id='om9-preset-7'); settle()
+    check('FCStd reopen preserves legacy focus ownership and PointColor', len(foci) == 2 and all(o in group.Group and o.Shape.ShapeType == 'Vertex' and rgb_equal(o.ViewObject.PointColor, expected) for o in foci))
+    packet = export_snapshot(doc, foci)
+    check('FCStd focus snapshot and export RGB retain displayed PointColor', all(own_state_matches(snapshot(doc), o, rgb, False, True) and own_state_matches(packet, o, rgb, False, True) for o in foci))
+    App.closeDocument(doc.Name)
+
+def malformed_permission_property():
+    doc = App.newDocument('MainTypedSelectableIntent'); doc.UndoMode = 1
+    obj = doc.addObject('Part::Feature', 'WrongPermissionPayload'); obj.Shape = Part.makeBox(1,1,1)
+    obj.ViewObject.Selectable = False
+    obj.addProperty('App::PropertyString', 'OM9LayerExplicitSelectable'); obj.OM9LayerExplicitSelectable = 'false'
+    doc.recompute(); before = doc.UndoCount
+    rejected = False
+    try:
+        command(doc, operation='set_current', layer_id='om9-preset-7')
+    except RuntimeError:
+        rejected = True
+    check('wrongly typed explicit permission metadata rejects before transaction', rejected and doc.UndoCount == before and not doc.HasPendingTransaction and not obj.ViewObject.Selectable and not any(o.TypeId == 'OpenMatrix9Gui::LayerDocumentObject' for o in doc.Objects))
+    App.closeDocument(doc.Name)
+
+def native_history_settings_inventory():
+    doc = App.newDocument('MainNativeHistorySettings'); doc.UndoMode = 1; settle()
+    # The registered History command creates the exact native settings factory.
+    enter('MatrixHistoryRecord'); enter('MatrixHistoryRecord')
+    settings = next(o for o in doc.Objects if o.TypeId == 'OpenMatrix9Gui::HistorySettings')
+    settings_name = settings.Name
+    check('actual HistorySettings factory has native policy fields and no view', settings.Record and settings.Update and not settings.Lock and settings.BrokenHistoryWarning and settings.ViewObject is None and not settings.InList)
+    enter('Layer=5')
+    group = next(o for o in doc.Objects if getattr(o, 'OM9LayerSchema', '') == '1' and o.OM9LayerIndex == 5)
+    group_name = group.Name
+    command(doc, operation='set_current', layer_id='om9-preset-7')
+    check('canonical inventory excludes exact native HistorySettings metadata', settings.Name not in {row['id'] for row in snapshot(doc)['objects']} and not native.collectLayerTransfer3dm(doc.Name, [], 2))
+    source = doc.addObject('Part::Feature', 'HistoryCirclePath'); source.Shape = Part.makeLine(App.Vector(0,0,0), App.Vector(10,0,0)); doc.recompute()
+    before = {o.Name for o in doc.Objects}
+    for text in ['Circle', 'AroundCurve', 'History=Yes', 'Curve='+source.Name+'.Edge1', 'OnCurve=0.5', '3']:
+        enter(text)
+    outputs = [o for o in doc.Objects if o.Name not in before and getattr(o, 'OM9FeatureId', '') == 'OM9-CURVE-005']
+    if len(outputs) == 1:
+        link = outputs[0].SourceCurve
+        report['history_circle_source'] = {'native_type': outputs[0].TypeId, 'shape_type': outputs[0].Shape.ShapeType, 'link_type': type(link).__name__, 'target': link[0].Name if link[0] else None, 'subnames': list(link[1])}
+    check('actual canonical plus legacy Circle History path commits through input guards', len(outputs) == 1 and outputs[0].TypeId == 'OpenMatrix9Gui::CircleHistory' and outputs[0].SourceCurve[0] is source and list(outputs[0].SourceCurve[1]) == ['Edge1'] and outputs[0] in group.Group and outputs[0].Shape.isValid())
+    history = outputs[0]
+    forged = doc.addObject('Part::Feature', 'ForgedHistorySettings'); forged.Shape = Part.makeBox(1,2,3); forged.Label = settings.Name
+    for name in ('Record', 'Update', 'Lock', 'BrokenHistoryWarning'):
+        forged.addProperty('App::PropertyBool', name); setattr(forged, name, True)
+    doc.recompute()
+    check('History policy fields cannot hide a geometry-bearing native model', forged.Name in {row['id'] for row in snapshot(doc)['objects']} and {o.Name for o in native.collectLayerTransfer3dm(doc.Name, [], 2)} == {source.Name, history.Name, forged.Name})
+    owner = next(o for o in doc.Objects if o.TypeId == 'OpenMatrix9Gui::LayerDocumentObject')
+    stored = owner.OM9LayerSnapshot
+    augmented = doc.addObject('OpenMatrix9Gui::HistorySettings', 'AugmentedHistorySettings')
+    augmented.addProperty('Part::PropertyPartShape', 'Shape'); augmented.Shape = Part.makeBox(2,3,4); doc.recompute()
+    undo = doc.UndoCount; count = len(doc.Objects)
+    rejected = []
+    for read in (lambda: snapshot(doc), lambda: native.collectLayerTransfer3dm(doc.Name, [], 2)):
+        try:
+            read(); rejected.append(False)
+        except RuntimeError:
+            rejected.append(True)
+    check('augmented registered HistorySettings geometry rejects instead of disappearing', all(rejected) and augmented.Shape.isValid() and abs(augmented.Shape.Volume-24)<1e-7 and len(doc.Objects)==count and doc.UndoCount==undo and owner.OM9LayerSnapshot==stored)
+    doc.removeObject(augmented.Name); doc.removeObject(forged.Name); doc.recompute()
+    command(doc, operation='set_current', layer_id='om9-preset-8')
+    check('canonical projection keeps HistorySettings policy and real History geometry', settings.Record and settings.Update and not settings.Lock and settings.BrokenHistoryWarning and history in group.Group and history.Shape.isValid())
+    names = {source.Name, history.Name}; saved = out/'canonical-history-settings.FCStd'; doc.saveAs(str(saved)); App.closeDocument(doc.Name)
+    doc = App.openDocument(str(saved)); settle(); settings = doc.getObject(settings_name); group = doc.getObject(group_name)
+    command(doc, operation='set_current', layer_id='om9-preset-7')
+    check('FCStd native HistorySettings remains metadata while recorded geometry transfers', settings.TypeId == 'OpenMatrix9Gui::HistorySettings' and settings.ViewObject is None and settings.Record and settings.Name not in {row['id'] for row in snapshot(doc)['objects']} and {o.Name for o in native.collectLayerTransfer3dm(doc.Name, [], 2)} == names and any(o.TypeId == 'OpenMatrix9Gui::CircleHistory' for o in group.Group))
+    App.closeDocument(doc.Name)
+
+def run():
+    global native, window, field
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui as native
+        report['native_module'] = native.__file__
+        report['module'] = str(native.__file__)
+        window = Gui.getMainWindow(); window.resize(1400,950)
+        field = command_input(window)
+        for name, scenario in [('legacy_coexistence', legacy_coexistence), ('explicit_selectable', explicit_selectable), ('malformed_permission_property', malformed_permission_property), ('legacy_ellipse_foci_color', legacy_ellipse_foci_color), ('native_history_settings_inventory', native_history_settings_inventory)]:
+            try:
+                scenario()
+            except Exception:
+                check(name+' completed', False); report[name+'_error'] = traceback.format_exc()
+                close_documents()
+        report['ok'] = bool(report['checks']) and all(c['passed'] for c in report['checks'])
+    except Exception:
+        report.update(ok=False, error=traceback.format_exc())
+    finally:
+        close_documents()
+        (out/'results.json').write_text(json.dumps(report,indent=2), encoding='utf-8')
+        if os.environ.get('OM9_SMOKE_KEEP_OPEN') != '1':
+            QtCore.QTimer.singleShot(0, QtWidgets.QApplication.instance().quit)
+QtCore.QTimer.singleShot(1800, run)

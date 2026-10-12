@@ -1,8 +1,9 @@
+#include <QDir>
+#include <QProcessEnvironment>
 #include "ThreeDmStaging.h"
+#include "ThreeDmImportJobs.h"
 #include <QCoreApplication>
 #include <QProcess>
-#include <QProcessEnvironment>
-#include <QDir>
 #include <QFile>
 #include <QJsonDocument>
 #include <QElapsedTimer>
@@ -27,9 +28,12 @@ QJsonArray stagePreservedArchive(const std::filesystem::path& source,const std::
         }
     }
     if(roots.size()>1000000)throw ExchangeError("3DM object limit exceeded");
-    int workers=std::clamp(QThread::idealThreadCount(),1,4);
-    bool valid=false;int requested=qEnvironmentVariableIntValue("OM9_3DM_WORKERS",&valid);if(valid&&requested>=1&&requested<=4)workers=std::min(workers,requested);
-    if(roots.size()<8||std::filesystem::file_size(source)>16ULL*1024*1024)workers=1;
+    const bool overridePresent=qEnvironmentVariableIsSet("OM9_3DM_WORKERS");
+    bool parsed=false;const auto requested=qgetenv("OM9_3DM_WORKERS").toLongLong(&parsed);
+    const auto planned=om9_3dm_import_worker_count(QThread::idealThreadCount(),roots.size(),
+        std::filesystem::file_size(source),overridePresent,parsed?requested:-1);
+    if(!planned)throw ExchangeError("OM9_3DM_WORKERS must be a positive integer no greater than 2147483647");
+    const int workers=static_cast<int>(planned);
     auto base=staging/(members?"definitions":"geometry");std::filesystem::create_directory(base);
     if(workers==1){auto model=readArchive(source,scale,!working,members,"",working);QJsonArray rows;int index=0;for(auto& item:model.items){auto row=encodeExchangeItem(item,base,index++);row["tolerance"]=model.tolerance;rows.append(row);}return rows;}
     const auto pluginRoot=qEnvironmentVariable("OM9_PLUGIN_ROOT");
@@ -46,8 +50,7 @@ QJsonArray stagePreservedArchive(const std::filesystem::path& source,const std::
         auto bytes=QJsonDocument(QJsonObject{{"source",QString::fromStdWString(source.wstring())},{"staging",QString::fromStdWString(dir.wstring())},{"scale",scale},{"members",members},{"working",working},{"ids",ids}}).toJson(QJsonDocument::Compact);
         QFile file(request);if(!file.open(QIODevice::WriteOnly|QIODevice::NewOnly)||file.write(bytes)!=bytes.size())throw ExchangeError("Cannot stage worker request");file.close();
         auto process=std::make_unique<QProcess>();process->setProcessChannelMode(QProcess::SeparateChannels);process->setProgram(executable);process->setArguments({request,result});
-        auto environment=QProcessEnvironment::systemEnvironment();environment.insert("PATH",QCoreApplication::applicationDirPath()+QDir::listSeparator()+environment.value("PATH"));process->setProcessEnvironment(environment);
-        process->start();jobs.processes.push_back(std::move(process));
+        auto environment=QProcessEnvironment::systemEnvironment();environment.insert("PATH",QCoreApplication::applicationDirPath()+QDir::listSeparator()+environment.value("PATH"));process->setProcessEnvironment(environment);process->start();jobs.processes.push_back(std::move(process));
         if(!jobs.processes.back()->waitForStarted(10000))throw ExchangeError("Cannot start 3DM import worker");outputs.push_back(result);
     }
     std::map<std::string,QJsonArray> converted;

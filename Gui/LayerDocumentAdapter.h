@@ -20,6 +20,7 @@ LayerExportSelection layerDocumentExportSelection(App::Document&,const std::vect
 void validateLayerDocumentExportSelection(App::Document&,const std::vector<std::string>& nativeNames,const std::string& expectedJson);
 bool isLayerStorageObject(const App::DocumentObject*);
 void requireLayerGeometryEditable(App::Document&);
+bool hasCanonicalLayerDocument(App::Document&);
 // Exchange bindings carry observed source state; the native creation observer
 // must not apply drawing defaults while the receiving adapter binds objects.
 class LayerNativeReceiveScope final {

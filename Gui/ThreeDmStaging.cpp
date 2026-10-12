@@ -54,6 +54,7 @@ QJsonObject encodeExchangeItem(const ExchangeItem& item,const std::filesystem::p
     if(item.ownState){o["layer_object_id"]=QString::fromStdString(item.ownState->id);o["layer_id"]=QString::fromStdString(item.ownState->layerId);}
     if(item.retained){o["capability"]="retained";if(!item.representationIssue.empty())o["representation_issue"]=QString::fromStdString(item.representationIssue);return o;}
     o["capability"]="editable";
+    if(!item.conversionReport.isEmpty())o["conversion_report"]=item.conversionReport;
     o["root_uuid"]=QString::fromStdString(item.sourceRootUuid);
     if(auto shape=std::get_if<TopoDS_Shape>(&item.geometry)){o["geometry_kind"]=shape->ShapeType()==TopAbs_VERTEX?1:shape->ShapeType()==TopAbs_EDGE||shape->ShapeType()==TopAbs_WIRE?2:3;o["representation"]="native-cad";}
     else if(std::holds_alternative<MeshData>(item.geometry)){o["geometry_kind"]=4;o["representation"]="native-mesh";}

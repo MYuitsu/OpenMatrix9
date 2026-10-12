@@ -4,7 +4,6 @@
 #include <QHash>
 #include <QImage>
 #include <functional>
-#include <optional>
 #include <cstddef>
 #include <vector>
 class QMainWindow;
@@ -15,9 +14,6 @@ namespace OpenMatrix9Gui {
 struct HostCallbacks {
     std::function<bool(std::size_t)> available;
     std::function<bool(std::size_t)> execute;
-    std::function<std::optional<bool>(std::size_t)> checked;
-    std::function<bool(const QString&)> submitText;
-    std::function<QString()> layerSnapshot;
 };
 class MatrixSidebar : public QDockWidget {
 public:
@@ -33,11 +29,8 @@ private:
     QWidget* section(int index, const QString& title, QWidget* body);
     void populateGrid();
     void populateHistory();
-    void invoke(std::size_t command);
     void refreshLayers();
-    void invokeLayer(QWidget*,const QString& operation);
-    QString defaultLayers;
-    QString renderedLayers;
+    void invoke(std::size_t command);
     std::size_t findCommand(const char* icon) const;
     QString tooltip(std::size_t command) const;
     QMainWindow* window;

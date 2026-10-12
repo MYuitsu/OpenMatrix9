@@ -16,17 +16,24 @@ def run():
         direct=out/'direct';direct.mkdir();expected=json.loads(native.prepareModeling3dm(str(source),str(direct),0))
         worker=Path(native.__file__).parent/'OM9ThreeDmImportWorker.exe';stage=out/'worker';stage.mkdir()
         req=out/'request.json';res=out/'worker.json'
-        request=dict(source=str(source),staging=str(stage),scale=0,working=True,members=False,ids=[],layer_transfer=True,layer_metadata='')
+        ids=sorted({item['root_uuid'] for item in expected['items']})
+        check('worker request uses two inspected source roots',len(ids)==2 and all(len(value)==36 for value in ids))
+        request=dict(source=str(source),staging=str(stage),scale=0,working=True,members=False,ids=ids)
         req.write_text(json.dumps(request),encoding='utf8')
         proc=subprocess.run([str(worker),str(req),str(res)],capture_output=True,timeout=90)
         report['worker_exit']=proc.returncode
         (out/'worker.stderr.log').write_bytes(proc.stderr)
         check('plugin-local worker runs with only installed host DLL search path',proc.returncode==0 and res.is_file())
         actual=json.loads(res.read_text(encoding='utf8'))
-        check('worker imports same current object count',len(actual['items'])==len(expected['items'])==2)
-        check('worker preserves full palette',actual['layer_session']['snapshot']['layers']==expected['layer_session']['snapshot']['layers'])
-        for item in actual['items']:
+        check('worker imports same current object count',len(actual['rows'])==len(expected['items'])==2)
+        def identity(item):
+            return tuple(json.dumps(item[key],sort_keys=True) for key in ('name','source_uuid','root_uuid','geometry_kind','class_name','color','visible','locked'))
+        check('worker preserves current source identity and attributes',sorted(map(identity,actual['rows']))==sorted(map(identity,expected['items'])))
+        direct_shapes={item['source_uuid']:item for item in expected['items']}
+        for item in actual['rows']:
             shape=Part.Shape();shape.read(item['brep']);check('worker stages valid editable BRep '+item['name'],shape.isValid())
+            reference=Part.Shape();reference.read(direct_shapes[item['source_uuid']]['brep'])
+            check('worker matches direct native geometry '+item['name'],abs(shape.Volume-reference.Volume)<1e-9 and abs(shape.Area-reference.Area)<1e-9 and abs(shape.Length-reference.Length)<1e-9)
         report.update(ok=True,module=native.__file__)
     except Exception:report.update(ok=False,error=traceback.format_exc())
     finally:

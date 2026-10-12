@@ -1,14 +1,40 @@
 # OM9-MEASURE-001 — Angle
 
-Status: in progress. Rust and native four-point menu/mouse/CMD measurement verified; TwoObjects and required O-Snaps remain incomplete.
+<!-- rhino-core-extended-input:start -->
+## Extended numeric input — validated slice
 
-Local source requires four prompts: Start of first line, End of first line, Start of second line, End of second line. Result appears in feedback window. Source explicitly requires O-Snaps to existing geometry. TwoObjects is an unnormalized option cue and must remain tracked.
+Extended typed point input through existing native geometry; no all-option or all-P0 completion.
 
-OM9 geometry choice: angle of directed world-space line vectors in degrees, 0..180, using normalized vectors and atan2(cross magnitude,dot) for accuracy near parallel directions. The lines may have different origins and lengths. Coordinates must be finite within ±1e9 mm; lines of length ≤1e-12 mm are rejected. These numeric/default choices are documented as OM9 decisions, not recovered Matrix defaults.
+[Runtime/source evidence](../validation/2026-10-09-rhino-core-extended-input.md). Native geometry is reused; live constraints, locale and other missing contracts remain open.
 
-ABI om9_measure_angle accepts 12 readable doubles (first line start/end then second line start/end), returns NaN on null pointer or invalid/degenerate input. Caller owns array. Four Rust tests cover geometry, invalid inputs, small angles and ABI layout. Stub failed two semantic tests before implementation. Current native report requirement, Undo/model invariance and snap workflow remain unverified.
+<!-- rhino-core-extended-input:end -->
 
-Plan: docs/superpowers/plans/2026-10-05-core-angle.md. Source: local specs/01-core/om9-measure-001-angle.md. No PDF reread. End Snap source read: includes curve endpoints, polyline interior vertices, closed seams and surface/polysurface corners; limiting it to open edges would not satisfy OM9-SNAP-002.
-Angle OM9-MEASURE-001 four-point directed 3D line math and ABI added. Four Rust tests passed; Clippy all-targets -D warnings passed, session55904 exit zero. Normalized atan2 preserves tiny angles and scale invariance; rejects invalid coordinates/zero-length lines. Native Angle, TwoObjects and explicitly required O-Snaps remain outstanding. Distance feature front status corrected to reflect native verification.
+Status: partially_implemented; validated_supported_slice (2026-10-09).
 
-Angle native original command mapping AnalyzeAngle -> Angle and four-point session integrated in existing read-only measurement controller. Rust release and native controller/Workbench/CurveController build/link succeeded. 14 native checks and exit zero: build/angle-isolated-1/ed250692c87e4039b1d02a75d5887a4e/results.json. Four exact prompts, spatial distinct-origin 90-degree result, menu/CMD sharing, first/second degenerate endpoint retries, Esc, four mouse points, no model/Undo and actual report history pass. TwoObjects reports unimplemented; O-Snaps not present. Distance regression passed all 24 checks with exit zero: build/distance-isolated-1/dd3ce1e800464aa2931fc166f795acab/results.json. Keep Angle in progress.
+**Supported slice:** native four-point Angle measurement, shared Cartesian point input and accepted-coordinate reporting. The TwoObjects branch remains unimplemented.
+
+### Inputs
+
+Enter or pick the start/end of the first directed line, then the start/end of the second. No geometry selection is required. Typed input uses the shared Rust parser: CPlane `x,y` / `x,y,z`, world `wX,Y,Z`, relative CPlane `r`, `R` or `@`, and relative world `wr`. Relative input starts from the last accepted world point across all four phases. Explicit length units and the captured document input scale are supported. Native picks, available snaps and F4 origin are already world coordinates and are not transformed a second time.
+
+### Parameters and defaults
+
+The supported branch reports degrees from 0 through 180 between the two directed line vectors. Both line lengths must exceed `1e-12` mm; world coordinate components must be finite and within ±`1e9` mm. `TwoObjects` and `Unit=` currently return an explicit unsupported-option message. Object selection, planar-face normals and object orientation/principal-versus-supplement behavior from the full contract remain open.
+
+### Output
+
+The final Angle result and each accepted point in world millimeters appear in command/report history. A completed, owned coordinate report is also exposed through the main-window `om9MeasurementReport` string property. The command creates no document object, dimension or annotation and does not modify document geometry, selection, units or Undo state.
+
+### Preview / commit / cancel
+
+The command retains accepted inputs until the fourth valid point. A rejected zero-length endpoint keeps the current phase and previous accepted point; failed inputs do not publish a completed report. The command-start CPlane is latched. Document owner/UID and the exact captured unit context are checked before input acceptance and completion; document switch/close or an invalidated context ends the session. Esc, command replacement and workbench cancellation clear pending measurement state.
+
+### History / dependency model
+
+Command/report history and the owned UI report record accepted inputs, frame revision, logical view slot, units and source kind. They are not an associative History feature, persisted measurement object, or dependency link to snapped geometry. Snap object identity is explicitly unavailable in the present report schema.
+
+### Error / invalid-input behavior
+
+The shared parser rejects malformed, ambiguous, non-finite and overflowing input without advancing accepted state. Rust computes the angle; the native adapter manages FreeCAD/Qt lifecycle and reporting. The final matching-module fixtures verify failed retries, lifetime and read-only invariants. Broader grammar and TwoObjects remain open.
+
+[Validation and remaining scope](../validation/2026-10-09-rhino-core-point-consumers.md).

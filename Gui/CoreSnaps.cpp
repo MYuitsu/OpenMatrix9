@@ -1,8 +1,9 @@
+#include <QStatusBar>
+#include "SnapQueryIndex.h"
 #include "CoreSnaps.h"
 #include "CoreSnapGeometry.h"
-#include "SnapQueryIndex.h"
-#include <QStatusBar>
 #include "RustBridge.h"
+#include "CurveController.h"
 #include <App/Application.h>
 #include <App/Document.h>
 #include <App/DocumentObject.h>
@@ -49,21 +50,25 @@ void save(){preferences()->SetInt("State",static_cast<long>(om9_snap_state()));s
 }
 namespace OpenMatrix9Gui {
 void CoreSnaps::activate(){enabled=true;if(!om9_snap_load(static_cast<unsigned int>(preferences()->GetInt("State",0))))om9_snap_load(0);syncAction();}
-void CoreSnaps::deactivate(){enabled=false;syncAction();}
+void CoreSnaps::deactivate(){enabled=false;clearTransient();syncAction();}
 bool CoreSnaps::handles(std::size_t index){auto* id=om9_command_id(index);return id&&modeBit(QString::fromUtf8(id));}
 bool CoreSnaps::available(){return enabled&&!Gui::Application::Instance->isClosing()&&om9AlterView(App::GetApplication().getActiveDocument());}
 bool CoreSnaps::checked(std::size_t command){return handles(command)&&(om9_snap_state()&modeBit(QString::fromUtf8(om9_command_id(command))))!=0;}
 bool CoreSnaps::execute(std::size_t command){if(!handles(command)||!available())return false;om9_snap_toggle(modeBit(QString::fromUtf8(om9_command_id(command))));save();return true;}
 bool CoreSnaps::submit(const QString& text){
     const auto input=text.trimmed();
-    if(auto mode=modeBit(input)){if(available()){om9_snap_toggle(mode);save();}return true;}
-    if(input.compare("Osnap On",Qt::CaseInsensitive)==0||input.compare("Osnap Off",Qt::CaseInsensitive)==0||input.compare("Osnap Toggle",Qt::CaseInsensitive)==0){
-        if(available()){auto state=om9_snap_state();if(input.endsWith("Toggle",Qt::CaseInsensitive)||bool(state&1U)!=input.endsWith("On",Qt::CaseInsensitive))om9_snap_toggle(1);save();}return true;
-    }
-    return false;
+    if(input.left(5).compare("Osnap",Qt::CaseInsensitive)!=0||(input.size()>5&&!input[5].isSpace()))return false;
+    if(!available()){CurveController::instance().setPrompt("Object snaps are unavailable in the current view");return true;}
+    const auto effect=om9_snap_submit(input.toUtf8().constData());
+    if(effect==1)save();
+    else if(effect==2)syncAction();
+    else if(effect==3)CurveController::instance().setPrompt("Osnap: End / Mid / Point, On / Off / Toggle, Once / Only <mode>, Suspend / Resume / Clear");
+    return effect!=0;
 }
+void CoreSnaps::acceptedPoint(bool accepted){om9_snap_accept_point(accepted);}
+void CoreSnaps::clearTransient(){om9_snap_transient_clear();}
 bool CoreSnaps::pick(Gui::View3DInventor* view,const QPoint& pixel,Base::Vector3d& output){
-    const auto state=om9_snap_state();
+    const auto state=om9_snap_effective_state();
     if(!enabled||!(state&1U)||!(state&14U)||!view)return false;
     try {
         SnapQuery query;query.cursor_px=pixel;query.modes=state&14U;

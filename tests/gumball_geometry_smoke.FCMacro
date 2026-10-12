@@ -1,0 +1,67 @@
+"""Private native staging facts; pointer/commit proof lives in gumball_core_smoke."""
+import json, os, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part, Mesh, Points
+from PySide6 import QtCore, QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']); report={'checks':[],'feature_ids':['OM9-INFO-020','OM9-INFO-021']}
+def check(name,passed):
+    report['checks'].append({'name':name,'passed':bool(passed)})
+    if not passed: raise AssertionError(name)
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('GumballGeometry'); doc.UndoMode=1
+        circle=doc.addObject('Part::Feature','Circle');circle.Shape=Part.makeCircle(5)
+        box=doc.addObject('Part::Feature','Box');box.Shape=Part.makeBox(2,3,4)
+        group=doc.addObject('App::Part','Parent');group.Placement.Base=App.Vector(10,20,30)
+        group.addObject(box)
+        mesh=doc.addObject('Mesh::Feature','Mesh');mesh.Mesh=Mesh.Mesh([[(0,0,0),(1,0,0),(0,1,0)]])
+        points=doc.addObject('Points::Feature','Points');points.Points=Points.Points([App.Vector(1,2,3),App.Vector(4,5,6)])
+        link1=doc.addObject('App::Link','Link1');link1.setLink(circle)
+        link2=doc.addObject('App::Link','Link2');link2.setLink(circle);link2.Placement.Base=App.Vector(20,0,0)
+        face=doc.addObject('Part::Feature','HoledFace')
+        outer=Part.Wire(Part.makeCircle(5));inner=Part.Wire(Part.makeCircle(2));inner.reverse()
+        face.Shape=Part.Face([outer,inner])
+        wire=doc.addObject('Part::Feature','WireCircle');wire.Shape=Part.Wire(Part.makeCircle(5))
+        wire.Placement=App.Placement(App.Vector(),App.Rotation(App.Vector(0,0,1),30))
+        doc.recompute();QtWidgets.QApplication.processEvents()
+        count=len(doc.Objects); undo=doc.UndoCount
+        before=circle.Shape.exportBrepToString()
+        f=native.gumballGeometryFacts(doc.Name,[circle.Name],'ScaleX','2','World')
+        report['circle_scale']=f
+        check('scale stages without editing source',circle.Shape.exportBrepToString()==before)
+        check('scale stages ellipse geometry',abs(f['staged'][0]['bounds_x']-20)<1e-5 and abs(f['staged'][0]['bounds_y']-10)<1e-5)
+        check('scale retains exact native curve',f['staged'][0]['curve_type'] in ('Geom_Ellipse','Geom_BSplineCurve'))
+        f=native.gumballGeometryFacts(doc.Name,[circle.Name],'MoveX','5','Object')
+        check('curve Object alignment follows native tangent',abs(f['frame'][3])<1e-8 and abs(f['frame'][4]+1)<1e-8)
+        f=native.gumballGeometryFacts(doc.Name,[wire.Name],'MoveX','5','Object')
+        check('single-edge wire Object alignment follows rotated native tangent',abs(f['frame'][3]-.5)<1e-8 and abs(f['frame'][4]+3**.5/2)<1e-8)
+        try:native.gumballGeometryFacts(doc.Name,[circle.Name,box.Name],'MoveX','5','Object')
+        except RuntimeError:check('ambiguous Object alignment reports unresolved',True)
+        else:check('ambiguous Object alignment reports unresolved',False)
+        f=native.gumballGeometryFacts(doc.Name,[box.Name],'MoveX','5 mm','World')
+        check('nested placement included exactly once',abs(f['staged'][0]['xmin']-15)<1e-5)
+        f=native.gumballGeometryFacts(doc.Name,[group.Name,box.Name],'MoveX','5','World')
+        check('parent child selection normalized once',len(f['selected_roots'])==1 and f['selected_roots'][0]==group.Name)
+        f=native.gumballGeometryFacts(doc.Name,[link1.Name,link2.Name],'MoveX','5','World')
+        check('distinct links remain separate occurrences',len(f['selected_roots'])==2 and abs(f['staged'][1]['xmin']-20)<1e-5)
+        for obj in (mesh,points):
+            f=native.gumballGeometryFacts(doc.Name,[obj.Name],'MoveX','5','World')
+            check(obj.Name+' retains discrete representation',f['staged'][0]['representation']==('Mesh' if obj==mesh else 'Points'))
+        f=native.gumballGeometryFacts(doc.Name,[face.Name],'ExtrudeZ','3 mm','World')
+        check('face extrusion keeps hole volume',abs(f['staged'][0]['volume']-63*3.141592653589793)<1e-5)
+        f=native.gumballGeometryFacts(doc.Name,[box.Name],'ScaleX','-2','World')
+        check('reflected solid remains valid',f['staged'][0]['valid'] and f['staged'][0]['volume']>0)
+        check('private staging adds no objects or Undo entries',(len(doc.Objects),doc.UndoCount)==(count,undo))
+        try:native.gumballGeometryFacts(doc.Name,[circle.Name,box.Name],'ScaleX','0','World')
+        except RuntimeError: check('invalid batch is rejected',len(doc.Objects)==count)
+        else:check('invalid batch is rejected',False)
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

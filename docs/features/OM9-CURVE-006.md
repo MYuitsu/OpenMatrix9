@@ -1,5 +1,14 @@
 # OM9-CURVE-006 — Ellipse
 
+<!-- rhino-core-extended-input:start -->
+## Extended numeric input — validated slice
+
+Extended typed point input through existing native geometry; no all-option or all-P0 completion.
+
+[Runtime/source evidence](../validation/2026-10-09-rhino-core-extended-input.md). Native geometry is reused; live constraints, locale and other missing contracts remain open.
+
+<!-- rhino-core-extended-input:end -->
+
 ## Source evidence
 
 Matrix 8 Book 1 PDF pages 140–141 (printed 130–131), resolved through the private reference registry. Source defines center/two semiaxis endpoints, right-click Diameter, Corner, Vertical, FromFoci/MarkFoci, AroundCurve and Deformable with Degree/PointCount. It gives no numeric radius defaults or History requirement. The original engineering contract and Rust request-planner example remain authoritative and unchanged.

@@ -1,0 +1,1102 @@
+{
+  "schema_version": 1,
+  "checkpoint": "rhino-core-periodic-persistence",
+  "date": "2026-10-10T03:51:55+07:00",
+  "parent_commit": "83a806c",
+  "p0_status": "in_progress",
+  "production_changes": false,
+  "complete_fixtures": [
+    "RCORE-01.T09"
+  ],
+  "native_module": {
+    "path": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+    "sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+  },
+  "accepted_runs": [
+    {
+      "suite": "kernel-warm",
+      "count": 142,
+      "process_exit": 0,
+      "process": {
+        "schema_version": 1,
+        "process_id": 2732,
+        "started_utc": "2026-10-09T20:46:47.3357145Z",
+        "observed_utc": "2026-10-09T20:46:51.2880339Z",
+        "wait_completed": true,
+        "exit_code": 0,
+        "executable": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+        "macro": "merge_replay.FCMacro"
+      },
+      "process_proof": "build/merge_replay-1/4605d00ec2444a74a2395a3df6143390/process.json",
+      "process_proof_sha256": "fb8adf004af104310d91217e7d74b28bcd4d06feb0c93ccbea7ba83d26ff8088",
+      "path": "build/merge_replay-1/4605d00ec2444a74a2395a3df6143390/results.json",
+      "result_sha256": "57188b51030e55b8b46b320c4fa792e0e40764905801057f30182c3f82d29d1e",
+      "module_proof": "build/merge_replay-1/4605d00ec2444a74a2395a3df6143390/merge-native-module.json",
+      "module_proof_sha256": "575394618a533053d89077539e79c42f51b2e89ee6520ce7a42744e4dd3022c5",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4605d00ec2444a74a2395a3df6143390\\exact-kernel-candidate.3dm",
+          "sha256": "07b9ca7a83b1c8a1517ba01f389ba362a1efeef203fd0bc8549939b0141622f9"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4605d00ec2444a74a2395a3df6143390\\exact-kernel-candidate.FCStd",
+          "sha256": "2beb85fde1eab7f7f1eea6acde93cb7134a19d153554bac28c27d9403330e2da"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4605d00ec2444a74a2395a3df6143390\\merge-native-module.json",
+          "sha256": "575394618a533053d89077539e79c42f51b2e89ee6520ce7a42744e4dd3022c5"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4605d00ec2444a74a2395a3df6143390\\process.json",
+          "sha256": "fb8adf004af104310d91217e7d74b28bcd4d06feb0c93ccbea7ba83d26ff8088"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4605d00ec2444a74a2395a3df6143390\\results.json",
+          "sha256": "57188b51030e55b8b46b320c4fa792e0e40764905801057f30182c3f82d29d1e"
+        }
+      ],
+      "macro": "rhino_core_kernel_contract_smoke.FCMacro",
+      "macro_sha256": "5032a961fb9870a916e46faec6d7caf95c63d0a349d2a7ac341c4a22ee34e4d9",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+    },
+    {
+      "suite": "kernel-cold",
+      "count": 79,
+      "process_exit": 0,
+      "process": {
+        "schema_version": 1,
+        "process_id": 34232,
+        "started_utc": "2026-10-09T20:46:59.3367425Z",
+        "observed_utc": "2026-10-09T20:47:02.8249347Z",
+        "wait_completed": true,
+        "exit_code": 0,
+        "executable": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+        "macro": "merge_replay.FCMacro"
+      },
+      "process_proof": "build/merge_replay-1/594892c738464933817651e9fdf53aee/process.json",
+      "process_proof_sha256": "73667dcd1ca02d1274718b9f47e1020953371a0cb7f49258159857521cd12433",
+      "path": "build/merge_replay-1/594892c738464933817651e9fdf53aee/results.json",
+      "result_sha256": "52aa443cfd048e8b4d92c7982ac65d9fc79f6b25acc91892353271ee26f41478",
+      "module_proof": "build/merge_replay-1/594892c738464933817651e9fdf53aee/merge-native-module.json",
+      "module_proof_sha256": "575394618a533053d89077539e79c42f51b2e89ee6520ce7a42744e4dd3022c5",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\594892c738464933817651e9fdf53aee\\merge-native-module.json",
+          "sha256": "575394618a533053d89077539e79c42f51b2e89ee6520ce7a42744e4dd3022c5"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\594892c738464933817651e9fdf53aee\\process.json",
+          "sha256": "73667dcd1ca02d1274718b9f47e1020953371a0cb7f49258159857521cd12433"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\594892c738464933817651e9fdf53aee\\results.json",
+          "sha256": "52aa443cfd048e8b4d92c7982ac65d9fc79f6b25acc91892353271ee26f41478"
+        }
+      ],
+      "macro": "rhino_core_kernel_contract_smoke.FCMacro",
+      "macro_sha256": "5032a961fb9870a916e46faec6d7caf95c63d0a349d2a7ac341c4a22ee34e4d9",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+    },
+    {
+      "suite": "periodic-warm",
+      "count": 204,
+      "process_exit": 0,
+      "process": {
+        "schema_version": 1,
+        "process_id": 21536,
+        "started_utc": "2026-10-09T20:47:12.2314338Z",
+        "observed_utc": "2026-10-09T20:47:16.5395037Z",
+        "wait_completed": true,
+        "exit_code": 0,
+        "executable": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+        "macro": "merge_replay.FCMacro"
+      },
+      "process_proof": "build/merge_replay-1/3e28cafa09074a9bb4f432e6a100d88d/process.json",
+      "process_proof_sha256": "c2c8994361dce5ddd7519b4297c603a839b8ef39119f66be98e152200c72e3a6",
+      "path": "build/merge_replay-1/3e28cafa09074a9bb4f432e6a100d88d/results.json",
+      "result_sha256": "8558c576ed2ba12a78c00002123be7ee03e9ab298e4f3dcf223e5f4ecc379cc8",
+      "module_proof": "build/merge_replay-1/3e28cafa09074a9bb4f432e6a100d88d/merge-native-module.json",
+      "module_proof_sha256": "228b7f5909f9dc458a1a74e5e15f604173b9b4d5495f0e7e72a956c384a07c7e",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\before-FCStd-save-periodic-local.brep",
+          "sha256": "5e840aba26a49c2b91af84e44427a04039cd76e9ecde01aefc4955d321541684"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\before-FCStd-save-periodic-world.brep",
+          "sha256": "fef06393b38a9d7c876a6fa5dec06bccfcd6a1c073d476a10a324f44ec87859b"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\before-FCStd-save-PeriodicQ2.brep",
+          "sha256": "377e2abd81c472ee02e32e63b165933e81727eb0301d0e29c1af38d6fdf4aa65"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\before-FCStd-save-RhinoObject.brep",
+          "sha256": "d4660ee3e32ac658f8b041c8873909effe5360c3f0113074af881218e164dba1"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\before-FCStd-save-RhinoObject001.brep",
+          "sha256": "fd35c159347fd60457f471f90a720709f63097e76041ac574062520fda1952d0"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\before-FCStd-save-RhinoObject002.brep",
+          "sha256": "cdfe5bc773abd76099bf33635bed64bd9ed541b5081556817971c9e81b631a5b"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\merge-native-module.json",
+          "sha256": "228b7f5909f9dc458a1a74e5e15f604173b9b4d5495f0e7e72a956c384a07c7e"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\PeriodicKernel.FCStd",
+          "sha256": "4854be11ed9531f23c8ae9616a0cd58c2f27b45dcc616628a885876777006456"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\process.json",
+          "sha256": "c2c8994361dce5ddd7519b4297c603a839b8ef39119f66be98e152200c72e3a6"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\progress.json",
+          "sha256": "0d9b5265776e49d860fff972335ebcaf07a420636e0d05d9180087dd4c5e2b5d"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\results.json",
+          "sha256": "8558c576ed2ba12a78c00002123be7ee03e9ab298e4f3dcf223e5f4ecc379cc8"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-after-RhinoLayer.brep",
+          "sha256": "9f0d2bba3013b144be51953488d15b7a0cd9259da4b5f0033333c9f1f98430c7"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-after-RhinoObject.brep",
+          "sha256": "73586bf247aeadaff2135f91119856fa57ea6dfed9ef52d4014cebdd26bfde16"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-after-RhinoObject001.brep",
+          "sha256": "534e7d297caa86e62b588c3b7c44e28369ea04fcaffc5e9c11aec16a81634f65"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-after-RhinoObject002.brep",
+          "sha256": "114a2eb2bdc0e453ff63f4f617eeba787aaae3c2783cda538e549c35c3d667cf"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-before-RhinoLayer.brep",
+          "sha256": "9f0d2bba3013b144be51953488d15b7a0cd9259da4b5f0033333c9f1f98430c7"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-before-RhinoObject.brep",
+          "sha256": "73586bf247aeadaff2135f91119856fa57ea6dfed9ef52d4014cebdd26bfde16"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-before-RhinoObject001.brep",
+          "sha256": "534e7d297caa86e62b588c3b7c44e28369ea04fcaffc5e9c11aec16a81634f65"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-before-RhinoObject002.brep",
+          "sha256": "114a2eb2bdc0e453ff63f4f617eeba787aaae3c2783cda538e549c35c3d667cf"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-pre-target-RhinoLayer.brep",
+          "sha256": "9f0d2bba3013b144be51953488d15b7a0cd9259da4b5f0033333c9f1f98430c7"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-pre-target-RhinoObject.brep",
+          "sha256": "70e72d6c33a69471bb717cafdb92eb6779c5bbb8c32dedca20fa61c90e3c8070"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-pre-target-RhinoObject001.brep",
+          "sha256": "534e7d297caa86e62b588c3b7c44e28369ea04fcaffc5e9c11aec16a81634f65"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-pre-target-RhinoObject002.brep",
+          "sha256": "114a2eb2bdc0e453ff63f4f617eeba787aaae3c2783cda538e549c35c3d667cf"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\warm-FCStd-periodic-local.brep",
+          "sha256": "5e840aba26a49c2b91af84e44427a04039cd76e9ecde01aefc4955d321541684"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\warm-FCStd-periodic-world.brep",
+          "sha256": "fef06393b38a9d7c876a6fa5dec06bccfcd6a1c073d476a10a324f44ec87859b"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\warm-FCStd-PeriodicQ2.brep",
+          "sha256": "377e2abd81c472ee02e32e63b165933e81727eb0301d0e29c1af38d6fdf4aa65"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\warm-FCStd-RhinoObject.brep",
+          "sha256": "d4660ee3e32ac658f8b041c8873909effe5360c3f0113074af881218e164dba1"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\warm-FCStd-RhinoObject001.brep",
+          "sha256": "fd35c159347fd60457f471f90a720709f63097e76041ac574062520fda1952d0"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\warm-FCStd-RhinoObject002.brep",
+          "sha256": "cdfe5bc773abd76099bf33635bed64bd9ed541b5081556817971c9e81b631a5b"
+        }
+      ],
+      "macro": "rhino_core_periodic_persistence_smoke.FCMacro",
+      "macro_sha256": "a072dc1ca13d83471d2ece28be630a0d65fa9d4b6721200b57df2eb16a703aa2",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+    },
+    {
+      "suite": "periodic-cold",
+      "count": 102,
+      "process_exit": 0,
+      "process": {
+        "schema_version": 1,
+        "process_id": 82080,
+        "started_utc": "2026-10-09T20:47:25.1367244Z",
+        "observed_utc": "2026-10-09T20:47:28.8218793Z",
+        "wait_completed": true,
+        "exit_code": 0,
+        "executable": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+        "macro": "merge_replay.FCMacro"
+      },
+      "process_proof": "build/merge_replay-1/d350bdd11328495aaca38bf5967dbf65/process.json",
+      "process_proof_sha256": "a5f4f97250a59b0165186900dc8a1d1813d909903704ae9a5231844e6f6b2d1f",
+      "path": "build/merge_replay-1/d350bdd11328495aaca38bf5967dbf65/results.json",
+      "result_sha256": "faeb790b61fbcd5ceebcfebd1a71b226445241f41e5ac99783f7eba6f221f2e8",
+      "module_proof": "build/merge_replay-1/d350bdd11328495aaca38bf5967dbf65/merge-native-module.json",
+      "module_proof_sha256": "228b7f5909f9dc458a1a74e5e15f604173b9b4d5495f0e7e72a956c384a07c7e",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\d350bdd11328495aaca38bf5967dbf65\\cold-FCStd-periodic-local.brep",
+          "sha256": "5e840aba26a49c2b91af84e44427a04039cd76e9ecde01aefc4955d321541684"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\d350bdd11328495aaca38bf5967dbf65\\cold-FCStd-periodic-world.brep",
+          "sha256": "fef06393b38a9d7c876a6fa5dec06bccfcd6a1c073d476a10a324f44ec87859b"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\d350bdd11328495aaca38bf5967dbf65\\cold-FCStd-PeriodicQ2.brep",
+          "sha256": "377e2abd81c472ee02e32e63b165933e81727eb0301d0e29c1af38d6fdf4aa65"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\d350bdd11328495aaca38bf5967dbf65\\cold-FCStd-RhinoObject.brep",
+          "sha256": "d4660ee3e32ac658f8b041c8873909effe5360c3f0113074af881218e164dba1"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\d350bdd11328495aaca38bf5967dbf65\\cold-FCStd-RhinoObject001.brep",
+          "sha256": "fd35c159347fd60457f471f90a720709f63097e76041ac574062520fda1952d0"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\d350bdd11328495aaca38bf5967dbf65\\cold-FCStd-RhinoObject002.brep",
+          "sha256": "cdfe5bc773abd76099bf33635bed64bd9ed541b5081556817971c9e81b631a5b"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\d350bdd11328495aaca38bf5967dbf65\\merge-native-module.json",
+          "sha256": "228b7f5909f9dc458a1a74e5e15f604173b9b4d5495f0e7e72a956c384a07c7e"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\d350bdd11328495aaca38bf5967dbf65\\process.json",
+          "sha256": "a5f4f97250a59b0165186900dc8a1d1813d909903704ae9a5231844e6f6b2d1f"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\d350bdd11328495aaca38bf5967dbf65\\progress.json",
+          "sha256": "f3c9038df4ad02787b5c19f406a15b18143c10896b37f9a810adb8c0867be822"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\d350bdd11328495aaca38bf5967dbf65\\results.json",
+          "sha256": "faeb790b61fbcd5ceebcfebd1a71b226445241f41e5ac99783f7eba6f221f2e8"
+        }
+      ],
+      "macro": "rhino_core_periodic_persistence_smoke.FCMacro",
+      "macro_sha256": "a072dc1ca13d83471d2ece28be630a0d65fa9d4b6721200b57df2eb16a703aa2",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+    }
+  ],
+  "application_assertions": 527,
+  "authored_T09_assertions": 306,
+  "saved_fcstd": {
+    "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\PeriodicKernel.FCStd",
+    "sha256": "4854be11ed9531f23c8ae9616a0cd58c2f27b45dcc616628a885876777006456"
+  },
+  "periodic_metrics": [
+    {
+      "suite": "periodic-warm",
+      "stage": "before FCStd save",
+      "sample_count": 775,
+      "sampled_deviation_max_mm": 8.881784197001252e-16,
+      "world_bounds": [
+        7.333333233333333,
+        -5.0000001,
+        1.9999999,
+        8.666666766666665,
+        -3.4999999,
+        2.0000001
+      ],
+      "expected_bounds": [
+        7.333333333333333,
+        -5,
+        2,
+        8.666666666666666,
+        -3.5,
+        2
+      ],
+      "bbox_allowance_mm": 1.0000011368683772e-07
+    },
+    {
+      "suite": "periodic-warm",
+      "stage": "warm FCStd",
+      "sample_count": 775,
+      "sampled_deviation_max_mm": 8.881784197001252e-16,
+      "world_bounds": [
+        7.333333233333333,
+        -5.0000001,
+        1.9999999,
+        8.666666766666665,
+        -3.4999999,
+        2.0000001
+      ],
+      "expected_bounds": [
+        7.333333333333333,
+        -5,
+        2,
+        8.666666666666666,
+        -3.5,
+        2
+      ],
+      "bbox_allowance_mm": 1.0000011368683772e-07
+    },
+    {
+      "suite": "periodic-cold",
+      "stage": "cold FCStd",
+      "sample_count": 775,
+      "sampled_deviation_max_mm": 8.881784197001252e-16,
+      "world_bounds": [
+        7.333333233333333,
+        -5.0000001,
+        1.9999999,
+        8.666666766666665,
+        -3.4999999,
+        2.0000001
+      ],
+      "expected_bounds": [
+        7.333333333333333,
+        -5,
+        2,
+        8.666666666666666,
+        -3.5,
+        2
+      ],
+      "bbox_allowance_mm": 1.0000011368683772e-07
+    }
+  ],
+  "source_files": [
+    {
+      "path": "tests/rhino_core_periodic_persistence_smoke.FCMacro",
+      "sha256": "a072dc1ca13d83471d2ece28be630a0d65fa9d4b6721200b57df2eb16a703aa2"
+    },
+    {
+      "path": "tests/rhino_core_kernel_contract_smoke.FCMacro",
+      "sha256": "5032a961fb9870a916e46faec6d7caf95c63d0a349d2a7ac341c4a22ee34e4d9"
+    },
+    {
+      "path": "tests/run_menu_smoke.ps1",
+      "sha256": "3649ae126bd39306a384e77bd0f46d4a8a3f8f227d5cb3e82161a4baec6bb9bd"
+    },
+    {
+      "path": "Gui/CoreObjects.cpp",
+      "sha256": "fedbdfba5593f89d5b4bf2f6148aabd58112e4f2c7bb5cc43e105d3c8acaa98e"
+    }
+  ],
+  "source_reviews": [
+    {
+      "path": "docs/reviews/2026-10-10-periodic-persistence-review.md",
+      "sha256": "776c5d256e708b116a25b34ff4a89b3be72981321be7508661e5a3c8a47a2877"
+    }
+  ],
+  "review_fingerprints": 37,
+  "reviewed_files": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_periodic_persistence_smoke.FCMacro",
+      "reviewed_sha256": "a072dc1ca13d83471d2ece28be630a0d65fa9d4b6721200b57df2eb16a703aa2"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_kernel_contract_smoke.FCMacro",
+      "reviewed_sha256": "5032a961fb9870a916e46faec6d7caf95c63d0a349d2a7ac341c4a22ee34e4d9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\run_menu_smoke.ps1",
+      "reviewed_sha256": "3649ae126bd39306a384e77bd0f46d4a8a3f8f227d5cb3e82161a4baec6bb9bd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\superpowers\\plans\\2026-10-10-rhino-core-periodic-persistence.md",
+      "reviewed_sha256": "d9728215c27db77fa141eddf9b08d1284b6573f7882a51e1651b1606b5c57bb8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\01-object-model-kernel.md",
+      "reviewed_sha256": "54ce8187e013a456e41ebdec3af15a005df3de8156dccb51d94a06256738d143"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\p0-next-kernel-reuse.md",
+      "reviewed_sha256": "b18c860e0eb31ddf4fa034eec8a4e4be6a510d2ce5026ea901f6529eab0bc409"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\TopoShape.cpp",
+      "reviewed_sha256": "2f7de58f556e3ce2cb0877ebdb1a83536d1e73be2d8a2b9243056083f0619e5e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "reviewed_sha256": "8b03c89907672d0579544a1fce934632c231ad5b70e23612fc09bd3c6b790598"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\results.json",
+      "reviewed_sha256": "8558c576ed2ba12a78c00002123be7ee03e9ab298e4f3dcf223e5f4ecc379cc8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\d350bdd11328495aaca38bf5967dbf65\\results.json",
+      "reviewed_sha256": "faeb790b61fbcd5ceebcfebd1a71b226445241f41e5ac99783f7eba6f221f2e8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\process.json",
+      "reviewed_sha256": "c2c8994361dce5ddd7519b4297c603a839b8ef39119f66be98e152200c72e3a6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\d350bdd11328495aaca38bf5967dbf65\\process.json",
+      "reviewed_sha256": "a5f4f97250a59b0165186900dc8a1d1813d909903704ae9a5231844e6f6b2d1f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\merge-native-module.json",
+      "reviewed_sha256": "228b7f5909f9dc458a1a74e5e15f604173b9b4d5495f0e7e72a956c384a07c7e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\d350bdd11328495aaca38bf5967dbf65\\merge-native-module.json",
+      "reviewed_sha256": "228b7f5909f9dc458a1a74e5e15f604173b9b4d5495f0e7e72a956c384a07c7e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\PeriodicKernel.FCStd",
+      "reviewed_sha256": "4854be11ed9531f23c8ae9616a0cd58c2f27b45dcc616628a885876777006456"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4605d00ec2444a74a2395a3df6143390\\results.json",
+      "reviewed_sha256": "57188b51030e55b8b46b320c4fa792e0e40764905801057f30182c3f82d29d1e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\594892c738464933817651e9fdf53aee\\results.json",
+      "reviewed_sha256": "52aa443cfd048e8b4d92c7982ac65d9fc79f6b25acc91892353271ee26f41478"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4605d00ec2444a74a2395a3df6143390\\process.json",
+      "reviewed_sha256": "fb8adf004af104310d91217e7d74b28bcd4d06feb0c93ccbea7ba83d26ff8088"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\594892c738464933817651e9fdf53aee\\process.json",
+      "reviewed_sha256": "73667dcd1ca02d1274718b9f47e1020953371a0cb7f49258159857521cd12433"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4605d00ec2444a74a2395a3df6143390\\merge-native-module.json",
+      "reviewed_sha256": "575394618a533053d89077539e79c42f51b2e89ee6520ce7a42744e4dd3022c5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\594892c738464933817651e9fdf53aee\\merge-native-module.json",
+      "reviewed_sha256": "575394618a533053d89077539e79c42f51b2e89ee6520ce7a42744e4dd3022c5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4605d00ec2444a74a2395a3df6143390\\exact-kernel-candidate.FCStd",
+      "reviewed_sha256": "2beb85fde1eab7f7f1eea6acde93cb7134a19d153554bac28c27d9403330e2da"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4605d00ec2444a74a2395a3df6143390\\exact-kernel-candidate.3dm",
+      "reviewed_sha256": "07b9ca7a83b1c8a1517ba01f389ba362a1efeef203fd0bc8549939b0141622f9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\before-FCStd-save-periodic-local.brep",
+      "reviewed_sha256": "5e840aba26a49c2b91af84e44427a04039cd76e9ecde01aefc4955d321541684"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\before-FCStd-save-periodic-world.brep",
+      "reviewed_sha256": "fef06393b38a9d7c876a6fa5dec06bccfcd6a1c073d476a10a324f44ec87859b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\before-FCStd-save-RhinoObject.brep",
+      "reviewed_sha256": "d4660ee3e32ac658f8b041c8873909effe5360c3f0113074af881218e164dba1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\before-FCStd-save-RhinoObject001.brep",
+      "reviewed_sha256": "fd35c159347fd60457f471f90a720709f63097e76041ac574062520fda1952d0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\before-FCStd-save-RhinoObject002.brep",
+      "reviewed_sha256": "cdfe5bc773abd76099bf33635bed64bd9ed541b5081556817971c9e81b631a5b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\before-FCStd-save-PeriodicQ2.brep",
+      "reviewed_sha256": "377e2abd81c472ee02e32e63b165933e81727eb0301d0e29c1af38d6fdf4aa65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-pre-target-RhinoObject.brep",
+      "reviewed_sha256": "70e72d6c33a69471bb717cafdb92eb6779c5bbb8c32dedca20fa61c90e3c8070"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-before-RhinoObject.brep",
+      "reviewed_sha256": "73586bf247aeadaff2135f91119856fa57ea6dfed9ef52d4014cebdd26bfde16"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\3e28cafa09074a9bb4f432e6a100d88d\\source-after-RhinoObject.brep",
+      "reviewed_sha256": "73586bf247aeadaff2135f91119856fa57ea6dfed9ef52d4014cebdd26bfde16"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\343d9efcb3be472ba68c56c16a0635db\\results.json",
+      "reviewed_sha256": "9d630e2498b2550504a81eb406360c60bad65b69f80bb520c93a3c60e1b4e7a1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\results.json",
+      "reviewed_sha256": "89e9f54ae851bb94028f0f8ac19bfd0dfd3621f65afef4deb77c6e85d7d8ddd5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\results.json",
+      "reviewed_sha256": "798d97a877ad0607740d4336bbc00990a86cea5dd1c2671e3673d9d298b27337"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\results.json",
+      "reviewed_sha256": "5188195c8080b7e3418069dc5dc4be5b3dff5e00c559eb53fb814cb0ce18ebe7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\results.json",
+      "reviewed_sha256": "4c68ee174865b9264f9c5e412cdf05a68e8f475dd244cc468ac5c83bfbedc345"
+    }
+  ],
+  "legacy_predicates": {
+    "count": 10,
+    "ast_equal": true,
+    "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_kernel_contract_smoke.FCMacro",
+    "sha256": "5032a961fb9870a916e46faec6d7caf95c63d0a349d2a7ac341c4a22ee34e4d9"
+  },
+  "prior_reused_proof": {
+    "path": "docs/validation/2026-10-10-rhino-core-hatch-input-gate-evidence.json",
+    "sha256": "49f92810cdcd7a64ec7d166ea0abd271b8177cfe0e01df1b5781df03105322c0",
+    "rust541_native27_5ctests_sdk0_not_rerun": true
+  },
+  "excluded_runs": [
+    {
+      "path": "build/merge_replay-1/343d9efcb3be472ba68c56c16a0635db",
+      "reason": "Copy assertion baseline confounds target-document initialization; source rootFreeflag changes beforecopy."
+    },
+    {
+      "path": "build/merge_replay-1/703103faa9834f1c9a7ef8d0b9aa0db2",
+      "reason": "Same source-baseline issue; file exporter differs from hashed string witness."
+    },
+    {
+      "path": "build/merge_replay-1/504ae80f79a84b9c9180aef8fc6b3323",
+      "reason": "Exact raw string witness isolates one Freeflag; geometry/basis same."
+    },
+    {
+      "path": "build/merge_replay-1/4e2fae8ea93a421ca330181a72263858",
+      "reason": "Staged diagnostics locate flag change immediately afternewdocument, beforecopy."
+    },
+    {
+      "path": "build/merge_replay-1/550c5e3deaeb447abf4e56a58cfdc244",
+      "reason": "Fixture reads source.Name after source close;98checks prior error, no product persistence failure."
+    },
+    {
+      "path": "build/merge_replay-1/f719946207b74765a9ddff5e88cff01e",
+      "reason": "203PASS superseded final204 stronger inventory assertion."
+    },
+    {
+      "path": "build/merge_replay-1/9277c59e62f740f0b5c262b1cd622b29",
+      "reason": "101PASS superseded final102 stronger inventory assertion."
+    }
+  ],
+  "excluded_artifacts": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\343d9efcb3be472ba68c56c16a0635db\\before-FCStd-save-periodic-local.brep",
+      "sha256": "5e840aba26a49c2b91af84e44427a04039cd76e9ecde01aefc4955d321541684"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\343d9efcb3be472ba68c56c16a0635db\\before-FCStd-save-periodic-world.brep",
+      "sha256": "fef06393b38a9d7c876a6fa5dec06bccfcd6a1c073d476a10a324f44ec87859b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\343d9efcb3be472ba68c56c16a0635db\\before-FCStd-save-PeriodicQ2.brep",
+      "sha256": "377e2abd81c472ee02e32e63b165933e81727eb0301d0e29c1af38d6fdf4aa65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\343d9efcb3be472ba68c56c16a0635db\\before-FCStd-save-RhinoObject.brep",
+      "sha256": "d4660ee3e32ac658f8b041c8873909effe5360c3f0113074af881218e164dba1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\343d9efcb3be472ba68c56c16a0635db\\before-FCStd-save-RhinoObject001.brep",
+      "sha256": "fd35c159347fd60457f471f90a720709f63097e76041ac574062520fda1952d0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\343d9efcb3be472ba68c56c16a0635db\\before-FCStd-save-RhinoObject002.brep",
+      "sha256": "cdfe5bc773abd76099bf33635bed64bd9ed541b5081556817971c9e81b631a5b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\343d9efcb3be472ba68c56c16a0635db\\merge-native-module.json",
+      "sha256": "0d89e9f3d7968e25556701e9d37986b7072cc7304e50e3b70a89ab0b1448bda9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\343d9efcb3be472ba68c56c16a0635db\\progress.json",
+      "sha256": "ec5cf7ebedbf58571436cdca031577a4a994470fb65067b70ccc0ad5520bce30"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\343d9efcb3be472ba68c56c16a0635db\\results.json",
+      "sha256": "9d630e2498b2550504a81eb406360c60bad65b69f80bb520c93a3c60e1b4e7a1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\before-FCStd-save-periodic-local.brep",
+      "sha256": "5e840aba26a49c2b91af84e44427a04039cd76e9ecde01aefc4955d321541684"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\before-FCStd-save-periodic-world.brep",
+      "sha256": "fef06393b38a9d7c876a6fa5dec06bccfcd6a1c073d476a10a324f44ec87859b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\before-FCStd-save-PeriodicQ2.brep",
+      "sha256": "377e2abd81c472ee02e32e63b165933e81727eb0301d0e29c1af38d6fdf4aa65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\before-FCStd-save-RhinoObject.brep",
+      "sha256": "d4660ee3e32ac658f8b041c8873909effe5360c3f0113074af881218e164dba1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\before-FCStd-save-RhinoObject001.brep",
+      "sha256": "fd35c159347fd60457f471f90a720709f63097e76041ac574062520fda1952d0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\before-FCStd-save-RhinoObject002.brep",
+      "sha256": "cdfe5bc773abd76099bf33635bed64bd9ed541b5081556817971c9e81b631a5b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\merge-native-module.json",
+      "sha256": "d743c8646e0a193c87614e6e55fe0b33ba8a1e325315648a0d1f257fc9a733e5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\progress.json",
+      "sha256": "ec5cf7ebedbf58571436cdca031577a4a994470fb65067b70ccc0ad5520bce30"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\results.json",
+      "sha256": "89e9f54ae851bb94028f0f8ac19bfd0dfd3621f65afef4deb77c6e85d7d8ddd5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\source-after-RhinoLayer.brep",
+      "sha256": "5311492ef6165f47f5e0ea1c9f72cc2a597fb8749d50daa74757acb8b81a4a04"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\source-after-RhinoObject.brep",
+      "sha256": "5c36131893d93326ed37d5165d11cf996a47dc0875845bc3db5c6cf1370febd7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\source-after-RhinoObject001.brep",
+      "sha256": "952b24e2759fa4f0c60a83e1465f62a65c9da32ac8d064617838dab2b06a712b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\source-after-RhinoObject002.brep",
+      "sha256": "eb521126d98d2512894c58a6f3e12550362e249d70ac78f587aa05ee012a9592"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\source-before-RhinoLayer.brep",
+      "sha256": "5311492ef6165f47f5e0ea1c9f72cc2a597fb8749d50daa74757acb8b81a4a04"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\source-before-RhinoObject.brep",
+      "sha256": "5c36131893d93326ed37d5165d11cf996a47dc0875845bc3db5c6cf1370febd7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\source-before-RhinoObject001.brep",
+      "sha256": "952b24e2759fa4f0c60a83e1465f62a65c9da32ac8d064617838dab2b06a712b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\703103faa9834f1c9a7ef8d0b9aa0db2\\source-before-RhinoObject002.brep",
+      "sha256": "eb521126d98d2512894c58a6f3e12550362e249d70ac78f587aa05ee012a9592"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\before-FCStd-save-periodic-local.brep",
+      "sha256": "5e840aba26a49c2b91af84e44427a04039cd76e9ecde01aefc4955d321541684"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\before-FCStd-save-periodic-world.brep",
+      "sha256": "fef06393b38a9d7c876a6fa5dec06bccfcd6a1c073d476a10a324f44ec87859b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\before-FCStd-save-PeriodicQ2.brep",
+      "sha256": "377e2abd81c472ee02e32e63b165933e81727eb0301d0e29c1af38d6fdf4aa65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\before-FCStd-save-RhinoObject.brep",
+      "sha256": "d4660ee3e32ac658f8b041c8873909effe5360c3f0113074af881218e164dba1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\before-FCStd-save-RhinoObject001.brep",
+      "sha256": "fd35c159347fd60457f471f90a720709f63097e76041ac574062520fda1952d0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\before-FCStd-save-RhinoObject002.brep",
+      "sha256": "cdfe5bc773abd76099bf33635bed64bd9ed541b5081556817971c9e81b631a5b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\merge-native-module.json",
+      "sha256": "9d5a5935d59e44b909ab05bb3f7d70539dbe08d3ceb07b7530287153a1483a00"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\progress.json",
+      "sha256": "ec5cf7ebedbf58571436cdca031577a4a994470fb65067b70ccc0ad5520bce30"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\results.json",
+      "sha256": "798d97a877ad0607740d4336bbc00990a86cea5dd1c2671e3673d9d298b27337"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\source-after-RhinoLayer.brep",
+      "sha256": "9f0d2bba3013b144be51953488d15b7a0cd9259da4b5f0033333c9f1f98430c7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\source-after-RhinoObject.brep",
+      "sha256": "73586bf247aeadaff2135f91119856fa57ea6dfed9ef52d4014cebdd26bfde16"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\source-after-RhinoObject001.brep",
+      "sha256": "534e7d297caa86e62b588c3b7c44e28369ea04fcaffc5e9c11aec16a81634f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\source-after-RhinoObject002.brep",
+      "sha256": "114a2eb2bdc0e453ff63f4f617eeba787aaae3c2783cda538e549c35c3d667cf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\source-before-RhinoLayer.brep",
+      "sha256": "9f0d2bba3013b144be51953488d15b7a0cd9259da4b5f0033333c9f1f98430c7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\source-before-RhinoObject.brep",
+      "sha256": "70e72d6c33a69471bb717cafdb92eb6779c5bbb8c32dedca20fa61c90e3c8070"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\source-before-RhinoObject001.brep",
+      "sha256": "534e7d297caa86e62b588c3b7c44e28369ea04fcaffc5e9c11aec16a81634f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\504ae80f79a84b9c9180aef8fc6b3323\\source-before-RhinoObject002.brep",
+      "sha256": "114a2eb2bdc0e453ff63f4f617eeba787aaae3c2783cda538e549c35c3d667cf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\before-FCStd-save-periodic-local.brep",
+      "sha256": "5e840aba26a49c2b91af84e44427a04039cd76e9ecde01aefc4955d321541684"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\before-FCStd-save-periodic-world.brep",
+      "sha256": "fef06393b38a9d7c876a6fa5dec06bccfcd6a1c073d476a10a324f44ec87859b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\before-FCStd-save-PeriodicQ2.brep",
+      "sha256": "377e2abd81c472ee02e32e63b165933e81727eb0301d0e29c1af38d6fdf4aa65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\before-FCStd-save-RhinoObject.brep",
+      "sha256": "d4660ee3e32ac658f8b041c8873909effe5360c3f0113074af881218e164dba1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\before-FCStd-save-RhinoObject001.brep",
+      "sha256": "fd35c159347fd60457f471f90a720709f63097e76041ac574062520fda1952d0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\before-FCStd-save-RhinoObject002.brep",
+      "sha256": "cdfe5bc773abd76099bf33635bed64bd9ed541b5081556817971c9e81b631a5b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\merge-native-module.json",
+      "sha256": "b234e66d582065e9c20ee9545da1c1902690e81d4a21d7de5bd380c0259e75f1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\progress.json",
+      "sha256": "ce05822ffe09b2ff25c9aa8bb97dd8fea2e8d9c8f7236f61502a179ae13b0695"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\results.json",
+      "sha256": "5188195c8080b7e3418069dc5dc4be5b3dff5e00c559eb53fb814cb0ce18ebe7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\source-after-RhinoLayer.brep",
+      "sha256": "9f0d2bba3013b144be51953488d15b7a0cd9259da4b5f0033333c9f1f98430c7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\source-after-RhinoObject.brep",
+      "sha256": "73586bf247aeadaff2135f91119856fa57ea6dfed9ef52d4014cebdd26bfde16"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\source-after-RhinoObject001.brep",
+      "sha256": "534e7d297caa86e62b588c3b7c44e28369ea04fcaffc5e9c11aec16a81634f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\source-after-RhinoObject002.brep",
+      "sha256": "114a2eb2bdc0e453ff63f4f617eeba787aaae3c2783cda538e549c35c3d667cf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\source-before-RhinoLayer.brep",
+      "sha256": "9f0d2bba3013b144be51953488d15b7a0cd9259da4b5f0033333c9f1f98430c7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\source-before-RhinoObject.brep",
+      "sha256": "70e72d6c33a69471bb717cafdb92eb6779c5bbb8c32dedca20fa61c90e3c8070"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\source-before-RhinoObject001.brep",
+      "sha256": "534e7d297caa86e62b588c3b7c44e28369ea04fcaffc5e9c11aec16a81634f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\4e2fae8ea93a421ca330181a72263858\\source-before-RhinoObject002.brep",
+      "sha256": "114a2eb2bdc0e453ff63f4f617eeba787aaae3c2783cda538e549c35c3d667cf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\before-FCStd-save-periodic-local.brep",
+      "sha256": "5e840aba26a49c2b91af84e44427a04039cd76e9ecde01aefc4955d321541684"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\before-FCStd-save-periodic-world.brep",
+      "sha256": "fef06393b38a9d7c876a6fa5dec06bccfcd6a1c073d476a10a324f44ec87859b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\before-FCStd-save-PeriodicQ2.brep",
+      "sha256": "377e2abd81c472ee02e32e63b165933e81727eb0301d0e29c1af38d6fdf4aa65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\before-FCStd-save-RhinoObject.brep",
+      "sha256": "d4660ee3e32ac658f8b041c8873909effe5360c3f0113074af881218e164dba1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\before-FCStd-save-RhinoObject001.brep",
+      "sha256": "fd35c159347fd60457f471f90a720709f63097e76041ac574062520fda1952d0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\before-FCStd-save-RhinoObject002.brep",
+      "sha256": "cdfe5bc773abd76099bf33635bed64bd9ed541b5081556817971c9e81b631a5b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\merge-native-module.json",
+      "sha256": "b19233cd7e6cb1244483443ff572eceffb7a1d75f1a5be4714bb68b107980eb1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\progress.json",
+      "sha256": "b3025a0f38dab3eac63c95526db1d90978666b50bb6d5871f87af360b264ef7b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\results.json",
+      "sha256": "4c68ee174865b9264f9c5e412cdf05a68e8f475dd244cc468ac5c83bfbedc345"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\source-after-RhinoLayer.brep",
+      "sha256": "9f0d2bba3013b144be51953488d15b7a0cd9259da4b5f0033333c9f1f98430c7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\source-after-RhinoObject.brep",
+      "sha256": "73586bf247aeadaff2135f91119856fa57ea6dfed9ef52d4014cebdd26bfde16"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\source-after-RhinoObject001.brep",
+      "sha256": "534e7d297caa86e62b588c3b7c44e28369ea04fcaffc5e9c11aec16a81634f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\source-after-RhinoObject002.brep",
+      "sha256": "114a2eb2bdc0e453ff63f4f617eeba787aaae3c2783cda538e549c35c3d667cf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\source-before-RhinoLayer.brep",
+      "sha256": "9f0d2bba3013b144be51953488d15b7a0cd9259da4b5f0033333c9f1f98430c7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\source-before-RhinoObject.brep",
+      "sha256": "73586bf247aeadaff2135f91119856fa57ea6dfed9ef52d4014cebdd26bfde16"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\source-before-RhinoObject001.brep",
+      "sha256": "534e7d297caa86e62b588c3b7c44e28369ea04fcaffc5e9c11aec16a81634f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\source-before-RhinoObject002.brep",
+      "sha256": "114a2eb2bdc0e453ff63f4f617eeba787aaae3c2783cda538e549c35c3d667cf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\source-pre-target-RhinoLayer.brep",
+      "sha256": "9f0d2bba3013b144be51953488d15b7a0cd9259da4b5f0033333c9f1f98430c7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\source-pre-target-RhinoObject.brep",
+      "sha256": "70e72d6c33a69471bb717cafdb92eb6779c5bbb8c32dedca20fa61c90e3c8070"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\source-pre-target-RhinoObject001.brep",
+      "sha256": "534e7d297caa86e62b588c3b7c44e28369ea04fcaffc5e9c11aec16a81634f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\550c5e3deaeb447abf4e56a58cfdc244\\source-pre-target-RhinoObject002.brep",
+      "sha256": "114a2eb2bdc0e453ff63f4f617eeba787aaae3c2783cda538e549c35c3d667cf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\before-FCStd-save-periodic-local.brep",
+      "sha256": "5e840aba26a49c2b91af84e44427a04039cd76e9ecde01aefc4955d321541684"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\before-FCStd-save-periodic-world.brep",
+      "sha256": "fef06393b38a9d7c876a6fa5dec06bccfcd6a1c073d476a10a324f44ec87859b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\before-FCStd-save-PeriodicQ2.brep",
+      "sha256": "377e2abd81c472ee02e32e63b165933e81727eb0301d0e29c1af38d6fdf4aa65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\before-FCStd-save-RhinoObject.brep",
+      "sha256": "d4660ee3e32ac658f8b041c8873909effe5360c3f0113074af881218e164dba1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\before-FCStd-save-RhinoObject001.brep",
+      "sha256": "fd35c159347fd60457f471f90a720709f63097e76041ac574062520fda1952d0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\before-FCStd-save-RhinoObject002.brep",
+      "sha256": "cdfe5bc773abd76099bf33635bed64bd9ed541b5081556817971c9e81b631a5b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\merge-native-module.json",
+      "sha256": "be273fbfc8cd2cda2b8f5a2defe79935f9b8517691ee90edcd818b5f0298e09f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\progress.json",
+      "sha256": "66ef4ba3798227a61205f18497d154380a9c9988b4b2c24a2d26bf33c4c422e3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\results.json",
+      "sha256": "2ee4a7d508a3cd731802e1c0fe5be22dcdafb326c1dd8a6a50e8c624ca095d26"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\source-after-RhinoLayer.brep",
+      "sha256": "9f0d2bba3013b144be51953488d15b7a0cd9259da4b5f0033333c9f1f98430c7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\source-after-RhinoObject.brep",
+      "sha256": "73586bf247aeadaff2135f91119856fa57ea6dfed9ef52d4014cebdd26bfde16"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\source-after-RhinoObject001.brep",
+      "sha256": "534e7d297caa86e62b588c3b7c44e28369ea04fcaffc5e9c11aec16a81634f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\source-after-RhinoObject002.brep",
+      "sha256": "114a2eb2bdc0e453ff63f4f617eeba787aaae3c2783cda538e549c35c3d667cf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\source-before-RhinoLayer.brep",
+      "sha256": "9f0d2bba3013b144be51953488d15b7a0cd9259da4b5f0033333c9f1f98430c7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\source-before-RhinoObject.brep",
+      "sha256": "73586bf247aeadaff2135f91119856fa57ea6dfed9ef52d4014cebdd26bfde16"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\source-before-RhinoObject001.brep",
+      "sha256": "534e7d297caa86e62b588c3b7c44e28369ea04fcaffc5e9c11aec16a81634f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\source-before-RhinoObject002.brep",
+      "sha256": "114a2eb2bdc0e453ff63f4f617eeba787aaae3c2783cda538e549c35c3d667cf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\source-pre-target-RhinoLayer.brep",
+      "sha256": "9f0d2bba3013b144be51953488d15b7a0cd9259da4b5f0033333c9f1f98430c7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\source-pre-target-RhinoObject.brep",
+      "sha256": "70e72d6c33a69471bb717cafdb92eb6779c5bbb8c32dedca20fa61c90e3c8070"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\source-pre-target-RhinoObject001.brep",
+      "sha256": "534e7d297caa86e62b588c3b7c44e28369ea04fcaffc5e9c11aec16a81634f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\source-pre-target-RhinoObject002.brep",
+      "sha256": "114a2eb2bdc0e453ff63f4f617eeba787aaae3c2783cda538e549c35c3d667cf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\warm-FCStd-periodic-local.brep",
+      "sha256": "5e840aba26a49c2b91af84e44427a04039cd76e9ecde01aefc4955d321541684"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\warm-FCStd-periodic-world.brep",
+      "sha256": "fef06393b38a9d7c876a6fa5dec06bccfcd6a1c073d476a10a324f44ec87859b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\warm-FCStd-PeriodicQ2.brep",
+      "sha256": "377e2abd81c472ee02e32e63b165933e81727eb0301d0e29c1af38d6fdf4aa65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\warm-FCStd-RhinoObject.brep",
+      "sha256": "d4660ee3e32ac658f8b041c8873909effe5360c3f0113074af881218e164dba1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\warm-FCStd-RhinoObject001.brep",
+      "sha256": "fd35c159347fd60457f471f90a720709f63097e76041ac574062520fda1952d0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\f719946207b74765a9ddff5e88cff01e\\warm-FCStd-RhinoObject002.brep",
+      "sha256": "cdfe5bc773abd76099bf33635bed64bd9ed541b5081556817971c9e81b631a5b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\9277c59e62f740f0b5c262b1cd622b29\\cold-FCStd-periodic-local.brep",
+      "sha256": "5e840aba26a49c2b91af84e44427a04039cd76e9ecde01aefc4955d321541684"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\9277c59e62f740f0b5c262b1cd622b29\\cold-FCStd-periodic-world.brep",
+      "sha256": "fef06393b38a9d7c876a6fa5dec06bccfcd6a1c073d476a10a324f44ec87859b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\9277c59e62f740f0b5c262b1cd622b29\\cold-FCStd-PeriodicQ2.brep",
+      "sha256": "377e2abd81c472ee02e32e63b165933e81727eb0301d0e29c1af38d6fdf4aa65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\9277c59e62f740f0b5c262b1cd622b29\\cold-FCStd-RhinoObject.brep",
+      "sha256": "d4660ee3e32ac658f8b041c8873909effe5360c3f0113074af881218e164dba1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\9277c59e62f740f0b5c262b1cd622b29\\cold-FCStd-RhinoObject001.brep",
+      "sha256": "fd35c159347fd60457f471f90a720709f63097e76041ac574062520fda1952d0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\9277c59e62f740f0b5c262b1cd622b29\\cold-FCStd-RhinoObject002.brep",
+      "sha256": "cdfe5bc773abd76099bf33635bed64bd9ed541b5081556817971c9e81b631a5b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\9277c59e62f740f0b5c262b1cd622b29\\merge-native-module.json",
+      "sha256": "be273fbfc8cd2cda2b8f5a2defe79935f9b8517691ee90edcd818b5f0298e09f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\9277c59e62f740f0b5c262b1cd622b29\\progress.json",
+      "sha256": "f3c9038df4ad02787b5c19f406a15b18143c10896b37f9a810adb8c0867be822"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\build\\merge_replay-1\\9277c59e62f740f0b5c262b1cd622b29\\results.json",
+      "sha256": "4a3bf2803658ce342d352a44b5d18187da0445a3618699f23434ad7e71bfa29b"
+    }
+  ],
+  "spec_package": {
+    "manifest_entries": 664,
+    "manifest_sha256": "9eaa4e31da731e764b63a3489ce9d4ea0dd47814218abbb05efef1140439c43b",
+    "json_yaml_equal": true,
+    "catalog_status_changes": [],
+    "command_capability_changes": []
+  },
+  "public_source_audit": {
+    "exit": 0,
+    "raw_log": "H:\\FreeCAD-src\\build\\p0-periodic-public-audit.log",
+    "raw_log_sha256": "4db34a1a6d118130a28191b290bfa9164a9f5d727016026e1c41d67cf3a28eb5",
+    "result": {
+      "source_files": 2146,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    }
+  },
+  "limits": [
+    "Authored compact periodic curve and existing rational circle/seam/hole faces only; all-family persistence and semantic subelement remapping remain open.",
+    "775point witnesses per stage prove declared sampled deviation only, not global continuous maximum or parameter map.",
+    "BBox numerical padding1e-7+64ULP(10mm) is separate from1e-7mm locus bound and1e-12 persistence equality.",
+    "Exact source copy control starts after target-document initialization; prior source circle root Free flag transition is retained, not normalized.",
+    "Same-name identity guard rejection does not prove delayed-worker handle release/UAF, full T08 or T11.",
+    "No arbitrary periodic3DM, source layer/attribute copying or new adaptive area certificate."
+  ]
+}

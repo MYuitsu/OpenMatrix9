@@ -1,0 +1,49 @@
+"""Merged native periodic exchange preserves compact basis and sampled locus."""
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtWidgets
+import hashlib,json,os,traceback
+from pathlib import Path
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'sampled_only':True,'length_tolerance_mm':1e-7}
+
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+
+def run():
+    docs=[]
+    try:
+        import OpenMatrix9Gui as native, ThreeDm
+        report['module']=native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('MergedPeriodic');docs.append(doc.Name);doc.UndoMode=1
+        curve=Part.BSplineCurve()
+        curve.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(1,2,0),App.Vector(2,0,0)],[1,1,1,1],[0.,1.,2.,3.],True,2,[1.,1.,1.])
+        obj=doc.addObject('Part::Feature','PeriodicQ2');obj.Shape=curve.toShape();obj.Placement.Base=App.Vector(7,-5,2);doc.recompute()
+        before=hashlib.sha256(obj.Shape.exportBrepToString().encode()).hexdigest()
+        edge=obj.Shape.Edges[0];reference=[edge.valueAt(edge.FirstParameter+(edge.LastParameter-edge.FirstParameter)*i/32.) for i in range(33)]
+        check('source is compact true periodic quadratic',edge.Curve.isPeriodic() and edge.Curve.Degree==2 and edge.Curve.NbPoles==3)
+        check('native source edge already contains rigid placement',all((p-curve.value(edge.FirstParameter+(edge.LastParameter-edge.FirstParameter)*i/32.)-obj.Placement.Base).Length<=1e-7 for i,p in enumerate(reference)))
+        archive=out/'periodic.3dm';ThreeDm.export_file(str(archive),[obj],modeling=True)
+        target=App.newDocument('MergedPeriodicImport');docs.append(target.Name);target.UndoMode=1
+        objects=ThreeDm.import_file(str(archive),target,mode='modeling')
+        check('working periodic import produces one native CAD owner',len(objects)==1 and objects[0].isDerivedFrom('Part::Feature') and objects[0].OM9Representation=='native-cad')
+        actual=objects[0].Shape.Edges[0];basis=actual.Curve
+        check('working exchange retains true periodicity and compact poles',basis.isPeriodic() and basis.Degree==2 and basis.NbPoles==3)
+        check('working exchange retains complete native edge domain',abs(actual.FirstParameter-edge.FirstParameter)<=1e-12 and abs(actual.LastParameter-edge.LastParameter)<=1e-12)
+        samples=[actual.valueAt(actual.FirstParameter+(actual.LastParameter-actual.FirstParameter)*i/32.) for i in range(33)]
+        report['maximum_sample_residual_mm']=max((a-b).Length for a,b in zip(reference,samples))
+        check('independent source samples match rigid world exchange',report['maximum_sample_residual_mm']<=1e-7)
+        name=objects[0].Name;target.undo();check('periodic import Undo removes whole result',target.getObject(name) is None)
+        target.redo();check('periodic import Redo retains periodic basis',target.getObject(name).Shape.Edges[0].Curve.isPeriodic())
+        saved=out/'periodic.FCStd';target.saveAs(str(saved));target_name=target.Name;App.closeDocument(target_name);docs.remove(target_name)
+        restored=App.openDocument(str(saved));docs.append(restored.Name)
+        check('FCStd restore retains native periodic basis',restored.getObject(name).Shape.Edges[0].Curve.isPeriodic() and restored.getObject(name).Shape.Edges[0].Curve.NbPoles==3)
+        check('working exchange leaves original native geometry exact',hashlib.sha256(obj.Shape.exportBrepToString().encode()).hexdigest()==before)
+        report['ok']=True
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        for name in reversed(docs):
+            if name in App.listDocuments():App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(0,QtWidgets.QApplication.instance().quit)
+QtCore.QTimer.singleShot(1500,run)

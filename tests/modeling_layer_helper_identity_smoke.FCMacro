@@ -40,6 +40,10 @@ def run():
         check('layer projection cannot reveal native notes',not owner.ViewObject.Visibility and not owner.ViewObject.ShowInTree)
         check('layer metadata operation leaves both geometry volumes intact',all(doc.getObject(name).Shape.Volume==value for name,value in volumes.items()))
         doc.undo();check('one layer Undo preserves project notes',owner.Notes=='Owned project notes' and doc.Meta.get('OpenMatrix9.ProjectNotes')=='Owned project notes')
+        # Stock ZipWriter reads ambient Windows CRT errno without a stream
+        # failure. Isolate that host defect before testing persisted identity.
+        from stock_save_support import prepare_stock_fcstd_save
+        prepare_stock_fcstd_save(report)
         path=out/'native-helper.FCStd';doc.saveAs(str(path));savedName=doc.Name;App.closeDocument(savedName);docs.remove(savedName)
         loaded=App.openDocument(str(path));docs.append(loaded.Name);settle()
         restored=next(o for o in loaded.Objects if o.TypeId=='OpenMatrix9Gui::ProjectNotesObject')

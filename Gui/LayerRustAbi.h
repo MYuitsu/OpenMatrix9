@@ -103,6 +103,9 @@ std::uint32_t om9_layer_document_plan(std::uint64_t, Om9LayerByteView, std::uint
 std::uint32_t om9_layer_document_default(Om9LayerByteView,std::uint64_t*);
 std::uint32_t om9_layer_document_legacy(Om9LayerByteView,const Om9LayerLegacyObjectView*,std::size_t,std::uint64_t*);
 std::uint32_t om9_layer_document_reconcile(std::uint64_t,const Om9LayerLegacyObjectView*,std::size_t,std::uint64_t*);
+// IDs require strict native legacy-output ownership; facts contain own flags/RGB,
+// no paths. Rust rejects unknown/mismatched IDs and preserves canonical palette.
+std::uint32_t om9_layer_document_refresh_verified_legacy(std::uint64_t,const Om9LayerByteView*,std::size_t,const Om9LayerLegacyObjectView*,std::size_t,std::uint64_t*);
 std::uint32_t om9_layer_document_observed(std::uint64_t,const Om9LayerByteView*,std::size_t,std::uint64_t*);
 // Geometry-free panel with cached Rust effective flags; caller owns UTF-8 bytes.
 std::uint32_t om9_layer_document_panel(std::uint64_t,unsigned char*,std::size_t,std::size_t*);

@@ -1,12 +1,13 @@
+#include "LayerDocumentAdapter.h"
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "EditGeometry.h"
-#include "LayerDocumentAdapter.h"
-#include "RustBridge.h"
-#include "EditSpecialTypes.h"
+#include "CoreUnits.h"
 #include <Mod/Part/App/TopoShape.h>
 #include <Mod/Part/App/TopoShapePy.h>
 #include <BRepBuilderAPI_Sewing.hxx>
-
+#include "RustBridge.h"
+#include "EditSpecialTypes.h"
+#include "HistoryFeature.h"
 #include <App/Document.h>
 #include <App/DocumentObject.h>
 #include <algorithm>
@@ -41,7 +42,7 @@ bool surfaceOnly(PyObject* shape){const auto type=attr(shape,"ShapeType");if(typ
 namespace OpenMatrix9Gui {
 EditInput editInput(App::Document& doc,const std::string& name,unsigned kind,bool allowBlocks){
     auto* o=doc.getObject(name.c_str());if(!o)throw std::runtime_error("Select an object in the active document");
-    auto guard=capturePhase3Object(doc,name);
+    auto guard=captureObject(doc,name);
     Ref object(o->getPyObject());if(kind==2&&specialExplodeSource(object.value)){auto parts=specialExplodeComponents(object.value,allowBlocks);auto preview=specialExplodePreview(parts);return {name,signature(object.value),preview,false,parts,std::move(guard)};}
     const bool mesh=PyObject_HasAttrString(object.value,"Mesh");if(o->isDerivedFrom(Base::Type::fromName("App::Link"))||(!mesh&&!PyObject_HasAttrString(object.value,"Shape")))throw std::runtime_error("Select native curve/surface/solid/mesh objects; blocks require explicit CMD Explode");
     if(kind==2){if(PyObject_HasAttrString(object.value,"String")&&PyObject_HasAttrString(object.value,"FontFile"))throw std::runtime_error("Font/text Explode requires a dedicated annotation adapter; source is preserved");
@@ -56,30 +57,49 @@ EditInput editInput(App::Document& doc,const std::string& name,unsigned kind,boo
         Ref global(PyObject_CallMethod(object.value,"getGlobalPlacement",nullptr)),local(PyObject_GetAttrString(object.value,"Placement")),inverse(PyObject_CallMethod(local.value,"inverse",nullptr)),parent(PyNumber_Multiply(global.value,inverse.value)),matrix(PyObject_CallMethod(parent.value,"toMatrix",nullptr));
         if(mesh)set(shape->value,"Placement",global.value);else{Ref moved(PyObject_CallMethod(shape->value,"transformShape","OO",matrix.value,Py_False));}
     }
-    if(kind){phase3Validate(kind,{phase3ShapeFacts(shape->value)},false);}
-    return {name,signature(object.value),shape,mesh,{},std::move(guard)};
+    Phase3Snapshot phase3Guard;if(!mesh&&!o->getPropertyByName("OM9SourceUUID"))phase3Guard=capturePhase3Object(doc,name);
+    return {name,signature(object.value),shape,mesh,{},std::move(guard),std::move(phase3Guard)};
 }
 EditInput nativeShapeInput(App::Document& doc,const std::string& name){return editInput(doc,name,0);}
-void verifyEditInputs(App::Document& doc,const std::vector<EditInput>& inputs){for(const auto& i:inputs){verifyPhase3Object(doc,i.guard);auto* o=doc.getObject(i.name.c_str());if(!o)throw std::runtime_error("An edit input was deleted; cancel and reselect");Ref object(o->getPyObject());if(signature(object.value)!=i.signature)throw std::runtime_error("An edit input changed; cancel and reselect");}}
+void verifyEditInputs(App::Document& doc,const std::vector<EditInput>& inputs){for(const auto& i:inputs){verifyObject(doc,i.guard);if(i.phase3Guard)verifyPhase3Object(doc,i.phase3Guard);auto* o=doc.getObject(i.name.c_str());if(!o)throw std::runtime_error("An edit input was deleted; cancel and reselect");Ref object(o->getPyObject());if(signature(object.value)!=i.signature)throw std::runtime_error("An edit input changed; cancel and reselect");}}
+ToleranceSnapshot editJoinTolerance(const std::string& context,const std::vector<EditInput>& inputs,const std::optional<double>& overrideMm){
+    if(inputs.empty())throw std::runtime_error("Select Join inputs before resolving tolerance");
+    const bool surfaces=count(inputs.front().shape->value,"Faces")!=0;double bound=0;
+    for(const auto& input:inputs){
+        Ref box(PyObject_GetAttrString(input.shape->value,"BoundBox"));
+        for(const char* key:{"XMin","XMax","YMin","YMax","ZMin","ZMax"}){
+            Ref value(PyObject_GetAttrString(box.value,key));const double coordinate=PyFloat_AsDouble(value.value);
+            if(PyErr_Occurred()||!std::isfinite(coordinate))throw std::runtime_error("Invalid Join input bounds");
+            bound=std::max(bound,std::abs(coordinate));
+        }
+    }
+    return resolveTolerance(context,surfaces?2U:1U,overrideMm,bound);
+}
 EditShapes buildEdit(const std::vector<EditInput>& inputs,unsigned kind,std::size_t first,unsigned mode,double tolerance){
     // Spec: OM9-TOP11-005/008; OM9-SOLID-001..004. No interpreted command text.
     if(inputs.empty()||kind<1||kind>7)throw std::runtime_error("Select input objects");
     for(const auto& i:inputs)if(kind!=2&&i.mesh!=inputs[0].mesh)throw std::runtime_error("Mesh and BRep input types cannot be mixed in one Edit operation");
     if(inputs[0].mesh&&kind>=4){auto converted=inputs;for(auto& i:converted){i.shape=meshEditSolid(i.shape->value);i.mesh=false;}auto solids=buildEdit(converted,kind,first,mode,tolerance);EditShapes meshes;for(auto& s:solids)meshes.push_back(meshEditResult(s->value));return meshes;}
-    std::vector<Om9Phase3Facts> facts;for(const auto& input:inputs){if(input.mesh)phase3Require(1);facts.push_back(phase3ShapeFacts(input.shape->value));}phase3Validate(kind,facts);
+    const bool phase3=std::all_of(inputs.begin(),inputs.end(),[](const EditInput& input){return bool(input.phase3Guard)&&!input.mesh;}) && !(kind>=4&&surfaceOnly(inputs[0].shape->value));
+    if(phase3){std::vector<Om9Phase3Facts> facts;for(const auto& input:inputs)facts.push_back(phase3ShapeFacts(input.shape->value));phase3Validate(kind,facts);}
     Ref part(PyImport_ImportModule("Part"));EditShapes output;
     if(kind==1){
         bool curves=count(inputs[0].shape->value,"Faces")==0;Ref list(PyList_New(0));
         for(const auto& i:inputs){if((count(i.shape->value,"Faces")==0)!=curves)throw std::runtime_error("Join curves and surfaces separately");for(auto& e:elements(i.shape->value,curves?"Edges":"Faces"))append(list.value,e->value);}
         if(curves)output.push_back(joinEditCurves(list.value,tolerance));
         else{
-            // OCCT adapter: FreeCAD sewShape currently parses but ignores tolerance.
+            if(!std::isfinite(tolerance)||tolerance<=0)throw std::runtime_error("Surface Join requires a positive finite tolerance");
             BRepBuilderAPI_Sewing sewing(tolerance);
-            for(Py_ssize_t i=0;i<PySequence_Size(list.value);++i){Ref face(PySequence_GetItem(list.value,i));
-                if(!PyObject_TypeCheck(face.value,&Part::TopoShapePy::Type))throw std::runtime_error("Join requires native CAD faces");
-                sewing.Add(static_cast<Part::TopoShapePy*>(face.value)->getTopoShapePtr()->getShape());}
+            // OCCT may clamp small requests to its own resolution. Never report
+            // a cutoff smaller than the one the backend will actually use.
+            if(sewing.Tolerance()!=tolerance)throw std::runtime_error("Surface Join tolerance is below the kernel resolution; choose an explicit supported tolerance");
+            for(Py_ssize_t index=0;index<PyList_Size(list.value);++index){
+                auto* face=PyList_GetItem(list.value,index);
+                if(!PyObject_TypeCheck(face,&Part::TopoShapePy::Type))throw std::runtime_error("Surface Join requires native faces");
+                sewing.Add(static_cast<Part::TopoShapePy*>(face)->getTopoShapePtr()->getShape());
+            }
             sewing.Perform();auto shell=owned(new Part::TopoShapePy(new Part::TopoShape(sewing.SewedShape())));
-            if(attr(shell->value,"ShapeType")!="Shell"||count(shell->value,"Shells")!=1||count(shell->value,"Faces")!=PySequence_Size(list.value))throw std::runtime_error("Surfaces must share compatible edges to form one shell");output.push_back(shell);
+            if(attr(shell->value,"ShapeType")!="Shell"||count(shell->value,"Shells")!=1||count(shell->value,"Faces")!=PySequence_Size(list.value))throw std::runtime_error("Surfaces must share compatible edges within the effective Join tolerance");output.push_back(shell);
         }
     }else if(kind==2){for(const auto& i:inputs){EditShapes pieces;if(!i.components.empty())pieces=i.components;else if(i.mesh){Ref list(PyObject_CallMethod(i.shape->value,"getSeparateComponents",nullptr));for(Py_ssize_t j=0;j<PySequence_Size(list.value);++j)pieces.push_back(owned(PySequence_GetItem(list.value,j)));}else{const auto type=attr(i.shape->value,"ShapeType");if(type=="Compound"||type=="CompSolid"){Ref list(PyObject_CallMethod(i.shape->value,"childShapes",nullptr));for(Py_ssize_t j=0;j<PySequence_Size(list.value);++j)pieces.push_back(owned(PySequence_GetItem(list.value,j)));}else pieces=elements(i.shape->value,count(i.shape->value,"Faces")?"Faces":"Edges");}if(pieces.empty()||(i.components.empty()&&pieces.size()<2))throw std::runtime_error("Explode input needs separable components");output.insert(output.end(),pieces.begin(),pieces.end());}}
     else if(kind>=4){EditShape shape;const bool surfaces=surfaceOnly(inputs[0].shape->value);for(const auto& i:inputs)if(surfaceOnly(i.shape->value)!=surfaces)throw std::runtime_error("Select solid-only or surface-only Boolean sets");
@@ -98,7 +118,6 @@ EditShapes buildEdit(const std::vector<EditInput>& inputs,unsigned kind,std::siz
     for(const auto& shape:output)if(isExplodedText(shape->value))continue;else if(isEditMesh(shape->value))validateEditMesh(shape->value,false);else valid(shape->value);return output;
 }
 std::vector<EditShapes> splitEditCurves(const std::vector<EditInput>& inputs,bool extendLines){
-    std::vector<Om9Phase3Facts> facts;for(const auto& input:inputs)facts.push_back(phase3ShapeFacts(input.shape->value));phase3Validate(3,facts);
     if(inputs.size()<2)throw std::runtime_error("Trim needs at least two intersecting objects");
     Ref list(PyList_New(0));for(std::size_t i=1;i<inputs.size();++i)append(list.value,inputs[i].shape->value);
     if(extendLines)for(auto& e:extendedEditLines(inputs))append(list.value,e->value);
@@ -129,20 +148,20 @@ void verifyEditPickBoundary(const EditShapes& shapes,const std::set<std::size_t>
             if(shared)throw std::runtime_error("Pick inside a region, away from shared split boundaries");}
     }
 }
-void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const EditShapes& shapes,unsigned kind,bool remove,unsigned mode,std::size_t first,const EditProjection* projection){
+void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const EditShapes& shapes,unsigned kind,bool remove,unsigned mode,std::size_t first,const EditProjection* projection,const ToleranceSnapshot* toleranceContext){
     requireLayerGeometryEditable(doc);
-    phase3Require(om9_phase3_result_count(shapes.size()));
-    const double tolerance=om9_edit_tolerance();
-    verifyEditInputs(doc,inputs);std::vector<Om9Phase3Facts> facts;for(const auto& input:inputs)facts.push_back(phase3ShapeFacts(input.shape->value));phase3Validate(kind,facts);for(const auto& s:shapes)if(isExplodedText(s->value))continue;else if(isEditMesh(s->value))validateEditMesh(s->value,kind>=4);else valid(s->value);
+    const double tolerance=toleranceContext?toleranceContext->values.effectiveMm:om9_edit_tolerance();
+    if(toleranceContext&&unitContextSnapshot(doc)!=toleranceContext->context)throw std::runtime_error("Join unit/tolerance context changed; cancel and reselect");
+    verifyEditInputs(doc,inputs);for(const auto& s:shapes)if(isExplodedText(s->value))continue;else if(isEditMesh(s->value))validateEditMesh(s->value,kind>=4);else valid(s->value);
     // Deleting dependent/parametric inputs would sever unrelated models. Retain them instead.
     std::vector<std::string> deleting;for(std::size_t index=0;index<inputs.size();++index)if(remove||(kind==4&&index<first))deleting.push_back(inputs[index].name);
     for(const auto& name:deleting){auto* o=doc.getObject(name.c_str());for(auto* dependent:o->getInList()){
-        if(dependent->isDerivedFrom(Base::Type::fromName("App::Part"))||dependent->isDerivedFrom(Base::Type::fromName("App::DocumentObjectGroup")))continue;
+        if(dependent->isDerivedFrom(Base::Type::fromName("App::Part"))||dependent->isDerivedFrom(Base::Type::fromName("App::DocumentObjectGroup"))||hasRecordedHistory(dependent))continue;
         throw std::runtime_error("DeleteInput is unsafe for referenced objects; retain inputs or detach their dependents");
     }}
-    const int transactionId=om9OpenTransaction(doc,name(kind));
-    try{LayerGeometryTransaction layers(doc,transactionId);verifyEditInputs(doc,inputs);
-        Ref pyDoc(doc.getPyObject()),id(PyUnicode_FromString(feature(kind))),command(PyUnicode_FromString(name(kind))),sources(PyList_New(0));
+    phase3Require(om9_phase3_result_count(shapes.size()));
+    const int transaction=om9OpenTransaction(doc,name(kind));
+    try{std::unique_ptr<LayerGeometryTransaction> layers;if(hasCanonicalLayerDocument(doc))layers=std::make_unique<LayerGeometryTransaction>(doc,transaction);verifyEditInputs(doc,inputs);breakHistoryForEdit(doc,deleting);Ref pyDoc(doc.getPyObject()),id(PyUnicode_FromString(feature(kind))),command(PyUnicode_FromString(name(kind))),sources(PyList_New(0));
         for(const auto& i:inputs){Ref n(PyUnicode_FromString(i.name.c_str()));append(sources.value,n.value);}
         std::vector<std::size_t> owners;if(kind==2)for(std::size_t i=0;i<inputs.size();++i){auto pieces=buildEdit({inputs[i]},2,0,0,tolerance);owners.insert(owners.end(),pieces.size(),i);}
         for(std::size_t index=0;index<shapes.size();++index){auto shape=shapes[index];const bool mesh=isEditMesh(shape->value),textOutput=isExplodedText(shape->value);EditShapes groups;Ref source(kind==2?doc.getObject(inputs[owners.at(index)].name.c_str())->getPyObject():Py_NewRef(Py_None));
@@ -150,14 +169,17 @@ void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const Ed
                 for(auto& group:groups)if(PyObject_HasAttrString(group->value,"getGlobalPlacement")){Ref frame(PyObject_CallMethod(group->value,"getGlobalPlacement",nullptr)),inverse(PyObject_CallMethod(frame.value,"inverse",nullptr)),matrix(PyObject_CallMethod(inverse.value,"toMatrix",nullptr));shape=owned(textOutput?PyDict_Copy(shape->value):PyObject_CallMethod(shape->value,"copy",nullptr));if(textOutput){transformExplodedText(shape->value,matrix.value);}else if(mesh){Ref old(PyObject_GetAttrString(shape->value,"Placement")),local(PyNumber_Multiply(inverse.value,old.value));set(shape->value,"Placement",local.value);}else{Ref transformed(PyObject_CallMethod(shape->value,"transformShape","OO",matrix.value,Py_False));}break;}
             }
             Ref o(textOutput?createExplodedText(pyDoc.value,shape->value):Ref(PyObject_CallMethod(pyDoc.value,"addObject","ss",mesh?"Mesh::Feature":"Part::Feature",name(kind))));if(!textOutput)set(o.value,mesh?"Mesh":"Shape",shape->value);property(o.value,"App::PropertyString","OM9FeatureId",id.value);property(o.value,"App::PropertyString","OM9Command",command.value);property(o.value,"App::PropertyStringList","SourceNames",sources.value);Ref m(PyLong_FromUnsignedLong(mode));property(o.value,"App::PropertyInteger","BooleanMode",m.value);
-            if(kind==1){Ref t(PyFloat_FromDouble(tolerance));property(o.value,"App::PropertyFloat","JoinTolerance",t.value);}
+            if(kind==1){Ref t(PyFloat_FromDouble(tolerance));property(o.value,"App::PropertyFloat","JoinTolerance",t.value);
+                if(toleranceContext){Ref report(PyUnicode_FromString(toleranceContext->report.c_str()));property(o.value,"App::PropertyString","OM9ToleranceReport",report.value);
+                    auto* native=doc.getObject(attr(o.value,"Name").c_str());if(!native)throw std::runtime_error("Cannot resolve Join output for provenance");addUnitContextProvenance(*native,toleranceContext->context);}
+            }
             if(kind==3){property(o.value,"App::PropertyBool","TrimExtendLines",om9_edit_option(1)?Py_True:Py_False);property(o.value,"App::PropertyBool","TrimApparentIntersections",om9_edit_option(2)?Py_True:Py_False);
                 if(projection){Ref frame(PyList_New(0));for(const auto& row:{projection->eye,projection->right,projection->up,projection->forward})for(double value:row){Ref v(PyFloat_FromDouble(value));append(frame.value,v.value);}property(o.value,"App::PropertyFloatList","TrimProjectionFrame",frame.value);property(o.value,"App::PropertyBool","TrimPerspectiveProjection",projection->perspective?Py_True:Py_False);}}
             if(kind==2){Ref sv(PyObject_GetAttrString(source.value,"ViewObject")),ov(PyObject_GetAttrString(o.value,"ViewObject"));for(const char* key:{"ShapeColor","LineColor","PointColor","Transparency","LineWidth","PointSize","DisplayMode","TextColor"})if(PyObject_HasAttrString(sv.value,key)&&PyObject_HasAttrString(ov.value,key)){Ref style(PyObject_GetAttrString(sv.value,key));if(std::string(key)=="DisplayMode"){Ref modes(PyObject_CallMethod(ov.value,"listDisplayModes",nullptr));if(PySequence_Contains(modes.value,style.value)!=1)continue;}set(ov.value,key,style.value);}for(auto& group:groups){Ref added(PyObject_CallMethod(group->value,"addObject","O",o.value));}applyExplodeMetadata(o.value,shapes[index]);}
         }
-        for(const auto& n:deleting)doc.removeObject(n.c_str());doc.recompute();layers.finish();
-        if(!ownsLayerGeometryTransaction(doc,transactionId))throw std::runtime_error("BRep edit transaction ownership changed");
+        for(const auto& n:deleting)doc.removeObject(n.c_str());doc.recompute();if(layers)layers->finish();
+        if(!ownsLayerGeometryTransaction(doc,transaction))throw std::runtime_error("BRep edit transaction ownership changed");
         om9CommitTransaction(doc);
-    }catch(...){if(ownsLayerGeometryTransaction(doc,transactionId))om9AbortTransaction(doc);throw;}
+    }catch(...){if(ownsLayerGeometryTransaction(doc,transaction))om9AbortTransaction(doc);throw;}
 }
 }

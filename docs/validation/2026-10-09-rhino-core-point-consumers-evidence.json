@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "checkpoint": "rhino-core-point-consumers",
+  "date": "2026-10-09T21:51:35+07:00",
+  "parent_commit": "e6e08e5375d5fb2d75f214210193cd3cf2d666e5",
+  "p0_status": "in_progress",
+  "native_module": {
+    "path": "H:/FreeCAD-src/build/reusable-history-runtime/bin/OpenMatrix9Gui.pyd",
+    "sha256": "c59095ab83fa786ddee25300fae0f75263f11d1c06daa99907c2b329c10f05bd"
+  },
+  "build": {
+    "final_gui_exit": 0,
+    "final_gui_session": 60195,
+    "rust_link_gui_exit": 0,
+    "rust_link_gui_session": 43600
+  },
+  "rust": {
+    "tests_passed": 364,
+    "test_exit": 0,
+    "test_session": 48414,
+    "clippy_exit": 0,
+    "rustfmt_exit": 0,
+    "enumerated_tests": 364
+  },
+  "python": {
+    "run": 50,
+    "passed": 49,
+    "skipped": 1,
+    "exit": 0
+  },
+  "accepted_runs": [
+    {
+      "suite": "shared-input",
+      "path": "build/merge_replay-1/d22e08b99eb04154bdf399a0d9678d9c/results.json",
+      "count": 33,
+      "process_exit": 0,
+      "result_sha256": "858a5bd988b675bedba5c7805e8ff59f9e3d8fe604568a6050febf2ebf52bd83",
+      "module_proof": "build/merge_replay-1/d22e08b99eb04154bdf399a0d9678d9c/merge-native-module.json",
+      "macro": "core_point_parser_tools_smoke.FCMacro",
+      "macro_sha256": "d1c0f17d63b8bc3d6efcfcf0763a152181e556bd3047fb5096c650700bc4526e",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "c59095ab83fa786ddee25300fae0f75263f11d1c06daa99907c2b329c10f05bd"
+    },
+    {
+      "suite": "shared-input-cold",
+      "path": "build/merge_replay-1/66b6730ef65d4236bbf82a0aaf1fdb3e/results.json",
+      "count": 4,
+      "process_exit": 0,
+      "result_sha256": "589b98cc9ac7752b1faa5de4d260b91a6f27e0bd1845c6c9fd22434f09958687",
+      "module_proof": "build/merge_replay-1/66b6730ef65d4236bbf82a0aaf1fdb3e/merge-native-module.json",
+      "macro": "core_point_parser_tools_smoke.FCMacro",
+      "macro_sha256": "d1c0f17d63b8bc3d6efcfcf0763a152181e556bd3047fb5096c650700bc4526e",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "c59095ab83fa786ddee25300fae0f75263f11d1c06daa99907c2b329c10f05bd"
+    },
+    {
+      "suite": "distance",
+      "path": "build/merge_replay-1/4f0022941fc54705a955b93475387d44/results.json",
+      "count": 28,
+      "process_exit": 0,
+      "result_sha256": "45fa9d64b987a8851759019d004c48e3eae7cc1e585adf3a5cec820111a6bceb",
+      "module_proof": "build/merge_replay-1/4f0022941fc54705a955b93475387d44/merge-native-module.json",
+      "macro": "core_distance_smoke.FCMacro",
+      "macro_sha256": "8664d0d6db8817a8ff73183a7922e3eb34c2f9c8de21d3d02b4d3e5ad0a36dc1",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "c59095ab83fa786ddee25300fae0f75263f11d1c06daa99907c2b329c10f05bd"
+    },
+    {
+      "suite": "angle",
+      "path": "build/merge_replay-1/b88212a0e4c64f2999d932c568e16458/results.json",
+      "count": 19,
+      "process_exit": 0,
+      "result_sha256": "3c73fc328e282b452ce262d2e20495adab3ddc1c8c2443a150145a7c213e235a",
+      "module_proof": "build/merge_replay-1/b88212a0e4c64f2999d932c568e16458/merge-native-module.json",
+      "macro": "core_angle_smoke.FCMacro",
+      "macro_sha256": "30aba686d47c2a421bf88d900b45063fd3930ee75af28ccf1ec9348606d18e33",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "c59095ab83fa786ddee25300fae0f75263f11d1c06daa99907c2b329c10f05bd"
+    },
+    {
+      "suite": "picture-frame",
+      "path": "build/merge_replay-1/1240cd70aff24826b7669eaae99d614c/results.json",
+      "count": 47,
+      "process_exit": 0,
+      "result_sha256": "58e13d86c900edc9588e280daac7dbab00567a62d38b75c6d13e04c2c94051bc",
+      "module_proof": "build/merge_replay-1/1240cd70aff24826b7669eaae99d614c/merge-native-module.json",
+      "macro": "core_picture_frame_smoke.FCMacro",
+      "macro_sha256": "1360a1da327e2cc67d7d891da69ef36eb5815874bbb9ace34a5b5dde21127ff4",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "c59095ab83fa786ddee25300fae0f75263f11d1c06daa99907c2b329c10f05bd"
+    },
+    {
+      "suite": "invalid-cplane",
+      "path": "build/merge_replay-1/acc78cb4430743adad553f6f4e3bde12/results.json",
+      "count": 14,
+      "process_exit": 0,
+      "result_sha256": "98b82eb272d30357493b29fead121fc086060cd384132f9bacfd529c79caf758",
+      "module_proof": "build/merge_replay-1/acc78cb4430743adad553f6f4e3bde12/merge-native-module.json",
+      "macro": "core_invalid_cplane_tools_smoke.FCMacro",
+      "macro_sha256": "a725b0d901409cd537605c3f7d9b22a40c0fc0c0e9bd989b334eb98a2a1030cf",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "c59095ab83fa786ddee25300fae0f75263f11d1c06daa99907c2b329c10f05bd"
+    },
+    {
+      "suite": "snap-point-tools",
+      "path": "build/merge_replay-1/894d2de6312b4587b1a202ff803703c6/results.json",
+      "count": 7,
+      "process_exit": 0,
+      "result_sha256": "28b45f7e44a2a0ae0c5b086d540b194c42cf56a7f7705325ae45576a549f37ba",
+      "module_proof": "build/merge_replay-1/894d2de6312b4587b1a202ff803703c6/merge-native-module.json",
+      "macro": "core_snap_point_tools_smoke.FCMacro",
+      "macro_sha256": "2ae0e860b39bf57cd5436e00b91b8dfe47f8a395bcb2f409c6368586b4e26ae1",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "c59095ab83fa786ddee25300fae0f75263f11d1c06daa99907c2b329c10f05bd"
+    },
+    {
+      "suite": "snap-lifecycle",
+      "path": "build/merge_replay-1/8d823ca1b03946bb824af166973884d9/results.json",
+      "count": 10,
+      "process_exit": 0,
+      "result_sha256": "69728caa26c4dacdead3602b0c8a0691ddba0fdedb7b479387b04fbb36075a8e",
+      "module_proof": "build/merge_replay-1/8d823ca1b03946bb824af166973884d9/merge-native-module.json",
+      "macro": "core_snap_lifecycle_smoke.FCMacro",
+      "macro_sha256": "9cca8748e057786212b433f52c368764e807f3c82cfd536c9449b2313371cdc0",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "c59095ab83fa786ddee25300fae0f75263f11d1c06daa99907c2b329c10f05bd"
+    },
+    {
+      "suite": "coordinates",
+      "path": "build/merge_replay-1/0f582c3ac0e541e4a666529604598d00/results.json",
+      "count": 162,
+      "process_exit": 0,
+      "result_sha256": "1b2f36fdad6233962ad2c8696c7f9182273c93982cf4b2a0a1ed67f8702907bb",
+      "module_proof": "build/merge_replay-1/0f582c3ac0e541e4a666529604598d00/merge-native-module.json",
+      "macro": "core_coordinates_smoke.FCMacro",
+      "macro_sha256": "2b7cadc881da18e6a433f50c8e1f8b1d2fc8259dd90235913bc4e1b7d192a8ec",
+      "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+      "native_sha256": "c59095ab83fa786ddee25300fae0f75263f11d1c06daa99907c2b329c10f05bd"
+    }
+  ],
+  "native_assertions": 324,
+  "excluded_failed_runs": [
+    {
+      "path": "build/merge_replay-1/41dc7dce0e424630bae23b29fe57e408/results.json",
+      "sha256": "375bed3c310e52ef7bdeb59e11bf0780412bdbb8ecb961bfba1d0f5e965c77e4",
+      "module_proof": {
+        "macro": "core_point_parser_tools_smoke.FCMacro",
+        "macro_sha256": "bd338903576ebf0f743062ab740a6814b7041e053d96af236775a3c7039409f0",
+        "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+        "native_sha256": "ea12455c1a6d4065dc02d29c5923a8148818b51e051b989bcc75037028f40e1d"
+      },
+      "reason": "Old consumer module failed mixed CPlane/world Distance, relative Angle and mixed-unit PictureFrame."
+    },
+    {
+      "path": "build/merge_replay-1/b95e5a07be1243df95bf9f53fb01b9c6/results.json",
+      "sha256": "345c10f1a45ee43fa1d33487bb72f13403a29bb7030b6ad185608036278e80af",
+      "module_proof": {
+        "macro": "core_point_parser_tools_smoke.FCMacro",
+        "macro_sha256": "b59e286e1682cf697def74d4b586dead5280c77bec8f2b3f48dd894619401b05",
+        "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+        "native_sha256": "44b9aa248140e7d4b93d3202b23eeddee4552884ae0c55312551ae91186ef168"
+      },
+      "reason": "Old frame validator accepted near-scale and shear which a native rigid placement removes."
+    },
+    {
+      "path": "build/merge_replay-1/148ce334524740858f3844a8a4eb190c/results.json",
+      "sha256": "bc7b3267878a78f238e8d6b5889982e05aed8d470d9f93584ec87e5c94d63702",
+      "module_proof": {
+        "macro": "core_picture_frame_smoke.FCMacro",
+        "macro_sha256": "1360a1da327e2cc67d7d891da69ef36eb5815874bbb9ace34a5b5dde21127ff4",
+        "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+        "native_sha256": "44b9aa248140e7d4b93d3202b23eeddee4552884ae0c55312551ae91186ef168"
+      },
+      "reason": "Before the transaction-ID guard, a locked transaction allowed image mutation."
+    },
+    {
+      "path": "build/merge_replay-1/81584260088b4205a48dc0c74582d862/results.json",
+      "sha256": "810aec30d687ece0b71fad1f6c06e6d588f4c06eadbc4e93b5c1879e3204dab7",
+      "module_proof": {
+        "macro": "core_point_parser_tools_smoke.FCMacro",
+        "macro_sha256": "d1c0f17d63b8bc3d6efcfcf0763a152181e556bd3047fb5096c650700bc4526e",
+        "native_module": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+        "native_sha256": "f0088d1c9d6ae793ab3907910388eb42a11be5f9c7f6845f9e382c41f32f5537"
+      },
+      "reason": "Before router forwarding repair, accepted point and scalar records lost original surrounding whitespace."
+    }
+  ],
+  "source_files": [
+    {
+      "path": "Gui/CMakeLists.txt",
+      "sha256": "f0524ab9f19d71396d378de343aa5b1d882c1f3d4006db1d992c51a0da896617"
+    },
+    {
+      "path": "Gui/CoreCPlanes.cpp",
+      "sha256": "91f004f34a7fab6aff32b04d6e5950a279fd0f73d9596635222647575e927120"
+    },
+    {
+      "path": "Gui/CoreCPlanes.h",
+      "sha256": "35baa2219d09672eab79d37c5d5d5a647b63db621ef22dd001c1e8aa8aa1d915"
+    },
+    {
+      "path": "Gui/CoreCoordinates.cpp",
+      "sha256": "193c2facae6680b9cca7da50d98bf20244dd295fc8d40e6b21e53bfb7f085841"
+    },
+    {
+      "path": "Gui/CoreCoordinates.h",
+      "sha256": "0ba9a2f68fd411a3b2ccede902fa7791a160c34f5eab8e6798056ef67f15f894"
+    },
+    {
+      "path": "Gui/CoreDistance.cpp",
+      "sha256": "6cc3348342338c3970eddaccc50554a603c07f58cf95f11018b27401d57ea724"
+    },
+    {
+      "path": "Gui/CoreDistance.h",
+      "sha256": "904212f176cac66caaeb7d56565a3956eb96cff60a9bfeb8c784dc134880c187"
+    },
+    {
+      "path": "Gui/CorePictureFrame.cpp",
+      "sha256": "b5174464611a4abd5a70d3dcd61da74608a7d924a3d15d0fcb29f785dc73fe2b"
+    },
+    {
+      "path": "Gui/CorePictureFrame.h",
+      "sha256": "b6aae901daa6ddb6e2a08c91b69d009706c627a6af4a24e3d49a1110feb415f4"
+    },
+    {
+      "path": "Gui/CurveController.cpp",
+      "sha256": "2cccb747e6066bcfb286106820d0b8c3423857df733dbc8562b3cfadf106f807"
+    },
+    {
+      "path": "rust/src/lib.rs",
+      "sha256": "c0a0bd1699bf6c7c1402dc6e270a31b658c70f02e8e6dbd6efa3d1b07a81a5e0"
+    },
+    {
+      "path": "rust/src/coordinate_input.rs",
+      "sha256": "d6224141fa05fec67e600e354be216a552582f30d3f6e6f0305070559da5a348"
+    },
+    {
+      "path": "rust/src/coordinates.rs",
+      "sha256": "af93be30bf3346df606c164258fe6715d89c9cda656384821b108352a6fa0ca7"
+    },
+    {
+      "path": "rust/tests/coordinate_input.rs",
+      "sha256": "ab11b3fcd1f49349f89baea8b32f500a2cb7cab18c471028bc1c8353727be90f"
+    },
+    {
+      "path": "rust/tests/coordinates.rs",
+      "sha256": "1a63723654e7f9bbeb3fec803010f01054a80b15cb2be6d13217193483782474"
+    },
+    {
+      "path": "tests/core_point_parser_tools_smoke.FCMacro",
+      "sha256": "d1c0f17d63b8bc3d6efcfcf0763a152181e556bd3047fb5096c650700bc4526e"
+    },
+    {
+      "path": "tests/core_distance_smoke.FCMacro",
+      "sha256": "8664d0d6db8817a8ff73183a7922e3eb34c2f9c8de21d3d02b4d3e5ad0a36dc1"
+    },
+    {
+      "path": "tests/core_angle_smoke.FCMacro",
+      "sha256": "30aba686d47c2a421bf88d900b45063fd3930ee75af28ccf1ec9348606d18e33"
+    },
+    {
+      "path": "tests/core_picture_frame_smoke.FCMacro",
+      "sha256": "1360a1da327e2cc67d7d891da69ef36eb5815874bbb9ace34a5b5dde21127ff4"
+    }
+  ],
+  "source_reviews": [
+    {
+      "path": "docs/reviews/2026-10-09-point-consumer-review.md",
+      "sha256": "57253116b2eec0aa1994226082334b3a7e16c7cd5d6afa06c8d3aca02d3b7974"
+    },
+    {
+      "path": "docs/reviews/2026-10-09-distance-parser-review.md",
+      "sha256": "ba69fdb7c79fd8b9f26c8db19340151b768e80111e216e4513d0a542dcee62ad"
+    }
+  ],
+  "public_source_audit": {
+    "source_files": 2054,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  },
+  "spec_package": {
+    "manifest_entries": 664,
+    "manifest_sha256": "f5c25ceef5ca15c6511797c7bd751439ae2a63a240edc0db3a317ed959ef5e57",
+    "json_yaml_equal": true,
+    "updated_features": [
+      "OM9-MEASURE-001",
+      "OM9-MEASURE-002",
+      "OM9-VIEW-001"
+    ]
+  },
+  "limits": [
+    "Cartesian grammar only; polar/spherical/surveyor/fraction/locale and one-shot angle execution remain P0 work.",
+    "Distance still starts in mm and lacks Model_Units; Angle TwoObjects is unsupported.",
+    "PictureFrame lacks explicit EmbedBitmap/external-missing and AlphaTrasnparency modes; Autoname changes Label only and option prompt parity remains open.",
+    "Logical view slot and runtime document owner are recorded; snap object identity is explicitly unavailable. Reports do not establish associative History or complete session/view identity.",
+    "Tighter Frame::new validation rejects previously tolerated non-rigid rounded saved/imported axes; no silent normalization is performed.",
+    "Forced transaction-start rejection is exercised; arbitrary post-add property/recompute faults are not injected. Native libraries and release panic=abort remain outside safe Rust crash-containment guarantees.",
+    "No new Rhino runtime comparison was performed; all P0 remains in progress."
+  ]
+}
