@@ -1,0 +1,1615 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-10T19:04:38+07:00",
+  "chapter_status": "in_progress",
+  "scope": "Owned vertex-link/oriented surface observations and bounded native OCCT CAD inspection reports, separate from representation provenance and global embedding certificates. Full original RCORE-01 remains in progress.",
+  "sources": [
+    "Gui/CoreSupportSnapshot.cpp",
+    "Gui/CoreSupportSnapshot.h",
+    "Gui/CoreGeometryContract.cpp",
+    "Gui/CoreTopologySnapshot.cpp",
+    "Gui/CoreTopologySnapshot.h",
+    "Gui/CMakeLists.txt",
+    "Gui/NurbsBasisAdapter.cpp",
+    "Gui/NurbsBasisAdapter.h",
+    "rust/src/lib.rs",
+    "rust/src/nurbs_basis.rs",
+    "rust/src/nurbs_basis_ffi.rs",
+    "rust/src/support_snapshot.rs",
+    "rust/src/support_snapshot_ffi.rs",
+    "rust/src/analytic_support.rs",
+    "rust/tests/analytic_support.rs",
+    "rust/tests/support_snapshot.rs",
+    "rust/tests/support_snapshot_ffi.rs",
+    "tests/rhino_core_analytic_support_smoke.FCMacro",
+    "tests/rhino_core_support_snapshot_smoke.FCMacro",
+    "tests/rhino_core_topology_snapshot_smoke.FCMacro",
+    "tests/rhino_core_geometry_descriptor_smoke.FCMacro",
+    "tests/rhino_core_import_commit_gate_smoke.FCMacro",
+    "rust/src/geometry_contract.rs",
+    "rust/src/geometry_contract_ffi.rs",
+    "rust/tests/geometry_contract_ffi.rs",
+    "rust/tests/bezier_support.rs",
+    "tests/rhino_core_bezier_support_smoke.FCMacro",
+    "rust/src/derived_support.rs",
+    "rust/src/derived_support_ffi.rs",
+    "rust/tests/derived_support.rs",
+    "tests/rhino_core_derived_support_smoke.FCMacro",
+    "Gui/CoreSourceAttributes.cpp",
+    "Gui/CoreSourceAttributes.h",
+    "rust/src/geometry_frame.rs",
+    "rust/src/geometry_frame_ffi.rs",
+    "rust/src/source_attributes.rs",
+    "rust/src/source_attributes_ffi.rs",
+    "rust/tests/geometry_frame.rs",
+    "rust/tests/source_attributes.rs",
+    "tests/rhino_core_world_attributes_smoke.FCMacro",
+    "Gui/CoreDefinitionSnapshot.cpp",
+    "Gui/CoreDefinitionSnapshot.h",
+    "rust/src/instance_graph.rs",
+    "rust/src/instance_graph_ffi.rs",
+    "rust/tests/instance_graph.rs",
+    "tests/rhino_core_instance_definition_smoke.FCMacro",
+    "Gui/CoreDiscreteSnapshot.cpp",
+    "Gui/CoreDiscreteSnapshot.h",
+    "rust/src/discrete_snapshot.rs",
+    "rust/src/discrete_snapshot_ffi.rs",
+    "rust/tests/discrete_snapshot.rs",
+    "tests/rhino_core_discrete_snapshot_smoke.FCMacro",
+    "tests/rhino_core_discrete_module_loading_smoke.FCMacro",
+    "Gui/CoreEdgeSnapshot.cpp",
+    "Gui/CoreEdgeSnapshot.h",
+    "rust/src/edge_geometry.rs",
+    "rust/src/edge_geometry_ffi.rs",
+    "rust/tests/edge_geometry.rs",
+    "tests/rhino_core_edge_geometry_smoke.FCMacro",
+    "tests/native/edge_geometry_fixture.cpp",
+    "rust/src/array_occurrences.rs",
+    "rust/src/array_occurrences_ffi.rs",
+    "rust/tests/array_occurrences.rs",
+    "tests/rhino_core_instance_array_smoke.FCMacro",
+    "tests/rhino_core_instance_array_boundary_smoke.FCMacro",
+    "rust/src/reference_path.rs",
+    "rust/src/reference_path_ffi.rs",
+    "rust/tests/reference_path.rs",
+    "tests/rhino_core_reference_context_smoke.FCMacro",
+    "rust/src/surface_complex.rs",
+    "rust/tests/surface_complex.rs",
+    "tests/rhino_core_surface_complex_smoke.FCMacro",
+    "rust/src/shape_validation.rs",
+    "rust/tests/shape_validation.rs",
+    "Gui/CoreShapeValidation.cpp",
+    "Gui/CoreShapeValidation.h",
+    "tests/rhino_core_shape_validation_smoke.FCMacro"
+  ],
+  "source_fingerprints": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreSupportSnapshot.cpp",
+      "bytes": 22251,
+      "sha256": "646c5be3c8b6bd84db4de10e57ae7011c5f1dbd2681a36d3ac43e9494a62382d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreSupportSnapshot.h",
+      "bytes": 831,
+      "sha256": "03a6ca670397e5de19e3a86dd138eae1170b31b887df4a6204c95b4aaf5c23c1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreGeometryContract.cpp",
+      "bytes": 29218,
+      "sha256": "fb65d3c7f2c9f2c71759cf3d9b633c27e12d41c1a7dad2e10183c59d538f7305"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreTopologySnapshot.cpp",
+      "bytes": 12669,
+      "sha256": "4b490922323e8f14e01935138a37fcfe990b00167aa08c2e248cebe63f6a2d64"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreTopologySnapshot.h",
+      "bytes": 351,
+      "sha256": "beb34101a9f4e313959ad9ac871e89b53caf1e6d983972429e1518d259b5add3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CMakeLists.txt",
+      "bytes": 8357,
+      "sha256": "3fecda57a6370c179a51e294bebb3bc6568ed9ef25309f249c83da8602d187ae"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NurbsBasisAdapter.cpp",
+      "bytes": 20670,
+      "sha256": "341c02c464812a173c3d94a3ff9748f0eff9480fabc83992288e617ce8629f3f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NurbsBasisAdapter.h",
+      "bytes": 3633,
+      "sha256": "1ca7afaf36136083e97ae8b076afc08b43d5de06b7afbf27f66766db78c4c08a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\lib.rs",
+      "bytes": 1868,
+      "sha256": "45475d38b837122e052384f933c8f078975a3a9c1e6763ccedc39fa7b26b397d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\nurbs_basis.rs",
+      "bytes": 11166,
+      "sha256": "50d4fe44e2a325ff2f614c1f06d263d42cc1f16fc3504e4240863f395e41e916"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\nurbs_basis_ffi.rs",
+      "bytes": 10445,
+      "sha256": "a826ec5f2c42a476ca5f1f503c66d6058d71803d493cdcee2ff76c54538393f7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\support_snapshot.rs",
+      "bytes": 6150,
+      "sha256": "7e6ee4ab579eb7d03aa9e453172861195a32a80a19530eec3a5743028614304e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\support_snapshot_ffi.rs",
+      "bytes": 6469,
+      "sha256": "2d0a9d6fcf33cb69c9b4cc3d4a96b6c1f232fb5f5b34a166ed063fd9b0e1a6eb"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\analytic_support.rs",
+      "bytes": 5022,
+      "sha256": "4f386a88678cea05414833f5b6fd69ce629176e5cfd735f76e930c2d839f7d08"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\analytic_support.rs",
+      "bytes": 3829,
+      "sha256": "4194ece56c8e151e9f73b05c8efe09a99b40b7eec56cfd11a81aeed68df5bc8b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\support_snapshot.rs",
+      "bytes": 2916,
+      "sha256": "b4a9c37e6e78ccb12f4de6e69d08badb8a207bd10f1fbc44dcd1cd038476e28a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\support_snapshot_ffi.rs",
+      "bytes": 3970,
+      "sha256": "6e044be56c231841f4cf4ede0631c383ca6da84ce3f37d434c32a0c11e0d7188"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_analytic_support_smoke.FCMacro",
+      "bytes": 10780,
+      "sha256": "be861299632e4154f12b73db56df54e3e8e5814e3729c9e20a66d2852d296f8f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_support_snapshot_smoke.FCMacro",
+      "bytes": 11400,
+      "sha256": "faf1e09dfdbfde7d8dc8d87bbc54ee711d9c167abd95a2e94ab1fe6706f5969b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_topology_snapshot_smoke.FCMacro",
+      "bytes": 8288,
+      "sha256": "3b5caa79f2df766353a24262cfda414c7821096ad84f72930515bac899a6866a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_geometry_descriptor_smoke.FCMacro",
+      "bytes": 37949,
+      "sha256": "46da23b4b48a164f238e1b4e5852d0b389fd9afece11b45c5365e7015b8e2c9e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_import_commit_gate_smoke.FCMacro",
+      "bytes": 10604,
+      "sha256": "391e1e96940e20863a1360d9c90bb797d05265650b8a46747f2be04b4c9d54e9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_contract.rs",
+      "bytes": 17862,
+      "sha256": "32682f3fcd3a2ce0614eed6b9cfdf866da3282f6db6924bf542c7517b3cf3d75"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_contract_ffi.rs",
+      "bytes": 11390,
+      "sha256": "8a65916645f80097f192e9a5f294a20b7f283699add1d1b6ba2454864b57294d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\geometry_contract_ffi.rs",
+      "bytes": 6393,
+      "sha256": "92df03d48252dd0931703cd8ff94a7a41c81038cc7ac85bec1053b2fc45c2608"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\bezier_support.rs",
+      "bytes": 4769,
+      "sha256": "ee03f8850eba7bffcc4e9bbbd3189ee05598df166c580cc6f308a7b192830ab0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_bezier_support_smoke.FCMacro",
+      "bytes": 8057,
+      "sha256": "f3b6878116d44e4010831dfc92e2d00afa429b5beeacd2253663f562257b2327"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\derived_support.rs",
+      "bytes": 6599,
+      "sha256": "cdd55d8ea988ec67e1ee38da94399c4c5e5ffeba619a040ea93dbd20efa6e4fb"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\derived_support_ffi.rs",
+      "bytes": 4219,
+      "sha256": "b5996a667cf36933da5bf54c563f95e81af89bae8c709fcba7091285f2d2da36"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\derived_support.rs",
+      "bytes": 7674,
+      "sha256": "9895aa682867c342572cac64666d7d92fd0099902c4e11e45593585b0e591024"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_derived_support_smoke.FCMacro",
+      "bytes": 11031,
+      "sha256": "057c7317d47605405372925cd0fdf79072639106f6b8b7863bdc31f95b54857b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreSourceAttributes.cpp",
+      "bytes": 4724,
+      "sha256": "ac1851abf0745793e11904ea22a683f9f1f3aac9881aa5e705a515b4626ee16d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreSourceAttributes.h",
+      "bytes": 326,
+      "sha256": "217641cfd263bc8eb67d000b83555c8091a898069be5060255f653da9d647b16"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_frame.rs",
+      "bytes": 2958,
+      "sha256": "ee4b9130c6d8bb71e515976cdd2ddd00f6975ea7abc1ebdd9b3d13426328552e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_frame_ffi.rs",
+      "bytes": 826,
+      "sha256": "b631d6ca845421b4775b3135e42f750438719f460d0647fb2e1df8704e2d9e96"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\source_attributes.rs",
+      "bytes": 5016,
+      "sha256": "f5624013bdf383d3de1c6d5b9a8c8ebe65563a57c32505ac4329ddbcb4da5b01"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\source_attributes_ffi.rs",
+      "bytes": 3370,
+      "sha256": "3e1902c456f1ccdf9e832c770992c8d9495bbb0be92cec393a8f3c947c0382ff"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\geometry_frame.rs",
+      "bytes": 1831,
+      "sha256": "49ac56fc2ba0644eef681844dc0d01120eb9412d8c5db113ed1a49b4b19d86d1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\source_attributes.rs",
+      "bytes": 5458,
+      "sha256": "cba92971c2c9d9d48215cfb0c0b1037bd9a22b3d8066107f0fef332ad63924fa"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_world_attributes_smoke.FCMacro",
+      "bytes": 13224,
+      "sha256": "8bdd369edf43861cd8fdc01d1620c35db7e93d43f0d05e62fcc836ae00fda68a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreDefinitionSnapshot.cpp",
+      "bytes": 41256,
+      "sha256": "78fc213c7d323c65ea86c983b1be3360c2c94abb7aba2664b8911b79a2038f2f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreDefinitionSnapshot.h",
+      "bytes": 634,
+      "sha256": "090d10767c3c43e82f5f5599bec54b15cc9a120abdaf300c3b240f3993d75056"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\instance_graph.rs",
+      "bytes": 3468,
+      "sha256": "4ffa9fdecd1a3bcf3a4c3081b59a0a605f0d587a4a00c3da280259c77c6c886e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\instance_graph_ffi.rs",
+      "bytes": 1383,
+      "sha256": "4b6b5562027803ca43eeb87cc0231cd1cd7c66011dee15f7602756d11670bf4e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\instance_graph.rs",
+      "bytes": 2892,
+      "sha256": "13bab4e65bd1d7781a7a3bf2c7c226f90f8273a8f351b6f5c81269005ada12b8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_instance_definition_smoke.FCMacro",
+      "bytes": 13357,
+      "sha256": "7c4a0e26473b19c5a33918388d64d00c99c82f3651e59b1a647575c01d50d344"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreDiscreteSnapshot.cpp",
+      "bytes": 4772,
+      "sha256": "c4ff351818b6c6caf7cfc9cd505025ff4504534677868433e1d79b182787d806"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreDiscreteSnapshot.h",
+      "bytes": 292,
+      "sha256": "4e56f3630a89611b976c72fb899595c36d35e46f00e404e4abd1142ebec30efe"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\discrete_snapshot.rs",
+      "bytes": 2741,
+      "sha256": "5cbd91f1fa6a5853fda72451367ab84d5bf2be014aad1998352b81db2cfbbbe3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\discrete_snapshot_ffi.rs",
+      "bytes": 2081,
+      "sha256": "62f7f34c47b1dd3e8d422cf50147b8f1eb465dced4571b37e47cf84659fa2077"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\discrete_snapshot.rs",
+      "bytes": 4509,
+      "sha256": "259ac2115167dc4d0ca00ea44213771ff33c37d1b1241749ff00f3354a839d75"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_discrete_snapshot_smoke.FCMacro",
+      "bytes": 10310,
+      "sha256": "3113c35ff6631ff78147f86803b998efaf7f977c82561fea58f0e7eb2512ae78"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_discrete_module_loading_smoke.FCMacro",
+      "bytes": 2432,
+      "sha256": "b31ca89582bf8d6251150b2f613a26c3fc99dd0cf9a7350e6f2ca3c709034e54"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreEdgeSnapshot.cpp",
+      "bytes": 5840,
+      "sha256": "26f82dcc8e6eeb9d65c41c2d1d4a407230ce9b9150af627bd4109ac9167e81b0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreEdgeSnapshot.h",
+      "bytes": 516,
+      "sha256": "dcd83aaa0c5a6b9f5cbf77db2ec61b14b8fee95c58ca0e0f40c630f3d39b9593"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\edge_geometry.rs",
+      "bytes": 4303,
+      "sha256": "3c3bf3bba8d38595236ab63b091193909fc608c63dd1b5d85c3623de60e8f1f9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\edge_geometry_ffi.rs",
+      "bytes": 2082,
+      "sha256": "722214b44d698a5cc81ce3760c16bafc1e418e1218e87e24d893832235ec93f1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\edge_geometry.rs",
+      "bytes": 5087,
+      "sha256": "bd584bf352dc3aef3ce001548e990074ade46efeffd247f6e158b5d3f67cd688"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_edge_geometry_smoke.FCMacro",
+      "bytes": 15478,
+      "sha256": "3ea31433b6750e53a18d64a452e8df7fc2a4f449a6ca287ab748295e1e5310b1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\native\\edge_geometry_fixture.cpp",
+      "bytes": 4409,
+      "sha256": "ec32f7cba271d5be8c4bcb2eaa8b2a85f700bc57207845fdfbeac753fcae6840"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\array_occurrences.rs",
+      "bytes": 3056,
+      "sha256": "45b86f7aaf1c542028a0de707b7239469b305d192dd52def04c13f2d11d094f0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\array_occurrences_ffi.rs",
+      "bytes": 1413,
+      "sha256": "3e3743b665fa2dde0cba572c57d4cbb1a35d4d16c5f7d265bdbf86c6e985f30e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\array_occurrences.rs",
+      "bytes": 4067,
+      "sha256": "f22ac2db34ae923a831e32edcfca2f6bb06b6e883c6ab0faa582261c0280c783"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_instance_array_smoke.FCMacro",
+      "bytes": 14920,
+      "sha256": "120c0d518aabe0fb45ed57b3647d560ecccf7dc784c13b8f96e5a5a7c9e4b3bd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_instance_array_boundary_smoke.FCMacro",
+      "bytes": 4070,
+      "sha256": "07fac94fb49c2e5e35cc5059a8395846030916633bd1b53bbdf645d4eac00963"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\reference_path.rs",
+      "bytes": 2739,
+      "sha256": "911b358e81fcec5cc991b9a4d96c0eeab020f901d32fc48cad3439fb423cf483"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\reference_path_ffi.rs",
+      "bytes": 3114,
+      "sha256": "05efe898e3529ca0a901b5035fa870246b32ab9c46d3ec2c68831f1f0ad643ee"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\reference_path.rs",
+      "bytes": 4961,
+      "sha256": "d7d8253c3dd7e4ad42607590a11483c44741d41cdc6f6c5bb02da60b85b75698"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_reference_context_smoke.FCMacro",
+      "bytes": 13934,
+      "sha256": "bdb6c7345bee4f0a499418f5aefd4dfc4355a327db09fae57f2a17fa7e8fc833"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\surface_complex.rs",
+      "bytes": 3098,
+      "sha256": "f2e5981754cdaf659c3e8e4d9e9f37783fae5d8325425f24de6c0677c45808fa"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\surface_complex.rs",
+      "bytes": 4357,
+      "sha256": "9c2fa75b5aa61d897ce4bfccf0d8134fe44b85826828cebc2b1a7a5c4d98358f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_surface_complex_smoke.FCMacro",
+      "bytes": 5281,
+      "sha256": "39fa0fb6827fe47cc22e929b5b0243cbf5a7f0aff56b92d978643ef9585a1ea5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\shape_validation.rs",
+      "bytes": 3171,
+      "sha256": "cd0939171a2d2c7bd6c2bf4fff17eccbd97bb849f73ec7fa9d9af6eea983138a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\shape_validation.rs",
+      "bytes": 3463,
+      "sha256": "ef09b50053ef3023ed8d01e8e27af373ee746d2b2adaadfea7dd353143fcaca4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreShapeValidation.cpp",
+      "bytes": 6299,
+      "sha256": "db323c8c4a1c3b16869e7c435402ee3c68cb6ee335924b7535b01ff6632c1e74"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreShapeValidation.h",
+      "bytes": 465,
+      "sha256": "859916f39c9a79a275778f55e1f6de59610a254b003d61127c047518635a2ede"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_shape_validation_smoke.FCMacro",
+      "bytes": 8583,
+      "sha256": "13eca734b9c7d32d0dfed9b73bc25f547b198785250b82bcbd37272430c37d14"
+    }
+  ],
+  "remaining": [
+    "Uniform operation/type/options consumers and conversion/parameter reports, including final geometry/metadata/History commit/reject integration, remain open.",
+    "Configured topology traversal/overlapping selection, reference ownership/cycles, arbitrary attributes/userdata, annotation/extrusion and mesh/cloud channels/archive metadata remain open.",
+    "Every original worker/source-lock/publication/lifetime/allocation and global edge/UV correspondence obligation still requires its own evidence. Native algorithm validity does not establish a global embedding certificate."
+  ],
+  "review": "docs/reviews/2026-10-10-topology-validation-review.md",
+  "review_fingerprint": {
+    "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\reviews\\2026-10-10-topology-validation-review.md",
+    "bytes": 2198,
+    "sha256": "6aa8e72e7ee93e1bb11961c0c4615f832562a578be3ef087af651befa4281841"
+  },
+  "native_sources": [
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\Link.cpp",
+      "bytes": 103357,
+      "sha256": "bc503697b18aecfcd8b506f0ac40250cf8a6e6c0fb9bfbe0f4c3f1545d47a3ad"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\GroupExtension.cpp",
+      "bytes": 18027,
+      "sha256": "37c72d6431213fb25b16112af03f08457cedcebd24663344cdd5d0623977acb1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\GeoFeatureGroupExtension.cpp",
+      "bytes": 20571,
+      "sha256": "deaedb1fcab832ff91786c34f62e918eb1c9cbd38bbb60b30467ef906dd7dd8c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\DocumentObjectPyImp.cpp",
+      "bytes": 35415,
+      "sha256": "d404b202ec3d9035f9e1657ac39b8b2f13b2d5fb5eac9e77b47f05dadb1b6e6b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\PartFeature.cpp",
+      "bytes": 84936,
+      "sha256": "f75b38817bac5a46860c956ea78e76d3561815ad6390bb9f521eb86e2e6056fd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Mesh.h",
+      "bytes": 18095,
+      "sha256": "d1a3a4b84bffaaae6358e9618bd68ba53e248be57ea0675db1c1571d7f32f36a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Core\\MeshKernel.h",
+      "bytes": 27159,
+      "sha256": "69ee7d1f0c2aefb50f65f7c04c117daa4f5b0718890fadb6cc483abcbdc8a246"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\Points.h",
+      "bytes": 8056,
+      "sha256": "c7c08887cc7ac212e823cbe6eb4313efd14188845fe53b211516e6587311bd8c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\PropertyPointKernel.h",
+      "bytes": 3706,
+      "sha256": "57984bcba2e3950a814a946926ba58cdfce8bdb50915d5c335cfe8be4f564759"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\PropertyPointKernel.cpp",
+      "bytes": 6085,
+      "sha256": "677f7916e005bf3ed8159e5c48e427d84a7c2a692fdaf0e2f7949b8e386438ca"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\PointsFeature.cpp",
+      "bytes": 3960,
+      "sha256": "ab040c16751526ee12c2b6f4b4343508408cc7f4f63e55445153ada65038a048"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\AppPoints.cpp",
+      "bytes": 2819,
+      "sha256": "b62ec0416166699c4be8c8d160c8d698ba104aef6fe6c269aad3556074c17813"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRep_Tool.hxx",
+      "bytes": 19882,
+      "sha256": "308217970271349466f7bff4ae0014f81aafcdd311750e8ef5888f93ab003922"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\TopExp.hxx",
+      "bytes": 6627,
+      "sha256": "868d4f55c6e4a008adfc07787e24e5ffff1203e9244599f49dc05452c1e4b5fd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\TopoDS_Shape.hxx",
+      "bytes": 11734,
+      "sha256": "9535f666d49437f72151a484daf9f60d065ac59d0dc765866211427e94085f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\TopTools_ShapeMapHasher.hxx",
+      "bytes": 1335,
+      "sha256": "0f10c93946df144fa1cc46433b29c78ead9d87ce991b6968886e8eae01d60b8d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\NCollection_IndexedMap.hxx",
+      "bytes": 24993,
+      "sha256": "4ea642521417dcde1db81fad1f23fe9ea7be3676a289376fa0633dfcc65e41f6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\Geom_BSplineCurve.hxx",
+      "bytes": 38854,
+      "sha256": "6070421a76816696d9c116dc0b184e6a4afe9c63c77240b709ec0d2a690409b8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRep_Builder.hxx",
+      "bytes": 18147,
+      "sha256": "3f6586413a9b7adbdd58ac4f191f3ef700fe6fed796fe24da2ec399f3a50e1b6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepPrimAPI_MakeSphere.hxx",
+      "bytes": 6387,
+      "sha256": "881a123fc884e3fafd18f7556ad5d64a2718ef5d3ea8ba18561f1e16344de891"
+    }
+  ],
+  "native_dependencies": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\Mod\\Mesh\\Mesh.pyd",
+      "bytes": 5714944,
+      "sha256": "7a0dfb3afbdcc5ddfddbbf5d5bb85f2069a67b5f22d27d23d22aed6c7056da76"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\Mod\\Points\\Points.pyd",
+      "bytes": 1630720,
+      "sha256": "37593b045a77451a6a0865c2f7c14f5b449de7f884253360e7b38a8558c22936"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\src\\Mod\\Mesh\\App\\Mesh.lib",
+      "bytes": 1217622,
+      "sha256": "2edf2cf27abfbc90af40390eac8506016d2dfd0bb5477462a8cd4144530dea55"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepCheck_Analyzer.hxx",
+      "bytes": 7461,
+      "sha256": "193f4ba62d6c504836251f9253e6dedda592055da4155349a5a469424285a7a6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepCheck_Solid.hxx",
+      "bytes": 2064,
+      "sha256": "5940b67e6d241bb60c51f0b2c9a84a7c86a5aeaf261743b777a9b3708f71a71a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepClass3d_SolidClassifier.hxx",
+      "bytes": 2342,
+      "sha256": "3916ff3e3109e5cf09d333447e7fdc5d969140d54851207c933c151778106fe8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepClass3d_SClassifier.hxx",
+      "bytes": 2920,
+      "sha256": "096ff910d9a17eb04e7086d93f5f094866e85385a011761eae4601f460f76444"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\Precision.hxx",
+      "bytes": 19462,
+      "sha256": "73d59b7ca73e6bd2fc5c3f212f34fc9c4ae8a030efccfe80ca794ab9d834cff4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\Standard_Version.hxx",
+      "bytes": 2984,
+      "sha256": "838641a1b3b0834dc1236f132fafe5442872ba0a061b26aa5dd62c60ccaa0303"
+    }
+  ],
+  "native_fixture_artifacts": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\generator.exe",
+      "bytes": 84992,
+      "sha256": "970ee7c47807af155cd464030222f2c51fd4127e6f8d0302c782b866b64fca35"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\different-parameter-domains.brep",
+      "bytes": 782,
+      "sha256": "001887d0088318dfa33a7d7bd5a71a2c90a9355f58a0b8973f481d970928fd6e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\missing-curve3d.brep",
+      "bytes": 755,
+      "sha256": "e51327a373e517053573c9e1c70b451cb534edd5ad2ff214f0ef4ae4e759ea6a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\out-of-policy-vertex.brep",
+      "bytes": 209,
+      "sha256": "a4289d038dad4b4ee91018e96f60c4a17b024c427413c33a5572de28534bac8e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\located-null-degenerate-edge.brep",
+      "bytes": 583,
+      "sha256": "d5fbe209f4726af2c66c005fd8725440ff1c4089a572be1e18d3973e5ea73cba"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\located-bare-degenerate-edge.brep",
+      "bytes": 475,
+      "sha256": "53bcd2f4633fbb6a55b9ecf6dc919913f0e87a2c756d28ee62d506820f5b9d14"
+    }
+  ],
+  "harness": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\run-om9-plugin.ps1",
+      "bytes": 5287,
+      "sha256": "623aa26fd34a4e1b872766facec1e2c4f23f99ca6c4de6fef650c85c76499cfe"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\build-om9-plugin.ps1",
+      "bytes": 3540,
+      "sha256": "06396c92cbb6643fdff81b7dd92f905e2732326cfe77654d52ca7ffc7e9bb406"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\run-topology-validation-regressions.ps1",
+      "bytes": 2105,
+      "sha256": "1e7595e609ab37ee90d27450c9ce8e5a953a8ff671d8a54c985aea8d2fdbf812"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\record-topology-validation.py",
+      "bytes": 19594,
+      "sha256": "3bc8fe04aad8bc69da948dcd6895a59753a3d55c4e555e56d75176155e6b0a93"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\check-topology-validation.py",
+      "bytes": 4373,
+      "sha256": "c6ba50bc2b7767b9e4a4b6e456be51e84e4132aacaf347c34c1c531d6ea1c5ac"
+    }
+  ],
+  "documentation_fingerprints": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\README.md",
+      "bytes": 93880,
+      "sha256": "142b6f710c3af79943f61a17779d3b7130c2ec94a5de709f6da43af6a6bb7f11"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\IMPLEMENTATION_STATUS.md",
+      "bytes": 34546,
+      "sha256": "9036c9d60d13b6f999eb8b1a2a3986f35c9f2ceb0d55aea74e01790207128e97"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\README.md",
+      "bytes": 38268,
+      "sha256": "c0cf7f8dc833d3eadda96433cc5e1604a02ff64ffc10c2558f770af7f40ebc64"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\01-object-model-kernel.md",
+      "bytes": 42355,
+      "sha256": "b1f3350717db1087fe3238a41fb46f8bb4ed3c6ef2e27702807ec652c3424c72"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\features\\RCORE-01.md",
+      "bytes": 8803,
+      "sha256": "6bc3911d44ecbf76263d3ec07f8535ec087a64a55dce51fb57b8ac4415e29988"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\validation\\2026-10-10-rhino-core-topology-validation.md",
+      "bytes": 4709,
+      "sha256": "34ae457ae44a1440b523780ccb1ae70148231abb4548cb2696aac2f96c2dfda1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\reviews\\2026-10-10-topology-validation-review.md",
+      "bytes": 2198,
+      "sha256": "6aa8e72e7ee93e1bb11961c0c4615f832562a578be3ef087af651befa4281841"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\superpowers\\plans\\2026-10-10-rcore01-topology-validation.md",
+      "bytes": 4296,
+      "sha256": "b4a57c9e852380019858720cdf2a3be40409ec79922e016f905f6bce91aaed84"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\reviews\\2026-10-10-rcore01-closure-audit.md",
+      "bytes": 22052,
+      "sha256": "18850bfe061f8009a7d02cc34806b843014fa97914ba1431ad8746e0ae526738"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\openmatrix9-progress.json",
+      "bytes": 185020,
+      "sha256": "996c3269895fcae4bade11856dcbcd79f07abf9cc932f03b2f89d0e310b66683"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\CAPABILITY_LOOKUP.json",
+      "bytes": 88950,
+      "sha256": "f4997e1380eb6c4cd6d3889bd8ba574c18bb89427810f2d64d166450fe316867"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\MANIFEST.json",
+      "bytes": 116501,
+      "sha256": "a697a06ffd174f24ef3711210b80f710e65fe09fe2a170430507169c02f7d7eb"
+    }
+  ],
+  "validation": {
+    "host_runs": [
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-solid-final2-20261010",
+        "checks": 220,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 76616,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-solid-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-solid-final2-20261010\\results.json",
+            "bytes": 2195771,
+            "sha256": "b286836f01ea0611134e632c9ced9afa8f2488653b7f64491e7576e93b903b6f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-solid-final2-20261010\\shared-host-launch.json",
+            "bytes": 543,
+            "sha256": "89c5207b60fbe0bf5b51f74559edb7afb096a6f392660bfbac394a66bf365de0"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-solid-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 958,
+            "sha256": "bb3d9ff4c993ba0077913cb16dab2b3172bde1cba08279ac3a41217ab0a03096"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-solid-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 442,
+            "sha256": "0781db224cc9ecb5ec9e68cc811ea98a222811f6e0f1a66bc99b89d385a75632"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-solid-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-solid-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "9f1442a7e6abfc7bc4a9771df89717ed3473e85dc50ff562aeae407ab05bd603"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-complex-final2-20261010",
+        "checks": 67,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 28232,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-complex-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-complex-final2-20261010\\results.json",
+            "bytes": 1003982,
+            "sha256": "1e53c3869fff2261d0f8ab178000d0906833dbf5a66837ab3a1dd5f1fabf0466"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-complex-final2-20261010\\shared-host-launch.json",
+            "bytes": 545,
+            "sha256": "844815335e4bd8628f3c3d0512613e2d6987630213638f8411fcd7a51639f6fc"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-complex-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 960,
+            "sha256": "cedab2b874b228940b9e148d0450be9e80d13d4f73de6e1a4cf00f5092828f37"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-complex-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 441,
+            "sha256": "b6ffd87d2714cbf15db141a0b227f83315afb060064d0a63e520ce164e099547"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-complex-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-complex-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "34c48102d92d103b57f201fe7f1afbed4552ddd6aabe7624cd4461cbf280bb45"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-reference-final2-20261010",
+        "checks": 540,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 49424,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-reference-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-reference-final2-20261010\\results.json",
+            "bytes": 2399742,
+            "sha256": "7adbb74e0e8210861fc0752fb73bd794820b80260f0df68ba2c1b810edc07b7d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-reference-final2-20261010\\shared-host-launch.json",
+            "bytes": 547,
+            "sha256": "84fed3b85347933574d960221cff29c2132bc3b317049fb4aee503845076fb3c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-reference-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 962,
+            "sha256": "9c84944e070c09bb58909624339b2bf43b3f30a723dd7a5bdfcc2bd8eac9eafa"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-reference-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 443,
+            "sha256": "17c86a8d8b058ea10d88d5209e590124d19b9f66d69fbe38787b9aab2ba667aa"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-reference-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-reference-final2-20261010\\host-stderr.log",
+            "bytes": 3776,
+            "sha256": "2a38b7eb2592400c62e91769bbe856264c6c5b233be1007fcfd9d99ac29621fc"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-native-final2-20261010",
+        "checks": 609,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 37132,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-native-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-native-final2-20261010\\results.json",
+            "bytes": 2278133,
+            "sha256": "8232b176ac0a0fc67e3df249b7986739454cf8287fced3354e5d45a3273104f2"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-native-final2-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "7b5f72b44598dfe84ee2d098c1b874041b9918e504a773b42d83916a6f1bd0b9"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-native-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "6b65712511b84375e1ee27d0e3046b8dbe4387cf5fb79a03cfcf08c378162652"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-native-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 440,
+            "sha256": "301bf9c7e01ad794783b188fbbdcd99c0359ffb9d88ff1a7fc266f448dde84ec"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-native-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-native-final2-20261010\\host-stderr.log",
+            "bytes": 2687,
+            "sha256": "751b48ca13318c52ca5c74b4a1941afaaad3c36909ed57556148715e7082f9bb"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-boundary-final2-20261010",
+        "checks": 10,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 69016,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-boundary-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-boundary-final2-20261010\\results.json",
+            "bytes": 1305,
+            "sha256": "3a5900fc3aa18bce4e80bff69c96abb086644ecd19c50e9d730978c564b9d4c5"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-boundary-final2-20261010\\shared-host-launch.json",
+            "bytes": 546,
+            "sha256": "fc2988f9495c59278773786c4270c6a75d951bf25b608061ecaf95faf168ab79"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-boundary-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 961,
+            "sha256": "2824652e04bd831cdbbf9e2d2f3738cf81be6ea66fcd3118b1547dc0058dbb17"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-boundary-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 449,
+            "sha256": "3524ce07539f03a1c4602c62ee5ebbc7499967a2763c4ffeccb462f7c86fd377"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-boundary-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-boundary-final2-20261010\\host-stderr.log",
+            "bytes": 733,
+            "sha256": "8a99bf73e372d44b3253b39adf30d9349aac6ed3e0efcb6e88e3a74c23d5732e"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-edge-final2-20261010",
+        "checks": 921,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 48796,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-edge-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-edge-final2-20261010\\results.json",
+            "bytes": 706047,
+            "sha256": "d1e683b83b9b4beeb2cb8dd964cdbe39ff7c188c406c2b0351e7b322a65da028"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-edge-final2-20261010\\shared-host-launch.json",
+            "bytes": 542,
+            "sha256": "28155a9979fd0b1201ab796d11892aa30867ea383aadf7408f8b146af588ec6c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-edge-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 957,
+            "sha256": "d5902d539c67a7826c7165e79741dbf0f9d5c02e02a72d3bcc3b3cf5d8bae413"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-edge-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 439,
+            "sha256": "0fdc4d38d7f526242e0b4c9f825b8dbabd464278d9077ce3b6f6172343c86a5b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-edge-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-edge-final2-20261010\\host-stderr.log",
+            "bytes": 3014,
+            "sha256": "fc952085a2423fa33bcdda21aa25af4cd637313e600d35ff53a40b1f8608da74"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-discrete-final2-20261010",
+        "checks": 99,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 27832,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-discrete-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-discrete-final2-20261010\\results.json",
+            "bytes": 171623,
+            "sha256": "43bedff9f8c8ac91aaf10f6186fdd649478d8883635f3842a0e1b6377faa20ef"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-discrete-final2-20261010\\shared-host-launch.json",
+            "bytes": 546,
+            "sha256": "3535febe6f2040672c9870275ae2cc560f0de29af1f13f3dd66fd898c4a3d9db"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-discrete-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 961,
+            "sha256": "0875505791e948e942a70249945e6a128d4158641df86b0695d2e7bb2e4585b5"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-discrete-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 443,
+            "sha256": "f3c34ad37e7df1a6d35ba8045449c79597b24b0fab6765db2e54fb11e1224e0c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-discrete-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-discrete-final2-20261010\\host-stderr.log",
+            "bytes": 1522,
+            "sha256": "9148ed5ed0acfa1a5fcb4d3ac4eb0bb42d75694bf08449c01e4256a5d621866a"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-cold-final2-20261010",
+        "checks": 6,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 32952,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-cold-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-cold-final2-20261010\\results.json",
+            "bytes": 731,
+            "sha256": "e65368c4794be2b8aaeb218319fa7024327895db532f27b779d2f992368b160b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-cold-final2-20261010\\shared-host-launch.json",
+            "bytes": 542,
+            "sha256": "4f49cceacffca7e3eb58fa3fd5ef1790a39cb683a26aa02803950f77b000496b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-cold-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 957,
+            "sha256": "8660f7f43d96a9426b19ea8c9cf34a3eb04889398d72c080ab5e831cb64f4976"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-cold-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 449,
+            "sha256": "a874c2285ae39340155c7181deb7ba0c714fce10723a216ce19096381bf9934e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-cold-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-cold-final2-20261010\\host-stderr.log",
+            "bytes": 555,
+            "sha256": "e11336abf65855bfcef66fa4e0231e09001271261820960d85f7c8af81ef675f"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-instance-final2-20261010",
+        "checks": 48,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 18860,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-instance-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-instance-final2-20261010\\results.json",
+            "bytes": 571954,
+            "sha256": "2c5e3bac7eb856b96cc827058c7eb4ed984ed12429b41f49a9e52a4ea12e047e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-instance-final2-20261010\\shared-host-launch.json",
+            "bytes": 546,
+            "sha256": "0dcabce2288ccc5b69d379f49da2ba2dbd2f650b4f23b9c377ecdb3917d09f90"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-instance-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 961,
+            "sha256": "fdcee1bfc47f34fc53ca979a6056a522c8ccf2b1fc3c01c99469917f9e96af68"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-instance-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 445,
+            "sha256": "0ef926385f183cfb8d0ea8666ed943d2fd0b131ca90e8f8572aa66cc0e77627d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-instance-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-instance-final2-20261010\\host-stderr.log",
+            "bytes": 2339,
+            "sha256": "0a89355d29d7fbe58efbf18ae423cbd81f917bf97daee04b7a904805467f7c0f"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-world-final2-20261010",
+        "checks": 85,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 23548,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-world-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-world-final2-20261010\\results.json",
+            "bytes": 439719,
+            "sha256": "42c18d6028d5189a0d5b93914684207276cf1061b25aa67c1d8bb913660a8a75"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-world-final2-20261010\\shared-host-launch.json",
+            "bytes": 543,
+            "sha256": "c790e01564e1ce51ee2a51f10deb2e758143ea2e269dfae31157abb9a24881c7"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-world-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 958,
+            "sha256": "b272e2247fbf515931081ed70341719725b4db0192088228575ca9d7db42c9a1"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-world-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 442,
+            "sha256": "e86970e9f79171b06829da43bbc854e51a5f87c53e42d3b0b5fb3a20bab9941e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-world-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-world-final2-20261010\\host-stderr.log",
+            "bytes": 2090,
+            "sha256": "759f84a2e80335cba6cf1cb23dc54fc9bdbd70ccf7a96c0fcf324e3c2bcb6528"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-derived-final2-20261010",
+        "checks": 91,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 59484,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-derived-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-derived-final2-20261010\\results.json",
+            "bytes": 803438,
+            "sha256": "6d0e1938adfd428e93438a89a18a611ae69b00c89b6f0e0bc6c21d9b6a689942"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-derived-final2-20261010\\shared-host-launch.json",
+            "bytes": 545,
+            "sha256": "2e6e5f2972b64f6c84a7a7e9097dcdb1814a02a9e5387f2d1d5301f4af381817"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-derived-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 960,
+            "sha256": "2dc8fd38e158f11d3a309e75450400b04c4d478e2686f99f63e4baa478562af7"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-derived-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 441,
+            "sha256": "9346e4373a211cbc9baf713bacb485ed85b8b5aa920d31c9df83f9a344d1677d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-derived-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-derived-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "7b1940af905f0121b4ac2f780d2706b015158b69af415f8e1b4fa7404834f3ba"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-bezier-final2-20261010",
+        "checks": 76,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 33604,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-bezier-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-bezier-final2-20261010\\results.json",
+            "bytes": 250717,
+            "sha256": "48e0e594cb8412afc68c941ed4f2842804922e5e4163ca35cba5cbf145b5332e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-bezier-final2-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "556e937db9add2c2a05803947ec28dc8798745b9808c4c15df9344e51d757027"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-bezier-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "f1c247257eeaeae5d5cc5be0a5ac1873cd78d69627c884aa31e9856373c1ed39"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-bezier-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 440,
+            "sha256": "ef0ebce5bf2ee41c2dd926a1170990ff07661a574c5926db967911f95785990f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-bezier-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-bezier-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "789fdbd091edab795a7bdac020d130eaec97d052ded8fec7d2157ffb6c8b6eb3"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-analytic-final2-20261010",
+        "checks": 174,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 56156,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-analytic-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-analytic-final2-20261010\\results.json",
+            "bytes": 725901,
+            "sha256": "84f1dad3363f8b2f189981971c2c4f22c81a1637b1a5bc5cc8df6d77c716fddb"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-analytic-final2-20261010\\shared-host-launch.json",
+            "bytes": 546,
+            "sha256": "ebd2ea0da25915502afc42812b56d7e941c27f5e9a6341827ef18a80af9e9e8a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-analytic-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 961,
+            "sha256": "769b82520f036f508e4b66202c725ed2ce7b605f850b7c19b13df7f3cb6f3212"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-analytic-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 442,
+            "sha256": "d560183e7338df77ceb4459751b6dbbf920c9825102a3f02893edfb856d89d8a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-analytic-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-analytic-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "d3e5af72a536a8b595d1d27b15f25071c202be5ddfdf010e4ec8dfa3bf6f108e"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-nurbs-final2-20261010",
+        "checks": 54,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 39496,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-nurbs-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-nurbs-final2-20261010\\results.json",
+            "bytes": 1698030,
+            "sha256": "32ffb98a32fc543faea1077835688b9c296b67955b655adc77e1292cb4ab6a98"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-nurbs-final2-20261010\\shared-host-launch.json",
+            "bytes": 543,
+            "sha256": "a2cdf0c19d21ad302999ced7428cdd210c55d908fd661ad31799eb72654a0344"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-nurbs-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 958,
+            "sha256": "6e52eb7c8a334c5437fee5d8449638f1b09e5f2dd97c955e313e64a27827245c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-nurbs-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 442,
+            "sha256": "0af38a93ba169362be16ebb248c6a8b41ef493d41e4a003790fce97fa7331bed"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-nurbs-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-nurbs-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "2e0cf13d8f5071898039b02a3030271f73c25c7245e0bf6cc7488e81871d500f"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-topology-final2-20261010",
+        "checks": 177,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 5440,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-topology-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-topology-final2-20261010\\results.json",
+            "bytes": 663526,
+            "sha256": "5a9e5c83916fde60ea9b7357a1b6e64de0c4fa8c1f13a8db33fce2c2f5bb67da"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-topology-final2-20261010\\shared-host-launch.json",
+            "bytes": 545,
+            "sha256": "8c535b3690ee11242ed2d521b158133da90cd4154affae72d73528d82f6d4be0"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-topology-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 961,
+            "sha256": "09fd700ca5087226c8dbfa93c08309b3cb84c431935dd459db98fa463529938c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-topology-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 443,
+            "sha256": "29d83f7f6209c6cd1ec0edbc1812c5544ff18913678e8ab77b0ae0dc6d053768"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-topology-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-topology-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "5f07b72c3e68975e80fbec4ab5b2ca05cbec9168afe5db9c9d2e5515d1f535e5"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-descriptor-final2-20261010",
+        "checks": 151,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 43604,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-descriptor-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-descriptor-final2-20261010\\results.json",
+            "bytes": 1752284,
+            "sha256": "01cdc036efe963a9e40f5686291f7165b6f3dc2be5c8469aa8168a7a72ceec5b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-descriptor-final2-20261010\\shared-host-launch.json",
+            "bytes": 548,
+            "sha256": "acdb8072bacaedef8daaac277ffeacb86ebc8e9dca5aa0df27a428e93864c5d2"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-descriptor-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 963,
+            "sha256": "5f8b996dc78d7aea4d88403077ea57b858894acfd22aac69e0c3a32580251d71"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-descriptor-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 445,
+            "sha256": "851863778cdc1eb663673785a2e776adda7babc65234276b0dfda9287a2f9bdc"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-descriptor-final2-20261010\\host-stdout.log",
+            "bytes": 502,
+            "sha256": "e3a6f2d7086466d144789eb6b7f5b2abaa417157cb08dbe429175cacc1b44779"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-descriptor-final2-20261010\\host-stderr.log",
+            "bytes": 1404,
+            "sha256": "485f7d4465e2794e7d91c327a800ec8b9adc3a4e782ec67150bfff01317bee5c"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-validation-import-final2-20261010",
+        "checks": 55,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "7B2BCC9CFEBDDA20D97E385D6524AC0792D2B97F3BD12786B04D75AA144A4FE5",
+          "pid": 34780,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-validation-import-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-import-final2-20261010\\results.json",
+            "bytes": 1135223,
+            "sha256": "b9f6062fbb53bb6bb706a3ae30c63456301dbebd590052dcfa45159fb4558e3f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-import-final2-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "6604920e7a6bb7da50736326549c2a23ca8852d0d22699dbcedb332cad35a61a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-import-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "f01709f62353e75b2b27ee80ed7b1985939e38fc1c6c54578949a889fa068b97"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-import-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 444,
+            "sha256": "155d6c7b5951dcc7512154235abb4498a319a846a459380657c3ce450eb1064e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-import-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-validation-import-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "67a73582ffd30708470c6126eb749b47da1141b9347210c23fb9f31e6c5f3bb9"
+          }
+        ]
+      }
+    ],
+    "host_checks": 3383,
+    "rust_tests": 655,
+    "rust_log": {
+      "path": "H:\\FreeCAD-src\\build\\topology-validation-rust-full3-20261010.log",
+      "bytes": 102156,
+      "sha256": "c146c371aade35d48ed2f083c0be9d6caf8ace8767681469d4ece381ac434921"
+    },
+    "rust_process_exit_code": 0,
+    "plugin_build": {
+      "target": "OpenMatrix9Gui",
+      "sdk": "H:/FreeCAD-src/build/relWithDebInfo",
+      "cache": "H:/FreeCAD-src/build/openmatrix9-history-cage",
+      "workers": 14,
+      "process_exit_code": 0,
+      "root_rebuild": false
+    },
+    "public_source_audit": {
+      "source_files": 2314,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    },
+    "build_logs": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\topology-validation-build1-20261010.log",
+        "bytes": 1797,
+        "sha256": "356e43fd092165a4dd3075616510012f377ba9aa72872498f4b3e9db2f77c3e8"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\topology-validation-build2-20261010.log",
+        "bytes": 2078,
+        "sha256": "de3a35a9b9084321b1c2a985fb76dc20aa649b3e5831b3e56e34f8511df6526a"
+      }
+    ],
+    "red_artifacts": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\topology-validation-native-red2-20261010\\results.json",
+        "bytes": 814411,
+        "sha256": "9acaa2191204e903a499d44ae72c6c02fc88645df2c50963758fa8b7ed2ba6d7"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\topology-validation-native-red2-20261010\\shared-host-launch.json",
+        "bytes": 542,
+        "sha256": "ef3bc148afb8b98c785b6370e8529f4a89c21e848825a28371ce673a5cd0d3fc"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\topology-validation-solid-red1-20261010\\results.json",
+        "bytes": 1932440,
+        "sha256": "d91164040e924b08d1c81ec96675ea15b78ab196a2faca61c3e6ed29b5ff18ee"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\topology-validation-solid-red1-20261010\\shared-host-launch.json",
+        "bytes": 541,
+        "sha256": "3e28616a48bf69ca8ba3b512d31d252c809bbda4ec185221687dcc26361140a7"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\topology-validation-rust-red1-20261010.log",
+        "bytes": 3190,
+        "sha256": "8294b59671c49c813373f273583f4c68d339fcc4a964dbddaf17b9f36cbc5498"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\topology-validation-rust-ffi-red1-20261010.log",
+        "bytes": 2306,
+        "sha256": "5f0d7962ed545a5f432fba8167844945148ca2dd5e0664150b48b031cc899de8"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\topology-validation-rust-collapsed-red-20261010.log",
+        "bytes": 2380,
+        "sha256": "5c7f2e7d2ba203ffcd4d6700f73a1fe77ef836080cc1aeedfb641ecb808fffb7"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\topology-validation-rust-solid-red2-20261010.log",
+        "bytes": 3752,
+        "sha256": "77c3ad360be3fa8e08df265cbf6950a7d81a5e28ea4ca0b2f264dff9ffb7acfe"
+      }
+    ]
+  }
+}

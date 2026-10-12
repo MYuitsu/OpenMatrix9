@@ -1,0 +1,53 @@
+import sys
+sys.path.insert(0,'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+from command_options_fixture_support import *
+import Part
+underlined=check_mnemonics
+
+def run():
+    doc=App.newDocument('AllCommandMnemonics');doc.UndoMode=1
+    for name,words in [
+        ('Polyline',{'PersistentClose':'P','Mode':'M','Length':'L','Close':'C','Undo':'U'}),
+        ('Line',{'BothSides':'B','Length':'L','Undo':'U'}),
+        ('InterpCrv',{'PersistentClose':'P','Degree':'D','Knots':'K','Sharp':'S','Close':'C','Undo':'U'}),
+        ('Rectangle',{'Mode':'M','Length':'L','Width':'W','Undo':'U'}),
+        ('Circle',{'Mode':'M','Radius':'R','Diameter':'D','Circumference':'f','Area':'A','Orientation':'O','Point':'P','Curve':'C','OnCurve':'n','Undo':'U','Deformable':'b','History':'H','PointCount':'t','Degree':'e'}),
+        ('Ellipse',{'Mode':'M','Undo':'U','Curve':'C','OnCurve':'n','MarkFoci':'F','Deformable':'b','PointCount':'P','Degree':'D'})]:
+        command(name);underlined(words);key(QtCore.Qt.Key_Escape)
+    command('Polyline');command('0,0,0');command('M');underlined({'Line':'L','Arc':'A'});command('l')
+    check('subchoice L remains Mode and does not open Length','Mode=Line' in prompt() and not field().property('om9OptionPending'))
+    command('L');command('2cm');command('10,0,0');command()
+    check('shared numeric shorthand reaches native wire',len(doc.Objects)==1 and abs(doc.Objects[0].Shape.Length-20)<1e-7)
+    command('Circle');command('M');underlined({'Center':'C','2Point':'2','3Point':'3','Vertical':'V','Tangent':'T','AroundCurve':'A','FitPoints':'F'})
+    click_option('2Point');command('0,0,0');command('4,0,0')
+    check('full choice label still clicks native Circle',len(doc.Objects)==2 and abs(doc.Objects[-1].Shape.Edges[0].Curve.Radius-2)<1e-7)
+    command('Ellipse');command('M');underlined({'Center':'E','Corner':'C','Diameter':'D','Vertical':'V','FromFoci':'F','AroundCurve':'A'});command('c')
+    check('Ellipse Corner shortcut is distinct from Center','Mode=Corner' in prompt());key(QtCore.Qt.Key_Escape)
+    command('Sphere');underlined({'Center':'C','2Point':'2','3Point':'3','4Point':'4','Vertical':'V','AroundCurve':'A','FitPoints':'F','Tangent':'T'})
+    command('2');command('0,0,0');command('2')
+    check('Sphere numeric 2 remains diameter after shortcut 2',len(doc.Objects)==3 and abs(doc.Objects[-1].Shape.Volume-4*3.141592653589793/3)<1e-6)
+    command('Sphere');command('3');command('0,0,0');command('2,0,0');command('0,2,0')
+    check('Sphere supported three-point shortcut reaches native sphere',len(doc.Objects)==4 and doc.Objects[-1].Shape.isValid() and abs(doc.Objects[-1].Shape.Volume-4*3.141592653589793/3*2**1.5)<1e-6)
+    Gui.Selection.clearSelection();Gui.Selection.addSelection(doc.Objects[1]);command('Rebuild')
+    d=next(x for x in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9RebuildDialog') if x.isVisible())
+    underlined({'PointCount':'P','Degree':'D','DeleteInput':'I','Preview':'v'})
+    command('P');command('20');check('generic descriptor numeric shortcut updates Builder',d.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').value()==20)
+    command('I');check('generic descriptor toggle shortcut updates Builder','DeleteInput=No' in prompt());key(QtCore.Qt.Key_Escape)
+    profiles=[]
+    for z in (0,5):
+        p=doc.addObject('Part::Feature','Profile');p.Shape=Part.makeCircle(3,App.Vector(0,0,z));profiles.append(p)
+    doc.recompute();Gui.Selection.clearSelection()
+    for p in profiles:Gui.Selection.addSelection(doc.Name,p.Name)
+    Gui.runCommand('OM9_SurfaceLoft');settle();command()
+    d=next(x for x in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9SurfaceOptions') if x.isVisible())
+    underlined({'Style':'S','Closed':'C','SectionMode':'o','History':'H','DynamicPreview':'D','Preview':'v','Automatic':'u','Natural':'N'})
+    command('S');underlined({'Normal':'N','Straight Sections':'S','Loose':'L','Tight':'T','Uniform':'U','Developable':'D'});command('l')
+    check('Loft subchoice shorthand updates native Builder',d.findChild(QtWidgets.QComboBox,'OM9LoftStyle').currentIndex()==2)
+    command('O');underlined({'Do Not Simplify':'D','Rebuild':'b','Refit':'f'});command('b');command('12')
+    check('nested shortcut applies accepted parent and numeric child',d.findChild(QtWidgets.QComboBox,'OM9SectionMode').currentIndex()==1 and d.findChild(QtWidgets.QSpinBox,'OM9SectionPointCount').value()==12)
+    command('H');check('common shorthand keeps CMD Builder sync',d.findChild(QtWidgets.QCheckBox,'OM9SurfaceHistory').isChecked())
+    command();created=[o for o in doc.Objects if hasattr(o,'OM9FeatureId') and o.OM9FeatureId=='OM9-SURFACE-009']
+    check('Loft native result through shared shortcuts',len(created)==1 and created[0].Shape.isValid())
+    field().grab().save(str(out/'all-mnemonics.png'))
+
+QtCore.QTimer.singleShot(1800,lambda:execute(run))

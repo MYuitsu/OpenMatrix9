@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-10",
+  "scope": "Focused follow-up for bounded post-decode native NURBS, Mesh and PointCloud input-tree preflight; partial RCORE-01.T07. All P0 remains in progress.",
+  "source_fingerprints": {
+    "Gui/NativeInputTree.cpp": {
+      "sha256": "3a47989f7c44e5364ca19138157427ad920b9d3f23c3760294a6d27e92ccb268",
+      "bytes": 22642
+    },
+    "Gui/NativeInputTree.h": {
+      "sha256": "2303af98ff3611dd15bd86113507fdac4a1cccb4ee8a4a56cb43e03d17677f83",
+      "bytes": 938
+    },
+    "Gui/ThreeDmBrep.cpp": {
+      "sha256": "fa9e398870c24c1d71feadd5dae84f712a40800cd13077882716ae4f3907b0a0",
+      "bytes": 19447
+    },
+    "Gui/ThreeDmArchive.cpp": {
+      "sha256": "85930d1a9dbe2312bd7296b7a50e7b2ebd0ed1e8469040d9213910db39ecfeb7",
+      "bytes": 25092
+    },
+    "Gui/ThreeDmExplode.cpp": {
+      "sha256": "22323ed35935900acb44938dadeaa15527e9a083572f31b3377c239ca26dd00d",
+      "bytes": 23018
+    },
+    "Gui/ThreeDmMeshes.cpp": {
+      "sha256": "d6e29c98af000dccff55b613ab294594a0ba1a14ca051addf949466d88408edc",
+      "bytes": 1159
+    },
+    "Gui/ThreeDmPointCloud.cpp": {
+      "sha256": "73109fa2df59da5465e37feb3e3750a68ae2f9e6429f1589e985fffee47b92f0",
+      "bytes": 9816
+    },
+    "tests/native/rhino_core_native_input_tree.cpp": {
+      "sha256": "808ea651ba13767dc5ebd72da31544964aa5ff737ae33e0686323e52ff74d7dd",
+      "bytes": 43785
+    },
+    "tests/native/CMakeLists.txt": {
+      "sha256": "6d1d4a57f3244555363311d48821cc29c9ec473565935ef5c0e49f592261aeb2",
+      "bytes": 27609
+    },
+    "tests/rhino_core_native_input_tree_smoke.FCMacro": {
+      "sha256": "23949d3271813757a287a295b452d8ce5d22a09fba9b6bfa709ca3b30fa8a956",
+      "bytes": 4401
+    }
+  },
+  "validation": {
+    "rust": {
+      "command": "rtk cargo test --manifest-path H:/FreeCAD-src/Mod/OpenMatrix9/rust/Cargo.toml",
+      "passed": 572,
+      "failed": 0,
+      "suites": 73,
+      "result": "pass"
+    },
+    "native_input_tree": {
+      "target": "ThreeDmNativeInputTreeTests",
+      "checks": 92,
+      "failures": 0,
+      "result": "pass",
+      "fixture_results": "H:/FreeCAD-src/build/rcore-native/native-input-tree-results.json",
+      "red_reproduction": "H:/FreeCAD-src/build/rcore-native/native-input-tree-topology-index-red-20261010.json",
+      "covered_delta": [
+        "BRep vertex adjacency storage rejects before ON_Brep copy",
+        "Out-of-range BRep edge-to-trim references reject before any copy",
+        "Invalid copied BRep face-loop topology rejects before SolidOrientation",
+        "Deleted edge/trim tombstones match the pinned SDK's IsCorrupt back-pointer rejection",
+        "Malformed block mesh face index rejects before Explode Duplicate and ON_Mesh::IsValid",
+        "Malformed PointCloud capacity rejects before value traversal",
+        "Finite set and paired-NaN mesh curvature controls; partial-NaN and unmanaged N-gon rejection",
+        "Nonfinite PointCloud point/normal/intensity rejection, plus empty-source and malformed-source overlay controls",
+        "Existing valid archive Mesh and PointCloud adapters remain in use"
+      ]
+    },
+    "archive_staging": {
+      "red": {
+        "checks": 66,
+        "failures": 2,
+        "result": "fail as expected before production gate",
+        "file": "H:/FreeCAD-src/build/rcore-native/native-input-tree-results-verified-20261010.json",
+        "observed": [
+          "Invalid transformed block member reached archive.geometry.Duplicate",
+          "Invalid surface reached archive.surface.BrepForm"
+        ]
+      },
+      "green": {
+        "checks": 67,
+        "failures": 0,
+        "result": "pass",
+        "file": "H:/FreeCAD-src/build/rcore-native/native-input-tree-archive-signed-green-20261010.json",
+        "observed": [
+          "Invalid transformed block member rejects with the native basis error before Duplicate and GetNurbForm",
+          "Invalid surface rejects with the native basis error before BrepForm",
+          "Invalid tagged signed-placement BRep rejects before IsSolid/SolidOrientation"
+        ]
+      },
+      "related_ctests": {
+        "passed": 6,
+        "failed": 0,
+        "names": [
+          "OM9-FILE-012.CurveOnSurfaceArchive",
+          "RCORE-01.NativeInputTree",
+          "OM9-FILE-012.NativeTransform",
+          "OM9-FILE-012.Preservation",
+          "OM9-FILE-012.Archive",
+          "OM9-FILE-012.Blocks"
+        ],
+        "test_log": "H:/FreeCAD-src/build/rcore-native/Testing/Temporary/LastTest.log"
+      }
+    },
+    "freecad_shared_host": {
+      "checks": 21,
+      "failures": 0,
+      "process_exit_code": 0,
+      "host": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "plugin": "H:/FreeCAD-src/build/reusable-history-runtime/bin/OpenMatrix9Gui.pyd",
+      "plugin_sha256": "85f1ed567d3a68097cb264972b4bee109719560365182fbc0a680b25279fbff2",
+      "module_root": "H:/FreeCAD-src/build/reusable-history-runtime/Mod/OpenMatrix9",
+      "run_directory": "H:/FreeCAD-src/build/native-input-tree-mesh-cloud-current-plugin-20261010",
+      "results": "H:/FreeCAD-src/build/native-input-tree-mesh-cloud-current-plugin-20261010/results.json",
+      "launch_record": "H:/FreeCAD-src/build/native-input-tree-mesh-cloud-current-plugin-20261010/shared-host-launch.json"
+    },
+    "plugin_build": {
+      "script": "H:/FreeCAD-src/build/build-om9-plugin.ps1",
+      "plugin_cache": "H:/FreeCAD-src/build/openmatrix9-history-cage",
+      "shared_sdk": "H:/FreeCAD-src/build/relWithDebInfo",
+      "runtime": "H:/FreeCAD-src/build/reusable-history-runtime",
+      "scope": "OM9 plugin target only; no FreeCAD root reconfigure/build",
+      "result": "Plugin-only target built successfully against the shared SDK; NativeInputTree, ThreeDmMeshes and ThreeDmPointCloud rebuilt and OpenMatrix9Gui linked into the isolated runtime."
+    }
+  },
+  "explode_cage": {
+    "red": {
+      "checks": 82,
+      "failures": 1,
+      "result": "expected failure before finite-knot delta/domain-width check",
+      "failed_clause": "Explode cage rejects finite knot overflow before evaluation"
+    },
+    "green": {
+      "checks": 73,
+      "failures": 0,
+      "result": "pass",
+      "file": "H:/FreeCAD-src/build/rcore-native/native-input-tree-results.json",
+      "covered": [
+        "Exploded block curve rejects before Duplicate and GetNurbForm",
+        "Non-finite cage CV rejects before IsValid/IsoSurface",
+        "Finite extreme knot domain rejects before IsValid/IsoSurface",
+        "Cage point count and CV stride overflow reject before buffer access",
+        "Malformed archived Mesh indices and PointCloud capacities reject before copy or SDK validity"
+      ]
+    },
+    "positive_integration": {
+      "target": "OM9ThreeDmExplodeTest",
+      "result": "pass",
+      "run_output": "3DM Explode PASS; text contours available"
+    },
+    "related_ctests": {
+      "passed": 6,
+      "failed": 0,
+      "test_log": "H:/FreeCAD-src/build/rcore-native/Testing/Temporary/LastTest.log"
+    }
+  },
+  "reuse_audit": {
+    "line_polyline": "Existing OM9 command/session/controller and Part.makePolygon construction in Gui/CurveController.cpp are reused. No duplicate wire solver or geometry implementation was added.",
+    "converters": "Existing openNURBS/OCCT conversion paths and shared Rust NURBS basis validator remain authoritative."
+  },
+  "mesh_cloud_review": {
+    "result": "No code-level blocker in the bounded post-decode Mesh/PointCloud increment; the reviewer confirmed the added numeric branches and the current 92-check fixture plus six focused CTests.",
+    "scope_limit": "Does not assess ONX_Model::Read or decoder-time native allocations.",
+    "report": "docs/reviews/2026-10-10-native-input-tree-mesh-cloud-review.md"
+  },
+  "independent_review": {
+    "result": "approved for this bounded post-decode increment; no remaining actionable finding",
+    "closed_finding": "Finite adjacent cage knot deltas and active domain width can overflow despite finite knot values; both are now checked before IsValid/IsoSurface.",
+    "report": "docs/reviews/2026-10-10-native-input-tree-explode-cage-review.md"
+  },
+  "review_rulings": [
+    "Ruling: keep BRep vertex m_ei adjacency array envelope validation before copy — malformed or oversized adjacency must not reach an owning BRep copy — cost if wrong: a valid SDK topology variant that encodes adjacency differently could be rejected.",
+    "Ruling: validate every BRep edge-to-trim reference before authorizing a copy, then validate the independent orientation copy before SolidOrientation — pinned OpenNURBS 5 reads the paired trim in IsManifold without a range check — cost if wrong: malformed topology that the SDK intended to recover will be refused earlier.",
+    "Ruling: retain early rejection of DeleteEdge/DeleteTrim tombstones — the pinned SDK's IsCorrupt rejects cleared back-pointers before its later deleted-index checks, and the existing copy-plus-validation path rejects the same state — cost if wrong: a different SDK version that permits non-compacted BReps remains unsupported.",
+    "Ruling: validate supported archive member owners before Duplicate, surface BrepForm, and signed-placement orientation queries — the readArchive regressions observed these operations before the converter-only gate — cost if wrong: a valid but unlisted native owner class could be refused before its converter runs. The gate still begins after ONX_Model::Read.",
+    "Ruling: reject malformed NURBS cage counts, strides, knots and CV/weight values before Explode IsValid/IsoSurface — the pinned SDK does not check finite knot differences before evaluation — cost if wrong: invalid numeric cages are refused; raw ONX_Model::Read allocation remains outside this guard."
+  ],
+  "remaining_open": [
+    "Raw archive decoding and any native allocations inside ONX_Model::Read",
+    "Process-wide allocator and aggregate worker-memory instrumentation",
+    "Analytic, other cage-edit and remaining native input policies",
+    "Arbitrary custom native owner classes and broader concurrent lifetimes",
+    "Remaining RCORE-01.T07 clauses and all other P0 requirements"
+  ],
+  "artifacts": {
+    "report": "docs/validation/2026-10-10-rhino-core-native-input-tree.md",
+    "archive_stage_evidence": "docs/validation/2026-10-10-rhino-core-native-archive-stage.json",
+    "archive_stage_review": "docs/reviews/2026-10-10-native-input-tree-archive-stage-review.md",
+    "native_fixture": "H:/FreeCAD-src/build/rcore-native/native-input-tree-results.json",
+    "host_results": "H:/FreeCAD-src/build/native-input-tree-explode-final2-20261010/results.json",
+    "host_launch": "H:/FreeCAD-src/build/native-input-tree-explode-final2-20261010/shared-host-launch.json",
+    "explode_cage_evidence": "docs/validation/2026-10-10-rhino-core-native-explode-cage.json",
+    "explode_cage_review": "docs/reviews/2026-10-10-native-input-tree-explode-cage-review.md",
+    "mesh_cloud_evidence": "docs/validation/2026-10-10-rhino-core-native-mesh-cloud.json",
+    "mesh_cloud_review": "docs/reviews/2026-10-10-native-input-tree-mesh-cloud-review.md"
+  }
+}

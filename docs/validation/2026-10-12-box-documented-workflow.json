@@ -1,0 +1,430 @@
+{
+  "feature_id": "OM9-SOLID-012",
+  "scope": "Documented required Box method selection; strict edge endpoints; Center full dimensions; native callback prompt lifecycle",
+  "plugin": {
+    "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-runtime-20261012/bin/OpenMatrix9Gui.pyd",
+    "bytes": 13663232,
+    "sha256": "200bbfd573ea96562bcfcbebc1e836d877e31557c35106e48a8eebcb73ac0901"
+  },
+  "native_suites": 17,
+  "native_checks": 1195,
+  "rust_checks": 1042,
+  "rust_suites": 135,
+  "rust_log": {
+    "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/rust.log",
+    "bytes": 118042,
+    "sha256": "ece98438e9d8cd24076b4b452008e2fd6ea7d596d67b92952c33dc8c2f78f0ad"
+  },
+  "source": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/solid.rs",
+      "bytes": 56022,
+      "sha256": "ffb0c8774f009fdde1d389a754e9a8dbf65601ddb15e3ab4a58a8f8b4a712d7b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SolidController.cpp",
+      "bytes": 36829,
+      "sha256": "9d5f109f2c629ea9d70d9999c4971148af4796e4b6a6ffc61d31b70b52c8127e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/box_documented_workflow.rs",
+      "bytes": 3848,
+      "sha256": "7d486de5bf6dfe8cec977907917d3af9ffd5810d298fe8fb78ffcd782b6e4599"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/box_documented_workflow_smoke.FCMacro",
+      "bytes": 4876,
+      "sha256": "df72dc6689a0199bca0ffbe7d7959f7e6952a3b0773603f2236bf1b45858c3b5"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_solid_callback_smoke.FCMacro",
+      "bytes": 9890,
+      "sha256": "114f65bab1190b0455cd41040c460e5a1f658d59f5d0fb52d974d67b49ee7fa0"
+    }
+  ],
+  "native": [
+    {
+      "fixture": "rhino_core_solid_callback",
+      "passed": true,
+      "checks": 156,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\rhino_core_solid_callback-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/rhino_core_solid_callback-final04/results.json",
+        "bytes": 119393,
+        "sha256": "e5d8b61153de585ed253ddb7f3f0fc2bcd88931389f9379c60d2a7490381933a"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "rhino_core_solid_publication",
+      "passed": true,
+      "checks": 86,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\rhino_core_solid_publication-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/rhino_core_solid_publication-final04/results.json",
+        "bytes": 130337,
+        "sha256": "0b20c90bf72c1713d4e39cb26689a91d16e0029060f72232bb4a9c5aedf9d805"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "rhino_core_solid_construction",
+      "passed": true,
+      "checks": 67,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\rhino_core_solid_construction-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/rhino_core_solid_construction-final04/results.json",
+        "bytes": 22742,
+        "sha256": "1a8471d01ebb38edeaa0ef5639a18637791a9775c8c9b40cfab0a24ee5660bd2"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "box_documented_workflow",
+      "passed": true,
+      "checks": 31,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\box_documented_workflow-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/box_documented_workflow-final04/results.json",
+        "bytes": 6629,
+        "sha256": "1a1bda07c62f38d1bbdb9ea21c088e0b38eac764ae90de3afe2a0aebfbc7adf8"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "box_command_options",
+      "passed": true,
+      "checks": 26,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\box_command_options-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/box_command_options-final04/results.json",
+        "bytes": 4486,
+        "sha256": "062bc984a7718875650fcd8f470c3c2bbb30e6da3a5697e05b71a5328f8a2293"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "box_command_usability",
+      "passed": true,
+      "checks": 17,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\box_command_usability-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/box_command_usability-final04/results.json",
+        "bytes": 4875,
+        "sha256": "d0226db2220d05c5c79d13081df1af52e9dd7ed136ba91e342a48ed8ae2ad2e6"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "box_command_history",
+      "passed": true,
+      "checks": 11,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\box_command_history-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/box_command_history-final04/results.json",
+        "bytes": 2832,
+        "sha256": "b1b23da312a4e86d99aaf031666c3d699af3e771eb81cfa2660160935bca75d7"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "solid_commands",
+      "passed": true,
+      "checks": 71,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\solid_commands-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/solid_commands-final04/results.json",
+        "bytes": 7995,
+        "sha256": "d67fd3e6282844edfb730507f7024ad83fce0293b2e5afd60d4e71e5ee516410"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "solid_options",
+      "passed": true,
+      "checks": 252,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\solid_options-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/solid_options-final04/results.json",
+        "bytes": 40536,
+        "sha256": "efc2e302c0f5b68a3189c632e31a43ed5606cf877c457244df7376f6b695305d"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "rhino_core_native_solid_binding",
+      "passed": true,
+      "checks": 88,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\rhino_core_native_solid_binding-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/rhino_core_native_solid_binding-final04/results.json",
+        "bytes": 7655,
+        "sha256": "1be7cd03072790456391344e8d7da203780afd41f76d808033c6231540448d69"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "command_mnemonics",
+      "passed": true,
+      "checks": 181,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\command_mnemonics-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/command_mnemonics-final04/results.json",
+        "bytes": 22670,
+        "sha256": "f2339c0e8db7f34f0eca0c0b69fd8373c13a1555c95349d386882f63e8d9c8a6"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "builder_command_options",
+      "passed": true,
+      "checks": 25,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\builder_command_options-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/builder_command_options-final04/results.json",
+        "bytes": 4112,
+        "sha256": "67ba2bd1a5220c20539ac27ed254a6df8c5f0f78c32779f11de25feab4a908d4"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "rebuild_command_options",
+      "passed": true,
+      "checks": 15,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\rebuild_command_options-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/rebuild_command_options-final04/results.json",
+        "bytes": 3234,
+        "sha256": "a2aff735f8f385591bb4a2c44b686ef9140773e629e15bb59406eba454be2231"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "command_line_options",
+      "passed": true,
+      "checks": 26,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\command_line_options-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/command_line_options-final04/results.json",
+        "bytes": 4091,
+        "sha256": "34bb208a2259488f5c430384c5817aea72c1e23301a8aca09629822ce0e5abef"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "core_invalid_cplane_tools",
+      "passed": true,
+      "checks": 14,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\core_invalid_cplane_tools-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/core_invalid_cplane_tools-final04/results.json",
+        "bytes": 1778,
+        "sha256": "086959e06bc7ec801bd35aecc2574d7967a0c9ccc20465b7bd4d2695f0cc942f"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "core_extended_input",
+      "passed": true,
+      "checks": 58,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\core_extended_input-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/core_extended_input-final04/results.json",
+        "bytes": 7894,
+        "sha256": "d205ab72a4819badb3515f2cdbafdd9b184d66073e9e78f10e4b4281af4aa9c1"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    {
+      "fixture": "layer_panel",
+      "passed": true,
+      "checks": 71,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-20261012\\layer_panel-final04",
+      "results": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/layer_panel-final04/results.json",
+        "bytes": 8767,
+        "sha256": "a509dc84b770fc51db7cdfe350aece1f7cf734d2d3bcc2e75a6c02633e38f06c"
+      },
+      "native_app": {
+        "path": "C:\\Users\\nguye\\.codex\\om9-native-tests\\atomic-host-app-lookup299-20261012\\FreeCADApp.dll",
+        "sha256": "c21b3ab49bd7dbd8230a4349cac91af1992249bad53e469e415cf0da76ba96fb",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "native_gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    }
+  ],
+  "review": "Scoped read-only review; callback non-solid prompt guard corrected",
+  "excluded": [
+    "red: old cbe plugin failed mandatory method selection",
+    "core_extended_input-green01: obsolete Center display text; green02 passes",
+    "rhino_core_solid_callback-green01: missing fault environment, no fixture ran",
+    "rhino_core_solid_callback-green02: two real replacement-session failures, bridge corrected and final04 rerun",
+    "rhino_core_solid_callback-final01: wrong Line native command ID in added fixture",
+    "rhino_core_solid_callback-final02/final03: added Line fixture ordered endpoints incorrectly; corrected without changing geometry or Undo expectations"
+  ],
+  "manual": {
+    "ready": true,
+    "visible": true,
+    "focused": true,
+    "document": "OM9DocumentedBoxTest",
+    "label": "OM9 — Box theo tài liệu",
+    "objects": 1,
+    "rebuild_sample": "RebuildSample",
+    "pid": 81336,
+    "prompt": "Box. Choose a method ( Diagonal 3Point Vertical Center ): ",
+    "feature": "OM9-SOLID-012",
+    "module": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-documented-runtime-20261012\\bin\\OpenMatrix9Gui.pyd",
+    "module_sha256": "200bbfd573ea96562bcfcbebc1e836d877e31557c35106e48a8eebcb73ac0901",
+    "receipt": {
+      "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-documented-20261012/manual01/manual-ready.json",
+      "sha256": "87c38be2edbc0823b8c2912ed5b005755ab883db0329a9eb2cbe6ebd6c67acaa"
+    }
+  },
+  "business_skill_update": {
+    "status": "updated_and_synchronized",
+    "authorized_by": "User reply: Có, cập nhật skill",
+    "updated_at": "2026-10-12T16:17:55+07:00",
+    "skill": "openmatrix9-feature-port",
+    "source": {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/skills/openmatrix9-feature-port/references/solid-box-sphere-contract.md",
+      "bytes": 9665,
+      "sha256": "955f1e61454553da021b6bd15f99a654dd9a0eb5debb4def438399697e4efcf9"
+    },
+    "installed": {
+      "path": "C:/Users/nguye/.codex/skills/openmatrix9-feature-port/references/solid-box-sphere-contract.md",
+      "bytes": 9665,
+      "sha256": "955f1e61454553da021b6bd15f99a654dd9a0eb5debb4def438399697e4efcf9"
+    }
+  }
+}

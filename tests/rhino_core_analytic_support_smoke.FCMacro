@@ -1,0 +1,133 @@
+"""Read-only analytic support snapshot and independent sampled native oracles."""
+import json,math,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[],'descriptors':{}}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def point(data,u,v=0):
+    t=data['analytic_type'];p=data['parameters'];a=data['axes_xyz'];o=data['origin_xyz']
+    if t=='line':coeff=[u,0,0]
+    elif t=='circle':coeff=[p['radius']*math.cos(u),p['radius']*math.sin(u),0]
+    elif t=='ellipse':coeff=[p['major_radius']*math.cos(u),p['minor_radius']*math.sin(u),0]
+    elif t=='hyperbola':coeff=[p['major_radius']*math.cosh(u),p['minor_radius']*math.sinh(u),0]
+    elif t=='parabola':coeff=[u*u/(4*p['focal']),u,0]
+    elif t=='plane':coeff=[u,v,0]
+    elif t=='cylinder':coeff=[p['radius']*math.cos(u),p['radius']*math.sin(u),v]
+    elif t=='cone':
+        radius=p['reference_radius']+v*math.sin(p['semi_angle'])
+        coeff=[radius*math.cos(u),radius*math.sin(u),v*math.cos(p['semi_angle'])]
+    elif t=='sphere':coeff=[p['radius']*math.cos(v)*math.cos(u),p['radius']*math.cos(v)*math.sin(u),p['radius']*math.sin(v)]
+    elif t=='torus':
+        radius=p['major_radius']+p['minor_radius']*math.cos(v)
+        coeff=[radius*math.cos(u),radius*math.sin(u),p['minor_radius']*math.sin(v)]
+    return [o[i]+sum(a[j][i]*coeff[j] for j in range(3)) for i in range(3)]
+def transform(matrix,p):return [sum(matrix[r][c]*p[c] for c in range(3))+matrix[r][3] for r in range(3)]
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('AnalyticSupports');doc.UndoMode=1
+        def add(name,shape):
+            obj=doc.addObject('Part::Feature',name);obj.Shape=shape;return obj
+        line=add('Line',Part.makeLine(App.Vector(1,2,3),App.Vector(4,6,3)))
+        circle=add('Circle',Part.makeCircle(10,App.Vector(2,3,4),App.Vector(0,0,1),30,150))
+        ellipse=Part.Ellipse();ellipse.MajorRadius=5;ellipse.MinorRadius=2
+        hyperbola=Part.Hyperbola();hyperbola.MajorRadius=3;hyperbola.MinorRadius=2
+        parabola=Part.Parabola();parabola.Focal=2
+        curves=[line,circle,add('Ellipse',ellipse.toShape()),add('Hyperbola',hyperbola.toShape(-1,1)),add('Parabola',parabola.toShape(-2,2))]
+        def surface(shape,cls):return next(f for f in shape.Faces if isinstance(f.Surface,cls))
+        faces=[add('Plane',Part.makePlane(10,7)),add('Cylinder',surface(Part.makeCylinder(4,7),Part.Cylinder)),
+               add('Cone',surface(Part.makeCone(4,2,7),Part.Cone)),add('Sphere',Part.makeSphere(3).Faces[0]),
+               add('Torus',Part.makeTorus(8,2).Faces[0])]
+        doc.recompute()
+        for obj in curves+faces:
+            raw=obj.Shape.exportBrepToString();history=(doc.UndoCount,doc.RedoCount)
+            row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));report['descriptors'][obj.Name]=row
+            data=row.get('geometry_data')
+            check(obj.Name+' has owned typed analytic support',isinstance(data,dict) and data.get('analytic_type')==obj.Name.lower() and row['geometry_data_status']=='copied_validated_analytic')
+            check(obj.Name+' keeps analytic form without implicit NURBS conversion',row['form']=='analytic' and row['basis'] is None and data['parameter_convention']=='occt_native')
+            if obj in curves:
+                edge=obj.Shape.Edges[0];lo,hi=edge.FirstParameter,edge.LastParameter
+                for f in [.2,.5,.8]:
+                    u=lo+(hi-lo)*f;q=edge.Curve.value(u);expected=transform(row['brep_tool_location'],point(data,u))
+                    check(obj.Name+' curve samples match native parameters',sum((expected[i]-[q.x,q.y,q.z][i])**2 for i in range(3))<1e-18)
+            else:
+                face=obj.Shape.Faces[0];u0,u1,v0,v1=face.ParameterRange
+                for f in [.2,.5,.8]:
+                    u=u0+(u1-u0)*f;v=v0+(v1-v0)*(.8-f/2);q=face.Surface.value(u,v)
+                    expected=transform(row['brep_tool_location'],point(data,u,v))
+                    check(obj.Name+' surface samples match native parameters',sum((expected[i]-[q.x,q.y,q.z][i])**2 for i in range(3))<1e-18)
+                check(obj.Name+' common face reuses the same support',row['topology']['faces'][0]['geometry_data']==data)
+                for loop in row['topology']['faces'][0]['loops']:
+                    for use in loop['edge_uses']:
+                        pc=use['pcurve'];support=pc['geometry_data']
+                        if support and support['kind']=='analytic_curve':
+                            parameter=pc['domain'][0 if use['orientation']=='forward' else 1]
+                            uv=point(support,parameter)
+                            check(obj.Name+' analytic UV pcurve preserves parameter direction',sum((uv[i]-pc['uv_start'][i])**2 for i in range(2))<1e-18 and uv[2]==0)
+            check(obj.Name+' preserves exact source and Undo/Redo',obj.Shape.exportBrepToString()==raw and history==(doc.UndoCount,doc.RedoCount))
+        located=add('LocatedCylinder',faces[1].Shape);located.Placement=App.Placement(App.Vector(13,-4,6),App.Rotation(App.Vector(0,1,0),37))
+        reverse=Part.Shape(located.Shape);reverse.reverse();reversed_face=add('ReversedCylinder',reverse)
+        doc.recompute()
+        for obj in [located,reversed_face]:
+            raw=obj.Shape.exportBrepToString();row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));report['descriptors'][obj.Name]=row
+            data=row['geometry_data'];u,v=1.2,3.1;q=obj.Shape.Surface.value(u,v)
+            expected=transform(row['brep_tool_location'],point(data,u,v))
+            check(obj.Name+' native location applied once in sampled oracle',sum((expected[i]-[q.x,q.y,q.z][i])**2 for i in range(3))<1e-18)
+            check(obj.Name+' retains local support instead of baking location',data==report['descriptors']['Cylinder']['geometry_data'])
+            check(obj.Name+' preserves source BRep',obj.Shape.exportBrepToString()==raw)
+        check('reversed analytic face keeps separate orientation',report['descriptors']['ReversedCylinder']['geometry_orientation']=='reversed')
+        # Author both senses of all four UV conics on the exact same plane.
+        # A wrong Axis()/Position() extraction or normalized Y axis changes
+        # these sampled UV values even when the 3D boundary looks unchanged.
+        plane=Part.Plane();plane.rotate(App.Placement(App.Vector(3,5,7),App.Rotation(App.Vector(1,2,3),29)))
+        for kind,cls,bounds in [('circle',Part.Geom2d.Circle2d,(.2,2.2)),
+                                ('ellipse',Part.Geom2d.Ellipse2d,(.2,2.2)),
+                                ('hyperbola',Part.Geom2d.Hyperbola2d,(-.7,.7)),
+                                ('parabola',Part.Geom2d.Parabola2d,(-1,1))]:
+            for sense in [1,-1]:
+                conic=cls();conic.Location=App.Base.Vector2d(4,6);conic.XAxis=App.Base.Vector2d(.6,.8)
+                if sense<0:conic.reverse()
+                edge=conic.toShape(plane,*bounds)
+                wire=Part.Wire([edge,Part.makeLine(edge.Vertexes[-1].Point,edge.Vertexes[0].Point)])
+                obj=add('UV'+kind+('Direct' if sense>0 else 'Indirect'),Part.Face(plane,wire));doc.recompute()
+                raw=obj.Shape.exportBrepToString();history=(doc.UndoCount,doc.RedoCount)
+                row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));report['descriptors'][obj.Name]=row
+                candidates=[use['pcurve'] for loop in row['topology']['faces'][0]['loops'] for use in loop['edge_uses']
+                            if use['pcurve']['geometry_data'] and use['pcurve']['geometry_data'].get('analytic_type')==kind]
+                check(obj.Name+' has exactly one native conic pcurve',len(candidates)==1)
+                pc=candidates[0];data=pc['geometry_data']
+                check(obj.Name+' distinguishes UV sense from embedded XYZ frame',data['uv_sense']==sense and data['frame_handedness']==1)
+                check(obj.Name+' retains noncanonical UV origin and axes',data['origin_xyz']==[4,6,0] and abs(data['axes_xyz'][0][0]-.6)<1e-12 and abs(data['axes_xyz'][0][1]-.8)<1e-12)
+                for f in [.2,.5,.8]:
+                    parameter=pc['domain'][0]+f*(pc['domain'][1]-pc['domain'][0]);q=conic.value(parameter);uv=point(data,parameter)
+                    check(obj.Name+' sampled UV parameters match authored native curve',sum((uv[i]-[q.x,q.y][i])**2 for i in range(2))<1e-18 and uv[2]==0)
+                check(obj.Name+' preserves source and Undo/Redo',obj.Shape.exportBrepToString()==raw and history==(doc.UndoCount,doc.RedoCount))
+        # Reflect the supporting geometry itself, separately from reversing a
+        # TopoDS face. This creates real indirect native analytic surface frames.
+        for source in faces:
+            support=source.Shape.Surface;matrix=App.Matrix();matrix.A22=-1;support.transform(matrix)
+            obj=add('Indirect'+source.Name,support.toShape(*source.Shape.ParameterRange));doc.recompute()
+            raw=obj.Shape.exportBrepToString();history=(doc.UndoCount,doc.RedoCount)
+            row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));report['descriptors'][obj.Name]=row;data=row['geometry_data']
+            check(obj.Name+' native analytic support has indirect frame',data['frame_handedness']==-1 and data['uv_sense'] is None)
+            u0,u1,v0,v1=obj.Shape.ParameterRange
+            for f in [.2,.5,.8]:
+                u=u0+(u1-u0)*f;v=v0+(v1-v0)*(.8-f/2);q=obj.Shape.Surface.value(u,v)
+                expected=transform(row['brep_tool_location'],point(data,u,v))
+                check(obj.Name+' sampled indirect surface matches native parameters',sum((expected[i]-[q.x,q.y,q.z][i])**2 for i in range(3))<1e-18)
+            check(obj.Name+' preserves source and Undo/Redo',obj.Shape.exportBrepToString()==raw and history==(doc.UndoCount,doc.RedoCount))
+        detached=json.dumps(report['descriptors'],sort_keys=True);line.Shape=Part.makeBox(1,2,3);doc.recompute();App.closeDocument(doc.Name)
+        check('analytic snapshots survive replacement and close',json.dumps(report['descriptors'],sort_keys=True)==detached)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

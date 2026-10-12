@@ -1,0 +1,206 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Solved Builder output and slot admission must precede document mutation.
+
+Opening a transaction before solving the last output consumes existing Redo
+even when abort restores every object. Each case checks the actual Redo action,
+source BReps, durable records and slot ownership on the native host.
+"""
+import json, os, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part, OpenMatrix9Gui as OM
+from PySide6 import QtCore
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'module': OM.__file__, 'checks': [], 'diagnostics': []}
+
+
+def check(name, value):
+    report['checks'].append(dict(name=name, passed=bool(value)))
+
+
+def recipe(scale=1):
+    return json.dumps(dict(schema=1, evaluator='om9.affine-template', version=1,
+                           settings={}, scale=[scale, 1, 1]))
+
+
+def gem(d, name, width=1):
+    obj = d.addObject('Part::Feature', name)
+    obj.Shape = Part.makeBox(width, 2, 4)
+    obj.addProperty('App::PropertyString', 'OM9GemShape')
+    obj.OM9GemShape = 'round'
+    return obj
+
+
+def baseline(name):
+    d = App.newDocument('BuilderOutput' + name)
+    d.UndoMode = 1
+    source = gem(d, 'Gem')
+    seed = d.addObject('Part::Feature', 'FiniteSeed')
+    basis = Part.BSplineCurve()
+    basis.buildFromPolesMultsKnots([App.Vector(0, 0, 0), App.Vector(1e149, 1, 1)],
+                                  [2, 2], [0., 1.], False, 1)
+    seed.Shape = basis.toShape()
+    seed.Visibility = False
+    witness = d.addObject('App::FeaturePython', 'Witness')
+    d.recompute()
+    check(name + ' native seed is valid and below existing basis budget',
+          seed.Shape.isValid() and abs(seed.Shape.Edges[0].Curve.getPoles()[-1].x / 1e149 - 1) < 1e-14)
+    return d, source, seed, witness
+
+
+def snapshot(d):
+    rows = []
+    for obj in d.Objects:
+        rows.append((obj.Name,
+                     obj.Shape.exportBrepToString() if 'Shape' in obj.PropertiesList else None,
+                     obj.Templates.exportBrepToString() if 'Templates' in obj.PropertiesList else None,
+                     getattr(obj, 'Parameters', None), repr(getattr(obj, 'OutputNames', None)),
+                     getattr(getattr(obj, 'SourceGem', None), 'Name', None),
+                     getattr(getattr(obj, 'ParentRecord', None), 'Name', None),
+                     getattr(obj, 'Recorded', None)))
+    return tuple(rows), d.UndoCount, d.RedoCount
+
+
+def rejected(name, d, witness, call):
+    d.openTransaction('Redo witness')
+    witness.Label = 'Executable Redo'
+    d.commitTransaction()
+    d.undo()
+    before = snapshot(d)
+    message = ''
+    did_reject = False
+    try:
+        call()
+    except Exception as error:
+        message = str(error)
+        did_reject = True
+    after = snapshot(d)
+    report['diagnostics'].append(dict(case=name, text=message, rejected=did_reject,
+                                     objects_unchanged=before[0] == after[0],
+                                     undo_before=before[1], undo_after=after[1],
+                                     redo_before=before[2], redo_after=after[2]))
+    check(name + ' rejects with typed Builder context', did_reject and 'Builder' in message
+          and any(code in message for code in ('InvalidBasis', 'NonFiniteGeometry', 'StaleGeometry')))
+    check(name + ' preserves all source geometry records and links', before[0] == after[0])
+    check(name + ' preserves Undo and Redo counts', before[1:] == after[1:])
+    if d.RedoCount:
+        d.redo()
+    check(name + ' preserves executable Redo', witness.Label == 'Executable Redo')
+
+
+def create_case():
+    d, source, seed, witness = baseline('Create')
+    rejected('Create solved output', d, witness,
+             lambda: OM.createBuilderRecord(source, 'OM9-SETTING-001', recipe(1e9), [seed]))
+    App.closeDocument(d.Name)
+
+
+def restore_case():
+    d, source, seed, witness = baseline('Restore')
+    record = OM.createBuilderRecord(source, 'OM9-SETTING-001', recipe(), [seed])
+    check('Restore working recipe produces valid native output',
+          d.getObject(record.OutputNames[0]).Shape.isValid())
+    d.openTransaction('Persist failing recipe without its output')
+    d.removeObject(record.OutputNames[0])
+    record.Parameters = recipe(1e9)
+    d.recompute()
+    d.commitTransaction()
+    check('Restore fixture retains failing recipe and missing output',
+          record.Parameters == recipe(1e9) and d.getObject(record.OutputNames[0]) is None)
+    rejected('Restore solved output', d, witness, lambda: OM.restoreBuilderOutputs(record))
+    record.Parameters = recipe()
+    child = OM.restoreBuilderOutputs(record)[0]
+    check('Restore repair uses original native evaluator and slot',
+          child.Shape.isValid() and child.ParentRecord == record
+          and abs(child.Shape.Edges[0].Curve.getPoles()[-1].x / 1e149 - 1) < 1e-14)
+    App.closeDocument(d.Name)
+
+
+def match_case():
+    d, source, seed, witness = baseline('Match')
+    record = OM.createBuilderRecord(source, 'OM9-SETTING-001', recipe(), [seed], True)
+    d.openTransaction('Match targets')
+    good = gem(d, 'FirstTarget', 2)
+    bad = gem(d, 'LastTarget', 1e9)
+    d.recompute()
+    d.commitTransaction()
+    rejected('Match last target solved output', d, witness,
+             lambda: OM.matchBuilderAttributes(source, [good, bad]))
+    d.openTransaction('Repair target')
+    bad.Shape = Part.makeBox(3, 2, 4)
+    d.commitTransaction()
+    before_undo = d.UndoCount
+    made = OM.matchBuilderAttributes(source, [good, bad])
+    children = [d.getObject(r.OutputNames[0]) for r in made]
+    check('Match repaired batch commits every output in one transaction',
+          len(made) == 2 and all(c.Shape.isValid() for c in children)
+          and all(c.ParentRecord == r for c, r in zip(children, made))
+          and d.UndoCount == before_undo + 1
+          and abs(children[0].Shape.Edges[0].Curve.getPoles()[-1].x / 1e149 - 2) < 1e-13
+          and abs(children[1].Shape.Edges[0].Curve.getPoles()[-1].x / 1e149 - 3) < 1e-13)
+    evidence=json.loads(children[1].OM9GeometryResult)
+    parameters=evidence['conversion_reports'][0]['parameter_map']
+    check('Large native query failures are explicit without certifying a parameter map',
+          parameters['recorded_queries_complete'] is False
+          and bool(parameters['unavailable_queries']) and parameters['global_mapping'] is None
+          and any(row.get('error')=='KernelFailure'
+                  and row.get('operation')=='NativeBuilder.ParameterQuery'
+                  for row in evidence['diagnostics'])
+          and evidence['conversion_reports'][0]['exactness']=='sampled_only')
+    made_names = [obj.Name for obj in made + children]
+    d.undo()
+    check('Match one Undo removes the complete prepared batch',
+          all(d.getObject(name) is None for name in made_names)
+          and d.UndoCount == before_undo and d.getObject(record.Name) == record)
+    d.redo()
+    restored = [d.getObject(name) for name in made_names]
+    check('Match one Redo restores the complete native batch',
+          all(obj is not None for obj in restored)
+          and all(obj.Shape.isValid() for obj in restored[2:]))
+    bad.Shape = Part.makeBox(4, 2, 4)
+    d.recompute()
+    last = d.getObject(made_names[3])
+    check('Prepared publication expires before later History recompute',
+          last.Recorded and last.ParentRecord == d.getObject(made_names[1])
+          and abs(last.Shape.Edges[0].Curve.getPoles()[-1].x / 1e149 - 4) < 1e-13)
+    App.closeDocument(d.Name)
+
+
+def occupied_case():
+    d, source, seed, witness = baseline('Occupied')
+    second = d.addObject('Part::Feature', 'SecondSeed')
+    second.Shape = Part.makeBox(1, 1, 1)
+    record = OM.createBuilderRecord(source, 'OM9-SETTING-001', recipe(), [seed, second])
+    first, slot = record.OutputNames
+    d.openTransaction('Replace output with unrelated object')
+    d.removeObject(first)
+    d.removeObject(slot)
+    alien = d.addObject('Part::Feature', slot)
+    alien.Shape = Part.makeBox(1, 1, 1)
+    d.recompute()
+    d.commitTransaction()
+    check('Occupied slot fixture has missing first slot and occupied last slot',
+          alien.Name == slot and d.getObject(first) is None)
+    rejected('Restore occupied slot', d, witness, lambda: OM.restoreBuilderOutputs(record))
+    App.closeDocument(d.Name)
+
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        create_case()
+        restore_case()
+        match_case()
+        occupied_case()
+        report['ok'] = all(c['passed'] for c in report['checks'])
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        (out / 'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+
+QtCore.QTimer.singleShot(1200, run)

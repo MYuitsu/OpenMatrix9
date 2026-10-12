@@ -1,0 +1,34 @@
+"""Independent cold FCStd restore of Solid numerical input evidence."""
+import json,math,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+    try:
+        check('cold host begins without any loaded model',not App.listDocuments())
+        root=Path(os.environ['OM9_SOLID_CONSTRUCTION_ARCHIVE_DIR'])
+        warm=json.loads((root/'results.json').read_text())
+        expected={o['case']:o for o in warm['observations'] if 'construction' in o}
+        import Part,OpenMatrix9Gui as OM
+        report['module']=OM.__file__
+        for mode,kind,volume in [('BoxCenter','Box',192.),('SphereCenter','Sphere',32*math.pi/3),('AroundCurve','Sphere',32*math.pi/3),('FitPoints','Sphere',4*math.pi/3),('4Point','Sphere',4*math.pi/3)]:
+            doc=App.openDocument(str(root/(mode+'.FCStd')));obj=doc.getObject(kind)
+            raw=getattr(obj,'OM9SolidConstruction','');units=getattr(obj,'OM9UnitContext','')
+            value=json.loads(raw) if raw else {};context=units
+            check(mode+' native shape retains independent expected volume',obj is not None and obj.Shape.isValid() and obj.Shape.isClosed() and abs(obj.Shape.Volume-volume)<1e-7)
+            check(mode+' cold construction and units match saved independent evidence',bool(value) and value==expected[mode]['construction'] and context==expected[mode]['unit_context'])
+            check(mode+' restored metadata is independent of new process generation',value.get('phase')==6 and int(value.get('generation','0'))>0 and value.get('lifetime')=='immutable_construction_input_evidence_not_current_validity')
+            if mode=='4Point':points=[[1,0,0],[0,1,0],[-1,0,0],[0,0,1]]
+            elif mode=='AroundCurve':points=[[0,0,0],[2.5,0,0]]
+            elif mode=='FitPoints':points=[[1,0,0],[0,1,0],[-1,0,0]]
+            else:points=[[10,20,30]] if kind=='Box' else [[1,2,3]]
+            check(mode+' points reduced by solver are still present',value.get('accepted_points')==points)
+            report['observations'].append(dict(case=mode,construction=value,units=context,volume=obj.Shape.Volume));App.closeDocument(doc.Name)
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

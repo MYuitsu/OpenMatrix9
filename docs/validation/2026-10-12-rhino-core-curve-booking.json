@@ -1,0 +1,2389 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-curve-booking-20261012",
+  "status": "in_progress",
+  "updated_at": "2026-10-12T01:07:44+07:00",
+  "scope": "Curve native booking identity and premature close protection; full RCORE-01 retained",
+  "production_sources": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCurvePublication.h",
+      "bytes": 1521,
+      "sha256": "195085ccde5e5a9cd756c482c4d769904f68e6b3589dba4a5114ea684133058f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCurvePublication.cpp",
+      "bytes": 11625,
+      "sha256": "c3adef5005a9f23c03f1b10212c0d3e0cd2a9ace058c00dc416385e279326391"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveController.cpp",
+      "bytes": 39023,
+      "sha256": "14e4adf33f036e6580c2a0e6a6798b180386e35d08c9041df7da6aa1fdf3125d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveEllipse.cpp",
+      "bytes": 13646,
+      "sha256": "1eb12bcc97eb271afdbef1a2482678604360c84e9beb114911a0761da664efee"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_ffi.rs",
+      "bytes": 26513,
+      "sha256": "4e018b2db9011e1186964e86a38a8e148f61244d0eb003c3a3b7287d98ba92c0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_booking_callback_smoke.FCMacro",
+      "bytes": 6744,
+      "sha256": "a1ba273fee7b88d46ed711a955fb24c7ac9acdd1869ce3846ba0a22e161c4f74"
+    }
+  ],
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+    "bytes": 16420352,
+    "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+  },
+  "selected_app": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "probe": {
+    "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+    "bytes": 50688,
+    "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+  },
+  "shared_sdk_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "current": [
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011",
+      "fixture": "rhino_core_curve_result_smoke.FCMacro",
+      "checks": 54,
+      "passed": 54,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 34156,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/results.json",
+          "bytes": 352140,
+          "sha256": "678b0c36f462756c8238139603699a98475b0cade1bbd3eda9b38ee03c3ab818"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 594,
+          "sha256": "24bda65d35ee17011246b0c7543f9707bb1ee710cd4d152182a35aea84d145b2"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5427,
+          "sha256": "1aa7b6815d6cce213cedf7d35bf9559d8a482cc51662bd003b57917b5e3acc9d"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/host-stderr.log",
+          "bytes": 9582,
+          "sha256": "d066c83458bba8e301371da4efc21149478772f8f8b1731580f44abc9916abe2"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/user.cfg",
+          "bytes": 18056,
+          "sha256": "2d86474f3856fbdbe258d8ae9ce86741513a8f5a388671fcb06eaefd227df5cf"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2827,
+          "sha256": "7bfee88c201eb8f86930db8cb65374297a392c950ed265705d0b9af124c9329d"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011",
+      "fixture": "rhino_core_curve_result_native_smoke.FCMacro",
+      "checks": 33,
+      "passed": 33,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 28684,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/results.json",
+          "bytes": 457785,
+          "sha256": "c0386ed1a7769fa8f3b2c219626fb6353dce74eea6f5c0609277797bce5fba4e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 601,
+          "sha256": "ef602d58da48a1a072ed3c1cd94bbd1a7e324963857f511fedd9b670f638356f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 7802,
+          "sha256": "ca3e389248e45d35584fe3dbe8c58b921a5b6c746d6bd7cbb5423b4ca3647b5e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/host-stderr.log",
+          "bytes": 7145,
+          "sha256": "184b98ec23381cfd6c8cc1d113b66ebd05e4c804c4b19e2314b469a00550dc16"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/user.cfg",
+          "bytes": 18194,
+          "sha256": "b6080546a38a183ed8d2f6f56fc850f1b13cbb4bb6400552eb3a22ff92b7ebd8"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2834,
+          "sha256": "5cd103e13c9c56d685aa2228e47633c239ed3db2b4d5c2ab59975d876de4438e"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-cold56-offscreen-20261011",
+      "fixture": "rhino_core_curve_result_cold_smoke.FCMacro",
+      "checks": 58,
+      "passed": 58,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 64472,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-cold56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-cold56-offscreen-20261011/results.json",
+          "bytes": 173227,
+          "sha256": "fa59a6f1f78709ee7f21f8727be566aa22f6aadc02349afd3e5540c48247d1f5"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-cold56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 593,
+          "sha256": "ef6e6e66ff84295963c1dfb5f840fe36f7cbd1243d399062ae5eb572f674df19"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-cold56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-cold56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-cold56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5039,
+          "sha256": "c7d059dd6b55de1a0abe9a8e6af7b6a9257c6361c8064bc7a46fa52eb69e1597"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-cold56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-cold56-offscreen-20261011/host-stderr.log",
+          "bytes": 3833,
+          "sha256": "cf7be619dd998b10c0b9023e35c15c0ad16e491421f3d2dfe6772b9111454902"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-cold56-offscreen-20261011/user.cfg",
+          "bytes": 17437,
+          "sha256": "a747ecd17c94a8f40bd1785cb2b1159d7a3ff119196b8db2d22bfa70b3af5bdb"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-cold56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2826,
+          "sha256": "4db87ee1114987d51190ee6d4b034d63905310bfd7bb97b6b19c12274be3d274"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-capture-error-green56-offscreen-20261011",
+      "fixture": "rhino_core_curve_native_capture_error_smoke.FCMacro",
+      "checks": 12,
+      "passed": 12,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 52744,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-capture-error-green56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-capture-error-green56-offscreen-20261011/results.json",
+          "bytes": 69525,
+          "sha256": "d9d11d7997723fecb94d83f7d03ffa8b64632c4ebc3196071280041bf86f7c77"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-capture-error-green56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 608,
+          "sha256": "8c0c51023b61969cf7065bc33f484b3b247b5919c29a549f08bc70a1108c0f59"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-capture-error-green56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-capture-error-green56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-capture-error-green56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 4066,
+          "sha256": "a6d8b3addb45d09582d19455050964122f30c32d3519e340038350c161b017be"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-capture-error-green56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-capture-error-green56-offscreen-20261011/host-stderr.log",
+          "bytes": 4452,
+          "sha256": "c36271bdcf471533cdcc9064346e0cf3124d84c65a20624f4afcaa4e7e384f9b"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-capture-error-green56-offscreen-20261011/user.cfg",
+          "bytes": 18085,
+          "sha256": "8a35a79a3046c35fca8e8cb2787bb4123e8eeb5e40e225c345576c81e5478d66"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-capture-error-green56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2841,
+          "sha256": "757e84721b8d430f801ea1bc9827bfb72a85ecb11f098975df1b0e2e7bf8c1cf"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011",
+      "fixture": "rhino_core_curve_native_source_smoke.FCMacro",
+      "checks": 18,
+      "passed": 18,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 23520,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/results.json",
+          "bytes": 158553,
+          "sha256": "7b68dece5ecc81bf557b56779b69083a01e3d062d92d91fd50858365d9218eed"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 601,
+          "sha256": "5a1da3bb4e7207dc759c0736bee35d64465f746c8a2c368bc673912c25487240"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5802,
+          "sha256": "b7d4798ace75872e88b5cefe1f9483e99ee7c3b2fa8a7fd27515faed5ed9e862"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/host-stderr.log",
+          "bytes": 6650,
+          "sha256": "a911300fb368d67c2b563097bd8f661a0ebdfc960b12343c402265c691556450"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/user.cfg",
+          "bytes": 18194,
+          "sha256": "0c096e3b0f20e83d1c52a9827954439f4be409677e0fd64843e9146e875afa92"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2834,
+          "sha256": "538f27356defbdf053591764616acfe42e66fa430cce983501876b34fb99e95b"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-cold56-offscreen-20261011",
+      "fixture": "rhino_core_curve_native_source_cold_smoke.FCMacro",
+      "checks": 21,
+      "passed": 21,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 17496,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-cold56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-cold56-offscreen-20261011/results.json",
+          "bytes": 45206,
+          "sha256": "0daa246ea485a67b6e54207d9b1d6be56cd0b260f8106ee5077f9bc2f47da592"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-cold56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 600,
+          "sha256": "543b057b2e28ddfbfc16049f8c9827c394859e24b5958759991208b379b3b1d0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-cold56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-cold56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-cold56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 4237,
+          "sha256": "41a221f01b43f99efbfe34757fa517adc4ba193557312ff514d1394b3536c188"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-cold56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-cold56-offscreen-20261011/host-stderr.log",
+          "bytes": 1942,
+          "sha256": "a51fc286864f415d34f548d30f55611e82c7456841d1ff600e7549c53452af53"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-cold56-offscreen-20261011/user.cfg",
+          "bytes": 17451,
+          "sha256": "838570bfa10b9d39abbbe02610ad4c490c898fece2479930faf0ab53f45f23a0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-cold56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2833,
+          "sha256": "7d49812098d101b45d67b3f6765152687699f9a4a7a286275bb4518561dc3d0d"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011",
+      "fixture": "rhino_core_curve_accepted_input_smoke.FCMacro",
+      "checks": 24,
+      "passed": 24,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 25148,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/results.json",
+          "bytes": 124533,
+          "sha256": "ed4e5d6bb7609e40fb1af125b76360cfa896b77fd98d34dfb9aae49ce95dbb67"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 597,
+          "sha256": "b1335950a16bae3fb4a88623bb76d898c39df31856d0fcbcb997b4fff26e0466"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 4566,
+          "sha256": "acfd21a4690beb152986f62177f0786b9521ac0336f974b9361777032eb95776"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/host-stderr.log",
+          "bytes": 7321,
+          "sha256": "f48d2a4698971ba498b9153a3650144c48843919db4dc8f4c8757230a261376d"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/user.cfg",
+          "bytes": 18185,
+          "sha256": "c0cfe5f9f8f441d0504dc4052616576138ff67fc4da48c151ab40738e424056c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2830,
+          "sha256": "a32bd022181517eae62fe40f97a5ea87f8df9020cb0d7e0a4e80e0c20d37e678"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted-cold56-offscreen-20261011",
+      "fixture": "rhino_core_curve_accepted_input_cold_smoke.FCMacro",
+      "checks": 13,
+      "passed": 13,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 48516,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted-cold56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted-cold56-offscreen-20261011/results.json",
+          "bytes": 107377,
+          "sha256": "ab4539504a3d532b4fea357b507465588f7258e53fd7705ba5ed44a1ca50c407"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted-cold56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 602,
+          "sha256": "13c94f1b6b4e9a23913333ca197839c9089e098ebb1a389dcc71bd3179e12f0b"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted-cold56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted-cold56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted-cold56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 2153,
+          "sha256": "d1f5e9b290f98c231d3b71e01835584c678354775cc034c1a76d8c03c8324ba4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted-cold56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted-cold56-offscreen-20261011/host-stderr.log",
+          "bytes": 1859,
+          "sha256": "106d9c4f6919006d95a0f10acdf7f379386160dd4ab8505fef170e04777d6447"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted-cold56-offscreen-20261011/user.cfg",
+          "bytes": 17455,
+          "sha256": "1edcfa8c93db257218e8e426c9a77cdccee5d85122ffd8fcc616134b05180697"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted-cold56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2835,
+          "sha256": "01cbfb377948cb6064146d0715af80d7bc53bbdc47ce9d803c996fe5164ef0d0"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011",
+      "fixture": "rhino_core_curve_construction_smoke.FCMacro",
+      "checks": 42,
+      "passed": 42,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 63988,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/results.json",
+          "bytes": 116190,
+          "sha256": "75df0300cdd5766c17dff4503507b3109f9343d0e8b97831bf702d5ccdc2e4a2"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 601,
+          "sha256": "2da9e6e462dad39a39b9212e6d5ca9f92c990f5ccb1de6d60fe16ac328f9800c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 4144,
+          "sha256": "d13e1f70e5b9ddf626838ed9e9c8431e9afb7a3f38ada32c615271059eaaea09"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/host-stderr.log",
+          "bytes": 8500,
+          "sha256": "7b7469597e7bd387330871b65b5566c17acf20892430eb30de67eb31861fa827"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/user.cfg",
+          "bytes": 18071,
+          "sha256": "163b624a01ecb2acadb980348bdd17f9e5f9948b40901c28580f9c553869a244"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2834,
+          "sha256": "c862ebd3b98da45716cac672a846ac5d5e7f91794db324c7cfde061e2cc8a805"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction-cold56-offscreen-20261011",
+      "fixture": "rhino_core_curve_construction_cold_smoke.FCMacro",
+      "checks": 19,
+      "passed": 19,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 74736,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction-cold56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction-cold56-offscreen-20261011/results.json",
+          "bytes": 94851,
+          "sha256": "54cc8a1b9e98fbf719d07a31bccbf280566c0331a802686d36361c13dad99742"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction-cold56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 606,
+          "sha256": "907de9c39a3ad94aa197cfe2c7b9e50a352feb21bb75da7e09c52b57e260bb19"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction-cold56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction-cold56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction-cold56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 2211,
+          "sha256": "d5afbef7e71a2d04bf47af17ed128c7ea87fe7e00f82951c658f9cd747ebabb4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction-cold56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction-cold56-offscreen-20261011/host-stderr.log",
+          "bytes": 2365,
+          "sha256": "244e4f5907cba46695d7351554f3861b8b75fe40998ebf9d222fc1df239da424"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction-cold56-offscreen-20261011/user.cfg",
+          "bytes": 17463,
+          "sha256": "a6b17ba6b4c07ae745129a5ab8c5e29fc0a9c58b94cdcde1400a6bdd0525cb08"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction-cold56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2839,
+          "sha256": "744e741675b502e69e8def6d0fe60b7a78e1adec25e1b76589f648a8168c1610"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011",
+      "fixture": "rhino_core_curve_construction_basis_smoke.FCMacro",
+      "checks": 26,
+      "passed": 26,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 60472,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/results.json",
+          "bytes": 91645,
+          "sha256": "cdae238e9d4437bbc8549f328666e3865a56b104c32a3c373a93f6e952599b61"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 594,
+          "sha256": "31c70ca3394003f06f0f783904399fb1a59f1a4d15a4d6bb66eee6a530c378db"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5058,
+          "sha256": "b2f9abc993c16ac9fb777eafc3cc56857f4f9bea50ce85e08b3a736dab97f9e4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/host-stderr.log",
+          "bytes": 7638,
+          "sha256": "bec102feac915ccfd239dc142e75d1a13dd756b59100e84b8500e873e2ec9c49"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/user.cfg",
+          "bytes": 18056,
+          "sha256": "715c6dd5e475e1f090542b1997b479b1bdb3d1a5410dfbc6c26c033b7158040a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2827,
+          "sha256": "b3794af121b7200255672eaa42a5aa58bfa54600844d7f5a11ce26f2f105c934"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis-cold56-offscreen-20261011",
+      "fixture": "rhino_core_curve_construction_basis_smoke.FCMacro",
+      "checks": 27,
+      "passed": 27,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 36508,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis-cold56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis-cold56-offscreen-20261011/results.json",
+          "bytes": 91742,
+          "sha256": "644a844422870f16e0c09ad57b5d9447e234f795e7d1b696cb37b3e78b6f6f00"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis-cold56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 599,
+          "sha256": "a07028729541e24d29d82ed67256abba90c34a651fe85ddb77a55f8beac98c49"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis-cold56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis-cold56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis-cold56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5058,
+          "sha256": "b2f9abc993c16ac9fb777eafc3cc56857f4f9bea50ce85e08b3a736dab97f9e4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis-cold56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis-cold56-offscreen-20261011/host-stderr.log",
+          "bytes": 2112,
+          "sha256": "0c292bbbbb6d06d05f4fde7aa058f2dd063dd6de343c68df9991305a7eb8eaf9"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis-cold56-offscreen-20261011/user.cfg",
+          "bytes": 17449,
+          "sha256": "985fd845131b10c63c915dd132f446df306460aa9205ab5ebbfcb3290b522e06"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis-cold56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2832,
+          "sha256": "ccaf1a267a5063d434b94ef6a42b1654bf9ef787f56c43892ebd54e5384628db"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-binding56-offscreen-20261011",
+      "fixture": "rhino_core_native_curve_binding_smoke.FCMacro",
+      "checks": 59,
+      "passed": 59,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 7572,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-binding56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-binding56-offscreen-20261011/results.json",
+          "bytes": 5713,
+          "sha256": "7490f76351831d3485c88b14eb7acaa8dfc13ff774bdf396b37f688bf7b67c6e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-binding56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 595,
+          "sha256": "8f865d26b681e18d8d73a8ff2d63745c7e1207bb9898bebf5b21f5638c171f7c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-binding56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-binding56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-binding56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 3466,
+          "sha256": "c2983f685e97079ce2111945714a12dc0439fa84e73c28f1aeb36c316296a46e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-binding56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-binding56-offscreen-20261011/host-stderr.log",
+          "bytes": 1670,
+          "sha256": "3d19a13046620bf71573c50006ce9c40aa99c6959a766bfb0c6150e9b0151074"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-binding56-offscreen-20261011/user.cfg",
+          "bytes": 17824,
+          "sha256": "8aea4bdbd0fcc0ccc0818f00cefeac240d1a71476b973fca50a7a3688a141b9e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-binding56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2829,
+          "sha256": "2c8fc7258861f0263e5946c936ec050f8607b29cd7e81379bb0a3b22adaa384a"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-policy56-offscreen-20261011",
+      "fixture": "rhino_core_native_curve_policy_smoke.FCMacro",
+      "checks": 36,
+      "passed": 36,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 15804,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-policy56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-policy56-offscreen-20261011/results.json",
+          "bytes": 15727,
+          "sha256": "52e324bff07e60817720319fc622acf947e3af7c046f968a5a22f47db46eaf7b"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-policy56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 595,
+          "sha256": "341aa04288d4f9a14ed12a3108b9d655273cc8b113ae1b4d65c2728d1bfb68ef"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-policy56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-policy56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-policy56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 3809,
+          "sha256": "5e8cd557f9dbc30210b5de0e54a98dba714603e613db2c29a1d13c6419f50835"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-policy56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-policy56-offscreen-20261011/host-stderr.log",
+          "bytes": 9248,
+          "sha256": "cdff029a0290e6bcc9bdadd11fb86241c4965627ade266308c37b24a5a44543e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-policy56-offscreen-20261011/user.cfg",
+          "bytes": 17867,
+          "sha256": "81ccb71d7281477d56ad5ddcc9f442695379a9d387fa974e6efbdd7aa47cdf96"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-policy56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2828,
+          "sha256": "d70e5e5b6fb9f41c357f73cdacd6406fbb3c3563791b7091563972f481ca7287"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-history56-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_policy_smoke.FCMacro",
+      "checks": 33,
+      "passed": 33,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 4004,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-history56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-history56-offscreen-20261011/results.json",
+          "bytes": 6090,
+          "sha256": "bff004463461b7711dffb014eeb0b0426821c7908f117256c839deca11a5f181"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-history56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 602,
+          "sha256": "30eb5f9cfa9b65f897b49901f8e305cf8805980f7f0ec2077a8967a987873000"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-history56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-history56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-history56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 8139,
+          "sha256": "57e6d1ac283836d0c7cdd6b4ec2b41a4096fd0ca586775fdaaf0c9ea14593da5"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-history56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-history56-offscreen-20261011/host-stderr.log",
+          "bytes": 12107,
+          "sha256": "bcec025af8bcac423f17071c89d24510e2bcf8780eb5c21ca6aed3588d2a5eb5"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-history56-offscreen-20261011/user.cfg",
+          "bytes": 18119,
+          "sha256": "773de435bb5650c56c320b01993c8070a840500f9935082a5e7bc7eb8bfdcc08"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-history56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2836,
+          "sha256": "5ff90c5c8ee53edabb8e628bea9b910d6e8a2b6324d741000d0cf1bd949de034"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-context56-offscreen-20261011",
+      "fixture": "circle_input_context_smoke.FCMacro",
+      "checks": 16,
+      "passed": 16,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 42436,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-context56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-context56-offscreen-20261011/results.json",
+          "bytes": 2200,
+          "sha256": "8472c56f8bd5c36e638086a705002f33360e92aaec0e2761a6230c55d2b968f9"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-context56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 603,
+          "sha256": "8947086e25dcb56b6d51116737947ed40c680bf2c36a32a786d8af2086f7d7ab"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-context56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-context56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-context56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5542,
+          "sha256": "0858f9ceeae318b03b4285432f67148255779236f64e33643609e2f1823cd71d"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-context56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-context56-offscreen-20261011/host-stderr.log",
+          "bytes": 13858,
+          "sha256": "9b53b76b7b90c4ed7f964e22721b5166fc6fe7c8807949d457842ffa6495027f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-context56-offscreen-20261011/user.cfg",
+          "bytes": 18074,
+          "sha256": "cc9ad4fe46d1a51822697e6b077c3e91ea55b438df9c8afa862cc70d365bba62"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-circle-context56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2836,
+          "sha256": "fc36b3eddcdce37d1d573de16c0f05084818b85b64e74a835f57e73feaf31e80"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011",
+      "fixture": "rhino_core_solid_result_smoke.FCMacro",
+      "checks": 61,
+      "passed": 61,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 7264,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/results.json",
+          "bytes": 407711,
+          "sha256": "d669c6b3b722f9e37e14cf60bffe80f04cac0cd93d5f8eeb8631c58a08a2d301"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 593,
+          "sha256": "7b14d6e2fd48899714127ca7ee0e5cfc677559760aa7165eceb679a2e6846c01"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 9148,
+          "sha256": "21c5851f12c19ffa9d896d51e6f072bd688880ff339082901ff84f643bd26709"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/host-stderr.log",
+          "bytes": 9559,
+          "sha256": "56ba375601d382e7f13ef8bb689406010a4d31985e4ef287e97c0988ed598a10"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/user.cfg",
+          "bytes": 18179,
+          "sha256": "dfa01b774a55c208e4f9806d50b98dbf1e257b99d3147b3bb87656b9993ef435"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2827,
+          "sha256": "db07e0c9321d15e355c4ee3b4b1fd4819bd82e5e73f16cb1a913caac405b25c0"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011",
+      "fixture": "rhino_core_edit_result_smoke.FCMacro",
+      "checks": 110,
+      "passed": 110,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 41836,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/results.json",
+          "bytes": 11534,
+          "sha256": "8f8a75c425017e09a8d7308885d380a522be81a0b68611d2f004eaa82e0b958b"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 593,
+          "sha256": "2058f48044dea781a31396bd6926fd7d56acd5a3e8614384e8930045952029b7"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 7510,
+          "sha256": "7dff8b4e8a9a60fca7e462a30b875344ebe47fcdd2c686c924e7daf62f7c3d69"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/host-stderr.log",
+          "bytes": 13468,
+          "sha256": "b70ea6d9911154ca28808c591f8ea7ad055123078e1e44b006f1649f8ccdc250"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/user.cfg",
+          "bytes": 18178,
+          "sha256": "2329d3012493f1be9051f4e4366d84cfec0fd6d6bd6c3104c593fa3b5e8e71d0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2826,
+          "sha256": "8f2fbc6fb325bae576bc4c345c09bac0ee9f5839c22c81e1d021aff72b8a661e"
+        }
+      ]
+    }
+  ],
+  "callbacks": [
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-green56-offscreen-20261011",
+      "fixture": "rhino_core_curve_booking_callback_smoke.FCMacro",
+      "checks": 120,
+      "passed": 120,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 42648,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-green56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-green56-offscreen-20261011/results.json",
+          "bytes": 64483,
+          "sha256": "e3a2d7fd7346f1bfa2c74843a9fd37a1d6916da6be8d643fe86aaa24b85c71dc"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-green56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 603,
+          "sha256": "a48783016415bc7ace8df204ae031c1d88e1ce856c7415c64eb283aba1f41dda"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-green56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-green56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-green56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 6744,
+          "sha256": "a1ba273fee7b88d46ed711a955fb24c7ac9acdd1869ce3846ba0a22e161c4f74"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-green56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-green56-offscreen-20261011/host-stderr.log",
+          "bytes": 23160,
+          "sha256": "41500b97b265bfefeb4a640936cb67065529553539ef9e368cc77ec817ad0782"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-green56-offscreen-20261011/user.cfg",
+          "bytes": 18074,
+          "sha256": "56f7367df7b07811a2322974d621919e478b78e4b70d0f69dfcdf52c30a13730"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-green56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2836,
+          "sha256": "2423a53f3eeab589ac6a279b389429b07ee075274369eaff52e1bd1f42401b55"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-replacement-callback-green56-offscreen-20261011",
+      "fixture": "rhino_core_curve_replacement_callback_smoke.FCMacro",
+      "checks": 60,
+      "passed": 60,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 36244,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-replacement-callback-green56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-replacement-callback-green56-offscreen-20261011/results.json",
+          "bytes": 31218,
+          "sha256": "2d8f3cbb27188af80a8ccac7e0ae864e21396a673e79e84c1617e71b7153bdb6"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-replacement-callback-green56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 607,
+          "sha256": "bee1d54ebe6553dec894e5186d2f9a1ec608dd95470b931f567db2093e874829"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-replacement-callback-green56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-replacement-callback-green56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-replacement-callback-green56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5296,
+          "sha256": "5dfa433dd8be9fe4af9713b23aa1f4e1c975529aa04f088d4ee28674155e4840"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-replacement-callback-green56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-replacement-callback-green56-offscreen-20261011/host-stderr.log",
+          "bytes": 15528,
+          "sha256": "3395fd595db8a5852645423d5d4f26bdbfc5d0f5fa6fa6a12e51e6450a44adba"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-replacement-callback-green56-offscreen-20261011/user.cfg",
+          "bytes": 18082,
+          "sha256": "9d762a7678d7c0ad59e189f9c15d467af23a40df2219e843bf3b1e0185ce9d56"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-replacement-callback-green56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2840,
+          "sha256": "abd795b12df4f334dac3c4d253d3a64b70293baa393a32fd3b18e6b890705a8a"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-callback-green56-offscreen-20261011",
+      "fixture": "rhino_core_curve_callback_smoke.FCMacro",
+      "checks": 210,
+      "passed": 210,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 8044,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-callback-green56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-green56-offscreen-20261011/results.json",
+          "bytes": 162837,
+          "sha256": "b5311c4c8bb572d4f0b9ff95ed684537f49e676451639314cf117aace005d571"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-green56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 594,
+          "sha256": "000fa95b90f8e206dc902809800ca38de2b81f8d7adceab01b2ebe5032dc56a9"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-green56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-green56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-green56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5795,
+          "sha256": "96dae63b7d971ac0ae3e85036060f5965fffcff9b435464c7e3b974865a8c503"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-green56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-green56-offscreen-20261011/host-stderr.log",
+          "bytes": 40072,
+          "sha256": "b973ed8f34686da97a3dc811629153db5bc01d5faee81e7c7b2ca6e840b1d6f9"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-green56-offscreen-20261011/user.cfg",
+          "bytes": 18058,
+          "sha256": "73e6234b166d16f987ac2d5f8a6bf1dd3cd6810c40515af20ae93257bd86669c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-green56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2828,
+          "sha256": "daf610ce113b8eaeb1de775ef927fc681842cb770cbeef98c088bb1a3be6c127"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-source-callback-green56-offscreen-20261011",
+      "fixture": "rhino_core_curve_source_callback_smoke.FCMacro",
+      "checks": 60,
+      "passed": 60,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 15936,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-source-callback-green56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-source-callback-green56-offscreen-20261011/results.json",
+          "bytes": 97730,
+          "sha256": "e341d1a4e2cda6bfe23100149f2886b5765fe43956c0d9089e2066b938642b41"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-source-callback-green56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 602,
+          "sha256": "c548512092bf67124b7ab90afca9b823f88e0d0d02196b97674bc13266d6f9b9"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-source-callback-green56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-source-callback-green56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-source-callback-green56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5348,
+          "sha256": "08a7c28417b2928a66a033b262eb94f030acb3d67f091c342e09b670728767b0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-source-callback-green56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-source-callback-green56-offscreen-20261011/host-stderr.log",
+          "bytes": 12413,
+          "sha256": "d6b221dc8e4560b407223600f7009bae3cec6ffee67efc6f1dcbaca043962d49"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-source-callback-green56-offscreen-20261011/user.cfg",
+          "bytes": 18196,
+          "sha256": "5a72c9423643ae52c2b6b9e1b4583c650fa386555a74983f8be36ae9959b9c0a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-source-callback-green56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2835,
+          "sha256": "59561b82e2c5bbdcb8a6c1ea24cc5f0704c22bce4b9a8de6d7eac83b0b8c5d15"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-layer-callback-green56-offscreen-20261011",
+      "fixture": "rhino_core_curve_layer_callback_smoke.FCMacro",
+      "checks": 210,
+      "passed": 210,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 74924,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-layer-callback-green56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-layer-callback-green56-offscreen-20261011/results.json",
+          "bytes": 163091,
+          "sha256": "64d2f0a657acff50775f293419c8de0e66d2bf7b04073bd964e3dece43bdbd74"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-layer-callback-green56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 601,
+          "sha256": "bd51ac3faeddd8c49aef4006c431d7d274d5850be1d8bcc2902fc07b47715f45"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-layer-callback-green56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-layer-callback-green56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-layer-callback-green56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 6135,
+          "sha256": "41e7477a99f78debed3e80719828e1320a4cb26e653d20effe4855adb5e89cf3"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-layer-callback-green56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-layer-callback-green56-offscreen-20261011/host-stderr.log",
+          "bytes": 50269,
+          "sha256": "8b786abf2c850074cc8f3714a84f08a97dcdaffb2c81cacd3ae8ac6f82fb3514"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-layer-callback-green56-offscreen-20261011/user.cfg",
+          "bytes": 18070,
+          "sha256": "62a14023138e1814a5efbd634c637529ec349f8db3afc8e55682719fc081c6f6"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-layer-callback-green56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2834,
+          "sha256": "9f10f46634ecc200c4e28cd7fed2c26dd4801ecd62ab7f74b8e48b362e68ccb9"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-hidden-layer-green56-offscreen-20261011",
+      "fixture": "rhino_core_curve_hidden_layer_smoke.FCMacro",
+      "checks": 50,
+      "passed": 50,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "298D34471B715DC09ADB3D3283875FDAC3D74FB40D89033DB8B2EAD90E2A93D1",
+        "pid": 64780,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-booking-runtime56-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-hidden-layer-green56-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-booking-runtime56-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16420352,
+        "sha256": "298d34471b715dc09adb3d3283875fdac3d74fb40d89033db8b2ead90e2a93d1"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-hidden-layer-green56-offscreen-20261011/results.json",
+          "bytes": 11875,
+          "sha256": "f7b1f9908a01b74e1f32cdd4bb67fff1eab48ddd124b56b2809f2109515ece72"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-hidden-layer-green56-offscreen-20261011/shared-host-launch.json",
+          "bytes": 599,
+          "sha256": "08e4e35ec87c0e83cb167d2cac2afd4e3ac215e5ee8ee3d5972d1cfc8e7a2b25"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-hidden-layer-green56-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-hidden-layer-green56-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-hidden-layer-green56-offscreen-20261011/fixture.FCMacro",
+          "bytes": 4828,
+          "sha256": "61bfa2634b92c14cc9100cab26e92767abef160de9dc3d2a3d9783f2545c9676"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-hidden-layer-green56-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-hidden-layer-green56-offscreen-20261011/host-stderr.log",
+          "bytes": 9292,
+          "sha256": "09aacd43e53ec934d0ab40cb33f78949a5689e377a3ec87352af5cb3f45f44cc"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-hidden-layer-green56-offscreen-20261011/user.cfg",
+          "bytes": 18066,
+          "sha256": "1659632e25a00839af1af5a10efa6daf80721798c3e2f87be19418ec6f3c6286"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-hidden-layer-green56-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2832,
+          "sha256": "efb119852d638f142e400e5c90756d6ee0a8583a2443905cbf8985c57b2ff157"
+        }
+      ]
+    }
+  ],
+  "current_checks": 1372,
+  "current_actual_exits_zero": 24,
+  "cold_hosts": 5,
+  "archives": [
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/Circle.FCStd",
+      "bytes": 9483,
+      "sha256": "40d09ec89ef57d4b80392b55ff50205aa77cbde2a8ce3ad4e024bcfa1d0993ae"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/Ellipse.FCStd",
+      "bytes": 9652,
+      "sha256": "1f63797f0875cb65cdef4164ff39d3c9374dd2b723ad5e7c6d411e6fc10483c0"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/InterpCrv.FCStd",
+      "bytes": 7965,
+      "sha256": "a9e20aed29c72583406f5464949597b080cb411e6555999c4c229849a5f4e6e1"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/Line.FCStd",
+      "bytes": 7794,
+      "sha256": "d0afdbc1e621247e00d673ddf23859a7a547b30d4d20b1df780016756657c53f"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/Polyline.FCStd",
+      "bytes": 8093,
+      "sha256": "92c2a5c1f91f45a3f48f85f55bbc5fa1c207877ec109032c4be7a10602bbbcb9"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/Rectangle.FCStd",
+      "bytes": 8091,
+      "sha256": "538c395f00c4121c2dfc5a94d2fcb39344fb6eb2c5daff0cc0a915c6238043b3"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/CirclePath.FCStd",
+      "bytes": 13377,
+      "sha256": "f54b6070d01164d65583a3513d346502a22eb3eae23bbbd61a38e757cb6a56af"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/EllipsePath.FCStd",
+      "bytes": 14090,
+      "sha256": "ed62beeb748a0e31ed73a88c2d62166f195ac64309daffe583d42d4994d7495a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/FitBranch.FCStd",
+      "bytes": 11025,
+      "sha256": "d9b7e1fee4aa8afbfe2edc6c3a4e4203871eb85056541e08f6b605c799230892"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/CirclePath.FCStd",
+      "bytes": 13378,
+      "sha256": "f041e55b64d067844394d0c3191c9b397e9f55dfecca14c04e423f290b8fe826"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/EllipsePath.FCStd",
+      "bytes": 14089,
+      "sha256": "f7bf3a71ea2c2ce980ec86b17f0456263b1d67902023917f3facd51343a24467"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/FitBranch.FCStd",
+      "bytes": 11031,
+      "sha256": "5e6c8ea9159c29d3ef95e21a26acc55673ec912eb283adc956e1325eb962fbf0"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/CircleQuantity.FCStd",
+      "bytes": 9363,
+      "sha256": "baccec4607ed331595f6c57a47421c7f3f32b3e1a5c3234a60a905fa2cd3cab2"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/EllipseQuantity.FCStd",
+      "bytes": 9685,
+      "sha256": "e1897a640c85ec5c6fbcf1d5f70bd9a32a3c30ecfef095e01fb810d77fa98c95"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/FitUndo.FCStd",
+      "bytes": 10662,
+      "sha256": "af47b1a70a2439742a15bab293403d763ca7dfe59fa054eeba8a0c12559da0a4"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/RectangleDirection.FCStd",
+      "bytes": 8246,
+      "sha256": "617baa4c032e8a469875e8d0c1109025135ff3854f3885bf9a378283820bd232"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/Circle.FCStd",
+      "bytes": 9480,
+      "sha256": "a2e6909a3c6193ff202bd87c2668813af4283d4ff7722d02dd9ddcbc361e0d7b"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/Ellipse.FCStd",
+      "bytes": 9652,
+      "sha256": "365cd184e164c1f0a91be38bdc4815bbc14d50875e282aa8b1744eed0be9c749"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/InterpCrv.FCStd",
+      "bytes": 7961,
+      "sha256": "c06fab87f0eed62e9296c5efe9530739981e88471e1eaaad8753a0d9e5156670"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/Line.FCStd",
+      "bytes": 7791,
+      "sha256": "05b6d40a06b1ba38e444df048b6b1f4ede914a295c1ed929ea9f5fd03b919a4d"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/Polyline.FCStd",
+      "bytes": 8091,
+      "sha256": "7987256ebfce7ca90f2cd97ba4b9565473a606d3849b4efee093ffeab17055dc"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/Rectangle.FCStd",
+      "bytes": 8089,
+      "sha256": "9b26693552d08704461967dbe6f9524dc9169e38800c9a979adeca34e3712a4e"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/BoundaryBothSides.FCStd",
+      "bytes": 7831,
+      "sha256": "9b7fe62acf2ba25c5fd47091c02c25d893711800ff272299d14ceae28a68cf47"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/BoundaryLine.FCStd",
+      "bytes": 7772,
+      "sha256": "6c2ba305ab3260928bede6e53fb08c94a0234873c9476a60e46e5e46e2bb334b"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/DeformCircle.FCStd",
+      "bytes": 10054,
+      "sha256": "bdda5f307ac2302acd90e25dd07d75321593c6dcec2d48c06ee37567a6b13464"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/DeformEllipse.FCStd",
+      "bytes": 10286,
+      "sha256": "b71d53cf652d904c6a71ac38d2c058d1203eca3e7148321ec63b25b4239abe4c"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/PeriodicInterp.FCStd",
+      "bytes": 7970,
+      "sha256": "06849831f5057533bad728d2eb9124d8deeddbc4343206d062fd7addb7545169"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/AroundCurve.FCStd",
+      "bytes": 9888,
+      "sha256": "91ab7a561e1cb674e5c4181811e432793ab2110aad6e661c3ebf0b9bf689e0f1"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/AroundPoint.FCStd",
+      "bytes": 9905,
+      "sha256": "f8c8f6772a0f47d9ef475b85e068911968c5bdba894904f2ced9cd10b692aa3a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/BoxCenter.FCStd",
+      "bytes": 10435,
+      "sha256": "61b7a787c65bf6ad46fc63ea6211b351f1a7c2309f213de955b6bc4a43fca78d"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/FitCloud.FCStd",
+      "bytes": 11659,
+      "sha256": "2b508d7c1917813a342756219b086b7e69cd584dcbfcc261e6b2dfd97990d943"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-solid56-offscreen-20261011/SphereCenter.FCStd",
+      "bytes": 8252,
+      "sha256": "863fcff9015967d5fb84df340c0b6d71227a5e75099b956b997aa6bc4792069a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/Boolean2Objects.FCStd",
+      "bytes": 21274,
+      "sha256": "09e8692d3932426ec1dd07444f4719f3e4f972e79e2b1cd8294aaaca809fa15f"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/BooleanDifference.FCStd",
+      "bytes": 17388,
+      "sha256": "66a35281a9868ceb11209c599858b10dc316b9c0075660457ae4a9ff44fe2324"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/BooleanIntersection.FCStd",
+      "bytes": 18737,
+      "sha256": "13e21ed4bd260647e5a4e80cbf7fe104eec6167151b2fcdecd10bdc0b418d287"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/BooleanUnion.FCStd",
+      "bytes": 21282,
+      "sha256": "99b9693f726a00f8cda56e40d758d228b205dc1f48a4b9b4f0de8e9e77400c9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/Explode.FCStd",
+      "bytes": 11448,
+      "sha256": "360900caf5976658f370dce88d0e3a3cf69a99510dc85377d8befba7ca1d31e5"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/Join.FCStd",
+      "bytes": 9078,
+      "sha256": "e0f9dd53870b4c34999ec74d6f930676d354422604ae74c37d8fe548304213d9"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-edit56-offscreen-20261011/Trim.FCStd",
+      "bytes": 10667,
+      "sha256": "d4f3d52f1f5d016f70dfb3351fc6118bbf6673a6b5c3ae363838721aa4a7cb03"
+    }
+  ],
+  "cold_archives": [
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/Circle.FCStd",
+      "bytes": 9483,
+      "sha256": "40d09ec89ef57d4b80392b55ff50205aa77cbde2a8ce3ad4e024bcfa1d0993ae"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/Ellipse.FCStd",
+      "bytes": 9652,
+      "sha256": "1f63797f0875cb65cdef4164ff39d3c9374dd2b723ad5e7c6d411e6fc10483c0"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/InterpCrv.FCStd",
+      "bytes": 7965,
+      "sha256": "a9e20aed29c72583406f5464949597b080cb411e6555999c4c229849a5f4e6e1"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/Line.FCStd",
+      "bytes": 7794,
+      "sha256": "d0afdbc1e621247e00d673ddf23859a7a547b30d4d20b1df780016756657c53f"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/Polyline.FCStd",
+      "bytes": 8093,
+      "sha256": "92c2a5c1f91f45a3f48f85f55bbc5fa1c207877ec109032c4be7a10602bbbcb9"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-green56-offscreen-20261011/Rectangle.FCStd",
+      "bytes": 8091,
+      "sha256": "538c395f00c4121c2dfc5a94d2fcb39344fb6eb2c5daff0cc0a915c6238043b3"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/CirclePath.FCStd",
+      "bytes": 13377,
+      "sha256": "f54b6070d01164d65583a3513d346502a22eb3eae23bbbd61a38e757cb6a56af"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/EllipsePath.FCStd",
+      "bytes": 14090,
+      "sha256": "ed62beeb748a0e31ed73a88c2d62166f195ac64309daffe583d42d4994d7495a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-native-green56-offscreen-20261011/FitBranch.FCStd",
+      "bytes": 11025,
+      "sha256": "d9b7e1fee4aa8afbfe2edc6c3a4e4203871eb85056541e08f6b605c799230892"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/CirclePath.FCStd",
+      "bytes": 13378,
+      "sha256": "f041e55b64d067844394d0c3191c9b397e9f55dfecca14c04e423f290b8fe826"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/EllipsePath.FCStd",
+      "bytes": 14089,
+      "sha256": "f7bf3a71ea2c2ce980ec86b17f0456263b1d67902023917f3facd51343a24467"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-source-green56-offscreen-20261011/FitBranch.FCStd",
+      "bytes": 11031,
+      "sha256": "5e6c8ea9159c29d3ef95e21a26acc55673ec912eb283adc956e1325eb962fbf0"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/CircleQuantity.FCStd",
+      "bytes": 9363,
+      "sha256": "baccec4607ed331595f6c57a47421c7f3f32b3e1a5c3234a60a905fa2cd3cab2"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/EllipseQuantity.FCStd",
+      "bytes": 9685,
+      "sha256": "e1897a640c85ec5c6fbcf1d5f70bd9a32a3c30ecfef095e01fb810d77fa98c95"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/FitUndo.FCStd",
+      "bytes": 10662,
+      "sha256": "af47b1a70a2439742a15bab293403d763ca7dfe59fa054eeba8a0c12559da0a4"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-accepted56-offscreen-20261011/RectangleDirection.FCStd",
+      "bytes": 8246,
+      "sha256": "617baa4c032e8a469875e8d0c1109025135ff3854f3885bf9a378283820bd232"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/Circle.FCStd",
+      "bytes": 9480,
+      "sha256": "a2e6909a3c6193ff202bd87c2668813af4283d4ff7722d02dd9ddcbc361e0d7b"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/Ellipse.FCStd",
+      "bytes": 9652,
+      "sha256": "365cd184e164c1f0a91be38bdc4815bbc14d50875e282aa8b1744eed0be9c749"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/InterpCrv.FCStd",
+      "bytes": 7961,
+      "sha256": "c06fab87f0eed62e9296c5efe9530739981e88471e1eaaad8753a0d9e5156670"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/Line.FCStd",
+      "bytes": 7791,
+      "sha256": "05b6d40a06b1ba38e444df048b6b1f4ede914a295c1ed929ea9f5fd03b919a4d"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/Polyline.FCStd",
+      "bytes": 8091,
+      "sha256": "7987256ebfce7ca90f2cd97ba4b9565473a606d3849b4efee093ffeab17055dc"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-construction56-offscreen-20261011/Rectangle.FCStd",
+      "bytes": 8089,
+      "sha256": "9b26693552d08704461967dbe6f9524dc9169e38800c9a979adeca34e3712a4e"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/BoundaryBothSides.FCStd",
+      "bytes": 7831,
+      "sha256": "9b7fe62acf2ba25c5fd47091c02c25d893711800ff272299d14ceae28a68cf47"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/BoundaryLine.FCStd",
+      "bytes": 7772,
+      "sha256": "6c2ba305ab3260928bede6e53fb08c94a0234873c9476a60e46e5e46e2bb334b"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/DeformCircle.FCStd",
+      "bytes": 10054,
+      "sha256": "bdda5f307ac2302acd90e25dd07d75321593c6dcec2d48c06ee37567a6b13464"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/DeformEllipse.FCStd",
+      "bytes": 10286,
+      "sha256": "b71d53cf652d904c6a71ac38d2c058d1203eca3e7148321ec63b25b4239abe4c"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-basis56-offscreen-20261011/PeriodicInterp.FCStd",
+      "bytes": 7970,
+      "sha256": "06849831f5057533bad728d2eb9124d8deeddbc4343206d062fd7addb7545169"
+    }
+  ],
+  "rust": {
+    "passed": 882,
+    "failed": 0,
+    "ignored": 0,
+    "suites": 126,
+    "actual_exit": 0,
+    "log": {
+      "path": "H:/FreeCAD-src/build/curve-booking-fullrust56-20261011.log",
+      "bytes": 94820,
+      "sha256": "2d6235d3fff99d9a6fd2fadb1cc362cafe99cb60f1f7812f14cf316729a24eac"
+    },
+    "exit": {
+      "path": "H:/FreeCAD-src/build/curve-booking-fullrust56-20261011.log.exit.json",
+      "bytes": 24,
+      "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+    }
+  },
+  "build_log": {
+    "path": "H:/FreeCAD-src/build/curve-booking-build56-20261011.log",
+    "bytes": 15499,
+    "sha256": "48764a5402715931fda803ce36b95646e31f5cb3b264ccfb170461de8526d08d"
+  },
+  "build_exit": {
+    "path": "H:/FreeCAD-src/build/curve-booking-build56-20261011.log.exit.json",
+    "bytes": 24,
+    "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+  },
+  "red": [
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-commit-red55-offscreen-20261011",
+      "fixture": "rhino_core_curve_booking_callback_smoke.FCMacro",
+      "checks": 30,
+      "passed": 12,
+      "failures": [
+        "Line/commit complete document and Undo and prior Redo unchanged",
+        "Line/commit no rejected output remains",
+        "Line/commit prior native Redo still executes",
+        "Polyline/commit complete document and Undo and prior Redo unchanged",
+        "Polyline/commit no rejected output remains",
+        "Polyline/commit prior native Redo still executes",
+        "Rectangle/commit complete document and Undo and prior Redo unchanged",
+        "Rectangle/commit no rejected output remains",
+        "Rectangle/commit prior native Redo still executes",
+        "Circle/commit complete document and Undo and prior Redo unchanged",
+        "Circle/commit no rejected output remains",
+        "Circle/commit prior native Redo still executes",
+        "Ellipse/commit complete document and Undo and prior Redo unchanged",
+        "Ellipse/commit no rejected output remains",
+        "Ellipse/commit prior native Redo still executes",
+        "InterpCrv/commit complete document and Undo and prior Redo unchanged",
+        "InterpCrv/commit no rejected output remains",
+        "InterpCrv/commit prior native Redo still executes"
+      ],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-publication-runtime55-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "E5A89CFBEDB520E5E84A679B6E7370DE4BC301C28FAFAD858AEC4C9C91E496D8",
+        "pid": 28228,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-publication-runtime55-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-commit-red55-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-publication-runtime55-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16419328,
+        "sha256": "e5a89cfbedb520e5e84a679b6e7370de4bc301c28fafad858aec4c9c91e496d8"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-commit-red55-offscreen-20261011/results.json",
+          "bytes": 21179,
+          "sha256": "fd63adc8977c462bfc46780af4e34ccadad6cfb9412392bc5e2af8d2fb8ab501"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-commit-red55-offscreen-20261011/shared-host-launch.json",
+          "bytes": 607,
+          "sha256": "0709ebeea6aad568364d8af844ce2bc5223b21ea31a1f68b8fe15b1c016cc01a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-commit-red55-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-commit-red55-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-commit-red55-offscreen-20261011/fixture.FCMacro",
+          "bytes": 6744,
+          "sha256": "a1ba273fee7b88d46ed711a955fb24c7ac9acdd1869ce3846ba0a22e161c4f74"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-commit-red55-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-commit-red55-offscreen-20261011/host-stderr.log",
+          "bytes": 7363,
+          "sha256": "d755d980d83fe0d27c7b94046f9cfc2dbf845304d477426b3ffc4a98d137cd7f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-commit-red55-offscreen-20261011/user.cfg",
+          "bytes": 18066,
+          "sha256": "87c77159417669de637a0ef440bdcc8405e599098c20d38219f12a5d713f0ef4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-commit-red55-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2832,
+          "sha256": "b9532c2c36b1ed9bf1c597d022862bc74784b4cfdc827359e0b97489446c2cb1"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-booking-abort-red55-offscreen-20261011",
+      "fixture": "rhino_core_curve_booking_callback_smoke.FCMacro",
+      "checks": 5,
+      "passed": 3,
+      "failures": [
+        "Line/abort complete document and Undo and prior Redo unchanged",
+        "Line/abort typed diagnostic identifies actual operation"
+      ],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-publication-runtime55-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "E5A89CFBEDB520E5E84A679B6E7370DE4BC301C28FAFAD858AEC4C9C91E496D8",
+        "pid": 17432,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-publication-runtime55-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-booking-abort-red55-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-publication-runtime55-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16419328,
+        "sha256": "e5a89cfbedb520e5e84a679b6e7370de4bc301c28fafad858aec4c9c91e496d8"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-abort-red55-offscreen-20261011/results.json",
+          "bytes": 2161,
+          "sha256": "3a9a69a3586e9ecf6f7a6868c98b46fbcb3afc094befafb2344f7706c2ec1561"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-abort-red55-offscreen-20261011/shared-host-launch.json",
+          "bytes": 606,
+          "sha256": "075038835d99432821ccada1153676381e3ae45bb3d802f099b6ac14430db87c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-abort-red55-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-abort-red55-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-abort-red55-offscreen-20261011/fixture.FCMacro",
+          "bytes": 6744,
+          "sha256": "a1ba273fee7b88d46ed711a955fb24c7ac9acdd1869ce3846ba0a22e161c4f74"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-abort-red55-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-abort-red55-offscreen-20261011/host-stderr.log",
+          "bytes": 2105,
+          "sha256": "6ddd7c004f6350ba2e07c90400a2ab63c957a14bd0c07c1433797e6ea2e59454"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-abort-red55-offscreen-20261011/user.cfg",
+          "bytes": 18064,
+          "sha256": "6e1e1145e350211c64849d67d9d44842e9b9639f6fee411f99d45bb902c6313a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-abort-red55-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2827,
+          "sha256": "c9fa944327abcb33139d173d2241e7ceaa7f8df47e82bda76dc7664766b3d667"
+        }
+      ]
+    }
+  ],
+  "excluded_full_run": {
+    "reason": "Full exploratory native booking witness timed out without a result; excluded from RED or acceptance counts. Exact owned process killed by runner; terminal true. Only separate completed commit30 and Line/abort5 are RED evidence.",
+    "terminal": {
+      "accepted": false,
+      "reason": "Startup/fixture timeout, owned handle killed",
+      "pid": 26176,
+      "has_exited": true
+    },
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-red55-offscreen-20261011/fixture.FCMacro",
+        "bytes": 6084,
+        "sha256": "13646d3f8bfecc4ced1fc6b6858110d03cefc72fc0511b61ffdc388629808e5b"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-red55-offscreen-20261011/shared-host-launch.json",
+        "bytes": 612,
+        "sha256": "b298d8954367e6e1dacf96b0964d877b3abd5dd6ec93a04bb446b4edaf57580c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-red55-offscreen-20261011/excluded-terminal.json",
+        "bytes": 128,
+        "sha256": "ddcd2edb6d9494668681c2b94df3bfdcc06c9478e58ae0a44ac82d5954ef5c78"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-red55-offscreen-20261011/loaded-native-app.json",
+        "bytes": 227,
+        "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-red55-offscreen-20261011/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-red55-offscreen-20261011/host-stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-red55-offscreen-20261011/host-stderr.log",
+        "bytes": 12090,
+        "sha256": "5fc64caf9db0b3306939d0e0815a7e047c42b4be54e82db75fad53593a885ad7"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-booking-callback-red55-offscreen-20261011/startup.log",
+        "bytes": 57119,
+        "sha256": "501ad1694c1c351d4d9b776f2118c78c5fcc8b6431a03a95d630cc1bae9dda12"
+      }
+    ]
+  },
+  "source_inventory": {
+    "path": "H:/FreeCAD-src/build/curve-booking-producers56-20261011.json",
+    "bytes": 166958,
+    "sha256": "7f7767213592940ecc1c446f06a20fa0bad5db805e26437418b1c794f55b2284"
+  },
+  "source_comparisons": [
+    {
+      "path": "H:/FreeCAD-src/build/curve-booking-producers56-postbuild-20261011.json",
+      "bytes": 109,
+      "sha256": "f90cf1a8c63be23646b8318f315ea6d300566e103a6f3a873b5586bd5cafd200"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/curve-booking-producers56-postnative-20261011.json",
+      "bytes": 109,
+      "sha256": "f90cf1a8c63be23646b8318f315ea6d300566e103a6f3a873b5586bd5cafd200"
+    }
+  ],
+  "inventory_inputs_match_at_postrun": true,
+  "inventory_scope": "Expanded selected source/resources/tests, not an exact compiler dependency certificate",
+  "review_disposition": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/reviews/2026-10-12-curve-booking-disposition.md",
+    "bytes": 2827,
+    "sha256": "c6d9b8cdb1e0d449dc19102374294ebec5278d87c80ff361ff3747288534dfee"
+  },
+  "prior_checkpoint": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-11-rhino-core-curve-publication.json",
+    "bytes": 153202,
+    "sha256": "7edd5b6b62ccb91de32acbc74dc4e1875e35113989681ff52d9f1939ccc45af0"
+  },
+  "remaining": [
+    "Every original RCORE-01 requirement remains required: adapters1–7, C01–C12, T01–T11 and every enabled family/consumer, GeometryRef/Snapshot/Result, rational/periodic basis, trims/pcurves/seam occurrences, independent read/edit/retain/export.",
+    "Task2 remains open: generic native snap/pick provenance, all original numeric/native parameter paths, full subset/index sharing across selection observations, aggregate allocation/traversal/worker/cancellation bounds. Replay currently duplicates construction sources/events in the common result; complete sharing and aggregate cost remain required.",
+    "Task3 main direct Curve results are paired, but Ellipse foci and Circle History recompute/freeze/detach/Rebuild result lifecycle still require implementation and independent native/cold evidence.",
+    "Named Curve output/source/layer/context/cross-family replacement and native commit/abort/reopen are checked. Every native document-close boundary, global observer close/lifetime, aggregate rollback across all enabled families and the full original publication contract remain required.",
+    "Analytic-to-NURBS global deviation/locus and parameter mapping, complete topology maps and output attributes remain unproven. Native validity/master/physical dimensions are scoped observations; conversion exactness remains uninspected and maps null.",
+    "Tangent/native_solution, changed CPlanes/orientation, every numeric mode and explicit non-Circle Undo, repeated/shared sources and revision exhaustion are not established by the six focused Rust tests/nine new native recipes.",
+    "Offscreen evidence does not establish actual mouse, every viewport preview lifetime, OpenGL/render acceptance or all original cache/resource invariants. Production ABI/deployment acceptance remains pending; selected App/GUI host reuses the one SDK.",
+    "Expanded source/resource/test inventories are not exact compiler dependency certificates. Source inspection review establishes no runtime behavior beyond the named executed fixtures."
+  ],
+  "next_action": "Pair Ellipse auxiliary focus outputs with the common owned GeometryResult and original construction/source evidence, native vertex/master/attributes/units and checked publication. First reproduce missing focus results, then implement Rust role/output admission using the existing solver. Continue Circle History/Rebuild, full sharing/budgets/conversion/maps and every original RCORE-01 requirement."
+}

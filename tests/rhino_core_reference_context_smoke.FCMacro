@@ -1,0 +1,159 @@
+"""Native member paths across Link and physical/virtual array contexts."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[],'errors':{},'descriptors':{},'native_targets':{}}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def place(x,y,z,a=0):return App.Placement(App.Vector(x,y,z),App.Rotation(App.Vector(1,2,3),a))
+def transformed(m,p):return App.Vector(*[sum(m[r][c]*[p.x,p.y,p.z][c] for c in range(3))+m[r][3] for r in range(3)])
+def leaves(row):
+ if row['representation']=='instance':return leaves(row['geometry_data']['definition_geometry'])
+ if row['representation']=='group':return [r for c in row['geometry_data']['members'] for r in leaves(c)]
+ return [row]
+def state(doc):return ([o.Name for o in doc.Objects],doc.UndoCount,doc.RedoCount,{o.Name:o.Shape.exportBrepToString() for o in doc.Objects if o.isDerivedFrom('Part::Feature')},{o.Name:list(o.Placement.toMatrix().A) for o in doc.Objects if 'Placement' in o.PropertiesList},{o.Name:(o.Label,o.Label2,[(p,str(getattr(o,p))) for p in ['LinkedObject','LinkTransform','ElementCount','ShowElement','ElementList','Scale','ScaleVector','PlacementList','ScaleList'] if p in o.PropertiesList]) for o in doc.Objects})
+def run():
+ try:
+  import OpenMatrix9Gui as native
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+  doc=App.newDocument('ReferenceContexts');doc.UndoMode=1
+  unrelated=doc.addObject('App::Part','Unrelated');unrelated.Placement=place(500,600,700,47)
+  definition=doc.addObject('App::Part','Definition');unrelated.addObject(definition);definition.Placement=place(11,13,17,23);definition.Label='Definition label'
+  inner=doc.addObject('App::Part','Inner');definition.addObject(inner);inner.Placement=place(3,-7,2,41);inner.Label='Inner label'
+  point=doc.addObject('Part::Feature','Member');inner.addObject(point);point.Shape=Part.Vertex(App.Vector(2,3,5));point.Placement=place(2,4,6,31);point.Label='Member label'
+  parent=doc.addObject('App::Part','Parent');parent.Placement=place(100,200,300,37)
+  root=doc.addObject('App::Part','References');parent.addObject(root);root.Placement=place(7,11,13,17)
+  paths=[];array_contexts=[]
+  for flag in [False,True]:
+   link=doc.addObject('App::Link','Bridge'+str(int(flag)));root.addObject(link);link.setLink(definition);link.LinkTransform=flag;link.LinkPlacement=place(-11,5,9,43);link.ScaleVector=App.Vector(-2,3,.5);link.Label='Bridge label'+str(int(flag))
+   for sub in [link.Name+'.'+inner.Name+'.'+point.Name+'.',link.Name+'.'+definition.Name+'.'+inner.Name+'.'+point.Name+'.','$'+link.Label+'.$'+inner.Label+'.$'+point.Label+'.']:paths.append((sub,point))
+   nested=doc.addObject('App::Link','Chained'+str(int(flag)));root.addObject(nested);nested.setLink(link);nested.LinkTransform=flag;nested.LinkPlacement=place(3,7,11,29);nested.ScaleVector=App.Vector(1.2,.9,-.5)
+   for sub in [nested.Name+'.'+inner.Name+'.'+point.Name+'.',nested.Name+'.'+link.Name+'.'+definition.Name+'.'+inner.Name+'.'+point.Name+'.']:paths.append((sub,point))
+   configured=doc.addObject('App::Link','Configured'+str(int(flag)));root.addObject(configured);configured.setLink(definition,inner.Name+'.');configured.LinkTransform=flag;configured.LinkPlacement=place(5,11,17,31)
+   paths.append((configured.Name+'.'+point.Name+'.',point))
+  for expanded in [False,True]:
+   for flag in [False,True]:
+    array=doc.addObject('App::Link','Array'+str(int(expanded))+str(int(flag)));root.addObject(array);array.setLink(definition);array.ShowElement=expanded;array.LinkTransform=flag;array.ElementCount=2;array.LinkPlacement=place(19,23,29,43);array.ScaleVector=App.Vector(.7,-2,1.3)
+    if expanded:
+     for i,e in enumerate(array.ElementList):e.Placement=place(3+i*7,5-i*3,7+i*2,11+i*13);e.Scale=.7+i*.4
+    else:array.PlacementList=[place(3,5,7,11),place(10,2,9,24)];array.ScaleList=[App.Vector(.7,1.2,2),App.Vector(.9,1.5,1.9)]
+    paths.append((array.Name+'.1.'+inner.Name+'.'+point.Name+'.',point))
+    paths.append((array.Name+'.1.'+definition.Name+'.'+inner.Name+'.'+point.Name+'.',point))
+    if expanded:paths.append((array.Name+'.'+array.ElementList[1].Name+'.'+inner.Name+'.'+point.Name+'.',point))
+    wrapper=doc.addObject('App::Link','Wrapped'+array.Name);root.addObject(wrapper);wrapper.setLink(array);wrapper.LinkTransform=flag;wrapper.LinkPlacement=place(5,17,19,23)
+    paths.append((wrapper.Name+'.'+array.Name+'.1.'+inner.Name+'.'+point.Name+'.',point))
+    array_contexts.append(array)
+    if not expanded:
+     for token in [array.Name+'_i1','$'+array.Name+'_i1',definition.Name,'$'+definition.Label]:paths.append((array.Name+'.'+token+'.'+inner.Name+'.'+point.Name+'.',point))
+     paths.append((array.Name+'.'+inner.Name+'.'+point.Name+'.',point))
+  doc.recompute()
+  def exercise(label,obj,sub,target,world):
+   before=state(doc);row=None
+   try:row=json.loads(native.geometryDescriptor(doc.Name,obj.Name,sub))
+   except (ValueError,RuntimeError) as exc:report['errors'][label]=str(exc)
+   check(label+' reference resolves through native context',row is not None)
+   check(label+' inspection preserves source and history',state(doc)==before)
+   if row is None:return
+   report['descriptors'][label]=row;items=leaves(row)
+   check(label+' retains actual definition identity',len(items)==1 and items[0]['object_name']==target.Name and items[0]['representation']=='point')
+   if len(items)!=1:return
+   for v in items[0]['topology']['vertices']:
+    raw=target.Placement.inverse().multVec(target.Shape.Vertexes[int(v['native_topology_index'])-1].Point)
+    check(label+' owned world point matches independent native path',(transformed(v['local_to_world'],App.Vector(*v['point_xyz']))-world.multVec(raw)).Length<1e-8)
+  for ordinal,(sub,expected) in enumerate(paths):
+   target,path=root.getSubObject(sub,1,App.Matrix(),True);target,path=target.getLinkedObject(True,path,False)
+   label='group '+str(ordinal);report['native_targets'][label]=target.Name
+   check(label+' authored native path reaches expected definition',target==expected)
+   exercise(label,root,sub,expected,parent.getGlobalPlacement().toMatrix().multiply(path))
+   link=doc.addObject('App::Link','PathReference'+str(ordinal));parent.addObject(link);link.setLink(root,sub);link.LinkTransform=True;link.LinkPlacement=place(17,19,23,31);link.ScaleVector=App.Vector(.3,1.7,-2);doc.recompute()
+   target,path=link.getLinkedObject(True,App.Matrix(),True);label='link '+str(ordinal);report['native_targets'][label]=target.Name
+   check(label+' authored native reference reaches expected definition',target==expected)
+   exercise(label,link,'',expected,parent.getGlobalPlacement().toMatrix().multiply(path))
+  for array in array_contexts:
+   selections=['1.'+inner.Name+'.'+point.Name+'.','1.'+definition.Name+'.'+inner.Name+'.'+point.Name+'.','1.$'+definition.Label+'.'+inner.Name+'.'+point.Name+'.']
+   if not array.ShowElement:
+    selections += [array.Name+'_i1.'+inner.Name+'.'+point.Name+'.',definition.Name+'.'+inner.Name+'.'+point.Name+'.',inner.Name+'.'+point.Name+'.']
+   for sub in selections:
+    target,path=array.getSubObject(sub,1,App.Matrix(),True);target,path=target.getLinkedObject(True,path,False);label=array.Name+' direct '+sub
+    check(label+' authored native selection reaches expected definition',target==point)
+    exercise(label,array,sub,point,root.getGlobalPlacement().toMatrix().multiply(path))
+  for flag in [False,True]:
+   link=doc.getObject('Bridge'+str(int(flag)))
+   for token in [definition.Name,'$'+definition.Label]:
+    sub=token+'.'+inner.Name+'.'+point.Name+'.';target,path=link.getSubObject(sub,1,App.Matrix(),True);target,path=target.getLinkedObject(True,path,False)
+    check(link.Name+' direct definition oracle '+token,target==point)
+    exercise(link.Name+' direct '+token,link,sub,point,root.getGlobalPlacement().toMatrix().multiply(path))
+  # Physical element labels must win over collapsed-array naming heuristics.
+  # Distinct placements make retargeting to occurrence1 observable in world XYZ.
+  for flag in [False,True]:
+   array=doc.addObject('App::Link','Collision'+str(int(flag)));root.addObject(array);array.setLink(definition);array.ShowElement=True;array.LinkTransform=flag;array.ElementCount=2
+   array.ElementList[0].Placement=place(3,5,7,11);array.ElementList[1].Placement=place(10,2,9,24);doc.recompute()
+   array.ElementList[1].Label='Other '+array.Name;array.ElementList[0].Label=array.Name+'_i1'
+   report.setdefault('element_labels',{})[array.Name]=[(e.Name,e.Label) for e in array.ElementList]
+   token='$'+array.Name+'_i1';element,_=array.getSubObject(token+'.',1,App.Matrix(),True)
+   check(array.Name+' physical label oracle selects element0',element==array.ElementList[0])
+   sub=token+'.'+inner.Name+'.'+point.Name+'.';target,path=array.getSubObject(sub,1,App.Matrix(),True);target,path=target.getLinkedObject(True,path,False)
+   check(array.Name+' physical label oracle reaches point',target==point)
+   exercise(array.Name+' physical alias label',array,sub,point,root.getGlobalPlacement().toMatrix().multiply(path))
+  # A bounded naming-pattern index outside the actual array count falls back
+  # to a linked definition label, through occurrence0, in the native resolver.
+  original_label=definition.Label
+  for array in array_contexts:
+   if array.ShowElement:continue
+   definition.Label=array.Name+'_i2';doc.recompute();sub='$'+definition.Label+'.'+inner.Name+'.'+point.Name+'.'
+   target,path=array.getSubObject(sub,1,App.Matrix(),True);target,path=target.getLinkedObject(True,path,False)
+   check(array.Name+' out of range alias label oracle reaches point',target==point)
+   exercise(array.Name+' fallback direct',array,sub,point,root.getGlobalPlacement().toMatrix().multiply(path))
+   sub=array.Name+'.'+sub;target,path=root.getSubObject(sub,1,App.Matrix(),True);target,path=target.getLinkedObject(True,path,False)
+   check(array.Name+' fallback group oracle reaches point',target==point)
+   exercise(array.Name+' fallback group',root,sub,point,parent.getGlobalPlacement().toMatrix().multiply(path))
+  definition.Label=original_label;doc.recompute()
+  solid=doc.addObject('Part::Feature','Solid');solid.Shape=Part.makeBox(3,5,7)
+  for expanded in [False,True]:
+   array=doc.addObject('App::Link','ConfiguredArray'+str(int(expanded)));root.addObject(array);array.setLink(solid,'',['Face1','Face3']);array.ShowElement=expanded;array.ElementCount=2;doc.recompute()
+   check(array.Name+' native occurrence exists',array.getSubObject('1.',1,App.Matrix(),True) is not None)
+   before=state(doc);row=None
+   try:row=json.loads(native.geometryDescriptor(doc.Name,array.Name,'1.'))
+   except (ValueError,RuntimeError) as exc:report['errors'][array.Name]=str(exc)
+   check(array.Name+' selected occurrence retains configured faces',row is not None and len(row['geometry_data']['members'])==1 and [r['subelement'] for r in leaves(row)]==['Face1','Face3'])
+   check(array.Name+' configured selection preserves source',state(doc)==before)
+  suppressed=doc.addObject('App::Link','SuppressedSolid');root.addObject(suppressed);suppressed.setLink(solid);suppressed.ShowElement=True;suppressed.ElementCount=2;doc.recompute();suppressed.ElementList[1].Suppressed=True;doc.recompute()
+  for obj,sub in [(suppressed,'1.Face1'),(root,suppressed.Name+'.1.Face1')]:
+   check(obj.Name+' suppressed Face1 native invalid',obj.getSubObject(sub,1,App.Matrix(),True) is None)
+   before=state(doc);rejected=False
+   try:native.geometryDescriptor(doc.Name,obj.Name,sub)
+   except (ValueError,RuntimeError):rejected=True
+   check(obj.Name+' suppressed Face1 rejected',rejected)
+   check(obj.Name+' suppressed Face1 preserves source',state(doc)==before and suppressed.ElementList[1].Suppressed)
+  for array in array_contexts:
+   if not array.ShowElement:continue
+   sub='1.'+definition.Name+'.'+definition.Name+'.'+inner.Name+'.'+point.Name+'.'
+   check(array.Name+' repeated definition is native invalid',array.getSubObject(sub,1,App.Matrix(),True) is None)
+   before=state(doc);rejected=False
+   try:native.geometryDescriptor(doc.Name,array.Name,sub)
+   except (ValueError,RuntimeError):rejected=True
+   check(array.Name+' repeated definition rejected',rejected)
+   check(array.Name+' repeated definition preserves source',state(doc)==before)
+   element=array.ElementList[1];element.Suppressed=True;doc.recompute();sub='1.'+inner.Name+'.'+point.Name+'.'
+   check(array.Name+' suppressed member is native invalid',array.getSubObject(sub,1,App.Matrix(),True) is None)
+   before=state(doc);rejected=False
+   try:native.geometryDescriptor(doc.Name,array.Name,sub)
+   except (ValueError,RuntimeError):rejected=True
+   check(array.Name+' suppressed member rejected',rejected)
+   check(array.Name+' suppressed member preserves source',state(doc)==before)
+   element.Suppressed=False;doc.recompute()
+  for obj,sub in [(root,'Missing.Member.'),(root,'a.'*65),(root,'x'*4097),(root,array_contexts[0].Name+'.9999999999999999999999.'),(array_contexts[0],'2.Inner.Member.'),(array_contexts[0],array_contexts[0].Name+'_i9999999999999999999999.Inner.Member.'),(array_contexts[2],'$Missing.Inner.Member.')]:
+   before=state(doc);rejected=False
+   try:native.geometryDescriptor(doc.Name,obj.Name,sub)
+   except (ValueError,RuntimeError):rejected=True
+   check(obj.Name+' invalid '+sub[:65]+' rejected',rejected)
+   check(obj.Name+' invalid '+sub[:65]+' leaves source unchanged',state(doc)==before)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

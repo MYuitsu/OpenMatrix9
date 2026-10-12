@@ -1,0 +1,1228 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-11T07:13:51+07:00",
+  "scope": "Bounded independent Rust saved Surface History options/group metadata admission, fixed scalar ABI and current-native rail closure before existing Loft/Sweep solvers; full RCORE-01 remains in progress.",
+  "chapter_status": "in_progress",
+  "remaining": [
+    "Original global conversion/deviation bounds, full-domain parameter correspondence and all-family GeometryResult consumers.",
+    "Uniform attributes/preservation, native source identity/lock/revision/generation, cancellation/cache/transaction contracts across all enabled entry points.",
+    "Original representation families and adapters1–7, C01–C12, T01–T11 final acceptance, including aggregate native/worker budgets.",
+    "Standalone raw JSON construction/serialization and unrelated legacy native readers are outside this bounded saved-reader checkpoint."
+  ],
+  "source_fingerprints": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceHistory.cpp",
+      "bytes": 17497,
+      "sha256": "7d857d9a7327eb8f88bdccf0075bc31d85e2b21792f329dd2af455cfa405b76c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceHistory.h",
+      "bytes": 2209,
+      "sha256": "586c68b2d79a8acc0bbe68dc7919ac6902a0c94a955d6cdd00a6ea44dd466fd4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/NativeSurfaceHistoryRequest.h",
+      "bytes": 1201,
+      "sha256": "200aff078d1086dda9e8619b6c42363cd8b4636fdda2450e9b0d358cb552dbdf"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CMakeLists.txt",
+      "bytes": 8612,
+      "sha256": "1088635a562cc138312307ce519589e29a5d3ae29b26c5d3c684eb97ee40adbd"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceGeometry.cpp",
+      "bytes": 25090,
+      "sha256": "7741ab2fa184a9726aacaebba007b2abb9ad6c80ac7fce920cee5cdd9d34e8a2"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceGeometry.h",
+      "bytes": 1540,
+      "sha256": "f2851b8ca438874810ae8ee73b206c65a0ffd1be23748ee761cf64c5ee5cc2ae"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/NativeSurfaceRequest.h",
+      "bytes": 1074,
+      "sha256": "415d24352d1b66e0a5edae124b2c02205ac07f1a66db99af60f1765f975b26d6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/surface_history.rs",
+      "bytes": 7904,
+      "sha256": "1f51a89cff3b65e0cdceeb3681aff7a775e53529a7f71666990f4a0c28a4e201"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/native_surface_capability.rs",
+      "bytes": 7877,
+      "sha256": "44e973805fd6b9fc7e2a07aa6a78e78180d207b492e486c29365ef0c4f4e4c13"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/builder_history.rs",
+      "bytes": 15975,
+      "sha256": "3929d2440613a0e26ef062b03bb1b9707c83598105b0f2600acbed776f545a35"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/lib.rs",
+      "bytes": 2246,
+      "sha256": "2948064a400f5f6ec1e01143c3b6167fcebddc5eb02c8ceb2084cc6205294196"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/surface_history.rs",
+      "bytes": 7494,
+      "sha256": "972afbb4223babf0631fbd8c89ecedd0da1269c83325d562937fd6f93d51ed9d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_surface_history_admission_smoke.FCMacro",
+      "bytes": 7238,
+      "sha256": "ac505266a2c21215e261e36e38bca6c78484f5081a0db032dcdcf6f12559a894"
+    }
+  ],
+  "runtime": {
+    "plugin": {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-runtime1-20261011/bin/OpenMatrix9Gui.pyd",
+      "bytes": 15286272,
+      "sha256": "6534bf47b9336fbfff10538ddbaf2fbcef557b134c4bf4fe46ebfc69c2416d98"
+    },
+    "host": {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    "worker": {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-runtime1-20261011/bin/OM9ThreeDmImportWorker.exe",
+      "bytes": 10267136,
+      "sha256": "3c5077eecfd56ad636388d4abf72fce8d953238fe6b5381804da6a709e6d2961"
+    }
+  },
+  "validation": {
+    "host_checks": 698,
+    "host_runs": [
+      {
+        "name": "green1",
+        "directory": "H:\\FreeCAD-src\\build\\surface-history-admission-green1-r4-20261011",
+        "checks": 55,
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-green1-r4-20261011/fixture.FCMacro",
+            "bytes": 7238,
+            "sha256": "ac505266a2c21215e261e36e38bca6c78484f5081a0db032dcdcf6f12559a894"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-green1-r4-20261011/host-stderr.log",
+            "bytes": 4448,
+            "sha256": "d3e949d1bf135621c0f943961c88e693072bd6c6a72824adea7b2294b58b0d82"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-green1-r4-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-green1-r4-20261011/prepare-test.FCMacro",
+            "bytes": 332,
+            "sha256": "3d50f7e38ea4cdef3251afd839f7a7b8d870102fb09f31e4e583e00daf68e432"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-green1-r4-20261011/results.json",
+            "bytes": 7581,
+            "sha256": "45df7f2044427560b4752299be81f366bebe3189b9af725d6ee581a82b076061"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-green1-r4-20261011/select-plugin.FCMacro",
+            "bytes": 961,
+            "sha256": "b64a60d0968c936bd0c71bd2932623dcd952892b0cf338c9e22846f30938230c"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-green1-r4-20261011/shared-host-launch.json",
+            "bytes": 584,
+            "sha256": "de02200d73c304083e3a4d84f9e3ce55383b8b6c6bd49dbec81fee43963090e2"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-green1-r4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-green1-r4-20261011/user.cfg",
+            "bytes": 16865,
+            "sha256": "ed8e6109672617eb5f5e9b033fe70c448ac874e4de725a28ca27538b74958fa3"
+          }
+        ]
+      },
+      {
+        "name": "commands1",
+        "directory": "H:\\FreeCAD-src\\build\\surface-history-admission-commands1-r4-20261011",
+        "checks": 97,
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-commands1-r4-20261011/fixture.FCMacro",
+            "bytes": 13772,
+            "sha256": "386e0ac64e5a8dc96a1ecb2517ba00c4f3b5b29f5a5904eaea18d897a837533a"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-commands1-r4-20261011/host-stderr.log",
+            "bytes": 3862,
+            "sha256": "7bd05af04c3ad43954abc853a7f7296ddbd044c3697130acbfb48356a2ffc8ac"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-commands1-r4-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-commands1-r4-20261011/OM9-SURFACE-001.FCStd",
+            "bytes": 19142,
+            "sha256": "e4831318fd105b19ef76dba69eeb05423f000fb5b8cf0d3949ec8b692eb5fcec"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-commands1-r4-20261011/OM9-SURFACE-003.FCStd",
+            "bytes": 20193,
+            "sha256": "6e9483b3c85a1da3a1c18af2a50e60090a25c43b0978c345042d58dca52b1b5a"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-commands1-r4-20261011/OM9-SURFACE-009.20261011-070943.FCBak",
+            "bytes": 22525,
+            "sha256": "ad008373f82ecfda5ffa040283da4b0ff0e0101576e9db731a2664e3ee07d79e"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-commands1-r4-20261011/OM9-SURFACE-009.FCStd",
+            "bytes": 16359,
+            "sha256": "55f48f1e954f05630c4ef33e03b50ef5e853330a513e8046724c8adff64fe111"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-commands1-r4-20261011/prepare-test.FCMacro",
+            "bytes": 335,
+            "sha256": "89f62513cb5768b2992ce3af635251005e1561ea2084facc882c2ea2afcbd1bb"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-commands1-r4-20261011/results.json",
+            "bytes": 11137,
+            "sha256": "bab7b82af6c3cbf349a079344d994720f45d20f96812dc85780fb7d768fb2d2f"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-commands1-r4-20261011/select-plugin.FCMacro",
+            "bytes": 964,
+            "sha256": "d3042cb6ff8132919df0c306e8919a36dee3b776d7ac45930a4eb8ed9e9b3476"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-commands1-r4-20261011/shared-host-launch.json",
+            "bytes": 587,
+            "sha256": "49dfd6417381a20716974a4a8447376e610645c13c66d60556fcda71f05469aa"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-commands1-r4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-commands1-r4-20261011/user.cfg",
+            "bytes": 16994,
+            "sha256": "39a25d38b9c7845839d5e1a0f75075165d50fff77ce13ca9beed4c94893ca303"
+          }
+        ]
+      },
+      {
+        "name": "options1",
+        "directory": "H:\\FreeCAD-src\\build\\surface-history-admission-options1-r4-20261011",
+        "checks": 180,
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/ChainedRail.FCStd",
+            "bytes": 13562,
+            "sha256": "651c9a8986980b6852af8ad8445808d82d6175a897989b67ee83917fb8022ac8"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/ClosedRebuild.FCStd",
+            "bytes": 22387,
+            "sha256": "c64748fb30c894976a04083696a53f56aacb979701420b944d4faaee6be95df1"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/ClosedSweep1.FCStd",
+            "bytes": 32948,
+            "sha256": "2aa068b8417427f871c208a571391b48b4f107383ad97951b88af65e07fdd691"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/ClosedSweep2.FCStd",
+            "bytes": 37112,
+            "sha256": "6fd12488bf64c21fd8e37f8cafc61d111060cb277059f13ac2ca30537693966d"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/fixture.FCMacro",
+            "bytes": 19702,
+            "sha256": "10a51c532ec4a18382611e982d025920ac3c5f98208156d423002f73fe1adbd9"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/host-stderr.log",
+            "bytes": 9615,
+            "sha256": "8842be81d5de06f00ec8c8055c982790fd99265b80eb5fff3f9e169b555ad5d4"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/LoftDevelopable.FCStd",
+            "bytes": 16199,
+            "sha256": "087676268c615eb3e154df6fd0274f6b2f5c0a5c2ff618321f5a648a7952b9f3"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/LoftLoose.FCStd",
+            "bytes": 16130,
+            "sha256": "5b148874290ca1c8468056485b84a457efc650facc6c96d98c030b5ddd4993a1"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/LoftTight.FCStd",
+            "bytes": 16132,
+            "sha256": "c2e32b52a3682bf8da7f670a3ae0c605302a496998307a3f75aa8b4b7043bd23"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/LoftUniform.FCStd",
+            "bytes": 16254,
+            "sha256": "96c0eccf7601f0ed7b980e3e37fc4ba35e9b59da1d0fe001c509cfb5916eb670"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/MaintainHeightFalse.FCStd",
+            "bytes": 22420,
+            "sha256": "974fdcc434767ad4171385dba81a7e6ec19a7869ba42bfc670d4ce625a5eb3e4"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/MaintainHeightTrue.FCStd",
+            "bytes": 22658,
+            "sha256": "4f3b2e1de9debe7be4f37237861c7109244cccd16e3887c7e882bcd6abbcec83"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/prepare-test.FCMacro",
+            "bytes": 334,
+            "sha256": "1283b248311a714964ded17e3f672af3cd92fdd7ecbec2808e9b79c23ed0418e"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/results.json",
+            "bytes": 17028,
+            "sha256": "bda016bdd08abdb75d7a44d30ef9484e9d3e9536298ef68ad3a3cc8ee80ce6d1"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/SectionRebuild.FCStd",
+            "bytes": 16950,
+            "sha256": "d502ece817d463481f2b27a1d7aee26a9ea976ed5a6de674e5d46ab76ef01448"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/select-plugin.FCMacro",
+            "bytes": 963,
+            "sha256": "670b9b09703ec243cac7d8cc01647bd6f7ad8e34aa2304a5be4cf3a81af23a60"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/shared-host-launch.json",
+            "bytes": 586,
+            "sha256": "706da626ac36035f3296ac575a9de7ce39e404daf4bbf9a77beed33a6f8de248"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-options1-r4-20261011/user.cfg",
+            "bytes": 16992,
+            "sha256": "c05a8b6a9b70b5468a455793f464e7829646698f4074cf5361211b249cc86e8f"
+          }
+        ]
+      },
+      {
+        "name": "advanced1",
+        "directory": "H:\\FreeCAD-src\\build\\surface-history-admission-advanced1-r4-20261011",
+        "checks": 108,
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/ClosedHistory1.FCStd",
+            "bytes": 33052,
+            "sha256": "5e4bf6299458171b6fc920e5cc55ea03b6b6658475605820efa9f8381c121a2c"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/ClosedHistory2.FCStd",
+            "bytes": 37227,
+            "sha256": "ceb693e6f73459bd9447554a454d108b957585087945692cdb9876cb8ffc39f3"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/fixture.FCMacro",
+            "bytes": 15284,
+            "sha256": "c25e9a78e04faf9c5e20b1fcd8ec9e9c7cbc528e6df2447575314530321c6d35"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/gvSweep2History.FCStd",
+            "bytes": 19438,
+            "sha256": "770bc047ec635ab22cec3fa3f13c9f3b6c39609e1d8c55ddea5190578f538918"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/gvSweepHistory.FCStd",
+            "bytes": 17105,
+            "sha256": "0b4598b1fbd6c8bdd7d02990af0bf6ece10ba7105b489535fced4884321227fa"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/HistoryCheckbox.FCStd",
+            "bytes": 15004,
+            "sha256": "cdc952b19a592730654e5e9dc49a9b71d6badd73847de32685b2b4956e1d356d"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/host-stderr.log",
+            "bytes": 6066,
+            "sha256": "62735b782b03dfed349ff5bdc8824b4ad05ab9eb4964806456710bae37ff8838"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/prepare-test.FCMacro",
+            "bytes": 335,
+            "sha256": "e99ec5fa7da56a09412c9f60c808b64324cdcbbf53835c942c561ca417c684d7"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/RefitOpen.FCStd",
+            "bytes": 20109,
+            "sha256": "58aa4437c0813573540ee0b54e53c41f48c1bc44a1b147be4daf27cb8f402bf3"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/results.json",
+            "bytes": 12745,
+            "sha256": "0f2eca7f07b61647298f8c3e92aa82512e6df0bc225e6dd7d746b6294289714b"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/select-plugin.FCMacro",
+            "bytes": 964,
+            "sha256": "60fe3c343c989756e9beb84217026cc60ba9975895758d8eb77b8e89665a0ceb"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/shared-host-launch.json",
+            "bytes": 587,
+            "sha256": "d1da4ad6320408e71a193178a1c40ac678597fb0b7fbea4ad4210448e8de297e"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/SlashFrames.FCStd",
+            "bytes": 28467,
+            "sha256": "7b38ce5c38674ab1437d534239ba8fb1c859a65f1686afe042e7dfad9d091357"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-advanced1-r4-20261011/user.cfg",
+            "bytes": 16994,
+            "sha256": "4483f22e63d602465da46b44c832c34c66d412a319d97bde1d20451704b8ba22"
+          }
+        ]
+      },
+      {
+        "name": "constraints1",
+        "directory": "H:\\FreeCAD-src\\build\\surface-history-admission-constraints1-r4-20261011",
+        "checks": 85,
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-constraints1-r4-20261011/fixture.FCMacro",
+            "bytes": 18060,
+            "sha256": "4967ea143ea170fe5097b660f5134db784e6827ee0b4d0bb102df29a0cba3192"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-constraints1-r4-20261011/host-stderr.log",
+            "bytes": 6490,
+            "sha256": "8e9381d0e5e7fa034d00746cc7027d206e858d8632c5a79e4e020cd10a37f6fd"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-constraints1-r4-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-constraints1-r4-20261011/prepare-test.FCMacro",
+            "bytes": 338,
+            "sha256": "4b7c0f0cdcc919eaf06d69b98852db6905b56f6e0692bf5b50e47ceb8ccb77c9"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-constraints1-r4-20261011/progress.json",
+            "bytes": 9355,
+            "sha256": "c2a2dbf621577e5834d230a50ff006301fa7cb86fb19f8b2f35cf3b8af556142"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-constraints1-r4-20261011/results.json",
+            "bytes": 9370,
+            "sha256": "44d366037eeacc26ff6898662f2c30c658b186a607823d594bb3562ee223e8f4"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-constraints1-r4-20261011/select-plugin.FCMacro",
+            "bytes": 967,
+            "sha256": "8cae229ea3d36e61e1789eef08380e5ee27541e7d3aabc3d32fb43b7ed5be585"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-constraints1-r4-20261011/shared-host-launch.json",
+            "bytes": 589,
+            "sha256": "faf25d8a568c86a27b31944bb45e1731031329d36de3d9d0b4366ea4787c5061"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-constraints1-r4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-constraints1-r4-20261011/user.cfg",
+            "bytes": 17000,
+            "sha256": "52c545fee094b9b4558817db41d502cab4c94e8848bfaf76892c94c4d14a7b7b"
+          }
+        ]
+      },
+      {
+        "name": "history1",
+        "directory": "H:\\FreeCAD-src\\build\\surface-history-admission-history1-r4-20261011",
+        "checks": 65,
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-history1-r4-20261011/fixture.FCMacro",
+            "bytes": 12363,
+            "sha256": "7e603d0a2017d09406f0edf90ad75eeeb654eb95f2ea8b02008a1f81c92c76f0"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-history1-r4-20261011/host-stderr.log",
+            "bytes": 6945,
+            "sha256": "93c2e92b33ccd5d5008953832cbf0521e8224c858017f5375780f3338e512b63"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-history1-r4-20261011/host-stdout.log",
+            "bytes": 5409,
+            "sha256": "4a82c53eeb26c79cc904cca6c21bac86d5adefeb77c5df5e126afbdf925d6356"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-history1-r4-20261011/prepare-test.FCMacro",
+            "bytes": 334,
+            "sha256": "aa0b957f7c1b3dfd2e1bb41d084f09eac00e7bd195031653c22cc8df30542346"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-history1-r4-20261011/results.json",
+            "bytes": 7016,
+            "sha256": "8168aff922e8a5d7cf395fed0d125d0d9d830650b78d1b94b0a76e5c6555d79f"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-history1-r4-20261011/select-plugin.FCMacro",
+            "bytes": 963,
+            "sha256": "ee19a2afd9080a45254c564929718ddb866d4380566f476c13b534716477b6ec"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-history1-r4-20261011/shared-host-launch.json",
+            "bytes": 586,
+            "sha256": "cc6e3095d698e5fc0441131722101b06e08d6dd8bf76c2340ee706abd0eec691"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-history1-r4-20261011/surface-history-1.FCStd",
+            "bytes": 9571,
+            "sha256": "a273646aebcd35d600ad0d8607a17ba36fd17a3be4b072d6a8a30f497e955f09"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-history1-r4-20261011/surface-history-2.FCStd",
+            "bytes": 30681,
+            "sha256": "f919978eb07cf991fe47c3e5cb2ae99aacdafe9d2c6998951b0f02f294abc995"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-history1-r4-20261011/surface-history-3.FCStd",
+            "bytes": 10180,
+            "sha256": "d368ac5b00687dfaf3ab2d7765b407fd5c376a11635ee793edf82790b492d861"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-history1-r4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-history1-r4-20261011/user.cfg",
+            "bytes": 16869,
+            "sha256": "1d63f4b8252a97652983eb860891f249dfd8940f7d08c880d4264c8e6707d952"
+          }
+        ]
+      },
+      {
+        "name": "cold-sweep1",
+        "directory": "H:\\FreeCAD-src\\build\\surface-history-admission-cold-sweep1-r4-20261011",
+        "checks": 3,
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep1-r4-20261011/fixture.FCMacro",
+            "bytes": 12363,
+            "sha256": "7e603d0a2017d09406f0edf90ad75eeeb654eb95f2ea8b02008a1f81c92c76f0"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep1-r4-20261011/host-stderr.log",
+            "bytes": 547,
+            "sha256": "e538897693129f36e4f056ac4d5224daeb8e677b8688aa7e3eaf477fa6bb0994"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep1-r4-20261011/host-stdout.log",
+            "bytes": 608,
+            "sha256": "d4c436034c76e9b7ce5f3d7a999b6043239646ead03a85e7aac7c82010c44a43"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep1-r4-20261011/prepare-test.FCMacro",
+            "bytes": 476,
+            "sha256": "c651994605ae17557df56709522a50d8ef2f6004c44fea93ee14c1cda8e8e487"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep1-r4-20261011/results.json",
+            "bytes": 434,
+            "sha256": "4afef52bd35ffcf35de793efeb0991081ed5d3890da782339a2a08210911b599"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep1-r4-20261011/select-plugin.FCMacro",
+            "bytes": 966,
+            "sha256": "bc92a98cba99365829be2066edb0957cb6ff9d044416981dd9464d9317814377"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep1-r4-20261011/shared-host-launch.json",
+            "bytes": 589,
+            "sha256": "80d8ef04f6612c71395992f63c074d35bc9ff661379f296fd251e2accc9f5b49"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep1-r4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep1-r4-20261011/user.cfg",
+            "bytes": 16301,
+            "sha256": "4d6398164cc309a3d7df18363a8d79a271ada911c257e84a1b7569e619b3db74"
+          }
+        ]
+      },
+      {
+        "name": "cold-sweep2",
+        "directory": "H:\\FreeCAD-src\\build\\surface-history-admission-cold-sweep2-r4-20261011",
+        "checks": 3,
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep2-r4-20261011/fixture.FCMacro",
+            "bytes": 12363,
+            "sha256": "7e603d0a2017d09406f0edf90ad75eeeb654eb95f2ea8b02008a1f81c92c76f0"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep2-r4-20261011/host-stderr.log",
+            "bytes": 547,
+            "sha256": "3fd60622fa5f6b145a56ec1451cd6e8ad8c1984137762bd2122e8bcd19b18323"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep2-r4-20261011/host-stdout.log",
+            "bytes": 608,
+            "sha256": "d4c436034c76e9b7ce5f3d7a999b6043239646ead03a85e7aac7c82010c44a43"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep2-r4-20261011/prepare-test.FCMacro",
+            "bytes": 476,
+            "sha256": "10b8e80d306d6ece01abda71818eaccaedca467da0af5e033c5852deac229f52"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep2-r4-20261011/results.json",
+            "bytes": 434,
+            "sha256": "4afef52bd35ffcf35de793efeb0991081ed5d3890da782339a2a08210911b599"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep2-r4-20261011/select-plugin.FCMacro",
+            "bytes": 966,
+            "sha256": "cc849a66a98fdaaddd342ea24a8653253470c664c9b74975aaac768179588473"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep2-r4-20261011/shared-host-launch.json",
+            "bytes": 589,
+            "sha256": "3b36fd31b72b50460cc1ec697b99207f416b7b736ba113260f8ebf9af233c96c"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep2-r4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-sweep2-r4-20261011/user.cfg",
+            "bytes": 16300,
+            "sha256": "fa7b612984fdaa60183aef063befd4611710c1c081e005aeabace7f4751207e1"
+          }
+        ]
+      },
+      {
+        "name": "cold-loft1",
+        "directory": "H:\\FreeCAD-src\\build\\surface-history-admission-cold-loft1-r4-20261011",
+        "checks": 3,
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-loft1-r4-20261011/fixture.FCMacro",
+            "bytes": 12363,
+            "sha256": "7e603d0a2017d09406f0edf90ad75eeeb654eb95f2ea8b02008a1f81c92c76f0"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-loft1-r4-20261011/host-stderr.log",
+            "bytes": 546,
+            "sha256": "94f29d61ebb66f796831ea6a9901b70c9bd55cca3870d1cda5eef7aa9d7aac68"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-loft1-r4-20261011/host-stdout.log",
+            "bytes": 608,
+            "sha256": "d4c436034c76e9b7ce5f3d7a999b6043239646ead03a85e7aac7c82010c44a43"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-loft1-r4-20261011/prepare-test.FCMacro",
+            "bytes": 475,
+            "sha256": "6b26d8ce37e0ede1b71add87979d3a334535ce120fd192266e6409dbcfbc3206"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-loft1-r4-20261011/results.json",
+            "bytes": 434,
+            "sha256": "4afef52bd35ffcf35de793efeb0991081ed5d3890da782339a2a08210911b599"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-loft1-r4-20261011/select-plugin.FCMacro",
+            "bytes": 965,
+            "sha256": "62fb89dc854dec04e4e86864ed24b1f94df46a25986360efb4cb15f9a96c671e"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-loft1-r4-20261011/shared-host-launch.json",
+            "bytes": 588,
+            "sha256": "174e376e3a3f53bbfdea973d447fa44f6b6f3cf35a1ded2335350d0a5483eff5"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-loft1-r4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-cold-loft1-r4-20261011/user.cfg",
+            "bytes": 16299,
+            "sha256": "ec284bb50e59be66668717cda4225ea898132a09b91779b05ee2328ba248acb1"
+          }
+        ]
+      },
+      {
+        "name": "policy1",
+        "directory": "H:\\FreeCAD-src\\build\\surface-history-admission-policy1-r4-20261011",
+        "checks": 29,
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-policy1-r4-20261011/fixture.FCMacro",
+            "bytes": 2760,
+            "sha256": "3fad4e75985dd3b42c6529dea003153a42c260a2deee695cdbfcfd39cca16088"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-policy1-r4-20261011/host-stderr.log",
+            "bytes": 226,
+            "sha256": "afefc2a8bf5fc47a590ea6867f1b0d2b89967bfa4f5e987351a100072f148934"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-policy1-r4-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-policy1-r4-20261011/prepare-test.FCMacro",
+            "bytes": 333,
+            "sha256": "a01f92069a7cdabeafc8eedfd84a2f8cd6ee5da464534682b7be293473895db7"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-policy1-r4-20261011/results.json",
+            "bytes": 2992,
+            "sha256": "ed3fb6dab0a151dcda835064a2fe4e9b2439ba2c9373eecca3c95d8028764aa4"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-policy1-r4-20261011/select-plugin.FCMacro",
+            "bytes": 962,
+            "sha256": "cf32a8a513249ba4c15a0076dbba2e7d5bcf1f536ade467dad1c5c00b7009d68"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-policy1-r4-20261011/shared-host-launch.json",
+            "bytes": 585,
+            "sha256": "69f2a86a05d36c93273b69e96ece4138921bc2872960e8750151d344a69768d6"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-policy1-r4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-policy1-r4-20261011/user.cfg",
+            "bytes": 15636,
+            "sha256": "f52e156cf7dec4cb1a1c3f585a2ea4fdf778e4d3e659ec141b828122ae765c13"
+          }
+        ]
+      },
+      {
+        "name": "diagnostics1",
+        "directory": "H:\\FreeCAD-src\\build\\surface-history-admission-diagnostics1-r4-20261011",
+        "checks": 6,
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r4-20261011/fixture.FCMacro",
+            "bytes": 2679,
+            "sha256": "4c08bc3d822c5943a811ac7c837aad34bcd00a1441dd0a4849b8e98482b18296"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r4-20261011/host-stderr.log",
+            "bytes": 329,
+            "sha256": "0d23d63cf5ea3092f1e2114a9e4070c4b0ea1eb863ae9d070eaf407fd218b7f8"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r4-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r4-20261011/prepare-test.FCMacro",
+            "bytes": 338,
+            "sha256": "d99a141869d5e868daf76a29eec1875ef237c355d7b2312dc6ad8ba9146207be"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r4-20261011/results.json",
+            "bytes": 1993,
+            "sha256": "b86f54857e821d19ea52bbeb97e41bddaae4f8129ae1779209761938ea41a6a9"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r4-20261011/select-plugin.FCMacro",
+            "bytes": 967,
+            "sha256": "7c13f5d7d3f2b3cc7b4213c7fd88565837056df38c2b55bd9d433d934270cd87"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r4-20261011/shared-host-launch.json",
+            "bytes": 590,
+            "sha256": "811303da4c515c1f0001a19f7ecac1029d61cd6f3f879e7bbcf470fe1c28e19d"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r4-20261011/user.cfg",
+            "bytes": 16303,
+            "sha256": "0f089fb061054a0cdff0c9956a275bb09059cd0fa91d5ed9783fe77f9858b45b"
+          }
+        ]
+      },
+      {
+        "name": "builder1",
+        "directory": "H:\\FreeCAD-src\\build\\surface-history-admission-builder1-r4-20261011",
+        "checks": 17,
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-builder1-r4-20261011/builder-conversion.FCStd",
+            "bytes": 37855,
+            "sha256": "951a00f7f0610c5f89f4d77f178366d14b3501ccffc9bbd668f6cb937fce76f3"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-builder1-r4-20261011/fixture.FCMacro",
+            "bytes": 5583,
+            "sha256": "1b88f9aaefa7776477a12a696ba014cb5a09e413df25c985e5da9195fcfc726e"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-builder1-r4-20261011/host-stderr.log",
+            "bytes": 275,
+            "sha256": "2dc26e437f81246cb358fcb78718347525acb3fe1777766fc915e8b81910daa0"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-builder1-r4-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-builder1-r4-20261011/prepare-test.FCMacro",
+            "bytes": 334,
+            "sha256": "dbd205f34e055bdff42622f44a91d4479ecc39c373e0c5cda934228bc49c5ca5"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-builder1-r4-20261011/results.json",
+            "bytes": 1943,
+            "sha256": "909c332440818ca9369654a7caf453d4516a3d70b922c248e1747a4f75eb047e"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-builder1-r4-20261011/select-plugin.FCMacro",
+            "bytes": 963,
+            "sha256": "e8413d84b90b85d973c47000e3a4e8cef7a385d7d15e5c77ff585d4f7a8f4c2f"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-builder1-r4-20261011/shared-host-launch.json",
+            "bytes": 586,
+            "sha256": "3bad9ea65cf741eac23e4e4dbc158cf01daaf220ab1ff6dfc91858db6c045b1e"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-builder1-r4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-builder1-r4-20261011/user.cfg",
+            "bytes": 16870,
+            "sha256": "5e16bff5a8021ace46eede818fe927bbcf05fd3052baa468e5828df9188593d5"
+          }
+        ]
+      },
+      {
+        "name": "prepared1",
+        "directory": "H:\\FreeCAD-src\\build\\surface-history-admission-prepared1-r4-20261011",
+        "checks": 47,
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-prepared1-r4-20261011/fixture.FCMacro",
+            "bytes": 6964,
+            "sha256": "541fabe7b08e2e739e77927f70f33833f7a9993250cdbb3541da1d82cf094ad4"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-prepared1-r4-20261011/host-stderr.log",
+            "bytes": 275,
+            "sha256": "2dc26e437f81246cb358fcb78718347525acb3fe1777766fc915e8b81910daa0"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-prepared1-r4-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-prepared1-r4-20261011/prepare-test.FCMacro",
+            "bytes": 335,
+            "sha256": "a2c6e176596ab52eff2ab0f57f7a0b6ff2124a8c269323f71820208328e92d53"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-prepared1-r4-20261011/prepared-results.FCStd",
+            "bytes": 33735,
+            "sha256": "3605a7d0a458f5ca358e84b249e2dffa06707895b8af1ed0c81115aa380b7a1f"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-prepared1-r4-20261011/results.json",
+            "bytes": 724283,
+            "sha256": "26681f2a756cc8c1e262ab2e823ab56accc6d9a4a6db4a4921a47d3ae1a44941"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-prepared1-r4-20261011/select-plugin.FCMacro",
+            "bytes": 964,
+            "sha256": "af878e4dbcdf14d8a5eb565292bd9ae9eab9380a6be5c1d316f5503444157bd0"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-prepared1-r4-20261011/shared-host-launch.json",
+            "bytes": 587,
+            "sha256": "6e09b6bf1d06d80c5986ffd7f9bc65fcbf0bb43e75f82ec549475731d0edc8fc"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-prepared1-r4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/surface-history-admission-prepared1-r4-20261011/user.cfg",
+            "bytes": 16872,
+            "sha256": "d95699d4ac18fb0c5802ae39421dc5bef590ea8911ea21b358043db46b32be1c"
+          }
+        ]
+      }
+    ],
+    "full_rust_tests": 767,
+    "full_rust_suites": 109,
+    "logs": [
+      {
+        "path": "H:/FreeCAD-src/build/surface-history-admission-rust3-20261011.log",
+        "bytes": 124663,
+        "sha256": "50fcc801dc40456411c22c78cefde93e52443a97f3f2e32954d5d7c4da4b4c87"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/surface-history-admission-rust3-20261011.log.exit.json",
+        "bytes": 24,
+        "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/surface-history-admission-build3-20261011.log",
+        "bytes": 3150,
+        "sha256": "a317e39d682973089b6fac81c00412d4daedf38a351a8f3d410bbbf16a13fdfa"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/surface-history-admission-build3-20261011.log.exit.json",
+        "bytes": 24,
+        "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+      }
+    ],
+    "public_source_audit": {
+      "source_files": 2456,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    }
+  },
+  "red_artifacts": [
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-red3-20261011/host-stderr.log",
+      "bytes": 2156,
+      "sha256": "8721be726299e0ff217691ada96e11f0ed38f98df9934fab84778f10a9fa0fd2"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-red3-20261011/host-stdout.log",
+      "bytes": 268,
+      "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-red3-20261011/results.json",
+      "bytes": 2181,
+      "sha256": "fbc4d6ada341969abea043180b2fd1f8da1cfdb939cde5fd4ed4af293d067712"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-red3-20261011/select-plugin.FCMacro",
+      "bytes": 951,
+      "sha256": "64c3d1149aa8370903478a8d41b654ca4a1f61c9a7d1d86f5965c50be39c572c"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-red3-20261011/shared-host-launch.json",
+      "bytes": 565,
+      "sha256": "4d1a36e2207c6c5a397fb2e15e63e51bbc96d9ac4d7089f75d756b4405267d92"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-red3-20261011/system.cfg",
+      "bytes": 1100,
+      "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-red3-20261011/user.cfg",
+      "bytes": 16482,
+      "sha256": "93a24a28402e932033021e4670e9a301897fb9ae59563f28dbea4470b80f6335"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-rail-red1-20261011/fixture.FCMacro",
+      "bytes": 5867,
+      "sha256": "616f3db3df510d6984288b349c5cb16eed96eabd0dffcfedc2e91af6cc87c7c1"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-rail-red1-20261011/host-stderr.log",
+      "bytes": 3363,
+      "sha256": "dee18d636bfd5c2562affce4c5762d9d8c8195408808b5262476c83f28d52a4a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-rail-red1-20261011/host-stdout.log",
+      "bytes": 268,
+      "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-rail-red1-20261011/results.json",
+      "bytes": 7290,
+      "sha256": "ea1850d72441aae078098a9e35fd41484bd9be9f39061b8512091958c7e64348"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-rail-red1-20261011/select-plugin.FCMacro",
+      "bytes": 956,
+      "sha256": "6cab977e07f3ce451967e4946e7a9e24de4d2195007c5d363e51dbb38777ea68"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-rail-red1-20261011/shared-host-launch.json",
+      "bytes": 584,
+      "sha256": "c2881be01109fd334a5ed3f5f8ddc4aba0ea1f9b00f818d45db6c4714d7386cf"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-rail-red1-20261011/system.cfg",
+      "bytes": 1100,
+      "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-rail-red1-20261011/user.cfg",
+      "bytes": 16865,
+      "sha256": "c553e6a13b458a1203eea54eddab1d486259aed0795a8caafa66ccc7a1b35d14"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r3-20261011/fixture.FCMacro",
+      "bytes": 2679,
+      "sha256": "4c08bc3d822c5943a811ac7c837aad34bcd00a1441dd0a4849b8e98482b18296"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r3-20261011/host-stderr.log",
+      "bytes": 330,
+      "sha256": "d4da45d4918a868e1375f27d14f96be4c25b0bbb0f0b797671e9ee73beaba697"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r3-20261011/host-stdout.log",
+      "bytes": 268,
+      "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r3-20261011/prepare-test.FCMacro",
+      "bytes": 338,
+      "sha256": "85b44104c8b59af05e6edc0350a1c5d2c45e6f53717526812a8b582df12aeab7"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r3-20261011/results.json",
+      "bytes": 1997,
+      "sha256": "f53bb43255e0a77dec7e0361f45383ea5f7402c1a0f222c91ab36db42097e110"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r3-20261011/select-plugin.FCMacro",
+      "bytes": 967,
+      "sha256": "75a332f3272f36dc0188dba5d15bade8550e5e3801eb1a920e71dfc8eb039264"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r3-20261011/shared-host-launch.json",
+      "bytes": 589,
+      "sha256": "00e07e27b988cdee2ae9325d9432128dd327414fa035f59721a5754359f21b7b"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r3-20261011/system.cfg",
+      "bytes": 1100,
+      "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/surface-history-admission-diagnostics1-r3-20261011/user.cfg",
+      "bytes": 16303,
+      "sha256": "aa6d5540f44e5be4235f01e4227a9c3f559d6da144e5dbfbf167d477d6ce86e5"
+    }
+  ],
+  "harness_fingerprints": [
+    {
+      "path": "H:/FreeCAD-src/build/run-surface-history-acceptance.ps1",
+      "bytes": 2709,
+      "sha256": "0098657da101a351cb8b01097f8ff2b1be6eaf697e5557e289e05a2c0105ed9d"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/run-surface-history-work.ps1",
+      "bytes": 997,
+      "sha256": "33ca82c0ee95b8fb7644c83f3fe143ff02b014a6cdc2b9b19b36963610368e1d"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/record-surface-history-progress.py",
+      "bytes": 16364,
+      "sha256": "83de3cc339a39f3451ca7199506a1da74fd6ed36168b3d845dc775773e811262"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/check-surface-history-progress.py",
+      "bytes": 3633,
+      "sha256": "744e84e2310dc73067914c4a5417fde368668e3b53cdc240d9a23838e1bdd3b1"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/build-om9-plugin.ps1",
+      "bytes": 4337,
+      "sha256": "736e748838818017ca216de22b389ac358fec6620e3bce1608bca8557d0ad742"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/run-om9-plugin.ps1",
+      "bytes": 5632,
+      "sha256": "32c9fcd34f6beb2770b4440f0bf3766fd51af49b817b21434c858d4b4a6ab020"
+    }
+  ],
+  "documentation_fingerprints": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/README.md",
+      "bytes": 106742,
+      "sha256": "b3af24d8d9cb377f427e1127df8b742a4cb74761d8387b4c704aa2ff612c9669"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md",
+      "bytes": 47707,
+      "sha256": "3280ed113a6b61bfb55d385026c5d9776a60135c02d45cb5fc26895ff8a66445"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/README.md",
+      "bytes": 50152,
+      "sha256": "cabe386467aa945d2cdc68b420dd75ac5c3c4a6086e90626e791471775a32fbb"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
+      "bytes": 57335,
+      "sha256": "ec49ac432fc7e2dfead898ecb4b06a0fe6bf8520f71b34bbc2a7bc5bee91f40c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/09-history-dependencies.md",
+      "bytes": 24365,
+      "sha256": "9aaf4028d013c893a5ebe07f30cccb346bb76b54b3aa44213bac8135e3a19a08"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/features/RCORE-01.md",
+      "bytes": 20903,
+      "sha256": "a1f51a4fccfa5485d25eebf713c710d4dc62cc20dd0c94d9cc6106cd411aeca7"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/03-surface/README.md",
+      "bytes": 5955,
+      "sha256": "189fcbdb4861f567a59e7aa334b5908e940c0d2440202490b794db2284d5ae56"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/features/OM9-SURFACE-001.md",
+      "bytes": 5316,
+      "sha256": "9a45476755a51d5180720c390a41877c4058097e0c1b462e96eef681dbecd9a5"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/features/OM9-SURFACE-002.md",
+      "bytes": 1895,
+      "sha256": "f312bd5bc08cee4c516d7a4a62fe4310716a704e8b8b070b530e17f622000fd1"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/features/OM9-SURFACE-003.md",
+      "bytes": 4298,
+      "sha256": "02d9df426e2bf497929baa1515fb00a676667f87b4afea5dda2d538b8b5f2ed3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/features/OM9-SURFACE-004.md",
+      "bytes": 1856,
+      "sha256": "93a133be63f08b7031f268cc8a5a30bb6c328a3dc6b4fbeba0723b19aaabdd9b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/features/OM9-SURFACE-009.md",
+      "bytes": 4409,
+      "sha256": "bdd3bc60c4781f4debae1c317bdede651fc607c52397259c1f20588140500b2d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/03-surface/om9-surface-001-sweep-1.md",
+      "bytes": 17602,
+      "sha256": "438a2902c563fd8bd8f15447e86085a0a76db6594d1847dcd4ed44452ec0bb0f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/03-surface/om9-surface-002-sweep-1-history.md",
+      "bytes": 9455,
+      "sha256": "c2a2985154cee026798a9a89d2be2ea78a46a046dc4a1e75879ce6b186fa3f12"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/03-surface/om9-surface-003-sweep-2.md",
+      "bytes": 16915,
+      "sha256": "9bb97854cb74201d0ceb6353da01325d2f8de17e1a1f16b59d9f66a966819517"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/03-surface/om9-surface-004-sweep-2-history.md",
+      "bytes": 9605,
+      "sha256": "5e6ae056b0722a065a00957d9b7b462b484eab66d85911e9d99285d557462ec5"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/03-surface/om9-surface-009-loft.md",
+      "bytes": 15844,
+      "sha256": "39689a8e6ff12a9ad9994ae9720a05f0f919e88b50bbab91ca24539fe43aa082"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-11-rhino-core-surface-history-admission.md",
+      "bytes": 4754,
+      "sha256": "d0fd8cec207d151d726defe7989f85746f1dc1d45a23ff555a2dfe1b36ea7f04"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/superpowers/plans/2026-10-10-rcore01-native-construction-capabilities.md",
+      "bytes": 44580,
+      "sha256": "cd1b21f2c4a6bbfef07395318007132d640209679757ad0074b3cd55e2d94c68"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/reviews/2026-10-11-surface-history-admission-review.md",
+      "bytes": 1298,
+      "sha256": "a8cbc01733a40c07731d6860c95f9f307b24f30b1c77492e418d373bba65f43d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/openmatrix9-progress.json",
+      "bytes": 260678,
+      "sha256": "472b245d429f49888357a0e21956c733773c8a6c7fb6511d33323fbb4e1cd1fc"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "bytes": 100829,
+      "sha256": "df7be10ac96e4997486943a6358b36a74129b7d3284f630a4cbe58aa01881aea"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/FEATURES.json",
+      "bytes": 1872102,
+      "sha256": "b749624401c478aa046cfc97c2783e5e00a11b47339a1678990130f5e30bb73a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/FEATURES.yaml",
+      "bytes": 1498020,
+      "sha256": "195d76d6dc370633cf341e0af0b7025e08f76b9d82ac9bea0b04f07793018663"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/MANIFEST.json",
+      "bytes": 116505,
+      "sha256": "feec11bcd9e91a2194660074ddb7de600b8dfbcc9463e2025f07fd4fa69a5ec2"
+    }
+  ]
+}

@@ -40,6 +40,7 @@
 #include <algorithm>
 #include <memory>
 #include <limits>
+#include "CoreLayers.h"
 namespace {
 Gui::View3DInventor* containing(QObject* object){
     auto* widget=qobject_cast<QWidget*>(object);auto* doc=Gui::Application::Instance->activeDocument();if(!widget||!doc)return nullptr;
@@ -99,6 +100,8 @@ void CoreMouse::select(const QPoint& point,bool rectangle){
         // Native crossing tests geometry. Its window mode tests centers; remove
         // partial objects to obtain Rhino's full-window containment behavior.
         Gui::applyBoxSelection(viewer,{viewer->fromQPoint(anchor),viewer->fromQPoint(point)},(modifiers&3)==3,(modifiers&1)!=0);
+        for(const auto& selection:Gui::Selection().getSelectionT(name,Gui::ResolveMode::NoResolve))
+            if(!CoreLayers::objectEditable(selection.getObject()))Gui::Selection().rmvSelection(name,selection.getObjectName().c_str(),selection.getSubName().c_str());
         if(point.x()>=anchor.x()){
             const QRect rect=QRect(anchor,point).normalized();auto selected=Gui::Selection().getSelectionT(name,Gui::ResolveMode::NoResolve);
             for(const auto& selection:selected){if((modifiers&1)&&std::find(previous.begin(),previous.end(),selection)!=previous.end())continue;auto* object=selection.getObject();if(!object)continue;auto* provider=dynamic_cast<Gui::ViewProviderDocumentObject*>(target->getGuiDocument()->getViewProvider(object));if(!provider)continue;
@@ -113,7 +116,7 @@ void CoreMouse::select(const QPoint& point,bool rectangle){
     }
     std::unique_ptr<SoPickedPoint> picked(viewer->pickPoint(viewer->fromQPoint(point)));
     auto* provider=picked?dynamic_cast<Gui::ViewProviderDocumentObject*>(viewer->getViewProviderByPath(picked->getPath())):nullptr;
-    if(!provider||!provider->isSelectable()||!provider->getObject()){if(modifiers==0)Gui::Selection().clearSelection(name);return;}
+    if(!provider||!CoreLayers::objectEditable(provider->getObject())){if(modifiers==0)Gui::Selection().clearSelection(name);return;}
     auto* object=provider->getObject();std::string sub;
     if((modifiers&3)==3)provider->getElementPicked(picked.get(),sub);
     if(modifiers==2)Gui::Selection().rmvSelection(name,object->getNameInDocument());

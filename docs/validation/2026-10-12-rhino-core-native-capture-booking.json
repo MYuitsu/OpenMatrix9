@@ -1,0 +1,553 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-native-capture-booking-20261012",
+  "status": "in_progress",
+  "goal_complete": false,
+  "updated_at": "2026-10-12T08:21:58+07:00",
+  "sources": [
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.cpp",
+      "bytes": 38944,
+      "sha256": "a1acc2d84bea82b54662ed3894a64fb39638cd3246a0c0835c79acfe3999801d"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.h",
+      "bytes": 14667,
+      "sha256": "77329e67cfb39827dca543a5940b4ec0a84a6d6367c25ab1ce1ae2ae41133fde"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/private/PropertyReplay.h",
+      "bytes": 9158,
+      "sha256": "29dac4dacd62ed5aa5a9858cc7e34b44a160001ce4421487bba27f9054167d07"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Document.cpp",
+      "bytes": 161324,
+      "sha256": "c0e0f477bc25f83a585255ce26af2f10c92a0eb7e1dca09a555b341727397ef9"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Document.h",
+      "bytes": 58644,
+      "sha256": "24ed1a2d1d8dae30e10d525ab5e3275d4abfdf1dabc6f3b964f94a1e19c05ac1"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/native/property_merge_probe.cpp",
+      "bytes": 15289,
+      "sha256": "b167aea1d9f4c9e054ce00eb21e21a78e0d2201257acf93d3b829dfe09dd2a66"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_property_merge_smoke.FCMacro",
+      "bytes": 969,
+      "sha256": "4a6eb7dd2610cd330c6874aae24d2e853b0bc0e36fc8c4622f45d3de3064c6de"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_replay_booking_policy_smoke.FCMacro",
+      "bytes": 2731,
+      "sha256": "0be00cc3537a669cd42878b73304de730840d1be98c43a6e949f0c98cd42dd3d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistory.cpp",
+      "bytes": 36343,
+      "sha256": "52203b1abdbad0d43df716c96f0481e0847c64cb33df0f23ac16b2c6b6170079"
+    }
+  ],
+  "selected_app": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-booking141-20261012/FreeCADApp.dll",
+    "bytes": 7826944,
+    "sha256": "2e6f57828496f35fbbb629b155ba345c95d27a6d57de63fa1418796dd58ff15e"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-booking141-20261012/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "plugin": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-runtime138/bin/OpenMatrix9Gui.pyd",
+    "bytes": 13597696,
+    "sha256": "21e877833e581d7dbbed75e3d93613bd858496664914bbc6a7564ca525fcbcbe"
+  },
+  "plugin_import_app": "App135",
+  "loaded_app": "App141",
+  "compatibility": {
+    "plugin_runtime": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-runtime138",
+    "plugin_import_app": "App135",
+    "loaded_app": "App141",
+    "source_delta": [
+      "H:/FreeCAD-src/src/App/private/PropertyReplay.h"
+    ],
+    "public_headers_unchanged": true,
+    "private_pimpl_implementation_only": true,
+    "complete_abi_certificate": false
+  },
+  "matching_manifest": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/native-app-sdk141.json",
+    "bytes": 35289,
+    "sha256": "2a67bd96cd69b818058cad0e0a7b1675a10929e4b7a80a8fe20c1e666acf93b5"
+  },
+  "builds": [
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-capture135-20261012",
+      "exit_code": 0,
+      "inputs": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-capture135-20261012/inputs.json",
+        "bytes": 44234,
+        "sha256": "d2d9b2145f2711b2906887c5db2310ad6257148d508ed57d7f4f6c9cc1830850"
+      },
+      "receipt": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-capture135-20261012/build.exit.json",
+        "bytes": 124,
+        "sha256": "fac0ec6f50a93f9f01fd68f970fa9038e847138b91ee16e5f71df9c854f49c5c"
+      },
+      "compile_log": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-capture135-20261012/compile.log",
+        "bytes": 238,
+        "sha256": "8f536ec4afd5166382abcee463568f374d6dd7d8e02389a2ea8c0fb149bb2178"
+      },
+      "link_log": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-capture135-20261012/link.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "shared_sdk_outputs_unchanged": true,
+      "compiler_dependency_certificate": false
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-booking141-20261012",
+      "exit_code": 0,
+      "inputs": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-booking141-20261012/inputs.json",
+        "bytes": 44234,
+        "sha256": "6de0cc7d5e51d880f7681e19434b2084cda190241945c2ba3fe121ec04a6c821"
+      },
+      "receipt": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-booking141-20261012/build.exit.json",
+        "bytes": 115,
+        "sha256": "aabd71610ad28bef13c68afd8648d1e9e44a56886ded044d0c6a8a896bf2a14a"
+      },
+      "compile_log": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-booking141-20261012/compile.log",
+        "bytes": 183,
+        "sha256": "46c51fd4bcfc33337217faaa0fcce2da48b23080c231b3354a08f67f8d43ffca"
+      },
+      "link_log": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-booking141-20261012/link.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "shared_sdk_outputs_unchanged": true,
+      "compiler_dependency_certificate": false
+    }
+  ],
+  "hosts": [
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic143-offscreen-20261012",
+      "checks": 432,
+      "passed": 432,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic143-offscreen-20261012/results.json",
+          "bytes": 186745,
+          "sha256": "992d15abc93f51959d9033a660403b0d1a30d1b3c75ed44f735d4afebe1482ca"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic143-offscreen-20261012/shared-host-launch.json",
+          "bytes": 650,
+          "sha256": "b02090b9255313854f8297f64ab3057ce5a5f5da408853ab4db3f5596aaaac05"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic143-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "3c859912c14844e279ef1b99412959b43221654a80d035ce280c3bf67e4dd354"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic143-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic143-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "0af78a6127bfb884ba361667f348af01eb3236afe1b19e65feb194878671c46b"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic143-offscreen-20261012/host-stderr.log",
+          "bytes": 64328,
+          "sha256": "b1d52ecdc3a57915832d723a0b534482b5dcf0372ddcc6e1d3bbf20dc8dc7ce9"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic143-offscreen-20261012/startup.log",
+          "bytes": 161767,
+          "sha256": "d960aa45572dd9a14248e4ca64b46306d8b4cf4d4a6dd4aa92fa3a454ad88023"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close143-offscreen-20261012",
+      "checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close143-offscreen-20261012/results.json",
+          "bytes": 593,
+          "sha256": "da12b204e6c2a92ea56f72c4aa345fa09d0f33d4933a5779faa888a76150152f"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close143-offscreen-20261012/shared-host-launch.json",
+          "bytes": 649,
+          "sha256": "b0332fc466218ae9812cee95bd73adeb61e1cd05fc662a34dccd35b2d621af2f"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close143-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "3c859912c14844e279ef1b99412959b43221654a80d035ce280c3bf67e4dd354"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close143-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close143-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "0af78a6127bfb884ba361667f348af01eb3236afe1b19e65feb194878671c46b"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close143-offscreen-20261012/host-stderr.log",
+          "bytes": 2839,
+          "sha256": "521c83b6f0a87c78a2c6e3ab8a94781ffbabfea4641e672793c417d9e8d155eb"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close143-offscreen-20261012/startup.log",
+          "bytes": 43405,
+          "sha256": "78577e8ae916343e3a28d70f3cdb81e3f7f23307adc2005900e7119a9f2da258"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes143-offscreen-20261012",
+      "checks": 109,
+      "passed": 109,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes143-offscreen-20261012/results.json",
+          "bytes": 21970,
+          "sha256": "5ce2b8060737c7d89e8afaa542b313a22115ac62ea8e047d44b87161a186e032"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes143-offscreen-20261012/shared-host-launch.json",
+          "bytes": 649,
+          "sha256": "68955ef426a7d0b91d2b42ec1bc58c76a4b2ebc66a6df2229071ef9f41191ed0"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes143-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "3c859912c14844e279ef1b99412959b43221654a80d035ce280c3bf67e4dd354"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes143-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes143-offscreen-20261012/host-stdout.log",
+          "bytes": 15285,
+          "sha256": "38310de269c46136f403774a3031a235d3de78856a63b7586696f49057716de4"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes143-offscreen-20261012/host-stderr.log",
+          "bytes": 38117,
+          "sha256": "ca4bdf0e92a991df618a08d478ff346673af9f8dddbe8e4183891f8704b325ac"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes143-offscreen-20261012/startup.log",
+          "bytes": 118416,
+          "sha256": "26b4423db8e2ac00a6f8788e9a3e805d8e971f17f83048c230504ea33babea1a"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result143-offscreen-20261012",
+      "checks": 33,
+      "passed": 33,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result143-offscreen-20261012/results.json",
+          "bytes": 454441,
+          "sha256": "cb6c8e3b8d38ab6df53874a1af10aef532854a6c9536752af3ce0ab4fc316ff8"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result143-offscreen-20261012/shared-host-launch.json",
+          "bytes": 650,
+          "sha256": "e8e5dc2704f9b2c33a864025a392d531cd9cc5f77d89a4f0bb157011aeb309d4"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result143-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "3c859912c14844e279ef1b99412959b43221654a80d035ce280c3bf67e4dd354"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result143-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result143-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "0af78a6127bfb884ba361667f348af01eb3236afe1b19e65feb194878671c46b"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result143-offscreen-20261012/host-stderr.log",
+          "bytes": 7155,
+          "sha256": "aa904f811db5e62b2b49e4dce66a7198bb3fd813a827dc1745a3b1d51a0d005e"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result143-offscreen-20261012/startup.log",
+          "bytes": 50383,
+          "sha256": "febf64d36fd25e4f88a7bfafb4b199e573ce39ba8a7b4ea62e926cbc389097a7"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/capture-green143-offscreen-20261012",
+      "checks": 34,
+      "passed": 34,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": false,
+      "unhandled_lines": [
+        "Unhandled std::exception caught in GUIApplication::notify.",
+        "The error message is: resource deadlock would occur: resource deadlock would occur"
+      ],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/capture-green143-offscreen-20261012/results.json",
+          "bytes": 4014,
+          "sha256": "450710dbd9c44938c267e0bf34e911c0ac22634931c7aa8c6058471117dac6c6"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/capture-green143-offscreen-20261012/shared-host-launch.json",
+          "bytes": 640,
+          "sha256": "104ed7d1feb6b694d38d0ea9341ca617bebee814d10a5e1fb1b147ea68fe4c90"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/capture-green143-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "3c859912c14844e279ef1b99412959b43221654a80d035ce280c3bf67e4dd354"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/capture-green143-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/capture-green143-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "0af78a6127bfb884ba361667f348af01eb3236afe1b19e65feb194878671c46b"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/capture-green143-offscreen-20261012/host-stderr.log",
+          "bytes": 1088,
+          "sha256": "010e946fd5519db2a3157d62ea2116944d9fa4bf89bdaf2f6254a3fc785d7217"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/capture-green143-offscreen-20261012/startup.log",
+          "bytes": 40357,
+          "sha256": "417d2e6c838860a79050347fde27e2e4080192a405f523a6e39b03138ea0cb1a"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/booking-green142-offscreen-20261012",
+      "checks": 80,
+      "passed": 80,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/booking-green142-offscreen-20261012/results.json",
+          "bytes": 47293,
+          "sha256": "bd14a50b6facb410d86fb5865ac3b852face291dbebc41ed224ea0d4d44080ce"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/booking-green142-offscreen-20261012/shared-host-launch.json",
+          "bytes": 640,
+          "sha256": "192ff8a805329dcb5567a8c736c141a71d3bf7232c6ecfb8a684ee1bf64018b2"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/booking-green142-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "3c859912c14844e279ef1b99412959b43221654a80d035ce280c3bf67e4dd354"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/booking-green142-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/booking-green142-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "0af78a6127bfb884ba361667f348af01eb3236afe1b19e65feb194878671c46b"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/booking-green142-offscreen-20261012/host-stderr.log",
+          "bytes": 5941,
+          "sha256": "faca0a524b57d8b31fd1c04b1a7800307f2c3945e1174d2d4aabf73e4c9656fd"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/booking-green142-offscreen-20261012/startup.log",
+          "bytes": 56971,
+          "sha256": "93d112f5f0da92f2ac8169142f13197beb723a0dd20f6154ed0497db729c0216"
+        }
+      ]
+    }
+  ],
+  "checks": 692,
+  "clean_hosts": 5,
+  "capture_red": {
+    "artifact": "C:/Users/nguye/.codex/om9-native-tests/capture-red134-offscreen-20261012",
+    "checks": 34,
+    "passed": 31,
+    "exit_code": 0,
+    "unhandled_runtime": true
+  },
+  "capture_timeout": {
+    "artifact": "C:/Users/nguye/.codex/om9-native-tests/capture-red133-offscreen-20261012",
+    "terminal": {
+      "accepted": false,
+      "has_exited": true,
+      "pid": 76492,
+      "reason": "Startup/fixture timeout, owned handle killed"
+    },
+    "accepted": false
+  },
+  "booking_red": {
+    "artifact": "C:/Users/nguye/.codex/om9-native-tests/booking-policy-red140-offscreen-20261012",
+    "checks": 80,
+    "passed": 77,
+    "failed": 3,
+    "exit_code": 0,
+    "runtime_gate_clean": true,
+    "unhandled_lines": [],
+    "files": [
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/booking-policy-red140-offscreen-20261012/results.json",
+        "bytes": 47406,
+        "sha256": "1f352091da0d78e9abd43b46f2291c41065124394a33a8bef899dd10bdbd59a7"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/booking-policy-red140-offscreen-20261012/shared-host-launch.json",
+        "bytes": 645,
+        "sha256": "ce3fcc1d3ccabf845019b4ced726c56f860f59bbca06bce30b340ab40f5bffc6"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/booking-policy-red140-offscreen-20261012/loaded-native-app.json",
+        "bytes": 249,
+        "sha256": "522573bfb57b29c82ac60e613a888d89716d2a88a899166c2e49b87807162dc2"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/booking-policy-red140-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/booking-policy-red140-offscreen-20261012/host-stdout.log",
+        "bytes": 373,
+        "sha256": "7429864a7b4a93724da83f7b73ea9f38679cacb37bdb9f35197e3c6b6c6e836f"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/booking-policy-red140-offscreen-20261012/host-stderr.log",
+        "bytes": 5941,
+        "sha256": "faca0a524b57d8b31fd1c04b1a7800307f2c3945e1174d2d4aabf73e4c9656fd"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/booking-policy-red140-offscreen-20261012/startup.log",
+        "bytes": 57026,
+        "sha256": "cc6c260f7c56daa015f6fbae377dda7ec4eb419bf7aea372ebcf909a0217a5e8"
+      }
+    ]
+  },
+  "string_scope": {
+    "artifact": "C:/Users/nguye/.codex/om9-native-tests/capture-scope139-offscreen-20261012",
+    "checks": 744,
+    "passed": 744,
+    "failed": 0,
+    "exit_code": 0,
+    "runtime_gate_clean": false,
+    "unhandled_lines": [
+      "Unhandled std::exception caught in GUIApplication::notify.",
+      "The error message is: resource deadlock would occur: resource deadlock would occur"
+    ],
+    "files": [
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/capture-scope139-offscreen-20261012/results.json",
+        "bytes": 144664,
+        "sha256": "4eac2d8d641756c0be983d99e030ca73447a82da1d258b38c5fd9852dc78dbb1"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/capture-scope139-offscreen-20261012/shared-host-launch.json",
+        "bytes": 640,
+        "sha256": "33dd05a8d96625529913f2d9614c4b18edb406c2ea9f8006dab3698e637e576f"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/capture-scope139-offscreen-20261012/loaded-native-app.json",
+        "bytes": 249,
+        "sha256": "522573bfb57b29c82ac60e613a888d89716d2a88a899166c2e49b87807162dc2"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/capture-scope139-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/capture-scope139-offscreen-20261012/host-stdout.log",
+        "bytes": 373,
+        "sha256": "7429864a7b4a93724da83f7b73ea9f38679cacb37bdb9f35197e3c6b6c6e836f"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/capture-scope139-offscreen-20261012/host-stderr.log",
+        "bytes": 16992,
+        "sha256": "872b8ab7128472056e10ea134071d105b7f67ad9be783dcf5be41286593f82b5"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/capture-scope139-offscreen-20261012/startup.log",
+        "bytes": 94496,
+        "sha256": "507d8afc6b313e14098266671988feea0a2ae1b1b86a6b90f697ccc2b8737985"
+      }
+    ]
+  },
+  "string_scope_error_phase": "initial macro/workbench handling before OpenMatrix9 native load; cause unresolved",
+  "prior_shutdown_attribution_corrected": true,
+  "rust_rerun": false,
+  "remaining": [
+    "Native journal capture now stages metadata/copy and object records before publishing. Named first/later/removal Copy exceptions and retry first-write behavior pass34. App135 capture136 is clean; App141 capture143 again logs initial macro/workbench resource deadlock despite all34 assertions and host0. Complete dynamic removal, null capture, allocation failures, rename/move capture and native status/cache semantics are not certified by this cohort.",
+    "Named native comparison across plain/booked/active/preserving, UndoMode0/1 and commit/abort/Undo/Redo passes80. Regular accepted first-write now discards prior Redo; preserving booking retains its existing policy. Global/multidocument descriptors and participants, signalOpen callback state and every native history API remain open.",
+    "Commit journal retirement and private property destruction callbacks still occur after transfer/completion; latch rejection, reversible transfer and complete lifecycle protection through release require further native tests and implementation. Tasks2/3 and complete savepoint acceptance remain open.",
+    "Native String scope744 passes assertions but logs unhandled resource deadlock during initial macro/workbench handling. Earlier checkpoints described this as shutdown; current startup.log orders it before OpenMatrix9 native load, while host shutdown is normal. The exact cause is unresolved. Double OM9 workbench registration also appears in shared-host initialization; four named Circle/Curve hosts have no unhandled/deadlock but that does not certify all startup paths.",
+    "All original RCORE01 requirements remain authoritative: adapters1-7,C01-C12,T01-T11; stable refs/world transforms/owned geometry-topology-attributes-units; all rational/periodic curves/surfaces/UV trim/pcurve/seam families; deviation/locus/parameter maps; operation/representation/options/backend registry; GeometryResult for all enabled consumers; worker ownership and aggregate allocation/traversal/cancellation; checked publication/History/cache/locks/lifetime; solid validity/manifold/cavities; independent read/edit/retain/export; generic Snap/mouse/render/persistence/lifecycle. No original scope is reduced.",
+    "Rust suite was not rerun in this checkpoint. Original raw native offset-D3 discrepancy remains RED and unchanged; plugin build source candidates are not a full compiler dependency, ABI or peak-allocation certificate."
+  ],
+  "next_action": "Add native journal retirement/destruction callback witnesses and reversible acceptance where needed; audit exact descriptors/multidocument participants and budgets. Diagnose initial macro/workbench deadlock with its real phase, then continue complete original RCORE01 acceptance."
+}

@@ -14,6 +14,9 @@ extern "C" {
 int om9_cage_box_parameters(const double*,const double*,std::size_t*,std::size_t*);
 int om9_cage_box_fill(const std::size_t*,const std::size_t*,const double*,const double*,double*,std::size_t,double*,std::size_t,double*,std::size_t,double*,std::size_t,double*);
 int om9_cage_create(const Om9CageDescriptor*,Om9CageHandle**);
+// Synchronous borrowed values only; neither query retains native storage.
+int om9_cage_validate_descriptor(const Om9CageDescriptor*,const double*);
+int om9_cage_binding_admit(const double*,std::size_t,const double*,std::size_t,const void*,std::size_t,unsigned,bool);
 int om9_cage_create_placed(const Om9CageDescriptor*,const double*,Om9CageHandle**);
 void om9_cage_destroy(Om9CageHandle*);
 int om9_cage_deform(const Om9CageHandle*,const double*,std::size_t,double*,std::size_t);

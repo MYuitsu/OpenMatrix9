@@ -1,0 +1,143 @@
+"""Real FitPoints admission, identity and source/Undo/Redo preservation."""
+import json, math, os, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part, Points, Mesh, OpenMatrix9Gui
+from PySide6 import QtCore, QtGui, QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+report={'checks':[],'module':OpenMatrix9Gui.__file__,'diagnostics':[]}
+def check(name,value): report['checks'].append({'name':name,'passed':bool(value)})
+def events(): QtWidgets.QApplication.processEvents()
+def enter(text=''):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    if text: QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));events()
+def cancel():
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Escape,QtCore.Qt.NoModifier));events()
+def state(doc,source):
+    if 'Shape' in source.PropertiesList: geometry=source.Shape.exportBrepToString()
+    elif 'Points' in source.PropertiesList: geometry=tuple(tuple(p) for p in source.Points.Points)
+    else: geometry=repr(source.Mesh.Topology)
+    return tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount,geometry
+def rejection(command,family):
+    doc=App.newDocument('FitAdmission'+command+family);doc.UndoMode=1
+    doc.openTransaction('Source')
+    if family=='Poles':
+        curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots(
+            [App.Vector(0,0,0),App.Vector(1e151,1,0),App.Vector(2,0,0)],
+            [3,3],[0.,1.],False,2)
+        source=doc.addObject('Part::Feature','BadPoles');source.Shape=curve.toShape()
+    elif family=='LargePoles':
+        curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots(
+            [App.Vector(i,0,0) for i in range(1025)], [2]+[1]*1023+[2],
+            list(range(1025)),False,1)
+        source=doc.addObject('Part::Feature','LargePoles');source.Shape=curve.toShape()
+    elif family=='Surface':
+        surface=Part.BSplineSurface();surface.buildFromPolesMultsKnots(
+            [[App.Vector(i,j,0) for j in range(513)] for i in range(2)],
+            [2,2],[2]+[1]*511+[2],[0.,1.],list(range(513)),False,False,1,1)
+        source=doc.addObject('Part::Feature','LargeSurface');source.Shape=surface.toShape()
+    elif family=='Cloud':
+        source=doc.addObject('Points::Feature','LargeCloud')
+        source.Points=Points.Points([App.Vector(i,0,0) for i in range(1025)])
+    else:
+        source=doc.addObject('Mesh::Feature','LargeMesh')
+        source.Mesh=Mesh.Mesh([(App.Vector(3*i,0,0),App.Vector(3*i+1,1,0),App.Vector(3*i+2,0,0)) for i in range(342)])
+    doc.recompute();doc.commitTransaction()
+    doc.openTransaction('Redo witness');source.Label='Executable Redo';doc.commitTransaction();doc.undo()
+    before=state(doc,source)
+    console.clear();Gui.Selection.clearSelection();Gui.Selection.addSelection(source,'Face1' if family=='Surface' else '')
+    enter(command);enter('FitPoints');enter('Selection' if command=='Circle' else '')
+    diagnostic=console.toPlainText();report['diagnostics'].append(dict(command=command,family=family,text=diagnostic))
+    check(command+' '+family+' has typed operation/source diagnostic',any(
+        all(s in line for s in ('InvalidBasis',command,'FitPoints',source.Name))
+        for line in diagnostic.splitlines()))
+    check(command+' '+family+' rejection preserves source objects Undo and Redo',state(doc,source)==before)
+    cancel();doc.redo()
+    check(command+' '+family+' preserves executable Redo',source.Label=='Executable Redo')
+    App.closeDocument(doc.Name)
+def cumulative(command):
+    doc=App.newDocument('FitCumulative'+command);doc.UndoMode=1
+    sources=[]
+    for name,count in [('CloudA',513),('CloudB',512)]:
+        source=doc.addObject('Points::Feature',name)
+        source.Points=Points.Points([App.Vector(i,0,0) for i in range(count)]);sources.append(source)
+    doc.recompute()
+    before=(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount)
+    console.clear();Gui.Selection.clearSelection()
+    for source in sources: Gui.Selection.addSelection(source)
+    enter(command);enter('FitPoints');enter('Selection' if command=='Circle' else '')
+    message=console.toPlainText()
+    check(command+' cumulative count identifies the overflowing second source',any(
+        all(s in line for s in ('InvalidBasis',command,'FitPoints','CloudB')) for line in message.splitlines()))
+    check(command+' cumulative rejection preserves document and Undo/Redo',before==(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount))
+    cancel()
+    check(command+' cumulative rejection preserves both clouds',len(sources[0].Points.Points)==513 and len(sources[1].Points.Points)==512)
+    App.closeDocument(doc.Name)
+def boundary(command):
+    doc=App.newDocument('FitBoundary'+command);doc.UndoMode=1
+    local=[(3,0,0),(0,3,0),(-3,0,0),(0,-3,0)] if command=='Circle' else [(1,1,1),(1,-1,-1),(-1,1,-1),(-1,-1,1)]
+    source=doc.addObject('Points::Feature','BoundaryCloud');source.Points=Points.Points([App.Vector(*p) for p in local]*256)
+    source.Placement.Base=App.Vector(5,6,7)
+    group=doc.addObject('App::Part','Parent');group.Group=[source];group.Placement.Base=App.Vector(10,20,30)
+    doc.recompute();before=tuple(tuple(p) for p in source.Points.Points);count=len(doc.Objects)
+    Gui.Selection.clearSelection();Gui.Selection.addSelection(source)
+    enter(command);enter('FitPoints');enter('Selection' if command=='Circle' else '')
+    if command=='Circle':enter()
+    output=next((o for o in doc.Objects if o!=source and 'Shape' in o.PropertiesList),None)
+    radius=3 if command=='Circle' else math.sqrt(3)
+    center=App.Vector(15,26,37)
+    valid=output is not None and not output.Shape.isNull() and output.Shape.isValid()
+    if valid:
+        geometry=output.Shape.Edges[0].Curve if command=='Circle' else output.Shape.Faces[0].Surface
+        actual_radius=geometry.Radius
+        report.setdefault('boundary_measurements',[]).append(dict(command=command,objects=len(doc.Objects),before=count,
+            center=list(geometry.Center),bounding_box_center=list(output.Shape.BoundBox.Center),expected=list(center),radius=actual_radius,expected_radius=radius,
+            source_transform=list(source.Placement.Base),global_transform=list(source.getGlobalPlacement().Base)))
+        # Analytic center/radius are authoritative; tessellated bounding boxes
+        # can be asymmetric and are not a geometry-precision measurement.
+        valid=(geometry.Center-center).Length<1e-6 and abs(
+            actual_radius-radius)<1e-6
+    check(command+' accepts 1024 points with own and parent placement exactly once',len(doc.Objects)==count+1 and valid)
+    check(command+' boundary fit preserves its source points',tuple(tuple(p) for p in source.Points.Points)==before)
+    output_name=output.Name if output is not None else ''
+    doc.undo();undone=len(doc.Objects)==count;doc.redo();restored=doc.getObject(output_name)
+    check(command+' boundary fit supports Undo/Redo',undone and len(doc.Objects)==count+1 and restored is not None and not restored.Shape.isNull())
+    cancel();App.closeDocument(doc.Name)
+def typed_overflow(command):
+    doc=App.newDocument('FitTypedBudget'+command);doc.UndoMode=1
+    source=doc.addObject('Points::Feature','TypedBudgetCloud')
+    source.Points=Points.Points([App.Vector(i,0,0) for i in range(1024)]);doc.recompute()
+    before=(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount)
+    Gui.Selection.clearSelection();Gui.Selection.addSelection(source)
+    console.clear();enter(command);enter('FitPoints');enter('0,0,0');enter('Selection')
+    message=console.toPlainText()
+    check(command+' typed plus selected count identifies the overflowing source',any(
+        all(s in line for s in ('InvalidBasis',command,'FitPoints','TypedBudgetCloud')) for line in message.splitlines()))
+    check(command+' typed plus selected rejection preserves document Undo/Redo',before==(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount))
+    enter('2,0,0');enter('0,2,0');enter()
+    output=next((o for o in doc.Objects if o!=source and 'Shape' in o.PropertiesList),None)
+    valid=output is not None and not output.Shape.isNull()
+    if valid:
+        geometry=output.Shape.Edges[0].Curve if command=='Circle' else output.Shape.Faces[0].Surface
+        valid=(geometry.Center-App.Vector(1,1,0)).Length<1e-6 and abs(geometry.Radius-math.sqrt(2))<1e-6
+    check(command+' failed selected batch preserves typed points for retry',len(doc.Objects)==len(before[0])+1 and valid)
+    cancel();App.closeDocument(doc.Name)
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        if console is None: raise RuntimeError('Command transcript unavailable')
+        for command in ('Circle','Sphere'):
+            for family in ('Poles','Cloud','Mesh','LargePoles'): rejection(command,family)
+            if command=='Circle':rejection(command,'Surface')
+            cumulative(command);boundary(command);typed_overflow(command)
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:
+        report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()): App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

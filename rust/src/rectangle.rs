@@ -8,7 +8,7 @@ pub enum Mode {
     ThreePoint,
     Vertical,
 }
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug, PartialEq)]
 pub struct Rectangle {
     pub mode: Mode,
     pub length: Option<f64>,

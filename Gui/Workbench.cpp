@@ -160,12 +160,8 @@ Gui::MenuItem* Workbench::setupMenuBar() const
 
 Gui::ToolBarItem* Workbench::setupToolBars() const
 {
-    // Exchange is visible without opening the sidebar's File group.
-    auto* root=Gui::StdWorkbench::setupToolBars();
-    auto* exchange=new Gui::ToolBarItem(root);
-    exchange->setCommand("3DM");
-    *exchange << "Import3dm" << "Export3dm";
-    return root;
+    // Exchange commands remain in the menu and sidebar File group.
+    return Gui::StdWorkbench::setupToolBars();
 }
 
 

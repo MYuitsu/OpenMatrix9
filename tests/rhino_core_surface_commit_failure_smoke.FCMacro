@@ -1,0 +1,154 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Exercise actual native before/close commit failures through Surface commands."""
+import gc
+import json
+import os
+import sys
+import traceback
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+import OpenMatrix9Gui as OM
+from PySide6 import QtCore, QtGui, QtWidgets
+
+sys.path.insert(0, os.environ['OM9_PUBLICATION_FAULT_DIR'])
+import OM9PublicationFault as Fault
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = dict(module=OM.__file__, probe=Fault.__file__, checks=[], observations=[])
+
+def check(name, value):
+    report['checks'].append(dict(name=name, passed=bool(value)))
+
+def events():
+    QtWidgets.QApplication.processEvents()
+
+def enter(console, text=''):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_End, QtCore.Qt.ControlModifier))
+    if text:
+        QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+            QtCore.QEvent.KeyPress, 0, QtCore.Qt.NoModifier, text))
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_Return, QtCore.Qt.NoModifier))
+    events()
+
+def snapshot(doc):
+    return tuple((obj.Name, obj.Label,
+        tuple(obj.Placement.toMatrix().A) if 'Placement' in obj.PropertiesList else None,
+        obj.Shape.exportBrepToString() if 'Shape' in obj.PropertiesList else None,
+        getattr(obj, 'OM9GeometryResult', None)) for obj in doc.Objects), doc.UndoCount, doc.RedoCount
+
+cases = [(kind, history, stage) for kind in [1, 2, 3]
+         for history in [False, True] for stage in ['before', 'close']]
+current = {}
+console = None
+
+def save_and_close():
+    report['ok'] = not report.get('error') and all(row['passed'] for row in report['checks'])
+    (out / 'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+    QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+def next_case():
+    try:
+        if not cases:
+            save_and_close()
+            return
+        kind, history, stage = cases.pop(0)
+        operation = ['Sweep1', 'Sweep2', 'Loft'][kind - 1]
+        label = operation + (' History ' if history else ' Plain ') + stage
+        doc = App.newDocument('SurfaceCommit' + str(kind) + str(int(history)) + stage)
+        current.clear()
+        current.update(doc=doc, operation=operation, label=label)
+        doc.UndoMode = 1
+        sources = []
+        def line(name, a, b):
+            obj = doc.addObject('Part::Feature', name)
+            obj.Shape = Part.makeLine(App.Vector(*a), App.Vector(*b))
+            sources.append(obj)
+        if kind == 3:
+            line('First', (0, 0, 0), (0, 3, 0))
+            line('Last', (10, 0, 0), (10, 3, 0))
+        else:
+            line('Rail', (0, 0, 0), (10, 0, 0))
+            if kind == 2:
+                line('SecondRail', (0, 3, 0), (10, 3, 0))
+            line('Profile', (0, 0, 0), (0, 3, 0))
+        witness = doc.addObject('App::FeaturePython', 'Witness')
+        doc.recompute()
+        doc.openTransaction('Prior executable Redo')
+        witness.Label = 'Prior value'
+        doc.commitTransaction()
+        doc.undo()
+        current.update(before=snapshot(doc), sources=sources,
+                       identities=[(obj.Name, obj) for obj in doc.Objects])
+        Gui.Selection.clearSelection()
+        for obj in sources:
+            Gui.Selection.addSelection(obj)
+        console.clear()
+        Gui.runCommand(['OM9_SurfaceSweepSweep1Rail', 'OM9_SurfaceSweepSweep2Rails',
+                        'OM9_SurfaceLoft'][kind - 1])
+        events()
+        enter(console)
+        dialog = next(widget for widget in Gui.getMainWindow().findChildren(
+            QtWidgets.QDialog, 'OM9SurfaceOptions') if widget.isVisible())
+        dialog.findChild(QtWidgets.QCheckBox, 'OM9SurfaceHistory').setChecked(history)
+        current['button'] = dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok)
+        Fault.arm(stage, doc.Name, sources[-1].Name)
+        # Install verification BEFORE the native click. A Base::Exception may
+        # unwind that Qt callback; the separate event still examines real state.
+        QtCore.QTimer.singleShot(400, verify_case)
+        QtCore.QTimer.singleShot(0, attempt_commit)
+    except Exception:
+        report['error'] = traceback.format_exc()
+        save_and_close()
+
+def attempt_commit():
+    current['button'].click()
+
+def verify_case():
+    doc = current['doc']
+    try:
+        gc.collect()
+        before, after = current['before'], snapshot(doc)
+        error = console.toPlainText()
+        status, refs = Fault.status(), Fault.counts()
+        label, operation, sources = current['label'], current['operation'], current['sources']
+        report['observations'].append(dict(case=label, error=error, fault=status, refs=refs,
+            before_undo=before[1], after_undo=after[1], before_redo=before[2], after_redo=after[2],
+            model_restored=before[0] == after[0]))
+        check(label + ' actual native fault fires exactly once', status['calls'] == 1 and not status['armed'])
+        check(label + ' error includes typed code operation and every source',
+              any('KernelFailure:' in row and operation in row and all(s.Name in row for s in sources)
+                  for row in error.splitlines()))
+        check(label + ' geometry metadata and Undo restored', before[:2] == after[:2])
+        check(label + ' existing native object identities preserved',
+              all(doc.getObject(name) is obj for name, obj in current['identities']))
+        check(label + ' output wrappers invalidated and released',
+              bool(refs) and all(not row['valid'] and row['refcount'] == 1 for row in refs))
+        check(label + ' failed native close disposes uncertified Redo', before[2] == 1 and after[2] == 0)
+        enter(console, 'Cancel')
+    except Exception:
+        report['error'] = traceback.format_exc()
+    finally:
+        Fault.clear()
+        App.closeDocument(doc.Name)
+        current.clear()
+        if report.get('error'):
+            save_and_close()
+        else:
+            QtCore.QTimer.singleShot(0, next_case)
+
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        events()
+        console = Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript')
+        next_case()
+    except Exception:
+        report['error'] = traceback.format_exc()
+        save_and_close()
+
+QtCore.QTimer.singleShot(1200, run)

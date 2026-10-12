@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Reuse unchanged70 native gates; capture final records after all Group edits."""
+import os
+from pathlib import Path
+helper=Path(os.environ['OM9_FIXTURE_HELPER_DIR'])/'rhino_core_circle_history_fit_geometry_smoke.FCMacro'
+source=helper.read_text(encoding='utf-8-sig')
+needle="report['ok']=all(c['passed']for c in report['checks']);doc.saveAs(str(out/'fit_geometry.FCStd'))"
+assert source.count(needle)==1
+capture="report['final_records']=[dict(name=r['child'],raw=doc.getObject(r['child']).OM9GeometryResult)for r in report['cases']];"+needle
+exec(compile(source.replace(needle,capture),str(helper),'exec'))

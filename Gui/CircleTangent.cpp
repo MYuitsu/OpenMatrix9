@@ -28,7 +28,7 @@ bool evaluate(void* opaque,std::size_t index,double fraction,double* out) noexce
 }
 }
 namespace OpenMatrix9Gui {
-std::array<double,7> circleSolveNative(const std::map<std::size_t,SolidCurveReference>& refs,const double* b,std::size_t count,const double* frame,int solution,bool fromFirst,bool vertical){
+std::array<double,7> circleSolveNative(const std::map<std::size_t,SolidCurveReference>& refs,const double* b,std::size_t count,const double* frame,int solution,bool fromFirst,bool vertical,std::array<double,3>* contactFractions){
     Base::PyGILStateLocker lock;
     if(!b||!frame||count<2||count>3)throw std::runtime_error("Invalid native Circle tangent constraints");
     std::vector<double> evidence;Context context;double seeds[3]={};
@@ -45,15 +45,15 @@ std::array<double,7> circleSolveNative(const std::map<std::size_t,SolidCurveRefe
         if(vertical&&std::abs(spatial[9]*frame[9]+spatial[10]*frame[10]+spatial[11]*frame[11])>1e-8)throw std::runtime_error("Tangent Vertical requires a plane perpendicular to CPlane");
         double contacts[9]={};const auto [center,radius]=nativeTangentCircle(refs,b,count,spatial,spatial[12],solution,fromFirst,contacts);
         const SolidPoint normal{spatial[9],spatial[10],spatial[11]};
-        bool verified=true;
+        bool verified=true;std::array<double,3> fractions{};
         for(std::size_t i=0;i<count;++i){
             SolidPoint p{b[i*4],b[i*4+1],b[i*4+2]},t{};
-            if(!b[i*4+3]){const auto contact=solidOnCurve(refs.at(i),{contacts[i*3],contacts[i*3+1],contacts[i*3+2]});p=contact.first;t=contact.second;}
+            if(!b[i*4+3]){const auto contact=solidOnCurve(refs.at(i),{contacts[i*3],contacts[i*3+1],contacts[i*3+2]});p=contact.first;t=contact.second;fractions[i]=solidCurveFraction(refs.at(i),p);}
             SolidPoint delta;for(unsigned j=0;j<3;++j)delta[j]=p[j]-center[j];
             if(std::abs(dot(delta,normal))>1e-6||std::abs(std::sqrt(dot(delta,delta))-radius)>1e-6*std::max(1.,radius)||(!b[i*4+3]&&(std::abs(dot(t,normal))>1e-8||std::abs(dot(delta,t)/radius)>1e-8)))verified=false;
             if(fromFirst&&i==0){SolidPoint shift;for(unsigned j=0;j<3;++j)shift[j]=p[j]-b[j];if(std::sqrt(dot(shift,shift))>1e-6)verified=false;}
         }
-        if(verified)return {center[0],center[1],center[2],spatial[9],spatial[10],spatial[11],radius};
+        if(verified){if(contactFractions)*contactFractions=fractions;return {center[0],center[1],center[2],spatial[9],spatial[10],spatial[11],radius};}
     }
     double output[10];char error[1024]={};
     if(!om9_circle_spatial_solve(b,seeds,count,frame,fromFirst,vertical,solution,evaluate,&context,output,error,sizeof(error)))throw std::runtime_error(error[0]?error:"Spatial Tangent failed");
@@ -69,6 +69,7 @@ std::array<double,7> circleSolveNative(const std::map<std::size_t,SolidCurveRefe
         if(std::abs(dot(delta,normal))>1e-6||std::abs(std::sqrt(dot(delta,delta))-validated[6])>1e-6*std::max(1.,validated[6]))throw std::runtime_error("Spatial Tangent contact failed exact native verification");
         if(!b[i*4+3]){const SolidPoint t{contact[3],contact[4],contact[5]};if(std::abs(dot(t,normal))>1e-8||std::abs(dot(delta,t)/validated[6])>1e-8)throw std::runtime_error("Spatial Tangent direction failed exact native verification");}
     }
+    if(contactFractions){contactFractions->fill(0.);for(std::size_t i=0;i<count;++i)if(!b[i*4+3])(*contactFractions)[i]=output[7+i];}
     return {validated[0],validated[1],validated[2],validated[3],validated[4],validated[5],validated[6]};
 }
 }

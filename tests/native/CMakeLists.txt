@@ -170,6 +170,14 @@ add_test(NAME RCORE-01.ExactKernelFixtures COMMAND ThreeDmKernelContractTests "$
 add_executable(NurbsBasisContractTests nurbs_basis_adapter.cpp)
 target_link_libraries(NurbsBasisContractTests PRIVATE OM9ThreeDm)
 add_test(NAME RCORE-01.NativeBasisGate COMMAND NurbsBasisContractTests)
+# Compile the actual converters with fixture-only entry hooks. Their definitions
+# precede the normal archive, which supplies all other native bridge objects.
+add_library(ThreeDmInputTreeFixture STATIC ../../Gui/NativeInputTree.cpp ../../Gui/ThreeDmArchive.cpp ../../Gui/ThreeDmExplode.cpp ../../Gui/ThreeDmCurves.cpp ../../Gui/ThreeDmSurfaces.cpp ../../Gui/ThreeDmBrep.cpp ../../Gui/ThreeDmMeshes.cpp ../../Gui/ThreeDmPointCloud.cpp)
+target_link_libraries(ThreeDmInputTreeFixture PUBLIC OM9ThreeDm)
+target_compile_definitions(ThreeDmInputTreeFixture PRIVATE OM9_NATIVE_INPUT_TRACE)
+add_executable(ThreeDmNativeInputTreeTests rhino_core_native_input_tree.cpp)
+target_link_libraries(ThreeDmNativeInputTreeTests PRIVATE ThreeDmInputTreeFixture)
+add_test(NAME RCORE-01.NativeInputTree COMMAND ThreeDmNativeInputTreeTests "${CMAKE_CURRENT_BINARY_DIR}/native-input-tree-results.json")
 add_executable(ThreeDmCurveParameterTests rhino_core_curve_parameters.cpp)
 add_executable(ThreeDmPolycurveTests rhino_core_polycurve_partition.cpp)
 target_link_libraries(ThreeDmPolycurveTests PRIVATE OM9ThreeDm)

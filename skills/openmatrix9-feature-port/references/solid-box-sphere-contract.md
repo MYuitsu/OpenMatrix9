@@ -9,23 +9,32 @@ Trong checkout đang làm việc, lấy `spec_path` theo exact ID từ catalog/f
 - Box: `specs/04-solid/om9-solid-012-box.md`.
 - Sphere: `specs/04-solid/om9-solid-014-sphere.md`.
 - Bằng chứng: `docs/validation/2026-10-09-solid-box-sphere-options.md`, ledger `docs/openmatrix9-progress.json`; fixtures `rust/tests/solid_options.rs`, `tests/solid_options_smoke.FCMacro` cùng các test core.
+- Box hiện hành: `docs/validation/2026-10-12-box-documented-workflow.md` và `.json`; `rust/tests/box_documented_workflow.rs`, `tests/box_documented_workflow_smoke.FCMacro`. Nội dung chọn phương pháp bắt buộc của báo cáo này đã được supersede bởi correction Box mặc định theo video; xem báo cáo hiện hành dưới đây.
 
 Trước khi thay đổi hoặc tuyên bố thêm capability, đối chiếu code/spec và chạy fixture liên quan trên đúng native module. Kết quả validator/code mẫu không thay thế nghiệm thu hình học FreeCAD. Catalog vẫn là `partially_implemented / validated_supported_slice` khi còn các giới hạn dưới đây.
 
-## Box: định nghĩa kích thước và frame
+## Box: luồng mặc định, các option và frame
 
-| Mode | Quy tắc |
+Người dùng làm rõ video ngày 2026-10-12: **video là Box mặc định, không phải một trong bốn option**. Box mở ngay ở `First corner of base ( Diagonal 3Point Vertical Center ):`; **không bắt buộc chọn phương pháp trước điểm đầu**. Điều này thay thế quy tắc chọn phương pháp bắt buộc đã lưu trước đó. Áp dụng correction này cho quy tắc Box đã được người dùng đồng ý cập nhật skill.
+
+| Luồng | Quy tắc |
 |---|---|
-| Corners | Hai góc đáy rồi Height; hoặc góc đầu rồi Length/Width/Height nhập số. |
-| Diagonal | Góc đối diện của đáy rồi Height; không hỏi/nhận side Length. |
-| 3Point | Hai đầu cạnh đầu tiên chiếu lên CPlane đã chụp, rồi signed Width và Height. |
-| Vertical | Cạnh đầu nằm trong CPlane đã chụp; Width theo pháp tuyến của CPlane đó, Height vuông góc đáy đứng. |
-| Center | Điểm đầu là tâm đáy; Length/Width nhập số là kích thước toàn phần. Góc được pick cho hai extent tâm–góc phải nhân đôi. |
-| Cube | Hai góc đối diện 3D xác định cạnh bằng nhau, mỗi cạnh dài `diagonalLength / sqrt(3)`, và hướng khối; chọn trong Diagonal hoặc dùng shortcut mode. |
+| Mặc định | Chọn góc đáy thứ nhất, chọn góc đáy đối diện, chọn hoặc nhập Height: **3 lần chọn**. Hai góc xác định cả Length và Width trong CPlane đã chụp. Không nhận số Length thay góc đối diện. `Corners` là tên enum nội bộ của luồng mặc định, không phải option thứ năm hiển thị. |
+| Diagonal | Hai góc đáy đối diện rồi Height; không hỏi/nhận side Length. Có Cube trong nhánh này. |
+| 3Point | Option riêng: chọn hai đầu của cạnh đầu tiên, chọn điểm phía đối diện hoặc nhập signed Width, rồi Height. Không đổi option này thành luồng mặc định 3 lần chọn; không nhận số Length thay điểm cuối cạnh. |
+| Vertical | Chọn hai đầu cạnh trong CPlane đã chụp; Width theo pháp tuyến CPlane để đáy vuông góc CPlane, Height vuông góc đáy đứng. Không nhận số Length thay điểm cuối cạnh. |
+| Center | Chọn tâm rồi góc để xác định cả Length/Width và chuyển sang Height; hoặc nhập Length toàn phần, rồi Width và Height. Hai extent tâm–góc phải nhân đôi. |
+| Cube | Hai góc đối diện 3D xác định cạnh bằng nhau, mỗi cạnh dài `diagonalLength / sqrt(3)` và hướng khối; chọn trong Diagonal hoặc shortcut mode. |
 
-Frame được chụp khi chấp nhận điểm định nghĩa đầu tiên. Đổi viewport sau đó không đổi frame, đặc biệt pháp tuyến dùng trong Vertical. Cube dùng phép quay tối thiểu từ body diagonal của frame đã chụp sang diagonal được pick; half-turn chính xác dùng trục đơn vị theo `cross(capturedBodyDiagonal, capturedX)`. Diagonal gần đối hướng vẫn phải đến đúng điểm pick, không được thay bằng half-turn gần đúng.
+Bốn option Diagonal/3Point/Vertical/Center dùng click hoặc phím tắt D/3/V/C trước điểm đầu; chúng là nhánh tùy chọn. Right-click icon Box chọn option 3Point riêng và vẫn nhận hai đầu cạnh rồi Width/Height.
 
-Enter tại Width dùng Length; Enter tại Height dùng Width. Typed Length dương; signed Width/Height và extent pick âm dịch origin để dimensions dương, giữ frame thuận tay phải. Chuột Width của Vertical chiếu lên mặt phẳng đáy đứng; chuột Height dùng trục pháp tuyến đáy và mouse ray. Ray song song cần đổi view hoặc nhập số. Right-click icon Box bắt đầu 3Point.
+`0` là điểm gốc CPlane tại bước nhập điểm, không phải chiều dài zero. Ví dụ mặc định: `Box → 0 → 10,20,0 → 5`. Option 3Point: `Box → 3 → 0 → 10,0,0 → 20 → 10`. Center nhập số: `Box → C → 0 → 10 → 20 → 10`. Không suy diễn video thành chuỗi nhập Length/Width cho Box mặc định.
+
+Box hover vẽ outline đáy sau góc đầu và wire khối ở bước Height, cùng các marker, trong cả bốn view. Preview không pick được và không tạo object/transaction. Trong Top/Bottom view, khi ray song song trục Height, kéo theo hướng lên màn hình với tỉ lệ world; default dùng góc đáy đối diện làm anchor. Side/perspective view giữ phép closest-ray/axis. Height âm đặt đỉnh dưới đáy; marker phải nằm trên đáy gốc và đỉnh thật, không dịch hai lần do normalized origin.
+
+Frame chụp tại điểm định nghĩa đầu tiên; đổi viewport không đổi frame, đặc biệt pháp tuyến Vertical. Cube quay tối thiểu body diagonal của frame sang diagonal pick; half-turn chính xác dùng trục đơn vị `cross(capturedBodyDiagonal, capturedX)`. Diagonal gần đối hướng vẫn phải đến đúng điểm pick.
+
+Enter tại Width dùng Length, Enter tại Height dùng Width. Typed Length dương chỉ dùng ở bước góc-hoặc-Length của Center; signed Width/Height và picked extent âm dịch origin để dimensions dương, giữ frame thuận tay phải. Chuột Width của Vertical chiếu lên mặt phẳng đáy đứng. Bằng chứng hiện hành trong checkout: `docs/validation/2026-10-12-box-default-video.md`, `rust/tests/box_default_video.rs`, `box_wire_ffi.rs`, `tests/box_default_video_smoke.FCMacro`. Native evidence ở báo cáo chọn phương pháp bắt buộc trước đó là historical.
 
 ## Sphere: các nhánh dựng
 

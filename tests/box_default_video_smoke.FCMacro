@@ -1,0 +1,52 @@
+import sys
+sys.path.insert(0,'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+from command_options_fixture_support import *
+from pivy import coin
+
+def run():
+    doc=App.newDocument('BoxDefaultVideo');doc.UndoMode=1
+    window=Gui.getMainWindow();window.raise_();window.activateWindow();settle()
+    command('Osnap Off');settle()
+    area=window.findChild(QtWidgets.QMdiArea)
+    if area.activeSubWindow() is None:
+        views=area.subWindowList();check('native document views exist',bool(views));area.setActiveSubWindow(views[0]);settle()
+    Gui.activeDocument().activeView().viewTop();settle()
+    viewer=next(w for w in area.activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible())
+    target=viewer.viewport();middle=target.rect().center()
+    a_pixel=middle-QtCore.QPoint(65,35);b_pixel=middle+QtCore.QPoint(50,40);h_pixel=b_pixel-QtCore.QPoint(0,60)
+    def projected(pos):
+        ratio=viewer.devicePixelRatioF();a,b=Gui.activeDocument().activeView().projectPointToLine(round(pos.x()*ratio),round(target.height()*ratio)-round(pos.y()*ratio)-1)
+        delta=b-a;return a+delta*(-a.z/delta.z)
+    a,b,h=[projected(p) for p in [a_pixel,b_pixel,h_pixel]]
+    def hover(pos):
+        QtWidgets.QApplication.sendEvent(target,QtGui.QMouseEvent(QtCore.QEvent.MouseMove,QtCore.QPointF(pos),QtCore.Qt.NoButton,QtCore.Qt.NoButton,QtCore.Qt.NoModifier));settle()
+    def click(pos):QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=pos);settle()
+    def outlines():
+        found=[]
+        for view in Gui.activeDocument().mdiViewsOfType('Gui::View3DInventor'):
+            search=coin.SoSearchAction();search.setName('OM9SolidPreview');search.setInterest(coin.SoSearchAction.ALL);search.apply(view.getSceneGraph())
+            for i in range(search.getPaths().getLength()):
+                node=search.getPaths()[i].getTail();lines=coin.SoSearchAction();lines.setType(coin.SoLineSet.getClassTypeId());lines.apply(node)
+                path=lines.getPath();found.append(path.getTail().numVertices.getNum() if path else -1)
+        return found
+    command('Box');check('default asks first corner without selecting option',prompt()=='First corner of base ( Diagonal 3Point Vertical Center ): ')
+    check_mnemonics({'Diagonal':'D','3Point':'3','Vertical':'V','Center':'C'})
+    click(a_pixel);check('first click advances default to other corner',prompt()=='Other corner of base: ' and not doc.Objects)
+    hover(b_pixel);base=outlines();check('base outline appears in all four views before second click',len(base)==4 and base==[4]*4 and not doc.Objects and doc.UndoCount==0)
+    window.grab().save(str(out/'base-preview.png'));click(b_pixel)
+    check('second click proceeds straight to Height','Height' in prompt() and not doc.Objects)
+    hover(h_pixel);box=outlines();check('Top view drag previews twelve edges in all four views',box==[12]*4 and not doc.Objects and doc.UndoCount==0)
+    window.grab().save(str(out/'height-preview.png'));click(h_pixel)
+    expected=abs((b.x-a.x)*(b.y-a.y)*(h.y-b.y));obj=doc.Objects[-1]
+    check('exactly three actual clicks create valid native Box',len(doc.Objects)==1 and obj.Shape.isValid() and len(obj.Shape.Solids)==1 and abs(obj.Shape.Volume-expected)<max(1e-6,expected*1e-6))
+    check('commit removes every preview',outlines()==[] and doc.UndoCount==1)
+    bnd=obj.Shape.BoundBox;check('default base includes both picked opposite corners',abs(bnd.XMin-min(a.x,b.x))<1e-5 and abs(bnd.XMax-max(a.x,b.x))<1e-5 and abs(bnd.YMin-min(a.y,b.y))<1e-5 and abs(bnd.YMax-max(a.y,b.y))<1e-5)
+    window.grab().save(str(out/'box-committed.png'))
+    doc.undo();check('one Undo removes committed Box',not doc.Objects);doc.redo();check('Redo restores exact native volume',abs(doc.Objects[-1].Shape.Volume-expected)<max(1e-6,expected*1e-6))
+    command('Box');command('0');command('10,20,0');command('5');check('typed default three-step equivalent',abs(doc.Objects[-1].Shape.Volume-1000)<1e-6)
+    command('Box');command('3');command('0');command('3,4,0');check('explicit 3Point still asks Width','Width' in prompt());command('2');command('3');check('explicit 3Point still uses adjacent edge width height',abs(doc.Objects[-1].Shape.Volume-30)<1e-6)
+    command('Box');command('0');hover(b_pixel);key(QtCore.Qt.Key_Escape);check('Esc removes partial base preview',outlines()==[] and len(doc.Objects)==3)
+    saved=out/'box-default-video.FCStd';doc.saveAs(str(saved));volumes=[o.Shape.Volume for o in doc.Objects];App.closeDocument(doc.Name);restored=App.openDocument(str(saved))
+    check('FCStd retains native solids and volumes',len(restored.Objects)==3 and all(o.Shape.isValid() and abs(o.Shape.Volume-v)<max(1e-6,v*1e-6) for o,v in zip(restored.Objects,volumes)))
+    report['transcript']=field().toPlainText()
+QtCore.QTimer.singleShot(1800,lambda:execute(run))

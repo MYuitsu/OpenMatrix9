@@ -35,7 +35,40 @@
         "../../../docs/validation/2026-10-10-rhino-core-periodic-persistence.md",
         "../../../docs/validation/2026-10-10-rhino-core-subobject-ownership.md",
         "../../../docs/validation/2026-10-10-rhino-core-delayed-publication.md",
-        "../../../docs/validation/2026-10-10-rhino-core-host-parameter-dependency.md"
+        "../../../docs/validation/2026-10-10-rhino-core-host-parameter-dependency.md",
+        "../../../docs/validation/2026-10-10-rhino-core-import-commit-gate.md",
+        "../../../docs/validation/2026-10-10-rhino-core-topology-snapshot.md",
+        "../../../docs/validation/2026-10-10-rhino-core-owned-support.md",
+        "../../../docs/validation/2026-10-10-rhino-core-analytic-support.md",
+        "../../../docs/validation/2026-10-10-rhino-core-bezier-support.md",
+        "../../../docs/validation/2026-10-10-rhino-core-derived-support.md",
+        "../../../docs/validation/2026-10-10-rhino-core-world-attributes.md",
+        "../../../docs/validation/2026-10-10-rhino-core-instance-definitions.md",
+        "../../../docs/validation/2026-10-10-rhino-core-discrete-snapshots.md",
+        "../../../docs/validation/2026-10-10-rhino-core-edge-geometry.md",
+        "../../../docs/validation/2026-10-10-rhino-core-instance-arrays.md",
+        "../../../docs/validation/2026-10-10-rhino-core-reference-contexts.md",
+        "../../../docs/validation/2026-10-10-rhino-core-topology-validation.md",
+        "../../../docs/validation/2026-10-10-rhino-core-prepared-cad-results.md",
+        "../../../docs/validation/2026-10-10-rhino-core-prepared-result-snapshots.md",
+        "../../../docs/validation/2026-10-10-rhino-core-prepared-discrete-results.md",
+        "../../../docs/validation/2026-10-10-rhino-core-native-edit-capabilities.md",
+        "../../../docs/validation/2026-10-10-rhino-core-native-construction-input.md",
+        "../../../docs/validation/2026-10-11-rhino-core-native-surface-policy.md",
+        "../../../docs/validation/2026-10-11-rhino-core-native-surface-diagnostics.md",
+        "../../../docs/validation/2026-10-11-rhino-core-fit-point-input.md",
+        "../../../docs/validation/2026-10-11-rhino-core-native-rebuild-policy.md",
+        "../../../docs/validation/2026-10-11-rhino-core-native-curve-policy.md",
+        "../../../docs/validation/2026-10-11-rhino-core-native-solid-policy.md",
+        "../../../docs/validation/2026-10-11-rhino-core-native-cage-policy.md",
+        "../../../docs/validation/2026-10-11-rhino-core-cage-borrowed-admission.md",
+        "../../../docs/validation/2026-10-11-rhino-core-circle-history-policy.md",
+        "../../../docs/validation/2026-10-11-rhino-core-builder-policy.md",
+        "../../../docs/validation/2026-10-11-rhino-core-builder-output.md",
+        "../../../docs/validation/2026-10-11-rhino-core-builder-result.md",
+        "../../../docs/validation/2026-10-11-rhino-core-builder-conversion.md",
+        "../../../docs/validation/2026-10-11-rhino-core-surface-history-admission.md",
+        "../../../docs/validation/2026-10-11-rhino-core-surface-result.md"
       ]
     },
     {
@@ -245,7 +278,8 @@
       "runtime_validation": "partial_native_validation",
       "implementation_evidence": "../../../docs/validation/2026-10-09-rhino-core-p0.md",
       "implementation_followup_evidence": [
-        "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md"
+        "../../../docs/validation/2026-10-10-rhino-core-kernel-contract.md",
+        "../../../docs/validation/2026-10-10-rhino-core-import-commit-gate.md"
       ]
     },
     {
@@ -1754,6 +1788,366 @@
       ],
       "evidence": "../../../docs/validation/2026-10-10-rhino-core-host-parameter-dependency.md",
       "scope": "Authored T10 Circle/Line native durable parameter consumer with fresh guarded observed conversion, source/point/target query/basis persistence, History and lifecycle; broader conversion/P0 stays open."
+    },
+    {
+      "id": "rhino-core-native-input-tree-followup",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01",
+        "RCORE-07",
+        "RCORE-10"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-native-mesh-cloud.md",
+      "scope": "Native preflight for selected NURBS owner trees plus Mesh/PointCloud before covered copy/conversion, Duplicate, BrepForm, IsValid and IsoSurface paths; 92 native checks, 6 focused CTests and 21 host checks. Full T07, raw ONX_Model::Read, process-wide allocation and all P0 remain open."
+    },
+    {
+      "id": "rhino-core-import-commit-gate-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01",
+        "RCORE-10"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-import-commit-gate.md",
+      "scope": "Prepared CAD/previews reject invalid basis before topology/transaction/property assignment; GUI-thread and plain-container gates;106 host checks. Full RCORE-01/T07 remains open."
+    },
+    {
+      "id": "rhino-core-topology-snapshot-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-topology-snapshot.md",
+      "scope": "Owned face/loop/edge-use/pcurve endpoint observations and boundary connectivity;383 host checks. Full topology/solid/supporting geometry and RCORE-01 remain open."
+    },
+    {
+      "id": "rhino-core-owned-support-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-owned-support.md",
+      "scope": "Rust-owned validated NURBS basis for common faces/pcurves and standalone 3D curves; rational/periodic/full-domain values copied without normalization. Full RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-analytic-support-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-analytic-support.md",
+      "scope": "Rust-owned native analytic curve/surface/UV metadata for ten OCCT kinds, preserving parameters, natural domains, native-local frames and separate UV sense. Full RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-bezier-support-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-bezier-support.md",
+      "scope": "Rust-owned Bezier curve/surface/UV control nets, weights and natural domains, reusing existing native checked adapters without conversion. Full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-derived-support-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-derived-support.md",
+      "scope": "Rust-owned offset curve/surface, extrusion/revolution and inner trim basis chains; reuse native analytic/NURBS/Bezier readers without conversion. Full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-world-attributes-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-world-attributes.md",
+      "scope": "Rust-owned checked world frames and native identity/appearance attributes; exactly-once placement for direct Part features and nested direct Part App::Link definitions, separate instance/definition descriptors. Full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-instance-definitions-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-instance-definitions.md",
+      "scope": "Rust-owned bounded instance/group occurrence graph; native ordered group definitions, nested link identities, member paths and single/multiple Part subelement snapshots with checked world placement. Full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-discrete-snapshots-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-discrete-snapshots.md",
+      "scope": "Rust-owned mesh/cloud raw-local arrays, triangle indices and bounds; checked native property ownership, direct/group/link world frames, deferred shared Mesh SDK dependency. Full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-edge-geometry-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-edge-geometry.md",
+      "scope": "Rust-owned native3D edge/vertex/tolerance tables joined with UV topology, loose/standalone Part geometry and exact-once direct/group/link frames. Full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-instance-arrays-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-instance-arrays.md",
+      "scope": "Rust-owned ordered native instance-array occurrences, indices/identities/member paths and exact-once world frames with existing Part/group/mesh/cloud definition readers. Full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-reference-contexts-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-reference-contexts.md",
+      "scope": "Bounded owned native group/link/array reference paths, explicit definition names/labels, collapsed alias fallback and exact-once frames using existing geometry readers. Full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-topology-validation-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-topology-validation.md",
+      "scope": "Owned vertex-link/oriented surface observations and bounded native OCCT CAD inspection reports, separate from representation provenance and global embedding certificates. Full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-prepared-cad-results-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-prepared-cad-results.md",
+      "scope": "Prepared native CAD import and affine-preview admission, private native geometry/plain metadata, typed diagnostics and immutable validation reports. Full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-prepared-result-snapshots-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-prepared-result-snapshots.md",
+      "scope": "Prepared native CAD GeometrySnapshot fields, bounded independently restorable OCCT V3 master, owned typed topology/support observations and frozen binding attributes; Rust result/report assembly with exact unit revision. Full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-prepared-discrete-results-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-prepared-discrete-results.md",
+      "scope": "Prepared mesh and current float64 PointCloud owned GeometrySnapshots, Rust admission/result assembly, bounded native copies and immutable report persistence; mesh archive correspondence at declared float32 host precision. Full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-native-edit-capabilities-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-native-edit-capabilities.md",
+      "scope": "Shared Rust operation/type/options capability consumed by existing native Join/Explode/Trim/Boolean declaration, input capture and solve; concrete Part/Mesh and block/cage leaf admission before copies. Full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-native-construction-input-20261010",
+      "date": "2026-10-10",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-10-rhino-core-native-construction-input.md",
+      "scope": "Native Surface/Rebuild source admission before copy, reusing the existing Rust-backed InputTree. Partial construction integration; full original RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-native-surface-policy-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-native-surface-policy.md",
+      "scope": "Shared Rust Surface operation/type/options policy consumed by native declaration, capture and construction for existing Sweep1/Sweep2/Loft solvers; partial RCORE-01 integration."
+    },
+    {
+      "id": "rhino-core-native-surface-diagnostics-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-native-surface-diagnostics.md",
+      "scope": "Native Surface capability errors identify the current first source/subelement and operation; additional input count is explicit. Partial original typed-error integration."
+    },
+    {
+      "id": "rhino-core-fit-point-input-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-fit-point-input.md",
+      "scope": "Bounded builtin native point readers shared by Circle/Sphere FitPoints and Circle source/History reads, with Rust cumulative count and existing coordinate admission. Partial RCORE-01 integration."
+    },
+    {
+      "id": "rhino-core-native-rebuild-policy-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-native-rebuild-policy.md",
+      "scope": "Shared Rust operation/type/options policy for the existing native curve Rebuild adapter, declaration/capture/construct gates and concrete curve-only topology checks before private copy. Partial RCORE-01 integration."
+    },
+    {
+      "id": "rhino-core-native-curve-policy-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-native-curve-policy.md",
+      "scope": "Shared Rust current-session operation/type/options policy for existing Line, Polyline, InterpCrv, Rectangle, Circle and Ellipse. Partial RCORE-01 integration."
+    },
+    {
+      "id": "rhino-core-native-solid-policy-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-native-solid-policy.md",
+      "scope": "Shared Rust current-session operation/type/options policy for existing Box/Sphere, bounded owned output validation and live Sphere reference/FitPoints admission. Partial RCORE-01 integration."
+    },
+    {
+      "id": "rhino-core-native-cage-policy-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-native-cage-policy.md",
+      "scope": "Common Rust policy for existing Cage/Create/Capture/Release, owned session options and independent API/recompute requests; borrowed Part/Mesh input admission before copy or Topology extraction. Partial RCORE-01 integration."
+    },
+    {
+      "id": "rhino-core-cage-borrowed-admission-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-cage-borrowed-admission.md",
+      "scope": "Borrowed rational Cage descriptors and saved binding values are validated by Rust before owned input copies or result buffers; native control selection and independent recompute use typed operation/object errors. Existing deformation/restore/release services are reused."
+    },
+    {
+      "id": "rhino-core-circle-history-policy-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01",
+        "RCORE-09"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-circle-history-policy.md",
+      "scope": "Independent persisted Circle options use the existing shared Rust construction policy before native stored-point copies and source extraction. Replay does not consult or mutate the interactive session; existing analytic/deformable/FitPoints/tangent/legacy AroundCurve solvers and recipes are reused."
+    },
+    {
+      "id": "rhino-core-builder-policy-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01",
+        "RCORE-09"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-builder-policy.md",
+      "scope": "Independent existing affine-template Builder requests use the shared Rust operation/type/options policy before native source/template copy and GUI transactions. Create, persisted validation/recompute, explicit restore and all Match targets reuse the existing affine evaluator, shape tags, frames and slot/History rules."
+    },
+    {
+      "id": "rhino-core-builder-output-publication-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01",
+        "RCORE-09"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-builder-output.md",
+      "scope": "Existing native Builder Create/restore/Match solved-output staging and scoped GUI publication; full RCORE-01 remains open."
+    },
+    {
+      "id": "rhino-core-builder-result-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01",
+        "RCORE-09"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-builder-result.md",
+      "scope": "Native affine Builder owned result/source attributes and paired Create/restore/Match/History publication; original full RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-builder-conversion-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01",
+        "RCORE-09"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-builder-conversion.md",
+      "scope": "Native affine Builder composed topology history, owned input snapshot, measured vertex/edge/trimmed-face queries and explicit unavailable-query evidence; original full RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-surface-history-admission-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01",
+        "RCORE-09"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-surface-history-admission.md",
+      "scope": "Bounded independent Rust saved Surface History options/group metadata admission, fixed scalar ABI and current-native rail closure before existing Loft/Sweep solvers; full RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-surface-result-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01",
+        "RCORE-09"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-surface-result.md",
+      "scope": "Native Loft/Sweep GeometryResult using actual EditSurface recipe, owned source refs/wire snapshots/attributes, actual closure, exact published native master and paired History/FCStd publication. Full RCORE-01 remains in progress."
+    },
+    {
+      "id": "rhino-core-edit-result-20261011",
+      "date": "2026-10-11",
+      "runtime_validation": "partial_native_validation",
+      "chapters": [
+        "RCORE-01"
+      ],
+      "evidence": "../../../docs/validation/2026-10-11-rhino-core-edit-result.md",
+      "scope": "Native CAD Edit results, recompute source isolation and native Dimension full capture/finite guard; prior-Redo and full original all-family contracts remain open. Full original RCORE-01 preserved."
     }
   ]
 }

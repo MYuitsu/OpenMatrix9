@@ -1,0 +1,28 @@
+"""Cold host restores all six constructor snapshots without a live Curve session."""
+import json,math,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  source=Path(os.environ['OM9_CURVE_CONSTRUCTION_ARCHIVE_DIR']);warm=json.loads((source/'results.json').read_text())
+  expected={o['command']:o for o in warm['observations']};assert len(expected)==6
+  check('cold host starts without a live Curve constructor',json.loads(OM.geometryCurveCapability(1,2))['status']==100)
+  for command,length in [('Line',20.),('Polyline',12.),('Rectangle',14.),('Circle',2*math.pi),('Ellipse',None),('InterpCrv',7.)]:
+   doc=App.openDocument(str(source/(command+'.FCStd')));obj=doc.getObject(command)
+   raw=getattr(obj,'OM9CurveConstruction','') if obj else '';value=json.loads(raw) if raw else {}
+   check(command+' cold restore owns the exact saved construction bytes',bool(raw) and raw==expected[command]['raw'])
+   check(command+' cold restore retains plan options and owned state',bool(value) and value==expected[command]['construction'])
+   geometry=obj is not None and obj.Shape.isValid() and not obj.Shape.isNull()
+   if geometry:
+    geometry=abs(obj.Shape.Length-length)<1e-7 if length is not None else isinstance(obj.Shape.Edges[0].Curve,Part.Ellipse) and abs(obj.Shape.Edges[0].Curve.MajorRadius-5)<1e-7 and abs(obj.Shape.Edges[0].Curve.MinorRadius-3)<1e-7
+   check(command+' cold restore retains independently checked native geometry',geometry)
+   report['observations'].append(dict(command=command,raw=raw,construction=value));App.closeDocument(doc.Name)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

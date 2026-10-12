@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Rejected replay preserves external native XLink identity and sub-elements."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE']);import OM9ReplayRetirement as probe
+def state(doc):return dict(booked=doc.getBookedTransactionID(),pending=doc.HasPendingTransaction,undo=list(doc.UndoNames),redo=list(doc.RedoNames))
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench')
+  for kind in ['PropertyXLink','PropertyXLinkSub','PropertyXLinkList','PropertyXLinkSubList']:
+   for action in ['value','close','remove','clear']:
+    label=kind+' '+action
+    targetDoc=App.newDocument('ExternalTarget');target=targetDoc.addObject('App::FeaturePython','Target')
+    targetDoc.recompute();targetDoc.saveAs(str(out/(kind+'-'+action+'-target.FCStd')))
+    doc=App.newDocument('RedoXLinks');doc.UndoMode=1
+    child=doc.getObject(probe.create(doc.Name));child.addProperty('App::'+kind,'Linked')
+    doc.recompute();doc.saveAs(str(out/(kind+'-'+action+'-owner.FCStd')));doc.clearUndos()
+    doc.openTransaction('Prior external link')
+    expected=dict(PropertyXLink=target,PropertyXLinkSub=(target,['Face1','Edge2']),PropertyXLinkList=[target],PropertyXLinkSubList=[(target,('Face1','Edge2'))])[kind]
+    child.Linked=expected;child.Value='prior-redo-value';doc.commitTransaction();doc.undo()
+    check(label+' fixture contains old native Redo',len(doc.RedoNames)==1)
+    doc.openTransaction('Caller');before=state(doc);value=child.Value
+    result=probe.run(doc.Name,action,'discarded_redo')
+    check(label+' old Redo property destructor callback blocked',result['callbacks']==1 and result['blocked']==1)
+    check(label+' rejected replay completes cleanup',not result['accepted']and result['rollback']and result['complete'])
+    check(label+' original caller and Redo unchanged',state(doc)==before)
+    check(label+' private values restored',child.Value==value and child.Output=='')
+    doc.abortTransaction();doc.redo()
+    check(label+' external native identity and subnames restored',child.Linked==expected)
+    check(label+' paired old Redo value restored',child.Value=='prior-redo-value')
+    report['observations'].append(dict(kind=kind,action=action,result=result,linked=str(child.Linked),expected=str(expected)))
+    App.closeDocument(doc.Name);App.closeDocument(targetDoc.Name)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

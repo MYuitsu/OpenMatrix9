@@ -1,0 +1,308 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-circle-native-savepoint-20261012",
+  "status": "in_progress",
+  "goal_complete": false,
+  "updated_at": "2026-10-12T08:04:59+07:00",
+  "circle_integrated": true,
+  "native_design_approved": true,
+  "hosts": [
+    {
+      "name": "atomic",
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic131-offscreen-20261012",
+      "checks": 432,
+      "passed": 432,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic131-offscreen-20261012/results.json",
+          "bytes": 186745,
+          "sha256": "390162e1574b4e744a0e0c2a268007e9cb0fe31a9752183796f9c4de4336320f"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic131-offscreen-20261012/shared-host-launch.json",
+          "bytes": 655,
+          "sha256": "c2359770a684eea7d53c9179bd5acf6b3de77042b3e7132a32ca6eb46424caa4"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic131-offscreen-20261012/loaded-native-app.json",
+          "bytes": 254,
+          "sha256": "b4d87fe5ae4fab1ca0c7e4a1dff3c8c286df1f8e36e26413308b13f47202ef83"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic131-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic131-offscreen-20261012/host-stdout.log",
+          "bytes": 378,
+          "sha256": "d6a18305fe54b75d465639ff5e6e7e31e551078e0bf4e4d5afc012014a7a146c"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic131-offscreen-20261012/host-stderr.log",
+          "bytes": 66218,
+          "sha256": "271581c2e3624204abaceeb51892d5e401e7b3cbcc4f3b98294a36b521a415ca"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic131-offscreen-20261012/fixture.FCMacro",
+          "bytes": 7499,
+          "sha256": "7bce865d4c7a42ee6e54f8fb9a95fceecfd05debad969beb153ca18405be92e2"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic131-offscreen-20261012/run-fixture.FCMacro",
+          "bytes": 308,
+          "sha256": "9f1062a4b326fdf8912b4f65ce5db273cfed3f69c88ea4b5414458e0c88949cd"
+        }
+      ]
+    },
+    {
+      "name": "close",
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close131-offscreen-20261012",
+      "checks": 4,
+      "passed": 4,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close131-offscreen-20261012/results.json",
+          "bytes": 593,
+          "sha256": "029c5e7b72805ff2965dffaf17d96255827dbbb842a2326a4e02bb457f90eaf1"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close131-offscreen-20261012/shared-host-launch.json",
+          "bytes": 654,
+          "sha256": "24deed53c3fb38ebc91284518dbfdd4099e448fbb3d9dff60671c2f98352a828"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close131-offscreen-20261012/loaded-native-app.json",
+          "bytes": 254,
+          "sha256": "b4d87fe5ae4fab1ca0c7e4a1dff3c8c286df1f8e36e26413308b13f47202ef83"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close131-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close131-offscreen-20261012/host-stdout.log",
+          "bytes": 378,
+          "sha256": "d6a18305fe54b75d465639ff5e6e7e31e551078e0bf4e4d5afc012014a7a146c"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close131-offscreen-20261012/host-stderr.log",
+          "bytes": 2839,
+          "sha256": "cbd8412f3919294ce3f9ab0b8f286ac5b76f2b25ed4bab2bc5403c2a4fb8f8f9"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close131-offscreen-20261012/fixture.FCMacro",
+          "bytes": 3383,
+          "sha256": "bbe9255a2096f582ea383b1e9b0ee09cf17e1e25671d181d7ea6339da79d5eac"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close131-offscreen-20261012/run-fixture.FCMacro",
+          "bytes": 308,
+          "sha256": "9f1062a4b326fdf8912b4f65ce5db273cfed3f69c88ea4b5414458e0c88949cd"
+        }
+      ]
+    },
+    {
+      "name": "modes",
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes131-offscreen-20261012",
+      "checks": 109,
+      "passed": 109,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes131-offscreen-20261012/results.json",
+          "bytes": 21970,
+          "sha256": "69f0b45947322ae34f68ae28c2f54db36471de07b88a53f519c15fe466646841"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes131-offscreen-20261012/shared-host-launch.json",
+          "bytes": 654,
+          "sha256": "3f665a8071ceef496b1a95eed1cc5cb0b9ae96b50c36abb0e7fe136934a915bc"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes131-offscreen-20261012/loaded-native-app.json",
+          "bytes": 254,
+          "sha256": "b4d87fe5ae4fab1ca0c7e4a1dff3c8c286df1f8e36e26413308b13f47202ef83"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes131-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes131-offscreen-20261012/host-stdout.log",
+          "bytes": 15290,
+          "sha256": "8b4972f57343d60103c61a276137b57bdf6b17f25d8a22c098bdf2ed85afcbad"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes131-offscreen-20261012/host-stderr.log",
+          "bytes": 37685,
+          "sha256": "863ad4eaed8586da598e81ccad582549eacb0f860249b7e6470d14b854f03f7b"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes131-offscreen-20261012/fixture.FCMacro",
+          "bytes": 17219,
+          "sha256": "f5154879b54a9b1af1054f7a6ec33506e6556ac1703f014b7beb845bd1be5134"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes131-offscreen-20261012/run-fixture.FCMacro",
+          "bytes": 308,
+          "sha256": "9f1062a4b326fdf8912b4f65ce5db273cfed3f69c88ea4b5414458e0c88949cd"
+        }
+      ]
+    },
+    {
+      "name": "result",
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result131-offscreen-20261012",
+      "checks": 33,
+      "passed": 33,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result131-offscreen-20261012/results.json",
+          "bytes": 454441,
+          "sha256": "e9f7ff445d870fd9ac835dc0c250ce1a3a3e5dbf7b8a239dc062434fd151d478"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result131-offscreen-20261012/shared-host-launch.json",
+          "bytes": 655,
+          "sha256": "3c97fe025572b02882c4c6d15117d126c98d5fd778ef2df0bebe655275ad1d1e"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result131-offscreen-20261012/loaded-native-app.json",
+          "bytes": 254,
+          "sha256": "b4d87fe5ae4fab1ca0c7e4a1dff3c8c286df1f8e36e26413308b13f47202ef83"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result131-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result131-offscreen-20261012/host-stdout.log",
+          "bytes": 378,
+          "sha256": "d6a18305fe54b75d465639ff5e6e7e31e551078e0bf4e4d5afc012014a7a146c"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result131-offscreen-20261012/host-stderr.log",
+          "bytes": 7155,
+          "sha256": "5da1ede4414862d0eb9ce07cfedc77e611601e6ca1d28b94b197b2c63dc425da"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result131-offscreen-20261012/fixture.FCMacro",
+          "bytes": 7802,
+          "sha256": "ca3e389248e45d35584fe3dbe8c58b921a5b6c746d6bd7cbb5423b4ca3647b5e"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result131-offscreen-20261012/run-fixture.FCMacro",
+          "bytes": 308,
+          "sha256": "9f1062a4b326fdf8912b4f65ce5db273cfed3f69c88ea4b5414458e0c88949cd"
+        }
+      ]
+    }
+  ],
+  "checks": 578,
+  "atomic_callbacks": 48,
+  "selected_app": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-replay-scope125-20261012/FreeCADApp.dll",
+    "bytes": 7822336,
+    "sha256": "313d26cebfffbb3e0d55d910abead14be87c54f9022b4ae15b53bab216d60604"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-replay-scope125-20261012/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "plugin": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-runtime131/bin/OpenMatrix9Gui.pyd",
+    "bytes": 13597696,
+    "sha256": "1e4b596da8dfd865199bf1cffeceb8785e7850c6f1dd22955b680c31a69fba92"
+  },
+  "matching_app_import": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-replay-scope125-20261012/FreeCADApp.lib",
+    "bytes": 3111330,
+    "sha256": "9ec15d1271a213e0b953217756525f3964a18ec26731a6010450b2aa057704c4"
+  },
+  "native_manifest": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/native-app-sdk125.json",
+    "bytes": 35304,
+    "sha256": "835e41cbcce70a6c34114bd2f04bbeee74a628b204e55fb14f02f47fee1e461f"
+  },
+  "selected_sources": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistory.cpp",
+      "bytes": 36343,
+      "sha256": "52203b1abdbad0d43df716c96f0481e0847c64cb33df0f23ac16b2c6b6170079"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/cmake/StandaloneSDK.cmake",
+      "bytes": 5028,
+      "sha256": "07c942f83e5fc88e5729d8635927039bb6aa2478f22c4b78694b4e5ecd205e03"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tools/validate_native_app_sdk.py",
+      "bytes": 2544,
+      "sha256": "bed2a2622c04aa3f313f5b48bbfbe8acdc314de9d4c3c8ab3bdaa4c224c28ce7"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/build-om9-plugin.ps1",
+      "bytes": 7952,
+      "sha256": "d18dba3e9677b5d229f0d4dc1e08afba1454bfda358732a3a3e358fadbb5778e"
+    }
+  ],
+  "source_candidates_match": true,
+  "compiler_dependency_certificate": false,
+  "plugin_build": {
+    "exit_code": 0,
+    "receipt": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-build131.log.exit.json",
+      "bytes": 140,
+      "sha256": "13631fd6315989f73cc8121df8768c1063dd71249605cc7823754b90ff842eb3"
+    },
+    "log": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-build131.log",
+      "bytes": 17107,
+      "sha256": "938bfe3959ac26e34e870729eb2a42f88e0f658e53dcff3ee05b819e99916c5f"
+    },
+    "prebuild_full_plugin_source_inventory_frozen": false
+  },
+  "close_red": {
+    "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close130-offscreen-20261012",
+    "checks": 4,
+    "passed": 3,
+    "exit_code": 0,
+    "reason": "Owner survived/recompute returned, but pending Python callback error obscured native StaleGeometry"
+  },
+  "prior_scope_shutdown_failure_open": true,
+  "rust_rerun": false,
+  "remaining": [
+    "Full original RCORE-01 remains open: stable GeometryRef identity/revision/representation/world, complete owned geometry/topology/attributes/units, adapters1–7, C01–C12, T01–T11, every enabled GeometryResult consumer, and independent read/edit/retain/export of all supported families.",
+    "Initial Tangent now binds actual solved contact fractions to the retained owned selected curves, separately from probes; verifies circle/plane/D1/radial tangency/FromFirst/fixed-point null slots before session and common result publication. Checked analytic output and Deformable native spline basis are bound to the replayed plan. Live line/fixed/FromFirst/spline and genuinely nonplanar NURBS fixtures pass; this does not certify all native solver roots/families/options/backends. Generic CAD Edge/Face snap provenance, every other output consumer and complete old-format acceptance remain required. Raw old owned native_solution packets without contact metadata are rejected; historical saved result bytes remain until current recompute. Pure legacy numeric direct solution paths are retained and are not certified by this checked-contact output gate.",
+    "Raw native offset D3 discrepancy remains enabled RED: independent mathematical derivatives match45 queries, native differs at36. No dependency patch/rebuild. Higher-order parity, extreme asymmetric weights, complete UV/retained trim/nested native chains and periodic parameter continuation beyond captured natural basis still require native acceptance evidence.",
+    "Nineteen captured families/183-query synthetic tangent circles pass owned contact admission; live native nonplanar checks exercise retained contacts on actual spatial NURBS History. This is named fixture coverage, not all native solver roots, curve families/options/backends, global conversion or rigorous deviation bounds. The spatial archive is reopened in the same host; independent cold spatial contact acceptance remains separate.",
+    "Native Transaction staged property merge is implemented and tested, but App::Document::PropertyReplayTransaction, private replay routing, observer/lifetime/history barriers, checked rollback/error cleanup, booking materialization and recipe-v2/legacy Circle integration remain absent. Current new App117 unchanged semantic fixture remains RED355/432,48 callbacks,normal host exit0. Standalone journal tests use real native Transaction/Property with a native tracked test object; they do not prove visible Document Undo/Redo, source/child graph ownership or full consumer/lifecycle semantics. The approved full savepoint contract remains required.",
+    "Task2/3 remain open: generic snap/pick/mouse/render and parameter provenance; snapshot sharing, aggregate allocation/traversal/worker/cancellation bounds; Rebuild and every other enabled result consumer. Per-basis decoder bounds and sampled tests do not establish full aggregate budgets or lifecycle.",
+    "Global conversion/deviation/locus exactness and complete parameter/topology maps remain unproven, with maps null. Full CAD-versus-mesh solid validity/orientation/manifold/cavity coverage, supported attributes and persistence families remain required.",
+    "Fresh reconstructed Runtime93 packets retain genuine resolved fractions and all20 original recipes/points/plans/roles/probe/path parameters. Old Runtime59 fixtures remain immutable. Historical stored results may retain their old bytes; current recompute obtains new complete evidence. Raw legacy producer requests lacking contact metadata are rejected instead of bypassing verification. This does not replace all historical-format acceptance or production deployment requirements.",
+    "Prebuild1503 candidate inputs preserve production candidates at postbuild/postnative checkpoints. Full inventory match is false: one spatial assertion wrapper was corrected after build to inspect initial evidence only while the result is ConstructCurve, avoiding subsequently changed History sources. After postnative, concurrent work changed/added rust/src/command_options.rs, rust/src/lib.rs, rust/tests/command_options.rs. Current entire production source is therefore not certified by Runtime112; selected contact sources/actual fixture bytes still match their launch checkpoint. This is not an exact compiler dependency certificate. Shared SDK/App/Gui/host/solver reused; no native root rebuild, deployment or Git publication.",
+    "Journal admission bounds logical metadata/record traversal and native Property::getMemSize accounting before transfer; unusually larger copies are rejected after copying. Native allocator/container overhead, opaque kernel resources and peak Copy allocation are not fully certified. Both journals/property values must remain alive and exclusively protected; the future Document scope must provide that protection, including Copy/Paste/destruction callbacks. The staged API alone is not a complete atomic replay or worker memory-safety boundary.",
+    "Only native App objects were rebuilt in the single SDK cache, with DLL/import-lib/PDB link outputs redirected. Shared SDK binaries remain byte-identical; one unchanged test launcher was copied and Gui hard-linked for the isolated App test. Current plugin Runtime112 is unchanged and does not call the new API; an explicit matching App SDK import override and complete production ABI/deployment acceptance still remain for Document integration. Rust was not rerun for this native-only component; prior989/1 is historical, not current whole-source certification.",
+    "Document scope prototype is implemented: private native journaling without replacing caller pointer, observer mutation latch, native history/owner insertion/removal/close/restore and Application transaction guards, checked rollback/error cleanup and staged merge. Named mode0/1/booking/callback assertions pass744, but scope fixture still logs an unhandled GUI shutdown std::exception/resource deadlock despite host exit0. This is not a clean runtime gate or completed savepoint. Module/SDK/Circle integration and the unchanged semantic432/owner-close acceptance remain required.",
+    "UndoMode Python previously returned1 and ignored assignment. Native undoEnabled plus actual Python0/1 setter now exists; setter refuses changing mode during a caller booking/journal. Default1 and existing visible histories are retained. Complete generic UndoMode semantics, dynamic-property bookkeeping outside scope, all property Copy/Paste/destruction callbacks, capture failure atomicity, preallocation/traversal/opaque budgets and module-wide lifecycle still need verification. The current scope materializes a regular empty booking using preserved-Redo storage; exact regular-versus-preserving policy across every subsequent caller close remains an explicit review/acceptance obligation.",
+    "Circle recipe-v2 and legacy now use native savepoint before input reads through checked rollback/protected paired cleanup or verified commit. Semantic432 and owner-close4 pass with clean normal hosts. Prior Doc String-property744 fixture GUI shutdown resource deadlock remains unresolved; these four clean Circle/Curve cohorts do not clear that separate failure.",
+    "Current native capture mutates a property journal entry before Property::Copy completes. Copy-failure capture atomicity, dynamic removal failures, journal retirement callbacks, exact regular/preserving-Redo policy, global booking participants, cache/status/lifetime and complete allocation/traversal bounds remain open. Task2/3 and full RCORE01 are not completed by these cohorts."
+  ],
+  "next_action": "Add genuine native capture-Copy failure tests and fix strong journal recording; verify exact booking/Redo policy and journal retirement/callback lifetime. Diagnose native scope shutdown failure and continue all original RCORE01 adapters1-7/C01-C12/T01-T11 and regressions."
+}

@@ -73,7 +73,7 @@ pub unsafe extern "C" fn om9_builder_feature_id_valid(id: *const c_char) -> bool
     };
     valid_feature_id(s)
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) enum Json {
     Object(BTreeMap<String, Json>),
     Array(Vec<Json>),

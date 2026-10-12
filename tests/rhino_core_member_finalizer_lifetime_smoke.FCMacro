@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Real derived member destruction must invalidate its Python access first."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);action=os.environ.get('OM9_MEMBER_FINALIZER_ACTION','read')
+operation=os.environ.get('OM9_MEMBER_FINALIZER_OPERATION','close')
+report=dict(checks=[],events=[])
+def event(value):
+    report['events'].append(value);(out/'events.json').write_text(json.dumps(report,indent=2))
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM
+        report['module']=OM.__file__;sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE'])
+        import OM9ReplayRetirement as probe
+        doc=App.newDocument('MemberFinalizer');doc.UndoMode=1 if operation=='redo'else 0
+        if operation=='redo':doc.openTransaction('Retained member creation')
+        child=doc.getObject(probe.create_member(doc.Name));child.Value='M'*8192
+        class LastValue:
+            def __del__(self):
+                event('started')
+                try:
+                    if action=='read':event('read:'+str(len(child.Value)))
+                    elif action=='get':event('get:'+str(len(child.getPropertyByName('Value'))))
+                    elif action=='doc_add':doc.addObject('App::FeaturePython','Unexpected')
+                    elif action=='doc_remove':doc.removeObject('MemberChild')
+                    elif action=='doc_clear':doc.clearUndos()
+                    else:child.Value='during-destruction'
+                    event('allowed')
+                except Exception as error:event('blocked:'+type(error).__name__+':'+str(error))
+        child.Payload=LastValue()
+        if operation=='redo':
+            doc.commitTransaction();doc.undo()
+            check('reversible detach retains live original wrapper identity',
+                  doc.getObject('MemberChild')is None and child.Value=='M'*8192 and not report['events'])
+        event('before-disposal')
+        if operation=='close':App.closeDocument(doc.Name)
+        elif operation=='remove':doc.removeObject('MemberChild')
+        else:doc.clearUndos()
+        event('after-disposal')
+        check('actual derived Python member finalizer ran once',report['events'].count('started')==1)
+        check('expired native member access raises a lifetime error',
+              any(v.startswith('blocked:')and any(s in v.lower()for s in ('stalegeometry','deleted','destroy','no longer'))for v in report['events']))
+        check('native member was not read or written after its destruction','allowed'not in report['events'])
+        if operation!='close':App.closeDocument(doc.Name)
+        check('normal native close completes',not App.listDocuments())
+        report['ok']=all(c['passed']for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2));QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

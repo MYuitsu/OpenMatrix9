@@ -1,0 +1,133 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Real native commit failures must release Builder return references and retain context."""
+import gc
+import hashlib
+import json
+import os
+import sys
+import traceback
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+import OpenMatrix9Gui as OM
+from PySide6 import QtCore
+
+sys.path.insert(0, os.environ['OM9_PUBLICATION_FAULT_DIR'])
+import OM9PublicationFault as Fault
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = dict(module=OM.__file__, probe=Fault.__file__, checks=[], observations=[])
+
+def check(name, value):
+    report['checks'].append(dict(name=name, passed=bool(value)))
+
+def gem(doc, name, width):
+    obj = doc.addObject('Part::Feature', name)
+    obj.Shape = Part.makeBox(width, 2, 4)
+    obj.addProperty('App::PropertyString', 'OM9GemShape')
+    obj.OM9GemShape = 'round'
+    return obj
+
+def snapshot(doc):
+    return tuple((obj.Name, obj.Label, tuple(obj.Placement.toMatrix().A) if 'Placement' in obj.PropertiesList else None,
+        obj.Shape.exportBrepToString() if 'Shape' in obj.PropertiesList else None,
+        obj.Templates.exportBrepToString() if 'Templates' in obj.PropertiesList else None,
+        getattr(obj, 'Parameters', None), repr(getattr(obj, 'OutputNames', None)),
+        getattr(getattr(obj, 'SourceGem', None), 'Name', None),
+        getattr(getattr(obj, 'ParentRecord', None), 'Name', None),
+        getattr(obj, 'OM9GeometryResult', None)) for obj in doc.Objects), doc.UndoCount, doc.RedoCount
+
+def run_case(kind, stage, baseline):
+    doc = App.newDocument('BuilderCommit' + kind + stage)
+    try:
+        doc.UndoMode = 1
+        source = gem(doc, 'Gem', 1)
+        seed = doc.addObject('Part::Feature', 'Seed')
+        seed.Shape = Part.makeLine(App.Vector(0, 0, 0), App.Vector(1, 0, 0))
+        witness = doc.addObject('App::FeaturePython', 'Witness')
+        recipe = json.dumps(dict(schema=1, evaluator='om9.affine-template', version=1,
+                                 settings={}, scale=[1, 1, 1]))
+        target = None
+        if kind != 'Create':
+            record = OM.createBuilderRecord(source, 'OM9-SETTING-001', recipe, [seed], True)
+            if kind == 'Restore':
+                doc.openTransaction('Remove output before restore')
+                doc.removeObject(record.OutputNames[0])
+                doc.commitTransaction()
+            else:
+                target = gem(doc, 'Target', 2)
+        doc.recompute()
+        doc.openTransaction('Prior executable Redo')
+        witness.Label = 'Prior value'
+        doc.commitTransaction()
+        doc.undo()
+        before = snapshot(doc)
+        identities = [(obj.Name, obj) for obj in doc.Objects]
+        input_source = target if kind == 'Match' else source
+        input_name = input_source.Name
+        Fault.arm(stage, doc.Name, input_name)
+        rejected = False
+        error = ''
+        try:
+            if kind == 'Create':
+                OM.createBuilderRecord(source, 'OM9-SETTING-001', recipe, [seed], True)
+            elif kind == 'Restore':
+                OM.restoreBuilderOutputs(record)
+            else:
+                OM.matchBuilderAttributes(source, [target])
+        except Exception as failure:
+            rejected = True
+            error = str(failure)
+        gc.collect()
+        after = snapshot(doc)
+        status = Fault.status()
+        counts = Fault.counts()
+        return_type = 'BuilderOutput' if kind == 'Restore' else 'BuilderRecord'
+        returned = [(row['type'], row['refcount']) for row in counts
+                    if row['type'].endswith('::' + return_type)]
+        report['observations'].append(dict(case=kind, stage=stage, error=error,
+            rejected=rejected, fault=status, refs=counts, before_undo=before[1], after_undo=after[1],
+            before_redo=before[2], after_redo=after[2], model_restored=before[0] == after[0]))
+        label = kind + ' ' + stage
+        check(label + ' actual native fault fires exactly once', status['calls'] == 1 and not status['armed'])
+        check(label + ' API rejects', rejected)
+        check(label + ' geometry metadata links and Undo restored', before[:2] == after[:2])
+        check(label + ' existing native object identities preserved',
+              all(doc.getObject(name) is obj for name, obj in identities))
+        check(label + ' new native wrappers invalidated after abort', bool(returned) and all(not row['valid'] for row in counts))
+        if stage == 'early':
+            baseline[kind] = returned
+            check(label + ' source rejection retains executable prior Redo', after[2] == before[2] == 1)
+            if doc.RedoCount:
+                doc.redo()
+            check(label + ' retained Redo executes', witness.Label == 'Prior value')
+        else:
+            operation = dict(Create='Record Builder History', Restore='Restore Builder Outputs',
+                             Match='Match Builder Attributes')[kind]
+            check(label + ' commit error includes typed code actual operation and source',
+                  'KernelFailure:' in error and operation in error and input_name in error)
+            check(label + ' return references match pre-return failure baseline',
+                  bool(returned) and returned == baseline.get(kind))
+            # The checked native close verdict is failed: its history is not
+            # certified and is disposed by the existing native group contract.
+            check(label + ' failed native close disposes uncertified Redo', after[2] == 0)
+    finally:
+        Fault.clear()
+        App.closeDocument(doc.Name)
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        baseline = {}
+        for kind in ['Create', 'Restore', 'Match']:
+            for stage in ['early', 'before', 'close']:
+                run_case(kind, stage, baseline)
+        report['ok'] = all(row['passed'] for row in report['checks'])
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1200, run)

@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Rejected replay preserves prior Redo expression replacement and removal."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE'])
+import OM9ReplayRetirement as probe
+def state(doc):
+    return dict(booked=doc.getBookedTransactionID(),pending=doc.HasPendingTransaction,
+                undo=list(doc.UndoNames),redo=list(doc.RedoNames))
+def check(name,value): report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        for mode in ['replace','remove']:
+            for action in ['value','close','remove','clear']:
+                label=mode+' '+action
+                doc=App.newDocument('RedoExpressions');doc.UndoMode=1
+                child=doc.getObject(probe.create(doc.Name))
+                child.addProperty('App::PropertyFloat','Input');child.Input=3
+                child.addProperty('App::PropertyFloat','Computed')
+                child.setExpression('Computed','Input + 1')
+                doc.recompute();doc.clearUndos()
+                doc.openTransaction('Prior expression')
+                child.setExpression('Computed','Input * 2' if mode=='replace' else None)
+                child.Value='prior-redo-value';doc.commitTransaction();doc.undo()
+                check(label+' fixture restores original expression',dict(child.ExpressionEngine).get('Computed')=='Input + 1')
+                doc.openTransaction('Caller');before=state(doc);value=child.Value
+                result=probe.run(doc.Name,action,'discarded_redo')
+                check(label+' callback mutation is blocked',result['callbacks']==1 and result['blocked']==1)
+                check(label+' rejection rolls back and cleans up',not result['accepted'] and result['rollback'] and result['complete'])
+                check(label+' exact caller booking and prior Redo survive',state(doc)==before)
+                check(label+' replay values restored',child.Value==value and child.Output=='')
+                doc.abortTransaction();doc.redo()
+                expressions=dict(child.ExpressionEngine)
+                check(label+' native Redo replaces or removes expression',
+                      expressions.get('Computed')==('Input * 2' if mode=='replace' else None))
+                child.Input=4;doc.recompute()
+                if mode=='replace':check(label+' restored expression evaluates',child.Computed==8)
+                check(label+' paired native value restored',child.Value=='prior-redo-value')
+                report['observations'].append(dict(mode=mode,action=action,result=result,expressions=expressions))
+                App.closeDocument(doc.Name)
+        report['ok']=all(c['passed']for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -13,6 +13,8 @@
 #include "CoreKeyboard.h"
 #include "CoreMouse.h"
 #include "CurveGeometry.h"
+#include "CoreGeometryContract.h"
+#include "CoreCurvePublication.h"
 #include "CurveCircle.h"
 #include "CurveEllipse.h"
 #include "CoreLayers.h"
@@ -79,7 +81,9 @@ struct PyRef {
 // Typed native Python API adapter to the host's Part/OpenCascade bindings.
 // No command text is evaluated as Python code.
 void commit(App::Document& doc,const char* label) {
+    OpenMatrix9Gui::validateCurrentCurveCapability(1,3,label,"current construction");
     if(std::string(label)=="Ellipse"){OpenMatrix9Gui::commitEllipse(doc);return;}
+    const auto construction=OpenMatrix9Gui::curveConstructionEvidence();
     Base::PyGILStateLocker lock;
     PyRef app(PyImport_ImportModule("FreeCAD")),part(PyImport_ImportModule("Part"));
     PyRef vector(PyObject_GetAttrString(app.value,"Vector"));
@@ -115,14 +119,25 @@ void commit(App::Document& doc,const char* label) {
     }());
     PyRef valid(PyObject_CallMethod(shape.value,"isValid",nullptr));
     if(PyObject_IsTrue(valid.value)!=1)throw std::runtime_error("Part produced invalid geometry");
-    const auto circleLayer=std::string(label)=="Circle"?OpenMatrix9Gui::CoreLayers::captureCircle(doc):OpenMatrix9Gui::CircleLayerSnapshot{};
-    doc.openTransaction(std::string(label));
+    const auto circleLayer=OpenMatrix9Gui::CoreLayers::captureCircle(doc);
+    const auto outputName=doc.getUniqueObjectName(label);
+    const auto units=OpenMatrix9Gui::unitContextSnapshot(doc);
+    const auto result=OpenMatrix9Gui::curveGeometryResult(doc,shape.value,construction,units,outputName);
+    if(std::string(label)=="Circle")OpenMatrix9Gui::verifyCircleReferences(doc);
+    const bool deformable=om9_circle_deformable();const double fitDeviation=om9_circle_deviation(false),approxDeviation=om9_circle_deviation(true);
+    QJsonObject metadata{{"OM9CurveConstruction",QString::fromStdString(construction)},{"OM9GeometryResult",QString::fromStdString(result)}};
+    if(!units.empty())metadata["OM9UnitContext"]=QString::fromStdString(units);
+    if(std::string(label)=="Circle"||std::string(label)=="Rectangle")metadata["OM9FeatureId"]=std::string(label)=="Circle"?"OM9-CURVE-005":"OM9-CURVE-004";
+    if(std::string(label)=="Circle"){metadata["CircleDeformable"]=deformable;metadata["CircleFitDeviation"]=fitDeviation;metadata["CircleApproxDeviation"]=approxDeviation;}
+    OpenMatrix9Gui::CurvePublication publication(doc,label,construction,units,circleLayer);
+    publication.prepare(shape.value,outputName,metadata);publication.open();
     try {
         bool historyCreated=false;
         PyRef pyDoc(doc.getPyObject());PyRef object([&]()->PyObject*{
             if(std::string(label)=="Circle")if(auto* history=OpenMatrix9Gui::circleHistoryObject(doc,shape.value)){historyCreated=true;return history->getPyObject();}
-            return PyObject_CallMethod(pyDoc.value,"addObject","ss","Part::Feature",label);
+            return PyObject_CallMethod(pyDoc.value,"addObject","ss","Part::Feature",outputName.c_str());
         }());
+        publication.check();
         if(!historyCreated&&PyObject_SetAttrString(object.value,"Shape",shape.value)<0)throw std::runtime_error("Cannot assign Curve shape");
         if(std::string(label)=="Rectangle"||std::string(label)=="Circle") {
             PyRef property(PyObject_CallMethod(object.value,"addProperty","sss","App::PropertyString","OM9FeatureId","OpenMatrix9"));
@@ -130,32 +145,36 @@ void commit(App::Document& doc,const char* label) {
             if(PyObject_SetAttrString(object.value,"OM9FeatureId",id.value)<0)throw std::runtime_error("Cannot assign Curve feature ID");
         }
         if(std::string(label)=="Circle") {
-            for(const auto& parameter:std::vector<std::pair<const char*,double>>{{"CircleFitDeviation",om9_circle_deviation(false)},{"CircleApproxDeviation",om9_circle_deviation(true)}}){
+            for(const auto& parameter:std::vector<std::pair<const char*,double>>{{"CircleFitDeviation",fitDeviation},{"CircleApproxDeviation",approxDeviation}}){
                 PyRef property(PyObject_CallMethod(object.value,"addProperty","sss","App::PropertyLength",parameter.first,"OpenMatrix9"));PyRef value(PyFloat_FromDouble(parameter.second));
                 if(PyObject_SetAttrString(object.value,parameter.first,value.value)<0)throw std::runtime_error("Cannot persist Circle deviation");
             }
             PyRef property(PyObject_CallMethod(object.value,"addProperty","sss","App::PropertyBool","CircleDeformable","OpenMatrix9"));
-            if(PyObject_SetAttrString(object.value,"CircleDeformable",om9_circle_deformable()?Py_True:Py_False)<0)throw std::runtime_error("Cannot persist Circle output kind");
+            if(PyObject_SetAttrString(object.value,"CircleDeformable",deformable?Py_True:Py_False)<0)throw std::runtime_error("Cannot persist Circle output kind");
         }
         // New Curve output must remain visible on the selected black Matrix canvas.
         // Existing objects and their layer/user colors are left intact.
         PyRef view(PyObject_GetAttrString(object.value,"ViewObject"));PyRef color(Py_BuildValue("(ddd)",0.0,130.0/255.0,85.0/255.0));
         if(PyObject_SetAttrString(view.value,"LineColor",color.value)<0)throw std::runtime_error("Cannot assign Curve line color");
-        if(std::string(label)=="Circle"){
+        if(std::string(label)=="Circle"||circleLayer.index){
             PyRef name(PyObject_GetAttrString(object.value,"Name"));const char* nativeName=PyUnicode_AsUTF8(name.value);
             auto* native=nativeName?doc.getObject(nativeName):nullptr;if(!native)throw std::runtime_error("Circle output identity missing");
             OpenMatrix9Gui::CoreLayers::applyCircle(doc,*native,circleLayer);
         }
-        PyRef outputName(PyObject_GetAttrString(object.value,"Name"));
-        auto* nativeOutput=doc.getObject(PyUnicode_AsUTF8(outputName.value));
+        PyRef actualName(PyObject_GetAttrString(object.value,"Name"));
+        if(outputName!=PyUnicode_AsUTF8(actualName.value))throw std::runtime_error("StaleGeometry: Curve planned output identity changed during publication");
+        auto* nativeOutput=doc.getObject(outputName.c_str());
         if(!nativeOutput)throw std::runtime_error("Curve output identity missing");
-        OpenMatrix9Gui::addUnitContextProvenance(*nativeOutput,OpenMatrix9Gui::unitContextSnapshot(doc));
-        doc.recompute();doc.commitTransaction();
-    }catch(...){doc.abortTransaction();throw;}
+        publication.check();OpenMatrix9Gui::addUnitContextProvenance(*nativeOutput,units);
+        OpenMatrix9Gui::persistCurveConstruction(object.value,construction);
+        OpenMatrix9Gui::persistCurveGeometryResult(object.value,result);
+        publication.watch(object.value,outputName);publication.check();
+        doc.recompute();publication.check();publication.commit();
+    }catch(...){publication.abort();throw;}
 }
 }
 namespace OpenMatrix9Gui {
-bool isCurveCommand(std::size_t index) {const char* id=om9_command_id(index);return id && (std::string(id)=="Line" || std::string(id)=="Polyline" || std::string(id)=="InterpCrv" || std::string(id)=="Rebuild" || std::string(id)=="Rectangle" || std::string(id)=="Circle" || std::string(id)=="Ellipse");}
+bool isCurveCommand(std::size_t index) {return OpenMatrix9Gui::CoreRebuild::handles(index)?om9_native_rebuild_declared():om9_native_curve_declared(index);}
 CurveController& CurveController::instance(){static auto* controller=new CurveController;return *controller;}
 CurveController::CurveController():QObject(qApp) {
     deleteConnection=App::GetApplication().signalDeleteDocument.connect([this](const App::Document& doc){if(document==doc.getName())cancel();});
@@ -173,6 +192,8 @@ void CurveController::activate() {
         console->completionEnabled=[this]{return enabled&&!GumballController::instance().active()&&!CageController::instance().active()&&!HistoryController::instance().active()&&!om9_curve_active()&&!CoreRebuild::instance().active()&&!EditController::instance().active()&&!SolidController::instance().active()&&!SurfaceController::instance().active()&&!CoreDistance::instance().active()&&!CorePictureFrame::instance().active()&&!CoreViewControls::instance().toolActive();};
         console->completionAvailable=[](const QString& name){for(std::size_t i=0;i<om9_command_count();++i)if(CageController::matches(i,name)||HistoryController::matches(i,name)||EditController::matches(i,name)||SolidController::matches(i,name)||SurfaceController::matches(i,name)||name.compare(QString::fromUtf8(om9_command_id(i)),Qt::CaseInsensitive)==0)return om9NativeCommandAvailable(i);return false;};
         console->accepted=[this]{acceptInput();};
+        console->optionActivated=[this](const QString& token){return optionEvent(1,token);};
+        console->optionNavigate=[this](int direction){return optionEvent(7,{},direction);};
         console->cancelled=[this]{cancelInput();};
         console->recalled=[this](int direction){
             if(inputHistory.isEmpty())return;
@@ -181,7 +202,7 @@ void CurveController::activate() {
         };
         const auto font=QFontDatabase::systemFont(QFontDatabase::FixedFont);body->setFont(font);
         QPalette palette=dock->palette();palette.setColor(QPalette::Window,QColor(130,180,140));palette.setColor(QPalette::Base,QColor(130,180,140));palette.setColor(QPalette::Text,Qt::black);palette.setColor(QPalette::WindowText,Qt::black);dock->setPalette(palette);body->setAutoFillBackground(true);
-        dock->setStyleSheet("QPlainTextEdit#OM9CommandTranscript { background:#82b48c; color:black; border:none; }");
+        dock->setStyleSheet("QPlainTextEdit#OM9CommandTranscript, QPlainTextEdit#OM9CommandHistoryPane { background:#82b48c; color:black; border:none; }");
         dock->setWidget(body);window->addDockWidget(Qt::TopDockWidgetArea,dock);window->resizeDocks({dock},{console->sizeHint().height()+4},Qt::Vertical);
     }
     dock->show();
@@ -189,7 +210,7 @@ void CurveController::activate() {
 void CurveController::deactivate(){enabled=false;cancel();if(dock)dock->hide();}
 bool CurveController::available(std::size_t index)const {
     auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
-    return enabled&&isCurveCommand(index)&&doc&&gui&&!gui->getInEdit()&&dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())&&Gui::Control().isAllowedAlterDocument(doc);
+    return enabled&&isCurveCommand(index)&&(!CoreRebuild::handles(index)||om9_native_rebuild_declared())&&doc&&gui&&!gui->getInEdit()&&dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())&&Gui::Control().isAllowedAlterDocument(doc);
 }
 bool CurveController::validDocument()const {
     auto* doc=App::GetApplication().getActiveDocument();
@@ -202,12 +223,44 @@ bool CurveController::start(std::size_t index) {
     try {
         auto& doc=*App::GetApplication().getActiveDocument();unitsSnapshot=unitContextSnapshot(doc);
         const bool ok=om9_curve_start(om9_command_id(index))&&om9_curve_input_units(unitInputScale(doc));
-        if(!ok){cancel();return false;}updateInputFrame();refresh();qApp->installEventFilter(this);CoreMouse::instance().prioritize();return true;
+        if(!ok){cancel();return false;}
+        const QString name=QString::fromUtf8(om9_command_id(index));unsigned family=name=="Polyline"?1:name=="Line"?2:name=="InterpCrv"?3:name=="Rectangle"?4:name=="Circle"?5:name=="Ellipse"?6:0;
+        commandOptions.open(family,unitInputScale(doc));updateInputFrame();refresh();qApp->installEventFilter(this);CoreMouse::instance().prioritize();return true;
     }catch(const std::exception& error){cancel();setPrompt(QString::fromUtf8(error.what()));return false;}
 }
 void CurveController::cancel(){GumballController::instance().cancel();if(om9_curve_active()||!document.empty())CoreSnaps::clearTransient();unitsSnapshot.clear();CageController::instance().cancel();HistoryController::instance().cancel();CoreRebuild::instance().cancel();EditController::instance().cancel();SurfaceController::instance().cancel();SolidController::instance().cancel();clearPreview();clearCircleReferences();clearEllipseReferences();om9_curve_cancel();document.clear();documentIdentity=nullptr;refresh();}
-void CurveController::cancelInput(){if(console)console->setInputText({});historyPosition=-1;CoreDistance::instance().cancel();CorePictureFrame::instance().cancel();cancel();}
-void CurveController::acceptInput(){submit(console?console->takeInput():QString());}
+void CurveController::cancelInput(){if(optionEvent(6))return;if(console)console->setInputText({});historyPosition=-1;CoreDistance::instance().cancel();CorePictureFrame::instance().cancel();cancel();}
+void CurveController::acceptInput(){if(console&&optionEvent(2,console->inputText()))return;submit(console?console->takeInput():QString());}
+QString CurveController::draftInput()const{return console?console->inputText():QString();}
+QString CurveController::promptInput()const{return console?console->property("om9Prompt").toString():QString();}
+void CurveController::setDraftInput(const QString& text){if(console)console->setInputText(text);}
+void CurveController::focusInput(std::function<bool()> current){
+    // Defer until the icon/menu's mouse release has finished restoring focus.
+    // Qt owns widget lifetime; the context cancels delivery on destruction.
+    QTimer::singleShot(0,this,[this,current=std::move(current)]{if(enabled&&console&&console->isVisible()&&(!current||current())){
+        console->setInputText(console->inputText());console->setFocus(Qt::OtherFocusReason);
+    }});
+}
+void CurveController::consumeOptionInput(unsigned kind){if(!console)return;if(kind==2)rememberInput(console->takeInput());else if(kind==6)console->setInputText({});}
+void CurveController::logInvocation(const QString& commandName){if(console)console->logInvocation(CommandOptionsBridge::invocationLine(commandName));}
+void CurveController::renderOptions(const CommandOptionsBridge& bridge,const QString& prefix){if(console)console->setOptionSnapshot(bridge.snapshot(prefix));}
+bool CurveController::optionEvent(unsigned kind,const QString& text,double number){
+    if(SolidController::instance().optionEvent(kind,text,number))return true;
+    if(SurfaceController::instance().optionEvent(kind,text,number))return true;
+    if(CoreRebuild::instance().optionEvent(kind,text,number))return true;
+    if(!commandOptions.active()||!om9_curve_active())return false;
+    if(!validDocument()){cancel();return true;}
+    commandOptions.draft(draftInput());const auto status=commandOptions.event(kind,text,number);
+    if(status==0)return false;
+    if(status==4){renderOptions(commandOptions,QString::fromUtf8(om9_command_id(command))+": "+commandOptions.error()+"; ");return true;}
+    if(status==2){
+        const auto effect=commandOptions.acceptCurve();
+        if(!effect){renderOptions(commandOptions,QString::fromUtf8(om9_command_id(command))+": "+commandOptions.error()+"; ");return true;}
+        consumeOptionInput(kind);result(effect);return true;
+    }
+    if(status==3){const auto action=commandOptions.action();consumeOptionInput(kind);submit(action);return true;}
+    consumeOptionInput(kind);refresh();return true;
+}
 bool CurveController::pendingInput()const{return console&&!console->inputText().trimmed().isEmpty();}
 void CurveController::logMessage(const QString& message){if(console)console->logMessage(message);}
 void CurveController::setPrompt(const QString& message){if(console)console->setPrompt(message);}
@@ -216,7 +269,7 @@ void CurveController::clearPreview(){
     previewOwners.clear();
 }
 void CurveController::updatePreview(const double* hover,bool close,bool square){
-    clearPreview();const auto count=om9_curve_preview_count();
+    clearPreview();if(om9_native_curve_capability(1,4)!=4)return;const auto count=om9_curve_preview_count();
     const bool interpolated=QString::fromUtf8(om9_command_id(command))=="InterpCrv";
     const bool rectangle=QString::fromUtf8(om9_command_id(command))=="Rectangle";
     const bool circle=QString::fromUtf8(om9_command_id(command))=="Circle";
@@ -262,16 +315,27 @@ void CurveController::updatePreview(const double* hover,bool close,bool square){
         view->getViewer()->redraw();
     }
 }
-void CurveController::refresh(){if(CoreRebuild::instance().active()||CoreDistance::instance().active()||CorePictureFrame::instance().active())return;char message[2048]={};om9_curve_message(message,sizeof(message));setPrompt(QString::fromUtf8(message));if(om9_curve_active())logMessage(QString::fromUtf8(message));}
-void CurveController::submit(const QString& text) {
-    if(!enabled)return;
+void CurveController::refresh(){
+    if(CoreRebuild::instance().active()||CoreDistance::instance().active()||CorePictureFrame::instance().active())return;
+    char message[2048]={};om9_curve_message(message,sizeof(message));
+    if(!om9_curve_active()){commandOptions.close();setPrompt(QString::fromUtf8(message));return;}
+    if(commandOptions.active()){
+        commandOptions.syncCurve();
+        const QString base=QString::fromUtf8(message).section('(',0,0);renderOptions(commandOptions,base.endsWith(' ')?base:base+" ");
+    }else setPrompt(QString::fromUtf8(message));
+}
+void CurveController::rememberInput(const QString& text){
     const auto input=text.trimmed();
     if(!input.isEmpty()){if(inputHistory.isEmpty()||inputHistory.back()!=input)inputHistory.append(input);if(inputHistory.size()>1000)inputHistory.removeFirst();}
     historyPosition=-1;historyDraft.clear();
+}
+void CurveController::submit(const QString& text) {
+    if(!enabled)return;
+    const auto input=text.trimmed();rememberInput(input);
     if(GumballController::instance().submit(input))return;
     QString layerError;if(CoreLayers::submit(input,layerError)){if(!layerError.isEmpty()){setPrompt(layerError);logMessage(layerError);}else if(om9_curve_active())refresh();else setPrompt("Current layer updated");return;}
     if(SolidController::instance().active()){SolidController::instance().submit(input);return;}
-    for(std::size_t i=0;i<om9_command_count();++i)if(SolidController::matches(i,input)){SolidController::instance().start(i);return;}
+    for(std::size_t i=0;i<om9_command_count();++i)if(SolidController::matches(i,input)){SolidController::instance().start(i,false);return;}
     if(SurfaceController::instance().active()){SurfaceController::instance().submit(input);return;}
     if(EditController::instance().active()){EditController::instance().submit(input);return;}
     if(HistoryController::instance().active()){HistoryController::instance().submit(input);return;}
@@ -333,9 +397,11 @@ void CurveController::result(unsigned int effect) {
     if(effect==2) {
         auto* doc=App::GetApplication().getActiveDocument();
         if(!validDocument()){cancel();setPrompt("Document or unit context changed; restart the command");return;}
-        try {commit(*doc,om9_command_id(command));CoreSnaps::clearTransient();unitsSnapshot.clear();clearCircleReferences();clearEllipseReferences();om9_sidebar_record_execution(command,true);logMessage(QString::fromUtf8(om9_command_id(command))+" created");document.clear();documentIdentity=nullptr;}
-        catch(const Base::Exception& error){cancel();setPrompt(QString::fromUtf8(error.what()));logMessage(console->property("om9Prompt").toString());Base::Console().error("OpenMatrix9 Curve: %s\n",error.what());}
-        catch(const std::exception& error){cancel();setPrompt(QString::fromUtf8(error.what()));logMessage(console->property("om9Prompt").toString());Base::Console().error("OpenMatrix9 Curve: %s\n",error.what());}
+        const auto generation=om9_curve_generation();const auto executionCommand=command;
+        const auto failed=[&](const char* error){if(om9_curve_generation()==generation){cancel();setPrompt(QString::fromUtf8(error));}logMessage(QString::fromUtf8(error));Base::Console().error("OpenMatrix9 Curve: %s\n",error);};
+        try {commit(*doc,om9_command_id(executionCommand));om9_sidebar_record_execution(executionCommand,true);if(om9_curve_generation()==generation){CoreSnaps::clearTransient();unitsSnapshot.clear();clearCircleReferences();clearEllipseReferences();document.clear();documentIdentity=nullptr;}logMessage(QString::fromUtf8(om9_command_id(executionCommand))+" created");}
+        catch(const Base::Exception& error){failed(error.what());}
+        catch(const std::exception& error){failed(error.what());}
     }else if(effect==3){CoreSnaps::clearTransient();unitsSnapshot.clear();clearEllipseReferences();document.clear();}
 }
 bool CurveController::eventFilter(QObject* watched,QEvent* event) {
@@ -362,8 +428,9 @@ bool CurveController::eventFilter(QObject* watched,QEvent* event) {
     if(!om9_curve_active())return false;
     if(event->type()==QEvent::KeyPress) {
         auto* key=static_cast<QKeyEvent*>(event);
-        if(key->key()==Qt::Key_Escape&&watched!=console&&!QApplication::activePopupWidget()&&!QApplication::activeModalWidget()){cancel();return true;}
+        if(key->key()==Qt::Key_Escape&&watched!=console&&!QApplication::activePopupWidget()&&!QApplication::activeModalWidget()){if(!optionEvent(6))cancel();return true;}
         if(key->key()==Qt::Key_F4&&CoreKeyboard::pointKeyAllowed(watched,key)) {
+            if(!commandOptions.pending().isEmpty())return true;
             if(!validDocument()){cancel();return true;}
             auto* view=dynamic_cast<Gui::View3DInventor*>(Gui::Application::Instance->activeDocument()->getActiveView());
             try {
@@ -390,6 +457,7 @@ bool CurveController::eventFilter(QObject* watched,QEvent* event) {
     if(!validDocument()){cancel();return false;}
     auto* view=dynamic_cast<Gui::View3DInventor*>(Gui::Application::Instance->activeDocument()->getActiveView());auto* viewer=view->getViewer();auto* widget=qobject_cast<QWidget*>(watched);
     if(!widget||!viewer->isAncestorOf(widget))return false;
+    if(!commandOptions.pending().isEmpty())return !hovering;
     if(!hovering)releaseTarget=watched;
     const auto pos=viewer->viewport()->mapFrom(widget,mouse->position().toPoint());
     // C-plane belongs to the native viewport, independently of its camera orientation.

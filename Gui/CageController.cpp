@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "CageController.h"
 #include "CageFeature.h"
+#include "CageCapability.h"
 #include "CurveController.h"
 #include "CoreKeyboard.h"
 #include "EditGeometry.h"
@@ -57,8 +58,13 @@ double number(PyObject* p,const char* key){Ref v(PyObject_GetAttrString(p,key));
 bool nativeControl(App::DocumentObject* o){return dynamic_cast<CageControl*>(o)!=nullptr;}
 bool retainedControl(App::DocumentObject* o){auto* p=o?o->getPropertyByName<App::PropertyString>("OM9SourceClass"):nullptr;return p&&(p->getStrValue()=="ON_MorphControl"||p->getStrValue()=="ON_NurbsCage");}
 struct Snapshot{std::string signature;std::array<double,3> lo{},hi{};};
-Snapshot snapshot(App::DocumentObject* o,bool retained=false){
-    if(!o||!o->getDocument()||!o->getDocument()->containsObject(o))throw std::runtime_error("Cage input was deleted; cancel and reselect");
+Snapshot snapshot(App::DocumentObject* o,const void* session,unsigned kind,unsigned role,unsigned stage,const std::string& identity){
+    const std::string operation=kind==1?"Cage":kind==2?"CageEdit":"ReleaseFromCage";
+    const bool retained=role==2;
+    if(!o||!o->getDocument()||!o->getDocument()->containsObject(o))throw std::runtime_error("StaleGeometry: "+operation+" input "+identity+" was deleted; cancel and reselect");
+    if(auto* control=dynamic_cast<CageControl*>(o))validateNativeCageControl(*control,operation,identity);
+    if(retained)validateCageSessionCapability(session,13,stage,role,operation,identity);
+    else validateCageGeometryInput(*o,operation,[&](unsigned representation){validateCageSessionCapability(session,representation,stage,role,operation,identity);});
     Ref object(o->getPyObject());Snapshot s;std::ostringstream frame;frame<<o->getID()<<':'<<std::hexfloat;
     auto global=App::GeoFeature::getGlobalPlacement(o).toMatrix();for(int r=0;r<4;++r)for(int c=0;c<4;++c)frame<<';'<<global[r][c];
     if(retained){for(const char* key:{"OM9SourceUUID","OM9SourceClass","OM9ImportNamespace","OM9Capability"}){Ref p(PyObject_GetAttrString(object.value,key)),v(PyObject_Repr(p.value));frame<<'|'<<text(v.value);}s.signature=frame.str();return s;}
@@ -68,7 +74,8 @@ Snapshot snapshot(App::DocumentObject* o,bool retained=false){
         if(PyObject_SetAttrString(copy.value,"Placement",placement.value)<0)throw std::runtime_error(pythonError());
         Ref bbox(PyObject_GetAttrString(copy.value,"BoundBox"));const char* lows[]={"XMin","YMin","ZMin"};const char* highs[]={"XMax","YMax","ZMax"};for(int a=0;a<3;++a){s.lo[a]=number(bbox.value,lows[a]);s.hi[a]=number(bbox.value,highs[a]);}
     }else{
-        auto input=nativeShapeInput(*o->getDocument(),o->getNameInDocument());s.signature=input.signature+frame.str();Ref bbox(PyObject_GetAttrString(input.shape->value,"BoundBox"));const char* lows[]={"XMin","YMin","ZMin"};const char* highs[]={"XMax","YMax","ZMax"};for(int a=0;a<3;++a){s.lo[a]=number(bbox.value,lows[a]);s.hi[a]=number(bbox.value,highs[a]);}
+        NativeShapeAdmission admission{operation.c_str(),[](PyObject*,bool){}};
+        auto input=nativeShapeInput(*o->getDocument(),o->getNameInDocument(),&admission);s.signature=input.signature+frame.str();Ref bbox(PyObject_GetAttrString(input.shape->value,"BoundBox"));const char* lows[]={"XMin","YMin","ZMin"};const char* highs[]={"XMax","YMax","ZMax"};for(int a=0;a<3;++a){s.lo[a]=number(bbox.value,lows[a]);s.hi[a]=number(bbox.value,highs[a]);}
     }
     // Control data, including rational weights and full knots, is independent
     // of its displayed lattice. Exact scalar/vector property serialization
@@ -84,7 +91,7 @@ CageController::CageController():QObject(qApp){
     changed=App::GetApplication().signalActiveDocument.connect([this](const App::Document& d){if(active()&&document!=&d)cancel();});
     auto* timer=new QTimer(this);timer->setInterval(150);connect(timer,&QTimer::timeout,this,[this]{if(active()&&!valid())cancel();});timer->start();
 }
-bool CageController::handles(std::size_t i){return om9_cage_command_kind(om9_command_id(i))!=0;}
+bool CageController::handles(std::size_t i){return om9_native_cage_declared(om9_cage_command_kind(om9_command_id(i)));}
 bool CageController::matches(std::size_t i,const QString& s){return handles(i)&&om9_cage_command_kind(s.toUtf8().constData())==om9_cage_command_kind(om9_command_id(i));}
 bool CageController::available(std::size_t i)const{auto* d=App::GetApplication().getActiveDocument();auto* g=Gui::Application::Instance->activeDocument();return handles(i)&&om9_cage_command_available(d!=nullptr,g!=nullptr,g&&!g->getInEdit()&&!g->isAboutToClose(),d&&Gui::Control().isAllowedAlterDocument(d));}
 bool CageController::active()const{return document&&session;}
@@ -96,7 +103,7 @@ void CageController::cancel(){closeDialog();om9_cage_session_free(session);sessi
 void CageController::add(const QString& name,unsigned role){
     auto* o=document->getObject(name.toUtf8().constData());if(role==1&&!nativeControl(o))throw std::runtime_error("Select one existing OpenMatrix9 native 3D cage; use Restore=name for retained 3DM controls");if(role==2&&!retainedControl(o))throw std::runtime_error("Restore requires an existing retained ON_MorphControl or ON_NurbsCage");
     if(role==0&&(nativeControl(o)||dynamic_cast<CageBinding*>(o)))throw std::runtime_error("Select whole captive/source geometry; controls and binding storage are separate roles");
-    auto s=snapshot(o,role==2);check(om9_cage_session_add(session,name.toUtf8().constData(),s.signature.c_str(),s.lo.data(),s.hi.data(),role));
+    auto s=snapshot(o,session,kind,role,2,name.toStdString());check(om9_cage_session_add(session,name.toUtf8().constData(),s.signature.c_str(),s.lo.data(),s.hi.data(),role));
 }
 void CageController::selection(){for(const auto& selected:Gui::Selection().getSelection(document->getName())){if(selected.SubName&&*selected.SubName)throw std::runtime_error("Cage commands require whole objects");auto* o=document->getObject(selected.FeatName);if(kind==2&&nativeControl(o))continue;add(QString::fromUtf8(selected.FeatName));}}
 bool CageController::start(std::size_t i){if(!available(i))return false;cancel();CurveController::instance().cancel();document=App::GetApplication().getActiveDocument();command=i;kind=om9_cage_command_kind(om9_command_id(i));session=om9_cage_session_new(kind);
@@ -117,8 +124,8 @@ void CageController::syncOptions(){if(!dialog)return;const char* fields[]={"UCou
 void CageController::commit(){
     if(!active()||!valid()){cancel();return;}try{Base::PyGILStateLocker lock;
         if(om9_cage_session_phase(session)==3&&dialog){if(kind==1){const char* fields[]={"UCount","VCount","WCount","UDegree","VDegree","WDegree"};QStringList values;for(const char* key:fields)values<<dialog->findChild<QLineEdit*>(QString("OM9Cage")+key)->text().trimmed();check(om9_cage_session_option(session,"Parameters",values.join(',').toUtf8().constData()));}if(auto* edit=dialog->findChild<QLineEdit*>("OM9CageFalloff"))check(om9_cage_session_option(session,"Falloff",edit->text().trimmed().toUtf8().constData()));if(auto* region=dialog->findChild<QComboBox*>("OM9CageRegion"))check(om9_cage_session_option(session,"Region",region->currentText().toUtf8().constData()));}
-        double values[13];unsigned flags=om9_cage_session_values(session,values);Ref captives(PyList_New(0));for(std::size_t i=0;i<om9_cage_session_count(session);++i){const char* name=om9_cage_session_name(session,i);auto* o=document->getObject(name);auto current=snapshot(o);check(om9_cage_session_verify(session,name,current.signature.c_str()));Ref object(o->getPyObject());if(PyList_Append(captives.value,object.value)<0)throw std::runtime_error(pythonError());}
-        const char* controlName=om9_cage_session_control(session);App::DocumentObject* control=controlName?document->getObject(controlName):nullptr;if(controlName){auto current=snapshot(control,flags&2);check(om9_cage_session_verify(session,controlName,current.signature.c_str()));}
+        double values[13];unsigned flags=om9_cage_session_values(session,values);Ref captives(PyList_New(0));for(std::size_t i=0;i<om9_cage_session_count(session);++i){const char* name=om9_cage_session_name(session,i);auto* o=document->getObject(name);auto current=snapshot(o,session,kind,0,3,name);check(om9_cage_session_verify(session,name,current.signature.c_str()));Ref object(o->getPyObject());if(PyList_Append(captives.value,object.value)<0)throw std::runtime_error(pythonError());}
+        const char* controlName=om9_cage_session_control(session);App::DocumentObject* control=controlName?document->getObject(controlName):nullptr;if(controlName){auto current=snapshot(control,session,kind,flags&2?2:1,3,controlName);check(om9_cage_session_verify(session,controlName,current.signature.c_str()));}
         check(om9_cage_session_prepare(session));Ref api(PyImport_ImportModule("OpenMatrix9Gui"));
         if(kind==1){Ref lo(Py_BuildValue("(ddd)",values[0],values[1],values[2])),hi(Py_BuildValue("(ddd)",values[3],values[4],values[5])),counts(Py_BuildValue("(ddd)",values[6],values[7],values[8])),degrees(Py_BuildValue("(ddd)",values[9],values[10],values[11]));Ref result(PyObject_CallMethod(api.value,"createCage","sOOOO",document->getName(),lo.value,hi.value,counts.value,degrees.value));}
         else if(kind==2){if(!control)throw std::runtime_error("Control was deleted; cancel and reselect");Ref object(control->getPyObject());if(flags&2){Ref result(PyObject_CallMethod(api.value,"restore3dmCage","O",object.value));}else{Ref result(PyObject_CallMethod(api.value,"captureCage","OOsd",object.value,captives.value,flags&1?"Local":"Global",values[12]));}}

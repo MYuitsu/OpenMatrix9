@@ -1,0 +1,56 @@
+import sys
+sys.path.insert(0,'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+from command_options_fixture_support import *
+
+def run():
+    doc=App.newDocument('DocumentedBox');doc.UndoMode=1
+    window=Gui.getMainWindow();window.raise_();window.activateWindow();settle()
+    command('Box')
+    check('Box starts default flow with optional methods',prompt()=='First corner of base ( Diagonal 3Point Vertical Center ): ')
+    check_mnemonics({'Diagonal':'D','3Point':'3','Vertical':'V','Center':'C'})
+    command('0');check('default zero accepts first corner',draft()=='' and not doc.Objects and prompt()=='Other corner of base: ')
+    key(QtCore.Qt.Key_Escape);command('Box');click_option('3Point');check('3Point asks edge start','Start of edge' in prompt())
+    command('0');check('zero means origin after method choice',draft()=='' and prompt()=='End of edge: ')
+    for invalid in ['10','Length=10']:
+        command(invalid);check('3Point requires endpoint '+invalid,draft()==invalid and prompt()=='End of edge: ' and not doc.Objects)
+    command('3,4,0');check('picked endpoints define length five','<5 mm>' in prompt())
+    command('-2');command('3');first=doc.Objects[-1]
+    check('3Point rotated signed native solid',first.Shape.isValid() and len(first.Shape.Solids)==1 and abs(first.Shape.Volume-30)<1e-6 and 'mode=3Point' in first.SolidParameters)
+    doc.undo();check('one transaction Undo',not doc.Objects);doc.redo();check('one transaction Redo',len(doc.Objects)==1)
+    command('Box');command('V');command('0,0,0')
+    command('10');check('Vertical requires endpoint',draft()=='10' and prompt()=='End of edge: ' and len(doc.Objects)==1)
+    command('3,4,0');command('2');command('3');vertical=doc.Objects[-1]
+    axes=[float(v) for v in vertical.SolidParameters.split(';axes=')[1].split(';')[0].rstrip(',').split(',')]
+    check('Vertical perpendicular native solid',vertical.Shape.isValid() and abs(vertical.Shape.Volume-30)<1e-6 and len(axes)==9 and all(abs(a-b)<1e-9 for a,b in zip(axes,[.6,.8,0,0,0,1,.8,-.6,0])))
+    command('Box');click_option('Center');check('Center asks center','Center of base' in prompt())
+    QtTest.QTest.keyClicks(field(),'0');QtTest.QTest.keyClick(field(),QtCore.Qt.Key_Return);settle()
+    check('Center click then zero keeps focus',field().hasFocus() and draft()=='' and 'Other corner of base or length' in prompt())
+    command('Length=10');command('20');command('10');center=doc.Objects[-1];b=center.Shape.BoundBox
+    check('Center typed full dimensions',abs(center.Shape.Volume-2000)<1e-6 and (b.XMin,b.YMin,b.ZMin,b.XMax,b.YMax,b.ZMax)==(-5,-10,0,5,10,10))
+    command('Box');command('C');command('0,0,0');command('5,10,0');check('Center corner advances to Height','Height' in prompt());command('10')
+    check('Center corner native dimensions',abs(doc.Objects[-1].Shape.Volume-2000)<1e-6)
+    command('Box');command('Corners');check('Corners not exposed as a fifth option',draft()=='Corners' and 'First corner of base' in prompt());key(QtCore.Qt.Key_Escape)
+    for obj in doc.Objects:obj.Visibility=False
+    Gui.activeDocument().activeView().viewTop();settle()
+    area=window.findChild(QtWidgets.QMdiArea)
+    viewer=next(w for w in area.activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible())
+    target=viewer.viewport();middle=target.rect().center()
+    positions=[middle-QtCore.QPoint(60,40),middle+QtCore.QPoint(50,20),middle+QtCore.QPoint(-40,70)]
+    def projected(pos):
+        ratio=viewer.devicePixelRatioF()
+        a,b=Gui.activeDocument().activeView().projectPointToLine(round(pos.x()*ratio),round(target.height()*ratio)-round(pos.y()*ratio)-1)
+        delta=b-a;return a+delta*(-a.z/delta.z)
+    a,b,c=[projected(pos) for pos in positions];edge=b-a
+    normal=App.Vector(0,0,1).cross(edge)/edge.Length;width=(c-a).dot(normal);count=len(doc.Objects)
+    command('Box');command('3')
+    for pos in positions:QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=pos);settle()
+    command('5');mouse=doc.Objects[-1]
+    check('three viewport picks define actual base',len(doc.Objects)==count+1 and mouse.Shape.isValid() and abs(mouse.Shape.Volume-abs(edge.Length*width*5))<max(1e-6,abs(mouse.Shape.Volume)*1e-6))
+    command('Box');command('3');command('0');command('10,0,0');command();command()
+    check('native Width Height Enter defaults',abs(doc.Objects[-1].Shape.Volume-1000)<1e-6)
+    path=out/'documented-box.FCStd';doc.saveAs(str(path))
+    parameters=[o.SolidParameters for o in doc.Objects];volumes=[o.Shape.Volume for o in doc.Objects]
+    App.closeDocument(doc.Name);restored=App.openDocument(str(path))
+    check('FCStd preserves methods and solids',[o.SolidParameters for o in restored.Objects]==parameters and all(o.Shape.isValid() and abs(o.Shape.Volume-v)<1e-6 for o,v in zip(restored.Objects,volumes)))
+    report['transcript']=field().toPlainText()
+QtCore.QTimer.singleShot(1800,lambda:execute(run))

@@ -4,6 +4,7 @@ set(FREECAD_SOURCE_DIR "" CACHE PATH "Matching FreeCAD source checkout")
 set(FREECAD_SDK_BUILD "" CACHE PATH "Existing FreeCAD build with headers/import libraries")
 set(FREECAD_DEPENDENCY_PREFIX "" CACHE PATH "Matching FreeCAD dependency prefix")
 set(OPENMATRIX9_RUNTIME_ROOT "" CACHE PATH "Optional separate runtime output for interactive module previews")
+set(OPENMATRIX9_NATIVE_APP_MANIFEST "" CACHE FILEPATH "Explicit hash-bound isolated native App SDK override")
 if(NOT OPENMATRIX9_RUNTIME_ROOT)
     set(OPENMATRIX9_RUNTIME_ROOT "${FREECAD_SDK_BUILD}")
 endif()
@@ -28,6 +29,20 @@ foreach(lib Gui App Base)
         IMPORTED_IMPLIB "${FREECAD_SDK_BUILD}/src/${lib}/FreeCAD${lib}.lib"
         IMPORTED_LOCATION "${FREECAD_SDK_BUILD}/bin/FreeCAD${lib}.dll")
 endforeach()
+if(OPENMATRIX9_NATIVE_APP_MANIFEST)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    execute_process(COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_LIST_DIR}/../tools/validate_native_app_sdk.py"
+        "${OPENMATRIX9_NATIVE_APP_MANIFEST}" --sdk "${FREECAD_SDK_BUILD}" --source "${FREECAD_SOURCE_DIR}"
+        RESULT_VARIABLE app_validation OUTPUT_VARIABLE app_selection ERROR_VARIABLE app_error)
+    if(NOT app_validation EQUAL 0)
+        message(FATAL_ERROR "Native App SDK override rejected: ${app_error}")
+    endif()
+    string(JSON native_app_dll GET "${app_selection}" native_dll)
+    string(JSON native_app_import GET "${app_selection}" native_import)
+    set_target_properties(FreeCADApp PROPERTIES IMPORTED_IMPLIB "${native_app_import}" IMPORTED_LOCATION "${native_app_dll}")
+    message(STATUS "Validated native App import: ${native_app_import}")
+endif()
 target_include_directories(FreeCADGui INTERFACE
     "${FREECAD_SOURCE_DIR}/src" "${FREECAD_SDK_BUILD}" "${FREECAD_SDK_BUILD}/src"
     "${FREECAD_SOURCE_DIR}/src/3rdParty/PyCXX" "${FREECAD_SOURCE_DIR}/src/3rdParty"

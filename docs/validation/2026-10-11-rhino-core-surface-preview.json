@@ -1,0 +1,1385 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-surface-preview-20261011",
+  "updated_at": "2026-10-11T15:56:06+07:00",
+  "status": "in_progress",
+  "scope": "Surface preview cleanup plus native camera command admission during deferred teardown; full original RCORE-01 retained",
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/surface-preview-runtime25-20261011/bin/OpenMatrix9Gui.pyd",
+    "bytes": 15773696,
+    "sha256": "c081ed038273fed1259f962a9ed9f56fe83e9b139f738d179eabac64c2325a78"
+  },
+  "selected_app": {
+    "path": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "selected_camera_app": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "selected_camera_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "sources": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceController.cpp",
+      "bytes": 27539,
+      "sha256": "6c2c4e840c7b19f731968afeffff0c7522a5b95134102550c3c793490390ad7d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_surface_preview_lifecycle_smoke.FCMacro",
+      "bytes": 12003,
+      "sha256": "32dba0757060db6e302438c96c857bf55f68d729bf0b43c4ae2ba5801749c1ff"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_camera_close_smoke.FCMacro",
+      "bytes": 3752,
+      "sha256": "7cb94cd61834877fc37e4b90bbd7e264cd4e141b7c376192dbdc479e09fc2975"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/Gui/View3DInventor.cpp",
+      "bytes": 27720,
+      "sha256": "3dd76bc5210a60343cb58cad87e28c18eb7267c4dd48340d308430984e7ce49b"
+    }
+  ],
+  "producer_sources": {
+    "path": "H:/FreeCAD-src/build/edit-result-sourcepreview25-20261011.json",
+    "bytes": 10352,
+    "sha256": "e7c5b9a208db397a13715c75253e63e0dbf8cf371a16f1bf8056f32a0daf2f05"
+  },
+  "rust_sources": {
+    "path": "H:/FreeCAD-src/build/edit-result-rust-sourcepreview25-20261011.json",
+    "bytes": 41250,
+    "sha256": "1654e042472fbd91f62f708425e39d44a43b9ab00ed0d0ff029a6de7a4f3ff36"
+  },
+  "shared_sdk_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "build_log": {
+    "path": "H:/FreeCAD-src/build/edit-result-surface-preview-build25-20261011.log",
+    "bytes": 13872,
+    "sha256": "2ba2df5528d6242093ead12ed6dfa5980a3c61d9d1476947341ab8541e481252"
+  },
+  "camera_build_inputs": {
+    "path": "H:/FreeCAD-src/build/camera-gui-green2-20261011/inputs.json",
+    "bytes": 66822,
+    "sha256": "f23345e206571d3994e8d0237d8f9f99ae55998d5b66f109f6fed7d9bd8f264f"
+  },
+  "camera_build_log": {
+    "path": "H:/FreeCAD-src/build/camera-gui-green2-20261011/link.log",
+    "bytes": 384,
+    "sha256": "d0188a1a20413623fb41f85033c203c3a6b9cc9f9015e174b890dd36426da777"
+  },
+  "camera_build_terminal_exit_code": 0,
+  "red": {
+    "artifact": "H:/FreeCAD-src/build/surface-preview-lifecycle-red3-20261011",
+    "checks": 468,
+    "passed": 420,
+    "failures": [
+      "Sweep1 Plain before preview absent in every retained viewport",
+      "Sweep1 Plain before temporary root leases returned exactly",
+      "Sweep1 Plain close preview absent in every retained viewport",
+      "Sweep1 Plain close temporary root leases returned exactly",
+      "Sweep1 Plain early preview absent in every retained viewport",
+      "Sweep1 Plain early temporary root leases returned exactly",
+      "Sweep1 Plain stale preview absent in every retained viewport",
+      "Sweep1 Plain stale temporary root leases returned exactly",
+      "Sweep1 History before preview absent in every retained viewport",
+      "Sweep1 History before temporary root leases returned exactly",
+      "Sweep1 History close preview absent in every retained viewport",
+      "Sweep1 History close temporary root leases returned exactly",
+      "Sweep1 History early preview absent in every retained viewport",
+      "Sweep1 History early temporary root leases returned exactly",
+      "Sweep1 History stale preview absent in every retained viewport",
+      "Sweep1 History stale temporary root leases returned exactly",
+      "Sweep2 Plain before preview absent in every retained viewport",
+      "Sweep2 Plain before temporary root leases returned exactly",
+      "Sweep2 Plain close preview absent in every retained viewport",
+      "Sweep2 Plain close temporary root leases returned exactly",
+      "Sweep2 Plain early preview absent in every retained viewport",
+      "Sweep2 Plain early temporary root leases returned exactly",
+      "Sweep2 Plain stale preview absent in every retained viewport",
+      "Sweep2 Plain stale temporary root leases returned exactly",
+      "Sweep2 History before preview absent in every retained viewport",
+      "Sweep2 History before temporary root leases returned exactly",
+      "Sweep2 History close preview absent in every retained viewport",
+      "Sweep2 History close temporary root leases returned exactly",
+      "Sweep2 History early preview absent in every retained viewport",
+      "Sweep2 History early temporary root leases returned exactly",
+      "Sweep2 History stale preview absent in every retained viewport",
+      "Sweep2 History stale temporary root leases returned exactly",
+      "Loft Plain before preview absent in every retained viewport",
+      "Loft Plain before temporary root leases returned exactly",
+      "Loft Plain close preview absent in every retained viewport",
+      "Loft Plain close temporary root leases returned exactly",
+      "Loft Plain early preview absent in every retained viewport",
+      "Loft Plain early temporary root leases returned exactly",
+      "Loft Plain stale preview absent in every retained viewport",
+      "Loft Plain stale temporary root leases returned exactly",
+      "Loft History before preview absent in every retained viewport",
+      "Loft History before temporary root leases returned exactly",
+      "Loft History close preview absent in every retained viewport",
+      "Loft History close temporary root leases returned exactly",
+      "Loft History early preview absent in every retained viewport",
+      "Loft History early temporary root leases returned exactly",
+      "Loft History stale preview absent in every retained viewport",
+      "Loft History stale temporary root leases returned exactly"
+    ],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\commit-runtime24-20261011\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "A459CD7637C0D1EE2B246AB55B1297E0DBA6E3787BF2BBC407F09E208E304942",
+      "pid": 27640,
+      "module_root": "H:\\FreeCAD-src\\build\\commit-runtime24-20261011\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/surface-preview-lifecycle-red3-20261011",
+      "exit_code": 0
+    },
+    "selection": {
+      "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+      "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+      "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+    },
+    "report": {
+      "path": "H:/FreeCAD-src/build/surface-preview-lifecycle-red3-20261011/results.json",
+      "bytes": 103162,
+      "sha256": "1c357f741737dae5e6eda0798a5e3936b06548d77305ed6bd91aaa297d2b2d1f"
+    },
+    "fixture": {
+      "path": "H:/FreeCAD-src/build/surface-preview-lifecycle-red3-20261011/fixture.FCMacro",
+      "bytes": 12003,
+      "sha256": "32dba0757060db6e302438c96c857bf55f68d729bf0b43c4ae2ba5801749c1ff"
+    },
+    "stdout": {
+      "path": "H:/FreeCAD-src/build/surface-preview-lifecycle-red3-20261011/host-stdout.log",
+      "bytes": 356,
+      "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+    },
+    "stderr": {
+      "path": "H:/FreeCAD-src/build/surface-preview-lifecycle-red3-20261011/host-stderr.log",
+      "bytes": 10840,
+      "sha256": "49bb2e4f911f89af05d5f75cd92914c2c7aa5ea8da476e5fb50372032a24d562"
+    }
+  },
+  "preview_green": {
+    "artifact": "H:/FreeCAD-src/build/surface-preview-lifecycle-green25camera3-20261011",
+    "checks": 468,
+    "passed": 468,
+    "failures": [],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+      "pid": 36396,
+      "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/surface-preview-lifecycle-green25camera3-20261011",
+      "exit_code": 0
+    },
+    "selection": {
+      "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+      "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+      "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+    },
+    "report": {
+      "path": "H:/FreeCAD-src/build/surface-preview-lifecycle-green25camera3-20261011/results.json",
+      "bytes": 103122,
+      "sha256": "49c881d7f84aa1b1f07de671419adab3a5ab0faf7297e552a471bcae8b9cece2"
+    },
+    "fixture": {
+      "path": "H:/FreeCAD-src/build/surface-preview-lifecycle-green25camera3-20261011/fixture.FCMacro",
+      "bytes": 12003,
+      "sha256": "32dba0757060db6e302438c96c857bf55f68d729bf0b43c4ae2ba5801749c1ff"
+    },
+    "stdout": {
+      "path": "H:/FreeCAD-src/build/surface-preview-lifecycle-green25camera3-20261011/host-stdout.log",
+      "bytes": 353,
+      "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+    },
+    "stderr": {
+      "path": "H:/FreeCAD-src/build/surface-preview-lifecycle-green25camera3-20261011/host-stderr.log",
+      "bytes": 10139,
+      "sha256": "58d9efb3a67ad4e26c14ecaed0b5fe259657dc17d67a627ff256cb0c72d50f0d"
+    },
+    "gui_selection": {
+      "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+      "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+    },
+    "gui_receipt": {
+      "path": "H:/FreeCAD-src/build/surface-preview-lifecycle-green25camera3-20261011/loaded-native-gui.json",
+      "bytes": 172,
+      "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+    }
+  },
+  "camera_red": {
+    "artifact": "H:/FreeCAD-src/build/camera-close-red6-20261011",
+    "checks": 18,
+    "passed": 15,
+    "failures": [
+      "0 camera command timer has no escaped exception",
+      "1 camera command timer has no escaped exception",
+      "2 camera command timer has no escaped exception"
+    ],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+      "pid": 70120,
+      "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/camera-close-red6-20261011",
+      "exit_code": 0
+    },
+    "selection": {
+      "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+      "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+      "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+    },
+    "report": {
+      "path": "H:/FreeCAD-src/build/camera-close-red6-20261011/results.json",
+      "bytes": 1867,
+      "sha256": "7ed3825c523ed7f673ca19225445f6b78b6faa616e1e8bc401400d58fdfe5cf2"
+    },
+    "fixture": {
+      "path": "H:/FreeCAD-src/build/camera-close-red6-20261011/fixture.FCMacro",
+      "bytes": 3752,
+      "sha256": "7cb94cd61834877fc37e4b90bbd7e264cd4e141b7c376192dbdc479e09fc2975"
+    },
+    "stdout": {
+      "path": "H:/FreeCAD-src/build/camera-close-red6-20261011/host-stdout.log",
+      "bytes": 356,
+      "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+    },
+    "stderr": {
+      "path": "H:/FreeCAD-src/build/camera-close-red6-20261011/host-stderr.log",
+      "bytes": 641,
+      "sha256": "1fc0245a848abe269d99fad8cadcf92b7b815a9c4c51ab3c6ef770521adfa894"
+    }
+  },
+  "camera_green": {
+    "artifact": "H:/FreeCAD-src/build/camera-close-green6-20261011",
+    "checks": 18,
+    "passed": 18,
+    "failures": [],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+      "pid": 42760,
+      "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/camera-close-green6-20261011",
+      "exit_code": 0
+    },
+    "selection": {
+      "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+      "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+      "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+    },
+    "report": {
+      "path": "H:/FreeCAD-src/build/camera-close-green6-20261011/results.json",
+      "bytes": 1863,
+      "sha256": "40e7af8259475de4d8672600f8e293dcdac416eb45bb1751065e18079962075b"
+    },
+    "fixture": {
+      "path": "H:/FreeCAD-src/build/camera-close-green6-20261011/fixture.FCMacro",
+      "bytes": 3752,
+      "sha256": "7cb94cd61834877fc37e4b90bbd7e264cd4e141b7c376192dbdc479e09fc2975"
+    },
+    "stdout": {
+      "path": "H:/FreeCAD-src/build/camera-close-green6-20261011/host-stdout.log",
+      "bytes": 353,
+      "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+    },
+    "stderr": {
+      "path": "H:/FreeCAD-src/build/camera-close-green6-20261011/host-stderr.log",
+      "bytes": 266,
+      "sha256": "6596b0cf6f637a5b8a5fac67ad1913f5d461195ac1defd2c79df5c8c0bfd26c0"
+    },
+    "gui_selection": {
+      "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+      "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+    },
+    "gui_receipt": {
+      "path": "H:/FreeCAD-src/build/camera-close-green6-20261011/loaded-native-gui.json",
+      "bytes": 172,
+      "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+    }
+  },
+  "historical_preview_with_camera_errors": {
+    "artifact": "H:/FreeCAD-src/build/surface-preview-lifecycle-green25-20261011",
+    "checks": 468,
+    "passed": 468,
+    "failures": [],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+      "pid": 62868,
+      "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/surface-preview-lifecycle-green25-20261011",
+      "exit_code": 0
+    },
+    "selection": {
+      "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+      "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+      "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+    },
+    "report": {
+      "path": "H:/FreeCAD-src/build/surface-preview-lifecycle-green25-20261011/results.json",
+      "bytes": 103122,
+      "sha256": "49c881d7f84aa1b1f07de671419adab3a5ab0faf7297e552a471bcae8b9cece2"
+    },
+    "fixture": {
+      "path": "H:/FreeCAD-src/build/surface-preview-lifecycle-green25-20261011/fixture.FCMacro",
+      "bytes": 12003,
+      "sha256": "32dba0757060db6e302438c96c857bf55f68d729bf0b43c4ae2ba5801749c1ff"
+    },
+    "stdout": {
+      "path": "H:/FreeCAD-src/build/surface-preview-lifecycle-green25-20261011/host-stdout.log",
+      "bytes": 356,
+      "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+    },
+    "stderr": {
+      "path": "H:/FreeCAD-src/build/surface-preview-lifecycle-green25-20261011/host-stderr.log",
+      "bytes": 10861,
+      "sha256": "af09e356b769af720ca27e2dab378c1cfe48c2bbcf23ab7dfd655b4d594c1db7"
+    },
+    "escaped_camera_exceptions": 6
+  },
+  "fault_green": [
+    {
+      "artifact": "H:/FreeCAD-src/build/builder-commit-fault-green25-20261011",
+      "checks": 69,
+      "passed": 69,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 45752,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/builder-commit-fault-green25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/builder-commit-fault-green25-20261011/results.json",
+        "bytes": 14254,
+        "sha256": "1d3c59f586670d4357ba8d06cc6ac805d4e5845a6978b19a2593dd7b051de489"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/builder-commit-fault-green25-20261011/fixture.FCMacro",
+        "bytes": 6224,
+        "sha256": "aa42397a5d0670b89baad5715307432bd4ba3fab99530abeb1207b8b962a0150"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/builder-commit-fault-green25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/builder-commit-fault-green25-20261011/host-stderr.log",
+        "bytes": 266,
+        "sha256": "6596b0cf6f637a5b8a5fac67ad1913f5d461195ac1defd2c79df5c8c0bfd26c0"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/surface-commit-fault-green25-20261011",
+      "checks": 72,
+      "passed": 72,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 66824,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/surface-commit-fault-green25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/surface-commit-fault-green25-20261011/results.json",
+        "bytes": 19768,
+        "sha256": "2a090b0537000565d708a10a9d3f2dacf4ade1be56f9098a0ba0ed382f3f8947"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/surface-commit-fault-green25-20261011/fixture.FCMacro",
+        "bytes": 6722,
+        "sha256": "ed517a308a62b0fa864edaa18c48af3fc0087ef383f9f6f82f99bf4e49a43b72"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/surface-commit-fault-green25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/surface-commit-fault-green25-20261011/host-stderr.log",
+        "bytes": 3536,
+        "sha256": "4fb31ee11f5397e8f66db97b000dd294ab0c55d3ed01d5fb265e2c545d306030"
+      }
+    }
+  ],
+  "regressions": [
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-builder-publication-preview25-20261011",
+      "checks": 18,
+      "passed": 18,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 75408,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-builder-publication-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-publication-preview25-20261011/results.json",
+        "bytes": 3071,
+        "sha256": "2751262ab977869883cec4da9691be38c2498a71f63fe82b12b83c9148bfe530"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-publication-preview25-20261011/fixture.FCMacro",
+        "bytes": 5231,
+        "sha256": "87c80c608cde96cdfc83e733f4295bfe3871925c0c86c4ce34b6c760d5b531f9"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-publication-preview25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-publication-preview25-20261011/host-stderr.log",
+        "bytes": 266,
+        "sha256": "6596b0cf6f637a5b8a5fac67ad1913f5d461195ac1defd2c79df5c8c0bfd26c0"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-surface-publication-preview25-20261011",
+      "checks": 30,
+      "passed": 30,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 38076,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-surface-publication-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-publication-preview25-20261011/results.json",
+        "bytes": 7928,
+        "sha256": "dedba51517d7f99d864d7e859588ef9de9cd4d91d002b115122f39a41766befe"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-publication-preview25-20261011/fixture.FCMacro",
+        "bytes": 5429,
+        "sha256": "6a91f9818b5ba15f3fd05b650689f3bef3db6135b5082d1ef3a570e547c1bdb9"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-publication-preview25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-publication-preview25-20261011/host-stderr.log",
+        "bytes": 2523,
+        "sha256": "96da501118414b248e623bf0cdfcb5a47fb0318540254517f0b7d48cbbbaa03a"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-builder-output-preview25-20261011",
+      "checks": 29,
+      "passed": 29,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 64820,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-builder-output-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-output-preview25-20261011/results.json",
+        "bytes": 4846,
+        "sha256": "8edb2aeb75058b5f1005986bddb0ce01f72d8a66c47a2df1aa270a0eb0bb9154"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-output-preview25-20261011/fixture.FCMacro",
+        "bytes": 8951,
+        "sha256": "f07e7e829b5ae0e15c678765bab024ab31b7ddb95770eb09183ee97f201d94d6"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-output-preview25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-output-preview25-20261011/host-stderr.log",
+        "bytes": 266,
+        "sha256": "6596b0cf6f637a5b8a5fac67ad1913f5d461195ac1defd2c79df5c8c0bfd26c0"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-builder-result-preview25-20261011",
+      "checks": 20,
+      "passed": 20,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 49016,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-builder-result-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-result-preview25-20261011/results.json",
+        "bytes": 2336,
+        "sha256": "ad0fff77767c50294a9a37ab55faf6f88b24fa6c7553db9ee9eba558b9aa5f5a"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-result-preview25-20261011/fixture.FCMacro",
+        "bytes": 7851,
+        "sha256": "a240151b7142c2f4bbdad50cac605a608ccadd706ddd629e739ad58dd352f2d1"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-result-preview25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-result-preview25-20261011/host-stderr.log",
+        "bytes": 375,
+        "sha256": "5e76c4f44e674afab5ba869f92d4826a25d5a9af697700e02b5a12e1dd4fbe89"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-builder-conversion-preview25-retry1-20261011",
+      "checks": 17,
+      "passed": 17,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 18696,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-builder-conversion-preview25-retry1-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-conversion-preview25-retry1-20261011/results.json",
+        "bytes": 1934,
+        "sha256": "1504696e570ca5a71160e344359a3479ba92f595545eb508b2f76eaac718c7e6"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-conversion-preview25-retry1-20261011/fixture.FCMacro",
+        "bytes": 5583,
+        "sha256": "1b88f9aaefa7776477a12a696ba014cb5a09e413df25c985e5da9195fcfc726e"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-conversion-preview25-retry1-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-conversion-preview25-retry1-20261011/host-stderr.log",
+        "bytes": 266,
+        "sha256": "6596b0cf6f637a5b8a5fac67ad1913f5d461195ac1defd2c79df5c8c0bfd26c0"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-builder-history-preview25-20261011",
+      "checks": 43,
+      "passed": 43,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 4856,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-builder-history-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-history-preview25-20261011/results.json",
+        "bytes": 4493,
+        "sha256": "d4bc40929d7c7d452e7dda772b43bb5591277db781d93bf81cc6e158a5b10dd1"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-history-preview25-20261011/fixture.FCMacro",
+        "bytes": 14166,
+        "sha256": "14065f187101514008cdd2257a621e5b2a64a19152a1c462f1b06be7485980ae"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-history-preview25-20261011/host-stdout.log",
+        "bytes": 3715,
+        "sha256": "5dd0076536343bcf4aa6ab6e1e820a6b6ebacc24d0a2804e86dc3d5efa4dce7f"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-history-preview25-20261011/host-stderr.log",
+        "bytes": 620,
+        "sha256": "65b146fb95e17d2e4f70248547d21d3ed2a5ba11fe6d0008c3530ff3d4c67597"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-builder-groups-preview25-20261011",
+      "checks": 10,
+      "passed": 10,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 19492,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-builder-groups-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-groups-preview25-20261011/results.json",
+        "bytes": 1242,
+        "sha256": "9e82079d0adbcc845a36299f111698db359f58c72334fa7f2eba1f22d33d0036"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-groups-preview25-20261011/fixture.FCMacro",
+        "bytes": 5453,
+        "sha256": "26a8532c61fb2568a75ab44d83585f45dcdaecce72e6bbeb44910edecb73544e"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-groups-preview25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-builder-groups-preview25-20261011/host-stderr.log",
+        "bytes": 675,
+        "sha256": "2ccc2ce90782359d987bb8a486056fbae181f0b2c043cea0c93e3f6e765185e0"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-surface-result-preview25-20261011",
+      "checks": 81,
+      "passed": 81,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 69788,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-surface-result-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-result-preview25-20261011/results.json",
+        "bytes": 7758,
+        "sha256": "bed7bc71b6bde2cb841404686574ebfbb951c7e04898ff39d6e1fbd9f2500694"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-result-preview25-20261011/fixture.FCMacro",
+        "bytes": 6705,
+        "sha256": "1c4b1b312bc08c5df0901e3c533b82479343fd9c874b38f71cb742ccdd8617bc"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-result-preview25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-result-preview25-20261011/host-stderr.log",
+        "bytes": 2761,
+        "sha256": "2529c6adc8b70228818227f4e2e812bd4dc61dc0d13be40a542986e1440d1abd"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-surface-identity-preview25-20261011",
+      "checks": 6,
+      "passed": 6,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 10544,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-surface-identity-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-identity-preview25-20261011/results.json",
+        "bytes": 731,
+        "sha256": "92d87b3393d9188eac3ea98a00616d2c612138a38298d211a93bfe28727f57d7"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-identity-preview25-20261011/fixture.FCMacro",
+        "bytes": 3230,
+        "sha256": "281b1bf63aa729155154e24086b44993324a0e9b86de0511e4235bacff9ab469"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-identity-preview25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-identity-preview25-20261011/host-stderr.log",
+        "bytes": 1466,
+        "sha256": "1b4ad8e7b7b8cd8325752f0cd773289a7a20a239b385c18fc399d11cfdb95ede"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-surface-frame-preview25-20261011",
+      "checks": 4,
+      "passed": 4,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 56668,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-surface-frame-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-frame-preview25-20261011/results.json",
+        "bytes": 534,
+        "sha256": "c9784051457a480af4dcb638aa9145ed67ca52b90a5ea66b101baae7734a58d6"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-frame-preview25-20261011/fixture.FCMacro",
+        "bytes": 2744,
+        "sha256": "54c198ae16e7582f85dc199322ce679fc771b5c325556d0e38f1938c645cb4e0"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-frame-preview25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-frame-preview25-20261011/host-stderr.log",
+        "bytes": 1362,
+        "sha256": "b1a8f99e2a9b51a4ccaf12d274f62ad7cd41c120fccc5337cda9f9421345e811"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-surface-analytic-preview25-20261011",
+      "checks": 8,
+      "passed": 8,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 19612,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-surface-analytic-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-analytic-preview25-20261011/results.json",
+        "bytes": 1237,
+        "sha256": "9ad0e3aa8daf3c55c0817357d21f6ac356b04bb4121b1ce2354f5d1f6129204e"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-analytic-preview25-20261011/fixture.FCMacro",
+        "bytes": 2710,
+        "sha256": "d666a7c6e67fed3ebc315e0d8a301b005a0074d82099dd47e89e37588eb114f4"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-analytic-preview25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-analytic-preview25-20261011/host-stderr.log",
+        "bytes": 1356,
+        "sha256": "848408bef3d936386cdb77e21e5df55908ac2d2de4024189c8319c2edc33aa15"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-surface-commands-preview25-20261011",
+      "checks": 97,
+      "passed": 97,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 18224,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-surface-commands-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-commands-preview25-20261011/results.json",
+        "bytes": 11119,
+        "sha256": "01dd07a44857e7cffedd1cd806e6104af47a486f70f3d606bf6ed7f5589de84d"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-commands-preview25-20261011/fixture.FCMacro",
+        "bytes": 13772,
+        "sha256": "386e0ac64e5a8dc96a1ecb2517ba00c4f3b5b29f5a5904eaea18d897a837533a"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-commands-preview25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-commands-preview25-20261011/host-stderr.log",
+        "bytes": 3853,
+        "sha256": "360bd603fcaa868db11a231eb0bb9cdb5534a568255bad6fb10bb8b6d3ceddb0"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-surface-history-preview25-20261011",
+      "checks": 65,
+      "passed": 65,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 21076,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-surface-history-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-history-preview25-20261011/results.json",
+        "bytes": 6998,
+        "sha256": "69a64e8e7ee149564c0c325b5a63121cebe248e4bdc7ac281de62d0e70d435a1"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-history-preview25-20261011/fixture.FCMacro",
+        "bytes": 12363,
+        "sha256": "7e603d0a2017d09406f0edf90ad75eeeb654eb95f2ea8b02008a1f81c92c76f0"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-history-preview25-20261011/host-stdout.log",
+        "bytes": 5479,
+        "sha256": "89f92c7f8bffa7b38647f4291d195bcbee33ce5bd3cd251c2dbfd232bdd3f458"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-history-preview25-20261011/host-stderr.log",
+        "bytes": 6606,
+        "sha256": "862f4c279502ea2cc1c60c4b8ce805954941ab6065d18c0f28320d6976c0d884"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-surface-diagnostic-preview25-20261011",
+      "checks": 6,
+      "passed": 6,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 6940,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-surface-diagnostic-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-diagnostic-preview25-20261011/results.json",
+        "bytes": 1984,
+        "sha256": "05d4c58bb2f4d2a95171290e6051ba22f045f41c20d98e35019cec8b0829e5a4"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-diagnostic-preview25-20261011/fixture.FCMacro",
+        "bytes": 2679,
+        "sha256": "4c08bc3d822c5943a811ac7c837aad34bcd00a1441dd0a4849b8e98482b18296"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-diagnostic-preview25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-surface-diagnostic-preview25-20261011/host-stderr.log",
+        "bytes": 320,
+        "sha256": "4d65c2c6232e61598bb914fde9ea9f8e0d8893fe2b54c42f1b9c746cc83ccd95"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-edit-callback-preview25-20261011",
+      "checks": 5,
+      "passed": 5,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 12012,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-edit-callback-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-edit-callback-preview25-20261011/results.json",
+        "bytes": 951,
+        "sha256": "87a0ca95052aa052c832b0ab9fcd3238b5ba742b2d9369460ff40f8bc6fa2d2c"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-edit-callback-preview25-20261011/fixture.FCMacro",
+        "bytes": 3886,
+        "sha256": "285c820f2abd71ad415bf821046b02bb7c1a31862d70535f7ae3a434c49babfe"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-edit-callback-preview25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-edit-callback-preview25-20261011/host-stderr.log",
+        "bytes": 1211,
+        "sha256": "6f87161911374d578960bc4f717a1644f67443dcd4eb46718479ca32803676af"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/edit-result-atomic-api-preview25-20261011",
+      "checks": 23,
+      "passed": 23,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 83216,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/edit-result-atomic-api-preview25-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/edit-result-atomic-api-preview25-20261011/results.json",
+        "bytes": 3244,
+        "sha256": "219114bf0424248a82171d3fc17b0667bb395ac9c99b43ef0fb8721342b194d2"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/edit-result-atomic-api-preview25-20261011/fixture.FCMacro",
+        "bytes": 7997,
+        "sha256": "df772d223cd12320842376e40c0ee6a474f5fcbaf64118ef2d3ac740d9e90a18"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/edit-result-atomic-api-preview25-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/edit-result-atomic-api-preview25-20261011/host-stderr.log",
+        "bytes": 217,
+        "sha256": "230387a0ce57f36ceb454c8a6ef8fce4ea19bc22ca010ad14436f63bd9ce2b5c"
+      }
+    }
+  ],
+  "cold": [
+    {
+      "artifact": "H:/FreeCAD-src/build/preview-cold-builder-present-20261011",
+      "checks": 3,
+      "passed": 3,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 53496,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/preview-cold-builder-present-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/preview-cold-builder-present-20261011/results.json",
+        "bytes": 515,
+        "sha256": "8c011079e99501b163a1ab577256bd1210441a000dfa02068a58d9cf0bf9ba27"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/preview-cold-builder-present-20261011/fixture.FCMacro",
+        "bytes": 14236,
+        "sha256": "81b989840c6df5e8225b847ce2f1f3cbb447fd4cc2e2d3ebaa05d7625ab4e0dd"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/preview-cold-builder-present-20261011/host-stdout.log",
+        "bytes": 774,
+        "sha256": "8da31d48e907951f627a3c8bdf31f49e818cd3cdda661a72c2db639af7c16362"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/preview-cold-builder-present-20261011/host-stderr.log",
+        "bytes": 217,
+        "sha256": "230387a0ce57f36ceb454c8a6ef8fce4ea19bc22ca010ad14436f63bd9ce2b5c"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/preview-cold-builder-missing-20261011",
+      "checks": 4,
+      "passed": 4,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 31084,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/preview-cold-builder-missing-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/preview-cold-builder-missing-20261011/results.json",
+        "bytes": 619,
+        "sha256": "6c7fc6f2cf86657d95312d98311dee5e844d338833250be775bf7a32c8beadca"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/preview-cold-builder-missing-20261011/fixture.FCMacro",
+        "bytes": 14236,
+        "sha256": "81b989840c6df5e8225b847ce2f1f3cbb447fd4cc2e2d3ebaa05d7625ab4e0dd"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/preview-cold-builder-missing-20261011/host-stdout.log",
+        "bytes": 852,
+        "sha256": "7e039290342b19b10a32de06c9433cdda69bd0099eea0c2f181232f8e118e9e9"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/preview-cold-builder-missing-20261011/host-stderr.log",
+        "bytes": 217,
+        "sha256": "230387a0ce57f36ceb454c8a6ef8fce4ea19bc22ca010ad14436f63bd9ce2b5c"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/preview-cold-surface-1-20261011",
+      "checks": 13,
+      "passed": 13,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 46280,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/preview-cold-surface-1-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/preview-cold-surface-1-20261011/results.json",
+        "bytes": 1347,
+        "sha256": "4d225ffdb2dadc68496fe447b2b17d88ead111ccc52b4dbdc15f93d4900481c5"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/preview-cold-surface-1-20261011/fixture.FCMacro",
+        "bytes": 6707,
+        "sha256": "8423e969775d1b7f11fa77cd76b38c2eb0f5098292e214dc467d8e1b112573f3"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/preview-cold-surface-1-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/preview-cold-surface-1-20261011/host-stderr.log",
+        "bytes": 676,
+        "sha256": "679163a59ae4048fe0f5e12a593116eb8f360cdcad5c64e375373176ca8b2a6a"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/preview-cold-surface-2-20261011",
+      "checks": 13,
+      "passed": 13,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 35064,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/preview-cold-surface-2-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/preview-cold-surface-2-20261011/results.json",
+        "bytes": 1347,
+        "sha256": "4d225ffdb2dadc68496fe447b2b17d88ead111ccc52b4dbdc15f93d4900481c5"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/preview-cold-surface-2-20261011/fixture.FCMacro",
+        "bytes": 6707,
+        "sha256": "8423e969775d1b7f11fa77cd76b38c2eb0f5098292e214dc467d8e1b112573f3"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/preview-cold-surface-2-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/preview-cold-surface-2-20261011/host-stderr.log",
+        "bytes": 676,
+        "sha256": "972223ecae11f0e3b9daf86954d6eff6a60b4cd5fe907bac6e89c3afc08cebf7"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/preview-cold-surface-3-20261011",
+      "checks": 13,
+      "passed": 13,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+        "pid": 57288,
+        "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/preview-cold-surface-3-20261011",
+        "exit_code": 0
+      },
+      "selection": {
+        "path": "H:\\FreeCAD-src\\build\\atomic-gui-host-api19-test3-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "report": {
+        "path": "H:/FreeCAD-src/build/preview-cold-surface-3-20261011/results.json",
+        "bytes": 1347,
+        "sha256": "4d225ffdb2dadc68496fe447b2b17d88ead111ccc52b4dbdc15f93d4900481c5"
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/build/preview-cold-surface-3-20261011/fixture.FCMacro",
+        "bytes": 6707,
+        "sha256": "8423e969775d1b7f11fa77cd76b38c2eb0f5098292e214dc467d8e1b112573f3"
+      },
+      "stdout": {
+        "path": "H:/FreeCAD-src/build/preview-cold-surface-3-20261011/host-stdout.log",
+        "bytes": 356,
+        "sha256": "b7bfd46af9a8ff316048e3f8d5e25137d7985382b35b616c83d5222ca6fd8c3e"
+      },
+      "stderr": {
+        "path": "H:/FreeCAD-src/build/preview-cold-surface-3-20261011/host-stderr.log",
+        "bytes": 676,
+        "sha256": "e3554d3804d84766236a1a901883df6d297f3083845b86b2dc518249f52c3c80"
+      }
+    }
+  ],
+  "new_gui_checks": 486,
+  "new_gui_actual_exits_zero": 2,
+  "earlier_gui_checks": 649,
+  "earlier_gui_actual_exits_zero": 23,
+  "host_checks": 1135,
+  "actual_host_exits_zero": 25,
+  "cohort_scope": "486 assertions/2 terminal exits0 use the newly pinned GUI DLL. Earlier649/23 caller/cold assertions use the prior host, same plugin/App hash; do not treat these as reruns against new GUI.",
+  "reused_rust_evidence": {
+    "passed": 808,
+    "failed": 0,
+    "ignored": 0,
+    "suites": 115,
+    "log": {
+      "path": "H:/FreeCAD-src/build/edit-result-commit24-fullrust-20261011.log",
+      "bytes": 85254,
+      "sha256": "42c8cbab51b26c4e4ea6c3cd80f94e6265d0090b89e3af048dffe82ba2aff7a0"
+    },
+    "source_identical": true,
+    "source_files": 218,
+    "new_execution": false
+  },
+  "remaining": [
+    "RCORE-01 remains in_progress. Preserve every original geometry family, enabled consumer, eight typed errors, adapters1–7, C01–C12 and T01–T11; these caller witnesses do not certify the whole chapter.",
+    "Global conversion deviation and complete parameter/topology maps, remaining source attributes/full GeometryResult consumers, rational/periodic basis/trims/seam occurrences, solid validity and truthful representation/read/edit/retain/export remain required.",
+    "Worker-to-GUI dispatch, arbitrary/custom callbacks, all-family source/lock/owner gates, aggregate allocation/traversal/cancellation budgets, previews/cache cleanup in other enabled producers and independent persistence/lifetime contracts remain required. Surface proofs cover exercised synchronous error/cancel/close/switch paths; camera guard proves only the two action-state queries during deferred teardown, not every direct camera caller or partial allocation failure.",
+    "Caller commit diagnostics/reference release are proven only for the exercised Builder Create/Restore/Match and Sweep1/Sweep2/Loft plain/History paths; other producers, partial Python allocation failures and additional native exception classes are not certified.",
+    "Production deployment/ABI acceptance remains pending: the isolated GUI test host uses App19 and the separately linked camera-guard GUI DLL. Shared SDK App12 and GUI binaries are unchanged. Historical caller/cold suites below used the earlier GUI host and were not rerun against the new GUI DLL.",
+    "One prior owned test launcher attempt terminated with ntdll invalid-handle c0000008 before recorded bootstrap telemetry; identical-binary retry passes, underlying startup cause remains unproven. Early new camera fixtures lacked pivy initialization or the checked-action argument; these attempts are retained and excluded from final proof."
+  ],
+  "native_exception": "Coin cleanup and native View3DInventor camera admission require GUI-thread C++/Qt APIs; existing Rust request/state policies and OCCT solvers are reused. Python/pivy fixtures exercise host APIs only.",
+  "excluded_attempts": [
+    "surface-preview-lifecycle-red1-20261011",
+    "surface-preview-lifecycle-red2-20261011",
+    "camera-close-red2-20261011",
+    "camera-close-green2-20261011",
+    "camera-close-red3-20261011",
+    "camera-close-green3-20261011",
+    "camera-close-red4-20261011",
+    "camera-close-green4-20261011",
+    "camera-close-red5-20261011",
+    "surface-preview-lifecycle-green25camera2-20261011"
+  ],
+  "diagnostic_note": "The final camera RED6/GREEN6 and preview camera3 ran sequentially. Initial RED5 overlapped the earlier preview camera2; these are excluded from final proof. Diagnostic diag2 receipts were inadvertently rewritten once by an identical-binary runner, so they are not counted as immutable final test evidence.",
+  "failed_startup_attempt": {
+    "artifact": "H:/FreeCAD-src/build/edit-result-builder-conversion-preview25-20261011",
+    "launch": {
+      "host": "H:/FreeCAD-src/build/atomic-gui-host-api19-test3-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "C081ED038273FED1259F962A9ED9F56FE83E9B139F738D179EABAC64C2325A78",
+      "pid": 53344,
+      "module_root": "H:\\FreeCAD-src\\build\\surface-preview-runtime25-20261011\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/edit-result-builder-conversion-preview25-20261011",
+      "exit_code": -1073741816
+    },
+    "events": {
+      "path": "H:/FreeCAD-src/build/surface-preview-validation25-20261011/startup-events.json",
+      "bytes": 1820,
+      "sha256": "a382cd2e669b486f63d10863cd619f0c3ae0c9a6c9f50549694e4d8f67cce67b"
+    },
+    "diagnosis": "Windows event1000 identifies the owned PID and ntdll invalid handle; exact root cause unproven."
+  }
+}

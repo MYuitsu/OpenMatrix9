@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""A rejected replay preserves native Python-property identity without serialization."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE']);import OM9ReplayRetirement as probe
+class Opaque:
+    saved=0
+    def __getstate__(self):
+        Opaque.saved+=1
+        raise RuntimeError('journal must preserve identity without serialization')
+def state(doc):return dict(booked=doc.getBookedTransactionID(),pending=doc.HasPendingTransaction,undo=list(doc.UndoNames),redo=list(doc.RedoNames))
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench')
+  for payload_kind in ['dict','opaque']:
+   for action in ['value','close','remove','clear']:
+    label=payload_kind+' '+action;doc=App.newDocument('RedoPython');doc.UndoMode=1
+    child=doc.getObject(probe.create(doc.Name));child.addProperty('App::PropertyPythonObject','Payload')
+    original={'original':1}if payload_kind=='dict'else Opaque()
+    expected={'redo':2}if payload_kind=='dict'else Opaque()
+    child.Payload=original;doc.recompute();doc.clearUndos()
+    doc.openTransaction('Prior Python identity');child.Payload=expected;child.Value='prior-redo-value';doc.commitTransaction();doc.undo()
+    check(label+' original Python identity restored by native Undo',child.Payload is original)
+    doc.openTransaction('Caller');before=state(doc);value=child.Value;saved=Opaque.saved
+    (out/'test-started.json').write_text(json.dumps(dict(kind=payload_kind,action=action,before=before)))
+    result=probe.run(doc.Name,action,'discarded_redo')
+    check(label+' old native property destructor callback ran and blocked',result['callbacks']==1 and result['blocked']==1)
+    check(label+' replay rejection completes cleanup',not result['accepted']and result['rollback']and result['complete'])
+    check(label+' exact caller and Redo preserved',state(doc)==before)
+    check(label+' private values restored',child.Value==value and child.Output=='')
+    check(label+' original live Python identity preserved',child.Payload is original)
+    check(label+' native inverse invokes no serialization',Opaque.saved==saved)
+    doc.abortTransaction();doc.redo()
+    check(label+' original native Redo restores same Python identity',child.Payload is expected)
+    check(label+' paired original Redo value restored',child.Value=='prior-redo-value')
+    report['observations'].append(dict(kind=payload_kind,action=action,result=result,serialization_calls=Opaque.saved-saved))
+    App.closeDocument(doc.Name)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

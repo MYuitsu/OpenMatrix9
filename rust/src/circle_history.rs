@@ -2,6 +2,8 @@
 use crate::circle::{Circle, Mode, Plan, Point, Size, check_point, fit_circle};
 use crate::spline::{self, Spline};
 pub const CONFIG_LEN: usize = 24;
+#[path="circle_history_result.rs"]
+pub(crate) mod result;
 pub const OUTPUT_LEN: usize = 4096;
 #[derive(Clone)]
 pub struct Recipe {
@@ -16,6 +18,21 @@ pub struct Replay {
     pub approx_deviation: f64,
 }
 impl Recipe {
+    /// An owned request from persisted mm options, independent of command state.
+    /// This is input/solve admission; full output snapshots/maps remain separate.
+    pub fn construction_capability(&self,input:crate::geometry_contract::RepresentationKind,
+        point_count:usize)->Result<crate::geometry_contract::OperationCapability,crate::geometry_contract::CapabilityError>{
+        use crate::geometry_contract::*;
+        use crate::native_curve_capability::{Options,Request,Stage};
+        if point_count==0||point_count>crate::fit_point_input::MAX_POINTS||self.options.constraints.len()>3{
+            return Err(CapabilityError::UnsupportedOptions);
+        }
+        self.validate().map_err(|_|CapabilityError::UnsupportedOptions)?;
+        operation_capability(OperationId::ConstructCurve,input,OperationOptions::NativeCurve(Request{
+            options:Options::Circle(self.options.clone()),stage:Stage::Capture,input_count:point_count,
+            output_count:0,has_plan:false,mm_per_unit:1.,
+        }))
+    }
     pub fn new(options: &Circle, numeric_radius: Option<f64>) -> Self {
         Self {
             options: options.clone(),
@@ -172,12 +189,22 @@ impl Recipe {
         Ok(())
     }
 }
+/// Match the existing native Tangent acceptance policy for a fixed contact.
+/// Curve probes are not contacts and must be checked against their source first.
+pub(crate) fn tangent_point_matches(plan:&Plan,point:Point)->bool{
+    let delta:Point=std::array::from_fn(|i|point[i]-plan.center[i]);
+    let height=delta.iter().zip(plan.normal).map(|(a,b)|a*b).sum::<f64>();
+    let distance=delta.iter().map(|v|v*v).sum::<f64>().sqrt();
+    height.abs()<=1e-6&&(distance-plan.radius).abs()<=1e-6*plan.radius.max(1.)
+}
 pub fn replay(
     recipe: &Recipe,
     points: &[Point],
     native_plan: Option<[f64; 7]>,
 ) -> Result<Replay, String> {
     recipe.validate()?;
+    recipe.construction_capability(crate::geometry_contract::RepresentationKind::Point,points.len())
+        .map_err(|error|format!("InvalidBasis: Circle History shared request rejected: {error:?}"))?;
     if points.is_empty() || points.len() > 1024 {
         return Err("Circle History needs 1 through 1024 recorded points".into());
     }
@@ -220,10 +247,7 @@ pub fn replay(
             return Err("Circle History tangent Vertical needs a perpendicular plane".into());
         }
         if options.from_first {
-            let d: Point = std::array::from_fn(|i| points[0][i] - plan.center[i]);
-            let height = d.iter().zip(plan.normal).map(|(a, b)| a * b).sum::<f64>();
-            let length = d.iter().map(|v| v * v).sum::<f64>().sqrt();
-            if height.abs() > 1e-6 || (length - plan.radius).abs() > 1e-6 * plan.radius.max(1.) {
+            if !tangent_point_matches(&plan,points[0]) {
                 return Err("Circle History fixed first contact is off its circle".into());
             }
         }
@@ -343,6 +367,31 @@ impl Replay {
         out.resize(OUTPUT_LEN, 0.);
         Ok(out)
     }
+}
+/// # Safety
+/// Config is24 initialized aligned doubles in one live immutable allocation for
+/// the synchronous call. Invalid length/alignment is rejected before access;
+/// caller guarantees live readable storage for admitted headers. No pointers,
+/// native owners or current command state are retained or accessed.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_circle_history_capability(config:*const f64,config_count:usize,
+    representation:u32,point_count:usize)->u32{
+    use crate::geometry_contract::*;
+    if config_count!=CONFIG_LEN||config.is_null()||(config as usize)%std::mem::align_of::<f64>()!=0
+        ||(config as usize).checked_add(CONFIG_LEN*std::mem::size_of::<f64>()).is_none()
+        ||point_count==0||point_count>crate::fit_point_input::MAX_POINTS{return 102;}
+    std::panic::catch_unwind(||{
+        let input=match representation{1=>RepresentationKind::Point,2=>RepresentationKind::Curve,3=>RepresentationKind::Polycurve,
+            4=>RepresentationKind::TrimmedFace,5=>RepresentationKind::Shell,6=>RepresentationKind::Solid,7=>RepresentationKind::Brep,
+            8=>RepresentationKind::Mesh,9=>RepresentationKind::PointCloud,10=>RepresentationKind::Instance,11=>RepresentationKind::Group,
+            12=>RepresentationKind::Annotation,13=>RepresentationKind::Retained,_=>return 101};
+        let Ok(recipe)=Recipe::decode(unsafe{std::slice::from_raw_parts(config,CONFIG_LEN)})else{return 102};
+        match recipe.construction_capability(input,point_count){
+            Ok(capability) if capability.backend==Backend::OcctEdit=>4,Ok(_)=>100,
+            Err(CapabilityError::UnsupportedOperation(_))=>100,
+            Err(CapabilityError::UnsupportedRepresentation(_))=>101,Err(CapabilityError::UnsupportedOptions)=>102,
+        }
+    }).unwrap_or(103)
 }
 /// # Safety
 /// config has 24 readable doubles; points has count*3 readable doubles with

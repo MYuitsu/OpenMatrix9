@@ -1,0 +1,56 @@
+"""Dimension publication must inspect full current view data, not only revisions."""
+import os,json,math,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Draft,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+from pivy import coin
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'module':OM.__file__,'checks':[]}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def events():QtWidgets.QApplication.processEvents()
+def enter(text=''):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));events()
+class Observer:
+ fired=False
+ def slotCreatedObject(self,obj):
+  if not self.fired and obj.Document.Name==self.doc.Name and obj.Name.startswith('Explode'):
+   if self.mode=='font':
+    previous=self.source.ViewObject.FontSize.Value;self.source.ViewObject.FontSize=previous+1
+    self.fired=self.source.ViewObject.FontSize.Value==previous+1
+   elif self.mode=='graphics':
+    self.source.ViewObject.Proxy.coords.point.set1Value(0,(50.,60.,70.))
+    self.fired=tuple(self.source.ViewObject.Proxy.coords.point[0].getValue())==(50.,60.,70.)
+   else:
+    points=coin.SoVertexProperty();points.vertex.setValues([(float('nan'),0.,0.),(float('nan'),1.,0.)])
+    line=coin.SoLineSet();line.vertexProperty=points;line.numVertices.setValue(2)
+    node=coin.SoSeparator();node.addChild(line);view=self.source.ViewObject.Proxy.node_wld;view.addChild(node)
+    self.fired=view.findChild(node)>=0 and math.isnan(points.vertex[0].getValue()[0])
+def run():
+ global console
+ observer=None
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');events();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  for mode in ['font','graphics','nonfinite']:
+   d=App.newDocument('DimensionMutation'+mode);d.UndoMode=1
+   source=Draft.make_dimension(App.Vector(),App.Vector(10,0,0),App.Vector(0,3,0));d.recompute();events()
+   baseline=(tuple(o.Name for o in d.Objects),d.UndoCount,repr(source.Start),repr(source.End),repr(source.Dimline))
+   Gui.Selection.clearSelection();Gui.Selection.addSelection(source);console.clear();enter('Explode');enter()
+   observer=Observer();observer.doc=d;observer.source=source;observer.mode=mode;App.addDocumentObserver(observer);enter();App.removeDocumentObserver(observer)
+   check(mode+' native observer actually changes dimension view input',observer.fired)
+   check(mode+' view input change rejects all staged outputs',not any(getattr(o,'OM9FeatureId','')=='OM9-TOP11-005' for o in d.Objects))
+   check(mode+' rejection retains native document source and Undo',(tuple(o.Name for o in d.Objects),d.UndoCount,repr(source.Start),repr(source.End),repr(source.Dimline))==baseline)
+   error='NonFiniteGeometry' if mode=='nonfinite' else 'StaleGeometry'
+   diagnostics=[line for line in console.toPlainText().splitlines() if error in line]
+   report.setdefault('diagnostics',{})[mode]=diagnostics
+   check(mode+' rejection reports typed operation and source on the same diagnostic line',any(error in line and source.Name in line and 'Explode' in line for line in diagnostics))
+   enter('Cancel');App.closeDocument(d.Name);events();observer=None
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  if observer:
+   try:App.removeDocumentObserver(observer)
+   except Exception:pass
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2));QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

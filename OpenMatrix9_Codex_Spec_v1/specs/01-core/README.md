@@ -33,7 +33,7 @@
 | [OM9-INFO-021](om9-info-021-gumball-alignment.md) | Gumball Alignment | `GumballAlignment` | Info & Settings | `partially_implemented` |
 | [OM9-INFO-022](om9-info-022-relocate-gumball.md) | Relocate Gumball | `RelocateGumball` | Info & Settings | `partially_implemented` |
 | [OM9-HISTORY-001](om9-history-001-history-workflow.md) | History Workflow | `—` | History | `not_started` |
-| [OM9-LAYER-001](om9-layer-001-layer-management.md) | Layer Management | `—` | Layers | `not_started` |
+| [OM9-LAYER-001](om9-layer-001-layer-management.md) | Layer Management | `—` | Layers | `partially_implemented` / `validated_supported_slice` — panel + supported outputs, 2026-10-11 |
 | [OM9-PROJECT-001](om9-project-001-project-manager-workflow.md) | Project Manager Workflow | `—` | Project Manager | `not_started` |
 | [OM9-PROJECTDB-001](om9-projectdb-001-project-manager-database.md) | Project Manager Database | `—` | Project Manager Database | `not_started` |
 | [OM9-SNAP-001](om9-snap-001-center-snap.md) | Center Snap | `Osnap C` | Snaps | `not_started` |

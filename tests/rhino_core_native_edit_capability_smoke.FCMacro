@@ -1,0 +1,52 @@
+"""Shared native Edit registry, actual GUI admission and source preservation."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh
+from PySide6 import QtCore,QtWidgets
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'decisions':[]}
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def events():QtWidgets.QApplication.processEvents()
+def run():
+ try:
+  import OpenMatrix9Gui as native
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench');events()
+  cases=[(1,2,4,0,4),(1,8,4,0,101),(2,3,4,0,6),(2,8,4,0,6),(2,10,4,0,6),(2,12,4,0,6),
+         (3,4,7,0,4),(3,2,0,0,102),(4,6,0,0,4),(4,8,0,0,5),(4,2,0,0,101),
+         (7,6,4,4,4),(7,6,4,5,102),(1,2,5,0,102),(0,2,4,0,100)]
+  for kind,representation,flags,mode,expected in cases:
+   try:decision=json.loads(native.geometryEditCapability(kind,representation,flags,mode))
+   except AttributeError:decision={}
+   report['decisions'].append(dict(request=[kind,representation,flags,mode],response=decision))
+   check('shared native decision '+str([kind,representation,flags,mode]),decision.get('status')==expected and decision.get('allowed')==(expected<100) and decision.get('schema_version')==1)
+  doc=App.newDocument('NativeEditCapability');doc.UndoMode=1
+  curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(1e151,1,0),App.Vector(2,0,0)],[3,3],[0.,1.],False,2)
+  doc.openTransaction('Sources');bad=doc.addObject('Part::Feature','BadCurve');bad.Shape=curve.toShape();doc.commitTransaction()
+  doc.openTransaction('Redo');bad.Label='Redo witness';doc.commitTransaction();doc.undo()
+  baseline=(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount,bad.Shape.exportBrepToString())
+  transcript=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript');transcript.clear()
+  join_command=next(c for c in Gui.listCommands() if c.lower().endswith('topiconjoin'))
+  Gui.Selection.clearSelection();Gui.Selection.addSelection(bad);Gui.runCommand(join_command,0);events()
+  text=transcript.toPlainText()
+  check('actual Join rejects oversized native basis with current operation/object',all(s in text for s in ('InvalidBasis','Join','BadCurve')))
+  check('native basis rejection keeps objects geometry and Undo/Redo',(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount,bad.Shape.exportBrepToString())==baseline)
+  # Esc is routed by the command transcript and must clear its real session.
+  from PySide6 import QtGui
+  QtWidgets.QApplication.sendEvent(transcript,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Escape,QtCore.Qt.NoModifier));events()
+  doc.redo();check('native basis rejection preserves executable Redo',bad.Label=='Redo witness')
+  App.closeDocument(doc.Name)
+  doc=App.newDocument('NativeEditMeshBudget');item=doc.addObject('Mesh::Feature','SegmentOwner');item.Mesh=Mesh.Mesh([[App.Vector(0,0,0),App.Vector(2,0,0),App.Vector(0,3,0)]])
+  mesh=item.Mesh.copy()
+  for _ in range(16384):mesh.addSegment([0])
+  item.Mesh=mesh;before=(len(doc.Objects),doc.UndoCount,item.Mesh.countSegments())
+  explode_command=next(c for c in Gui.listCommands() if c.lower().endswith('topiconexplode'))
+  transcript.clear();Gui.Selection.clearSelection();Gui.Selection.addSelection(item);Gui.runCommand(explode_command,0);events();text=transcript.toPlainText()
+  check('actual Explode rejects segment owner budget with current object',all(s in text for s in ('InvalidBasis','Explode','SegmentOwner')))
+  check('mesh budget rejection leaves native owner intact',len(doc.Objects)==before[0] and doc.UndoCount==before[1])
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

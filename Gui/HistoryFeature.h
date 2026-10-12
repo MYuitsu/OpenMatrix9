@@ -7,6 +7,7 @@
 #include <fastsignals/signal.h>
 #include <string>
 #include <vector>
+#include <functional>
 namespace OpenMatrix9Gui {
 class HistorySettings final : public App::DocumentObject {
     PROPERTY_HEADER_WITH_OVERRIDE(OpenMatrix9Gui::HistorySettings);
@@ -53,6 +54,7 @@ void warnBrokenHistory(App::DocumentObject*);
 void detachObjectHistory(App::DocumentObject*);
 // Call inside the same transaction that replaces/consumes ordinary Edit inputs.
 // Incoming and affected outgoing records detach; existing geometry stays intact.
-void breakHistoryForEdit(App::Document&,const std::vector<std::string>&);
+void breakHistoryForEdit(App::Document&,const std::vector<std::string>&,
+    const std::function<void(App::DocumentObject&,bool)>& detachBoundary={});
 HistoryJoin* createHistoryJoin(App::Document&,const std::vector<std::string>&,double tolerance=1e-7);
 }

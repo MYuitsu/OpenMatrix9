@@ -12,6 +12,19 @@ openmatrix9_commit: 52e887ab706dcd5d80e23979fb1f1b62d8d869b0
 
 # RCORE-10 — FCStd, trao đổi 3DM và clipboard
 
+## Cập nhật kiểm chứng persistence/import — 2026-10-10
+
+Đã kiểm tra thêm các lát cắt: T05 giữ phân đoạn polycurve trong working 3DM;
+T07 preflight native cho một số cây NURBS, Mesh và PointCloud trước các điểm
+copy/chuyển đổi được bao phủ; T09 giữ periodic curve/face seam-hole qua FCStd.
+Gate mới dùng lại adapter nhập Mesh/PointCloud và Line/Polyline. 92 native
+checks, 6 archive/block CTests và 21 host checks đạt; raw decode trong
+`ONX_Model::Read`, allocator toàn tiến trình và budget worker vẫn ngoài phạm vi.
+[Input-tree](../../../docs/validation/2026-10-10-rhino-core-native-mesh-cloud.md),
+[T05](../../../docs/validation/2026-10-10-rhino-core-polycurve-partition.md),
+[T09](../../../docs/validation/2026-10-10-rhino-core-periodic-persistence.md).
+Không có bằng chứng Rhino clipboard round-trip; **RCORE-10 và toàn bộ P0 còn mở.**
+
 <!-- rhino-core-kernel-contract:start -->
 Dùng lại bộ chuyển đổi FreeCAD/OCCT/openNURBS; bổ sung validator basis Rust,
 descriptor chỉ đọc và policy cho inspection/working 3DM. 480 Rust tests;

@@ -5,6 +5,8 @@
 #include "SolidReferences.h"
 #include "RustBridge.h"
 #include "CoreLayers.h"
+#include "CoreCurveNativeInput.h"
+#include "CoreCurvePublication.h"
 #include <Base/Interpreter.h>
 #include <App/Document.h>
 #include <Gui/View3DInventor.h>
@@ -28,19 +30,23 @@ std::optional<Pick> pickInfo(PyObject* info){
     for(unsigned i=0;i<3;++i){auto* coordinate=PyDict_GetItemString(info,axes[i]);if(!coordinate)throw std::runtime_error("Missing native Ellipse pick coordinate");result.point[i]=PyFloat_AsDouble(coordinate);if(PyErr_Occurred()||!std::isfinite(result.point[i]))throw std::runtime_error("Invalid native Ellipse pick coordinate");}
     return result;
 }
-unsigned selectReference(App::Document& doc,const QString& name){
-    auto selected=solidCurveReference(doc,name.toStdString());
+unsigned selectReference(App::Document& doc,const QString& name,const QString& original={}){
+    const auto admission=curveNativeAdmission(doc,"Ellipse");
+    auto selected=solidCurveReference(doc,name.toStdString(),"Ellipse");
     verifySolidReferences(doc,{},selected);
-    const auto effect=om9_ellipse_reference(0,0,0,0,0,0,1);
+    selected.curveEvidence=captureCurveNativeSource(doc,selected.input.name,selected.sub,{},"Ellipse");
+    const auto effect=acceptCurveNativeInput(doc,admission,"reference",1,{0,0,0},{0,0,0},{},original,{{selected.curveEvidence,"path",0,0,0}});
     if(effect==1)path=std::move(selected);
     return effect;
 }
-unsigned acceptCenter(App::Document& doc,const SolidPoint& seed,std::optional<double> fraction={}){
+unsigned acceptCenter(App::Document& doc,const SolidPoint& seed,std::optional<double> fraction={},const QString& original={}){
+    const auto admission=curveNativeAdmission(doc,"Ellipse");
     if(!path)throw std::runtime_error("Reselect the Ellipse path");
     verifyEllipseReferences(doc);
     const auto [point,tangent]=solidOnCurve(*path,seed,fraction);
     verifyEllipseReferences(doc);
-    return om9_ellipse_reference(point[0],point[1],point[2],tangent[0],tangent[1],tangent[2],2);
+    const auto parameter=fraction?*fraction:solidCurveFraction(*path,point);
+    return acceptCurveNativeInput(doc,admission,"reference",2,point,tangent,{},original,{},parameter);
 }
 Ref vector(PyObject* type,const double* coordinates){return Ref(PyObject_CallFunction(type,"ddd",coordinates[0],coordinates[1],coordinates[2]));}
 void preflight(PyObject* shape,bool wire){
@@ -66,7 +72,7 @@ void applyLayer(App::Document& doc,PyObject* object,const CircleLayerSnapshot& l
 }
 namespace OpenMatrix9Gui {
 void clearEllipseReferences(){Base::PyGILStateLocker lock;path.reset();}
-void verifyEllipseReferences(App::Document& doc){verifySolidReferences(doc,{},path);}
+void verifyEllipseReferences(App::Document& doc){verifySolidReferences(doc,{},path);if(path&&path->curveEvidence)verifyCurveNativeSource(doc,*path->curveEvidence,"Ellipse");}
 std::optional<unsigned> ellipseNativeInput(App::Document& doc,const QString& input){
     Base::PyGILStateLocker lock;const auto text=input.trimmed();
     // Undo keeps the edge while removing a center/axis; returning to edge-selection
@@ -74,14 +80,14 @@ std::optional<unsigned> ellipseNativeInput(App::Document& doc,const QString& inp
     if(text.compare("Undo",Qt::CaseInsensitive)==0||text.compare("u",Qt::CaseInsensitive)==0||text.compare("Cancel",Qt::CaseInsensitive)==0||text.compare("Esc",Qt::CaseInsensitive)==0)return {};
     verifyEllipseReferences(doc);
     const auto mode=om9_ellipse_reference_mode();
-    if(text.startsWith("Curve=",Qt::CaseInsensitive)&&mode==1)return selectReference(doc,text.mid(6).trimmed());
+    if(text.startsWith("Curve=",Qt::CaseInsensitive)&&mode==1)return selectReference(doc,text.mid(6).trimmed(),input);
     if(text.startsWith("OnCurve=",Qt::CaseInsensitive)&&mode==2){
         bool ok=false;const double fraction=text.mid(8).toDouble(&ok);
         if(!ok)throw std::runtime_error("OnCurve requires a fraction within 0..1");
-        return acceptCenter(doc,{0,0,0},fraction);
+        return acceptCenter(doc,{0,0,0},fraction,input);
     }
     for(const auto* option:{"Center","Diameter","Corner","Vertical","FromFoci"})if(text.compare(option,Qt::CaseInsensitive)==0&&om9_curve_preview_count()==0){
-        const auto effect=om9_curve_input(text.toUtf8().constData());
+        const auto effect=om9_curve_input(input.toUtf8().constData());
         if(effect==1&&om9_ellipse_reference_mode()==0)clearEllipseReferences();
         return effect;
     }
@@ -114,6 +120,7 @@ std::optional<std::array<double,3>> ellipseNativeHover(App::Document& doc,Gui::V
 void ellipseNativeResult(unsigned effect){if(effect==3||om9_ellipse_reference_mode()==1)clearEllipseReferences();}
 void commitEllipse(App::Document& doc){
     Base::PyGILStateLocker lock;verifyEllipseReferences(doc);
+    const auto construction=curveConstructionEvidence();
     double plan[11];if(!om9_curve_ellipse_plan(plan))throw std::runtime_error("No committed Ellipse plan");
     Ref app(PyImport_ImportModule("FreeCAD")),part(PyImport_ImportModule("Part")),vectorType(PyObject_GetAttrString(app.value,"Vector"));
     Ref center(vector(vectorType.value,plan)),major(vector(vectorType.value,plan+3)),normal(vector(vectorType.value,plan+6));
@@ -143,26 +150,49 @@ void commitEllipse(App::Document& doc){
         }
     }
     const auto layer=CoreLayers::captureCircle(doc);verifyEllipseReferences(doc);
-    doc.openTransaction("Ellipse");
+    const auto units=unitContextSnapshot(doc);const auto outputName=doc.getUniqueObjectName("Ellipse");
+    const auto result=curveGeometryResult(doc,shape.value,construction,units,outputName);verifyEllipseReferences(doc);
+    const bool deformable=om9_ellipse_deformable();const double deviationValue=om9_ellipse_deviation();
+    QJsonObject metadata{{"OM9FeatureId","OM9-CURVE-006"},{"OM9Role","Ellipse"},{"EllipseDeformable",deformable},{"EllipseApproxDeviation",deviationValue},
+        {"OM9CurveConstruction",QString::fromStdString(construction)},{"OM9GeometryResult",QString::fromStdString(result)}};
+    if(!units.empty())metadata["OM9UnitContext"]=QString::fromStdString(units);
+    CurvePublication publication(doc,"Ellipse",construction,units,layer);publication.prepare(shape.value,outputName,metadata);
+    std::vector<std::string> focusNames;
+    std::vector<std::string> focusResults;
+    for(std::size_t i=0;i<foci.size();++i){
+        const auto name=doc.getUniqueObjectName(i==0?"EllipseFocus1":"EllipseFocus2");focusNames.push_back(name);
+        focusResults.push_back(curveGeometryResult(doc,foci[i].value,construction,units,name,i==0?"ellipse_focus1":"ellipse_focus2"));
+        QJsonObject properties{{"OM9FeatureId","OM9-CURVE-006"},{"OM9Role",i==0?"Focus1":"Focus2"},
+            {"OM9CurveConstruction",QString::fromStdString(construction)},{"OM9GeometryResult",QString::fromStdString(focusResults.back())}};
+        if(!units.empty())properties["OM9UnitContext"]=QString::fromStdString(units);
+        publication.prepare(foci[i].value,name,properties);
+    }
+    publication.open();
     try {
-        auto object=createCurveFeature(doc,shape.value,"Ellipse");
+        auto object=createCurveFeature(doc,shape.value,outputName.c_str());
+        publication.check();
         stringProperty(object.value,"OM9FeatureId","OM9-CURVE-006");stringProperty(object.value,"OM9Role","Ellipse");
         Ref kind(PyObject_CallMethod(object.value,"addProperty","sss","App::PropertyBool","EllipseDeformable","OpenMatrix9"));
-        if(PyObject_SetAttrString(object.value,"EllipseDeformable",om9_ellipse_deformable()?Py_True:Py_False)<0)throw std::runtime_error("Cannot persist Ellipse output kind");
-        Ref deviationProperty(PyObject_CallMethod(object.value,"addProperty","sss","App::PropertyLength","EllipseApproxDeviation","OpenMatrix9")),deviation(PyFloat_FromDouble(om9_ellipse_deviation()));
+        if(PyObject_SetAttrString(object.value,"EllipseDeformable",deformable?Py_True:Py_False)<0)throw std::runtime_error("Cannot persist Ellipse output kind");
+        Ref deviationProperty(PyObject_CallMethod(object.value,"addProperty","sss","App::PropertyLength","EllipseApproxDeviation","OpenMatrix9")),deviation(PyFloat_FromDouble(deviationValue));
         if(PyObject_SetAttrString(object.value,"EllipseApproxDeviation",deviation.value)<0)throw std::runtime_error("Cannot persist Ellipse approximation deviation");
         applyLayer(doc,object.value,layer);
-        const auto units=unitContextSnapshot(doc);
         if(!units.empty())stringProperty(object.value,"OM9UnitContext",units.c_str());
+        persistCurveConstruction(object.value,construction);
+        persistCurveGeometryResult(object.value,result);
+        publication.watch(object.value,outputName);
         for(std::size_t i=0;i<foci.size();++i){
-            auto focusObject=createCurveFeature(doc,foci[i].value,i==0?"EllipseFocus1":"EllipseFocus2");
+            publication.check();auto focusObject=createCurveFeature(doc,foci[i].value,focusNames[i].c_str());publication.check();
             stringProperty(focusObject.value,"OM9FeatureId","OM9-CURVE-006");stringProperty(focusObject.value,"OM9Role",i==0?"Focus1":"Focus2");
             Ref view(PyObject_GetAttrString(focusObject.value,"ViewObject")),color(Py_BuildValue("(ddd)",layer.color[0],layer.color[1],layer.color[2])),size(PyFloat_FromDouble(5.));
             if(PyObject_SetAttrString(view.value,"PointColor",color.value)<0||PyObject_SetAttrString(view.value,"PointSize",size.value)<0)throw std::runtime_error("Cannot style Ellipse focus");
             applyLayer(doc,focusObject.value,layer);
             if(!units.empty())stringProperty(focusObject.value,"OM9UnitContext",units.c_str());
+            persistCurveConstruction(focusObject.value,construction);
+            persistCurveGeometryResult(focusObject.value,focusResults[i]);
+            publication.watch(focusObject.value,focusNames[i]);
         }
-        doc.recompute();doc.commitTransaction();
-    }catch(...){doc.abortTransaction();throw;}
+        publication.check();doc.recompute();publication.check();publication.commit();
+    }catch(...){publication.abort();throw;}
 }
 }

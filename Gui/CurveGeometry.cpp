@@ -1,8 +1,72 @@
 #include "CurveGeometry.h"
 #include "RustBridge.h"
 #include <App/Document.h>
+#include "CoreGeometryContract.h"
+#include "CorePreparedSnapshot.h"
+#include "CorePreparedCad.h"
+#include "CoreTopologySnapshot.h"
+#include "CoreShapeValidation.h"
+#include <Mod/Part/App/TopoShapePy.h>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonParseError>
+#include <Standard_Failure.hxx>
+#include <Base/Exception.h>
 #include <cmath>
 namespace OpenMatrix9Gui {
+std::string curveConstructionEvidence(){
+    const auto query=om9_curve_construction_json(0,nullptr,0);
+    if(query.status||query.reserved||!query.generation||!query.needed||query.needed>om9_prepared_result_limit())
+        throw std::runtime_error("Cannot capture completed Curve construction");
+    std::string bytes(query.needed,'\0');
+    const auto copy=om9_curve_construction_json(query.generation,reinterpret_cast<unsigned char*>(bytes.data()),bytes.size());
+    if(copy.status||copy.reserved||copy.generation!=query.generation||copy.needed!=query.needed)
+        throw std::runtime_error("Curve construction changed during capture");
+    return bytes;
+}
+void persistCurveConstruction(PyObject* object,const std::string& evidence){
+    CurvePyRef property(PyObject_CallMethod(object,"addProperty","sss","App::PropertyString","OM9CurveConstruction","OpenMatrix9"));
+    CurvePyRef value(PyUnicode_DecodeUTF8(evidence.data(),Py_ssize_t(evidence.size()),"strict"));
+    if(PyObject_SetAttrString(object,"OM9CurveConstruction",value.value)<0)
+        throw std::runtime_error("Cannot persist Curve construction");
+    CurvePyRef mode(PyObject_CallMethod(object,"setEditorMode","si","OM9CurveConstruction",1));
+}
+void persistCurveGeometryResult(PyObject* object,const std::string& result){
+    if(!PyObject_HasAttrString(object,"OM9GeometryResult")){
+        CurvePyRef property(PyObject_CallMethod(object,"addProperty","sss","App::PropertyString","OM9GeometryResult","OpenMatrix9"));
+    }
+    CurvePyRef value(PyUnicode_DecodeUTF8(result.data(),Py_ssize_t(result.size()),"strict"));
+    if(PyObject_SetAttrString(object,"OM9GeometryResult",value.value)<0)throw std::runtime_error("KernelFailure: ConstructCurve result metadata assignment failed");
+    CurvePyRef mode(PyObject_CallMethod(object,"setEditorMode","si","OM9GeometryResult",1));
+}
+std::string curveGeometryResult(App::Document& doc,PyObject* shape,const std::string& construction,const std::string& units,const std::string& outputName,const std::string& outputRole){
+    std::string command="ConstructCurve";const char* failure="InvalidBasis";
+    try {
+        QJsonParseError error;const auto parsed=QJsonDocument::fromJson(QByteArray::fromStdString(construction),&error);
+        if(error.error!=QJsonParseError::NoError||!parsed.isObject())throw std::runtime_error("Invalid owned Curve construction JSON");
+        const auto recipe=parsed.object();command=recipe.value("command").toString().toStdString();
+        validateNativePartShape(shape,command,outputName);
+        const auto& native=static_cast<Part::TopoShapePy*>(shape)->getTopoShapePtr()->getShape();
+        failure="InvalidTrimTopology";const auto topology=topologySnapshot(native),validation=shapeValidation(native,topology);
+        const QJsonObject attributes{{"schema_version",1},{"availability","not_applicable_constructed_output"}};
+        const QJsonObject identity{{"document_name",doc.getName()},{"name",QString::fromStdString(outputName)}};
+        QJsonObject context{{"schema_version",1},{"operation","ConstructCurve"},{"construction",recipe},
+            {"attribute_role","source_evidence_in_input_snapshots_output_attributes_unavailable"},
+            {"output_parent_to_world",QJsonArray{1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}}};
+        if(!outputRole.empty())context["output_role"]=QString::fromStdString(outputRole);
+        failure="InvalidBasis";const auto result=preparedCadResult(native,topology,validation,attributes,identity,units,context);
+        return QJsonDocument(result).toJson(QJsonDocument::Compact).toStdString();
+    }catch(const PreparedCadFailure&){throw;}
+    catch(const Standard_Failure& e){throw std::runtime_error("KernelFailure: "+command+" output "+outputName+": "+(e.GetMessageString()?e.GetMessageString():"native result capture failed"));}
+    catch(const Base::Exception& e){throw std::runtime_error("KernelFailure: "+command+" output "+outputName+": "+e.what());}
+    catch(const std::exception& e){
+        const std::string detail=e.what();
+        for(const char* type:{"UnsupportedOperation","UnsupportedRepresentation","InvalidBasis","InvalidTrimTopology","NonFiniteGeometry","StaleGeometry","SingularTransform","KernelFailure"})
+            if(detail.rfind(std::string(type)+":",0)==0)throw;
+        if(detail.find("budget")!=std::string::npos)failure="InvalidBasis";
+        throw std::runtime_error(std::string(failure)+": "+command+" output "+outputName+": "+detail);
+    }
+}
 CurvePyRef publishedSplineShape() {
     // OM9-CURVE-003/009: Rust fits poles; OCCT constructs the native B-spline.
     const auto count=om9_spline_pole_count(), degree=om9_spline_degree(), knots=om9_spline_knot_count();

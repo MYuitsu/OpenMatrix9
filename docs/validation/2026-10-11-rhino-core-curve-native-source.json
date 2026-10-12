@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-curve-native-source-20261011",
+  "updated_at": "2026-10-11T21:08:00+07:00",
+  "status": "in_progress",
+  "scope": "Executed failing witness for missing complete Curve native source evidence; no production implementation claim",
+  "native_red": {
+    "artifact": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011",
+    "fixture": "rhino_core_curve_native_source_smoke.FCMacro",
+    "checks": 18,
+    "passed": 9,
+    "failures": [
+      "CirclePath exact original native parameter or batch token retained",
+      "CirclePath owned source identity revision frame and surviving batch range retained",
+      "CirclePath full parent geometry and source attributes owned rather than selected samples only",
+      "EllipsePath exact original native parameter or batch token retained",
+      "EllipsePath owned source identity revision frame and surviving batch range retained",
+      "EllipsePath full parent geometry and source attributes owned rather than selected samples only",
+      "FitBranch exact original native parameter or batch token retained",
+      "FitBranch owned source identity revision frame and surviving batch range retained",
+      "FitBranch full parent geometry and source attributes owned rather than selected samples only"
+    ],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "421EE9C3E5FD42CF35A18572A2167E9BBDAA1EBAD6D1A119235494D12CC9E02C",
+      "pid": 27092,
+      "module_root": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011",
+      "exit_code": 0
+    },
+    "plugin": {
+      "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+      "bytes": 16050688,
+      "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+    },
+    "probe": null,
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011/results.json",
+        "bytes": 98536,
+        "sha256": "b37c0d6865ad6ec676d11fc25c8bd459d1a29c5d7a027fe3bb2079129b68934e"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011/shared-host-launch.json",
+        "bytes": 600,
+        "sha256": "54fb5cdbf83fa13379d96fc0ca4bc8e9e0e778e62bbba4e7d320a34d75f5e80f"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011/loaded-native-app.json",
+        "bytes": 227,
+        "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011/fixture.FCMacro",
+        "bytes": 5802,
+        "sha256": "b7d4798ace75872e88b5cefe1f9483e99ee7c3b2fa8a7fd27515faed5ed9e862"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011/host-stdout.log",
+        "bytes": 353,
+        "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011/host-stderr.log",
+        "bytes": 6753,
+        "sha256": "e2b3c89036129ad818708b1307ba3bfb3b2ae2628bac8663ed563a560ae83621"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011/user.cfg",
+        "bytes": 18188,
+        "sha256": "b21e220192c66a7761ee969627bd0fc7ef1e383a245a5af0440491fbe2d33efe"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011/select-plugin.FCMacro",
+        "bytes": 2831,
+        "sha256": "d1a075a4c4142bec1c8fd0d7808158fff2f7b80ec9384ad1f136d2f694e148bd"
+      }
+    ]
+  },
+  "archives": [
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011/CirclePath.FCStd",
+      "bytes": 8737,
+      "sha256": "73384d1d4a4ece2826f280cb33e83268678ce638b98d93c3d555b2c0fdac1f6c"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011/EllipsePath.FCStd",
+      "bytes": 9091,
+      "sha256": "faa4a44e79c186df9a322df182606704a95c7043617bed87783089e730d3b48a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-native-source-red45-offscreen-20261011/FitBranch.FCStd",
+      "bytes": 8220,
+      "sha256": "7795b663ed4702747b61e4ca3dcfdc7caa650df5f78fef87c6b8c24dd351a0bf"
+    }
+  ],
+  "selected_app": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "probe": {
+    "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+    "bytes": 50688,
+    "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+  },
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+    "bytes": 16050688,
+    "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+  },
+  "shared_sdk_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "historical_green_checkpoint": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-11-rhino-core-curve-accepted-input.json",
+    "bytes": 153451,
+    "sha256": "e386d47bdc6a78d49044c9c9cd35d75e8f3adadabbb3116bf2a47f4c491241c3"
+  },
+  "historical_green_verification": {
+    "path": "H:/FreeCAD-src/build/curve-accepted-verification45-20261011.json",
+    "bytes": 3111,
+    "sha256": "5c902ad20d0eb571db48439cf5d128ffd646667801a17505cab092f3a4a98db2"
+  },
+  "remaining": [
+    "Every original RCORE-01 requirement remains required: GeometryRef/Snapshot/Result, rational/periodic basis, UV trims/pcurves/seam occurrences, complete attributes, every enabled consumer, independent family read/edit/retain/export, adapters1–7, C01–C12 and T01–T11.",
+    "Common produced GeometryResult now enforces bytes16MiB/nodes1million/depth64 before serialization/caller-buffer copy. Source-envelope admission is still necessary only: complete request/output overhead reservation and aggregate allocation/traversal/worker/cancellation bounds remain required.",
+    "Global conversion/deviation bounds and complete parameter/topology maps remain unproven. Valid closed native Solid is not a certificate of these contracts.",
+    "Curve retains owned pre-normalization values at Rust entrypoints: exact text/units/frame/previous/pending options, original mouse points, native reference values and whole FitPoints batches with Circle branch Undo. Full native source identity/revision/attributes/snapshots, GUI-native parameter text such as OnCurve fractions, common ConstructCurve GeometryResult, checked publication, Ellipse foci, Circle History and Rebuild result pairing remain required.",
+    "Offscreen evidence covers native kernel, command, Qt keys, callbacks and scoped FCStd persistence only. Actual mouse, OpenGL rendering and viewport acceptance remain required; historical graphics cohorts are not current reruns.",
+    "The two cold hosts verify five named recipes and one indexed54-reference result, with OM9 imported by bootstrap. Unsignalled native root-frame mutations, actual Solid preview leases and complete original lifetime/cache invariants still require evidence.",
+    "Production deployment/ABI acceptance remains pending. An isolated App19/camera-guard GUI host reuses the single shared SDK; no root FreeCAD build or full runtime copy was made.",
+    "Runtime45 native source witness is RED9/18: raw native token, immutable identity/revision/frame/ranges, and full parent native source snapshots/attributes are absent for Circle path, Ellipse path and Circle FitPoints after whole-batch Undo. Implement these without replacing existing solvers.",
+    "All non-Gumball/non-lib.rs frozen inputs match. Gumball and Rust module-root files changed in the parallel gumball chat; complete current checkout/build correspondence is unproven. The 448 rows are a pre-build inventory, not an exact compiled-input certificate."
+  ],
+  "next_action": "Reuse existing native snapshot/topology/attributes/stamp/fit capture APIs; Rust owns envelope validation, admission/context association and serialization. Capture raw GUI/native tokens at the same accepted event, snapshot complete parent geometry plus selected subelement/ranges, share immutable source snapshots and restore source branch on Circle Undo. Then common ConstructCurve GeometryResult and checked publication."
+}

@@ -1,0 +1,55 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# OM9-LAYER-001: close/reopen identical FCStd during modal layer actions.
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+result={'feature_id':'OM9-LAYER-001','checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    (out/'progress.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(500,loop.quit);loop.exec()
+def group():return next(o for o in doc.Objects if getattr(o,'OM9LayerIndex',0)==17)
+def reopen(dialog,change):
+    global doc
+    seen['accepted']=True;App.closeDocument(doc.Name);doc=App.openDocument(str(file));change(dialog);dialog.accept()
+def respond(cls,change):
+    def callback():
+        d=next((w for w in QtWidgets.QApplication.topLevelWidgets() if isinstance(w,cls) and w.isVisible()),None)
+        if d:reopen(d,change)
+        else:QtCore.QTimer.singleShot(100,callback)
+    QtCore.QTimer.singleShot(100,callback)
+def run():
+    global doc,file,seen
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui
+        result['module']=OpenMatrix9Gui.__file__
+        check('Selected native module',Path(result['module']).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        doc=App.newDocument('ModalLayers');doc.UndoMode=1;settle()
+        dock=Gui.getMainWindow().findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar');dock.findChild(QtWidgets.QToolButton,'OM9LayersAdvanced').click();current=dock.findChild(QtWidgets.QToolButton,'OM9LayerCurrent16');current.click();settle()
+        a=doc.addObject('Part::Feature','A');a.Shape=Part.makeLine(App.Vector(),App.Vector(5,0,0));doc.recompute();Gui.Selection.addSelection(a)
+        dock.findChild(QtWidgets.QToolButton,'OM9LayerHide').click();settle()
+        file=out/'ModalLayers.FCStd';doc.saveAs(str(file));old_uid=doc.Uid;old_id=group().ID;old_name=group().Label;old_color=tuple(group().OM9LayerColor)
+        seen={'accepted':False};respond(QtWidgets.QInputDialog,lambda d:d.setTextValue('Stale rename'))
+        QtTest.QTest.mouseClick(current,QtCore.Qt.RightButton,QtCore.Qt.ShiftModifier);settle()
+        check('Reopened document has same persistent UID/ID',doc.Uid==old_uid and group().ID==old_id)
+        check('Rename rejects closed/reopened document',seen['accepted'] and group().Label==old_name)
+        seen={'accepted':False};respond(QtWidgets.QColorDialog,lambda d:d.setCurrentColor(QtGui.QColor(200,10,80)))
+        QtTest.QTest.mouseClick(dock.findChild(QtWidgets.QToolButton,'OM9LayerSwatch16'),QtCore.Qt.RightButton,QtCore.Qt.ShiftModifier);settle()
+        check('Color rejects closed/reopened document',seen['accepted'] and tuple(group().OM9LayerColor)==old_color)
+        def choose(d):
+            listing=d.findChild(QtWidgets.QListWidget,'OM9HiddenObjects')
+            for i in range(listing.count()):listing.item(i).setSelected(True)
+        seen={'accepted':False};respond(QtWidgets.QDialog,choose)
+        QtTest.QTest.mouseClick(dock.findChild(QtWidgets.QToolButton,'OM9LayerShow'),QtCore.Qt.RightButton);settle()
+        check('Show rejects closed/reopened document',seen['accepted'] and not doc.A.ViewObject.Visibility and doc.A.OM9ObjectHidden)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(0,QtWidgets.QApplication.instance().quit)
+QtCore.QTimer.singleShot(1400,run)

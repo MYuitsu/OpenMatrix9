@@ -189,6 +189,18 @@ impl PointInput {
         mut component: impl FnMut(&str) -> Result<f64, String>,
     ) -> Result<Self, String> {
         let token = text.trim();
+        // In a point-input phase, Rhino's bare 0 abbreviates CPlane 0,0,0.
+        // The consumer still decides whether the current phase expects a
+        // point or a scalar dimension; a zero width/radius must stay invalid.
+        if token == "0" {
+            return Ok(Self {
+                original: text.into(),
+                kind: PointKind::AbsoluteCPlane,
+                components: [0.; 3],
+                component_count: 3,
+                notation: PointNotation::Cartesian,
+            });
+        }
         if token.chars().any(char::is_whitespace) {
             return Err("Whitespace is not allowed inside point coordinates".into());
         }

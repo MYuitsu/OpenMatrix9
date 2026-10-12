@@ -6,6 +6,33 @@ use std::{
     sync::{Mutex, OnceLock},
 };
 type Point = [f64; 3];
+pub struct WirePreview {
+    pub segments: Vec<[Point;2]>,
+    pub markers: [Point;3],
+}
+/// Value-only publication observation. The GUI owns all native objects and
+/// supplies both object-local and world matrices as separate calls.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct SolidPublicationFrame {
+    pub expected: [f64; 16],
+    pub actual: [f64; 16],
+}
+
+/// 0: same frame, 1: non-finite, 2: unsupported frame, 3: stale frame.
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_solid_publication_frame(input: SolidPublicationFrame) -> u32 {
+    use crate::geometry_frame::{Frame as GeometryFrame, FrameError, IDENTITY};
+    for matrix in [input.expected, input.actual] {
+        if let Err(error) = GeometryFrame::compose(IDENTITY, IDENTITY, IDENTITY, matrix) {
+            return if error == FrameError::NonFinite { 1 } else { 2 };
+        }
+    }
+    let epsilon = 64. * f64::EPSILON;
+    if input.expected.iter().zip(input.actual).all(|(expected, actual)| {
+        (*expected - actual).abs() <= epsilon * expected.abs().max(actual.abs()).max(1.)
+    }) { 0 } else { 3 }
+}
 mod geometry;
 const MIN: f64 = 1e-7;
 fn add(a: Point, b: Point) -> Point {
@@ -27,7 +54,7 @@ fn cross(a: Point, b: Point) -> Point {
         a[0] * b[1] - a[1] * b[0],
     ]
 }
-fn finite(p: Point) -> bool {
+pub(crate) fn finite(p: Point) -> bool {
     p.iter().all(|x| x.is_finite() && x.abs() <= 1e9)
 }
 fn number(text: &str) -> Result<f64, String> {
@@ -44,19 +71,34 @@ fn number(text: &str) -> Result<f64, String> {
     let n = text
         .trim()
         .parse::<f64>()
-        .map_err(|_| "Enter a point or a supported dimension".to_owned())?
+        .map_err(|_| "Enter a number, for example 10 or 10mm".to_owned())?
         * k;
-    if !n.is_finite() || n.abs() > 1e9 {
-        return Err("Dimension/coordinate must be finite and within 1e9 mm".into());
-    }
+    if !n.is_finite() { return Err("Enter a valid number".into()); }
+    if n.abs() > 1e9 { return Err("This value is too large. Enter a smaller value".into()); }
     Ok(n)
 }
 fn dimension(n: f64) -> Result<f64, String> {
-    if !n.is_finite() || n.abs() < MIN || n.abs() > 1e9 {
-        Err("Dimension must be nonzero and within 1e9 mm".into())
-    } else {
-        Ok(n)
-    }
+    if !n.is_finite() { return Err("Enter a valid number".into()); }
+    if n == 0. { return Err("Enter a value other than zero".into()); }
+    if n.abs() < MIN { return Err("This value is too small. Enter a larger value".into()); }
+    if n.abs() > 1e9 { return Err("This value is too large. Enter a smaller value".into()); }
+    Ok(n)
+}
+pub(crate) fn dimension_valid(n:f64)->bool{dimension(n).is_ok()}
+pub(crate) fn validate_frame(origin:Point,axes:[Point;3])->Result<(),String>{
+    if !finite(origin)||axes.iter().flatten().any(|x|!x.is_finite()){return Err("Invalid CPlane".into());}
+    for i in 0..3{for j in 0..3{if (dot(axes[i],axes[j])-if i==j{1.}else{0.}).abs()>1e-6{return Err("CPlane must be orthonormal".into());}}}
+    if dot(cross(axes[0],axes[1]),axes[2])<0.999999{return Err("CPlane must be right handed".into());}
+    Ok(())
+}
+pub(crate) fn native_output_valid(kind:Kind,b:&[f64;15])->bool{
+    if b.iter().any(|x|!x.is_finite()){return false;}
+    let origin=[b[0],b[1],b[2]];let axes=[[b[3],b[4],b[5]],[b[6],b[7],b[8]],[b[9],b[10],b[11]]];
+    if validate_frame(origin,axes).is_err(){return false;}
+    if kind==Kind::Sphere{return dimension_valid(b[12])&&b[12]>0.&&b[13]==0.&&b[14]==0.&&origin.iter().all(|x|x.abs()+b[12]<=1e9);}
+    if b[12..].iter().any(|&n|!dimension_valid(n)||n<=0.){return false;}
+    for bits in 0..8{let mut p=origin;for i in 0..3{if bits&(1<<i)!=0{p=add(p,scale(axes[i],b[12+i]));}}if !finite(p){return false;}}
+    true
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u32)]
@@ -101,15 +143,17 @@ struct Data {
     length: f64,
     width: f64,
     mode: Mode,
+    mode_selected: bool,
     points: Vec<Point>,
+    accepted_points: Vec<Point>,
     circle: Option<(Point, f64, Point)>,
     radius: f64,
     point_constraint: bool,
     constraint_types: Vec<bool>,
     output: Option<[f64; 15]>,
 }
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum Mode {
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Mode {
     Corners,
     Diagonal,
     ThreePoint,
@@ -130,6 +174,25 @@ pub struct Session {
     history: Vec<Data>,
 }
 impl Session {
+    pub fn capability_request(&self,stage:crate::native_solid_capability::Stage)
+        ->Result<crate::native_solid_capability::Request,crate::geometry_contract::CapabilityError>{
+        use crate::geometry_contract::{CapabilityError,OperationId};
+        if self.phase()==0{return Err(CapabilityError::UnsupportedOperation(OperationId::ConstructSolid));}
+        if self.kind==Kind::Box && !self.data.mode_selected && stage!=crate::native_solid_capability::Stage::Declare {
+            return Err(CapabilityError::UnsupportedOptions);
+        }
+        if self.data.constraint_types.len()>3{return Err(CapabilityError::UnsupportedOptions);}
+        Ok(crate::native_solid_capability::Request{kind:self.kind,mode:self.data.mode,stage,phase:self.phase(),
+            point_count:self.data.points.len(),length:self.data.length,width:self.data.width,radius:self.data.radius,
+            point_constraint:self.data.point_constraint,constraint_types:self.data.constraint_types.clone(),
+            first:self.data.first,axes:self.data.axes,frame_origin:self.frame.0,frame_axes:self.frame.1,
+            circle:self.data.circle,output:self.data.output})
+    }
+    pub fn construction_capability(&self,input:crate::geometry_contract::RepresentationKind,stage:crate::native_solid_capability::Stage)
+        ->Result<crate::geometry_contract::OperationCapability,crate::geometry_contract::CapabilityError>{
+        use crate::geometry_contract::*;
+        operation_capability(OperationId::ConstructSolid,input,OperationOptions::NativeSolid(self.capability_request(stage)?))
+    }
     pub fn new(kind: Kind) -> Self {
         let axes = [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]];
         Self {
@@ -147,7 +210,9 @@ impl Session {
                 } else {
                     Mode::Center
                 },
+                mode_selected: true,
                 points: Vec::new(),
+                accepted_points: Vec::new(),
                 circle: None,
                 radius: 0.,
                 point_constraint: false,
@@ -161,27 +226,136 @@ impl Session {
     pub fn phase(&self) -> u32 {
         self.data.phase
     }
+    /// Declarative phase presentation for the common option reducer. Geometry
+    /// input/defaults remain owned by this native construction session.
+    pub fn command_options(&self, generation:u64, scale:f64) -> Result<crate::command_options::OptionSession,String> {
+        use crate::command_options::{OptionContext,OptionSession,OptionSpec};
+        if self.kind==Kind::Sphere { return self.sphere_command_options(generation,scale); }
+        if self.kind != Kind::Box || self.phase()==0 || self.phase()==6 {
+            return Err("No editable Box options".into());
+        }
+        let first=self.phase()==1;
+        let diagonal=self.phase()==2 && self.data.mode==Mode::Diagonal;
+        let mut schema=Vec::new();
+        for (name,alias) in [("Diagonal","D"),("3Point","3P"),("Vertical","V"),("Center","C")] {
+            let mut spec=OptionSpec::action(name).alias(alias);
+            if first&&name=="3Point" {spec=spec.alias("3");}
+            spec.shown=first;
+            if !first { spec=spec.disabled("Select the construction mode before the first point"); }
+            schema.push(spec);
+        }
+        let mut cube=OptionSpec::action("Cube");cube.shown=diagonal;
+        if !first && !diagonal { cube=cube.disabled("Cube is available in the Diagonal branch"); }
+        if diagonal { cube=cube.alias("C"); }
+        schema.push(cube);
+        let mut undo=OptionSpec::action("Undo").alias("U").hidden();
+        if self.history.is_empty(){undo=undo.disabled("No input to undo");}
+        schema.push(undo);
+        schema.push(OptionSpec::action("Cancel").alias("Esc").hidden());
+        for key in ["Mode","Length","Width","Height"] { schema.push(OptionSpec::native_input(key).hidden()); }
+        let question=match self.phase(){
+            1 if !self.data.mode_selected=>"Box. Choose a method".into(),
+            1 if self.data.mode==Mode::Center=>"Center of base".into(),
+            1 if matches!(self.data.mode,Mode::ThreePoint|Mode::Vertical)=>"Start of edge".into(),
+            1=>"First corner of base".into(),
+            2 if matches!(self.data.mode,Mode::Diagonal|Mode::Cube)=>"Other corner of box".into(),
+            2 if matches!(self.data.mode,Mode::ThreePoint|Mode::Vertical)=>"End of edge".into(),
+            2 if self.data.mode==Mode::Center=>"Other corner of base or length".into(),
+            2=>"Other corner of base".into(),
+            3=>format!("Width. Press Enter to use length <{} mm>",self.data.length),
+            4=>format!("Height. Press Enter to use width <{} mm>",self.data.width.abs()),
+            _=>return Err("Unsupported Box input phase".into()),
+        };
+        let mut model=OptionSession::new(schema,std::collections::BTreeMap::new(),OptionContext::new(generation,scale).feature("OM9-SOLID-012"))?;
+        model.set_question(&question)?;
+        Ok(model)
+    }
+    fn sphere_command_options(&self,generation:u64,scale:f64)->Result<crate::command_options::OptionSession,String>{
+        use crate::command_options::{OptionContext,OptionSession,OptionSpec};
+        if matches!(self.phase(),0|6){return Err("No editable Sphere options".into());}
+        let first=self.phase()==1;
+        let mut schema=Vec::new();
+        for (name,alias) in [("Center","C"),("2Point","2"),("3Point","3"),("4Point","4"),("Vertical","V"),("AroundCurve","A"),("FitPoints","F"),("Tangent","T")]{
+            let mut spec=OptionSpec::native_input(name);spec.shown=first;
+            if first{spec=spec.alias(alias);}
+            schema.push(spec);
+        }
+        for (name,alias,shown) in [("Radius","R",self.phase()==9||(self.phase()==20&&self.data.points.len()==2)),("Diameter","D",false),("Point","P",self.phase()==20),("Undo","U",!self.history.is_empty())]{
+            let mut spec=OptionSpec::native_input(name);if shown{spec=spec.alias(alias);}spec.shown=shown;schema.push(spec);
+        }
+        for name in ["Mode","Path","OnCurve","Curve","Cancel"]{schema.push(OptionSpec::native_input(name).hidden());}
+        let question=match self.phase(){
+            1=>"Center of sphere",
+            5=>"Radius. Pick a point or enter a positive value",
+            7=>"Other diameter endpoint or diameter",
+            8=>"Second point",
+            9=>"Third circle point or radius",
+            10=>"Fourth point outside circle plane",
+            11=>"Direction off chord to orient radius circle",
+            12=>"Radius for the picked chord",
+            15=>"Add points. Press Enter to fit sphere",
+            16=>"Select a curve. Use Path=Object.EdgeN",
+            17=>"Pick center on curve. Use OnCurve=0..1",
+            20 if self.data.point_constraint=>"Pick a non-tangent point",
+            20=>"Select a tangent curve. Use Curve=Object.EdgeN",
+            21=>"Resolve tangent sphere",
+            22=>"Radius for two tangent or point constraints",
+            _=>return Err("Unsupported Sphere input phase".into()),
+        };
+        let mut model=OptionSession::new(schema,std::collections::BTreeMap::new(),OptionContext::new(generation,scale).feature("OM9-SOLID-014"))?;
+        model.set_question(question)?;Ok(model)
+    }
     pub fn output(&self) -> Option<[f64; 15]> {
         self.data.output
     }
+    /// Independent accepted numerical input evidence. Native reference owners,
+    /// units and conversion facts are bound separately by the host adapter.
+    /// This is not a GeometryResult or a certificate of live source validity.
+    pub fn construction_evidence(&self,generation:u64)->Result<String,u32>{
+        use crate::{builder_history::Json,prepared_result::{map,string,encode_owned},
+            geometry_contract::RepresentationKind,native_solid_capability::Stage};
+        if generation==0{return Err(5);}
+        self.construction_capability(RepresentationKind::Point,Stage::Construct).map_err(|_|2u32)?;
+        let output=self.output().ok_or(2u32)?;
+        if !finite(self.data.last)||self.data.previous_accepted.is_some_and(|p|!finite(p))
+            ||self.data.points.iter().any(|p|!finite(*p)){return Err(4);}
+        let vector=|values:&[f64]|Json::Array(values.iter().map(|&n|Json::Number(n)).collect());
+        let points=|values:&[Point]|Json::Array(values.iter().map(|p|vector(p)).collect());
+        let mode=match self.data.mode{
+            Mode::Corners=>"Corners",Mode::Diagonal=>"Diagonal",Mode::ThreePoint=>"3Point",
+            Mode::Vertical=>"Vertical",Mode::Center=>"Center",Mode::Cube=>"Cube",Mode::TwoPoint=>"2Point",
+            Mode::FourPoint=>"4Point",Mode::FitPoints=>"FitPoints",Mode::AroundCurve=>"AroundCurve",Mode::Tangent=>"Tangent",
+        };
+        let circle=self.data.circle.map_or(Json::Other,|(center,radius,normal)|map([
+            ("center",vector(&center)),("radius",Json::Number(radius)),("normal",vector(&normal))]));
+        let evidence=map([
+            ("schema_version",Json::Number(1.)),("operation",string("ConstructSolid")),
+            ("feature_id",string(if self.kind==Kind::Box{"OM9-SOLID-012"}else{"OM9-SOLID-014"})),
+            ("kind",string(self.kind.caption())),("mode",string(mode)),("generation",string(&generation.to_string())),
+            ("coordinates",string("document_world_mm")),("phase",Json::Number(self.phase() as f64)),
+            ("frame_origin",vector(&self.frame.0)),("frame_axes",points(&self.frame.1)),
+            ("first",vector(&self.data.first)),("last",vector(&self.data.last)),
+            ("previous_accepted",self.data.previous_accepted.map_or(Json::Other,|p|vector(&p))),
+            ("axes",points(&self.data.axes)),("points",points(&self.data.points)),
+            ("accepted_points",points(&self.data.accepted_points)),
+            ("frame_role",string("session_input_frame_at_capture")),
+            ("length",Json::Number(self.data.length)),("width",Json::Number(self.data.width)),
+            ("radius",Json::Number(self.data.radius)),("circle",circle),
+            ("point_constraint",Json::Boolean(self.data.point_constraint)),
+            ("constraint_types",Json::Array(self.data.constraint_types.iter().map(|&v|Json::Boolean(v)).collect())),
+            ("output",vector(&output)),
+            ("lifetime",string("immutable_construction_input_evidence_not_current_validity")),
+            ("source_provenance",string("numeric_inputs_only_native_owners_bound_separately")),
+        ]);
+        encode_owned(&evidence)
+    }
     pub fn set_frame(&mut self, origin: Point, axes: [Point; 3]) -> Result<(), String> {
-        if !finite(origin) || axes.iter().flatten().any(|x| !x.is_finite()) {
-            return Err("Invalid CPlane".into());
-        }
-        for i in 0..3 {
-            for j in 0..3 {
-                if (dot(axes[i], axes[j]) - if i == j { 1. } else { 0. }).abs() > 1e-6 {
-                    return Err("CPlane must be orthonormal".into());
-                }
-            }
-        }
-        if dot(cross(axes[0], axes[1]), axes[2]) < 0.999999 {
-            return Err("CPlane must be right handed".into());
-        }
+        validate_frame(origin,axes)?;
         self.frame = (origin, axes);
         Ok(())
     }
     pub fn prompt(&self) -> String {
+        if self.kind == Kind::Box && let Ok(model) = self.command_options(1,1.) { return model.snapshot().text; }
         let action = match self.phase() {
             1 => {
                 if self.kind == Kind::Box {
@@ -280,8 +454,10 @@ impl Session {
             .or_else(|| text.strip_prefix("mode="))
             .unwrap_or(text)
             .to_ascii_lowercase();
+        if self.kind == Kind::Box && mode_text == "corners" {
+            return Err("Corners is unavailable. Choose Diagonal, 3Point, Vertical or Center".into());
+        }
         let mode = match (self.kind, mode_text.as_str()) {
-            (Kind::Box, "corners") => Some(Mode::Corners),
             (Kind::Box, "diagonal") => Some(Mode::Diagonal),
             (Kind::Box, "vertical") => Some(Mode::Vertical),
             (Kind::Box, "center") => Some(Mode::Center),
@@ -306,6 +482,7 @@ impl Session {
                 return Err("Select the construction mode before the first point".into());
             }
             self.data.mode = mode;
+            self.data.mode_selected = true;
             match mode {
                 Mode::FitPoints => self.data.phase = 15,
                 Mode::AroundCurve => self.data.phase = 16,
@@ -317,6 +494,9 @@ impl Session {
                 _ => {}
             }
             return Ok(Effect::Waiting);
+        }
+        if self.kind == Kind::Box && !self.data.mode_selected {
+            return Err("Choose Diagonal, 3Point, Vertical or Center before entering a point".into());
         }
         if text.is_empty() {
             return match self.phase() {
@@ -370,7 +550,7 @@ impl Session {
                 return Ok(Effect::Waiting);
             }
             let allowed = match self.phase() {
-                2 => "Length",
+                2 if self.kind == Kind::Box && self.data.mode == Mode::Center => "Length",
                 3 => "Width",
                 4 => "Height",
                 5 => "Radius",
@@ -384,8 +564,12 @@ impl Session {
             }
             return self.numeric(number(value)?);
         }
-        match classify_numeric(text) {
+        let point_only = self.phase() == 1 || (self.kind == Kind::Box && self.phase() == 2
+            && self.data.mode != Mode::Center);
+        let syntax = if point_only && text == "0" { NumericSyntax::Point } else { classify_numeric(text) };
+        match syntax {
             NumericSyntax::Point => {}
+            NumericSyntax::Scalar if point_only => return Err("Pick the required point or enter coordinates X,Y,Z; 0 means the construction-plane origin".into()),
             NumericSyntax::Scalar => return self.numeric(number(text)?),
             NumericSyntax::AngleConstraint => {
                 return Err("One-shot angle constraints are not supported in this command phase".into());
@@ -398,9 +582,15 @@ impl Session {
         Ok(effect)
     }
     fn numeric(&mut self, n: f64) -> Result<Effect, String> {
-        let n = dimension(n)?;
+        let name = match self.phase() {
+            2 => "Length", 3 => "Width", 4 => "Height", 7 => "Diameter", _ => "Radius",
+        };
+        let n = dimension(n).map_err(|error| format!("{name}: {error}"))?;
         match self.phase() {
             2 => {
+                if self.kind == Kind::Box && self.data.mode != Mode::Center {
+                    return Err("Pick the end of the edge; Length input is available only in Center".into());
+                }
                 if matches!(self.data.mode, Mode::Diagonal | Mode::Cube) {
                     return Err("Pick the opposite diagonal corner".into());
                 }
@@ -475,6 +665,14 @@ impl Session {
         }
     }
     fn point_inner(&mut self, p: Point) -> Result<Effect, String> {
+        if self.data.accepted_points.len()>=crate::fit_point_input::MAX_POINTS{return Err("Accepted point capture budget".into());}
+        let effect=self.point_geometry(p)?;
+        self.data.accepted_points.push(p);Ok(effect)
+    }
+    fn point_geometry(&mut self, p: Point) -> Result<Effect, String> {
+        if self.kind == Kind::Box && !self.data.mode_selected {
+            return Err("Choose Diagonal, 3Point, Vertical or Center before picking a point".into());
+        }
         if !finite(p) {
             return Err("Invalid point coordinates".into());
         }
@@ -586,7 +784,7 @@ impl Session {
                 self.circle_result(circle)
             }
             15 => {
-                if self.data.points.len() >= 1024 {
+                if self.data.points.len() >= crate::fit_point_input::MAX_POINTS {
                     return Err("FitPoints supports up to 1024 points".into());
                 }
                 self.data.points.push(p);
@@ -631,6 +829,7 @@ impl Session {
     pub fn accept_reference(&mut self, p: Point, tangent: Point) -> Result<Effect, String> {
         let before = self.data.clone();
         let effect = (|| {
+            if self.data.accepted_points.len()>=crate::fit_point_input::MAX_POINTS{return Err("Accepted point capture budget".into());}
             if !finite(p) {
                 return Err("Invalid reference point".into());
             }
@@ -660,6 +859,7 @@ impl Session {
         })();
         match effect {
             Ok(e) => {
+                self.data.accepted_points.push(p);
                 self.data.previous_accepted = Some(p);
                 self.history.push(before);
                 Ok(e)
@@ -686,7 +886,7 @@ impl Session {
     }
     pub fn append_fit_points(&mut self, points: &[Point]) -> Result<Effect, String> {
         if self.phase() != 15
-            || self.data.points.len() + points.len() > 1024
+            || !crate::fit_point_input::admit_count(self.data.points.len(),points.len())
             || points.iter().any(|&p| !finite(p))
         {
             return Err("Invalid FitPoints batch or point limit exceeded".into());
@@ -695,6 +895,7 @@ impl Session {
             return Ok(Effect::Waiting);
         }
         self.history.push(self.data.clone());
+        self.data.accepted_points.extend_from_slice(points);
         self.data.points.extend_from_slice(points);
         self.data.last = *points.last().unwrap();
         self.data.previous_accepted = Some(self.data.last);
@@ -766,6 +967,7 @@ impl Session {
         Ok(Effect::Commit)
     }
     pub fn preview(&self, p: Point, ortho: bool) -> Option<[f64; 15]> {
+        if self.kind == Kind::Box && !self.data.mode_selected { return None; }
         let mut candidate = Self {
             kind: self.kind,
             data: self.data.clone(),
@@ -777,6 +979,57 @@ impl Session {
             candidate.input("").ok()?;
         }
         candidate.output()
+    }
+    /// Scene-only construction outline. A base is drawable before there is a
+    /// complete solid; hover never adds an accepted point or an Undo checkpoint.
+    pub fn wire_preview(&self, p: Point, ortho: bool) -> Option<WirePreview> {
+        if self.kind!=Kind::Box || !self.data.mode_selected || !matches!(self.phase(),2|3|4) || !finite(p) {return None;}
+        let mut candidate=Self{kind:self.kind,data:self.data.clone(),frame:self.frame,history:Vec::new()};
+        let height=dot(sub(p,self.data.first),self.data.axes[2]);
+        if !(self.phase()==4 && height.abs()<1e-7) {candidate.point(candidate.constrain(p,ortho)).ok()?;}
+        if candidate.phase()==3 {
+            let end=add(candidate.data.first,scale(candidate.data.axes[0],candidate.data.length));
+            return Some(WirePreview{segments:vec![[candidate.data.first,end]],markers:[candidate.data.first,end,end]});
+        }
+        let (origin,axes,dims,full)=if let Some(b)=candidate.output(){
+            ([b[0],b[1],b[2]],[[b[3],b[4],b[5]],[b[6],b[7],b[8]],[b[9],b[10],b[11]]],[b[12],b[13],b[14]],true)
+        }else if candidate.phase()==4 {
+            let mut origin=candidate.data.first;let axes=candidate.data.axes;
+            let length=dimension(candidate.data.length).ok()?;let width=dimension(candidate.data.width).ok()?;
+            if candidate.data.mode==Mode::Center {origin=sub(sub(origin,scale(axes[0],length*0.5)),scale(axes[1],width*0.5));}
+            if length<0. {origin=add(origin,scale(axes[0],length));}
+            if width<0. {origin=add(origin,scale(axes[1],width));}
+            (origin,axes,[length.abs(),width.abs(),0.],false)
+        }else{return None;};
+        let mut vertices=[[0.;3];8];
+        for (i,v) in vertices.iter_mut().enumerate(){
+            *v=add(add(add(origin,scale(axes[0],if i&1!=0{dims[0]}else{0.})),scale(axes[1],if i&2!=0{dims[1]}else{0.})),scale(axes[2],if i&4!=0{dims[2]}else{0.}));
+            if !finite(*v){return None;}
+        }
+        let pairs=[(0,1),(1,3),(3,2),(2,0),(4,5),(5,7),(7,6),(6,4),(0,4),(1,5),(2,6),(3,7)];
+        let segments=pairs[..if full{12}else{4}].iter().map(|&(a,b)|[vertices[a],vertices[b]]).collect();
+        // Mark the construction base, not the normalized lower face: negative
+        // Height moves the BRep origin but must not shift these markers twice.
+        let factor=if candidate.data.mode==Mode::Center{0.5}else{1.};
+        let opposite=add(add(candidate.data.first,scale(candidate.data.axes[0],candidate.data.length*factor)),scale(candidate.data.axes[1],candidate.data.width*factor));
+        let signed_height=if candidate.data.mode==Mode::Cube{candidate.data.length}else{height};
+        let top=if full{add(opposite,scale(candidate.data.axes[2],signed_height))}else{opposite};
+        Some(WirePreview{segments,markers:[self.data.first,opposite,top]})
+    }
+    fn height_anchor_for(&self, state:&Self)->Point {
+        add(add(state.data.first,scale(state.data.axes[0],state.data.length)),scale(state.data.axes[1],state.data.width))
+    }
+    pub fn height_anchor(&self)->Point {
+        if self.kind==Kind::Box && self.data.mode==Mode::Corners {self.height_anchor_for(self)}else{self.data.first}
+    }
+    /// Screen-up drag when a top/bottom view ray is parallel to the height axis.
+    /// Native code supplies the hit on the base plane and camera's world up.
+    pub fn height_drag(&self, hit:Point, up:Point)->Option<Point> {
+        if self.kind!=Kind::Box || self.phase()!=4 || !finite(hit) || !finite(up) {return None;}
+        let n=self.data.axes[2];let tangent=sub(up,scale(n,dot(up,n)));
+        let norm=dot(tangent,tangent).sqrt();if norm<1e-9{return None;}
+        let anchor=self.height_anchor();let height=dot(sub(hit,anchor),scale(tangent,1./norm));
+        let result=add(anchor,scale(n,height));finite(result).then_some(result)
     }
     pub fn constrain(&self, p: Point, ortho: bool) -> Point {
         if !ortho
@@ -812,10 +1065,26 @@ impl Session {
 struct State {
     session: Option<Session>,
     message: String,
+    generation: u64,
+    input_revision: u64,
+    error: String,
+}
+pub(crate) fn command_option_state(scale: f64) -> Option<(u64,u64,crate::command_options::OptionSession)> {
+    let locked=state().lock().ok()?;
+    let session=locked.session.as_ref()?;
+    let model=session.command_options(locked.generation,scale).ok()?;
+    Some((locked.generation,locked.input_revision,model))
 }
 fn state() -> &'static Mutex<State> {
     static STATE: OnceLock<Mutex<State>> = OnceLock::new();
     STATE.get_or_init(|| Mutex::new(State::default()))
+}
+pub(crate) fn current_construction_capability(input:crate::geometry_contract::RepresentationKind,stage:crate::native_solid_capability::Stage)
+    ->Option<Result<crate::geometry_contract::OperationCapability,crate::geometry_contract::CapabilityError>>{
+    use crate::geometry_contract::{CapabilityError,OperationId};
+    let locked=state().lock().ok()?;
+    Some(locked.session.as_ref().map_or(Err(CapabilityError::UnsupportedOperation(OperationId::ConstructSolid)),
+        |s|s.construction_capability(input,stage)))
 }
 fn string(p: *const c_char) -> Option<String> {
     if p.is_null() {
@@ -835,11 +1104,14 @@ fn change(f: impl FnOnce(&mut Session) -> Result<Effect, String>) -> u32 {
         .as_mut()
         .ok_or("No active solid command".to_owned())
         .and_then(f);
+    state.input_revision = state.input_revision.saturating_add(1);
+    state.error = result.as_ref().err().cloned().unwrap_or_default();
     state.message = match &result {
         Ok(_) => state
             .session
             .as_ref()
             .map_or(String::new(), Session::prompt),
+        Err(e) if state.session.as_ref().is_some_and(|session|session.kind == Kind::Box) => e.clone(),
         Err(e) => format!(
             "{e}. {}",
             state
@@ -851,7 +1123,10 @@ fn change(f: impl FnOnce(&mut Session) -> Result<Effect, String>) -> u32 {
     match result {
         Ok(Effect::Waiting) => 1,
         Ok(Effect::Commit) => 2,
-        Ok(Effect::Cancelled) => 3,
+        Ok(Effect::Cancelled) => {
+            state.generation = state.generation.saturating_add(1);
+            3
+        },
         Err(_) => 0,
     }
 }
@@ -872,13 +1147,50 @@ pub unsafe extern "C" fn om9_solid_start(p: *const c_char) -> bool {
     };
     let mut state = state().lock().unwrap_or_else(|p| p.into_inner());
     let session = Session::new(kind);
+    if session.construction_capability(crate::geometry_contract::RepresentationKind::Point,crate::native_solid_capability::Stage::Declare).is_err(){return false;}
+    let Some(generation) = state.generation.checked_add(1) else { return false; };
+    state.generation = generation;
     state.message = session.prompt();
+    state.input_revision = 0;
+    state.error.clear();
     state.session = Some(session);
     true
 }
 #[unsafe(no_mangle)]
 pub extern "C" fn om9_solid_cancel() {
-    *state().lock().unwrap_or_else(|p| p.into_inner()) = State::default();
+    let mut state = state().lock().unwrap_or_else(|p| p.into_inner());
+    let generation = state.generation.saturating_add(1);
+    *state = State { generation, ..State::default() };
+}
+/// Scalar request identity; no native owner or pointer crosses this boundary.
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_solid_generation() -> u64 {
+    state().lock().unwrap_or_else(|p| p.into_inner()).generation
+}
+/// # Safety
+/// Caller owns a writable non-overlapping allocation of `capacity` bytes for
+/// this call. Null/capacity0 queries size. No pointer retained; Rust panic is
+/// contained. Generation is checked under the same lock as capture/copy.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_solid_construction_json(generation:u64,output:*mut u8,capacity:usize)
+    ->crate::prepared_result::Summary{
+    use crate::prepared_result::{Summary,MAX_RESULT_BYTES};
+    let rejected=|status,needed|Summary{status,reserved:0,needed};
+    if capacity>MAX_RESULT_BYTES||capacity>isize::MAX as usize{return rejected(2,0);}
+    if (output.is_null()&&capacity!=0)||(!output.is_null()&&(output as usize).checked_add(capacity).is_none()){
+        return rejected(1,0);
+    }
+    std::panic::catch_unwind(||{
+        let state=state().lock().unwrap_or_else(|p|p.into_inner());
+        if generation==0||generation!=state.generation{return rejected(5,0);}
+        let Some(session)=state.session.as_ref()else{return rejected(5,0);};
+        let evidence=match session.construction_evidence(generation){Ok(e)=>e,Err(status)=>return rejected(status,0)};
+        let needed=evidence.len();
+        if output.is_null(){return rejected(0,needed);}
+        if capacity<needed{return rejected(2,needed);}
+        unsafe{std::ptr::copy_nonoverlapping(evidence.as_ptr(),output,needed);}
+        rejected(0,needed)
+    }).unwrap_or_else(|_|rejected(7,0))
 }
 #[unsafe(no_mangle)]
 pub extern "C" fn om9_solid_phase() -> u32 {
@@ -901,7 +1213,7 @@ pub extern "C" fn om9_solid_reference_mode() -> u32 {
 #[unsafe(no_mangle)]
 pub extern "C" fn om9_solid_mode_name() -> *const c_char {
     let guard = state().lock().unwrap_or_else(|p| p.into_inner());
-    let name = guard.session.as_ref().map_or(c"", |s| match s.data.mode {
+    let name = guard.session.as_ref().map_or(c"", |s| if s.kind==Kind::Box&&!s.data.mode_selected {c"ChooseMethod"} else {match s.data.mode {
         Mode::Corners => c"Corners",
         Mode::Diagonal => c"Diagonal",
         Mode::ThreePoint => c"3Point",
@@ -913,7 +1225,7 @@ pub extern "C" fn om9_solid_mode_name() -> *const c_char {
         Mode::FitPoints => c"FitPoints",
         Mode::AroundCurve => c"AroundCurve",
         Mode::Tangent => c"Tangent",
-    });
+    }});
     name.as_ptr()
 }
 #[unsafe(no_mangle)]
@@ -988,7 +1300,7 @@ pub extern "C" fn om9_solid_point_count() -> usize {
 /// Input points addresses count*3 readable doubles; count is at most 1024.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn om9_solid_fit_points(p: *const f64, count: usize) -> u32 {
-    if p.is_null() || count > 1024 {
+    if p.is_null() || !crate::fit_point_input::admit_count(0,count) {
         return 0;
     }
     let values = unsafe { std::slice::from_raw_parts(p, count * 3) };
@@ -1059,6 +1371,7 @@ pub unsafe extern "C" fn om9_solid_geometry(
     z: f64,
     ortho: bool,
 ) -> bool {
+  std::panic::catch_unwind(||{
     if p.is_null() {
         return false;
     }
@@ -1066,6 +1379,9 @@ pub unsafe extern "C" fn om9_solid_geometry(
     let Some(s) = &state.session else {
         return false;
     };
+    use crate::{geometry_contract::*,native_solid_capability::Stage};
+    let stage=if preview{Stage::Preview}else{Stage::Construct};
+    if s.construction_capability(RepresentationKind::Point,stage).is_err(){return false;}
     let b = if preview {
         s.preview([x, y, z], ortho)
     } else {
@@ -1074,10 +1390,40 @@ pub unsafe extern "C" fn om9_solid_geometry(
     let Some(b) = b else {
         return false;
     };
+    let Ok(mut request)=s.capability_request(stage) else{return false;};request.output=Some(b);
+    if operation_capability(OperationId::ConstructSolid,RepresentationKind::Point,OperationOptions::NativeSolid(request)).is_err(){return false;}
     unsafe {
         std::ptr::copy_nonoverlapping(b.as_ptr(), p, 15);
     }
     true
+  }).unwrap_or(false)
+}
+/// # Safety
+/// Segments addresses 72 writable doubles; markers addresses 9 writable doubles.
+/// Return is the bounded segment count (1, 4 or 12), zero for no valid outline.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_solid_wire_preview(segments:*mut f64,markers:*mut f64,x:f64,y:f64,z:f64,ortho:bool)->u32 {
+    std::panic::catch_unwind(||{
+        if segments.is_null()||markers.is_null(){return 0;}
+        let locked=state().lock().unwrap_or_else(|p|p.into_inner());let Some(s)=&locked.session else{return 0;};
+        if s.construction_capability(crate::geometry_contract::RepresentationKind::Point,crate::native_solid_capability::Stage::Preview).is_err(){return 0;}
+        let Some(wire)=s.wire_preview([x,y,z],ortho) else{return 0;};
+        if wire.segments.len()>12{return 0;}
+        for(i,edge)in wire.segments.iter().enumerate(){for(j,p)in edge.iter().enumerate(){unsafe{std::ptr::copy_nonoverlapping(p.as_ptr(),segments.add(i*6+j*3),3);}}}
+        for(i,p)in wire.markers.iter().enumerate(){unsafe{std::ptr::copy_nonoverlapping(p.as_ptr(),markers.add(i*3),3);}}
+        wire.segments.len() as u32
+    }).unwrap_or(0)
+}
+/// # Safety
+/// Result addresses 3 writable doubles; hit and up each address 3 readable doubles.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_solid_height_drag(result:*mut f64,hit:*const f64,up:*const f64)->bool {
+    std::panic::catch_unwind(||{
+        if result.is_null()||hit.is_null()||up.is_null(){return false;}
+        let hit=unsafe{[*hit,*hit.add(1),*hit.add(2)]};let up=unsafe{[*up,*up.add(1),*up.add(2)]};
+        let locked=state().lock().unwrap_or_else(|p|p.into_inner());let Some(s)=&locked.session else{return false;};
+        let Some(p)=s.height_drag(hit,up)else{return false;};unsafe{std::ptr::copy_nonoverlapping(p.as_ptr(),result,3);}true
+    }).unwrap_or(false)
 }
 /// # Safety
 /// Non-null output addresses 6 writable doubles: height anchor and normal.
@@ -1094,7 +1440,7 @@ pub unsafe extern "C" fn om9_solid_height_axis(p: *mut f64) -> bool {
         return false;
     }
     unsafe {
-        std::ptr::copy_nonoverlapping(s.data.first.as_ptr(), p, 3);
+        std::ptr::copy_nonoverlapping(s.height_anchor().as_ptr(), p, 3);
         std::ptr::copy_nonoverlapping(s.data.axes[2].as_ptr(), p.add(3), 3);
     }
     true

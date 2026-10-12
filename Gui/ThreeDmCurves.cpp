@@ -1,6 +1,8 @@
 #include "ThreeDmGeometry.h"
 #include "NurbsBasisAdapter.h"
 #include "CurveConversionContract.h"
+#include "NativeInputTrace.h"
+#include "NativeInputTree.h"
 #include <Geom_BSplineCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom_TrimmedCurve.hxx>
@@ -22,10 +24,10 @@ struct PreparedCurve {
     bool beforeClampPeriodic = false;
 };
 static PreparedCurve nurbs(const ON_Curve& c,double tolerance=0.){
-    if(auto raw=ON_NurbsCurve::Cast(&c))BasisContract::checkedBasis(*raw);
+    InputTree::validate(c);
     PreparedCurve prepared;auto& n=prepared.basis;
     if(!c.IsValid())throw ExchangeError("Invalid or unsupported curve");
-    prepared.form=c.GetNurbForm(n,tolerance);
+    OM9_NATIVE_INPUT_ENTRY("curve.GetNurbForm");prepared.form=c.GetNurbForm(n,tolerance);
     if(prepared.form!=1&&prepared.form!=2)throw ExchangeError("Invalid or unsupported curve");
     BasisContract::checkedBasis(n);
     prepared.getNurbFormDomain={n.Domain().Min(),n.Domain().Max()};
@@ -42,7 +44,7 @@ static Handle(Geom_Curve) curve3dFromNurbs(const ON_NurbsCurve& n){
     TColgp_Array1OfPnt p(1,n.CVCount());TColStd_Array1OfReal w(1,n.CVCount()),ks(1,int(k.size()));TColStd_Array1OfInteger ms(1,int(m.size()));
     for(int i=0;i<n.CVCount();++i){ON_3dPoint v;n.GetCV(i,v);p.SetValue(i+1,gp_Pnt(v.x,v.y,v.z));w.SetValue(i+1,n.Weight(i));}
     for(int i=0;i<int(k.size());++i){ks.SetValue(i+1,k[i]);ms.SetValue(i+1,m[i]);}
-    return new Geom_BSplineCurve(p,w,ks,ms,n.Degree(),false);
+    OM9_NATIVE_INPUT_ENTRY("curve.OCCTConstructor");return new Geom_BSplineCurve(p,w,ks,ms,n.Degree(),false);
 }
 Handle(Geom_Curve) curve3d(const ON_Curve& c){
     auto prepared=nurbs(c);return curve3dFromNurbs(prepared.basis);
@@ -52,16 +54,16 @@ Handle(Geom2d_Curve) curve2d(const ON_Curve& c){
     TColgp_Array1OfPnt2d p(1,n.CVCount());TColStd_Array1OfReal w(1,n.CVCount()),ks(1,int(k.size()));TColStd_Array1OfInteger ms(1,int(m.size()));
     for(int i=0;i<n.CVCount();++i){ON_3dPoint v;n.GetCV(i,v);p.SetValue(i+1,gp_Pnt2d(v.x,v.y));w.SetValue(i+1,n.Weight(i));}
     for(int i=0;i<int(k.size());++i){ks.SetValue(i+1,k[i]);ms.SetValue(i+1,m[i]);}
-    return new Geom2d_BSplineCurve(p,w,ks,ms,n.Degree(),false);
+    OM9_NATIVE_INPUT_ENTRY("curve2d.OCCTConstructor");return new Geom2d_BSplineCurve(p,w,ks,ms,n.Degree(),false);
 }
 static TopoDS_Shape curveEdge(const Handle(Geom_Curve)& n,const ON_Interval& d){BRepBuilderAPI_MakeEdge edge(n,d.Min(),d.Max());if(!edge.IsDone())throw ExchangeError("Curve edge construction failed");return edge.Edge();}
-TopoDS_Shape importCurve(const ON_Curve& c,double){return curveEdge(curve3d(c),c.Domain());}
+TopoDS_Shape importCurve(const ON_Curve& c,double){auto target=curve3d(c);const auto domain=c.Domain();return curveEdge(target,domain);}
 CurveConversion::ObservedCurve CurveConversion::importCurveObserved(
     const ON_Curve& c,Options options,std::span<const double> parameters){
     try {
         // Domain/CRC can read raw native storage. Gate its envelope first;
         // complete shared value validation still precedes GetNurbForm below.
-        if(auto raw=ON_NurbsCurve::Cast(&c))BasisContract::preflightBasis(*raw);
+        InputTree::validate(c);
         Detail::preflight(c,options,parameters);
         const auto sourceCrc=c.DataCRC(0);
         auto prepared=nurbs(c,options.conversionTolerance);
@@ -78,26 +80,27 @@ CurveConversion::ObservedCurve CurveConversion::importCurveObserved(
 }
 template<class Curve> static std::unique_ptr<ON_Curve> toON(const Curve& n,int dimension){
     BasisContract::checkedBasis(n);
-    auto out=std::make_unique<ON_NurbsCurve>(dimension,n->IsRational(),n->Degree()+1,n->NbPoles());
+    OM9_NATIVE_INPUT_ENTRY("curve.ONConstructor");auto out=std::make_unique<ON_NurbsCurve>(dimension,n->IsRational(),n->Degree()+1,n->NbPoles());
     for(int i=1;i<=n->NbPoles();++i){auto p=n->Pole(i);double w=n->Weight(i);double z=0;if constexpr(requires{p.Z();})z=p.Z();out->SetCV(i-1,ON_4dPoint(p.X()*w,p.Y()*w,z*w,w));}
     std::vector<double> flat;for(int i=1;i<=n->NbKnots();++i)for(int j=0;j<n->Multiplicity(i);++j)flat.push_back(n->Knot(i));
     if(int(flat.size())!=out->KnotCount()+2)throw ExchangeError("NURBS knot cardinality mismatch");
     for(int i=0;i<out->KnotCount();++i)out->SetKnot(i,flat[i+1]);ON_wString log;ON_TextLog errors(log);if(!out->IsValid(&errors))throw ExchangeError(std::string("Exported NURBS curve invalid: ")+ON_String(log).Array());return out;
 }
 std::unique_ptr<ON_Curve> curveON(const Handle(Geom_Curve)& c,double a,double b){
-    if(auto raw=Handle(Geom_BSplineCurve)::DownCast(c);!raw.IsNull())BasisContract::checkedBasis(raw);
-    auto n=GeomConvert::CurveToBSplineCurve(new Geom_TrimmedCurve(c,a,b));BasisContract::checkedBasis(n);if(n->IsPeriodic())n->SetNotPeriodic();return toON(n,3);
+    InputTree::validate(c);
+    OM9_NATIVE_INPUT_ENTRY("curve.GeomConvert");auto n=GeomConvert::CurveToBSplineCurve(new Geom_TrimmedCurve(c,a,b));BasisContract::checkedBasis(n);if(n->IsPeriodic())n->SetNotPeriodic();return toON(n,3);
 }
 std::unique_ptr<ON_Curve> curveON(const Handle(Geom2d_Curve)& c,double a,double b){
+    InputTree::validate(c);
     auto spline=Handle(Geom2d_BSplineCurve)::DownCast(c);
     Handle(Geom2d_BSplineCurve) n;
     if(!spline.IsNull()){
         BasisContract::checkedBasis(spline);
-        n=Handle(Geom2d_BSplineCurve)::DownCast(spline->Copy());
+        OM9_NATIVE_INPUT_ENTRY("curve2d.Copy");n=Handle(Geom2d_BSplineCurve)::DownCast(spline->Copy());
         const double parameterTolerance=1e-10*std::max({1.0,std::abs(a),std::abs(b)});
         if(std::abs(a-n->FirstParameter())>parameterTolerance||std::abs(b-n->LastParameter())>parameterTolerance)n->Segment(a,b);
-    }else n=Geom2dConvert::CurveToBSplineCurve(new Geom2d_TrimmedCurve(c,a,b));
+    }else {OM9_NATIVE_INPUT_ENTRY("curve2d.GeomConvert");n=Geom2dConvert::CurveToBSplineCurve(new Geom2d_TrimmedCurve(c,a,b));}
     BasisContract::checkedBasis(n);if(n->IsPeriodic())n->SetNotPeriodic();return toON(n,2);
 }
-std::unique_ptr<ON_Curve> exportCurve(const TopoDS_Edge& e,double){double a,b;TopLoc_Location loc;auto c=BRep_Tool::Curve(e,loc,a,b);if(c.IsNull())throw ExchangeError("Edge has no 3D curve");c=Handle(Geom_Curve)::DownCast(c->Transformed(loc.Transformation()));auto out=curveON(c,a,b);if(e.Orientation()==TopAbs_REVERSED)out->Reverse();return out;}
+std::unique_ptr<ON_Curve> exportCurve(const TopoDS_Edge& e,double){double a,b;TopLoc_Location loc;auto c=BRep_Tool::Curve(e,loc,a,b);if(c.IsNull())throw ExchangeError("Edge has no 3D curve");InputTree::validate(c);OM9_NATIVE_INPUT_ENTRY("curve.TransformCopy");c=Handle(Geom_Curve)::DownCast(c->Transformed(loc.Transformation()));auto out=curveON(c,a,b);if(e.Orientation()==TopAbs_REVERSED)out->Reverse();return out;}
 }

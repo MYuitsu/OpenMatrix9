@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Ellipse focus outputs require full common results paired with their vertices."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(console,text):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier))
+def settle():
+ loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(80,loop.quit);loop.exec()
+def case(console,center):
+ doc=App.newDocument('EllipseFocusResult');doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+ undo=doc.UndoCount;x,y,z=center
+ inputs=[f'{x-4},{y},{z}',f'{x+4},{y},{z}',f'{x},{y+3},{z}']
+ for text in ['Ellipse','FromFoci','MarkFoci=Yes']+inputs:enter(console,text)
+ settle();main=doc.getObject('Ellipse');focus=[doc.getObject('EllipseFocus1'),doc.getObject('EllipseFocus2')]
+ check(str(center)+' three outputs one Undo',main is not None and all(focus)and doc.UndoCount==undo+1)
+ check(str(center)+' independent focus positions',all(focus)and all((o.Shape.Vertexes[0].Point-App.Vector(x+sign*4,y,z)).Length<1e-7 for o,sign in zip(focus,[-1,1])))
+ originals=[];construction=getattr(main,'OM9CurveConstruction','')
+ for i,obj in enumerate(focus):
+  label=str(center)+'/Focus'+str(i+1);raw=getattr(obj,'OM9GeometryResult','');originals.append(raw);value=json.loads(raw)if raw else None
+  check(label+' common result role and original construction',value is not None and value['operation']=='ConstructCurve'and value['operation_context'].get('output_role')=='ellipse_focus'+str(i+1)and value['operation_context']['construction']==json.loads(construction))
+  inputs_value=value['input_snapshots']if value else []
+  check(label+' original foci and third point retained',bool(inputs_value)and inputs_value[0]['geometry_data']['points_xyz']==[[x-4,y,z],[x+4,y,z],[x,y+3,z]])
+  outputs=value['output_snapshots']if value else [];snapshot=outputs[0]if outputs else None
+  check(label+' full owned point master topology and units',snapshot is not None and snapshot['ownership']=='private_native_copy'and snapshot['native_shape_type']==7 and snapshot['geometry_data']['representation']=='point'and len(snapshot['topology_data']['vertices'])==1 and snapshot['unit_context_snapshot']==obj.OM9UnitContext)
+  master=Part.Shape()
+  if snapshot:master.importBrepFromString(snapshot['geometry_data']['native_master']['payload'])
+  check(label+' independent CAD master vertex matches output',not master.isNull()and len(master.Vertexes)==1 and (master.Vertexes[0].Point-obj.Shape.Vertexes[0].Point).Length<1e-7)
+  check(label+' paired construction property',bool(raw)and getattr(obj,'OM9CurveConstruction','')==construction)
+ doc.undo();settle();check(str(center)+' Undo removes entire result set',all(doc.getObject(name)is None for name in ['Ellipse','EllipseFocus1','EllipseFocus2']))
+ doc.redo();settle();check(str(center)+' Redo restores paired full results',all(raw and raw==getattr(doc.getObject('EllipseFocus'+str(i+1)),'OM9GeometryResult','')for i,raw in enumerate(originals)))
+ path=out/('Focus'+str(int(x))+'.FCStd');doc.saveAs(str(path));App.closeDocument(doc.Name)
+ doc=App.openDocument(str(path));settle();check(str(center)+' FCStd retains all exact result bytes',all(raw and raw==getattr(doc.getObject('EllipseFocus'+str(i+1)),'OM9GeometryResult','')for i,raw in enumerate(originals)))
+ report['observations'].append(dict(center=center,results=originals,archive=str(path)));App.closeDocument(doc.Name)
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');settle();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  for center in [[0.,0.,0.],[10.,20.,30.]]:case(console,center)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

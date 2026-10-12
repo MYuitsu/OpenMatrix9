@@ -173,7 +173,8 @@ bool hasHistoryDependents(App::DocumentObject* o){
         for(auto* parent:historyParents(candidate))if(parent==o)return true;
     return false;
 }
-void breakHistoryForEdit(App::Document& d,const std::vector<std::string>& names){
+void breakHistoryForEdit(App::Document& d,const std::vector<std::string>& names,
+    const std::function<void(App::DocumentObject&,bool)>& detachBoundary){
     std::set<App::DocumentObject*> targets;for(const auto& name:names)if(auto* o=d.getObject(name.c_str()))targets.insert(o);
     for(auto* o:targets)if(historyEditLocked(o))throw std::runtime_error("History Lock prevents this child geometry edit");
     std::set<App::DocumentObject*> broken;
@@ -181,7 +182,7 @@ void breakHistoryForEdit(App::Document& d,const std::vector<std::string>& names)
         if(targets.contains(o))broken.insert(o);
         for(auto* p:historyParents(o))if(targets.contains(p))broken.insert(o);
     }
-    for(auto* o:broken){warn(o);detachObjectHistory(o);}
+    for(auto* o:broken){warn(o);if(detachBoundary)detachBoundary(*o,true);detachObjectHistory(o);if(detachBoundary)detachBoundary(*o,false);}
 }
 HistoryJoin* createHistoryJoin(App::Document& d,const std::vector<std::string>& names,double tolerance){
     if(names.size()<2||!std::isfinite(tolerance)||tolerance<=0)throw std::runtime_error("Join History requires two or more separate curves and a positive tolerance");

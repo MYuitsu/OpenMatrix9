@@ -1,0 +1,178 @@
+"""Atomic publication must retain real executable native Redo after abort.
+
+The fallback to the default transaction is deliberate RED characterization when
+the opt-in host API is absent. It is recorded, never treated as opt-in evidence.
+"""
+import json, os, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, OpenMatrix9Gui as OM
+from PySide6 import QtCore
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'module': OM.__file__, 'checks': [], 'observations': []}
+owned_documents = []
+
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+
+def document(name):
+    doc = App.newDocument(name)
+    owned_documents.append(doc.Name)
+    doc.UndoMode = 1
+    seed = doc.addObject('App::FeaturePython', 'Seed')
+    seed.Label = 'Initial'
+    seed.addProperty('App::PropertyLink', 'Target')
+    doc.recompute()
+    doc.clearUndos()
+    return doc, seed
+
+def start(doc, name):
+    method = getattr(doc, 'openTransactionPreservingRedo', None)
+    report['observations'].append({'document': doc.Name, 'opt_in_api': method is not None})
+    (method if method is not None else doc.openTransaction)(name)
+
+def snapshot(doc):
+    return (tuple((obj.Name, obj.ID, obj.Label) for obj in doc.Objects),
+            doc.UndoCount, doc.RedoCount)
+
+def property_witness(doc, seed, label='Previous action'):
+    doc.openTransaction('Property witness')
+    seed.Label = label
+    doc.commitTransaction()
+    doc.undo()
+
+def run():
+    try:
+        doc, seed = document('AtomicPropertyOrder')
+        check('host exposes explicit opt-in transaction API',
+              hasattr(doc, 'openTransactionPreservingRedo'))
+        for label in ['First action', 'Second action']:
+            doc.openTransaction(label)
+            seed.Label = label
+            doc.commitTransaction()
+        doc.undo(); doc.undo()
+        baseline = snapshot(doc)
+        check('property fixture has two real redo records', doc.RedoCount == 2)
+        start(doc, 'Rejected publication')
+        seed.Label = 'Temporary'
+        doc.addObject('App::FeaturePython', 'Temporary')
+        check('pending publication hides prior redo actions', doc.RedoCount == 0)
+        doc.abortTransaction()
+        check('abort restores objects native IDs and Undo/Redo baseline', snapshot(doc) == baseline)
+        doc.redo()
+        check('abort retains first executable property redo', seed.Label == 'First action')
+        doc.redo()
+        check('abort retains second executable property redo in order', seed.Label == 'Second action')
+
+        doc, seed = document('AtomicCreatedLink')
+        doc.openTransaction('Create linked object')
+        child = doc.addObject('App::FeaturePython', 'Child')
+        child.Label = 'Original child'
+        child_id = child.ID
+        seed.Target = child
+        doc.commitTransaction(); doc.undo()
+        baseline = snapshot(doc)
+        check('creation witness undo detaches child and clears link',
+              doc.getObject('Child') is None and seed.Target is None and doc.RedoCount == 1)
+        start(doc, 'Rejected creation')
+        seed.Label = 'Temporary'
+        doc.addObject('App::FeaturePython', 'Temporary')
+        doc.abortTransaction()
+        check('creation abort restores complete history baseline', snapshot(doc) == baseline)
+        doc.redo()
+        restored = doc.getObject('Child')
+        check('old creation redo restores same native object and link',
+              restored is not None and restored.ID == child_id and restored is child
+              and restored.Label == 'Original child' and seed.Target is restored
+              and seed in restored.InList and restored in seed.OutList)
+        doc.undo()
+        check('restored creation can be undone again with link cleanup',
+              doc.getObject('Child') is None and seed.Target is None and not seed.OutList)
+
+        doc, seed = document('AtomicRemovedLink')
+        child = doc.addObject('App::FeaturePython', 'Child')
+        child_id = child.ID
+        seed.Target = child
+        doc.clearUndos()
+        doc.openTransaction('Remove linked object')
+        doc.removeObject('Child')
+        doc.commitTransaction(); doc.undo()
+        baseline = snapshot(doc)
+        check('removal witness undo restores child and native link',
+              doc.getObject('Child') is child and seed.Target is child and seed in child.InList
+              and child in seed.OutList and doc.RedoCount == 1)
+        start(doc, 'Rejected removal')
+        doc.removeObject('Child')
+        seed.Label = 'Temporary'
+        doc.abortTransaction()
+        check('removal abort restores native object link and history',
+              snapshot(doc) == baseline and doc.getObject('Child') is child and seed.Target is child
+              and seed in child.InList and child in seed.OutList)
+        doc.redo()
+        check('old removal redo executes and cleans link',
+              doc.getObject('Child') is None and seed.Target is None and not seed.OutList)
+        doc.undo()
+        check('old removal remains undoable with original native ownership',
+              doc.getObject('Child') is child and child.ID == child_id and seed.Target is child
+              and seed in child.InList and child in seed.OutList)
+
+        doc, seed = document('AtomicCommit')
+        property_witness(doc, seed)
+        start(doc, 'Accepted publication')
+        seed.Label = 'Accepted'
+        doc.commitTransaction()
+        check('successful opt-in commit invalidates prior redo normally', doc.RedoCount == 0)
+        check('successful opt-in commit creates one undo action', doc.UndoCount == 1)
+        doc.undo()
+        check('accepted publication undo restores original value', seed.Label == 'Initial')
+        doc.redo()
+        check('accepted publication redo executes its actual change', seed.Label == 'Accepted')
+
+        doc, seed = document('AtomicEmpty')
+        property_witness(doc, seed)
+        baseline = snapshot(doc)
+        start(doc, 'Empty publication'); doc.abortTransaction()
+        check('empty opt-in abort retains history baseline', snapshot(doc) == baseline)
+        doc.redo()
+        check('empty opt-in abort retains executable redo', seed.Label == 'Previous action')
+
+        doc, seed = document('AtomicClear')
+        property_witness(doc, seed)
+        start(doc, 'Pending publication')
+        seed.Label = 'Pending'
+        doc.clearUndos(); doc.abortTransaction()
+        check('explicit clearing never resurrects retained history',
+              doc.UndoCount == 0 and doc.RedoCount == 0 and seed.Label == 'Pending')
+
+        doc, seed = document('AtomicReplacement')
+        property_witness(doc, seed)
+        start(doc, 'First publication')
+        seed.Label = 'Committed first'
+        doc.openTransaction('Replacement')
+        seed.Label = 'Rejected replacement'
+        doc.abortTransaction()
+        check('replacement commits first transaction without resurrecting old redo',
+              seed.Label == 'Committed first' and doc.UndoCount == 1 and doc.RedoCount == 0)
+
+        doc, seed = document('AtomicClose')
+        doc.openTransaction('Created owner')
+        child = doc.addObject('App::FeaturePython', 'Child')
+        seed.Target = child
+        doc.commitTransaction(); doc.undo()
+        name = doc.Name
+        start(doc, 'Close pending publication')
+        seed.Label = 'Temporary'
+        App.closeDocument(name)
+        check('document close disposes pending and detached history owners', name not in App.listDocuments())
+        report['ok'] = all(row['passed'] for row in report['checks'])
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        for name in owned_documents:
+            if name in App.listDocuments():
+                App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1200, run)

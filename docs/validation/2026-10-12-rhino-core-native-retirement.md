@@ -1,0 +1,21 @@
+# RCORE-01 — Original property retirement before caller transfer
+
+App147 có native factory/Paste inverse; original Copy retirement được kiểm tra trước caller merge.
+Original retirement **204/204**, registered native subtype **204/204**;32 callback/case mỗi cohort, phục hồi và giữ caller history.
+Matching Runtime149/App147: **1982 kiểm tra/13 host sạch**, gồm semantic432,close4,modes109,Curve33,booking80,capture34,scope744,cold modes62,legacy8/cold3,spatial65.
+**Final recovery disposal vẫn RED128/204**:32 callback bị chặn và không báo accepted, nhưng rollback/paired cleanup chưa hoàn tất. **Task2/3/full RCORE-01 còn mở.**
+
+Original RED146 reported accepted32/32 after blocked destructor callbacks. App147 retains an independent native factory/Paste inverse, retires original Copy instances under observer/lifetime protection and verifies before transfer. No JSON geometry compensation is used. Both parent-aliased and registered native String subtype witnesses now restore the original native values and exact caller history. Final inverse disposal is separately tested and remains a complete RED host:0accepted,0checked rollback/cleanup across32 cases. The KernelFailure is explicit and must not be treated as successful savepoint acceptance. Shared SDK DLL/import/PDB stay unchanged; only required App objects and plugin are built, with matching DLL/import selection. Scope744clean uses early native import; original delayed-import failures remain unresolved. Rust was not rerun and raw offset-D3 RED is untouched.
+
+Remaining requirements:
+
+- Final recovery disposal remains RED128/204 across32 cases: mutations are blocked, no replay claims accepted, but its inverse has been destroyed and caller merge is already transferred. Metadata/output and exact caller recovery fail. Need an inverse that survives every callback-bearing disposal and checked/reversible caller transfer; explicit KernelFailure alone is not completion.
+- Native factory/Paste preparation and original Copy retirement have named proof for parent-aliased and registered native String subtypes. Complete factory/Paste/restore/Copy/allocation/destruction callbacks, unsupported or opaque property types, original native status/touch/cache flags and global/multidocument participants remain open.
+- Native limits count reported retained property sizes and logical records. Recovery, preparation, stage and history/name capture do not yet establish a complete aggregate/peak allocator/traversal certificate. Constructor copies history/name state before fully bounded preflight; regular discarded Redo property/object disposal also needs rejection/lifetime evidence.
+- Scope150744 is clean with the wrapper loading the selected native plugin before its Qt timer, matching production bootstrap ordering. Earlier delayed-import macro/workbench deadlocks are retained; this is not a source fix or proof of all startup paths. Shared SDK plus -M selected runtime still emits duplicate workbench registration during startup and requires correction.
+- Preserve all original RCORE01 adapters1-7,C01-C12,T01-T11 and requirements: stable refs/world-once/ownership; all curve/surface/trim/pcurve/seam families; conversion/deviation/locus/parameter maps; operation/representation/options/backend registry; GeometryResult for every enabled consumer; workers/sharing/aggregate bounds/cancellation; publication/History/cache/locks/lifetime; solid validity/manifold/cavities; independent read/edit/retain/export; generic Snap/mouse/render/persistence/lifecycle. No narrower completion is claimed.
+- Rust suite was not rerun. Original raw native offset-D3 discrepancy remains RED and unchanged. App source candidates and selected loaded hashes are not a full ABI/compiler dependency or native memory-safety certificate; no full prebuild plugin source inventory was frozen.
+
+Next: Implement retirement-safe inverse retention and checked/reversible caller transfer; pass unchanged late-disposal32-case matrix including paired cleanup/exact history. Add regular discarded-Redo ownership/destruction, factory/Paste/restore failures, metadata/status/cache, participants and aggregate preflight. Continue full RCORE01 acceptance and correct actual startup selection.
+
+[Machine evidence](2026-10-12-rhino-core-native-retirement.json).

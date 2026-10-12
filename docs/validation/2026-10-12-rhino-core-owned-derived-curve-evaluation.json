@@ -1,0 +1,1270 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-owned-derived-curve-evaluation-20261012",
+  "status": "in_progress",
+  "goal_complete": false,
+  "updated_at": "2026-10-12T04:04:38+07:00",
+  "scope": "Owned Taylor curve derivatives and trim/offset evaluation;raw native D3 and source binding remain RED",
+  "sources": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/support_snapshot.rs",
+      "bytes": 11010,
+      "sha256": "5452c56601ce2846df190cdf18c96117b2e0f4caba2b3586ca242d54981ee51f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/analytic_support.rs",
+      "bytes": 6902,
+      "sha256": "d6a45d992af2b280753529e7903c4451d858479fcbe5b7df5ca39dc05e939424"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/derived_support.rs",
+      "bytes": 8652,
+      "sha256": "9e4096f93fd2023ded93d5375713dd6c0cedf49a0c6db561503bf4a779932d0d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_taylor.rs",
+      "bytes": 1676,
+      "sha256": "a8d0bc5e2c3f421a36ad9242228ce16c5ad4cad633eeb4bfb0f2615a6d6ff000"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/lib.rs",
+      "bytes": 2501,
+      "sha256": "e75d194ddb95cb8756499c0f3b95c7918d33b8401c2bc16c0d9dbe7a2d941b25"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/support_evaluation_tests.rs",
+      "bytes": 13798,
+      "sha256": "b35b0093361b16488cb8e3154b0eb2238d656c8647d058e9aedd427cb6374b40"
+    }
+  ],
+  "unchanged_circle_history": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history.rs",
+      "bytes": 17935,
+      "sha256": "5cbe67ef0016d65b0f206df6f651e904877b041b8e2496ce5f2386736aea6740"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history_result.rs",
+      "bytes": 15132,
+      "sha256": "5360e77ec8ae5bed5202235e2534b665f47d681756d17c5d21e4319e014256db"
+    }
+  ],
+  "focused_rust": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/owned-jets-partial86-20261012.log",
+      "bytes": 2368,
+      "sha256": "a8a818bd428e4b0a4d601ebf3adba706ff246cbf0c34df78d9a8584d969ee5d7"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/owned-jets-partial86-20261012.log.exit.json",
+      "bytes": 133,
+      "sha256": "6685375407b2cfe242bacd11b3d3513bd99ff655bd3b6f4043479934f0c338d7"
+    },
+    "passed": 10,
+    "failed": 1,
+    "ignored": 0,
+    "exit_code": 101,
+    "failures": [
+      "support_snapshot::evaluation_tests::owned_curve_jets_match_native_value_and_three_derivatives_for_nineteen_families"
+    ]
+  },
+  "full_rust": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/owned-jets-full86-20261012.log",
+      "bytes": 103555,
+      "sha256": "ff7c77b1f97e47d6912063dd9e3474d5d46914a3d2855c7aeba915817df1061f"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/owned-jets-full86-20261012.log.exit.json",
+      "bytes": 133,
+      "sha256": "db68a99d1523c4b8a65ad28dd60dceeee4e113598f772b87f6996113f9808484"
+    },
+    "passed": 943,
+    "failed": 4,
+    "ignored": 0,
+    "exit_code": 101,
+    "failures": [
+      "curve::result_tests::history_native_source_tangent_plan_must_bind_selected_source_geometry",
+      "curve::result_tests::history_native_source_tangent_points_must_correspond_to_owned_curve",
+      "support_snapshot::evaluation_tests::owned_curve_jets_match_native_value_and_three_derivatives_for_nineteen_families",
+      "curve::result_tests::history_native_source_around_fraction_must_match_current_plan"
+    ]
+  },
+  "tdd_red": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/owned-jets-red82-20261012.log",
+      "bytes": 4195,
+      "sha256": "4e0cdb309a7020df0295325f4a8edf3d3447736b4b0ec812cc23540d042a8b91"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/owned-jets-red82-20261012.log.exit.json",
+      "bytes": 160,
+      "sha256": "523b8ce864a2a878130b80393fe05396be497b29e805d5d64e3232d6a79be8ce"
+    },
+    "reason": "Missing Taylor and derived evaluation methods,E0599 only;not a runtime assertion RED"
+  },
+  "oracle": [
+    {
+      "source": "H:/FreeCAD-src/build/solid-regression-owned-curve-jets81-offscreen-20261011/results.json",
+      "source_sha256": "3f437b885f8a572be8bd9517e172173937c1c4d6c443634c149023790f859b71",
+      "fixture": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/fixtures/owned_curve_evaluation/native_jets_oracle.json",
+      "fixture_sha256": "57e63cf345f5f799a2ab76d8e690f363b51957dba3e981e86ac0941128d4eb46",
+      "cases": 19,
+      "queries": 183,
+      "scope": "Actual OCCT native valueAt and derivative1/2/3At, nineteen authored families including nested offset and retained trim; expectations independent of Rust evaluator"
+    },
+    {
+      "source": "H:/FreeCAD-src/build/solid-regression-owned-curve-jets81-offscreen-20261011/results.json",
+      "source_sha256": "3f437b885f8a572be8bd9517e172173937c1c4d6c443634c149023790f859b71",
+      "fixture": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/fixtures/owned_curve_evaluation/independent_offset_third.json",
+      "fixture_sha256": "867d93f088ca2662c20f1f4c8c26e74a4d094f6922e956db943920323241b7c1",
+      "generator": "H:\\FreeCAD-src\\build\\capture-owned-jets-math85.py",
+      "generator_sha256": "09c58bf4481f3096a464767481edbe7a1b883a2873dda8424cccbebdf7db60cd",
+      "method": "mpmath.diff of rational Bernstein/conic and normalized tangent-cross-direction definitions;70 decimal digits;no Rust outputs;not a global error-bound certificate",
+      "mpmath_version": "1.4.1",
+      "cases": 5,
+      "queries": 45,
+      "native_third_mismatches": 36
+    }
+  ],
+  "native_value_first_second_queries": 183,
+  "independent_offset_third_queries": 45,
+  "native_third_mismatch_queries": 36,
+  "native_third_test_retained": true,
+  "diagnostic": {
+    "artifact": "H:/FreeCAD-src/build/solid-regression-owned-curve-jets83-diagnostic-offscreen-20261011",
+    "report": {
+      "path": "H:/FreeCAD-src/build/solid-regression-owned-curve-jets83-diagnostic-offscreen-20261011/results.json",
+      "bytes": 128067,
+      "sha256": "bb55fd1892e497ef7aa0694a484ec5920ab377ab86207b90e74c82285bd0b3ed"
+    },
+    "launch": {
+      "path": "H:/FreeCAD-src/build/solid-regression-owned-curve-jets83-diagnostic-offscreen-20261011/shared-host-launch.json",
+      "bytes": 608,
+      "sha256": "617950ee325d62803b90d4d0901080bf000f9a9108a8ead43aba790a5d2fd190"
+    },
+    "rows": [
+      {
+        "name": "OffsetBezier",
+        "rows": [
+          {
+            "parameter": 0.2,
+            "native_third": [
+              -657.6328291978485,
+              370.99529790391443,
+              -8.47765687515522
+            ],
+            "central_second_difference": [
+              -14.23279114192155,
+              -7.910621507178916,
+              -8.477656875527371
+            ],
+            "basis_fourth": [
+              1.352383772112017,
+              -69.32505858216649,
+              -69.32505858216649
+            ]
+          },
+          {
+            "parameter": 0.5,
+            "native_third": [
+              -224.08958566143264,
+              19.356895424419676,
+              -24.121215213200315
+            ],
+            "central_second_difference": [
+              -5.223756381766974,
+              -24.497342400908725,
+              -24.12121520761756
+            ],
+            "basis_fourth": [
+              47.95840551469344,
+              -15.986135171564484,
+              -15.986135171564472
+            ]
+          },
+          {
+            "parameter": 0.8,
+            "native_third": [
+              852.1876306197593,
+              76.89211929384678,
+              -15.558584378504044
+            ],
+            "central_second_difference": [
+              8.655395240708684,
+              -15.762115858120039,
+              -15.558584376851313
+            ],
+            "basis_fourth": [
+              27.180232768910447,
+              59.814186401825665,
+              59.814186401825665
+            ]
+          }
+        ]
+      },
+      {
+        "name": "OffsetNurbs",
+        "rows": [
+          {
+            "parameter": 0.2,
+            "native_third": [
+              8864.964093132005,
+              -6432.477729770256,
+              61.18662204312091
+            ],
+            "central_second_difference": [
+              60.76965419010704,
+              62.98364685775048,
+              61.186622102837866
+            ],
+            "basis_fourth": [
+              -467.8642169250735,
+              -379.96935408314425,
+              -379.96935408314425
+            ]
+          },
+          {
+            "parameter": 0.5,
+            "native_third": [
+              -89.56908061694595,
+              37.44787037724114,
+              26.666666666666664
+            ],
+            "central_second_difference": [
+              4.780316184049837,
+              18.831495319504562,
+              26.666666678454295
+            ],
+            "basis_fourth": [
+              -85.33333333333333,
+              28.444444444444436,
+              28.444444444444436
+            ]
+          },
+          {
+            "parameter": 0.8,
+            "native_third": [
+              -14862.283338934092,
+              -2901.636214402311,
+              93.06058329349095
+            ],
+            "central_second_difference": [
+              -30.306605071217515,
+              94.58809508151587,
+              93.06058338731658
+            ],
+            "basis_fourth": [
+              -266.8926820282602,
+              624.8883204009225,
+              624.8883204009225
+            ]
+          }
+        ]
+      },
+      {
+        "name": "OffsetCircle",
+        "rows": [
+          {
+            "parameter": 0.42500000000000004,
+            "native_third": [
+              3.3810304102960833,
+              -7.470517610223077,
+              0.0
+            ],
+            "central_second_difference": [
+              3.381030410265495,
+              -7.470517610097537,
+              0.0
+            ],
+            "basis_fourth": [
+              6.377271130678236,
+              2.8862454722039734,
+              0.0
+            ]
+          },
+          {
+            "parameter": 1.1,
+            "native_third": [
+              7.30790035250377,
+              -3.719488195689734,
+              0.0
+            ],
+            "central_second_difference": [
+              7.30790035243789,
+              -3.719488195708109,
+              0.0
+            ],
+            "basis_fourth": [
+              3.1751728499790413,
+              6.238451520430048,
+              0.0
+            ]
+          },
+          {
+            "parameter": 1.775,
+            "native_third": [
+              8.02962679646982,
+              1.6628570321629583,
+              0.0
+            ],
+            "central_second_difference": [
+              8.02962679637975,
+              1.6628570321586265,
+              0.0
+            ],
+            "basis_fourth": [
+              -1.4195121006269156,
+              6.854559460401067,
+              0.0
+            ]
+          }
+        ]
+      },
+      {
+        "name": "OffsetTrim",
+        "rows": [
+          {
+            "parameter": 0.2375,
+            "native_third": [
+              -113.80580713108778,
+              41.372106593877966,
+              -7.501654123293684
+            ],
+            "central_second_difference": [
+              -6.499196250886462,
+              -7.475110054788735,
+              -7.501654122732403
+            ],
+            "basis_fourth": [
+              7.268011373783067,
+              -27.013164344692967,
+              -27.01316434469296
+            ]
+          },
+          {
+            "parameter": 0.5,
+            "native_third": [
+              -31.19231340984139,
+              -6.701591213608087,
+              -12.350062189158557
+            ],
+            "central_second_difference": [
+              -2.5722878525646915,
+              -12.446350748840372,
+              -12.350062187327369
+            ],
+            "basis_fourth": [
+              19.643762898818416,
+              -6.547920966272812,
+              -6.54792096627281
+            ]
+          },
+          {
+            "parameter": 0.7625,
+            "native_third": [
+              108.96058090891472,
+              -8.718050003205832,
+              -10.460477534054009
+            ],
+            "central_second_difference": [
+              2.6960311374280006,
+              -10.548172546098742,
+              -10.460477532914235
+            ],
+            "basis_fourth": [
+              16.48944658132005,
+              19.094011692991934,
+              19.094011692991934
+            ]
+          }
+        ]
+      },
+      {
+        "name": "OffsetNestedDirection",
+        "rows": [
+          {
+            "parameter": 0.2,
+            "native_third": [
+              547.2963623555798,
+              -615.0288270663822,
+              271.6830319928293
+            ],
+            "central_second_difference": [
+              -12.563637833040707,
+              -8.329964688869039,
+              -8.246968103220452
+            ],
+            "basis_fourth": [
+              1.352383772112017,
+              -69.32505858216649,
+              -69.32505858216649
+            ]
+          },
+          {
+            "parameter": 0.5,
+            "native_third": [
+              -114.22073462575916,
+              52.936381748878205,
+              -78.81946100475986
+            ],
+            "central_second_difference": [
+              -4.668211223535223,
+              -23.730826555223846,
+              -24.043199298628966
+            ],
+            "basis_fourth": [
+              47.95840551469344,
+              -15.986135171564484,
+              -15.986135171564472
+            ]
+          },
+          {
+            "parameter": 0.8,
+            "native_third": [
+              -660.054775373166,
+              244.93513215270428,
+              -349.6948556299157
+            ],
+            "central_second_difference": [
+              7.967945672682219,
+              -14.77277632608853,
+              -15.683495103990806
+            ],
+            "basis_fourth": [
+              27.180232768910447,
+              59.814186401825665,
+              59.814186401825665
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "native_d3_expression_confirmation": {
+    "reference": {
+      "url": "https://raw.githubusercontent.com/Open-Cascade-SAS/OCCT/V8_0_1/src/ModelingData/TKG3d/Geom/Geom_OffsetCurveUtils.pxx",
+      "path": "H:/FreeCAD-src/build/occt-V8_0_1-Geom_OffsetCurveUtils.pxx",
+      "sha256": "fc283b159ff3c06b2b31f19fbff4bcf325b17a65ed04e2ab3e806656dd358443"
+    },
+    "sdk_version_header": {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Standard_Version.hxx",
+      "sha256": "838641a1b3b0834dc1236f132fafe5442872ba0a061b26aa5dd62c60ccaa0303",
+      "version": "8.0.1"
+    },
+    "published_formula_matches_native_queries": 36,
+    "rows": [
+      {
+        "name": "OffsetBezier",
+        "parameter": 0.1,
+        "published_formula_third": [
+          -353.1490199479944,
+          268.1061862322634,
+          -1.8640174802638998
+        ],
+        "native_third": [
+          -353.1490199479945,
+          268.1061862322634,
+          -1.8640174802639011
+        ]
+      },
+      {
+        "name": "OffsetBezier",
+        "parameter": 0.1008,
+        "published_formula_third": [
+          -355.51350102170034,
+          269.23760402545514,
+          -1.9130322669712705
+        ],
+        "native_third": [
+          -355.5135010217003,
+          269.2376040254552,
+          -1.9130322669712692
+        ]
+      },
+      {
+        "name": "OffsetBezier",
+        "parameter": 0.2,
+        "published_formula_third": [
+          -657.6328291978481,
+          370.9952979039142,
+          -8.47765687515522
+        ],
+        "native_third": [
+          -657.6328291978485,
+          370.99529790391443,
+          -8.47765687515522
+        ]
+      },
+      {
+        "name": "OffsetBezier",
+        "parameter": 0.30000000000000004,
+        "published_formula_third": [
+          -843.5814706891454,
+          348.2543729901696,
+          -15.305773734229472
+        ],
+        "native_third": [
+          -843.5814706891463,
+          348.2543729901699,
+          -15.305773734229478
+        ]
+      },
+      {
+        "name": "OffsetBezier",
+        "parameter": 0.5,
+        "published_formula_third": [
+          -224.08958566143227,
+          19.35689542441961,
+          -24.12121521320031
+        ],
+        "native_third": [
+          -224.08958566143264,
+          19.356895424419676,
+          -24.121215213200315
+        ]
+      },
+      {
+        "name": "OffsetBezier",
+        "parameter": 0.7000000000000001,
+        "published_formula_third": [
+          798.5804735415974,
+          -16.849024840119096,
+          -20.886221872688246
+        ],
+        "native_third": [
+          798.5804735415975,
+          -16.849024840119135,
+          -20.88622187268825
+        ]
+      },
+      {
+        "name": "OffsetBezier",
+        "parameter": 0.8,
+        "published_formula_third": [
+          852.1876306197587,
+          76.89211929384676,
+          -15.55858437850405
+        ],
+        "native_third": [
+          852.1876306197593,
+          76.89211929384678,
+          -15.558584378504044
+        ]
+      },
+      {
+        "name": "OffsetBezier",
+        "parameter": 0.8992,
+        "published_formula_third": [
+          634.2979557700038,
+          128.92184890180994,
+          -9.418194230345271
+        ],
+        "native_third": [
+          634.2979557700043,
+          128.92184890181,
+          -9.418194230345271
+        ]
+      },
+      {
+        "name": "OffsetBezier",
+        "parameter": 0.9,
+        "published_formula_third": [
+          631.9659239300663,
+          129.05159867539533,
+          -9.36863464788538
+        ],
+        "native_third": [
+          631.9659239300671,
+          129.0515986753955,
+          -9.368634647885377
+        ]
+      },
+      {
+        "name": "OffsetNurbs",
+        "parameter": 0.1,
+        "published_formula_third": [
+          44823.16151420986,
+          -39367.45808898492,
+          125.88136971408214
+        ],
+        "native_third": [
+          44823.16151420987,
+          -39367.45808898493,
+          125.88136971408217
+        ]
+      },
+      {
+        "name": "OffsetNurbs",
+        "parameter": 0.1008,
+        "published_formula_third": [
+          44176.65571142122,
+          -38751.03997911568,
+          125.05435991201479
+        ],
+        "native_third": [
+          44176.65571142121,
+          -38751.039979115674,
+          125.05435991201486
+        ]
+      },
+      {
+        "name": "OffsetNurbs",
+        "parameter": 0.2,
+        "published_formula_third": [
+          8864.964093132001,
+          -6432.477729770255,
+          61.18662204312091
+        ],
+        "native_third": [
+          8864.964093132005,
+          -6432.477729770256,
+          61.18662204312091
+        ]
+      },
+      {
+        "name": "OffsetNurbs",
+        "parameter": 0.30000000000000004,
+        "published_formula_third": [
+          2343.8682343358805,
+          -1284.0490367319137,
+          36.46157843709749
+        ],
+        "native_third": [
+          2343.8682343358805,
+          -1284.049036731914,
+          36.461578437097494
+        ]
+      },
+      {
+        "name": "OffsetNurbs",
+        "parameter": 0.5,
+        "published_formula_third": [
+          -89.56908061694602,
+          37.44787037724116,
+          26.666666666666668
+        ],
+        "native_third": [
+          -89.56908061694595,
+          37.44787037724114,
+          26.666666666666664
+        ]
+      },
+      {
+        "name": "OffsetNurbs",
+        "parameter": 0.7000000000000001,
+        "published_formula_third": [
+          -3655.4196421027705,
+          -312.9311500041778,
+          51.38384981300531
+        ],
+        "native_third": [
+          -3655.4196421027723,
+          -312.931150004178,
+          51.38384981300531
+        ]
+      },
+      {
+        "name": "OffsetNurbs",
+        "parameter": 0.8,
+        "published_formula_third": [
+          -14862.283338934081,
+          -2901.6362144023074,
+          93.06058329349088
+        ],
+        "native_third": [
+          -14862.283338934092,
+          -2901.636214402311,
+          93.06058329349095
+        ]
+      },
+      {
+        "name": "OffsetNurbs",
+        "parameter": 0.8992,
+        "published_formula_third": [
+          -79334.73828090007,
+          -21870.48408756411,
+          196.6437047084055
+        ],
+        "native_third": [
+          -79334.73828090014,
+          -21870.484087564113,
+          196.6437047084055
+        ]
+      },
+      {
+        "name": "OffsetNurbs",
+        "parameter": 0.9,
+        "published_formula_third": [
+          -80535.65428267435,
+          -22245.392747083217,
+          197.97627552731984
+        ],
+        "native_third": [
+          -80535.65428267438,
+          -22245.39274708324,
+          197.97627552731996
+        ]
+      },
+      {
+        "name": "OffsetTrim",
+        "parameter": 0.15,
+        "published_formula_third": [
+          -97.41124082851123,
+          46.03643533375249,
+          -5.052100003312586
+        ],
+        "native_third": [
+          -97.41124082851124,
+          46.03643533375249,
+          -5.052100003312589
+        ]
+      },
+      {
+        "name": "OffsetTrim",
+        "parameter": 0.1507,
+        "published_formula_third": [
+          -97.59939139135727,
+          46.03668326210792,
+          -5.072043842106698
+        ],
+        "native_third": [
+          -97.59939139135719,
+          46.036683262107864,
+          -5.072043842106697
+        ]
+      },
+      {
+        "name": "OffsetTrim",
+        "parameter": 0.2375,
+        "published_formula_third": [
+          -113.80580713108775,
+          41.372106593877966,
+          -7.501654123293677
+        ],
+        "native_third": [
+          -113.80580713108778,
+          41.372106593877966,
+          -7.501654123293684
+        ]
+      },
+      {
+        "name": "OffsetTrim",
+        "parameter": 0.32499999999999996,
+        "published_formula_third": [
+          -109.82059917228617,
+          28.00591363430232,
+          -9.692928860566528
+        ],
+        "native_third": [
+          -109.82059917228615,
+          28.005913634302303,
+          -9.692928860566534
+        ]
+      },
+      {
+        "name": "OffsetTrim",
+        "parameter": 0.5,
+        "published_formula_third": [
+          -31.192313409841375,
+          -6.701591213608086,
+          -12.350062189158555
+        ],
+        "native_third": [
+          -31.19231340984139,
+          -6.701591213608087,
+          -12.350062189158557
+        ]
+      },
+      {
+        "name": "OffsetTrim",
+        "parameter": 0.6749999999999999,
+        "published_formula_third": [
+          77.82551752723545,
+          -16.146136612438877,
+          -11.836206516823129
+        ],
+        "native_third": [
+          77.82551752723548,
+          -16.146136612438866,
+          -11.836206516823127
+        ]
+      },
+      {
+        "name": "OffsetTrim",
+        "parameter": 0.7625,
+        "published_formula_third": [
+          108.96058090891466,
+          -8.718050003205843,
+          -10.460477534054009
+        ],
+        "native_third": [
+          108.96058090891472,
+          -8.718050003205832,
+          -10.460477534054009
+        ]
+      },
+      {
+        "name": "OffsetTrim",
+        "parameter": 0.8492999999999999,
+        "published_formula_third": [
+          115.95919844135935,
+          1.4945940034697063,
+          -8.585416752990337
+        ],
+        "native_third": [
+          115.95919844135943,
+          1.4945940034697305,
+          -8.585416752990335
+        ]
+      },
+      {
+        "name": "OffsetTrim",
+        "parameter": 0.85,
+        "published_formula_third": [
+          115.92448612030674,
+          1.5752175423901802,
+          -8.568842452048356
+        ],
+        "native_third": [
+          115.92448612030681,
+          1.5752175423901864,
+          -8.568842452048358
+        ]
+      },
+      {
+        "name": "OffsetNestedDirection",
+        "parameter": 0.1,
+        "published_formula_third": [
+          341.9283293068064,
+          -452.48051065839377,
+          175.29024265526286
+        ],
+        "native_third": [
+          341.92832930680635,
+          -452.4805106583938,
+          175.29024265526286
+        ]
+      },
+      {
+        "name": "OffsetNestedDirection",
+        "parameter": 0.1008,
+        "published_formula_third": [
+          343.7468815627062,
+          -454.226371825886,
+          176.15584131177815
+        ],
+        "native_third": [
+          343.7468815627061,
+          -454.226371825886,
+          176.15584131177812
+        ]
+      },
+      {
+        "name": "OffsetNestedDirection",
+        "parameter": 0.2,
+        "published_formula_third": [
+          547.2963623555795,
+          -615.0288270663818,
+          271.68303199282906
+        ],
+        "native_third": [
+          547.2963623555798,
+          -615.0288270663822,
+          271.6830319928293
+        ]
+      },
+      {
+        "name": "OffsetNestedDirection",
+        "parameter": 0.30000000000000004,
+        "published_formula_third": [
+          593.8448544775933,
+          -581.5439633382201,
+          287.6115893887571
+        ],
+        "native_third": [
+          593.8448544775937,
+          -581.5439633382204,
+          287.61158938875735
+        ]
+      },
+      {
+        "name": "OffsetNestedDirection",
+        "parameter": 0.5,
+        "published_formula_third": [
+          -114.22073462575916,
+          52.936381748878205,
+          -78.81946100475986
+        ],
+        "native_third": [
+          -114.22073462575916,
+          52.936381748878205,
+          -78.81946100475986
+        ]
+      },
+      {
+        "name": "OffsetNestedDirection",
+        "parameter": 0.7000000000000001,
+        "published_formula_third": [
+          -768.3073503100292,
+          361.5591052044699,
+          -407.415633351201
+        ],
+        "native_third": [
+          -768.3073503100293,
+          361.55910520447003,
+          -407.41563335120105
+        ]
+      },
+      {
+        "name": "OffsetNestedDirection",
+        "parameter": 0.8,
+        "published_formula_third": [
+          -660.0547753731657,
+          244.93513215270426,
+          -349.6948556299156
+        ],
+        "native_third": [
+          -660.054775373166,
+          244.93513215270428,
+          -349.6948556299157
+        ]
+      },
+      {
+        "name": "OffsetNestedDirection",
+        "parameter": 0.8992,
+        "published_formula_third": [
+          -387.8334773746103,
+          99.82719494882639,
+          -208.39724306531508
+        ],
+        "native_third": [
+          -387.83347737461054,
+          99.82719494882647,
+          -208.39724306531522
+        ]
+      },
+      {
+        "name": "OffsetNestedDirection",
+        "parameter": 0.9,
+        "published_formula_third": [
+          -385.478690362932,
+          98.8285185200921,
+          -207.17481009866
+        ],
+        "native_third": [
+          -385.4786903629323,
+          98.82851852009215,
+          -207.17481009866017
+        ]
+      }
+    ],
+    "scope": "The published8.0.1 offsetD3 expression reproduces36 measured non-circular native third derivatives using independent basis derivatives;no patch or exact compiler-input identity claimed"
+  },
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/owned-jets-runtime86-20261012/bin/OpenMatrix9Gui.pyd",
+    "bytes": 16880640,
+    "sha256": "fa05c28fa7e9fa4d656bcd4b3f3bf706fd1b791dd15325ee9d7f5d15e555c9b7"
+  },
+  "selected_app": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "probe": {
+    "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+    "bytes": 50688,
+    "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+  },
+  "shared_sdk_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "native": [
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-owned-jets-native86-offscreen-20261011",
+      "fixture": "rhino_core_owned_curve_jets_oracle.FCMacro",
+      "checks": 58,
+      "passed": 58,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\owned-jets-runtime86-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "FA05C28FA7E9FA4D656BCD4B3F3BF706FD1B791DD15325EE9D7F5D15E555C9B7",
+        "pid": 40348,
+        "module_root": "H:\\FreeCAD-src\\build\\owned-jets-runtime86-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-owned-jets-native86-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/owned-jets-runtime86-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16880640,
+        "sha256": "fa05c28fa7e9fa4d656bcd4b3f3bf706fd1b791dd15325ee9d7f5d15e555c9b7"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-native86-offscreen-20261011/results.json",
+          "bytes": 120347,
+          "sha256": "e0b28b04bad3b770b6d98de078b8276e1faf9d2f99cff8d14539ce6f745f9939"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-native86-offscreen-20261011/shared-host-launch.json",
+          "bytes": 586,
+          "sha256": "c0f9b1845011a0e117382251708693bd6c5d9fc0130580842df69379c7a01962"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-native86-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-native86-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-native86-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5397,
+          "sha256": "02dc4a07b22a0a89b2fdc18c8b3ada859ee306766e6ca67246366c7a0e96c06a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-native86-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-native86-offscreen-20261011/host-stderr.log",
+          "bytes": 3080,
+          "sha256": "35ff1bd823068b6fbf97481de48c99a57b9b35cc3b9f5b65b6657c14b0438856"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-native86-offscreen-20261011/user.cfg",
+          "bytes": 18053,
+          "sha256": "707a1c72ab6f775832f5a529a11da80e25c112aeac536fb33766a080f3cbc0c8"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-native86-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2825,
+          "sha256": "0b06102e0c5c9cfa5fd66baf313b325fc0a90a25df11c29f334bf763cc68f3a2"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-owned-jets-modes86-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_modes_result_smoke.FCMacro",
+      "checks": 109,
+      "passed": 109,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\owned-jets-runtime86-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "FA05C28FA7E9FA4D656BCD4B3F3BF706FD1B791DD15325EE9D7F5D15E555C9B7",
+        "pid": 37292,
+        "module_root": "H:\\FreeCAD-src\\build\\owned-jets-runtime86-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-owned-jets-modes86-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/owned-jets-runtime86-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16880640,
+        "sha256": "fa05c28fa7e9fa4d656bcd4b3f3bf706fd1b791dd15325ee9d7f5d15e555c9b7"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-modes86-offscreen-20261011/results.json",
+          "bytes": 21924,
+          "sha256": "29ff513aef8712d5c45a17c7b902ea1dac2b7dbd1cdf080e83aafd3753ac1309"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-modes86-offscreen-20261011/shared-host-launch.json",
+          "bytes": 585,
+          "sha256": "53d9c5a7e8d9803baeefe433e54340f67504817edc4f78e64190be6aa548e864"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-modes86-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-modes86-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-modes86-offscreen-20261011/fixture.FCMacro",
+          "bytes": 17219,
+          "sha256": "f5154879b54a9b1af1054f7a6ec33506e6556ac1703f014b7beb845bd1be5134"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-modes86-offscreen-20261011/host-stdout.log",
+          "bytes": 15219,
+          "sha256": "b2a8bf59c53e72eb92cd9c3f5fd805e8d1ab81c1a77af3eb59de7e4b77120569"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-modes86-offscreen-20261011/host-stderr.log",
+          "bytes": 37871,
+          "sha256": "4a57390b8a5ec47890e0ffde0516bb2bdd2cf6268330af248577a504d9dc48f1"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-modes86-offscreen-20261011/user.cfg",
+          "bytes": 18176,
+          "sha256": "2a670300e25fa72ccc7ccd00d1b11f33ad381d0c640688ee30aae6d05269b365"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-modes86-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2824,
+          "sha256": "7d3f9a707e32373274ecc519815f1d28fc8853206a261c355fb942856adf40d9"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-owned-jets-cold86-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_modes_cold_smoke.FCMacro",
+      "checks": 62,
+      "passed": 62,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\owned-jets-runtime86-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "FA05C28FA7E9FA4D656BCD4B3F3BF706FD1B791DD15325EE9D7F5D15E555C9B7",
+        "pid": 14616,
+        "module_root": "H:\\FreeCAD-src\\build\\owned-jets-runtime86-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-owned-jets-cold86-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/owned-jets-runtime86-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16880640,
+        "sha256": "fa05c28fa7e9fa4d656bcd4b3f3bf706fd1b791dd15325ee9d7f5d15e555c9b7"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-cold86-offscreen-20261011/results.json",
+          "bytes": 6358,
+          "sha256": "ccdad0eb59a3e6381f24249c858b882c93a739ff39753fc066ff185f899549ad"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-cold86-offscreen-20261011/shared-host-launch.json",
+          "bytes": 584,
+          "sha256": "f0ba1a91e9fcbd6990b897d75dac786283b78e86c94836146b86c112747232a0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-cold86-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-cold86-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-cold86-offscreen-20261011/fixture.FCMacro",
+          "bytes": 2854,
+          "sha256": "27eac9f73e1c8159172d6f9c9bf5b3b650fe976ef455094e5d070a68d2ebb428"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-cold86-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-cold86-offscreen-20261011/host-stderr.log",
+          "bytes": 2206,
+          "sha256": "f1f2c65e4bfe3aeaa2948f910c9ca78d0e3c4d805bc5e62dab9b901406ec2c24"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-cold86-offscreen-20261011/user.cfg",
+          "bytes": 18049,
+          "sha256": "f5acc771e98a9e8d706da436f8c7d81cf0ff88112e37b02bf786aa8b898fd9a1"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-owned-jets-cold86-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2823,
+          "sha256": "594a772862f0f31dbd8eba37f2a5be312174f9a0c65b340f26b47a6975dbd4f0"
+        }
+      ]
+    }
+  ],
+  "native_checks": 229,
+  "native_hosts": 3,
+  "build": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/owned-jets-build86-20261012.log",
+      "bytes": 16232,
+      "sha256": "e071f673879bea98ca97840d4e312524a8c520f5d1eb9a8d3362d3e0cb04c5b5"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/owned-jets-build86-20261012.log.exit.json",
+      "bytes": 24,
+      "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+    },
+    "exit_code": 0,
+    "target": "OpenMatrix9Gui",
+    "sdk": "H:/FreeCAD-src/build/relWithDebInfo"
+  },
+  "source_inventory": {
+    "path": "H:/FreeCAD-src/build/owned-jets-producers86-20261012.json",
+    "bytes": 174317,
+    "sha256": "1152e3f997b821d6654fb70a363e22b6f48029678b5a85cc70dc55c5e9cef9e6"
+  },
+  "inventory_count": 1474,
+  "inventory_changes": [],
+  "inventory_match": true,
+  "production_inputs_match": true,
+  "compiler_dependency_certificate": false,
+  "remaining": [
+    "The full original RCORE-01 objective remains open: GeometryRef/Snapshot/Result for every enabled consumer; adapters1–7, C01–C12, T01–T11; rational/periodic basis, trims/pcurves/seam occurrences; independent read/edit/retain/export and complete supported attributes.",
+    "Current GeometryResult is now directly checked across the existing all-mode History fixture: numeric/picked Center, oriented/direction, TwoPoint, ThreePoint radius and live endpoint branches, Vertical, constant Area, whole FitPoints with growing topology, deformable Center/Fit/Around/Tangent, bounded native tangent and fixed-contact point dependencies, parent placement, Lock, deletion/Undo, detach/Undo and command source pruning. Twenty recorded results cold reopen and retain exact bytes; legacy empty-recipe AroundCurve also has paired current native/cold evidence. This is named fixture coverage, not every option/backend/representation or complete historical provenance. Native-plan/source correspondence remains required. Rust now rejects missing/duplicate path roles, nonexistent/duplicate role indices, incomplete Tangent role metadata, curve roles backed by Point, overlapping fixed/curve spans and off-circle/off-plane fixed points. Native roundoff acceptance is retained. Three independent source geometry/parameter tests remain RED: AroundCurve fraction versus owned path, off-curve Tangent probe and substituted full Tangent source. Full source/contact evaluation and provenance across every supported curve family remain required.",
+    "Exact rejection-time Circle History evidence is RED355/432 across48 cases, Runtime59. The three caller states are no booking, unmaterialized preserving-Redo booking, and already materialized preserving-Redo journal with an independent caller edit. Forty-two cases retain tampered metadata; three source callbacks retain changed point geometry. Sixteen booked cases materialize the caller journal (Undo2/Redo1/pendingFalse becomesUndo3/Redo0/pendingTrue); plain/active states retain immediate counts/names/booking/pending. Original executable Redo succeeds48/48 after explicit caller abort where applicable. Identical counts do not prove absence of pollution of an existing journal. A checked native replay savepoint/notification barrier must preserve pre-existing caller edits and booking/journal, reject observer mutations, restore protected metadata/source state and clear paired invalid output. All original close/removal/owner/lock/dependency/cache invariants remain open. A new isolated close callback also removes the owning document while replay remains active; prefix after_close/document_aliveFalse is saved, no recompute return occurs within300s, and the exact owned host is killed and terminal. This strengthens the required native lifetime barrier; neither a completed test gate nor a particular crash cause is claimed.",
+    "Task2/3 remain open: generic snap/pick/parameter provenance, snapshot sharing and aggregate allocation/traversal/worker/cancellation bounds, Rebuild and every other enabled GeometryResult consumer.",
+    "Global conversion/deviation/locus and complete parameter/topology maps remain unproven; the current native Circle output contract checks basis, full domain and shared endpoint identity. Full conversion exactness is reported uninspected; maps remain null.",
+    "Four recorded archives were independently reopened in one new native host and replayed again; offscreen evidence does not certify actual mouse, rendering, all viewport/preview/cache lifetime or every original persistence family.",
+    "The inventory was captured before Runtime59 build and relevant Curve/History source hashes match. Full inventory differs due parallel Gumball source and a new test fixture; it is not an exact compiler dependency certificate. Production ABI/deployment acceptance remains pending.",
+    "Owned curve evaluation is a foundation only and is not connected to Circle History source admission. All three source correspondence tests still fail. Derived trimmed/offset support chains, selected edge restriction and world-frame integration, contact correspondence, higher derivatives, extreme asymmetric weights and full aggregate allocation bounds remain unverified. The sampled oracle does not establish global deviation, parameter maps, complete family parity or mathematical exactness.",
+    "Trim/offset math evaluation is implemented but source admission remains unconnected. Raw native D3 differs at36/45 offset queries from independent70-digit derivative definitions; the original raw D3 test remains failed. Actual native OffsetTrim and nested offset constructors flatten to simpler captured bases; literal trim/depth16/UV tests do not establish equivalent native family capture. Full edge/parameter/world/contact binding, native singular-normal policy and higher-order parity remain required, together with every original RCORE-01 requirement."
+  ],
+  "next_action": "Connect owned source value/D1 to selected edge/full-object/domain/frame/parameter admission across all supported families, preserving AroundCurve probe versus current anchor and Tangent probe versus final contact. Retain raw native D3 discrepancy test and investigate exact installed OCCT behavior separately; sampled high-precision derivatives are not a global bound. Keep proposed native savepoint interface review pending. Continue all original adapters1–7/C01–C12/T01–T11, all enabled GeometryResult consumers, conversion/maps, budgets, persistence and lifecycle.",
+  "native_design_review": "Pending;no new native interface implemented",
+  "ruling": "Retain independent mathematical Taylor coefficients and the conflicting native D3 failure. Do not copy a discrepant kernel derivative into owned math to obtain green. Native D0-D2 gate and mathematical D3 gate are separate evidence;full RCORE-01 is not complete.",
+  "reference_review": "Published OCCT V8_0_1 Geom_OffsetCurveUtils.pxx D3 expression reproduces36 measured values from independent basis derivatives. SDK Standard_Version.hxx is8.0.1;exact binary compiler-input identity remains unproven. No dependency patch/rebuild.",
+  "prior_checkpoint": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-12-rhino-core-owned-curve-evaluation.json",
+    "bytes": 23999,
+    "sha256": "9687d4a098a698f8efab8e6a89888a96738aeb5a077e0342136466a8f72d28f4"
+  }
+}

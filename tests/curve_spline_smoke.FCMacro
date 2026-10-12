@@ -17,6 +17,28 @@ def enter(text):
     field.setFocus(); field.setText(text); QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return); settle()
 def button(dialog, name):
     return dialog.findChild(QtWidgets.QPushButton, name)
+def document_viewer(doc):
+    global mouse_view_handles
+    # Command-frame focus can leave QMdiArea.activeSubWindow() unset while
+    # FreeCAD still has an active native view. Resolve the current OM9 view
+    # by its actual document/slot metadata before exercising mouse input.
+    tabs=window.findChild(QtWidgets.QTabBar,'OM9ViewportTabs')
+    if tabs is None: raise AssertionError('OM9 viewport tabs are missing')
+    slot=tabs.currentIndex(); matches=[]
+    for area in window.findChildren(QtWidgets.QMdiArea):
+        for sub in area.subWindowList():
+            view=sub.widget()
+            if view.property('om9DocumentName')!=doc.Name or view.property('om9ViewSlot')!=slot: continue
+            for viewer in view.findChildren(QtWidgets.QWidget):
+                if viewer.metaObject().className()=='Gui::View3DInventorViewer' and viewer.isVisible():
+                    matches.append((area,sub,view,viewer))
+    if len(matches)!=1: raise AssertionError(f'Expected one visible native viewer for {doc.Name} slot {slot}; found {len(matches)}')
+    # Retain native parent wrappers for the duration of the mouse sequence.
+    # Releasing a temporary parent wrapper can invalidate its PySide children.
+    mouse_view_handles=matches[0]
+    area,sub,view,viewer=mouse_view_handles; area.setActiveSubWindow(sub); settle()
+    result['mouse_view']={'document':doc.Name,'slot':slot,'visible':viewer.isVisible()}
+    return viewer
 def rebuild(objects, menu=False):
     Gui.Selection.clearSelection()
     for obj in objects: Gui.Selection.addSelection(obj)
@@ -62,7 +84,7 @@ def run():
         check('Periodic native seam agrees', (seam.value(seam.FirstParameter)-seam.value(seam.LastParameter)).Length<1e-7)
         closed_points=[App.Vector(0,0,0),App.Vector(5,0,0),App.Vector(6,4,0),App.Vector(1,6,0),App.Vector(-2,2,0)]
         check('Periodic native interpolation agrees with picked points', all((seam.value(i/5)-p).Length<1e-7 for i,p in enumerate(closed_points)))
-        viewer=next(w for w in window.findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible())
+        viewer=document_viewer(doc)
         target=viewer.viewport(); center=target.rect().center()
         picks=[center+QtCore.QPoint(-70,0),center+QtCore.QPoint(0,-60),center+QtCore.QPoint(80,0),center+QtCore.QPoint(0,70)]
         count=len(doc.Objects); enter('InterpCrv')
@@ -107,8 +129,10 @@ def run():
         Gui.Selection.clearSelection(); enter('Rebuild'); Gui.Selection.addSelection(doc.Objects[-2]); enter('')
         dialog=window.findChild(QtWidgets.QDialog,'OM9RebuildDialog')
         check('Postselection Enter opens Rebuild', dialog is not None and dialog.isVisible())
-        dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(3)
         dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree').setValue(5)
+        accepted_count=dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').value()
+        dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(3)
+        check('Invalid Rebuild count restores accepted parameters',dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').value()==accepted_count)
         button(dialog,'OM9RebuildOK').click(); settle()
         check('Invalid Rebuild options stay editable and do not mutate', dialog.isVisible() and len(doc.Objects)==count)
         button(dialog,'OM9RebuildCancel').click(); settle()

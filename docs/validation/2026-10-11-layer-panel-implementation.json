@@ -1,0 +1,237 @@
+{
+  "feature_id": "OM9-LAYER-001",
+  "validated_at": "2026-10-11T07:03:15+07:00",
+  "implementation_status": "partially_implemented",
+  "validation_status": "validated_supported_slice",
+  "scope": "32 model slots plus Lights slot33; separate current/Assign, swatch selection, lock and OM9 pick/Region/edit guards, independent Hidden/layer visibility, group toggles, Hide/Show left/right, collapsed Advanced rename/color with modal generation guards. Supported root Curve/Solid/Surface/Edit/Rebuild outputs use current layer; Explode preserves source ownership. Rust and matching-host native workflows validated. MatrixArt/material, general hierarchy/import inheritance and session-time layer binding remain outside this slice. Footer omitted by explicit user request.",
+  "source_sha256": {
+    "rust/src/layers.rs": "5ac2849871e0a2fd5483017404f60910d7c72e22c4b2a16772cfb297d5805a7d",
+    "rust/tests/layers.rs": "e12548f21db0408598d938697d7058ccba296fc2a2835016490d4cc7f13fd024",
+    "rust/tests/layer_panel.rs": "1adda92805fc8d2d4b30c7bd77cd3e0ffe126b3d780c074baa32af649269dbfd",
+    "Gui/CoreLayers.h": "a20833f57848e2aa60a1638ad000127dadec3a80e2987fe8d1199c2e63030342",
+    "Gui/CoreLayers.cpp": "98d797e6bad59890cf0f37d3524a3b86991531e94befea11d04f27cf5c8fbd14",
+    "Gui/MatrixSidebar.cpp": "971a1ecb38af5d5d2f7795f5e55102df30dc239fc3cbc4b582b25fd7f391f416",
+    "Gui/CoreObjects.h": "c945c6eac03011b8d4efa607f9e4ec03a810356197aa85c49bd695fc4738a97d",
+    "Gui/CoreObjects.cpp": "351128204e45c580114052cf6548d60c92cee10cbb5f167d27635672d70d7149",
+    "Gui/Command.cpp": "159a87e72e029386cbcfee5999863150ed8667c29713e6cc894f4bd8377401b1",
+    "Gui/CoreMouse.cpp": "94cf5af7768b849b2cf8de7945c235be18766932df430b3a79a8184c526a3a50",
+    "Gui/EditGeometry.cpp": "90aa856b698432c40461e9df8673541440aa84e6cf39d2fff6230b88dff5c540",
+    "Gui/CoreRebuild.cpp": "7a7ad1f14882777cbb4fd3c6aa3d7f4dc49d38a76d940f4be69559902c359b8d",
+    "Gui/CurveController.cpp": "c04ffc3992e456283e65fa1a9a8a119a9ec53a3a43e3875ef8cae06295e5fd81",
+    "Gui/SolidController.cpp": "532098d42a319eb52873bf189b3ac803782e6a020652d75ec2a3c76edde63e00",
+    "Gui/SurfaceGeometry.cpp": "7741ab2fa184a9726aacaebba007b2abb9ad6c80ac7fce920cee5cdd9d34e8a2",
+    "tests/layer_panel_smoke.FCMacro": "18ecbd92865ed6ee302c850b49b5bbb0ec83e2213e911752351fcb135d007510",
+    "tests/layer_outputs_smoke.FCMacro": "1654d90e297dbce66e07e6893cff9b1fb3e7d7d938be4e379092ca065d78e877",
+    "tests/layer_visibility_permission_smoke.FCMacro": "159684635157fe569f5439253fa36cac748abd782c1e6627d36c5da1d93dedf3",
+    "tests/layer_modal_lifecycle_smoke.FCMacro": "d9a711711330d7d9f187d6e93d25c24d1fafb724c304d1388d377581fa1b64aa",
+    "tests/circle_layers_smoke.FCMacro": "961b33a197e0b93968f34a60d41c74f7cb5ba5272e96eb3043cbc0edd36b94b7",
+    "tests/core_mouse_smoke.FCMacro": "2937ed5416d81f293bfc41c3d2f99cb1d7adf535574ca317ed6331c4bd825de6"
+  },
+  "module_sha256": "2eaaa9829e19cc389dc27385d063d92c67479bfb42fdc64aa89db35a9d162ac9",
+  "sdk": "H:/FreeCAD-src/build/relWithDebInfo",
+  "plugin_runtime": "H:\\FreeCAD-src\\build\\om9-layer-panel-runtime-20261011",
+  "build_command": "build/build-om9-plugin.ps1 -BuildDirectory build/openmatrix9-history-cage (existing configuration; OpenMatrix9Gui only), plugin-only validation copy",
+  "rust_tests": {
+    "command": "cargo test --manifest-path rust/Cargo.toml --locked --offline --test layer_panel --test layers",
+    "passed": 11,
+    "failed": 0,
+    "exit_code": 0
+  },
+  "native": {
+    "panel": {
+      "report": "H:\\FreeCAD-src\\build\\shared-host-tests\\layer-panel-complete-20261011\\results.json",
+      "sha256": "3bbd6e4b49ac9be2275e7d9f5550f6baaff5a3fc21723bbdb438b795feb46033",
+      "checks": 71,
+      "passed": 71,
+      "ok": true,
+      "fresh_run": true,
+      "runner_exit_code": 0,
+      "module": "H:\\FreeCAD-src\\build\\om9-layer-panel-runtime-20261011\\bin\\OpenMatrix9Gui.pyd"
+    },
+    "outputs": {
+      "report": "H:\\FreeCAD-src\\build\\shared-host-tests\\layer-outputs-complete-20261011\\results.json",
+      "sha256": "ba463aaf9eb48bdb5769b930c60d5ef87d6f6bcef277808d514868a34d963276",
+      "checks": 21,
+      "passed": 21,
+      "ok": true,
+      "fresh_run": true,
+      "runner_exit_code": 0,
+      "module": "H:\\FreeCAD-src\\build\\om9-layer-panel-runtime-20261011\\bin\\OpenMatrix9Gui.pyd"
+    },
+    "permission": {
+      "report": "H:\\FreeCAD-src\\build\\shared-host-tests\\layer-permission-complete-20261011\\results.json",
+      "sha256": "993c9429589e5c0f8147e430ae6cae960a869bd13eafc83397a85a04dc37b105",
+      "checks": 5,
+      "passed": 5,
+      "ok": true,
+      "fresh_run": true,
+      "runner_exit_code": 0,
+      "module": "H:\\FreeCAD-src\\build\\om9-layer-panel-runtime-20261011\\bin\\OpenMatrix9Gui.pyd"
+    },
+    "modal": {
+      "report": "H:\\FreeCAD-src\\build\\shared-host-tests\\layer-modal-complete-20261011\\results.json",
+      "sha256": "44293ffbdccb10566630b2dcfebcc0d6d4fda3a4c05cb7765f80ae67d33b3e79",
+      "checks": 5,
+      "passed": 5,
+      "ok": true,
+      "fresh_run": true,
+      "runner_exit_code": 0,
+      "module": "H:\\FreeCAD-src\\build\\om9-layer-panel-runtime-20261011\\bin\\OpenMatrix9Gui.pyd"
+    },
+    "circle": {
+      "report": "H:\\FreeCAD-src\\build\\shared-host-tests\\circle-layer-complete-20261011\\results.json",
+      "sha256": "ccbae02a60b4f6d3ca05095b0a36899ed114510bec4a72d23a04605a9fb7c9b1",
+      "checks": 51,
+      "passed": 51,
+      "ok": true,
+      "fresh_run": true,
+      "runner_exit_code": 0,
+      "module": "H:\\FreeCAD-src\\build\\om9-layer-panel-runtime-20261011\\bin\\OpenMatrix9Gui.pyd"
+    },
+    "mouse": {
+      "report": "H:\\FreeCAD-src\\build\\shared-host-tests\\layer-mouse-complete-20261011\\results.json",
+      "sha256": "2706481bea5bf52a06b9806a68f3246fceef9576d3645d53e7e0673e72531f6a",
+      "checks": 51,
+      "passed": 51,
+      "ok": true,
+      "fresh_run": true,
+      "runner_exit_code": 0,
+      "module": "H:\\FreeCAD-src\\build\\om9-layer-panel-runtime-20261011\\bin\\OpenMatrix9Gui.pyd"
+    }
+  },
+  "native_checks": 204,
+  "public_source_audit": {
+    "source_files": 2454,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  },
+  "review": {
+    "assessment": "With fixes; both Important issues reproduced RED and fixed; second source review found no remaining Important issues",
+    "reproductions": [
+      "layer-outputs-review-red-20261011: default DeleteInput incorrectly rejected OM9 layer membership",
+      "layer-permission-review-red-20261011: native Tree Show lost Selectable permission"
+    ],
+    "fixes": [
+      "Validated layer ownership exemption; retain true-dependent protection",
+      "Separate Rust selectable permission from display state",
+      "Correct Rebuild output-layer UI text"
+    ]
+  },
+  "visual_qa": {
+    "path": "H:/FreeCAD-src/build/shared-host-tests/layer-panel-complete-20261011/layers-panel.png",
+    "scope": "Actual Qt layer panel, order, collapse, controls and omitted footer; not viewport renderer/pixel-commercial parity"
+  },
+  "limitations": [
+    "Whole-crate Clippy blocked by unrelated WIP lints and sandbox config access; isolated layers Clippy passed",
+    "Legacy standalone MatrixSidebar Qt test target not run; actual matching-host gestures tested",
+    "No official FreeCAD1.1.4 deployment because its ABI differs from the shared development SDK",
+    "MatrixArt/material, general import hierarchy, all semantic builder families and session-time output-layer binding not validated"
+  ],
+  "skill_business_update": {
+    "status": "saved",
+    "approved_at": "2026-10-11T07:17:34+07:00",
+    "authorization": "có lưu trong skill mới",
+    "skill": "openmatrix9-layers-contract",
+    "source": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\skills\\openmatrix9-layers-contract",
+    "installed": "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-layers-contract"
+  },
+  "documentation_verification": {
+    "ok": true,
+    "checks": [
+      {
+        "name": "Unrelated JSON features preserved",
+        "passed": true
+      },
+      {
+        "name": "Unrelated YAML features preserved",
+        "passed": true
+      },
+      {
+        "name": "Layer JSON/YAML agree",
+        "passed": true
+      },
+      {
+        "name": "Spec/catalog implementation status agree",
+        "passed": true
+      },
+      {
+        "name": "Spec/catalog validated slice agree",
+        "passed": true
+      },
+      {
+        "name": "Spec validation record exists",
+        "passed": true
+      },
+      {
+        "name": "Footer omitted by user clarification",
+        "passed": true
+      },
+      {
+        "name": "Unrelated manifest entries preserved",
+        "passed": true
+      },
+      {
+        "name": "Manifest hash/bytes FEATURES.json",
+        "passed": true
+      },
+      {
+        "name": "Manifest hash/bytes FEATURES.yaml",
+        "passed": true
+      },
+      {
+        "name": "Manifest hash/bytes IMPLEMENTATION_STATUS.md",
+        "passed": true
+      },
+      {
+        "name": "Manifest hash/bytes specs/01-core/README.md",
+        "passed": true
+      },
+      {
+        "name": "Manifest hash/bytes specs/01-core/om9-layer-001-layer-management.md",
+        "passed": true
+      },
+      {
+        "name": "Unrelated progress items preserved",
+        "passed": true
+      },
+      {
+        "name": "Unrelated progress root context preserved",
+        "passed": true
+      },
+      {
+        "name": "Reviewed source hashes match",
+        "passed": true
+      },
+      {
+        "name": "All fresh native report hashes match",
+        "passed": true
+      },
+      {
+        "name": "All native reports pass",
+        "passed": true
+      },
+      {
+        "name": "Selected module hash matches",
+        "passed": true
+      },
+      {
+        "name": "11 fresh Rust checks passed",
+        "passed": true
+      },
+      {
+        "name": "Public source audit passed",
+        "passed": true
+      },
+      {
+        "name": "Actual Qt panel image exists",
+        "passed": true
+      },
+      {
+        "name": "Revised local links resolve",
+        "passed": true
+      }
+    ],
+    "count": 23
+  }
+}

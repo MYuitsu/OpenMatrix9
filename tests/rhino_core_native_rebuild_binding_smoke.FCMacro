@@ -1,0 +1,32 @@
+"""Actual native scalar Rebuild ABI and unchanged shared policies."""
+import json,os,traceback
+from pathlib import Path
+import FreeCADGui as Gui,OpenMatrix9Gui
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'module':OpenMatrix9Gui.__file__}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def run():
+    try:
+        gate=lambda *args:json.loads(OpenMatrix9Gui.geometryRebuildCapability(*args))
+        for kind in [2,3,7]:
+            check('declaration '+str(kind),gate(kind,1,0,4,3,1)['allowed'])
+            for flags in [0,1,4,5,8,9,12,13]:
+                r=gate(kind,3,16,256,11,flags)
+                check('construct '+str(kind)+' flags '+str(flags),r['status']==4 and r['backend']=='occt_edit')
+        for kind in [0,1,4,5,6,8,9,10,11,12,13]:
+            check('unsupported source '+str(kind),gate(kind,3,1,4,3,1)['status']==101)
+        for name,args in [('empty',(2,3,0,4,3,1)),('count',(2,3,17,4,3,1)),
+            ('poles',(2,3,1,257,3,1)),('degree',(2,3,1,4,4,1)),
+            ('layer',(2,3,1,4,3,3)),('stage',(2,4,1,4,3,1)),('flags',(2,3,1,4,3,16))]:
+            check('unsupported '+name,gate(*args)['status']==102)
+        rejected=False
+        try:gate(2,3,-1,4,3,1)
+        except ValueError:rejected=True
+        check('negative envelope fails before unsigned conversion',rejected)
+        check('existing native Edit policy',json.loads(OpenMatrix9Gui.geometryEditCapability(1,2,4,0))['allowed'])
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

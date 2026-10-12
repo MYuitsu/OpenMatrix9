@@ -1,0 +1,44 @@
+import os,sys
+sys.path.insert(0,'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+from command_options_fixture_support import *
+import Part
+
+def control(dialog,cls,name):
+    c=dialog.findChild(cls,name);check('real control '+name,c is not None);return c
+def run():
+    doc=App.newDocument('BuilderOptions');doc.UndoMode=1
+    profiles=[]
+    for z in (0,5):
+        p=doc.addObject('Part::Feature','Profile');p.Shape=Part.makeCircle(3,App.Vector(0,0,z));profiles.append(p)
+    doc.recompute();Gui.Selection.clearSelection()
+    for p in profiles:Gui.Selection.addSelection(doc.Name,p.Name)
+    Gui.runCommand('OM9_SurfaceLoft');settle();command()
+    d=next(x for x in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9SurfaceOptions') if x.isVisible())
+    check('exact Loft command identity',field().property('om9OptionFeatureId')=='OM9-SURFACE-009')
+    command('Style');check('Builder CMD opens native Style options','Straight Sections' in prompt() and 'Loose' in prompt())
+    command('Straight Sections');style=control(d,QtWidgets.QComboBox,'OM9LoftStyle');check('CMD choice updates control',style.currentIndex()==1)
+    style.setCurrentIndex(0);settle();check('control choice updates CMD','Style=Normal' in prompt())
+    command('DynamicPreview');dynamic=control(d,QtWidgets.QCheckBox,'OM9SurfaceDynamicPreview');check('CMD toggle updates checkbox',not dynamic.isChecked())
+    dynamic.setChecked(True);settle();check('checkbox updates CMD','DynamicPreview=Yes' in prompt())
+    command('SectionMode');command('Rebuild');check('child number phase','PointCount' in prompt())
+    history=control(d,QtWidgets.QCheckBox,'OM9SurfaceHistory')
+    command('History=Yes');report['unrelated_cmd_state']={'pending':bool(field().property('om9OptionPending')),'prompt':prompt(),'history':history.isChecked(),'section_index':d.findChild(QtWidgets.QComboBox,'OM9SectionMode').currentIndex()}
+    check('unrelated CMD toggle preserves child and accepted parent',bool(field().property('om9OptionPending')) and 'PointCount' in prompt() and history.isChecked() and d.findChild(QtWidgets.QComboBox,'OM9SectionMode').currentIndex()==0)
+    command('12');count=control(d,QtWidgets.QSpinBox,'OM9SectionPointCount');mode=control(d,QtWidgets.QComboBox,'OM9SectionMode')
+    check('child number applies real parameters',count.value()==12 and mode.currentIndex()==1 and len(doc.Objects)==2)
+    command('PointCount');set_draft('24');count.setValue(30);settle();check('Builder preserves CMD draft and old value',draft()=='24' and count.value()==12)
+    key(QtCore.Qt.Key_Return);check('draft Enter updates Builder without commit',count.value()==24 and len(doc.Objects)==2)
+    command('PointCount');command('NaN');check('invalid number keeps native state',count.value()==24 and draft()=='NaN')
+    key(QtCore.Qt.Key_Escape);check('Esc preserves accepted state',count.value()==24 and d.isVisible())
+    command('SectionMode=Refit');command('0.1mm');tolerance=control(d,QtWidgets.QDoubleSpinBox,'OM9RefitTolerance')
+    check('Refit child quantity reaches native control',abs(tolerance.value()-0.1)<1e-9 and tolerance.isEnabled() and not count.isEnabled())
+    editor=tolerance.findChild(QtWidgets.QLineEdit);editor.setFocus();editor.selectAll();QtTest.QTest.keyClicks(editor,'0.02cm');QtTest.QTest.keyClick(editor,QtCore.Qt.Key_Return);settle()
+    check('Builder raw units use common parser',abs(tolerance.value()-0.2)<1e-9 and len(doc.Objects)==2)
+    command('SectionMode=Rebuild');command('24');command();created=[o for o in doc.Objects if hasattr(o,'OM9FeatureId')]
+    check('main Enter commits native surface',len(created)==1 and created[0].Shape.isValid() and len(created[0].Shape.Faces)>0)
+    before=created[0].SurfaceOptions;area=created[0].Shape.Area
+    doc.undo();check('Builder one transaction Undo',len(doc.Objects)==2);doc.redo();check('Builder Redo',len(doc.Objects)==3)
+    path=out/'builder-options.FCStd';doc.saveAs(str(path));App.closeDocument(doc.Name);restored=App.openDocument(str(path));o=next(o for o in restored.Objects if hasattr(o,'OM9FeatureId'))
+    check('FCStd parameters and geometry',o.SurfaceOptions==before and abs(o.Shape.Area-area)<1e-6)
+
+QtCore.QTimer.singleShot(1800,lambda:execute(run))

@@ -1,0 +1,352 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-circle-history-owned-source-binding-20261012",
+  "status": "in_progress",
+  "goal_complete": false,
+  "updated_at": "2026-10-12T04:20:25+07:00",
+  "scope": "Owned selected-edge source binding for AroundCurve and Tangent probes/fixed points;final contact remains RED",
+  "sources": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/owned_curve_input.rs",
+      "bytes": 7613,
+      "sha256": "f9ec52a22e6fec0b1f21c06406ee2a70944e205c55b78076e9a5dab931d666eb"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history_result.rs",
+      "bytes": 17405,
+      "sha256": "091d8f45b9424577785530f8691967a59555fe2a11a0d6b2b18d94d80f06e0bb"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/lib.rs",
+      "bytes": 2524,
+      "sha256": "cd315e22ee0af3a8f11239708c007756716c8832b1267bbd1dc1d85dbd6c2663"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/support_evaluation_tests.rs",
+      "bytes": 17530,
+      "sha256": "5bbf4ad2a563a39b7bdabc6bd32d2e133bf55418680daef9e8b8a880fb2fa843"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_result_tests.rs",
+      "bytes": 31857,
+      "sha256": "347522d32da3cde298f4ff65d950e9a0766920d794652e2baa4b1a3da75b3eba"
+    }
+  ],
+  "source_red": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/history-binding-red90-20261012.log",
+      "bytes": 4735,
+      "sha256": "62d5295896e9bfa53c018e6f9a7af11553dc6033edb2a80dd76677f9a95a6b73"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/history-binding-red90-20261012.log.exit.json",
+      "bytes": 146,
+      "sha256": "0ba887f38d453815dc4f7e9e2bd7a5ce68340d5f28d4aaa9fae3b0de502fc08e"
+    },
+    "passed": 17,
+    "failed": 6,
+    "ignored": 0,
+    "exit_code": 101,
+    "failures": [
+      "curve::result_tests::history_native_source_tangent_fraction_must_bind_the_recorded_probe",
+      "curve::result_tests::history_native_source_fixed_point_binds_source_even_when_on_same_circle",
+      "curve::result_tests::history_native_source_tangent_plan_must_bind_selected_source_geometry",
+      "curve::result_tests::history_native_source_tangent_points_must_correspond_to_owned_curve",
+      "curve::result_tests::history_native_source_around_rejects_wrong_owned_tangent_normal",
+      "curve::result_tests::history_native_source_around_fraction_must_match_current_plan"
+    ]
+  },
+  "source_green": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/history-binding-green91-20261012.log",
+      "bytes": 2574,
+      "sha256": "3a9d8f67922e902ede118ffeef64bb21478bc8b97c6e168e4c3b9fc531fdb059"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/history-binding-green91-20261012.log.exit.json",
+      "bytes": 146,
+      "sha256": "a53d389ffd72dfd0af955a57936abe03e8aa1281a1f434e84165c5c09c97b9ce"
+    },
+    "passed": 23,
+    "failed": 0,
+    "ignored": 0,
+    "exit_code": 0,
+    "failures": []
+  },
+  "decoder": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/history-binding-decoder91-20261012.log",
+      "bytes": 643,
+      "sha256": "da55028e1d3e19ec8d2d2a1b85d59585a50d4c8a19ba43d835c1ec109a89b0ef"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/history-binding-decoder91-20261012.log.exit.json",
+      "bytes": 148,
+      "sha256": "25d8053e4b765cd97a91f9269b944418043fea3ad37e16e6bd539017d284e8ea"
+    },
+    "passed": 3,
+    "failed": 0,
+    "ignored": 0,
+    "exit_code": 0,
+    "failures": []
+  },
+  "full_rust": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/history-binding-full91-20261012.log",
+      "bytes": 101500,
+      "sha256": "6f4311d5582f643a3479904108d2bdf55a9b680bfac9b6236a87f2d65a4d6e16"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/history-binding-full91-20261012.log.exit.json",
+      "bytes": 147,
+      "sha256": "bfc733d881a73e87fff38a152e1526b080413548bdff3b177c987d5c0863062d"
+    },
+    "passed": 953,
+    "failed": 2,
+    "ignored": 0,
+    "exit_code": 101,
+    "failures": [
+      "curve::result_tests::history_tangent_contact_must_bind_plan_even_when_all_probes_match",
+      "support_snapshot::evaluation_tests::owned_curve_jets_match_native_value_and_three_derivatives_for_nineteen_families"
+    ]
+  },
+  "source_admission_native_oracle_queries": 183,
+  "selected_edge_world_native_oracle_queries": 183,
+  "oracle_families": 19,
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/history-binding-runtime91-20261012/bin/OpenMatrix9Gui.pyd",
+    "bytes": 16903168,
+    "sha256": "275dc58614be20dffd2e7d0969526f367b2b0905833e1c2bbd5c3da1b519db3f"
+  },
+  "selected_app": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "probe": {
+    "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+    "bytes": 50688,
+    "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+  },
+  "shared_sdk_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "unchanged_history_solver": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history.rs",
+    "bytes": 17935,
+    "sha256": "5cbe67ef0016d65b0f206df6f651e904877b041b8e2496ce5f2386736aea6740"
+  },
+  "native": [
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-history-binding-modes91-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_modes_result_smoke.FCMacro",
+      "checks": 109,
+      "passed": 109,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\history-binding-runtime91-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "275DC58614BE20DFFD2E7D0969526F367B2B0905833E1C2BBD5C3DA1B519DB3F",
+        "pid": 58852,
+        "module_root": "H:\\FreeCAD-src\\build\\history-binding-runtime91-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-history-binding-modes91-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/history-binding-runtime91-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16903168,
+        "sha256": "275dc58614be20dffd2e7d0969526f367b2b0905833e1c2bbd5c3da1b519db3f"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-modes91-offscreen-20261011/results.json",
+          "bytes": 21939,
+          "sha256": "9b71584985aa74c1cdf8738052f51e8334fde418970f095f9907cf87ac8130c5"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-modes91-offscreen-20261011/shared-host-launch.json",
+          "bytes": 600,
+          "sha256": "d76529c2417882f10eabdd49d5ffa77bb732994144cae74c3773b87cafa3488f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-modes91-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-modes91-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-modes91-offscreen-20261011/fixture.FCMacro",
+          "bytes": 17219,
+          "sha256": "f5154879b54a9b1af1054f7a6ec33506e6556ac1703f014b7beb845bd1be5134"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-modes91-offscreen-20261011/host-stdout.log",
+          "bytes": 15234,
+          "sha256": "47f8c68d54383caa74b750904de893eb1a7bad39f15fed992b0bf045e7878dca"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-modes91-offscreen-20261011/host-stderr.log",
+          "bytes": 37716,
+          "sha256": "8cf2aa3a5e8f823e9b1da4e02012c11f277c429c69a3bea471fbc41f4358c1fb"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-modes91-offscreen-20261011/user.cfg",
+          "bytes": 18186,
+          "sha256": "a42f8c104b3560471b8aba584b90dba6801c9ed5433837f7cb77d25131ac4f5c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-modes91-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2829,
+          "sha256": "6ed9a936ed8d94c1f34a05f0286285ed88262dc23aaaaa29167d14ce4e6caa12"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-history-binding-cold91-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_modes_cold_smoke.FCMacro",
+      "checks": 62,
+      "passed": 62,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\history-binding-runtime91-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "275DC58614BE20DFFD2E7D0969526F367B2B0905833E1C2BBD5C3DA1B519DB3F",
+        "pid": 66860,
+        "module_root": "H:\\FreeCAD-src\\build\\history-binding-runtime91-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-history-binding-cold91-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/history-binding-runtime91-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16903168,
+        "sha256": "275dc58614be20dffd2e7d0969526f367b2b0905833e1c2bbd5c3da1b519db3f"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-cold91-offscreen-20261011/results.json",
+          "bytes": 6363,
+          "sha256": "0a8f42766c51c07b6022108065cd448af4ae24533f2327832e45c5f34d398ec2"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-cold91-offscreen-20261011/shared-host-launch.json",
+          "bytes": 599,
+          "sha256": "f50da1bdf8502b09708371e1c9c64b3a1bbb11cb2157179d0115db849a93bc25"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-cold91-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-cold91-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-cold91-offscreen-20261011/fixture.FCMacro",
+          "bytes": 2854,
+          "sha256": "27eac9f73e1c8159172d6f9c9bf5b3b650fe976ef455094e5d070a68d2ebb428"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-cold91-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-cold91-offscreen-20261011/host-stderr.log",
+          "bytes": 2221,
+          "sha256": "85b5c89c299a0eeaa3fe5f8049eef39349811b9f97988cdf7770d233a7193f99"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-cold91-offscreen-20261011/user.cfg",
+          "bytes": 18059,
+          "sha256": "d07d1230b5f6921a0de22104a8ada445b0d3d414d6373e9556781ed5377c87ed"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-history-binding-cold91-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2828,
+          "sha256": "57c7ad91f580b461c25f73b8a6418b496a7c7d305d870cc97ac43a939053cb5a"
+        }
+      ]
+    }
+  ],
+  "native_checks": 171,
+  "native_hosts": 2,
+  "build": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/history-binding-build91-20261012.log",
+      "bytes": 16242,
+      "sha256": "faceab80c9330f94eb625961eb7af82ece92e7ca65d5716d147cbdbe269b2c35"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/history-binding-build91-20261012.log.exit.json",
+      "bytes": 24,
+      "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+    },
+    "exit_code": 0,
+    "target": "OpenMatrix9Gui",
+    "sdk": "H:/FreeCAD-src/build/relWithDebInfo"
+  },
+  "inventory": {
+    "path": "H:/FreeCAD-src/build/history-binding-producers91-20261012.json",
+    "bytes": 174423,
+    "sha256": "b3eeeb4c1d67d05e169bc5692e701fd9c7c1318c3a2023bf38247a60544fde2c"
+  },
+  "inventory_count": 1475,
+  "inventory_match": true,
+  "compiler_dependency_certificate": false,
+  "remaining": [
+    "Full original RCORE-01 remains open: stable GeometryRef identity/revision/representation/world, complete owned geometry/topology/attributes/units, adapters1–7, C01–C12, T01–T11, and every enabled GeometryResult consumer.",
+    "Final Tangent contact/plane/radius/source correspondence is not implemented. The new unchanged RED witness retains both correct curve probes but moves the circle to center(5,5),radius4, which is not tangent to its horizontal source y=0. Probe checks are not contact checks. Direction and radius-endpoint source semantics also need complete independent correspondence.",
+    "Raw native offset D3 discrepancy remains enabled RED: Rust matches independent mathematical derivatives at45 queries, native differs at36. No dependency patch/rebuild. Higher-order parity, extreme asymmetric weights, UV/retained trim/nested native chains and periodic parameter continuation beyond the captured natural basis need native acceptance evidence.",
+    "AroundCurve and Tangent curve probes now bind selected owned edge, fraction, absolute domain, native location applied once and D0/D1. Nineteen captured families/183 queries pass selected-edge world tests and source admission. These are synthetic envelopes around genuine native-local oracle rows, not183 live native History commands or complete family/backend acceptance. Native unflattened chain parity remains unproven.",
+    "Circle History atomic rejection/lifetime are unchanged: RED355/432/48 callbacks, pending caller journal pollution, changed metadata/source state, and owner-close recompute hang witness. Native savepoint proposal remains pending human review; no new interface implemented. Full ownership/removal/lock/dependency/cache, Undo/Redo/cancellation and notification invariants remain required.",
+    "Task2/3 remain open: generic snap/pick/mouse/render and parameter provenance; snapshot sharing, aggregate allocation/traversal/worker/cancellation bounds; Rebuild and all other enabled result consumers. Decoder per-basis counts/depth/payload bounds are not an aggregate budget certificate.",
+    "Global conversion/deviation/locus exactness, complete parameter/topology maps and native CAD-versus-mesh solid validity/orientation/manifold/cavity coverage remain unproven. Maps remain null. Complete independent read/edit/retain/export and all supported attributes/persistence families remain required.",
+    "Native History109/cold62 checks are named existing coverage with20 exact cold results, not every option/representation/backend, GUI mouse/render, full lifecycle or production deployment. Frozen candidate inventory is not an exact compiler dependency certificate."
+  ],
+  "next_action": "Use the existing native Tangent solver contacts to preserve resolved contact fractions, then independently evaluate owned D0/D1 against circle plane/radius/tangency and FromFirst. Preserve legacy/current History behavior and every supported curve family; first retain the new plan-with-correct-probes RED witness and obtain fresh native packet/result/cold evidence. Extend live native family/world/periodic-continuation coverage. Keep the native savepoint proposal pending review and continue all original RCORE-01 adapters1–7/C01–C12/T01–T11, result consumers, conversion/maps, budgets, persistence and lifecycle.",
+  "native_design_review": "Pending;no new native interface implemented",
+  "prior_checkpoint": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-12-rhino-core-owned-derived-curve-evaluation.json",
+    "bytes": 48109,
+    "sha256": "8b81c77faeb655d8ed505a058fa7c2e922e383b08e75b44220ca772065011b2b"
+  }
+}

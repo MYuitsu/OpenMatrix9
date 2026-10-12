@@ -1,0 +1,834 @@
+{
+  "snapshot": {
+    "geometry_data": {
+      "coordinates": "native_local_with_locations",
+      "native_master": {
+        "encoding": "occt_brep_ascii_v3",
+        "payload": "\nCASCADE Topology V3, (c) Open Cascade\nLocations 0\nCurve2ds 0\nCurves 1\n7 0 1  3 12 13  10 3.6264375649021034 -2.0937247042850591  10 4.1874494085518146 -6.4250240793660056e-15  10 3.6264375649021523 2.0937247042850813  10 2.0937247042850511 3.6264375649021363  10 2.4883145823480952e-14 4.1874494085517684  10 -2.0937247042850951 3.6264375649021803  10 -3.6264375649021336 2.0937247042850387  10 -4.1874494085517702 3.1230051724804832e-14  10 -3.6264375649021821 -2.0937247042851004  10 -2.0937247042850351 -3.6264375649021274  10 -3.8976026784270023e-14 -4.1874494085517782  10 2.0937247042851115 -3.6264375649021656 \n 0 1 0.083333333333333329 1 0.16666666666666666 1 0.25 1 0.33333333333333331 1 0.41666666666666669 1 0.5 1 0.58333333333333337 1 0.66666666666666663 1 0.75 1 0.83333333333333337 1 0.91666666666666663 1 1 1\nPolygon3D 0\nPolygonOnTriangulations 0\nSurfaces 0\nTriangulations 0\n\nTShapes 3\nVe\n1e-07\n10 4.00044546066859 -5.55111512312578e-16\n0 0\n\n0101101\n*\nEd\n 1e-07 1 1 0\n1  1 0 0 1\n0\n\n0101100\n+3 0 -3 0 *\nWi\n\n1101100\n+2 0 *\n\n+1 0 ",
+        "sdk_version": "8.0.1",
+        "triangulation_included": false
+      },
+      "native_root_location": [
+        [
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "native_root_orientation": "forward",
+      "representation": "polycurve"
+    },
+    "native_shape_type": 5,
+    "ownership": "private_native_copy",
+    "schema_version": 1,
+    "source_attributes": {
+      "availability": "not_applicable_constructed_output",
+      "schema_version": 1
+    },
+    "topology_data": {
+      "closed": null,
+      "degenerate_use_count": 0,
+      "edge_closed": false,
+      "edge_identity_count": 0,
+      "edge_manifold": true,
+      "edge_use_count": 0,
+      "edges_3d": [
+        {
+          "curve_present": true,
+          "degenerate": false,
+          "domain": [
+            0,
+            1
+          ],
+          "edge_id": "1",
+          "end_vertex_id": "1",
+          "geometry_coordinates": "native_local",
+          "geometry_data": {
+            "axis": {
+              "degree": 3,
+              "full_domain": [
+                0,
+                1
+              ],
+              "knots": [
+                0,
+                0.08333333333333333,
+                0.16666666666666666,
+                0.25,
+                0.3333333333333333,
+                0.4166666666666667,
+                0.5,
+                0.5833333333333334,
+                0.6666666666666666,
+                0.75,
+                0.8333333333333334,
+                0.9166666666666666,
+                1
+              ],
+              "multiplicities": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "periodic": true
+            },
+            "kind": "nurbs_curve",
+            "poles_xyz": [
+              [
+                10,
+                3.6264375649021034,
+                -2.093724704285059
+              ],
+              [
+                10,
+                4.187449408551815,
+                -6.4250240793660056e-15
+              ],
+              [
+                10,
+                3.6264375649021523,
+                2.0937247042850813
+              ],
+              [
+                10,
+                2.093724704285051,
+                3.6264375649021363
+              ],
+              [
+                10,
+                2.4883145823480952e-14,
+                4.187449408551768
+              ],
+              [
+                10,
+                -2.093724704285095,
+                3.6264375649021803
+              ],
+              [
+                10,
+                -3.6264375649021336,
+                2.0937247042850387
+              ],
+              [
+                10,
+                -4.18744940855177,
+                3.123005172480483e-14
+              ],
+              [
+                10,
+                -3.626437564902182,
+                -2.0937247042851004
+              ],
+              [
+                10,
+                -2.093724704285035,
+                -3.6264375649021274
+              ],
+              [
+                10,
+                -3.897602678427002e-14,
+                -4.187449408551778
+              ],
+              [
+                10,
+                2.0937247042851115,
+                -3.6264375649021656
+              ]
+            ],
+            "schema_version": 1,
+            "weights": null
+          },
+          "geometry_data_status": "copied_validated_basis",
+          "native_class": "Geom_BSplineCurve",
+          "native_location": [
+            [
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "native_same_parameter": true,
+          "native_same_range": true,
+          "native_topology_index": "1",
+          "parameter_correspondence_certificate": null,
+          "start_vertex_id": "1",
+          "tolerance": 1e-07
+        }
+      ],
+      "face_occurrences": [],
+      "faces": [],
+      "free_boundary_components": [],
+      "identity_scope": "snapshot_local_native_shape_and_location",
+      "incidence_scope": "recorded_face_edge_uses",
+      "manifold": null,
+      "native_shape_is_solid": false,
+      "solid_orientation": null,
+      "support_payload_bytes": 1511,
+      "surface_complex": {
+        "boundary_vertex_count": 0,
+        "closed": false,
+        "face_oriented": false,
+        "geometry_validity": null,
+        "manifold": false,
+        "scope": "recorded_unique_native_face_complex",
+        "vertex_count": 0,
+        "vertex_manifold": false
+      },
+      "validation": {
+        "closed": null,
+        "conversion_performed": false,
+        "global_self_intersection_certificate": null,
+        "input_preflight": {
+          "basis_bytes": 496,
+          "nodes": 6
+        },
+        "loose_geometry": false,
+        "manifold": null,
+        "native_method": {
+          "analyzer": "BRepCheck_Analyzer",
+          "classifier_precision": 1e-07,
+          "exact_curve_on_surface_requested": true,
+          "exact_curve_on_surface_scope": "SameParameter_edges",
+          "geometry_controls": true,
+          "orientation_classifier": "BRepClass3d_SolidClassifier.PerformInfinitePoint",
+          "parallel": false,
+          "precision_scope": "native_algorithm_not_document_tolerance"
+        },
+        "native_orientation_code": 0,
+        "native_solid_orientation": null,
+        "native_valid": true,
+        "operation": "InspectGeometry",
+        "reasons": [
+          "no_faces",
+          "vertex_nonmanifold",
+          "open_boundary",
+          "inconsistent_face_orientation",
+          "root_is_not_native_solid",
+          "solid_orientation_uninspected",
+          "no_shells"
+        ],
+        "repeated_face_occurrences": false,
+        "schema_version": 1,
+        "scope": "native_shape_and_recorded_surface_complex",
+        "shell_count": 0,
+        "source_modified": false,
+        "valid_solid": false,
+        "world_solid_orientation": null
+      },
+      "vertices": [
+        {
+          "geometry_coordinates": "native_local",
+          "native_location": [
+            [
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "native_topology_index": "1",
+          "point_xyz": [
+            10,
+            4.000445460668585,
+            -5.551115123125783e-16
+          ],
+          "tolerance": 1e-07,
+          "vertex_id": "1"
+        }
+      ]
+    },
+    "unit_context_revision": "1",
+    "unit_context_snapshot": "1|1|1e0|1e0|1e-2|1e-3|1e-2"
+  },
+  "validation": {
+    "closed": null,
+    "conversion_performed": false,
+    "global_self_intersection_certificate": null,
+    "input_preflight": {
+      "basis_bytes": 496,
+      "nodes": 6
+    },
+    "loose_geometry": false,
+    "manifold": null,
+    "native_method": {
+      "analyzer": "BRepCheck_Analyzer",
+      "classifier_precision": 1e-07,
+      "exact_curve_on_surface_requested": true,
+      "exact_curve_on_surface_scope": "SameParameter_edges",
+      "geometry_controls": true,
+      "orientation_classifier": "BRepClass3d_SolidClassifier.PerformInfinitePoint",
+      "parallel": false,
+      "precision_scope": "native_algorithm_not_document_tolerance"
+    },
+    "native_orientation_code": 0,
+    "native_solid_orientation": null,
+    "native_valid": true,
+    "operation": "InspectGeometry",
+    "reasons": [
+      "no_faces",
+      "vertex_nonmanifold",
+      "open_boundary",
+      "inconsistent_face_orientation",
+      "root_is_not_native_solid",
+      "solid_orientation_uninspected",
+      "no_shells"
+    ],
+    "repeated_face_occurrences": false,
+    "schema_version": 1,
+    "scope": "native_shape_and_recorded_surface_complex",
+    "shell_count": 0,
+    "source_modified": false,
+    "valid_solid": false,
+    "world_solid_orientation": null
+  },
+  "input_identity": {
+    "document_name": "CircleHistoryMore",
+    "name": "Circle014"
+  },
+  "operation_context": {
+    "attribute_role": "source_evidence_in_input_snapshots_output_attributes_unavailable",
+    "feature_id": "OM9-CURVE-005",
+    "native_plan": [
+      10,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1e-07
+    ],
+    "operation": "ReplayCircleHistory",
+    "original_construction": "{\"accepted_input_events\":[{\"admission_revision_after\":\"4\",\"admission_revision_before\":\"3\",\"circle_context_after\":\"1\",\"circle_context_before\":\"0\",\"circle_size\":\"Radius\",\"frame_axes\":[[1,0,0],[0,1,0],[0,0,1]],\"frame_origin\":[0,0,0],\"input_mm_per_unit\":1,\"kind\":\"text\",\"normalized_point_count_before\":0,\"pending_option\":null,\"previous_point_world\":null,\"resolved_point_world\":null,\"text\":\"AroundCurve\"},{\"admission_revision_after\":\"6\",\"admission_revision_before\":\"5\",\"circle_context_after\":\"2\",\"circle_context_before\":\"1\",\"circle_size\":\"Radius\",\"frame_axes\":[[1,0,0],[0,1,0],[0,0,1]],\"frame_origin\":[0,0,0],\"input_mm_per_unit\":1,\"kind\":\"text\",\"normalized_point_count_before\":0,\"pending_option\":null,\"previous_point_world\":null,\"resolved_point_world\":null,\"text\":\"History=Yes\"},{\"admission_revision_after\":\"8\",\"admission_revision_before\":\"7\",\"circle_context_after\":\"3\",\"circle_context_before\":\"2\",\"circle_size\":\"Radius\",\"frame_axes\":[[1,0,0],[0,1,0],[0,0,1]],\"frame_origin\":[0,0,0],\"input_mm_per_unit\":1,\"kind\":\"text\",\"normalized_point_count_before\":0,\"pending_option\":null,\"previous_point_world\":null,\"resolved_point_world\":null,\"text\":\"Deformable=Yes\"},{\"admission_revision_after\":\"10\",\"admission_revision_before\":\"9\",\"circle_context_after\":\"4\",\"circle_context_before\":\"3\",\"circle_size\":\"Radius\",\"frame_axes\":[[1,0,0],[0,1,0],[0,0,1]],\"frame_origin\":[0,0,0],\"input_mm_per_unit\":1,\"kind\":\"text\",\"normalized_point_count_before\":0,\"pending_option\":null,\"previous_point_world\":null,\"resolved_point_world\":null,\"text\":\"PointCount=12\"},{\"admission_revision_after\":\"12\",\"admission_revision_before\":\"11\",\"circle_context_after\":\"5\",\"circle_context_before\":\"4\",\"circle_size\":\"Radius\",\"frame_axes\":[[1,0,0],[0,1,0],[0,0,1]],\"frame_origin\":[0,0,0],\"input_mm_per_unit\":1,\"kind\":\"native_reference\",\"native_input_role\":\"owned_source_values_at_admission_not_current_source_validity\",\"native_source_count\":1,\"normal\":[0,0,0],\"normalized_point_count_before\":0,\"pending_option\":null,\"point_world\":[0,0,0],\"points_world\":[],\"previous_point_world\":null,\"reference_kind\":1,\"text\":\"Curve=DeformablePath.Edge1\"},{\"admission_revision_after\":\"14\",\"admission_revision_before\":\"13\",\"circle_context_after\":\"6\",\"circle_context_before\":\"5\",\"circle_size\":\"Radius\",\"frame_axes\":[[1,0,0],[0,1,0],[0,0,1]],\"frame_origin\":[0,0,0],\"input_mm_per_unit\":1,\"kind\":\"native_reference\",\"native_input_role\":\"owned_source_values_at_admission_not_current_source_validity\",\"native_source_count\":0,\"normal\":[1,0,0],\"normalized_point_count_before\":0,\"pending_option\":null,\"point_world\":[5,0,0],\"points_world\":[],\"previous_point_world\":null,\"reference_kind\":2,\"text\":\"OnCurve=.5\"},{\"admission_revision_after\":\"15\",\"admission_revision_before\":\"14\",\"circle_context_after\":\"7\",\"circle_context_before\":\"6\",\"circle_size\":\"Radius\",\"frame_axes\":[[1,0,0],[0,1,0],[0,0,1]],\"frame_origin\":[0,0,0],\"input_mm_per_unit\":1,\"kind\":\"text\",\"normalized_point_count_before\":1,\"pending_option\":null,\"previous_point_world\":[5,0,0],\"resolved_point_world\":null,\"text\":\"4\"}],\"accepted_input_role\":\"entrypoint_values_before_normalization_not_complete_native_sources\",\"accepted_input_undo_role\":\"circle_checkpoint_restores_branch_other_commands_retain_explicit_undo_events\",\"circle\":{\"center\":[5,0,0],\"normal\":[1,0,0],\"radius\":4},\"circle_approx_deviation\":0.000445460668585973,\"command\":\"Circle\",\"coordinates\":\"document_world_mm\",\"ellipse\":null,\"ellipse_approx_deviation\":0,\"feature_id\":\"OM9-CURVE-005\",\"frame_axes\":[[1,0,0],[0,1,0],[0,0,1]],\"frame_origin\":[0,0,0],\"frame_role\":\"session_input_frame_at_capture\",\"generation\":\"30\",\"input_mm_per_unit\":1,\"input_role\":\"normalized_session_state_not_complete_accepted_input_history\",\"lifetime\":\"immutable_construction_input_evidence_not_current_validity\",\"normalized_points\":[[5,0,0]],\"operation\":\"ConstructCurve\",\"options\":{\"axes\":[[1,0,0],[0,1,0],[0,0,1]],\"constraints\":[],\"deformable\":true,\"degree\":3,\"fit_deviation\":0,\"from_first\":false,\"history\":true,\"mode\":\"AroundCurve\",\"normal\":[1,0,0],\"orientating\":false,\"oriented\":false,\"path_selected\":true,\"point_count\":12,\"point_mode\":false,\"radius_constraint\":null,\"radius_pending\":false,\"size\":\"Radius\",\"solution\":null,\"tangent_vertical\":false},\"output_points\":[[5,4.000445460668586,-0.00000000000000033306690738754696],[5,3.995535336188772,0.19620964777426833],[5,3.9808875374583703,0.3919570360337961],[5,3.9566259265409482,0.586779905263842],[5,3.922874365500072,0.7802159959496645],[5,3.879756716399309,0.971803048576523],[5,3.8273968413022263,1.1610788036296757],[5,3.7659186022723907,1.347581001594382],[5,3.6954458613733694,1.5308473829559013],[5,3.616102480668729,1.710415688199491],[5.000000000000001,3.528012322222037,1.8858236578104108],[5,3.4313005723893752,2.0566097968545587],[5,3.3261718750777813,2.2223584852362035],[5,3.212954033398273,2.382725208859084],[5,3.0919854448019937,2.5373715702720565],[5,2.9636045067400874,2.6859591720239773],[4.999999999999999,2.828149616663698,2.828149616663703],[4.999999999999999,2.6859591720239697,2.9636045067400896],[4.999999999999999,2.5373715702720463,3.0919854448019923],[4.999999999999999,2.382725208859071,3.2129540333982685],[4.999999999999999,2.2223584852361897,3.3261718750777725],[4.999999999999999,2.056609796854546,3.431300572389362],[4.999999999999999,1.8858236578103984,3.52801232222202],[4.999999999999999,1.7104156881994805,3.61610248066871],[4.999999999999999,1.5308473829558926,3.695445861373347],[4.999999999999999,1.347581001594377,3.7659186022723663],[4.999999999999999,1.1610788036296735,3.8273968413021997],[4.999999999999999,0.9718030485765236,3.8797567163992803],[4.999999999999999,0.7802159959496681,3.9228743655000433],[5,0.5867799052638478,3.9566259265409194],[5,0.3919570360338039,3.9808875374583437],[5,0.1962096477742774,3.9955353361887473],[5.000000000000001,0.000000000000009048317650695026,4.0004454606685655],[5.000000000000001,-0.19620964777426017,3.9955353361887522],[5.000000000000002,-0.39195703603378895,3.980887537458352],[5,-0.5867799052638357,3.9566259265409314],[5.000000000000001,-0.7802159959496602,3.9228743655000593],[5,-0.9718030485765202,3.8797567163993003],[5,-1.1610788036296749,3.8273968413022206],[5,-1.3475810015943832,3.765918602272389],[5.000000000000001,-1.5308473829559037,3.695445861373371],[5.000000000000001,-1.7104156881994947,3.6161024806687347],[5.000000000000001,-1.8858236578104162,3.5280123222220445],[5.000000000000001,-2.0566097968545645,3.431300572389384],[5.000000000000001,-2.2223584852362097,3.326171875077792],[5,-2.3827252088590902,3.2129540333982836],[4.999999999999999,-2.537371570272062,3.0919854448020025],[5.000000000000001,-2.6859591720239835,2.9636045067400967],[4.999999999999999,-2.8281496166637083,2.8281496166637043],[5.000000000000001,-2.9636045067400945,2.685959172023975],[4.999999999999999,-3.0919854448019954,2.5373715702720485],[5,-3.212954033398271,2.382725208859073],[5.000000000000001,-3.326171875077775,2.22235848523619],[5,-3.4313005723893637,2.0566097968545445],[5,-3.528012322222021,1.885823657810396],[5,-3.6161024806687103,1.7104156881994774],[5,-3.695445861373347,1.5308473829558897],[5,-3.7659186022723663,1.347581001594374],[5,-3.8273968413021993,1.161078803629671],[5,-3.879756716399281,0.9718030485765218],[5,-3.9228743655000433,0.780215995949667],[4.999999999999999,-3.9566259265409194,0.5867799052638476],[5,-3.980887537458344,0.3919570360338048],[4.999999999999999,-3.9955353361887473,0.19620964777427874],[4.999999999999999,-4.0004454606685655,0.000000000000010824674490095276],[4.999999999999999,-3.9955353361887522,-0.19620964777425806],[5,-3.9808875374583526,-0.3919570360337869],[4.999999999999999,-3.9566259265409327,-0.5867799052638341],[4.999999999999999,-3.9228743655000597,-0.7802159959496587],[5,-3.8797567163993008,-0.9718030485765192],[4.999999999999999,-3.8273968413022215,-1.1610788036296744],[5,-3.7659186022723903,-1.347581001594383],[5,-3.695445861373373,-1.530847382955904],[5,-3.616102480668735,-1.7104156881994956],[5,-3.528012322222045,-1.885823657810417],[5,-3.431300572389386,-2.0566097968545662],[5.000000000000001,-3.3261718750777924,-2.2223584852362106],[5.000000000000001,-3.2129540333982836,-2.382725208859091],[5.000000000000001,-3.091985444802004,-2.5373715702720636],[5.000000000000001,-2.963604506740096,-2.6859591720239835],[5,-2.828149616663705,-2.8281496166637083],[5,-2.6859591720239737,-2.963604506740093],[5,-2.537371570272049,-3.0919854448019954],[5,-2.382725208859072,-3.2129540333982693],[5,-2.2223584852361893,-3.3261718750777733],[5,-2.056609796854543,-3.431300572389362],[5,-1.8858236578103953,-3.5280123222220197],[5,-1.7104156881994774,-3.616102480668709],[5.000000000000001,-1.53084738295589,-3.6954458613733463],[4.999999999999999,-1.3475810015943746,-3.765918602272366],[5,-1.1610788036296724,-3.8273968413021997],[5.000000000000001,-0.9718030485765236,-3.879756716399282],[5,-0.7802159959496693,-3.9228743655000446],[5,-0.5867799052638503,-3.9566259265409216],[5.000000000000001,-0.3919570360338074,-3.9808875374583463],[5,-0.19620964777428146,-3.99553533618875],[5,-0.000000000000013211653993039363,-4.000445460668567],[5,0.1962096477742562,-3.9955353361887536],[5.000000000000001,0.3919570360337856,-3.9808875374583534],[5,0.5867799052638337,-3.956625926540932],[5,0.7802159959496592,-3.922874365500058],[5,0.9718030485765204,-3.879756716399298],[5,1.1610788036296766,-3.8273968413022175],[5,1.3475810015943857,-3.765918602272385],[5.000000000000001,1.530847382955907,-3.695445861373367],[5,1.710415688199499,-3.616102480668729],[5,1.8858236578104197,-3.528012322222039],[5,2.056609796854568,-3.4313005723893797],[5,2.2223584852362115,-3.3261718750777884],[5,2.3827252088590902,-3.2129540333982813],[5,2.537371570272061,-3.091985444802003],[5.000000000000001,2.68595917202398,-2.963604506740097],[5.000000000000001,2.828149616663703,-2.8281496166637075],[5.000000000000001,2.9636045067400865,-2.685959172023979],[5.000000000000001,3.091985444801987,-2.537371570272055],[5,3.212954033398261,-2.3827252088590796],[5,3.3261718750777645,-2.222358485236197],[5.000000000000001,3.431300572389354,-2.0566097968545516],[5,3.528012322222012,-1.8858236578104022],[4.999999999999999,3.6161024806687037,-1.7104156881994823],[4.999999999999999,3.6954458613733436,-1.5308473829558928],[4.999999999999999,3.765918602272366,-1.347581001594375],[5,3.8273968413022033,-1.16107880362967],[5,3.8797567163992888,-0.9718030485765184],[5,3.922874365500055,-0.7802159959496615],[5,3.9566259265409345,-0.58677990526384],[5,3.9808875374583614,-0.39195703603379534],[5,3.9955353361887673,-0.19620964777426828],[5,4.000445460668586,-0.00000000000000033306690738754696]],\"output_points_role\":\"display_outline_only\",\"schema_version\":1,\"source_provenance\":\"native_owners_and_original_inputs_not_complete_in_this_value\",\"source_refs\":[{\"accepted_event_index\":4,\"ancestors\":[],\"document\":\"1\",\"document_uid\":\"e728d998-fed6-4c49-b31e-d391cf4e1c92\",\"epoch\":\"1\",\"generation\":\"12\",\"input_snapshot_index\":1,\"object\":\"1329\",\"object_name\":\"DeformablePath\",\"point_begin\":0,\"point_end\":0,\"revision\":\"1\",\"role\":\"path\",\"role_index\":0,\"snapshot_frame\":\"document_world\",\"subelement\":\"Edge1\",\"unit_context_snapshot\":\"1|1|1e0|1e0|1e-2|1e-3|1e-2\",\"world\":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]}],\"source_snapshot_indexing\":\"source_snapshots_one_based\",\"source_snapshots\":[{\"geometry_data\":{\"coordinates\":\"native_local_with_locations\",\"native_master\":{\"encoding\":\"occt_brep_ascii_v3\",\"payload\":\"\\nCASCADE Topology V3, (c) Open Cascade\\nLocations 4\\n1\\n              1               0               0               0 \\n              0               1               0               0 \\n              0               0               1               0 \\n1\\n              1               0               0               0 \\n              0               1               0               0 \\n              0               0               1               0 \\n2  1 1 2 1 0\\n2  1 -1 0\\nCurve2ds 0\\nCurves 1\\n1 0 0 0 1 0 0 \\nPolygon3D 0\\nPolygonOnTriangulations 0\\nSurfaces 0\\nTriangulations 0\\n\\nTShapes 3\\nVe\\n1e-07\\n0 0 0\\n0 0\\n\\n0101101\\n*\\nVe\\n1e-07\\n10 0 0\\n0 0\\n\\n0101101\\n*\\nEd\\n 1e-07 1 1 0\\n1  1 0 0 10\\n0\\n\\n1101000\\n+3 4 -2 4 *\\n\\n+1 3 \",\"sdk_version\":\"8.0.1\",\"triangulation_included\":false},\"native_root_location\":[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],\"native_root_orientation\":\"forward\",\"representation\":\"curve\"},\"native_shape_type\":6,\"ownership\":\"private_native_copy\",\"schema_version\":1,\"selected_points_world\":[],\"source_attributes\":{\"coverage\":{\"other_app_properties\":\"uninspected\",\"rhino_user_data\":\"uninspected\"},\"document_uid\":\"e728d998-fed6-4c49-b31e-d391cf4e1c92\",\"label\":\"DeformablePath\",\"label2\":\"\",\"native_type\":\"Part::Feature\",\"object_name\":\"DeformablePath\",\"schema_version\":1,\"selectable\":true,\"shape_appearance\":[{\"ambient\":[0.33333298563957214,0.33333298563957214,0.33333298563957214,1],\"diffuse\":[0.67843097448349,0.7098039984703064,0.7411760091781616,1],\"emissive\":[0,0,0,1],\"image\":\"\",\"image_path\":\"\",\"shininess\":0.8999999761581421,\"specular\":[0.5333330035209656,0.5333330035209656,0.5333330035209656,1],\"transparency\":0,\"uuid\":\"7f9fd73b-50c9-41d8-b7b2-575a030c1eeb\"}],\"view_provider_type\":\"PartGui::ViewProviderPart\",\"visibility\":true},\"topology_data\":{\"closed\":null,\"degenerate_use_count\":0,\"edge_closed\":false,\"edge_identity_count\":0,\"edge_manifold\":true,\"edge_use_count\":0,\"edges_3d\":[{\"curve_present\":true,\"degenerate\":false,\"domain\":[0,10],\"edge_id\":\"1\",\"end_vertex_id\":\"2\",\"geometry_coordinates\":\"native_local\",\"geometry_data\":{\"analytic_type\":\"line\",\"axes_xyz\":[[1,0,0],[0,0,0],[0,0,0]],\"dimension\":3,\"frame_handedness\":0,\"kind\":\"analytic_curve\",\"natural_domains\":[\"unbounded\"],\"origin_xyz\":[0,0,0],\"parameter_convention\":\"occt_native\",\"parameters\":{},\"schema_version\":1,\"uv_sense\":null},\"geometry_data_status\":\"copied_validated_analytic\",\"native_class\":\"Geom_Line\",\"native_location\":[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],\"native_same_parameter\":true,\"native_same_range\":true,\"native_topology_index\":\"1\",\"parameter_correspondence_certificate\":null,\"start_vertex_id\":\"1\",\"tolerance\":0.0000001}],\"face_occurrences\":[],\"faces\":[],\"free_boundary_components\":[],\"identity_scope\":\"snapshot_local_native_shape_and_location\",\"incidence_scope\":\"recorded_face_edge_uses\",\"manifold\":null,\"native_shape_is_solid\":false,\"solid_orientation\":null,\"support_payload_bytes\":956,\"surface_complex\":{\"boundary_vertex_count\":0,\"closed\":false,\"face_oriented\":false,\"geometry_validity\":null,\"manifold\":false,\"scope\":\"recorded_unique_native_face_complex\",\"vertex_count\":0,\"vertex_manifold\":false},\"validation\":{\"closed\":null,\"conversion_performed\":false,\"global_self_intersection_certificate\":null,\"input_preflight\":{\"basis_bytes\":0,\"nodes\":5},\"loose_geometry\":false,\"manifold\":null,\"native_method\":{\"analyzer\":\"BRepCheck_Analyzer\",\"classifier_precision\":0.0000001,\"exact_curve_on_surface_requested\":true,\"exact_curve_on_surface_scope\":\"SameParameter_edges\",\"geometry_controls\":true,\"orientation_classifier\":\"BRepClass3d_SolidClassifier.PerformInfinitePoint\",\"parallel\":false,\"precision_scope\":\"native_algorithm_not_document_tolerance\"},\"native_orientation_code\":0,\"native_solid_orientation\":null,\"native_valid\":true,\"operation\":\"InspectGeometry\",\"reasons\":[\"no_faces\",\"vertex_nonmanifold\",\"open_boundary\",\"inconsistent_face_orientation\",\"root_is_not_native_solid\",\"solid_orientation_uninspected\",\"no_shells\"],\"repeated_face_occurrences\":false,\"schema_version\":1,\"scope\":\"native_shape_and_recorded_surface_complex\",\"shell_count\":0,\"source_modified\":false,\"valid_solid\":false,\"world_solid_orientation\":null},\"vertices\":[{\"geometry_coordinates\":\"native_local\",\"native_location\":[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],\"native_topology_index\":\"1\",\"point_xyz\":[0,0,0],\"tolerance\":0.0000001,\"vertex_id\":\"1\"},{\"geometry_coordinates\":\"native_local\",\"native_location\":[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],\"native_topology_index\":\"2\",\"point_xyz\":[10,0,0],\"tolerance\":0.0000001,\"vertex_id\":\"2\"}]},\"unit_context_snapshot\":\"1|1|1e0|1e0|1e-2|1e-3|1e-2\"}],\"spline\":{\"basis_role\":\"nonrational_native_constructor_basis\",\"degree\":3,\"domain\":[0,1],\"expanded_evaluation_knots\":[-0.25,-0.16666666666666663,-0.08333333333333337,0,0.08333333333333333,0.16666666666666666,0.25,0.3333333333333333,0.4166666666666667,0.5,0.5833333333333334,0.6666666666666666,0.75,0.8333333333333334,0.9166666666666666,1,1.0833333333333333,1.1666666666666667,1.25],\"knots\":[0,0.08333333333333333,0.16666666666666666,0.25,0.3333333333333333,0.4166666666666667,0.5,0.5833333333333334,0.6666666666666666,0.75,0.8333333333333334,0.9166666666666666,1],\"multiplicities\":[1,1,1,1,1,1,1,1,1,1,1,1,1],\"periodic\":true,\"poles\":[[5,3.6264375649021034,-2.093724704285059],[5,4.187449408551815,-0.0000000000000064250240793660056],[5,3.6264375649021523,2.0937247042850813],[5,2.093724704285051,3.6264375649021363],[5,0.000000000000024883145823480952,4.187449408551768],[5,-2.093724704285095,3.6264375649021803],[5,-3.6264375649021336,2.0937247042850387],[5,-4.18744940855177,0.00000000000003123005172480483],[5,-3.626437564902182,-2.0937247042851004],[5,-2.093724704285035,-3.6264375649021274],[5,-0.00000000000003897602678427002,-4.187449408551778],[5,2.0937247042851115,-3.6264375649021656]],\"weights\":null}}",
+    "output_parent_to_world": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "path_fraction": 0.5,
+    "points_world": [
+      [
+        5,
+        0,
+        0
+      ]
+    ],
+    "recipe": [
+      2,
+      4,
+      0,
+      4,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      3,
+      12,
+      0,
+      -1,
+      0
+    ],
+    "recorded_points_world": [
+      [
+        5,
+        0,
+        0
+      ]
+    ],
+    "recorded_recipe": [
+      2,
+      4,
+      0,
+      4,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      3,
+      12,
+      0,
+      -1,
+      0
+    ],
+    "recorded_source_parameters": [],
+    "recorded_source_roles": [],
+    "resolved_plan": {
+      "approx_deviation": 0.000445460668585973,
+      "center": [
+        10,
+        0,
+        0
+      ],
+      "fit_deviation": 0,
+      "normal": [
+        1,
+        0,
+        0
+      ],
+      "radius": 4
+    },
+    "schema_version": 1,
+    "source_refs": [
+      {
+        "ancestors": [],
+        "document": "1",
+        "document_uid": "e728d998-fed6-4c49-b31e-d391cf4e1c92",
+        "epoch": "3",
+        "generation": "12",
+        "input_snapshot_index": 1,
+        "object": "1329",
+        "object_name": "DeformablePath",
+        "point_begin": 0,
+        "point_end": 0,
+        "revision": "3",
+        "role": "history_path",
+        "role_index": 0,
+        "selected_representation": 2,
+        "snapshot_frame": "document_world",
+        "subelement": "Edge1",
+        "unit_context_snapshot": "1|1|1e0|1e0|1e-2|1e-3|1e-2",
+        "world": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    ],
+    "source_snapshot_indexing": "input_snapshots_zero_based_including_numeric_input",
+    "storage": "recipe_v2",
+    "source_snapshots": [
+      {
+        "geometry_data": {
+          "coordinates": "native_local_with_locations",
+          "native_master": {
+            "encoding": "occt_brep_ascii_v3",
+            "payload": "\nCASCADE Topology V3, (c) Open Cascade\nLocations 4\n1\n              1               0               0               0 \n              0               1               0               0 \n              0               0               1               0 \n1\n              1               0               0               0 \n              0               1               0               0 \n              0               0               1               0 \n2  1 1 2 1 0\n2  1 -1 0\nCurve2ds 0\nCurves 1\n1 0 0 0 1 0 0 \nPolygon3D 0\nPolygonOnTriangulations 0\nSurfaces 0\nTriangulations 0\n\nTShapes 3\nVe\n1e-07\n0 0 0\n0 0\n\n0101101\n*\nVe\n1e-07\n20 0 0\n0 0\n\n0101101\n*\nEd\n 1e-07 1 1 0\n1  1 0 0 20\n0\n\n1101000\n+3 4 -2 4 *\n\n+1 3 ",
+            "sdk_version": "8.0.1",
+            "triangulation_included": false
+          },
+          "native_root_location": [
+            [
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              1
+            ]
+          ],
+          "native_root_orientation": "forward",
+          "representation": "curve"
+        },
+        "native_shape_type": 6,
+        "ownership": "private_native_copy",
+        "schema_version": 1,
+        "selected_points_world": [],
+        "source_attributes": {
+          "coverage": {
+            "other_app_properties": "uninspected",
+            "rhino_user_data": "uninspected"
+          },
+          "document_uid": "e728d998-fed6-4c49-b31e-d391cf4e1c92",
+          "label": "DeformablePath",
+          "label2": "",
+          "native_type": "Part::Feature",
+          "object_name": "DeformablePath",
+          "schema_version": 1,
+          "selectable": true,
+          "shape_appearance": [
+            {
+              "ambient": [
+                0.33333298563957214,
+                0.33333298563957214,
+                0.33333298563957214,
+                1
+              ],
+              "diffuse": [
+                0.67843097448349,
+                0.7098039984703064,
+                0.7411760091781616,
+                1
+              ],
+              "emissive": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "image": "",
+              "image_path": "",
+              "shininess": 0.8999999761581421,
+              "specular": [
+                0.5333330035209656,
+                0.5333330035209656,
+                0.5333330035209656,
+                1
+              ],
+              "transparency": 0,
+              "uuid": "7f9fd73b-50c9-41d8-b7b2-575a030c1eeb"
+            }
+          ],
+          "view_provider_type": "PartGui::ViewProviderPart",
+          "visibility": true
+        },
+        "topology_data": {
+          "closed": null,
+          "degenerate_use_count": 0,
+          "edge_closed": false,
+          "edge_identity_count": 0,
+          "edge_manifold": true,
+          "edge_use_count": 0,
+          "edges_3d": [
+            {
+              "curve_present": true,
+              "degenerate": false,
+              "domain": [
+                0,
+                20
+              ],
+              "edge_id": "1",
+              "end_vertex_id": "2",
+              "geometry_coordinates": "native_local",
+              "geometry_data": {
+                "analytic_type": "line",
+                "axes_xyz": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    0
+                  ]
+                ],
+                "dimension": 3,
+                "frame_handedness": 0,
+                "kind": "analytic_curve",
+                "natural_domains": [
+                  "unbounded"
+                ],
+                "origin_xyz": [
+                  0,
+                  0,
+                  0
+                ],
+                "parameter_convention": "occt_native",
+                "parameters": {},
+                "schema_version": 1,
+                "uv_sense": null
+              },
+              "geometry_data_status": "copied_validated_analytic",
+              "native_class": "Geom_Line",
+              "native_location": [
+                [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  1
+                ]
+              ],
+              "native_same_parameter": true,
+              "native_same_range": true,
+              "native_topology_index": "1",
+              "parameter_correspondence_certificate": null,
+              "start_vertex_id": "1",
+              "tolerance": 1e-07
+            }
+          ],
+          "face_occurrences": [],
+          "faces": [],
+          "free_boundary_components": [],
+          "identity_scope": "snapshot_local_native_shape_and_location",
+          "incidence_scope": "recorded_face_edge_uses",
+          "manifold": null,
+          "native_shape_is_solid": false,
+          "solid_orientation": null,
+          "support_payload_bytes": 956,
+          "surface_complex": {
+            "boundary_vertex_count": 0,
+            "closed": false,
+            "face_oriented": false,
+            "geometry_validity": null,
+            "manifold": false,
+            "scope": "recorded_unique_native_face_complex",
+            "vertex_count": 0,
+            "vertex_manifold": false
+          },
+          "validation": {
+            "closed": null,
+            "conversion_performed": false,
+            "global_self_intersection_certificate": null,
+            "input_preflight": {
+              "basis_bytes": 0,
+              "nodes": 5
+            },
+            "loose_geometry": false,
+            "manifold": null,
+            "native_method": {
+              "analyzer": "BRepCheck_Analyzer",
+              "classifier_precision": 1e-07,
+              "exact_curve_on_surface_requested": true,
+              "exact_curve_on_surface_scope": "SameParameter_edges",
+              "geometry_controls": true,
+              "orientation_classifier": "BRepClass3d_SolidClassifier.PerformInfinitePoint",
+              "parallel": false,
+              "precision_scope": "native_algorithm_not_document_tolerance"
+            },
+            "native_orientation_code": 0,
+            "native_solid_orientation": null,
+            "native_valid": true,
+            "operation": "InspectGeometry",
+            "reasons": [
+              "no_faces",
+              "vertex_nonmanifold",
+              "open_boundary",
+              "inconsistent_face_orientation",
+              "root_is_not_native_solid",
+              "solid_orientation_uninspected",
+              "no_shells"
+            ],
+            "repeated_face_occurrences": false,
+            "schema_version": 1,
+            "scope": "native_shape_and_recorded_surface_complex",
+            "shell_count": 0,
+            "source_modified": false,
+            "valid_solid": false,
+            "world_solid_orientation": null
+          },
+          "vertices": [
+            {
+              "geometry_coordinates": "native_local",
+              "native_location": [
+                [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  1
+                ]
+              ],
+              "native_topology_index": "1",
+              "point_xyz": [
+                0,
+                0,
+                0
+              ],
+              "tolerance": 1e-07,
+              "vertex_id": "1"
+            },
+            {
+              "geometry_coordinates": "native_local",
+              "native_location": [
+                [
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  1
+                ]
+              ],
+              "native_topology_index": "2",
+              "point_xyz": [
+                20,
+                0,
+                0
+              ],
+              "tolerance": 1e-07,
+              "vertex_id": "2"
+            }
+          ]
+        },
+        "unit_context_revision": "1",
+        "unit_context_snapshot": "1|1|1e0|1e0|1e-2|1e-3|1e-2"
+      }
+    ]
+  }
+}

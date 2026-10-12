@@ -1,0 +1,46 @@
+"""Original admitted Curve values survive normalization, Undo and FCStd."""
+import json,math,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Points,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(text=''):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def run():
+ global console
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  cases=[('RectangleDirection','Rectangle',['3Point','0,0,0','Length=5','10,0,0','0,3,0']),('CircleQuantity','Circle',['0,0,0','Diameter','2cm']),('EllipseQuantity','Ellipse',['Degree','3','0,0,0','5mm','3mm']),('FitUndo','Circle',['FitPoints','Selection','Undo','Selection',''])]
+  for case,command,texts in cases:
+   doc=App.newDocument(case);doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+   if case=='FitUndo':
+    cloud=doc.addObject('Points::Feature','Cloud');cloud.Points=Points.Points([App.Vector(1,0,0),App.Vector(0,1,0),App.Vector(-1,0,0)]);doc.recompute();Gui.Selection.clearSelection();Gui.Selection.addSelection(cloud)
+   before=doc.UndoCount;enter(command)
+   for text in texts:enter(text)
+   obj=doc.getObject(command);raw=getattr(obj,'OM9CurveConstruction','') if obj else '';value=json.loads(raw) if raw else {};a=value.get('accepted_input_events',[])
+   geometry=obj is not None and obj.Shape.isValid() and not obj.Shape.isNull()
+   if geometry:
+    geometry=abs(obj.Shape.Length-16.)<1e-7 if case=='RectangleDirection' else abs(obj.Shape.Edges[0].Curve.MajorRadius-5)<1e-7 and abs(obj.Shape.Edges[0].Curve.MinorRadius-3)<1e-7 if case=='EllipseQuantity' else abs(obj.Shape.Edges[0].Curve.Radius-(1. if case=='FitUndo' else 10.))<1e-7
+   check(case+' reuses solver with independently checked geometry',geometry)
+   if case=='RectangleDirection':
+    retained=len(a)==5 and a[2].get('text')=='Length=5' and a[3].get('text')=='10,0,0' and a[3].get('resolved_point_world')==[10,0,0] and value['normalized_points'][1]==[5,0,0]
+   elif case=='CircleQuantity':retained=len(a)==3 and a[2].get('text')=='2cm' and a[2].get('circle_size')=='Diameter'
+   elif case=='EllipseQuantity':retained=len(a)==5 and a[1].get('pending_option')=='Degree' and a[3].get('text')=='5mm' and a[4].get('text')=='3mm' and a[3].get('resolved_point_world') is None
+   else:retained=len(a)==3 and a[1].get('kind')=='native_fit_batch' and a[1].get('points_world')==[[1,0,0],[0,1,0],[-1,0,0]]
+   check(case+' owns original accepted values distinct from normalized points',retained)
+   check(case+' retained events bind units frame and previous context',bool(a) and all(e.get('input_mm_per_unit')==1. and 'frame_axes' in e and 'previous_point_world' in e and 'pending_option' in e for e in a))
+   check(case+' original input and Shape have one native Undo',doc.UndoCount==before+1)
+   doc.undo();missing=doc.getObject(command) is None;doc.redo();obj=doc.getObject(command)
+   check(case+' native Undo Redo restores original accepted bytes',missing and obj is not None and bool(raw) and obj.OM9CurveConstruction==raw)
+   path=out/(case+'.FCStd');name=doc.Name;doc.saveAs(str(path));enter('Cancel');App.closeDocument(name);doc=App.openDocument(str(path));obj=doc.getObject(command)
+   check(case+' FCStd restores exact original accepted input',obj is not None and bool(raw) and getattr(obj,'OM9CurveConstruction','')==raw)
+   report['observations'].append(dict(case=case,command=command,raw=raw,construction=value,diagnostic=console.toPlainText()));Gui.Selection.clearSelection();App.closeDocument(doc.Name)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

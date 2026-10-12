@@ -1,4 +1,6 @@
 #include "ThreeDmArchive.h"
+#include "NativeInputTrace.h"
+#include "NativeInputTree.h"
 #include "ThreeDmPointCloud.h"
 #include "ThreeDmCurveOnSurface.h"
 #include "PolycurveContract.h"
@@ -118,7 +120,8 @@ static ExchangeModel readArchiveImpl(const std::filesystem::path& path,double cu
                 const auto& members=definition->InstanceGeometryIdList();
                 ON_wString signedTag;bool signedPlacement=false;
                 if(members.Count()==1&&a->GetUserString(signedSolidTag,signedTag)&&signedTag==L"1"){
-                    auto child=findObject(members[0]);auto solid=child?ON_Brep::Cast(child->Geometry(nullptr)):nullptr;signedPlacement=solid&&solid->IsSolid()&&solid->SolidOrientation()==1;
+                    auto child=findObject(members[0]);auto solid=child?ON_Brep::Cast(child->Geometry(nullptr)):nullptr;
+                    if(solid){InputTree::validate(*solid);OM9_NATIVE_INPUT_ENTRY("archive.brep.SignedPlacementOrientation");signedPlacement=solid->IsSolid()&&solid->SolidOrientation()==1;}
                 }
                 if(item.name.empty()&&!signedPlacement)item.name=utf8(definition->Name());
                 ancestry.push_back(id);
@@ -128,8 +131,19 @@ static ExchangeModel readArchiveImpl(const std::filesystem::path& path,double cu
                 }
                 ancestry.pop_back();return;
             }
+            // Validate the original archive owner before staging a transformed
+            // block member or constructing a BRep from a surface. Downstream
+            // converters keep their own gates; this closes the earlier archive
+            // copy/kernel-construction boundary without claiming ONX_Model::Read
+            // or its native allocations are guarded.
+            if(auto curve=ON_Curve::Cast(g))InputTree::validate(*curve);
+            else if(auto brep=ON_Brep::Cast(g))InputTree::validate(*brep);
+            else if(auto surface=ON_Surface::Cast(g))InputTree::validate(*surface);
+            else if(auto mesh=ON_Mesh::Cast(g))InputTree::validate(*mesh);
+            else if(auto cloud=ON_PointCloud::Cast(g))InputTree::validate(*cloud);
             std::unique_ptr<ON_Geometry> transformed;
             if(!transform.IsIdentity()){
+                OM9_NATIVE_INPUT_ENTRY("archive.geometry.Duplicate");
                 transformed.reset(ON_Geometry::Cast(g->Duplicate()));
                 if(!transformed)throw ExchangeError("Cannot clone block geometry for transform");
                 transformNativeGeometry(*transformed,transform);
@@ -149,8 +163,8 @@ static ExchangeModel readArchiveImpl(const std::filesystem::path& path,double cu
             else if(auto curve=ON_Curve::Cast(g))item.geometry=importCurve(*curve,result.tolerance/factor);
             else if(auto brep=ON_Brep::Cast(g))item.geometry=importBrep(*brep,result.tolerance/factor);
             else if(auto mesh=ON_Mesh::Cast(g))item.geometry=importMesh(*mesh);
-            else if(auto cloud=ON_PointCloud::Cast(g)){validatePointCloud(*cloud);item.geometry=*cloud;}
-            else if(auto surface=ON_Surface::Cast(g)){std::unique_ptr<ON_Brep> brep(surface->BrepForm());if(!brep)throw ExchangeError("Cannot convert surface/extrusion to BRep");item.geometry=importBrep(*brep,result.tolerance/factor);}
+            else if(auto cloud=ON_PointCloud::Cast(g)){validatePointCloud(*cloud);OM9_NATIVE_INPUT_ENTRY("archive.pointcloud.Copy");item.geometry=*cloud;}
+            else if(auto surface=ON_Surface::Cast(g)){OM9_NATIVE_INPUT_ENTRY("archive.surface.BrepForm");std::unique_ptr<ON_Brep> brep(surface->BrepForm());if(!brep)throw ExchangeError("Cannot convert surface/extrusion to BRep");item.geometry=importBrep(*brep,result.tolerance/factor);}
             else throw ExchangeError("Unsupported 3DM object type (annotations and plugin objects are not converted)");
             if(auto s=std::get_if<TopoDS_Shape>(&item.geometry)){if(factor!=1.0){gp_Trsf transform;transform.SetScale(gp_Pnt(0,0,0),factor);*s=BRepBuilderAPI_Transform(*s,transform,true).Shape();}}
             else if(auto mesh=std::get_if<MeshData>(&item.geometry)){for(auto& p:mesh->vertices)for(auto& v:p)v*=factor;}

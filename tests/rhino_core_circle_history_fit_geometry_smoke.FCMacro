@@ -1,0 +1,87 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Native FitPoints precedence, control poles, enumeration and world-once oracle."""
+import json,math,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh,Points
+from PySide6 import QtCore,QtWidgets,QtTest
+sys.path.insert(0,os.environ.get('OM9_FIXTURE_HELPER_DIR',str(Path(__file__).parent)))
+from command_console_support import command_input
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(checks=[],cases=[])
+def check(name,value):
+ report['checks'].append(dict(name=name,passed=bool(value)))
+ (out/'progress.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+def settle():
+ loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(100,loop.quit);loop.exec()
+def enter(text):
+ field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def vec(p):return App.Vector(*p)
+def xyz(p):return [p.x,p.y,p.z]
+def near(a,b):return len(a)==len(b) and all(max(abs(x-y)for x,y in zip(p,q))<1e-6 for p,q in zip(a,b))
+def expected(owner,kind):
+ parent=owner.getGlobalPlacement()*owner.Placement.inverse()
+ if kind=='curve':p=owner.Shape.Edges[0].Curve.getPoles()
+ elif kind=='surface':p=[v for row in owner.Shape.Faces[0].Surface.getPoles()for v in row]
+ elif kind=='cloud':p=owner.Points.Points
+ elif kind=='mesh':p=[v.Vector for v in owner.Mesh.Points]
+ else:p=[v.Point for v in owner.Shape.Vertexes]
+ return [xyz(parent.multVec(v))for v in p]
+def paired(child):
+ try:
+  v=json.loads(child.OM9GeometryResult);s=Part.Shape();s.importBrepFromString(v['output_snapshots'][0]['geometry_data']['native_master']['payload'])
+  a,b=child.Shape.Edges[0],s.Edges[0]
+  return s.isValid()and s.isClosed()and all((a.valueAt(a.FirstParameter+f*(a.LastParameter-a.FirstParameter))-b.valueAt(b.FirstParameter+f*(b.LastParameter-b.FirstParameter))).Length<1e-7 for f in [0,.2,.5,.8,1])
+ except (ValueError,KeyError,IndexError,AttributeError):return False
+def run():
+ global doc,field
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM
+  report['module']=OM.__file__;field=command_input(Gui.getMainWindow());doc=App.newDocument('HistoryFitGeometry');doc.UndoMode=1
+  OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+  settings=doc.addObject('OpenMatrix9Gui::HistorySettings','OM9HistorySettings');settings.BrokenHistoryWarning=False
+  group=doc.addObject('App::Part','FitParent');group.Placement=App.Placement(vec([12,-8,4]),App.Rotation(vec([1,2,3]),23))
+  ring=[vec(p)for p in [[5,0,0],[0,5,0],[-5,0,0],[0,-5,0]]]
+  net=[[vec(p)for p in row]for row in [[[-4,-3,0],[0,-5,0],[4,-3,0]],[[-4,3,0],[0,5,0],[4,3,0]]]]
+  c=Part.BSplineCurve();c.buildFromPolesMultsKnots(ring,[4,4],[0.,1.],False,3,[1.,2.,3.,4.])
+  periodic=Part.BSplineCurve();periodic.buildFromPolesMultsKnots(ring,[1,1,1,1,1],[0.,1.,2.,3.,4.],True,2,[1.,2.,3.,4.])
+  b=Part.BezierCurve();b.setPoles(ring);b.setWeight(2,.5)
+  s=Part.BSplineSurface();s.buildFromPolesMultsKnots(net,[2,2],[3,3],[0.,1.],[0.,1.],False,False,1,2,[[1.,2.,3.],[4.,5.,6.]])
+  bs=Part.BezierSurface();bs.increase(1,2)
+  for u in range(2):
+   for v in range(3):bs.setPole(u+1,v+1,net[u][v]);bs.setWeight(u+1,v+1,u*3+v+1)
+  triangle=lambda points:Part.Face(Part.makePolygon([vec(p)for p in points+[points[0]]]))
+  fallback=Part.makeCompound([triangle([[5,0,0],[0,5,0],[-5,0,0]]),triangle([[-5,0,0],[0,-5,0],[5,0,0]])])
+  cases=[('RationalNurbs','curve',c.toShape(),''),('PeriodicNurbs','curve',periodic.toShape(),''),('RationalBezier','curve',b.toShape(),''),
+   ('NurbsSurface','surface',s.toShape(),''),('NurbsFace','surface',s.toShape(),'Face1'),('BezierSurface','surface',bs.toShape(),''),
+   ('BezierFace','surface',bs.toShape(),'Face1'),('CompoundVertices','vertices',fallback,''),('Cloud','cloud',None,''),('Mesh','mesh',None,'')]
+  for name,kind,shape,sub in cases:
+   owner=doc.addObject('Points::Feature'if kind=='cloud'else'Mesh::Feature'if kind=='mesh'else'Part::Feature',name)
+   if kind=='cloud':owner.Points=Points.Points(ring)
+   elif kind=='mesh':owner.Mesh=Mesh.Mesh([(ring[0],ring[1],ring[2]),(ring[0],ring[2],ring[3])])
+   else:owner.Shape=shape
+   group.addObject(owner);owner.Placement=App.Placement(vec([2,3,1]),App.Rotation(vec([0,0,1]),31));doc.recompute()
+   Gui.Selection.clearSelection();Gui.Selection.addSelection(owner,sub)if sub else Gui.Selection.addSelection(owner)
+   before=len(doc.Objects);enter('Circle');enter('FitPoints');enter('History=Yes');enter('Selection');enter('')
+   check(name+' initial command commits one recorded Circle',len(doc.Objects)==before+1 and doc.Objects[-1].TypeId=='OpenMatrix9Gui::CircleHistory')
+   child=doc.Objects[-1];want=expected(owner,kind);initial=json.loads(child.OM9GeometryResult)
+   check(name+' native input follows full control-pole/vertex order',near(initial['operation_context']['construction']['normalized_points'],want))
+   check(name+' initial output master stays paired',paired(child))
+   row=dict(name=name,kind=kind,subelement=sub,source=owner.Name,child=child.Name,initial=initial,recorded_recipe=list(child.Recipe),recorded_points_world=[xyz(v)for v in child.Points],recorded_source_roles=list(child.SourceRoles),recorded_source_parameters=list(child.SourceParameters),fit_deviation=child.FitDeviation,approx_deviation=child.ApproxDeviation,expected_initial=want)
+   report['cases'].append(row);child.touch();doc.recompute()
+   check(name+' unchanged History replay keeps paired geometry',paired(child))
+   if child.OM9GeometryResult:
+    row['replay']=json.loads(child.OM9GeometryResult);selected=row['replay']['input_snapshots'][1]['selected_points_world']
+    check(name+' current History selected points match native oracle',near(selected,want))
+   else:check(name+' current History selected points match native oracle',False)
+   owner.Placement.Base=owner.Placement.Base+vec([1,-2,3]);doc.recompute();row['expected_edited']=expected(owner,kind)
+   check(name+' edited source replay keeps paired geometry',paired(child))
+   if child.OM9GeometryResult:
+    row['edited']=json.loads(child.OM9GeometryResult);check(name+' edited selected geometry applies parent/own transform once',near(row['edited']['input_snapshots'][1]['selected_points_world'],row['expected_edited']))
+   else:check(name+' edited selected geometry applies parent/own transform once',False)
+   enter('Cancel')
+  report['ok']=all(c['passed']for c in report['checks']);doc.saveAs(str(out/'fit_geometry.FCStd'))
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

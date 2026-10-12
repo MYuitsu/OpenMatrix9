@@ -4,6 +4,7 @@
 #include "SurfaceRefit.h"
 #include "SurfaceConstraints.h"
 #include "RustBridge.h"
+#include "NativeSurfaceRequest.h"
 #include "CurveController.h"
 #include "CoreDistance.h"
 #include "CorePictureFrame.h"
@@ -35,6 +36,7 @@
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QSpinBox>
+#include <QSignalBlocker>
 #include <QFormLayout>
 #include <QVBoxLayout>
 #include <QTableWidget>
@@ -70,7 +72,7 @@ void SurfaceController::deactivate(){enabled=false;cancel();}
 bool SurfaceController::active()const{return document&&om9_surface_phase()!=0;}
 bool SurfaceController::available(std::size_t i)const{
     auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
-    return enabled&&handles(i)&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&!dialog&&dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())&&Gui::Control().isAllowedAlterDocument(doc);
+    return enabled&&handles(i)&&om9_native_surface_declared(om9_surface_kind(om9_command_id(i)))&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&!dialog&&dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())&&Gui::Control().isAllowedAlterDocument(doc);
 }
 bool SurfaceController::valid()const{
     auto* gui=Gui::Application::Instance->activeDocument();return enabled&&document==App::GetApplication().getActiveDocument()&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&Gui::Control().isAllowedAlterDocument(document);
@@ -99,14 +101,15 @@ bool SurfaceController::start(std::size_t i,const QString& invoked){
 }
 void SurfaceController::clearPreview(){for(const auto& [root,node]:previews){if(root->findChild(node)>=0)root->removeChild(node);root->unref();}previews.clear();}
 void SurfaceController::cancel(){
+    optionBridge.close();optionErrorPending=false;
     om9_surface_cancel();document=nullptr;inputs.clear();chainInputs.clear();slashPicking=0;slashTable=nullptr;clearPreview();
     if(dialog){auto* old=dialog.data();dialog=nullptr;old->disconnect(this);old->hide();old->deleteLater();}status=nullptr;buttons=nullptr;
 }
-void SurfaceController::error(const std::exception& e){const auto text=QString::fromUtf8(e.what());prompt(text);if(status)status->setText(text);if(buttons)buttons->button(QDialogButtonBox::Ok)->setEnabled(false);Base::Console().warning("OpenMatrix9 surface: %s\n",e.what());}
+void SurfaceController::error(const std::exception& e){clearPreview();const auto text=QString::fromUtf8(e.what());prompt(text);if(status)status->setText(text);if(buttons)buttons->button(QDialogButtonBox::Ok)->setEnabled(false);Base::Console().warning("OpenMatrix9 surface: %s\n",e.what());}
 void SurfaceController::add(const std::string& object,const std::string& sub){
     if(!active()||!valid()||om9_surface_phase()==4)return;
     try{
-        Base::PyGILStateLocker lock;SurfaceInput input{object,sub};input.guards.push_back(captureObject(*document,object,sub));ShapeRef wire(surfaceWire(*document,input));ShapeRef closed(PyObject_CallMethod(wire.p,"isClosed",nullptr));
+        Base::PyGILStateLocker lock;SurfaceInput input{object,sub};input.guards.push_back(captureObject(*document,object,sub));ShapeRef wire(surfaceWire(*document,input,surfaceOperation(options.kind)));ShapeRef closed(PyObject_CallMethod(wire.p,"isClosed",nullptr));
         if(!closed.p){PyErr_Clear();throw std::runtime_error("Cannot inspect curve closure");}input.closed=PyObject_IsTrue(closed.p)==1;
         const auto key=object+"."+sub;
         if(om9_surface_phase()==5){
@@ -146,7 +149,7 @@ void SurfaceController::submit(const QString& text){
             try {Base::PyGILStateLocker lock;SurfaceInput rail=chainInputs.front();
                 rail.guards.clear();
                 for(const auto& edge:chainInputs){rail.chain.emplace_back(edge.object,edge.sub);rail.guards.insert(rail.guards.end(),edge.guards.begin(),edge.guards.end());}
-                ShapeRef wire(surfaceWire(*document,rail)),closed(PyObject_CallMethod(wire.p,"isClosed",nullptr));
+                ShapeRef wire(surfaceWire(*document,rail,surfaceOperation(options.kind))),closed(PyObject_CallMethod(wire.p,"isClosed",nullptr));
                 if(!closed.p)throw std::runtime_error("Cannot inspect rail chain");rail.closed=PyObject_IsTrue(closed.p)==1;
                 if(!om9_surface_chain_finish(rail.closed)){prompt(message());return;}
                 inputs.push_back(rail);chainInputs.clear();refresh();
@@ -184,10 +187,10 @@ void SurfaceController::optionsDialog(){
         connect(closed,&QCheckBox::toggled,this,[this](bool b){options.closed=b;preview();});
     }
     auto* sectionMode=new QComboBox(dialog);sectionMode->setObjectName("OM9SectionMode");sectionMode->addItems({"Do Not Simplify","Rebuild","Refit"});form->addRow("Cross-section curves",sectionMode);
-    auto* pointCount=new QSpinBox(dialog);pointCount->setObjectName("OM9SectionPointCount");pointCount->setRange(2,256);pointCount->setValue(16);pointCount->setEnabled(false);form->addRow("Control points",pointCount);
+    auto* pointCount=new CommandOptionSpinBox(dialog);pointCount->setObjectName("OM9SectionPointCount");pointCount->setRange(2,256);pointCount->setValue(16);pointCount->setEnabled(false);form->addRow("Control points",pointCount);
     connect(sectionMode,&QComboBox::currentIndexChanged,this,[this,pointCount](int i){options.sectionMode=i;pointCount->setEnabled(i==1);preview();});
     connect(pointCount,&QSpinBox::valueChanged,this,[this](int i){options.pointCount=i;preview();});
-    auto* tolerance=new QDoubleSpinBox(dialog);tolerance->setObjectName("OM9RefitTolerance");tolerance->setDecimals(7);tolerance->setRange(1e-7,1e6);tolerance->setValue(options.tolerance);tolerance->setSuffix(" mm");tolerance->setEnabled(false);form->addRow("Refit tolerance",tolerance);
+    auto* tolerance=new CommandOptionDoubleSpinBox(dialog);tolerance->setObjectName("OM9RefitTolerance");tolerance->setDecimals(7);tolerance->setRange(1e-7,1e6);tolerance->setValue(options.tolerance);tolerance->setSuffix(" mm");tolerance->setEnabled(false);form->addRow("Refit tolerance",tolerance);
     connect(sectionMode,&QComboBox::currentIndexChanged,this,[this,tolerance](int i){tolerance->setEnabled(i==2);preview();});
     connect(tolerance,&QDoubleSpinBox::valueChanged,this,[this](double value){options.tolerance=value;preview();});
     auto* history=new QCheckBox("Recompute when source curves change",dialog);history->setObjectName("OM9SurfaceHistory");history->setChecked(options.history);history->setEnabled(!options.historyCommand);form->addRow("History",history);
@@ -230,7 +233,66 @@ void SurfaceController::optionsDialog(){
     buttons=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel,dialog);layout->addWidget(buttons);
     connect(buttons,&QDialogButtonBox::accepted,this,[this]{commit();});connect(buttons,&QDialogButtonBox::rejected,dialog,&QDialog::reject);
     connect(dialog,&QDialog::rejected,this,[this]{cancel();prompt("Surface command cancelled");});
-    dialog->resize(560,380);dialog->show();preview();
+    bindOptions();dialog->resize(560,380);dialog->show();preview();
+}
+namespace {
+struct SurfaceOptionBinding {const char* key;const char* object;};
+const SurfaceOptionBinding surfaceOptionBindings[]={
+    {"Style","OM9LoftStyle"},{"Closed","OM9ClosedLoft"},{"Closed","OM9ClosedSweep"},{"Frenet","OM9SweepFrenet"},
+    {"MaintainHeight","OM9MaintainHeight"},{"SectionMode","OM9SectionMode"},{"PointCount","OM9SectionPointCount"},
+    {"Tolerance","OM9RefitTolerance"},{"History","OM9SurfaceHistory"},{"DynamicPreview","OM9SurfaceDynamicPreview"},
+    {"ContinuityA","OM9ContinuityA"},{"ContinuityB","OM9ContinuityB"},{"MatchStart","OM9MatchStartTangents"},{"MatchEnd","OM9MatchEndTangents"}
+};
+}
+void SurfaceController::bindOptions(){
+    const char* feature=options.kind==1?(options.historyCommand?"OM9-SURFACE-002":"OM9-SURFACE-001"):options.kind==2?(options.historyCommand?"OM9-SURFACE-004":"OM9-SURFACE-003"):"OM9-SURFACE-009";
+    optionBridge.open(10+options.kind,1.,QString::fromUtf8(feature));
+    for(const auto& binding:surfaceOptionBindings){auto* widget=dialog->findChild<QWidget*>(binding.object);if(!widget)continue;
+        QObject::disconnect(widget,nullptr,this,nullptr);
+        const QString key=QString::fromUtf8(binding.key);
+        if(auto* check=qobject_cast<QCheckBox*>(widget)){
+            optionBridge.seed(binding.key,3,check->isChecked()?1.:0.);
+            optionBridge.gate(binding.key,check->isEnabled(),check->toolTip().isEmpty()?"This option is unavailable for the selected input":check->toolTip());
+        }else if(auto* combo=qobject_cast<QComboBox*>(widget)){
+            const auto input=optionBridge.choiceInput(binding.key,combo->currentIndex());if(optionBridge.event(4,input)==2)optionBridge.accept();
+            optionBridge.gate(binding.key,combo->isEnabled(),combo->toolTip());
+        }else if(auto* count=qobject_cast<QSpinBox*>(widget)){
+            optionBridge.seed(binding.key,5,count->value());
+        }else if(auto* number=qobject_cast<QDoubleSpinBox*>(widget)){
+            optionBridge.seed(binding.key,5,number->value());
+        }
+        optionBridge.bind(widget,binding.key,this,[this](unsigned kind,const QString& text,double number){optionEvent(kind,text,number);});
+    }
+    options=optionValues(false);renderOptionControls();CurveController::instance().renderOptions(optionBridge,options.kind==1?"Sweep1 ":options.kind==2?"Sweep2 ":"Loft ");
+}
+SurfaceOptions SurfaceController::optionValues(bool candidate)const{
+    SurfaceOptions result=options;
+    auto boolean=[&](const char* key,bool& target){const auto v=optionBridge.value(key,candidate);if(v.kind)target=v.number!=0.;};
+    auto choice=[&](const char* key,unsigned& target){const auto v=optionBridge.value(key,candidate);if(v.kind)target=v.choice;};
+    choice("Style",result.style);choice("SectionMode",result.sectionMode);choice("ContinuityA",result.continuityA);choice("ContinuityB",result.continuityB);
+    boolean("Closed",result.closed);boolean("Frenet",result.frenet);boolean("MaintainHeight",result.maintainHeight);boolean("DynamicPreview",result.preview);boolean("History",result.history);boolean("MatchStart",result.matchStart);boolean("MatchEnd",result.matchEnd);
+    const auto count=optionBridge.value("PointCount",candidate),tolerance=optionBridge.value("Tolerance",candidate);if(count.kind)result.pointCount=unsigned(count.number);if(tolerance.kind)result.tolerance=tolerance.number;
+    return result;
+}
+void SurfaceController::renderOptionControls(){
+    if(!dialog)return;
+    for(const auto& binding:surfaceOptionBindings)optionBridge.render(dialog->findChild<QWidget*>(binding.object),binding.key);
+}
+bool SurfaceController::optionEvent(unsigned kind,const QString& text,double number){
+    if(!active()||!dialog||!optionBridge.active())return false;
+    if(!valid()){cancel();return true;}
+    auto& cmd=CurveController::instance();optionBridge.draft(cmd.draftInput());const auto outcome=optionBridge.event(kind,text,number);
+    if(outcome==0){if(kind!=6||!optionErrorPending)return false;CommandOptionsBridge::discardDrafts(dialog);optionErrorPending=false;cmd.consumeOptionInput(kind);renderOptionControls();preview();cmd.renderOptions(optionBridge,"Surface ");return true;}
+    auto fail=[&](const QString& message){optionErrorPending=true;renderOptionControls();if(status)status->setText(message);if(buttons)buttons->button(QDialogButtonBox::Ok)->setEnabled(false);cmd.renderOptions(optionBridge,message+"; ");};
+    if(outcome==4){fail(optionBridge.error());return true;}
+    if(outcome==2){
+        try{Base::PyGILStateLocker lock;const auto proposed=optionValues(true);ShapeRef shape(buildSurface(*document,inputs,proposed));
+            if(!valid()||!optionBridge.accept()){fail("Option session changed; restart the command");return true;}
+            options=proposed;optionErrorPending=false;cmd.consumeOptionInput(kind);renderOptionControls();preview(shape.p);
+        }catch(const std::exception& error){optionBridge.accept(false);fail(QString::fromUtf8(error.what()));return true;}
+    }else if(outcome==3){const auto action=optionBridge.action();cmd.consumeOptionInput(kind);submit(action);if(!active())return true;}
+    else {cmd.consumeOptionInput(kind);if(kind==6){CommandOptionsBridge::discardDrafts(dialog);optionErrorPending=false;renderOptionControls();preview();}}
+    cmd.renderOptions(optionBridge,options.kind==1?"Sweep1 ":options.kind==2?"Sweep2 ":"Loft ");return true;
 }
 void SurfaceController::updateSlashes(){
     if(!slashTable)return;slashTable->setRowCount(int(options.slashes.size()));
@@ -249,8 +311,8 @@ void SurfaceController::alignInputs(bool automatic){
     if(!active()||!valid()||!dialog)return;
     try {Base::PyGILStateLocker lock;auto proposed=inputs;const unsigned rails=options.kind==1?1:options.kind==2?2:0;
         if(automatic){
-            ShapeRef reference(surfaceWire(*document,inputs[rails]));
-            for(std::size_t i=rails+1;i<inputs.size();++i){auto natural=inputs[i];natural.seam=0;natural.reverse=false;ShapeRef wire(surfaceWire(*document,natural));
+            ShapeRef reference(surfaceWire(*document,inputs[rails],surfaceOperation(options.kind)));
+            for(std::size_t i=rails+1;i<inputs.size();++i){auto natural=inputs[i];natural.seam=0;natural.reverse=false;ShapeRef wire(surfaceWire(*document,natural,surfaceOperation(options.kind)));
                 automaticSurfaceAlignment(reference.p,wire.p,proposed[i].seam,proposed[i].reverse);}
         }else for(std::size_t i=rails;i<inputs.size();++i)proposed[i].seam=0;
         inputs=std::move(proposed);auto* table=dialog->findChild<QTableWidget*>("OM9SurfaceInputs");
@@ -259,14 +321,14 @@ void SurfaceController::alignInputs(bool automatic){
         preview();
     }catch(const std::exception& e){error(e);}
 }
-void SurfaceController::preview(){
-    clearPreview();if(!active()||!valid())return;
+void SurfaceController::preview(PyObject* prepared){
+    if(!active()||!valid())return;
     try{
-        Base::PyGILStateLocker lock;ShapeRef shape(buildSurface(*document,inputs,options));
-        if(!options.preview){if(status)status->setText("Preview hidden. Click Preview to display it; OK validates the current settings.");if(buttons)buttons->button(QDialogButtonBox::Ok)->setEnabled(true);return;}
+        Base::PyGILStateLocker lock;ShapeRef shape(prepared?Py_NewRef(prepared):buildSurface(*document,inputs,options));
+        if(!options.preview){clearPreview();if(status)status->setText("Preview hidden. Click Preview to display it; OK validates the current settings.");if(buttons)buttons->button(QDialogButtonBox::Ok)->setEnabled(!optionErrorPending);return;}
         ShapeRef inventor(PyObject_CallMethod(shape.p,"writeInventor",nullptr));
         if(!inventor.p){PyErr_Clear();throw std::runtime_error("Cannot render surface preview");}const char* text=PyUnicode_AsUTF8(inventor.p);if(!text)throw std::runtime_error("Invalid preview data");
-        auto* gui=Gui::Application::Instance->activeDocument();for(auto* mdi:gui->getMDIViews()){
+        clearPreview();auto* gui=Gui::Application::Instance->activeDocument();for(auto* mdi:gui->getMDIViews()){
             auto* view=dynamic_cast<Gui::View3DInventor*>(mdi);if(!view)continue;auto* root=dynamic_cast<SoSeparator*>(view->getViewer()->getSceneGraph());if(!root)continue;
             SoInput input;input.setBuffer(text,std::strlen(text));auto* mesh=SoDB::readAll(&input);if(!mesh)throw std::runtime_error("Cannot load preview mesh");
             auto* wrapper=new SoSeparator;wrapper->setName("OM9SurfacePreview");auto* skip=new SoPickStyle;skip->style=SoPickStyle::UNPICKABLE;wrapper->addChild(skip);wrapper->addChild(mesh);root->ref();root->addChild(wrapper);previews.emplace_back(root,wrapper);
@@ -276,6 +338,7 @@ void SurfaceController::preview(){
 }
 void SurfaceController::commit(){
     if(!active()||!valid()){cancel();return;}
+    if(!optionBridge.pending().isEmpty()||optionErrorPending||CommandOptionsBridge::hasDrafts(dialog)||!CurveController::instance().draftInput().trimmed().isEmpty()){CurveController::instance().renderOptions(optionBridge,"Accept or cancel the pending option first; ");return;}
     try{
         Base::PyGILStateLocker lock;ShapeRef shape(buildSurface(*document,inputs,options));commitSurface(*document,shape.p,inputs,options);
         om9_sidebar_record_execution(command,true);cancel();prompt("Surface created. Command:");
@@ -286,8 +349,8 @@ bool SurfaceController::eventFilter(QObject* watched,QEvent* event){
     if(!active()||Gui::Application::Instance->isClosing())return false;if(!valid()){cancel();return false;}
     auto* view=containing(watched);
     if(event->type()==QEvent::KeyPress&&CoreKeyboard::inputContext(watched)){
-        auto* key=static_cast<QKeyEvent*>(event);if(key->key()==Qt::Key_Escape){cancel();prompt("Surface command cancelled");return true;}
-        if(view&&(key->key()==Qt::Key_Return||key->key()==Qt::Key_Enter||key->key()==Qt::Key_Space)){submit({});return true;}
+        auto* key=static_cast<QKeyEvent*>(event);if(key->key()==Qt::Key_Escape){if(optionEvent(6))return true;cancel();prompt("Surface command cancelled");return true;}
+        if(view&&(key->key()==Qt::Key_Return||key->key()==Qt::Key_Enter||key->key()==Qt::Key_Space)){if(!optionEvent(2,CurveController::instance().draftInput()))submit({});return true;}
     }
     if((dialog&&!slashPicking)||!view||event->type()!=QEvent::MouseButtonPress)return false;
     auto* mouse=static_cast<QMouseEvent*>(event);if(mouse->button()!=Qt::LeftButton||mouse->modifiers()&(Qt::ControlModifier|Qt::AltModifier|Qt::MetaModifier))return false;
@@ -302,13 +365,13 @@ bool SurfaceController::eventFilter(QObject* watched,QEvent* event){
         const auto& rail=inputs[slashPicking-1];bool matches=rail.object==object->getNameInDocument()&&(rail.sub.empty()||rail.sub==sub);
         for(const auto& ref:rail.chain)matches=matches||(ref.first==object->getNameInDocument()&&(ref.second.empty()||ref.second==sub));
         if(!matches){prompt(slashPicking==1?"Pick the first slash point on rail A":"Pick the second slash point on rail B");return true;}
-        try{Base::PyGILStateLocker lock;ShapeRef wire(surfaceWire(*document,rail));const auto& p=picked->getPoint();
+        try{Base::PyGILStateLocker lock;ShapeRef wire(surfaceWire(*document,rail,surfaceOperation(options.kind)));const auto& p=picked->getPoint();
             const double fraction=surfaceRailFraction(wire.p,{p[0],p[1],p[2]});
             if(slashPicking==1){slashFirst=fraction;slashPicking=2;prompt("Add Slash: pick the matching point on rail B");}
             else {addSlash(slashFirst,fraction);slashPicking=1;prompt("Add Slash: pick another point on rail A, or Enter to finish");}
         }catch(const std::exception& e){error(e);}return true;
     }
-    if(om9_surface_phase()!=5){try{Base::PyGILStateLocker lock;ShapeRef wire(surfaceWire(*document,{object->getNameInDocument(),""}));sub.clear();}catch(const std::exception&){} }
+    if(om9_surface_phase()!=5){try{Base::PyGILStateLocker lock;ShapeRef wire(surfaceWire(*document,{object->getNameInDocument(),""},surfaceOperation(options.kind)));sub.clear();}catch(const std::exception&){} }
     add(object->getNameInDocument(),sub);return true;
 }
 }

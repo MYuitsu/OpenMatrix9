@@ -1,6 +1,7 @@
 #pragma once
 #include <QPlainTextEdit>
 #include <functional>
+#include "CommandOptions.h"
 class QListWidget;
 namespace OpenMatrix9Gui {
 // One selectable document, with only its current input suffix editable.
@@ -12,12 +13,16 @@ public:
     void setInputText(const QString&);
     void insertInput(const QString&);
     void setPrompt(const QString&);
+    void setOptionSnapshot(const CommandOptionSnapshot&);
     void logMessage(const QString&);
+    void logInvocation(const QString&);
     QString takeInput();
     std::function<void()> accepted,cancelled;
     std::function<void(int)> recalled;
     std::function<bool()> completionEnabled;
     std::function<bool(const QString&)> completionAvailable;
+    std::function<bool(const QString&)> optionActivated;
+    std::function<bool(int)> optionNavigate;
 protected:
     void keyPressEvent(QKeyEvent*)override;
     void insertFromMimeData(const QMimeData*)override;
@@ -36,6 +41,7 @@ private:
     void editPosition();
     void updateBoundary();
     void stylePrompt();
+    bool followHistory()const;
     QString optionAt(const QPoint&)const;
     void updatePanes();
     void keepInputVisible();
@@ -50,6 +56,7 @@ private:
     QString pressedOption;
     QString dismissedCompletion;
     QString currentPrompt="Command: ",lastMessage;
+    CommandOptionSnapshot currentOptions;
     int promptStart=0,inputStart=0;
 };
 }

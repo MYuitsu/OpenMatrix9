@@ -10,6 +10,75 @@ pub struct Cage {
     pub points: Vec<[f64; 3]>,
     pub weights: Vec<f64>,
 }
+/// Immutable basis borrowed for a synchronous validation call, before copying.
+pub struct BorrowedCage<'a>{
+    pub counts:[usize;3],pub degrees:[usize;3],pub knots:[&'a [f64];3],
+    pub points:&'a [[f64;3]],pub weights:&'a [f64],
+}
+impl BorrowedCage<'_>{
+    pub fn validate(&self)->Result<(),Error>{
+        let total=cage_dimensions(self.counts,self.degrees).map_err(|_|Error::InvalidCage)?;
+        for axis in 0..3{
+            let n=self.counts[axis];let p=self.degrees[axis];let knots=self.knots[axis];
+            if knots.len()!=n+p+1||knots.iter().any(|x|!x.is_finite())||knots.windows(2).any(|w|w[0]>w[1]){return Err(Error::InvalidCage);}
+            let lo=knots[p];let hi=knots[n];
+            if lo>=hi||!(hi-lo).is_finite()||knots[..=p].iter().any(|x|*x!=lo)||knots[n..].iter().any(|x|*x!=hi)
+                ||knots[p+1]==lo||knots[n-1]==hi{return Err(Error::InvalidCage);}
+            let mut run=1;for w in knots.windows(2){run=if w[0]==w[1]{run+1}else{1};if run>p+1{return Err(Error::InvalidCage);}}
+        }
+        if self.points.len()!=total||self.weights.len()!=total||self.points.iter().flatten().any(|v|!v.is_finite())
+            ||self.weights.iter().any(|w|!w.is_finite()||*w<=0.){return Err(Error::InvalidCage);}
+        Ok(())
+    }
+}
+/// # Safety
+/// Descriptor/pose must be live initialized aligned storage. For an admitted
+/// header its arrays must remain immutable, readable, in one allocation each
+/// for the synchronous call. Invalid headers need no live array data. No handle
+/// or array is retained; native callers retain allocation/free responsibility.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_cage_validate_descriptor(d:*const Om9CageDescriptor,pose:*const f64)->i32{
+    ffi_status(||{
+        if !readable(d,1)||!readable(pose,16){return Err(Error::InvalidBuffer);}
+        // SAFETY: caller supplies initialized descriptor/pose; borrowed arrays
+        // are gated before access and cannot escape this synchronous query.
+        unsafe{borrow_descriptor(&*d,&pose.cast::<[f64;16]>().read())}?;Ok(0)
+    })
+}
+/// # Safety
+/// Each admitted nonempty array is initialized immutable readable storage for
+/// the call. XYZ/UVW records are three aligned doubles; triangle indices are
+/// signed native integers of index_bytes4 or8, with their natural alignment.
+/// Counts/byte overflow are checked before access. No buffers are retained.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_cage_binding_admit(source:*const [f64;3],source_count:usize,
+    parameters:*const [f64;3],parameter_count:usize,indices:*const std::ffi::c_void,
+    index_count:usize,index_bytes:u32,mesh:bool)->i32{
+    ffi_status(||{
+        if source_count>MAX_POINTS||parameter_count>MAX_POINTS{return Err(Error::Capacity);}
+        if source_count!=parameter_count||!readable(source,source_count)||!readable(parameters,parameter_count)
+            ||!matches!(index_bytes,4|8){return Err(Error::InvalidBuffer);}
+        if mesh{
+            if source_count==0||index_count==0||index_count%3!=0{return Ok(-13);}
+            if !crate::discrete_snapshot::counts_allowed(8,source_count,index_count/3){return Err(Error::Capacity);}
+            if (index_bytes==4&&!readable(indices.cast::<i32>(),index_count))
+                ||(index_bytes==8&&!readable(indices.cast::<i64>(),index_count)){return Err(Error::InvalidBuffer);}
+        }
+        // SAFETY: admitted envelopes, initialized immutable storage remains a
+        // caller condition. Empty slices never borrow a null pointer.
+        let source=if source_count==0{&[]}else{unsafe{std::slice::from_raw_parts(source,source_count)}};
+        let parameters=if parameter_count==0{&[]}else{unsafe{std::slice::from_raw_parts(parameters,parameter_count)}};
+        if source.iter().chain(parameters).flatten().any(|v|!v.is_finite()){return Err(Error::NonFinite);}
+        if mesh{for start in (0..index_count).step_by(3){
+            let mut face=[0u64;3];
+            for a in 0..3{let value=if index_bytes==4{(unsafe{indices.cast::<i32>().add(start+a).read()}) as i64}
+                else{unsafe{indices.cast::<i64>().add(start+a).read()}};
+                if value<0{return Ok(-13);}face[a]=value as u64;}
+            if !crate::discrete_snapshot::triangle_allowed(face,source_count){return Ok(-13);}
+        }}
+        Ok(0)
+    })
+}
 #[derive(Debug, Clone, PartialEq)]
 pub enum Region {
     Global,
@@ -60,16 +129,7 @@ impl Cage {
         hi: [f64; 3],
     ) -> Result<(Self, [f64; 16]), Error> {
         let total = box_dimensions(counts, degrees)?;
-        let mut reference = IDENTITY;
-        for a in 0..3 {
-            let span = hi[a] - lo[a];
-            if !lo[a].is_finite() || !hi[a].is_finite() || !span.is_finite() || span <= 0. {
-                return Err(Error::InvalidFrame);
-            }
-            reference[a * 4 + a] = 1. / span;
-            reference[a * 4 + 3] = -lo[a] / span;
-        }
-        validate_frame(&reference)?;
+        let reference = box_reference(lo,hi)?;
         let knots: [Vec<f64>; 3] = std::array::from_fn(|a| {
             let n = counts[a];
             let p = degrees[a];
@@ -114,51 +174,8 @@ impl Cage {
         Ok((cage, reference))
     }
     pub fn validate(&self) -> Result<(), Error> {
-        let mut total = 1usize;
-        for axis in 0..3 {
-            let n = self.counts[axis];
-            let p = self.degrees[axis];
-            let knots = &self.knots[axis];
-            if !(1..=16).contains(&p) || n <= p || n > MAX_POINTS {
-                return Err(Error::InvalidCage);
-            }
-            total = total
-                .checked_mul(n)
-                .filter(|n| *n <= MAX_POINTS)
-                .ok_or(Error::InvalidCage)?;
-            if knots.len() != n + p + 1
-                || knots.iter().any(|x| !x.is_finite())
-                || knots.windows(2).any(|w| w[0] > w[1])
-            {
-                return Err(Error::InvalidCage);
-            }
-            let lo = knots[p];
-            let hi = knots[n];
-            if lo >= hi
-                || !(hi - lo).is_finite()
-                || knots[..=p].iter().any(|x| *x != lo)
-                || knots[n..].iter().any(|x| *x != hi)
-                || knots[p + 1] == lo
-                || knots[n - 1] == hi
-            {
-                return Err(Error::InvalidCage);
-            }
-            let mut run = 1;
-            for w in knots.windows(2) {
-                run = if w[0] == w[1] { run + 1 } else { 1 };
-                if run > p + 1 {
-                    return Err(Error::InvalidCage);
-                }
-            }
-        }
-        if self.points.len() != total
-            || self.weights.len() != total
-            || self.points.iter().flatten().any(|v| !v.is_finite())
-            || self.weights.iter().any(|w| !w.is_finite() || *w <= 0.)
-        {
-            return Err(Error::InvalidCage);
-        }
-        Ok(())
+        BorrowedCage{counts:self.counts,degrees:self.degrees,knots:std::array::from_fn(|a|self.knots[a].as_slice()),
+            points:&self.points,weights:&self.weights}.validate()
     }
     /// Evaluate in the actual knot domains. Outside parameters continue the
     /// first/last polynomial span; invalid rational denominators are rejected.
@@ -493,14 +510,7 @@ impl Deformation {
     pub fn new(cage: Cage, world_to_parameter: [f64; 16], region: Region) -> Result<Self, Error> {
         cage.validate()?;
         validate_frame(&world_to_parameter)?;
-        if let Region::Local { min, max, falloff } = &region {
-            if !falloff.is_finite()
-                || *falloff < 0.
-                || (0..3).any(|i| !min[i].is_finite() || !max[i].is_finite() || min[i] > max[i])
-            {
-                return Err(Error::InvalidRegion);
-            }
-        }
+        validate_region(&region)?;
         let affine_current = cage.exact_normalized_affine();
         Ok(Self {
             cage,
@@ -594,11 +604,23 @@ fn validate_frame(m: &[f64; 16]) -> Result<(), Error> {
         Ok(())
     }
 }
-fn box_dimensions(counts: [usize; 3], degrees: [usize; 3]) -> Result<usize, Error> {
+pub(crate) fn box_reference(lo:[f64;3],hi:[f64;3])->Result<[f64;16],Error>{
+    let mut reference=IDENTITY;
+    for a in 0..3{
+        let span=hi[a]-lo[a];
+        if !lo[a].is_finite()||!hi[a].is_finite()||!span.is_finite()||span<=0.{return Err(Error::InvalidFrame);}
+        reference[a*4+a]=1./span;reference[a*4+3]=-lo[a]/span;
+    }
+    validate_frame(&reference)?;Ok(reference)
+}
+pub(crate) fn box_dimensions(counts: [usize; 3], degrees: [usize; 3]) -> Result<usize, Error> {
+    if counts.iter().any(|n|!(2..=128).contains(n)){return Err(Error::InvalidCage);}
+    cage_dimensions(counts,degrees)
+}
+fn cage_dimensions(counts:[usize;3],degrees:[usize;3])->Result<usize,Error>{
     let mut total = 1usize;
     for a in 0..3 {
-        if !(2..=128).contains(&counts[a])
-            || !(1..=16).contains(&degrees[a])
+        if counts[a]>MAX_POINTS||!(1..=16).contains(&degrees[a])
             || degrees[a] >= counts[a]
         {
             return Err(Error::InvalidCage);
@@ -775,6 +797,38 @@ fn ffi_status(f: impl FnOnce() -> Result<i32, Error>) -> i32 {
 fn aligned<T>(pointer: *const T) -> bool {
     !pointer.is_null() && (pointer as usize).is_multiple_of(std::mem::align_of::<T>())
 }
+fn readable<T>(pointer:*const T,count:usize)->bool{
+    if count==0{return pointer.is_null()||(pointer as usize).is_multiple_of(std::mem::align_of::<T>());}
+    aligned(pointer)&&count.checked_mul(std::mem::size_of::<T>()).is_some_and(|bytes|
+        bytes<=isize::MAX as usize&&(pointer as usize).checked_add(bytes).is_some())
+}
+fn validate_region(region:&Region)->Result<(),Error>{
+    if let Region::Local{min,max,falloff}=region{
+        if !falloff.is_finite()||*falloff<0.||(0..3).any(|i|!min[i].is_finite()||!max[i].is_finite()||min[i]>max[i]){
+            return Err(Error::InvalidRegion);
+        }
+    }
+    Ok(())
+}
+// SAFETY: caller owns initialized immutable foreign storage until the returned
+// view is dropped. Header/address arithmetic is checked before slices; no view
+// may escape the enclosing synchronous FFI call or become a retained handle.
+unsafe fn borrow_descriptor<'a>(d:&Om9CageDescriptor,pose:&[f64;16])->Result<(BorrowedCage<'a>,Region),Error>{
+    validate_frame(pose)?;
+    let total=cage_dimensions(d.counts,d.degrees)?;
+    if d.point_count!=total||d.weight_count!=total||!readable(d.points.cast::<[f64;3]>(),total)||!readable(d.weights,total){
+        return Err(Error::InvalidBuffer);
+    }
+    for a in 0..3{if d.knot_lengths[a]!=d.counts[a]+d.degrees[a]+1||!readable(d.knots[a],d.knot_lengths[a]){return Err(Error::InvalidBuffer);}}
+    let region=match d.region{0=>Region::Global,1=>Region::Local{min:d.local_min,max:d.local_max,falloff:d.falloff},_=>return Err(Error::InvalidRegion)};
+    let view=BorrowedCage{counts:d.counts,degrees:d.degrees,
+        knots:std::array::from_fn(|a|unsafe{std::slice::from_raw_parts(d.knots[a],d.knot_lengths[a])}),
+        points:unsafe{std::slice::from_raw_parts(d.points.cast::<[f64;3]>(),total)},weights:unsafe{std::slice::from_raw_parts(d.weights,total)}};
+    view.validate()?;validate_frame(&d.world_to_parameter)?;validate_region(&region)?;Ok((view,region))
+}
+fn owned_copy<T:Copy>(values:&[T])->Result<Vec<T>,Error>{
+    let mut out=Vec::new();out.try_reserve_exact(values.len()).map_err(|_|Error::Capacity)?;out.extend_from_slice(values);Ok(out)
+}
 /// # Safety
 /// Inputs are readable aligned arrays of three doubles; outputs are writable
 /// aligned arrays of three usize values and may not overlap each other. Inputs
@@ -899,53 +953,17 @@ pub unsafe extern "C" fn om9_cage_create_placed(
     out: *mut *mut CageHandle,
 ) -> i32 {
     ffi_status(|| {
-        if !aligned(d) || !aligned(out) || !aligned(pose) {
+        if !readable(d,1) || !readable(out,1) || !readable(pose,16) {
             return Err(Error::InvalidBuffer);
         }
         let pose = unsafe { pose.cast::<[f64; 16]>().read() };
-        validate_frame(&pose)?;
         // SAFETY: caller supplies live aligned descriptor/output storage.
         let d = unsafe { &*d };
-        let mut total = 1usize;
-        for a in 0..3 {
-            if !(1..=16).contains(&d.degrees[a])
-                || d.counts[a] <= d.degrees[a]
-                || d.counts[a] > MAX_POINTS
-            {
-                return Err(Error::InvalidCage);
-            }
-            total = total
-                .checked_mul(d.counts[a])
-                .filter(|v| *v <= MAX_POINTS)
-                .ok_or(Error::Capacity)?;
-            if d.knot_lengths[a] != d.counts[a] + d.degrees[a] + 1 || !aligned(d.knots[a]) {
-                return Err(Error::InvalidBuffer);
-            }
-        }
-        if d.point_count != total
-            || d.weight_count != total
-            || !aligned(d.points)
-            || !aligned(d.weights)
-        {
-            return Err(Error::InvalidBuffer);
-        }
-        let knots = std::array::from_fn(|a| {
-            unsafe { std::slice::from_raw_parts(d.knots[a], d.knot_lengths[a]) }.to_vec()
-        });
-        let points = unsafe { std::slice::from_raw_parts(d.points, total * 3) }
-            .chunks_exact(3)
-            .map(|p| [p[0], p[1], p[2]])
-            .collect();
-        let weights = unsafe { std::slice::from_raw_parts(d.weights, total) }.to_vec();
-        let region = match d.region {
-            0 => Region::Global,
-            1 => Region::Local {
-                min: d.local_min,
-                max: d.local_max,
-                falloff: d.falloff,
-            },
-            _ => return Err(Error::InvalidRegion),
-        };
+        let (view,region)=unsafe{borrow_descriptor(d,&pose)}?;
+        // Validation completed without allocating. Fallible copies now produce
+        // Rust-owned independent basis; no foreign pointer reaches the handle.
+        let mut knots:[Vec<f64>;3]=Default::default();for a in 0..3{knots[a]=owned_copy(view.knots[a])?;}
+        let points=owned_copy(view.points)?;let weights=owned_copy(view.weights)?;
         let deformation = Deformation::with_pose(
             Cage {
                 counts: d.counts,

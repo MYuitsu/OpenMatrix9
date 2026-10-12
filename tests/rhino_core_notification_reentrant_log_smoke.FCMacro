@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Showing a notification must permit Qt's synchronous warning to enter logging."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(checks=[])
+sys.path.insert(0,os.environ['OM9_EXCEPTION_TRACE_PROBE'])
+import OM9ExceptionTrace as trace
+assert trace.start()
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM
+        report['module']=OM.__file__
+        prefs=App.ParamGet('User parameter:BaseApp/Preferences/NotificationArea')
+        prefs.SetBool('NonIntrusiveNotificationsEnabled',True)
+        prefs.SetBool('PreventNonIntrusiveNotificationsWhenWindowNotActive',False)
+        prefs.SetBool('HideNonIntrusiveNotificationsWhenWindowDeactivated',False)
+        prefs.SetBool('DeveloperWarningSubscriptionEnabled',True)
+        App.Console.PrintWarning('RCORE notification reentrant warning witness\n')
+        loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(1800,loop.quit);loop.exec()
+        rows=trace.report();(out/'exception-traces.json').write_text(json.dumps(rows,indent=2))
+        errors=[r for r in rows if any(f['symbol']=='std::_Throw_Cpp_error'for f in r['frames']) and
+                any(f['symbol']=='Gui::NotificationArea::pushNotification'for f in r['frames'])]
+        report['deadlock_exceptions']=len(errors)
+        labels=[w for w in QtWidgets.QApplication.topLevelWidgets()if w.objectName()=='NotificationBox_label']
+        report['popup_labels']=[w.text()for w in labels]
+        check('actual native popup retains the seeded GUI warning',
+              any('RCORE notification reentrant warning witness'in w.text()for w in labels))
+        check('popup logging does not re-lock the held notification storage mutex',not errors)
+        check('native GUI remains responsive after actual popup/log callbacks',not App.listDocuments())
+        report['ok']=all(c['passed']for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

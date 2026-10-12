@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Circle History must keep current Shape and the owned GeometryResult together."""
+import json,math,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Points,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(console,text):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier))
+def settle():
+ loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(80,loop.quit);loop.exec()
+def exact(shape,kind,n):
+ if shape.isNull()or not shape.isValid()or not shape.Edges:return False
+ c=shape.Edges[0].Curve
+ center=App.Vector(3*n,4*n,5*n)if kind=='Center'else App.Vector(5*n,0,0)if kind=='Around'else App.Vector()
+ radius=n if kind=='Cloud'else 2.
+ return isinstance(c,Part.Circle)and abs(c.Radius-radius)<1e-7 and (c.Center-center).Length<1e-7
+def raw(obj):return getattr(obj,'OM9GeometryResult','')
+def paired(obj,kind,n):
+ try:
+  value=json.loads(raw(obj));snapshot=value['output_snapshots'][0];master=Part.Shape();master.importBrepFromString(snapshot['geometry_data']['native_master']['payload'])
+  return exact(obj.Shape,kind,n)and exact(master,kind,n)and snapshot['ownership']=='private_native_copy'and snapshot['unit_context_snapshot']==getattr(obj,'OM9UnitContext','')and bool(value['input_snapshots'])
+ except (ValueError,KeyError,IndexError,TypeError):return False
+def case(console,kind):
+ doc=App.newDocument('CircleHistoryResult'+kind);doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+ settings=doc.addObject('OpenMatrix9Gui::HistorySettings','OM9HistorySettings');settings.BrokenHistoryWarning=False
+ source=doc.addObject('Points::Feature'if kind=='Cloud'else 'Part::Feature','Source')
+ def assign(n):
+  if kind=='Center':source.Shape=Part.Vertex(App.Vector(3*n,4*n,5*n))if n else Part.Shape()
+  elif kind=='Around':source.Shape=Part.makeLine(App.Vector(),App.Vector(10*n,0,0))if n else Part.Shape()
+  else:source.Points=Points.Points([App.Vector(n,0,0),App.Vector(0,n,0),App.Vector(-n,0,0)]if n else [])
+ assign(1);doc.recompute();Gui.Selection.clearSelection()
+ args=['Circle','History=Yes']
+ if kind=='Center':args+=['Point=Source.Vertex1','Radius=2']
+ elif kind=='Around':args+=['AroundCurve','Curve=Source.Edge1','OnCurve=.5','Radius=2']
+ else:Gui.Selection.addSelection(source);args+=['FitPoints','Selection','']
+ for text in args:enter(console,text)
+ settle();child=doc.getObject('Circle');initial=raw(child);check(kind+' initial recorded result paired',child is not None and child.Recorded and paired(child,kind,1))
+ enter(console,'Line');enter(console,'1,2,3');transcript=console.toPlainText();assign(2);doc.recompute();settle();updated=raw(child)
+ check(kind+' existing source solver updates geometry',exact(child.Shape,kind,2))
+ check(kind+' updated result has current independently decoded master',bool(updated)and updated!=initial and paired(child,kind,2))
+ try:
+  old=json.loads(initial)['input_snapshots'];new=json.loads(updated)['input_snapshots'];fresh=old!=new
+ except (ValueError,KeyError):fresh=False
+ check(kind+' replay captures refreshed owned input snapshots',fresh)
+ check(kind+' replay leaves active Line transcript intact',console.toPlainText()==transcript);enter(console,'Cancel')
+ settings.Update=False;frozen_shape=child.Shape.exportBrepToString();frozen=raw(child);assign(3);doc.recompute();settle()
+ check(kind+' Update No freezes Shape and exact result bytes',child.Shape.exportBrepToString()==frozen_shape and raw(child)==frozen and paired(child,kind,2))
+ settings.Update=True;doc.recompute();settle();check(kind+' Update Yes resumes paired result',paired(child,kind,3)and raw(child)!=frozen)
+ assign(0);doc.recompute();settle();check(kind+' invalid source clears Shape and result together',child.Shape.isNull()and not raw(child))
+ assign(4);doc.recompute();settle();check(kind+' valid source recovers paired result',paired(child,kind,4));recovered=raw(child)
+ doc.openTransaction('Detach Circle History');child.Recorded=False;doc.commitTransaction();detached=raw(child);assign(5);doc.recompute();settle()
+ check(kind+' detach retains owned result and frozen geometry',not child.Recorded and bool(detached)and detached==recovered==raw(child)and paired(child,kind,4))
+ check(kind+' detach removes native dependency links',not child.Sources and not child.SourceCurve)
+ archive=out/(kind+'.FCStd');doc.saveAs(str(archive));App.closeDocument(doc.Name);doc=App.openDocument(str(archive));settle();child=doc.getObject('Circle')
+ check(kind+' FCStd restores detached paired exact result bytes',bool(detached)and raw(child)==detached and paired(child,kind,4))
+ report['observations'].append(dict(case=kind,initial=initial,updated=updated,detached=detached,archive=str(archive)));App.closeDocument(doc.Name)
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');settle();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  for kind in ['Center','Around','Cloud']:case(console,kind)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

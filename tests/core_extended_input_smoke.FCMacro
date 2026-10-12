@@ -121,7 +121,7 @@ def run():
         create('Circle',['3Point','w-5,0,0','w5,0,0','Radius','w0,5,0','wr0,0,5'],lambda o:(o.Shape.Edges[0].Curve.Center-App.Vector(0,math.sqrt(12.5),math.sqrt(12.5))).Length<1e-8 and abs(o.Shape.Edges[0].Curve.Radius-math.sqrt(50))<1e-8)
         create('Rectangle',['0,0,0','5<45'],lambda o:abs(o.Shape.BoundBox.YLength-5/math.sqrt(2))<1e-8 and abs(o.Shape.BoundBox.ZLength-5/math.sqrt(2))<1e-8)
         create('Ellipse',['0,0,0','5<0','2<90'],lambda o:abs(o.Shape.Edges[0].Curve.MajorRadius-5)<1e-8 and abs(o.Shape.Edges[0].Curve.MinorRadius-2)<1e-8)
-        create('Box',['0,0,0','5<45','2'],lambda o:abs(o.Shape.Volume-25)<1e-7)
+        create('Box',['Diagonal','0,0,0','5<45','2'],lambda o:abs(o.Shape.Volume-25)<1e-7)
         create('Sphere',['0,0,0','5<0'],lambda o:abs(o.Shape.Volume-4/3*math.pi*125)<1e-7)
         # Default display-derived bounds are asymmetric even for the exact unit
         # sphere. Inspect the analytic surface instead of treating that bbox as
@@ -129,7 +129,7 @@ def run():
         create('Sphere',['4Point','w1,0,0','w0,1,0','w-1,0,0','wr1,0,1'],lambda o:abs(o.Shape.Volume-4/3*math.pi)<1e-8 and o.Shape.Faces[0].Surface.Center.Length<1e-8 and abs(o.Shape.Faces[0].Surface.Radius-1)<1e-8)
         before_objects=len(doc.Objects);before_undo=doc.UndoCount
         enter('Sphere');enter('FitPoints');enter('rw1<0');enter('Undo')
-        check('FitPoints rejects a relative first point without adding an input checkpoint','Center (' in prompt.text() and len(doc.Objects)==before_objects and doc.UndoCount==before_undo)
+        check('FitPoints rejects a relative first point without adding an input checkpoint','Center of sphere (' in prompt.text() and len(doc.Objects)==before_objects and doc.UndoCount==before_undo)
         enter('Cancel')
         result['ok']=all(c['passed'] for c in result['checks'])
         if result['ok']:source.unlink()

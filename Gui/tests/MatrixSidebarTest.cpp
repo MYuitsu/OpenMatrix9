@@ -31,7 +31,7 @@ private slots:
         QMainWindow window;MatrixSidebar sidebar(&window,QStringLiteral(OM9_RESOURCE_DIR),{});
         QCOMPARE(sidebar.findChildren<QWidget*>(QRegularExpression("OM9SelectorRow[0-2]")).size(),3);
         QCOMPARE(sidebar.findChildren<QToolButton*>(QRegularExpression("OM9InfoIcon\\d+")).size(),22);
-        QCOMPARE(sidebar.findChildren<QLabel*>(QRegularExpression("OM9LayerName\\d+")).size(),32);
+        QCOMPARE(sidebar.findChildren<QToolButton*>(QRegularExpression("OM9LayerCurrent\\d+")).size(),32);
         QCOMPARE(sidebar.findChildren<QToolButton*>(QRegularExpression("OM9LayerLock\\d+")).size(),32);
         QCOMPARE(sidebar.findChildren<QComboBox*>(QRegularExpression("OM9DisplayCombo\\d")).size(),2);
         QCOMPARE(sidebar.findChildren<QFrame*>("OM9ProjectCategory").size(),5);

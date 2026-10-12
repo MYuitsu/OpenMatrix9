@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Prior Redo owns a detached native object; its destructor can veto replay."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE']);import OM9ReplayRetirement as probe
+report['probe']=probe.__file__
+def state(doc):return dict(booked=doc.getBookedTransactionID(),pending=doc.HasPendingTransaction,undo=list(doc.UndoNames),redo=list(doc.RedoNames))
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench')
+  for action in ['value','close','remove','clear']:
+   doc=App.newDocument('RedoObjectDisposal');doc.UndoMode=1
+   child=doc.getObject(probe.create(doc.Name));doc.recompute();doc.clearUndos()
+   doc.openTransaction('Prior creation');retired=doc.getObject(probe.create(doc.Name,'Retired',True));doc.commitTransaction();doc.undo()
+   check(action+' original Redo retains a detached native object',doc.getObject('Retired')is None and list(doc.RedoNames)==['Prior creation'])
+   doc.openTransaction('Caller');before=state(doc);value=child.Value
+   result=probe.run(doc.Name,action,'redo_object');live=doc.Name in App.listDocuments()
+   check(action+' actual detached object destructor callback attempted',result['callbacks']==1)
+   check(action+' object destructor mutation blocked',result['blocked']==1)
+   check(action+' rejects with completed checked rollback cleanup',not result['accepted']and result['rollback']and result['complete']and 'StaleGeometry'in result['error'])
+   check(action+' keeps native owner and current child alive',live and doc.getObject('Child')is child)
+   check(action+' restores current value and clears paired output',child.Value==value and child.Output=='')
+   check(action+' exact original empty booking and executable Redo',state(doc)==before)
+   doc.abortTransaction();doc.redo()
+   check(action+' original native object identity is restored by Redo',doc.getObject('Retired')is retired)
+   report['observations'].append(dict(action=action,before=before,after=state(doc),result=result,retired_present=doc.getObject('Retired')is not None,value=child.Value,output=child.Output))
+   App.closeDocument(doc.Name)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

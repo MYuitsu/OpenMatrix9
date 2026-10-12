@@ -5,7 +5,7 @@ command: null
 domain: 01-core
 module: The Main Menu
 kind: menu
-implementation_status: not_started
+implementation_status: partially_implemented
 guide_date: '2026-10-07'
 guide_scope: engineering_contract_and_request_planner
 sample_status: compiled_and_validation_tests_passed
@@ -13,7 +13,7 @@ sample_status: compiled_and_validation_tests_passed
 
 # OM9-MAIN-001 — Main Menu
 
-Alias tương thích: `Chưa có alias command`. Nhóm: `01-core`. Trạng thái: `not_started`.
+Alias tương thích: `Chưa có alias command`. Nhóm: `01-core`. Trạng thái: `partially_implemented`.
 
 ## Hợp đồng thiết kế
 
@@ -149,3 +149,16 @@ Unavailable/failed hiển thị diagnostic; thiếu command adapter giữ mục 
 - [ ] [OM9-ANALYSIS](../../ENGINEERING_CONTRACTS.md#om9-analysis): kiểm chứng cho `OM9-MAIN-001` hoặc ghi lý do không áp dụng.
 
 - [ ] Ghi rõ supported slice, tolerance, options còn thiếu và kết quả native theo exact feature ID.
+
+## Startup UI cleanup — 2026-10-11
+
+Supported slice: bỏ toolbar 3DM trùng lệnh và ẩn Task trống khi khởi động.
+Giữ menu chữ và Import3dm/Export3dm. Đây là lựa chọn OM9 được người dùng yêu cầu,
+không chứng nhận mọi quy tắc bố cục/menu của Matrix gốc.
+
+- [x] FreeCAD 1.1.4 khởi động OM9 có document, toolbar 3DM và Task trống bị ẩn.
+- [x] Menu chữ và action Import3dm/Export3dm vẫn truy cập được.
+- [x] Profile mới: sáu kiểm tra runtime đạt, host thoát 0; launcher cài đặt đã cập nhật.
+- [ ] Nghiệm thu toàn bộ hợp đồng interface/menu ngoài phạm vi startup này.
+
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-startup-ui-cleanup.md).

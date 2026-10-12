@@ -5,7 +5,10 @@ command: null
 domain: 01-core
 module: Layers
 kind: tool_or_workflow
-implementation_status: not_started
+implementation_status: partially_implemented
+implementation_validation_status: validated_supported_slice
+implementation_reviewed_at: '2026-10-11'
+implementation_validation_record: ../../../docs/validation/2026-10-11-layer-panel-implementation.md
 guide_date: '2026-10-07'
 guide_scope: engineering_contract_and_request_planner
 sample_status: compiled_and_validation_tests_passed
@@ -13,13 +16,56 @@ sample_status: compiled_and_validation_tests_passed
 
 # OM9-LAYER-001 — Layer Management
 
-Alias tương thích: `Chưa có alias command`. Nhóm: `01-core`. Trạng thái: `not_started`.
+Alias tương thích: `Chưa có alias command`. Nhóm: `01-core`. Trạng thái: `partially_implemented` / `validated_supported_slice`; các thao tác panel đã được kiểm tra trên plugin và shared host tương thích. Giới hạn được ghi ở implementation notes.
 
 ## Hợp đồng thiết kế
 
 **Hợp đồng thiết kế `OM9-LAYER-001` — Layer Management.**
 
-Layers tổ chức object theo group màu và visibility/lock; current layer nhận object không có semantic layer chuyên biệt. Vai trò màu Settings tím, Cutters cam, Profiles vàng, Rails nâu đỏ giữ nhận diện nhưng không dùng màu làm loại geometry. In arrow đổi layer selection; right-click swatch chọn objects visible trên layer; lock ngăn pick/region nhưng vẫn hiện; toggle lớp/group bật tắt display. Hide/Show object độc lập layer: Hide giấu selection, Show hiện mọi hidden trong scope phiên, right-Hide giữ selection và ẩn phần khác, right-Show cho chọn một phần hidden để hiện. Job Bag thường lưu selection nên không tự gồm hidden/off-layer; full save/Master lưu mọi object cùng trạng thái. Advanced có thêm 16 layers có thể đổi tên/màu qua Shift+right-click, có giới hạn với Matrix Art/Lights theo capability; lưu document để giữ tùy biến, New dùng defaults. Không dùng swatch index thay persistent layer ID.
+Layers tổ chức object theo group màu và visibility/lock; current layer nhận object không có semantic layer chuyên biệt. Vai trò màu Settings tím, Cutters cam, Profiles vàng, Rails nâu đỏ giữ nhận diện nhưng không dùng màu làm loại geometry. In arrow gán các object đã chọn sang layer đích; đây là thao tác khác với chọn current layer. Right-click swatch chọn objects visible trên layer; lock ngăn pick/region nhưng vẫn hiện; toggle lớp/group bật tắt display. Hide/Show object độc lập layer: Hide giấu selection, Show hiện mọi hidden trong scope phiên, right-Hide giữ selection và ẩn phần khác, right-Show cho chọn một phần hidden để hiện. Job Bag thường lưu selection nên không tự gồm hidden/off-layer; full save/Master lưu mọi object cùng trạng thái. Advanced có thêm 16 layers có thể đổi tên/màu qua Shift+right-click, có giới hạn với Matrix Art/Lights theo capability; lưu document để giữ tùy biến, New dùng defaults. Không dùng swatch index thay persistent layer ID.
+
+### Nguồn và phạm vi đối chiếu ngày 2026-10-11
+
+Đã đọc và kiểm hình cả bốn trang của bản trích người dùng cung cấp
+`matrix8_book_1 Copy.pdf`: trang PDF 1-4, trang in 44-47, Chapter 9,
+The Layers Menu. Đây là nguồn mô tả Matrix8; ảnh người dùng là tham chiếu
+bố cục panel. Không coi ảnh, code mẫu hay tên control là chứng nhận runtime
+hoặc bằng chứng mọi hành vi Matrix9 giống Matrix8.
+
+| Trang PDF / in | Nội dung được đối chiếu |
+|---|---|
+| 1 / 44 | Vai trò nhóm Metal, Gem, User, Heads, Finger, Cutting, Creation. |
+| 2 / 45 | Anatomy: In arrow gán selection; swatch chuột phải chọn theo layer; current-layer highlight; layer/group toggle. |
+| 3 / 46 | Lock chặn cả Region Select; layer-off; Hide/Show trái/phải; scope Job Bag và full save. |
+| 4 / 47 | Advanced thêm 16 layer; Shift+right-click tên/màu; lưu tùy biến và reset theo phiên/document. |
+
+### Bố cục panel và các thao tác cần có
+
+Hàng đầu là Lights cùng Hide/Show. Khối cơ bản có hai cột, tám hàng:
+trái Metal 01-04 rồi Gem 01-04; phải User 01-04 rồi Heads, Finger,
+Cutting, Creation. Khối Advanced có hai cột, tám hàng: trái User 17-20
+rồi User 25-28; phải User 21-24 rồi User 29-32. Advanced có control mở/thu
+riêng. Mỗi hàng có tên, In arrow, swatch, lock và visibility; thanh dài
+điều khiển visibility theo nhóm. Màu highlight báo current layer.
+
+| Thành phần / thao tác | Hợp đồng nguồn | Phạm vi đã triển khai |
+|---|---|---|
+| Current layer | Output mới dùng current nếu không có layer nghiệp vụ riêng. | Tên hoặc swatch trái chọn current; CMD nhận index 1..33, tên chuẩn/tên tùy biến, Lights và None. Arrow không đổi current. |
+| In arrow trái | Gán selection sang layer đích và đổi màu. | Validate cả batch trước mutation; plain root geometry/members được gán trong một transaction. Reject layer khóa, foreign document, nhóm structural/placed/import ownership không an toàn. |
+| Swatch phải | Chọn objects visible trên layer. | Chỉ chọn member visible, không Hidden/off/locked, có quyền Selectable. |
+| Lock | Chặn pick và Region Select; vẫn thấy để tham chiếu. | Mặt nạ Selectable native và OM9 dispatcher/mouse/SelectAll/edit guards; unlock giữ quyền Selectable trước đó. Visibility không ghi đè quyền chọn. |
+| Visibility layer | Tắt/bật display layer và members. | Giữ explicit object visibility và OM9 Hidden riêng; Off/On không hiện object đã ẩn. |
+| Visibility nhóm | Bật/tắt cả nhóm. | Nhóm 4 slot: tất cả đang hiện thì tắt, trạng thái mixed thì hiện. |
+| Hide / Show trái | Hide selection; Show hidden. | Hidden riêng theo document; Show khôi phục object do OM9 Hide, không bật layer đang Off hoặc object explicit invisible khác. |
+| Hide / Show phải | Reverse Hide và selective Show. | Giữ selection/ẩn phần visible khác; dialog chọn hidden, Cancel không ghi và stale document/object identity bị từ chối. |
+| Advanced | Thêm 16 layer, mở/thu. | Mặc định thu; đúng thứ tự hai cột 17–20/25–28 và 21–24/29–32. Thu không mất state. |
+| Shift+right tên/màu | Tùy biến Advanced. | Chỉ 17..32, trim tên không rỗng/controls, tối đa 128 UTF-8 bytes, tên unique không trùng slot chuẩn; đổi màu members. Dialog revalidates session/generation. |
+| Lights | Hàng riêng, không có trong MatrixArt. | Slot33 trắng, đủ current/Assign/selection/lock/visibility. Không tự tạo light geometry. Rust có Art restriction; MatrixArt runtime chưa hỗ trợ. |
+| Footer combo / C A L V C | Người dùng xác nhận giao diện gốc không có (2026-10-11). | Bỏ toàn bộ, không suy chức năng hoặc để placeholder. |
+
+Mã RGB tuyệt đối, kích thước pixel, default current layer và cách click tên
+để đặt current không được suy từ ảnh minh họa. Màu/slot đang có trong Rust
+là defaults OM9 hiện hữu; chưa chứng nhận palette thương mại chính xác.
 
 ### Chi tiết panel layer và liên kết material
 
@@ -110,44 +156,72 @@ Các ca trên là yêu cầu kiểm thử geometry/state của feature; kết qu
 
 ## OpenMatrix9 implementation notes
 
-Supported slice dưới đây là hợp đồng để triển khai; trạng thái native giữ nguyên
-và các ca runtime vẫn cần nghiệm thu.
+[Bằng chứng triển khai và kiểm thử](../../../docs/validation/2026-10-11-layer-panel-implementation.md)
+thay thế hiện trạng của [audit trước triển khai](../../../docs/validation/2026-10-11-layer-management-audit.md).
+Giữ `partially_implemented` cho toàn feature; panel và supported output slice đã nghiệm thu native.
 
-### Inputs
+### Inputs, identity và defaults
 
-Document layer table, current layer và selected object identities; hierarchical visibility/lock phải xét effective state.
+Rust sở hữu slot/defaults/parser, name/action policy, effective visibility và selection permission.
+C++ là ngoại lệ native cho FreeCAD properties/groups/transactions/selection và Qt Unicode label matching.
+32 slot model cộng Lights33; 0/None là root legacy. Group tạo lazy, mặc định visible/unlocked;
+document New có current=None, palette OM9 hiện hữu. Circle/Ellipse root giữ xanh legacy;
+các family khác giữ style hiện hữu khi current=None. Không chứng nhận palette thương mại.
+Rename đổi Label, giữ native Name/ID/slot; modal giữ document session và Rust ObjectStamp,
+không giữ pointer để commit sau đóng/mở lại cùng FCStd. Name và màu Cancel không ghi.
 
-### Parameters and defaults
+### Durable state và permissions
 
-UI actions theo hợp đồng layer. Bảng 32 layer chuẩn trong helper material không xác nhận thứ tự swatch của panel.
+`OM9LayerSchema`, `OM9LayerIndex`, `OM9LayerColor`, `OM9LayerLocked`,
+`OM9LayerStateSchema`, `OM9ActiveLayer`, `OM9OutputLayerIndex`,
+`OM9LayerExplicitVisible`, `OM9LayerExplicitSelectable` và `OM9ObjectHidden`
+được lưu trong FCStd. Layer visibility, explicit visibility và Hidden là các trạng thái riêng.
+Native Selectable chỉ bị mask bởi lock; visibility tự ngăn native picking, OM9 guards
+còn kiểm layer visibility/Hidden. Bật object qua cây FreeCAD không làm mất quyền Selectable.
+Raw host commands ngoài OM9 dispatcher không được coi là permission service hoàn chỉnh.
+Snap/reference là policy riêng, không thay đổi thành editing permission.
 
-### Output
+### Output, preview và transactions
 
-Layer/object state hoặc material links theo action; persistent layer identity khác index hiển thị.
+Root Curve (gồm Circle History/Deformable, Ellipse/foci), Box/Sphere,
+Sweep1/2/Loft và History, Join/Trim/Boolean, Rebuild dùng current khi commit.
+Explode giữ group/source ownership và output-layer metadata để không thay placement.
+Storage/rig/cage/import hierarchy không tự bị chuyển sang current.
+Layer khóa từ chối output; layer Off nhận output invisible. Capture ngay trước transaction,
+không freeze layer khi bắt đầu preview. Mọi layer mutation có transaction riêng/abort;
+geometry output dùng transaction command hiện hữu. Rebuild DeleteInput mặc định được phép
+với validated OM9 layer ownership; real dependents vẫn chặn. Undo/Redo phục hồi cả input/group.
 
-### Preview / commit / cancel
+### Phạm vi chưa nghiệm thu
 
-Mọi thay document trong transaction; nhánh đổi viewport và material initialization có scope riêng. Cancel không giữ mutation một phần.
+MatrixArt runtime/material initialization, general imported-layer hierarchy/inheritance,
+mọi semantic builder family và session-time output-layer binding chưa được bật bằng slice này.
+Lights tổ chức object, chưa tạo illumination. Job Bag/Master không được chứng nhận từ FCStd tests.
+Legacy files có visibility đã bị adapter cũ ghi đè không đủ dữ liệu để tự khôi phục ý định trước đó.
+Không copy plugin SDK mới vào launcher FreeCAD1.1.4 khác ABI.
 
-### History / dependency model
+### Nghiệm thu panel
 
-Layer/material links phải save/reload đúng; đổi appearance chưa đồng nghĩa phải replay geometry History.
+- [x] `LAYER-ASSIGN`: tách Assign/current, atomic rejection, membership/color và Undo/Redo.
+- [x] `LAYER-SELECT`: right swatch và SelectAll giữ visible/unlocked/selectable scope.
+- [x] `LAYER-LOCK`: native click, window/crossing Region Select, OM9 Delete và unlock permission.
+- [x] `LAYER-VISIBILITY`: Hidden độc lập Off/On; explicit visibility/Selectable không bị mất.
+- [x] `LAYER-HIDE-SHOW`: trái/phải, selective Show Cancel/commit, FCStd.
+- [x] `LAYER-ADVANCED`: mở/thu, rename/color, Cancel, duplicate rejection và persistence.
+- [x] `LAYER-MODAL`: đổi document, đóng/mở lại cùng persistent UID/native ID không commit stale actions.
+- [x] `LAYER-OUTPUT`: native Line/Box/Sphere/Loft, Circle/Ellipse, Join/Explode/Rebuild và dependency protection.
+- [x] `LAYER-LIGHTS`: slot33 không lẫn 32 model slots; assignment/visibility/state persistence.
+- [x] `LAYER-FOOTER`: bỏ combo/C A L V C theo yêu cầu trực tiếp của người dùng.
+- [ ] Art/material/general hierarchy và mọi output family: giới hạn ở trên, không suy từ panel tests.
 
-### Error / invalid-input behavior
+## Acceptance checklist (supported slice)
 
-Layer/resource thiếu hoặc native modify thất bại báo diagnostic; nhánh material repair bỏ qua layer thiếu thay vì tạo ngầm khi add-missing tắt.
-
-## Acceptance checklist
-
-- [ ] Hợp đồng feature và điều kiện hình học được kiểm chứng trước khi triển khai.
-- [ ] Inputs and selection state documented.
-- [ ] Parameters/defaults/units documented.
-- [ ] Output geometry documented.
-- [ ] Preview/commit/cancel behavior tested if applicable.
-- [ ] History/dependencies tested if applicable.
-- [ ] Undo/redo tested.
-- [ ] Save/reload persistence tested.
-- [ ] Automated tests use feature ID `OM9-LAYER-001`.
+- [x] Nguồn PDF 1–4 / trang in 44–47 đã đọc; quyết định footer của người dùng ghi riêng.
+- [x] Inputs, defaults, current/Assign, explicit visibility và permission được mô tả.
+- [x] Native commit/cancel, stale modal, Undo/Redo và FCStd được kiểm tra.
+- [x] Fixtures panel/output/permission/modal dùng exact feature ID `OM9-LAYER-001`.
+- [x] Plugin-only build và matching shared host kiểm tra module path/runner exit0.
+- [ ] Toàn feature và toàn compatibility nguồn: còn scope exclusions được công bố.
 
 ## Hợp đồng kỹ thuật chung
 
@@ -164,4 +238,4 @@ Layer/resource thiếu hoặc native modify thất bại báo diagnostic; nhánh
 - [ ] [OM9-ANNOTATE](../../ENGINEERING_CONTRACTS.md#om9-annotate): kiểm chứng cho `OM9-LAYER-001` hoặc ghi lý do không áp dụng.
 - [ ] [OM9-ANALYSIS](../../ENGINEERING_CONTRACTS.md#om9-analysis): kiểm chứng cho `OM9-LAYER-001` hoặc ghi lý do không áp dụng.
 
-- [ ] Ghi rõ supported slice, tolerance, options còn thiếu và kết quả native theo exact feature ID.
+- [x] Supported slice, native reports và giới hạn ghi trong report triển khai; audit cũ giữ riêng làm lịch sử. Checklist kỹ thuật chung còn cần evidence riêng cho toàn feature.

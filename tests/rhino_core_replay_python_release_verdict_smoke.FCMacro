@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""A swallowed finalizer violation cannot produce an accepted replay verdict."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, OpenMatrix9Gui as OM
+from PySide6 import QtCore
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = dict(module=OM.__file__, checks=[], observations=[])
+sys.path.insert(0, os.environ['OM9_REPLAY_RETIREMENT_PROBE'])
+import OM9ReplayRetirement as probe
+
+def check(name, passed):
+    report['checks'].append(dict(name=name, passed=bool(passed)))
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        for mode in (0, 1):
+            for action in ('value', 'clear', 'close', 'close_object', 'remove'):
+                events = []
+                doc = App.newDocument('ReleaseVerdict%d%s' % (mode, action))
+                doc.UndoMode = mode
+                child = doc.getObject(probe.create(doc.Name))
+                child.addProperty('App::PropertyPythonObject', 'Payload')
+                class LastValue:
+                    def __del__(self):
+                        events.append('started')
+                        try:
+                            if action == 'value': child.Value = 'tampered'
+                            elif action == 'clear': doc.clearUndos()
+                            elif action == 'close': App.closeDocument(doc.Name)
+                            elif action == 'close_object': App.closeDocument(doc)
+                            else: doc.removeObject('Child')
+                            events.append('changed')
+                        except Exception as error:
+                            events.append(str(error))
+                child.Payload = LastValue()
+                doc.recompute()
+                doc.clearUndos()
+                report['running_case'] = dict(mode=mode, action=action)
+                (out/'results.json').write_text(json.dumps(report, indent=2))
+                result = probe.run(doc.Name, action, 'python_release', None)
+                prefix = 'mode%d/%s: ' % (mode, action)
+                check(prefix + 'actual finalizer ran', len(events) == 2 and events[0] == 'started')
+                check(prefix + 'mutation rejected by native barrier', len(events) == 2 and 'StaleGeometry' in events[1])
+                check(prefix + 'replay not accepted after swallowed violation', not result['accepted'])
+                check(prefix + 'cleanup not reported complete after irreversible release', not result['complete'])
+                check(prefix + 'unverified disposal reported as typed kernel failure', 'KernelFailure' in result['error'])
+                report['observations'].append(dict(mode=mode, action=action, result=result, events=list(events)))
+                (out/'results.json').write_text(json.dumps(report, indent=2))
+        report.pop('running_case', None)
+        report['ok'] = all(c['passed'] for c in report['checks'])
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report, indent=2))
+        for name in list(App.listDocuments()): App.closeDocument(name)
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1000, run)

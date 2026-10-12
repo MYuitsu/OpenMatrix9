@@ -1,5 +1,15 @@
 # OM9-SOLID-014 — Sphere
 
+<!-- common-command-mnemonics-20261012:start -->
+2026-10-12: quy tắc gạch chân một ký tự áp dụng qua engine Rust chung cho toàn
+bộ schema Command Options hiện có: Line/Polyline, InterpCrv, Rectangle, Circle,
+Ellipse, Rebuild, Box/Sphere, Sweep1/History, Sweep2/History và Loft. Tùy chọn con
+khai báo alias trong phase cha; tên đầy đủ vẫn click được. Alias trùng hoặc
+disabled không được quảng cáo bằng gạch chân. Lệnh mới đăng ký schema để dùng
+cùng resolver, renderer và binding CMD–Builder. Trạng thái toàn feature còn partial.
+[Bằng chứng native](../validation/2026-10-12-common-command-mnemonics.md).
+<!-- common-command-mnemonics-20261012:end -->
+
 <!-- rhino-core-extended-input:start -->
 ## Extended numeric input — validated slice
 

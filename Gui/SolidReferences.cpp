@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 // OM9-SOLID-014: exact native curve references and planar tangent construction.
 #include "SolidReferences.h"
+#include "NativeFitPoints.h"
+#include "CoreGeometryContract.h"
 #include <App/Document.h>
 #include <App/DocumentObject.h>
 #include <Gui/Selection/Selection.h>
@@ -93,8 +95,25 @@ template<class Solver> void collect(const Solver& solver,const std::vector<Const
 }
 }
 namespace OpenMatrix9Gui {
-SolidCurveReference solidCurveReference(App::Document& doc,const std::string& path){
-    const auto pos=path.find('.');const auto name=path.substr(0,pos);const auto sub=pos==std::string::npos?std::string():path.substr(pos+1);auto input=nativeShapeInput(doc,name);
+SolidCurveReference solidCurveReference(App::Document& doc,const std::string& path,const char* curveOperation,bool currentSolid,const std::function<void(unsigned)>& independentAdmission){
+    const auto pos=path.find('.');const auto name=path.substr(0,pos);const auto sub=pos==std::string::npos?std::string():path.substr(pos+1);
+    const NativeShapeAdmission admission{curveOperation,[&](PyObject* original,bool mesh){
+        auto admit=[&](unsigned representation){if(independentAdmission)independentAdmission(representation);else if(currentSolid)validateCurrentSolidCapability(representation,2,curveOperation,path);else validateCurrentCurveCapability(representation,2,curveOperation,path);};
+        if(mesh){admit(8);return;}
+        Ref edges(PyObject_GetAttrString(original,"Edges"));const auto count=PySequence_Size(edges.value);
+        const std::string context=std::string(curveOperation)+" input "+path+": ";
+        if(sub.empty()){if(count!=1)throw std::runtime_error("InvalidBasis: "+context+"Specify one bounded native edge: Object.EdgeN");}
+        else{
+            if(!sub.starts_with("Edge")||sub.size()<=4||sub.find_first_not_of("0123456789",4)!=std::string::npos)
+                throw std::runtime_error("UnsupportedRepresentation: "+context+"Select a native EdgeN subelement");
+            std::size_t index=0;try{index=std::stoul(sub.substr(4));}catch(const std::exception&){throw std::runtime_error("StaleGeometry: "+context+"Curve edge reference is stale");}
+            if(index==0||index>std::size_t(count))throw std::runtime_error("StaleGeometry: "+context+"Curve edge reference is stale");
+        }
+        // The bounded borrowed edge list established an actual selected curve,
+        // including valid EdgeN references inside a face/solid/compound owner.
+        admit(2);
+    }};
+    auto input=nativeShapeInput(doc,name,curveOperation?&admission:nullptr);
     Ref edges(PyObject_GetAttrString(input.shape->value,"Edges"));const auto count=PySequence_Size(edges.value);std::size_t index=0;
     if(sub.empty()){if(count!=1)throw std::runtime_error("Specify one bounded native edge: Object.EdgeN");}
     else {if(!sub.starts_with("Edge")||sub.size()<=4||sub.find_first_not_of("0123456789",4)!=std::string::npos)throw std::runtime_error("Select a native EdgeN subelement");index=std::stoul(sub.substr(4));if(index==0||index>std::size_t(count))throw std::runtime_error("Curve edge reference is stale");--index;}
@@ -116,26 +135,12 @@ std::pair<SolidPoint,SolidPoint> solidOnCurve(const SolidCurveReference& ref,con
     if(u>first+eps&&u<last-eps){const auto a=tangent(ref.edge->value,u-eps),b=tangent(ref.edge->value,u+eps);if(dot(a,b)<0.99)throw std::runtime_error("Pick a smooth curve location, not a cusp/corner");}
     return {value(ref.edge->value,u),t};
 }
-std::vector<SolidPoint> solidSelectedFitPoints(App::Document& doc,bool surfacePoles){
-    std::vector<SolidPoint> result;Ref app(PyImport_ImportModule("FreeCAD"));
+std::vector<SolidPoint> solidSelectedFitPoints(App::Document& doc,bool surfacePoles,std::size_t used){
+    std::vector<SolidPoint> result;
     for(const auto& sel:Gui::Selection().getSelection(doc.getName())){
-        auto* native=doc.getObject(sel.FeatName);if(!native)throw std::runtime_error("FitPoints selection is stale");Ref object(native->getPyObject());
-        if(native->isDerivedFrom(Base::Type::fromName("App::Link")))throw std::runtime_error("FitPoints does not accept linked references");
-        Ref global(PyObject_CallMethod(object.value,"getGlobalPlacement",nullptr)),local(PyObject_GetAttrString(object.value,"Placement")),inverse(PyObject_CallMethod(local.value,"inverse",nullptr)),parent(PyNumber_Multiply(global.value,inverse.value));
-        auto append=[&](PyObject* p,PyObject* transform){Ref moved(PyObject_CallMethod(transform,"multVec","O",p));const auto v=point(moved.value);if(result.size()>=1024)throw std::runtime_error("FitPoints supports up to 1024 selected points");result.push_back(v);};
-        auto surfacePoints=[&](PyObject* face){Ref surface(PyObject_GetAttrString(face,"Surface"));if(!PyObject_HasAttrString(surface.value,"getPoles"))return false;Ref rows(PyObject_CallMethod(surface.value,"getPoles",nullptr));for(Py_ssize_t i=0;i<PySequence_Size(rows.value);++i){Ref row(PySequence_GetItem(rows.value,i));for(Py_ssize_t j=0;j<PySequence_Size(row.value);++j){Ref p(PySequence_GetItem(row.value,j));append(p.value,parent.value);}}return true;};
-        if(PyObject_HasAttrString(object.value,"Shape")){
-            Ref shape(PyObject_GetAttrString(object.value,"Shape"));
-            if(sel.SubName&&*sel.SubName){if(surfacePoles&&std::string(sel.SubName).starts_with("Face")){Ref face(PyObject_CallMethod(shape.value,"getElement","s",sel.SubName));if(!surfacePoints(face.value))throw std::runtime_error("Selected face has no surface control points");}else{if(!std::string(sel.SubName).starts_with("Vertex"))throw std::runtime_error("FitPoints subelements must be vertices or supported surface faces");Ref vertex(PyObject_CallMethod(shape.value,"getElement","s",sel.SubName)),p(PyObject_GetAttrString(vertex.value,"Point"));append(p.value,parent.value);}}
-            else {Ref edges(PyObject_GetAttrString(shape.value,"Edges"));bool poles=false;
-                if(surfacePoles){Ref faces(PyObject_GetAttrString(shape.value,"Faces"));if(PySequence_Size(faces.value)==1){Ref face(PySequence_GetItem(faces.value,0));poles=surfacePoints(face.value);}}
-                if(!poles&&PySequence_Size(edges.value)==1){Ref edge(PySequence_GetItem(edges.value,0)),curve(PyObject_GetAttrString(edge.value,"Curve"));if(PyObject_HasAttrString(curve.value,"getPoles")){Ref values(PyObject_CallMethod(curve.value,"getPoles",nullptr));for(Py_ssize_t i=0;i<PySequence_Size(values.value);++i){Ref p(PySequence_GetItem(values.value,i));append(p.value,parent.value);}poles=true;}}
-                if(!poles){Ref vertices(PyObject_GetAttrString(shape.value,"Vertexes"));for(Py_ssize_t i=0;i<PySequence_Size(vertices.value);++i){Ref vertex(PySequence_GetItem(vertices.value,i)),p(PyObject_GetAttrString(vertex.value,"Point"));append(p.value,parent.value);}}
-            }
-        }else if(PyObject_HasAttrString(object.value,"Mesh")){Ref mesh(PyObject_GetAttrString(object.value,"Mesh")),topology(PyObject_GetAttrString(mesh.value,"Topology")),points(PySequence_GetItem(topology.value,0));
-            if(sel.SubName&&*sel.SubName)throw std::runtime_error("Select the whole mesh to fit its vertices");for(Py_ssize_t i=0;i<PySequence_Size(points.value);++i){Ref p(PySequence_GetItem(points.value,i));append(p.value,parent.value);}
-        }else if(PyObject_HasAttrString(object.value,"Points")){Ref cloud(PyObject_GetAttrString(object.value,"Points")),points(PyObject_GetAttrString(cloud.value,"Points"));for(Py_ssize_t i=0;i<PySequence_Size(points.value);++i){Ref p(PySequence_GetItem(points.value,i));append(p.value,parent.value);}}
-        else throw std::runtime_error("FitPoints accepts native vertices, curve poles, mesh vertices or point clouds");
+        auto points=nativeFitPoints(doc,sel.FeatName,sel.SubName?sel.SubName:"",surfacePoles,
+            used+result.size(),surfacePoles?"Circle FitPoints":"Sphere FitPoints",surfacePoles,!surfacePoles);
+        result.insert(result.end(),points.begin(),points.end());
     }
     return result;
 }

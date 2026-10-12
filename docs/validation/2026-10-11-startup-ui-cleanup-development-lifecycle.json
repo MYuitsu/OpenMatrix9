@@ -1,0 +1,300 @@
+{
+  "checks": [
+    {
+      "name": "native task dock available",
+      "passed": true
+    },
+    {
+      "name": "empty task dock hidden on activation",
+      "passed": true
+    },
+    {
+      "name": "redundant 3DM toolbar absent or hidden",
+      "passed": true
+    },
+    {
+      "name": "native menu bar remains available",
+      "passed": true
+    },
+    {
+      "name": "3DM import and export remain in menus",
+      "passed": true
+    },
+    {
+      "name": "one Matrix sidebar",
+      "passed": true
+    },
+    {
+      "name": "real task dialog can show the dock",
+      "passed": true
+    },
+    {
+      "name": "active task remains visible after workbench switch",
+      "passed": true
+    },
+    {
+      "name": "task fixture closes its active dialog",
+      "passed": true
+    },
+    {
+      "name": "idle tasks hidden with prior visibility True",
+      "passed": false
+    },
+    {
+      "name": "prior task visibility restored True",
+      "passed": true
+    },
+    {
+      "name": "idle tasks hidden with prior visibility False",
+      "passed": false
+    },
+    {
+      "name": "prior task visibility restored False",
+      "passed": false
+    },
+    {
+      "name": "switching preserves document geometry and Undo state",
+      "passed": true
+    },
+    {
+      "name": "switches retain one Matrix sidebar",
+      "passed": true
+    }
+  ],
+  "module": "H:\\FreeCAD-src\\build\\om9-startup-ui-runtime-20261011\\bin\\OpenMatrix9Gui.pyd",
+  "toolbars": [
+    {
+      "name": "File",
+      "visible": true,
+      "actions": [
+        "Std_New",
+        "Std_Open",
+        "Std_Save"
+      ]
+    },
+    {
+      "name": "Edit",
+      "visible": true,
+      "actions": [
+        "&Ho\u00e0n t\u00e1c",
+        "&L\u00e0m l\u1ea1i",
+        "",
+        "Std_Refresh"
+      ]
+    },
+    {
+      "name": "Clipboard",
+      "visible": false,
+      "actions": [
+        "Std_Cut",
+        "Std_Copy",
+        "Std_Paste"
+      ]
+    },
+    {
+      "name": "Workbench",
+      "visible": true,
+      "actions": [
+        ""
+      ]
+    },
+    {
+      "name": "Macro",
+      "visible": false,
+      "actions": [
+        "Std_DlgMacroRecord",
+        "Std_DlgMacroExecute",
+        "Std_DlgMacroExecuteDirect"
+      ]
+    },
+    {
+      "name": "View",
+      "visible": true,
+      "actions": [
+        "Std_ViewFitAll",
+        "Std_ViewFitSelection",
+        "Std_ViewGroup",
+        "Std_AlignToSelection",
+        "",
+        "Std_DrawStyle",
+        "Part_SelectFilter",
+        "",
+        "Std_Measure",
+        "Std_MassProperties"
+      ]
+    },
+    {
+      "name": "Individual Views",
+      "visible": false,
+      "actions": [
+        "Std_ViewIsometric",
+        "Std_ViewFront",
+        "Std_ViewTop",
+        "Std_ViewRight",
+        "Std_ViewRear",
+        "Std_ViewBottom",
+        "Std_ViewLeft"
+      ]
+    },
+    {
+      "name": "Structure",
+      "visible": true,
+      "actions": [
+        "Std_Part",
+        "Part_Datums",
+        "Std_Group",
+        "Std_LinkActions",
+        "Std_VarSet"
+      ]
+    },
+    {
+      "name": "Help",
+      "visible": true,
+      "actions": [
+        "Std_WhatsThis"
+      ]
+    },
+    {
+      "name": "Part Design Helper Features",
+      "visible": false,
+      "actions": [
+        "PartDesign_Body",
+        "PartDesign_CompSketches",
+        "Sketcher_ValidateSketch",
+        "Part_CheckGeometry",
+        "PartDesign_SubShapeBinder",
+        "PartDesign_Clone"
+      ]
+    },
+    {
+      "name": "Part Design Modeling Features",
+      "visible": false,
+      "actions": [
+        "PartDesign_Pad",
+        "PartDesign_Revolution",
+        "PartDesign_AdditiveLoft",
+        "PartDesign_AdditivePipe",
+        "PartDesign_AdditiveHelix",
+        "PartDesign_CompPrimitiveAdditive",
+        "",
+        "PartDesign_Pocket",
+        "PartDesign_Hole",
+        "PartDesign_Groove",
+        "PartDesign_SubtractiveLoft",
+        "PartDesign_SubtractivePipe",
+        "PartDesign_SubtractiveHelix",
+        "PartDesign_CompPrimitiveSubtractive",
+        "",
+        "PartDesign_Boolean"
+      ]
+    },
+    {
+      "name": "Part Design Dress-Up Features",
+      "visible": false,
+      "actions": [
+        "PartDesign_Fillet",
+        "PartDesign_Chamfer",
+        "PartDesign_Draft",
+        "PartDesign_Thickness",
+        "PartDesign_Defeaturing"
+      ]
+    },
+    {
+      "name": "Part Design Transformation Features",
+      "visible": false,
+      "actions": [
+        "PartDesign_Mirrored",
+        "PartDesign_LinearPattern",
+        "PartDesign_PolarPattern",
+        "PartDesign_CircularPattern",
+        "PartDesign_PathPattern",
+        "PartDesign_PointPattern",
+        "PartDesign_MultiTransform"
+      ]
+    },
+    {
+      "name": "Solids",
+      "visible": false,
+      "actions": [
+        "Part_Box",
+        "Part_Cylinder",
+        "Part_Sphere",
+        "Part_Cone",
+        "Part_Torus",
+        "Part_Tube",
+        "Part_Primitives",
+        "Part_Builder"
+      ]
+    },
+    {
+      "name": "Part Tools",
+      "visible": false,
+      "actions": [
+        "Sketcher_NewSketch",
+        "Part_Extrude",
+        "Part_Revolve",
+        "Part_Mirror",
+        "Part_Scale",
+        "Part_Fillet",
+        "Part_Chamfer",
+        "Part_MakeFace",
+        "Part_RuledSurface",
+        "Part_Loft",
+        "Part_Sweep",
+        "Part_Section",
+        "Part_CrossSections",
+        "Part_CompOffset",
+        "Part_Thickness",
+        "Part_ProjectionOnSurface",
+        "Part_ColorPerFace"
+      ]
+    },
+    {
+      "name": "Boolean Tools",
+      "visible": false,
+      "actions": [
+        "Part_CompCompoundTools",
+        "Part_LinkArrays",
+        "Part_Boolean",
+        "Part_Cut",
+        "Part_Fuse",
+        "Part_Common",
+        "Part_CompJoinFeatures",
+        "Part_CompSplitFeatures",
+        "Part_CheckGeometry",
+        "Part_Defeaturing"
+      ]
+    }
+  ],
+  "dock_diagnostics": [
+    {
+      "prior": true,
+      "active_task": "False",
+      "docks": [
+        {
+          "name": "Tasks",
+          "kind": "QDockWidget",
+          "hidden": false,
+          "visible": true,
+          "parent": "",
+          "toggle_data": "Std_TaskView"
+        }
+      ]
+    },
+    {
+      "prior": false,
+      "active_task": "False",
+      "docks": [
+        {
+          "name": "Tasks",
+          "kind": "QDockWidget",
+          "hidden": false,
+          "visible": true,
+          "parent": "",
+          "toggle_data": "Std_TaskView"
+        }
+      ]
+    }
+  ],
+  "ok": false
+}

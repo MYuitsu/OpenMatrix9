@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Retain all existing nonplanar checks and independently inspect initial contacts."""
+from pathlib import Path
+import os
+fixture=Path(os.environ['OM9_FIXTURE_HELPER_DIR'])/'rhino_core_circle_history_contacts_spatial_smoke.FCMacro'
+source=(Path(os.environ['OM9_FIXTURE_HELPER_DIR'])/'circle_nonplanar_smoke.FCMacro').read_text(encoding='utf-8')
+needle='    c=o.Shape.Edges[0].Curve\n    return isinstance(c,Part.Circle)'
+assert source.count(needle)==1
+source=source.replace(needle,'''    c=o.Shape.Edges[0].Curve
+    if getattr(o,'OM9CurveConstruction','') and getattr(o,'OM9GeometryResult','') and json.loads(o.OM9GeometryResult)['operation']=='ConstructCurve':
+        construction=json.loads(o.OM9CurveConstruction)
+        events=[e for e in construction['accepted_input_events'] if e.get('kind')=='native_solution']
+        if events:
+            event=events[-1];fractions=event['resolved_contact_fractions'];constraints=construction['options']['constraints']
+            check('Initial spatial contact count/indexing '+o.Name,len(fractions)==len(constraints) and event['resolved_contact_indexing']=='current_constraint_points_zero_based')
+            center=App.Vector(*event['center']);normal=App.Vector(*event['normal']);radius=event['radius']
+            for i,(constraint,f)in enumerate(zip(constraints,fractions)):
+                if constraint['is_point']:
+                    check('Initial spatial fixed fraction null '+o.Name+str(i),f is None and abs((App.Vector(*constraint['point'])-center).Length-radius)<1e-6);continue
+                reference=next(r for r in construction['source_refs'] if r['role']=='tangent' and r['role_index']==i)
+                obj=doc.getObject(reference['object_name']);edge=obj.Shape.getElement(reference['subelement']) if reference['subelement'] else obj.Shape.Edges[0]
+                parent=obj.getGlobalPlacement()*obj.Placement.inverse();u=edge.FirstParameter+f*(edge.LastParameter-edge.FirstParameter)
+                point=parent.multVec(edge.valueAt(u));tangent=parent.Rotation.multVec(edge.tangentAt(u));delta=point-center
+                check('Initial spatial independent native contact '+o.Name+str(i),0<=f<=1 and abs(delta.Length-radius)<=1e-6*max(1.,radius) and abs(delta.dot(normal))<=1e-6 and abs(tangent.dot(normal))<=1e-8 and abs(delta.dot(tangent)/radius)<=1e-8)
+                if i==0 and construction['options']['from_first']:
+                    check('Initial spatial FromFirst exact contact '+o.Name,(point-App.Vector(*constraint['point'])).Length<=1e-6)
+    return isinstance(c,Part.Circle)''',1)
+# This executes the unchanged spatial workflow with additional initial evidence
+# assertions. The History-only wrapper and its original 65 checks run separately.
+exec(compile(source,str(fixture),'exec'),globals())

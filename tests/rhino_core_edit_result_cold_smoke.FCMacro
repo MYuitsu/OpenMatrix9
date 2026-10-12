@@ -1,0 +1,26 @@
+"""RCORE-01: independent process restores native Edit evidence/master pairing."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'module':OM.__file__,'checks':[]}
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def bounds(s):b=s.BoundBox;return [b.XMin,b.XMax,b.YMin,b.YMax,b.ZMin,b.ZMax]
+def run():
+ try:
+  models=Path(os.environ['OM9_EDIT_RESULT_MODELS'])
+  for command,count in [('Join',1),('Explode',2),('Trim',3),('BooleanDifference',1),('BooleanIntersection',1),('BooleanUnion',1),('Boolean2Objects',1)]:
+   d=App.openDocument(str(models/(command+'.FCStd')));objects=[o for o in d.Objects if hasattr(o,'OM9GeometryResult')]
+   check(command+' cold output count',len(objects)==count)
+   for o in objects:
+    raw=o.OM9GeometryResult;r=json.loads(raw);master=Part.Shape();master.importBrepFromString(r['output_snapshots'][0]['geometry_data']['native_master']['payload'])
+    check(command+' cold master/Shape pairing '+o.Name,master.isValid() and o.Shape.isValid() and all(abs(a-b)<1e-6 for a,b in zip(bounds(master),bounds(o.Shape))) and abs(master.Length-o.Shape.Length)<1e-6 and abs(master.Area-o.Shape.Area)<1e-6 and abs(master.Volume-o.Shape.Volume)<1e-6)
+    check(command+' cold identity and owned evidence '+o.Name,r['input_identity']['name']==o.Name and len(r['input_snapshots'])==len(r['operation_context']['source_refs']) and bool(r['input_snapshots']) and r['lifetime']=='immutable_native_operation_evidence_not_current_validity')
+    d.recompute();check(command+' cold recompute keeps evidence '+o.Name,o.OM9GeometryResult==raw)
+   App.closeDocument(d.Name)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for n in list(App.listDocuments()):App.closeDocument(n)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

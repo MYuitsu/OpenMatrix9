@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Post-acceptance diagnostic observers cannot turn publication into rejection."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE']);import OM9ReplayRetirement as probe
+def check(name,passed):report['checks'].append(dict(name=name,passed=bool(passed)))
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(80,loop.quit);loop.exec()
+def enter(console,text):
+    console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');settle()
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        for legacy in (False,True):
+            for throwing in (False,True):
+                doc=App.newDocument('HistoryDisposalLogger');doc.UndoMode=1
+                OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+                settings=doc.addObject('OpenMatrix9Gui::HistorySettings','OM9HistorySettings');settings.BrokenHistoryWarning=False
+                source=doc.addObject('Part::Feature','Source')
+                if legacy:
+                    source.Shape=Part.makeLine(App.Vector(),App.Vector(10,0,0))
+                    child=doc.addObject('OpenMatrix9Gui::CircleHistory','LegacyCircle')
+                    child.SourceCurve=(source,['Edge1']);child.PathFraction=.5;child.Radius=2;child.Recorded=True;doc.recompute()
+                    source.Shape=Part.makeLine(App.Vector(),App.Vector(20,0,0));center=App.Vector(10,0,0)
+                else:
+                    source.Shape=Part.Vertex(App.Vector(3,4,5));doc.recompute()
+                    for text in ('Circle','History=Yes','Point=Source.Vertex1','Radius=2'):enter(console,text)
+                    settle();child=doc.getObject('Circle')
+                    source.Shape=Part.Vertex(App.Vector(6,8,10));center=App.Vector(6,8,10)
+                child.touch();label=child.Label
+                doc.clearUndos();doc.openTransaction('Prior creation');probe.create(doc.Name,'Retired',True);doc.commitTransaction();doc.undo()
+                doc.openTransaction('Caller');result=probe.history_disposal(doc.Name,child.Name,throwing)
+                prefix='legacy%d/throw%d: '%(legacy,throwing)
+                check(prefix+'real irreversible disposal attempts mutation once',result['callbacks']==1 and result['blocked']==1)
+                check(prefix+'separate diagnostic reaches actual console observer',result['logger_calls']==1 and 'StaleGeometry'in result['message']and '%s'not in result['message'])
+                check(prefix+'accepted child remains valid despite observer failure','Invalid'not in child.State and not child.Shape.isNull()and child.Shape.isValid())
+                check(prefix+'accepted paired result survives',bool(child.OM9GeometryResult)and isinstance(child.Shape.Edges[0].Curve,Part.Circle)and(child.Shape.Edges[0].Curve.Center-center).Length<1e-7)
+                check(prefix+'owner attributes survive blocked mutation',child.Label==label and doc.getObject(child.Name)is child)
+                check(prefix+'normal caller transaction remains usable',doc.HasPendingTransaction and not doc.RedoNames)
+                report['observations'].append(dict(case=prefix,result=result,state=list(child.State),status=child.getStatusString()))
+                doc.abortTransaction();App.closeDocument(doc.Name)
+        report['ok']=all(c['passed']for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

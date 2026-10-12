@@ -1,0 +1,48 @@
+import sys
+sys.path.insert(0,'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+from command_options_fixture_support import *
+
+def probe(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+
+def run():
+    doc=App.newDocument('BoxCommandUsability');doc.UndoMode=1
+    window=Gui.getMainWindow();window.raise_();window.activateWindow();settle()
+    sidebar=window.findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar')
+    group=next(b for b in sidebar.findChildren(QtWidgets.QToolButton) if b.objectName().startswith('OM9Group') and b.text()=='Solid')
+    QtTest.QTest.mouseClick(group,QtCore.Qt.LeftButton);settle()
+    button=next(b for b in sidebar.findChildren(QtWidgets.QToolButton) if b.property('om9IconKey')=='SolidBoxCornertoCornerHeight' and b.isVisible())
+    QtTest.QTest.mouseClick(button,QtCore.Qt.LeftButton);settle()
+    report['focus_after_icon']=str(QtWidgets.QApplication.focusWidget().objectName()) if QtWidgets.QApplication.focusWidget() else None
+    probe('real left icon click focuses CMD',field().hasFocus())
+    # Independently probe parsing even on the known RED focus build.
+    command('C');field().setFocus();QtTest.QTest.keyClicks(field(),'0');key(QtCore.Qt.Key_Return)
+    accepted=draft()=='' and prompt().startswith('Other corner of base or length')
+    probe('zero is accepted origin and leaves live draft empty',accepted)
+    probe('origin input enters preceding prompt in history','Center of base ( Diagonal 3Point Vertical Center ): 0\n' in field().toPlainText())
+    if not accepted:command('0,0')
+    command('10');probe('Width explains Enter default','Press Enter to use length' in prompt())
+    command('0');probe('invalid Width stays editable',draft()=='0' and len(doc.Objects)==0)
+    probe('validation error is in history with clean live prompt','Error: ' in field().toPlainText() and 'Dimension must' not in prompt() and '1e9' not in field().toPlainText())
+    command('1e20');probe('large value has plain recovery instruction','smaller' in field().toPlainText().lower() and '1e9' not in field().toPlainText())
+    command('20');probe('Height explains Enter default','Press Enter to use width' in prompt())
+    command('10');probe('Matrix example creates native volume 2000',len(doc.Objects)==1 and doc.Objects[0].Shape.isValid() and abs(doc.Objects[0].Shape.Volume-2000)<1e-6)
+    window.resizeDocks([window.findChild(QtWidgets.QDockWidget,'OM9CommandFrame')],[180],QtCore.Qt.Vertical);settle()
+    field().grab().save(str(out/'matrix-box-example-history.png'))
+    doc.undo();probe('native Undo',len(doc.Objects)==0);doc.redo();probe('native Redo',len(doc.Objects)==1)
+    QtTest.QTest.mouseClick(button,QtCore.Qt.RightButton);settle();probe('right icon click also focuses CMD',field().hasFocus())
+    command('0');command('10,0,0');command();probe('Enter Width default advances to Height','Press Enter to use width' in prompt());command()
+    probe('right-click 3Point keeps native Enter defaults',len(doc.Objects)==2 and abs(doc.Objects[-1].Shape.Volume-1000)<1e-6 and '3Point' in doc.Objects[-1].SolidParameters)
+    command('_Box');command('3');command('0');command('3,0,0');command('2');command('4')
+    probe('shortcut3 selects 3Point with explicit endpoint',len(doc.Objects)==3 and abs(doc.Objects[-1].Shape.Volume-24)<1e-6 and '3Point' in doc.Objects[-1].SolidParameters)
+    # Cancel synchronously before the queued icon-start focus is delivered.
+    Gui.runCommand('OM9_SolidBoxCornertoCornerHeight')
+    QtWidgets.QApplication.sendEvent(field(),QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Escape,QtCore.Qt.NoModifier))
+    editor=QtWidgets.QLineEdit(window);editor.setObjectName('OM9UsabilityEditor');editor.resize(200,24);editor.move(30,100);editor.show();editor.setFocus()
+    report['cancel_focus_before']={'editor_visible':editor.isVisible(),'editor_focus':editor.hasFocus()};settle()
+    report['cancel_focus_after']=str(QtWidgets.QApplication.focusWidget().objectName()) if QtWidgets.QApplication.focusWidget() else None
+    probe('cancelled command cannot steal focus from another editor',editor.hasFocus());editor.deleteLater()
+    history=field().findChild(QtWidgets.QPlainTextEdit,'OM9CommandHistoryPane');history.grab().save(str(out/'box-usability-history.png'))
+    report['transcript']=field().toPlainText();report['source_sha256'].update({p:hashlib.sha256((Path('H:/FreeCAD-src/Mod/OpenMatrix9')/p).read_bytes()).hexdigest() for p in ['Gui/SolidController.cpp','Gui/CurveController.h','rust/src/solid.rs','rust/src/coordinates.rs','rust/src/curve_input_log.rs']})
+    check('all actual icon/origin/prompt/history assertions',all(c['passed'] for c in report['checks']))
+
+QtCore.QTimer.singleShot(1800,lambda:execute(run))

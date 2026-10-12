@@ -13,6 +13,15 @@ sample_status: compiled_and_validation_tests_passed
 
 # OM9-TOP11-005 — Explode
 
+<!-- rhino-core-edit-result-20261011:start -->
+Rust admission và native CAD Edit GeometryResult đã triển khai trên solver sẵn có.
+Runtime14/15 đã đạt các hồi quy CAD/lệnh/guard và cold reload; callback abort còn thất bại 2/5 kiểm tra Redo.
+Runtime15: Dimension NaN/Infinity 10/10, callback font/đồ họa và lỗi đúng Explode/source 12/12; dùng lại kiểm finite Rust.
+Full Rust 808 đạt; bằng chứng native giữ riêng theo plugin, không suy thành nghiệm thu toàn chương.
+**RCORE-01 đang triển khai**, không đóng consumer/lifecycle hay yêu cầu gốc.
+[Bằng chứng, lỗi đang mở và bước tiếp](../../../docs/validation/2026-10-11-rhino-core-edit-result.md).
+<!-- rhino-core-edit-result-20261011:end -->
+
 <!-- rhino-core-object-foundations:start -->
 ## Bổ sung guard input dùng chung — 2026-10-09
 

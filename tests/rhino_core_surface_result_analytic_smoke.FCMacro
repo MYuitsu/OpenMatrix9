@@ -1,0 +1,31 @@
+"""RCORE-01: rigid output frames preserve analytic native surface geometry."""
+import os,json,math,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'module':OM.__file__,'checks':[],'observations':[]}
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  for grouped in [False,True]:
+   d=App.newDocument('AnalyticSurface'+str(int(grouped)));sources=[]
+   for name,z in [('First',0),('Last',8)]:
+    o=d.addObject('Part::Feature',name);o.Shape=Part.Wire([Part.makeCircle(3,App.Vector(0,0,z))]);sources.append(o)
+   h=d.addObject('OpenMatrix9Gui::SurfaceHistory','SurfaceHistory')
+   if grouped:
+    group=d.addObject('App::Part','OutputGroup');group.Placement.Base=App.Vector(15,-30,10);group.addObject(h);h.Placement.Base=App.Vector(2,5,7)
+   h.SourceCurves=[(o,['']) for o in sources];h.SurfaceOptions=json.dumps(dict(version=1,kind=3,style=0,frenet=False,closed=False,maintainHeight=False,preview=True,sectionMode=0,pointCount=16,tolerance=.01,continuityA=0,continuityB=0,matchStart=False,matchEnd=False,slashes=[],history=True,historyCommand=False,inputs=[dict(count=1,chain=False,closed=False,reverse=False,seam=0) for _ in sources]));h.HistoryEnabled=True;d.recompute()
+   value=json.loads(h.OM9GeometryResult);master=Part.Shape();master.importBrepFromString(value['output_snapshots'][0]['geometry_data']['native_master']['payload'])
+   report['observations'].append(dict(grouped=grouped,area=h.Shape.Area,surface=type(h.Shape.Faces[0].Surface).__name__,snapshot_area=master.Area))
+   check('native output keeps analytic cylinder',h.isValid() and isinstance(h.Shape.Faces[0].Surface,Part.Cylinder))
+   check('original analytic area tolerance preserved',abs(h.Shape.Area-48*math.pi)<1e-5)
+   check('snapshot equals actual placed analytic shape',isinstance(master.Faces[0].Surface,Part.Cylinder) and abs(master.Area-48*math.pi)<1e-5 and (master.Faces[0].CenterOfMass-h.Shape.Faces[0].CenterOfMass).Length<1e-6)
+   world=h.Shape.copy();world.transformShape((h.getGlobalPlacement()*h.Placement.inverse()).toMatrix())
+   check('world geometry stays at source center once',(world.Faces[0].CenterOfMass-App.Vector(0,0,4)).Length<1e-6)
+   App.closeDocument(d.Name)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for n in list(App.listDocuments()):App.closeDocument(n)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

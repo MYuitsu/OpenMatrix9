@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-circle-history-lifetime-red-20261012",
+  "status": "in_progress",
+  "updated_at": "2026-10-12T02:47:19+07:00",
+  "scope": "Actual Circle History owner-close failure witness and proposed native journal design; full original RCORE-01 retained",
+  "production_changed": false,
+  "rebuild": false,
+  "rust_rerun": false,
+  "production_sources": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistory.cpp",
+      "bytes": 33958,
+      "sha256": "f69281a23fa308de68b0f46e92f78398b1f5a6ebcfacfdf12a036c3acc22b1f0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistory.h",
+      "bytes": 2013,
+      "sha256": "d466643285cb703d5c6e5b1e85da0f06e3f1bccc7b8abd03d37c1a306c191197"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistoryAdapter.cpp",
+      "bytes": 12845,
+      "sha256": "f6198dc752fc4afc141cdb1759375a61dee8fdb6e41fb1a5118c687b5e3675f8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCurveNativeInput.cpp",
+      "bytes": 10073,
+      "sha256": "60af0889e09a88c17c40e4dec8920d8ff8b5fe2d40838dc93cc9394f98a94675"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCurveNativeInput.h",
+      "bytes": 1356,
+      "sha256": "44286e1bc912592d342f934e242df6cd7ecc9925df75fdddb149ffe1e28fc8f3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveGeometry.cpp",
+      "bytes": 8308,
+      "sha256": "9716b340d0a1be7ac70ff81178a7d71fa6d447aa381c1a45a0036bf18a076cc9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCurvePublication.cpp",
+      "bytes": 11625,
+      "sha256": "c3adef5005a9f23c03f1b10212c0d3e0cd2a9ace058c00dc416385e279326391"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history_result.rs",
+      "bytes": 12575,
+      "sha256": "2d06a974204f93528ba91352ef2d104a05e6db3e78095526b413981949788804"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history.rs",
+      "bytes": 17700,
+      "sha256": "87cd2a31e04628a8898477d58ee3668694d43be773b7421992fd0d31116aeb09"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve.rs",
+      "bytes": 66480,
+      "sha256": "e20e3b3a83a45ef401462eedd5d99b6898cb05c5a5be4b3bfd79ce66111d16cf"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_native_input.rs",
+      "bytes": 11923,
+      "sha256": "826739feb2de333642163f2b69b87d66021a844e2a0b6eb840b3b34367d2d42b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_result.rs",
+      "bytes": 11313,
+      "sha256": "d2df8b9d0df39d95d27793ea2cc5e1a996f54df13e0137a30b0098bdc5177206"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_result_tests.rs",
+      "bytes": 16065,
+      "sha256": "26f810a4b7f11e738ee4459bfdca4decdad133c4461f6b9038698ea85b755ebd"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/prepared_result.rs",
+      "bytes": 23567,
+      "sha256": "c83240c639d697e9097f99c4ecf0f934bf008e4fd719bba16c9e0eb28cba2a30"
+    }
+  ],
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/circle-history-runtime59-20261012/bin/OpenMatrix9Gui.pyd",
+    "bytes": 16758272,
+    "sha256": "b6f3282b2036e6e520e295dd1916a9bfd9c5ddddc52484bacaed641368ba4c1a"
+  },
+  "selected_app": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "probe": {
+    "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+    "bytes": 50688,
+    "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+  },
+  "shared_sdk_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "native_api_evidence": [
+    {
+      "path": "H:/FreeCAD-src/src/App/Document.cpp",
+      "bytes": 158149,
+      "sha256": "f5b75a2c80a0ce9c1bf7720cbfa9da3a984019c9f22196cb27c8657cc41913b4"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Document.h",
+      "bytes": 57560,
+      "sha256": "a17697109d612331dc8cacd78b71810992d8f2cbce78b3db91281a301f54831a"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.h",
+      "bytes": 13263,
+      "sha256": "b40694aba9dffa66f93fe150e9a4368db1a0ecf5baa7097e4419afe8cb079f59"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.cpp",
+      "bytes": 27357,
+      "sha256": "4578a38cdf5bccec6ab68bb8ecc3fb63d46a6ce36d2d193258a19e5a4039b723"
+    }
+  ],
+  "close_witness": {
+    "artifact": "H:/FreeCAD-src/build/solid-regression-circle-history-close-red63-offscreen-20261011",
+    "launch": {
+      "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "B6F3282B2036E6E520E295DD1916A9BFD9C5DDDDC52484BACAED641368BA4C1A",
+      "pid": 56600,
+      "module_root": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/solid-regression-circle-history-close-red63-offscreen-20261011",
+      "exit_code": null
+    },
+    "terminal": {
+      "pid": 56600,
+      "accepted": false,
+      "has_exited": true,
+      "reason": "Startup/fixture timeout, owned handle killed"
+    },
+    "prefix": {
+      "module": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\bin\\OpenMatrix9Gui.pyd",
+      "checks": [
+        {
+          "name": "recorded Circle exists before lifetime probe",
+          "passed": true
+        }
+      ],
+      "phase": "after_close",
+      "callbacks": 1,
+      "document_alive_after_callback": false
+    },
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-close-red63-offscreen-20261011/results.json",
+        "bytes": 311,
+        "sha256": "5a5c3522f3aec249652d6626d41faebe6eb7af98bd50375f2f7bdcfaf1f8bbb5"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-close-red63-offscreen-20261011/shared-host-launch.json",
+        "bytes": 604,
+        "sha256": "310efb1e9e5c605c305a67dd77b8b062231c3691a52c3d55611fd2cc6e8b7e99"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-close-red63-offscreen-20261011/excluded-terminal.json",
+        "bytes": 128,
+        "sha256": "919dbd10fa050cad68e896c0ad1dc1709d229f0e470a0d06335877a52408de17"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-close-red63-offscreen-20261011/loaded-native-app.json",
+        "bytes": 227,
+        "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-close-red63-offscreen-20261011/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-close-red63-offscreen-20261011/fixture.FCMacro",
+        "bytes": 3383,
+        "sha256": "bbe9255a2096f582ea383b1e9b0ee09cf17e1e25671d181d7ea6339da79d5eac"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-close-red63-offscreen-20261011/host-stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-close-red63-offscreen-20261011/host-stderr.log",
+        "bytes": 2619,
+        "sha256": "53f5350b189091bc77399a5408fd91592d8a881aa5117c3d17619d4c1c5e1b54"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-close-red63-offscreen-20261011/user.cfg",
+        "bytes": 14176,
+        "sha256": "a45b84a7525c23f4ecabb366d2beb3a1c64d51e997d3e317cea287d34299e169"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-close-red63-offscreen-20261011/select-plugin.FCMacro",
+        "bytes": 2832,
+        "sha256": "e483643f5bf6c46bf8837d5743c8fb6b1346e9a62defe78cbbff6f1ec834131e"
+      }
+    ],
+    "completed_fixture": false,
+    "completed_checks": 0,
+    "setup_assertions": 1,
+    "observed_callbacks": 1,
+    "owner_alive_after_close": false,
+    "runner_exit": 1,
+    "natural_host_exit": null,
+    "timeout_seconds": 300,
+    "accepted": false,
+    "interpretation": "Owner close succeeds inside native replay;recompute does not return before300s;owned test handle killed and terminal. This is a lifetime failure witness,not a completed suite or specific crash attribution."
+  },
+  "design": {
+    "path": "docs/superpowers/specs/2026-10-12-circle-history-native-savepoint-design.md",
+    "source": {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/superpowers/specs/2026-10-12-circle-history-native-savepoint-design.md",
+      "bytes": 12605,
+      "sha256": "dc0e1050c1ce12748fea9317504560ff746f49178e3a5c52b9c3ec1568db400d"
+    },
+    "status": "proposed_review_required",
+    "native_scope_reason": "Existing public transaction opening retires the caller;checked native restore,property-journal isolation anddocument lifetime protection are private App state. Direct plugin compensation cannot establish the original ownership/history contract."
+  },
+  "prior_checkpoint": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-12-rhino-core-circle-history-atomic-state.json",
+    "bytes": 175366,
+    "sha256": "6c891f76a07bc8c69fcfb7df409a38284b68407a28b806eaebc7e0eebb17ed63"
+  },
+  "remaining": [
+    "The full original RCORE-01 objective remains open: GeometryRef/Snapshot/Result for every enabled consumer; adapters1–7, C01–C12, T01–T11; rational/periodic basis, trims/pcurves/seam occurrences; independent read/edit/retain/export and complete supported attributes.",
+    "Current GeometryResult is now directly checked across the existing all-mode History fixture: numeric/picked Center, oriented/direction, TwoPoint, ThreePoint radius and live endpoint branches, Vertical, constant Area, whole FitPoints with growing topology, deformable Center/Fit/Around/Tangent, bounded native tangent and fixed-contact point dependencies, parent placement, Lock, deletion/Undo, detach/Undo and command source pruning. Twenty recorded results cold reopen and retain exact bytes; legacy empty-recipe AroundCurve also has paired current native/cold evidence. This is named fixture coverage, not every option/backend/representation or complete historical provenance. Native-plan/source correspondence remains required.",
+    "Exact rejection-time Circle History evidence is RED355/432 across48 cases, Runtime59. The three caller states are no booking, unmaterialized preserving-Redo booking, and already materialized preserving-Redo journal with an independent caller edit. Forty-two cases retain tampered metadata; three source callbacks retain changed point geometry. Sixteen booked cases materialize the caller journal (Undo2/Redo1/pendingFalse becomesUndo3/Redo0/pendingTrue); plain/active states retain immediate counts/names/booking/pending. Original executable Redo succeeds48/48 after explicit caller abort where applicable. Identical counts do not prove absence of pollution of an existing journal. A checked native replay savepoint/notification barrier must preserve pre-existing caller edits and booking/journal, reject observer mutations, restore protected metadata/source state and clear paired invalid output. All original close/removal/owner/lock/dependency/cache invariants remain open. A new isolated close callback also removes the owning document while replay remains active; prefix after_close/document_aliveFalse is saved, no recompute return occurs within300s, and the exact owned host is killed and terminal. This strengthens the required native lifetime barrier; neither a completed test gate nor a particular crash cause is claimed.",
+    "Task2/3 remain open: generic snap/pick/parameter provenance, snapshot sharing and aggregate allocation/traversal/worker/cancellation bounds, Rebuild and every other enabled GeometryResult consumer.",
+    "Global conversion/deviation/locus and complete parameter/topology maps remain unproven; the current native Circle output contract checks basis, full domain and shared endpoint identity. Full conversion exactness is reported uninspected; maps remain null.",
+    "Four recorded archives were independently reopened in one new native host and replayed again; offscreen evidence does not certify actual mouse, rendering, all viewport/preview/cache lifetime or every original persistence family.",
+    "The inventory was captured before Runtime59 build and relevant Curve/History source hashes match. Full inventory differs due parallel Gumball source and a new test fixture; it is not an exact compiler dependency certificate. Production ABI/deployment acceptance remains pending."
+  ],
+  "next_action": "Review the proposed native replay-savepoint design, then implement the checked native property journal and lifetime/history/observer barriers before Circle reads live sources. Preserve all caller states; use the unchanged semantic432 RED and require the close callback to complete normally with owner alive and paired typed rejection. Continue every original RCORE-01 requirement."
+}

@@ -1,0 +1,57 @@
+"""Concrete Explode leaves must pass admission before native extraction/copy."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh
+from PySide6 import QtCore,QtGui,QtWidgets
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def events():QtWidgets.QApplication.processEvents()
+def enter(text=''):
+ transcript.setFocus()
+ QtWidgets.QApplication.sendEvent(transcript,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(transcript,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(transcript,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));events()
+def escape():
+ QtWidgets.QApplication.sendEvent(transcript,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Escape,QtCore.Qt.NoModifier));events()
+def run():
+ global transcript
+ try:
+  import OpenMatrix9Gui as native
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench');events()
+  transcript=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  for case in ('block-basis','cage-basis','block-mesh'):
+   doc=App.newDocument('ExplodeLeaf_'+case.replace('-','_'));doc.UndoMode=1
+   doc.openTransaction('Sources')
+   if case=='block-mesh':
+    leaf=doc.addObject('Mesh::Feature','BadMesh');mesh=Mesh.Mesh([[App.Vector(),App.Vector(2,0,0),App.Vector(0,3,0)]])
+    for _ in range(16384):mesh.addSegment([0])
+    leaf.Mesh=mesh
+   else:
+    curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots([App.Vector(),App.Vector(1e151,1,0),App.Vector(2,0,0)],[3,3],[0.,1.],False,2)
+    leaf=doc.addObject('Part::Feature','BadCurve');leaf.Shape=curve.toShape()
+   if case=='cage-basis':
+    source=doc.addObject('Part::Feature','Cage');source.addProperty('App::PropertyLinkList','OM9CageComponents');source.OM9CageComponents=[leaf]
+   else:source=doc.addObject('App::Link','Block');source.setLink(leaf)
+   doc.commitTransaction();doc.recompute()
+   doc.openTransaction('Redo');source.Label='Redo witness';doc.commitTransaction();doc.undo()
+   geometry=leaf.Mesh.countSegments() if case=='block-mesh' else leaf.Shape.exportBrepToString()
+   baseline=(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount,geometry)
+   Gui.Selection.clearSelection();Gui.Selection.addSelection(source);transcript.clear();enter('Explode')
+   check(case+' rejects invalid native leaf with operation and identity',all(s in transcript.toPlainText() for s in ('InvalidBasis','Explode',leaf.Name)))
+   geometry=leaf.Mesh.countSegments() if case=='block-mesh' else leaf.Shape.exportBrepToString()
+   check(case+' rejection preserves sources and Undo/Redo',(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount,geometry)==baseline)
+   escape();doc.redo();check(case+' leaves executable Redo',source.Label=='Redo witness');App.closeDocument(doc.Name)
+  # A scalar curve is intentionally allowed as a block leaf, despite ordinary
+  # single-curve Explode being unsupported. Keep the existing adapter behavior.
+  doc=App.newDocument('ExplodeValidScalar');leaf=doc.addObject('Part::Feature','Line');leaf.Shape=Part.makeLine(App.Vector(),App.Vector(4,0,0));source=doc.addObject('App::Link','Block');source.setLink(leaf);source.LinkPlacement.Base=App.Vector(20,30,40);doc.recompute()
+  Gui.Selection.clearSelection();Gui.Selection.addSelection(source);enter('Explode');enter();enter()
+  pieces=[o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOP11-005']
+  check('valid scalar block leaf retains existing solver and world placement',len(pieces)==1 and abs(pieces[0].Shape.Length-4)<1e-7 and (pieces[0].Shape.CenterOfMass-App.Vector(22,30,40)).Length<1e-7 and doc.getObject('Line') is not None and doc.getObject('Block') is None)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

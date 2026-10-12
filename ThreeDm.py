@@ -111,6 +111,10 @@ def _insert_prepared(name, prepared):
             obj.OM9MeshArchive = json.dumps(dict(vertices=item["vertices"], faces=item["faces"]))
             obj.addProperty("App::PropertyString", "OM9MeshSignature", "Rhino 5")
             obj.OM9MeshSignature = hashlib.sha256(repr(obj.Mesh.Topology).encode()).hexdigest()
+        if '_om9_geometry_result' in item:
+            obj.addProperty('App::PropertyString','OM9GeometryResult','Rhino 5')
+            obj.OM9GeometryResult=item['_om9_geometry_result']
+            obj.setEditorMode('OM9GeometryResult',1)
         obj.Label = item["name"] or obj.Name
         obj.addProperty("App::PropertyFloat", "OM9Tolerance", "Rhino 5")
         obj.OM9Tolerance = item["tolerance"]

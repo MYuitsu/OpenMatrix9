@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Native source values and ownership must stay bound across Curve publication."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Points,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(console,text):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier))
+def settle():
+ loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(80,loop.quit);loop.exec()
+def snapshot(doc):
+ return dict(objects=[dict(name=o.Name,label=o.Label,shape=o.Shape.exportBrepToString()if 'Shape'in o.PropertiesList else None,
+  points=[list(p)for p in o.Points.Points]if 'Points'in o.PropertiesList else None,
+  placement=list(o.Placement.toMatrix().A)if 'Placement'in o.PropertiesList else None,
+  members=[m.Name for m in o.Group]if 'Group'in o.PropertiesList else None)for o in doc.Objects],undo=doc.UndoCount,redo=doc.RedoCount)
+class Observer:
+ def __init__(self,doc,command,action):self.doc=doc.Name;self.command=command;self.action=action;self.calls=0;self.armed=True
+ def slotChangedObject(self,obj,prop):
+  if not self.armed or obj.Document.Name!=self.doc or obj.Name!=self.command or prop!='OM9GeometryResult'or not getattr(obj,prop,''):return
+  self.armed=False;self.calls+=1;source=obj.Document.getObject('Source')
+  if self.action=='geometry':
+   if 'Points'in source.PropertiesList:source.Points=Points.Points([App.Vector(2,0,0),App.Vector(0,2,0),App.Vector(-2,0,0)])
+   else:source.Shape=Part.makeLine(App.Vector(10,20,30),App.Vector(10,20,70))
+  elif self.action=='placement':source.Placement.Base=App.Vector(90,80,70)
+  elif self.action=='label':source.Label='Changed native source'
+  elif self.action=='parent':obj.Document.getObject('Parent').addObject(source)
+def case(console,recipe,action):
+ command='Ellipse'if recipe=='EllipsePath'else'Circle';label=recipe+'/'+action;doc=App.newDocument('CurveSourceCallback'+recipe+action);observer=None
+ try:
+  doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+  if recipe=='FitPoints':
+   source=doc.addObject('Points::Feature','Source');source.Points=Points.Points([App.Vector(1,0,0),App.Vector(0,1,0),App.Vector(-1,0,0)]);source.Placement.Base=App.Vector(10,20,30)
+   prefix=['Circle','FitPoints','Selection'];final=''
+  else:
+   source=doc.addObject('Part::Feature','Source');source.Shape=Part.makeCompound([Part.makeLine(App.Vector(10,20,30),App.Vector(10,20,50)),Part.makeLine(App.Vector(),App.Vector(100,0,0))])
+   prefix=[command,'AroundCurve','Curve=Source.Edge1','OnCurve=0.2500']+(['5mm']if command=='Ellipse'else[]);final='3mm'if command=='Ellipse'else'2mm'
+  source.Label='Original full source';witness=doc.addObject('App::FeaturePython','Witness')
+  if action=='parent':doc.addObject('App::Part','Parent')
+  doc.recompute();doc.openTransaction('Prior executable Redo');witness.Label='Prior Redo executes';doc.commitTransaction();doc.undo();settle()
+  console.clear();Gui.Selection.clearSelection()
+  if recipe=='FitPoints':Gui.Selection.addSelection(source)
+  for text in prefix:enter(console,text)
+  before=snapshot(doc);observer=Observer(doc,command,action);App.addDocumentObserver(observer)
+  enter(console,final);settle();calls=observer.calls;App.removeDocumentObserver(observer);observer=None;after=snapshot(doc);diagnostic=console.toPlainText()
+  check(label+' real native source callback once',calls==1)
+  check(label+' native source and document and Undo Redo restored',before==after and before['redo']==1)
+  check(label+' changed source has no published output',doc.getObject(command)is None)
+  check(label+' typed error identifies command and source',any('StaleGeometry:'in line and command in line and 'Source'in line for line in diagnostic.splitlines()))
+  executed=False
+  if doc.RedoCount:doc.redo();executed=witness.Label=='Prior Redo executes'
+  check(label+' prior native Redo still executes',executed)
+  report['observations'].append(dict(case=label,before=before,after=after,calls=calls,diagnostic=diagnostic))
+ finally:
+  if observer:App.removeDocumentObserver(observer)
+  Gui.Selection.clearSelection();enter(console,'Cancel');App.closeDocument(doc.Name)
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');settle();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  for recipe in ['CirclePath','EllipsePath','FitPoints']:
+   for action in ['geometry','placement','label','parent']:case(console,recipe,action)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

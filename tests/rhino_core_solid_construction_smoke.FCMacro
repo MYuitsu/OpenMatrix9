@@ -1,0 +1,115 @@
+"""Owned Solid construction evidence; this does not certify conversion/maps."""
+import gc,json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+sys.path.insert(0,os.environ['OM9_PUBLICATION_FAULT_DIR'])
+import OM9PublicationFault as Fault
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,probe=Fault.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(160,loop.quit);loop.exec()
+def enter(console,text):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def snapshot(doc):return tuple((o.Name,o.Label,o.Shape.exportBrepToString() if 'Shape' in o.PropertiesList else None) for o in doc.Objects),doc.UndoCount,doc.RedoCount
+def positive(console,mode):
+    doc=App.newDocument('SolidCapture'+mode);doc_name=doc.Name;doc.UndoMode=1
+    try:
+        OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+        source=doc.addObject('Part::Feature','Source');source.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0));doc.recompute()
+        before=doc.UndoCount
+        if mode=='BoxCenter':texts=['Box','Center','10,20,30','4','6','8'];kind='Box';expected=[8,17,30,1,0,0,0,1,0,0,0,1,4,6,8];name='Center';points=[[10,20,30]];accepted=points
+        elif mode=='AroundCurve':texts=['Sphere','AroundCurve','Path=Source.Edge1','OnCurve=.25','Radius=2'];kind='Sphere';expected=[2.5,0,0,0,0,-1,0,1,0,1,0,0,2,0,0];name=mode;points=[];accepted=[[0,0,0],[2.5,0,0]]
+        elif mode=='FitPoints':texts=['Sphere','FitPoints','1,0,0','0,1,0','-1,0,0',''];kind='Sphere';expected=[0,0,0,1,0,0,0,1,0,0,0,1,1,0,0];name=mode;points=[[1,0,0],[0,1,0],[-1,0,0]];accepted=points
+        elif mode=='4Point':texts=['Sphere','4Point','1,0,0','0,1,0','-1,0,0','0,0,1'];kind='Sphere';expected=[0,0,0,1,0,0,0,1,0,0,0,1,1,0,0];name=mode;points=[[1,0,0],[0,1,0]];accepted=points+[[-1,0,0],[0,0,1]]
+        else:texts=['Sphere','1,2,3','Radius=2'];kind='Sphere';expected=[1,2,3,1,0,0,0,1,0,0,0,1,2,0,0];name='Center';points=[[1,2,3]];accepted=points
+        console.clear()
+        for text in texts:enter(console,text)
+        settle();outputs=[o for o in doc.Objects if getattr(o,'OM9Command','')==kind]
+        obj=outputs[0] if outputs else None
+        raw=getattr(obj,'OM9SolidConstruction','');units=getattr(obj,'OM9UnitContext','')
+        value=json.loads(raw) if raw else {};context=units
+        report['observations'].append(dict(case=mode,construction=value,unit_context=context,diagnostic=console.toPlainText()))
+        check(mode+' Shape and independent construction metadata published together',len(outputs)==1 and bool(raw) and bool(units) and obj.Shape.isValid())
+        check(mode+' actual kind mode phase and generation retained',value.get('kind')==kind and value.get('mode')==name and value.get('phase')==6 and int(value.get('generation','0'))>0 and value.get('feature_id')==('OM9-SOLID-012' if kind=='Box' else 'OM9-SOLID-014'))
+        check(mode+' world plan has independently expected origin axes and dimensions',len(value.get('output',[]))==15 and all(abs(a-b)<1e-7 for a,b in zip(value.get('output',[]),expected)))
+        check(mode+' accepted input points retained without invented conversion',value.get('points')==points and value.get('accepted_points')==accepted and value.get('coordinates')=='document_world_mm' and value.get('source_provenance')=='numeric_inputs_only_native_owners_bound_separately' and 'parameter_map' not in value)
+        check(mode+' exact unit context and revision bound',context==OM.unitContext(doc.Name)['snapshot'] and bool(context))
+        check(mode+' exactly one publication Undo',doc.UndoCount==before+1)
+        restored=False
+        if obj:
+            object_name=obj.Name;doc.undo();removed=doc.getObject(object_name) is None;doc.redo();restored=removed and doc.getObject(object_name) is obj and getattr(obj,'OM9SolidConstruction','')==raw and getattr(obj,'OM9UnitContext','')==units
+        check(mode+' Undo Redo restores the same native identity and frozen evidence',restored)
+        source.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(20,0,0));doc.recompute()
+        check(mode+' standalone evidence remains the accepted input after source edit',bool(raw) and getattr(obj,'OM9SolidConstruction','')==raw)
+        file=out/(mode+'.FCStd');doc.saveAs(str(file));doc_name=doc.Name;App.closeDocument(doc_name);loaded=App.openDocument(str(file));loaded_obj=loaded.getObject(kind)
+        check(mode+' FCStd restores shape and evidence bytes',loaded_obj is not None and loaded_obj.Shape.isValid() and getattr(loaded_obj,'OM9SolidConstruction','')==raw and getattr(loaded_obj,'OM9UnitContext','')==units and bool(raw))
+        App.closeDocument(loaded.Name)
+    finally:
+        enter(console,'Cancel')
+        if doc_name in App.listDocuments():App.closeDocument(doc_name)
+class Tamper:
+    def __init__(self,name,action):self.name=name;self.action=action;self.calls=0
+    def slotChangedObject(self,obj,prop):
+        if self.calls or prop!='OM9SolidConstruction' or obj.Document.Name!=self.name or not getattr(obj,prop,''):return
+        self.calls+=1
+        if self.action=='remove':obj.removeProperty(prop)
+        elif self.action=='units':obj.removeProperty('OM9UnitContext')
+        else:obj.OM9SolidConstruction='tampered'
+def rejected(console,action):
+    doc=App.newDocument('SolidCaptureReject'+action);doc.UndoMode=1;observer=Tamper(doc.Name,action)
+    try:
+        OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+        source=doc.addObject('Part::Feature','Source');source.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0));doc.recompute()
+        doc.openTransaction('prior Redo');source.Label='Prior value';doc.commitTransaction();doc.undo();settle()
+        before=snapshot(doc);console.clear()
+        for text in ['Box','Diagonal','0,0,0','2,3,0']:enter(console,text)
+        App.addDocumentObserver(observer);Fault.arm('observe',doc.Name,source.Name)
+        enter(console,'4');settle();App.removeDocumentObserver(observer);gc.collect()
+        source_document=source.Document;del source_document
+        captured=Fault.counts();diagnostic=console.toPlainText()
+        report['observations'].append(dict(case='reject/'+action,captured=captured,diagnostic=diagnostic,calls=observer.calls))
+        check(action+' callback actually changed new evidence once',observer.calls==1)
+        check(action+' source Undo and prior Redo unchanged',snapshot(doc)==before)
+        check(action+' typed original operation and input diagnostic',any('StaleGeometry:' in line and 'Box' in line and 'typed construction points' in line for line in diagnostic.splitlines()))
+        check(action+' native output invalidated and wrapper released',len(captured)==1 and all(not r['valid'] and r['refcount']==1 for r in captured))
+        check(action+' no partial output metadata object remains',all(getattr(o,'OM9Command','')!='Box' for o in doc.Objects))
+        redo=False
+        if doc.RedoCount:doc.redo();redo=source.Label=='Prior value'
+        check(action+' prior native Redo remains executable',redo)
+    finally:
+        App.removeDocumentObserver(observer);Fault.clear();enter(console,'Cancel')
+        App.closeDocument(doc.Name)
+def stale_units(console):
+    doc=App.newDocument('SolidCaptureStaleUnits');name=doc.Name;doc.UndoMode=1
+    try:
+        OM.setUnitContext(name,1.,1.,.01,.001,.01);original=OM.unitContext(name)
+        console.clear()
+        for text in ['Box','Diagonal','0,0,0','2,3,0']:enter(console,text)
+        OM.setUnitContext(name,1.,1.,.02,.001,.01);before=snapshot(doc)
+        enter(console,'4');settle();diagnostic=console.toPlainText()
+        report['observations'].append(dict(case='unit-context-stale',diagnostic=diagnostic))
+        check('unit-context actually changed during input',OM.unitContext(name)!=original)
+        check('unit-context stale command cannot create an object or Undo',snapshot(doc)==before)
+        check('unit-context original Box input diagnostic',any('StaleGeometry:' in line and 'Box' in line and 'typed construction points' in line for line in diagnostic.splitlines()))
+        enter(console,'Cancel');count=len(doc.Objects)
+        for text in ['Box','Diagonal','0,0,0','2,3,0','4']:enter(console,text)
+        check('fresh command works with the new context',len(doc.Objects)==count+1)
+    finally:
+        enter(console,'Cancel');App.closeDocument(name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');settle()
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        for mode in ['BoxCenter','SphereCenter','AroundCurve','FitPoints','4Point']:positive(console,mode)
+        for action in ['replace','remove','units']:rejected(console,action)
+        stale_units(console)
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

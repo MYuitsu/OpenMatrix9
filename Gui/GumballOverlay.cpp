@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "GumballOverlay.h"
+#include "GumballMeshComponents.h"
 #include <Gui/View3DInventor.h>
 #include <Gui/View3DInventorViewer.h>
 #include <Gui/Inventor/SoFCBoundingBox.h>
@@ -48,6 +49,7 @@ void square(SoSeparator* parent,float half){
 }
 }
 GumballOverlay::~GumballOverlay(){detach();}
+void GumballOverlay::componentHighlight(const GumballMeshComponentPick* pick){if(componentNode)updateGumballMeshComponentHighlight(componentNode,pick,view?view->getViewer()->viewport()->devicePixelRatioF():1.0);}
 void GumballOverlay::attach(Gui::View3DInventor* native){
     if(view==native&&root&&owner&&owner->findChild(root)>=0&&owner==native->getViewer()->getSceneGraph())return;
     detach();if(!native)return;
@@ -58,11 +60,12 @@ void GumballOverlay::attach(Gui::View3DInventor* native){
     auto* skip=new Gui::SoSkipBoundingGroup;skip->mode=Gui::SoSkipBoundingGroup::EXCLUDE_BBOX;root->addChild(skip);
     auto* annotation=new SoAnnotation;skip->addChild(annotation);widgetNode=new SoSeparator;annotation->addChild(widgetNode);
     previewNode=new SoSeparator;skip->addChild(previewNode);
+    componentNode=new SoSeparator;skip->addChild(componentNode);
 }
 void GumballOverlay::detach(){
     closeEditor();if(view)view->getViewer()->viewport()->setProperty("om9GumballViewport",false);
     if(owner){if(root&&owner->findChild(root)>=0)owner->removeChild(root);owner->unref();}
-    if(root)root->unref();view=nullptr;owner=root=previewNode=widgetNode=nullptr;pose=menuPose=nullptr;
+    if(root)root->unref();view=nullptr;owner=root=previewNode=widgetNode=componentNode=nullptr;pose=menuPose=nullptr;
     handles.fill(nullptr);colors.fill(nullptr);facing.fill(nullptr);
 }
 void GumballOverlay::render(const Om9GumballSnapshot& s,std::uint64_t session,const Om9GumballSettings& configuration,const std::vector<std::array<double,3>>& points){

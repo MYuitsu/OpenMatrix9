@@ -11,6 +11,26 @@ def check(name, value):
     report['checks'].append({'name': name, 'passed': bool(value)})
     if not value: raise AssertionError(name)
 def near(a, b): return abs(a-b) < 1e-8
+def ownership_diagnostic(label, ui, doc, group, child):
+    def owner(obj):
+        placement = obj.Placement
+        return {'name':obj.Name,'id':obj.ID,'type':obj.TypeId,
+                'placement':{'base':list(placement.Base),'rotation':list(placement.Rotation.Q)},
+                'global_placement':{'base':list(obj.getGlobalPlacement().Base),'rotation':list(obj.getGlobalPlacement().Rotation.Q)},
+                'parent':getattr(obj.getParentGeoFeatureGroup(),'Name',None),
+                'members':[[member.Name,member.ID] for member in getattr(obj,'Group',[])]}
+    def selection(resolve):
+        return [{'name':item.Object.Name,'id':item.Object.ID,'document':item.DocumentName,
+                 'subnames':list(item.SubElementNames)}
+                for item in Gui.Selection.getSelectionEx(doc.Name,resolve)]
+    report.setdefault('ownership_selection_diagnostics',[]).append({
+        'label':label,'group':owner(group),'child':owner(child),
+        'undo':doc.UndoCount,'redo':doc.RedoCount,
+        'no_resolve':selection(0),'resolved':selection(1),'new_style':selection(2),
+        'resolved_objects':[[obj.Name,obj.ID] for obj in Gui.Selection.getSelection(doc.Name)],
+        'exact_whole_group_selected':Gui.Selection.isSelected(group,'',0),
+        'exact_child_path_selected':Gui.Selection.isSelected(group,child.Name+'.',0),
+        'state':ui.native.gumballState(),'transcript':ui.transcript()})
 def run():
     ui = None
     try:
@@ -49,7 +69,22 @@ def run():
         check('Link copy retains shared definition and independent occurrence',len(copies)==1 and copies[0].LinkedObject==source and near(copies[0].LinkPlacement.Base.x,14) and near(first.LinkPlacement.Base.x,10) and bool(copies[0].OM9GumballIdentity))
         doc.undo();ui.settle()
         group=doc.addObject('App::Part','PlacedGroup'); child=doc.addObject('Part::Feature','Member');child.Shape=Part.makeBox(2,3,4);group.addObject(child);group.Placement.Base=App.Vector(30,0,0);doc.recompute()
-        ui.select(group,child);ui.numeric('MoveX','5 mm')
+        report['ownership_selection_events']=[]
+        class OwnershipSelectionObserver:
+            def addSelection(self,document,name,subname,point):
+                report['ownership_selection_events'].append({'event':'add','document':document,'name':name,'subname':subname,'point':list(point)})
+            def removeSelection(self,document,name,subname):
+                report['ownership_selection_events'].append({'event':'remove','document':document,'name':name,'subname':subname})
+            def clearSelection(self,document):
+                report['ownership_selection_events'].append({'event':'clear','document':document})
+        selection_observer=OwnershipSelectionObserver();Gui.Selection.addObserver(selection_observer,0)
+        try:
+            ownership_diagnostic('before parent and child selection',ui,doc,group,child)
+            ui.select(group,child)
+            ownership_diagnostic('before parent and child MoveX',ui,doc,group,child)
+            try:ui.numeric('MoveX','5 mm')
+            finally:ownership_diagnostic('after parent and child MoveX',ui,doc,group,child)
+        finally:Gui.Selection.removeObserver(selection_observer)
         check('selected parent and child transform once',near(group.Placement.Base.x,35) and near(child.Placement.Base.x,0));doc.undo();ui.settle()
         ui.numeric('MoveX','5 mm',QtCore.Qt.AltModifier)
         copiedgroup=next(o for o in doc.Objects if o.TypeId=='App::Part' and o!=group)

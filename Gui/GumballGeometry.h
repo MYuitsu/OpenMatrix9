@@ -3,6 +3,7 @@
 #include "CoreObjects.h"
 #include "CoreCoordinates.h"
 #include "GumballRust.h"
+#include "GumballMeshComponents.h"
 #include <memory>
 #include <functional>
 #include <vector>
@@ -25,10 +26,11 @@ struct GumballStagedBatch {std::shared_ptr<GumballNativeData> native;QJsonObject
 GumballInputs captureGumballInputs(App::Document&,const std::vector<Gui::SelectionObject>&,const CoordinateContext&);
 void verifyGumballInputs(App::Document&,const GumballInputs&);
 GumballStagedBatch stageGumballBatch(const GumballInputs&,const Om9GumballSnapshot&);
-void publishGumballBatch(App::Document&,const GumballInputs&,const Om9GumballSnapshot&,GumballStagedBatch&&);
+std::vector<std::string> publishGumballBatch(App::Document&,const GumballInputs&,const Om9GumballSnapshot&,GumballStagedBatch&&);
 std::vector<std::vector<Base::Vector3d>> gumballPreviewLines(const GumballStagedBatch&);
 QJsonObject gumballInputFacts(const GumballInputs&);
 std::vector<std::array<double,3>> gumballExtentPoints(const GumballInputs&,const double* frame);
 QJsonObject gumballObjectFrameFacts(const GumballInputs&);
+std::optional<GumballMeshComponentPick> gumballComponentHighlight(const GumballInputs&);
 void addGumballGeometryMethods(_object*);
 }

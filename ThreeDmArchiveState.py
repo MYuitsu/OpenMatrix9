@@ -1331,6 +1331,8 @@ def bind_archive(document, prepared):
     namespace = str(uuid.uuid4())
     container = document.addObject('App::FeaturePython', 'RhinoSourceArchive')
     container.Label = 'Rhino source archive (storage only)'
+    if '_om9_geometry_result' in prepared:
+        _property(container,'String','OM9GeometryResult',prepared['_om9_geometry_result'])
     _property(container, 'Integer', 'OM9ArchiveSchema', 1)
     _property(container, 'String', 'OM9ImportNamespace', namespace)
     from ThreeDmStorage import bind

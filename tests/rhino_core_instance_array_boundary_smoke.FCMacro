@@ -1,0 +1,55 @@
+"""Native member provenance and early cumulative array count/depth rejection."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[],'rejections':{}}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def run():
+ try:
+  import OpenMatrix9Gui as native
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+  doc=App.newDocument('ArrayBoundaries');doc.UndoMode=1
+  definition=doc.addObject('App::Part','Definition')
+  point=doc.addObject('Part::Feature','Member');definition.addObject(point);point.Shape=Part.Vertex(App.Vector(2,3,5))
+  def descriptor(obj,sub=''):return json.loads(native.geometryDescriptor(doc.Name,obj.Name,sub))
+  for expanded in [False,True]:
+   array=doc.addObject('App::Link','MemberArray'+str(int(expanded)));array.setLink(definition,point.Name+'.');array.ShowElement=expanded;array.ElementCount=2
+   doc.recompute();before=(doc.UndoCount,doc.RedoCount,point.Shape.exportBrepToString(),[o.Name for o in doc.Objects])
+   row=descriptor(array);members=row['geometry_data']['members']
+   check('member path retained in '+('physical' if expanded else 'virtual')+' array',all(m['geometry_data']['linked_member_path']==point.Name+'.' for m in members))
+   check('member definition identity retained '+str(expanded),all(m['geometry_data']['definition_ref']['object_name']==point.Name for m in members))
+   check('member inspection preserves native state '+str(expanded),before==(doc.UndoCount,doc.RedoCount,point.Shape.exportBrepToString(),[o.Name for o in doc.Objects]))
+  # 1 root +4090 empty groups =4091 nodes before the final array. That
+  # array requires at least1+2*3=7 more nodes. Its deliberately missing
+  # member proves capacity must reject before resolving any native path.
+  root=doc.addObject('App::DocumentObjectGroup','Wide')
+  empties=[doc.addObject('App::DocumentObjectGroup','G') for _ in range(4090)]
+  array=doc.addObject('App::Link','LateArray');array.setLink(definition,'Missing.');array.ShowElement=False;array.ElementCount=3;array.ViewObject.Visibility=False
+  root.Group=empties+[array];doc.recompute();before=(doc.UndoCount,doc.RedoCount,len(doc.Objects));error=None
+  try:descriptor(root)
+  except (ValueError,RuntimeError) as exc:error=str(exc)
+  report['rejections']['count']=error
+  check('cumulative array graph capacity rejects before native member lookup',error is not None and 'Instance array occurrence/depth budget' in error)
+  check('cumulative rejection preserves native document',before==(doc.UndoCount,doc.RedoCount,len(doc.Objects)))
+  # Array at depth63 needs a definition at depth65, beyond depth64.
+  # A malformed member again distinguishes preflight from late traversal.
+  deep=doc.addObject('App::DocumentObjectGroup','Deep');last=deep
+  for _ in range(61):
+   child=doc.addObject('App::DocumentObjectGroup','Level');last.Group=[child];last=child
+  array=doc.addObject('App::Link','DeepArray');array.setLink(definition,'Missing.');array.ShowElement=False;array.ElementCount=2;array.ViewObject.Visibility=False;last.Group=[array]
+  doc.recompute();before=(doc.UndoCount,doc.RedoCount,len(doc.Objects));error=None
+  try:descriptor(deep)
+  except (ValueError,RuntimeError) as exc:error=str(exc)
+  report['rejections']['depth']=error
+  check('array required child depth rejects before native member lookup',error is not None and 'Instance array occurrence/depth budget' in error)
+  check('depth rejection preserves native document',before==(doc.UndoCount,doc.RedoCount,len(doc.Objects)))
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

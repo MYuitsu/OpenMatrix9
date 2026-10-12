@@ -1,0 +1,13 @@
+{
+  "source": "H:/FreeCAD-src/build/solid-regression-owned-curve-jets81-offscreen-20261011/results.json",
+  "source_sha256": "3f437b885f8a572be8bd9517e172173937c1c4d6c443634c149023790f859b71",
+  "fixture": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/fixtures/owned_curve_evaluation/independent_offset_third.json",
+  "fixture_sha256": "867d93f088ca2662c20f1f4c8c26e74a4d094f6922e956db943920323241b7c1",
+  "generator": "H:\\FreeCAD-src\\build\\capture-owned-jets-math85.py",
+  "generator_sha256": "09c58bf4481f3096a464767481edbe7a1b883a2873dda8424cccbebdf7db60cd",
+  "method": "mpmath.diff of rational Bernstein/conic and normalized tangent-cross-direction definitions;70 decimal digits;no Rust outputs;not a global error-bound certificate",
+  "mpmath_version": "1.4.1",
+  "cases": 5,
+  "queries": 45,
+  "native_third_mismatches": 36
+}

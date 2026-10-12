@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-namespace App { class Document; }
+namespace App { class Document; class DocumentObject; }
 namespace OpenMatrix9Gui {
 // Fixed-width Rust ABI, never an address. Generations are process-session scoped.
 struct ObjectStamp {
@@ -22,6 +22,10 @@ struct ObjectSnapshot {
 // pointers are retained by Rust. A subelement is valid only at this revision.
 ObjectSnapshot captureObject(App::Document&, const std::string& name,
                              const std::string& subelement={});
+// GUI-thread process identity; changes on close/reopen even with the same Uid.
+std::uint64_t documentSession(App::Document&);
+ObjectStamp objectIdentity(App::DocumentObject&);
+bool validateObjectIdentity(App::Document&,const std::string&,const ObjectStamp&);
 void verifyObject(App::Document&, const ObjectSnapshot&);
 void addObjectSnapshotMethods(PyObject* module);
 }

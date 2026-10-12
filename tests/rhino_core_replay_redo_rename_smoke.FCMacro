@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""A replay rejection preserves old Redo native rename and property values."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE']);import OM9ReplayRetirement as probe
+def state(doc):return dict(booked=doc.getBookedTransactionID(),pending=doc.HasPendingTransaction,undo=list(doc.UndoNames),redo=list(doc.RedoNames))
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench')
+  for action in ['value','close','remove','clear']:
+   doc=App.newDocument('RedoRename');doc.UndoMode=1
+   child=doc.getObject(probe.create(doc.Name));child.addProperty('App::PropertyString','Original');child.Original='retained-payload'
+   doc.recompute();doc.clearUndos();doc.openTransaction('Prior rename')
+   check(action+' native rename fixture succeeds',probe.rename(doc.Name,'Original','Renamed'))
+   child.Value='prior-redo-value';doc.commitTransaction();doc.undo()
+   check(action+' original native property restored by Undo','Original'in child.PropertiesList and 'Renamed'not in child.PropertiesList)
+   doc.openTransaction('Caller');before=state(doc);value=child.Value
+   result=probe.run(doc.Name,action,'discarded_redo')
+   check(action+' copied old Redo property retirement callback ran and blocked',result['callbacks']==1 and result['blocked']==1)
+   check(action+' replay rejected with completed rollback cleanup',not result['accepted']and result['rollback']and result['complete'])
+   check(action+' caller booking and old Redo unchanged',state(doc)==before)
+   check(action+' private replay restored',child.Value==value and child.Output=='')
+   doc.abortTransaction();doc.redo()
+   check(action+' original native Redo rename remains executable','Renamed'in child.PropertiesList and 'Original'not in child.PropertiesList and child.Renamed=='retained-payload')
+   check(action+' original native Redo values remain executable',child.Value=='prior-redo-value')
+   report['observations'].append(dict(action=action,result=result,before=before,after=state(doc)))
+   App.closeDocument(doc.Name)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

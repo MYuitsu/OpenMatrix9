@@ -1,0 +1,53 @@
+"""RCORE-01 Task3: six existing constructors publish common owned CAD results."""
+import json,math,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(console,text):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def physical(shape,command,length):
+ if shape.isNull() or not shape.isValid():return False
+ if length is not None:return abs(shape.Length-length)<1e-7
+ curve=shape.Edges[0].Curve
+ return isinstance(curve,Part.Ellipse) and abs(curve.MajorRadius-5)<1e-7 and abs(curve.MinorRadius-3)<1e-7 and (curve.Center-App.Vector(1,2,3)).Length<1e-7
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  cases=[('Line',['BothSides=Yes','0,0,0','10,0,0'],[[0,0,0],[10,0,0]],20.,'OM9-CURVE-002'),
+   ('Polyline',['0,0,0','3,0,0','3,4,0','Close'],[[0,0,0],[3,0,0],[3,4,0]],12.,'OM9-CURVE-001'),
+   ('Rectangle',['0,0,0','4,3,0'],[[0,0,0],[4,3,0]],14.,'OM9-CURVE-004'),
+   ('Circle',['3Point','1,0,0','0,1,0','-1,0,0'],[[1,0,0],[0,1,0],[-1,0,0]],2*math.pi,'OM9-CURVE-005'),
+   ('Ellipse',['1,2,3','6,2,3','1,5,3'],[[1,2,3],[6,2,3],[1,5,3]],None,'OM9-CURVE-006'),
+   ('InterpCrv',['Degree=1','0,0,0','3,0,0','3,4,0',''],[[0,0,0],[3,0,0],[3,4,0]],7.,'OM9-CURVE-003')]
+  for command,texts,points,length,fid in cases:
+   doc=App.newDocument('CurveResult'+command);doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01);before=doc.UndoCount
+   enter(console,command)
+   for text in texts:enter(console,text)
+   obj=doc.getObject(command);raw=getattr(obj,'OM9GeometryResult','') if obj else '';result=json.loads(raw) if raw else {};construction=json.loads(getattr(obj,'OM9CurveConstruction','{}')) if obj else {}
+   check(command+' existing solver has independent physical dimensions',obj is not None and physical(obj.Shape,command,length))
+   context=result.get('operation_context') or {};inputs=result.get('input_snapshots',[]);outputs=result.get('output_snapshots',[])
+   check(command+' common accepted result has actual constructor identity',result.get('operation')=='ConstructCurve' and result.get('status')=='accepted' and context.get('construction')==construction and construction.get('feature_id')==fid)
+   numeric=inputs[0].get('geometry_data',{}) if inputs else {}
+   check(command+' owned original numeric points precede solver normalization',numeric.get('representation')=='point_cloud' and numeric.get('coordinates')=='document_world_mm' and numeric.get('points_xyz')==points)
+   rebuilt=Part.Shape();payload=outputs[0].get('geometry_data',{}).get('native_master',{}).get('payload','') if len(outputs)==1 else ''
+   if payload:rebuilt.importBrepFromString(payload)
+   check(command+' independent CAD master preserves physical output and topology',bool(payload) and physical(rebuilt,command,length) and len(rebuilt.Edges)==len(obj.Shape.Edges) and len(rebuilt.Vertexes)==len(obj.Shape.Vertexes))
+   reports=result.get('conversion_reports',[])
+   check(command+' conversion gaps are explicit without fabricated maps',bool(reports) and all(r.get('exactness')=='uninspected' and r.get('parameter_map') is None and r.get('deviation_report') is None for r in reports) and result.get('topology_map') is None and 'upstream_archive_conversion' not in raw and 'NativeBuilder' not in raw)
+   check(command+' numeric constructor has no invented native source',len(inputs)==1 and context.get('source_refs')==[] and bool(outputs) and all(s.get('unit_context_snapshot')==obj.OM9UnitContext for s in inputs+outputs))
+   check(command+' Shape and paired evidence publish in one Undo',doc.UndoCount==before+1)
+   doc.undo();missing=doc.getObject(command) is None;doc.redo();obj=doc.getObject(command)
+   check(command+' one Undo Redo restores exact result and Shape',missing and obj is not None and bool(raw) and getattr(obj,'OM9GeometryResult','')==raw and physical(obj.Shape,command,length))
+   path=out/(command+'.FCStd');doc.saveAs(str(path));enter(console,'Cancel');App.closeDocument(doc.Name);doc=App.openDocument(str(path));obj=doc.getObject(command)
+   check(command+' FCStd preserves independently owned result bytes',obj is not None and bool(raw) and getattr(obj,'OM9GeometryResult','')==raw)
+   report['observations'].append(dict(command=command,feature_id=fid,raw=raw,result=result,construction=construction));App.closeDocument(doc.Name)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

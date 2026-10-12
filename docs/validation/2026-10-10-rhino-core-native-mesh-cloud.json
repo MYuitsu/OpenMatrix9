@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-10",
+  "scope": "Bounded post-decode RCORE-01.T07 Mesh and PointCloud admission; all P0 remains in progress.",
+  "source_fingerprints": {
+    "Gui/NativeInputTree.cpp": {
+      "bytes": 22642,
+      "sha256": "3a47989f7c44e5364ca19138157427ad920b9d3f23c3760294a6d27e92ccb268"
+    },
+    "Gui/NativeInputTree.h": {
+      "bytes": 938,
+      "sha256": "2303af98ff3611dd15bd86113507fdac4a1cccb4ee8a4a56cb43e03d17677f83"
+    },
+    "Gui/ThreeDmMeshes.cpp": {
+      "bytes": 1159,
+      "sha256": "d6e29c98af000dccff55b613ab294594a0ba1a14ca051addf949466d88408edc"
+    },
+    "Gui/ThreeDmPointCloud.cpp": {
+      "bytes": 9816,
+      "sha256": "73109fa2df59da5465e37feb3e3750a68ae2f9e6429f1589e985fffee47b92f0"
+    },
+    "Gui/ThreeDmArchive.cpp": {
+      "bytes": 25092,
+      "sha256": "85930d1a9dbe2312bd7296b7a50e7b2ebd0ed1e8469040d9213910db39ecfeb7"
+    },
+    "Gui/ThreeDmExplode.cpp": {
+      "bytes": 23018,
+      "sha256": "22323ed35935900acb44938dadeaa15527e9a083572f31b3377c239ca26dd00d"
+    },
+    "tests/native/CMakeLists.txt": {
+      "bytes": 27609,
+      "sha256": "6d1d4a57f3244555363311d48821cc29c9ec473565935ef5c0e49f592261aeb2"
+    },
+    "tests/native/rhino_core_native_input_tree.cpp": {
+      "bytes": 43785,
+      "sha256": "808ea651ba13767dc5ebd72da31544964aa5ff737ae33e0686323e52ff74d7dd"
+    }
+  },
+  "validation": {
+    "red": {
+      "checks": 79,
+      "failures": 2,
+      "result": "expected failure before Mesh/PointCloud preflight"
+    },
+    "native_fixture": {
+      "command": "ThreeDmNativeInputTreeTests",
+      "checks": 92,
+      "failures": 0,
+      "result": "pass",
+      "report": "H:/FreeCAD-src/build/rcore-native/native-input-tree-results.json",
+      "covered": [
+        "Malformed archived block mesh face index rejects before Explode Duplicate and ON_Mesh::IsValid",
+        "Malformed PointCloud array capacity rejects before value traversal",
+        "Paired-NaN and finite set curvature remain accepted; partial-NaN curvature and unmanaged N-gons reject before SDK calls or buffer reads",
+        "Nonfinite PointCloud point, normal and intensity reject before value traversal; empty overlay source remains supported and malformed storage rejects before copy",
+        "Valid Mesh and PointCloud archive adapters remain in use",
+        "Unsupported PointCloud Explode rejects before Duplicate"
+      ]
+    },
+    "ctest": {
+      "passed": 6,
+      "failed": 0,
+      "names": [
+        "OM9-FILE-012.CurveOnSurfaceArchive",
+        "RCORE-01.NativeInputTree",
+        "OM9-FILE-012.NativeTransform",
+        "OM9-FILE-012.Preservation",
+        "OM9-FILE-012.Archive",
+        "OM9-FILE-012.Blocks"
+      ],
+      "log": "H:/FreeCAD-src/build/rcore-native/Testing/Temporary/LastTest.log"
+    },
+    "explode_positive_integration": {
+      "target": "OM9ThreeDmExplodeTest",
+      "result": "pass",
+      "output": "3DM Explode PASS; text contours available"
+    },
+    "plugin_build": {
+      "script": "H:/FreeCAD-src/build/build-om9-plugin.ps1",
+      "cache": "H:/FreeCAD-src/build/openmatrix9-history-cage",
+      "shared_sdk": "H:/FreeCAD-src/build/relWithDebInfo",
+      "runtime": "H:/FreeCAD-src/build/reusable-history-runtime",
+      "scope": "OpenMatrix9Gui plugin target only; no FreeCAD root rebuild",
+      "result": "pass",
+      "plugin": "H:/FreeCAD-src/build/reusable-history-runtime/bin/OpenMatrix9Gui.pyd",
+      "plugin_sha256": "85f1ed567d3a68097cb264972b4bee109719560365182fbc0a680b25279fbff2"
+    },
+    "shared_host": {
+      "run_directory": "H:/FreeCAD-src/build/native-input-tree-mesh-cloud-current-plugin-20261010",
+      "results": "H:/FreeCAD-src/build/native-input-tree-mesh-cloud-current-plugin-20261010/results.json",
+      "launch_record": "H:/FreeCAD-src/build/native-input-tree-mesh-cloud-current-plugin-20261010/shared-host-launch.json",
+      "checks": 21,
+      "failures": 0,
+      "exit_code": 0,
+      "loaded_plugin": "H:/FreeCAD-src/build/reusable-history-runtime/bin/OpenMatrix9Gui.pyd",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "plugin_sha256": "85f1ed567d3a68097cb264972b4bee109719560365182fbc0a680b25279fbff2"
+    },
+    "rust": {
+      "status": "unchanged and not rerun in this C++ increment; last full result",
+      "passed": 572,
+      "suites": 73
+    }
+  },
+  "reuse": [
+    "Existing native Mesh and PointCloud adapters remain authoritative.",
+    "Existing Line/Polyline commands, controller, and Part.makePolygon construction are reused."
+  ],
+  "independent_review": {
+    "result": "No code-level blocker in the bounded post-decode Mesh/PointCloud increment; current 92-check fixture and six CTests pass.",
+    "scope_limit": "Does not assess ONX_Model::Read or decoder-time native allocations.",
+    "report": "../reviews/2026-10-10-native-input-tree-mesh-cloud-review.md"
+  },
+  "limits": [
+    "ONX_Model::Read and native allocations during archive decoding happen before the gate and are not covered.",
+    "64 MiB is a per-owner-tree logical payload limit, not an archive-wide or process-wide allocator budget.",
+    "No aggregate worker-memory certificate is provided.",
+    "The caller still must provide a live, initialized, immutable, readable SDK owner; address checks cannot prove allocation lifetime or accessibility.",
+    "Remaining analytic families, other cage-edit paths and all-P0 contracts remain open."
+  ]
+}

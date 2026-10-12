@@ -1,0 +1,1831 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-acceptance-offset-d3-20261012",
+  "status": "in_progress",
+  "goal_complete": false,
+  "updated_at": "2026-10-12T13:22:01+07:00",
+  "approved_design": "docs/superpowers/specs/2026-10-12-replay-identity-acceptance-boundary-design.md",
+  "selected_app": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-boundary247-20261012/FreeCADApp.dll",
+    "bytes": 7903232,
+    "sha256": "ece7b61f189c4a00f61308f8515dfa86b90cf0434f07c3aa798e1b1df4c24f9c"
+  },
+  "matching_import": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-boundary247-20261012/FreeCADApp.lib",
+    "bytes": 3124548,
+    "sha256": "bf404d096fe85762e45e621812ed59922e4f611efdbd6a7f9cfa1edcac7cf1ff"
+  },
+  "plugin": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-runtime254/bin/OpenMatrix9Gui.pyd",
+    "bytes": 13660160,
+    "sha256": "8cce5801c25bfcc4976157797dd33da4e1b4fba2873786294431c75351e03435"
+  },
+  "kernel": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-boundary247-20261012/TKG3d.dll",
+    "bytes": 1236992,
+    "sha256": "a41ffbc8542b38b5d3a4bb1f05e84badf835033d2e0442fcbbc9e2db1f557876"
+  },
+  "native_manifest": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/native-app-sdk247.json",
+    "bytes": 35251,
+    "sha256": "160eec8a42244eb78ddaf267209821c567aa9c1a16d6cbd44525b5dc856e50b1"
+  },
+  "sources": [
+    {
+      "path": "H:/FreeCAD-src/src/App/Document.h",
+      "bytes": 58907,
+      "sha256": "bf13c7983730b210c1229b0cc4a3764f783cffe6c1690059ff50cf90697701ae"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/private/PropertyReplay.h",
+      "bytes": 13344,
+      "sha256": "ec2457c06c42fd9192f0fe063886449f3f428f5b84effa57993d003ecc8681a9"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.cpp",
+      "bytes": 68874,
+      "sha256": "b3a36490fa5ba8b3d7ccacc38a6a30e761a776950aea6a46b09a7d302d18fd93"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/ApplicationPy.cpp",
+      "bytes": 35202,
+      "sha256": "41c259678a8825aee7e674317bd707226adb2c254cad9e7f1531c170bd75ca5b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistory.cpp",
+      "bytes": 37328,
+      "sha256": "e9fb61f75eb3c38b3be04a151a7ae57cf93d6cd5b8a5554364095c154ea645d8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/native/replay_retirement_probe.cpp",
+      "bytes": 14222,
+      "sha256": "879849e5735ef667f75fdfd2faac46efb7a274570a88f8591878f24ee2f96c72"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/native/occt_offset_d3_probe.cpp",
+      "bytes": 3131,
+      "sha256": "3491d9db01c83e7607e610ccf54427dcbdd64377d71c3d6f5de9a6c525205442"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_replay_acceptance_boundary_smoke.FCMacro",
+      "bytes": 8342,
+      "sha256": "ed2e936e61b3dffe089f9f3274802887e685e2340046c88e80edbb62bda3d4e1"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_circle_history_disposal_logger_smoke.FCMacro",
+      "bytes": 4355,
+      "sha256": "18f2956ff404751f3bdbafb99dcf0094d9e381e80e08292eb87af20369151a1f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tools/build_occt_offset_d3.py",
+      "bytes": 5175,
+      "sha256": "c0e18c72171f1b6d18f08070354f85026b23a55f5b015362e1e2257821ae3cd0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tools/update_owned_curve_jets_oracle.py",
+      "bytes": 3641,
+      "sha256": "af962bdc6483b722f520f42f0996e165cb4e321fc08abb99d014f615de36e240"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tools/patches/occt-8.0.1-offset-d3.patch",
+      "bytes": 1888,
+      "sha256": "807c376a1a30656f80b3532a03785f4355fb5cb93065de0846cbe954a8c86e3b"
+    }
+  ],
+  "source_candidates_match": true,
+  "compiler_dependency_certificate": false,
+  "plugin_full_prebuild_inventory_frozen": false,
+  "plugin_build_receipt": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-build254.log.exit.json",
+    "bytes": 100,
+    "sha256": "b2d56ebb7e29f0dbac38467436e1bd09f28563e1400e90a1d900c55bae05be8f"
+  },
+  "native_probe_builds": [
+    {
+      "inputs": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/final-scope-probe259-20261012/inputs.json",
+        "bytes": 7573,
+        "sha256": "0aac08751a01e42db8eb11d158dbbf1793f040341a64d66801d44b13055a7100"
+      },
+      "source": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/final-scope-probe259-20261012/source.cpp",
+        "bytes": 2927,
+        "sha256": "a81c5601a866a414c788b229906a270d3c1949ac128c2f270c9f1b6415babd49"
+      },
+      "receipt": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/final-scope-probe259-20261012/build.exit.json",
+        "bytes": 24,
+        "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+      }
+    },
+    {
+      "inputs": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/final-retirement-probe259-20261012/inputs.json",
+        "bytes": 7625,
+        "sha256": "c36922dd05f4cdc45378c6aa298169450929060fdd6ccbf3477a29cd31c88564"
+      },
+      "source": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/final-retirement-probe259-20261012/source.cpp",
+        "bytes": 14222,
+        "sha256": "879849e5735ef667f75fdfd2faac46efb7a274570a88f8591878f24ee2f96c72"
+      },
+      "receipt": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/final-retirement-probe259-20261012/build.exit.json",
+        "bytes": 24,
+        "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+      }
+    },
+    {
+      "inputs": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/final-merge-probe259-20261012/inputs.json",
+        "bytes": 7587,
+        "sha256": "cf9782c4a0ce26cfeb53d005598cd4fecb7792fe953de8342af203f0fc6944d2"
+      },
+      "source": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/final-merge-probe259-20261012/source.cpp",
+        "bytes": 24319,
+        "sha256": "5c49ab5ca2673f0dc6c021e32795d811ae3c7de301dc4ae6ac8e094de34f8dc5"
+      },
+      "receipt": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/final-merge-probe259-20261012/build.exit.json",
+        "bytes": 24,
+        "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+      }
+    }
+  ],
+  "hosts": [
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic259-offscreen-20261012",
+      "checks": 432,
+      "passed": 432,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic259-offscreen-20261012/results.json",
+          "bytes": 186745,
+          "sha256": "626607c89b6cc450041fcc79c1d1c476f9ff2203a9a4b0e5ce29cd6d85c74c47"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 650,
+          "sha256": "0dfe960120341ca29a948766131ffe925084d29a00ec99b55db8aa4179b9b3c9"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic259-offscreen-20261012/host-stderr.log",
+          "bytes": 68162,
+          "sha256": "61f6892345e4fdf3de029ae0a1599322990a61d4bd57c8a42e8b8497113640e3"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close259-offscreen-20261012",
+      "checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close259-offscreen-20261012/results.json",
+          "bytes": 593,
+          "sha256": "3ca1a2b9feb5418485da0c526394f5e795e7ce40e3d861a7d5e1f29560fb5b15"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 649,
+          "sha256": "f48548fdf715ff53adb7f85447d0f4d135b59f22dafdc00788563b75fab4a597"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close259-offscreen-20261012/host-stderr.log",
+          "bytes": 3114,
+          "sha256": "3ea530863dcce07df612efae454ff46476266505439b18bb35b9517f8ba2500e"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes259-offscreen-20261012",
+      "checks": 109,
+      "passed": 109,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes259-offscreen-20261012/results.json",
+          "bytes": 21970,
+          "sha256": "513bfcea928d3aecc7c8eb20b9063c914cc8e0a1e02588038cd5b8551e4697f4"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 650,
+          "sha256": "67645ad11d21fe0282167bdc9035fbca0a06a80c1a745b5561571c61d4432d12"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes259-offscreen-20261012/host-stderr.log",
+          "bytes": 38225,
+          "sha256": "f41cc36367b47dc1480e0a03ea0ec2d64b9c5f25b517ffffec466e079eefdada"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result259-offscreen-20261012",
+      "checks": 33,
+      "passed": 33,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result259-offscreen-20261012/results.json",
+          "bytes": 454441,
+          "sha256": "0141bb326ef778c45a96e8cc34941773a06a5fb82c4257e12a4f9addfbba0c98"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 650,
+          "sha256": "56a1e647491ad08915c71b0900292304204652f9773d3deae33c165b96df740e"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result259-offscreen-20261012/host-stderr.log",
+          "bytes": 7155,
+          "sha256": "7314dad68864fd69a549806bf034cdc9cf7b94b0dc86158157921a9f654690e0"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking259-offscreen-20261012",
+      "checks": 80,
+      "passed": 80,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking259-offscreen-20261012/results.json",
+          "bytes": 47284,
+          "sha256": "e313da8f2a0b2a4bbe07c015fe488d84e2cdc767f72b28997a5e4d78a253df37"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 646,
+          "sha256": "61644d56f91fa54c807a1d1369a68bc4666fbd87b904366717d26d127b95daa8"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking259-offscreen-20261012/host-stderr.log",
+          "bytes": 5941,
+          "sha256": "6c34ff7ad6443297bc92b3f38373e9419b4607e111971a8403399641fce945d7"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture259-offscreen-20261012",
+      "checks": 54,
+      "passed": 54,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture259-offscreen-20261012/results.json",
+          "bytes": 6371,
+          "sha256": "6ff91f89a30c91f843af2b515a127d5a50a8ffb8f4303dbc996b510a76ee295a"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 645,
+          "sha256": "9f40613de5f67cf9e197c8cfa3342e0d433df95b224524db197addb5133e6c57"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture259-offscreen-20261012/host-stderr.log",
+          "bytes": 909,
+          "sha256": "5161ac2d07021e6fc63c90915bcf000ee42b92cf62ce89c8c92e4d3d50900ac4"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope259-offscreen-20261012",
+      "checks": 744,
+      "passed": 744,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope259-offscreen-20261012/results.json",
+          "bytes": 144743,
+          "sha256": "55c1729f128941c8ed8b0a570bebe83ca4b8ebc0818c3e65f2df9033ab8de00f"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 644,
+          "sha256": "f97d152b9068b6e44cedb3df24ebc1d585367b98f2e5dcc73712e14b41f992dc"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope259-offscreen-20261012/host-stderr.log",
+          "bytes": 16813,
+          "sha256": "0693c250d366c18a44ffbbcd5bdec3c71a903448ec4dd8454a5e47fddda16218"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/inverse-own259-offscreen-20261012",
+      "checks": 204,
+      "passed": 204,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own259-offscreen-20261012/results.json",
+          "bytes": 52281,
+          "sha256": "f691f6af1647f797daee2e7059a6a3596e571742165a19bb7053191b4543ccc8"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 639,
+          "sha256": "58d7549775adafd731e00714c9ac5b7892039316c235e40f2646cab234bcf01f"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own259-offscreen-20261012/host-stderr.log",
+          "bytes": 5941,
+          "sha256": "6c34ff7ad6443297bc92b3f38373e9419b4607e111971a8403399641fce945d7"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/inverse-late259-offscreen-20261012",
+      "checks": 204,
+      "passed": 204,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late259-offscreen-20261012/results.json",
+          "bytes": 52281,
+          "sha256": "f691f6af1647f797daee2e7059a6a3596e571742165a19bb7053191b4543ccc8"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 640,
+          "sha256": "c589da7c75d8786f4d8766a7f86d2a85d2c5b3fec139af7f1d5bdd2a5ec3fc38"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late259-offscreen-20261012/host-stderr.log",
+          "bytes": 5941,
+          "sha256": "6c34ff7ad6443297bc92b3f38373e9419b4607e111971a8403399641fce945d7"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-green259-offscreen-20261012",
+      "checks": 28,
+      "passed": 28,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-green259-offscreen-20261012/results.json",
+          "bytes": 6724,
+          "sha256": "269ff4996bf95062f4f808d3db2225925ab05923b3f01451fc428818c44feee1"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-green259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 648,
+          "sha256": "1d55ddf593d6a33949e6d32366c2f79d14b03c3aacd847b947d0395e813d41af"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-green259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-green259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-green259-offscreen-20261012/host-stderr.log",
+          "bytes": 1713,
+          "sha256": "158e5af1b8eba58fcf5e65414cbf7b27640eb851df227c246815a5ff7d046c73"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/save-callback259-offscreen-20261012",
+      "checks": 204,
+      "passed": 204,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/save-callback259-offscreen-20261012/results.json",
+          "bytes": 52281,
+          "sha256": "f691f6af1647f797daee2e7059a6a3596e571742165a19bb7053191b4543ccc8"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/save-callback259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 641,
+          "sha256": "1234617755dcae59a4bc46434549cd3ad342abbb9e96a42a65ff172f2b34260e"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/save-callback259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/save-callback259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/save-callback259-offscreen-20261012/host-stderr.log",
+          "bytes": 5941,
+          "sha256": "6c34ff7ad6443297bc92b3f38373e9419b4607e111971a8403399641fce945d7"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold259-offscreen-20261012",
+      "checks": 62,
+      "passed": 62,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold259-offscreen-20261012/results.json",
+          "bytes": 6376,
+          "sha256": "f416e2ede25e8a1917f9ca0a14addc45e3c0caaad7652708e3e305df296e9f86"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 648,
+          "sha256": "5da502b1bb972acea69d45262f0a9c8e2d22fa2a9824e0c0ffa283da492d5705"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold259-offscreen-20261012/host-stderr.log",
+          "bytes": 2236,
+          "sha256": "f5e99894066c4f5d6f4a1022b96ef69e9093facb176ef43b461a1d4dfaadf6c8"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy259-offscreen-20261012",
+      "checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy259-offscreen-20261012/results.json",
+          "bytes": 967,
+          "sha256": "8f0602972a51557d650d6ebe6793a2ce846f808620f750c6a951d5e20dccd7c5"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 644,
+          "sha256": "c7ccf849ac3081554c3c3ceb3ac6141673d6de7fc3e9e81b8e3354d24a110d03"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy259-offscreen-20261012/host-stderr.log",
+          "bytes": 4501,
+          "sha256": "4e0e08f58a3a9b844ce4af61d2b4e7c9a34cfdc14f07728db3f3f71d1dfcbb94"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold259-offscreen-20261012",
+      "checks": 3,
+      "passed": 3,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold259-offscreen-20261012/results.json",
+          "bytes": 444,
+          "sha256": "b14d03f9931d189dd84f32fae9fc45f10571d8ae3cf4ba415c5c2dfb9ce413e0"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 649,
+          "sha256": "87c3411c4ace98cfea08685809039b049d37dd49761c3b94881ec0975a852b93"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold259-offscreen-20261012/host-stderr.log",
+          "bytes": 2542,
+          "sha256": "d2fdea2eca3e747de84c90b3ed44cdabc93a586a29d173223b8e2b9223c5d19a"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial259-offscreen-20261012",
+      "checks": 65,
+      "passed": 65,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial259-offscreen-20261012/results.json",
+          "bytes": 6723,
+          "sha256": "6dec762d96ee27827ae3082b0e283d6ace8607ec4effd15b66eb027a88cff99d"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 646,
+          "sha256": "66d4675899f645b41fbe5d0639412813768705508054310c5df58df897c400e7"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial259-offscreen-20261012/host-stderr.log",
+          "bytes": 14657,
+          "sha256": "0605b7e6b8fff30c4677a39d251965978f75b7dc095183a58689f3615cf0d3bb"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/redo-links-green259-offscreen-20261012",
+      "checks": 128,
+      "passed": 128,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-links-green259-offscreen-20261012/results.json",
+          "bytes": 25869,
+          "sha256": "746ebe4d872c2f50402eeba1d19640179524fb78c887eadab073913d384eec96"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-links-green259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 644,
+          "sha256": "c155a3c7b90ce0505c6d1e57ea92a9bc1e00a3b3af0e76daa665dd5f9ac19329"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-links-green259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-links-green259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-links-green259-offscreen-20261012/host-stderr.log",
+          "bytes": 3525,
+          "sha256": "bbd1414496b7b17b263258da6693b6262d275f980eec2c9c954cabb6309cf39a"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/redo-expressions-green259-offscreen-20261012",
+      "checks": 60,
+      "passed": 60,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-expressions-green259-offscreen-20261012/results.json",
+          "bytes": 11082,
+          "sha256": "76e27a27f8137147ff76bc74a05e09cf00b26baa193b37399ff69d3d8344316e"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-expressions-green259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 650,
+          "sha256": "fc39743779a722fc44719e8b95eb91323eec45d6f7924181252f8cdcc4f2a120"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-expressions-green259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-expressions-green259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-expressions-green259-offscreen-20261012/host-stderr.log",
+          "bytes": 3133,
+          "sha256": "71bf403978a86f5db077e944aa6c5a2498e51092c44dac22b671277971d17aa8"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/redo-xlinks-green259-offscreen-20261012",
+      "checks": 112,
+      "passed": 112,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-xlinks-green259-offscreen-20261012/results.json",
+          "bytes": 23841,
+          "sha256": "dfa207c3ebb01b44fa1e74354accbbc8b0582a24f5bd9aa7e12c7514aef6b2b3"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-xlinks-green259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 645,
+          "sha256": "e6441a7a502b1f63844380cd9b3d864f4eb452c66e6c7dfaeb9f8a976675c899"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-xlinks-green259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-xlinks-green259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-xlinks-green259-offscreen-20261012/host-stderr.log",
+          "bytes": 7541,
+          "sha256": "45fd7f3d819bf15f7fc8399a335a5244dfbced64047079688279d6408653dda6"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/redo-rename-green259-offscreen-20261012",
+      "checks": 32,
+      "passed": 32,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-rename-green259-offscreen-20261012/results.json",
+          "bytes": 6802,
+          "sha256": "8c2aff609ace50553e33c410c42811f5e31966417f4c67b72fbd5b7352f582d5"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-rename-green259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 645,
+          "sha256": "f944660931a1b4e65f7576e1f9dabd3c4f6a342b78bd70dae33b6a6169785128"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-rename-green259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-rename-green259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-rename-green259-offscreen-20261012/host-stderr.log",
+          "bytes": 1713,
+          "sha256": "158e5af1b8eba58fcf5e65414cbf7b27640eb851df227c246815a5ff7d046c73"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/merge-green259-offscreen-20261012",
+      "checks": 32,
+      "passed": 32,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/merge-green259-offscreen-20261012/results.json",
+          "bytes": 6706,
+          "sha256": "9b2c0ab23721cea2bf5acd03658cc2f5224250cbdb57436a58227a12680e10cc"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/merge-green259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 639,
+          "sha256": "8abd4672ec2d877c4eb774253dc7c35ccb8eb6f10c0077abc4b70afdacd32fb4"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/merge-green259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/merge-green259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/merge-green259-offscreen-20261012/host-stderr.log",
+          "bytes": 1713,
+          "sha256": "158e5af1b8eba58fcf5e65414cbf7b27640eb851df227c246815a5ff7d046c73"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retry-green259-offscreen-20261012",
+      "checks": 12,
+      "passed": 12,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retry-green259-offscreen-20261012/results.json",
+          "bytes": 2434,
+          "sha256": "10e1c0b586256bdd75d1ee9e76847c6ab0346dabf583c69b1cca06dbcc273cdb"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retry-green259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 639,
+          "sha256": "9d813ef8a0b17997d05bd0e2a7499ffbbac60480a8a4fb5edfd5ecc2b2a48437"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retry-green259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retry-green259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retry-green259-offscreen-20261012/host-stderr.log",
+          "bytes": 1411,
+          "sha256": "505c94d523a469db741dd22c6b324607920d29ebcc3f96279f99128a4f5d5337"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/python-redo259-offscreen-20261012",
+      "checks": 72,
+      "passed": 72,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-redo259-offscreen-20261012/results.json",
+          "bytes": 12541,
+          "sha256": "40caa2428bbcc71a1863e41aed21de8a6669c82030d9c10b25f636d448e4f86d"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-redo259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 639,
+          "sha256": "6f8975f024717a57a6233a4b563f10c484e31ae0e6c859a2fbdb51e20b93296c"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-redo259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-redo259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-redo259-offscreen-20261012/host-stderr.log",
+          "bytes": 2317,
+          "sha256": "7162b50b567d0a7507537c5e8a21d55ea99228ad4bc937295eb79cacb30161b5"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/python-inverse259-offscreen-20261012",
+      "checks": 201,
+      "passed": 201,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-inverse259-offscreen-20261012/results.json",
+          "bytes": 35991,
+          "sha256": "5fa8196cd0feca792176c720bea1e1687a63e5369a27ac6d9c8ee4e85f060f03"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-inverse259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 642,
+          "sha256": "503c156d4245e0714ea52e2581584becd2b07153335935acfa8d82b825f56156"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-inverse259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-inverse259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-inverse259-offscreen-20261012/host-stderr.log",
+          "bytes": 4733,
+          "sha256": "1ba4c11fb906708d3586ca34f8d5b5f1dff5e113e2203928c6fe81ae8775bcad"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/python-finalizer259-offscreen-20261012",
+      "checks": 6,
+      "passed": 6,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-finalizer259-offscreen-20261012/results.json",
+          "bytes": 1401,
+          "sha256": "37b318a07c139872760262193fcac92c9df54db5d6d9ed5aed1a8e6ab29e4043"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-finalizer259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 644,
+          "sha256": "682bd268643ae36c4106a5c195d2d7ab908fcfddd7d0feb0e5d8a5e1e94fbce7"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-finalizer259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-finalizer259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/python-finalizer259-offscreen-20261012/host-stderr.log",
+          "bytes": 1411,
+          "sha256": "505c94d523a469db741dd22c6b324607920d29ebcc3f96279f99128a4f5d5337"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/source-families259-offscreen-20261012",
+      "checks": 180,
+      "passed": 180,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/source-families259-offscreen-20261012/results.json",
+          "bytes": 27479,
+          "sha256": "a4e6e2bb1ca03eab9bfd0ffcbbaa56118ad2e8279e421161554e2a8f699dd020"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/source-families259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 643,
+          "sha256": "42152c48770a40e9299e0307060d46fc23e043cc732a5a83d4261d70811682ec"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/source-families259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/source-families259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/source-families259-offscreen-20261012/host-stderr.log",
+          "bytes": 8651,
+          "sha256": "438e17ff20427c5b692a423311dd341e175ee0aa390db126cd41598a861ec58e"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/acceptance-boundary259-offscreen-20261012",
+      "checks": 162,
+      "passed": 162,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/acceptance-boundary259-offscreen-20261012/results.json",
+          "bytes": 33494,
+          "sha256": "be27fee8ab9923c2bbf398c3726c6155992a3ec51da6948eaced4c4aa637fc03"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/acceptance-boundary259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 647,
+          "sha256": "8b20e2792d28341017dee212ab9c1f3770ada8a43ab4f9466c421105f04b745a"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/acceptance-boundary259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/acceptance-boundary259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/acceptance-boundary259-offscreen-20261012/host-stderr.log",
+          "bytes": 4733,
+          "sha256": "1ba4c11fb906708d3586ca34f8d5b5f1dff5e113e2203928c6fe81ae8775bcad"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/disposal-logger259-offscreen-20261012",
+      "checks": 24,
+      "passed": 24,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/disposal-logger259-offscreen-20261012/results.json",
+          "bytes": 4449,
+          "sha256": "e6c9e92a29bf6c3c4ef5e938ea0d37495d1834c435eb11d7901fa22514fe75cb"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/disposal-logger259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 643,
+          "sha256": "96cb6f2ae3ad8b3b06b6a048aad090c0a9b47ee4c81c45a75e199a1ab928b6ba"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/disposal-logger259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/disposal-logger259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/disposal-logger259-offscreen-20261012/host-stderr.log",
+          "bytes": 5360,
+          "sha256": "54bd4f951396bdc1d99b0046fa492ffed8915f0aba35a13b2bffac477fc911ec"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/native-jets259-offscreen-20261012",
+      "checks": 58,
+      "passed": 58,
+      "failed": 0,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/native-jets259-offscreen-20261012/results.json",
+          "bytes": 120383,
+          "sha256": "3052aa28dc74c42a8fc1bf7a06875672be17fc3e7fc6e4be80bf79827dbbfcab"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/native-jets259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 639,
+          "sha256": "8226f5319b7b2a40c4a83f5e963cbac5da100c1e2ce00aa88e2b70a1438f86e0"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/native-jets259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/native-jets259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/native-jets259-offscreen-20261012/host-stderr.log",
+          "bytes": 3096,
+          "sha256": "c058f894dff3c156e58007bfa03104a6e6eaaea13a706ad6789c0ec190d1314c"
+        }
+      ]
+    }
+  ],
+  "checks": 3313,
+  "superseded_strict_finalizer_witnesses": [
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/release-full259-offscreen-20261012",
+      "checks": 8,
+      "passed": 4,
+      "failed": 4,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/release-full259-offscreen-20261012/results.json",
+          "bytes": 1765,
+          "sha256": "6693ce0ed1d2aaa497bf754f5ebf444bcf36974e09f3d94cdbb13bd3717c8e05"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/release-full259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 640,
+          "sha256": "eec655bf2041a6bab4691b2571e792737535e5518792d41f8f70c921be0047bd"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/release-full259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/release-full259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/release-full259-offscreen-20261012/host-stderr.log",
+          "bytes": 1260,
+          "sha256": "399253d38039ceda8fbfe3d31596aa0f2e1284b1c89016597ec1b0f0d3695aa4"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/redo-object259-offscreen-20261012",
+      "checks": 32,
+      "passed": 16,
+      "failed": 16,
+      "exit_code": 0,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-object259-offscreen-20261012/results.json",
+          "bytes": 7430,
+          "sha256": "500371e588bacfd48055398c0ac059e523c31a2d5751822fc3e620d0aa6dcbf1"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-object259-offscreen-20261012/shared-host-launch.json",
+          "bytes": 638,
+          "sha256": "81b024a7bedb43b420fcee3291d5f3ceed0772490b92032e5e5d94357cd17cda"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-object259-offscreen-20261012/loaded-native-app.json",
+          "bytes": 250,
+          "sha256": "0938245efe25c09c4849406f43f479d3886cf0dba4df2775cd7d9567611ff516"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-object259-offscreen-20261012/loaded-native-kernel.json",
+          "bytes": 190,
+          "sha256": "872ac9fa90306e30223820e74b83cdd5556b80dcafeef19f7f0a90fa30ff5e74"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/redo-object259-offscreen-20261012/host-stderr.log",
+          "bytes": 1713,
+          "sha256": "158e5af1b8eba58fcf5e65414cbf7b27640eb851df227c246815a5ff7d046c73"
+        }
+      ]
+    }
+  ],
+  "kernel_build_receipt": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/occt-offset-runtime240-20261012/build-receipt.json",
+    "bytes": 134119,
+    "sha256": "aa40a2586d89347b925b2f5522849b9b85a38413ba8a530ee89f47833465a683"
+  },
+  "exact_kernel_headers": 108,
+  "identical_kernel_exports": 1892,
+  "kernel_red": {
+    "checks": 12,
+    "passed": 4
+  },
+  "kernel_green": {
+    "checks": 12,
+    "passed": 12
+  },
+  "native_oracle": {
+    "cases": 19,
+    "queries": 183,
+    "changed_third_queries": 36,
+    "independent_queries": 45,
+    "provenance": {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/fixtures/owned_curve_evaluation/native_jets_corrected_provenance.json",
+      "bytes": 12661,
+      "sha256": "189fcc640ebdac9c5464890bf513f6e91f213f63dcfa42dacbca131b75bd6849"
+    }
+  },
+  "rust": {
+    "passed": 1037,
+    "failed": 0,
+    "groups": 134,
+    "exit_code": 0,
+    "log": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/rust-all255.log",
+      "bytes": 115692,
+      "sha256": "204eb1ed3b1a760c7a3c1fd97e6096df3656069e547acefd48c983e1dc48a898"
+    },
+    "receipt": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/rust-all255.log.exit.json",
+      "bytes": 116,
+      "sha256": "f72670d0e03164026b85d4e8fd70f43979aa94ccbb366d73130d9f4372bfba14"
+    }
+  },
+  "shared_freecad_outputs_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/src/App/FreeCADApp.lib",
+      "bytes": 3103284,
+      "sha256": "59b7845e365bdc9f8ada83b2110fbd258c612fa3d0fbf9e2f449e154f51b861c"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.pdb",
+      "bytes": 254824448,
+      "sha256": "16cc28a2a42fe4076a2f1b8e5b772fb914e4a363beca1c1c6c8547eae8bb8c57"
+    }
+  ],
+  "shared_occt_outputs_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/lib/TKMath.lib",
+      "bytes": 560334,
+      "sha256": "b540b19669fcab623d40731d5131f6e5544474281115237711a741a051699728"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/bin/TKMath.dll",
+      "bytes": 1419776,
+      "sha256": "0f6f246ac194e1246bd0caffdabd06bf3106b95c07eb7fb7c51bfd8c43ce6c6a"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/lib/TKernel.lib",
+      "bytes": 691718,
+      "sha256": "23be72f79603bfe5c253e28ba11318dd4726fbe7d3d4d6170b22c37fc9db9319"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/bin/TKernel.dll",
+      "bytes": 1717760,
+      "sha256": "73859cfb0e2c6ddece879c75b1d1e4d81e2dabebabdac6ccc5c22a6422b5b550"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/lib/TKG2d.lib",
+      "bytes": 353056,
+      "sha256": "65774c10aa581d5f3b62e38b3d9755114b431addf76de4d732ec237aa3f10ee0"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/bin/TKG2d.dll",
+      "bytes": 440832,
+      "sha256": "928c9fa44622218a749f6c0bfeddcd76d86ea3ea28270e9cb5374896fd31737c"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/lib/TKG3d.lib",
+      "bytes": 827556,
+      "sha256": "b062ea01b23794aa9ca9ff18c58a6e21987f4e0e724358ecb392c0b8c92cb0b0"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/bin/TKG3d.dll",
+      "bytes": 1357824,
+      "sha256": "0188a0249af97a021087e4e5e58c99c4e715518b659e7acd56ec497205994a90"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Adaptor3d_Curve.hxx",
+      "bytes": 7249,
+      "sha256": "7a11a653e835bc4e2232b71519e72182f4dbd7694b0ac383565c9695eb3ac079"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Adaptor3d_CurveOnSurface.hxx",
+      "bytes": 8313,
+      "sha256": "af7171a77c15b241e3e496b0a5b3101282eca2e9cf2a4f6f0cbef439f2ab0461"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Adaptor3d_HSurfaceTool.hxx",
+      "bytes": 10270,
+      "sha256": "ddabd038f9270277c8567cbc53388df460280589af8a23e1cf1b872c22818a30"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Adaptor3d_HVertex.hxx",
+      "bytes": 1811,
+      "sha256": "f6eaf6cb879374cf3793636fa6369f309900e4cb066f75add75117d42501cdd2"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Adaptor3d_InterFunc.hxx",
+      "bytes": 2444,
+      "sha256": "435437861507fef2396dfd965630f75ded911415f0578b5bd659b1d48c083696"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Adaptor3d_IsoCurve.hxx",
+      "bytes": 6867,
+      "sha256": "4dbd488a34385621f3e7a9d93c131cf20b6f2848bddccbac50af3564132c2c26"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Adaptor3d_Surface.hxx",
+      "bytes": 11317,
+      "sha256": "5f189976e9b983cbb4f2ac1ef9dbbee6747392d2847d8aed31062c395d6588bb"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Adaptor3d_TopolTool.hxx",
+      "bytes": 7321,
+      "sha256": "f5f604dac638c1ea1a0bae7e307e60c811c825575cf1a1ede04f34eb0fb7f436"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/AdvApprox_ApproxAFunction.hxx",
+      "bytes": 9116,
+      "sha256": "1ea2586efcd0aa53b5f740fc2464f2c8b0a154931ae7445e1ed4e4f15dcc1fd9"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/AdvApprox_ApproxAFunction.lxx",
+      "bytes": 3003,
+      "sha256": "71a40ddcab37ffa76b3e9db45cfd4e291fd6d229de2811768c91b3719bb2903f"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/AdvApprox_Cutting.hxx",
+      "bytes": 1356,
+      "sha256": "b148c97c855ee6ac5b2507c66f9a0698a2d0f8c0f7c4c8dad7388675a1eb7de1"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/AdvApprox_DichoCutting.hxx",
+      "bytes": 1359,
+      "sha256": "e54aa5e25c4284c824950b497206ea3c1e42cbfdbeb0f58d733931f31f2a91ec"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/AdvApprox_EvaluatorFunction.hxx",
+      "bytes": 2579,
+      "sha256": "3e372e0a6814e27e3ebe0a2b072a09a46e1777ad050e1eb79dae15e34a1c02fa"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/AdvApprox_PrefAndRec.hxx",
+      "bytes": 2113,
+      "sha256": "f31dfbd7466db54026b2b382dc65183d19cd95d87be361b8fbf4c1b5eda84b76"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/AdvApprox_PrefCutting.hxx",
+      "bytes": 1546,
+      "sha256": "1204eba185ae0422d6a17bf8bca65785cff50cd50c7e2d103b8c596a64c7a07b"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/AdvApprox_SimpleApprox.hxx",
+      "bytes": 4741,
+      "sha256": "bebe72cf221828b6dd653bc1851d07ea1ac5e53eb08a87b1de5528c0ef3d0544"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Axis1Placement.hxx",
+      "bytes": 2696,
+      "sha256": "986b2c4136628fc149c394dff90b5394fa00414f666e935a92910faa8644e365"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Axis2Placement.hxx",
+      "bytes": 5341,
+      "sha256": "fef713eb338b54796e37a28d3b810893b7b7e920d95ecdac6488291978df7f94"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_AxisPlacement.hxx",
+      "bytes": 4296,
+      "sha256": "da3e038f24e1d3bdbd8c00d9865e5e4d381c4adfbf77a2f96d849301d08c4026"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_BSplineCurve.hxx",
+      "bytes": 38854,
+      "sha256": "6070421a76816696d9c116dc0b184e6a4afe9c63c77240b709ec0d2a690409b8"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_BSplineSurface.hxx",
+      "bytes": 61691,
+      "sha256": "d84a88d95ab7fb1581ba54447e428c19c78e1af2deb8dc451deab2e79335a079"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_BezierCurve.hxx",
+      "bytes": 16181,
+      "sha256": "8c78fd383044e71fbdab4089e087b4174ebd016dc47ed90f31546f82f2c0b330"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_BezierSurface.hxx",
+      "bytes": 28984,
+      "sha256": "f2f8352da27bbfdb7b5c86a1852fd19a119fcb3dc6662c2be0e7b04de73fa8c2"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_BoundedCurve.hxx",
+      "bytes": 2172,
+      "sha256": "e8d7dbedf4d2ba72306bb5af3e8d0a5c40981f780f2f2cbafa4808ecba286fbe"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_BoundedSurface.hxx",
+      "bytes": 2317,
+      "sha256": "92beded835e14f18379fb10f0431da733f67ff25f36ce6f39473255d11e74e86"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_CartesianPoint.hxx",
+      "bytes": 2791,
+      "sha256": "41a3399e331475fb67473db6381eb8effb03c38890c75f4c434cb9593c0c87a7"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Circle.hxx",
+      "bytes": 6113,
+      "sha256": "f0ed5a5245098683528453037817e0f6d82c257031ffdf89bf33661bd4f0f90b"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Conic.hxx",
+      "bytes": 4930,
+      "sha256": "b4ddef7d3044b53e8dd3bb15cf4c8782f65ab02557332329ce356560c9813a42"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_ConicalSurface.hxx",
+      "bytes": 11731,
+      "sha256": "150b458c4ea5d11aeb06e600d33a636067792da84e6a28f4a9e039d2ebb6c307"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Curve.hxx",
+      "bytes": 9729,
+      "sha256": "ce5664c892dfa7d5a76479a451b83fdd3a05a4d189672a1317af8df6a4f82e66"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_CylindricalSurface.hxx",
+      "bytes": 8587,
+      "sha256": "6882ff37a10a6e1d7f509e603951bba9e8e0fec960563362c9f5b78425503bfe"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Direction.hxx",
+      "bytes": 4079,
+      "sha256": "cf76b91364375235328fa988c51bc01454aa4b67ff504bdaee5d79dbe39646aa"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_ElementarySurface.hxx",
+      "bytes": 5079,
+      "sha256": "8c2d8e9bb4694b6bc56c4d145f721ac18f0d9bba1b57443107c7813dafb1f807"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Ellipse.hxx",
+      "bytes": 8820,
+      "sha256": "8ec953b04dfb75b40684e617ff9eae4dbc43bc6aeaff46772eee479484212876"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Geometry.hxx",
+      "bytes": 4884,
+      "sha256": "8bbf9eb15af19152debddb49473d09ae525edb73300a7d3c1d53771fbfe14177"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Hyperbola.hxx",
+      "bytes": 10787,
+      "sha256": "e2e70aca80930dfbbdc3f7522201c62c6bfb0293a36ce074ff0b7265aac05e1f"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Line.hxx",
+      "bytes": 6099,
+      "sha256": "5f79f016187036ce7bce54170898c8357bbeee75858a3daa3996f054069de024"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_OffsetCurve.hxx",
+      "bytes": 12877,
+      "sha256": "2f9435553c6ef4418f4abc8504c3346f2ea3e114333af54b04f763e282895d01"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_OffsetSurface.hxx",
+      "bytes": 16655,
+      "sha256": "0e2d830d05149296bc8b27a5d881360552e5e1d9b921ef6fb65b0d9231d66545"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Parabola.hxx",
+      "bytes": 8585,
+      "sha256": "b976ccc20359ace9ed080f1780382e9c0cf2a92b444c6198a2f48ffaad78bf57"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Plane.hxx",
+      "bytes": 8564,
+      "sha256": "53cd2f50b530c8a6635c2dc071d3b45ee27bd597804be96324d1ae716cfc38b0"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Point.hxx",
+      "bytes": 2000,
+      "sha256": "7fb9268d9a6a3087e527202a333a3c77eed17890cd30c75453043df28b55b509"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_RectangularTrimmedSurface.hxx",
+      "bytes": 15548,
+      "sha256": "92fa9c575e9c39fd7782ef5304fe9f0d678844bab3c3ff84af73f0762a84c79d"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_SphericalSurface.hxx",
+      "bytes": 9672,
+      "sha256": "474b1a88a987111c0e5d2441f65c992c32e9efaed51348e2a2454d458637e62d"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Surface.hxx",
+      "bytes": 13108,
+      "sha256": "c9cdf46839d73189d65c6545e3de4977549722e3d4e0ec4c8c0ccc01e3efeeaa"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_SurfaceOfLinearExtrusion.hxx",
+      "bytes": 10869,
+      "sha256": "cae9c8b6473ed1e8f082146946e59499c69b2d095e0b82b36564902d0f2db4b1"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_SurfaceOfRevolution.hxx",
+      "bytes": 12847,
+      "sha256": "6f66677be8bf69825c30443a916cb9eead7e44874eccf631717d1606c2d4808e"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_SweptSurface.hxx",
+      "bytes": 2679,
+      "sha256": "76087ff6ded9fefb52014f6adc0a77f138c7a88036267a5a269e301dd0a486fc"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_ToroidalSurface.hxx",
+      "bytes": 9983,
+      "sha256": "1cb964812da1893e6267fafda3c9658e23329653f9a25ed06cc686eaabe96320"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Transformation.hxx",
+      "bytes": 8468,
+      "sha256": "1f5e3106c40734b40ab018b3b35552840fea2d057c4d62bdcd7944fdf83df820"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_TrimmedCurve.hxx",
+      "bytes": 10785,
+      "sha256": "0104e36cc0682df854d6ca6edeb0ff9beeb8652431883f1df2acdceecdb85588"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_UndefinedDerivative.hxx",
+      "bytes": 1446,
+      "sha256": "3ed09000bf9f7e36d6c10680d166d5b26907b7573d6ae2d079459a5b6e067cd6"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_UndefinedValue.hxx",
+      "bytes": 1411,
+      "sha256": "c103ea219bb805833ca39fc1b46aafcb0dc4d1e2641fe6aa00836f9a447d8cf1"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_Vector.hxx",
+      "bytes": 5141,
+      "sha256": "fe0c45e37bfc5aa426558950e370e99dde2f5a5b9e408f03c0fee7684ca2c5a0"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/Geom_VectorWithMagnitude.hxx",
+      "bytes": 5027,
+      "sha256": "f25812c2602bdf8c176bc2b178f232cee5a6171e8c4e8ff5cbc7b0eb39df939a"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomAdaptor.hxx",
+      "bytes": 1842,
+      "sha256": "78cd57128f949167ea01c1a7c5bbc7803b1adad63679f7b702dc2c984e535fae"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomAdaptor_Curve.hxx",
+      "bytes": 9850,
+      "sha256": "3c97006c38c06a9e2158df0c5f8b7ba22d72aea8c5807555a59e9ccc707253dd"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomAdaptor_Surface.hxx",
+      "bytes": 15048,
+      "sha256": "eff24d657fc2e7b39ed3887bb000b22278ef685a04add8d5c94bde5d635a6891"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomAdaptor_SurfaceOfLinearExtrusion.hxx",
+      "bytes": 6376,
+      "sha256": "eb6b1d50730d177f7471f530a6b4c82869afedeb5d2a9029fe8ba8057034d145"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomAdaptor_SurfaceOfRevolution.hxx",
+      "bytes": 7119,
+      "sha256": "0578ae1e92b219fb71ca5df8f687ede8a660e2d2727770f361f7d2c643ddb96b"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomAdaptor_TransformedCurve.hxx",
+      "bytes": 7840,
+      "sha256": "344fdcea4310a51094503ce6d0a292342d3dc469fb96e177b1872c21c881b84c"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomAdaptor_TransformedSurface.hxx",
+      "bytes": 11811,
+      "sha256": "ff2b2e383e3902bf87b20f374d1fdefd2f203749770c2bf0760889c9faea5bea"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomEval_AHTBezierCurve.hxx",
+      "bytes": 6173,
+      "sha256": "e4545d08e003b4b307f43c8acc663346a64c4982c43245684a9d778324c93112"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomEval_AHTBezierSurface.hxx",
+      "bytes": 9215,
+      "sha256": "9ab26403fbc7a5b967b1382cae2319dccc03356a9bdd957c504fc9ff63527226"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomEval_CircularHelicoidSurface.hxx",
+      "bytes": 5112,
+      "sha256": "d5772ecebd20be8518542f628e2865f4a4e8740b74c473ef8a2be970dc9ae28b"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomEval_CircularHelixCurve.hxx",
+      "bytes": 4681,
+      "sha256": "62c00240a63cd010d103cbb69f319d04198f9d63ae00cd26efa17187597fe8f8"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomEval_EllipsoidSurface.hxx",
+      "bytes": 8009,
+      "sha256": "22055336af88c8a9339532b7e23414656d8e353940b3516cded0e4ec8d8c1e9f"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomEval_HypParaboloidSurface.hxx",
+      "bytes": 7666,
+      "sha256": "6a0684ed87323db2e1178063506cd0c50a1d1d6e20e9bfbb74c5aa275054736e"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomEval_HyperboloidSurface.hxx",
+      "bytes": 8093,
+      "sha256": "a8e4f7651ac3068d32696feafcdc79b7ced1fce1accc166b9265aebb0aa7457e"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomEval_ParaboloidSurface.hxx",
+      "bytes": 6924,
+      "sha256": "9a844a28a7acf3b6070d4531ce5068f78b29886f1f4e30e0a6f60eea678376c7"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomEval_RepCurveDesc.hxx",
+      "bytes": 3578,
+      "sha256": "7f423ebaf39b3e5046b492fcfa52d266c54eb834861c681bdfe9fb114dcdda6f"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomEval_RepSurfaceDesc.hxx",
+      "bytes": 4531,
+      "sha256": "c6e16b01df06bd9b3df359fcaa021628c05b6ac3e001e57418185894f072008d"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomEval_SineWaveCurve.hxx",
+      "bytes": 4551,
+      "sha256": "43efb94c35fd2353dfa4b801cf816a582e17f7fa081e93170088aaad315b2166"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomEval_TBezierCurve.hxx",
+      "bytes": 7137,
+      "sha256": "aaa0b35734bfe3aecbed41d95c7c47f1672cd502eef645f396c18a66b697732e"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomEval_TBezierSurface.hxx",
+      "bytes": 9643,
+      "sha256": "6f748616acf38a1b1e317c65c832042a1693e4562e321fb837488460c875bb5d"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval.hxx",
+      "bytes": 6895,
+      "sha256": "92eb7492ac3303d8474330b6f768fe3ff84443c6dfbf242a030186ca5ea46756"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_BSplineCurve.hxx",
+      "bytes": 4323,
+      "sha256": "678a054db9c8162eaa19d3145e9249eb5d27d107a74557122bc428829aa06ebb"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_BSplineSurface.hxx",
+      "bytes": 5252,
+      "sha256": "f576d32561dcef07ab0637235b273b14e79a0bd717a9f2d5f4f8ee06a8f2f121"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_BezierCurve.hxx",
+      "bytes": 3738,
+      "sha256": "eafb837a106a32cdff5687d2ea01c0252684225ab6333d96b833d10f7f784c77"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_BezierSurface.hxx",
+      "bytes": 4889,
+      "sha256": "35a1f01ea8408bd8133a99a3374bbe87cbfd057a2c7334144b0f9375977e112a"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_Circle.hxx",
+      "bytes": 4226,
+      "sha256": "15856bbd41f3d0196845f43e9b44e09fb0a17d561fa5a0f3c5f9babcf633d08f"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_Cone.hxx",
+      "bytes": 6382,
+      "sha256": "376d812c2e1408db98ad4d21f6b34d7f348324e174f4a6e2c3d958ea4e739ad5"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_Curve.hxx",
+      "bytes": 6298,
+      "sha256": "279d9f6ef2c25b11ae3197db302ff2d6bceae3a950218d59f8e499619ec5d8e0"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_Cylinder.hxx",
+      "bytes": 6311,
+      "sha256": "72b5bb2d1a7d746eacc41077be5227db9a1b8f185f711b779b8bbc204d43f811"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_Ellipse.hxx",
+      "bytes": 3846,
+      "sha256": "773258c77b33fc8c8f43266495b588029fa9d2ad90da2a56637e5edcadcfe8d9"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_Hyperbola.hxx",
+      "bytes": 3817,
+      "sha256": "127ff4126153626d73ff1846e491a4f9519ed2dd8c8a9cb4604bfa2780128c17"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_Line.hxx",
+      "bytes": 8276,
+      "sha256": "23574e7a5af3e34f8f5175c513b23f4ee609f8eb29d81c67ef7bcc942d79be90"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_OffsetCurve.hxx",
+      "bytes": 4437,
+      "sha256": "affc7c5eb55f3b54dd241b7bc872f4657ec1356a1ea6ecc8cc68bfd80ce16949"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_OffsetSurface.hxx",
+      "bytes": 5107,
+      "sha256": "f778eecf8ce7f645554add0c59d5fec3e59e00485ab65528a149e4b4d1ca7c7f"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_OtherCurve.hxx",
+      "bytes": 4057,
+      "sha256": "0ed77b81f808e65d4e7569f26dbf834d2b4e962f0ad5824946ad55f1e6e2633f"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_OtherSurface.hxx",
+      "bytes": 5976,
+      "sha256": "0fa2ee18745333a0886d4df0aa75150ee5275659583b77f687e1f9205045a743"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_Parabola.hxx",
+      "bytes": 3727,
+      "sha256": "90a919bcd94b2aaa16587ac8115ee7d6cbe5a59f25f881ffb590c1f93d289770"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_Plane.hxx",
+      "bytes": 11542,
+      "sha256": "e7f71134ae3a3b5ed8f3caf4fc9442854ff87ed66bd1554e2c6cb066f25c20af"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_Sphere.hxx",
+      "bytes": 6227,
+      "sha256": "7d7f1cf64d0f2867bd0ba1e385148f7cb15766da991ee65460c22a06d97e1dd7"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_Surface.hxx",
+      "bytes": 8847,
+      "sha256": "44dd0d284354a52fb22881ae0366e768ff9b1e7ebd832fdac0c215f04444980b"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_SurfaceOfExtrusion.hxx",
+      "bytes": 5532,
+      "sha256": "8d8608e1bb13177b6f104293a36fcc490539a7c227109dc0f56b2086d5dc3737"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_SurfaceOfRevolution.hxx",
+      "bytes": 5929,
+      "sha256": "8f1ef6c6f903d43cc0d252818e9ce6bb246dc7c0b8e177355bc34af062e84ad8"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomGridEval_Torus.hxx",
+      "bytes": 6357,
+      "sha256": "9c971deb1e19bb2202d242c9810a7d129746ca4769045cf502dd14db81cf4079"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomHash_CurveHasher.hxx",
+      "bytes": 1613,
+      "sha256": "7128463684965ed323c0b2d94fa32ae53d48bb8abac0786ec4fa220b273eb182"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomHash_Polygon2DHasher.hxx",
+      "bytes": 1412,
+      "sha256": "e8a8cd1cf2685319242b3d82a6e663978b7d1e5e1c4ac85e7e93deb8df9cbb73"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomHash_Polygon3DHasher.hxx",
+      "bytes": 1412,
+      "sha256": "b25d9d7f2b4872d81e3a670e0f1f045c211d38c5a3860d1b9fc08e9dafee08a4"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomHash_PolygonOnTriHasher.hxx",
+      "bytes": 1567,
+      "sha256": "10c6e63b03e709e276b617895ddb66d969f2cd922e61a4939093060318d5608d"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomHash_SurfaceHasher.hxx",
+      "bytes": 1650,
+      "sha256": "41b130b132025f4a7bf6ea21b53d3e469504658b12734a689c955dee08241c20"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/GeomHash_TriangulationHasher.hxx",
+      "bytes": 1450,
+      "sha256": "eb877caf9ffc149ded851e171cb5f95801b9ec39177a59a5e32f8566bd41ac7b"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/TopAbs.hxx",
+      "bytes": 7693,
+      "sha256": "c7ae92f38bcb009c70e00e8cfa89da80143b6c99674e4c2a27658d31727e5f21"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/TopAbs_Orientation.hxx",
+      "bytes": 2030,
+      "sha256": "f518133c28f415ccdc81335222b3c6b6972f4b8f4829f85003603e6600a1890a"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/TopAbs_ShapeEnum.hxx",
+      "bytes": 2388,
+      "sha256": "9280bce1412baa45a08392337fed3096297645830aa465a5650923e9807bc87e"
+    },
+    {
+      "path": "H:/FreeCAD-src/.pixi/envs/default/Library/include/opencascade/TopAbs_State.hxx",
+      "bytes": 1169,
+      "sha256": "7c82e227664220cc5064af339857126f169d70a1d5be71c230ab696c9ec417bb"
+    }
+  ],
+  "remaining": [
+    "The user approved acceptance before irreversible disposal. The old strict destructor-veto witnesses remain unchanged historical tests, superseded by the approved162-check boundary fixture; they are not silently reported green and are no longer an impossible identity-recovery requirement.",
+    "Complete native admission and aggregate/peak allocation remain open for opaque/custom values, closures, all property/status/touch/cache identities and external allocator dependencies. Constructor currently copies histories and transaction descriptions before complete aggregate budget admission; next implement bounded preflight.",
+    "Global/multidocument/source participants and arbitrary lifecycle/cleanup callbacks still require complete audit. Initial boundary fixture242 crashed during hostile normal-close teardown; corrected fixture disables attacks only after assertions. Normal-close custom-native/Python finalizer lifecycle needs a separate controlled witness.",
+    "Selected App247/plugin254/kernel240 is an isolated test runtime. Shared SDK/FreeCAD/OCCT binaries are unchanged; production deployment and complete ABI/compiler/native-memory-safety certification are not claimed.",
+    "Every original RCORE01 adapter1-7,C01-C12,T01-T11 stays open until its full audit: refs/world-once/ownership; curve/surface/trim/pcurve/seam families; conversion/deviation/locus/maps; registry/GeometryResult all consumers; workers/aggregate bounds/cancel; atomic publication/History/cache/locks/lifetime; valid oriented manifold solids/cavities; read/edit/retain/export; generic Snap/mouse/render/persistence/lifecycle. Component passes do not prove full RCORE01.",
+    "Native source190/build/loaded hashes and selected SDK/import do not establish a complete ABI/compiler dependency/native memory-safety certificate. Plugin full prebuild source inventory was not frozen; no production host replacement or publish is claimed."
+  ],
+  "next_action": "Add failing constructor/history/name aggregate-budget tests and bounded native preflight; audit global/source participants and normal-close finalizer lifetime; continue all original RCORE01 services/adapters/C01-C12/T01-T11."
+}

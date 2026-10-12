@@ -85,6 +85,61 @@ pub struct SurfaceCounts {
     pub weight_count: usize,
     pub knot_counts: [usize; 2],
 }
+/// Logical extracted values only. Reserved is zero; a rejection grants no bytes.
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+pub struct CountSummary {
+    pub status: u32,
+    pub reserved: u32,
+    pub bytes: usize,
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_basis_curve_payload(
+    degree: usize,
+    poles: usize,
+    weights: usize,
+    knots: usize,
+    limits: Limits,
+) -> CountSummary {
+    let p = limits.into();
+    count_summary(
+        BasisPolicy::validate_degree(p, degree)
+            .and_then(|()| preflight_curve_counts(poles, weights_count(weights), knots, knots, p)),
+    )
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_basis_surface_payload(c: SurfaceCounts, limits: Limits) -> CountSummary {
+    let p = limits.into();
+    count_summary(
+        BasisPolicy::validate_degree(p, c.degrees[0])
+            .and_then(|()| p.validate_degree(c.degrees[1]))
+            .and_then(|()| {
+                preflight_surface_counts(
+                    c.u_count,
+                    c.v_count,
+                    c.pole_count,
+                    weights_count(c.weight_count),
+                    c.knot_counts,
+                    c.knot_counts,
+                    p,
+                )
+            }),
+    )
+}
+fn count_summary(result: Result<usize, BasisError>) -> CountSummary {
+    match result {
+        Ok(bytes) => CountSummary {
+            status: 0,
+            reserved: 0,
+            bytes,
+        },
+        Err(e) => CountSummary {
+            status: status(Err(e)),
+            reserved: 0,
+            bytes: 0,
+        },
+    }
+}
 fn status(result: Result<(), BasisError>) -> u32 {
     match result {
         Ok(()) => 0,
@@ -169,7 +224,7 @@ fn weights_buffer_valid(ptr: *const f64, count: usize) -> bool {
         buffer_valid(ptr, count)
     }
 }
-unsafe fn borrowed_axis<'a>(a: NativeAxis) -> Axis<'a> {
+pub(crate) unsafe fn borrowed_axis<'a>(a: NativeAxis) -> Axis<'a> {
     // SAFETY: the caller establishes all buffer validity and lifetime conditions;
     // count and address guards ran before this function. Axes are nonempty.
     Axis {
@@ -182,7 +237,7 @@ unsafe fn borrowed_axis<'a>(a: NativeAxis) -> Axis<'a> {
         domain: a.domain,
     }
 }
-unsafe fn borrowed_weights<'a>(ptr: *const f64, count: usize) -> Option<&'a [f64]> {
+pub(crate) unsafe fn borrowed_weights<'a>(ptr: *const f64, count: usize) -> Option<&'a [f64]> {
     if count == 0 {
         None
     } else {

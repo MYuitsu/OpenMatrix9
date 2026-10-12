@@ -1,0 +1,464 @@
+{
+  "key": "rhino-core-isolated-publication-20261011",
+  "updated_at": "2026-10-11T14:36:42+07:00",
+  "status": "in_progress",
+  "chapter_complete": false,
+  "shared_sdk_version": "API12",
+  "isolated_native_version": "API19",
+  "matching_om9_gui_runtime_verified": false,
+  "selected_native_app": {
+    "path": "H:/FreeCAD-src/build/atomic-host-app-api19-test-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "shared_outputs_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/src/App/FreeCADApp.lib",
+      "bytes": 3103284,
+      "sha256": "59b7845e365bdc9f8ada83b2110fbd258c612fa3d0fbf9e2f449e154f51b861c"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.pdb",
+      "bytes": 254824448,
+      "sha256": "16cc28a2a42fe4076a2f1b8e5b772fb914e4a363beca1c1c6c8547eae8bb8c57"
+    }
+  ],
+  "build": {
+    "actual_exit_code": 0,
+    "object_targets": 102,
+    "inputs": {
+      "path": "H:/FreeCAD-src/build/atomic-host-app-api19-test-20261011/inputs.json",
+      "bytes": 43944,
+      "sha256": "d2bbbbdab45d9b821c01d76c22faae2a9ef0876f75b9915a5205a4b6494c7422"
+    },
+    "compile_log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-app-api19-test-20261011/compile.log",
+      "bytes": 559,
+      "sha256": "e93bfca77a70ad9bfc65990d0f555bc3ac9703fed5a31cd2e7c167063c547751"
+    },
+    "link_log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-app-api19-test-20261011/link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "import_library": {
+      "path": "H:/FreeCAD-src/build/atomic-host-app-api19-test-20261011/FreeCADApp.lib",
+      "bytes": 3104040,
+      "sha256": "1d0c3bb63687e3a657ad9b6b2322dad2c7607ebe154faaed76bd344c74925f17"
+    }
+  },
+  "current_sources": [
+    {
+      "path": "H:/FreeCAD-src/src/App/Application.cpp",
+      "bytes": 144889,
+      "sha256": "f55897175a05135e21f093e0250725d6b3ed482f1e562a080863e01bf64ad159"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Application.h",
+      "bytes": 43799,
+      "sha256": "c80f88954b5dc09b73787bec2e5ff3f36474cccdec756c1df33630b654b6a3e7"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/AutoTransaction.cpp",
+      "bytes": 14109,
+      "sha256": "8628212da785cc050be5412edf8cdc8546759b46032b2810c9e824c3581a9f30"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Document.cpp",
+      "bytes": 158149,
+      "sha256": "f5b75a2c80a0ce9c1bf7720cbfa9da3a984019c9f22196cb27c8657cc41913b4"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Document.h",
+      "bytes": 57560,
+      "sha256": "a17697109d612331dc8cacd78b71810992d8f2cbce78b3db91281a301f54831a"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/private/DocumentP.h",
+      "bytes": 7333,
+      "sha256": "d0717e0acecc7e7f73db15148e5bcdfbfb41780454c95ce3dddc6323e550fe55"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.cpp",
+      "bytes": 27357,
+      "sha256": "4578a38cdf5bccec6ab68bb8ecc3fb63d46a6ce36d2d193258a19e5a4039b723"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.h",
+      "bytes": 13263,
+      "sha256": "b40694aba9dffa66f93fe150e9a4368db1a0ecf5baa7097e4419afe8cb079f59"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/native/rhino_core_atomic_publication_close.cpp",
+      "bytes": 43387,
+      "sha256": "16abcae74487caac2c3166023de51e814f5d000092759e0fb38dc4f9f448f413"
+    }
+  ],
+  "global_boundary": {
+    "artifact": "H:/FreeCAD-src/build/atomic-host-tests-close-api19-20261011",
+    "executed": 28,
+    "passed": 28,
+    "failures": [],
+    "skipped": [],
+    "disabled": 0,
+    "exit": {
+      "host_sha256": "FA8492BA753EEB9298A9DF3491A2F9AF049BF3FB6A27B38046E0A9A2A5955176",
+      "host_path": "H:/FreeCAD-src/build/atomic-host-tests-close-api19-20261011/FreeCADApp.dll",
+      "module_reported": true,
+      "filter": "AtomicPublicationCloseTest.*",
+      "exit_code": 0,
+      "selection_valid": true,
+      "expected_host_path": "H:\\FreeCAD-src\\build\\atomic-host-tests-close-api19-20261011/FreeCADApp.dll"
+    },
+    "xml": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-api19-20261011/isolated-isolated-boundary.xml",
+      "bytes": 8615,
+      "sha256": "b83cc1e2b1c861d9d7d9aacc4335b66b7595f83487f59270d4d4e50873d22269"
+    },
+    "log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-api19-20261011/isolated-isolated-boundary.log",
+      "bytes": 5589,
+      "sha256": "7f8e66a11b5e70b58680f2e87dda4dbe5dd5d57f20e6db22a6467a7ed0c40abd"
+    },
+    "inputs": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-api19-20261011/inputs.json",
+      "bytes": 11055,
+      "sha256": "c23dc29383a298ae87378b96b03829bd461aafe3c8d23cbbd0ba82104d6c0a5d"
+    },
+    "binary": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-api19-20261011/App_tests_run.exe",
+      "bytes": 3914752,
+      "sha256": "bb1d414e3d63d2aad3bf38038fd7106cccadcc1166de78652a382ec30624ccc1"
+    }
+  },
+  "targeted_native": {
+    "artifact": "H:/FreeCAD-src/build/atomic-host-tests-api19-20261011",
+    "executed": 46,
+    "passed": 46,
+    "failures": [],
+    "skipped": [],
+    "disabled": 0,
+    "exit": {
+      "host_sha256": "FA8492BA753EEB9298A9DF3491A2F9AF049BF3FB6A27B38046E0A9A2A5955176",
+      "host_path": "H:/FreeCAD-src/build/atomic-host-tests-api19-20261011/FreeCADApp.dll",
+      "module_reported": true,
+      "selection_valid": true,
+      "expected_host_path": "H:\\FreeCAD-src\\build\\atomic-host-tests-api19-20261011/FreeCADApp.dll",
+      "exit_code": 0,
+      "filter": "DocumentTest.Atomic*:DocumentTest.DefaultTransactionStillInvalidatesPriorRedo"
+    },
+    "xml": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api19-20261011/isolated-isolated-atomic.xml",
+      "bytes": 11444,
+      "sha256": "0e8d7cef9c18e27a366b003fe97f894faca9b70f85b849fa068e7013e0578b15"
+    },
+    "log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api19-20261011/isolated-isolated-atomic.log",
+      "bytes": 7852,
+      "sha256": "18e01a42758e27cf915e9def5a4fb2ff57e772f3febed252658fdb742267a8f5"
+    },
+    "inputs": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api19-20261011/inputs.json",
+      "bytes": 10904,
+      "sha256": "afb305b9c60b4b3ab79bbcea94a3d8140b5d65f24329eddd8b17310cefbfe264"
+    },
+    "binary": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api19-20261011/App_tests_run.exe",
+      "bytes": 4102656,
+      "sha256": "4b40e9708a9df6537e86591b8a99028a7f41b2e9b9ba6b2b9db20cbce685d894"
+    }
+  },
+  "app_suite": {
+    "artifact": "H:/FreeCAD-src/build/atomic-host-tests-api19-20261011",
+    "executed": 604,
+    "passed": 602,
+    "failures": [],
+    "skipped": [
+      "BackupPolicyTest.StandardWithZeroFilesDeletesExisting",
+      "BackupPolicyTest.TimestampWithZeroFilesDeletesExisting"
+    ],
+    "disabled": 7,
+    "exit": {
+      "expected_host_path": "H:\\FreeCAD-src\\build\\atomic-host-tests-api19-20261011/FreeCADApp.dll",
+      "host_path": "H:/FreeCAD-src/build/atomic-host-tests-api19-20261011/FreeCADApp.dll",
+      "module_reported": true,
+      "selection_valid": true,
+      "host_sha256": "FA8492BA753EEB9298A9DF3491A2F9AF049BF3FB6A27B38046E0A9A2A5955176",
+      "exit_code": 0,
+      "filter": "*"
+    },
+    "xml": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api19-20261011/isolated-isolated-app.xml",
+      "bytes": 144058,
+      "sha256": "f727de107fbfea43262bd110e46715c3939e766bcd5a9c7dec454083e909d48f"
+    },
+    "log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api19-20261011/isolated-isolated-app.log",
+      "bytes": 80229,
+      "sha256": "9bd5174063b16ecd75c43bb46660e5c9f5984c843e90d91b8ea6195b2d7ed52b"
+    },
+    "inputs": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api19-20261011/inputs.json",
+      "bytes": 10904,
+      "sha256": "afb305b9c60b4b3ab79bbcea94a3d8140b5d65f24329eddd8b17310cefbfe264"
+    },
+    "binary": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api19-20261011/App_tests_run.exe",
+      "bytes": 4102656,
+      "sha256": "4b40e9708a9df6537e86591b8a99028a7f41b2e9b9ba6b2b9db20cbce685d894"
+    }
+  },
+  "historical_red_witnesses": [
+    {
+      "artifact": "H:/FreeCAD-src/build/atomic-host-tests-close-red10-20261011",
+      "executed": 3,
+      "passed": 0,
+      "failures": [
+        "AtomicPublicationCloseTest.RestoredObjectObserverCannotOverwriteUntouchedSource",
+        "AtomicPublicationCloseTest.DeletedObjectObserverCannotOverwriteUntouchedSource",
+        "AtomicPublicationCloseTest.RemovalJournalObserverCannotOverwriteUntouchedSource"
+      ],
+      "skipped": [],
+      "disabled": 0,
+      "exit": {
+        "exit_code": 1,
+        "filter": "AtomicPublicationCloseTest.RestoredObjectObserverCannotOverwriteUntouchedSource:AtomicPublicationCloseTest.DeletedObjectObserverCannotOverwriteUntouchedSource:AtomicPublicationCloseTest.RemovalJournalObserverCannotOverwriteUntouchedSource",
+        "host_sha256": "C13DF12404F5AB5AB22158190E1181BCE81E8182A34C9BD6B9AE0879EE0B9020"
+      },
+      "xml": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red10-20261011/isolated-structural.xml",
+        "bytes": 3949,
+        "sha256": "7364acb7cbe36891b507495b3a1f459eef9fe45fc1400396c6839ab1d813f565"
+      },
+      "log": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red10-20261011/isolated-structural.log",
+        "bytes": 2657,
+        "sha256": "7ee5a85f5fd288cdcaa573869c736271b127d91e0baa2445aedbf58a18f02c8b"
+      },
+      "inputs": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red10-20261011/inputs.json",
+        "bytes": 9976,
+        "sha256": "e7c8077e4472f3bf86facc3da41207ecc41e199dc3573e322245d55f6b0206a6"
+      },
+      "binary": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red10-20261011/App_tests_run.exe",
+        "bytes": 3810304,
+        "sha256": "e4197cb3b065bcf9db6df6a914b9504e0090edb6edb6782bbd571de2de0ff6f9"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/atomic-host-tests-close-red11-20261011",
+      "executed": 1,
+      "passed": 0,
+      "failures": [
+        "AtomicPublicationCloseTest.ActivatedRestoredObjectObserverCannotOverwriteUntouchedSource"
+      ],
+      "skipped": [],
+      "disabled": 0,
+      "exit": {
+        "module_reported": true,
+        "exit_code": 1,
+        "host_sha256": "066385CC768DA18D049D49D5850912B7344F3F2BCBD8E6F1B5FDC85264D49D99",
+        "host_path": "H:/FreeCAD-src/build/atomic-host-tests-close-red11-20261011/FreeCADApp.dll",
+        "filter": "AtomicPublicationCloseTest.ActivatedRestoredObjectObserverCannotOverwriteUntouchedSource",
+        "selection_valid": true,
+        "expected_host_path": "H:\\FreeCAD-src\\build\\atomic-host-tests-close-red11-20261011/FreeCADApp.dll"
+      },
+      "xml": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red11-20261011/isolated-isolated-activation2.xml",
+        "bytes": 1569,
+        "sha256": "dd7c1f24d508eee2df55f8db36a3c05ccecd1b354a4a648281b4e014ba0607a2"
+      },
+      "log": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red11-20261011/isolated-isolated-activation2.log",
+        "bytes": 1208,
+        "sha256": "56b9e67c060a9904e64b458a72f55b3a3fcb5af16306dcedb4d11e7fd75d407b"
+      },
+      "inputs": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red11-20261011/inputs.json",
+        "bytes": 11059,
+        "sha256": "c8b7a144c61e9ca1ba89fdc078f2fa1faec64506d771b0c3c8ebb8c9c4bc9e76"
+      },
+      "binary": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red11-20261011/App_tests_run.exe",
+        "bytes": 3823616,
+        "sha256": "e44c531c16c2a96e4d06724dcac992509635dded4e2cc9cb571c05695f201755"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/atomic-host-tests-close-red12-20261011",
+      "executed": 2,
+      "passed": 1,
+      "failures": [
+        "AtomicPublicationCloseTest.NestedGlobalMoveRestoresReceiverFirst"
+      ],
+      "skipped": [],
+      "disabled": 0,
+      "exit": {
+        "module_reported": true,
+        "filter": "AtomicPublicationCloseTest.NestedGlobalMove*",
+        "selection_valid": true,
+        "host_path": "H:/FreeCAD-src/build/atomic-host-tests-close-red12-20261011/FreeCADApp.dll",
+        "expected_host_path": "H:\\FreeCAD-src\\build\\atomic-host-tests-close-red12-20261011/FreeCADApp.dll",
+        "host_sha256": "853D55C3BFE50F78A4B07E49CEFD0F480636AF119E312AFDFF90B6EA822BDF53",
+        "exit_code": 1
+      },
+      "xml": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red12-20261011/isolated-isolated-nested-move.xml",
+        "bytes": 1671,
+        "sha256": "07bf7faa41143ab304ffd222dc6b3f4dd12efee0dc985b8bfa627079a5a33b45"
+      },
+      "log": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red12-20261011/isolated-isolated-nested-move.log",
+        "bytes": 1197,
+        "sha256": "0312655261c15740528882a9ffbc2255c845ab7e8da7e3273583acebaada2385"
+      },
+      "inputs": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red12-20261011/inputs.json",
+        "bytes": 11055,
+        "sha256": "cec35b841d6a3973ada9ceccec9038f10f4e95b65d642c2511b49a2727bd7e06"
+      },
+      "binary": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red12-20261011/App_tests_run.exe",
+        "bytes": 3862528,
+        "sha256": "d6882f73d0ff60225a3d3f674a0abb81fa58768087d0592f67de5aaa80ca975f"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/atomic-host-tests-close-red12-20261011",
+      "executed": 1,
+      "passed": 0,
+      "failures": [
+        "AtomicPublicationCloseTest.NestedRollbackFailureDoesNotPoisonIndependentOuterRollback"
+      ],
+      "skipped": [],
+      "disabled": 0,
+      "exit": {
+        "selection_valid": true,
+        "exit_code": 1,
+        "expected_host_path": "H:\\FreeCAD-src\\build\\atomic-host-tests-close-red12-20261011/FreeCADApp.dll",
+        "module_reported": true,
+        "host_sha256": "853D55C3BFE50F78A4B07E49CEFD0F480636AF119E312AFDFF90B6EA822BDF53",
+        "filter": "AtomicPublicationCloseTest.NestedRollbackFailureDoesNotPoisonIndependentOuterRollback",
+        "host_path": "H:/FreeCAD-src/build/atomic-host-tests-close-red12-20261011/FreeCADApp.dll"
+      },
+      "xml": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red12-20261011/isolated-isolated-nested-verdict.xml",
+        "bytes": 2007,
+        "sha256": "ade4eae77e43316a68ef0dba1e8fd26a4c5040b0e93686e3909f635d720cb168"
+      },
+      "log": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red12-20261011/isolated-isolated-nested-verdict.log",
+        "bytes": 1394,
+        "sha256": "1696cd11e01e3f4c594e5ebbc81ceddb86fd7cc57ff401d1134744e6c73cf26f"
+      },
+      "inputs": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red12-20261011/inputs.json",
+        "bytes": 11055,
+        "sha256": "cec35b841d6a3973ada9ceccec9038f10f4e95b65d642c2511b49a2727bd7e06"
+      },
+      "binary": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red12-20261011/App_tests_run.exe",
+        "bytes": 3862528,
+        "sha256": "d6882f73d0ff60225a3d3f674a0abb81fa58768087d0592f67de5aaa80ca975f"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/atomic-host-tests-close-red13-20261011",
+      "executed": 1,
+      "passed": 0,
+      "failures": [
+        "AtomicPublicationCloseTest.SameTransactionFailureCrossesIndependentNestedVerdict"
+      ],
+      "skipped": [],
+      "disabled": 0,
+      "exit": {
+        "expected_host_path": "H:\\FreeCAD-src\\build\\atomic-host-tests-close-red13-20261011/FreeCADApp.dll",
+        "selection_valid": true,
+        "host_path": "H:/FreeCAD-src/build/atomic-host-tests-close-red13-20261011/FreeCADApp.dll",
+        "host_sha256": "592983D6DB27A7B00238870C203368BBECC7BF1A0519622DC5BCB9A116EB2217",
+        "filter": "AtomicPublicationCloseTest.SameTransactionFailureCrossesIndependentNestedVerdict",
+        "module_reported": true,
+        "exit_code": 1
+      },
+      "xml": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red13-20261011/isolated-isolated-interleaved-verdict.xml",
+        "bytes": 1092,
+        "sha256": "0764571d6d7365ac8ad91d0e64af85332ad8aaa6d3061089e463164326ea0983"
+      },
+      "log": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red13-20261011/isolated-isolated-interleaved-verdict.log",
+        "bytes": 982,
+        "sha256": "50f9e2fceea81cd34c1b2ced378bcea60347151adb48144fb420fbc61ef551b1"
+      },
+      "inputs": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red13-20261011/inputs.json",
+        "bytes": 11055,
+        "sha256": "badddc42e3e0d5bbba30fa3e7de69a6efb638c0a5ef3e7d3a89c0cefe48d6fca"
+      },
+      "binary": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red13-20261011/App_tests_run.exe",
+        "bytes": 3901952,
+        "sha256": "c7e739ed52623cebf9301cf735e76f8a804de6fd40ef33bacdb4326f6ebf3221"
+      }
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/atomic-host-tests-close-red14-20261011",
+      "executed": 1,
+      "passed": 0,
+      "failures": [
+        "AtomicPublicationCloseTest.DefaultNestedRollbackDoesNotBorrowOuterCheckedVerdict"
+      ],
+      "skipped": [],
+      "disabled": 0,
+      "exit": {
+        "module_reported": true,
+        "host_sha256": "100FB980DE931751147A966D189500A2A8CD5D65D0EC6C4843A0042158BEF32B",
+        "filter": "AtomicPublicationCloseTest.DefaultNestedRollbackDoesNotBorrowOuterCheckedVerdict",
+        "expected_host_path": "H:\\FreeCAD-src\\build\\atomic-host-tests-close-red14-20261011/FreeCADApp.dll",
+        "exit_code": 1,
+        "host_path": "H:/FreeCAD-src/build/atomic-host-tests-close-red14-20261011/FreeCADApp.dll",
+        "selection_valid": true
+      },
+      "xml": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red14-20261011/isolated-isolated-default-verdict.xml",
+        "bytes": 2008,
+        "sha256": "fc035ffef9f4eef63993bc1e3199a20934400d4ed9d08caa908edc4332871a0d"
+      },
+      "log": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red14-20261011/isolated-isolated-default-verdict.log",
+        "bytes": 1377,
+        "sha256": "d6667dbe659e398356c37b1a95737be8369177568c11845972db48ace4874345"
+      },
+      "inputs": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red14-20261011/inputs.json",
+        "bytes": 11055,
+        "sha256": "5d64ba2ca00c2f56fba16b76d0f1c6f0517fee706e7a60f31165ca44bf7219d9"
+      },
+      "binary": {
+        "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red14-20261011/App_tests_run.exe",
+        "bytes": 3914752,
+        "sha256": "bc36d4503c14437472141166eff0c2ac151e5b9ac68efd00d04058bb03275ed5"
+      }
+    }
+  ],
+  "remaining": [
+    "Shared SDK still loads API12; observed FreeCAD PID75944 is live. Do not replace its DLL while the user demo is open. Only native test executables select isolated API19.",
+    "After shared host closes, build FreeCADApp target only, then standalone OpenMatrix9Gui with the shared SDK and run matching existing OM9 callers. No matching API19 GUI/plugin acceptance is claimed.",
+    "Native callback coverage is limited to exercised synchronous lifecycle/property/transaction signals. Worker-to-GUI dispatch, arbitrary virtual/custom callbacks, full source/lock/owner checks, cache and aggregate allocation/traversal/cancellation budgets remain open.",
+    "Actual OM9 operation/source typed commit diagnostics and Python result reference ownership after commit exceptions remain open; generic native RuntimeError is not full caller acceptance.",
+    "Retain the complete original GeometryRef/snapshot/schema/units/world-once/representation contract, every enabled consumer and geometry family, rational/periodic basis, trims/pcurves/seam occurrences, full GeometryResult/source attributes, measured global conversion deviation and parameter/topology maps, solid validity and truthful read/edit/retain/export/persistence/ownership; eight typed errors, adapters1–7, C01–C12, T01–T11 still require full-scope evidence."
+  ],
+  "limitations": [
+    "Each RED is an independent historical executable/source/DLL cohort, not one combined baseline run. RED12 move executes two orders, one already passes.",
+    "Final28 global cases use a fresh fixture/bootstrap. Root App uses fresh Document/bootstrap plus cached other test units; global cases are additional and not included in App604. This is not the whole FreeCAD project test suite.",
+    "Actual loaded App module path and SHA are reported by each selected test process and verified by the runner. Only one App DLL is selected next to each test exe; shared host/resources/dependencies are reused.",
+    "FreeCADApp native journal/signals/property ownership necessitate these C++ adapters. No portable OM9 business logic or existing solver is replaced; Rust source is unchanged and prior Rust808/Runtime21 caller evidence remains historical.",
+    "Failed preparations are retained: red9 wrong signal connection type; API14 first trial missing response file; API14b bootstrap Windows macro conflict; red11 first shell lacks Get-FileHash. These are preparation errors, not runtime RED proofs."
+  ]
+}

@@ -1,0 +1,3183 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-10T23:11:07+07:00",
+  "chapter_status": "in_progress",
+  "scope": "Shared Rust operation/type/options capability consumed by existing native Join/Explode/Trim/Boolean declaration, input capture and solve; concrete Part/Mesh and block/cage leaf admission before copies. Full original RCORE-01 remains in progress.",
+  "sources": [
+    "Gui/CoreSupportSnapshot.cpp",
+    "Gui/CoreSupportSnapshot.h",
+    "Gui/CoreGeometryContract.cpp",
+    "Gui/CoreTopologySnapshot.cpp",
+    "Gui/CoreTopologySnapshot.h",
+    "Gui/CMakeLists.txt",
+    "Gui/NurbsBasisAdapter.cpp",
+    "Gui/NurbsBasisAdapter.h",
+    "rust/src/lib.rs",
+    "rust/src/nurbs_basis.rs",
+    "rust/src/nurbs_basis_ffi.rs",
+    "rust/src/support_snapshot.rs",
+    "rust/src/support_snapshot_ffi.rs",
+    "rust/src/analytic_support.rs",
+    "rust/tests/analytic_support.rs",
+    "rust/tests/support_snapshot.rs",
+    "rust/tests/support_snapshot_ffi.rs",
+    "tests/rhino_core_analytic_support_smoke.FCMacro",
+    "tests/rhino_core_support_snapshot_smoke.FCMacro",
+    "tests/rhino_core_topology_snapshot_smoke.FCMacro",
+    "tests/rhino_core_geometry_descriptor_smoke.FCMacro",
+    "tests/rhino_core_import_commit_gate_smoke.FCMacro",
+    "rust/src/geometry_contract.rs",
+    "rust/src/geometry_contract_ffi.rs",
+    "rust/tests/geometry_contract_ffi.rs",
+    "rust/tests/bezier_support.rs",
+    "tests/rhino_core_bezier_support_smoke.FCMacro",
+    "rust/src/derived_support.rs",
+    "rust/src/derived_support_ffi.rs",
+    "rust/tests/derived_support.rs",
+    "tests/rhino_core_derived_support_smoke.FCMacro",
+    "Gui/CoreSourceAttributes.cpp",
+    "Gui/CoreSourceAttributes.h",
+    "rust/src/geometry_frame.rs",
+    "rust/src/geometry_frame_ffi.rs",
+    "rust/src/source_attributes.rs",
+    "rust/src/source_attributes_ffi.rs",
+    "rust/tests/geometry_frame.rs",
+    "rust/tests/source_attributes.rs",
+    "tests/rhino_core_world_attributes_smoke.FCMacro",
+    "Gui/CoreDefinitionSnapshot.cpp",
+    "Gui/CoreDefinitionSnapshot.h",
+    "rust/src/instance_graph.rs",
+    "rust/src/instance_graph_ffi.rs",
+    "rust/tests/instance_graph.rs",
+    "tests/rhino_core_instance_definition_smoke.FCMacro",
+    "Gui/CoreDiscreteSnapshot.cpp",
+    "Gui/CoreDiscreteSnapshot.h",
+    "rust/src/discrete_snapshot.rs",
+    "rust/src/discrete_snapshot_ffi.rs",
+    "rust/tests/discrete_snapshot.rs",
+    "tests/rhino_core_discrete_snapshot_smoke.FCMacro",
+    "tests/rhino_core_discrete_module_loading_smoke.FCMacro",
+    "Gui/CoreEdgeSnapshot.cpp",
+    "Gui/CoreEdgeSnapshot.h",
+    "rust/src/edge_geometry.rs",
+    "rust/src/edge_geometry_ffi.rs",
+    "rust/tests/edge_geometry.rs",
+    "tests/rhino_core_edge_geometry_smoke.FCMacro",
+    "tests/native/edge_geometry_fixture.cpp",
+    "rust/src/array_occurrences.rs",
+    "rust/src/array_occurrences_ffi.rs",
+    "rust/tests/array_occurrences.rs",
+    "tests/rhino_core_instance_array_smoke.FCMacro",
+    "tests/rhino_core_instance_array_boundary_smoke.FCMacro",
+    "rust/src/reference_path.rs",
+    "rust/src/reference_path_ffi.rs",
+    "rust/tests/reference_path.rs",
+    "tests/rhino_core_reference_context_smoke.FCMacro",
+    "rust/src/surface_complex.rs",
+    "rust/tests/surface_complex.rs",
+    "tests/rhino_core_surface_complex_smoke.FCMacro",
+    "rust/src/shape_validation.rs",
+    "rust/tests/shape_validation.rs",
+    "Gui/CoreShapeValidation.cpp",
+    "Gui/CoreShapeValidation.h",
+    "tests/rhino_core_shape_validation_smoke.FCMacro",
+    "Gui/CorePreparedCad.cpp",
+    "Gui/CorePreparedCad.h",
+    "rust/src/prepared_cad.rs",
+    "rust/tests/prepared_cad.rs",
+    "tests/rhino_core_prepared_cad_result_smoke.FCMacro",
+    "tests/rhino_core_prepared_cad_cold_smoke.FCMacro",
+    "tests/rhino_core_prepared_metadata_smoke.FCMacro",
+    "Gui/ThreeDmPython.cpp",
+    "ThreeDm.py",
+    "ThreeDmArchiveState.py",
+    "ThreeDmModeling.py",
+    "Gui/NativeInputTree.cpp",
+    "Gui/NativeInputTree.h",
+    "rust/src/native_input_tree.rs",
+    "tests/modeling_exchange_smoke.FCMacro",
+    "tests/three_dm_preservation_smoke.FCMacro",
+    "Gui/CorePreparedSnapshot.cpp",
+    "Gui/CorePreparedSnapshot.h",
+    "rust/src/prepared_result.rs",
+    "rust/tests/prepared_result.rs",
+    "tests/rhino_core_prepared_snapshot_smoke.FCMacro",
+    "tests/rhino_core_prepared_snapshot_cold_smoke.FCMacro",
+    "Gui/CoreUnits.cpp",
+    "Gui/CoreUnits.h",
+    "rust/src/units.rs",
+    "rust/src/builder_history.rs",
+    "rust/src/prepared_discrete.rs",
+    "rust/tests/prepared_discrete_result.rs",
+    "tests/rhino_core_prepared_discrete_result_smoke.FCMacro",
+    "tests/rhino_core_prepared_discrete_cold_smoke.FCMacro",
+    "rust/src/native_edit_capability.rs",
+    "rust/tests/native_edit_capability.rs",
+    "tests/rhino_core_native_edit_capability_smoke.FCMacro",
+    "tests/rhino_core_native_edit_special_input_smoke.FCMacro",
+    "tests/rhino_core_affine_binding_smoke.FCMacro",
+    "Gui/EditGeometry.cpp",
+    "Gui/EditGeometry.h",
+    "Gui/EditController.cpp",
+    "Gui/EditSpecialTypes.cpp",
+    "Gui/EditSpecialTypes.h",
+    "tests/edit_commands_smoke.FCMacro",
+    "tests/edit_options_smoke.FCMacro",
+    "tests/edit_special_types_smoke.FCMacro",
+    "tests/edit_3dm_special_smoke.FCMacro",
+    "tests/solid_options_smoke.FCMacro",
+    "tests/surface_commands_smoke.FCMacro",
+    "tests/curve_spline_smoke.FCMacro"
+  ],
+  "source_fingerprints": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreSupportSnapshot.cpp",
+      "bytes": 22251,
+      "sha256": "646c5be3c8b6bd84db4de10e57ae7011c5f1dbd2681a36d3ac43e9494a62382d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreSupportSnapshot.h",
+      "bytes": 831,
+      "sha256": "03a6ca670397e5de19e3a86dd138eae1170b31b887df4a6204c95b4aaf5c23c1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreGeometryContract.cpp",
+      "bytes": 30345,
+      "sha256": "6befdf3dfacdbb1e2e2fa9b497e08935749854b392aaa441bd3cd5a4b6f87b6f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreTopologySnapshot.cpp",
+      "bytes": 12669,
+      "sha256": "4b490922323e8f14e01935138a37fcfe990b00167aa08c2e248cebe63f6a2d64"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreTopologySnapshot.h",
+      "bytes": 351,
+      "sha256": "beb34101a9f4e313959ad9ac871e89b53caf1e6d983972429e1518d259b5add3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CMakeLists.txt",
+      "bytes": 8432,
+      "sha256": "dd81a86c3f991a9b93dcbcba5ed6acf7ed53ef2a9b39354811d2e61e03a23ac2"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NurbsBasisAdapter.cpp",
+      "bytes": 20670,
+      "sha256": "341c02c464812a173c3d94a3ff9748f0eff9480fabc83992288e617ce8629f3f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NurbsBasisAdapter.h",
+      "bytes": 3633,
+      "sha256": "1ca7afaf36136083e97ae8b076afc08b43d5de06b7afbf27f66766db78c4c08a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\lib.rs",
+      "bytes": 1970,
+      "sha256": "f6d94e817bc7ad4ca0b548496a7abf1466d0fd89d6b2a50edc890f0464102d7c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\nurbs_basis.rs",
+      "bytes": 11166,
+      "sha256": "50d4fe44e2a325ff2f614c1f06d263d42cc1f16fc3504e4240863f395e41e916"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\nurbs_basis_ffi.rs",
+      "bytes": 10445,
+      "sha256": "a826ec5f2c42a476ca5f1f503c66d6058d71803d493cdcee2ff76c54538393f7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\support_snapshot.rs",
+      "bytes": 6150,
+      "sha256": "7e6ee4ab579eb7d03aa9e453172861195a32a80a19530eec3a5743028614304e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\support_snapshot_ffi.rs",
+      "bytes": 6469,
+      "sha256": "2d0a9d6fcf33cb69c9b4cc3d4a96b6c1f232fb5f5b34a166ed063fd9b0e1a6eb"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\analytic_support.rs",
+      "bytes": 5022,
+      "sha256": "4f386a88678cea05414833f5b6fd69ce629176e5cfd735f76e930c2d839f7d08"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\analytic_support.rs",
+      "bytes": 3829,
+      "sha256": "4194ece56c8e151e9f73b05c8efe09a99b40b7eec56cfd11a81aeed68df5bc8b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\support_snapshot.rs",
+      "bytes": 2916,
+      "sha256": "b4a9c37e6e78ccb12f4de6e69d08badb8a207bd10f1fbc44dcd1cd038476e28a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\support_snapshot_ffi.rs",
+      "bytes": 3970,
+      "sha256": "6e044be56c231841f4cf4ede0631c383ca6da84ce3f37d434c32a0c11e0d7188"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_analytic_support_smoke.FCMacro",
+      "bytes": 10780,
+      "sha256": "be861299632e4154f12b73db56df54e3e8e5814e3729c9e20a66d2852d296f8f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_support_snapshot_smoke.FCMacro",
+      "bytes": 11400,
+      "sha256": "faf1e09dfdbfde7d8dc8d87bbc54ee711d9c167abd95a2e94ab1fe6706f5969b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_topology_snapshot_smoke.FCMacro",
+      "bytes": 8288,
+      "sha256": "3b5caa79f2df766353a24262cfda414c7821096ad84f72930515bac899a6866a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_geometry_descriptor_smoke.FCMacro",
+      "bytes": 37949,
+      "sha256": "46da23b4b48a164f238e1b4e5852d0b389fd9afece11b45c5365e7015b8e2c9e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_import_commit_gate_smoke.FCMacro",
+      "bytes": 10604,
+      "sha256": "391e1e96940e20863a1360d9c90bb797d05265650b8a46747f2be04b4c9d54e9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_contract.rs",
+      "bytes": 18324,
+      "sha256": "f5bb356cb75a4b3d7fb77fbd5ac2061393eef7aad3422e0f089478a756138238"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_contract_ffi.rs",
+      "bytes": 11515,
+      "sha256": "a3e2996e7ae87ddba68b4e13f17bcfac7ffafd3d804192ffa4ae54a6d6a9b34b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\geometry_contract_ffi.rs",
+      "bytes": 6393,
+      "sha256": "92df03d48252dd0931703cd8ff94a7a41c81038cc7ac85bec1053b2fc45c2608"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\bezier_support.rs",
+      "bytes": 4769,
+      "sha256": "ee03f8850eba7bffcc4e9bbbd3189ee05598df166c580cc6f308a7b192830ab0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_bezier_support_smoke.FCMacro",
+      "bytes": 8057,
+      "sha256": "f3b6878116d44e4010831dfc92e2d00afa429b5beeacd2253663f562257b2327"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\derived_support.rs",
+      "bytes": 6599,
+      "sha256": "cdd55d8ea988ec67e1ee38da94399c4c5e5ffeba619a040ea93dbd20efa6e4fb"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\derived_support_ffi.rs",
+      "bytes": 4219,
+      "sha256": "b5996a667cf36933da5bf54c563f95e81af89bae8c709fcba7091285f2d2da36"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\derived_support.rs",
+      "bytes": 7674,
+      "sha256": "9895aa682867c342572cac64666d7d92fd0099902c4e11e45593585b0e591024"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_derived_support_smoke.FCMacro",
+      "bytes": 11031,
+      "sha256": "057c7317d47605405372925cd0fdf79072639106f6b8b7863bdc31f95b54857b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreSourceAttributes.cpp",
+      "bytes": 4724,
+      "sha256": "ac1851abf0745793e11904ea22a683f9f1f3aac9881aa5e705a515b4626ee16d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreSourceAttributes.h",
+      "bytes": 326,
+      "sha256": "217641cfd263bc8eb67d000b83555c8091a898069be5060255f653da9d647b16"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_frame.rs",
+      "bytes": 2958,
+      "sha256": "ee4b9130c6d8bb71e515976cdd2ddd00f6975ea7abc1ebdd9b3d13426328552e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_frame_ffi.rs",
+      "bytes": 826,
+      "sha256": "b631d6ca845421b4775b3135e42f750438719f460d0647fb2e1df8704e2d9e96"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\source_attributes.rs",
+      "bytes": 5016,
+      "sha256": "f5624013bdf383d3de1c6d5b9a8c8ebe65563a57c32505ac4329ddbcb4da5b01"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\source_attributes_ffi.rs",
+      "bytes": 3370,
+      "sha256": "3e1902c456f1ccdf9e832c770992c8d9495bbb0be92cec393a8f3c947c0382ff"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\geometry_frame.rs",
+      "bytes": 1831,
+      "sha256": "49ac56fc2ba0644eef681844dc0d01120eb9412d8c5db113ed1a49b4b19d86d1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\source_attributes.rs",
+      "bytes": 5458,
+      "sha256": "cba92971c2c9d9d48215cfb0c0b1037bd9a22b3d8066107f0fef332ad63924fa"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_world_attributes_smoke.FCMacro",
+      "bytes": 13224,
+      "sha256": "8bdd369edf43861cd8fdc01d1620c35db7e93d43f0d05e62fcc836ae00fda68a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreDefinitionSnapshot.cpp",
+      "bytes": 41256,
+      "sha256": "78fc213c7d323c65ea86c983b1be3360c2c94abb7aba2664b8911b79a2038f2f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreDefinitionSnapshot.h",
+      "bytes": 634,
+      "sha256": "090d10767c3c43e82f5f5599bec54b15cc9a120abdaf300c3b240f3993d75056"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\instance_graph.rs",
+      "bytes": 3468,
+      "sha256": "4ffa9fdecd1a3bcf3a4c3081b59a0a605f0d587a4a00c3da280259c77c6c886e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\instance_graph_ffi.rs",
+      "bytes": 1383,
+      "sha256": "4b6b5562027803ca43eeb87cc0231cd1cd7c66011dee15f7602756d11670bf4e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\instance_graph.rs",
+      "bytes": 2892,
+      "sha256": "13bab4e65bd1d7781a7a3bf2c7c226f90f8273a8f351b6f5c81269005ada12b8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_instance_definition_smoke.FCMacro",
+      "bytes": 13357,
+      "sha256": "7c4a0e26473b19c5a33918388d64d00c99c82f3651e59b1a647575c01d50d344"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreDiscreteSnapshot.cpp",
+      "bytes": 7289,
+      "sha256": "e74bcdfe67bcb0694d91b3622d6a24faaf51dbcc37db17440ea26f767210f920"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreDiscreteSnapshot.h",
+      "bytes": 964,
+      "sha256": "73bedc1889fa75a40710dae8030f56f83d24f94ff1c2292bebdd8ed75780ee1e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\discrete_snapshot.rs",
+      "bytes": 2741,
+      "sha256": "5cbd91f1fa6a5853fda72451367ab84d5bf2be014aad1998352b81db2cfbbbe3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\discrete_snapshot_ffi.rs",
+      "bytes": 2081,
+      "sha256": "62f7f34c47b1dd3e8d422cf50147b8f1eb465dced4571b37e47cf84659fa2077"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\discrete_snapshot.rs",
+      "bytes": 4509,
+      "sha256": "259ac2115167dc4d0ca00ea44213771ff33c37d1b1241749ff00f3354a839d75"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_discrete_snapshot_smoke.FCMacro",
+      "bytes": 10310,
+      "sha256": "3113c35ff6631ff78147f86803b998efaf7f977c82561fea58f0e7eb2512ae78"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_discrete_module_loading_smoke.FCMacro",
+      "bytes": 2432,
+      "sha256": "b31ca89582bf8d6251150b2f613a26c3fc99dd0cf9a7350e6f2ca3c709034e54"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreEdgeSnapshot.cpp",
+      "bytes": 5840,
+      "sha256": "26f82dcc8e6eeb9d65c41c2d1d4a407230ce9b9150af627bd4109ac9167e81b0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreEdgeSnapshot.h",
+      "bytes": 516,
+      "sha256": "dcd83aaa0c5a6b9f5cbf77db2ec61b14b8fee95c58ca0e0f40c630f3d39b9593"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\edge_geometry.rs",
+      "bytes": 4303,
+      "sha256": "3c3bf3bba8d38595236ab63b091193909fc608c63dd1b5d85c3623de60e8f1f9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\edge_geometry_ffi.rs",
+      "bytes": 2082,
+      "sha256": "722214b44d698a5cc81ce3760c16bafc1e418e1218e87e24d893832235ec93f1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\edge_geometry.rs",
+      "bytes": 5087,
+      "sha256": "bd584bf352dc3aef3ce001548e990074ade46efeffd247f6e158b5d3f67cd688"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_edge_geometry_smoke.FCMacro",
+      "bytes": 15478,
+      "sha256": "3ea31433b6750e53a18d64a452e8df7fc2a4f449a6ca287ab748295e1e5310b1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\native\\edge_geometry_fixture.cpp",
+      "bytes": 4409,
+      "sha256": "ec32f7cba271d5be8c4bcb2eaa8b2a85f700bc57207845fdfbeac753fcae6840"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\array_occurrences.rs",
+      "bytes": 3056,
+      "sha256": "45b86f7aaf1c542028a0de707b7239469b305d192dd52def04c13f2d11d094f0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\array_occurrences_ffi.rs",
+      "bytes": 1413,
+      "sha256": "3e3743b665fa2dde0cba572c57d4cbb1a35d4d16c5f7d265bdbf86c6e985f30e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\array_occurrences.rs",
+      "bytes": 4067,
+      "sha256": "f22ac2db34ae923a831e32edcfca2f6bb06b6e883c6ab0faa582261c0280c783"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_instance_array_smoke.FCMacro",
+      "bytes": 14920,
+      "sha256": "120c0d518aabe0fb45ed57b3647d560ecccf7dc784c13b8f96e5a5a7c9e4b3bd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_instance_array_boundary_smoke.FCMacro",
+      "bytes": 4070,
+      "sha256": "07fac94fb49c2e5e35cc5059a8395846030916633bd1b53bbdf645d4eac00963"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\reference_path.rs",
+      "bytes": 2739,
+      "sha256": "911b358e81fcec5cc991b9a4d96c0eeab020f901d32fc48cad3439fb423cf483"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\reference_path_ffi.rs",
+      "bytes": 3114,
+      "sha256": "05efe898e3529ca0a901b5035fa870246b32ab9c46d3ec2c68831f1f0ad643ee"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\reference_path.rs",
+      "bytes": 4961,
+      "sha256": "d7d8253c3dd7e4ad42607590a11483c44741d41cdc6f6c5bb02da60b85b75698"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_reference_context_smoke.FCMacro",
+      "bytes": 13934,
+      "sha256": "bdb6c7345bee4f0a499418f5aefd4dfc4355a327db09fae57f2a17fa7e8fc833"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\surface_complex.rs",
+      "bytes": 3098,
+      "sha256": "f2e5981754cdaf659c3e8e4d9e9f37783fae5d8325425f24de6c0677c45808fa"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\surface_complex.rs",
+      "bytes": 4357,
+      "sha256": "9c2fa75b5aa61d897ce4bfccf0d8134fe44b85826828cebc2b1a7a5c4d98358f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_surface_complex_smoke.FCMacro",
+      "bytes": 5281,
+      "sha256": "39fa0fb6827fe47cc22e929b5b0243cbf5a7f0aff56b92d978643ef9585a1ea5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\shape_validation.rs",
+      "bytes": 3171,
+      "sha256": "cd0939171a2d2c7bd6c2bf4fff17eccbd97bb849f73ec7fa9d9af6eea983138a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\shape_validation.rs",
+      "bytes": 3463,
+      "sha256": "ef09b50053ef3023ed8d01e8e27af373ee746d2b2adaadfea7dd353143fcaca4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreShapeValidation.cpp",
+      "bytes": 6299,
+      "sha256": "db323c8c4a1c3b16869e7c435402ee3c68cb6ee335924b7535b01ff6632c1e74"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreShapeValidation.h",
+      "bytes": 465,
+      "sha256": "859916f39c9a79a275778f55e1f6de59610a254b003d61127c047518635a2ede"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_shape_validation_smoke.FCMacro",
+      "bytes": 8583,
+      "sha256": "13eca734b9c7d32d0dfed9b73bc25f547b198785250b82bcbd37272430c37d14"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CorePreparedCad.cpp",
+      "bytes": 24875,
+      "sha256": "d2811867ba62751b8eed134cb15f9464ebd2c0b1b798892374ae5e7807b4149f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CorePreparedCad.h",
+      "bytes": 671,
+      "sha256": "7cbf5a8ffd312a67e00d7b9d530cf8c79e50d4ca4e5ffd2cb77969a68c627e9e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\prepared_cad.rs",
+      "bytes": 2997,
+      "sha256": "cb47f622edb8fd0c5c50bb5730a0d6cfa21e69ff57e8f9a97d3085f16691bf78"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\prepared_cad.rs",
+      "bytes": 2829,
+      "sha256": "b8d91c9f11f8a7c86e3080a8544e1262e8772e9096acf46c23f115708353e303"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_cad_result_smoke.FCMacro",
+      "bytes": 6964,
+      "sha256": "541fabe7b08e2e739e77927f70f33833f7a9993250cdbb3541da1d82cf094ad4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_cad_cold_smoke.FCMacro",
+      "bytes": 1638,
+      "sha256": "b529d5b0ff3a4fe558ac5d7552619c440dae08a234a1b661d8d10455c386522d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_metadata_smoke.FCMacro",
+      "bytes": 5127,
+      "sha256": "6183683faf6f866d633f992ce54b22fc47792437ae364a9e3bdf7ee438680576"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\ThreeDmPython.cpp",
+      "bytes": 29829,
+      "sha256": "3578688086de4e54f771450c18f1ada873644440bc913a0fde1b59265b654a3a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\ThreeDm.py",
+      "bytes": 20075,
+      "sha256": "2f825b6f87a2406d10bed0f621709e667daf32f227f9205cf09bea76b3f99f3f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\ThreeDmArchiveState.py",
+      "bytes": 101555,
+      "sha256": "df95561ed2d35b4aee8695ca6b8a1a0fe8ab81ce4b6dbf6502023deb48f1b8a8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\ThreeDmModeling.py",
+      "bytes": 4535,
+      "sha256": "05467c9785e9525766164c0ea400d6fa55d580354106314de7db4166f3ebd967"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NativeInputTree.cpp",
+      "bytes": 22642,
+      "sha256": "3a47989f7c44e5364ca19138157427ad920b9d3f23c3760294a6d27e92ccb268"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NativeInputTree.h",
+      "bytes": 938,
+      "sha256": "2303af98ff3611dd15bd86113507fdac4a1cccb4ee8a4a56cb43e03d17677f83"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\native_input_tree.rs",
+      "bytes": 3962,
+      "sha256": "707eddbb504f288a98e75bc5bfaa77433bfc339d1be97b398629d1f9d521a6a8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\modeling_exchange_smoke.FCMacro",
+      "bytes": 9134,
+      "sha256": "53c8e706e1bf648f24d4a809b8364e310124d1a2ef5c77a7ef4e6f050d7bef68"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\three_dm_preservation_smoke.FCMacro",
+      "bytes": 6870,
+      "sha256": "163104275f00c7e412f56966ebfcda50b0601ee4b75aa9b22dae7b934a019988"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CorePreparedSnapshot.cpp",
+      "bytes": 5603,
+      "sha256": "37847f9dcca053bb1809734838e806bcd9bc223737f8bb4cf525e3befee9e398"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CorePreparedSnapshot.h",
+      "bytes": 707,
+      "sha256": "53e421aa408062d741642cddb5ebf52fbbe9e833193f3e2189e93c792fb15aa6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\prepared_result.rs",
+      "bytes": 8485,
+      "sha256": "106d1fbbac7c9ddef3254f586eac001aacfc7fd4c8c1763cd45b58ccabdbbf55"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\prepared_result.rs",
+      "bytes": 3778,
+      "sha256": "56a2251f378fc09964da128ad1bc2452a5bb784ad5443df00ca56929f44182d6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_snapshot_smoke.FCMacro",
+      "bytes": 6239,
+      "sha256": "37f8886f5cba33ac7203095490dd8e0ff2d441bef226910527225ebf1c3a60e5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_snapshot_cold_smoke.FCMacro",
+      "bytes": 2571,
+      "sha256": "ad2089305311c06e2ebd9095d79d2c19e8293cebaca2da66d4ae115d897b71ea"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreUnits.cpp",
+      "bytes": 7297,
+      "sha256": "43aa730498e4e509c773e0e2eec33a59754e173e66a75a13707aad2f2185a101"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreUnits.h",
+      "bytes": 769,
+      "sha256": "bb5eb42328bc72796b671a9eadc4d4ed76141d7608070c7976e39cec57970e3a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\units.rs",
+      "bytes": 16987,
+      "sha256": "60b488fff3969cf54a103a6988684a2b810c0dbac165187e9874cd852f5f2b89"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\builder_history.rs",
+      "bytes": 15964,
+      "sha256": "836ebdfd672d8114fa421dcb2ab3173006b94a9618de7586a170b4b210d0b1a8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\prepared_discrete.rs",
+      "bytes": 6453,
+      "sha256": "9bd2f861b6e8ae2421fb4a45c87ec3bb65843ca6cb4bfefb9dc4730004caea9a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\prepared_discrete_result.rs",
+      "bytes": 6153,
+      "sha256": "56de2f201238bdc76535e937fe35db78ab174faf4828227ff7afc1f1d2ac0819"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_discrete_result_smoke.FCMacro",
+      "bytes": 8268,
+      "sha256": "feade70634295aa33f4219cf57dca5f75ed5a231f9d689ef268d20cb887dce21"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_discrete_cold_smoke.FCMacro",
+      "bytes": 2152,
+      "sha256": "15c7386f90ff148fe8e375f27dd7f242c794cd06577ce7eb31562ecfffd4da77"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\native_edit_capability.rs",
+      "bytes": 3403,
+      "sha256": "277a393bbecd7ba826493a792ae34474c66c51e3056329db0fcd493041aa4454"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\native_edit_capability.rs",
+      "bytes": 3328,
+      "sha256": "40f8d6232a553483e1baa494c007416ca9be846a2b7e84bd3f8b4562b733d71e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_native_edit_capability_smoke.FCMacro",
+      "bytes": 4048,
+      "sha256": "2abde5d00fa89f55b5cb8d8402879f869652cf695ef996e9db13de38ecf0c639"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_native_edit_special_input_smoke.FCMacro",
+      "bytes": 4319,
+      "sha256": "8cfae8cb22c53b20fcd36252d482206f3db3a127642f21629c0fdeff7ebe1188"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_affine_binding_smoke.FCMacro",
+      "bytes": 2809,
+      "sha256": "a3c710fe834b6fe5ff7af618ab3618f5e30a4355b90c17423e2e5b7ee2735ae0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\EditGeometry.cpp",
+      "bytes": 29157,
+      "sha256": "7fc659ddd654e66945a67510db6b5ae1ae599a7d6e867769133794b4d1b20523"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\EditGeometry.h",
+      "bytes": 2448,
+      "sha256": "bbc668a268e1532c76355444c5e961939d46c0703502cfdd1ebcf093d97bb264"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\EditController.cpp",
+      "bytes": 21546,
+      "sha256": "fccdf0d3c03451524f70fdd1ca883e0ffdfc9b9aaed4c2b8aa3fbe23d1dd4c26"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\EditSpecialTypes.cpp",
+      "bytes": 28364,
+      "sha256": "29a82c6d08d85f4af3690b1ecd318841c17f30fe1dc1050f0deddfeddb34c0be"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\EditSpecialTypes.h",
+      "bytes": 581,
+      "sha256": "8e975096a52620d0c26f5e23e26bdf8b82e15dee1e695ac02c4c0721433aab6a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\edit_commands_smoke.FCMacro",
+      "bytes": 18972,
+      "sha256": "4ab90521116651e7b879bf33df5804f8d7ebf49a8e66b012038c653beefe800b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\edit_options_smoke.FCMacro",
+      "bytes": 19959,
+      "sha256": "6f560804cee5fd7cac109b237bc57501d4f9e1c8eaba57b19c32d8695678cee3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\edit_special_types_smoke.FCMacro",
+      "bytes": 11202,
+      "sha256": "c21c56062f7d26ce7d7f8b20819158daa420949474ee41f24659eef210de123d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\edit_3dm_special_smoke.FCMacro",
+      "bytes": 14298,
+      "sha256": "627789d22f97011ae590bef3af8ef792cdaea8a8bf7f730538ae1a8d1741cca9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\solid_options_smoke.FCMacro",
+      "bytes": 19138,
+      "sha256": "63f953de35ee83ca697146cefa6d8bee40945f91271f8107ebf1854c6dd219a5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\surface_commands_smoke.FCMacro",
+      "bytes": 13772,
+      "sha256": "386e0ac64e5a8dc96a1ecb2517ba00c4f3b5b29f5a5904eaea18d897a837533a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\curve_spline_smoke.FCMacro",
+      "bytes": 13853,
+      "sha256": "9cd8d8a25eff648f0da8959c5f1b2fee13d7988ce710a8eb5c32ff41b056da02"
+    }
+  ],
+  "remaining": [
+    "Curve/Surface/Solid creation, Rebuild, cage editing and other enabled geometry consumers still require shared operation registry integration and matching evidence.",
+    "Native Edit still needs complete GeometryResult/output snapshot, conversion/deviation/parameter-map and topology-map integration; constraint declarations alone do not prove report coverage.",
+    "Per-owner native Part/Mesh preflight does not close aggregate Edit/special output budgets, raw decoder allocation or every annotation/control path. Existing known special adapters are reused, not globally certified.",
+    "All remaining original closure-audit obligations, uniform typed exceptions, source ownership/locks, workers/caches and wider lifetime/persistence contracts remain open."
+  ],
+  "review": "docs/reviews/2026-10-10-native-edit-capabilities-review.md",
+  "review_fingerprint": {
+    "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\reviews\\2026-10-10-native-edit-capabilities-review.md",
+    "bytes": 2236,
+    "sha256": "566e1a0635d5f9d0ee64acecc51636d1cd04423c7b3a9af26f72ace0a5cc49af"
+  },
+  "native_sources": [
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\Link.cpp",
+      "bytes": 103357,
+      "sha256": "bc503697b18aecfcd8b506f0ac40250cf8a6e6c0fb9bfbe0f4c3f1545d47a3ad"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\GroupExtension.cpp",
+      "bytes": 18027,
+      "sha256": "37c72d6431213fb25b16112af03f08457cedcebd24663344cdd5d0623977acb1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\GeoFeatureGroupExtension.cpp",
+      "bytes": 20571,
+      "sha256": "deaedb1fcab832ff91786c34f62e918eb1c9cbd38bbb60b30467ef906dd7dd8c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\DocumentObjectPyImp.cpp",
+      "bytes": 35415,
+      "sha256": "d404b202ec3d9035f9e1657ac39b8b2f13b2d5fb5eac9e77b47f05dadb1b6e6b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\PartFeature.cpp",
+      "bytes": 84936,
+      "sha256": "f75b38817bac5a46860c956ea78e76d3561815ad6390bb9f521eb86e2e6056fd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Mesh.h",
+      "bytes": 18095,
+      "sha256": "d1a3a4b84bffaaae6358e9618bd68ba53e248be57ea0675db1c1571d7f32f36a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Core\\MeshKernel.h",
+      "bytes": 27159,
+      "sha256": "69ee7d1f0c2aefb50f65f7c04c117daa4f5b0718890fadb6cc483abcbdc8a246"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\Points.h",
+      "bytes": 8056,
+      "sha256": "c7c08887cc7ac212e823cbe6eb4313efd14188845fe53b211516e6587311bd8c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\PropertyPointKernel.h",
+      "bytes": 3706,
+      "sha256": "57984bcba2e3950a814a946926ba58cdfce8bdb50915d5c335cfe8be4f564759"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\PropertyPointKernel.cpp",
+      "bytes": 6085,
+      "sha256": "677f7916e005bf3ed8159e5c48e427d84a7c2a692fdaf0e2f7949b8e386438ca"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\PointsFeature.cpp",
+      "bytes": 3960,
+      "sha256": "ab040c16751526ee12c2b6f4b4343508408cc7f4f63e55445153ada65038a048"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\AppPoints.cpp",
+      "bytes": 2819,
+      "sha256": "b62ec0416166699c4be8c8d160c8d698ba104aef6fe6c269aad3556074c17813"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRep_Tool.hxx",
+      "bytes": 19882,
+      "sha256": "308217970271349466f7bff4ae0014f81aafcdd311750e8ef5888f93ab003922"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\TopExp.hxx",
+      "bytes": 6627,
+      "sha256": "868d4f55c6e4a008adfc07787e24e5ffff1203e9244599f49dc05452c1e4b5fd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\TopoDS_Shape.hxx",
+      "bytes": 11734,
+      "sha256": "9535f666d49437f72151a484daf9f60d065ac59d0dc765866211427e94085f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\TopTools_ShapeMapHasher.hxx",
+      "bytes": 1335,
+      "sha256": "0f10c93946df144fa1cc46433b29c78ead9d87ce991b6968886e8eae01d60b8d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\NCollection_IndexedMap.hxx",
+      "bytes": 24993,
+      "sha256": "4ea642521417dcde1db81fad1f23fe9ea7be3676a289376fa0633dfcc65e41f6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\Geom_BSplineCurve.hxx",
+      "bytes": 38854,
+      "sha256": "6070421a76816696d9c116dc0b184e6a4afe9c63c77240b709ec0d2a690409b8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRep_Builder.hxx",
+      "bytes": 18147,
+      "sha256": "3f6586413a9b7adbdd58ac4f191f3ef700fe6fed796fe24da2ec399f3a50e1b6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepPrimAPI_MakeSphere.hxx",
+      "bytes": 6387,
+      "sha256": "881a123fc884e3fafd18f7556ad5d64a2718ef5d3ea8ba18561f1e16344de891"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\TopoShape.cpp",
+      "bytes": 157707,
+      "sha256": "2f7de58f556e3ce2cb0877ebdb1a83536d1e73be2d8a2b9243056083f0619e5e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\TopoShapePyImp.cpp",
+      "bytes": 93062,
+      "sha256": "db0f1f3fb0fb55e13017c64466d1f916821340810057259a203053c37d4eab0e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Mesh.cpp",
+      "bytes": 67826,
+      "sha256": "87df041474235ae5eaf64b4ede5c9a5d5d5eb2a7885d707dc426c078a686ab1c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\MeshPyImp.cpp",
+      "bytes": 66081,
+      "sha256": "86bc5911998919651d4ad91496083d1dfd11aea844ba66299a393d644bd591cc"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Segment.cpp",
+      "bytes": 6012,
+      "sha256": "436ee8771f3b17946dd17bd5b6aa64cc7a800dfc6848f5449d214b6ca000aed5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Segment.h",
+      "bytes": 4358,
+      "sha256": "2d599a4fd9d553bd943cf3f063bbb874ddc393abbaf8b5751a902e9f14009529"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Core\\MeshKernel.cpp",
+      "bytes": 42166,
+      "sha256": "69d2817b508cf759624af325f55a7bec03443dc6b13ef803e4a7e269698bb577"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Core\\Elements.h",
+      "bytes": 44038,
+      "sha256": "a0c31f0dc9b1b83f0296958404e24dcf10edcb96394c05a2880d88a5c0922d4d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Core\\Definitions.cpp",
+      "bytes": 2664,
+      "sha256": "45835064793063ba27afa2bf4eff52792d44de937722c7c6efa4af10a567a1a5"
+    }
+  ],
+  "native_dependencies": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\Mod\\Mesh\\Mesh.pyd",
+      "bytes": 5714944,
+      "sha256": "7a0dfb3afbdcc5ddfddbbf5d5bb85f2069a67b5f22d27d23d22aed6c7056da76"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\Mod\\Points\\Points.pyd",
+      "bytes": 1630720,
+      "sha256": "37593b045a77451a6a0865c2f7c14f5b449de7f884253360e7b38a8558c22936"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\src\\Mod\\Mesh\\App\\Mesh.lib",
+      "bytes": 1217622,
+      "sha256": "2edf2cf27abfbc90af40390eac8506016d2dfd0bb5477462a8cd4144530dea55"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepCheck_Analyzer.hxx",
+      "bytes": 7461,
+      "sha256": "193f4ba62d6c504836251f9253e6dedda592055da4155349a5a469424285a7a6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepCheck_Solid.hxx",
+      "bytes": 2064,
+      "sha256": "5940b67e6d241bb60c51f0b2c9a84a7c86a5aeaf261743b777a9b3708f71a71a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepClass3d_SolidClassifier.hxx",
+      "bytes": 2342,
+      "sha256": "3916ff3e3109e5cf09d333447e7fdc5d969140d54851207c933c151778106fe8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepClass3d_SClassifier.hxx",
+      "bytes": 2920,
+      "sha256": "096ff910d9a17eb04e7086d93f5f094866e85385a011761eae4601f460f76444"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\Precision.hxx",
+      "bytes": 19462,
+      "sha256": "73d59b7ca73e6bd2fc5c3f212f34fc9c4ae8a030efccfe80ca794ab9d834cff4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\Standard_Version.hxx",
+      "bytes": 2984,
+      "sha256": "838641a1b3b0834dc1236f132fafe5442872ba0a061b26aa5dd62c60ccaa0303"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\include\\pyerrors.h",
+      "bytes": 12968,
+      "sha256": "d7947aded270de2b45a9cdfa2e3d523d46655f0d8edad3ce69d405e0d9f51d1f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepBuilderAPI_Copy.hxx",
+      "bytes": 2739,
+      "sha256": "213ecd5816c97c056cb39d496a44ab8cab2d466423526e4f0fd44589bdc8280a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepTools.hxx",
+      "bytes": 18988,
+      "sha256": "204dbe773b11c9a5e23b8946bae83decd6a1814bef84b29fc45d7c631e9b4b10"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\TopTools_FormatVersion.hxx",
+      "bytes": 1641,
+      "sha256": "f805759441307be718a765ec237c36370e13491608b7f3c3fd67d4b366bc7dbf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\src\\Mod\\Mesh\\App\\MeshPy.h",
+      "bytes": 27116,
+      "sha256": "ab43f56e3270e1b12a7972685629dbee3989d57b8744eaf31ece3ca655ef3380"
+    }
+  ],
+  "native_fixture_artifacts": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\generator.exe",
+      "bytes": 84992,
+      "sha256": "970ee7c47807af155cd464030222f2c51fd4127e6f8d0302c782b866b64fca35"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\different-parameter-domains.brep",
+      "bytes": 782,
+      "sha256": "001887d0088318dfa33a7d7bd5a71a2c90a9355f58a0b8973f481d970928fd6e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\missing-curve3d.brep",
+      "bytes": 755,
+      "sha256": "e51327a373e517053573c9e1c70b451cb534edd5ad2ff214f0ef4ae4e759ea6a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\out-of-policy-vertex.brep",
+      "bytes": 209,
+      "sha256": "a4289d038dad4b4ee91018e96f60c4a17b024c427413c33a5572de28534bac8e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\located-null-degenerate-edge.brep",
+      "bytes": 583,
+      "sha256": "d5fbe209f4726af2c66c005fd8725440ff1c4089a572be1e18d3973e5ea73cba"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\located-bare-degenerate-edge.brep",
+      "bytes": 475,
+      "sha256": "53bcd2f4633fbb6a55b9ecf6dc919913f0e87a2c756d28ee62d506820f5b9d14"
+    }
+  ],
+  "harness": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\run-om9-plugin.ps1",
+      "bytes": 5632,
+      "sha256": "32c9fcd34f6beb2770b4440f0bf3766fd51af49b817b21434c858d4b4a6ab020"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\build-om9-plugin.ps1",
+      "bytes": 4280,
+      "sha256": "eb6d40b1fa3122a1b963c7b515a93938bac70739bb7a3f34cd8745a71cb80cea"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\run-native-edit-regressions.ps1",
+      "bytes": 5922,
+      "sha256": "35edad29f46c1eb66c1a05ec48d77c0e0c47c30e320f58f296479b074065aac6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\record-native-edit-capabilities.py",
+      "bytes": 25601,
+      "sha256": "067fafc1aa70fbccde4529eeebcbc23c4fa83e81ac3f9cea6fa1086c7b2290be"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\check-native-edit-capabilities.py",
+      "bytes": 5545,
+      "sha256": "78e2a4a5791e751f5ed3cc0ca882a728afbb7722d07f1a3c72f79704ae40f0e9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\shared-host-profile-isolation.FCMacro",
+      "bytes": 1373,
+      "sha256": "c91a70869032c49b3f7c7394df93f4116e51b4408911d8f5fc05a6765dc4a206"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\trace-native-edit-options.FCMacro",
+      "bytes": 1039,
+      "sha256": "ae5fd424682342484e7f28dcdab7fdf5a5f81ef95afd4da9117aa4fc32f44f14"
+    }
+  ],
+  "documentation_fingerprints": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\README.md",
+      "bytes": 96473,
+      "sha256": "e41d8d04f090dff2e925e17345d3f8985a4c3696da09906a633f206452bd6e39"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\IMPLEMENTATION_STATUS.md",
+      "bytes": 37151,
+      "sha256": "5aee12375cbf99ecfc3902a0ab9f0b7697226c11c260ce81e34342932d7d1da7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\README.md",
+      "bytes": 40778,
+      "sha256": "27fcd21c90f291f573dec1ef92cb97a8defb525852a4725b244a45156e8be8a9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\01-object-model-kernel.md",
+      "bytes": 47961,
+      "sha256": "eb0ab64d993db721f57f9f031ba2c0080bc817da8dc699f847615772839cd4ab"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\features\\RCORE-01.md",
+      "bytes": 11388,
+      "sha256": "c8332e0207202c947ef4eb8b8ec3f928b484a40bf0feff8b1251d6174474dd8a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\validation\\2026-10-10-rhino-core-native-edit-capabilities.md",
+      "bytes": 5927,
+      "sha256": "8db231f472c78d3fd8d9ffa76983d489ac5eb381340b396c16b29c1222c90182"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\reviews\\2026-10-10-native-edit-capabilities-review.md",
+      "bytes": 2236,
+      "sha256": "566e1a0635d5f9d0ee64acecc51636d1cd04423c7b3a9af26f72ace0a5cc49af"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\superpowers\\plans\\2026-10-10-rcore01-native-edit-capabilities.md",
+      "bytes": 7411,
+      "sha256": "b5cbb618b50f43b28167c885fc731a83aac9e0da55e1852d02a3359a4e13508d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\superpowers\\plans\\2026-10-10-rcore01-native-construction-capabilities.md",
+      "bytes": 9699,
+      "sha256": "581c3314e4e19e4224ad63488ebaa3dd1c182d5a0d34a6659eb36b451578eb94"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\reviews\\2026-10-10-rcore01-closure-audit.md",
+      "bytes": 26315,
+      "sha256": "26fca12d6559dd1ca6c39093e0c6f9bd23e0764dbbf2c38847a7f4f5844ea6e8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\reviews\\2026-10-10-rcore01-enabled-consumer-audit.md",
+      "bytes": 4672,
+      "sha256": "63ef97cfa7117b063114bf4763c4b2803f5f95f38abc004a3cc2280d0ae4ddf3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\openmatrix9-progress.json",
+      "bytes": 213969,
+      "sha256": "43aaccebf9742e0605accaa9e08d209d859fc1ec8438ec41aab7adb3cb79b8c2"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\CAPABILITY_LOOKUP.json",
+      "bytes": 91578,
+      "sha256": "2b2419ebd0bac46ddcb71321a9f51d61112c2f5749e9681f5ac1215719693244"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\MANIFEST.json",
+      "bytes": 116501,
+      "sha256": "b116c6120c47701bcf76f26ae198e6dddc65db62b215e0142c8e37007913d4c9"
+    }
+  ],
+  "validation": {
+    "host_runs": [
+      {
+        "case": "capability",
+        "macro": "rhino_core_native_edit_capability_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-capability-final4-20261010",
+        "checks": 20,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 46220,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-capability-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-capability-final4-20261010\\results.json",
+            "bytes": 6075,
+            "sha256": "c81d7edc83e53c284dc3e06fa94cda21bc1f619e0578d0c4aff2996a1d374b6e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-capability-final4-20261010\\shared-host-launch.json",
+            "bytes": 540,
+            "sha256": "5ee6c3f344e2e5a2950001f77ccab32a11cbbf35897c49419f545bf249804b77"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-capability-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 1001,
+            "sha256": "ae4bdf836a7c2e9133e551721d286e04048abb3b9af27faa987ce562b60d5921"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-capability-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 955,
+            "sha256": "8e57cfab524d6891d6a735424dd26c67776821a6e3176564757aac718d80e6eb"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-capability-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-capability-final4-20261010\\host-stderr.log",
+            "bytes": 1133,
+            "sha256": "ab03b7eef0ecfeb7eac3dbfec5802f536c75e7d661066ba6b18b43c2411366ba"
+          }
+        ]
+      },
+      {
+        "case": "special-input",
+        "macro": "rhino_core_native_edit_special_input_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-special-input-final4-20261010",
+        "checks": 10,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 44112,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-special-input-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-special-input-final4-20261010\\results.json",
+            "bytes": 1211,
+            "sha256": "829e96cadeccb3c344c1f0ebd854c897c4dfcfca22c6cd9dd36727af2d375974"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-special-input-final4-20261010\\shared-host-launch.json",
+            "bytes": 543,
+            "sha256": "1ee04b3e3130d79504edc669b0bb7fac13b568cc46257384cbe77b3e30e90732"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-special-input-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 1004,
+            "sha256": "62d657f47d8c71cb835c9ddf272f5d1a713e78b5d8425f71794c6359ee45afb8"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-special-input-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 958,
+            "sha256": "05fa42ec1673f26b2e8bdc94d3dffed530a800121af3c13fa0aa43267e7dc5bc"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-special-input-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-special-input-final4-20261010\\host-stderr.log",
+            "bytes": 1263,
+            "sha256": "0f5b89a5376aeb0eaf8da5da96613c550d8925533eda5fe8f92c6dc50523aafe"
+          }
+        ]
+      },
+      {
+        "case": "affine-binding",
+        "macro": "rhino_core_affine_binding_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-affine-binding-final4-20261010",
+        "checks": 5,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 51576,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-affine-binding-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-affine-binding-final4-20261010\\results.json",
+            "bytes": 734,
+            "sha256": "50ad6710fdb8433042f3f5d202b813400d0d97a3a4626c0de1f69117944b95e8"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-affine-binding-final4-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "d24a0b9ed6d13a9b9f84a69737226089b029f0254cd855fa18ed2811a7cb214d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-affine-binding-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 993,
+            "sha256": "ea9287d176a536e7732693d6e0fa53a824bbc0e8a098f5cce7c73d3a491bb688"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-affine-binding-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "1bb842cd6a3495fd7a303a27b54f4ada114d87cd3e34ff1d0eebbef872664089"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-affine-binding-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-affine-binding-final4-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "fc7862aaf014596589ec59a6818be35943e312644f32e4b7fc5ad4f508a54cb8"
+          }
+        ]
+      },
+      {
+        "case": "edit-commands",
+        "macro": "edit_commands_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-edit-commands-final4-20261010",
+        "checks": 115,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 37860,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-edit-commands-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-commands-final4-20261010\\results.json",
+            "bytes": 11432,
+            "sha256": "7dbb4d2805fc94728630b75faba4b6cac55cb012386e1206fbdab49eebefb8ed"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-commands-final4-20261010\\shared-host-launch.json",
+            "bytes": 543,
+            "sha256": "3e78099a230bc10bd5c5cbf7793f7407dc23babed554ff2ed6527363f0cd640a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-commands-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 981,
+            "sha256": "1b4a3e383d4f809c455d473b9c90e7e39f80ff4b6dfa4ae4ea80a76a6f50cfd4"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-commands-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 958,
+            "sha256": "e54928eca5e469a5651f45afb2fe3d5f22d64c20c219bb69ef1ca42f34d7c7bb"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-commands-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-commands-final4-20261010\\host-stderr.log",
+            "bytes": 5967,
+            "sha256": "09b7c66bc1e7cca0092991d393d871d44fea34eaf86492f27a31945d05461208"
+          }
+        ]
+      },
+      {
+        "case": "edit-options",
+        "macro": "edit_options_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-edit-options-focused6-20261010",
+        "checks": 57,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 62196,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-edit-options-focused6-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-focused6-20261010\\results.json",
+            "bytes": 8157,
+            "sha256": "c1faf12996cd4966026eb5aae7f5a3400817f7124f91169020d15fcf2f942e59"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-focused6-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "02d0b114e13b7845a80605cadf164e17b762eaf71e75b655bbc0e81878aab3bc"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-focused6-20261010\\prepare-test.FCMacro",
+            "bytes": 984,
+            "sha256": "3638a54b69623d4de37cc1f8bb3badb909739c7c8ec9875e78b37e083e3f469b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-focused6-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "9eae6675c865150611cb7b974f6c1abe66ba0f28827e48d89fdc6c22fb7efc01"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-focused6-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-focused6-20261010\\host-stderr.log",
+            "bytes": 5727,
+            "sha256": "a5d2c5233bb47e6b89501e0c0b9b49364eb48cc806fd977ca64af6d656f75db0"
+          }
+        ]
+      },
+      {
+        "case": "edit-special",
+        "macro": "edit_special_types_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-edit-special-final4-20261010",
+        "checks": 25,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 47900,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-edit-special-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-special-final4-20261010\\results.json",
+            "bytes": 81137,
+            "sha256": "ef1af71bee7f9226f2bfe32979e0f8952a67215e24fe1bedd6a942861c6302e7"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-special-final4-20261010\\shared-host-launch.json",
+            "bytes": 542,
+            "sha256": "1befddf299d86ebe4e9d814499af5644d22025144da86b67667042a35c656b28"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-special-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 986,
+            "sha256": "e6decece27984b91e2205118cf41ce58703e278b55c835b1e0efc1940225a0ba"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-special-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 957,
+            "sha256": "d66875c3a8bab11ed4979ba02cf5dd1847f283138ead90f657b13854e2e8204f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-special-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-special-final4-20261010\\host-stderr.log",
+            "bytes": 2827,
+            "sha256": "75dfbe96a373f53b19427c7458b5dfb9ec20c85889e6d505ad156b77ec533717"
+          }
+        ]
+      },
+      {
+        "case": "edit-3dm-special",
+        "macro": "edit_3dm_special_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-edit-3dm-special-final4-20261010",
+        "checks": 44,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 9368,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-edit-3dm-special-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-3dm-special-final4-20261010\\results.json",
+            "bytes": 5489,
+            "sha256": "6bf3ea7917abe352b1f372db9cb206c7ab67d83ca10710278e2ea87b1db565a5"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-3dm-special-final4-20261010\\shared-host-launch.json",
+            "bytes": 545,
+            "sha256": "f03193c30f2471f2ec967aeed4b0b282864c4bb569b3498245b7bcf42b90dec5"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-3dm-special-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 984,
+            "sha256": "315870fe9e3225ad8732f515e09b7033ef1f3dc2557ab33dc273142d271c410a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-3dm-special-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 961,
+            "sha256": "5bd33a5096d3912bf120378d2584bd0e95ccc562a1bca53119b7be2d1d3e2ef4"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-3dm-special-final4-20261010\\host-stdout.log",
+            "bytes": 1588,
+            "sha256": "bf04ff17890eef97b96fd6e868994f745776694c58578869dc9b494872504dcd"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edit-3dm-special-final4-20261010\\host-stderr.log",
+            "bytes": 2006,
+            "sha256": "f753e57a078c297ea906ec57451e57efd3204d1521b6be80ab8ba700a7fc8195"
+          }
+        ]
+      },
+      {
+        "case": "solid-options",
+        "macro": "solid_options_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-solid-options-final4-20261010",
+        "checks": 252,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 66008,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-solid-options-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-solid-options-final4-20261010\\results.json",
+            "bytes": 42358,
+            "sha256": "d4a797c28de23160a5a7bfa252dcd0a995f3d2f8f474c948c354110c358ffc0f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-solid-options-final4-20261010\\shared-host-launch.json",
+            "bytes": 543,
+            "sha256": "79e5c36be2ac13d73ba9e5fe3018e83e67593acd2877d0e9b10a03e15a7c284d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-solid-options-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 981,
+            "sha256": "02652b99412f08d7360e16dea8a10eb62df70e9755ecd7ee96f6f8bd4fb73c45"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-solid-options-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 958,
+            "sha256": "59e4022db680ebed752345372734fa231356046ee995a2c4fb7271ae06a4ae7a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-solid-options-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-solid-options-final4-20261010\\host-stderr.log",
+            "bytes": 1958,
+            "sha256": "553eb312ba83fbec3a3b9596494fc4b312b2a47c5ee96c86c011f2e6486fe18e"
+          }
+        ]
+      },
+      {
+        "case": "surface-commands",
+        "macro": "surface_commands_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-surface-commands-final4-20261010",
+        "checks": 97,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 4100,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-surface-commands-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-surface-commands-final4-20261010\\results.json",
+            "bytes": 11099,
+            "sha256": "aca74328bbd4a3cea54f21fb813b32eb4bb798fd84b92f4728a6bf198517775b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-surface-commands-final4-20261010\\shared-host-launch.json",
+            "bytes": 545,
+            "sha256": "889c7a4c9d7a869c55cc522692f87ea4f9aa74605407ad958d805f272bc28e35"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-surface-commands-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 984,
+            "sha256": "0c002a9d19b3b3dab81f183790b6d4ee6ac6bb0a14f4d510c1690ab1b4543d3f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-surface-commands-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 961,
+            "sha256": "afebe5445ede6f5f714a943c5f7717b8d87e9bed6e3b563669dc906768963950"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-surface-commands-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-surface-commands-final4-20261010\\host-stderr.log",
+            "bytes": 3673,
+            "sha256": "fcc14c7bb17f81d27cab61058fed7cf8b979810ae1daae684cda97ec4bc125c4"
+          }
+        ]
+      },
+      {
+        "case": "curve-spline",
+        "macro": "curve_spline_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-focused8-20261010",
+        "checks": 41,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 27736,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-curve-spline-focused8-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-focused8-20261010\\results.json",
+            "bytes": 4472,
+            "sha256": "710e57691d01fd27de5a323cc6a12334923a144ab34bfe7830f0424c20a8a6a7"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-focused8-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "93d59a3d60720f9d5cd890be4a4d5e6e3151d5ffbce4263f451604c8256d0d75"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-focused8-20261010\\prepare-test.FCMacro",
+            "bytes": 984,
+            "sha256": "a86ba7baf4d803696aee8e36acfb3c4ce7080615b93854488c1137fbc64b0ae3"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-focused8-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "eb8a263b83a159bcbef371c9ac862094af03399264528092ccc8586a1d3fcc07"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-focused8-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-focused8-20261010\\host-stderr.log",
+            "bytes": 992,
+            "sha256": "a0471e0672ffdc7bf0d13d135838e05d79b75beeb9e772517bfb5a425e3b45da"
+          }
+        ]
+      },
+      {
+        "case": "discrete-result",
+        "macro": "rhino_core_prepared_discrete_result_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-final4-20261010",
+        "checks": 81,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 42468,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-discrete-result-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-final4-20261010\\results.json",
+            "bytes": 36807,
+            "sha256": "7d421462cebae69142cc0de38771939abe2c5d0227aeaf9a6a353ed21a004ecc"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-final4-20261010\\shared-host-launch.json",
+            "bytes": 545,
+            "sha256": "5ee890f140fb53f7446efdf57fcec6833aac039c87e5c6e84fc98607226228f4"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 1003,
+            "sha256": "f14a1818ee658b83a309713589dd99b8737653e3a96c3bf7d360e4c4544ccbef"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 960,
+            "sha256": "dc9c47174471e75d24d77a79142b52c499a9e0704dfba1aa1fbc29599fda4182"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-final4-20261010\\prepared-discrete.FCStd",
+            "bytes": 5499,
+            "sha256": "6b1d24fb681ca4a6ae1b60a59049d5f0beae2fe2ee2624d986bc66ae55113a48"
+          }
+        ]
+      },
+      {
+        "case": "discrete-result-cold",
+        "macro": "rhino_core_prepared_discrete_cold_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-cold-final4-20261010",
+        "checks": 8,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 24024,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-discrete-result-cold-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-cold-final4-20261010\\results.json",
+            "bytes": 1076,
+            "sha256": "9745577de9bee03f6137daecf5c70a3d76cc0d49ea488344bba4f39b86bdcbfd"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-cold-final4-20261010\\shared-host-launch.json",
+            "bytes": 550,
+            "sha256": "0cb3dde06250a9fc0d8aebe41a3906a9756e91e2dde9cf4db9bf9e19736ebc11"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-cold-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 1001,
+            "sha256": "809fbcad14545d1bf702f2453f75cdee83cb448b4491d672eefb1f84d36af65c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-cold-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 965,
+            "sha256": "25921c84dc89349b80185b2606a9ddcbadda3a27028bfb56dc76af5ace2b234c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-cold-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-result-cold-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      },
+      {
+        "case": "snapshot",
+        "macro": "rhino_core_prepared_snapshot_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-snapshot-final4-20261010",
+        "checks": 67,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 77144,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-snapshot-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-snapshot-final4-20261010\\results.json",
+            "bytes": 945551,
+            "sha256": "e8312017cd22be2128b74dd87c7522b8a7ce57ab41dfe709eeb12bd17f3bd464"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-snapshot-final4-20261010\\shared-host-launch.json",
+            "bytes": 538,
+            "sha256": "72dd9eae8a046b0c38e731cd940d508cad7cc41f5b85623dc1a864e7884d239a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-snapshot-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 996,
+            "sha256": "bba7a061514a43b96778daab26c5301e0695dbeeaa0518a0c018124965bd0602"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-snapshot-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 953,
+            "sha256": "b789b7ba301a014052fe401bc33607aeca2497d5d701d9f9716fd7c4c90458d3"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-snapshot-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-snapshot-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-snapshot-final4-20261010\\prepared-results.FCStd",
+            "bytes": 29824,
+            "sha256": "ab973ab60f34ead780cc5dbeef4058c70f7fcd44d97acccf1e01733a1f064a89"
+          }
+        ]
+      },
+      {
+        "case": "snapshot-cold",
+        "macro": "rhino_core_prepared_snapshot_cold_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-snapshot-cold-final4-20261010",
+        "checks": 40,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 67676,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-snapshot-cold-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-snapshot-cold-final4-20261010\\results.json",
+            "bytes": 10912,
+            "sha256": "9da133a5664a6b1687a67b6c85d102e1705a7a3106431500e95f121f84c77ceb"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-snapshot-cold-final4-20261010\\shared-host-launch.json",
+            "bytes": 543,
+            "sha256": "2f0fdcc2579ed98019594908db60444f5074667a2fdfac2fc78420e7e64376a7"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-snapshot-cold-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 1001,
+            "sha256": "f788922d56912e80019413f54e1b5313df0284e469ab6c9ba0be7d0b82b89ba1"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-snapshot-cold-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 958,
+            "sha256": "4c1ece209538847d456f8e8dd2062b8e09204b4f52dc12dc2192498e8a0a5dd5"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-snapshot-cold-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-snapshot-cold-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      },
+      {
+        "case": "metadata",
+        "macro": "rhino_core_prepared_metadata_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-metadata-final4-20261010",
+        "checks": 95,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 8152,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-metadata-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-metadata-final4-20261010\\results.json",
+            "bytes": 24295,
+            "sha256": "bcad238aaa5ed55e943073b1f72526b846d697a947411a665a064c05f900441d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-metadata-final4-20261010\\shared-host-launch.json",
+            "bytes": 537,
+            "sha256": "78a8eb783ffc1d23e2c38370b26997d626e8a8b44fecf25295195eb0c036135e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-metadata-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 996,
+            "sha256": "a897fd8eb3d87ca847180bd44d34ad167c6ca781ac8c3cec8151a68fefd5be02"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-metadata-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 953,
+            "sha256": "98dd8a7e57f1389b31cf48c2ddbd08488e03c4e14bf479010b4d88f0eedd3851"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-metadata-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-metadata-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      },
+      {
+        "case": "prepared",
+        "macro": "rhino_core_prepared_cad_result_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-prepared-final4-20261010",
+        "checks": 47,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 14968,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-prepared-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-prepared-final4-20261010\\results.json",
+            "bytes": 721588,
+            "sha256": "40d18537e73c7a5f612b3e69f6914be2b2d9d13b39df0463d0e843d9a6e065f4"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-prepared-final4-20261010\\shared-host-launch.json",
+            "bytes": 538,
+            "sha256": "1ad7c76b4f1995fa9e6252eddb1f969ea8a6f1eb9153d645d627458413753064"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-prepared-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 998,
+            "sha256": "66982378d29fe85aaab252b118045d76873801162e720a113053b42a8f0d2cd2"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-prepared-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 953,
+            "sha256": "3a28fb598a5213a43a811eef14fff4deff5df67b25d9f6b930e26d2aa3f3d579"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-prepared-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-prepared-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-prepared-final4-20261010\\prepared-results.FCStd",
+            "bytes": 33632,
+            "sha256": "b173a811c91848d5d80628279f1c6e058f0f249e6ae866aa77226fe01a8fd5c1"
+          }
+        ]
+      },
+      {
+        "case": "prepared-cold",
+        "macro": "rhino_core_prepared_cad_cold_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-prepared-cold-final4-20261010",
+        "checks": 18,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 74976,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-prepared-cold-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-prepared-cold-final4-20261010\\results.json",
+            "bytes": 2102,
+            "sha256": "ec49751c89ff4879d11365ea729f6340cc694e95eb24eff13f3becae1d4ce0d4"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-prepared-cold-final4-20261010\\shared-host-launch.json",
+            "bytes": 543,
+            "sha256": "9e5dfc66146743c1eb5f202e34eb61403e04ad46be3cf7aa4ce54f5a0e66934a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-prepared-cold-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 996,
+            "sha256": "8dee72c9e0cf48df6f1a93c394160fe0a632d195d862b749adbf8d34309b0e30"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-prepared-cold-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 958,
+            "sha256": "1c2a6af4b9fd1a94edc7da47e8b0ff855959f30fe0a97dbf0405878b7f10e081"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-prepared-cold-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-prepared-cold-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      },
+      {
+        "case": "modeling",
+        "macro": "modeling_exchange_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-modeling-final4-20261010",
+        "checks": 32,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 78640,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-modeling-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-modeling-final4-20261010\\results.json",
+            "bytes": 3460,
+            "sha256": "e5e69bda5e099b936775998c6797a99e08ad4ba46f92fdb009678da4b3eae6e4"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-modeling-final4-20261010\\shared-host-launch.json",
+            "bytes": 538,
+            "sha256": "d1240d39ab996210fde56eca1710767a5badec50a9cafc0542c5370ac7f1936f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-modeling-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 985,
+            "sha256": "d824ce8f8e2eaf4cbb73791b02923c939d882d3fab90b0ba66843ac9c12494a9"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-modeling-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 953,
+            "sha256": "0de3717f6d3f9f39039856bd730f23c770cff9173e8e05132a2e95d2e0cdc7af"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-modeling-final4-20261010\\host-stdout.log",
+            "bytes": 736,
+            "sha256": "660064718274ee0adcad1da31fdaa00b9e05f04e02a29de55b55ddb4078b6be0"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-modeling-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      },
+      {
+        "case": "preservation",
+        "macro": "three_dm_preservation_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-preservation-final4-20261010",
+        "checks": 19,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 3460,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-preservation-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-preservation-final4-20261010\\results.json",
+            "bytes": 1655,
+            "sha256": "6db108511e7e255ef9bf1e9305c4f7e54848af2416004afdd3f8f80dd64afc44"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-preservation-final4-20261010\\shared-host-launch.json",
+            "bytes": 541,
+            "sha256": "9a4b2c29e1bb35034f9cf090f365cdc4d7af5d65e2c44943ada056507aea1fb9"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-preservation-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 989,
+            "sha256": "c7c18f13206cc783f87933cf2ca6fabad5e41c7672755e6b9a3aa61b3c8a24a2"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-preservation-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 957,
+            "sha256": "940df8f24968657a4d743497d85a71e31c33142508b21927d979a52b1023a06f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-preservation-final4-20261010\\host-stdout.log",
+            "bytes": 748,
+            "sha256": "0196004966f1cb6a1fe1fe551dc537bdd17fde78c404cc0bb0d77db714895222"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-preservation-final4-20261010\\host-stderr.log",
+            "bytes": 382,
+            "sha256": "a93257bc1431bab8b0382bb9d7820dff481619dfdd0f5aa7142bf501d720a60b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-preservation-final4-20261010\\ThreeDmPreservationTests.exe.log",
+            "bytes": 19,
+            "sha256": "b8434bd41c2ae4443b4d332c3c410a83673fdd5b6456b2f94950e140688f2365"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-preservation-final4-20261010\\ThreeDmInventoryTests.exe.log",
+            "bytes": 122,
+            "sha256": "36aa814a068fa068330939ae90dba25e869e530346165abf2224a13cad6d60ae"
+          }
+        ]
+      },
+      {
+        "case": "solid",
+        "macro": "rhino_core_shape_validation_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-solid-final4-20261010",
+        "checks": 220,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 66844,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-solid-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-solid-final4-20261010\\results.json",
+            "bytes": 2195771,
+            "sha256": "95187dd9b0bc7ddc64ef428e31b9192cd52ec61e797661dfb3d77578dc139c2a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-solid-final4-20261010\\shared-host-launch.json",
+            "bytes": 535,
+            "sha256": "eddd4f29e911f45b95bded249dfcc2b814c6ec9946d55f75b8f510ba16312acc"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-solid-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 995,
+            "sha256": "c1d00377b8e870188cf2bf1caed14361f73992af6a237bbf56d7058f75ce84a3"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-solid-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 950,
+            "sha256": "b71a9c0a97a465074fe491b33e70b4f6437d565bf4b318b913dc739919f1ab35"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-solid-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-solid-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      },
+      {
+        "case": "complex",
+        "macro": "rhino_core_surface_complex_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-complex-final4-20261010",
+        "checks": 67,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 76268,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-complex-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-complex-final4-20261010\\results.json",
+            "bytes": 1003972,
+            "sha256": "e784ce705952d5bf02e6955d9da5f56547f1be4cb7d3ad0bab2c06441964efbb"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-complex-final4-20261010\\shared-host-launch.json",
+            "bytes": 537,
+            "sha256": "4fb73c74662e133c26bf23344001c20f3da084bc9503172eecc65f74ec2a547f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-complex-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 994,
+            "sha256": "a33e144e19e332bcd2466818958d571d0ba0bd0bb347ee6202583e7a6e8b5166"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-complex-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 952,
+            "sha256": "7b7c266d445371f8644611d2eff051fa51982d8c4c002e4ba34001a6dcaa7719"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-complex-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-complex-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      },
+      {
+        "case": "reference",
+        "macro": "rhino_core_reference_context_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-reference-final4-20261010",
+        "checks": 540,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 38884,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-reference-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-reference-final4-20261010\\results.json",
+            "bytes": 2398978,
+            "sha256": "18791a555a73f33c6ae93fc37cbe6c965f86b50448cb0a9afaf363d9736b1666"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-reference-final4-20261010\\shared-host-launch.json",
+            "bytes": 539,
+            "sha256": "8a25096ca744fab82463e7517c6c3037b6fe04c21929d3287d9e5cd05ca03181"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-reference-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 996,
+            "sha256": "9f84ede1459288224d6e7c2ba623aca9f08fbca6496b3c1209786ad743524beb"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-reference-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 954,
+            "sha256": "8e13aab3524ac006b16dac97f718b219a99db8c6d9fe491679fbcf581c4cfa0d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-reference-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-reference-final4-20261010\\host-stderr.log",
+            "bytes": 3428,
+            "sha256": "8be793018d5c610c8b1f50ac5ddb34298d1af4fa87fbb99bb4ea80c7eaf79410"
+          }
+        ]
+      },
+      {
+        "case": "native",
+        "macro": "rhino_core_instance_array_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-native-final4-20261010",
+        "checks": 609,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 74084,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-native-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-native-final4-20261010\\results.json",
+            "bytes": 2278133,
+            "sha256": "30c296fbac291bd3dba83947694746facfd2413a4e5e4ee5f824c809f88500e6"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-native-final4-20261010\\shared-host-launch.json",
+            "bytes": 536,
+            "sha256": "6d580caa41b9217d302fa10b8a8a1cce43ce154b6188704130617324894da39c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-native-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 993,
+            "sha256": "417d8d5215bd9a5f5eaeba1d7532ac618f8fcd7966fe6e89d25d3177a83aa679"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-native-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 951,
+            "sha256": "62dacab862b684ceaf4c7ca8b2ae1acd05c21f093754ea5fe7e8ff82b4b0ea2f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-native-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-native-final4-20261010\\host-stderr.log",
+            "bytes": 2339,
+            "sha256": "6fa3899a6ee6aeeb68c0fbcff30bbf1a30fa2a2f35bf56c3da457388a906f90f"
+          }
+        ]
+      },
+      {
+        "case": "boundary",
+        "macro": "rhino_core_instance_array_boundary_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-boundary-final4-20261010",
+        "checks": 10,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 27872,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-boundary-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-boundary-final4-20261010\\results.json",
+            "bytes": 1305,
+            "sha256": "3a5900fc3aa18bce4e80bff69c96abb086644ecd19c50e9d730978c564b9d4c5"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-boundary-final4-20261010\\shared-host-launch.json",
+            "bytes": 538,
+            "sha256": "df0be5f4762a1cb1a0dbd6f74da7e0e1374e5e2759d1a90f25031203941b1a35"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-boundary-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 1002,
+            "sha256": "4fbb4153b087e25936f1a5fb8ab34af54eaaf65ee4ab9da32641801d1e7da2a8"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-boundary-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 953,
+            "sha256": "24fa7661b5912f8f9711547d6d0bd1e9f94587442dfe6f8e82a3fb3b3331a5da"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-boundary-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-boundary-final4-20261010\\host-stderr.log",
+            "bytes": 385,
+            "sha256": "f8ad8e9d0a592fce8de93c34137125216825cc5dbd5360d9077f3455b6957dec"
+          }
+        ]
+      },
+      {
+        "case": "edge",
+        "macro": "rhino_core_edge_geometry_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-edge-final4-20261010",
+        "checks": 921,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 53488,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-edge-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edge-final4-20261010\\results.json",
+            "bytes": 706019,
+            "sha256": "ce2e9b5f17ca51259dfc5f4c5232ff2bb0c8d0cf2f933c6be0186aaa9af4c674"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edge-final4-20261010\\shared-host-launch.json",
+            "bytes": 534,
+            "sha256": "08c5fffca6b7ce88875ec2878edce35cd353d95c42d4175da9c2bf14df9a3c61"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edge-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 992,
+            "sha256": "ec1ca6bda2f6ea81caf109fd5eb7cedf5f58a7a91f73565f285a5f00ce96ab9c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edge-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 949,
+            "sha256": "98c9d256d464ebebc1acf52e707471f5404186b26a6085524793a0d4aa2c4c06"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edge-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-edge-final4-20261010\\host-stderr.log",
+            "bytes": 2666,
+            "sha256": "a7e4b68fea4fb667fe17057ca29afcc61e20112912a310aaa9224d6735f37703"
+          }
+        ]
+      },
+      {
+        "case": "discrete",
+        "macro": "rhino_core_discrete_snapshot_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-discrete-final4-20261010",
+        "checks": 99,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 76148,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-discrete-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-final4-20261010\\results.json",
+            "bytes": 171575,
+            "sha256": "1f15bcf4c8e28e6181c676e88d45021918b8b159902a01329e25accf114bf736"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-final4-20261010\\shared-host-launch.json",
+            "bytes": 538,
+            "sha256": "d6c7e248a10a76bb0c80c926c48e9ecdc3c13baefb16d58fc81a457ac2c0a248"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 996,
+            "sha256": "2c29a73846ec088a9ac2b7be4bcdce9e5c6e57773405cafc5255070e93ee1018"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 953,
+            "sha256": "50b43d472d549f4e85be0aab301b8a1fbae1c715f887e3ce98a5c0a5937b5778"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-discrete-final4-20261010\\host-stderr.log",
+            "bytes": 1174,
+            "sha256": "b481949c9c0588e13e4a952599449d53bc774b41265b1c3885dbaaf202dff79e"
+          }
+        ]
+      },
+      {
+        "case": "cold",
+        "macro": "rhino_core_discrete_module_loading_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-cold-final4-20261010",
+        "checks": 6,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 23452,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-cold-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-cold-final4-20261010\\results.json",
+            "bytes": 731,
+            "sha256": "e65368c4794be2b8aaeb218319fa7024327895db532f27b779d2f992368b160b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-cold-final4-20261010\\shared-host-launch.json",
+            "bytes": 534,
+            "sha256": "35d3e786c4b5c32e9637c2dade33489803d77a9c165492feed1e3411e326d6d4"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-cold-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 1002,
+            "sha256": "0c1717e36a8b687d49fae646dc2d64df66ca0ad70e14d97de17d5d10b244b550"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-cold-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 949,
+            "sha256": "ddf8fadcf09f4572ab0cca082e03ccde912663feb2da805470268aa34d9f7981"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-cold-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-cold-final4-20261010\\host-stderr.log",
+            "bytes": 207,
+            "sha256": "c25c5e4ebacb722933f161e6487cd8ab1224ec3f1b9ac200f52ee684c89cc5c3"
+          }
+        ]
+      },
+      {
+        "case": "instance",
+        "macro": "rhino_core_instance_definition_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-instance-final4-20261010",
+        "checks": 48,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 62416,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-instance-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-instance-final4-20261010\\results.json",
+            "bytes": 571954,
+            "sha256": "8030997dce79857dcbab1bc8dd8d6a0884f46b0b589734b9bb5737cd0659c1df"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-instance-final4-20261010\\shared-host-launch.json",
+            "bytes": 538,
+            "sha256": "a9f96746b6a2f9b1611d6628069d6959fa6be1490b47e5da04e535050e3e3338"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-instance-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 998,
+            "sha256": "48766f6bf6cb054dae9d52532f5750224234b1a73de49686e00c13c99cb26c02"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-instance-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 953,
+            "sha256": "706debf207f174abafbc24294d40a989418367c72e16be17168185a8a1e58834"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-instance-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-instance-final4-20261010\\host-stderr.log",
+            "bytes": 1991,
+            "sha256": "205de04a7584d08698c172f74ab58b72f5f62c1c24327b390a66658a2f4b8406"
+          }
+        ]
+      },
+      {
+        "case": "world",
+        "macro": "rhino_core_world_attributes_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-world-final4-20261010",
+        "checks": 85,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 8936,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-world-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-world-final4-20261010\\results.json",
+            "bytes": 439669,
+            "sha256": "17fec43fa368c5a62e620981cd0574c8df940636a2c2825e477d2b663c9af9ff"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-world-final4-20261010\\shared-host-launch.json",
+            "bytes": 534,
+            "sha256": "170cea86a53d856bf33015b5e7052904b429e22c7c33f1d4203f7537657f64d2"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-world-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 995,
+            "sha256": "72ef893c15098da6f4672a011e28c04c59b298adccc4bde617c33823e37315a9"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-world-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 950,
+            "sha256": "27a8553df6a7d3b07d99cd0a04e4e7d4df162275dff3e991caa9aabc20043f7a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-world-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-world-final4-20261010\\host-stderr.log",
+            "bytes": 1742,
+            "sha256": "1cfd377fef1d9726f0e579565e054395293ffe8e5d210cda2c3e78e7e5e0d782"
+          }
+        ]
+      },
+      {
+        "case": "derived",
+        "macro": "rhino_core_derived_support_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-derived-final4-20261010",
+        "checks": 91,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 42676,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-derived-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-derived-final4-20261010\\results.json",
+            "bytes": 803451,
+            "sha256": "84a632b78604d4b16a0783af3684f17ad82cb3102ff9a74fdf1c168f641b4ea5"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-derived-final4-20261010\\shared-host-launch.json",
+            "bytes": 537,
+            "sha256": "75c726e3d37f63f23de206da55879f5b35aea259a54621007e16eb3bb42b1e8c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-derived-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 994,
+            "sha256": "e846a4f7409a16e75026a7940f404bee7f6fa67c56e1ad8f5e33eb5844538d97"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-derived-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 952,
+            "sha256": "751117b10097c4fb7c5b99660b77c92ae95ca357d0ded5483a11235f29e7ef35"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-derived-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-derived-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      },
+      {
+        "case": "bezier",
+        "macro": "rhino_core_bezier_support_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-bezier-final4-20261010",
+        "checks": 76,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 18608,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-bezier-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-bezier-final4-20261010\\results.json",
+            "bytes": 250717,
+            "sha256": "8a61e53b0f2fbb54695c838373da0e5c98e1659b33079c0f44c29ba03d069cd7"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-bezier-final4-20261010\\shared-host-launch.json",
+            "bytes": 536,
+            "sha256": "ea035a27007d5806dc8edbca336222ccb00ad1b2ef3759b4b55cb04d02e1a6a8"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-bezier-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 993,
+            "sha256": "78d47ef25766ee27e0b3e85043e6044fb01e26580f42a8e5f52f90317f71c374"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-bezier-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 951,
+            "sha256": "333b75bd843dfe71c702c6722676b0892c05b4154f072d4fc42a41ffa38efc51"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-bezier-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-bezier-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      },
+      {
+        "case": "analytic",
+        "macro": "rhino_core_analytic_support_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-analytic-final4-20261010",
+        "checks": 174,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 60156,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-analytic-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-analytic-final4-20261010\\results.json",
+            "bytes": 725901,
+            "sha256": "fa0d5f912fd0dee7cba7f0e1063367fc271e31dbaec554aea9c1feed0511190f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-analytic-final4-20261010\\shared-host-launch.json",
+            "bytes": 538,
+            "sha256": "627e3844213b547da3ac4a90d35a827e72c0499e7cde6b14a2436f711cfc6723"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-analytic-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 995,
+            "sha256": "022f17507338465b7dea01224978d4cbdf225d7f16e3686dab4dc89c18164537"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-analytic-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 953,
+            "sha256": "44668ab874afd702251b2eb1eac061e7ddc89cc947988341df6ccee538f52090"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-analytic-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-analytic-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      },
+      {
+        "case": "nurbs",
+        "macro": "rhino_core_support_snapshot_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-nurbs-final4-20261010",
+        "checks": 54,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 42872,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-nurbs-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-nurbs-final4-20261010\\results.json",
+            "bytes": 1698030,
+            "sha256": "c2b1973b3d651321a2510eea51fbf6f825f4512f08ed4e911e753d8fb7884c50"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-nurbs-final4-20261010\\shared-host-launch.json",
+            "bytes": 535,
+            "sha256": "95d2718eab86e35b1b7fc2602488c0ac5fedebf74c0db1410bb574d15cf9e6b3"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-nurbs-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 995,
+            "sha256": "95f4d73c6d03cb57d20f361b4ae9667a3a219297de07497fdc5a33f7bf8c2e3a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-nurbs-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 950,
+            "sha256": "9a89f321c90eba040e7edd2a496c2317441f49cfe77dd529d604d5a387ea216e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-nurbs-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-nurbs-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      },
+      {
+        "case": "topology",
+        "macro": "rhino_core_topology_snapshot_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-topology-final4-20261010",
+        "checks": 177,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 69720,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-topology-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-topology-final4-20261010\\results.json",
+            "bytes": 663534,
+            "sha256": "2f8bd416aab6c1fa47199a1264c0498b39c934a6c1a42236af19c19b03eadf1e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-topology-final4-20261010\\shared-host-launch.json",
+            "bytes": 538,
+            "sha256": "4baf0adf054275afe7f2f8bcb4c6266ebb0f4ce3b49957c0a25932419cccacf9"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-topology-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 996,
+            "sha256": "9b675c8bb9f41badcce0b4080d398f62926013524262cfd07e8151af60479bce"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-topology-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 953,
+            "sha256": "9795ceaeccaa15478bf115972e2e7eaaa13749ba15954d5896d7d0f39026f683"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-topology-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-topology-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      },
+      {
+        "case": "descriptor",
+        "macro": "rhino_core_geometry_descriptor_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-descriptor-final4-20261010",
+        "checks": 151,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 57608,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-descriptor-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-descriptor-final4-20261010\\results.json",
+            "bytes": 1751996,
+            "sha256": "6edb183464e7852c0fcd5166d327f90212eee67d460f26619809119e6b74ca3a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-descriptor-final4-20261010\\shared-host-launch.json",
+            "bytes": 540,
+            "sha256": "706390e3acfafb9fc2a88d699b91f72b393b2b1e3d359abeb68634708d49ca2b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-descriptor-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 998,
+            "sha256": "911a0afcaaac129ee038b53574c54d7d4bcab70366303c32e8a57aa6d2694920"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-descriptor-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 955,
+            "sha256": "508e305fcb9a559ead20810548352fd9ff402f45cbd48ded2427d34005891e1c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-descriptor-final4-20261010\\host-stdout.log",
+            "bytes": 502,
+            "sha256": "e3a6f2d7086466d144789eb6b7f5b2abaa417157cb08dbe429175cacc1b44779"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-descriptor-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      },
+      {
+        "case": "import",
+        "macro": "rhino_core_import_commit_gate_smoke.FCMacro",
+        "directory": "H:\\FreeCAD-src\\build\\native-edit-import-final4-20261010",
+        "checks": 55,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 81460,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-edit-import-final4-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-import-final4-20261010\\results.json",
+            "bytes": 1135703,
+            "sha256": "48b7f0ad3f39ba70e4179f3fe8c2188bf216d5126fca36b806afc2e9f60aff79"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-import-final4-20261010\\shared-host-launch.json",
+            "bytes": 536,
+            "sha256": "aae0149cffe458ef9de4366b6f41515765feca36404ccb173c15cb0c9b1a3332"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-import-final4-20261010\\prepare-test.FCMacro",
+            "bytes": 997,
+            "sha256": "cdd83a9bb570f06a9aa02f41195497789da7e6c451c8a9a186ad0e0d92936ea2"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-import-final4-20261010\\select-plugin.FCMacro",
+            "bytes": 951,
+            "sha256": "af5d246f422210bfd1767146d7b3dba5c1025811d6ade420ab05cc9dcd739fad"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-import-final4-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-edit-import-final4-20261010\\host-stderr.log",
+            "bytes": 256,
+            "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+          }
+        ]
+      }
+    ],
+    "host_checks": 4456,
+    "rust_tests": 679,
+    "rust_log": {
+      "path": "H:\\FreeCAD-src\\build\\native-edit-rust-full1-20261010.log",
+      "bytes": 106648,
+      "sha256": "662ed1a60e68a828c6a201b791cea69032e74c1f9d9e9bf47f76d63e82c936c4"
+    },
+    "rust_process_exit_code": 0,
+    "plugin_build": {
+      "target": "OpenMatrix9Gui",
+      "sdk": "H:/FreeCAD-src/build/relWithDebInfo",
+      "cache": "H:/FreeCAD-src/build/openmatrix9-history-cage",
+      "workers": 14,
+      "process_exit_code": 0,
+      "root_rebuild": false
+    },
+    "public_source_audit": {
+      "source_files": 2354,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    },
+    "profile_isolation_runs": [
+      {
+        "stage": "red1",
+        "checks": 4,
+        "failed": 3,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 76912,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/shared-host-profile-red1-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\shared-host-profile-red1-20261010\\results.json",
+            "bytes": 1294,
+            "sha256": "4799551d4ed5bdb296bdb12c9103ebbf3bf3967edce505fbd291d3a0e1b15743"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\shared-host-profile-red1-20261010\\shared-host-launch.json",
+            "bytes": 535,
+            "sha256": "1ec27649100f455ee8a0ede41483fa9a5fb615d0ee6f046807cc34bf1cde329c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\shared-host-profile-red1-20261010\\select-plugin.FCMacro",
+            "bytes": 932,
+            "sha256": "0f0de3612f4148065455a9bc3215c26a1e341df5729dcfbbb968867703e5b29d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\shared-host-profile-red1-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\shared-host-profile-red1-20261010\\host-stderr.log",
+            "bytes": 555,
+            "sha256": "8977c8f8c229b2014a12c1dfb6790a1226df617ff584d4b549bc1cef1bc92d88"
+          }
+        ]
+      },
+      {
+        "stage": "green1",
+        "checks": 4,
+        "failed": 0,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "AE403DF557E6C8DED0B24741A92067D455327979DD3A3A1518D27DAD7C6165BE",
+          "pid": 18596,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/shared-host-profile-green1-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\shared-host-profile-green1-20261010\\results.json",
+            "bytes": 1318,
+            "sha256": "07842a6533a14eb91ee5c73f4892a3a09245d710446981933263c4f6154a98eb"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\shared-host-profile-green1-20261010\\shared-host-launch.json",
+            "bytes": 537,
+            "sha256": "2bc37f79de44fe4fcef0f9e738ab51e2d9fac1ee94058dbf7eab6fec18108e29"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\shared-host-profile-green1-20261010\\select-plugin.FCMacro",
+            "bytes": 932,
+            "sha256": "0f0de3612f4148065455a9bc3215c26a1e341df5729dcfbbb968867703e5b29d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\shared-host-profile-green1-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\shared-host-profile-green1-20261010\\host-stderr.log",
+            "bytes": 207,
+            "sha256": "c25c5e4ebacb722933f161e6487cd8ab1224ec3f1b9ac200f52ee684c89cc5c3"
+          }
+        ]
+      }
+    ],
+    "build_logs": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-build1-20261010.log",
+        "bytes": 2727,
+        "sha256": "9f1445e42e73cf9638f81de9e01e7b8cf3bc853e6565384eecb280589f15c62a"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-build2-20261010.log",
+        "bytes": 4019,
+        "sha256": "f11091da7854fd996ba3a6ba3e71402657341b3baefbc984cedaa5a348a56384"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-build3-20261010.log",
+        "bytes": 681,
+        "sha256": "8a698490bea41819a6c0bdcaa21ebe67ae05ee6d63b4c3136ba571d29666f3af"
+      }
+    ],
+    "regression_log": {
+      "path": "H:\\FreeCAD-src\\build\\native-edit-regressions-final4-20261010.log",
+      "bytes": 1270,
+      "sha256": "4f33332150f6701662c2aa62f8cd8bd772a3d87294d7686598d61fe644386dab"
+    },
+    "resumed_regression_logs": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-focused6-20261010.log",
+        "bytes": 170,
+        "sha256": "7e7c77709b9994ae54f8b4c0e68d6cf85953960883cff94a709fd7e33bdcd54a"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-focused8-20261010.log",
+        "bytes": 170,
+        "sha256": "2d16376364feee980ebb16b7fc7c1ab29968bafb6a9eced0a6490b67547929e0"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-regressions-final4-resume1-20261010.log",
+        "bytes": 1703,
+        "sha256": "81dc76fc090af20d1cab57378f14911e9686c211f3525e2608c07a211d17aaeb"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-regressions-final4-resume2-20261010.log",
+        "bytes": 4280,
+        "sha256": "dbf25272bdd49e70f3f737468365005ef6a1eaf6097191c16054f8a06123a751"
+      }
+    ],
+    "excluded_curve_fixture_artifacts": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-final4-20261010\\results.json",
+        "bytes": 1859,
+        "sha256": "47f2f7a3a9837da2e3e23eb847a523d2cebbddcd233c6a18664bdb39952f7850"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-final4-20261010\\shared-host-launch.json",
+        "bytes": 542,
+        "sha256": "ba3e05e7cd9799b39523d88e60cb44c63725858c56cb38818223a6ac6bed6bd6"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-final4-20261010\\prepare-test.FCMacro",
+        "bytes": 980,
+        "sha256": "37e2c55d81fd937e3e832d36f30db3812712ee56fe8f5ea97a5760b22abedf93"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-final4-20261010\\host-stderr.log",
+        "bytes": 256,
+        "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-focused7-20261010\\results.json",
+        "bytes": 1756,
+        "sha256": "00fb8a6b7639f7992b6088d9f2f433cc674f5ebc343ede27c9e13116882d95d8"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-focused7-20261010\\shared-host-launch.json",
+        "bytes": 544,
+        "sha256": "7f775032c95e59fa65feffff7dd003a8709a4a2eea0440e0c461d9c347c3175b"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-focused7-20261010\\prepare-test.FCMacro",
+        "bytes": 984,
+        "sha256": "b1f63b4c489d88400af294b911128b39b5ea689a0ee63af6d39512e12d0a715e"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-curve-spline-focused7-20261010\\host-stderr.log",
+        "bytes": 256,
+        "sha256": "532ad8cf97fde70bb37db24c82d34e0ec44393ec455b046fc5438e0a80528725"
+      }
+    ],
+    "excluded_options_artifacts": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-final4-20261010\\shared-host-launch.json",
+        "bytes": 542,
+        "sha256": "5e3f886529bd62baadcbad48e300064431e45bf3e4d9cb04b61c8bdaf58d8d77"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-final4-20261010\\host-stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-final4-20261010\\host-stderr.log",
+        "bytes": 1019,
+        "sha256": "2f11a84d92272a206a953e852e5118c3b6d66dd876a5f8ba583032c690cc5774"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-final4-20261010\\prepare-test.FCMacro",
+        "bytes": 980,
+        "sha256": "e2ccfb6bdd99da7b2a6286c2f7c263e32b1863e78fddeccf57fb31f34aeba36d"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-trace5-20261010\\results.json",
+        "bytes": 8157,
+        "sha256": "da19e3dc75b23a738385f1847494af55920f9a95e15eb7aba8398be9066bfe08"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-trace5-20261010\\shared-host-launch.json",
+        "bytes": 545,
+        "sha256": "cece9f77d62c87d4ded51b89c6e51ae9ed21cbcc1c52929fa74be076372bb1cf"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-trace5-20261010\\python-execution-trace.jsonl",
+        "bytes": 203799,
+        "sha256": "66ea8b480633fee76265b4a95f243a708f5a89d67fca0f40f8557709038fc53b"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-trace5-20261010\\native-fault-trace.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-options-trace5-20261010\\host-stderr.log",
+        "bytes": 6075,
+        "sha256": "f0d10fee23ded609fcea2ef82cb1cabce89e493c45f1760ecaa18094d69558b5"
+      }
+    ],
+    "red_artifacts": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-native-red4-20261010\\results.json",
+        "bytes": 3818,
+        "sha256": "b095e6b546eb77cd1202d32596c5daadb93aa0c4eb0a3806063a62b4edbc577a"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-native-red4-20261010\\shared-host-launch.json",
+        "bytes": 534,
+        "sha256": "6da862b99884f724b73711e6252a781548d2da0943ab9fcc511a741f0fa017fa"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-special-input-red1-20261010\\results.json",
+        "bytes": 1216,
+        "sha256": "ec9bb7f04a3eed147a59629fd8eedbdc8b3ec9c9adfde86354fe175e65fae188"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-special-input-red1-20261010\\shared-host-launch.json",
+        "bytes": 541,
+        "sha256": "0fc0c8b09b55e9a7b1ca91117a7fd985aeb5a3eefb6065be766341c0109c2b2b"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-affine-binding-red1-20261010\\results.json",
+        "bytes": 528,
+        "sha256": "1d5b94833693ac7a54deeccf07bd759013b2da093cf45af64862ee3c4348f365"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-affine-binding-red1-20261010\\shared-host-launch.json",
+        "bytes": 542,
+        "sha256": "7cf3d213959118e93e15d38a86efa0ab5bcf30d0a12325d5187ef1ba9e294c19"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-rust-red1-20261010.log",
+        "bytes": 2418,
+        "sha256": "5837d83d47fd94d7b7920af1a6ba37288966c47473f0b70a56f2990f50aa7737"
+      }
+    ],
+    "excluded_timeout_artifacts": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-commands-final1-20261010\\results.json",
+        "bytes": 11432,
+        "sha256": "7dbb4d2805fc94728630b75faba4b6cac55cb012386e1206fbdab49eebefb8ed"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-commands-final1-20261010\\shared-host-launch.json",
+        "bytes": 546,
+        "sha256": "a17c2aed0d9e9bff37e8f0170674053b368100c86b3c0368023d77f92e89cec8"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-commands-final2-20261010\\results.json",
+        "bytes": 11432,
+        "sha256": "7dbb4d2805fc94728630b75faba4b6cac55cb012386e1206fbdab49eebefb8ed"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-edit-edit-commands-final2-20261010\\shared-host-launch.json",
+        "bytes": 546,
+        "sha256": "91ba5cdfe342794b9b010eab81d2a327d0b25f3e7744f7d0c0cddb1e4bd39d71"
+      }
+    ]
+  }
+}

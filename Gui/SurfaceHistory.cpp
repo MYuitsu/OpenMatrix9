@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "SurfaceHistory.h"
+#include "CoreSurfaceResult.h"
 #include "HistoryFeature.h"
+#include "NativeSurfaceHistoryRequest.h"
 #include <App/Document.h>
 #include <App/GeoFeatureGroupExtension.h>
 #include <Base/Exception.h>
@@ -8,7 +10,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonParseError>
 #include <algorithm>
 #include <cmath>
 #include <set>
@@ -21,82 +22,61 @@ struct ChangeGuard {
     explicit ChangeGuard(bool& value):flag(value),previous(value){flag=true;}
     ~ChangeGuard(){flag=previous;}
 };
-double number(const QJsonObject& obj,const char* name,double lo,double hi) {
-    const auto value=obj.value(QLatin1String(name));
-    if(!value.isDouble()||!std::isfinite(value.toDouble())||value.toDouble()<lo||value.toDouble()>hi)
-        throw std::runtime_error(std::string("Invalid Surface History number: ")+name);
-    return value.toDouble();
+std::runtime_error savedFailure(const char* code,const std::string& identity,const char* message) {
+    return std::runtime_error(std::string(code)+": Surface History "+identity+": "+message);
 }
-unsigned integer(const QJsonObject& obj,const char* name,unsigned lo,unsigned hi) {
-    const double value=number(obj,name,lo,hi);
-    if(std::floor(value)!=value)throw std::runtime_error(std::string("Invalid Surface History integer: ")+name);
-    return static_cast<unsigned>(value);
-}
-bool boolean(const QJsonObject& obj,const char* name) {
-    const auto value=obj.value(QLatin1String(name));
-    if(!value.isBool())throw std::runtime_error(std::string("Invalid Surface History boolean: ")+name);
-    return value.toBool();
-}
-void parse(App::Document& doc,const char* text,const App::PropertyLinkSubList& links,
-           std::vector<OpenMatrix9Gui::SurfaceInput>& inputs,OpenMatrix9Gui::SurfaceOptions& options) {
-    QJsonParseError error;
-    const auto document=QJsonDocument::fromJson(QByteArray(text),&error);
-    if(error.error!=QJsonParseError::NoError||!document.isObject())throw std::runtime_error("Malformed Surface History settings");
-    const auto root=document.object();
-    integer(root,"version",1,1);
-    options.kind=integer(root,"kind",1,3);
-    options.style=integer(root,"style",0,5);
-    options.sectionMode=integer(root,"sectionMode",0,2);
-    options.pointCount=integer(root,"pointCount",2,256);
-    options.frenet=boolean(root,"frenet");
-    options.closed=boolean(root,"closed");
-    options.maintainHeight=boolean(root,"maintainHeight");
-    options.preview=boolean(root,"preview");
-    options.history=boolean(root,"history");
-    options.historyCommand=boolean(root,"historyCommand");
-    options.tolerance=number(root,"tolerance",1e-7,1e6);
-    options.continuityA=integer(root,"continuityA",0,2);
-    options.continuityB=integer(root,"continuityB",0,2);
-    options.matchStart=boolean(root,"matchStart");
-    options.matchEnd=boolean(root,"matchEnd");
-    const auto slashes=root.value("slashes");
-    if(!slashes.isArray()||slashes.toArray().size()>256)throw std::runtime_error("Invalid Surface History slash list");
-    for(const auto value:slashes.toArray()){
-        if(!value.isArray()||value.toArray().size()!=2)throw std::runtime_error("Invalid Surface History slash pair");
-        const auto pair=value.toArray();
-        for(const auto coordinate:pair)if(!coordinate.isDouble()||!std::isfinite(coordinate.toDouble())||coordinate.toDouble()<0||coordinate.toDouble()>1)
-            throw std::runtime_error("Surface History slash fractions must be between 0 and 1");
-        options.slashes.emplace_back(pair[0].toDouble(),pair[1].toDouble());
+OpenMatrix9Gui::NativeSavedSurfaceRequest decode(const std::string& text,std::size_t count,const std::string& identity,
+                                               const App::PropertyLinkSubList* links=nullptr) {
+    OpenMatrix9Gui::NativeSavedSurfaceRequest saved{};
+    const auto status=OpenMatrix9Gui::om9_surface_history_decode(
+        reinterpret_cast<const unsigned char*>(text.data()),text.size(),count,&saved);
+    if(status){
+        std::string message="invalid, unsupported or oversized saved surface request";
+        if(status>=201&&status<=203){
+            message=std::string(OpenMatrix9Gui::surfaceOperation(status-200))+" saved request rejected";
+            // Only diagnostic identity, after Rust parsed the complete bounded
+            // metadata. No geometry/copy/solver is touched on a rejected request.
+            if(links&&!links->getValues().empty()&&links->getValues().size()==links->getSubValues().size()){
+                auto* source=links->getValues().front();
+                if(source&&source->isAttachedToDocument()){
+                    message+="; source ";message+=source->getNameInDocument();
+                    const auto& sub=links->getSubValues().front();if(!sub.empty())message+="."+sub;
+                }
+            }
+        }
+        throw savedFailure(status==103?"KernelFailure":"InvalidBasis",identity,message.c_str());
     }
-    const auto records=root.value("inputs");
-    if(!records.isArray()||records.toArray().size()>256)throw std::runtime_error("Invalid Surface History input records");
-    const auto& objects=links.getValues();
-    const auto& subs=links.getSubValues();
-    if(objects.size()!=subs.size())throw std::runtime_error("Surface History source reference mismatch");
+    return saved;
+}
+void parse(App::Document& doc,const std::string& text,const App::PropertyLinkSubList& links,
+           const std::string& identity,std::vector<OpenMatrix9Gui::SurfaceInput>& inputs,OpenMatrix9Gui::SurfaceOptions& options) {
+    // Borrow existing property bytes and link count only. Rust validates and owns
+    // the complete saved request before any native source resolution or copies.
+    const auto saved=decode(text,links.getValues().size(),identity,&links);
+    options.kind=saved.kind;options.style=saved.style;
+    options.sectionMode=saved.sectionMode;options.pointCount=saved.pointCount;
+    options.tolerance=saved.tolerance;options.continuityA=saved.continuityA;options.continuityB=saved.continuityB;
+    options.frenet=(saved.flags&1)!=0;options.closed=(saved.flags&2)!=0;
+    options.maintainHeight=(saved.flags&4)!=0;options.matchStart=(saved.flags&8)!=0;options.matchEnd=(saved.flags&16)!=0;
+    options.history=(saved.flags&32)!=0;options.historyCommand=(saved.flags&64)!=0;options.preview=(saved.flags&128)!=0;
+    for(std::size_t i=0;i<saved.slashCount;++i)options.slashes.emplace_back(saved.slashes[i][0],saved.slashes[i][1]);
+    const auto& objects=links.getValues();const auto& subs=links.getSubValues();
+    if(objects.size()!=subs.size())throw savedFailure("InvalidBasis",identity,"source reference mismatch");
     std::size_t index=0;
-    for(const auto record:records.toArray()){
-        if(!record.isObject())throw std::runtime_error("Invalid Surface History input record");
-        const auto obj=record.toObject();
-        const auto count=integer(obj,"count",1,4096);
-        const bool chain=boolean(obj,"chain");
-        if(!chain&&count!=1)throw std::runtime_error("Surface History input grouping mismatch");
-        if(count>objects.size()-std::min(index,objects.size()))throw std::runtime_error("A Surface History input was deleted or detached");
+    for(unsigned row=0;row<saved.groupCount;++row){
+        const auto& group=saved.inputs[row];const bool chain=(group.flags&1)!=0;
         OpenMatrix9Gui::SurfaceInput input;
-        input.closed=boolean(obj,"closed");
-        input.reverse=boolean(obj,"reverse");
-        input.seam=number(obj,"seam",0,1);
-        if(input.seam>=1)throw std::runtime_error("Surface History seam must be less than 1");
-        for(unsigned i=0;i<count;++i,++index){
+        input.closed=(group.flags&2)!=0;input.reverse=(group.flags&4)!=0;input.seam=group.seam;
+        for(unsigned i=0;i<group.count;++i,++index){
             auto* source=objects[index];
-            if(!source||!source->isAttachedToDocument())throw std::runtime_error("A Surface History input was deleted");
-            if(source->getDocument()!=&doc)throw std::runtime_error("Surface History inputs must belong to the same document");
-            if(!source->isValid())throw std::runtime_error("A Surface History input has a recompute error");
+            if(!source||!source->isAttachedToDocument())throw savedFailure("StaleGeometry",identity,"source deleted or detached");
+            if(source->getDocument()!=&doc)throw savedFailure("StaleGeometry",identity,"source belongs to a different document");
+            if(!source->isValid())throw savedFailure("InvalidBasis",identity,"source has a recompute error");
             if(i==0){input.object=source->getNameInDocument();input.sub=subs[index];}
             if(chain)input.chain.emplace_back(source->getNameInDocument(),subs[index]);
         }
         inputs.push_back(std::move(input));
     }
-    if(index!=objects.size())throw std::runtime_error("Surface History source reference count mismatch");
 }
 std::string pythonError() {
     PyObject *type=nullptr,*value=nullptr,*trace=nullptr;
@@ -118,6 +98,7 @@ SurfaceHistory::SurfaceHistory() {
     ADD_PROPERTY_TYPE(SurfaceOptions,(""),"OpenMatrix9",App::Prop_None,"Versioned surface options and input grouping (JSON)");
     ADD_PROPERTY_TYPE(OM9FeatureId,(""),"OpenMatrix9",App::Prop_ReadOnly,"Exact OpenMatrix9 feature identifier");
     ADD_PROPERTY_TYPE(OM9Command,(""),"OpenMatrix9",App::Prop_ReadOnly,"Surface construction command");
+    ADD_PROPERTY_TYPE(OM9GeometryResult,(""),"OpenMatrix9",App::Prop_ReadOnly,"Immutable native operation evidence; not current validity after direct geometry edits");
     ADD_PROPERTY_TYPE(HistoryEnabled,(true),"OpenMatrix9",App::Prop_None,"Clear to detach this surface from its parents");
     ADD_PROPERTY_TYPE(UpdateHistory,(true),"OpenMatrix9",App::Prop_None,"Suspend or resume updates while retaining parent links");
 }
@@ -167,18 +148,24 @@ short SurfaceHistory::mustExecute() const {
     if(HistoryEnabled.getValue()&&UpdateHistory.getValue()&&isTouched())return 1;
     return Part::Feature::mustExecute();
 }
-void SurfaceHistory::clearShape(){ChangeGuard guard(changing);Shape.setValue(Part::TopoShape());}
+void SurfaceHistory::clearShape(){ChangeGuard guard(changing);Shape.setValue(Part::TopoShape());OM9GeometryResult.setValue("");}
 App::DocumentObjectExecReturn* SurfaceHistory::execute() {
     if(!HistoryEnabled.getValue()||!UpdateHistory.getValue()||!historyUpdatesEnabled(*getDocument()))return Part::Feature::execute();
     try {
-        refreshPlacements();
         std::vector<SurfaceInput> inputs;
         OpenMatrix9Gui::SurfaceOptions options;
-        parse(*getDocument(),SurfaceOptions.getValue(),SourceCurves,inputs,options);
+        parse(*getDocument(),SurfaceOptions.getStrValue(),SourceCurves,getNameInDocument(),inputs,options);
+        refreshPlacements();
         Base::PyGILStateLocker lock;
-        PyObject* result=buildSurface(*getDocument(),inputs,options);
+        const auto evidence=captureSurfaceEvidence(*getDocument(),inputs,options);
+        PyObject* result=buildSurface(*getDocument(),evidence.inputs,options);
         if(!result)throw std::runtime_error(pythonError());
-        try {ChangeGuard guard(changing);Shape.setPyObject(result);}
+        try {
+            const auto parent=App::GeoFeature::getGlobalPlacement(this)*Placement.getValue().inverse();
+            const auto prepared=prepareSurfaceOutput(*getDocument(),result,evidence,getNameInDocument(),parent,Placement.getValue());
+            verifySurfaceOutput(*getDocument(),prepared);
+            ChangeGuard guard(changing);Shape.setValue(prepared.shape);OM9GeometryResult.setValue(prepared.result);
+        }
         catch(...){Py_DECREF(result);throw;}
         Py_DECREF(result);
         const char* id=options.kind==1?(options.historyCommand?"OM9-SURFACE-002":"OM9-SURFACE-001"):
@@ -261,7 +248,9 @@ std::string serializeSurfaceHistoryOptions(const std::vector<SurfaceInput>& inpu
     root.insert("inputs",records);root.insert("slashes",slashes);
     return QJsonDocument(root).toJson(QJsonDocument::Compact).toStdString();
 }
-void SurfaceHistory::initialize(PyObject* shape,const std::vector<SurfaceInput>& inputs,const OpenMatrix9Gui::SurfaceOptions& options) {
+void SurfaceHistory::initialize(const PreparedSurfaceOutput& prepared,const std::vector<SurfaceInput>& inputs,const OpenMatrix9Gui::SurfaceOptions& options) {
+    verifySurfaceOutput(*getDocument(),prepared);
+    if(prepared.outputName!=getNameInDocument())throw std::runtime_error("StaleGeometry: Surface output name changed before publication");
     std::vector<App::DocumentObject*> objects;
     std::vector<std::string> subs;
     for(const auto& input:inputs){
@@ -273,12 +262,15 @@ void SurfaceHistory::initialize(PyObject* shape,const std::vector<SurfaceInput>&
         }
     }
     // Validate the schema using exactly the references that will be persisted.
+    const auto raw=serializeSurfaceHistoryOptions(inputs,options);
+    if(raw!=prepared.recipe)throw std::runtime_error("StaleGeometry: Surface result recipe changed before publication");
+    decode(raw,objects.size(),getNameInDocument());
     SourceCurves.setValues(objects,subs);
-    SurfaceOptions.setValue(serializeSurfaceHistoryOptions(inputs,options));
+    SurfaceOptions.setValue(raw);
     std::vector<SurfaceInput> parsedInputs;
     OpenMatrix9Gui::SurfaceOptions parsedOptions;
-    parse(*getDocument(),SurfaceOptions.getValue(),SourceCurves,parsedInputs,parsedOptions);
-    {ChangeGuard guard(changing);Shape.setPyObject(shape);HistoryEnabled.setValue(true);UpdateHistory.setValue(true);}
+    parse(*getDocument(),SurfaceOptions.getStrValue(),SourceCurves,getNameInDocument(),parsedInputs,parsedOptions);
+    {ChangeGuard guard(changing);Shape.setValue(prepared.shape);OM9GeometryResult.setValue(prepared.result);HistoryEnabled.setValue(true);UpdateHistory.setValue(true);}
     refreshPlacements();
     OM9FeatureId.setValue(options.kind==1?(options.historyCommand?"OM9-SURFACE-002":"OM9-SURFACE-001"):
                          options.kind==2?(options.historyCommand?"OM9-SURFACE-004":"OM9-SURFACE-003"):"OM9-SURFACE-009");
@@ -286,12 +278,12 @@ void SurfaceHistory::initialize(PyObject* shape,const std::vector<SurfaceInput>&
                         options.kind==2?(options.historyCommand?"gvSweep2History":"Sweep2"):"Loft");
     if(!historyRecordingEnabled(*getDocument()))HistoryEnabled.setValue(false);
 }
-SurfaceHistory* createSurfaceHistory(App::Document& doc,PyObject* shape,const std::vector<SurfaceInput>& inputs,const SurfaceOptions& options) {
-    auto* object=doc.addObject("OpenMatrix9Gui::SurfaceHistory",options.kind==1?"Sweep1":options.kind==2?"Sweep2":"Loft");
+SurfaceHistory* createSurfaceHistory(App::Document& doc,const PreparedSurfaceOutput& prepared,const std::vector<SurfaceInput>& inputs,const SurfaceOptions& options) {
+    auto* object=doc.addObject("OpenMatrix9Gui::SurfaceHistory",prepared.outputName.c_str());
     if(!object)throw std::runtime_error("Cannot create native Surface History feature");
     auto* result=dynamic_cast<SurfaceHistory*>(object);
     const std::string name=object->getNameInDocument();
-    try {if(!result)throw std::runtime_error("Surface History native type mismatch");result->initialize(shape,inputs,options);return result;}
+    try {if(!result)throw std::runtime_error("Surface History native type mismatch");result->initialize(prepared,inputs,options);return result;}
     catch(...){doc.removeObject(name.c_str());throw;}
 }
 }

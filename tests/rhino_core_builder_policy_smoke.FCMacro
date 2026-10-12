@@ -1,0 +1,134 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Independent Builder input admission preserves native recipe and Redo."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'module':OM.__file__,'checks':[],'diagnostics':[]}
+raw=json.dumps(dict(schema=1,evaluator='om9.affine-template',version=1,settings={}))
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def baseline(kind):
+    d=App.newDocument('BuilderAdmission'+kind);d.UndoMode=1;d.openTransaction('Sources')
+    gem=d.addObject('Part::Feature','Gem');gem.Shape=Part.makeBox(2,4,8);gem.addProperty('App::PropertyString','OM9GemShape');gem.OM9GemShape='round'
+    seed=d.addObject('Mesh::Feature' if kind=='Mesh' else 'Part::Feature','Seed')
+    if kind=='Mesh':seed.Mesh=Mesh.Mesh([[App.Vector(0,0,0),App.Vector(1,0,0),App.Vector(0,1,0)]])
+    elif kind=='Basis':
+        curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(1e151,0,0)],[2,2],[0.,1.],False,1);seed.Shape=curve.toShape()
+    else:seed.Shape=Part.makeBox(1,1,1)
+    seed.Visibility=False
+    witness=d.addObject('App::FeaturePython','Witness');d.commitTransaction();d.recompute()
+    return d,gem,seed,witness
+def create_failure(kind,expected):
+    d,gem,seed,witness=baseline(kind)
+    d.openTransaction('Redo witness');witness.Label='Executable Redo';d.commitTransaction();d.undo()
+    before=(tuple(o.Name for o in d.Objects),d.UndoCount,d.RedoCount,gem.Shape.exportBrepToString(),repr(seed.Mesh.Topology) if kind=='Mesh' else seed.Shape.exportBrepToString())
+    message='';rejected=False
+    try:OM.createBuilderRecord(gem,'OM9-SETTING-001',raw,[seed])
+    except Exception as error:rejected=True;message=str(error)
+    report['diagnostics'].append(dict(case=kind,text=message,rejected=rejected))
+    check(kind+' rejects with typed Builder seed context',rejected and all(s in message for s in (expected,'Builder',seed.Name)))
+    after=(tuple(o.Name for o in d.Objects),d.UndoCount,d.RedoCount,gem.Shape.exportBrepToString(),repr(seed.Mesh.Topology) if kind=='Mesh' else seed.Shape.exportBrepToString())
+    check(kind+' preserves source objects and executable Redo',before==after)
+    if d.RedoCount:d.redo()
+    check(kind+' retains Redo witness',witness.Label=='Executable Redo')
+    App.closeDocument(d.Name)
+def replay_failure():
+    d,gem,seed,witness=baseline('Recipe');record=OM.createBuilderRecord(gem,'OM9-SETTING-001',raw,[seed]);child=d.getObject(record.OutputNames[0]);d.recompute()
+    record.Parameters='{}';d.recompute();message=record.getStatusString()
+    report['diagnostics'].append(dict(case='Recipe',text=message))
+    check('Stored invalid recipe rejects with typed record context',not record.isValid() and all(s in message for s in ('InvalidBasis','Builder',record.Name)))
+    check('Invalid recipe clears dependent output without dropping links',child.Shape.isNull() and child.Recorded and child.ParentRecord==record and record.SourceGem==gem)
+    record.Parameters=raw;d.recompute();check('Restored recipe uses existing affine evaluator',not child.Shape.isNull() and abs(child.Shape.Volume-1)<1e-8)
+    App.closeDocument(d.Name)
+
+# Omitting the pre-transaction restore/Match gate can consume Redo even when
+# rollback leaves geometry unchanged. Snapshots therefore include stack counts
+# and an executable witness, not only object-name equality.
+def arm_redo(d,witness):
+    d.openTransaction('Redo witness');witness.Label='Executable Redo';d.commitTransaction();d.undo()
+
+def snapshot(d):
+    objects=[]
+    for o in d.Objects:
+        shape=o.Shape.exportBrepToString() if 'Shape' in o.PropertiesList else None
+        stored=o.Templates.exportBrepToString() if 'Templates' in o.PropertiesList else None
+        objects.append((o.Name,shape,stored,repr(getattr(o,'Parameters',None)),repr(getattr(o,'OutputNames',None)),
+                        getattr(getattr(o,'SourceGem',None),'Name',None),getattr(getattr(o,'ParentRecord',None),'Name',None),getattr(o,'Recorded',None)))
+    return tuple(objects),d.UndoCount,d.RedoCount
+
+def rejected_call(name,d,witness,call,code,identity):
+    arm_redo(d,witness);before=snapshot(d);message='';rejected=False
+    try:call()
+    except Exception as error:rejected=True;message=str(error)
+    report['diagnostics'].append(dict(case=name,text=message,rejected=rejected))
+    check(name+' rejects with typed operation and input',rejected and all(s in message for s in (code,'Builder',identity)))
+    check(name+' keeps objects geometry links recipe Undo Redo',before==snapshot(d))
+    if d.RedoCount:d.redo()
+    check(name+' retains executable Redo',witness.Label=='Executable Redo')
+
+def bad_basis():
+    c=Part.BSplineCurve();c.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(1e151,0,0)],[2,2],[0.,1.],False,1)
+    return c.toShape()
+
+def persisted_failure(kind):
+    d,gem,seed,witness=baseline('Stored'+kind);record=OM.createBuilderRecord(gem,'OM9-SETTING-001',raw,[seed]);child=d.getObject(record.OutputNames[0]);d.recompute()
+    original_shape=gem.Shape.copy();original_templates=record.Templates.copy();original_dimensions=record.InitialDimensions
+    identity=record.Name
+    if kind=='Recipe':record.Parameters='{}'
+    elif kind=='SourceBasis':gem.Shape=bad_basis();identity=gem.Name
+    elif kind in ('TemplateBasis','TemplateType','TemplateCount'):
+        record.setPropertyStatus('Templates','-ReadOnly')
+        record.Templates=Part.makeCompound([bad_basis()]) if kind=='TemplateBasis' else Part.makeBox(1,1,1) if kind=='TemplateType' else Part.makeCompound([Part.Vertex(App.Vector(i,0,0)) for i in range(1025)])
+        record.setPropertyStatus('Templates','ReadOnly');record.touch()
+    elif kind=='Dimensions':
+        record.setPropertyStatus('InitialDimensions','-ReadOnly');record.InitialDimensions=App.Vector(0,4,8);record.setPropertyStatus('InitialDimensions','ReadOnly');record.touch()
+    d.recompute();message=record.getStatusString()
+    report['diagnostics'].append(dict(case='Persisted'+kind,text=message))
+    check(kind+' recompute rejects stored input with typed identity',not record.isValid() and all(s in message for s in ('InvalidBasis','Builder',identity)))
+    check(kind+' invalidation keeps durable links and storage',child.Shape.isNull() and child.Recorded and child.ParentRecord==record and record.SourceGem==gem)
+    rejected_call(kind+' restore',d,witness,lambda:OM.restoreBuilderOutputs(record),'InvalidBasis',identity)
+    record.Parameters=raw;gem.Shape=original_shape
+    record.setPropertyStatus('Templates','-ReadOnly');record.Templates=original_templates;record.setPropertyStatus('Templates','ReadOnly')
+    record.setPropertyStatus('InitialDimensions','-ReadOnly');record.InitialDimensions=original_dimensions;record.setPropertyStatus('InitialDimensions','ReadOnly')
+    record.touch();d.recompute()
+    check(kind+' repair reuses durable affine template',record.isValid() and not child.Shape.isNull() and abs(child.Shape.Volume-1)<1e-8 and child.ParentRecord==record)
+    App.closeDocument(d.Name)
+
+def match_failure(kind):
+    d,gem,seed,witness=baseline('Match'+kind);record=OM.createBuilderRecord(gem,'OM9-SETTING-001',raw,[seed]);d.recompute()
+    first=d.addObject('Part::Feature','FirstTarget');first.Shape=Part.makeBox(2,4,8);first.addProperty('App::PropertyString','OM9GemShape');first.OM9GemShape='round'
+    second=d.addObject('Part::Feature','LaterTarget');second.Shape=bad_basis() if kind=='Basis' else Part.makePlane(2,4) if kind=='Dimensions' else Part.makeBox(2,4,8)
+    second.addProperty('App::PropertyString','OM9GemShape');second.OM9GemShape='round';d.recompute()
+    if kind=='Recipe':record.Parameters='{}';d.recompute()
+    rejected_call('Match later '+kind,d,witness,lambda:OM.matchBuilderAttributes(gem,[first,second]),'InvalidBasis',record.Name if kind=='Recipe' else second.Name)
+    check('Match later '+kind+' creates no first-target recipe',not any(o.TypeId=='OpenMatrix9Gui::BuilderRecord' and o.SourceGem==first for o in d.Objects))
+    App.closeDocument(d.Name)
+
+def enter(text):
+    console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+
+def independence():
+    d,gem,seed,witness=baseline('Independent');recipe=json.dumps(dict(schema=1,evaluator='om9.affine-template',version=1,settings={},scale=[2,3,4],offset=[1,2,3]))
+    record=OM.createBuilderRecord(gem,'OM9-SETTING-001',recipe,[seed],True);child=d.getObject(record.OutputNames[0]);d.recompute()
+    check('Explicit recipe retains scale offset and owned seed',abs(child.Shape.Volume-24)<1e-7 and (child.Shape.CenterOfGravity-App.Vector(2,3.5,5)).Length<1e-7)
+    enter('Line');enter('1,2,3');before=console.toPlainText();gem.Shape=Part.makeBox(4,8,16);gem.Placement=App.Placement(App.Vector(10,20,30),App.Rotation(App.Vector(0,0,1),90));d.recompute()
+    check('Stored dimensions scale and rotated frame applied once',abs(child.Shape.Volume-192)<1e-7 and (child.Shape.CenterOfGravity-App.Vector(5,23,37)).Length<1e-7)
+    check('Builder replay leaves active Line transcript intact',console.toPlainText()==before)
+    enter('7,8,9');lines=[o for o in d.Objects if o.Name.startswith('Line')]
+    check('Line retains original picks after Builder replay',len(lines)==1 and (lines[0].Shape.Vertexes[0].Point-App.Vector(1,2,3)).Length<1e-9 and (lines[0].Shape.Vertexes[-1].Point-App.Vector(7,8,9)).Length<1e-9)
+    App.closeDocument(d.Name)
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');create_failure('Basis','InvalidBasis');create_failure('Mesh','UnsupportedRepresentation');replay_failure()
+        for kind in ('Recipe','SourceBasis','TemplateBasis','TemplateType','TemplateCount','Dimensions'):persisted_failure(kind)
+        for kind in ('Basis','Dimensions','Recipe'):match_failure(kind)
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript');independence()
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

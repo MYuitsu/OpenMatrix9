@@ -1,0 +1,25 @@
+# RCORE-01 — Native value snapshots and merge lifetime
+
+App191/Runtime193 giữ identity native cho Link/XLink, subname/shadow/partial flags và cây biểu thức/validator; dùng lại setters/Paste của FreeCAD. Frozen journal giữ thao tác rename và refresh các entry mới/canceled. Prepared phase và cleanup guard chặn callback trong merge unwind; commit retry bị từ chối trước null journal.
+Đã kiểm chứng **2607/2607 assertion qua21 host**, gồm Link128, XLink112, expression60, rename32, merge-unwind32, retry12, native journal51 và hồi quy/cold reload.
+**Còn RED:** detached-object disposal16/32 và Rust121pass/1fail (raw native offset D3). Python property identity/orphan Save, frozen-source preparation và toàn bộ **Task2/3/full RCORE-01 còn mở**.
+
+C++ remains the necessary FreeCAD journal/lifetime adapter: native document transactions, Property Copy/Paste, link/expr state and observer control are private/native APIs. Portable policy/data remain Rust-owned; Python additions are test fixtures only. Reuse the single SDK and standalone plugin cache; isolated App DLL/import/PDB outputs do not replace the shared host. This technical correction adds no new product behavior rule to a skill.
+
+The original value-only discarded-Redo rejection now passes28/28. The stricter merge witness corrected a false positive: catching a native memory exception is not a replay barrier. It now requires StaleGeometry for all four destructor attempts and passes32/32. Ordinary open-notification failure followed by commit retry originally crashed the isolated host; Recording-only admission now passes12/12. Retired-record appends, first-write reuse, destination merges, incremental retirement and dynamic-add cancellation pass51/51.
+
+Remaining requirements:
+
+- Detached native object destructor disposal remains RED16/32 on current App191/Runtime193: four attempts are blocked and replay is not accepted, but prior object identity/Redo booking and complete paired cleanup cannot be recovered after native object destruction. Preserve unchanged failure witness; do not call full savepoint or Task2/3 complete.
+- Review identifies an unverified P1 for PropertyPythonObject snapshots: native Copy is orphaned, Save dereferences its container and XML rebuilding can lose PyObject identity. Add real native identity/lifetime witness and replace persistence with a protected native value snapshot before accepting this family.
+- Review identifies a P2 in preparing merge/recovery/public inverse FROM a frozen source journal: null Property pointers are misread as dynamic additions. Native apply, append, repeated retirement and destination merge are verified by51 checks; source composition needs its own failing native tests and implementation.
+- Complete native value admission remains open for custom/nonpersistent/opaque properties, Python/validator/expression payload retirement callbacks, topology/shape identity, status/touch/cache, factory/Copy/Paste/Save/Restore/allocation failures and shared native dependencies.
+- Aggregate/peak allocation and traversal preflight remains open: constructor copies history/names before complete bounded admission; expression getMemSize reports0 and estimated text/map accounting is not a complete retained-tree or closure allocation certificate. Source/property guard counts are not full bounded-worker proof.
+- All global/multidocument/source participants, locks and before-mutation controls, old move/rename histories, all cleanup/open/restore callbacks, GUI/startup paths and persisted caches require complete acceptance. Selected startup still reports duplicate workbench registration; earlier delayed-import deadlocks remain preserved, not solved by early import.
+- Full current Rust cargo test is RED121pass/1fail: support_snapshot::evaluation_tests::owned_curve_jets_match_native_value_and_three_derivatives_for_nineteen_families disagrees with raw native OffsetBezier D3 at parameter0.1. Do not alter the oracle or hide unsupported families.
+- Every original RCORE01 adapter1-7,C01-C12,T01-T11 stays open until its full audit: refs/world-once/ownership; curve/surface/trim/pcurve/seam families; conversion/deviation/locus/maps; registry/GeometryResult all consumers; workers/aggregate bounds/cancel; atomic publication/History/cache/locks/lifetime; valid oriented manifold solids/cavities; read/edit/retain/export; generic Snap/mouse/render/persistence/lifecycle. Component passes do not prove full RCORE01.
+- Native source190/build/loaded hashes and selected SDK/import do not establish a complete ABI/compiler dependency/native memory-safety certificate. Plugin full prebuild source inventory was not frozen; no production host replacement or publish is claimed.
+
+Next: Reproduce native PropertyPythonObject/Proxy inverse identity and orphan Save failure, implement protected native retention, then fix frozen-source preparation and detached object retirement while continuing all original RCORE01 requirements.
+
+[Machine evidence](2026-10-12-rhino-core-native-value-snapshots.json).

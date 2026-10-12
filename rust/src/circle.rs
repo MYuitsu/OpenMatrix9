@@ -29,7 +29,7 @@ pub struct Plan {
     pub normal: Point,
     pub radius: f64,
 }
-#[derive(Clone)]
+#[derive(Clone,Debug,PartialEq)]
 pub struct Circle {
     pub mode: Mode,
     pub size: Size,
@@ -293,7 +293,7 @@ impl Circle {
     pub fn pick(&mut self, points: &mut Vec<Point>, p: Point) -> Result<Option<Plan>, String> {
         check_point(p)?;
         if self.mode == Mode::FitPoints {
-            if points.len() >= 1024 {
+            if points.len() >= crate::fit_point_input::MAX_POINTS {
                 return Err("FitPoints accepts at most 1024 points".into());
             }
             points.push(p);

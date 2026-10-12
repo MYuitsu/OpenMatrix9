@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #pragma once
 #include "SurfaceGeometry.h"
+#include "CommandOptions.h"
 #include <QObject>
 #include <QPointer>
 #include <fastsignals/signal.h>
@@ -17,12 +18,15 @@ public:
     void activate();void deactivate();
     bool available(std::size_t)const;bool active()const;
     bool start(std::size_t,const QString& invoked={});void cancel();void submit(const QString&);
+    bool optionEvent(unsigned,const QString& text={},double number=0.);
 protected:
     bool eventFilter(QObject*,QEvent*)override;
 private:
     SurfaceController();
     bool valid()const;void prompt(const QString&);void refresh();
-    void add(const std::string&,const std::string&);void optionsDialog();void preview();void commit();void clearPreview();
+    void add(const std::string&,const std::string&);void optionsDialog();void preview(PyObject* prepared=nullptr);void commit();void clearPreview();
+    void bindOptions();void renderOptionControls();SurfaceOptions optionValues(bool candidate)const;
+    CommandOptionsBridge optionBridge;bool optionErrorPending=false;
     void error(const std::exception&);
     void alignInputs(bool automatic);
     void addSlash(double,double);void updateSlashes();

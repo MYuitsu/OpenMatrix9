@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Retirement callbacks must reject replay despite swallowing their errors."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE']);import OM9ReplayRetirement as probe
+report['probe']=probe.__file__
+def state(doc):return dict(booked=doc.getBookedTransactionID(),pending=doc.HasPendingTransaction,undo=list(doc.UndoNames),redo=list(doc.RedoNames))
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench')
+  for undo_mode in [0,1]:
+   for booking in ['plain','booked','active','preserving']:
+    for action in ['value','close','remove','clear']:
+     key=f'{undo_mode}/{booking}/{action}';doc=App.newDocument('Retirement');doc.UndoMode=undo_mode
+     child=doc.getObject(probe.create(doc.Name));doc.recompute();doc.clearUndos()
+     if undo_mode:
+      doc.openTransaction('Prior redo');child.Output='prior-redo';doc.commitTransaction();doc.undo()
+     if booking=='preserving':doc.openTransactionPreservingRedo('Caller')
+     elif booking!='plain':doc.openTransaction('Caller')
+     if booking=='active':child.Value='caller-value'
+     before=state(doc);value=child.Value;result=probe.run(doc.Name,action,os.environ.get('OM9_RETIREMENT_PHASE','original'))
+     live=doc.Name in App.listDocuments()
+     check(key+' actual native retirement callback attempted',result['callbacks']==1)
+     check(key+' attempted mutation blocked',result['blocked']==1)
+     check(key+' rejects replay with checked rollback and cleanup',not result['accepted']and result['rollback']and result['complete']and 'StaleGeometry'in result['error'])
+     check(key+' keeps native document and child alive',live and doc.getObject('Child')is child)
+     check(key+' restores value and clears paired invalid output',child.Value==value and child.Output=='')
+     check(key+' exact caller journal booking and visible history',state(doc)==before)
+     report['observations'].append(dict(case=key,before=before,after=state(doc),value_before=value,value_after=child.Value,output_after=child.Output,result=result))
+     if booking!='plain':doc.abortTransaction()
+     if before['redo']:doc.redo();check(key+' prior Redo remains executable',child.Output=='prior-redo')
+     App.closeDocument(doc.Name)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

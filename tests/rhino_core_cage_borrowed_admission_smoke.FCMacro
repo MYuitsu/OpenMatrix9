@@ -1,0 +1,64 @@
+"""Malformed native cage bases/binding snapshots are admitted before copies."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'module':OM.__file__,'diagnostics':[]}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def enter(text=''):
+    console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def mesh(doc):
+    obj=doc.addObject('Mesh::Feature','Captive');obj.Mesh=Mesh.Mesh([[(0,0,0),(1,0,0),(0,1,0)]]);return obj
+def control_case(route,kind):
+    d=App.newDocument('CageBorrowed'+route+kind);d.UndoMode=1;c=OM.createCage(d.Name,(-1,-1,-1),(2,2,2));c.ViewObject.Visibility=False
+    d.openTransaction('Sources');target=mesh(d);witness=d.addObject('App::FeaturePython','Witness')
+    if kind=='Weight':v=list(c.Weights);v[0]=0;c.Weights=v
+    elif kind=='Point':v=list(c.ControlPoints);v[0]=App.Vector(float('nan'),0,0);c.ControlPoints=v
+    elif kind=='Knot':c.UKnots=[0,0,0,1]
+    elif kind=='Cardinality':c.Counts=[2,2]
+    elif kind=='Budget':c.Counts=[1000000,1000000,2]
+    else:v=c.ReferenceFrame;v.A11=0;c.ReferenceFrame=v
+    d.commitTransaction();d.openTransaction('Redo witness');witness.Label='Executable Redo';d.commitTransaction();d.undo()
+    def state():return (tuple(o.Name for o in d.Objects),d.UndoCount,d.RedoCount,repr(target.Mesh.Topology),repr(c.ControlPoints),repr(c.Counts),repr(c.Weights),repr(c.UKnots),str(c.ReferenceFrame))
+    before=state();console.clear();Gui.Selection.clearSelection()
+    if route=='API':
+        message=''
+        try:OM.captureCage(c,[target])
+        except Exception as error:message=str(error)
+    else:enter('CageEdit');enter(target.Name);enter();enter(c.Name);message=console.toPlainText()
+    report['diagnostics'].append(dict(route=route,kind=kind,text=message))
+    check(route+' '+kind+' names invalid basis operation and control',any(all(s in line for s in ('InvalidBasis','CageEdit',c.Name)) for line in message.splitlines()))
+    check(route+' '+kind+' preserves source objects geometry Undo and Redo',before==state())
+    enter('Cancel');d.redo();check(route+' '+kind+' keeps executable Redo',witness.Label=='Executable Redo');App.closeDocument(d.Name)
+def binding_case(kind):
+    d=App.newDocument('CageBindingBorrowed'+kind);d.UndoMode=1;c=OM.createCage(d.Name,(-1,-1,-1),(2,2,2))
+    if kind=='CachedNull':target=d.addObject('Part::Feature','Captive');target.Shape=Part.makeBox(1,1,1)
+    else:target=mesh(d)
+    b=OM.captureCage(c,[target])[0]
+    if kind=='Count':b.SourceVertices=list(b.SourceVertices)[:2]
+    elif kind=='Values':v=list(b.BoundParameters);v[0]=App.Vector(float('nan'),0,0);b.BoundParameters=v
+    elif kind=='Triangles':b.SourceTriangles=[0,1,100]
+    elif kind=='Empty':b.SourceVertices=[];b.BoundParameters=[];b.SourceTriangles=[]
+    elif kind=='CachedNull':b.SourceShape=Part.Shape()
+    else:b.Region='Local';b.LocalMin=App.Vector(2,2,2);b.LocalMax=App.Vector(1,1,1)
+    before=(d.UndoCount,tuple(o.Name for o in d.Objects));d.recompute();message=b.getStatusString();report['diagnostics'].append(dict(route='Binding',kind=kind,text=message))
+    code='NonFiniteGeometry' if kind=='Values' else 'InvalidTopology' if kind in ('Triangles','Empty','CachedNull') else 'InvalidBasis'
+    check('Binding '+kind+' names typed error and captive',all(s in message for s in (code,'CageEdit',target.Name)))
+    check('Binding '+kind+' retains recipe and creates no extra objects or Undo',b.Active and b.Control==c and before==(d.UndoCount,tuple(o.Name for o in d.Objects)))
+    # Release must stay usable for a damaged captive; it reads the relationship.
+    OM.releaseFromCage([b]);check('Binding '+kind+' can release damaged captive by binding storage',not b.Active and b.Control is None);App.closeDocument(d.Name)
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        for route in ('API','CMD'):
+            for kind in ('Weight','Point','Knot','Cardinality','Budget','Frame'):control_case(route,kind)
+        for kind in ('Count','Values','Triangles','Empty','Region','CachedNull'):binding_case(kind)
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

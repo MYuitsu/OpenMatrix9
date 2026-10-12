@@ -1,0 +1,58 @@
+"""RCORE-01.T07 partial: staged live native input rejection preserves host state."""
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,hashlib,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'cases':[],'module':None}
+def sha(value):return hashlib.sha256(value).hexdigest()
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    (out/'progress.json').write_text(json.dumps(report,indent=2))
+    if not value:raise AssertionError(name)
+def snapshot(doc):
+    return {'undo':doc.UndoCount,'redo':doc.RedoCount,'objects':[
+        {'name':obj.Name,'label':obj.Label,'type':obj.TypeId,'properties':list(obj.PropertiesList),
+         'state':list(obj.State),'placement':list(obj.Placement.toMatrix().A),
+         'shape':sha(obj.Shape.exportBrepToString().encode())} for obj in doc.Objects]}
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as native
+        report['module']=str(Path(native.__file__).resolve())
+        doc=App.newDocument('NativeInputTree');doc.UndoMode=1
+        doc.openTransaction('Fixture sources')
+        sentinel=doc.addObject('Part::Feature','Sentinel');sentinel.Shape=Part.makeBox(2,3,4)
+        curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(1,2,0),App.Vector(2,0,0)],[3,3],[0.,1.],False,2,[1.,.5,1.])
+        source=doc.addObject('Part::Feature','Source');source.ViewObject.Visibility=False;source.Shape=curve.toShape()
+        surface=Part.BSplineSurface();surface.buildFromPolesMultsKnots([[App.Vector(0,0,0),App.Vector(0,1,0)],[App.Vector(1,0,0),App.Vector(1,1,0)]],[2,2],[2,2],[0.,1.],[0.,1.],False,False,1,1,[[1.,.5],[.75,1.]])
+        face=doc.addObject('Part::Feature','Surface');face.ViewObject.Visibility=False;face.Shape=surface.toShape()
+        doc.commitTransaction();doc.recompute()
+        doc.openTransaction('Fixture Redo');sentinel.Label='Temporary fixture label';doc.commitTransaction();doc.undo()
+        check('fixture contains actual Undo and Redo history',doc.UndoCount>0 and doc.RedoCount>0)
+        baseline=snapshot(doc)
+        destination=out/'unchanged.3dm';destination.write_bytes(b'existing-output-sentinel')
+        cases=[(family,name,value) for family in ['curve','surface'] for name,value in [('coordinate-limit',1e151),('nonfinite-pole',float('nan')),('infinite-pole',float('inf'))]]
+        for family,name,value in cases:
+            name=family+'-'+name
+            bad=(curve if family=='curve' else surface).copy();shape=bad.toShape()
+            if family=='curve':bad.setPole(2,App.Vector(value,2,0))
+            else:bad.setPole(1,1,App.Vector(value,0,0))
+            staged=out/(name+'.brep');shape.exportBrep(str(staged));before=staged.read_bytes()
+            request={'tolerance':1e-6,'items':[{'name':name,'layer':'Default','brep':str(staged)}]}
+            error=None
+            try:native.write3dm(json.dumps(request),str(destination))
+            except Exception as exc:error=str(exc)
+            report['cases'].append({'name':name,'error':error,'input_sha256':sha(before)})
+            check(name+' rejected by native basis before output write',error is not None and ('basis rejected by Rust contract' in error or 'Invalid native NURBS' in error))
+            check(name+' exact document inventory geometry Undo Redo unchanged',snapshot(doc)==baseline)
+            check(name+' staged bytes and existing destination unchanged',staged.read_bytes()==before and destination.read_bytes()==b'existing-output-sentinel')
+        valid=out/'valid.brep';curve.toShape().exportBrep(str(valid))
+        native.write3dm(json.dumps({'tolerance':1e-6,'items':[{'name':'ValidCurve','layer':'Default','brep':str(valid)}]}),str(out/'valid.3dm'))
+        check('valid rational native source still writes V5 archive',(out/'valid.3dm').read_bytes().startswith(b'3D Geometry File Format       5'))
+        check('positive export also preserves host inventory geometry Undo Redo',snapshot(doc)==baseline)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

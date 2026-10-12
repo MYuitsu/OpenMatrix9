@@ -1,6 +1,14 @@
 use openmatrix9_rust::core_objects::Stamp;
 use openmatrix9_rust::geometry_contract_ffi::*;
 #[test]
+fn bezier_form_is_distinct_and_retained_for_curves_and_faces() {
+    for (representation,kind) in [(2,2),(4,3)] {
+        let mut value=input(representation);value.legacy_kind=kind;value.form=3;value.facts_scope=1;
+        let result=om9_geometry_descriptor(value);
+        assert_eq!((result.status,result.form),(0,3));
+    }
+}
+#[test]
 fn descriptor_abi_has_matching_scope_layouts() {
     use std::mem::{align_of, offset_of, size_of};
     assert_eq!(size_of::<DescriptorInput>(), 104);
@@ -131,6 +139,27 @@ fn unknown_flags_reject() {
     i = input(4);
     i.values = 1;
     assert_ne!(om9_geometry_descriptor(i).status, 0);
+}
+
+#[test]
+fn instance_inspection_keeps_solid_and_definition_facts_unknown() {
+    let mut i=input(10);i.legacy_kind=9;
+    let result=om9_geometry_descriptor(i);assert_eq!((result.status,result.representation,result.solid),(0,10,0));
+    i.known=1;assert_ne!(om9_geometry_descriptor(i).status,0);
+}
+#[test]
+fn group_definition_inspection_is_distinct_from_baked_brep() {
+    let mut i=input(11);i.legacy_kind=9;
+    let r=om9_geometry_descriptor(i);assert_eq!((r.status,r.representation,r.solid),(0,11,0));
+    i.form=1;assert_ne!(om9_geometry_descriptor(i).status,0);
+}
+
+#[test]
+fn native_derived_form_remains_distinct_from_analytic_simplifications() {
+    for (rep,kind) in [(2,2),(4,3)] {
+        let mut i=input(rep);i.legacy_kind=kind;i.form=4;i.facts_scope=1;
+        let result=om9_geometry_descriptor(i);assert_eq!((result.status,result.form),(0,4));
+    }
 }
 
 #[test]

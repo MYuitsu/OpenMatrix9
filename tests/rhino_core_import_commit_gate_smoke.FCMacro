@@ -1,0 +1,195 @@
+"""RCORE-01.T07: live prepared CAD must pass the Rust/native gate before binding."""
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore
+from pathlib import Path
+import hashlib, io, json, os, threading, traceback, zipfile
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'checks': [], 'cases': [], 'snapshots': {}}
+
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+    (out / 'progress.json').write_text(json.dumps(report, indent=2))
+    if not value:
+        raise AssertionError(name)
+
+def properties(owner):
+    result = {}
+    # Dump real properties through PropertyContainer, never computed Shape getters
+    # on App::Part/App::Link. Compare member bytes, excluding ZIP timestamps.
+    for name in sorted(owner.PropertiesList):
+        raw = bytes(owner.dumpPropertyContent(name, Compression=0))
+        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+            result[name] = {
+                'type': owner.getTypeIdOfProperty(name),
+                'status': sorted(owner.getPropertyStatus(name), key=repr),
+                'members': {entry: hashlib.sha256(archive.read(entry)).hexdigest()
+                            for entry in sorted(archive.namelist())},
+            }
+    return result
+
+def snapshot(doc):
+    return {'undo': doc.UndoCount, 'redo': doc.RedoCount,
+            'properties': properties(doc),
+            'objects': [{'name': obj.Name, 'type': obj.TypeId,
+                         'state': sorted(obj.State), 'properties': properties(obj),
+                         'view': properties(obj.ViewObject)} for obj in doc.Objects]}
+
+def item(name):
+    return {'name': name, 'brep': 'already-prepared-native-shape',
+            'tolerance': 1e-6, 'layer': 'Fixture::CAD',
+            'locked': False, 'visible': True, 'color': [20, 40, 60]}
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui as native
+        report['module'] = str(Path(native.__file__).resolve())
+        doc = App.newDocument('ImportCommitGate')
+        doc.UndoMode = 1
+        doc.openTransaction('Fixture source and properties')
+        parent = doc.addObject('App::Part', 'Container')
+        parent.Placement.Base = App.Vector(7, 8, 9)
+        source = doc.addObject('Part::Feature', 'Source')
+        source.Shape = Part.makeBox(2, 3, 4)
+        source.addProperty('App::PropertyString', 'FixtureMetadata')
+        source.FixtureMetadata = 'original metadata'
+        source.addProperty('App::PropertyFloatList', 'FixtureValues')
+        source.FixtureValues = [1.25, 2.5, 5.0]
+        parent.addObject(source)
+        sibling = doc.addObject('App::Link', 'Sibling')
+        sibling.setLink(source)
+        sibling.Placement.Base = App.Vector(20, 0, 0)
+        doc.recompute()
+        doc.commitTransaction()
+        before_metadata = snapshot(doc)
+        source.FixtureMetadata = 'same inventory, different metadata'
+        check('oracle detects a value edit with unchanged property names', snapshot(doc) != before_metadata)
+        source.FixtureMetadata = 'original metadata'
+        doc.recompute()
+        doc.openTransaction('Fixture redo label')
+        source.Label = 'Temporary label'
+        doc.commitTransaction()
+        doc.undo()
+        baseline = snapshot(doc)
+        check('fixture has actual Undo and Redo history', doc.UndoCount > 0 and doc.RedoCount > 0)
+        check('snapshot is repeatable and leaves all property inventories exact', snapshot(doc) == baseline)
+        check('snapshot never materializes App::Part computed Shape cache', '_Part_ShapeCache' not in parent.PropertiesList)
+        report['snapshots']['baseline'] = baseline
+
+        # Only a copied name enters the worker. None is guaranteed to reject
+        # without binding, including on the pre-thread-gate baseline.
+        document_name = doc.Name
+        worker_error = []
+        def call_from_worker():
+            try:
+                native.commit3dm(document_name, None)
+            except Exception as exc:
+                worker_error.append(str(exc))
+        worker = threading.Thread(target=call_from_worker)
+        worker.start()
+        worker.join(3)
+        check('worker entry rejects before document/native access with GUI-thread reason',
+              not worker.is_alive() and len(worker_error) == 1 and 'GUI thread' in worker_error[0])
+        check('worker entry rejection preserves all properties and executable history', snapshot(doc) == baseline)
+
+        curve = Part.BSplineCurve()
+        curve.buildFromPolesMultsKnots([App.Vector(0, 0, 0), App.Vector(1, 2, 0), App.Vector(2, 0, 0)],
+                                      [3, 3], [0., 1.], False, 2, [1., .5, 1.])
+        surface = Part.BSplineSurface()
+        surface.buildFromPolesMultsKnots([[App.Vector(0, 0, 0), App.Vector(0, 1, 0)],
+                                         [App.Vector(1, 0, 0), App.Vector(1, 1, 0)]],
+                                        [2, 2], [2, 2], [0., 1.], [0., 1.], False, False, 1, 1,
+                                        [[1., .5], [.75, 1.]])
+        for family in ('curve', 'surface'):
+            for case, value in [('coordinate-limit', 1e151), ('nan', float('nan')), ('infinity', float('inf'))]:
+                bad = (curve if family == 'curve' else surface).copy()
+                shape = bad.toShape()
+                if family == 'curve':
+                    bad.setPole(2, App.Vector(value, 2, 0))
+                else:
+                    bad.setPole(1, 1, App.Vector(value, 0, 0))
+                name = family + '-' + case
+                # Invalid second member proves the entire batch preflights before
+                # publishing even its valid first member or opening a transaction.
+                before_bytes = shape.exportBrepToString()
+                for binding in ('geometry-batch', 'preserved-instance-preview'):
+                    valid = [(item('ValidFirst'), curve.toShape())]
+                    prepared = valid + [(item(name), shape)] if binding == 'geometry-batch' else {
+                        # The gate must precede archive binding/manifest access.
+                        # A missing manifest cannot satisfy the required basis error.
+                        'host_geometry': valid,
+                        'host_previews': {'detached-preview': [(item(name), shape)]},
+                    }
+                    case_name = binding + '-' + name
+                    error = None
+                    try:
+                        native.commit3dm(doc.Name, prepared)
+                    except Exception as exc:
+                        error = str(exc)
+                    after = snapshot(doc)
+                    report['cases'].append({'name': case_name, 'error': error, 'after': after})
+                    check(case_name + ' rejected by shared native/Rust basis gate', error is not None and
+                          ('basis rejected by Rust contract' in error or 'Invalid native NURBS' in error))
+                    check(case_name + ' exact document/object/view properties and Undo/Redo unchanged', after == baseline)
+                    check(case_name + ' live detached source bytes unchanged', shape.exportBrepToString() == before_bytes)
+
+        hidden_curve = curve.copy()
+        hidden_shape = hidden_curve.toShape()
+        hidden_curve.setPole(2, App.Vector(1e151, 2, 0))
+        class RowsWithDifferentIteration(list):
+            def __iter__(self):
+                return iter([(item('HiddenInvalidCad'), hidden_shape)])
+        class PairWithDifferentLength(list):
+            def __len__(self):
+                return 2
+        class MetadataWithDifferentContains(dict):
+            def __contains__(self, key):
+                return key == 'brep' or super().__contains__(key)
+        metadata = item('HiddenMetadataCad')
+        del metadata['brep']
+        subclass_requests = [
+            ('rows-iteration', RowsWithDifferentIteration([(item('StoredValidCad'), curve.toShape())])),
+            # Three actual items avoids dereferencing empty storage on the old
+            # gate, while still proving that virtual len and storage disagree.
+            ('pair-length', [PairWithDifferentLength([item('StoredValidCad'), curve.toShape(), 'extra'])]),
+            ('metadata-contains', [(MetadataWithDifferentContains(metadata), hidden_shape)]),
+        ]
+        for name, prepared in subclass_requests:
+            error = None
+            try:
+                native.commit3dm(doc.Name, prepared)
+            except Exception as exc:
+                error = str(exc)
+            report['cases'].append({'name': name, 'error': error})
+            check(name + ' container overrides reject before unchecked native indexing/binding',
+                  error is not None and 'plain' in error)
+            check(name + ' rejected container preserves all properties and Undo/Redo', snapshot(doc) == baseline)
+
+        doc.redo()
+        check('rejected batches preserve an executable Redo transaction', source.Label == 'Temporary label')
+        doc.undo()
+        check('Redo then Undo restores exact pre-request state', snapshot(doc) == baseline)
+        accepted = native.commit3dm(doc.Name, [(item('ValidCurve'), curve.toShape()),
+                                              (item('ValidSurface'), surface.toShape())])
+        names = [obj.Name for obj in accepted]
+        check('valid batch binds both rational CAD objects', len(accepted) == 2 and all(obj.Shape.isValid() for obj in accepted))
+        check('valid batch uses exactly one Undo and clears previous Redo', doc.UndoCount == baseline['undo'] + 1 and doc.RedoCount == 0)
+        doc.undo()
+        check('one Undo removes all accepted batch objects and layers', all(doc.getObject(name) is None for name in names) and
+              [obj.Name for obj in doc.Objects] == [obj['name'] for obj in baseline['objects']])
+        check('Undo preserves source values and shared sibling target', source.FixtureMetadata == 'original metadata' and
+              sibling.LinkedObject == source and abs(source.Shape.Volume - 24) < 1e-10)
+        doc.redo()
+        check('one Redo restores the two valid native objects', all(doc.getObject(name).Shape.isValid() for name in names))
+        report['ok'] = True
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(report, indent=2))
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        Gui.getMainWindow().close()
+
+QtCore.QTimer.singleShot(1200, run)

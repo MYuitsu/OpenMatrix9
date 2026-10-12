@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Independent process: exact archived bytes, native masters and source replay."""
+import json,os,traceback,zipfile,xml.etree.ElementTree as ET
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);directory=Path(os.environ['OM9_CIRCLE_FIT_ARCHIVES']);report=dict(module=OM.__file__,checks=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def expected(owner,kind):
+ parent=owner.getGlobalPlacement()*owner.Placement.inverse()
+ if kind=='curve':p=owner.Shape.Edges[0].Curve.getPoles()
+ elif kind=='surface':p=[v for row in owner.Shape.Faces[0].Surface.getPoles()for v in row]
+ elif kind=='cloud':p=owner.Points.Points
+ elif kind=='mesh':p=[v.Vector for v in owner.Mesh.Points]
+ else:p=[v.Point for v in owner.Shape.Vertexes]
+ return [[q.x,q.y,q.z]for q in [parent.multVec(v)for v in p]]
+def paired(child):
+ try:
+  v=json.loads(child.OM9GeometryResult);s=Part.Shape();s.importBrepFromString(v['output_snapshots'][0]['geometry_data']['native_master']['payload'])
+  a,b=child.Shape.Edges[0],s.Edges[0]
+  return s.isValid()and s.isClosed()and all((a.valueAt(a.FirstParameter+f*(a.LastParameter-a.FirstParameter))-b.valueAt(b.FirstParameter+f*(b.LastParameter-b.FirstParameter))).Length<1e-7 for f in [0,.2,.5,.8,1])
+ except (ValueError,KeyError,IndexError,AttributeError):return False
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');warm=json.loads((directory/'results.json').read_text());cases=warm['cases'];final={r['name']:r['raw']for r in warm['final_records']};archive=directory/'fit_geometry.FCStd'
+  with zipfile.ZipFile(archive)as z:xml=ET.fromstring(z.read('Document.xml'))
+  # Compare loaded result to the actual persisted native String value. This
+  # avoids regenerating expected bytes from the JSON encoder under test.
+  saved={o.attrib['name']:p.find('String').attrib['value']for o in xml.findall('./ObjectData/Object')for p in o.findall('./Properties/Property')if p.attrib['name']=='OM9GeometryResult'}
+  doc=App.openDocument(str(archive))
+  for row in cases:
+   child=doc.getObject(row['child']);check(row['name']+' exact result bytes from archived native property',child.OM9GeometryResult==saved[child.Name])
+   check(row['name']+' complete owned result equals final native capture',json.loads(child.OM9GeometryResult)==json.loads(final[child.Name]))
+   check(row['name']+' cold independent master stays paired',paired(child))
+  parent=doc.getObject('FitParent');parent.Placement.Base=parent.Placement.Base+App.Vector(1,1,1);doc.recompute()
+  for row in cases:
+   child=doc.getObject(row['child']);check(row['name']+' restored parent change preserves paired output',paired(child))
+   values=json.loads(child.OM9GeometryResult)['input_snapshots'][1]['selected_points_world'];want=expected(doc.getObject(row['source']),row['kind'])
+   check(row['name']+' restored native poles/vertices transform once',len(values)==len(want)and all(max(abs(x-y)for x,y in zip(a,b))<1e-6 for a,b in zip(values,want)))
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

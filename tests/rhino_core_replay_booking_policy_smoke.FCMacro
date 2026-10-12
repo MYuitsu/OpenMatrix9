@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Compare accepted savepoint history with actual native property writes."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_SCOPE_PROBE']);import OM9ReplayScope as probe
+report['probe']=probe.__file__
+def state(doc,child):
+ return dict(booked=bool(doc.getBookedTransactionID()),pending=doc.HasPendingTransaction,undo=list(doc.UndoNames),redo=list(doc.RedoNames),label=child.Label,output=child.Output)
+def exercise(mode,booking,ending,replay):
+ doc=App.newDocument('Policy');doc.UndoMode=mode
+ child=doc.addObject('App::FeaturePython','Child');child.addProperty('App::PropertyString','Output');child.Label='original-label';child.Output='original-output';doc.recompute();doc.clearUndos()
+ if mode:
+  doc.openTransaction('Prior redo');child.Output='prior-redo';doc.commitTransaction();doc.undo()
+ if booking=='preserving':doc.openTransactionPreservingRedo('Caller')
+ elif booking!='plain':doc.openTransaction('Caller')
+ if booking=='active':child.Label='caller-label'
+ before=state(doc,child)
+ if replay:
+  result=probe.run(doc.Name,child.Name,True)
+  if not result['accepted']or not result['complete']:raise RuntimeError(result)
+ else:child.Label='replayed-label';child.Output='replayed-output'
+ accepted=state(doc,child)
+ if ending=='commit':doc.commitTransaction()
+ else:doc.abortTransaction()
+ closed=state(doc,child)
+ doc.undo();undone=state(doc,child);doc.redo();redone=state(doc,child)
+ App.closeDocument(doc.Name)
+ return dict(before=before,accepted=accepted,closed=closed,undone=undone,redone=redone)
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench')
+  for mode in [0,1]:
+   for booking in ['plain','booked','active','preserving']:
+    for ending in ['commit','abort']:
+     native=exercise(mode,booking,ending,False);replay=exercise(mode,booking,ending,True);key=f'{mode}/{booking}/{ending}'
+     for phase in ['before','accepted','closed','undone','redone']:
+      report['checks'].append(dict(name=key+' '+phase+' matches native property history',passed=native[phase]==replay[phase]))
+     report['observations'].append(dict(case=key,native=native,replay=replay))
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

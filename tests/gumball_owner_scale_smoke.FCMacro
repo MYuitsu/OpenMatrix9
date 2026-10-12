@@ -8,6 +8,15 @@ out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'feature_ids':['OM9
 def check(name,value):
     report['checks'].append({'name':name,'passed':bool(value)})
     if not value:raise AssertionError(name)
+def result_for(doc,source):
+    matches=[o for o in doc.Objects if getattr(o,'OM9GumballScaleSource',None)==source]
+    return matches[-1] if matches else None
+def same_geometry(actual,expected):
+    if not actual.isValid() or len(actual.Vertexes)!=len(expected.Vertexes) or len(actual.Edges)!=len(expected.Edges):return False
+    a,b=actual.optimalBoundingBox(False,False),expected.optimalBoundingBox(False,False)
+    if any(abs(getattr(a,k)-getattr(b,k))>1e-6 for k in ('XMin','YMin','ZMin','XMax','YMax','ZMax')):return False
+    return all(Part.Vertex(edge.valueAt(edge.FirstParameter+t*(edge.LastParameter-edge.FirstParameter))).distToShape(expected)[0]<1e-6
+               for edge in actual.Edges for t in (0,.25,.5,.75,1))
 def run():
     doc=None
     try:
@@ -36,9 +45,16 @@ def run():
         # Gui tessellation is not an exact sphere-bound oracle. Query the
         # kernel's analytical bounds without triangulation or added tolerance.
         check('uniform Sphere scale uses Radius',sphere.Radius.Value==6 and abs(sphere.Shape.optimalBoundingBox(False,False).XLength-12)<1e-7)
-        doc.undo();ui.settle();before=(sphere.Radius.Value,doc.UndoCount,doc.RedoCount)
-        ui.numeric('ScaleX','2');ui.settle()
-        check('anisotropic Sphere rejects before transaction',(sphere.Radius.Value,doc.UndoCount,doc.RedoCount)==before and 'UnsupportedOwner' in native.gumballState()['unresolved'])
+        doc.undo();ui.settle();before=sphere.Radius.Value;names={o.Name for o in doc.Objects};undo=doc.UndoCount
+        ui.numeric('ScaleX','2');doc.recompute();ui.settle();sphere_result=result_for(doc,sphere)
+        check('anisotropic Sphere creates durable native affine result and preserves Radius',sphere_result is not None and
+              sphere.Radius.Value==before and sphere.TypeId=='Part::Sphere' and sphere_result.LinkedObject.TypeId=='Part::Scale' and doc.UndoCount==undo+1)
+        sphere_expected=sphere.Shape.transformGeometry(App.Matrix(*json.loads(sphere_result.OM9GumballReport)['matrix']))
+        check('anisotropic Sphere result matches native affine geometry',same_geometry(Part.getShape(sphere_result),sphere_expected))
+        created={o.Name for o in doc.Objects}-names;sphere_result_name=sphere_result.Name
+        doc.undo();doc.recompute();ui.settle();check('anisotropic Sphere Undo removes only the result graph',all(doc.getObject(n) is None for n in created) and sphere.Radius.Value==before and sphere.Visibility)
+        doc.redo();doc.recompute();ui.settle();sphere_result=doc.getObject(sphere_result_name)
+        check('anisotropic Sphere Redo restores associated geometry',sphere_result is not None and sphere_result.OM9GumballScaleSource==sphere and same_geometry(Part.getShape(sphere_result),sphere_expected))
         source=doc.addObject('Part::Feature','Definition');source.Shape=Part.makeBox(2,3,4)
         link=doc.addObject('App::Link','Occurrence');link.setLink(source);link.Placement.Base=App.Vector(20,0,0);doc.recompute();ui.select(link)
         bounds=source.Shape.BoundBox;ui.numeric('ScaleX','2');doc.recompute();ui.settle()
@@ -54,18 +70,32 @@ def run():
         doc.redo();doc.recompute();ui.settle();check('Redo Scale after restoration preserves anisotropy',link.ScaleVector==App.Vector(2,1,1))
         doc.undo();ui.select(link)
         ui.numeric('ScaleX','2',QtCore.Qt.AltModifier);doc.recompute();ui.settle()
-        copied=next(o for o in doc.Objects if o.TypeId=='App::Link' and o!=link);copied_name=copied.Name
+        copied=next(o for o in doc.Objects if o.TypeId=='App::Link' and o!=link and o.LinkedObject==source and getattr(o,'OM9GumballIdentity',None));copied_name=copied.Name
         check('Alt Link Scale preserves source and creates scaled occurrence',link.ScaleVector==App.Vector(1,1,1) and copied.ScaleVector==App.Vector(2,1,1) and copied.LinkedObject==source)
         doc.undo();doc.recompute();ui.settle();check('Alt Link Scale Undo removes only new occurrence',doc.getObject(copied_name) is None and link.ScaleVector==App.Vector(1,1,1))
         doc.redo();doc.recompute();ui.settle();copied=doc.getObject(copied_name)
         check('Alt Link Scale Redo restores anisotropic occurrence',copied is not None and copied.ScaleVector==App.Vector(2,1,1) and abs(copied.Shape.BoundBox.XLength-4)<1e-7)
         doc.undo();ui.settle()
         link.Placement.Rotation=App.Rotation(App.Vector(0,0,1),45);doc.recompute();ui.select(link)
-        before=(link.Placement,link.ScaleVector,doc.UndoCount,doc.RedoCount)
-        ui.numeric('ScaleX','2');ui.settle()
-        check('unrepresentable Link shear rejects without owner writes',(link.Placement,link.ScaleVector,doc.UndoCount,doc.RedoCount)==before and 'UnsupportedOwner' in native.gumballState()['unresolved'])
+        before=(link.Placement,link.ScaleVector);baseline=Part.getShape(link);names={o.Name for o in doc.Objects};undo=doc.UndoCount
+        ui.numeric('ScaleX','2');doc.recompute();ui.settle();shear_result=result_for(doc,link)
+        check('Link shear creates associated native graph without changing source occurrence',shear_result is not None and
+              (link.Placement,link.ScaleVector)==before and link.LinkedObject==source and doc.UndoCount==undo+1 and
+              shear_result.LinkedObject.Base.LinkedObject.TypeId=='Part::Compound' and len(shear_result.LinkedObject.Base.LinkedObject.Links)==1 and
+              shear_result.LinkedObject.Base.LinkedObject.Links[0].TypeId=='App::Link' and
+              shear_result.LinkedObject.Base.LinkedObject.Links[0].LinkedObject==link and shear_result.LinkedObject.Base.LinkedObject.Links[0].LinkTransform and
+              shear_result.LinkedObject.Base.LinkedObject.Links[0].LinkPlacement==App.Placement())
+        shear_expected=baseline.transformGeometry(App.Matrix(*json.loads(shear_result.OM9GumballReport)['matrix']))
+        check('Link shear result matches complete affine geometry',same_geometry(Part.getShape(shear_result),shear_expected))
+        created={o.Name for o in doc.Objects}-names;shear_name=shear_result.Name
+        doc.undo();doc.recompute();ui.settle();check('Link shear Undo preserves definition and removes result graph',all(doc.getObject(n) is None for n in created) and
+              (link.Placement,link.ScaleVector)==before and link.LinkedObject==source and link.Visibility)
+        doc.redo();doc.recompute();ui.settle();shear_result=doc.getObject(shear_name)
+        check('Link shear Redo restores native associative result',shear_result is not None and shear_result.OM9GumballScaleSource==link and same_geometry(Part.getShape(shear_result),shear_expected))
         report['ok']=True
-    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    except Exception:
+        report['ok']=False;report['error']=traceback.format_exc()
+        if 'ui' in locals():report['failure_state']=native.gumballState();report['failure_transcript']=ui.transcript()
     finally:
         (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
         if doc is not None:App.closeDocument(doc.Name)

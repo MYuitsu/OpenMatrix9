@@ -1,0 +1,1558 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-solid-construction-20261011",
+  "updated_at": "2026-10-11T17:44:24+07:00",
+  "status": "in_progress",
+  "scope": "Rust-owned accepted numerical Solid construction state, atomic Shape/metadata publication and independent cold FCStd restore; full RCORE-01 remains required",
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/solid-construction-runtime35-20261011/bin/OpenMatrix9Gui.pyd",
+    "bytes": 15826432,
+    "sha256": "c695720ecc0f0062143301ea835ddcd78f84816c53591692b28a733ff638b291"
+  },
+  "previous_plugin": {
+    "path": "H:/FreeCAD-src/build/solid-construction-runtime34-20261011/bin/OpenMatrix9Gui.pyd",
+    "bytes": 15826432,
+    "sha256": "ad96f71f6371da2abcc9e02868a7bb4c3f3576dac4917b7b9785eae8747d1939"
+  },
+  "baseline_plugin": {
+    "path": "H:/FreeCAD-src/build/solid-publication-runtime33-20261011/bin/OpenMatrix9Gui.pyd",
+    "bytes": 15797248,
+    "sha256": "0763215778d3ec5e0c1fdff72955daaf49fa2d541235f8c78bb279b0d649f5cd"
+  },
+  "selected_app": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "shared_sdk_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "probe": {
+    "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+    "bytes": 50688,
+    "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+  },
+  "sources": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/solid.rs",
+      "bytes": 48240,
+      "sha256": "9257a927ac06f5cb085a7b576850845281f8f5420b942c77013667200d483ffa"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/prepared_result.rs",
+      "bytes": 17742,
+      "sha256": "c4bf82ba87949cc41db74d8fd4db7f2ee595e45e7bbf0edc595cee862f04e1e4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/solid_construction_capture.rs",
+      "bytes": 5163,
+      "sha256": "37471d79980cd81d6249e7269db446ae2af306620026e9b98bcab6cdcca03938"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SolidController.cpp",
+      "bytes": 31860,
+      "sha256": "2b6856f7cc7dcde1da7f648df150a23475652f87aa7fd36b5afbf620a6812ee9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SolidController.h",
+      "bytes": 1505,
+      "sha256": "2c2e761e6890d2e6760573646c71163ed3d66e8319c491cc902d8d4e42255452"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/RustBridge.h",
+      "bytes": 13429,
+      "sha256": "b4428621f495782ecd7236ff89a07b7983cd7efe16b8871fd1787b060e532bc3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_solid_construction_smoke.FCMacro",
+      "bytes": 9692,
+      "sha256": "82c2d5833146226bdeeab944687a5fb054ef9894d66d8f0de8676ebe89982b72"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_solid_construction_cold_smoke.FCMacro",
+      "bytes": 2723,
+      "sha256": "c770ac39e3ffa9aa442a90e5f43ef05650d7b189516c57532de1fa40e2372a13"
+    }
+  ],
+  "producer_sources": {
+    "path": "H:/FreeCAD-src/build/solid-publication-source35-20261011.json",
+    "bytes": 79158,
+    "sha256": "a8f74dd0249dad849c5fd6af2fb42b7557c1bf350f25a080443630e0bca837f3"
+  },
+  "rust_source_snapshot": {
+    "path": "H:/FreeCAD-src/build/solid-publication-source34-20261011.json",
+    "bytes": 79158,
+    "sha256": "74a6b5e2244fed806bc9d3b7d4fca2e7d501fefa76286bff870fc58aec60b741"
+  },
+  "rust": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/edit-result-solid-construction-fullrust34-final-20261011.log",
+      "bytes": 133141,
+      "sha256": "77c700620882b66a3799a09a2db5b88a7513206c39deb526a849913e04cf96aa"
+    },
+    "exit_receipt": {
+      "path": "H:/FreeCAD-src/build/edit-result-solid-construction-fullrust34-final-20261011.log.exit.json",
+      "bytes": 24,
+      "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+    },
+    "passed": 816,
+    "failed": 0,
+    "ignored": 0,
+    "source_files": 221,
+    "build_inputs_including_cargo": 223,
+    "source_identical_to_runtime35": true,
+    "new_execution_for_runtime35": false
+  },
+  "build_log": {
+    "path": "H:/FreeCAD-src/build/edit-result-solid-construction-build35-20261011.log",
+    "bytes": 14316,
+    "sha256": "622557db09675a2983833c721a78602c62f4950795e936ff03a046d7b9076409"
+  },
+  "build_exit": {
+    "path": "H:/FreeCAD-src/build/edit-result-solid-construction-build35-20261011.log.exit.json",
+    "bytes": 24,
+    "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+  },
+  "current": [
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011",
+      "checks": 67,
+      "passed": 67,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C695720ECC0F0062143301EA835DDCD78F84816C53591692B28A733FF638B291",
+        "pid": 9952,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-construction-runtime35-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15826432,
+        "sha256": "c695720ecc0f0062143301ea835ddcd78f84816c53591692b28a733ff638b291"
+      },
+      "probe": {
+        "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+        "bytes": 50688,
+        "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+      },
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011/results.json",
+          "bytes": 24356,
+          "sha256": "0e97b39d26ce436fb400d61ffb3de881be2022e764b1dff8bf5e7023425aad52"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011/shared-host-launch.json",
+          "bytes": 592,
+          "sha256": "96af2073e70b7636d96fdfe8f4c21b7e8fd7fe95d2454240dd6f9cb74f21d529"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011/fixture.FCMacro",
+          "bytes": 9692,
+          "sha256": "82c2d5833146226bdeeab944687a5fb054ef9894d66d8f0de8676ebe89982b72"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011/host-stderr.log",
+          "bytes": 1792,
+          "sha256": "93a6d3e4c9328bcf7cd063144a167f1e39c7621a9cc34abd45b48803a10e2de2"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-construction-cold35-20261011",
+      "checks": 21,
+      "passed": 21,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C695720ECC0F0062143301EA835DDCD78F84816C53591692B28A733FF638B291",
+        "pid": 40152,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-construction-cold35-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-construction-runtime35-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15826432,
+        "sha256": "c695720ecc0f0062143301ea835ddcd78f84816c53591692b28a733ff638b291"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-cold35-20261011/results.json",
+          "bytes": 13927,
+          "sha256": "b6fbdd95f67c4cac231e96c5cecfb66989ffc822fc415d7e660396482d261f60"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-cold35-20261011/shared-host-launch.json",
+          "bytes": 592,
+          "sha256": "737eff81d9d1a57243c996397b5316e3321b3c8fef3d72e914602e7bfc4b34b2"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-cold35-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-cold35-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-cold35-20261011/fixture.FCMacro",
+          "bytes": 2723,
+          "sha256": "c770ac39e3ffa9aa442a90e5f43ef05650d7b189516c57532de1fa40e2372a13"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-cold35-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-construction-cold35-20261011/host-stderr.log",
+          "bytes": 220,
+          "sha256": "1dc9bb819485733ef88c372f5b09d3ca5b5e589e55128abf1b20aaf31313d563"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-callback-green35-20261011",
+      "checks": 150,
+      "passed": 150,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C695720ECC0F0062143301EA835DDCD78F84816C53591692B28A733FF638B291",
+        "pid": 43148,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-callback-green35-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-construction-runtime35-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15826432,
+        "sha256": "c695720ecc0f0062143301ea835ddcd78f84816c53591692b28a733ff638b291"
+      },
+      "probe": {
+        "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+        "bytes": 50688,
+        "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+      },
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-callback-green35-20261011/results.json",
+          "bytes": 119202,
+          "sha256": "ead3ece0ff5c3e5bfada56e10310a4f117877c24654a7a2cc3671bbbd79c1921"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-callback-green35-20261011/shared-host-launch.json",
+          "bytes": 589,
+          "sha256": "5d46b828b339a51a2d21b959942f0e855836d81f10f619cdea31619106c351da"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-callback-green35-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-callback-green35-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-callback-green35-20261011/fixture.FCMacro",
+          "bytes": 8638,
+          "sha256": "c6c75f6137f4941d1de5ad37a9d03d47aba0b6094d5715def5ef1b12ccfa7da3"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-callback-green35-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-callback-green35-20261011/host-stderr.log",
+          "bytes": 3874,
+          "sha256": "2c8c7b6168817a33b2759f52ffcd1a03fc971442f5238b27e33da454602aafcc"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-publication-green35-20261011",
+      "checks": 86,
+      "passed": 86,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C695720ECC0F0062143301EA835DDCD78F84816C53591692B28A733FF638B291",
+        "pid": 21076,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-publication-green35-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-construction-runtime35-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15826432,
+        "sha256": "c695720ecc0f0062143301ea835ddcd78f84816c53591692b28a733ff638b291"
+      },
+      "probe": {
+        "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+        "bytes": 50688,
+        "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+      },
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-publication-green35-20261011/results.json",
+          "bytes": 61048,
+          "sha256": "a65e49a8a63e5a5b00fc02fe5e7638ae575a4d5445ab21d2dcc6ffda365eddc0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-publication-green35-20261011/shared-host-launch.json",
+          "bytes": 581,
+          "sha256": "6ec48b60638fb3a17a05d20f5a17e078624bc464f585ff891c2886f60e1a8232"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-publication-green35-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-publication-green35-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-publication-green35-20261011/fixture.FCMacro",
+          "bytes": 8962,
+          "sha256": "ff4fbc55cf4e265157d840a13531caa1d127c282e2fe5aabd2c601515d1f4566"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-publication-green35-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-publication-green35-20261011/host-stderr.log",
+          "bytes": 2304,
+          "sha256": "d266230091532a2a4a50e270fec4afd7a6fb64ab925afcc0e77a90d33f15b840"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-commands35-20261011",
+      "checks": 70,
+      "passed": 70,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C695720ECC0F0062143301EA835DDCD78F84816C53591692B28A733FF638B291",
+        "pid": 11156,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-commands35-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-construction-runtime35-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15826432,
+        "sha256": "c695720ecc0f0062143301ea835ddcd78f84816c53591692b28a733ff638b291"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-commands35-20261011/results.json",
+          "bytes": 7998,
+          "sha256": "c0aaf87df03f1e2ac45f6acbd18bdfee9076454b267b2048e43ef47aa7d9d5fa"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-commands35-20261011/shared-host-launch.json",
+          "bytes": 583,
+          "sha256": "1b65803f0817edc0a7e8763b753864971db005756776c9624875c55c7b7ab4a4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-commands35-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-commands35-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-commands35-20261011/fixture.FCMacro",
+          "bytes": 15258,
+          "sha256": "273902531613dcb19b5b14258525cc87819675b44bfdcd2fac68a318bd1fed1b"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-commands35-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-commands35-20261011/host-stderr.log",
+          "bytes": 2038,
+          "sha256": "3f15663180806a7e0c22111a947a9c224f2d446f90da4c91f5ea798cfb64c34c"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-options35-20261011",
+      "checks": 252,
+      "passed": 252,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C695720ECC0F0062143301EA835DDCD78F84816C53591692B28A733FF638B291",
+        "pid": 28464,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-options35-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-construction-runtime35-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15826432,
+        "sha256": "c695720ecc0f0062143301ea835ddcd78f84816c53591692b28a733ff638b291"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-options35-20261011/results.json",
+          "bytes": 42384,
+          "sha256": "e1a8cf0f792aa9ebce67ab7e8d2037d60578aa5b635b34dac3a380cd76f3b599"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-options35-20261011/shared-host-launch.json",
+          "bytes": 582,
+          "sha256": "0394498c04ef42673fb8a28b9da6f6a3be4b273ce9c862784fe9b8a087e3ac4b"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-options35-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-options35-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-options35-20261011/fixture.FCMacro",
+          "bytes": 19138,
+          "sha256": "63f953de35ee83ca697146cefa6d8bee40945f91271f8107ebf1854c6dd219a5"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-options35-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-options35-20261011/host-stderr.log",
+          "bytes": 2003,
+          "sha256": "4971991c985c2733cc0e4a8cb787eb8a22891b0f703eaea5475fb06c17186238"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-binding35-20261011",
+      "checks": 93,
+      "passed": 93,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C695720ECC0F0062143301EA835DDCD78F84816C53591692B28A733FF638B291",
+        "pid": 79512,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-binding35-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-construction-runtime35-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15826432,
+        "sha256": "c695720ecc0f0062143301ea835ddcd78f84816c53591692b28a733ff638b291"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-binding35-20261011/results.json",
+          "bytes": 8054,
+          "sha256": "356a0ac2e915cb7f4d4f1310575e504eec15900191d7727ffed8fcfa4fd0becb"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-binding35-20261011/shared-host-launch.json",
+          "bytes": 582,
+          "sha256": "85d7c9a0e211d7f226d7f08641b0bbf2522707a909644f30e1d75fdd76072263"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-binding35-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-binding35-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-binding35-20261011/fixture.FCMacro",
+          "bytes": 3407,
+          "sha256": "f701e6b0d7852ba72e4ad6df73bd401045a818ccbfec600254ebbab8321c0be7"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-binding35-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-binding35-20261011/host-stderr.log",
+          "bytes": 269,
+          "sha256": "71b8d4db0c610241c0b5a27335cae38f58a55e68a4a790ab0e9cb4347f3916c0"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-policy35-20261011",
+      "checks": 18,
+      "passed": 18,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "C695720ECC0F0062143301EA835DDCD78F84816C53591692B28A733FF638B291",
+        "pid": 60388,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-construction-runtime35-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-policy35-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-construction-runtime35-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15826432,
+        "sha256": "c695720ecc0f0062143301ea835ddcd78f84816c53591692b28a733ff638b291"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-policy35-20261011/results.json",
+          "bytes": 4890,
+          "sha256": "d45e2c82f7795bb44d0b4384eafa8dee7d0f5e17a7773ab62c71af74dd08c5ae"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-policy35-20261011/shared-host-launch.json",
+          "bytes": 581,
+          "sha256": "d7f61bf9b95555e9c8c683c7cb60f8a19282b604ebc52057cf1927c278437804"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-policy35-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-policy35-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-policy35-20261011/fixture.FCMacro",
+          "bytes": 3620,
+          "sha256": "9aae8bebe845527800e5fa32f16d5b9965ddb7cb2f42a384f5d52db566bb05cb"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-policy35-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-policy35-20261011/host-stderr.log",
+          "bytes": 915,
+          "sha256": "9ed800bd902f2b0ed541d49e3db81e3aa4497c459f4df8069139ee0a25b85504"
+        }
+      ]
+    }
+  ],
+  "current_checks": 757,
+  "current_actual_exits_zero": 8,
+  "baseline_red": {
+    "artifact": "H:/FreeCAD-src/build/solid-regression-construction-red33-5-20261011",
+    "checks": 67,
+    "passed": 12,
+    "failures": [
+      "BoxCenter Shape and independent construction metadata published together",
+      "BoxCenter actual kind mode phase and generation retained",
+      "BoxCenter world plan has independently expected origin axes and dimensions",
+      "BoxCenter accepted input points retained without invented conversion",
+      "BoxCenter exact unit context and revision bound",
+      "BoxCenter standalone evidence remains the accepted input after source edit",
+      "BoxCenter FCStd restores shape and evidence bytes",
+      "SphereCenter Shape and independent construction metadata published together",
+      "SphereCenter actual kind mode phase and generation retained",
+      "SphereCenter world plan has independently expected origin axes and dimensions",
+      "SphereCenter accepted input points retained without invented conversion",
+      "SphereCenter exact unit context and revision bound",
+      "SphereCenter standalone evidence remains the accepted input after source edit",
+      "SphereCenter FCStd restores shape and evidence bytes",
+      "AroundCurve Shape and independent construction metadata published together",
+      "AroundCurve actual kind mode phase and generation retained",
+      "AroundCurve world plan has independently expected origin axes and dimensions",
+      "AroundCurve accepted input points retained without invented conversion",
+      "AroundCurve exact unit context and revision bound",
+      "AroundCurve standalone evidence remains the accepted input after source edit",
+      "AroundCurve FCStd restores shape and evidence bytes",
+      "FitPoints Shape and independent construction metadata published together",
+      "FitPoints actual kind mode phase and generation retained",
+      "FitPoints world plan has independently expected origin axes and dimensions",
+      "FitPoints accepted input points retained without invented conversion",
+      "FitPoints exact unit context and revision bound",
+      "FitPoints standalone evidence remains the accepted input after source edit",
+      "FitPoints FCStd restores shape and evidence bytes",
+      "4Point Shape and independent construction metadata published together",
+      "4Point actual kind mode phase and generation retained",
+      "4Point world plan has independently expected origin axes and dimensions",
+      "4Point accepted input points retained without invented conversion",
+      "4Point exact unit context and revision bound",
+      "4Point standalone evidence remains the accepted input after source edit",
+      "4Point FCStd restores shape and evidence bytes",
+      "replace callback actually changed new evidence once",
+      "replace source Undo and prior Redo unchanged",
+      "replace typed original operation and input diagnostic",
+      "replace native output invalidated and wrapper released",
+      "replace no partial output metadata object remains",
+      "replace prior native Redo remains executable",
+      "remove callback actually changed new evidence once",
+      "remove source Undo and prior Redo unchanged",
+      "remove typed original operation and input diagnostic",
+      "remove native output invalidated and wrapper released",
+      "remove no partial output metadata object remains",
+      "remove prior native Redo remains executable",
+      "units callback actually changed new evidence once",
+      "units source Undo and prior Redo unchanged",
+      "units typed original operation and input diagnostic",
+      "units native output invalidated and wrapper released",
+      "units no partial output metadata object remains",
+      "units prior native Redo remains executable",
+      "unit-context stale command cannot create an object or Undo",
+      "unit-context original Box input diagnostic"
+    ],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\solid-publication-runtime33-20261011\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "0763215778D3EC5E0C1FDFF72955DAAF49FA2D541235F8C78BB279B0D649F5CD",
+      "pid": 33204,
+      "module_root": "H:\\FreeCAD-src\\build\\solid-publication-runtime33-20261011\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/solid-regression-construction-red33-5-20261011",
+      "exit_code": 0
+    },
+    "loaded": {
+      "app": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    "plugin": {
+      "path": "H:/FreeCAD-src/build/solid-publication-runtime33-20261011/bin/OpenMatrix9Gui.pyd",
+      "bytes": 15797248,
+      "sha256": "0763215778d3ec5e0c1fdff72955daaf49fa2d541235f8c78bb279b0d649f5cd"
+    },
+    "probe": {
+      "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+      "bytes": 50688,
+      "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+    },
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-red33-5-20261011/results.json",
+        "bytes": 13273,
+        "sha256": "fc47a66f7028220bdf8cffd0b8b6341906dd57d5d082d4e1f26aed512eeb39a5"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-red33-5-20261011/shared-host-launch.json",
+        "bytes": 591,
+        "sha256": "4063a1d3413cd8b3d62d75a31f00ccbb2cb0985a2d36a422d24301d84d902faf"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-red33-5-20261011/loaded-native-app.json",
+        "bytes": 227,
+        "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-red33-5-20261011/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-red33-5-20261011/fixture.FCMacro",
+        "bytes": 9692,
+        "sha256": "82c2d5833146226bdeeab944687a5fb054ef9894d66d8f0de8676ebe89982b72"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-red33-5-20261011/host-stdout.log",
+        "bytes": 353,
+        "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-red33-5-20261011/host-stderr.log",
+        "bytes": 1703,
+        "sha256": "1c7a1e592664b7351eb8fb70a63dd07cda3220f7f2c869848c73aaec725f02e4"
+      }
+    ]
+  },
+  "metadata_red": {
+    "artifact": "H:/FreeCAD-src/build/solid-regression-construction-green34-2-20261011",
+    "checks": 67,
+    "passed": 66,
+    "failures": [
+      "remove typed original operation and input diagnostic"
+    ],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\solid-construction-runtime34-20261011\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "AD96F71F6371DA2ABCC9E02868A7BB4C3F3576DAC4917B7B9785EAE8747D1939",
+      "pid": 49536,
+      "module_root": "H:\\FreeCAD-src\\build\\solid-construction-runtime34-20261011\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/solid-regression-construction-green34-2-20261011",
+      "exit_code": 0
+    },
+    "loaded": {
+      "app": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+        "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+        "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+      },
+      "gui": {
+        "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+        "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+      }
+    },
+    "plugin": {
+      "path": "H:/FreeCAD-src/build/solid-construction-runtime34-20261011/bin/OpenMatrix9Gui.pyd",
+      "bytes": 15826432,
+      "sha256": "ad96f71f6371da2abcc9e02868a7bb4c3f3576dac4917b7b9785eae8747d1939"
+    },
+    "probe": {
+      "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+      "bytes": 50688,
+      "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+    },
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-green34-2-20261011/results.json",
+        "bytes": 24226,
+        "sha256": "8327a3c4f86802c7e5ada50ea515b6e704082d76ddfed239f731480b7a9183f1"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-green34-2-20261011/shared-host-launch.json",
+        "bytes": 595,
+        "sha256": "9aa3243da9b723cb29af45437879ca80e5ff378343310727e7a0b49c056b3b19"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-green34-2-20261011/loaded-native-app.json",
+        "bytes": 227,
+        "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-green34-2-20261011/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-green34-2-20261011/fixture.FCMacro",
+        "bytes": 9692,
+        "sha256": "82c2d5833146226bdeeab944687a5fb054ef9894d66d8f0de8676ebe89982b72"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-green34-2-20261011/host-stdout.log",
+        "bytes": 353,
+        "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-construction-green34-2-20261011/host-stderr.log",
+        "bytes": 1794,
+        "sha256": "673ac798f8aa6cc8dcf121ba1f6c23b2a335a8ff29ce37278c54e134aa23b5e9"
+      }
+    ]
+  },
+  "archives": [
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011/BoxCenter.FCStd",
+      "bytes": 15862,
+      "sha256": "cc396388028fe86173f48d06336cfb31b6104fd9139e919acdbfb22699408ab5"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011/SphereCenter.FCStd",
+      "bytes": 26106,
+      "sha256": "6848610557d6f7a688750d2c2e461a02b5d3cc2fdddb4b238cc7724e9a615a1d"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011/AroundCurve.FCStd",
+      "bytes": 24176,
+      "sha256": "cbdf9f0eb6c28366cfe4d0d81db3e26da49c4990c1ebeb5bb391e95855a45bd9"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011/FitPoints.FCStd",
+      "bytes": 23782,
+      "sha256": "f90236ab8bf42be3b262a8b75825b59094fdcbce8229179d2ec5d5bfc523f492"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-construction-green35-20261011/4Point.FCStd",
+      "bytes": 23751,
+      "sha256": "2c1e72bff0cd8e50475d6581b4778cc43904539bdd9382dae1b311cb4f1e3aba"
+    }
+  ],
+  "cold_hosts": 1,
+  "prior": [
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-builder-fault32-20261011",
+      "checks": 69,
+      "passed": 69,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "93477220ACAC688694DEC86327992C24655FF5F4FF32CE06C946CEB7B8DD84FA",
+        "pid": 61428,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-builder-fault32-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-publication-runtime32-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15796224,
+        "sha256": "93477220acac688694dec86327992c24655ff5f4ff32ce06c946ceb7b8dd84fa"
+      },
+      "probe": {
+        "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+        "bytes": 50688,
+        "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+      },
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-fault32-20261011/results.json",
+          "bytes": 14259,
+          "sha256": "3d14c8f2205eb82245d8838e7d916b3a29c7b93fa2c69c70b0d415bee455805b"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-fault32-20261011/shared-host-launch.json",
+          "bytes": 586,
+          "sha256": "1df78e9a7b0fc51225dc2d136f1c9d09b297197fc5e07085ec7e0907b7ef3215"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-fault32-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-fault32-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-fault32-20261011/fixture.FCMacro",
+          "bytes": 6224,
+          "sha256": "aa42397a5d0670b89baad5715307432bd4ba3fab99530abeb1207b8b962a0150"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-fault32-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-fault32-20261011/host-stderr.log",
+          "bytes": 268,
+          "sha256": "6d0ba65d65f231e75ddb28f3bfce0380f2027a3ce37b2cbdf46dd1e13bdefa98"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-surface-fault32-20261011",
+      "checks": 72,
+      "passed": 72,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "93477220ACAC688694DEC86327992C24655FF5F4FF32CE06C946CEB7B8DD84FA",
+        "pid": 82268,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-surface-fault32-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-publication-runtime32-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15796224,
+        "sha256": "93477220acac688694dec86327992c24655ff5f4ff32ce06c946ceb7b8dd84fa"
+      },
+      "probe": {
+        "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+        "bytes": 50688,
+        "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+      },
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-fault32-20261011/results.json",
+          "bytes": 19773,
+          "sha256": "63f0c688973b5d724bdb48be75864dbc4e6458da1f90054102b1f6746571d54c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-fault32-20261011/shared-host-launch.json",
+          "bytes": 586,
+          "sha256": "49eab212b98158102b93859c080931b69d05eb51b06e120d63737fcf99ae390d"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-fault32-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-fault32-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-fault32-20261011/fixture.FCMacro",
+          "bytes": 6722,
+          "sha256": "ed517a308a62b0fa864edaa18c48af3fc0087ef383f9f6f82f99bf4e49a43b72"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-fault32-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-fault32-20261011/host-stderr.log",
+          "bytes": 3550,
+          "sha256": "5f79e78926e051c27575296996d652973d2f093ccea46edc53b68c6029b9a9b8"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-builder-publication32-20261011",
+      "checks": 18,
+      "passed": 18,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "93477220ACAC688694DEC86327992C24655FF5F4FF32CE06C946CEB7B8DD84FA",
+        "pid": 47944,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-builder-publication32-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-publication-runtime32-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15796224,
+        "sha256": "93477220acac688694dec86327992c24655ff5f4ff32ce06c946ceb7b8dd84fa"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-publication32-20261011/results.json",
+          "bytes": 3073,
+          "sha256": "f7aa3dad9e4d56f7b79e238722956f10922ac329689cbe817162466bdda01f43"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-publication32-20261011/shared-host-launch.json",
+          "bytes": 592,
+          "sha256": "059d7e4b74873ec0069ba62b53c6c2c2577f6ffa20b67bd62a3744da0568ef72"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-publication32-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-publication32-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-publication32-20261011/fixture.FCMacro",
+          "bytes": 5231,
+          "sha256": "87c80c608cde96cdfc83e733f4295bfe3871925c0c86c4ce34b6c760d5b531f9"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-publication32-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-builder-publication32-20261011/host-stderr.log",
+          "bytes": 268,
+          "sha256": "6d0ba65d65f231e75ddb28f3bfce0380f2027a3ce37b2cbdf46dd1e13bdefa98"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-surface-publication32-20261011",
+      "checks": 30,
+      "passed": 30,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "93477220ACAC688694DEC86327992C24655FF5F4FF32CE06C946CEB7B8DD84FA",
+        "pid": 72644,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-surface-publication32-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-publication-runtime32-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15796224,
+        "sha256": "93477220acac688694dec86327992c24655ff5f4ff32ce06c946ceb7b8dd84fa"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-publication32-20261011/results.json",
+          "bytes": 7930,
+          "sha256": "08f7778f4060f483ed4ff95bd46991b353ef1006cfb4ff7204b5df9eae95e267"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-publication32-20261011/shared-host-launch.json",
+          "bytes": 592,
+          "sha256": "9f61a08d1c1f6fc1a738c7191756ec27944cde1a01f84d3f3ceebd9486631057"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-publication32-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-publication32-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-publication32-20261011/fixture.FCMacro",
+          "bytes": 5429,
+          "sha256": "6a91f9818b5ba15f3fd05b650689f3bef3db6135b5082d1ef3a570e547c1bdb9"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-publication32-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-publication32-20261011/host-stderr.log",
+          "bytes": 2516,
+          "sha256": "4bd998db07be45c05443ba421ca30d21ab27c5f92585aaf6e646c7f385161507"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-edit-callback32-20261011",
+      "checks": 5,
+      "passed": 5,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "93477220ACAC688694DEC86327992C24655FF5F4FF32CE06C946CEB7B8DD84FA",
+        "pid": 34956,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-edit-callback32-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-publication-runtime32-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15796224,
+        "sha256": "93477220acac688694dec86327992c24655ff5f4ff32ce06c946ceb7b8dd84fa"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-edit-callback32-20261011/results.json",
+          "bytes": 953,
+          "sha256": "158ebf5309f6f0fde5f4445c2b0621f0b8b53aaffee76225d702b90a69fb0cf1"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-edit-callback32-20261011/shared-host-launch.json",
+          "bytes": 586,
+          "sha256": "a61bc2e518808891e2123fbd439141ff846b4ebcc18a2874ca52f14f77d0d129"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-edit-callback32-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-edit-callback32-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-edit-callback32-20261011/fixture.FCMacro",
+          "bytes": 3886,
+          "sha256": "285c820f2abd71ad415bf821046b02bb7c1a31862d70535f7ae3a434c49babfe"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-edit-callback32-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-edit-callback32-20261011/host-stderr.log",
+          "bytes": 1207,
+          "sha256": "8c8538ef1eb1905e8e9c463c8c62c74d62fb0c3d19edaf05892d1949cc408f0c"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-atomic-api32-20261011",
+      "checks": 23,
+      "passed": 23,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "93477220ACAC688694DEC86327992C24655FF5F4FF32CE06C946CEB7B8DD84FA",
+        "pid": 31160,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-atomic-api32-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-publication-runtime32-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15796224,
+        "sha256": "93477220acac688694dec86327992c24655ff5f4ff32ce06c946ceb7b8dd84fa"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-atomic-api32-20261011/results.json",
+          "bytes": 3246,
+          "sha256": "f71c4cc6a3eaf679d53d87215d07f32295298d79d9a4bad767f67e6d7d07781f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-atomic-api32-20261011/shared-host-launch.json",
+          "bytes": 583,
+          "sha256": "e128ad0a7ab636a6579054119b2a52b85a63f9ab1181cc7bd1d0cdb6ea2f8f1c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-atomic-api32-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-atomic-api32-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-atomic-api32-20261011/fixture.FCMacro",
+          "bytes": 7997,
+          "sha256": "df772d223cd12320842376e40c0ee6a474f5fcbaf64118ef2d3ac740d9e90a18"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-atomic-api32-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-atomic-api32-20261011/host-stderr.log",
+          "bytes": 219,
+          "sha256": "8b583fe90e12a45fdb61e838ace1fbfe3d1b35bf982bccfa00cc5602ead30f46"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-surface-preview32-20261011",
+      "checks": 468,
+      "passed": 468,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "93477220ACAC688694DEC86327992C24655FF5F4FF32CE06C946CEB7B8DD84FA",
+        "pid": 83028,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-surface-preview32-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-publication-runtime32-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15796224,
+        "sha256": "93477220acac688694dec86327992c24655ff5f4ff32ce06c946ceb7b8dd84fa"
+      },
+      "probe": {
+        "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+        "bytes": 50688,
+        "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+      },
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-preview32-20261011/results.json",
+          "bytes": 103127,
+          "sha256": "e4f9fa4a9569a55b117e6e511c66731c976d18d8c45598819f5a8b0bbff0ef79"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-preview32-20261011/shared-host-launch.json",
+          "bytes": 588,
+          "sha256": "325b8ef5985b0ce219dea92cd5c78e039cf50c8216f751e99964c54ae18be90b"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-preview32-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-preview32-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-preview32-20261011/fixture.FCMacro",
+          "bytes": 12003,
+          "sha256": "32dba0757060db6e302438c96c857bf55f68d729bf0b43c4ae2ba5801749c1ff"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-preview32-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-surface-preview32-20261011/host-stderr.log",
+          "bytes": 10117,
+          "sha256": "ea5c5ebc1d28fd8747fd2201a921b54388680b2b8c1eaad6d636d050944e5e39"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-camera32-20261011",
+      "checks": 18,
+      "passed": 18,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "93477220ACAC688694DEC86327992C24655FF5F4FF32CE06C946CEB7B8DD84FA",
+        "pid": 25824,
+        "module_root": "H:\\FreeCAD-src\\build\\solid-publication-runtime32-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-camera32-20261011",
+        "exit_code": 0
+      },
+      "loaded": {
+        "app": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADApp.dll",
+          "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176",
+          "home": "H:\\FreeCAD-src\\build\\relWithDebInfo\\"
+        },
+        "gui": {
+          "path": "H:\\FreeCAD-src\\build\\camera-close-host-green2-20261011\\FreeCADGui.dll",
+          "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+        }
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/solid-publication-runtime32-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 15796224,
+        "sha256": "93477220acac688694dec86327992c24655ff5f4ff32ce06c946ceb7b8dd84fa"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-camera32-20261011/results.json",
+          "bytes": 1865,
+          "sha256": "e443501192ac905bed4d5780ca7c82d20bc9477640fde53cef0b20cfd82299d0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-camera32-20261011/shared-host-launch.json",
+          "bytes": 579,
+          "sha256": "0b1b5703c2b55b3d7e1aadeb287e14bddbc443c8f6205fa2872f614642a7734f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-camera32-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-camera32-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-camera32-20261011/fixture.FCMacro",
+          "bytes": 3752,
+          "sha256": "7cb94cd61834877fc37e4b90bbd7e264cd4e141b7c376192dbdc479e09fc2975"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-camera32-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-camera32-20261011/host-stderr.log",
+          "bytes": 268,
+          "sha256": "6d0ba65d65f231e75ddb28f3bfce0380f2027a3ce37b2cbdf46dd1e13bdefa98"
+        }
+      ]
+    }
+  ],
+  "prior_plugin": {
+    "path": "H:/FreeCAD-src/build/solid-publication-runtime32-20261011/bin/OpenMatrix9Gui.pyd",
+    "bytes": 15796224,
+    "sha256": "93477220acac688694dec86327992c24655ff5f4ff32ce06c946ceb7b8dd84fa"
+  },
+  "prior_checks": 703,
+  "prior_actual_exits_zero": 8,
+  "cohort_scope": "757/8 runs the matching Runtime35 plugin, including1 cold host.703/8 is preserved historical Runtime32 evidence only. Rust816 ran on identical Rust inputs at Runtime34; no Rust35 execution is claimed.",
+  "remaining": [
+    "RCORE-01 remains in_progress. Preserve every original geometry family, enabled consumer, eight typed errors, adapters1–7, C01–C12 and T01–T11; these caller witnesses do not certify the whole chapter.",
+    "Global conversion deviation and complete parameter/topology maps, remaining source attributes/full GeometryResult consumers, rational/periodic basis/trims/seam occurrences, solid validity and truthful representation/read/edit/retain/export remain required.",
+    "Worker-to-GUI dispatch, arbitrary/custom callbacks and native document closure, all-family source/lock/owner gates, aggregate allocation/traversal/cancellation budgets, preview/cache cleanup in other producers and independent persistence/lifetime contracts remain required. Solid proofs cover only the listed synchronous native publication/callback paths; no actual Solid preview was constructed by these fixtures.",
+    "Builder, Surface and Solid caller diagnostics/reference release are proven only for the exercised cases. Partial Python allocation failures, additional native exception classes, callbacks after the final gate and general GeometryResult integration remain unproven.",
+    "Production deployment/ABI acceptance remains pending. Tests use the isolated App19/camera-guard GUI host; shared SDK binaries are unchanged. Current Runtime35 has757 assertions/8 actual host exits0. Historical Runtime32 caller703/8 remains a separate cohort, not a Runtime35 rerun.",
+    "One prior owned test launcher attempt terminated with ntdll invalid-handle c0000008 before recorded bootstrap telemetry; identical-binary retry passes, underlying startup cause remains unproven. Early new camera fixtures lacked pivy initialization or the checked-action argument; these attempts are retained and excluded from final proof.",
+    "The Solid owned solver fingerprint excludes only native Checked cache bits on an independent copy. This is a tested publication-integrity guard, not a global geometric equivalence, deviation, conversion or topology-map certificate. Full Solid GeometryResult/conversion/maps remain required.",
+    "OM9SolidConstruction is Rust-owned numerical input evidence only. Full Solid GeometryResult, complete source attributes/master/provenance, selected FitPoints native source guards, conversion/deviation and parameter/topology maps remain required. It does not certify current/live validity or preserve every original numeric input token.",
+    "The captured frame is the session input frame at capture, not a promised initial frame. Existing Solid math still uses document-world mm and existing solver tolerances; storing and latching the unit-context revision does not establish tolerance-driven solver behavior.",
+    "Warm and cold archives cover the five named command recipes. No actual Solid preview was constructed; preview leases, worker dispatch, arbitrary later callbacks and every original family/adapter/C01–C12/T01–T11 still require evidence."
+  ],
+  "independent_review": "Source-only review of missing construction property guard found no findings: frozen staleContext precedes setEditorMode, pythonError clears exception and Ref owns successful getter. Native evidence is separate.",
+  "excluded_attempts": [
+    "Runtime33 initial construction attempt closed a document then accessed its invalid wrapper; excluded fixture error",
+    "Earlier Runtime33 witness variants before final matching67 fixture are historical and not pooled",
+    "First Runtime34 construction fixture parsed versioned pipe-separated units as JSON; excluded fixture error; expectations corrected to native unit snapshot and literal existing Sphere output layout",
+    "Runtime34 final matching67 fixture66passed/1 typed missing-property failure is RED, not GREEN",
+    "First full Rust34 execution815 predates accepted-point fidelity fix; final source-identical816 is used"
+  ],
+  "native_exception": "Rust owns accepted numerical point/history/constraint/frame state and bounded JSON serialization/query-copy ABI. C++ is limited to native units, GUI-thread properties/transactions and Part solver ownership. Existing FreeCAD Part construction is reused; macros and fault probe are test infrastructure."
+}

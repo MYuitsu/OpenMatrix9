@@ -5,5 +5,5 @@ namespace OpenMatrix9Gui {
 // Exact native evaluator/kernel adapter; solver policy/numerics live in Rust.
 std::array<double,7> circleSolveNative(const std::map<std::size_t,SolidCurveReference>&,
     const double* constraints,std::size_t count,const double* frame,int solution,
-    bool fromFirst,bool vertical);
+    bool fromFirst,bool vertical,std::array<double,3>* contactFractions=nullptr);
 }

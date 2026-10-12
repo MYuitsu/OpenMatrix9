@@ -1,0 +1,54 @@
+"""Actual source-content and result-publication callbacks; not conversion proof."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(console,text):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+class Tamper:
+    def __init__(self,doc,source,action):self.doc=doc;self.source=source;self.action=action;self.calls=0
+    def slotCreatedObject(self,obj):
+        if self.calls or self.action!='tolerance' or obj.Document!=self.doc or obj.Name!='Sphere':return
+        self.calls+=1;self.source.Shape.fixTolerance(.02)
+    def slotChangedObject(self,obj,prop):
+        if self.calls or self.action=='tolerance' or obj.Document!=self.doc or prop!='OM9GeometryResult' or not getattr(obj,prop,''):return
+        self.calls+=1
+        if self.action=='remove':obj.removeProperty(prop)
+        else:obj.OM9GeometryResult='tampered'
+def rejected(console,action):
+    doc=App.newDocument('SolidResultGuard'+action);doc.UndoMode=1;observer=None
+    try:
+        OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+        source=doc.addObject('Part::Feature','Source');source.Shape=Part.makePolygon([App.Vector(1,0,0),App.Vector(0,1,0),App.Vector(-1,0,0)])
+        witness=doc.addObject('App::FeaturePython','Witness');doc.recompute()
+        doc.openTransaction('prior Redo');witness.Label='Redo value';doc.commitTransaction();doc.undo()
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(source)
+        for text in ['Sphere','FitPoints','Selection']:enter(console,text)
+        before=(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount);console.clear()
+        observer=Tamper(doc,source,action);App.addDocumentObserver(observer);enter(console,'');App.removeDocumentObserver(observer)
+        diagnostic=console.toPlainText()
+        check(action+' actual callback executed once',observer.calls==1)
+        check(action+' no output or partial metadata and native Undo Redo unchanged',doc.getObject('Sphere') is None and (tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount)==before)
+        check(action+' typed rejection retains actual Sphere Source diagnostic',any('StaleGeometry:' in line and 'Sphere' in line and 'Source' in line for line in diagnostic.splitlines()))
+        if action=='tolerance':check('native shared TShape tolerance really changed',source.Shape.getTolerance(1)>=.019)
+        if doc.RedoCount:doc.redo()
+        check(action+' previous native Redo still executable',witness.Label=='Redo value')
+        report['observations'].append(dict(case=action,calls=observer.calls,diagnostic=diagnostic))
+    finally:
+        if observer:App.removeDocumentObserver(observer)
+        Gui.Selection.clearSelection();enter(console,'Cancel');App.closeDocument(doc.Name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        for action in ['tolerance','remove','alter']:rejected(console,action)
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

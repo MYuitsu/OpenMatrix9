@@ -1,0 +1,262 @@
+{
+  "key": "rhino-core-global-close-20261011",
+  "updated_at": "2026-10-11T13:59:11+07:00",
+  "status": "in_progress",
+  "final_native_acceptance": false,
+  "verified_sdk": "API12",
+  "app_dll": {
+    "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+    "bytes": 9877504,
+    "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+  },
+  "targeted_native": {
+    "artifact": "H:/FreeCAD-src/build/atomic-host-tests-api12-20261011",
+    "executed": 46,
+    "passed": 46,
+    "failures": [],
+    "skipped": [],
+    "exit": {
+      "exit_code": 0,
+      "scope": "atomic",
+      "note": "Consult inputs.json for compiled sources, bootstrap and selected shared SDK DLL.",
+      "profile": "H:\\FreeCAD-src\\build\\atomic-host-tests-api12-20261011\\profile-tests",
+      "temp": "H:\\FreeCAD-src\\build\\atomic-host-tests-api12-20261011\\temp-tests"
+    },
+    "xml": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api12-20261011/tests.xml",
+      "bytes": 11448,
+      "sha256": "b6a78aa57a8982c8e51ebab3e302f19faa6a721c1aa250ceec69c676fa095f15"
+    },
+    "log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api12-20261011/tests.log",
+      "bytes": 7850,
+      "sha256": "85017a1a8d93d3b53bf1fd292062828dec8a33d05defe553253e2492ecb67273"
+    },
+    "inputs": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api12-20261011/inputs.json",
+      "bytes": 9831,
+      "sha256": "1af4080dd64d28765391552183fd7de687002cc8d5826e5c83fa07b177b0f600"
+    },
+    "binary": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api12-20261011/App_tests_run.exe",
+      "bytes": 4099584,
+      "sha256": "e6abea24941e86fe26a293202077539445059a4c93dfd58462eeec7c6d2dcec5"
+    }
+  },
+  "app_suite": {
+    "artifact": "H:/FreeCAD-src/build/atomic-host-tests-api12-20261011",
+    "executed": 604,
+    "passed": 602,
+    "failures": [],
+    "skipped": [
+      "BackupPolicyTest.StandardWithZeroFilesDeletesExisting",
+      "BackupPolicyTest.TimestampWithZeroFilesDeletesExisting"
+    ],
+    "exit": {
+      "note": "Consult inputs.json for compiled sources, bootstrap and selected shared SDK DLL.",
+      "exit_code": 0,
+      "temp": "H:\\FreeCAD-src\\build\\atomic-host-tests-api12-20261011\\temp-suite-sdk",
+      "scope": "app",
+      "profile": "H:\\FreeCAD-src\\build\\atomic-host-tests-api12-20261011\\profile-suite-sdk"
+    },
+    "xml": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api12-20261011/suite-sdk.xml",
+      "bytes": 144057,
+      "sha256": "6757a10b9d7cfd3f6c01f22fd8afde030554f1503c70e9a86f4de26fa7f32a71"
+    },
+    "log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api12-20261011/suite-sdk.log",
+      "bytes": 80206,
+      "sha256": "9c12344db952eeef773480e4858cf8862c314aad67dacb33fdbf60305f1faf13"
+    },
+    "inputs": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api12-20261011/inputs.json",
+      "bytes": 9831,
+      "sha256": "1af4080dd64d28765391552183fd7de687002cc8d5826e5c83fa07b177b0f600"
+    },
+    "binary": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-api12-20261011/App_tests_run.exe",
+      "bytes": 4099584,
+      "sha256": "e6abea24941e86fe26a293202077539445059a4c93dfd58462eeec7c6d2dcec5"
+    }
+  },
+  "global_boundary_green": {
+    "artifact": "H:/FreeCAD-src/build/atomic-host-tests-close-api12-20261011",
+    "executed": 8,
+    "passed": 8,
+    "failures": [],
+    "skipped": [],
+    "exit": {
+      "host_sha256": "C13DF12404F5AB5AB22158190E1181BCE81E8182A34C9BD6B9AE0879EE0B9020",
+      "exit_code": 0,
+      "filter": "AtomicPublicationCloseTest.*"
+    },
+    "xml": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-api12-20261011/isolated-boundary.xml",
+      "bytes": 2702,
+      "sha256": "33e8d54d6b8255a80077a2cf8b4d1b8a3551d976d38181c898c4d1577503ed0c"
+    },
+    "log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-api12-20261011/isolated-boundary.log",
+      "bytes": 1866,
+      "sha256": "2755981b9d1c74dc94896132a8cb6ef747ae7152a719099bb52022542376d598"
+    },
+    "inputs": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-api12-20261011/inputs.json",
+      "bytes": 9976,
+      "sha256": "02c86d14b085cac0e6787b3872fe0038b623d168ff74ca39bd383ed8607a81d6"
+    },
+    "binary": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-api12-20261011/App_tests_run.exe",
+      "bytes": 3710464,
+      "sha256": "2d4cc0786ef08dd744283fb52670f47ee09d82e3dfbccdc4d4a2ad83daf9df26"
+    }
+  },
+  "admission_history_red": {
+    "artifact": "H:/FreeCAD-src/build/atomic-host-tests-close-red6-20261011",
+    "executed": 4,
+    "passed": 0,
+    "failures": [
+      "AtomicPublicationCloseTest.BeforeCommitRejectsLateParticipant",
+      "AtomicPublicationCloseTest.BeforeAbortRejectsLateParticipant",
+      "AtomicPublicationCloseTest.EmptyCommitRetainsExecutablePriorUndo",
+      "AtomicPublicationCloseTest.MixedCommitRetainsEmptyParticipantsPriorUndo"
+    ],
+    "skipped": [],
+    "exit": {
+      "exit_code": 1,
+      "host_sha256": "C13DF12404F5AB5AB22158190E1181BCE81E8182A34C9BD6B9AE0879EE0B9020",
+      "filter": "AtomicPublicationCloseTest.BeforeCommitRejectsLateParticipant:AtomicPublicationCloseTest.BeforeAbortRejectsLateParticipant:AtomicPublicationCloseTest.EmptyCommitRetainsExecutablePriorUndo:AtomicPublicationCloseTest.MixedCommitRetainsEmptyParticipantsPriorUndo"
+    },
+    "xml": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red6-20261011/isolated-admission-history.xml",
+      "bytes": 10276,
+      "sha256": "65c92f0710c5e4e11cb430d10f9dd6f9122e3af7052c38c0c5147b0a1a741e55"
+    },
+    "log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red6-20261011/isolated-admission-history.log",
+      "bytes": 5407,
+      "sha256": "623d104bba7f2df983f1ac3cb7202a18ae4977b94fdcfb3e161db93a4346b0ed"
+    },
+    "inputs": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red6-20261011/inputs.json",
+      "bytes": 9967,
+      "sha256": "4443ef2398bb290e91ff14c8769a789e7e8b6092546dbc73728fa16b4fd60f0c"
+    },
+    "binary": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red6-20261011/App_tests_run.exe",
+      "bytes": 3736576,
+      "sha256": "3d09f1d8ba5566ee90413945eefec6f7d0ab6bc15a008b8775f54edec85fbbe0"
+    }
+  },
+  "admission_nested_red": {
+    "artifact": "H:/FreeCAD-src/build/atomic-host-tests-close-red8-20261011",
+    "executed": 4,
+    "passed": 0,
+    "failures": [
+      "AtomicPublicationCloseTest.NestedAbortHasIndependentGlobalNotificationPair",
+      "AtomicPublicationCloseTest.NestedBeforeExceptionHasIndependentFailureVerdict",
+      "AtomicPublicationCloseTest.ProtectedGlobalCloseRejectsAutomaticLateAdmission",
+      "AtomicPublicationCloseTest.InnerCommitObserverCannotJoinClosingOuterGroup"
+    ],
+    "skipped": [],
+    "exit": {
+      "host_sha256": "C13DF12404F5AB5AB22158190E1181BCE81E8182A34C9BD6B9AE0879EE0B9020",
+      "exit_code": 1,
+      "filter": "AtomicPublicationCloseTest.ProtectedGlobalCloseRejectsAutomaticLateAdmission:AtomicPublicationCloseTest.InnerCommitObserverCannotJoinClosingOuterGroup:AtomicPublicationCloseTest.NestedAbortHasIndependentGlobalNotificationPair:AtomicPublicationCloseTest.NestedBeforeExceptionHasIndependentFailureVerdict"
+    },
+    "xml": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red8-20261011/isolated-admission-nested.xml",
+      "bytes": 10879,
+      "sha256": "d3cc24607b2a224c9e943a0d1b9f103cbc38bacac95d50647acdd5b71afd8504"
+    },
+    "log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red8-20261011/isolated-admission-nested.log",
+      "bytes": 5788,
+      "sha256": "bb6859d0e241ecaaa3ca1f1249132a9bd1f72f96e068bcaae1a7eb45fd18ed6e"
+    },
+    "inputs": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red8-20261011/inputs.json",
+      "bytes": 9967,
+      "sha256": "0f67b0b4168d3a5ace1bcfe6e35aae0bbbcc4eb38420096e65580b6ff6889ae1"
+    },
+    "binary": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red8-20261011/App_tests_run.exe",
+      "bytes": 3782656,
+      "sha256": "0d798fd2a416e7991201b8dca8b57ec24c019f88502ef40449b4841f7b39352e"
+    }
+  },
+  "historical_api11_fatal_close": {
+    "exit": {
+      "exit_code": 3,
+      "host_sha256": "B0EF93D50EFFE2DFC37FE525E45C8DEF7EF842EC65E3A93ED8182E466DCC336D",
+      "filter": "AtomicPublicationCloseTest.CloseCommitExceptionRollsBackStagedNativeJournals"
+    },
+    "log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-tests-close-red3-20261011/isolated-close-commit.log",
+      "bytes": 408,
+      "sha256": "5b958db33e6b2ea238900992bcd25babfbdc37d22baec7867bd840632b87783a"
+    },
+    "xml_exists": false
+  },
+  "candidate_api13": {
+    "source": [
+      {
+        "path": "H:/FreeCAD-src/src/App/Application.cpp",
+        "bytes": 144889,
+        "sha256": "f55897175a05135e21f093e0250725d6b3ed482f1e562a080863e01bf64ad159"
+      },
+      {
+        "path": "H:/FreeCAD-src/src/App/Application.h",
+        "bytes": 43799,
+        "sha256": "c80f88954b5dc09b73787bec2e5ff3f36474cccdec756c1df33630b654b6a3e7"
+      },
+      {
+        "path": "H:/FreeCAD-src/src/App/AutoTransaction.cpp",
+        "bytes": 14109,
+        "sha256": "8628212da785cc050be5412edf8cdc8546759b46032b2810c9e824c3581a9f30"
+      },
+      {
+        "path": "H:/FreeCAD-src/src/App/Document.cpp",
+        "bytes": 157738,
+        "sha256": "c8208ef4931551e2a095e558e103b7616541e143a046ac55e60112bc5768c245"
+      },
+      {
+        "path": "H:/FreeCAD-src/src/App/Document.h",
+        "bytes": 57560,
+        "sha256": "a17697109d612331dc8cacd78b71810992d8f2cbce78b3db91281a301f54831a"
+      },
+      {
+        "path": "H:/FreeCAD-src/src/App/private/DocumentP.h",
+        "bytes": 7333,
+        "sha256": "d0717e0acecc7e7f73db15148e5bcdfbfb41780454c95ce3dddc6323e550fe55"
+      },
+      {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/native/rhino_core_atomic_publication_close.cpp",
+        "bytes": 23224,
+        "sha256": "1c696e28e13d98abbd32daa4d9bc5b23792556f00e21af65025ffb187034052e"
+      }
+    ],
+    "object_compile_exit_code": 0,
+    "object_compile_log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-api13-compile-20261011.log",
+      "bytes": 519,
+      "sha256": "cd43410a863dfbb582f4824d0d84d2db1e07c8fbff9dbd3d4004ea85f09ad139"
+    },
+    "linked": false,
+    "runtime_verified": false
+  },
+  "remaining": [
+    "API13 native candidate has object compilation only; no linked SDK DLL or matching runtime verification. Shared FreeCAD Gumball demo uses API12 DLL (observed PID75944); do not replace DLL while live.",
+    "Rebuild FreeCADApp target only after shared host closes, run the current16-case global unit, root Document/App regressions and matching selected OM9 plugin callers. Resolve every failure.",
+    "Nested callback/notification and automatic admission fixes need genuine native acceptance; arbitrary worker/custom callbacks and aggregate allocation/traversal/cancellation budgets remain open.",
+    "Caller operation/source typed commit errors and Python result reference ownership require witnesses and fixes; generic native commit failure is not full diagnostic acceptance.",
+    "All original RCORE-01 families, enabled consumers, GeometryResult/source attributes, measured global conversion deviation and parameter/topology maps, representation/export, persistence, ownership/cache/lifecycle, eight typed errors, adapters1–7, C01–C12 and T01–T11 remain required."
+  ],
+  "limitations": [
+    "The three global cohorts use successive source revisions and separate executables; these are not one combined16-case run.",
+    "Root App uses fresh Document/bootstrap units and cached other App dependencies; it excludes the isolated global unit and is not the full FreeCAD project suite.",
+    "Runtime21/API11 caller checks and Rust808 remain historical evidence; no matching API12/API13 OM9 host run is claimed.",
+    "close-red4/red5 mixed cases had incorrect setup; close-red6 is the corrected executed witness. red7 caught SEH after calling absent Redo; red8 asserts availability before replay and is the refined nested witness."
+  ]
+}

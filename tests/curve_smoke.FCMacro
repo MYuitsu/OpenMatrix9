@@ -13,6 +13,18 @@ def check(name,ok):
     if not ok: raise AssertionError(name)
 def settle():
     loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(450,loop.quit);loop.exec()
+
+def active_viewer(window):
+    # Workspace layout and dock focus can temporarily leave MDI activation empty.
+    # Wait for the real active viewer; never substitute an arbitrary viewport.
+    timer=QtCore.QElapsedTimer();timer.start()
+    while timer.elapsed()<2500:
+        area=window.findChild(QtWidgets.QMdiArea);sub=area.activeSubWindow() if area else None
+        if sub:
+            viewer=next((w for w in sub.findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible()),None)
+            if viewer:return viewer
+        loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(25,loop.quit);loop.exec()
+    raise AssertionError('Active native viewport did not become ready within 2500 ms')
 def type_command(text):
     field.setFocus();field.setText('');QtTest.QTest.keyClicks(field,text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
 def run():
@@ -41,7 +53,7 @@ def run():
         check('Curve group exists',group is not None);QtTest.QTest.mouseClick(group,QtCore.Qt.LeftButton);settle()
         button=next((b for b in dock.findChildren(QtWidgets.QToolButton) if b.property('om9IconKey')=='CurveLineSingleLine'),None)
         check('Line mouse button enabled',button is not None and button.isEnabled());QtTest.QTest.mouseClick(button,QtCore.Qt.LeftButton);settle()
-        viewer=next((w for w in window.findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible()),None)
+        viewer=active_viewer(window)
         check('active viewer found',viewer is not None)
         target=viewer.viewport();center=target.rect().center()
         def xy_pick(position):
@@ -79,7 +91,7 @@ def run():
         settle();Gui.setActiveDocument(other.Name);settle()
         type_command('Line');Gui.activeDocument().activeView().setAnimationEnabled(False);Gui.activeDocument().activeView().viewFront();settle()
         result['front_before']={'app':App.activeDocument().Name,'gui':Gui.activeDocument().Document.Name,'prompt':command_prompt(window).text()}
-        current=next(w for w in window.findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible())
+        current=active_viewer(window)
         QtTest.QTest.mouseClick(current.viewport(),QtCore.Qt.LeftButton,pos=current.viewport().rect().center());settle()
         result['front_after']=command_prompt(window).text()
         check('parallel XY ray is rejected without losing command',not other.Objects and 'cannot intersect' in command_prompt(window).text())
@@ -91,6 +103,7 @@ def run():
         result['ok']=False;result['error']=traceback.format_exc()
         result['debug']={'prompt':command_prompt(window).text() if field else '',
                          'objects':[(o.Name,len(o.Shape.Edges),o.Shape.isClosed()) for o in App.activeDocument().Objects] if App.activeDocument() else []}
+        result['debug']['mdi']=[dict(name=area.objectName(),visible=area.isVisible(),active=area.activeSubWindow().windowTitle() if area.activeSubWindow() else None,windows=[dict(title=sub.windowTitle(),visible=sub.isVisible(),viewers=sum(w.metaObject().className()=='Gui::View3DInventorViewer' for w in sub.findChildren(QtWidgets.QWidget))) for sub in area.subWindowList()]) for area in window.findChildren(QtWidgets.QMdiArea)]
     finally:
         (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
         for name in list(App.listDocuments()):

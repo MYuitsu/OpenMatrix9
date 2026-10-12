@@ -1,0 +1,67 @@
+"""Owned result snapshots restore native CAD without document/native owners."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'snapshots':{}}
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def item(name):return dict(name=name,brep='prepared',tolerance=1e-6,layer='Fixtures::Đá',locked=False,visible=True,color=[20,40,60],source_uuid='identity-'+name,class_name='native-fixture',wire_density=2)
+def signature(shape):
+ return (shape.ShapeType,len(shape.Faces),len(shape.Wires),len(shape.Edges),len(shape.Vertexes),
+  tuple(round(v,10) for v in (shape.BoundBox.XMin,shape.BoundBox.YMin,shape.BoundBox.ZMin,shape.BoundBox.XMax,shape.BoundBox.YMax,shape.BoundBox.ZMax)),
+  tuple((e.Orientation,round(e.Length,10),tuple(round(v,10) for v in e.Vertexes[0].Point)) for e in shape.Edges))
+def run():
+ try:
+  import OpenMatrix9Gui as native
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('PreparedSnapshots');doc.UndoMode=1
+  context=native.setUnitContext(doc.Name,25.4,1.,1e-6,1e-6,.001)
+  curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(1,2,0),App.Vector(2,0,0)],[3,3],[0.,1.],False,2,[1.,.5,1.])
+  wire=Part.makePolygon([App.Vector(0,0,0),App.Vector(2,0,0),App.Vector(2,3,0)])
+  outer=Part.makePolygon([App.Vector(0,0,0),App.Vector(20,0,0),App.Vector(20,20,0),App.Vector(0,20,0),App.Vector(0,0,0)])
+  inner=Part.Wire([Part.makeCircle(3,App.Vector(10,10,0))]);inner.reverse();hole=Part.Face([outer,inner])
+  cylinder=next(f for f in Part.makeCylinder(4,7).Faces if isinstance(f.Surface,Part.Cylinder));box=Part.makeBox(2,3,4)
+  reversed_curve=curve.toShape();reversed_curve.reverse();moved=Part.makeCircle(2);moved.Placement=App.Placement(App.Vector(7,8,9),App.Rotation(App.Vector(0,1,0),37))
+  cases=[('Điểm',Part.Vertex(App.Vector(2,3,4))),('Rational',curve.toShape()),('Reversed',reversed_curve),('MovedCircle',moved),('Wire',wire),('Hole',hole),('Seam',cylinder),('Shell',box.Shells[0]),('Solid',Part.makeSphere(3)),('Compound',Part.makeCompound([box,wire]))]
+  baseline=doc.UndoCount;objects=native.commit3dm(doc.Name,[(item(name),shape) for name,shape in cases]);saved={};saved_bytes={}
+  for (name,shape),obj in zip(cases,objects):
+   result=json.loads(obj.OM9GeometryResult);snap=result.get('output_snapshots',[{}])[0];report['snapshots'][name]=snap
+   saved[obj.Name]=result;saved_bytes[obj.Name]=obj.OM9GeometryResult
+   check(name+' snapshot has original required fields',snap.get('schema_version')==1 and all(k in snap for k in ('unit_context_revision','geometry_data','topology_data','source_attributes')))
+   check(name+' snapshot captures explicit unit revision',snap.get('unit_context_revision')==str(context['revision']) and snap.get('unit_context_snapshot')==context['snapshot'])
+   attributes=snap.get('source_attributes',{})
+   check(name+' source attributes are exact frozen binding metadata',all(attributes.get(k)==v for k,v in item(name).items() if k!='brep'))
+   data=snap.get('geometry_data',{});master=data.get('native_master',{})
+   restored=None
+   try:
+    if master.get('encoding')=='occt_brep_ascii_v3':restored=Part.Shape();restored.importBrepFromString(master['payload'])
+   except Exception:pass
+   check(name+' native master restores complete CAD structure',restored is not None and restored.isValid() and signature(restored)==signature(shape))
+   topology=snap.get('topology_data',{})
+   check(name+' typed support and trim tables retained',isinstance(topology.get('faces'),list) and isinstance(topology.get('edges_3d'),list) and isinstance(topology.get('vertices'),list) and len(topology['faces'])==len(shape.Faces))
+   conversions=result.get('conversion_reports',[])
+   check(name+' conversion reports have required fields without invented exactness',bool(conversions) and all(all(k in r for k in ('from','to','exactness','preserved_fields','dropped_fields','deviation_report','warnings')) and r['exactness']=='uninspected' for r in conversions))
+  rational=report['snapshots']['Rational'].get('topology_data',{}).get('edges_3d',[{}])[0].get('geometry_data',{})
+  check('rational basis survives in owned typed observations',rational.get('kind')=='nurbs_curve' and rational.get('weights')==[1.,.5,1.] and rational.get('axis',{}).get('degree')==2)
+  hole_rows=report['snapshots']['Hole'].get('topology_data',{}).get('faces',[{}])
+  check('hole loop roles survive in snapshot',len(hole_rows)==1 and sorted(l['role'] for l in hole_rows[0].get('loops',[]))==['hole','outer'])
+  seam_rows=report['snapshots']['Seam'].get('topology_data',{}).get('faces',[])
+  check('seam retains separate ordered pcurve occurrences',any(u.get('seam') and u.get('pcurve',{}).get('geometry_data') for f in seam_rows for l in f.get('loops',[]) for u in l['edge_uses']))
+  check('all snapshots commit in one Undo entry',doc.UndoCount==baseline+1)
+  names=[o.Name for o in objects];doc.undo();check('one Undo removes snapshot-bearing objects',all(doc.getObject(n) is None for n in names));doc.redo()
+  check('one Redo restores exact report bytes',all(doc.getObject(n).OM9GeometryResult==saved_bytes[n] for n in names))
+  file=out/'prepared-results.FCStd';doc.recompute();doc.saveAs(str(file));report.update(saved_file=str(file),saved_reports=saved,saved_report_bytes=saved_bytes)
+  App.closeDocument(doc.Name)
+  restored=[]
+  for name,shape in cases:
+   try:
+    detached=Part.Shape();detached.importBrepFromString(report['snapshots'][name]['geometry_data']['native_master']['payload']);restored.append(signature(detached)==signature(shape))
+   except Exception:restored.append(False)
+  check('owned snapshots restore after document close',all(restored))
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2,ensure_ascii=False))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

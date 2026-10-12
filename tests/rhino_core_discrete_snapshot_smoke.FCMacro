@@ -1,0 +1,116 @@
+"""RCORE-01 owned native mesh/cloud and their occurrence world frames."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Mesh,Points
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[],'descriptors':{}}
+def check(name,value):
+ report['checks'].append({'name':name,'passed':bool(value)})
+ if not value:raise AssertionError(name)
+def placement(x,y,z,a=0):return App.Placement(App.Vector(x,y,z),App.Rotation(App.Vector(1,2,3),a))
+def transformed(m,p):return App.Vector(*[sum(m[r][c]*p[c] for c in range(3))+m[r][3] for r in range(3)])
+def near(a,b):
+ if isinstance(a,dict):return a.keys()==b.keys() and all(near(a[k],b[k]) for k in a)
+ if isinstance(a,(list,tuple)):return len(a)==len(b) and all(near(x,y) for x,y in zip(a,b))
+ return abs(a-b)<1e-12 if isinstance(a,float) else a==b
+def leaves(row):
+ if row['representation']=='instance':return leaves(row['geometry_data']['definition_geometry'])
+ if row['representation']=='group':return [v for c in row['geometry_data']['members'] for v in leaves(c)]
+ return [row]
+def state(doc):
+ return {'names':[o.Name for o in doc.Objects],'history':[doc.UndoCount,doc.RedoCount],
+ 'mesh':{o.Name:([list(p) for p in o.Mesh.Topology[0]],o.Mesh.Topology[1]) for o in doc.Objects if o.isDerivedFrom('Mesh::Feature')},
+ 'cloud':{o.Name:[list(p) for p in o.Points.Points] for o in doc.Objects if o.isDerivedFrom('Points::Feature')},
+ 'placements':{o.Name:list(o.Placement.toMatrix().A) for o in doc.Objects if 'Placement' in o.PropertiesList}}
+def run():
+ try:
+  import OpenMatrix9Gui as native
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+  doc=App.newDocument('DiscreteSnapshots');doc.UndoMode=1
+  outer=doc.addObject('App::Part','Outer');outer.Placement=placement(100,200,300,37)
+  definition=doc.addObject('App::Part','Definition');outer.addObject(definition);definition.Placement=placement(11,13,17,23)
+  verts=[App.Vector(1,2,3),App.Vector(4,2,3),App.Vector(1,6,3),App.Vector(1,2,8)]
+  mesh_data=Mesh.Mesh([verts[:3],[verts[0],verts[2],verts[3]]])
+  mesh=doc.addObject('Mesh::Feature','MeshDefinition');definition.addObject(mesh);mesh.Mesh=mesh_data;mesh.Placement=placement(2,4,6,31)
+  points_data=Points.Points(verts);cloud=doc.addObject('Points::Feature','CloudDefinition');definition.addObject(cloud);cloud.Points=points_data;cloud.Placement=placement(-3,5,7,41)
+  doc.recompute();before=state(doc)
+  for obj,kind,original in [(mesh,'mesh',mesh_data.Topology[0]),(cloud,'point_cloud',points_data.Points)]:
+   row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));report['descriptors'][obj.Name]=row
+   check(kind+' geometry owned',row['representation']==kind and isinstance(row['geometry_data'],dict) and row['geometry_data']['kind']==kind and row['geometry_data_status']=='copied_validated_discrete_geometry')
+   check(kind+' keeps raw native coordinates',row['geometry_data']['points_xyz']==[list(p) for p in original] and row['coordinates']=='native_local')
+   check(kind+' preserves common uninspected support fields',all(k in row and row[k] is None for k in ['basis','basis_frame','brep_tool_location','restriction_facts']))
+   check(kind+' reports widened native precision',row['geometry_data']['native_storage_precision']=='float32' and row['geometry_data']['coordinate_storage']=='owned_float64')
+   check(kind+' native facet payload retained',row['geometry_data']['triangles']==([list(f) for f in mesh_data.Topology[1]] if obj==mesh else None))
+   check(kind+' does not claim CAD solid',row['topology']['solid'] is False and row['topology']['manifold'] is None)
+   check(kind+' classification evidence names native representation',row['topology']['solid_evidence']=='native_representation_type')
+   for p,copied in zip(original,row['geometry_data']['points_xyz']):check(kind+' direct nested world point',(transformed(row['local_to_world'],copied)-definition.getGlobalPlacement().multVec(obj.Placement.multVec(p))).Length<1e-8)
+  check('direct snapshots preserve source and history',state(doc)==before)
+  for typename,prop,value,kind in [('Mesh::Feature','Mesh',mesh_data,'mesh'),('Points::Feature','Points',points_data,'point_cloud')]:
+   grouped=doc.addObject(typename,'Grouped'+prop);grouped.addExtension('App::GroupExtensionPython');setattr(grouped,prop,value);doc.recompute()
+   row=json.loads(native.geometryDescriptor(doc.Name,grouped.Name))
+   check(prop+' native owner takes precedence over empty Group extension',row['representation']==kind and row['geometry_data']['kind']==kind)
+   grouped_link=doc.addObject('App::Link','Linked'+grouped.Name);grouped_link.setLink(grouped);doc.recompute()
+   linked=json.loads(native.geometryDescriptor(doc.Name,grouped_link.Name))
+   check(prop+' grouped owner stays a definition leaf',len(leaves(linked))==1 and leaves(linked)[0]['representation']==kind and leaves(linked)[0]['geometry_data']==row['geometry_data'])
+  for obj in [mesh,cloud,definition]:
+   for flag in [False,True]:
+    link=doc.addObject('App::Link','Instance'+obj.Name+str(int(flag)));outer.addObject(link);link.setLink(obj);link.LinkTransform=flag
+    link.LinkPlacement=placement(-11,5,9,43);link.ScaleVector=App.Vector(-2,3,.5);doc.recompute();before=state(doc)
+    row=json.loads(native.geometryDescriptor(doc.Name,link.Name));report['descriptors'][link.Name]=row
+    check(link.Name+' canonical leaf types retained',[r['representation'] for r in leaves(row)]==(['mesh','point_cloud'] if obj==definition else ['mesh' if obj==mesh else 'point_cloud']))
+    target,path=link.getLinkedObject(True,App.Matrix(),True)
+    for leaf in leaves(row):
+     source=doc.getObject(leaf['object_name']);original=mesh_data.Topology[0] if source==mesh else points_data.Points
+     check(link.Name+' raw definition arrays retained',leaf['geometry_data']['points_xyz']==[list(p) for p in original])
+     source_path=App.Matrix()
+     if target==definition:_,source_path=definition.getSubObject(source.Name+'.',1,App.Matrix(),False)
+     for p,copied in zip(original,leaf['geometry_data']['points_xyz']):
+      expected=outer.getGlobalPlacement().toMatrix().multiply(path).multVec(source_path.multVec(p))
+      check(link.Name+' affine world point',(transformed(leaf['local_to_world'],copied)-expected).Length<1e-8)
+    check(link.Name+' inspection preserves source',state(doc)==before)
+  for typename,property_name,value in [('Mesh::Feature','Mesh',Mesh.Mesh()),('Points::Feature','Points',Points.Points())]:
+   obj=doc.addObject(typename,'Empty'+property_name);setattr(obj,property_name,value);doc.recompute()
+   row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));check(property_name+' empty data is known empty',row['geometry_data']['points_xyz']==[] and row['geometry_data']['bounds_xyz'] is None)
+  before=state(doc)
+  for obj in [mesh,cloud]:
+   rejected=False
+   try:native.geometryDescriptor(doc.Name,obj.Name,'Vertex999')
+   except (ValueError,RuntimeError):rejected=True
+   check(obj.Name+' unsupported selector rejects atomically',rejected and state(doc)==before)
+  for name,value,count,message in [('NaN',float('nan'),1,'Rust rejected discrete geometry values'),('Infinity',float('inf'),1,'Rust rejected discrete geometry values'),('TooMany',0.,100001,'Native discrete count/retained-data budget'),('Serialized',1e38,100000,'Rust rejected discrete geometry values/serialized budget')]:
+   bad=doc.addObject('Points::Feature','Rejected'+name);bad.ViewObject.Visibility=False
+   bad.Points=Points.Points([App.Vector(value,value,value)]*count);doc.recompute()
+   before_bad=json.dumps(state(doc),sort_keys=True);failure=None
+   try:native.geometryDescriptor(doc.Name,bad.Name)
+   except (ValueError,RuntimeError) as exc:failure=str(exc)
+   check(name+' native cloud rejects at expected gate',failure is not None and message in failure)
+   check(name+' rejected descriptor preserves native data and history',json.dumps(state(doc),sort_keys=True)==before_bad)
+   doc.removeObject(bad.Name);doc.recompute()
+  fractional=doc.addObject('Points::Feature','Fractional');fractional.Points=Points.Points([App.Vector(.1,.2,.3)]);doc.recompute()
+  fraction=json.loads(native.geometryDescriptor(doc.Name,fractional.Name))
+  check('float32 cloud source precision remains explicit',fraction['geometry_data']['points_xyz']==[[0.10000000149011612,0.20000000298023224,0.30000001192092896]])
+  saved=json.dumps(report['descriptors'],sort_keys=True);before=state(doc)
+  doc.openTransaction('Replace discrete source');mesh.Mesh=Mesh.Mesh();cloud.Points=Points.Points();doc.recompute();doc.commitTransaction()
+  for obj in [mesh,cloud]:
+   updated=json.loads(native.geometryDescriptor(doc.Name,obj.Name))
+   check(obj.Name+' replacement gets fresh empty payload',updated['geometry_data']['points_xyz']==[] and updated['stamp']!=report['descriptors'][obj.Name]['stamp'])
+  doc.undo();doc.recompute();restored=state(doc)
+  report['undo_diagnostics']={'before':before,'restored':restored}
+  # Native Points Undo rebuilds Placement from a matrix; its quaternion roundtrip
+  # changes placed getters by one double ULP. Inspection preservation stays exact.
+  check('discrete Undo restores sources within native placement precision',all(near(restored[k],before[k]) for k in ['mesh','cloud','placements']))
+  for obj in [mesh,cloud]:
+   restored_row=json.loads(native.geometryDescriptor(doc.Name,obj.Name))
+   check(obj.Name+' Undo publishes restored owned geometry',restored_row['geometry_data']==report['descriptors'][obj.Name]['geometry_data'] and restored_row['stamp']!=report['descriptors'][obj.Name]['stamp'])
+  doc.redo();doc.recompute()
+  check('discrete Redo restores replacement',all(json.loads(native.geometryDescriptor(doc.Name,o.Name))['geometry_data']['points_xyz']==[] for o in [mesh,cloud]))
+  App.closeDocument(doc.Name)
+  check('owned arrays survive source replacement and close',json.dumps(report['descriptors'],sort_keys=True)==saved);report['ok']=True
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

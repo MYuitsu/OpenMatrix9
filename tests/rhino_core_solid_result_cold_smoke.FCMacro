@@ -1,0 +1,29 @@
+"""New-process restore of owned Solid result bytes and independent native CAD."""
+import json,math,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+    try:
+        check('fresh host begins without a loaded model',not App.listDocuments())
+        root=Path(os.environ['OM9_SOLID_RESULT_ARCHIVE_DIR']);warm=json.loads((root/'results.json').read_text())
+        expected={o['case']:o for o in warm['observations'] if 'result' in o}
+        for case,kind,volume in [('BoxCenter','Box',192.),('SphereCenter','Sphere',32*math.pi/3),('AroundCurve','Sphere',32*math.pi/3),('AroundPoint','Sphere',32*math.pi/3),('FitCloud','Sphere',4*math.pi/3)]:
+            doc=App.openDocument(str(root/(case+'.FCStd')));obj=doc.getObject(kind)
+            raw=getattr(obj,'OM9GeometryResult','');value=json.loads(raw) if raw else {}
+            check(case+' cold native solid matches independent volume',obj is not None and obj.Shape.isValid() and obj.Shape.isClosed() and len(obj.Shape.Solids)==1 and abs(obj.Shape.Volume-volume)<1e-7)
+            check(case+' cold owned result preserves exact saved bytes',bool(raw) and raw==expected[case]['raw'] and value==expected[case]['result'])
+            check(case+' construction and unit revision remain bound',bool(value) and value['operation_context']['construction']==json.loads(obj.OM9SolidConstruction) and all(s['unit_context_snapshot']==obj.OM9UnitContext and s['unit_context_revision']=='1' for s in value['input_snapshots']+value['output_snapshots']))
+            master=Part.Shape()
+            if value:master.importBrepFromString(value['output_snapshots'][0]['geometry_data']['native_master']['payload'])
+            check(case+' persisted independent output CAD master reconstructs',bool(value) and master.isValid() and master.isClosed() and len(master.Solids)==1 and abs(master.Volume-volume)<1e-7)
+            check(case+' no cold fabricated conversion or parameter certificate',bool(value) and value['operation']=='ConstructSolid' and value['topology_map'] is None and all(r['exactness']=='uninspected' and r['parameter_map'] is None and r['deviation_report'] is None for r in value['conversion_reports']))
+            report['observations'].append(dict(case=case,raw=raw,volume=obj.Shape.Volume));App.closeDocument(doc.Name)
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

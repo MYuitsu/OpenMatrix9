@@ -1,0 +1,85 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# OM9-LAYER-001: Edit semantic inheritance and asynchronous Rebuild publication.
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtGui,QtWidgets,QtTest
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+result={'feature_id':'OM9-LAYER-001','checks':[]}
+def check(name,value):
+    result['checks'].append({'name':name,'passed':bool(value)})
+    (out/'progress.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+    if not value:raise AssertionError(name)
+def settle(ms=200):
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(ms,loop.quit);loop.exec()
+def enter(value=''):
+    field=command_input(window);field.setFocus();field.setText(value);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def select(*objects):
+    Gui.Selection.clearSelection()
+    for obj in objects:Gui.Selection.addSelection(obj)
+def layer(slot):return next(o for o in doc.Objects if getattr(o,'OM9LayerIndex',0)==slot and getattr(o,'OM9LayerSchema','')=='1')
+def current(slot):
+    settle(500);button=dock.findChild(QtWidgets.QToolButton,'OM9LayerCurrent'+str(slot-1))
+    check('Current layer control enabled',button is not None and button.isEnabled());button.click();settle()
+    check('Current layer persisted',any(getattr(o,'OM9ActiveLayer',0)==slot for o in doc.Objects))
+def edit(command):
+    Gui.runCommand(command);settle();enter()
+    dialogs=window.findChildren(QtWidgets.QDialog,'OM9EditOptions')
+    result['edit_dialogs']=[{'visible':d.isVisible(),'title':d.windowTitle()} for d in dialogs]
+    d=next((d for d in dialogs if d.isVisible()),None);check(command+' options',d is not None)
+    ok=d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok);check(command+' preview',ok.isEnabled());ok.click();settle()
+def run():
+    global window,doc,dock
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui
+        result['module']=OpenMatrix9Gui.__file__
+        check('Selected native module',Path(result['module']).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        window=Gui.getMainWindow();doc=App.newDocument('LayerOutputs');doc.UndoMode=1
+        dock=window.findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar');settle();current(1)
+        a=doc.addObject('Part::Feature','A');a.Shape=Part.makeLine(App.Vector(),App.Vector(5,0,0))
+        b=doc.addObject('Part::Feature','B');b.Shape=Part.makeLine(App.Vector(5,0,0),App.Vector(10,0,0));doc.recompute();select(a,b)
+        edit('OM9_TopIconJoin');joined=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOP11-008')
+        check('Join inherits current layer',joined in layer(1).Group and getattr(joined,'OM9OutputLayerIndex',0)==1)
+        current(17);select(joined);edit('OM9_TopIconExplode')
+        pieces=[o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOP11-005']
+        check('Explode preserves source layer and durable metadata',len(pieces)==2 and all(o in layer(1).Group and getattr(o,'OM9OutputLayerIndex',0)==1 for o in pieces))
+        select(pieces[0]);window.findChild(QtGui.QAction,'Rebuild').trigger();settle()
+        d=window.findChild(QtWidgets.QDialog,'OM9RebuildDialog');check('Rebuild options',d is not None and d.isVisible())
+        d.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(False)
+        d.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(4);d.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree').setValue(3)
+        before={o.Name for o in doc.Objects};d.findChild(QtWidgets.QPushButton,'OM9RebuildOK').click()
+        for _ in range(60):
+            settle()
+            if window.findChild(QtWidgets.QDialog,'OM9RebuildDialog') is None:break
+        outputs=[o for o in doc.Objects if o.Name not in before and 'Shape' in o.PropertiesList]
+        check('Rebuild inherits current layer',len(outputs)==1 and outputs[0] in layer(17).Group and outputs[0].OM9OutputLayerIndex==17)
+        name=outputs[0].Name;doc.undo();settle();check('Rebuild layer Undo',doc.getObject(name) is None)
+        doc.redo();settle();check('Rebuild layer Redo',doc.getObject(name) in layer(17).Group)
+        source_name=pieces[1].Name;select(pieces[1]);window.findChild(QtGui.QAction,'Rebuild').trigger();settle()
+        d=next((d for d in window.findChildren(QtWidgets.QDialog,'OM9RebuildDialog') if d.isVisible()),None)
+        check('Default Rebuild options',d is not None and d.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').isChecked())
+        before={o.Name for o in doc.Objects};d.findChild(QtWidgets.QPushButton,'OM9RebuildOK').click();settle()
+        result['default_rebuild_error']=d.findChild(QtWidgets.QLabel,'OM9RebuildError').text() if d.isVisible() else ''
+        outputs=[o for o in doc.Objects if o.Name not in before and 'Shape' in o.PropertiesList]
+        check('Default Rebuild replaces layered input',len(outputs)==1 and doc.getObject(source_name) is None and outputs[0] in layer(17).Group)
+        replacement=outputs[0].Name;doc.undo();settle()
+        check('Default Rebuild Undo restores input membership',doc.getObject(replacement) is None and doc.getObject(source_name) in layer(1).Group)
+        doc.redo();settle();check('Default Rebuild Redo',doc.getObject(source_name) is None and doc.getObject(replacement) in layer(17).Group)
+        dependent=doc.addObject('Part::Feature','RealDependent');dependent.Shape=pieces[0].Shape.copy()
+        dependent.addProperty('App::PropertyLink','Source');dependent.Source=pieces[0];doc.recompute();select(pieces[0])
+        window.findChild(QtGui.QAction,'Rebuild').trigger();settle()
+        d=next((d for d in window.findChildren(QtWidgets.QDialog,'OM9RebuildDialog') if d.isVisible()),None)
+        before={o.Name for o in doc.Objects};d.findChild(QtWidgets.QPushButton,'OM9RebuildOK').click();settle()
+        check('Rebuild retains real dependent protection',d.isVisible() and 'dependents' in d.findChild(QtWidgets.QLabel,'OM9RebuildError').text() and before=={o.Name for o in doc.Objects} and dependent.Source==pieces[0])
+        d.findChild(QtWidgets.QPushButton,'OM9RebuildCancel').click();settle()
+        piece_names=[pieces[0].Name];file=out/'layer-outputs.FCStd';old=doc.Name;doc.saveAs(str(file));App.closeDocument(old);doc=App.openDocument(str(file));settle()
+        check('Output layer persistence',doc.getObject(name) in layer(17).Group and doc.getObject(replacement) in layer(17).Group and doc.getObject(source_name) is None and all(doc.getObject(o) is not None and doc.getObject(o).OM9OutputLayerIndex==1 for o in piece_names))
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(0,QtWidgets.QApplication.instance().quit)
+QtCore.QTimer.singleShot(1400,run)

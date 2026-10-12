@@ -7,6 +7,7 @@
 #include <fastsignals/signal.h>
 
 namespace OpenMatrix9Gui {
+struct PreparedSurfaceOutput;
 // A native document feature. Its namespace also identifies the module loaded
 // by FreeCAD's type system when restoring an FCStd without an active workbench.
 class SurfaceHistory final : public Part::Feature {
@@ -21,10 +22,11 @@ public:
     App::PropertyString SurfaceOptions;
     App::PropertyString OM9FeatureId;
     App::PropertyString OM9Command;
+    App::PropertyString OM9GeometryResult;
     App::PropertyBool HistoryEnabled;
     App::PropertyBool UpdateHistory;
     short mustExecute() const override;
-    void initialize(PyObject*, const std::vector<SurfaceInput>&, const OpenMatrix9Gui::SurfaceOptions&);
+    void initialize(const PreparedSurfaceOutput&, const std::vector<SurfaceInput>&, const OpenMatrix9Gui::SurfaceOptions&);
     void onLostLinkToObject(App::DocumentObject*) override;
 protected:
     App::DocumentObjectExecReturn* execute() override;
@@ -45,6 +47,6 @@ private:
 std::string serializeSurfaceHistoryOptions(const std::vector<SurfaceInput>&, const SurfaceOptions&);
 // The caller owns the document transaction. Returns a fully initialized native
 // feature and removes it on failure; no incomplete feature survives an exception.
-SurfaceHistory* createSurfaceHistory(App::Document&, PyObject*,
+SurfaceHistory* createSurfaceHistory(App::Document&, const PreparedSurfaceOutput&,
                                     const std::vector<SurfaceInput>&, const SurfaceOptions&);
 }

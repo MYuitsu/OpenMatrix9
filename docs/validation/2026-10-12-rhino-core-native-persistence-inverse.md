@@ -1,0 +1,22 @@
+# RCORE-01 — Native persistence inverse through private disposal
+
+App154 giữ inverse bằng buffer native Save/Restore và seal merge source; mọi private Property được giải phóng/kiểm tra trước caller transfer.
+Final recovery disposal **204/204**, original registered retirement **204/204**;32 callback/case mỗi cohort. Native inverse/source retirement/seal/budget/dynamic tests **40/40**.
+Runtime156/App154 đạt **1988 kiểm tra/13 host sạch**, gồm semantic432,close4,modes109,Curve33,booking80,scope744 và cold/legacy/spatial.
+**Discarded regular Redo vẫn RED12/28**:4 callback bị chặn và không báo accepted, nhưng original booking/Redo và paired cleanup chưa phục hồi. **Task2/3/full RCORE-01 còn mở.**
+
+The prior recovery-disposal RED128/204 is preserved and now passes unchanged on the matched native host. Native inline Save/Restore buffers survive all private Property destructors; sealed stages validate caller records after their protected source is retired. The inverse stream rejects oversized writes and external-file/incomplete inline persistence. These admission checks are not a complete type/identity/allocator proof. The newly completed discarded-Redo RED host reports blocked attempts and restores the native value, but cannot restore exact prior Redo/caller booking or complete paired cleanup. This failure remains authoritative. Shared SDK DLL/import/PDB remain unchanged; isolated App and standalone plugin builds reuse SDK/cache. Rust was not rerun.
+
+Remaining requirements:
+
+- Regular discarded-Redo disposal is RED12/28 across4 native callbacks. Attempted value/close/remove/clear is blocked and replay reports unverified KernelFailure, but exact empty booking/prior executable Redo and paired cleanup fail because caller transfer/disposal is already irreversible. Preserve native Redo transaction/object/property ownership through failed acceptance; do not remove caller states or weaken callback execution.
+- Persistence inverse and sealed source now retain usable private rollback through final Property disposal; named32-case registered original and recovery retirement both pass204. Complete all property types, nonpersistent/opaque values, identity-sensitive payloads, dynamic links, Save/Restore/factory/Copy/allocation failures and native status/touch/cache semantics remain open. Inline persistence admission is not proof of lossless recovery for every type.
+- Native inverse stream rejects writes beyond configured retained-byte budget, and unit tests cover source destruction, seal/commit, byte rejection and dynamic add/remove. Recovery/preparation/stage/inverse plus history/name capture still need a complete aggregate/peak allocation/traversal preflight. Constructor allocates copied history/name state before fully bounded validation.
+- Global/multidocument descriptors, source participants, locks, open/restore/cleanup callbacks and all Application/Document before-mutation entry points require complete acceptance. Cached rollback completion must continue to verify baseline state rather than certify a previous property-only restore when history diverges.
+- Named scope744 and all13 current hosts are clean with early selected-native import. Earlier delayed-import macro/workbench deadlocks remain preserved and unresolved; startup still logs duplicate workbench registration for shared SDK plus -M runtime. No all-startup source fix is claimed.
+- Every original RCORE01 adapter1-7,C01-C12,T01-T11 stays open until its full audit: stable refs/world-once/ownership; all curve/surface/trim/pcurve/seam families; conversion/deviation/locus/maps; registry and GeometryResult every consumer; workers/sharing/aggregate budgets/cancel; checked publication/History/cache/locks/lifetime; solid validity/manifold/cavities; read/edit/retain/export; generic Snap/mouse/render/persistence/lifecycle.
+- Rust suite was not rerun. Raw native offset-D3 discrepancy remains RED. Selected native source/build/loaded hashes are not a complete ABI/compiler dependency or native memory-safety certificate; no full prebuild plugin source inventory was frozen.
+
+Next: Make discarded regular Redo acceptance preserve native ownership/history through every callback and reject without losing original stacks; pass unchanged4-action RED28 witness including executable Redo. Audit cached rollback verdict, lossless native inverse types/links/status/cache, failures, participants and aggregate preflight, then continue full original RCORE01.
+
+[Machine evidence](2026-10-12-rhino-core-native-persistence-inverse.json).

@@ -1,0 +1,9 @@
+{
+  "source": "H:/FreeCAD-src/build/solid-regression-owned-curve-jets81-offscreen-20261011/results.json",
+  "source_sha256": "3f437b885f8a572be8bd9517e172173937c1c4d6c443634c149023790f859b71",
+  "fixture": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/fixtures/owned_curve_evaluation/native_jets_oracle.json",
+  "fixture_sha256": "57e63cf345f5f799a2ab76d8e690f363b51957dba3e981e86ac0941128d4eb46",
+  "cases": 19,
+  "queries": 183,
+  "scope": "Actual OCCT native valueAt and derivative1/2/3At, nineteen authored families including nested offset and retained trim; expectations independent of Rust evaluator"
+}

@@ -62,6 +62,7 @@ def run():
         doc.Meta = {}
         settle()
         enter('Box')
+        enter('Diagonal')
         enter('0,0,0')
         runtime_plane = tuple(OM9.cplane(doc.Name, 0))
         doc.Meta = {metadata_key: malformed}

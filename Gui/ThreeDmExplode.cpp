@@ -1,4 +1,6 @@
 #include "ThreeDmExplode.h"
+#include "NativeInputTree.h"
+#include "NativeInputTrace.h"
 #include <fstream>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
@@ -67,6 +69,15 @@ class Decoder {
         result.components.push_back(std::move(item));
     }
     void native(const ON_Geometry& source,const ON_Xform& world,ExplodeComponent item,const char* role) {
+        if(auto curve=ON_Curve::Cast(&source))InputTree::validate(*curve);
+        else if(auto brep=ON_Brep::Cast(&source))InputTree::validate(*brep);
+        else if(auto surface=ON_Surface::Cast(&source))InputTree::validate(*surface);
+        else if(auto mesh=ON_Mesh::Cast(&source))InputTree::validate(*mesh);
+        else if(auto cloud=ON_PointCloud::Cast(&source)){
+            InputTree::validate(*cloud);
+            throw GeometryRepresentationUnavailable("PointCloud Explode has no editable representation",0);
+        }
+        OM9_NATIVE_INPUT_ENTRY("explode.geometry.Duplicate");
         std::unique_ptr<ON_Geometry> copy(ON_Geometry::Cast(source.Duplicate()));
         if(!copy||(!world.IsIdentity()&&!copy->Transform(world)))throw ExchangeError("Cannot transform exploded geometry");
         const auto g=copy.get();
@@ -94,6 +105,8 @@ class Decoder {
     }
     void curve(const ON_Curve& c,const ON_Xform& world,ExplodeComponent item,const char* role) { native(c,world,std::move(item),role); }
     void cage(const ON_NurbsCage& c,const ON_Xform& world,ExplodeComponent item) {
+        InputTree::validate(c);
+        OM9_NATIVE_INPUT_ENTRY("explode.cage.IsValid");
         if(!c.IsValid())throw ExchangeError("Invalid source NURBS cage");
         auto descriptor=std::make_shared<ExplodeCage>();
         std::size_t count=1;
@@ -105,6 +118,7 @@ class Decoder {
             auto q=world*p;q*=result.scaleMm;descriptor->points.push_back(xyz(q));descriptor->weights.push_back(c.Weight(u,v,w));}
         item.cage=descriptor;
         for(int d=0;d<3;++d)for(int side=0;side<2;++side){
+            OM9_NATIVE_INPUT_ENTRY("explode.cage.IsoSurface");
             std::unique_ptr<ON_NurbsSurface> surface(c.IsoSurface(d,c.Domain(d)[side]));
             if(!surface||!surface->IsValid())throw ExchangeError("Cannot evaluate exact cage boundary");
             auto part=item;part.name+="/Boundary"+std::to_string(d*2+side+1);native(*surface,world,std::move(part),"boundary-surface");}

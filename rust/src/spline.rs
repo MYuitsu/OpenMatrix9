@@ -3,6 +3,7 @@
 pub const MAX_POLES: usize = 256;
 pub const MAX_SAMPLES: usize = 4096;
 pub const TOLERANCE: f64 = 1e-7;
+pub fn interpolation_degree_valid(degree:usize)->bool{(1..=11).contains(&degree)&&degree%2==1}
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum Knots {
     #[default]
@@ -250,7 +251,7 @@ pub fn interpolate(
     periodic: bool,
 ) -> Result<Spline, String> {
     validate(points, MAX_POLES)?;
-    if !(1..=11).contains(&requested_degree) || requested_degree % 2 == 0 {
+    if !interpolation_degree_valid(requested_degree) {
         return Err("InterpCrv supports odd degrees 1, 3, 5, 7, 9 and 11".into());
     }
     if periodic && (points.len() < 3 || distance(points[0], *points.last().unwrap()) < TOLERANCE) {

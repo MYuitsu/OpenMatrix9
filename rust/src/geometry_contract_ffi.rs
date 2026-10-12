@@ -78,6 +78,10 @@ pub extern "C" fn om9_geometry_operation(
             Backend::OcctOpenNurbsExchange => 1,
             Backend::MeshOpenNurbsExchange => 2,
             Backend::PointCloudOpenNurbsExchange => 3,
+            Backend::OcctEdit => 4,
+            Backend::MeshOcctEdit => 5,
+            Backend::NativeExplodeAdapters => 6,
+            Backend::NativeCageAdapters => 7,
         },
         Err(CapabilityError::UnsupportedOperation(_)) => 100,
         Err(CapabilityError::UnsupportedRepresentation(_)) => 101,
@@ -141,6 +145,8 @@ pub extern "C" fn om9_geometry_descriptor(i: DescriptorInput) -> DescriptorSumma
         7 => (RepresentationKind::Brep, Some(3)),
         8 => (RepresentationKind::Mesh, Some(4)),
         9 => (RepresentationKind::PointCloud, Some(5)),
+        10 => (RepresentationKind::Instance, Some(9)),
+        11 => (RepresentationKind::Group, Some(9)),
         _ => return error(2),
     };
     if legacy.is_some_and(|k| k != i.legacy_kind) || !(1..=9).contains(&i.legacy_kind) {
@@ -151,7 +157,7 @@ pub extern "C" fn om9_geometry_descriptor(i: DescriptorInput) -> DescriptorSumma
         4 => 31,
         _ => 0,
     };
-    if i.known & !mask != 0 || i.values & !i.known != 0 || i.form > 2 {
+    if i.known & !mask != 0 || i.values & !i.known != 0 || i.form > 4 {
         return error(4);
     }
     let expected_domains = match i.representation {
@@ -213,6 +219,8 @@ pub extern "C" fn om9_geometry_descriptor(i: DescriptorInput) -> DescriptorSumma
             form: match i.form {
                 1 => Fact::Known(CurveForm::Analytic),
                 2 => Fact::Known(CurveForm::Nurbs),
+                3 => Fact::Known(CurveForm::Bezier),
+                4 => Fact::Known(CurveForm::Derived),
                 _ => Fact::Unknown,
             },
             domain: if i.domain_count == 1 {
@@ -235,6 +243,8 @@ pub extern "C" fn om9_geometry_descriptor(i: DescriptorInput) -> DescriptorSumma
             form: match i.form {
                 1 => Fact::Known(SurfaceForm::Analytic),
                 2 => Fact::Known(SurfaceForm::Nurbs),
+                3 => Fact::Known(SurfaceForm::Bezier),
+                4 => Fact::Known(SurfaceForm::Derived),
                 _ => Fact::Unknown,
             },
             domains: if i.domain_count == 2 {
@@ -260,6 +270,8 @@ pub extern "C" fn om9_geometry_descriptor(i: DescriptorInput) -> DescriptorSumma
             match c.form {
                 Fact::Known(CurveForm::Analytic) => 1,
                 Fact::Known(CurveForm::Nurbs) => 2,
+                Fact::Known(CurveForm::Bezier) => 3,
+                Fact::Known(CurveForm::Derived) => 4,
                 _ => 0,
             },
             if matches!(c.domain, Fact::Known(_)) {
@@ -276,6 +288,8 @@ pub extern "C" fn om9_geometry_descriptor(i: DescriptorInput) -> DescriptorSumma
             match s.form {
                 Fact::Known(SurfaceForm::Analytic) => 1,
                 Fact::Known(SurfaceForm::Nurbs) => 2,
+                Fact::Known(SurfaceForm::Bezier) => 3,
+                Fact::Known(SurfaceForm::Derived) => 4,
                 _ => 0,
             },
             if matches!(s.domains, Fact::Known(_)) {

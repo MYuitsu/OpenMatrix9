@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Reuse the existing nonplanar solver/History fixture; inspect native contacts."""
+from pathlib import Path
+import os
+
+fixture=Path(os.environ['OM9_FIXTURE_HELPER_DIR'])/'circle_nonplanar_smoke.FCMacro'
+source=fixture.read_text(encoding='utf-8')
+needle='    c=o.Shape.Edges[0].Curve\n    return isinstance(c,Part.Circle)'
+assert source.count(needle)==1
+source=source.replace(needle,'''    c=o.Shape.Edges[0].Curve
+    if getattr(o,'Recorded',False) and getattr(o,'OM9GeometryResult',''):
+        evidence=json.loads(o.OM9GeometryResult)
+        if evidence['operation']=='ReplayCircleHistory':
+            context=evidence['operation_context'];fractions=context['resolved_contact_fractions']
+            check('Spatial owned contact count/indexing '+o.Name,len(fractions)==len(o.Points) and context['resolved_contact_indexing']=='current_constraint_points_zero_based')
+            roles=list(o.SourceRoles)
+            for i,(obj,subs)in enumerate(o.Sources):
+                if roles[i*3]!=2:continue
+                offset=roles[i*3+1];f=fractions[offset]
+                check('Spatial native fraction bounded '+str(offset),isinstance(f,(int,float)) and 0<=f<=1)
+                edge=obj.Shape.getElement(subs[0]) if subs[0] else obj.Shape.Edges[0]
+                u=edge.FirstParameter+f*(edge.LastParameter-edge.FirstParameter)
+                parent=obj.getGlobalPlacement()*obj.Placement.inverse()
+                p=parent.multVec(edge.valueAt(u));t=parent.Rotation.multVec(edge.tangentAt(u));delta=p-c.Center
+                check('Spatial independent native solved contact '+str(offset),abs(delta.Length-c.Radius)<=1e-6*max(1.,c.Radius) and abs(delta.dot(c.Axis))<=1e-6 and abs(t.dot(c.Axis))<=1e-8 and abs(delta.dot(t)/c.Radius)<=1e-8)
+    return isinstance(c,Part.Circle)''',1)
+exec(compile(source,str(fixture),'exec'),globals())

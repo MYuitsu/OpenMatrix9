@@ -1,0 +1,559 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-11T00:15:19+07:00",
+  "scope": "Shared Rust Surface operation/type/options policy consumed by native declaration, capture and construction for existing Sweep1/Sweep2/Loft solvers; partial RCORE-01 integration.",
+  "chapter_status": "in_progress",
+  "plan_status": "in_progress",
+  "remaining": [
+    "Shared construction policy and bounded native references for Curve, Solid, Rebuild and cage consumers remain open.",
+    "Surface seam/reverse/chain metadata, computed Link getters, selected-topology allocation and constraint-support admission still need full coverage.",
+    "Native GeometryResult/conversion/deviation/parameter/topology maps and original chapter ownership, cache, worker and preservation obligations remain open.",
+    "Full construction-plan regression and its final source review remain pending; these nine runs do not replace the broader native Edit/prepared-result coverage."
+  ],
+  "source_fingerprints": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NativeSurfaceRequest.h",
+      "bytes": 1074,
+      "sha256": "415d24352d1b66e0a5edae124b2c02205ac07f1a66db99af60f1765f975b26d6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\SurfaceGeometry.cpp",
+      "bytes": 24295,
+      "sha256": "f1727200c76ea4e3148dc98aec6c32f10d959273f4ddf96b5693aeca4fdba896"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\SurfaceGeometry.h",
+      "bytes": 1540,
+      "sha256": "f2851b8ca438874810ae8ee73b206c65a0ffd1be23748ee761cf64c5ee5cc2ae"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\SurfaceController.cpp",
+      "bytes": 27524,
+      "sha256": "32c009345ffc0f3361d30b421c439f1033cba115ccb09766235ecd0aab0f113f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreGeometryContract.cpp",
+      "bytes": 34485,
+      "sha256": "b2d66d6641f3e598eaa04302c14ab3fb49d231b82739ebca47c78834e2a37c47"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_native_surface_capability_smoke.FCMacro",
+      "bytes": 2760,
+      "sha256": "3fad4e75985dd3b42c6529dea003153a42c260a2deee695cdbfcfd39cca16088"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_native_construction_input_smoke.FCMacro",
+      "bytes": 4797,
+      "sha256": "fca6e41a82fa507f4da4c9a013b894e5dd16afc44b2c45e600917890078006c2"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\surface_commands_smoke.FCMacro",
+      "bytes": 13772,
+      "sha256": "386e0ac64e5a8dc96a1ecb2517ba00c4f3b5b29f5a5904eaea18d897a837533a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\surface_options_smoke.FCMacro",
+      "bytes": 19702,
+      "sha256": "10a51c532ec4a18382611e982d025920ac3c5f98208156d423002f73fe1adbd9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\surface_advanced_smoke.FCMacro",
+      "bytes": 15284,
+      "sha256": "c25e9a78e04faf9c5e20b1fcd8ec9e9c7cbc528e6df2447575314530321c6d35"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\surface_constraints_smoke.FCMacro",
+      "bytes": 18060,
+      "sha256": "4967ea143ea170fe5097b660f5134db784e6827ee0b4d0bb102df29a0cba3192"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\surface_history_smoke.FCMacro",
+      "bytes": 11863,
+      "sha256": "38e588d40844424707ff30ae90e58fbfb04a93ab5b26fd714e694b672e64513b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\curve_spline_smoke.FCMacro",
+      "bytes": 13853,
+      "sha256": "9cd8d8a25eff648f0da8959c5f1b2fee13d7988ce710a8eb5c32ff41b056da02"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_native_edit_capability_smoke.FCMacro",
+      "bytes": 4048,
+      "sha256": "2abde5d00fa89f55b5cb8d8402879f869652cf695ef996e9db13de38ecf0c639"
+    }
+  ],
+  "rust_source_receipt": {
+    "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\validation\\2026-10-10-rhino-core-native-surface-policy-source.json",
+    "bytes": 3107,
+    "sha256": "bfce4d0d8e5f6d31c9fa59be48762389e89c71c514ab1001e552b937f49e1979"
+  },
+  "harness_fingerprints": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\record-native-surface-policy-progress.py",
+      "bytes": 12447,
+      "sha256": "bc8da9ce9c8e612333d50a178a7bc4056c2363763703db96e9e623d453b2782e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\run-native-construction-input-regressions.ps1",
+      "bytes": 1810,
+      "sha256": "ff4e53559536e472fb1842cebba1e370c1bcc0b03219d83870347a6f4e8e6907"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\run-om9-plugin.ps1",
+      "bytes": 5632,
+      "sha256": "32c9fcd34f6beb2770b4440f0bf3766fd51af49b817b21434c858d4b4a6ab020"
+    }
+  ],
+  "validation": {
+    "host_checks": 637,
+    "host_runs": [
+      {
+        "case": "binding",
+        "checks": 29,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "A74E38F1CB9EE3845B3EC7F4722BD500932CB4604FA7373D318C05F9C95830BB",
+          "pid": 19344,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-surface-binding-green1-20261011",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-surface-binding-green1-20261011\\results.json",
+            "bytes": 2973,
+            "sha256": "fe175341ba48441e3069dea22b17bf6b596d0ce41a865c12181455ed1a1e8435"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-surface-binding-green1-20261011\\shared-host-launch.json",
+            "bytes": 540,
+            "sha256": "121e6eb882a3eee72ee59e7c9e64db3a336b85cac9c0f45b3f4ad6fc6e6150f2"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-surface-binding-green1-20261011\\select-plugin.FCMacro",
+            "bytes": 963,
+            "sha256": "add6f7151cb3e91b89621a7bfe64d8b3eb22c13a74bb3eca4994cb510db42813"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-surface-binding-green1-20261011\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-surface-binding-green1-20261011\\host-stderr.log",
+            "bytes": 207,
+            "sha256": "c25c5e4ebacb722933f161e6487cd8ab1224ec3f1b9ac200f52ee684c89cc5c3"
+          }
+        ]
+      },
+      {
+        "case": "input",
+        "checks": 12,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "A74E38F1CB9EE3845B3EC7F4722BD500932CB4604FA7373D318C05F9C95830BB",
+          "pid": 8840,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-surface-input-policy-green1-20261011",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-surface-input-policy-green1-20261011\\results.json",
+            "bytes": 2373,
+            "sha256": "711afafddaf138da6ef26d1e67dfa2e585565bea7bde8e3cfa6c1ccfafd771dd"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-surface-input-policy-green1-20261011\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "fecac8c8e73422599b77efc8a4e02f91dc675d0d0e3f8497dc7779ec1ea077d5"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-surface-input-policy-green1-20261011\\select-plugin.FCMacro",
+            "bytes": 963,
+            "sha256": "911bfc5e8d05cc85a3336c1411647aac444b69cd61574c46cd4eb67205c3e052"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-surface-input-policy-green1-20261011\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-surface-input-policy-green1-20261011\\host-stderr.log",
+            "bytes": 1440,
+            "sha256": "2eca9fde3fb72d4ab9eb258343728f840ddfb5e3a14af64ab54ed94e4cb1d1b2"
+          }
+        ]
+      },
+      {
+        "case": "surface-commands",
+        "checks": 97,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "A74E38F1CB9EE3845B3EC7F4722BD500932CB4604FA7373D318C05F9C95830BB",
+          "pid": 25552,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-construction-surface-commands-surfacepolicy1-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-commands-surfacepolicy1-20261010\\results.json",
+            "bytes": 11099,
+            "sha256": "aca74328bbd4a3cea54f21fb813b32eb4bb798fd84b92f4728a6bf198517775b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-commands-surfacepolicy1-20261010\\shared-host-launch.json",
+            "bytes": 562,
+            "sha256": "8df32f87547e99395c7b7ddc01336a0aaa4e4625a7c934e1aab6d052caaaf21d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-commands-surfacepolicy1-20261010\\select-plugin.FCMacro",
+            "bytes": 977,
+            "sha256": "0d20202e5167aeb98e628510e3645f51e860dd0aa6b63421b19aea9c8601649b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-commands-surfacepolicy1-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-commands-surfacepolicy1-20261010\\host-stderr.log",
+            "bytes": 3673,
+            "sha256": "9dc001e41e0a5e1c504394e085a195597e200ed71ee8600da93c5d8b67b2439c"
+          }
+        ]
+      },
+      {
+        "case": "surface-options",
+        "checks": 180,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "A74E38F1CB9EE3845B3EC7F4722BD500932CB4604FA7373D318C05F9C95830BB",
+          "pid": 74840,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-construction-surface-options-surfacepolicy1-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-options-surfacepolicy1-20261010\\results.json",
+            "bytes": 16990,
+            "sha256": "b853c3fbdf2a8ad6febd714d5cb2740af151080494d0167a81e9d6587c047a80"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-options-surfacepolicy1-20261010\\shared-host-launch.json",
+            "bytes": 561,
+            "sha256": "faaac3ce45ba8cec2b0d8d57a5ab8ae5286a2bacc32bbcab8b68179f4ceb3f09"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-options-surfacepolicy1-20261010\\select-plugin.FCMacro",
+            "bytes": 976,
+            "sha256": "15967df3f5b0c74e7eef3fe8023291d4f9ec91361ba586493f0f7910fb6e5835"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-options-surfacepolicy1-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-options-surfacepolicy1-20261010\\host-stderr.log",
+            "bytes": 9171,
+            "sha256": "f15edc14adae76d40288a29bac3f7669f646519e81944858a32a67192b1d7809"
+          }
+        ]
+      },
+      {
+        "case": "surface-advanced",
+        "checks": 108,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "A74E38F1CB9EE3845B3EC7F4722BD500932CB4604FA7373D318C05F9C95830BB",
+          "pid": 55976,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-construction-surface-advanced-surfacepolicy1-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-advanced-surfacepolicy1-20261010\\results.json",
+            "bytes": 12708,
+            "sha256": "0ab36014682bc0970e6ffff8007a3f63223cd57cc682911cc3111085ba40a186"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-advanced-surfacepolicy1-20261010\\shared-host-launch.json",
+            "bytes": 562,
+            "sha256": "a0295492cfec70fc7b8e34b04561c9c0faac6dc01c668af788b4dbf22c1ffec3"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-advanced-surfacepolicy1-20261010\\select-plugin.FCMacro",
+            "bytes": 977,
+            "sha256": "b0f5afa88c68596f635eb6bd162d5c0cb9101a202cb28f3450072a0618204aab"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-advanced-surfacepolicy1-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-advanced-surfacepolicy1-20261010\\host-stderr.log",
+            "bytes": 5792,
+            "sha256": "bb005d0a0cfa7d38bfe150a3fec8bf30e725e7689185817d6c0e0e674223b013"
+          }
+        ]
+      },
+      {
+        "case": "surface-constraints",
+        "checks": 85,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "A74E38F1CB9EE3845B3EC7F4722BD500932CB4604FA7373D318C05F9C95830BB",
+          "pid": 9416,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-construction-surface-constraints-surfacepolicy1-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-constraints-surfacepolicy1-20261010\\results.json",
+            "bytes": 9332,
+            "sha256": "d08753292dde2c366fc4aad64c0232e8c1775b70b98120274ed41ea54af1a913"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-constraints-surfacepolicy1-20261010\\shared-host-launch.json",
+            "bytes": 564,
+            "sha256": "5ef1c6bf2a17bafeedb41bc7f58b04b32254413539093f3c5e2c8c236d6a5fdf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-constraints-surfacepolicy1-20261010\\select-plugin.FCMacro",
+            "bytes": 980,
+            "sha256": "5edbf14516ac1e355f5e52806708adc60eac33e877fecda27852e333145be8e9"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-constraints-surfacepolicy1-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-constraints-surfacepolicy1-20261010\\host-stderr.log",
+            "bytes": 6182,
+            "sha256": "25dfd8bde601653abafe5d132f1746058509732a802c9ccd3b327ee98a063283"
+          }
+        ]
+      },
+      {
+        "case": "surface-history",
+        "checks": 65,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "A74E38F1CB9EE3845B3EC7F4722BD500932CB4604FA7373D318C05F9C95830BB",
+          "pid": 18636,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-construction-surface-history-surfacepolicy1-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-history-surfacepolicy1-20261010\\results.json",
+            "bytes": 6978,
+            "sha256": "7f6b3d785de261f35b8e38aa7d1ae26a590d33d98bdadd277a65126902165952"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-history-surfacepolicy1-20261010\\shared-host-launch.json",
+            "bytes": 561,
+            "sha256": "490174801a8e9bbe57ca68478aa4ef113d38a78c477e2c38424beae57ce30cd2"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-history-surfacepolicy1-20261010\\select-plugin.FCMacro",
+            "bytes": 976,
+            "sha256": "4befaa6af6c802f9145a1918b7c6db748d387f02d71c306211381ea0b43d6968"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-history-surfacepolicy1-20261010\\host-stdout.log",
+            "bytes": 5371,
+            "sha256": "297236f5022676a12d128c8ae7236d8620056ec5c4a7ab512c7c16f62e5ec96e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-surface-history-surfacepolicy1-20261010\\host-stderr.log",
+            "bytes": 6312,
+            "sha256": "0f0db947ee0bc72998d7d46184247c8e51d42485e22b32f9c12868f50506ffef"
+          }
+        ]
+      },
+      {
+        "case": "curve-spline",
+        "checks": 41,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "A74E38F1CB9EE3845B3EC7F4722BD500932CB4604FA7373D318C05F9C95830BB",
+          "pid": 14804,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-construction-curve-spline-surfacepolicy1-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-curve-spline-surfacepolicy1-20261010\\results.json",
+            "bytes": 4472,
+            "sha256": "3245f0ee4ebe21848f414aa781fef69b5825537c6b025a39b35daa3ceccd612b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-curve-spline-surfacepolicy1-20261010\\shared-host-launch.json",
+            "bytes": 558,
+            "sha256": "cceb38577563cd1a88a37f1fa12e82dc1cda38d60f313775b39a9eecf484515b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-curve-spline-surfacepolicy1-20261010\\select-plugin.FCMacro",
+            "bytes": 973,
+            "sha256": "f0c3299295aa44107f45e5804ab48127a10bedcb9b6e1f721b1c521593c034a3"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-curve-spline-surfacepolicy1-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-curve-spline-surfacepolicy1-20261010\\host-stderr.log",
+            "bytes": 992,
+            "sha256": "a0471e0672ffdc7bf0d13d135838e05d79b75beeb9e772517bfb5a425e3b45da"
+          }
+        ]
+      },
+      {
+        "case": "edit-capability",
+        "checks": 20,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "A74E38F1CB9EE3845B3EC7F4722BD500932CB4604FA7373D318C05F9C95830BB",
+          "pid": 17092,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/native-construction-edit-capability-surfacepolicy1-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-edit-capability-surfacepolicy1-20261010\\results.json",
+            "bytes": 6075,
+            "sha256": "c81d7edc83e53c284dc3e06fa94cda21bc1f619e0578d0c4aff2996a1d374b6e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-edit-capability-surfacepolicy1-20261010\\shared-host-launch.json",
+            "bytes": 561,
+            "sha256": "caa08074a69f53bd31c15ba30b109a1c2e7382aad9701a700bce21251cad2f32"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-edit-capability-surfacepolicy1-20261010\\select-plugin.FCMacro",
+            "bytes": 976,
+            "sha256": "b54d46442c0f6480b52d3d60753784805b532f8452b222b42fbe54b5f7960bc9"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-edit-capability-surfacepolicy1-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\native-construction-edit-capability-surfacepolicy1-20261010\\host-stderr.log",
+            "bytes": 785,
+            "sha256": "f2e11c1372afc2a5927587d7d0e2fd3df07586ca41357c367dbc2bfcc526356c"
+          }
+        ]
+      }
+    ],
+    "full_rust_tests": 691,
+    "rust_evidence_reused_with_unchanged_source_fingerprints": true,
+    "binding_red_artifacts": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-surface-binding-red1-20261010\\results.json",
+        "bytes": 244,
+        "sha256": "49aff9a0a475dada3a72b20663b0a96d48b4b70b8f27e8431792751083dd8830"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\native-surface-binding-red1-20261010\\shared-host-launch.json",
+        "bytes": 538,
+        "sha256": "c4c96200d086cbf5d7404b546118085010eb1afd9c4a6396b76af82159d1e334"
+      }
+    ],
+    "plugin_build_confirmation": {
+      "command": "build/build-om9-plugin.ps1 -RuntimeDirectory H:/FreeCAD-src/build/reusable-history-runtime",
+      "process_exit_code": 0,
+      "session_id": 37724,
+      "root_rebuild": false
+    },
+    "public_source_audit": {
+      "source_files": 2366,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    }
+  },
+  "documentation_fingerprints": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\README.md",
+      "bytes": 97608,
+      "sha256": "e9d243e34fd94d61512e10c8d8cdcfe05e827bd0ccbef9dc89fa3b4d337d8dea"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\IMPLEMENTATION_STATUS.md",
+      "bytes": 38292,
+      "sha256": "59386117e2bc3fd98fbb6457dabab91327f6ae2a3d0120aaa19671245a1e4992"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\README.md",
+      "bytes": 41931,
+      "sha256": "48131703aef37fe7d8c881b073007d1bb9d60f40081204e277f453488980b3e9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\01-object-model-kernel.md",
+      "bytes": 49114,
+      "sha256": "a08f4b1e3d594b90f5e49a649c6bf2b671e12b3a4d65533f142e829db54cddd3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\features\\RCORE-01.md",
+      "bytes": 12519,
+      "sha256": "112b174fc56dc64da2d7ef1626e41c463ac1992c8a5c4d57b5968f1ab20606d5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\validation\\2026-10-11-rhino-core-native-surface-policy.md",
+      "bytes": 2706,
+      "sha256": "93a7b123e40c5ac74787a8d3895a9267075149e4e3faba1535a71e856bbc25f4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\superpowers\\plans\\2026-10-10-rcore01-native-construction-capabilities.md",
+      "bytes": 17437,
+      "sha256": "73f878a21a9d36f715bed7cfb86a894d3e7cccb0dd727e461b81a556d53a38d8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\openmatrix9-progress.json",
+      "bytes": 221027,
+      "sha256": "10fafba00188d1931fbe981d6a0d87f17998c8f87eba8d4c211d809892aa77da"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\CAPABILITY_LOOKUP.json",
+      "bytes": 92757,
+      "sha256": "c592c498ad47c201ef2b626284fa5e65977635e8551381ac40852252cc8311bf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\MANIFEST.json",
+      "bytes": 116501,
+      "sha256": "af6327587cd2c647e99689d0fd440fa14bb2f3cc656b7cd7ed8e4f940c3c1979"
+    }
+  ]
+}

@@ -7,6 +7,7 @@
 #include <Mod/Part/App/PartFeature.h>
 #include <fastsignals/signal.h>
 #include <vector>
+#include <optional>
 namespace OpenMatrix9Gui {
 class BuilderRecord final : public App::DocumentObject {
     PROPERTY_HEADER_WITH_OVERRIDE(OpenMatrix9Gui::BuilderRecord);
@@ -14,7 +15,7 @@ public:
     BuilderRecord(); ~BuilderRecord() override;
     App::PropertyLinkGlobal SourceGem;
     App::PropertyLinkListHidden PlacementSources;
-    App::PropertyString OM9FeatureId, Parameters, GemShapeTag;
+    App::PropertyString OM9FeatureId, Parameters, GemShapeTag, TemplateAttributes;
     App::PropertyStringList OutputNames;
     App::PropertyVector InitialDimensions;
     App::PropertyPlacement InitialFrame;
@@ -48,6 +49,7 @@ public:
     App::PropertyInteger TemplateIndex;
     App::PropertyBool Recorded;
     App::PropertyUUID OriginRecordIdentity;
+    App::PropertyString OM9GeometryResult;
     short mustExecute() const override;
     App::DocumentObjectExecReturn* execute() override;
     void onBeforeChange(const App::Property*) override;
@@ -57,12 +59,18 @@ public:
     void onSettingDocument() override;
     void onDocumentRestored() override;
     void unsetupObject() override;
-    void initialize(BuilderRecord*,unsigned);
+    void initialize(BuilderRecord*,unsigned,const Part::TopoShape& preparedLocal,const std::string& result);
+    // Native-owned, synchronous initial publication only. The API scope clears
+    // this slot after recompute/abort; it is never a persisted replay cache.
+    void stagePreparedShape(const Part::TopoShape&,const std::string& result);
+    void clearPreparedShape();
     void invalidate();
 private:
     bool writing=false;
+    struct Prepared {Part::TopoShape shape;std::string result;};
+    std::optional<Prepared> preparedShape;
     void refreshPlacements();
-    void setWorldShape(const Part::TopoShape&);
+    void setWorldShape();
     fastsignals::connection changed,beforeChanged;
 };
 void initializeBuilderHistoryTypes();

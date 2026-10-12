@@ -1,6 +1,7 @@
 #include "Workbench.h"
 #include "GumballGeometry.h"
 #include "GumballController.h"
+#include "GumballFrameObjects.h"
 #include "HistoryFeature.h"
 #include "EditSpecialTypes.h"
 #include "SurfaceHistory.h"
@@ -91,6 +92,8 @@ PyMOD_INIT_FUNC(OpenMatrix9Gui)
     OpenMatrix9Gui::addUnitMethods(module);
     OpenMatrix9Gui::addObjectSnapshotMethods(module);
     OpenMatrix9Gui::addGumballGeometryMethods(module);
+    OpenMatrix9Gui::initializeGumballFrameTypes();
+    OpenMatrix9Gui::addGumballFrameObjectMethods(module);
     OpenMatrix9Gui::GumballController::instance().addMethods(module);
     OpenMatrix9Gui::CoreRebuild::addDeliveryTestMethods(module);
     OpenMatrix9Gui::addGeometryContractMethods(module);

@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Initial Tangent: actual contacts distinct from probes, output and native history."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtTest
+sys.path.insert(0,os.environ['OM9_FIXTURE_HELPER_DIR'])
+from command_console_support import command_input
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(checks=[],records=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def settle():
+ loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(100,loop.quit);loop.exec()
+def enter(text):
+ field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def run():
+ global field
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM
+  report['module']=OM.__file__;field=command_input(Gui.getMainWindow());doc=App.newDocument('InitialContacts');doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+  a=doc.addObject('Part::Feature','A');a.Shape=Part.makeLine(App.Vector(1,-20,0),App.Vector(1,20,0))
+  b=doc.addObject('Part::Feature','B');b.Shape=Part.makeLine(App.Vector(-20,0,0),App.Vector(20,0,0))
+  p=doc.addObject('Part::Feature','P');p.Shape=Part.Vertex(App.Vector(5,8,0));doc.recompute();doc.clearUndos()
+  cases=[('TwoCurves',['Circle','Tangent','Curve=A.Edge1@1,4,0','Radius=4','Curve=B.Edge1@4,0,0'],[.6,.625]),
+   ('FixedFromFirst',['Circle','Tangent','FromFirstPoint=Yes','Curve=A.Edge1@1,4,0','Radius=4','Point=P.Vertex1'],[.6,None]),
+   ('Deformable',['Circle','Tangent','Deformable=Yes','PointCount=12','Curve=A.Edge1@1,4,0','Radius=4','Curve=B.Edge1@4,0,0'],[.6,.625])]
+  for name,tokens,want in cases:
+   count=len(doc.Objects)
+   for text in tokens:enter(text)
+   child=doc.Objects[-1];check(name+' creates one valid closed native output',len(doc.Objects)==count+1 and not child.Shape.isNull() and child.Shape.isValid() and child.Shape.isClosed())
+   raw=child.OM9CurveConstruction;value=json.loads(raw);result_raw=child.OM9GeometryResult;result=json.loads(result_raw)
+   solutions=[e for e in value['accepted_input_events']if e.get('kind')=='native_solution'];check(name+' records exactly one checked solution',len(solutions)==1)
+   event=solutions[0];fractions=event.get('resolved_contact_fractions')
+   if not isinstance(fractions,list):check(name+' requires actual solved contact evidence',False);continue
+   check(name+' retains actual contact fractions and indexing',event['resolved_contact_indexing']=='current_constraint_points_zero_based' and len(fractions)==len(want) and all(f is None if w is None else isinstance(f,(int,float)) and abs(f-w)<1e-8 for f,w in zip(fractions,want)))
+   center=App.Vector(*event['center']);normal=App.Vector(*event['normal']);radius=event['radius'];checks=[];contacts=[]
+   for i,f in enumerate(fractions):
+    if f is None:q=p.Shape.Vertexes[0].Point;checks.append(abs((q-center).Length-radius)<1e-6);contacts.append(list(q));continue
+    source=a if i==0 else b;edge=source.Shape.Edges[0];u=edge.FirstParameter+f*(edge.LastParameter-edge.FirstParameter);q=edge.valueAt(u);t=edge.tangentAt(u);d=q-center
+    checks.append(abs(d.Length-radius)<1e-6 and abs(d.dot(normal))<1e-6 and abs(t.dot(normal))<1e-8 and abs(d.dot(t)/radius)<1e-8);contacts.append(list(q))
+   check(name+' independent kernel D0 D1 satisfy circle plane and tangency',all(checks))
+   probes=value['normalized_points'];check(name+' original probes remain distinct from solved contacts',probes[0]==[1,4,0] and (fractions[1]is None or probes[1]==[4,0,0] and (App.Vector(*probes[1])-App.Vector(*contacts[1])).Length>.5))
+   check(name+' publishes the exact checked construction',result['operation_context']['construction']==value)
+   curve=child.Shape.Edges[0].Curve
+   if name=='Deformable':
+    spline=value['spline'];check(name+' keeps the actual native periodic spline basis',isinstance(curve,Part.BSplineCurve) and curve.isPeriodic() and curve.Degree==spline['degree'] and len(curve.getPoles())==len(spline['poles']) and all((q-App.Vector(*r)).Length<1e-8 for q,r in zip(curve.getPoles(),spline['poles'])))
+   else:check(name+' physical output matches checked circle',isinstance(curve,Part.Circle) and (curve.Center-center).Length<1e-8 and abs(curve.Radius-radius)<1e-8 and (curve.Axis-normal).Length<1e-8)
+   child_name=child.Name;doc.undo();settle();check(name+' actual Undo removes output',doc.getObject(child_name)is None and len(doc.Objects)==count);doc.redo();settle();child=doc.getObject(child_name)
+   check(name+' actual Redo restores geometry and exact evidence',child is not None and child.Shape.isValid() and child.OM9CurveConstruction==raw and child.OM9GeometryResult==result_raw)
+   report['records'].append(dict(case=name,name=child_name,raw=raw,result=result_raw,contacts=contacts))
+  archive=out/'initial_contacts.FCStd';doc.saveAs(str(archive));App.closeDocument(doc.Name);doc=App.openDocument(str(archive))
+  for row in report['records']:
+   child=doc.getObject(row['name']);check(row['case']+' reopened exact construction result and geometry',child.Shape.isValid() and child.OM9CurveConstruction==row['raw'] and child.OM9GeometryResult==row['result'])
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

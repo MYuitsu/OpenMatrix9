@@ -14,7 +14,7 @@ pub enum Mode {
     FromFoci,
     AroundCurve,
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Ellipse {
     pub mode: Mode,
     pub deformable: bool,

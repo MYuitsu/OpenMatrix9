@@ -1,0 +1,441 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-native-replay-scope-20261012",
+  "status": "in_progress",
+  "goal_complete": false,
+  "updated_at": "2026-10-12T07:46:54+07:00",
+  "scope": "Native Document replay scope prototype and real UndoMode0/1; not a completed clean savepoint gate",
+  "sources": [
+    {
+      "path": "H:/FreeCAD-src/src/App/Document.h",
+      "bytes": 58644,
+      "sha256": "24ed1a2d1d8dae30e10d525ab5e3275d4abfdf1dabc6f3b964f94a1e19c05ac1"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Document.cpp",
+      "bytes": 161324,
+      "sha256": "c0e0f477bc25f83a585255ce26af2f10c92a0eb7e1dca09a555b341727397ef9"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/private/DocumentP.h",
+      "bytes": 7436,
+      "sha256": "83dc52daff525af16b0f0e2f15d8cdc5f1525d400599f17f82ca68f89ad8381e"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/private/PropertyReplay.h",
+      "bytes": 8487,
+      "sha256": "2424e4f11749518b10e4aee3b775ac8e6954002e8b6d79a9927d0d3aa472ab90"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Application.cpp",
+      "bytes": 145022,
+      "sha256": "f8d99eb9e839c23d16d99d91b04e57bab2f67e5de3620eaf5717fde04c40dfd6"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/AutoTransaction.cpp",
+      "bytes": 14631,
+      "sha256": "3eb1ddea597e2558a76d1c525b3849a10ce1db770bed14e9aa82816d6ee48bd9"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/DocumentPyImp.cpp",
+      "bytes": 38710,
+      "sha256": "cf7cb32089383f998a3bf52a685eaeb97408ee840b3babed008feb8d3c4c172d"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.h",
+      "bytes": 14667,
+      "sha256": "77329e67cfb39827dca543a5940b4ec0a84a6d6367c25ab1ce1ae2ae41133fde"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.cpp",
+      "bytes": 37147,
+      "sha256": "ee74b4bf1e7ad2a03e109a500818161d52a3f1bcd8d74b4ac2011fcae8987c67"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/native/replay_scope_probe.cpp",
+      "bytes": 2927,
+      "sha256": "a81c5601a866a414c788b229906a270d3c1949ac128c2f270c9f1b6415babd49"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_replay_scope_smoke.FCMacro",
+      "bytes": 6056,
+      "sha256": "ac6ad41ec5ed39f5ef964aa19276e01d2d6c3ad019b2fee75fc6ba6c077ab986"
+    }
+  ],
+  "scope_assertions": {
+    "artifact": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-test126-offscreen-20261012",
+    "checks": 744,
+    "passed": 744,
+    "failed": 0,
+    "launch": {
+      "host": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-replay-scope125-20261012/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "AF1836F636C5DFEC633FA7771B104995B6F3E3391A7DB37F2DEE65349DD8A692",
+      "pid": 68852,
+      "module_root": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\Mod\\OpenMatrix9",
+      "output": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-test126-offscreen-20261012",
+      "exit_code": 0
+    },
+    "unhandled_shutdown_lines": [
+      "Unhandled std::exception caught in GUIApplication::notify.",
+      "The error message is: resource deadlock would occur: resource deadlock would occur"
+    ],
+    "runtime_gate_clean": false,
+    "files": [
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-test126-offscreen-20261012/results.json",
+        "bytes": 144633,
+        "sha256": "8029172daea1ac1a8bff0cf5c33825a8d132e738b7cc09bd1fbb4e4fb6420901"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-test126-offscreen-20261012/shared-host-launch.json",
+        "bytes": 627,
+        "sha256": "27c18dd80fc2f5ad5c54b1954524f41c29cd8384d267db99e7d2a1d8a6d2b331"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-test126-offscreen-20261012/loaded-native-app.json",
+        "bytes": 254,
+        "sha256": "b4d87fe5ae4fab1ca0c7e4a1dff3c8c286df1f8e36e26413308b13f47202ef83"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-test126-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-test126-offscreen-20261012/host-stdout.log",
+        "bytes": 378,
+        "sha256": "d6a18305fe54b75d465639ff5e6e7e31e551078e0bf4e4d5afc012014a7a146c"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-test126-offscreen-20261012/host-stderr.log",
+        "bytes": 16946,
+        "sha256": "545ed2e3b64520bb1bc6c8140d247c3840da5c4169ab757c4820c88b9c3b9ceb"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-test126-offscreen-20261012/select-plugin.FCMacro",
+        "bytes": 2829,
+        "sha256": "576dd9214ecc869b44fc554dfbc89916f3c38591e9138eef39a00ebbab88a88a"
+      }
+    ]
+  },
+  "scope_cases": 104,
+  "actual_undo_modes": [
+    0,
+    1
+  ],
+  "scope_runtime_gate_clean": false,
+  "regressions": [
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-result125-offscreen-20261012",
+      "checks": 33,
+      "passed": 33,
+      "failed": 0,
+      "launch": {
+        "host": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-replay-scope125-20261012/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "AF1836F636C5DFEC633FA7771B104995B6F3E3391A7DB37F2DEE65349DD8A692",
+        "pid": 55988,
+        "module_root": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\Mod\\OpenMatrix9",
+        "output": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-result125-offscreen-20261012",
+        "exit_code": 0
+      },
+      "unhandled_shutdown_lines": [],
+      "runtime_gate_clean": true,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-result125-offscreen-20261012/results.json",
+          "bytes": 458247,
+          "sha256": "4c2efdb2a783ae75d0a93dc8cecbb1c0a136a1e2b070a15910cb51c537a63d31"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-result125-offscreen-20261012/shared-host-launch.json",
+          "bytes": 629,
+          "sha256": "4e673b378816de5e37eff4dd743ff7ca0ed1d73da523eedb2c506eda50232e60"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-result125-offscreen-20261012/loaded-native-app.json",
+          "bytes": 254,
+          "sha256": "b4d87fe5ae4fab1ca0c7e4a1dff3c8c286df1f8e36e26413308b13f47202ef83"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-result125-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-result125-offscreen-20261012/host-stdout.log",
+          "bytes": 378,
+          "sha256": "d6a18305fe54b75d465639ff5e6e7e31e551078e0bf4e4d5afc012014a7a146c"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-result125-offscreen-20261012/host-stderr.log",
+          "bytes": 7134,
+          "sha256": "b93bf8387757423164439ade508bc60693f9081b0e5d199b394236d673acf6f7"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-result125-offscreen-20261012/select-plugin.FCMacro",
+          "bytes": 2852,
+          "sha256": "2ce10f6c6b8bf71bb58352658105b190de83e3700ec91ed36be11297cdb8eae7"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-modes128-offscreen-20261012",
+      "checks": 109,
+      "passed": 109,
+      "failed": 0,
+      "launch": {
+        "host": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-replay-scope125-20261012/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "AF1836F636C5DFEC633FA7771B104995B6F3E3391A7DB37F2DEE65349DD8A692",
+        "pid": 44812,
+        "module_root": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\Mod\\OpenMatrix9",
+        "output": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-modes128-offscreen-20261012",
+        "exit_code": 0
+      },
+      "unhandled_shutdown_lines": [],
+      "runtime_gate_clean": true,
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-modes128-offscreen-20261012/results.json",
+          "bytes": 21944,
+          "sha256": "418e66f05451330f64cb997687fb64f158111e656e7742c82f42cf39a07cd018"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-modes128-offscreen-20261012/shared-host-launch.json",
+          "bytes": 628,
+          "sha256": "cfc8b2f5e7130d382e003565d59aa9b810aed7ad27e9472ace1b47fdc97025b0"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-modes128-offscreen-20261012/loaded-native-app.json",
+          "bytes": 254,
+          "sha256": "b4d87fe5ae4fab1ca0c7e4a1dff3c8c286df1f8e36e26413308b13f47202ef83"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-modes128-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-modes128-offscreen-20261012/host-stdout.log",
+          "bytes": 15264,
+          "sha256": "f5c2e18f5a2a7d99f55be17985d950b08d58c0d91807813285030b78ba5620eb"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-modes128-offscreen-20261012/host-stderr.log",
+          "bytes": 37804,
+          "sha256": "dd7c46d341673de7ffa4ff2cdb584fc8dc96629f09978cb8455f4a2e97b54a0b"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-modes128-offscreen-20261012/select-plugin.FCMacro",
+          "bytes": 2855,
+          "sha256": "6da7a4f5bfd2300a9fef0c2f9affd2df1954bae97d57428af8599ca83535734b"
+        }
+      ]
+    }
+  ],
+  "regression_checks": 142,
+  "atomic_baseline": {
+    "artifact": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-atomic125-offscreen-20261012",
+    "checks": 432,
+    "passed": 355,
+    "failed": 77,
+    "launch": {
+      "host": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-replay-scope125-20261012/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "AF1836F636C5DFEC633FA7771B104995B6F3E3391A7DB37F2DEE65349DD8A692",
+      "pid": 53972,
+      "module_root": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\Mod\\OpenMatrix9",
+      "output": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-atomic125-offscreen-20261012",
+      "exit_code": 0
+    },
+    "unhandled_shutdown_lines": [],
+    "runtime_gate_clean": true,
+    "files": [
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-atomic125-offscreen-20261012/results.json",
+        "bytes": 189203,
+        "sha256": "544831380d0039cd2b5ed8bd288cd934061b457d65491a179fae394173c85cb7"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-atomic125-offscreen-20261012/shared-host-launch.json",
+        "bytes": 629,
+        "sha256": "96c7e570eb44378aa47d7c5e5b046b9dfdf7e664859591cd1b8b83a614b329d2"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-atomic125-offscreen-20261012/loaded-native-app.json",
+        "bytes": 254,
+        "sha256": "b4d87fe5ae4fab1ca0c7e4a1dff3c8c286df1f8e36e26413308b13f47202ef83"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-atomic125-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-atomic125-offscreen-20261012/host-stdout.log",
+        "bytes": 378,
+        "sha256": "d6a18305fe54b75d465639ff5e6e7e31e551078e0bf4e4d5afc012014a7a146c"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-atomic125-offscreen-20261012/host-stderr.log",
+        "bytes": 52950,
+        "sha256": "884bd4e959ce1943ca9dd32018fff0c70c6e4323ecc3ef48f5d520ccb60a95c3"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-atomic125-offscreen-20261012/select-plugin.FCMacro",
+        "bytes": 2852,
+        "sha256": "5a26329c99b52c0c73722a48f70c3facb96e83391a6eeb97b2f55e411a69044d"
+      }
+    ]
+  },
+  "atomic_callbacks": 48,
+  "selected_app": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-replay-scope125-20261012/FreeCADApp.dll",
+    "bytes": 7822336,
+    "sha256": "313d26cebfffbb3e0d55d910abead14be87c54f9022b4ae15b53bab216d60604"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-replay-scope125-20261012/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/initial-contacts-runtime112-20261012/bin/OpenMatrix9Gui.pyd",
+    "bytes": 16990720,
+    "sha256": "af1836f636c5dfec633fa7771b104995b6f3e3391a7db37f2dee65349dd8a692"
+  },
+  "build": {
+    "inputs": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-replay-scope125-20261012/inputs.json",
+      "bytes": 44259,
+      "sha256": "b8e1a6f302ed4ffbb3b5b69553fb9cfe7e7b5b9c77be3fc0fc803cdad4fe315e"
+    },
+    "receipt": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-replay-scope125-20261012/build.exit.json",
+      "bytes": 116,
+      "sha256": "0071a527b8d50225c041bcb6df649332f9ae9fe0dcf2fc85684800638ba5a0f4"
+    },
+    "compile_log": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-replay-scope125-20261012/compile.log",
+      "bytes": 2896,
+      "sha256": "3ee60fd1d2eb56ad9fff90078acb7db23040229e91e7e61a73d2175e58c3be2f"
+    },
+    "link_log": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-replay-scope125-20261012/link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "exit_code": 0,
+    "source_count": 190,
+    "source_candidates_match": true,
+    "shared_sdk_outputs_unchanged": [
+      {
+        "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+        "bytes": 9877504,
+        "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/relWithDebInfo/src/App/FreeCADApp.lib",
+        "bytes": 3103284,
+        "sha256": "59b7845e365bdc9f8ada83b2110fbd258c612fa3d0fbf9e2f449e154f51b861c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.pdb",
+        "bytes": 254824448,
+        "sha256": "16cc28a2a42fe4076a2f1b8e5b772fb914e4a363beca1c1c6c8547eae8bb8c57"
+      }
+    ],
+    "compiler_dependency_certificate": false
+  },
+  "red": {
+    "artifact": "H:/FreeCAD-src/build/replay-scope-red120-offscreen-20261012",
+    "checks": 1,
+    "passed": 0,
+    "actual_host_exit": 0,
+    "interpretation": "Native API absence, not744 old behavioral failures"
+  },
+  "undo_mode_red": {
+    "artifact": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-test124-offscreen-20261012",
+    "checks": 783,
+    "passed": 731,
+    "failed": 52,
+    "actual_host_exit": 0,
+    "reason": "All52 request0 assertions fail because getter remains1; original public setter was a stub"
+  },
+  "excluded_fixture_getter_setup": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-test122-offscreen-20261012",
+  "native_timeout": {
+    "artifact": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-test123-offscreen-20261012",
+    "terminal": {
+      "pid": 69032,
+      "accepted": false,
+      "has_exited": true,
+      "reason": "Startup/fixture timeout, owned handle killed"
+    },
+    "accepted": false,
+    "completed": false,
+    "reason": "Unhandled GUI std::exception and timeout; old probe lacked Base::Exception ABI catches"
+  },
+  "excluded_missing_helper": {
+    "artifact": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-modes125-offscreen-20261012",
+    "terminal": {
+      "pid": 74608,
+      "reason": "Startup/fixture timeout, owned handle killed",
+      "has_exited": true,
+      "accepted": false
+    }
+  },
+  "excluded_module_pin": "C:/Users/nguye/.codex/om9-native-tests/replay-scope-modes127-offscreen-20261012",
+  "storage": {
+    "native_output_on_C": true,
+    "shared_sdk_reused": true,
+    "failed_link121": {
+      "path": "H:/FreeCAD-src/build/atomic-host-app-replay-scope121-20261012/link.log",
+      "bytes": 8296,
+      "sha256": "dc855c4ccbee92442cf55a248113379c5f09f37942598797e5f3be41f93bb55f"
+    },
+    "retired_incomplete": {
+      "path": "H:/FreeCAD-src/build/atomic-host-app-replay-scope121-20261012/retired-incomplete-link-files.json",
+      "bytes": 584,
+      "sha256": "79106e19801c940505f3a55d8e8a92f5076066e873cb00d5e1de860920581670"
+    },
+    "retired_generated_ilk": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/retired-app117-ilk.json",
+      "bytes": 324,
+      "sha256": "ffa633db08719a6d892adc16195b435585f1218ae6b834d3863d6a598e050b26"
+    },
+    "root_reconfigure": false,
+    "full_runtime_clone": false,
+    "user_binaries_replaced": false
+  },
+  "native_design_approved": true,
+  "circle_integrated": false,
+  "rust_rerun": false,
+  "remaining": [
+    "Full original RCORE-01 remains open: stable GeometryRef identity/revision/representation/world, complete owned geometry/topology/attributes/units, adapters1–7, C01–C12, T01–T11, every enabled GeometryResult consumer, and independent read/edit/retain/export of all supported families.",
+    "Initial Tangent now binds actual solved contact fractions to the retained owned selected curves, separately from probes; verifies circle/plane/D1/radial tangency/FromFirst/fixed-point null slots before session and common result publication. Checked analytic output and Deformable native spline basis are bound to the replayed plan. Live line/fixed/FromFirst/spline and genuinely nonplanar NURBS fixtures pass; this does not certify all native solver roots/families/options/backends. Generic CAD Edge/Face snap provenance, every other output consumer and complete old-format acceptance remain required. Raw old owned native_solution packets without contact metadata are rejected; historical saved result bytes remain until current recompute. Pure legacy numeric direct solution paths are retained and are not certified by this checked-contact output gate.",
+    "Raw native offset D3 discrepancy remains enabled RED: independent mathematical derivatives match45 queries, native differs at36. No dependency patch/rebuild. Higher-order parity, extreme asymmetric weights, complete UV/retained trim/nested native chains and periodic parameter continuation beyond captured natural basis still require native acceptance evidence.",
+    "Nineteen captured families/183-query synthetic tangent circles pass owned contact admission; live native nonplanar checks exercise retained contacts on actual spatial NURBS History. This is named fixture coverage, not all native solver roots, curve families/options/backends, global conversion or rigorous deviation bounds. The spatial archive is reopened in the same host; independent cold spatial contact acceptance remains separate.",
+    "Native Transaction staged property merge is implemented and tested, but App::Document::PropertyReplayTransaction, private replay routing, observer/lifetime/history barriers, checked rollback/error cleanup, booking materialization and recipe-v2/legacy Circle integration remain absent. Current new App117 unchanged semantic fixture remains RED355/432,48 callbacks,normal host exit0. Standalone journal tests use real native Transaction/Property with a native tracked test object; they do not prove visible Document Undo/Redo, source/child graph ownership or full consumer/lifecycle semantics. The approved full savepoint contract remains required.",
+    "Task2/3 remain open: generic snap/pick/mouse/render and parameter provenance; snapshot sharing, aggregate allocation/traversal/worker/cancellation bounds; Rebuild and every other enabled result consumer. Per-basis decoder bounds and sampled tests do not establish full aggregate budgets or lifecycle.",
+    "Global conversion/deviation/locus exactness and complete parameter/topology maps remain unproven, with maps null. Full CAD-versus-mesh solid validity/orientation/manifold/cavity coverage, supported attributes and persistence families remain required.",
+    "Fresh reconstructed Runtime93 packets retain genuine resolved fractions and all20 original recipes/points/plans/roles/probe/path parameters. Old Runtime59 fixtures remain immutable. Historical stored results may retain their old bytes; current recompute obtains new complete evidence. Raw legacy producer requests lacking contact metadata are rejected instead of bypassing verification. This does not replace all historical-format acceptance or production deployment requirements.",
+    "Prebuild1503 candidate inputs preserve production candidates at postbuild/postnative checkpoints. Full inventory match is false: one spatial assertion wrapper was corrected after build to inspect initial evidence only while the result is ConstructCurve, avoiding subsequently changed History sources. After postnative, concurrent work changed/added rust/src/command_options.rs, rust/src/lib.rs, rust/tests/command_options.rs. Current entire production source is therefore not certified by Runtime112; selected contact sources/actual fixture bytes still match their launch checkpoint. This is not an exact compiler dependency certificate. Shared SDK/App/Gui/host/solver reused; no native root rebuild, deployment or Git publication.",
+    "Journal admission bounds logical metadata/record traversal and native Property::getMemSize accounting before transfer; unusually larger copies are rejected after copying. Native allocator/container overhead, opaque kernel resources and peak Copy allocation are not fully certified. Both journals/property values must remain alive and exclusively protected; the future Document scope must provide that protection, including Copy/Paste/destruction callbacks. The staged API alone is not a complete atomic replay or worker memory-safety boundary.",
+    "Only native App objects were rebuilt in the single SDK cache, with DLL/import-lib/PDB link outputs redirected. Shared SDK binaries remain byte-identical; one unchanged test launcher was copied and Gui hard-linked for the isolated App test. Current plugin Runtime112 is unchanged and does not call the new API; an explicit matching App SDK import override and complete production ABI/deployment acceptance still remain for Document integration. Rust was not rerun for this native-only component; prior989/1 is historical, not current whole-source certification.",
+    "Document scope prototype is implemented: private native journaling without replacing caller pointer, observer mutation latch, native history/owner insertion/removal/close/restore and Application transaction guards, checked rollback/error cleanup and staged merge. Named mode0/1/booking/callback assertions pass744, but scope fixture still logs an unhandled GUI shutdown std::exception/resource deadlock despite host exit0. This is not a clean runtime gate or completed savepoint. Module/SDK/Circle integration and the unchanged semantic432/owner-close acceptance remain required.",
+    "UndoMode Python previously returned1 and ignored assignment. Native undoEnabled plus actual Python0/1 setter now exists; setter refuses changing mode during a caller booking/journal. Default1 and existing visible histories are retained. Complete generic UndoMode semantics, dynamic-property bookkeeping outside scope, all property Copy/Paste/destruction callbacks, capture failure atomicity, preallocation/traversal/opaque budgets and module-wide lifecycle still need verification. The current scope materializes a regular empty booking using preserved-Redo storage; exact regular-versus-preserving policy across every subsequent caller close remains an explicit review/acceptance obligation.",
+    "Strong acceptance across journal release/destruction, document graph/cache/status flags, all Application/Document entry points and cross-document booking participants is not certified by named String-property tests. Existing Copy-failure recording and all resource/peak native allocation accounting require further tests. Do not declare Document savepoint, Task2/3 or full RCORE01 complete. Circle recipe-v2/legacy still uses its previous publication path; fresh App125 atomic355/432 confirms integration is missing."
+  ],
+  "next_action": "Complete scope lifecycle/rollback/capture-failure and exact regular/preserving policy; diagnose GUI shutdown exception on matched App/Gui/host. Add validated matching App SDK import override and integrate scope before Circle reads replay state, keeping it through rollback/paired cleanup and journal release. Run unchanged432 and actual owner-close to normal completion, plus Copy/Paste/restore/open/cleanup callbacks, true0/1 visible UndoRedo and every original RCORE01 requirement."
+}

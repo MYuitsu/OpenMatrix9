@@ -1,0 +1,83 @@
+"""Owned prepared CAD result admission, report binding and transaction isolation."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[],'cases':[]}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def item(name):return dict(name=name,brep='prepared',tolerance=1e-6,layer='Fixture::CAD',locked=False,visible=True,color=[20,40,60])
+def state(doc):
+ return ([o.Name for o in doc.Objects],doc.UndoCount,doc.RedoCount,
+  {o.Name:(o.Shape.exportBrepToString(),o.Label,list(o.Placement.toMatrix().A)) for o in doc.Objects if o.isDerivedFrom('Part::Feature')})
+def run():
+ try:
+  import OpenMatrix9Gui as native
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('PreparedCadResults');doc.UndoMode=1
+  doc.openTransaction('Source');source=doc.addObject('Part::Feature','Source');source.Shape=Part.makeBox(2,3,4);doc.commitTransaction()
+  doc.openTransaction('Redo witness');source.Label='Redo witness';doc.commitTransaction();doc.undo();baseline=state(doc)
+  curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(1,2,0),App.Vector(2,0,0)],[3,3],[0.,1.],False,2,[1.,.5,1.])
+  valid=curve.toShape();lateral=next(f for f in Part.makeCylinder(4,7).Faces if isinstance(f.Surface,Part.Cylinder));invalid=Part.makeSolid(Part.makeShell([lateral]))
+  callbacks=[]
+  class CustomValue:
+   def __bool__(self):callbacks.append('bool');return True
+   def __str__(self):callbacks.append('str');return 'custom'
+  cycle={};cycle['cycle']=cycle
+  negatives=[('invalid-solid',[(item('ValidFirst'),valid),(item('BadSolid'),invalid)],'InvalidTrim'),
+   ('custom-value',[(dict(item('Custom'),name=CustomValue()),valid)],'UnsupportedRepresentation'),
+   ('metadata-cycle',[(dict(item('Cycle'),extra=cycle),valid)],'UnsupportedRepresentation'),
+   ('nonfinite-number',[(dict(item('NaN'),tolerance=float('nan')),valid)],'NonFiniteGeometry'),
+   ('oversized-nodes',[(dict(item('Wide'),extra=[0]*4_000_001),valid)],'InvalidBasis'),
+   ('preview-invalid',dict(host_geometry=[(item('ValidFirst'),valid)],host_previews={'fixture-preview':[(item('BadPreview'),invalid)]}),'InvalidTrim')]
+  for name,prepared,code in negatives:
+   error=None;result={}
+   try:native.commit3dm(doc.Name,prepared)
+   except Exception as exc:
+    error=str(exc)
+    try:result=json.loads(exc.geometry_result)
+    except Exception:pass
+   report['cases'].append(dict(name=name,error=error,result=result))
+   diagnostics=result.get('diagnostics',[])
+   check(name+' typed diagnostic identifies operation/input',result.get('status')=='rejected' and len(diagnostics)==1 and diagnostics[0].get('code')==code and diagnostics[0].get('operation')=='CommitImport3dm' and 'input_identity' in diagnostics[0])
+   check(name+' rejected before changing source/Undo/Redo',state(doc)==baseline)
+  check('metadata callbacks never execute',not callbacks)
+  doc.redo();check('rejected results preserve executable Redo',source.Label=='Redo witness');doc.undo()
+  hollow=Part.makeBox(10,10,10).cut(Part.makeBox(4,4,4,App.Vector(3,3,3))).Solids[0]
+  cases=[('Point',Part.Vertex(App.Vector(2,3,4))),('Curve',valid),('CylinderFace',lateral),('ClosedShell',source.Shape.Shells[0]),('Solid',hollow),('Compound',Part.makeCompound([source.Shape]))]
+  inputs=[(dict(item(name),_om9_geometry_result='forged acceptance'),shape) for name,shape in cases]
+  before_inputs=[(dict(meta),shape.exportBrepToString()) for meta,shape in inputs]
+  objects=native.commit3dm(doc.Name,inputs);saved={};saved_bytes={}
+  for (name,_),obj in zip(cases,objects):
+   raw=obj.OM9GeometryResult if 'OM9GeometryResult' in obj.PropertiesList else '{}';r=json.loads(raw);saved[obj.Name]=r;saved_bytes[obj.Name]=raw
+   check(name+' report is native generated and accepted',r.get('schema_version')==1 and r.get('status')=='accepted' and r.get('operation')=='CommitImport3dm')
+   check(name+' report retains operation/input identity',r.get('input_identity',{}).get('name')==name)
+   check(name+' report distinguishes validation from conversion claims',r.get('validation',{}).get('native_valid') is True and r.get('conversion_reports',[{}])[0].get('exactness')=='uninspected')
+   check(name+' report is explicitly immutable import evidence',r.get('lifetime')=='immutable_import_evidence_not_current_validity')
+  check('forged report and caller metadata are not modified',all(meta==before[0] and shape.exportBrepToString()==before[1] for (meta,shape),before in zip(inputs,before_inputs)))
+  names=[o.Name for o in objects];check('batch reports share one transaction',doc.UndoCount==baseline[1]+1)
+  doc.undo();check('one Undo removes objects and reports',all(doc.getObject(n) is None for n in names));doc.redo()
+  check('one Redo restores reports',all('OM9GeometryResult' in doc.getObject(n).PropertiesList and json.loads(doc.getObject(n).OM9GeometryResult)==saved[n] for n in names))
+  owner_curve=curve.copy();owner_shape=owner_curve.toShape();expected=owner_curve.value(.5);meta=item('FrozenSource')
+  class Observer:
+   changed=False
+   def slotCreatedObject(self,obj):
+    if obj.Name.startswith('RhinoObject') and not self.changed:
+     self.changed=True;owner_curve.setPole(2,App.Vector(1,100,0));meta['name']='CallbackMutation';meta['color'][0]=255
+  observer=Observer();App.addDocumentObserver(observer)
+  try:frozen=native.commit3dm(doc.Name,[(meta,owner_shape)])[0]
+  finally:App.removeDocumentObserver(observer)
+  check('observer actually mutates prepared geometry and metadata',observer.changed and owner_curve.value(.5).distanceToPoint(expected)>1 and meta['name']=='CallbackMutation')
+  check('native geometry was detached before observer publication',frozen.Shape.Edges[0].valueAt(.5).distanceToPoint(expected)<1e-10)
+  check('plain metadata was frozen before observer publication',frozen.Label=='FrozenSource' and abs(frozen.OM9Color[0]-20/255.)<1e-6)
+  check('source document geometry remains unchanged',abs(source.Shape.Volume-24)<1e-10)
+  file=out/'prepared-results.FCStd';doc.recompute();doc.saveAs(str(file));report['saved_reports']=saved;report['saved_report_bytes']=saved_bytes;report['saved_file']=str(file)
+  App.closeDocument(doc.Name);restored=App.openDocument(str(file))
+  check('FCStd reload retains all immutable reports',all('OM9GeometryResult' in restored.getObject(n).PropertiesList and json.loads(restored.getObject(n).OM9GeometryResult)==r for n,r in saved.items()))
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

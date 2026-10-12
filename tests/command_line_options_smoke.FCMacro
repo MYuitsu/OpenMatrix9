@@ -1,0 +1,29 @@
+import os,sys
+sys.path.insert(0,'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+from command_options_fixture_support import *
+
+def run():
+    doc=App.newDocument('CommandOptions');doc.UndoMode=1
+    command('Polyline');command('0,0,0');command('Mode')
+    check('RCORE-04.T15 Mode opens choice rather than hard-coded Line','Arc' in prompt() and 'Mode' in prompt() and not doc.Objects)
+    click_option('Arc');check('unsupported Arc keeps choice and geometry',not doc.Objects and 'Mode' in prompt())
+    key(QtCore.Qt.Key_Escape);check('Esc closes child and keeps command',not doc.Objects and 'PersistentClose' in prompt())
+    click_option('PersistentClose');check('toggle clicked once','PersistentClose=Yes' in prompt())
+    command('P=Yes');check('explicit set is idempotent','PersistentClose=Yes' in prompt())
+    command('P=No');check('explicit clear','PersistentClose=No' in prompt())
+    command('Length');command('NaN');check('invalid number draft retained',draft()=='NaN' and not doc.Objects)
+    command('2cm');check('numeric Enter accepts option without wire',not doc.Objects and 'Length' in prompt())
+    command('10,0,0');check('one-shot Length is cleared after accepted point','Length=20' not in prompt());key(QtCore.Qt.Key_Return)
+    check('one native wire after main Enter',len(doc.Objects)==1 and doc.Objects[0].Shape.isValid())
+    check('Length reached actual geometry',abs(doc.Objects[0].Shape.Length-20)<1e-7)
+    doc.undo();check('one transaction Undo',len(doc.Objects)==0);doc.redo();check('Redo geometry',len(doc.Objects)==1)
+    command('Circle');check('Circle schema uses actual eight-pole current','PointCount=8' in prompt())
+    command('Deformable');check('Circle parameter toggle','Deformable=Yes' in prompt());command('Undo');check('accepted-input Undo refreshes common state','Deformable=No' in prompt())
+    command('Mode');command('2Point');check('choice reaches actual Circle mode','Mode=2Point' in prompt())
+    command('0,0,0');command('4,0,0');check('Circle native two-point geometry',len(doc.Objects)==2 and abs(doc.Objects[-1].Shape.Edges[0].Curve.Radius-2)<1e-7)
+    command('Rectangle');command('Mode');command('Center');command('0,0,0');command('5,4,0');check('Rectangle common choice native geometry',len(doc.Objects)==3 and doc.Objects[-1].Shape.isValid() and len(doc.Objects[-1].Shape.Edges)==4)
+    command('InterpCrv');check('InterpCrv current matches backend default','Knots=Uniform' in prompt());command('Knots');key(QtCore.Qt.Key_Down);key(QtCore.Qt.Key_Return);check('choice keyboard selects only after Enter','Knots=Uniform' in prompt())
+    command('Degree');command('2');check('native numeric domain rejection keeps draft',draft()=='2' and 'Degree' in prompt());key(QtCore.Qt.Key_Escape);check('numeric Escape retains InterpCrv','Knots=Uniform' in prompt())
+    key(QtCore.Qt.Key_Escape);check('main Escape cancels without output',len(doc.Objects)==3)
+
+QtCore.QTimer.singleShot(1800,lambda:execute(run))

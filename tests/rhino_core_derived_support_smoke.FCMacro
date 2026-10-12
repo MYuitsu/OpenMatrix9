@@ -1,0 +1,138 @@
+"""Owned derived basis chains; independent sampled native parameter oracles."""
+import json,math,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[],'descriptors':{}}
+def stage(name):(out/'last-stage.txt').write_text(name)
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def vec(p):return App.Vector(*p)
+def bezier(d,t):
+    n=d['degree'];p=d['poles_xyz'];w=d['weights'] or [1]*len(p)
+    b=[math.comb(n,i)*t**i*(1-t)**(n-i)*w[i] for i in range(n+1)]
+    return vec([sum(p[i][c]*b[i] for i in range(n+1))/sum(b) for c in range(3)])
+def evaluate(d,u,v=0):
+    k=d['kind']
+    if k=='bezier_curve':return bezier(d,u)
+    if k=='nurbs_curve':
+        assert d['axis']['knots']==[0,1] and d['axis']['multiplicities']==[d['axis']['degree']+1]*2
+        return bezier(dict(d,degree=d['axis']['degree']),u)
+    if k in ['bezier_surface','nurbs_surface']:
+        if k=='nurbs_surface':
+            assert all(a['knots']==[0,1] and a['multiplicities']==[a['degree']+1]*2 for a in d['axes'])
+            du,dv=[a['degree'] for a in d['axes']]
+        else:du,dv=d['degrees']
+        p=d['poles_xyz'];w=d['weights'] or [1]*len(p)
+        b=[math.comb(du,i)*u**i*(1-u)**(du-i)*math.comb(dv,j)*v**j*(1-v)**(dv-j)*w[i*d['v_count']+j] for i in range(d['u_count']) for j in range(d['v_count'])]
+        return vec([sum(p[i][c]*b[i] for i in range(len(p)))/sum(b) for c in range(3)])
+    if k=='analytic_curve':
+        o=vec(d['origin_xyz']);x,y,z=map(vec,d['axes_xyz']);p=d['parameters']
+        if d['analytic_type']=='line':return o+x*u
+        if d['analytic_type']=='circle':return o+(x*math.cos(u)+y*math.sin(u))*p['radius']
+    if k=='analytic_surface' and d['analytic_type']=='plane':
+        return vec(d['origin_xyz'])+vec(d['axes_xyz'][0])*u+vec(d['axes_xyz'][1])*v
+    if k in ['trimmed_curve','trimmed_surface']:return evaluate(d['basis'],u,v)
+    if k=='linear_extrusion':return evaluate(d['basis'],u)+vec(d['direction_xyz'])*v
+    if k=='revolution':
+        origin=vec(d['origin_xyz']);axis=vec(d['direction_xyz']);p=evaluate(d['basis'],v)-origin
+        return origin+p*math.cos(u)+axis.cross(p)*math.sin(u)+axis*(axis.dot(p)*(1-math.cos(u)))
+    if k=='offset_curve':
+        h=1e-5;p=evaluate(d['basis'],u);t=evaluate(d['basis'],u+h)-evaluate(d['basis'],u-h)
+        n=t.cross(vec(d.get('direction_xyz',[0,0,1])));n.normalize()
+        return p+n*d['offset']
+    if k=='offset_surface':
+        h=1e-5;b=d['basis'];p=evaluate(b,u,v)
+        du=evaluate(b,u+h,v)-evaluate(b,u-h,v);dv=evaluate(b,u,v+h)-evaluate(b,u,v-h)
+        n=du.cross(dv);n.normalize();return p+n*d['offset']
+    raise AssertionError('Unhandled independent oracle '+k)
+def transform(m,p):return vec([sum(m[r][c]*[p.x,p.y,p.z][c] for c in range(3))+m[r][3] for r in range(3)])
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+        stage('workbench activated')
+        doc=App.newDocument('DerivedSupport');doc.UndoMode=1
+        curve=Part.BezierCurve();curve.setPoles([vec([2,0,1]),vec([4,2,3]),vec([3,5,6])])
+        curve.setWeight(2,math.sqrt(.5))
+        spline=Part.BSplineCurve();spline.buildFromPolesMultsKnots([vec([2,0,1]),vec([4,2,3]),vec([3,5,6])],[3,3],[0.,1.],False,2,[1.,2.,1.])
+        poles=[[vec([0,0,0]),vec([0,7,0])],[vec([8,0,0]),vec([8,7,2])]]
+        ns=Part.BSplineSurface();ns.buildFromPolesMultsKnots(poles,[2,2],[2,2],[0.,1.],[0.,1.],False,False,1,1,[[1.,2.],[3.,4.]])
+        bs=Part.BezierSurface()
+        for i in range(2):
+            for j in range(2):bs.setPole(i+1,j+1,poles[i][j]);bs.setWeight(i+1,j+1,i*2+j+1)
+        circle=Part.Circle(vec([2,3,0]),vec([0,0,1]),7)
+        offset=Part.OffsetCurve(curve,-.4,vec([0,0,1]))
+        ex=Part.SurfaceOfExtrusion(curve,vec([1,0,2]))
+        rev=Part.SurfaceOfRevolution(curve,vec([1,-2,0]),vec([0,0,1]))
+        nested=Part.OffsetSurface(ex,-.3)
+        restricted=Part.RectangularTrimmedSurface(ex,.15,.85,-2,4)
+        inner_trim=Part.OffsetSurface(restricted,.2)
+        one_axis_trim=Part.OffsetSurface(Part.RectangularTrimmedSurface(ex,.15,.85,True),.2)
+        cases=[('OffsetBezier',offset.toShape(.1,.9),'offset_curve'),
+               ('OffsetCircle',Part.OffsetCurve(circle,1.2,vec([0,0,1])).toShape(.2,2),'offset_curve'),
+               ('Extrusion',ex.toShape(.1,.9,-2,3),'linear_extrusion'),
+               ('Revolution',rev.toShape(.1,2.3,.1,.9),'revolution'),
+               ('NestedOffsetExtrusion',nested.toShape(.1,.9,-2,3),'offset_surface'),
+               ('OffsetInnerTrim',inner_trim.toShape(.2,.8,-1,2),'offset_surface'),
+               ('OffsetPlane',Part.OffsetSurface(Part.Plane(),-2).toShape(-2,3,-1,4),'offset_surface'),
+               ('ExtrusionNurbs',Part.SurfaceOfExtrusion(spline,vec([1,0,2])).toShape(.1,.9,-2,3),'linear_extrusion'),
+               ('OffsetNurbsSurface',Part.OffsetSurface(ns,.2).toShape(.1,.9,.1,.9),'offset_surface'),
+               ('OffsetBezierSurface',Part.OffsetSurface(bs,-.2).toShape(.1,.9,.1,.9),'offset_surface'),
+               ('OffsetOneAxisTrim',one_axis_trim.toShape(.2,.8,-1,2),'offset_surface')]
+        objects=[]
+        stage('native fixtures constructed')
+        for name,shape,kind in cases:
+            obj=doc.addObject('Part::Feature',name);obj.Shape=shape;objects.append(obj)
+            obj.Placement=App.Placement(vec([13,-4,6]),App.Rotation(vec([1,2,3]),29))
+            doc.recompute();raw=obj.Shape.exportBrepToString();history=(doc.UndoCount,doc.RedoCount)
+            stage('descriptor '+name)
+            row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));report['descriptors'][name]=row;d=row.get('geometry_data')
+            check(name+' retains native derived kind',isinstance(d,dict) and d.get('kind')==kind)
+            check(name+' is distinct from analytic simplification',row['form']=='derived' and row['basis'] is None and row['geometry_data_status']=='copied_validated_derived')
+            is_curve=kind=='offset_curve'
+            if is_curve:
+                edge=obj.Shape.Edges[0];lo,hi=edge.FirstParameter,edge.LastParameter
+                for f in [.2,.5,.8]:
+                    t=lo+(hi-lo)*f;p=transform(row['brep_tool_location'],evaluate(d,t))
+                    check(name+' independent curve samples match native',(p-edge.Curve.value(t)).Length<2e-8)
+            else:
+                face=obj.Shape.Faces[0];u0,u1,v0,v1=face.ParameterRange
+                check(name+' root reuses common face support',row['topology']['faces'][0]['geometry_data']==d)
+                for a,b in [(.2,.3),(.5,.6),(.8,.4)]:
+                    u=u0+(u1-u0)*a;v=v0+(v1-v0)*b;p=transform(row['brep_tool_location'],evaluate(d,u,v))
+                    check(name+' independent surface samples match native',(p-face.Surface.value(u,v)).Length<2e-8)
+            check(name+' inspection preserves source/history',obj.Shape.exportBrepToString()==raw and history==(doc.UndoCount,doc.RedoCount))
+        check('extrusion separates unbounded V from face trim',report['descriptors']['Extrusion']['geometry_data']['natural_domains']==[[0,1],'unbounded'])
+        check('revolution preserves axis origin',report['descriptors']['Revolution']['geometry_data']['origin_xyz']==[1,-2,0])
+        check('inner surface trim retained',report['descriptors']['OffsetInnerTrim']['geometry_data']['basis']['kind']=='trimmed_surface' and report['descriptors']['OffsetInnerTrim']['geometry_data']['basis']['natural_domains']==[[.15,.85],[-2,4]])
+        check('inner one-axis trim retains unbounded V',report['descriptors']['OffsetOneAxisTrim']['geometry_data']['basis']['natural_domains']==[[.15,.85],'unbounded'])
+        check('derived rational Bezier controls/weights retained',report['descriptors']['Extrusion']['geometry_data']['basis']['poles_xyz']==[[2,0,1],[4,2,3],[3,5,6]] and report['descriptors']['Extrusion']['geometry_data']['basis']['weights']==[1,math.sqrt(.5),1])
+        check('derived NURBS curve weights retained',report['descriptors']['ExtrusionNurbs']['geometry_data']['basis']['weights']==[1,2,1])
+        for name in ['OffsetNurbsSurface','OffsetBezierSurface']:check(name+' original weights retained',report['descriptors'][name]['geometry_data']['basis']['weights']==[1,2,3,4])
+        reverse=doc.addObject('Part::Feature','ReversedDerived');shape=Part.Shape(objects[4].Shape);shape.reverse();reverse.Shape=shape;doc.recompute()
+        raw=reverse.Shape.exportBrepToString();history=(doc.UndoCount,doc.RedoCount);row=json.loads(native.geometryDescriptor(doc.Name,reverse.Name));report['descriptors'][reverse.Name]=row
+        check('derived topology reversal preserves local basis',row['geometry_orientation']=='reversed' and row['geometry_data']==report['descriptors']['NestedOffsetExtrusion']['geometry_data'])
+        check('reversed derived inspection preserves source/history',reverse.Shape.exportBrepToString()==raw and history==(doc.UndoCount,doc.RedoCount))
+        # Native UV offset is read from a face pcurve, not approximated to 3D.
+        uv=Part.Geom2d.BezierCurve2d();uv.setPoles([App.Base.Vector2d(2,3),App.Base.Vector2d(4,8),App.Base.Vector2d(7,4)])
+        uv_offset=Part.Geom2d.OffsetCurve2d(uv,-.2);plane=Part.Plane();edge=uv_offset.toShape(plane)
+        uf=doc.addObject('Part::Feature','UVOffset');uf.Shape=Part.Face(plane,Part.Wire([edge,Part.makeLine(edge.Vertexes[-1].Point,edge.Vertexes[0].Point)]));doc.recompute()
+        raw=uf.Shape.exportBrepToString();row=json.loads(native.geometryDescriptor(doc.Name,uf.Name));report['descriptors'][uf.Name]=row
+        pc=[use['pcurve']['geometry_data'] for loop in row['topology']['faces'][0]['loops'] for use in loop['edge_uses'] if use['pcurve']['geometry_data'] and use['pcurve']['geometry_data']['kind']=='offset_curve']
+        check('UV offset retains supporting chain',len(pc)==1 and pc[0]['dimension']==2 and 'direction_xyz' not in pc[0])
+        for t in [.2,.5,.8]:
+            p=evaluate(pc[0],t);q=uv_offset.value(t);check('UV offset independent samples match native',math.hypot(p.x-q.x,p.y-q.y)<2e-8 and p.z==0)
+        check('UV inspection preserves source',uf.Shape.exportBrepToString()==raw)
+        saved=json.dumps(report['descriptors'],sort_keys=True);objects[0].Shape=Part.makeBox(1,2,3);doc.recompute();App.closeDocument(doc.Name)
+        check('derived snapshots survive source replacement/close',json.dumps(report['descriptors'],sort_keys=True)==saved)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

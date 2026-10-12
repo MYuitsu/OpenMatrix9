@@ -1,5 +1,21 @@
 # OM9-CURVE-009 — Rebuild
 
+<!-- common-command-options-20261012:start -->
+Command Options 2026-10-12: các tham số scalar/toggle/choice dùng model Rust
+và binder CMD–Builder chung; native validation trước acceptance/preview,
+giữ draft lỗi và các guards/transactions hiện có.
+[API chung](../command-options-adapter.md) · [Native evidence](../validation/2026-10-12-command-line-options.md).
+<!-- common-command-options-20261012:end -->
+
+
+<!-- rhino-core-native-rebuild-policy:start -->
+Rebuild hiện có dùng policy operation/type/options Rust chung trước enable,
+copy và solve; kiểm nội dung Compound và giữ solver/source/placement/Undo/Redo.
+383 checks/nine actual host exits0 trên cùng plugin; full Rust702 đạt.
+Các family construction và hợp đồng output/ownership gốc còn mở;
+**RCORE-01 đang triển khai**. [Bằng chứng và giới hạn](../validation/2026-10-11-rhino-core-native-rebuild-policy.md).
+<!-- rhino-core-native-rebuild-policy:end -->
+
 Command `Rebuild`, icon `OthersCurveRebuild`, Curve menu. Implemented slice:
 native curve/wire selection, exact degree/pole-count fitting, preview and batch
 transactions. Surface Rebuild is a different, unsupported feature.

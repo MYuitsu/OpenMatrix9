@@ -18,6 +18,7 @@
 #include "CoreDistance.h"
 #include "CoreSnaps.h"
 #include "CoreKeyboard.h"
+#include "CoreLayers.h"
 #include <FCGlobal.h>
 #include <Base/Console.h>
 #include <Base/Interpreter.h>
@@ -73,6 +74,9 @@ private:std::size_t index;std::string ownedName,accelerator;
 }
 bool om9NativeCommandAvailable(std::size_t index) {
     if(!Gui::Application::Instance || !qApp || QThread::currentThread()!=qApp->thread())return false;
+    if(OpenMatrix9Gui::GumballController::handles(index))return OpenMatrix9Gui::GumballController::instance().available(index);
+    const char* nativeId=om9_command_native_id(index);
+    if(((om9_command_permissions(index)&1U)&&(!nativeId||std::string(nativeId)=="Std_Delete"))&&!OpenMatrix9Gui::CoreLayers::selectionEditable())return false;
     if(OpenMatrix9Gui::HistoryController::handles(index))return OpenMatrix9Gui::HistoryController::instance().available(index);
     if(OpenMatrix9Gui::CageController::handles(index))return OpenMatrix9Gui::CageController::instance().available(index);
     if(auto operation=om9_3dm_operation(index)) {auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();return doc&&gui&&!gui->getInEdit()&&Gui::Control().isAllowedAlterDocument(doc)&&(operation==1||Gui::Selection().hasSelection(doc->getName()));}
@@ -87,7 +91,6 @@ bool om9NativeCommandAvailable(std::size_t index) {
     if(OpenMatrix9Gui::isCurveCommand(index))return OpenMatrix9Gui::CurveController::instance().available(index);
     if(OpenMatrix9Gui::CoreWorkspace::handles(index))return OpenMatrix9Gui::CoreWorkspace::instance().available(index);
     if(OpenMatrix9Gui::CoreViewControls::handles(index))return OpenMatrix9Gui::CoreViewControls::instance().available(index);
-    if(OpenMatrix9Gui::GumballController::handles(index))return OpenMatrix9Gui::GumballController::instance().available(index);
     const char* native=om9_command_native_id(index);if(!native)return false;
     auto* doc=App::GetApplication().getActiveDocument();
     const std::string id=native;
@@ -108,6 +111,7 @@ bool om9NativeCommandAvailable(std::size_t index) {
     return command && command->isActive();
 }
 bool om9ExecuteNativeCommand(std::size_t index) {
+    if(!om9NativeCommandAvailable(index))return false;
     if(OpenMatrix9Gui::GumballController::handles(index))return OpenMatrix9Gui::GumballController::instance().execute(index);
     if(OpenMatrix9Gui::HistoryController::handles(index))return OpenMatrix9Gui::HistoryController::instance().start(index);
     if(OpenMatrix9Gui::CageController::handles(index))return OpenMatrix9Gui::CageController::instance().start(index);
@@ -142,7 +146,7 @@ bool om9ExecuteNativeCommand(std::size_t index) {
             Gui::Selection().clearSelection(name.c_str());
             if(auto* current=App::GetApplication().getDocument(name.c_str())) {
                 std::vector<App::DocumentObject*> objects;
-                for(auto* object:current->getObjects())if(!OpenMatrix9Gui::CoreNotes::isStorageObject(object)&&!dynamic_cast<OpenMatrix9Gui::HistorySettings*>(object)&&!OpenMatrix9Gui::isBuilderStorageObject(object)&&!OpenMatrix9Gui::isCageStorageObject(object))objects.push_back(object);
+                for(auto* object:current->getObjects())if(OpenMatrix9Gui::CoreLayers::objectEditable(object)&&!OpenMatrix9Gui::CoreNotes::isStorageObject(object)&&!dynamic_cast<OpenMatrix9Gui::HistorySettings*>(object)&&!OpenMatrix9Gui::isBuilderStorageObject(object)&&!OpenMatrix9Gui::isCageStorageObject(object))objects.push_back(object);
                 Gui::Selection().setSelection(name.c_str(),objects);
             }
         }

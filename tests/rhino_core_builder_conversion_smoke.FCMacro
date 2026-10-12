@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Actual native affine correspondence; samples cannot certify a global map."""
+import json,os,math,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'module':OM.__file__,'checks':[]}
+def check(name,v):report['checks'].append(dict(name=name,passed=bool(v)))
+def evidence(child):
+    try:return json.loads(child.OM9GeometryResult)
+    except Exception:return {}
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');d=App.newDocument('BuilderConversion');d.UndoMode=1
+        gem=d.addObject('Part::Feature','Gem');gem.Shape=Part.makeBox(2,2,2);gem.Placement.Base=App.Vector(100,0,0)
+        gem.addProperty('App::PropertyString','OM9GemShape');gem.OM9GemShape='round'
+        circle=d.addObject('Part::Feature','CircleSeed');circle.Shape=Part.makeCircle(3,App.Vector(103,0,0))
+        outer=Part.makePolygon([App.Vector(110,0,0),App.Vector(120,0,0),App.Vector(120,10,0),App.Vector(110,10,0),App.Vector(110,0,0)])
+        inner=Part.makePolygon([App.Vector(113,3,0),App.Vector(113,7,0),App.Vector(117,7,0),App.Vector(117,3,0),App.Vector(113,3,0)])
+        hole=d.addObject('Part::Feature','HoleSeed');hole.Shape=Part.Face([outer,inner])
+        cyl=d.addObject('Part::Feature','CylinderSeed');cyl.Shape=Part.makeCylinder(2,5,App.Vector(125,0,0)).Faces[0]
+        d.recompute();raw=json.dumps(dict(schema=1,evaluator='om9.affine-template',version=1,settings={},scale=[2,1,1]))
+        record=OM.createBuilderRecord(gem,'OM9-SETTING-001',raw,[circle,hole,cyl])
+        children=[d.getObject(n) for n in record.OutputNames]
+        for index,child in enumerate(children):
+            r=evidence(child);conversion=r.get('conversion_reports',[{}])[0];tm=r.get('topology_map') or {}
+            check('Native history supplies actual complete subshape mapping '+str(index),tm.get('method')=='composed_occt_modified_shape' and bool(tm.get('rows')) and tm.get('complete') is True)
+            dev=conversion.get('deviation_report') or {}
+            check('Deviation is measured on actual CAD '+str(index),dev.get('measurement')=='native_point_samples' and dev.get('sample_count',0)>0 and dev.get('max_distance',1)>-1 and dev.get('max_distance',1)<1e-6 and dev.get('global_bound') is None)
+            check('Original template has an owned input snapshot '+str(index),len(r.get('input_snapshots',[]))==1 and bool(r.get('input_snapshots',[{}])[0].get('geometry_data',{}).get('native_master')))
+        r=evidence(children[0]);c=r.get('conversion_reports',[{}])[0];query=c.get('parameter_map') or {}
+        samples=query.get('edge_queries',[])
+        check('Circle conversion reports actual parameter queries',query.get('method')=='native_parameter_query_samples' and query.get('evaluation')=='recorded_parameters_only' and bool(samples) and all(q.get('query_method') in ('verified_native_evaluation','native_projection') for q in samples))
+        output_edges=r.get('output_snapshots',[{}])[0].get('topology_data',{}).get('edges_3d',[])
+        # OCCT may retain a Geom_TrimmedCurve wrapper over the rational basis.
+        # Verify the stored basis itself, not a guessed outer DynamicType name.
+        check('Analytic to rational change is explicitly observed',any(
+            row.get('source_class')=='Geom_Circle' and any(
+                edge.get('native_topology_index')==str(row.get('output_index'))
+                and row.get('output_class')==edge.get('native_class')
+                and edge.get('geometry_data',{}).get('kind')=='nurbs_curve'
+                and edge.get('geometry_data',{}).get('axis',{}).get('degree')==2
+                and any(abs(w-1)>1e-6 for w in edge.get('geometry_data',{}).get('weights',[]))
+                for edge in output_edges) for row in (r.get('topology_map') or {}).get('rows',[])))
+        check('Unequal raw parameters are not claimed reusable',any(abs(q.get('source_parameter',0)-q.get('output_parameter',0))>1e-4 for q in samples) and c.get('parameterization') is None)
+        check('Mapped query pairs evaluate to the transformed source',bool(samples) and all(q.get('residual',1)<1e-6 for q in samples))
+        check('Trimmed face UV queries retain independent source/output values',all(bool(evidence(child).get('conversion_reports',[{}])[0].get('parameter_map',{}).get('face_queries')) for child in children[1:]))
+        check('Every recorded query succeeded for these bounded native fixtures',all(
+            evidence(child)['conversion_reports'][0]['parameter_map']['recorded_queries_complete'] is True
+            and not evidence(child)['diagnostics'] for child in children))
+        check('Hole and open periodic cylinder remain distinct',len(children[1].Shape.Wires)==2 and children[2].Shape.ShapeType=='Face' and not children[2].Shape.isClosed())
+        name=children[0].Name;before=children[0].OM9GeometryResult;file=out/'builder-conversion.FCStd';d.saveAs(str(file));App.closeDocument(d.Name);d=App.openDocument(str(file))
+        check('FCStd retains native conversion observations',d.getObject(name).OM9GeometryResult==before)
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

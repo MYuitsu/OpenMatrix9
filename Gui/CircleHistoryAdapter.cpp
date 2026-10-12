@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 // FreeCAD topology/selection/shape adapter; Rust owns Circle replay and bounds.
 #include "CircleHistoryAdapter.h"
+#include "NativeFitPoints.h"
 #include "CurveCircle.h"
 #include "CircleHistory.h"
 #include "HistoryFeature.h"
 #include "RustBridge.h"
+#include "CoreCurveNativeInput.h"
 #include <App/Document.h>
 #include <Base/Interpreter.h>
 #include <Gui/Selection/Selection.h>
@@ -29,8 +31,8 @@ std::string signature(App::Document& doc,const std::string& name,const std::vect
     std::ostringstream out;out<<std::setprecision(17);for(const auto& p:points)for(double v:p)out<<v<<',';return out.str();
 }
 CircleHistorySource capture(App::Document& doc,std::string name,std::string sub,long role,std::size_t index){
-    auto points=circleHistorySourcePoints(doc,name,sub);
-    CircleHistorySource source;source.name=std::move(name);source.sub=std::move(sub);source.role=role;source.index=index;source.count=role==-1?0:points.size();source.signature=signature(doc,source.name,points);source.snapshot=std::move(points);source.identity=doc.getObject(source.name.c_str());return source;
+    auto points=circleHistorySourcePoints(doc,name,sub,role==1?index:0,role==1?"Circle FitPoints":"Circle",true);
+    CircleHistorySource source;source.name=std::move(name);source.sub=std::move(sub);source.role=role;source.index=index;source.count=role==-1?0:points.size();source.signature=signature(doc,source.name,points);source.snapshot=std::move(points);source.identity=doc.getObject(source.name.c_str());source.nativeEvidence=captureCurveNativeSource(doc,source.name,source.sub,source.snapshot,"Circle");return source;
 }
 std::pair<std::string,std::string> vertexPath(const QString& text){
     const auto value=text.toStdString();const auto dot=value.find('.');
@@ -39,36 +41,16 @@ std::pair<std::string,std::string> vertexPath(const QString& text){
 }
 Ref list(const double* values,std::size_t count,bool integer=false){Ref result(PyList_New(Py_ssize_t(count)));for(std::size_t i=0;i<count;++i)PyList_SET_ITEM(result.value,Py_ssize_t(i),integer?PyLong_FromLong(long(values[i])):PyFloat_FromDouble(values[i]));return result;}
 }
-std::vector<SolidPoint> circleHistorySourcePoints(App::Document& doc,const std::string& name,const std::string& sub){
-    auto* native=doc.getObject(name.c_str());if(!native||!native->isValid())throw std::runtime_error("Circle History source is missing or invalid");
-    if(native->isDerivedFrom(Base::Type::fromName("App::Link")))throw std::runtime_error("Circle History does not accept linked references");
-    Ref object(native->getPyObject());Ref global(PyObject_CallMethod(object.value,"getGlobalPlacement",nullptr)),local(PyObject_GetAttrString(object.value,"Placement")),inverse(PyObject_CallMethod(local.value,"inverse",nullptr)),parent(PyNumber_Multiply(global.value,inverse.value));
-    std::vector<SolidPoint> result;
-    auto append=[&](PyObject* value){if(result.size()>=1024)throw std::runtime_error("Circle source supports at most 1024 points");Ref transformed(PyObject_CallMethod(parent.value,"multVec","O",value));result.push_back(point(transformed.value));};
-    auto surface=[&](PyObject* face){Ref geometry(PyObject_GetAttrString(face,"Surface"));if(!PyObject_HasAttrString(geometry.value,"getPoles"))return false;Ref rows(PyObject_CallMethod(geometry.value,"getPoles",nullptr));for(Py_ssize_t i=0;i<PySequence_Size(rows.value);++i){Ref row(PySequence_GetItem(rows.value,i));for(Py_ssize_t j=0;j<PySequence_Size(row.value);++j){Ref p(PySequence_GetItem(row.value,j));append(p.value);}}return true;};
-    if(PyObject_HasAttrString(object.value,"Shape")){
-        Ref shape(PyObject_GetAttrString(object.value,"Shape"));
-        if(!sub.empty()){
-            Ref element(PyObject_CallMethod(shape.value,"getElement","s",sub.c_str()));
-            if(sub.starts_with("Vertex")){Ref p(PyObject_GetAttrString(element.value,"Point"));append(p.value);}
-            else if(sub.starts_with("Face")){if(!surface(element.value))throw std::runtime_error("Selected Circle face has no surface control points");}
-            else throw std::runtime_error("Circle point sources require vertices or supported faces");
-        }else {
-            Ref faces(PyObject_GetAttrString(shape.value,"Faces")),edges(PyObject_GetAttrString(shape.value,"Edges"));bool poles=false;
-            if(PySequence_Size(faces.value)==1){Ref face(PySequence_GetItem(faces.value,0));poles=surface(face.value);}
-            if(!poles&&PySequence_Size(edges.value)==1){Ref edge(PySequence_GetItem(edges.value,0)),curve(PyObject_GetAttrString(edge.value,"Curve"));if(PyObject_HasAttrString(curve.value,"getPoles")){Ref values(PyObject_CallMethod(curve.value,"getPoles",nullptr));for(Py_ssize_t i=0;i<PySequence_Size(values.value);++i){Ref p(PySequence_GetItem(values.value,i));append(p.value);}poles=true;}}
-            if(!poles){Ref vertices(PyObject_GetAttrString(shape.value,"Vertexes"));for(Py_ssize_t i=0;i<PySequence_Size(vertices.value);++i){Ref vertex(PySequence_GetItem(vertices.value,i)),p(PyObject_GetAttrString(vertex.value,"Point"));append(p.value);}}
-        }
-    }else if(PyObject_HasAttrString(object.value,"Mesh")){
-        if(!sub.empty())throw std::runtime_error("Select the whole Circle mesh source");Ref mesh(PyObject_GetAttrString(object.value,"Mesh")),topology(PyObject_GetAttrString(mesh.value,"Topology")),points(PySequence_GetItem(topology.value,0));for(Py_ssize_t i=0;i<PySequence_Size(points.value);++i){Ref p(PySequence_GetItem(points.value,i));append(p.value);}
-    }else if(PyObject_HasAttrString(object.value,"Points")){
-        if(!sub.empty())throw std::runtime_error("Select the whole Circle point cloud source");Ref cloud(PyObject_GetAttrString(object.value,"Points")),points(PyObject_GetAttrString(cloud.value,"Points"));for(Py_ssize_t i=0;i<PySequence_Size(points.value);++i){Ref p(PySequence_GetItem(points.value,i));append(p.value);}
-    }else throw std::runtime_error("Circle source has no supported native points");
-    if(result.empty())throw std::runtime_error("Circle source has no points");return result;
+std::vector<SolidPoint> circleHistorySourcePoints(App::Document& doc,const std::string& name,const std::string& sub,
+    std::size_t used,const char* operation,bool currentCurve,const std::function<void(unsigned)>& independentAdmission){
+    auto points=nativeFitPoints(doc,name,sub,true,used,operation,currentCurve,false,independentAdmission);
+    if(points.empty())throw std::runtime_error(std::string("InvalidBasis: ")+operation+" input "+name+": source has no points");
+    return points;
 }
 std::optional<unsigned> circleHistoryNativeInput(App::Document& doc,const QString& text){
     Base::PyGILStateLocker lock;captureCircleReferenceContext();const auto t=text.trimmed();const bool direction=t.startsWith("Direction=",Qt::CaseInsensitive),p=t.startsWith("Point=",Qt::CaseInsensitive);
     if(p||direction){
+        const auto admission=curveNativeAdmission(doc,"Circle");
         verifyCircleHistoryReferences(doc);const auto [name,sub]=vertexPath(t.mid(direction?10:6));
         const auto index=om9_curve_preview_count();auto source=capture(doc,name,sub,direction?-1:0,direction?0:index);
         const auto point=source.snapshot.front();
@@ -76,10 +58,10 @@ std::optional<unsigned> circleHistoryNativeInput(App::Document& doc,const QStrin
         if(direction){
             // Native kind 4 requests the existing Circle orientation transition;
             // the session validates that it is waiting for a direction endpoint.
-            effect=om9_circle_reference(point[0],point[1],point[2],0,0,0,4);
+            effect=acceptCurveNativeInput(doc,admission,"reference",4,point,{0,0,0},{},text,{{source.nativeEvidence,"direction",0,index,index+1}});
         }else if(om9_circle_reference_mode()==3){
-            effect=om9_circle_reference(point[0],point[1],point[2],0,0,0,5);
-        }else effect=om9_curve_point(point[0],point[1],point[2]);
+            effect=acceptCurveNativeInput(doc,admission,"reference",5,point,{0,0,0},{},text,{{source.nativeEvidence,"point",index,index,index+1}});
+        }else effect=acceptCurveNativeInput(doc,admission,"point",0,point,{0,0,0},{},text,{{source.nativeEvidence,"point",index,index,index+1}});
         if(effect==1||effect==2){
             if(p){double config[24],picked[3072];const auto count=om9_circle_history_snapshot(config,picked,1024);
                 if(count==index){
@@ -93,11 +75,14 @@ std::optional<unsigned> circleHistoryNativeInput(App::Document& doc,const QStrin
         }return effect;
     }
     if(om9_circle_reference_mode()==4&&(t.compare("Selection",Qt::CaseInsensitive)==0||(t.isEmpty()&&om9_curve_preview_count()==0))){
+        const auto admission=curveNativeAdmission(doc,"Circle");
         verifyCircleHistoryReferences(doc);std::vector<CircleHistorySource> picked;std::vector<double> flat;auto offset=om9_curve_preview_count();
         for(const auto& sel:Gui::Selection().getSelection(doc.getName())){
             auto source=capture(doc,sel.FeatName,sel.SubName?sel.SubName:"",1,offset);offset+=source.count;for(const auto& point:source.snapshot)flat.insert(flat.end(),point.begin(),point.end());picked.push_back(std::move(source));
         }
-        if(flat.empty())throw std::runtime_error("Select native Circle fit points");const auto effect=om9_circle_fit_batch(flat.data(),flat.size()/3);
+        if(flat.empty())throw std::runtime_error("Select native Circle fit points");std::vector<SolidPoint> values;std::vector<CurveNativeBinding> bindings;
+        for(const auto& source:picked){values.insert(values.end(),source.snapshot.begin(),source.snapshot.end());bindings.push_back({source.nativeEvidence,"fit_points",bindings.size(),source.index,source.index+source.count});}
+        const auto effect=acceptCurveNativeInput(doc,admission,"fit_batch",0,{0,0,0},{0,0,0},values,text,bindings);
         if(effect!=1)return effect;sources.insert(sources.end(),picked.begin(),picked.end());
         // Empty input also finishes the fit. Preserve the batch's own context
         // after its source ledger is attached and before the second Rust event.
@@ -108,7 +93,7 @@ std::optional<unsigned> circleHistoryNativeInput(App::Document& doc,const QStrin
     const bool orientation=key.compare("Orientation",Qt::CaseInsensitive)==0||key.compare("o",Qt::CaseInsensitive)==0;
     const bool radiusOption=key.compare("Radius",Qt::CaseInsensitive)==0||key.compare("r",Qt::CaseInsensitive)==0;
     if(orientation||radiusOption){
-        const auto utf8=t.toUtf8();const auto effect=om9_curve_input(utf8.constData());
+        const auto utf8=text.toUtf8();const auto effect=om9_curve_input(utf8.constData());
         if(effect==1||effect==2)sources.erase(std::remove_if(sources.begin(),sources.end(),[&](const auto& source){return source.role==(orientation?-1:4);}),sources.end());
         return effect;
     }
@@ -119,7 +104,7 @@ std::vector<CircleHistorySource> circleHistoryReferenceSnapshot(){return sources
 void restoreCircleHistoryReferenceSnapshot(std::vector<CircleHistorySource> snapshot){sources=std::move(snapshot);}
 void verifyCircleHistoryReferences(App::Document& doc){
     Base::PyGILStateLocker lock;
-    for(const auto& source:sources){if(doc.getObject(source.name.c_str())!=source.identity)throw std::runtime_error("Circle point source changed or was deleted; Undo and reselect");const auto points=circleHistorySourcePoints(doc,source.name,source.sub);if(points!=source.snapshot||signature(doc,source.name,points)!=source.signature)throw std::runtime_error("Circle point source changed; Undo and reselect");}
+    for(const auto& source:sources){if(source.nativeEvidence)verifyCurveNativeSource(doc,*source.nativeEvidence,"Circle");if(doc.getObject(source.name.c_str())!=source.identity)throw std::runtime_error("Circle point source changed or was deleted; Undo and reselect");const auto points=circleHistorySourcePoints(doc,source.name,source.sub);if(points!=source.snapshot||signature(doc,source.name,points)!=source.signature)throw std::runtime_error("Circle point source changed; Undo and reselect");}
 }
 void pruneCircleHistoryReferences(unsigned effect){
     if(effect==3){clearCircleHistoryReferences();return;}

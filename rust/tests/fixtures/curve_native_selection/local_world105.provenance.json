@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-red105-offscreen-20261011/results.json",
+  "source_sha256": "a5368733be170942b12ce32477dc5f8c827f840885a41ba00ffe3c6aafd1f72d",
+  "generator": "H:/FreeCAD-src/build/prepare-initial-selection-local105.py",
+  "generator_sha256": "4dd9f7a2fb9517b408d4d2ca677f4f754e0e6b9b4a76c3714086e8124f4763d2",
+  "scope": "Genuine successful native initial constructors: native vertex normalized to small world geometry; retained NURBS local poles near1e12 with native_location translation-1e12 and selected world points within1e9. Actual native curve History replay is RED. These are saved owned results, not intercepted input requests.",
+  "files": [
+    {
+      "path": "rust/tests/fixtures/curve_native_selection/local_world105.json",
+      "bytes": 112745,
+      "sha256": "63afc82742320dc61d7379ab4b18485960585b5e8e8a47e587c9235edccebb9f"
+    }
+  ]
+}

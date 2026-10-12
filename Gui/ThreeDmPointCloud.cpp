@@ -1,4 +1,6 @@
 #include "ThreeDmPointCloud.h"
+#include "NativeInputTree.h"
+#include "NativeInputTrace.h"
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QCryptographicHash>
@@ -7,6 +9,8 @@
 #include <cmath>
 namespace OpenMatrix9Gui::ThreeDm {
 void validatePointCloud(const ON_PointCloud& cloud){
+    InputTree::validate(cloud);
+    OM9_NATIVE_INPUT_ENTRY("cloud.values");
     auto count=cloud.m_P.Count();if(count<=0)throw ExchangeError("Native PointCloud requires nonempty points");
     if((cloud.m_N.Count()!=0&&cloud.m_N.Count()!=count)||(cloud.m_C.Count()!=0&&cloud.m_C.Count()!=count)||(cloud.m_V.Count()!=0&&cloud.m_V.Count()!=count))throw ExchangeError("Native PointCloud optional array count differs from points");
     for(int i=0;i<count;++i)if(!cloud.m_P[i].IsValid())throw ExchangeError("Invalid native PointCloud point");
@@ -14,22 +18,22 @@ void validatePointCloud(const ON_PointCloud& cloud){
     for(int i=0;i<cloud.m_V.Count();++i)if(!std::isfinite(cloud.m_V[i]))throw ExchangeError("Invalid native PointCloud intensity");
     if(cloud.HasPlane()&&!cloud.m_plane.IsValid())throw ExchangeError("Invalid active native PointCloud plane");
 }
-static QJsonArray planeFields(const ON_Plane& plane){QJsonArray values;for(auto v:{plane.origin,ON_3dPoint(plane.xaxis),ON_3dPoint(plane.yaxis),ON_3dPoint(plane.zaxis)})for(int i=0;i<3;++i)values.append(v[i]);for(int i=0;i<4;++i)values.append(plane.plane_equation[i]);return values;}
+static QJsonArray planeFields(const ON_Plane& plane,bool active){QJsonArray values;if(!active){for(int i=0;i<16;++i)values.append(0.0);return values;}for(auto v:{plane.origin,ON_3dPoint(plane.xaxis),ON_3dPoint(plane.yaxis),ON_3dPoint(plane.zaxis)})for(int i=0;i<3;++i)values.append(v[i]);for(int i=0;i<4;++i)values.append(plane.plane_equation[i]);return values;}
 void validateRhino5PointCloud(const ON_PointCloud& cloud){
     validatePointCloud(cloud);
     if(cloud.m_V.Count()>0)throw ExchangeError("Rhino5-era openNURBS20130711 reader loses PointCloud intensity; retain current values in FCStd or explicitly clear them before Rhino5 export");
 }
 QJsonObject pointCloudFields(const ON_PointCloud& cloud){
-    validatePointCloud(cloud);QJsonArray points,normals,colors,values;
+    validatePointCloud(cloud);QJsonArray points,normals,colors,values;const bool hasPlane=cloud.HasPlane();
     for(int i=0;i<cloud.m_P.Count();++i){auto p=cloud.m_P[i];points.append(QJsonArray{p.x,p.y,p.z});}
     for(int i=0;i<cloud.m_N.Count();++i){auto n=cloud.m_N[i];normals.append(QJsonArray{n.x,n.y,n.z});}
     for(int i=0;i<cloud.m_C.Count();++i){auto c=cloud.m_C[i];for(auto v:{c.Red(),c.Green(),c.Blue(),c.Alpha()})colors.append(v);}
     for(int i=0;i<cloud.m_V.Count();++i)values.append(cloud.m_V[i]);
-    return QJsonObject{{"schema_version",1},{"points",points},{"normals",normals},{"colors",colors},{"values",values},{"ordered",cloud.IsOrdered()},{"has_plane",cloud.HasPlane()},{"plane",planeFields(cloud.m_plane)}};
+    return QJsonObject{{"schema_version",1},{"points",points},{"normals",normals},{"colors",colors},{"values",values},{"ordered",cloud.IsOrdered()},{"has_plane",hasPlane},{"plane",planeFields(cloud.m_plane,hasPlane)}};
 }
 QJsonObject pointCloudSummary(const ON_PointCloud& cloud){
-    validatePointCloud(cloud);ON_BoundingBox box;for(int i=0;i<cloud.m_P.Count();++i)box.Set(cloud.m_P[i],true);
-    QJsonObject summary{{"point_count",cloud.m_P.Count()},{"normal_count",cloud.m_N.Count()},{"color_count",cloud.m_C.Count()},{"value_count",cloud.m_V.Count()},{"ordered",cloud.IsOrdered()},{"has_plane",cloud.HasPlane()},{"plane",planeFields(cloud.m_plane)},{"flags",static_cast<double>(cloud.m_flags)}};
+    validatePointCloud(cloud);ON_BoundingBox box;for(int i=0;i<cloud.m_P.Count();++i)box.Set(cloud.m_P[i],true);const bool hasPlane=cloud.HasPlane();
+    QJsonObject summary{{"point_count",cloud.m_P.Count()},{"normal_count",cloud.m_N.Count()},{"color_count",cloud.m_C.Count()},{"value_count",cloud.m_V.Count()},{"ordered",cloud.IsOrdered()},{"has_plane",hasPlane},{"plane",planeFields(cloud.m_plane,hasPlane)},{"flags",static_cast<double>(cloud.m_flags)}};
     if(box.IsValid())summary["bounds"]=QJsonArray{box.m_min.x,box.m_min.y,box.m_min.z,box.m_max.x,box.m_max.y,box.m_max.z};
     // Bounded binary array hashes keep the inventory small and independent of
     // locale/JSON floating-point formatting. Inspecting never fills m_bbox.
@@ -52,7 +56,7 @@ void applyPointCloudFields(ON_Geometry& geometry,const std::filesystem::path& pa
     auto points=fields["points"].toArray(),normals=fields["normals"].toArray(),colors=fields["colors"].toArray(),values=fields["values"].toArray(),plane=fields["plane"].toArray();auto count=points.size();
     if(count<=0||count>2147483647||(normals.size()!=0&&normals.size()!=count)||(colors.size()!=0&&colors.size()!=4*count)||(values.size()!=0&&values.size()!=count)||plane.size()!=16)throw ExchangeError("Invalid PointCloud current array count");
     auto number=[](const QJsonValue& value){if(!value.isDouble()||!std::isfinite(value.toDouble()))throw ExchangeError("Invalid PointCloud current numeric field");return value.toDouble();};
-    ON_PointCloud edited=*cloud;edited.m_P.Empty();edited.m_N.Empty();edited.m_C.Empty();edited.m_V.Empty();
+    InputTree::validate(*cloud,true);OM9_NATIVE_INPUT_ENTRY("pointcloud.apply.copy");ON_PointCloud edited=*cloud;edited.m_P.Empty();edited.m_N.Empty();edited.m_C.Empty();edited.m_V.Empty();
     for(auto value:points){if(!value.isArray()||value.toArray().size()!=3)throw ExchangeError("PointCloud point requires3 doubles");auto row=value.toArray();edited.m_P.Append(ON_3dPoint(number(row[0]),number(row[1]),number(row[2])));}
     for(auto value:normals){if(!value.isArray()||value.toArray().size()!=3)throw ExchangeError("PointCloud normal requires3 doubles");auto row=value.toArray();edited.m_N.Append(ON_3dVector(number(row[0]),number(row[1]),number(row[2])));}
     for(qsizetype i=0;i<colors.size();i+=4){int rgba[4];for(int j=0;j<4;++j){auto value=number(colors[i+j]);if(value<0||value>255||value!=std::floor(value))throw ExchangeError("PointCloud color requires integer RGBA bytes");rgba[j]=static_cast<int>(value);}ON_Color color;color.SetRGBA(rgba[0],rgba[1],rgba[2],rgba[3]);edited.m_C.Append(color);}

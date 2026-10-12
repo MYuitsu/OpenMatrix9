@@ -25,7 +25,18 @@ def exact(obj,r,center):
 def feature(name,shape):
     obj=doc.addObject('Part::Feature',name);obj.Shape=shape;doc.recompute();return obj
 def screen(p):
-    viewer=next(w for w in window.findChild(QtWidgets.QMdiArea).activeSubWindow().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible());target=viewer.viewport();pixel=Gui.activeDocument().activeView().getPointOnScreen(App.Vector(*p));ratio=viewer.devicePixelRatioF()
+    # Qt's current subwindow survives application deactivation; activeSubWindow
+    # can be empty during native focus/layout changes. Never choose another slot.
+    timer=QtCore.QElapsedTimer();timer.start();viewer=None
+    while timer.elapsed()<2500:
+        area=window.findChild(QtWidgets.QMdiArea);sub=area.currentSubWindow() if area else None
+        if sub:
+            viewer=next((w for w in sub.findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible()),None)
+            if viewer:break
+        loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(25,loop.quit);loop.exec()
+    if viewer is None:raise AssertionError('Current native viewport did not become ready within 2500 ms')
+    result.setdefault('viewport_selection',[]).append(dict(active=area.activeSubWindow().windowTitle() if area.activeSubWindow() else None,current=sub.windowTitle(),document=Gui.activeDocument().Document.Name))
+    target=viewer.viewport();pixel=Gui.activeDocument().activeView().getPointOnScreen(App.Vector(*p));ratio=viewer.devicePixelRatioF()
     return target,QtCore.QPoint(round(pixel[0]/ratio),round(target.height()-(pixel[1]+1)/ratio))
 def run():
     global doc,field,window
@@ -109,6 +120,7 @@ def run():
         result['ok']=True
     except Exception:
         result['ok']=False;result['error']=traceback.format_exc();result['prompt']=command_prompt(window).text()
+        result['mdi']=[dict(active=a.activeSubWindow().windowTitle() if a.activeSubWindow() else None,current=a.currentSubWindow().windowTitle() if a.currentSubWindow() else None) for a in window.findChildren(QtWidgets.QMdiArea)]
     finally:
         (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
         for name in list(App.listDocuments()):

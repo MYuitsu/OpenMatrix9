@@ -1,0 +1,95 @@
+"""Owned Bezier support, sampled Bernstein/native oracles, exact source/history."""
+import json,math,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[],'descriptors':{}}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def bernstein(n,i,t):return math.comb(n,i)*t**i*(1-t)**(n-i)
+def evaluate(data,u,v=0):
+    p=data['poles_xyz'];w=data['weights'] or [1]*len(p)
+    if data['kind']=='bezier_curve':b=[bernstein(data['degree'],i,u) for i in range(len(p))]
+    else:
+        du,dv=data['degrees'];b=[bernstein(du,i,u)*bernstein(dv,j,v) for i in range(data['u_count']) for j in range(data['v_count'])]
+    d=sum(b[i]*w[i] for i in range(len(p)))
+    return [sum(p[i][c]*w[i]*b[i] for i in range(len(p)))/d for c in range(3)]
+def transform(m,p):return [sum(m[r][c]*p[c] for c in range(3))+m[r][3] for r in range(3)]
+def near(p,q):return sum((p[i]-[q.x,q.y,q.z][i])**2 for i in range(3))<1e-18
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('BezierSupport');doc.UndoMode=1
+        def add(name,shape):
+            obj=doc.addObject('Part::Feature',name);obj.Shape=shape;return obj
+        curve=Part.BezierCurve();curve.setPoles([App.Vector(10,0,0),App.Vector(10,10,0),App.Vector(0,10,0)]);curve.setWeight(2,math.sqrt(.5))
+        polynomial=Part.BezierCurve();polynomial.setPoles([App.Vector(0,0,0),App.Vector(1,3,2),App.Vector(4,1,0),App.Vector(6,4,3)])
+        surface=Part.BezierSurface();surface.increase(1,2)
+        poles=[[App.Vector(0,0,0),App.Vector(0,1,1),App.Vector(0,2,0)],
+               [App.Vector(3,0,0),App.Vector(3,1,2),App.Vector(3,2,0)]]
+        for u in range(2):
+            for v in range(3):surface.setPole(u+1,v+1,poles[u][v]);surface.setWeight(u+1,v+1,u*3+v+1)
+        full=add('RationalCurve',curve.toShape());trim=add('TrimmedCurve',curve.toShape(.2,.8))
+        trim.Placement=App.Placement(App.Vector(13,-4,6),App.Rotation(App.Vector(1,2,3),29))
+        poly=add('PolynomialCurve',polynomial.toShape());face=add('RationalSurface',surface.toShape())
+        restricted=add('RestrictedSurface',surface.toShape(.2,.8,.1,.9))
+        restricted.Placement=App.Placement(App.Vector(-3,8,5),App.Rotation(App.Vector(0,1,0),37))
+        reverse=Part.Shape(restricted.Shape);reverse.reverse();rev=add('ReversedSurface',reverse)
+        polynomial_surface=Part.BezierSurface();polynomial_surface.setPole(2,2,App.Vector(1,1,2))
+        poly_face=add('PolynomialSurface',polynomial_surface.toShape())
+        plane=Part.Plane();uv=Part.Geom2d.BezierCurve2d();uv.setPoles([App.Base.Vector2d(2,3),App.Base.Vector2d(4,8),App.Base.Vector2d(7,4)])
+        uv.setWeight(2,2);edge=uv.toShape(plane)
+        uv_face=add('BezierUVFace',Part.Face(plane,Part.Wire([edge,Part.makeLine(edge.Vertexes[-1].Point,edge.Vertexes[0].Point)])))
+        doc.recompute()
+        for obj in [full,trim,poly,face,restricted,rev,poly_face]:
+            raw=obj.Shape.exportBrepToString();history=(doc.UndoCount,doc.RedoCount)
+            row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));report['descriptors'][obj.Name]=row;data=row.get('geometry_data')
+            is_curve=obj in [full,trim,poly]
+            check(obj.Name+' has owned Bezier support',isinstance(data,dict) and data.get('kind')==('bezier_curve' if is_curve else 'bezier_surface'))
+            check(obj.Name+' stays native Bezier without implicit conversion',row['form']=='bezier' and row['basis'] is None and row['geometry_data_status']=='copied_validated_bezier')
+            check(obj.Name+' reports rationality separately',row['facts']['rational']==(obj not in [poly,poly_face]))
+            if is_curve:
+                e=obj.Shape.Edges[0];lo,hi=e.FirstParameter,e.LastParameter
+                check(obj.Name+' full domain is independent of edge restriction',data['full_domain']==[0,1] and row['domains']==[[lo,hi]])
+                for f in [.2,.5,.8]:
+                    t=lo+(hi-lo)*f;check(obj.Name+' Bernstein samples match native',near(transform(row['brep_tool_location'],evaluate(data,t)),e.Curve.value(t)))
+                if obj==poly:check('polynomial controls omit artificial weights',data['weights'] is None and data['degree']==3)
+                if obj==full:check('rational curve retains original controls and weights',data['poles_xyz']==[[10,0,0],[10,10,0],[0,10,0]] and data['weights']==[1,math.sqrt(.5),1])
+            else:
+                f=obj.Shape.Faces[0];u0,u1,v0,v1=f.ParameterRange
+                check(obj.Name+' full domains independent of face restriction',data['full_domains']==[[0,1],[0,1]] and row['domains']==[[u0,u1],[v0,v1]])
+                if obj==poly_face:
+                    check('polynomial surface retains weight omission and original controls',data['weights'] is None and data['degrees']==[1,1] and data['poles_xyz']==[[0,0,0],[0,1,0],[1,0,0],[1,1,2]])
+                else:
+                    check(obj.Name+' retains rectangular U-major weights',data['u_count']==2 and data['v_count']==3 and data['degrees']==[1,2] and data['weights']==[1,2,3,4,5,6])
+                check(obj.Name+' root shares common owned face payload',row['topology']['faces'][0]['geometry_data']==data)
+                for a,b in [(.2,.3),(.5,.6),(.8,.4)]:
+                    u=u0+(u1-u0)*a;v=v0+(v1-v0)*b
+                    check(obj.Name+' Bernstein tensor samples match native',near(transform(row['brep_tool_location'],evaluate(data,u,v)),f.Surface.value(u,v)))
+            check(obj.Name+' preserves exact source and Undo/Redo',obj.Shape.exportBrepToString()==raw and history==(doc.UndoCount,doc.RedoCount))
+        check('trimmed located curve retains original local controls',report['descriptors'][trim.Name]['geometry_data']==report['descriptors'][full.Name]['geometry_data'])
+        check('restricted located and reversed faces retain local controls',report['descriptors'][face.Name]['geometry_data']==report['descriptors'][restricted.Name]['geometry_data']==report['descriptors'][rev.Name]['geometry_data'])
+        check('reversed face orientation remains independent',report['descriptors'][rev.Name]['geometry_orientation']=='reversed')
+        raw=uv_face.Shape.exportBrepToString();history=(doc.UndoCount,doc.RedoCount)
+        row=json.loads(native.geometryDescriptor(doc.Name,uv_face.Name));report['descriptors'][uv_face.Name]=row
+        pc=[use['pcurve'] for loop in row['topology']['faces'][0]['loops'] for use in loop['edge_uses']
+            if use['pcurve']['geometry_data'] and use['pcurve']['geometry_data'].get('kind')=='bezier_curve']
+        check('face exposes authored Bezier UV support',len(pc)==1)
+        data=pc[0]['geometry_data'];check('UV Bezier keeps original weights and zero Z',data['weights']==[1,2,1] and all(p[2]==0 for p in data['poles_xyz']))
+        for t in [.2,.5,.8]:
+            q=uv.value(t);p=evaluate(data,t)
+            check('UV Bernstein samples match authored native curve',sum((p[i]-[q.x,q.y][i])**2 for i in range(2))<1e-18 and p[2]==0)
+        check('UV inspection preserves source and Undo/Redo',uv_face.Shape.exportBrepToString()==raw and history==(doc.UndoCount,doc.RedoCount))
+        saved=json.dumps(report['descriptors'],sort_keys=True);full.Shape=Part.makeBox(1,2,3);doc.recompute();App.closeDocument(doc.Name)
+        check('Bezier snapshots survive source replacement and close',json.dumps(report['descriptors'],sort_keys=True)==saved)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

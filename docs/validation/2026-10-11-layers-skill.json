@@ -1,0 +1,81 @@
+{
+  "skill": "openmatrix9-layers-contract",
+  "saved_at": "2026-10-11T07:17:34+07:00",
+  "user_authorization": "có lưu trong skill mới",
+  "source": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\skills\\openmatrix9-layers-contract",
+  "installed": "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-layers-contract",
+  "source_and_installed_sha256": {
+    "SKILL.md": "a37556bc663509e1e0ee4f74a5036d38978e6cc89073dab0fbad6fb0061203b6",
+    "agents/openai.yaml": "62e66a4b3de00a2798453231255e88816ca899ff199a5511026aa217852bd57c"
+  },
+  "validation": {
+    "quick_validate_source": "passed",
+    "quick_validate_installed": "passed",
+    "behavioral_reference_application": "passed; independently retrieves gestures and applies visibility/dependency/lifetime constraints"
+  },
+  "scope": "New approved OM9-LAYER-001 reference skill; no native behavior or implementation status changed",
+  "checks": [
+    {
+      "name": "Install target absent or identical: SKILL.md",
+      "passed": true
+    },
+    {
+      "name": "Install target absent or identical: agents/openai.yaml",
+      "passed": true
+    },
+    {
+      "name": "Source/installed file lists agree",
+      "passed": true
+    },
+    {
+      "name": "Source/installed bytes agree",
+      "passed": true
+    },
+    {
+      "name": "Skill name matches folder",
+      "passed": true
+    },
+    {
+      "name": "Default prompt names callable skill",
+      "passed": true
+    },
+    {
+      "name": "Normal automatic discovery retained",
+      "passed": true
+    },
+    {
+      "name": "Supporting checkout references exist",
+      "passed": true
+    },
+    {
+      "name": "Quick validator source skill",
+      "passed": true
+    },
+    {
+      "name": "Quick validator installed skill",
+      "passed": true
+    },
+    {
+      "name": "Unrelated progress items preserved",
+      "passed": true
+    },
+    {
+      "name": "Unrelated progress root context preserved",
+      "passed": true
+    },
+    {
+      "name": "Written ledger equals intended targeted state",
+      "passed": true
+    },
+    {
+      "name": "Public source audit passed",
+      "passed": true
+    }
+  ],
+  "public_source_audit": {
+    "source_files": 2462,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  }
+}

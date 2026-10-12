@@ -1,5 +1,13 @@
 # OM9-CURVE-005 — Circle
 
+<!-- rhino-core-circle-history-policy-20261011:start -->
+Circle History dùng request Rust từ tùy chọn đã lưu, kiểm trước copy/reader;
+giữ độc lập với lệnh đang nhập, legacy AroundCurve và Mesh/cloud FitPoints.
+1363 checks/27 actual host exits0 trên cùng plugin, gồm cold FCStd; full
+Rust739 đạt. Output results/maps, consumer khác và yêu cầu gốc còn mở;
+**RCORE-01 vẫn đang triển khai**. [Bằng chứng và giới hạn](../validation/2026-10-11-rhino-core-circle-history-policy.md).
+<!-- rhino-core-circle-history-policy-20261011:end -->
+
 <!-- rhino-core-extended-input:start -->
 ## Extended numeric input — validated slice
 

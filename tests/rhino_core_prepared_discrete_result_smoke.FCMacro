@@ -1,0 +1,108 @@
+"""Prepared mesh/cloud ownership, complete result and pretransaction admission."""
+import copy,json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Mesh,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'cases':[]}
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def meta(name):return dict(name=name,tolerance=1e-6,layer='Fixture',locked=False,visible=True,color=[20,40,60],source_uuid=name)
+def meshrow():
+ vertices=[[0.,0.,0.],[2.,0.,0.],[0.,3.,0.]];faces=[[0,1,2,2]]
+ return dict(meta('Mesh'),vertices=vertices,faces=faces),Mesh.Mesh([[App.Vector(*p) for p in vertices]])
+def cloudrow():
+ data=dict(schema_version=1,points=[[10000000.00000001,2.,3.],[4.,5.,6.]],normals=[[0.,0.,1.],[0.,1.,0.]],colors=[20,40,60,0,80,100,120,10],values=[.25,.75],plane=[0.]*16,ordered=True,has_plane=False)
+ return dict(meta('Cloud'),point_cloud_fields='prepared',point_cloud_sha256='0'*64),data
+def run():
+ try:
+  import OpenMatrix9Gui as native,ThreeDmPointCloud
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+  doc=App.newDocument('PreparedDiscrete');doc.UndoMode=1
+  mesh_meta,source_mesh=meshrow();cloud_meta,source_cloud=cloudrow();expected_mesh=source_mesh.Topology;expected_cloud=copy.deepcopy(source_cloud)
+  class Observer:
+   changed=False
+   def slotCreatedObject(self,obj):
+    if not self.changed and obj.Document==doc:
+     self.changed=True;source_mesh.translate(50,0,0);source_cloud['points'][0][0]=-99.;source_cloud['values'][0]=9.
+  observer=Observer();App.addDocumentObserver(observer)
+  try:objects=native.commit3dm(doc.Name,[(mesh_meta,source_mesh),(cloud_meta,source_cloud)])
+  finally:App.removeDocumentObserver(observer)
+  check('real observer mutated original inputs',observer.changed and source_mesh.Topology!=expected_mesh and source_cloud!=expected_cloud)
+  check('prepared mesh has private preobserver geometry',objects[0].Mesh.Topology==expected_mesh)
+  check('prepared cloud has private preobserver float64 fields',ThreeDmPointCloud.fields(objects[1])==expected_cloud)
+  saved={};saved_bytes={}
+  for kind,obj in zip(('mesh','point_cloud'),objects):
+   raw=getattr(obj,'OM9GeometryResult','{}');result=json.loads(raw);snapshot=result.get('output_snapshots',[{}])[0]
+   saved[obj.Name]=result;saved_bytes[obj.Name]=raw
+   check(kind+' snapshot has complete original fields',all(k in snapshot for k in ('schema_version','unit_context_revision','geometry_data','topology_data','source_attributes')))
+   check(kind+' has its own representation and owned data',snapshot.get('geometry_data',{}).get('representation')==kind and snapshot.get('ownership') in ('private_native_copy','private_plain_copy'))
+   check(kind+' result is native-generated immutable evidence',result.get('status')=='accepted' and result.get('lifetime')=='immutable_import_evidence_not_current_validity')
+  names=[o.Name for o in objects];doc.undo();check('single Undo removes both discrete rows',all(doc.getObject(n) is None for n in names));doc.redo()
+  check('single Redo restores exact report bytes',all(getattr(doc.getObject(n),'OM9GeometryResult','{}')==saved_bytes[n] for n in names))
+  file=out/'prepared-discrete.FCStd';doc.recompute();doc.saveAs(str(file));report.update(saved_file=str(file),saved_reports=saved,saved_report_bytes=saved_bytes,expected_cloud=expected_cloud)
+  App.closeDocument(doc.Name)
+  doc=App.newDocument('PreparedActiveCloud')
+  active_meta,active=cloudrow();active['has_plane']=True;active['plane']=[0.,0.,0.,1.,0.,0.,0.,1.,0.,0.,0.,1.,0.,0.,1.,0.]
+  active_object=native.commit3dm(doc.Name,[(active_meta,active)])[0]
+  check('existing ON_Plane validation accepts canonical active plane',ThreeDmPointCloud.fields(active_object)==active)
+  check('active plane native validity observation is retained',json.loads(active_object.OM9GeometryResult)['validation']['native_plane_valid'] is True)
+  App.closeDocument(doc.Name)
+  doc=App.newDocument('PreparedArchiveCorrespondence')
+  quad_item=meta('Quad');quad_item.update(vertices=[[0.,0.,0.],[2.00000001,0.,0.],[2.,3.,0.],[0.,3.,0.],[99.,99.,99.]],faces=[[0,1,2,3]])
+  quad_mesh=Mesh.Mesh()
+  points=[App.Vector(*p) for p in quad_item['vertices']]
+  quad_mesh.addFacet(points[0],points[1],points[2]);quad_mesh.addFacet(points[0],points[2],points[3])
+  placed_item,placed_mesh=meshrow();placed_mesh.translate(10,0,0)
+  for p in placed_item['vertices']:p[0]+=10.
+  positive=native.commit3dm(doc.Name,[(quad_item,quad_mesh),(placed_item,placed_mesh)])
+  import ThreeDm,tempfile
+  with tempfile.TemporaryDirectory(dir=out) as staging:
+   staged=ThreeDm._stage_current_geometry(positive,staging)['items']
+  check('quad archive keeps original float64 vertices and unused vertex',staged[0]['vertices']==quad_item['vertices'])
+  check('quad archive keeps original face partition',staged[0]['faces']==quad_item['faces'])
+  check('matching placed native mesh exports location once',staged[1]['vertices']==placed_item['vertices'])
+  check('matching placed native mesh keeps oriented face',staged[1]['faces']==placed_item['faces'])
+  App.closeDocument(doc.Name)
+  cases=[]
+  for field,value in [('normals',[[0.,0.,1.]]),('colors',[1,2,3]),('values',[1.]),('ordered',1),('plane',[0.]*15),('schema_version',2),('points',[[1.,2.,float('nan')]])]:
+   item,data=cloudrow();data[field]=value;cases.append(('cloud-'+field,item,data))
+  item,data=meshrow();del item['vertices'];cases.append(('mesh-missing-vertices',item,data))
+  item,data=meshrow();item['faces']=[[0,1,999,999]];cases.append(('mesh-invalid-archive-index',item,data))
+  item,_=meshrow();cases.append(('mesh-invalid-owner',item,object()))
+  item,data=cloudrow();data['has_plane']=True;cases.append(('cloud-invalid-active-plane',item,data))
+  item,data=cloudrow();data['colors'][0]=20.;cases.append(('cloud-noninteger-native-color-type',item,data))
+  item,data=meshrow()
+  for _ in range(16384):data.addSegment([0])
+  cases.append(('mesh-segment-owner-budget',item,data))
+  item,data=meshrow()
+  for p in item['vertices']:p[0]+=10.
+  cases.append(('mesh-archive-other-geometry',item,data))
+  item,data=meshrow();item['faces']=[[0,2,1,1]];cases.append(('mesh-archive-reversed-winding',item,data))
+  item,data=meshrow();data.translate(10,0,0);cases.append(('mesh-archive-missing-native-location',item,data))
+  for index,(name,item,data) in enumerate(cases):
+   doc=App.newDocument('PreparedDiscreteReject'+str(index));doc.UndoMode=1
+   doc.openTransaction('Source');source=doc.addObject('Part::Feature','Source');source.Shape=Part.makeBox(1,1,1);doc.commitTransaction()
+   doc.openTransaction('Redo');source.Label='Redo witness';doc.commitTransaction();doc.undo();baseline=(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount,source.Label)
+   class Count:
+    publications=0
+    def slotCreatedObject(self,obj):self.publications+=1
+   count=Count();App.addDocumentObserver(count);failure=None;result={}
+   try:native.commit3dm(doc.Name,[(item,data)])
+   except Exception as error:
+    failure=repr(error)
+    try:result=json.loads(error.geometry_result)
+    except Exception:pass
+   finally:App.removeDocumentObserver(count)
+   report['cases'].append(dict(name=name,error=failure,result=result,publications=count.publications))
+   diagnostic=result.get('diagnostics',[{}])[0]
+   check(name+' rejects with current typed identity',failure is not None and result.get('status')=='rejected' and diagnostic.get('input_identity',{}).get('name')==item['name'] and diagnostic.get('operation')=='CommitImport3dm')
+   check(name+' rejects before publication',count.publications==0)
+   check(name+' preserves source and Undo/Redo',(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount,source.Label)==baseline)
+   doc.redo();check(name+' preserves executable Redo',source.Label=='Redo witness');App.closeDocument(doc.Name)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

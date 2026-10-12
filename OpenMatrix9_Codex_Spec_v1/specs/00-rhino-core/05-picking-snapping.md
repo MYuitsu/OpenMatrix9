@@ -10,6 +10,14 @@ date: 2026-10-09
 
 # RCORE-05 — Pick, snapping và constraints
 
+## Đối soát tiến độ — 2026-10-10
+
+Các bản cập nhật identity/stale snapshot và delayed publication ở RCORE-01/04
+không thay thế nghiệm thu pick/snap. Bằng chứng hiện có vẫn giới hạn ở lifecycle
+Once/Only/Suspend/Resume/Clear và các consumer được liệt kê bên dưới; chưa có
+checkpoint mới xác nhận resolver hình học, hover/click provenance hay toàn bộ
+snap/constraint fixtures. **RCORE-05 vẫn đang triển khai.**
+
 <!-- rhino-core-extended-input:start -->
 ## Bổ sung đã kiểm chứng — extended numeric input
 

@@ -13,6 +13,7 @@ def run():
         Gui.activateWorkbench('OpenMatrix9Workbench')
         import ThreeDm
         import OpenMatrix9Gui as native
+        result['module'] = str(Path(native.__file__).resolve())
         doc=App.newDocument('ThreeDmTest');doc.UndoMode=1
         obj=doc.addObject('Part::Feature','Box');obj.Shape=Part.makeBox(10,10,10)
         obj.Label='Jewelry α';obj.Placement.Base=App.Vector(20,0,0)

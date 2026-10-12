@@ -1,0 +1,109 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Approved identity boundary: reversible veto versus accepted disposal."""
+import json, os, sys, traceback, weakref
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE'])
+import OM9ReplayRetirement as probe
+def check(name,passed):report['checks'].append(dict(name=name,passed=bool(passed)))
+def state(doc):return(doc.getBookedTransactionID(),doc.HasPendingTransaction,list(doc.UndoNames),list(doc.RedoNames))
+def payload(child,doc,action,events):
+    active={'enabled':True}
+    class LastValue:
+        def __del__(self):
+            if not active['enabled']:return
+            events.append('started')
+            try:
+                if action=='value':child.Value='tampered'
+                elif action=='clear':doc.clearUndos()
+                elif action=='close':App.closeDocument(doc.Name)
+                elif action=='close_object':App.closeDocument(doc)
+                else:doc.removeObject('Child')
+                events.append('changed')
+            except Exception as error:events.append(str(error))
+    child.Payload=LastValue()
+    return weakref.ref(child.Payload),active
+def fixture(name,mode=1):
+    doc=App.newDocument(name);doc.UndoMode=mode
+    child=doc.getObject(probe.create(doc.Name));child.addProperty('App::PropertyPythonObject','Payload')
+    return doc,child
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        for mode in (0,1):
+            for action in ('value','clear','close','close_object','remove'):
+                doc,child=fixture('AcceptedPythonDisposal',mode);events=[]
+                original,active=payload(child,doc,action,events);doc.recompute();doc.clearUndos()
+                result=probe.run(doc.Name,action,'python_release',None)
+                prefix='post Python/%d/%s: '%(mode,action)
+                check(prefix+'actual sole-reference finalizer ran once',len(events)==2 and events[0]=='started')
+                check(prefix+'late mutation remains blocked',len(events)==2 and 'StaleGeometry'in events[1])
+                check(prefix+'publication accepted without invented rollback',result['accepted']and result['complete']and not result['rollback'])
+                check(prefix+'disposal diagnostic is separate',not result['disposal_verified']and 'StaleGeometry'in result['disposal_diagnostic']and not result['error'])
+                check(prefix+'accepted paired values survive attempted mutation',child.Value=='replayed-value'and child.Output=='replayed-output')
+                check(prefix+'normal destruction ends original lifetime',original()is None)
+                check(prefix+'native owner remains alive without invented history',doc.getObject('Child')is child and state(doc)==(0,False,[],[]))
+                report['observations'].append(dict(case=prefix,result=result,events=list(events)))
+                active['enabled']=False
+                App.closeDocument(doc.Name)
+        for preserving in (False,True):
+            for action in ('value','clear','close','remove'):
+                doc,child=fixture('RejectedOriginalIdentity');events=[]
+                original,active=payload(child,doc,action,events);doc.recompute();doc.clearUndos()
+                doc.openTransaction('Prior creation');retired=doc.getObject(probe.create(doc.Name,'Retired',True));doc.commitTransaction();doc.undo()
+                if preserving:doc.openTransactionPreservingRedo('Caller')
+                else:doc.openTransaction('Caller')
+                before=state(doc)
+                result=probe.run(doc.Name,action,'original',None)
+                prefix='pre identity/%d/%s: '%(preserving,action)
+                check(prefix+'real reversible retirement veto is typed',result['callbacks']==1 and result['blocked']==1 and 'StaleGeometry'in result['error'])
+                check(prefix+'rejection completes checked restoration',not result['accepted']and result['rollback']and result['complete'])
+                check(prefix+'exact Python identity survives',original()is not None and child.Payload is original()and not events)
+                check(prefix+'exact caller history survives',state(doc)==before)
+                check(prefix+'paired invalid output cleared',child.Value=='original-value'and child.Output=='')
+                check(prefix+'restored completion has no new disposal violation',result['disposal_verified']and not result['disposal_diagnostic'])
+                doc.abortTransaction();doc.redo()
+                check(prefix+'original native object identity and executable Redo survive',doc.getObject('Retired')is retired)
+                report['observations'].append(dict(case=prefix,result=result,events=list(events)))
+                active['enabled']=False
+                App.closeDocument(doc.Name)
+        for action in ('value','clear','close','remove'):
+            doc,child=fixture('AcceptedNativeDisposal');doc.recompute();doc.clearUndos()
+            doc.openTransaction('Prior creation');retired=doc.getObject(probe.create(doc.Name,'Retired',True));doc.commitTransaction();doc.undo()
+            doc.openTransaction('Caller');result=probe.run(doc.Name,action,'redo_object')
+            prefix='post native/%s: '%action
+            check(prefix+'actual native destructor ran once under barrier',result['callbacks']==1 and result['blocked']==1 and 'StaleGeometry'in result['blocked_error'])
+            check(prefix+'publication accepted before irreversible disposal',result['accepted']and result['complete']and not result['rollback'])
+            check(prefix+'late failure is a separate disposal diagnostic',not result['disposal_verified']and 'StaleGeometry'in result['disposal_diagnostic']and not result['error'])
+            check(prefix+'accepted output and owner survive',doc.getObject('Child')is child and child.Value=='replayed-value'and child.Output=='replayed-output')
+            check(prefix+'regular FreeCAD first write discards prior Redo',not doc.RedoNames and doc.HasPendingTransaction and doc.getObject('Retired')is None)
+            doc.abortTransaction()
+            check(prefix+'caller Abort retains first-write property semantics',child.Value=='original-value'and child.Output=='original-output'and not doc.RedoNames)
+            report['observations'].append(dict(case=prefix,result=result))
+            App.closeDocument(doc.Name)
+        for preserving in (False,True):
+            doc,child=fixture('CompletedErrorDisposal');events=[]
+            original,active=payload(child,doc,'value',events);doc.recompute();doc.clearUndos()
+            if preserving:doc.openTransactionPreservingRedo('Caller')
+            else:doc.openTransaction('Caller')
+            result=probe.run(doc.Name,'value','python_cleanup',None)
+            prefix='error disposal/%d: '%preserving
+            check(prefix+'original reversible failure remains reported',not result['accepted']and 'native open notification failed'in result['error'])
+            check(prefix+'checked rollback and error completion precede disposal',result['rollback']and result['complete'])
+            check(prefix+'actual finalizer remains blocked',len(events)==2 and 'StaleGeometry'in events[1])
+            check(prefix+'error disposal diagnostic remains distinct',not result['disposal_verified']and 'StaleGeometry'in result['disposal_diagnostic'])
+            check(prefix+'completion retry does not erase diagnostic',not result['cleanup_retry_complete'])
+            check(prefix+'restored value and cleared output survive',child.Value=='original-value'and child.Output=='')
+            report['observations'].append(dict(case=prefix,result=result,events=list(events)))
+            active['enabled']=False
+            doc.abortTransaction();App.closeDocument(doc.Name)
+        report['ok']=all(c['passed']for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

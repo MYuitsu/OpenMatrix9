@@ -7,7 +7,7 @@ description: Use when rebuilding the Matrix9 startup layout, MAIN MENU, sidebar,
 
 Rust là ưu tiên số 1 khi triển khai hoặc chuyển code OM9. Đọc [quy tắc Rust và ranh giới native](../openmatrix9-workflow/references/rust-first.md) trước khi chọn ngôn ngữ/FFI/worker. Safe Rust sở hữu logic, validation và dữ liệu độc lập; C++ chỉ là bridge cho API native bắt buộc, Python cho bootstrap/test/tool khi cần. Ghi rõ lý do và owner của mọi ngoại lệ; không coi native FFI là memory-safe hoặc skill update là migration hoàn tất.
 
-For the user-approved finite grid, pinned Command/completion and viewport title/menu contract, read `openmatrix9-workspace-contract` (repository `skills/openmatrix9-workspace-contract/SKILL.md`). Its packaged references supplement the earlier theme baseline below.
+For the user-approved startup defaults (hide the redundant 3DM toolbar and idle Tasks dock), finite grid, pinned Command/completion and viewport title/menu contract, read [openmatrix9-workspace-contract](../openmatrix9-workspace-contract/SKILL.md). Its packaged references supplement the earlier theme baseline below.
 
 Keep Rust responsible for catalog, state and behavior; C++/Qt hosts widgets and native FreeCAD views. Python registers the workbench.
 

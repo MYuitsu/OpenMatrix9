@@ -1,4 +1,5 @@
 ---
+
 id: OM9-SOLID-014
 name: Sphere
 command: Sphere
@@ -14,6 +15,32 @@ sample_status: compiled_and_validation_tests_passed
 ---
 
 # OM9-SOLID-014 — Sphere
+
+<!-- common-command-mnemonics-20261012:start -->
+2026-10-12: quy tắc gạch chân một ký tự áp dụng qua engine Rust chung cho toàn
+bộ schema Command Options hiện có: Line/Polyline, InterpCrv, Rectangle, Circle,
+Ellipse, Rebuild, Box/Sphere, Sweep1/History, Sweep2/History và Loft. Tùy chọn con
+khai báo alias trong phase cha; tên đầy đủ vẫn click được. Alias trùng hoặc
+disabled không được quảng cáo bằng gạch chân. Lệnh mới đăng ký schema để dùng
+cùng resolver, renderer và binding CMD–Builder. Trạng thái toàn feature còn partial.
+[Bằng chứng native](../../../docs/validation/2026-10-12-common-command-mnemonics.md).
+<!-- common-command-mnemonics-20261012:end -->
+
+<!-- rhino-core-native-solid-policy:start -->
+Box/Sphere hiện có dùng request/options Rust chung trước declaration,
+Preview, commit và capture Sphere; kiểm output scalar giữ kích thước có dấu,
+CPlane và solver hiện hữu. 1071 checks/18 actual host exits0 trên cùng plugin;
+full Rust721 đạt. Các hợp đồng kết quả/ownership gốc và cage/replay còn mở;
+**RCORE-01 đang triển khai**. [Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-native-solid-policy.md).
+<!-- rhino-core-native-solid-policy:end -->
+
+<!-- rhino-core-fit-point-input:start -->
+Circle/Sphere và Circle History dùng reader điểm native có giới hạn Rust trước
+copy, giữ placement/source/Undo/Redo và ngân sách typed+selected. GREEN45;
+589 checks trên cùng plugin,7 actual host exits0;full Rust695 đạt.
+Các policy construction/results và yêu cầu gốc còn mở; **RCORE-01 đang triển khai**.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-fit-point-input.md).
+<!-- rhino-core-fit-point-input:end -->
 
 <!-- rhino-core-extended-input:start -->
 ## Extended numeric input — validated slice

@@ -1,0 +1,59 @@
+"""Cage native source admission, typed context, and recovery preservation."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh,Points,OpenMatrix9Gui
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'module':OpenMatrix9Gui.__file__,'diagnostics':[]}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def enter(text):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def rejection(route,kind):
+    doc=App.newDocument('CagePolicy'+route+kind);doc.UndoMode=1
+    control=OpenMatrix9Gui.createCage(doc.Name,(-1,-1,-1),(2,2,2))
+    doc.openTransaction('Sources');witness=doc.addObject('App::FeaturePython','Witness');name='Bad'+kind
+    if kind=='Basis':
+        source=doc.addObject('Part::Feature',name);source.ViewObject.Visibility=False
+        curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(1e151,1,0),App.Vector(2,0,0)],[3,3],[0.,1.],False,2)
+        source.Shape=curve.toShape();data=lambda:source.Shape.exportBrepToString()
+    elif kind=='MeshBudget':
+        source=doc.addObject('Mesh::Feature',name);source.ViewObject.Visibility=False
+        value=Mesh.Mesh([(App.Vector(0,0,0),App.Vector(1,0,0),App.Vector(0,1,0))])
+        for _ in range(16384):value.addSegment([0])
+        source.Mesh=value;data=lambda:(repr(source.Mesh.Topology),source.Mesh.countSegments())
+    elif kind=='Cloud':
+        source=doc.addObject('Points::Feature',name);source.Points=Points.Points([App.Vector(0,0,0)]);data=lambda:repr(source.Points.Points)
+    elif kind=='Group':
+        source=doc.addObject('App::DocumentObjectGroup',name);source.addObject(witness);data=lambda:[o.Name for o in source.Group]
+    elif kind=='Link':
+        source=doc.addObject('App::Link',name);source.setLink(witness);data=lambda:source.LinkedObject.Name
+    else:
+        source=doc.addObject('App::FeaturePython',name);source.addProperty('App::PropertyString','Shape');source.Shape='not a native shape';data=lambda:source.Shape
+    doc.recompute();doc.commitTransaction();doc.openTransaction('Redo witness');witness.Label='Executable Redo';doc.commitTransaction();doc.undo()
+    def state():return (tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount,data())
+    before=state();console.clear();Gui.Selection.clearSelection();message=''
+    operation='CageEdit' if route=='API' else route
+    if route=='API':
+        try:OpenMatrix9Gui.captureCage(control,[source])
+        except Exception as error:message=str(error)
+    else:enter(route);enter(name);message=console.toPlainText()
+    report['diagnostics'].append(dict(route=route,kind=kind,text=message))
+    code='InvalidBasis' if kind in ('Basis','MeshBudget') else 'UnsupportedRepresentation'
+    check(route+' '+kind+' identifies rejection operation and source',any(all(s in line for s in (code,operation,name)) for line in message.splitlines()))
+    check(route+' '+kind+' preserves geometry objects Undo and Redo',before==state())
+    enter('Cancel');doc.redo();check(route+' '+kind+' preserves executable Redo',witness.Label=='Executable Redo');App.closeDocument(doc.Name)
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents()
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        for route in ('Cage','CageEdit','API'):
+            for kind in ('Basis','MeshBudget','Cloud','Group','Link','Owner'):rejection(route,kind)
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

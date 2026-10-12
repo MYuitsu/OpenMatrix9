@@ -1,0 +1,60 @@
+"""A source mutation nested in native recompute must remain stale."""
+import os,json,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'module':OM.__file__,'checks':[]}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def events():QtWidgets.QApplication.processEvents()
+def master(shape):
+ # Native recompute introduces a redundant identity Location datum. Compare
+ # every serialized geometry/topology field with a common root datum, and
+ # retain the actual numeric root frame separately. Only this value wrapper
+ # is changed; the document's native master remains borrowed and unchanged.
+ # The property getter is immutable. Part.Shape creates an editable value
+ # wrapper sharing the native master, with its own root Location.
+ shape=Part.Shape(shape)
+ matrix=shape.Placement.toMatrix()
+ frame=tuple(getattr(matrix,'A'+str(r)+str(c)) for r in range(1,5) for c in range(1,5))
+ shape.Placement=App.Placement()
+ return frame,shape.exportBrepToString()
+def enter(text=''):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));events()
+class Observer:
+ fired=False
+ def slotChangedObject(self,obj,key):
+  if not self.fired and obj.Document.Name==self.doc.Name and obj.Name=='A' and key=='Shape' and 'Recompute' in obj.State and self.doc.getObject('BooleanUnion'):
+   self.fired=True;obj.Shape=Part.makeBox(30,10,10)
+def run():
+ global console
+ observer=None
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');events();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  d=App.newDocument('EditRecomputeMutation');d.UndoMode=1
+  a=d.addObject('Part::Feature','A');a.Shape=Part.makeBox(10,10,10)
+  b=d.addObject('Part::Feature','B');b.Shape=Part.makeBox(10,10,10,App.Vector(5,0,0))
+  original_a,original_b=a.Shape,b.Shape
+  raw_before=(a.Shape.exportBrepToString(),b.Shape.exportBrepToString())
+  baseline=(tuple(o.Name for o in d.Objects),master(a.Shape),master(b.Shape),d.UndoCount)
+  Gui.Selection.clearSelection();Gui.Selection.addSelection(a);Gui.Selection.addSelection(b);enter('BooleanUnion');enter()
+  observer=Observer();observer.doc=d;App.addDocumentObserver(observer)
+  dialog=next(q for q in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9EditOptions') if q.isVisible());dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();events();App.removeDocumentObserver(observer)
+  check('native source edit actually occurs during command recompute',observer.fired)
+  check('recompute source mutation rejects staged output',d.getObject('BooleanUnion') is None)
+  restored_a,restored_b=d.getObject('A').Shape,d.getObject('B').Shape
+  current=(tuple(o.Name for o in d.Objects),master(restored_a),master(restored_b),d.UndoCount)
+  check('recompute mutation rollback retains source masters and Undo',current==baseline)
+  check('recompute mutation rollback retains original native geometry identities',restored_a.isPartner(original_a) and restored_b.isPartner(original_b))
+  report['raw_serializer_equal']=[raw_before[0]==d.getObject('A').Shape.exportBrepToString(),raw_before[1]==d.getObject('B').Shape.exportBrepToString()]
+  check('recompute source mutation has typed source identity','StaleGeometry' in console.toPlainText() and 'A' in console.toPlainText())
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  if observer:
+   try:App.removeDocumentObserver(observer)
+   except Exception:pass
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

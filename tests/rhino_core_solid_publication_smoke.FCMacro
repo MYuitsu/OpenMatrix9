@@ -1,0 +1,180 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Actual Solid publication faults, retained inputs and executable prior Redo."""
+import gc, json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part, OpenMatrix9Gui as OM
+from PySide6 import QtCore, QtGui, QtWidgets
+from pivy import coin
+sys.path.insert(0, os.environ['OM9_PUBLICATION_FAULT_DIR'])
+import OM9PublicationFault as Fault
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = dict(module=OM.__file__, probe=Fault.__file__, checks=[], observations=[])
+
+def check(name, passed):
+    report['checks'].append(dict(name=name, passed=bool(passed)))
+
+def settle():
+    loop = QtCore.QEventLoop()
+    QtCore.QTimer.singleShot(180, loop.quit)
+    loop.exec()
+
+def enter(console, text):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_End, QtCore.Qt.ControlModifier))
+    if text:
+        QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+            QtCore.QEvent.KeyPress, 0, QtCore.Qt.NoModifier, text))
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_Return, QtCore.Qt.NoModifier))
+    QtWidgets.QApplication.processEvents()
+
+def snapshot(doc):
+    return tuple((o.Name, o.Label, tuple(o.Placement.toMatrix().A) if 'Placement' in o.PropertiesList else None,
+                  o.Shape.exportBrepToString() if 'Shape' in o.PropertiesList else None,
+                  getattr(o, 'SolidParameters', None), getattr(o, 'OM9GeometryResult', None))
+                 for o in doc.Objects), doc.UndoCount, doc.RedoCount
+
+def previews(doc):
+    counts = []
+    for view in Gui.getDocument(doc.Name).mdiViewsOfType('Gui::View3DInventor'):
+        search = coin.SoSearchAction()
+        search.setName(coin.SbName('OM9SolidPreview'))
+        search.setInterest(coin.SoSearchAction.ALL)
+        search.setSearchingAll(True)
+        search.apply(view.getSceneGraph())
+        counts.append(search.getPaths().getLength())
+    return counts
+
+def run_case(mode, stage, console):
+    operation = 'Box' if mode == 'Box' else 'Sphere'
+    label = mode + ' ' + stage
+    doc = App.newDocument('SolidPublication' + mode + stage)
+    doc_name = doc.Name
+    try:
+        doc.UndoMode = 1
+        source = doc.addObject('Part::Feature', 'Source')
+        source.Shape = Part.makeLine(App.Vector(0,0,0), App.Vector(10,0,0))
+        witness = doc.addObject('App::FeaturePython', 'Witness')
+        doc.recompute()
+        doc.openTransaction('Prior executable Redo')
+        witness.Label = 'Prior value'
+        doc.commitTransaction()
+        doc.undo()
+        settle()
+        Gui.Selection.clearSelection()
+        console.clear()
+        enter(console, operation)
+        if mode == 'Box':
+            enter(console, 'Diagonal')
+            enter(console, '0,0,0')
+            enter(console, '2,3,0')
+            final = '4'
+        elif mode == 'AroundCurve':
+            enter(console, 'AroundCurve')
+            enter(console, 'Path=Source.Edge1@0,0,0')
+            enter(console, 'OnCurve=.25')
+            final = 'Radius=2'
+        else:
+            enter(console, '0,0,0')
+            final = 'Radius=2'
+        if stage == 'stale':
+            source.Placement.Base = App.Vector(1,0,0)
+            doc.recompute()
+        before = snapshot(doc)
+        identities = [(o.Name, o) for o in doc.Objects]
+        if stage in ['early', 'before', 'close']:
+            Fault.arm(stage, doc_name, source.Name)
+        enter(console, 'Cancel' if stage == 'Cancel' else final)
+        settle()
+        gc.collect()
+        after = snapshot(doc)
+        text = console.toPlainText()
+        captured = Fault.counts() if stage in ['early', 'before', 'close'] else []
+        report['observations'].append(dict(case=label, before=before, after=after,
+            diagnostic=text, captured=captured, fault=Fault.status()))
+        if stage == 'success':
+            outputs = [o for o in doc.Objects if getattr(o, 'OM9FeatureId', '') ==
+                       ('OM9-SOLID-012' if mode == 'Box' else 'OM9-SOLID-014')]
+            check(label + ' one valid closed native solid', len(outputs) == 1 and outputs[0].Shape.isValid()
+                  and outputs[0].Shape.isClosed() and len(outputs[0].Shape.Solids) == 1)
+            check(label + ' exactly one new Undo entry', doc.UndoCount == before[1] + 1)
+            if outputs:
+                original = outputs[0]
+                name, volume = original.Name, original.Shape.Volume
+                geometry = original.Shape.exportBrepToString()
+                placement = tuple(original.Placement.toMatrix().A)
+                parameters = original.SolidParameters
+                doc.undo()
+                check(label + ' Undo removes output only', snapshot(doc)[0] == before[0])
+                doc.redo()
+                restored = doc.getObject(name)
+                check(label + ' Redo restores same native identity geometry Placement and metadata',
+                      restored is original and restored.Shape.exportBrepToString() == geometry
+                      and tuple(restored.Placement.toMatrix().A) == placement
+                      and restored.SolidParameters == parameters and abs(restored.Shape.Volume - volume) < 1e-7)
+        else:
+            check(label + ' source data and Undo preserved', before[:2] == after[:2])
+            check(label + ' original native source identities preserved',
+                  all(doc.getObject(name) is obj for name, obj in identities))
+            if stage in ['before', 'close']:
+                check(label + ' actual native commit fault once', Fault.status() == dict(calls=1, armed=False))
+                check(label + ' typed diagnostic identifies operation and input',
+                      any('KernelFailure:' in line and operation in line and
+                          ('Source.Edge1' in line if mode == 'AroundCurve' else 'typed construction points' in line)
+                          for line in text.splitlines()))
+                check(label + ' native outputs invalidated and released',
+                      len(captured) == 1 and all(not row['valid'] and row['refcount'] == 1 for row in captured))
+                # A failed native close verdict invalidates retained history.
+                # Ordinary early rejection/Cancel must preserve executable Redo.
+                check(label + ' failed native close disposes prior Redo', doc.RedoCount == 0)
+            elif stage in ['early', 'stale']:
+                check(label + ' typed stale diagnostic identifies Sphere and source',
+                      any('StaleGeometry:' in line and 'Sphere' in line and 'Source' in line for line in text.splitlines()))
+                if stage == 'early':
+                    check(label + ' actual output callback once', Fault.status() == dict(calls=1, armed=False))
+                    check(label + ' rejected native output released',
+                          len(captured) == 1 and all(not row['valid'] and row['refcount'] == 1 for row in captured))
+            if stage in ['early', 'stale', 'Cancel']:
+                check(label + ' prior Redo count preserved', before[2] == after[2] == 1)
+                executed = False
+                if doc.RedoCount:
+                    doc.redo()
+                    executed = witness.Label == 'Prior value'
+                check(label + ' prior Redo still executes', executed)
+        check(label + ' no temporary preview remains in four views', previews(doc) == [0,0,0,0])
+    finally:
+        Fault.clear()
+        if doc_name in App.listDocuments():
+            enter(console, 'Cancel')
+            App.closeDocument(doc_name)
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        settle()
+        console = Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript')
+        selected = os.environ.get('OM9_SOLID_PUBLICATION_CASE', '')
+        cases = [(mode, stage) for mode in ['Box', 'Center', 'AroundCurve']
+                 for stage in ['before', 'close', 'Cancel', 'success']]
+        cases += [('AroundCurve', stage) for stage in ['early', 'stale']]
+        if selected:
+            cases = [case for case in cases if '/'.join(case) == selected]
+            if not cases:
+                raise ValueError('Unknown Solid publication case: ' + selected)
+        report['cases'] = ['/'.join(case) for case in cases]
+        for mode, stage in cases:
+            run_case(mode, stage, console)
+        report['ok'] = all(c['passed'] for c in report['checks'])
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1200, run)

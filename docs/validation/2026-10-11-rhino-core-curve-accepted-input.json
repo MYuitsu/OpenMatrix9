@@ -1,0 +1,3557 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-curve-accepted-input-20261011",
+  "updated_at": "2026-10-11T21:01:30+07:00",
+  "status": "in_progress",
+  "scope": "Owned accepted Curve values at Rust entrypoints before normalization; full native sources and RCORE-01 retained",
+  "sources": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/CMakeLists.txt",
+      "bytes": 1458,
+      "sha256": "ef8544fc249d9b28241c6adb3a5525e752ae7b0ba6fcb259f494094d4cc34d61"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/AppOpenMatrix9Gui.cpp",
+      "bytes": 3023,
+      "sha256": "54176128f4a1f8482f6a21a8f765aeb384a8cfa2d83db70d4c97ef6a08223624"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/BuilderHistory.cpp",
+      "bytes": 49873,
+      "sha256": "516f61fda8035d358cfc742067b804c11251d71c67545ac6c3467064dcc2ae2b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/BuilderHistory.h",
+      "bytes": 3366,
+      "sha256": "dfe6aad3d040a10af582454558bb4756591314f3b28515c565bc2c4cc924ea62"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CMakeLists.txt",
+      "bytes": 9311,
+      "sha256": "18e3f26042a6d0c3780ff26d477c3601b54b6027ac666135b73ef120bae22135"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CadPresentation.cpp",
+      "bytes": 17185,
+      "sha256": "b69662f7f937ca0afec39865d8f4e9dbbb1ce3a97540d1c751ed3077a9bd35f7"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CadPresentation.h",
+      "bytes": 774,
+      "sha256": "ea02b4557b83d5f91cd79c3e73711048b8bdbb4ca3948d94ca79aa25d52d7f5d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CageCapability.cpp",
+      "bytes": 4832,
+      "sha256": "97e841a7842a711bb5d6ba0731186124715d522929e401f4c4aa8ba9664bf396"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CageCapability.h",
+      "bytes": 1330,
+      "sha256": "8a8429ed4ff8a01069374219b44374b88d4f9dfcc983b92af21fbb277d518fa9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CageController.cpp",
+      "bytes": 20007,
+      "sha256": "d9f0c5f86714b800ba656cc99ca088f43b11ad763657156c2a594b7fcc90f573"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CageController.h",
+      "bytes": 1281,
+      "sha256": "2e48175c31c27301a5b1d67197d177d7bae15016e8e84d251e3c1e6397e50972"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CageFeature.cpp",
+      "bytes": 39791,
+      "sha256": "94e1f74260853840f7ba02bc054c107a29c9b52e9e6344cd1320fb11de864674"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CageFeature.h",
+      "bytes": 2527,
+      "sha256": "b40e0d07deaeeb2d7d8d0ed43e0e7d5f7ec152d78eb7bf0a5859faeb879b61d6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CageGeometry.cpp",
+      "bytes": 10643,
+      "sha256": "4ced5539e01c79ec7fd5f3fd156dc2dbea304f558748d7a4e1d8f00218e6d493"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CageGeometry.h",
+      "bytes": 945,
+      "sha256": "3070335366d21896ba807f73ab0c252adb21cb880645e5bb87923400cf1d977a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CageRust.h",
+      "bytes": 1577,
+      "sha256": "13316dc3ba4e16fa8a64b9411529ed98effe7e33488e8c0e6054f8ff3cdf31d3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CameraState.h",
+      "bytes": 1073,
+      "sha256": "5d48d926ccd35b81534a08d977c19c6baef7bdc8d052a363e0e9a036368bcf47"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CameraTrace.h",
+      "bytes": 1418,
+      "sha256": "3d8817342db5faaa5f8642d12b1b1394fb02ec431a2dd8785a3693bd0f84fc51"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistory.cpp",
+      "bytes": 22121,
+      "sha256": "c92266d2287f930614d4877eb0f5daac4038f69ef4d4dd3aa5a48b8ecb8e4210"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistory.h",
+      "bytes": 1976,
+      "sha256": "93ee2d8187ca30ad812cb8041bcbda205372e428a4b2763928e65ba1e7873306"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistoryAdapter.cpp",
+      "bytes": 11916,
+      "sha256": "8bd31e9939f9a3158771f53ef774d0b47b34ede7a4f195857135853342012966"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistoryAdapter.h",
+      "bytes": 1728,
+      "sha256": "b3215ffa69c34848e991352d4a73c40fc4e34c0f3c24b9dbed7cb9b9f35871b0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleTangent.cpp",
+      "bytes": 5761,
+      "sha256": "6894330272c562005cddff9391901595c0482ae21409ce58d8058f594fb2d5d3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleTangent.h",
+      "bytes": 402,
+      "sha256": "5b9023672834f32a26a221b2db462f853e7ad95f1f4b6961a9f94bdce41a4420"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/Command.cpp",
+      "bytes": 11995,
+      "sha256": "713408c5009625edd7916afabbc4c188d151e92cbf60afb0f87a556e7d9ca0be"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CommandConsole.cpp",
+      "bytes": 20159,
+      "sha256": "102816c2468e1ef8da9a92254e38c48657ef599c1f10375144e58c713823ba83"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CommandConsole.h",
+      "bytes": 2037,
+      "sha256": "dd6a276150a560f2f084406df834410dff018a76cbc42c614ec6ad097478dbe4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreBuilderTransform.cpp",
+      "bytes": 11788,
+      "sha256": "5ccdb188a3e917a127b7cee1d00911bbd43893aecb2adf8587abb1408e3869fc"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreBuilderTransform.h",
+      "bytes": 828,
+      "sha256": "4a7684bc6cb038b61db51978297002eefb272583f67ca386f596cb46aa8fe346"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCPlanes.cpp",
+      "bytes": 27323,
+      "sha256": "91f004f34a7fab6aff32b04d6e5950a279fd0f73d9596635222647575e927120"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCPlanes.h",
+      "bytes": 1056,
+      "sha256": "35baa2219d09672eab79d37c5d5d5a647b63db621ef22dd001c1e8aa8aa1d915"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCoordinates.cpp",
+      "bytes": 8072,
+      "sha256": "193c2facae6680b9cca7da50d98bf20244dd295fc8d40e6b21e53bfb7f085841"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCoordinates.h",
+      "bytes": 3012,
+      "sha256": "0ba9a2f68fd411a3b2ccede902fa7791a160c34f5eab8e6798056ef67f15f894"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreDefinitionSnapshot.cpp",
+      "bytes": 41256,
+      "sha256": "78fc213c7d323c65ea86c983b1be3360c2c94abb7aba2664b8911b79a2038f2f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreDefinitionSnapshot.h",
+      "bytes": 634,
+      "sha256": "090d10767c3c43e82f5f5599bec54b15cc9a120abdaf300c3b240f3993d75056"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreDiscreteSnapshot.cpp",
+      "bytes": 7289,
+      "sha256": "e74bcdfe67bcb0694d91b3622d6a24faaf51dbcc37db17440ea26f767210f920"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreDiscreteSnapshot.h",
+      "bytes": 964,
+      "sha256": "73bedc1889fa75a40710dae8030f56f83d24f94ff1c2292bebdd8ed75780ee1e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreDistance.cpp",
+      "bytes": 10643,
+      "sha256": "6cc3348342338c3970eddaccc50554a603c07f58cf95f11018b27401d57ea724"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreDistance.h",
+      "bytes": 1359,
+      "sha256": "904212f176cac66caaeb7d56565a3956eb96cff60a9bfeb8c784dc134880c187"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreEdgeSnapshot.cpp",
+      "bytes": 5840,
+      "sha256": "26f82dcc8e6eeb9d65c41c2d1d4a407230ce9b9150af627bd4109ac9167e81b0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreEdgeSnapshot.h",
+      "bytes": 516,
+      "sha256": "dcd83aaa0c5a6b9f5cbf77db2ec61b14b8fee95c58ca0e0f40c630f3d39b9593"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreEditResult.cpp",
+      "bytes": 7278,
+      "sha256": "9aed7b318d1b16bb041eb579f61a01920f3c154cff658c2be766dcae97a9a2b9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreEditResult.h",
+      "bytes": 999,
+      "sha256": "7ed987cf372b409d5e0bcba97ce9a122a9872a4958449f8a708c9888e09ee83b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreGeometryContract.cpp",
+      "bytes": 38268,
+      "sha256": "466ae4d7ed9f027b74dadf10fabea03958d28498efd27016c5718c9980b284e8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreGeometryContract.h",
+      "bytes": 896,
+      "sha256": "687049e38e6c377d4b70dd2aa1b40470e533ec2571196e4119cbd6b201ed88f0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreKeyboard.cpp",
+      "bytes": 10204,
+      "sha256": "01cda7e69683d51b8ea12a9bf7eced14ab6eb6cfb1608486c7fa71fd3de362ea"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreKeyboard.h",
+      "bytes": 954,
+      "sha256": "8b63821bec0a9886ac421f11baed075a86337802c1024300170621e1c581fb34"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreLayers.cpp",
+      "bytes": 26432,
+      "sha256": "98d797e6bad59890cf0f37d3524a3b86991531e94befea11d04f27cf5c8fbd14"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreLayers.h",
+      "bytes": 2870,
+      "sha256": "a20833f57848e2aa60a1638ad000127dadec3a80e2987fe8d1199c2e63030342"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreMouse.cpp",
+      "bytes": 14512,
+      "sha256": "373905dd8868ee88900d940c04fe53da1f4481278284871968f4aaf912b0a2ae"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreMouse.h",
+      "bytes": 970,
+      "sha256": "aecfd5575d8f7b2287e98f94338f47fb09f590e8cfdaac736975f166cc726717"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreNotes.cpp",
+      "bytes": 6433,
+      "sha256": "5cfb0373d466e31772efcb6d7175670f8260e3543d77932a2a0e4795ccd20c78"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreNotes.h",
+      "bytes": 460,
+      "sha256": "2fc3d841ff004657aa9ab7427a74b188d03e56afe40914d1c27caa6b2e8501be"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreObjects.cpp",
+      "bytes": 11042,
+      "sha256": "351128204e45c580114052cf6548d60c92cee10cbb5f167d27635672d70d7149"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreObjects.h",
+      "bytes": 1326,
+      "sha256": "c945c6eac03011b8d4efa607f9e4ec03a810356197aa85c49bd695fc4738a97d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CorePictureFrame.cpp",
+      "bytes": 16677,
+      "sha256": "b5174464611a4abd5a70d3dcd61da74608a7d924a3d15d0fcb29f785dc73fe2b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CorePictureFrame.h",
+      "bytes": 1589,
+      "sha256": "b6aae901daa6ddb6e2a08c91b69d009706c627a6af4a24e3d49a1110feb415f4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CorePreparedCad.cpp",
+      "bytes": 24875,
+      "sha256": "d2811867ba62751b8eed134cb15f9464ebd2c0b1b798892374ae5e7807b4149f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CorePreparedCad.h",
+      "bytes": 671,
+      "sha256": "7cbf5a8ffd312a67e00d7b9d530cf8c79e50d4ca4e5ffd2cb77969a68c627e9e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CorePreparedSnapshot.cpp",
+      "bytes": 8150,
+      "sha256": "4405f5a0d239c1571e0f1cd7bd3998432b5e9b2d064861646703c88a72ef83cc"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CorePreparedSnapshot.h",
+      "bytes": 1265,
+      "sha256": "bf8637e0aed3394a63d245b0c40f651ded6bb823a71fb5f56cf66f4e15d0c034"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreRebuild.cpp",
+      "bytes": 30289,
+      "sha256": "7a7ad1f14882777cbb4fd3c6aa3d7f4dc49d38a76d940f4be69559902c359b8d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreRebuild.h",
+      "bytes": 995,
+      "sha256": "8c633e2cd70cf6f4e6903f6042100c8551b8bd6edd3786d53f057eeb71838325"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreShapeValidation.cpp",
+      "bytes": 6299,
+      "sha256": "db323c8c4a1c3b16869e7c435402ee3c68cb6ee335924b7535b01ff6632c1e74"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreShapeValidation.h",
+      "bytes": 465,
+      "sha256": "859916f39c9a79a275778f55e1f6de59610a254b003d61127c047518635a2ede"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreSnapGeometry.cpp",
+      "bytes": 5523,
+      "sha256": "2cd00ce7765ffe4d633f810204f6d2d0112b69d31cd0b8fc26668f59a0802767"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreSnapGeometry.h",
+      "bytes": 535,
+      "sha256": "f4dee92dc5a132775a8b856bb671d06618b9070ee052c913d9140faa58e41d08"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreSnaps.cpp",
+      "bytes": 5961,
+      "sha256": "1598d9f3950c884e45573a73f2c7088121d4a1381b766bd6660b954b7c5ade99"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreSnaps.h",
+      "bytes": 634,
+      "sha256": "b03cce2d5aa7c2bec654988439af9c5257f5906a5c9294b0687e515a6c71ccb1"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreSolidResult.cpp",
+      "bytes": 13089,
+      "sha256": "fe494300308e8b01be9968bca0b92c1610adaeb69f0298d747d08ddaf3133d83"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreSolidResult.h",
+      "bytes": 1372,
+      "sha256": "8cd28be80f1d3c499d5ce5794dac969d82b64929920858c223d5a20972e5c1bc"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreSourceAttributes.cpp",
+      "bytes": 4724,
+      "sha256": "ac1851abf0745793e11904ea22a683f9f1f3aac9881aa5e705a515b4626ee16d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreSourceAttributes.h",
+      "bytes": 326,
+      "sha256": "217641cfd263bc8eb67d000b83555c8091a898069be5060255f653da9d647b16"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreSupportSnapshot.cpp",
+      "bytes": 22251,
+      "sha256": "646c5be3c8b6bd84db4de10e57ae7011c5f1dbd2681a36d3ac43e9494a62382d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreSupportSnapshot.h",
+      "bytes": 831,
+      "sha256": "03a6ca670397e5de19e3a86dd138eae1170b31b887df4a6204c95b4aaf5c23c1"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreSurfaceResult.cpp",
+      "bytes": 8393,
+      "sha256": "d3e60e049502c26c680df08b25eb037d02a69c0a0bcb530a20fe5bf858ee327c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreSurfaceResult.h",
+      "bytes": 1211,
+      "sha256": "0dd1fab216504ea352d6c1bbebb44c8234fcc1703b6f81f69fdd85c57883f7f3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreThreeDm.cpp",
+      "bytes": 4222,
+      "sha256": "00057ff0cefdd77053d4b4e50b3a44c96dbf7fbdd4daf91f60970a588bb9eec2"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreThreeDm.h",
+      "bytes": 76,
+      "sha256": "f42f82d26d75e4b99bc3d2d9472fd89176c96021f29ad71324a8d85923a3aea4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreTolerance.cpp",
+      "bytes": 1809,
+      "sha256": "289aead99d2af57c3025eeb3ed17e07e110fb823547c704e18e6b4042f639e13"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreTolerance.h",
+      "bytes": 697,
+      "sha256": "d258195dc48954a7a559c439de4873cad6e8d5c1ff238f6be7de4cab2bb806fe"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreTopologySnapshot.cpp",
+      "bytes": 13017,
+      "sha256": "435cc3cc3019e9b3f332c14d1748bc579fb0bc1b8725519016272fb4d47c9891"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreTopologySnapshot.h",
+      "bytes": 351,
+      "sha256": "beb34101a9f4e313959ad9ac871e89b53caf1e6d983972429e1518d259b5add3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreUnits.cpp",
+      "bytes": 7297,
+      "sha256": "43aa730498e4e509c773e0e2eec33a59754e173e66a75a13707aad2f2185a101"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreUnits.h",
+      "bytes": 769,
+      "sha256": "bb5eb42328bc72796b671a9eadc4d4ed76141d7608070c7976e39cec57970e3a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreViewControls.cpp",
+      "bytes": 14551,
+      "sha256": "a773dfaddf9a5ea65003919f25513d5d2486682a6f98da0f6f67b8c995da6143"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreViewControls.h",
+      "bytes": 1238,
+      "sha256": "b5d29448a4f22a1290f49a4329aa9b4d255673214e5e6b335062f841ce9d5298"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreWorkspace.cpp",
+      "bytes": 34562,
+      "sha256": "5f31d4d98a3276a19fc9a9423cf635de5f7130443cac8c811ebd7206ef37c3a1"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreWorkspace.h",
+      "bytes": 1647,
+      "sha256": "8151a294365ada7f8704bebda392ebbc8f3a4344d0c66846c144a7deb8f77323"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveCircle.cpp",
+      "bytes": 13120,
+      "sha256": "5f634be9278b0e5d5be8489f51863201202509d72d470e621210c973935b8cd0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveCircle.h",
+      "bytes": 853,
+      "sha256": "24674ce7e41c8ea182195ff73faed8d2c04d32673278f8e901149a0d7b704edc"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveController.cpp",
+      "bytes": 37476,
+      "sha256": "a7c35eeee74ff87427b599bfefdc45c17585d17795f3c3bf97ac677bf44bdeaa"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveController.h",
+      "bytes": 1501,
+      "sha256": "f923a12c1d45770d455dc9dd3f9a9171f1023038f15b34c429fbc4548c6f3d78"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveConversionContract.cpp",
+      "bytes": 6182,
+      "sha256": "5c950c807e3b7aa2537b9919d4589c6fb0b7521fb462a22ff2d76a6a2dbe0e03"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveConversionContract.h",
+      "bytes": 3880,
+      "sha256": "d6604efaf0b30cf61d201f984633c2c844162290c74c576df698f27cfd9c7a74"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveEllipse.cpp",
+      "bytes": 11664,
+      "sha256": "49a03b762158b2f44c9f0b6c28eaf7a2f119d7ed9ea995370a190d34557a26fd"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveEllipse.h",
+      "bytes": 657,
+      "sha256": "90df7e79eac96517b6928e3bd38e1262e04a4cad904ff6834389f714e4a11ad8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveGeometry.cpp",
+      "bytes": 4721,
+      "sha256": "ff84f3ce7b2042138e3d2a2f5168faca575aeb587444a70f350c321c74b01b60"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveGeometry.h",
+      "bytes": 1139,
+      "sha256": "728229740929553521ddfd2fb12a421a8536c87ca3389fa691f77377585cf82c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveParameterPoint.cpp",
+      "bytes": 17936,
+      "sha256": "c6f491a380ace978f9b3824c6c98a75de9824dfb7861eeae634fcd7f2f7875ed"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveParameterPoint.h",
+      "bytes": 1727,
+      "sha256": "99ec12a3b18e50e3eb299cf9ad88cf00e0b5576cb33a01d180fadf84df95e966"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/EditController.cpp",
+      "bytes": 21546,
+      "sha256": "fccdf0d3c03451524f70fdd1ca883e0ffdfc9b9aaed4c2b8aa3fbe23d1dd4c26"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/EditController.h",
+      "bytes": 1886,
+      "sha256": "9cdc05790b49332143b2313fcc21c932abc52f9197e885f248109b03b10e9588"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/EditCurveOptions.cpp",
+      "bytes": 10978,
+      "sha256": "1ede44ce25e763c664ad3f84bb46245048af3f7d55d114102fac619a3a1ec8a3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/EditGeometry.cpp",
+      "bytes": 50504,
+      "sha256": "b8161336987ef7143fd55b6604ac469e3601a66bee99a514c47e634f3f62c61e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/EditGeometry.h",
+      "bytes": 2776,
+      "sha256": "f3e744d3f87951907ff74d0371f8930da3560c5b24d86ad1591d33ab6dabedee"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/EditMesh.cpp",
+      "bytes": 5104,
+      "sha256": "2c9241d96fe8842d834e5d2b332c398149c28bda8b4208cedbc06d55f21ecf6a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/EditSpecialTypes.cpp",
+      "bytes": 31032,
+      "sha256": "88ba8c68802c9760e44c57f6d6b4bc9ae2ea30597a9f6c1ad84f0a5542aaf25d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/EditSpecialTypes.h",
+      "bytes": 581,
+      "sha256": "8e975096a52620d0c26f5e23e26bdf8b82e15dee1e695ac02c4c0721433aab6a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ExplodedText.cpp",
+      "bytes": 1151,
+      "sha256": "4fceecf378903d854ebf77018505a32beca5dd704b627c43a8017024408863aa"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ExplodedText.h",
+      "bytes": 830,
+      "sha256": "73e907a1ee6f00e2f6eede73e554686891162e8ad9e30ba417363f66fea09349"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballController.cpp",
+      "bytes": 24738,
+      "sha256": "51d6c7b5b8ed0eb6fefde78b18d74bd0db52e0884fcabe9ff9b940fd6a1574fe"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballController.h",
+      "bytes": 1842,
+      "sha256": "9a97b271d33fded50422e144bde8f3a09e4a4d7cbd931213ddc3f33ba44f4a13"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballFrame.cpp",
+      "bytes": 1994,
+      "sha256": "b75f3903958a664d0c6ce790a2131cdd6a37ab680af059ffe78c8a8207732e31"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballFrame.h",
+      "bytes": 377,
+      "sha256": "1f8f6fec965d8850cdca0092652cbd9a271f306b24465f70a9de7ac9ba251a88"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballGeometry.cpp",
+      "bytes": 37271,
+      "sha256": "16fc5656a3717bd17683e690f91e30819dd31d3634c1828add7c684dd92542e3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballGeometry.h",
+      "bytes": 1464,
+      "sha256": "0702338558f06a0afd92b1432a7b9d15c68d2ebd30dfa054f67406f6cf665352"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballOverlay.cpp",
+      "bytes": 14152,
+      "sha256": "ad07b4e24625f939bb99d2c2ce14b9cc653684a5fb2d78eb0babc0d78e34f6ed"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballOverlay.h",
+      "bytes": 1391,
+      "sha256": "03c9c1026293f3c85d4baed500aa5f1086b8533ad6f136a459f158f31926905b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballRust.h",
+      "bytes": 1942,
+      "sha256": "2eecba5830c44880f9abd5aad76ba24cd943f3d20a039c962b2e69a913956032"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/HistoryController.cpp",
+      "bytes": 10742,
+      "sha256": "dad70b45dad202f1da222a0914332c9df057fad6201d6683c6da072685386931"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/HistoryController.h",
+      "bytes": 1125,
+      "sha256": "a9377deb6ee3dfb9397c097a4adfead1900957dabd9cc381763b60e604dcf2bb"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/HistoryFeature.cpp",
+      "bytes": 15715,
+      "sha256": "a7b8b595c922921a4f4b4a2afae17aca3a1b0a8761df2df92a850b3a759a0538"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/HistoryFeature.h",
+      "bytes": 2435,
+      "sha256": "6e9eafa38c2b87589f00b7262fe8887f5c9f8d43fadc8d9a98c130dfc8961e0e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/MatrixSidebar.cpp",
+      "bytes": 39265,
+      "sha256": "971a1ecb38af5d5d2f7795f5e55102df30dc239fc3cbc4b582b25fd7f391f416"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/MatrixSidebar.h",
+      "bytes": 1500,
+      "sha256": "6ececd78b01346c42035efa1d0b97033db4c04bd0f61c9ab2703522e61900038"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/NativeCommands.h",
+      "bytes": 140,
+      "sha256": "92ec1ccf88cd63471452b34a45beb8ffdd798e7bde77e9bce08dd2169e5db5b8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/NativeFitPoints.cpp",
+      "bytes": 10887,
+      "sha256": "6c48d4b036fb01f9a2c464eac5354648787c45b4bad9e53eff43fa09df845e0c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/NativeFitPoints.h",
+      "bytes": 554,
+      "sha256": "2a0173f3843f966c3ac2f6f42884dd2e1c0157ee1816638a68fd5f6e5b89579a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/NativeInputTrace.h",
+      "bytes": 471,
+      "sha256": "ea92c532844820f5c58b32d3164263f2a79d68ad88c4ab90f77254e62df74bab"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/NativeInputTree.cpp",
+      "bytes": 22642,
+      "sha256": "3a47989f7c44e5364ca19138157427ad920b9d3f23c3760294a6d27e92ccb268"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/NativeInputTree.h",
+      "bytes": 938,
+      "sha256": "2303af98ff3611dd15bd86113507fdac4a1cccb4ee8a4a56cb43e03d17677f83"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/NativeSurfaceHistoryRequest.h",
+      "bytes": 1201,
+      "sha256": "200aff078d1086dda9e8619b6c42363cd8b4636fdda2450e9b0d358cb552dbdf"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/NativeSurfaceRequest.h",
+      "bytes": 1074,
+      "sha256": "415d24352d1b66e0a5edae124b2c02205ac07f1a66db99af60f1765f975b26d6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/NurbsBasisAdapter.cpp",
+      "bytes": 20670,
+      "sha256": "341c02c464812a173c3d94a3ff9748f0eff9480fabc83992288e617ce8629f3f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/NurbsBasisAdapter.h",
+      "bytes": 3633,
+      "sha256": "1ca7afaf36136083e97ae8b076afc08b43d5de06b7afbf27f66766db78c4c08a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/PolycurveContract.cpp",
+      "bytes": 11995,
+      "sha256": "6cfda52fd00700686059d87baf244412017eb895fe1c7479c945fb132e879a00"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/PolycurveContract.h",
+      "bytes": 2115,
+      "sha256": "7717c9c89e0d95920eb7883b9a295178eeea179688d4a1c9c105a4c90dfa84ba"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/RetainedArchive.cpp",
+      "bytes": 7445,
+      "sha256": "724f2fb5c148a9981734d9a66676015c2656a0944a1c5fb951dfcb6cacdbf61a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/RetainedArchive.h",
+      "bytes": 755,
+      "sha256": "26d389829b8fe0c59ba33bdd7ff94aa180c2ce1446c92e76ca39b3deced90aef"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/RustBridge.h",
+      "bytes": 13839,
+      "sha256": "4949e2987de886bec6c0d5d68266c77f09ae8f755178611e8ed1e338e566e759"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SolidController.cpp",
+      "bytes": 33545,
+      "sha256": "03b8177fdd523bf16845203f649c6b7b66494e266f1800a0c80f6e24b8caa5ed"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SolidController.h",
+      "bytes": 1583,
+      "sha256": "99d57613303e7b8bea8e5d2c3afd8313e30e7af3a368fe669f9e119dbbff8a36"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SolidReferences.cpp",
+      "bytes": 19674,
+      "sha256": "00e2c6fe04c848e319858f9624f6a6db9c8d5ed7c7ba7055b7d4647d379ced63"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SolidReferences.h",
+      "bytes": 1436,
+      "sha256": "f7274fff35da45fdcd354e93425b5ea6a00589c4cc93ec0681b43614b11c6afa"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceConstraints.cpp",
+      "bytes": 20058,
+      "sha256": "55edd239f5584b8ce1995058ff5b7cb5696bac95a216bd333b1a629e6f0b2fd3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceConstraints.h",
+      "bytes": 693,
+      "sha256": "a28dc9da56e537d7b44409fcb8ca8a1d4f4b40efa2eed3a8c150f10aa91a262d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceController.cpp",
+      "bytes": 27539,
+      "sha256": "6c2c4e840c7b19f731968afeffff0c7522a5b95134102550c3c793490390ad7d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceController.h",
+      "bytes": 1678,
+      "sha256": "1600049bb9f85657e1ba89d82426703a8b53bca658fc598887778aeb710d442a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceGeometry.cpp",
+      "bytes": 27859,
+      "sha256": "ed41029e36c30074e10f088a06f148e0854200042abf00d3bab173ae11f64a1a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceGeometry.h",
+      "bytes": 1540,
+      "sha256": "f2851b8ca438874810ae8ee73b206c65a0ffd1be23748ee761cf64c5ee5cc2ae"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceHistory.cpp",
+      "bytes": 18575,
+      "sha256": "63d0a54ddd69868247fa9013132febd47ebed7f7187d94e5ca28f45315b8c631"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceHistory.h",
+      "bytes": 2320,
+      "sha256": "b9552638eb610ace9b4b8144eb976f170a8cdf7d27cca8b3cca0cfc3170105a6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceLoft.cpp",
+      "bytes": 9453,
+      "sha256": "fff5a47fddf101de9d27b31ad077bc617aa5bba215e857c6781972e3bcd48c15"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceLoft.h",
+      "bytes": 245,
+      "sha256": "51c207495ae8adcff32de97adf191b2382dab774955f9df6b676e0692cf151e7"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceRefit.cpp",
+      "bytes": 8364,
+      "sha256": "42d53fec410a0438fa83cf98167dc280381bdba6f7a72c5b5fdf91d959c6e1a3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceRefit.h",
+      "bytes": 448,
+      "sha256": "d9fb5d3043734e32a4ac68a473237b3cb1d9bc8e26d7a43eb337ee1b373992c2"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceSeams.cpp",
+      "bytes": 7463,
+      "sha256": "1b7d1551a96da907228e88dbf2bd86cdc6b13a5b1d35942b5c6d5574bd5fb220"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SurfaceSeams.h",
+      "bytes": 267,
+      "sha256": "445238e8c0625d47296641be2a5ea387bdaa6f33c335bd639644966640c82ac8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmArchive.cpp",
+      "bytes": 25092,
+      "sha256": "85930d1a9dbe2312bd7296b7a50e7b2ebd0ed1e8469040d9213910db39ecfeb7"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmArchive.h",
+      "bytes": 1155,
+      "sha256": "e4f2c2eea43cdbb0443421e34623f9fc08c397d81ac05795a48abc8bb9b3d78f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmBrep.cpp",
+      "bytes": 19447,
+      "sha256": "fa9e398870c24c1d71feadd5dae84f712a40800cd13077882716ae4f3907b0a0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmCage.cpp",
+      "bytes": 9561,
+      "sha256": "71a90f3f44f8fa2f193b51990ec0c3d8488d09c7a40d35e826f1cb69fb79de8b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmCage.h",
+      "bytes": 2580,
+      "sha256": "33242394f9551c3840ebca52b3e3afbd8e40d0b834b570fd8617067dfd5a3c0c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmClassRegistry.cpp",
+      "bytes": 1587,
+      "sha256": "ae88b935677c3d9fd50486ca94da50d609140f64b5d673775238128ecaa2f5b7"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmClassRegistry.h",
+      "bytes": 109,
+      "sha256": "8f31e18f814cf4981f3ed4c7be64f1ffe79535a58ff405e710caeec85d4f6433"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmCurveOnSurface.cpp",
+      "bytes": 15834,
+      "sha256": "189ca92d214d5928e86aa10f82756257ee1e71b070d43e932ce65bc64233715c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmCurveOnSurface.h",
+      "bytes": 437,
+      "sha256": "6cc52311aca2a306a250391c991b546f31dda7ae580ac728bbc07b603c465252"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmCurveOnSurfaceSchema.cpp",
+      "bytes": 10246,
+      "sha256": "138c01797ebdf01959c85e3ddf57d93f0b19745692442b06def748ba8d8766fe"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmCurves.cpp",
+      "bytes": 7061,
+      "sha256": "fb2a2235c2b7b5870e2a9f0f239e93c599825c3190f163d6dc78d668658edf3d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmExplode.cpp",
+      "bytes": 23018,
+      "sha256": "22323ed35935900acb44938dadeaa15527e9a083572f31b3377c239ca26dd00d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmExplode.h",
+      "bytes": 2415,
+      "sha256": "daa2e7da34990fe330abb9030dd5ebfac42d4aba4d77e085daef9072931c0338"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmGeometry.h",
+      "bytes": 1924,
+      "sha256": "5c65a853aadcf51054dafb0dbcabbb5244cae26011af345a7a5d381f92abf3b5"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmHatch.cpp",
+      "bytes": 16021,
+      "sha256": "6d037bd43f2cef83f82570a9bc688f836c8f85d32637ba387f9559e72251a70c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmHatch.h",
+      "bytes": 945,
+      "sha256": "c2c61d22e984312783257b5ca2e13c4bc4e7a8845a606e599aaccd009c963196"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmHatchDialog.cpp",
+      "bytes": 13876,
+      "sha256": "67931cae53851c4fe5fbdff71705eb8d520fbc5377b17bc7c38842c2119fc34f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmHatchDialog.h",
+      "bytes": 130,
+      "sha256": "a7d0f69c6427e64382f502a8497dc142299160fd35d2d784f33ef1f96e4a400b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmHatchLoopEdit.cpp",
+      "bytes": 16328,
+      "sha256": "d3c038bccabbe2f93974fa553ddb8d5395d5966174473925ea29e1161480976d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmHatchLoops.cpp",
+      "bytes": 5818,
+      "sha256": "646d744a625ff2888939f94161b7a17aab1ae47101ad28582cfa7bc7ddb75fa3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmImportJobs.cpp",
+      "bytes": 6586,
+      "sha256": "ee47e8f7bcc47ca71e9bec3edfb2f074ed6f076b1290afae21f13e9232f32f0f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmImportJobs.h",
+      "bytes": 444,
+      "sha256": "4369fb6c78aaf1309197c8ea5408fe7016d17640402c028b5a8401d028ef9d8d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmImportWorker.cpp",
+      "bytes": 2023,
+      "sha256": "de8fff017ac3d42341425cf4161cffbbe54955f036c09dc8ee25d0674967cc7b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmInventory.cpp",
+      "bytes": 14062,
+      "sha256": "711187180e69fd423878851add379bf25761e23ee0067b803f92dff92613e748"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmInventory.h",
+      "bytes": 525,
+      "sha256": "8364c874c7d5c8148884e9f56b5567db6b8b9819cc661994d55e29d14f611ed8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmMerge.cpp",
+      "bytes": 103229,
+      "sha256": "775fbc0ead88c3dd23606a640f00fe4dddc585b6bae3f40bf9af12a7d1539ac9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmMerge.h",
+      "bytes": 392,
+      "sha256": "33e0a8b702f735c5f1d79a7322b44e385938e9f3e25f38d5c1ed9b017893b745"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmMeshes.cpp",
+      "bytes": 1159,
+      "sha256": "d6e29c98af000dccff55b613ab294594a0ba1a14ca051addf949466d88408edc"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmModeling.cpp",
+      "bytes": 3550,
+      "sha256": "ab6ed320740352f1b8eb2d8735ce72384416714653dc084ed2908fb1b6c23b42"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmModeling.h",
+      "bytes": 262,
+      "sha256": "d1fbebf62ef380c52b3ce1a1901260d4c4cc3c7ed322c620709b15066bb8e1fa"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmNativeReferences.cpp",
+      "bytes": 20626,
+      "sha256": "a83573dddc0d99e19c7afbc7c6c89c5c90cf0bb4f213022ebf8080f2c46222d5"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmNativeReferences.h",
+      "bytes": 1626,
+      "sha256": "1d69f04f31413281ea731516159cfd41fb2b0abf0ddf09efc2b9733a5c091dca"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmPointCloud.cpp",
+      "bytes": 9816,
+      "sha256": "73109fa2df59da5465e37feb3e3750a68ae2f9e6429f1589e985fffee47b92f0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmPointCloud.h",
+      "bytes": 505,
+      "sha256": "c6c9be6101f2ae2955c36b92f9de0d2c7aebd66d0797ea1eae0da02b7b81e3c1"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmPython.cpp",
+      "bytes": 29829,
+      "sha256": "3578688086de4e54f771450c18f1ada873644440bc913a0fde1b59265b654a3a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmSolidShells.cpp",
+      "bytes": 6777,
+      "sha256": "1f7189c29e6572395b237164bf6e4d8071c8b46f3614145c935606560df8e2df"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmSolidShells.h",
+      "bytes": 255,
+      "sha256": "9b660c3750e4ebc2cd1180250ef86972108ecb0f921c4f5f0e4f83de14dd800e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmStaging.cpp",
+      "bytes": 2356,
+      "sha256": "70457375be4ba1cbb7dd1b23466b1237df1e1a828232e2ccf46a506f4f55903d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmStaging.h",
+      "bytes": 351,
+      "sha256": "7f3a508c8941a725c354ec638c1ec1c15ac4da74dc419321623c36ebcf45c59f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmSurfaces.cpp",
+      "bytes": 6019,
+      "sha256": "76192e820aa59fddd21caa75b29cf94e6d04c3622ec2fbf6c14c23c1fbe23e70"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmTransforms.cpp",
+      "bytes": 3656,
+      "sha256": "aaec4422174faee6e1fd51a666931ad95da04f452c3efb6c1bd6ec9cbd9ed395"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/ThreeDmTrimMapping.cpp",
+      "bytes": 4627,
+      "sha256": "591bbaa56fc8622b28afbba12d6e7b17fea73e05d1f7b0cd32d034c3856e6b7f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/Workbench.cpp",
+      "bytes": 4954,
+      "sha256": "5576cbaf290d408bd333392d11bff28bdecf8f14096d1574af02db54976e72cc"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/Workbench.h",
+      "bytes": 623,
+      "sha256": "70e96dc3993c79d2d9f014b825d6c4da44d5a10ef0a5a880ea6ee0d1b6261417"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/tests/MatrixSidebarTest.cpp",
+      "bytes": 9221,
+      "sha256": "73f2501a8026d04991980eee62266a38d06f801a0c61bdba9c410f9b6aa71094"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/Cargo.lock",
+      "bytes": 167,
+      "sha256": "19e2884a11d7a72b6f35f587cfe9e061ed63e6e41c8668cdb99fb4d58d839654"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/Cargo.toml",
+      "bytes": 264,
+      "sha256": "7ad38193eca4b70ee7a421299472099d1bce1b49e89782c3b3d4a96932975f85"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/analytic_support.rs",
+      "bytes": 5022,
+      "sha256": "4f386a88678cea05414833f5b6fd69ce629176e5cfd735f76e930c2d839f7d08"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/array_occurrences.rs",
+      "bytes": 3056,
+      "sha256": "45b86f7aaf1c542028a0de707b7239469b305d192dd52def04c13f2d11d094f0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/array_occurrences_ffi.rs",
+      "bytes": 1413,
+      "sha256": "3e3743b665fa2dde0cba572c57d4cbb1a35d4d16c5f7d265bdbf86c6e985f30e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/builder_history.rs",
+      "bytes": 15975,
+      "sha256": "3929d2440613a0e26ef062b03bb1b9707c83598105b0f2600acbed776f545a35"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/builder_transform.rs",
+      "bytes": 9250,
+      "sha256": "768869a332cf7be21fcc760d3ba3b5918041492bec73a9089524a61edef31ef6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/cage.rs",
+      "bytes": 44296,
+      "sha256": "7f7b25f53b00a080d9b97b61d28330adcd808a35d3947203d612c66426ef0ee2"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/cage_commands.rs",
+      "bytes": 16830,
+      "sha256": "f3fdb0213b7a7ccb37f310385fcd68fda7f40ee418904e2055df803b223514d4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle.rs",
+      "bytes": 18423,
+      "sha256": "aab58eeebb91864cd5b09645b658663da36e014e069fe4286e23d532563424c9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_fit.rs",
+      "bytes": 4618,
+      "sha256": "8c5691a59d52701e1199f861be88f1635fe5b724f84aab0d1ab1d12a2d7a1868"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history.rs",
+      "bytes": 17642,
+      "sha256": "c8e70ca47f962e09269ddb08440e0040197dc2418114a374700daec33ba4537c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_tangent.rs",
+      "bytes": 18697,
+      "sha256": "1507a64c265e2638830d3444f233facb700675c04274ba1bdc54c902781d24de"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/command_completion.rs",
+      "bytes": 3157,
+      "sha256": "0bc566dc9e225d53a0627f5c4eeaa8f27d4668c05ba307b9268d5372f3659c0b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/commands.rs",
+      "bytes": 78,
+      "sha256": "05f20521776662fe97d36725022bc0aa88d2c81527c8016a2fecafc63e065c4e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/coordinate_input.rs",
+      "bytes": 20810,
+      "sha256": "e6566680821518ea4085cd03ebb0bac7de922aecd86ae2eafe4df73940715969"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/coordinates.rs",
+      "bytes": 14694,
+      "sha256": "78438a8af9461a24555a7ba8614c7eee4852bc837f4a91e1b2dccfff5f5ae3c4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/core_3dm.rs",
+      "bytes": 1350,
+      "sha256": "e5b3f368058bb903818ddd128b23770b1de40f02c1c51e74ca78a365789ce18a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/core_3dm_archive.rs",
+      "bytes": 12344,
+      "sha256": "faaada334f4f7b4d0a7e1d6c52dedf42eef8965f60dec45fd6b8befc9f60f154"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/core_angle.rs",
+      "bytes": 1602,
+      "sha256": "09fc267d22d0994966ed0d2109b629eceffaa26a10e64694185ba5071ad25238"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/core_distance.rs",
+      "bytes": 1411,
+      "sha256": "708eb82cf23293db1dcfeb45afb59a5fbde5ffdfef6d2ef16295d379b19aa77b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/core_keyboard.rs",
+      "bytes": 2760,
+      "sha256": "2fd3c10026d551caae8bb00042bb73585adaa47ae4f47ca2c4af5d78cbb7e720"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/core_mouse.rs",
+      "bytes": 2431,
+      "sha256": "24ddd9f52bdc3db8538313738aec0ce1159c2c844c1f873da125281f43764cd7"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/core_notes.rs",
+      "bytes": 1889,
+      "sha256": "75b324e123fedfabe7e66c1aa5508253a61a32ffd8f38023e337f2b91967b86d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/core_objects.rs",
+      "bytes": 6123,
+      "sha256": "6af0c1de8b6cef78b009d88c1ca3012e868179b28f10cd8a17587de6b289024f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/core_picture_frame.rs",
+      "bytes": 6354,
+      "sha256": "db2b43599f0744259f0a6216427f50e92817c8b144b5c34572805c02242d061a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/core_snaps.rs",
+      "bytes": 8332,
+      "sha256": "11faefc30bc9f14fc10bc2627b62b3521dfe866f8b4a4ae980b6124d244ed02e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/core_view_controls.rs",
+      "bytes": 6778,
+      "sha256": "d8e1e245f15dfd3c19bb00ae8bf3e7a676c87102bc84b5efdf0cd909646850e2"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/core_view_tabs.rs",
+      "bytes": 4160,
+      "sha256": "cb0ff705bc895f16279152e52505fd8b06e81f073b8babfebcf5abdc23e27553"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/core_views.rs",
+      "bytes": 2820,
+      "sha256": "032549e8c976fdc03add156082a284ccfefe1024ea1eb596b9a5f4816e3e7384"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/cplanes.rs",
+      "bytes": 19231,
+      "sha256": "459fd4ff3794119736d37e06d3bc11da3c7931374e6c77efd59f04e9769f03d4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve.rs",
+      "bytes": 65441,
+      "sha256": "7f6a7ceac27b982dc6e7183915c9d77c8ba33df4334f95a8583d9557dc65a8cb"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_conversion.rs",
+      "bytes": 9566,
+      "sha256": "db3c0a42d4ca8fa67e7cb6d3265d7236c50b596cc29b429d00eddb71b45b4e5e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_conversion_ffi.rs",
+      "bytes": 8041,
+      "sha256": "ced17dac9bb3fed9377dbba4163065ca59039bcccaa7b1c654916db86d88e741"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_ffi.rs",
+      "bytes": 23911,
+      "sha256": "b7397a947badd239f7535a799e486a3510bbc52430392a5969659726e4fba14f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/derived_support.rs",
+      "bytes": 6599,
+      "sha256": "cdd55d8ea988ec67e1ee38da94399c4c5e5ffeba619a040ea93dbd20efa6e4fb"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/derived_support_ffi.rs",
+      "bytes": 4219,
+      "sha256": "b5996a667cf36933da5bf54c563f95e81af89bae8c709fcba7091285f2d2da36"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/discrete_snapshot.rs",
+      "bytes": 2856,
+      "sha256": "8b34b3760837c5ee3a34a61b6cee2fb37f57fee2f7eeaceab137e23271eefd74"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/discrete_snapshot_ffi.rs",
+      "bytes": 2081,
+      "sha256": "62f7f34c47b1dd3e8d422cf50147b8f1eb465dced4571b37e47cf84659fa2077"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/edge_geometry.rs",
+      "bytes": 4303,
+      "sha256": "3c3bf3bba8d38595236ab63b091193909fc608c63dd1b5d85c3623de60e8f1f9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/edge_geometry_ffi.rs",
+      "bytes": 2082,
+      "sha256": "722214b44d698a5cc81ce3760c16bafc1e418e1218e87e24d893832235ec93f1"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/edit.rs",
+      "bytes": 8655,
+      "sha256": "7092ae186f142b156b9dbd0e5381a104f41c7208e9eb0692cf5313be0da467e3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/edit_result.rs",
+      "bytes": 6473,
+      "sha256": "5c936d90556a0cfadc157cc2a31332328643bdb6dc0b9c2f10f0ddd69acf7a57"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/ellipse.rs",
+      "bytes": 10748,
+      "sha256": "825eb4861e18ff182e97fcede9b5b4a4521f9617882cbb82e63dfaadf0f1a6bf"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/ffi.rs",
+      "bytes": 14857,
+      "sha256": "bf2de934356333f76ea739bc68e0ccf8ff036277ecb05f25ff2dccd9679dc74c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/fit_point_input.rs",
+      "bytes": 875,
+      "sha256": "2540abad49d69fa282b6c32c2d9fd827535ec111885bc2d3f370198a951a2d92"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/gem.rs",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/geometry_contract.rs",
+      "bytes": 20342,
+      "sha256": "48064c5c37ece7d17c060512b44d66dfa0926034e3cb6c5be84d2c7cc0bfe562"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/geometry_contract_ffi.rs",
+      "bytes": 11561,
+      "sha256": "624f1240178e52df9f64e7cabe7c2c2e7e433bbedcee390c9c15be51235cebb7"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/geometry_frame.rs",
+      "bytes": 2958,
+      "sha256": "ee4b9130c6d8bb71e515976cdd2ddd00f6975ea7abc1ebdd9b3d13426328552e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/geometry_frame_ffi.rs",
+      "bytes": 826,
+      "sha256": "b631d6ca845421b4775b3135e42f750438719f460d0647fb2e1df8704e2d9e96"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/gumball.rs",
+      "bytes": 34417,
+      "sha256": "d83438caebeaab58d7b528812f606a4b00efb5bc9bc948514eb0b6482d2dc5ef"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/gumball_ffi.rs",
+      "bytes": 14402,
+      "sha256": "72c91cc05e7b534100aed935e547be343f27da4b8b3381df0e2acdb2f05a6acf"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/hatch_loop_input.rs",
+      "bytes": 8145,
+      "sha256": "41bed3ca4109bd8f032820253b201b469f01f291a27933575f39ae60cd07261d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/history.rs",
+      "bytes": 6617,
+      "sha256": "f108c1756861aab0516c50be9dcacef93eceb24779d4ef4d4139658675b2d213"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/instance_graph.rs",
+      "bytes": 3468,
+      "sha256": "4ffa9fdecd1a3bcf3a4c3081b59a0a605f0d587a4a00c3da280259c77c6c886e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/instance_graph_ffi.rs",
+      "bytes": 1383,
+      "sha256": "4b6b5562027803ca43eeb87cc0231cd1cd7c66011dee15f7602756d11670bf4e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/layers.rs",
+      "bytes": 10122,
+      "sha256": "5ac2849871e0a2fd5483017404f60910d7c72e22c4b2a16772cfb297d5805a7d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/lib.rs",
+      "bytes": 2351,
+      "sha256": "2c39d0b00686ed05536f080c0b8a06050522a1d1e906f681aeca1c2f32c8440f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/menu.rs",
+      "bytes": 5189,
+      "sha256": "a9b5331c2231707e667d45c63c4799e49f31c30450b970c77ee8532c000a1771"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/modeling_exchange.rs",
+      "bytes": 2072,
+      "sha256": "b546a400f2f939f65bc0f2d5b6fbb778804574e7d054cb03a456ca47b4f4dd1f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/native_builder_capability.rs",
+      "bytes": 5679,
+      "sha256": "a8f335e3711de2c751644176f77837bcd06633ae50225d8421ccbb5fbecdfe65"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/native_cage_capability.rs",
+      "bytes": 7504,
+      "sha256": "995894d8d73f65d5bcc991e0864d063fc6cbd7f26714555803f5305f7ed0e954"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/native_curve_capability.rs",
+      "bytes": 5386,
+      "sha256": "dc32011c72437b4fa9085212f62dac2a501a525fbfa81db452dea3a7db7ce44f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/native_edit_capability.rs",
+      "bytes": 3403,
+      "sha256": "277a393bbecd7ba826493a792ae34474c66c51e3056329db0fcd493041aa4454"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/native_input_tree.rs",
+      "bytes": 3962,
+      "sha256": "707eddbb504f288a98e75bc5bfaa77433bfc339d1be97b398629d1f9d521a6a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/native_input_tree_ffi.rs",
+      "bytes": 2701,
+      "sha256": "457ca16a5b0a96da8d7566b4a4d284ca52d2e43c10e9a3fc727340cd1c534143"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/native_rebuild_capability.rs",
+      "bytes": 2766,
+      "sha256": "8dfaa0f3c738c303c58be04c67936f3d01b529e10ec4d7e68a0cf65e1b1fe167"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/native_solid_capability.rs",
+      "bytes": 4463,
+      "sha256": "8040f1b7cbee1d244c96fa21b93571d11bfdac5c74ff82171eedefabd657325c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/native_surface_capability.rs",
+      "bytes": 7877,
+      "sha256": "44e973805fd6b9fc7e2a07aa6a78e78180d207b492e486c29365ef0c4f4e4c13"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/nurbs_basis.rs",
+      "bytes": 11166,
+      "sha256": "50d4fe44e2a325ff2f614c1f06d263d42cc1f16fc3504e4240863f395e41e916"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/nurbs_basis_ffi.rs",
+      "bytes": 10445,
+      "sha256": "a826ec5f2c42a476ca5f1f503c66d6058d71803d493cdcee2ff76c54538393f7"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/polycurve_contract.rs",
+      "bytes": 12063,
+      "sha256": "8c802cdcf983c13cea4820ec93f0c22fe968a7348998d7e1cbdd0f6a9fb67571"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/polycurve_contract_ffi.rs",
+      "bytes": 6769,
+      "sha256": "7b67905b52acb742ae565dfcd2dc9d7241c10f0f2bf95704ea9f54d2ac5c52ea"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/prepared_cad.rs",
+      "bytes": 3428,
+      "sha256": "32a55053b53c409d24a40dffb2d5b40f78fa9018491793731334368e28567a07"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/prepared_discrete.rs",
+      "bytes": 6453,
+      "sha256": "9bd2f861b6e8ae2421fb4a45c87ec3bb65843ca6cb4bfefb9dc4730004caea9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/prepared_result.rs",
+      "bytes": 21861,
+      "sha256": "68094f6991e29ab74c0de67f508e4ed404b86fb5c10395f9ad95c17b28ac57fa"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/rectangle.rs",
+      "bytes": 5839,
+      "sha256": "83dc614cd5a0ddb309eda04d2764a75b0cc6f55db4b7f9b9b4cde8fb14f9bb19"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/reference_path.rs",
+      "bytes": 2739,
+      "sha256": "911b358e81fcec5cc991b9a4d96c0eeab020f901d32fc48cad3439fb423cf483"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/reference_path_ffi.rs",
+      "bytes": 3114,
+      "sha256": "05efe898e3529ca0a901b5035fa870246b32ab9c46d3ec2c68831f1f0ad643ee"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/result_publication.rs",
+      "bytes": 3109,
+      "sha256": "b18db2a4b4bb988a287e2df7095490af8e41b09c99397a0025920e2a4ebf951a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/retained_archive.rs",
+      "bytes": 15421,
+      "sha256": "07706328875e826702ce7d7ef6f5d3261117effc1fbea52e81402ede45031373"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/shape_validation.rs",
+      "bytes": 3171,
+      "sha256": "cd0939171a2d2c7bd6c2bf4fff17eccbd97bb849f73ec7fa9d9af6eea983138a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/solid.rs",
+      "bytes": 48240,
+      "sha256": "9257a927ac06f5cb085a7b576850845281f8f5420b942c77013667200d483ffa"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/solid/geometry.rs",
+      "bytes": 8586,
+      "sha256": "d844f367e5d28fc6c20da26d2e5cf7b11a7792b3af404acff6b72f96a0cbb1d8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/solid_result.rs",
+      "bytes": 14241,
+      "sha256": "8d5c1f96842e1178863a939e5f82b407ed378c8819b1d92c073d2e6b91a1d846"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/source_attributes.rs",
+      "bytes": 7707,
+      "sha256": "92def009e2ac9f91b8b3c78e605896370e4f530de1d5146c6ca382be4fffcd43"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/source_attributes_ffi.rs",
+      "bytes": 3370,
+      "sha256": "3e1902c456f1ccdf9e832c770992c8d9495bbb0be92cec393a8f3c947c0382ff"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/spline.rs",
+      "bytes": 14949,
+      "sha256": "381b663d5dd5f597e9f10a39eaf68fc7c6cbbebc335d1bfe753c8612604ed655"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/spline_ffi.rs",
+      "bytes": 5878,
+      "sha256": "7b8bfb95c7d67dc09c6eaebfba0b553dc47bbea69ee53d9d62714113e7a2f99e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/state.rs",
+      "bytes": 2052,
+      "sha256": "93a7e97de9de75a79423547021e05a54421355357ff5cab2e256e67900d2deb9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/support_snapshot.rs",
+      "bytes": 6150,
+      "sha256": "7e6ee4ab579eb7d03aa9e453172861195a32a80a19530eec3a5743028614304e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/support_snapshot_ffi.rs",
+      "bytes": 6469,
+      "sha256": "2d0a9d6fcf33cb69c9b4cc3d4a96b6c1f232fb5f5b34a166ed063fd9b0e1a6eb"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/surface.rs",
+      "bytes": 15790,
+      "sha256": "2aa9b4da0f8aa6b9a75c0af64adc92ff5603da7c626c9bc647973392fa99c193"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/surface_complex.rs",
+      "bytes": 3098,
+      "sha256": "f2e5981754cdaf659c3e8e4d9e9f37783fae5d8325425f24de6c0677c45808fa"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/surface_history.rs",
+      "bytes": 7904,
+      "sha256": "1f51a89cff3b65e0cdceeb3681aff7a775e53529a7f71666990f4a0c28a4e201"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/surface_refit.rs",
+      "bytes": 4222,
+      "sha256": "5ef5bf001234606da3cf8f164a5aec08efa5644ef62d9b53b34d43f3974e8b68"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/surface_result.rs",
+      "bytes": 4948,
+      "sha256": "522069d0ca29956cb9e3e1c44d15975594e86176817edd8919f5cf6c83760168"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/tolerances.rs",
+      "bytes": 6524,
+      "sha256": "f3fa758c1aa511d5de0701fa7dbbed351c4f7255d08b9565e566fc2d4399f9b1"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/toolbar.rs",
+      "bytes": 83,
+      "sha256": "7fd0e5ea584432afd6c9f4af572dc17ad36e01389a83ec4f86f8c9392404002a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/topology_snapshot.rs",
+      "bytes": 9109,
+      "sha256": "6997f747b01fd86072aeaa1dd6693180b444db9e29545c40f027f9f00c41f8cd"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/topology_snapshot_ffi.rs",
+      "bytes": 3775,
+      "sha256": "4cb19e6b9c89fbdeeb93705cf470d6efc5ede1e6fb116a95ee7ac17c589dd379"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/ui/mod.rs",
+      "bytes": 676,
+      "sha256": "98f43f466b333f6097d75926fa22338fe9860283c9df7bf3f1527a35f1adf4a5"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/units.rs",
+      "bytes": 16987,
+      "sha256": "60b488fff3969cf54a103a6988684a2b810c0dbac165187e9874cd852f5f2b89"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/viewport_title.rs",
+      "bytes": 2053,
+      "sha256": "2a36a2d38c452647bd4d618550db4218f9c3360c2c7dbe81401269a139298a6f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/workbench.rs",
+      "bytes": 82,
+      "sha256": "2cd6491f4c81d76c1056b24eb6a8241c56360ee9520c8d2fc8d41ae42a103c38"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/worker_budget.rs",
+      "bytes": 2391,
+      "sha256": "ca52b3994b700ccda0ae2dfe34107e6e80ea20a668739d40e8693325c71d20a2"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/workspace.rs",
+      "bytes": 2932,
+      "sha256": "6ab988b826ef4289db1a0832c7612c6b448f381126b8af0850b8ca1027b91bb6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/analytic_support.rs",
+      "bytes": 3829,
+      "sha256": "4194ece56c8e151e9f73b05c8efe09a99b40b7eec56cfd11a81aeed68df5bc8b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/array_occurrences.rs",
+      "bytes": 4067,
+      "sha256": "f22ac2db34ae923a831e32edcfca2f6bb06b6e883c6ab0faa582261c0280c783"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/bezier_support.rs",
+      "bytes": 4769,
+      "sha256": "ee03f8850eba7bffcc4e9bbbd3189ee05598df166c580cc6f308a7b192830ab0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/builder_history.rs",
+      "bytes": 3634,
+      "sha256": "1075b0d1a885e0078ffc196a83ec907ce1292789325f6a05a711a854d17c905d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/cage_borrowed_admission.rs",
+      "bytes": 4841,
+      "sha256": "110abcf4750afbc5de941add8e55b2a55dc94750c269f147b9083ede255a2c0d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/cage_commands.rs",
+      "bytes": 3757,
+      "sha256": "eab4a1d2b5067268d18f48a2a12f7e5c4abe50f83ee367865d0bee7a6259d6de"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/cage_deformation.rs",
+      "bytes": 28186,
+      "sha256": "1d1b19dae7a32c2e103e025624e60b83160086f712a6ccb6eddf669790791f3f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/circle_advanced.rs",
+      "bytes": 6838,
+      "sha256": "6964ba2476c8481a9e82953ec4192afd600ba42bd8a3d0c3dddb7ae48b0603c9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/circle_history.rs",
+      "bytes": 9277,
+      "sha256": "e36b63d396c1b0ef79957084cba9ccf1696e986dd9ee0f4edbc7f200743dd237"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/circle_history_capability.rs",
+      "bytes": 3362,
+      "sha256": "b813ce34d1385c07cb0dd3fdde128fc70898e6cf74f45e51b973c76203da7be9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/circle_input_context.rs",
+      "bytes": 10562,
+      "sha256": "213e47653b79be573991e74a2806c6d36f7a2b72840b0a484a190e5496a7098e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/circle_nonplanar.rs",
+      "bytes": 6105,
+      "sha256": "c297f42c71ac7bff5b0cd83f1bc6ccd07a5c6b1f39bcbbe4d6d8de5833bcb708"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/circle_session.rs",
+      "bytes": 5714,
+      "sha256": "395a6335c909d80e7f51de5f638bb78fe42c17d38d072a85a4e7453dc1365b00"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/circle_spatial.rs",
+      "bytes": 2859,
+      "sha256": "858ef227d43572a4ac9c211276fa7c6aa96b35a14f86cb6451533f6c2aea67c9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/command_completion.rs",
+      "bytes": 681,
+      "sha256": "d1a15d68600142dd3a9c65076459777ce24364e77b59d9e704cb340624862b66"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/command_repeat.rs",
+      "bytes": 1500,
+      "sha256": "528a87993db38ac8679436fd75ee27c174e41f22ab50416b0b7fa5b738b222f7"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/coordinate_input.rs",
+      "bytes": 18017,
+      "sha256": "f6f9d081e5dc694bc6fc55bca7443473fa86e3f7aba5b10971601209481f1bf5"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/coordinates.rs",
+      "bytes": 4082,
+      "sha256": "1a63723654e7f9bbeb3fec803010f01054a80b15cb2be6d13217193483782474"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_3dm.rs",
+      "bytes": 1262,
+      "sha256": "638854ad70765451326c9347f3af4feecd645e27361d7bd4a45bfbdb68942da1"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_3dm_archive.rs",
+      "bytes": 6815,
+      "sha256": "6e0496621c45d67c97ba615d848876f2a7384db20e32c184f00cf611cfc03a66"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_3dm_manifest.rs",
+      "bytes": 3787,
+      "sha256": "5557ed46a1ba991c0a202a7929e0d43e4891046d7beddb9c269d4f2d347771e9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_angle.rs",
+      "bytes": 1635,
+      "sha256": "1b5c53229eb5b5654928d91eb3acd11deb3939762cfff7cc50de279510573b3f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_coordinates.rs",
+      "bytes": 10049,
+      "sha256": "79d82a9613067b4b6a8f533acc2879ef907516714c52c8a25572ed389a4d2928"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_distance.rs",
+      "bytes": 1718,
+      "sha256": "4947f91c5cf267214140396614b62b56e2cbd3938be719339e668868ba06a18d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_keyboard.rs",
+      "bytes": 2505,
+      "sha256": "b4dc95aab0f379c4544c1ee9db5e12f97b15dcbeaad0752cc61914561367136f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_mouse.rs",
+      "bytes": 1476,
+      "sha256": "51d94e6b5de51218b57063ccc624af297f2e4196731f56dc9747306e889d481a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_notes.rs",
+      "bytes": 689,
+      "sha256": "1142fba9e843a9ab2bcdecae46b54c83cf022544fb649030f0b89c4a063d895e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_objects.rs",
+      "bytes": 3489,
+      "sha256": "617cf68c8f27e1f7ec1af024eb3fb51a365a7d78988a8b1e037c194b5810052d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_picture_frame.rs",
+      "bytes": 3751,
+      "sha256": "85b327f393145ee1622d0c8795b33b6e7680ca9ea6d1a804fc24c17a7f23de45"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_snaps.rs",
+      "bytes": 5665,
+      "sha256": "969b252df650bf869515170bb642c4d8de98abeefbb34b92c62550802349c5f3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_view_controls.rs",
+      "bytes": 2774,
+      "sha256": "e61710c3efbe8fef0a4137ebcd758b627fbcef81e23cb60570dd0552d03d3c52"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/core_views.rs",
+      "bytes": 1807,
+      "sha256": "4403cc240965c8b9e00e1ad708b2905a81dfbc17270e75dbc27c8eb6fd7636c3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/cplane_registry.rs",
+      "bytes": 14965,
+      "sha256": "8cbe5de96ad73e9e75461acfbb8e8005f90643e170cfe93998b18ffb998313db"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/curve_command_permissions.rs",
+      "bytes": 594,
+      "sha256": "4deaf3f32df0d0d4c7a985bd706cdf1a36343466d241f84b9f91cbd38c6a007d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/curve_conversion.rs",
+      "bytes": 6390,
+      "sha256": "48646ec56f8754352930debc0401492e7d92d50a7829221bc12630486366a590"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/curve_conversion_ffi.rs",
+      "bytes": 4771,
+      "sha256": "e4a6d70923215455ad2654781964f7d0c8c19e82ffa927f8a8344cebfed7a665"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/curve_parameter_dependency.rs",
+      "bytes": 6512,
+      "sha256": "08b3018c70dc948ee597efa306ed91860f661299128d46844573d7776c5c54e4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/curve_session.rs",
+      "bytes": 9548,
+      "sha256": "1eb36e5223b15a86fe4272018f751166999d74fce810ae0b8901d45d4e999c3d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/derived_support.rs",
+      "bytes": 7674,
+      "sha256": "9895aa682867c342572cac64666d7d92fd0099902c4e11e45593585b0e591024"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/discrete_snapshot.rs",
+      "bytes": 4509,
+      "sha256": "259ac2115167dc4d0ca00ea44213771ff33c37d1b1241749ff00f3354a839d75"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/edge_geometry.rs",
+      "bytes": 5087,
+      "sha256": "bd584bf352dc3aef3ce001548e990074ade46efeffd247f6e158b5d3f67cd688"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/edit_commands.rs",
+      "bytes": 1022,
+      "sha256": "b05d12b5c726c65a09da96741e1211fcc79d12ce01ade4baa250345f73a51642"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/edit_result.rs",
+      "bytes": 5237,
+      "sha256": "74dbc6573348f414d5780c195dd6a1bba413e24fdb4880501759b0ccf225c671"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/edit_session.rs",
+      "bytes": 2256,
+      "sha256": "aef9c6ed576ff5202e29b785ef5bf7c0504c806c56286b066cabb4706f92b00d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/ellipse_session.rs",
+      "bytes": 7580,
+      "sha256": "be3e995f5e06cc3133fc67e865c39315b71ee98683715ca35f8d2db13476fad4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/extended_coordinate_sessions.rs",
+      "bytes": 10567,
+      "sha256": "a11f19a14e91e7031a917b0fde2019b83df4504fd162dbd70dfc416d3566b1f4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/extended_coordinates.rs",
+      "bytes": 5799,
+      "sha256": "5dead31ba050ef7d8d40268890450a8a105c92ce3ca2a22555f60e895ce1c203"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/ffi.rs",
+      "bytes": 5780,
+      "sha256": "a5afdd1335b7be56f51233c066ce396f30c50a2f20b5220d4c134c94de9de95d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/fit_point_input.rs",
+      "bytes": 1131,
+      "sha256": "e11bb82ae47f96c98522e4f7c5b07a7e0c58d48c5a70787f8027b0b310076540"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/geometry_contract.rs",
+      "bytes": 20116,
+      "sha256": "03d83d3e22ea02257364320ac3f42867687a376e47cf6ca162a60b9b1d7711b6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/geometry_contract_ffi.rs",
+      "bytes": 6393,
+      "sha256": "92df03d48252dd0931703cd8ff94a7a41c81038cc7ac85bec1053b2fc45c2608"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/geometry_frame.rs",
+      "bytes": 1831,
+      "sha256": "49ac56fc2ba0644eef681844dc0d01120eb9412d8c5db113ed1a49b4b19d86d1"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/gumball_catalog.rs",
+      "bytes": 1653,
+      "sha256": "846a7a75f72f777a410b76e649ec901f9f78600e2f91cb79fdabaec02699013b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/gumball_ffi.rs",
+      "bytes": 6355,
+      "sha256": "374b09b1b72b6732575432355935aa7272fc97c69abe6bff2a26c4ebf41b1a16"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/gumball_session.rs",
+      "bytes": 16378,
+      "sha256": "31fda6a1f579210be858413596c78cdc7049e510053dfdc2afcc06c7365f5aed"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/hatch_loop_input.rs",
+      "bytes": 4751,
+      "sha256": "99361aed9d613b3270ef7c3ab02547bcddf86c9e0c97a0aeb46829a592f09f6c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/history_commands.rs",
+      "bytes": 1117,
+      "sha256": "0af8b43a10337bc724f02a8397bfbd7da343eaeec777377229e9140217e32c29"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/history_graph.rs",
+      "bytes": 4254,
+      "sha256": "50cbb2e9b8e03e3f5b7cb1d4ee46aad75a746e096a49cad2b82cc89bc8131e91"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/instance_graph.rs",
+      "bytes": 2892,
+      "sha256": "13bab4e65bd1d7781a7a3bf2c7c226f90f8273a8f351b6f5c81269005ada12b8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/layer_panel.rs",
+      "bytes": 2495,
+      "sha256": "1adda92805fc8d2d4b30c7bd77cd3e0ffe126b3d780c074baa32af649269dbfd"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/layers.rs",
+      "bytes": 4315,
+      "sha256": "e12548f21db0408598d938697d7058ccba296fc2a2835016490d4cc7f13fd024"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/menu_state.rs",
+      "bytes": 3082,
+      "sha256": "00e42d88cf288a054a6088de239953d46a2ca4310ae8927c17c7a98b05f878d4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/modeling_exchange_policy.rs",
+      "bytes": 1189,
+      "sha256": "3aa00da7ceb5bee9c0bf22d7cd858fb85e418c6fba8dc464fcbfe8be9f7ef0cc"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_builder_capability.rs",
+      "bytes": 2931,
+      "sha256": "2d6a28810ee97a0ae401a277327846671e34796365abb3f51873c96ff03f8b85"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_builder_capability_ffi.rs",
+      "bytes": 2772,
+      "sha256": "9b670f7acaf05b2d9b77230b7aad3b82ff92a1294b738c2cb18129301322ac42"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_cage_capability.rs",
+      "bytes": 6731,
+      "sha256": "ba488a7e3ac6061c8b9c329914bbdc8170df9198eded6b8a8573809431a03220"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_cage_capability_ffi.rs",
+      "bytes": 3318,
+      "sha256": "58466ab1ef8635bace93570a2a15082a5d5540fc71b75a3cc82cf8915afe9d1c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_curve_capability.rs",
+      "bytes": 8711,
+      "sha256": "63dbbb6eb0f964d80ba658c4138fed53d48f818b4119d1d3dc15e2beade3f75c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_curve_capability_ffi.rs",
+      "bytes": 1987,
+      "sha256": "fc2e41c95616025741238b83efb7a53db616ad3885c0c5f4a11fd1438b842bab"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_edit_capability.rs",
+      "bytes": 3328,
+      "sha256": "40f8d6232a553483e1baa494c007416ca9be846a2b7e84bd3f8b4562b733d71e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_input_tree.rs",
+      "bytes": 3665,
+      "sha256": "31dcfb81bbca78cd50dd9acc9a76e53d3e0aebf34d2a6c40257776c15df9c82d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_input_tree_ffi.rs",
+      "bytes": 2073,
+      "sha256": "9ef53e42f746bd3d6e2aaf930cf84ce673b15705d85efc0344de1a48725cdcba"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_rebuild_capability.rs",
+      "bytes": 4205,
+      "sha256": "3c77e39997410a6e5641dbc6c39d5747d184a4425dccc3065eaf7af473a960b5"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_rebuild_capability_ffi.rs",
+      "bytes": 924,
+      "sha256": "16d52e39cbea315f53c2aa80e3a3f00caacee496bf0f9b4c8907e6013297dcfa"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_solid_capability.rs",
+      "bytes": 7368,
+      "sha256": "42669530bcf62f4052cd0b951567858d9e6cc60901c05208b71fae624239257d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_solid_capability_ffi.rs",
+      "bytes": 1784,
+      "sha256": "15ca7eff443ad3f75c6d1424fbb7a743987aae3dde052b63e23643b89373868b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_surface_capability.rs",
+      "bytes": 6744,
+      "sha256": "a5b9093f97e64b2c92e43a61c4d97afd85c2c1b4f37ad485dbb2167945bb6bdd"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/native_surface_capability_ffi.rs",
+      "bytes": 3299,
+      "sha256": "764a61ad3289b8fd7717980929405350563c49f5b5b92bca6e70018e3f101470"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/numeric_units.rs",
+      "bytes": 7194,
+      "sha256": "d7fb3d7deade8faa936f47e23701eed98f6501ffe1591f407f7ccfecf4ad9ca0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/nurbs_basis.rs",
+      "bytes": 13716,
+      "sha256": "90ad8b2697df44be3dd888dc6d7396c63d432e66ca2436477a79335a804567da"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/nurbs_basis_ffi.rs",
+      "bytes": 3947,
+      "sha256": "d7f331f333401d076589874de781f0cec7f172d9f8c0ebc13819076feac375f0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/nurbs_basis_payload.rs",
+      "bytes": 1712,
+      "sha256": "90c4c9239dfa90ba68c385e5b3f4a6d475f8d4ef47603f08c80369893857a9a6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/polycurve_contract.rs",
+      "bytes": 8924,
+      "sha256": "95f5bc5f003225de16342ae0c996bb76ff9a1586f02b58e005b656b5c9117300"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/polycurve_contract_ffi.rs",
+      "bytes": 6611,
+      "sha256": "7cacb4b51547558bff675f068277b5a3cb7441ad037e9951e81eb1dfbfd19307"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/prepared_cad.rs",
+      "bytes": 2876,
+      "sha256": "bc25407c2b724111b7cd19eb20b692657738ec71afadc4826cce1986ffef8786"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/prepared_discrete_result.rs",
+      "bytes": 6153,
+      "sha256": "56de2f201238bdc76535e937fe35db78ab174faf4828227ff7afc1f1d2ac0819"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/prepared_result.rs",
+      "bytes": 12669,
+      "sha256": "e9e16b9c151025945f33d6c783996185d0f45be5104e09c3f799fb528bba4ff3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/rectangle_session.rs",
+      "bytes": 5444,
+      "sha256": "0b604b0af0a0f5d2e17c2f485641422ae549064eb9eaf5b0ffe626c42275477c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/reference_path.rs",
+      "bytes": 4961,
+      "sha256": "d7d8253c3dd7e4ad42607590a11483c44741d41cdc6f6c5bb02da60b85b75698"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/result_publication.rs",
+      "bytes": 2920,
+      "sha256": "8d360fead1970e77d5b9f7a38724aeb0b45719f8f98a6f7bb7d3b6f94bca3540"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/retained_archive.rs",
+      "bytes": 16383,
+      "sha256": "ab4fec59dbff610e5bd6dbaff601bcc566da6430cd860d9c2008cf41f4e8e72d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/shape_validation.rs",
+      "bytes": 3463,
+      "sha256": "ef09b50053ef3023ed8d01e8e27af373ee746d2b2adaadfea7dd353143fcaca4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/snap_lifecycle.rs",
+      "bytes": 2397,
+      "sha256": "4827cd96d85419da535f836cc7179bdd2bab3816011e9e55a9de1639ae7443d2"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/solid_commands.rs",
+      "bytes": 918,
+      "sha256": "2522f44d6fc1f070754de642c213bf432c113c46f1fed2bf886a56bba93e18eb"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/solid_construction_capture.rs",
+      "bytes": 5163,
+      "sha256": "37471d79980cd81d6249e7269db446ae2af306620026e9b98bcab6cdcca03938"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/solid_options.rs",
+      "bytes": 8281,
+      "sha256": "e26a9ceced688d998c959c90520d954ddc57656432b7858cadc6761ce31f07a2"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/solid_publication_frame.rs",
+      "bytes": 1694,
+      "sha256": "3e09a8096bc4012983ff2511f9460f9d6d6c353291857220a62a4f7f4f8e5e05"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/solid_publication_generation.rs",
+      "bytes": 1129,
+      "sha256": "6cbeaed5e040345f4de2b811887fd80345cb7dc8903122264d36f1c629596a52"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/solid_result.rs",
+      "bytes": 11454,
+      "sha256": "73fc813fd70d4e10b38033d18caab66a2ab84ff76960c2f55b4164c7a18b74d7"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/solid_session.rs",
+      "bytes": 4137,
+      "sha256": "975906f0d54f67bed8d557d64324a54edde2c4b0c2d68494f9a6e6db10dcc591"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/source_attributes.rs",
+      "bytes": 5458,
+      "sha256": "cba92971c2c9d9d48215cfb0c0b1037bd9a22b3d8066107f0fef332ad63924fa"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/spline_basis.rs",
+      "bytes": 2567,
+      "sha256": "8e8133d888aca96ddf1ddb6c67e1f8cf97711460275571f84c9cfc93249fad6c"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/spline_geometry.rs",
+      "bytes": 3933,
+      "sha256": "acc7693da13d7e37329f129a28a6c378c7d847922212b9540ceaab7929a1d6fc"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/support_snapshot.rs",
+      "bytes": 2916,
+      "sha256": "b4a9c37e6e78ccb12f4de6e69d08badb8a207bd10f1fbc44dcd1cd038476e28a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/support_snapshot_ffi.rs",
+      "bytes": 3970,
+      "sha256": "6e044be56c231841f4cf4ede0631c383ca6da84ce3f37d434c32a0c11e0d7188"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/surface_commands.rs",
+      "bytes": 1025,
+      "sha256": "55d39496fe8fce015efc70355f2943b7cdd45dd701ad60739ba491829825d81d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/surface_complex.rs",
+      "bytes": 4357,
+      "sha256": "9c2fa75b5aa61d897ce4bfccf0d8134fe44b85826828cebc2b1a7a5c4d98358f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/surface_history.rs",
+      "bytes": 7494,
+      "sha256": "972afbb4223babf0631fbd8c89ecedd0da1269c83325d562937fd6f93d51ed9d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/surface_refit.rs",
+      "bytes": 4134,
+      "sha256": "4eb5317d0906e99be6aba147c84d15922369ba778da514cff75c45bf77e43158"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/surface_result.rs",
+      "bytes": 4066,
+      "sha256": "52f9cccb680b543283fb0d46c9824193155687838ed7cc9c05da6efa8e006251"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/surface_session.rs",
+      "bytes": 7024,
+      "sha256": "85b454e82527121b8e11a33548287a4df476bdf2753369ed4d8491927d831392"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/tolerances.rs",
+      "bytes": 5413,
+      "sha256": "e7e21c8ab95896a6d7cbc12678fd6cbd5e990be6a1dc19166af8fc8cfb90e19b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/topology_snapshot.rs",
+      "bytes": 4566,
+      "sha256": "75ed43d73f254a3acc66ff382459a6f631c1b722d2842168a781c7bc0f1400ec"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/topology_snapshot_ffi.rs",
+      "bytes": 3381,
+      "sha256": "b32595a5a8b54fbab2c34483b36bba7948974bb8c37f7911452766db1b5b988b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/units.rs",
+      "bytes": 4107,
+      "sha256": "ec07cd67ea793f796e6ae798ff818f9bab438be26d6f2c2fa8c56966dc4aa918"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/viewport_title.rs",
+      "bytes": 896,
+      "sha256": "db8e0aea9d76c520149f724007ebc97bcf285cdea95d333dd0f20c64b81cfdc2"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/worker_budget.rs",
+      "bytes": 2991,
+      "sha256": "29f03e4d6ee806fd29b0d3afea3264a0062418848ca25db46ee4362a22e9eb13"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_solid_result_budget_smoke.FCMacro",
+      "bytes": 3849,
+      "sha256": "81ec01ff2d71590496c8cdeb6154acd08bd0c088f091367aac04c2d6f4354e4b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_solid_result_cad_fit_smoke.FCMacro",
+      "bytes": 3341,
+      "sha256": "fd7990a29a6db1bf403b97af3b840c50bfac0d8b09a7f701cd5eac0899e6fe96"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_solid_result_cold_smoke.FCMacro",
+      "bytes": 2944,
+      "sha256": "18a645bcd4db5ee3a25b63aa4e37eb435e7d9e031fad599bcb199af3544bebaa"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_solid_result_guards_smoke.FCMacro",
+      "bytes": 4043,
+      "sha256": "290e5ad438087f039748f6512864327a5240058d2f0287c34451210710f6445a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_solid_result_indexed_cold_smoke.FCMacro",
+      "bytes": 6077,
+      "sha256": "41f05d077450d61a1a837b8e9d6a2a124e9c3d6ebe34b71077158dddbad55f17"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_solid_result_smoke.FCMacro",
+      "bytes": 9148,
+      "sha256": "21c5851f12c19ffa9d896d51e6f072bd688880ff339082901ff84f643bd26709"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_solid_result_unique_budget_smoke.FCMacro",
+      "bytes": 3951,
+      "sha256": "bacba8eaac129ccf5b204f7c0d80943c1df6db59dbb8143b291458bdd4b77dc6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/solid_source_budget.rs",
+      "bytes": 1802,
+      "sha256": "2066860c03a464a0a78e43f1f61495265094050d4b2dda2dc674358afccfc436"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_evidence.rs",
+      "bytes": 7934,
+      "sha256": "4fc4b914c2e3b9befb6e470837c0e1269c2746b8a071d5fded42e0c4b9b2de0a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/curve_construction.rs",
+      "bytes": 5216,
+      "sha256": "7a0edad023eaf103c9e4bee2be651d87179206b6fb81af0b561fb2ebc81ba489"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_construction_smoke.FCMacro",
+      "bytes": 4144,
+      "sha256": "d13e1f70e5b9ddf626838ed9e9c8431e9afb7a3f38ada32c615271059eaaea09"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_construction_cold_smoke.FCMacro",
+      "bytes": 2211,
+      "sha256": "d5afbef7e71a2d04bf47af17ed128c7ea87fe7e00f82951c658f9cd747ebabb4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_construction_basis_smoke.FCMacro",
+      "bytes": 5058,
+      "sha256": "b2f9abc993c16ac9fb777eafc3cc56857f4f9bea50ce85e08b3a736dab97f9e4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_input_log.rs",
+      "bytes": 5899,
+      "sha256": "b40573e281aa1723e7cbdf1dc185f0894c99a2355ed276c1173f387117610a0e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_accepted_input_tests.rs",
+      "bytes": 5966,
+      "sha256": "4c98071a4663a7fd07d9f0e9109732b494c21745e406c26b03373fd04daf7b69"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_accepted_input_smoke.FCMacro",
+      "bytes": 4566,
+      "sha256": "acfd21a4690beb152986f62177f0786b9521ac0336f974b9361777032eb95776"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_accepted_input_cold_smoke.FCMacro",
+      "bytes": 2153,
+      "sha256": "d1f5e9b290f98c231d3b71e01835584c678354775cc034c1a76d8c03c8324ba4"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/circle_input_context_smoke.FCMacro",
+      "bytes": 5542,
+      "sha256": "0858f9ceeae318b03b4285432f67148255779236f64e33643609e2f1823cd71d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/command_console_support.py",
+      "bytes": 1417,
+      "sha256": "169d4f8bae5778f860232ffa0936807ed3ad1f6e84eda210154d7fa71f4d0e06"
+    }
+  ],
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+    "bytes": 16050688,
+    "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+  },
+  "selected_app": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "probe": {
+    "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+    "bytes": 50688,
+    "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+  },
+  "shared_sdk_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "rust": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/solid-result-fullrust46-20261011.log",
+      "bytes": 137623,
+      "sha256": "cfacaf9f252a3df40d942f3011d89e7675a023a7db2f3a1992cf44b1c5f5d661"
+    },
+    "exit_receipt": {
+      "path": "H:/FreeCAD-src/build/solid-result-fullrust46-20261011.log.exit.json",
+      "bytes": 24,
+      "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+    },
+    "passed": 844,
+    "failed": 0,
+    "ignored": 0,
+    "focused": {
+      "initial_red": {
+        "log": {
+          "path": "H:/FreeCAD-src/build/curve-accepted-red45b-20261011.log",
+          "bytes": 3756,
+          "sha256": "e4db729eb31a76140785b65d8fe701a75064731cb7be2d43f30af6360ecc4eee"
+        },
+        "exit": {
+          "path": "H:/FreeCAD-src/build/curve-accepted-red45b-20261011.log.exit.json",
+          "bytes": 26,
+          "sha256": "d0feb6c94c7210b18c93530dade2af6cccd099a8a57900eae5974d1a231e1826"
+        }
+      },
+      "initial_green": {
+        "log": {
+          "path": "H:/FreeCAD-src/build/curve-accepted-green45b-20261011.log",
+          "bytes": 1415,
+          "sha256": "aed52a7833144bdc90a856b2dbf6459479389461bc1f7beab7689907dbda5be8"
+        },
+        "exit": {
+          "path": "H:/FreeCAD-src/build/curve-accepted-green45b-20261011.log.exit.json",
+          "bytes": 24,
+          "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+        }
+      },
+      "finite_red": {
+        "log": {
+          "path": "H:/FreeCAD-src/build/curve-accepted-review-red46-20261011.log",
+          "bytes": 2168,
+          "sha256": "9abcda63ac7b9ca230de1e87a6ee71645263be7651882a237b079076f4a76e4f"
+        },
+        "exit": {
+          "path": "H:/FreeCAD-src/build/curve-accepted-review-red46-20261011.log.exit.json",
+          "bytes": 26,
+          "sha256": "d0feb6c94c7210b18c93530dade2af6cccd099a8a57900eae5974d1a231e1826"
+        }
+      },
+      "green": {
+        "log": {
+          "path": "H:/FreeCAD-src/build/curve-accepted-review-green46-20261011.log",
+          "bytes": 1535,
+          "sha256": "88f4fec2ba20f8f35268ff241e6e293da92b855c072d3076a2f2853a2e7a4131"
+        },
+        "exit": {
+          "path": "H:/FreeCAD-src/build/curve-accepted-review-green46-20261011.log.exit.json",
+          "bytes": 24,
+          "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+        }
+      }
+    }
+  },
+  "build_log": {
+    "path": "H:/FreeCAD-src/build/solid-result-build45-20261011.log",
+    "bytes": 14924,
+    "sha256": "e0ddec3e94cc7370f20dcd81817506c457cb68c3f9ef5753774893d009371715"
+  },
+  "build_exit": {
+    "path": "H:/FreeCAD-src/build/solid-result-build45-20261011.log.exit.json",
+    "bytes": 24,
+    "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+  },
+  "current": [
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011",
+      "fixture": "rhino_core_curve_accepted_input_smoke.FCMacro",
+      "checks": 24,
+      "passed": 24,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "421EE9C3E5FD42CF35A18572A2167E9BBDAA1EBAD6D1A119235494D12CC9E02C",
+        "pid": 57364,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16050688,
+        "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011/results.json",
+          "bytes": 113125,
+          "sha256": "295726949dc2bbfca5daa06edbd33613d32eaf22de1986c021d3246af2a3bf98"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011/shared-host-launch.json",
+          "bytes": 597,
+          "sha256": "506c6762f785539666ac761057aad16aaf997390cdc8df75ca46101f47126de8"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011/fixture.FCMacro",
+          "bytes": 4566,
+          "sha256": "acfd21a4690beb152986f62177f0786b9521ac0336f974b9361777032eb95776"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011/host-stderr.log",
+          "bytes": 7320,
+          "sha256": "c3649332df40822b65aeecec7278f3735bb9c85459367f38d6e456721569c52d"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011/user.cfg",
+          "bytes": 18181,
+          "sha256": "46515755b5213ee8609ed1faf4fc9c930e5258721777755413a97fd4c402d041"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2828,
+          "sha256": "2880e1ce7b50cba698cbcf5d84f62ee3ca678ec98c5e45f4b9f2d84c7d14860e"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted-cold45-offscreen-20261011",
+      "fixture": "rhino_core_curve_accepted_input_cold_smoke.FCMacro",
+      "checks": 13,
+      "passed": 13,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "421EE9C3E5FD42CF35A18572A2167E9BBDAA1EBAD6D1A119235494D12CC9E02C",
+        "pid": 39112,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted-cold45-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16050688,
+        "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted-cold45-offscreen-20261011/results.json",
+          "bytes": 95969,
+          "sha256": "447f558713438f5f43bcbbf20420bdd711bf1c56947239af8db55c9f9d8ea81f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted-cold45-offscreen-20261011/shared-host-launch.json",
+          "bytes": 602,
+          "sha256": "f07918bce9ca220090d6e5c4f2ca28395c0e7092085e8f3d20fb4545ecfdccf9"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted-cold45-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted-cold45-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted-cold45-offscreen-20261011/fixture.FCMacro",
+          "bytes": 2153,
+          "sha256": "d1f5e9b290f98c231d3b71e01835584c678354775cc034c1a76d8c03c8324ba4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted-cold45-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted-cold45-offscreen-20261011/host-stderr.log",
+          "bytes": 1860,
+          "sha256": "224a6bcb4df93d5a685b1f674bf732af5e44c6fdfbb1af51baf65c359d92336a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted-cold45-offscreen-20261011/user.cfg",
+          "bytes": 17451,
+          "sha256": "3c3943dbfd73f8d1ed75d4c702ed059d357a0744572337c8cfe65ae8fad8846a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted-cold45-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2833,
+          "sha256": "8c2ea27154b52bb45ec9f300a959d170f47514db501946fcecb996233af1497c"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011",
+      "fixture": "rhino_core_curve_construction_smoke.FCMacro",
+      "checks": 42,
+      "passed": 42,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "421EE9C3E5FD42CF35A18572A2167E9BBDAA1EBAD6D1A119235494D12CC9E02C",
+        "pid": 31244,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16050688,
+        "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/results.json",
+          "bytes": 111349,
+          "sha256": "e65a90b68beb7f2fece9d91255c99e0134e4ba16fc9b7044096dc20e8fbdd88d"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/shared-host-launch.json",
+          "bytes": 594,
+          "sha256": "a9cccfb0ff5568dd8f160405d416b05f08ff4eeca5375bc477dd3241a90ea40a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/fixture.FCMacro",
+          "bytes": 4144,
+          "sha256": "d13e1f70e5b9ddf626838ed9e9c8431e9afb7a3f38ada32c615271059eaaea09"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/host-stderr.log",
+          "bytes": 8501,
+          "sha256": "2226db7f76e42e86a3ae8559081c65e1c1d018e0f75ef1d04d2bdc80a8421951"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/user.cfg",
+          "bytes": 18053,
+          "sha256": "49c7a8ac30b06464448d2d70ccee14b8447eafef6c03eed508ff75bbd47f1f16"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2825,
+          "sha256": "9c7e87e2db364170bc7924a19df42c5b3d6974f7a4e538105163bd0dbb464af6"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-input-cold45-offscreen-20261011",
+      "fixture": "rhino_core_curve_construction_cold_smoke.FCMacro",
+      "checks": 19,
+      "passed": 19,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "421EE9C3E5FD42CF35A18572A2167E9BBDAA1EBAD6D1A119235494D12CC9E02C",
+        "pid": 25456,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-input-cold45-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16050688,
+        "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-cold45-offscreen-20261011/results.json",
+          "bytes": 90010,
+          "sha256": "602b80b654cab24303ca85cdb40b1cbd8f80156bb7baa810773a2beba48dd096"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-cold45-offscreen-20261011/shared-host-launch.json",
+          "bytes": 593,
+          "sha256": "73f86508696585f3550316c52097e2eaa1cddfbff01cf0e1cc53e1a4f31aace5"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-cold45-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-cold45-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-cold45-offscreen-20261011/fixture.FCMacro",
+          "bytes": 2211,
+          "sha256": "d5afbef7e71a2d04bf47af17ed128c7ea87fe7e00f82951c658f9cd747ebabb4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-cold45-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-cold45-offscreen-20261011/host-stderr.log",
+          "bytes": 2366,
+          "sha256": "7aea8af5fb6e499f14bcc0e472ae04744782889e8040edd7782d8db32ab1653c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-cold45-offscreen-20261011/user.cfg",
+          "bytes": 17433,
+          "sha256": "a2f27baed9e98c5fe44ce99f73bf8add1e668384c0eb0f7cdc30e96fc5c4a47c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-cold45-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2824,
+          "sha256": "d16d369dee58aede5103b952828e2182ffb3bcf37094d9b85086fc0ac36d2edd"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011",
+      "fixture": "rhino_core_curve_construction_basis_smoke.FCMacro",
+      "checks": 26,
+      "passed": 26,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "421EE9C3E5FD42CF35A18572A2167E9BBDAA1EBAD6D1A119235494D12CC9E02C",
+        "pid": 11528,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16050688,
+        "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/results.json",
+          "bytes": 87695,
+          "sha256": "bf2b44c74f069f6e82296339f99fdf361eb3708220578f4b60be350d11c97873"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/shared-host-launch.json",
+          "bytes": 594,
+          "sha256": "6d2ddfdf6b673bffc00bbfa79b76e71e58948e813026934d95b3d2080f6a7229"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5058,
+          "sha256": "b2f9abc993c16ac9fb777eafc3cc56857f4f9bea50ce85e08b3a736dab97f9e4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/host-stderr.log",
+          "bytes": 7639,
+          "sha256": "1dff5e726b0d6a68b53eae4b917e337a419c7160b92e969f6db7d6708e2ff115"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/user.cfg",
+          "bytes": 18052,
+          "sha256": "4d39c4691f54f4bbdaca6ed943e935c3c1e7943cd2ab29bb66ce2ee0b0cf0692"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2825,
+          "sha256": "6dd046ecd3cbe3d76b8ffee01385044aefeb1f1ecb65417be6dbb8c6ee2f55d3"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-input-basis-cold45-offscreen-20261011",
+      "fixture": "rhino_core_curve_construction_basis_smoke.FCMacro",
+      "checks": 27,
+      "passed": 27,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "421EE9C3E5FD42CF35A18572A2167E9BBDAA1EBAD6D1A119235494D12CC9E02C",
+        "pid": 42088,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-input-basis-cold45-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16050688,
+        "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis-cold45-offscreen-20261011/results.json",
+          "bytes": 87792,
+          "sha256": "3a9766318bd47cff4751a7797afdfe1d715134f1abab643dd3aa634776bb59af"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis-cold45-offscreen-20261011/shared-host-launch.json",
+          "bytes": 599,
+          "sha256": "cd08642519b4efb64b20260776f50ae96464e21b87fb820fcf199b62db891687"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis-cold45-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis-cold45-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis-cold45-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5058,
+          "sha256": "b2f9abc993c16ac9fb777eafc3cc56857f4f9bea50ce85e08b3a736dab97f9e4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis-cold45-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis-cold45-offscreen-20261011/host-stderr.log",
+          "bytes": 2113,
+          "sha256": "d7cae7431da48bb68a5923011db54c7b7f6bca393e00dc9c76d0822a072b5b37"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis-cold45-offscreen-20261011/user.cfg",
+          "bytes": 17445,
+          "sha256": "1d355735d9c29c2e8ab1ac10dd987bff38e4b24156d62ec1c8825ea3376303f1"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis-cold45-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2830,
+          "sha256": "014b944873a0cc651f61a113b8efb51819f7540f073119de876a70b67f522b3a"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-input-binding45-offscreen-20261011",
+      "fixture": "rhino_core_native_curve_binding_smoke.FCMacro",
+      "checks": 59,
+      "passed": 59,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "421EE9C3E5FD42CF35A18572A2167E9BBDAA1EBAD6D1A119235494D12CC9E02C",
+        "pid": 35512,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-input-binding45-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16050688,
+        "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-binding45-offscreen-20261011/results.json",
+          "bytes": 5714,
+          "sha256": "c2873aa880eef10db15810594e3f0bdd69c00289c0d229a9183a4598a0e1aab1"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-binding45-offscreen-20261011/shared-host-launch.json",
+          "bytes": 596,
+          "sha256": "cfa2bd72e65cb9bd00fde05c0211ce4a60862e8e144600348a912a0029b466dd"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-binding45-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-binding45-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-binding45-offscreen-20261011/fixture.FCMacro",
+          "bytes": 3466,
+          "sha256": "c2983f685e97079ce2111945714a12dc0439fa84e73c28f1aeb36c316296a46e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-binding45-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-binding45-offscreen-20261011/host-stderr.log",
+          "bytes": 1671,
+          "sha256": "14fe60afc7e8658e10d00a01f16c01ca3b4d3843d23732af7af18830dd30d224"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-binding45-offscreen-20261011/user.cfg",
+          "bytes": 17820,
+          "sha256": "1d31b1d122da37b3b82402d6ff5bbb9fa90eb55e9afb26ebaff799a9f7c0969c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-binding45-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2827,
+          "sha256": "99f3843e370c868be96cec86e4f8c1881715e60d07ac3798692bb59e84c06cbf"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-input-policy45-offscreen-20261011",
+      "fixture": "rhino_core_native_curve_policy_smoke.FCMacro",
+      "checks": 36,
+      "passed": 36,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "421EE9C3E5FD42CF35A18572A2167E9BBDAA1EBAD6D1A119235494D12CC9E02C",
+        "pid": 63500,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-input-policy45-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16050688,
+        "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-policy45-offscreen-20261011/results.json",
+          "bytes": 15728,
+          "sha256": "6b24f6abf1b8ca95f2f053320f4f3f2f8bae030af7872cb78fde5b512f9b538e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-policy45-offscreen-20261011/shared-host-launch.json",
+          "bytes": 595,
+          "sha256": "6bb09eda67dffd9c448f05916e11037e12c3309f9be250a6aedb954812d88aee"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-policy45-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-policy45-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-policy45-offscreen-20261011/fixture.FCMacro",
+          "bytes": 3809,
+          "sha256": "5e8cd557f9dbc30210b5de0e54a98dba714603e613db2c29a1d13c6419f50835"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-policy45-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-policy45-offscreen-20261011/host-stderr.log",
+          "bytes": 9087,
+          "sha256": "7a43291f567bff430eb99544f5eac40f2bfaf12a2c193d137516418a30b0c428"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-policy45-offscreen-20261011/user.cfg",
+          "bytes": 17863,
+          "sha256": "2f04a9c999e1e76cb1a661c8f44dfc70b0aff6a05afff285576b802004ce906f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-policy45-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2826,
+          "sha256": "aea0383c5e176e177dc490d07c82fb81ef1100fbb9d97dfd0d0ea9649f8c8580"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-history45-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_policy_smoke.FCMacro",
+      "checks": 33,
+      "passed": 33,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "421EE9C3E5FD42CF35A18572A2167E9BBDAA1EBAD6D1A119235494D12CC9E02C",
+        "pid": 44904,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-history45-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16050688,
+        "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-history45-offscreen-20261011/results.json",
+          "bytes": 6091,
+          "sha256": "dbb6967223b72d0a0a724f42c48edca7a761f2c653e32fd0150a61812c0672b3"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-history45-offscreen-20261011/shared-host-launch.json",
+          "bytes": 603,
+          "sha256": "5e3d1d6eb45382692367ad350177eb1b2c3270ec90c35b95a7d037a1c583e5b9"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-history45-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-history45-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-history45-offscreen-20261011/fixture.FCMacro",
+          "bytes": 8139,
+          "sha256": "57e6d1ac283836d0c7cdd6b4ec2b41a4096fd0ca586775fdaaf0c9ea14593da5"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-history45-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-history45-offscreen-20261011/host-stderr.log",
+          "bytes": 12090,
+          "sha256": "4a55becb642b9426772a4458f022359171286d90b164ea1679b7b6e82a9f8ca0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-history45-offscreen-20261011/user.cfg",
+          "bytes": 18115,
+          "sha256": "4cb6a37be08c60c52319df4c81274c4ca0069032706971b27d32242bde8680fb"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-history45-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2834,
+          "sha256": "4ff09a73a92e237104ddb9e4666094bdcba4d6acca5ec6d642c6399c27fcc494"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context-retry45-offscreen-20261011",
+      "fixture": "circle_input_context_smoke.FCMacro",
+      "checks": 16,
+      "passed": 16,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "421EE9C3E5FD42CF35A18572A2167E9BBDAA1EBAD6D1A119235494D12CC9E02C",
+        "pid": 74416,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context-retry45-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16050688,
+        "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context-retry45-offscreen-20261011/results.json",
+          "bytes": 2201,
+          "sha256": "6070cd836952beed6425b28913e9016d37df1323c598cdc53b37724bbbcde147"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context-retry45-offscreen-20261011/shared-host-launch.json",
+          "bytes": 609,
+          "sha256": "b838ee0efe6a3b50cf4589942ba5c99e3892f9bb810c6427562fd0bd7f9014ea"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context-retry45-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context-retry45-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context-retry45-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5542,
+          "sha256": "0858f9ceeae318b03b4285432f67148255779236f64e33643609e2f1823cd71d"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context-retry45-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context-retry45-offscreen-20261011/host-stderr.log",
+          "bytes": 13821,
+          "sha256": "eb083848f6c227499e2e130fb8bacdbd93e99d0f56c2ccc22b48557383566cd0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context-retry45-offscreen-20261011/user.cfg",
+          "bytes": 18082,
+          "sha256": "6d83f22b0be208b2d8fec0f829b9c1d6e461f12da5c70cdb6d69d00b5143a459"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context-retry45-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2840,
+          "sha256": "183aa2619386ada3f366689b562bc8d893a31d6468c0faf729569548df438d0a"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-input-solid45-offscreen-20261011",
+      "fixture": "rhino_core_solid_result_smoke.FCMacro",
+      "checks": 61,
+      "passed": 61,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "421EE9C3E5FD42CF35A18572A2167E9BBDAA1EBAD6D1A119235494D12CC9E02C",
+        "pid": 46660,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-input-solid45-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16050688,
+        "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-solid45-offscreen-20261011/results.json",
+          "bytes": 407710,
+          "sha256": "f3bcdf145a4ee1116f9faa0a720137c1a177a7d5878067a1a33ca76a37dcb3f1"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-solid45-offscreen-20261011/shared-host-launch.json",
+          "bytes": 594,
+          "sha256": "37ffb36fd3c3999afb6d5b14aa282910d7b31e8383e8a0ca025d89671667fd6b"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-solid45-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-solid45-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-solid45-offscreen-20261011/fixture.FCMacro",
+          "bytes": 9148,
+          "sha256": "21c5851f12c19ffa9d896d51e6f072bd688880ff339082901ff84f643bd26709"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-solid45-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-solid45-offscreen-20261011/host-stderr.log",
+          "bytes": 9747,
+          "sha256": "2dad30b300e48aa4f1315272817c8e0c04845fb4a6aae8ffea6c2052f0130aab"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-solid45-offscreen-20261011/user.cfg",
+          "bytes": 18175,
+          "sha256": "64d886be73fd0b2db08067ae59f51b0d500af93a8e26380001a08d9bd007f1b0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-solid45-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2825,
+          "sha256": "da59858f3d706d7f7b0805292a2fce5f5c4f1388ae90b4517dcf99b50aad41b5"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-input-edit45-offscreen-20261011",
+      "fixture": "rhino_core_edit_result_smoke.FCMacro",
+      "checks": 110,
+      "passed": 110,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "421EE9C3E5FD42CF35A18572A2167E9BBDAA1EBAD6D1A119235494D12CC9E02C",
+        "pid": 36276,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-accepted-runtime45-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-input-edit45-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-accepted-runtime45-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16050688,
+        "sha256": "421ee9c3e5fd42cf35a18572a2167e9bbdaa1ebad6d1a119235494d12cc9e02c"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-edit45-offscreen-20261011/results.json",
+          "bytes": 11535,
+          "sha256": "6ca2801ca64e47ab7599e4b330882f91f044ba0c05064132845349c9cd1b7b6a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-edit45-offscreen-20261011/shared-host-launch.json",
+          "bytes": 593,
+          "sha256": "b61e5697057e7d77b45cdc578fc500fef5c0604b61afd35629020d9dd6467d87"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-edit45-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-edit45-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-edit45-offscreen-20261011/fixture.FCMacro",
+          "bytes": 7510,
+          "sha256": "7dff8b4e8a9a60fca7e462a30b875344ebe47fcdd2c686c924e7daf62f7c3d69"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-edit45-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-edit45-offscreen-20261011/host-stderr.log",
+          "bytes": 13463,
+          "sha256": "5b01b89988b9047b9251a25a174544b1471b045516e6a5349eb399f9b7616462"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-edit45-offscreen-20261011/user.cfg",
+          "bytes": 18174,
+          "sha256": "77f06845749cec2b4ed61642a116abbcdf74e81562fac935a4ed694c7a93c797"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-input-edit45-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2824,
+          "sha256": "1118b5e6fb0e4e4e8674333ebea7e62408b97976111b8902a156a66f7a27806a"
+        }
+      ]
+    }
+  ],
+  "current_checks": 466,
+  "current_actual_exits_zero": 12,
+  "cold_hosts": 3,
+  "archives": [
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011/RectangleDirection.FCStd",
+      "bytes": 6080,
+      "sha256": "9e2ac067bd46b8027b90d0b00c7c73923d5dd36cb64150859a1d29652856ca0d"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011/CircleQuantity.FCStd",
+      "bytes": 7348,
+      "sha256": "f29cf6d136e69aee00377e8e358d6fda5b534d38244873d0e6e7c2ef61313e0f"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011/EllipseQuantity.FCStd",
+      "bytes": 7519,
+      "sha256": "ca12d2986666ed11025a9251c07da059d244c6977a80c9c571721460f61d4a29"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-accepted45-offscreen-20261011/FitUndo.FCStd",
+      "bytes": 7813,
+      "sha256": "6ead836e50b6c700e485c4505c86463b4c844cf5394e0f97880d85493169a5f8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/Line.FCStd",
+      "bytes": 5915,
+      "sha256": "5931fcf5e077be20b9c4cf9de53ef8b2a80aa3f81ea6283c563c4a7afb841ceb"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/Polyline.FCStd",
+      "bytes": 6028,
+      "sha256": "d5df0b680a9be96897113809a8234bc942ff1161dcd08e3404b0812f859e5927"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/Rectangle.FCStd",
+      "bytes": 6020,
+      "sha256": "229d07c5e5f213b99238e28749632349197e55ceb373510d5c50e4da33c3e5f4"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/Circle.FCStd",
+      "bytes": 7384,
+      "sha256": "61233f5111309d0c1dcd2b09035d086daba639066670d7a87cdd4f1e439c023f"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/Ellipse.FCStd",
+      "bytes": 7622,
+      "sha256": "a53e6313a42d7ded26afc7a8d9c917bf79be4807df6acdd91b328c919eca5095"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-green45-offscreen-20261011/InterpCrv.FCStd",
+      "bytes": 6086,
+      "sha256": "708cb94a59fbdbad88881f9ff5c03e1d064101d6c69b66b01f3ff8a639f5de6d"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/PeriodicInterp.FCStd",
+      "bytes": 6112,
+      "sha256": "1c1054158ac35efe05ab2ac800700ceab65421b61a74158b9aabe09b27113d2c"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/DeformCircle.FCStd",
+      "bytes": 7896,
+      "sha256": "729e007ce33a459060d8a9e59316a9019b162f50ee1a7fbb197c502daa05c552"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/DeformEllipse.FCStd",
+      "bytes": 8087,
+      "sha256": "a35df4bf6d374e08fb6b1714344f88fe49f508d726332d7f2b5f820c49f55e86"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/BoundaryLine.FCStd",
+      "bytes": 5915,
+      "sha256": "74051128c38cda1022621f3c323eef480e5d79e703a462fa68b9398ade1b7e02"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-input-basis45-offscreen-20261011/BoundaryBothSides.FCStd",
+      "bytes": 5939,
+      "sha256": "b57d1c525e54f6dee5baa99d23cfb929473971ba78ad757562c7fee4d8c71e1e"
+    }
+  ],
+  "initial_native_red": {
+    "artifact": "H:/FreeCAD-src/build/solid-regression-curve-accepted-red44-offscreen-20261011",
+    "fixture": "rhino_core_curve_accepted_input_smoke.FCMacro",
+    "checks": 24,
+    "passed": 16,
+    "failures": [
+      "RectangleDirection owns original accepted values distinct from normalized points",
+      "RectangleDirection retained events bind units frame and previous context",
+      "CircleQuantity owns original accepted values distinct from normalized points",
+      "CircleQuantity retained events bind units frame and previous context",
+      "EllipseQuantity owns original accepted values distinct from normalized points",
+      "EllipseQuantity retained events bind units frame and previous context",
+      "FitUndo owns original accepted values distinct from normalized points",
+      "FitUndo retained events bind units frame and previous context"
+    ],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\curve-construction-runtime44-20261011\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "18739FE83B96EA034DC30292F179009A6DF96333263285AB32B35AD642B7C3FD",
+      "pid": 36736,
+      "module_root": "H:\\FreeCAD-src\\build\\curve-construction-runtime44-20261011\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/solid-regression-curve-accepted-red44-offscreen-20261011",
+      "exit_code": 0
+    },
+    "plugin": {
+      "path": "H:/FreeCAD-src/build/curve-construction-runtime44-20261011/bin/OpenMatrix9Gui.pyd",
+      "bytes": 16001024,
+      "sha256": "18739fe83b96ea034dc30292f179009a6df96333263285ab32b35ad642b7c3fd"
+    },
+    "probe": null,
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-accepted-red44-offscreen-20261011/results.json",
+        "bytes": 91157,
+        "sha256": "8ccab809927b0370ed5bbc370885eaa0c3d71dfc61bd80ca467a25cf6f92434e"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-accepted-red44-offscreen-20261011/shared-host-launch.json",
+        "bytes": 603,
+        "sha256": "da6904285f429e34348568fc750f76adfa1c39355bbcfca230b6fe2e5c946e8f"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-accepted-red44-offscreen-20261011/loaded-native-app.json",
+        "bytes": 227,
+        "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-accepted-red44-offscreen-20261011/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-accepted-red44-offscreen-20261011/fixture.FCMacro",
+        "bytes": 4566,
+        "sha256": "acfd21a4690beb152986f62177f0786b9521ac0336f974b9361777032eb95776"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-accepted-red44-offscreen-20261011/host-stdout.log",
+        "bytes": 353,
+        "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-accepted-red44-offscreen-20261011/host-stderr.log",
+        "bytes": 7322,
+        "sha256": "495e00056324fdedc578c8839f78f7fc695d68ae106419c1b012cc3db9c11c20"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-accepted-red44-offscreen-20261011/user.cfg",
+        "bytes": 18177,
+        "sha256": "ef91a09ea4df8ad5d7de73c481a823b52ac9a179c97c6b2dda8eb24ce21ec0ce"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-accepted-red44-offscreen-20261011/select-plugin.FCMacro",
+        "bytes": 2826,
+        "sha256": "e2da2bd2615701f6ff4588c3a450828674d77f6f206b8b32e4352929ec4722a9"
+      }
+    ]
+  },
+  "historical_checkpoint": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-11-rhino-core-curve-construction.json",
+    "bytes": 139823,
+    "sha256": "1b622eb52a69b95a1c3eaebe278555dc0c2ca6f77f4fbdb2e73feee4abdca94a"
+  },
+  "remaining": [
+    "Every original RCORE-01 requirement remains required: GeometryRef/Snapshot/Result, rational/periodic basis, UV trims/pcurves/seam occurrences, complete attributes, every enabled consumer, independent family read/edit/retain/export, adapters1–7, C01–C12 and T01–T11.",
+    "Common produced GeometryResult now enforces bytes16MiB/nodes1million/depth64 before serialization/caller-buffer copy. Source-envelope admission is still necessary only: complete request/output overhead reservation and aggregate allocation/traversal/worker/cancellation bounds remain required.",
+    "Global conversion/deviation bounds and complete parameter/topology maps remain unproven. Valid closed native Solid is not a certificate of these contracts.",
+    "Curve retains owned pre-normalization values at Rust entrypoints: exact text/units/frame/previous/pending options, original mouse points, native reference values and whole FitPoints batches with Circle branch Undo. Full native source identity/revision/attributes/snapshots, GUI-native parameter text such as OnCurve fractions, common ConstructCurve GeometryResult, checked publication, Ellipse foci, Circle History and Rebuild result pairing remain required.",
+    "Offscreen evidence covers native kernel, command, Qt keys, callbacks and scoped FCStd persistence only. Actual mouse, OpenGL rendering and viewport acceptance remain required; historical graphics cohorts are not current reruns.",
+    "The two cold hosts verify five named recipes and one indexed54-reference result, with OM9 imported by bootstrap. Unsignalled native root-frame mutations, actual Solid preview leases and complete original lifetime/cache invariants still require evidence.",
+    "Production deployment/ABI acceptance remains pending. An isolated App19/camera-guard GUI host reuses the single shared SDK; no root FreeCAD build or full runtime copy was made."
+  ],
+  "independent_review": "Fresh read-only review found one P2: encode_owned does not validate finite numbers, while native selection ignores some supplied point/normal fields. Added rejection-before-mutation test: RED5/6 to GREEN6/6. Fixed in Rust before solver/state/log mutation; invalid fields no longer produce non-JSON metadata. No additional actionable checkpoint/sharing/destruction/mouse/context finding. No second review used as a substitute for tests.",
+  "environment": "Offscreen QPA and isolated App19/GUI host; actual mouse/render, production deployment and complete chapter remain open.",
+  "native_exception": "Production implementation in safe Rust only; existing C++/FreeCAD property, solver and transaction adapters reused. Python/FCMacro are evidence recording and mandatory native GUI/API fixtures, not new business logic.",
+  "excluded_harness_startup": {
+    "terminal": {
+      "pid": 17172,
+      "reason": "Confirmed missing helper import; exact owned fixture process excluded before serial retry",
+      "has_exited": true,
+      "accepted": false,
+      "exit_code": -1
+    },
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context45-offscreen-20261011/shared-host-launch.json",
+        "bytes": 604,
+        "sha256": "f317aa851e241eff7e60e769baf52e3fa04f0ecd024bd4b558eb136253eeb0ad"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context45-offscreen-20261011/loaded-native-app.json",
+        "bytes": 227,
+        "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context45-offscreen-20261011/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context45-offscreen-20261011/host-stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context45-offscreen-20261011/host-stderr.log",
+        "bytes": 1033,
+        "sha256": "fc004f459b3dbd373aa71ec4375107a501bcfb60468af8d9c770edd3a218b8e7"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context45-offscreen-20261011/fixture.FCMacro",
+        "bytes": 5542,
+        "sha256": "0858f9ceeae318b03b4285432f67148255779236f64e33643609e2f1823cd71d"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context45-offscreen-20261011/excluded-terminal.json",
+        "bytes": 193,
+        "sha256": "992d02aa52a0389dfcfb7a6be4c357df5437c9c31045140881f835ea3adf024e"
+      }
+    ],
+    "reason": "Missing mandatory command_console_support helper in isolated macro path. Exact test process terminated after confirmed import failure; no checks ran. Retry copies source-identical helper, fixture and production source unchanged."
+  },
+  "fixture_helper": {
+    "path": "H:/FreeCAD-src/build/solid-regression-curve-input-circle-context-retry45-offscreen-20261011/command_console_support.py",
+    "bytes": 1417,
+    "sha256": "169d4f8bae5778f860232ffa0936807ed3ad1f6e84eda210154d7fa71f4d0e06"
+  },
+  "source_drift": [
+    {
+      "before": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballController.h",
+        "bytes": 1842,
+        "sha256": "9a97b271d33fded50422e144bde8f3a09e4a4d7cbd931213ddc3f33ba44f4a13"
+      },
+      "observed": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballController.h",
+        "bytes": 2177,
+        "sha256": "1ae6eea01c0e56ae1d329626c01eecdcf45d430959c6f0ba1f3f7aa1df23cc7c"
+      }
+    },
+    {
+      "before": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballGeometry.cpp",
+        "bytes": 37271,
+        "sha256": "16fc5656a3717bd17683e690f91e30819dd31d3634c1828add7c684dd92542e3"
+      },
+      "observed": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballGeometry.cpp",
+        "bytes": 38687,
+        "sha256": "19d8e2cff875b48ebeed96f5a14b66128cc9292abf3d9eabe47b5526a9620e09"
+      }
+    },
+    {
+      "before": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballGeometry.h",
+        "bytes": 1464,
+        "sha256": "0702338558f06a0afd92b1432a7b9d15c68d2ebd30dfa054f67406f6cf665352"
+      },
+      "observed": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballGeometry.h",
+        "bytes": 1561,
+        "sha256": "34e61b548c56cfcdcf1aa9e6d7c1b77316c8b29e554b4476f73bf02480789f8b"
+      }
+    },
+    {
+      "before": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballOverlay.cpp",
+        "bytes": 14152,
+        "sha256": "ad07b4e24625f939bb99d2c2ce14b9cc653684a5fb2d78eb0babc0d78e34f6ed"
+      },
+      "observed": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballOverlay.cpp",
+        "bytes": 17408,
+        "sha256": "c60ee6ced3b1987881ad0b24bdb4d85f56c3dc28e77db8152ec4eed70e8ca58a"
+      }
+    },
+    {
+      "before": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballOverlay.h",
+        "bytes": 1391,
+        "sha256": "03c9c1026293f3c85d4baed500aa5f1086b8533ad6f136a459f158f31926905b"
+      },
+      "observed": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballOverlay.h",
+        "bytes": 1673,
+        "sha256": "b247df2ff83e6bf7d7bc5454c86acc137cd07bce514bba4bbb266facd8a899ca"
+      }
+    },
+    {
+      "before": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballRust.h",
+        "bytes": 1942,
+        "sha256": "2eecba5830c44880f9abd5aad76ba24cd943f3d20a039c962b2e69a913956032"
+      },
+      "observed": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/GumballRust.h",
+        "bytes": 2817,
+        "sha256": "89ad36bfc3fb2f464b3d46ae3b6c5919815684b1379b1e64ee24cf5b6e32fa3e"
+      }
+    },
+    {
+      "before": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/gumball.rs",
+        "bytes": 34417,
+        "sha256": "d83438caebeaab58d7b528812f606a4b00efb5bc9bc948514eb0b6482d2dc5ef"
+      },
+      "observed": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/gumball.rs",
+        "bytes": 36907,
+        "sha256": "dac6030dd0b312d297fd39d3076a8bb763d35215a08ae354546f7546da90865e"
+      }
+    },
+    {
+      "before": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/gumball_ffi.rs",
+        "bytes": 14402,
+        "sha256": "72c91cc05e7b534100aed935e547be343f27da4b8b3381df0e2acdb2f05a6acf"
+      },
+      "observed": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/gumball_ffi.rs",
+        "bytes": 16261,
+        "sha256": "758e82079f4533e651df37e4534622dd390d8cfe084b0e0e1cd9bdabab0b5076"
+      }
+    },
+    {
+      "before": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/lib.rs",
+        "bytes": 2351,
+        "sha256": "2c39d0b00686ed05536f080c0b8a06050522a1d1e906f681aeca1c2f32c8440f"
+      },
+      "observed": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/lib.rs",
+        "bytes": 2373,
+        "sha256": "47eb4af951337a5d3e697351495c2778ddbaac112238a686e3c1ea1d9531f085"
+      }
+    }
+  ],
+  "source_match_scope": "All non-Gumball/non-lib.rs frozen inputs match. Gumball and Rust module-root files changed in the parallel gumball chat; complete current checkout/build correspondence is unproven. The 448 rows are a pre-build inventory, not an exact compiled-input certificate.",
+  "source_inventory": {
+    "path": "H:/FreeCAD-src/build/curve-accepted-source46-20261011.json",
+    "bytes": 83806,
+    "sha256": "8569fc8a8c5155150402f06051ab6f9e38c9b56a72d537da23f2c976acc2c86a"
+  }
+}

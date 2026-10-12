@@ -6,7 +6,7 @@ use crate::gumball::GumballError;
 pub struct OwnerScale {pub placement:[f64;16],pub factors:[f64;3]}
 fn dot(a:[f64;3],b:[f64;3])->f64 {a.iter().zip(b).map(|(a,b)|a*b).sum()}
 pub fn owner_scale(affine:[f64;16],world:[f64;16],old_scale:[f64;3],kind:u32)->Result<OwnerScale,GumballError>{
-    if !(1..=3).contains(&kind)||affine.iter().chain(world.iter()).chain(old_scale.iter()).any(|v|!v.is_finite()||v.abs()>1e12)
+    if !(1..=4).contains(&kind)||affine.iter().chain(world.iter()).chain(old_scale.iter()).any(|v|!v.is_finite()||v.abs()>1e12)
         || old_scale.iter().any(|v|v.abs()<1e-12)
         || [affine[12],affine[13],affine[14],world[12],world[13],world[14]].iter().any(|v|v.abs()>1e-12)
         || affine[15]!=1.||world[15]!=1. {return Err(GumballError::InvalidInput);}
@@ -19,8 +19,13 @@ pub fn owner_scale(affine:[f64;16],world:[f64;16],old_scale:[f64;3],kind:u32)->R
     let mut axes:[[f64;3];3]=std::array::from_fn(|c|columns[c].map(|v|v/lengths[c]));
     if [dot(axes[0],axes[1]),dot(axes[0],axes[2]),dot(axes[1],axes[2])].iter().any(|v|v.abs()>1e-8){return Err(GumballError::InvalidFrame);}
     let mut factors=lengths;let mut placement=m;
-    if kind==1 { // dimension properties preserve their native owner axes
+    if kind==1||kind==4 { // dimension properties preserve their native owner axes
         for c in 0..3 {let original=std::array::from_fn(|r|world[4*r+c]);if (dot(axes[c],original)-1.).abs()>1e-8{return Err(GumballError::InvalidFrame);}axes[c]=original;}
+        // Cylinder, Cone and regular Prism retain a circular/regular XY base.
+        // Height is independent; an elliptical base requires an affine result.
+        if kind==4&&(lengths[0]-lengths[1]).abs()>1e-8*lengths[0].max(lengths[1]) {
+            return Err(GumballError::InvalidFrame);
+        }
     }else if kind==2 { // a native Sphere can represent isotropic scaling only
         if (lengths[0]-lengths[1]).abs()>1e-8*lengths[0]||(lengths[0]-lengths[2]).abs()>1e-8*lengths[0]{return Err(GumballError::InvalidFrame);}
         for c in 0..3 {let original=std::array::from_fn(|r|world[4*r+c]);if (dot(axes[c],original)-1.).abs()>1e-8{return Err(GumballError::InvalidFrame);}}

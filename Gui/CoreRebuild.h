@@ -15,6 +15,7 @@ public:
     bool start(std::size_t);
     void cancel();
     void submit(const QString&);
+    bool optionEvent(unsigned,const QString& text={},double number=0.);
     // Registered only for the native fixture environment, never a user command.
     static void addDeliveryTestMethods(PyObject*);
 protected:
@@ -25,6 +26,7 @@ private:
     struct Result;
     std::unique_ptr<State> state;
     void options();
+    void bindOptions();void renderOptions();
     bool valid()const;
     void calculate(bool commit);
     void publish(const std::shared_ptr<Result>&);

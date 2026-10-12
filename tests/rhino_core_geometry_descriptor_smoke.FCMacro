@@ -41,7 +41,7 @@ report = {'schema_version': 1, 'checks': [], 'descriptors': {}, 'required_extern
               'accuracy_oracle': 'standalone native adaptive BRepGProp::VolumeProperties at Eps 1e-14 and 1e-16 on exact imported BRep',
               'accuracy_status': 'pending_external_execution'},
           'unfulfilled': ['No complete trim/seam graph, manifold/solid orientation or attribute preservation inspection',
-                          'Coordinates/local_to_world stay unknown; placement and native support location are provenance',
+                          'Unsupported representations retain unknown frames; arbitrary attributes/userdata remain uninspected',
                           'No solver/Rhino parity, all-consumer ownership or certified conversion parameter mapping']}
 
 def check(name, condition):
@@ -134,6 +134,7 @@ def run():
         import OpenMatrix9Gui as OM
         import ThreeDm
         report['native_module'] = str(OM.__file__)
+        report['module'] = str(OM.__file__)
         report['native_sha256'] = hashlib.sha256(Path(OM.__file__).read_bytes()).hexdigest()
         # The old-module RED must fail here before production companion code lands.
         check('Native module exposes read-only geometryDescriptor', callable(getattr(OM, 'geometryDescriptor', None)))
@@ -203,9 +204,23 @@ def run():
             check(obj.Name + ' unit context is copied', descriptor['unit_context_snapshot'] == OM.unitContext(doc.Name)['snapshot'])
             check(obj.Name + ' world placement provenance is finite', len(descriptor['world_placement_provenance']) == 4 and
                   all(len(row) == 4 and all(math.isfinite(v) for v in row) for row in descriptor['world_placement_provenance']))
-            check(obj.Name + ' transforms remain unclaimed', descriptor['coordinates'] is None and descriptor['local_to_world'] is None)
-            check(obj.Name + ' uninspected topology remains unknown', all(descriptor['topology'][key] is None for key in
-                  ['closed', 'manifold', 'solid_orientation', 'faces', 'free_boundary_components']))
+            known_frame = descriptor['representation'] != 'unknown'
+            check(obj.Name + ' known representation has validated world frame',
+                  (descriptor['coordinates'] in ['native_local', 'object_local'] and
+                   len(descriptor['local_to_world']) == 4 and
+                   all(len(row) == 4 and all(math.isfinite(v) for v in row) for row in descriptor['local_to_world']))
+                  if known_frame else descriptor['coordinates'] is None and descriptor['local_to_world'] is None)
+            check(obj.Name + ' full topology certificates remain unknown', all(descriptor['topology'][key] is None for key in
+                  ['closed', 'manifold', 'solid_orientation']))
+            if descriptor['representation'] in ['trimmed_face', 'shell', 'solid', 'brep']:
+                check(obj.Name + ' native face topology is observed', isinstance(descriptor['topology']['faces'], list) and
+                      isinstance(descriptor['topology']['free_boundary_components'], list))
+            elif descriptor['representation'] in ['point','curve','polycurve']:
+                check(obj.Name + ' nonface CAD topology is known empty', descriptor['topology']['faces']==[] and
+                      descriptor['topology']['free_boundary_components']==[])
+            else:
+                check(obj.Name + ' uninspected face topology remains unknown', all(descriptor['topology'][key] is None for key in
+                      ['faces', 'free_boundary_components']))
         data = descriptors[circle.Name]
         basis = data['basis']
         check('CircleR10 is CAD curve with retained NURBS form and domain', data['legacy_kind'] == 2 and

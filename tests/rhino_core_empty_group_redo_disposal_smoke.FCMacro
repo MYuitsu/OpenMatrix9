@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""A failed empty preserving group retires visible Redo under native protection."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(checks=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM
+        report['module']=OM.__file__;sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE'])
+        import OM9ReplayRetirement as probe
+        doc=App.newDocument('EmptyGroupDisposal');doc.UndoMode=1
+        seed=doc.addObject('App::FeaturePython','Seed');seed.Label='original';doc.clearUndos()
+        doc.openTransaction('Prior creation');retired=doc.getObject(probe.create(doc.Name,'Retired',True));doc.commitTransaction();doc.undo()
+        check('actual Redo holds detached native owner',doc.RedoCount==1 and doc.getObject('Retired')is None)
+        result=probe.failed_empty_redo(doc.Name);report['result']=result
+        check('actual native disposal runs once after checked group failure',not result['accepted'] and result['callbacks']==1)
+        check('disposal prevents native lock mutation',result['blocked']==1 and not result['locked'] and 'StaleGeometry'in result['error'])
+        check('failed group clears visible Redo without materializing a user journal',not doc.RedoNames and not doc.UndoNames and not doc.HasPendingTransaction)
+        doc.openTransaction('Followup');seed.Label='followup';doc.commitTransaction();doc.undo()
+        check('native owner and subsequent transaction remain usable',seed.Label=='original' and doc.RedoCount==1)
+        App.closeDocument(doc.Name);report['ok']=all(c['passed']for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2));QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

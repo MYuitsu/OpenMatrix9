@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later WITH OCCT-exception-1.0
+--- a/src/ModelingData/TKG3d/Geom/Geom_OffsetCurveUtils.pxx
++++ b/src/ModelingData/TKG3d/Geom/Geom_OffsetCurveUtils.pxx
+@@ -257,14 +257,14 @@
+     }
+     // V3 = P"' (U) :
+     D3Ndir.Subtract(D2Ndir.Multiplied(3.0 * Dr / R2));
+-    D3Ndir.Subtract(DNdir.Multiplied(3.0 * ((D2r / R2) + (Dr * Dr / R4))));
++    D3Ndir.Add(DNdir.Multiplied(9.0 * Dr * Dr / R4 - 3.0 * D2r / R2));
+     D3Ndir.Add(
+-      Ndir.Multiplied(6.0 * Dr * Dr / R4 + 6.0 * Dr * D2r / R4 - 15.0 * Dr * Dr * Dr / R6 - D3r));
++      Ndir.Multiplied(9.0 * Dr * D2r / R4 - 15.0 * Dr * Dr * Dr / R6 - D3r / R2));
+     D3Ndir.Multiply(theOffset / R);
+     // V2 = P" (U) :
+     R4 = R2 * R2;
+     D2Ndir.Subtract(DNdir.Multiplied(2.0 * Dr / R2));
+-    D2Ndir.Subtract(Ndir.Multiplied((3.0 * Dr * Dr / R4) - (D2r / R2)));
++    D2Ndir.Add(Ndir.Multiplied((3.0 * Dr * Dr / R4) - (D2r / R2)));
+     D2Ndir.Multiply(theOffset / R);
+     // V1 = P' (U) :
+     DNdir.Multiply(R);
+@@ -276,14 +276,14 @@
+     // V3 = P"' (U) :
+     D3Ndir.Divide(R);
+     D3Ndir.Subtract(D2Ndir.Multiplied(3.0 * Dr / R3));
+-    D3Ndir.Subtract(DNdir.Multiplied((3.0 * ((D2r / R3) + (Dr * Dr) / R5))));
++    D3Ndir.Add(DNdir.Multiplied(9.0 * Dr * Dr / R5 - 3.0 * D2r / R3));
+     D3Ndir.Add(
+-      Ndir.Multiplied(6.0 * Dr * Dr / R5 + 6.0 * Dr * D2r / R5 - 15.0 * Dr * Dr * Dr / R7 - D3r));
++      Ndir.Multiplied(9.0 * Dr * D2r / R5 - 15.0 * Dr * Dr * Dr / R7 - D3r / R3));
+     D3Ndir.Multiply(theOffset);
+     // V2 = P" (U) :
+     D2Ndir.Divide(R);
+     D2Ndir.Subtract(DNdir.Multiplied(2.0 * Dr / R3));
+-    D2Ndir.Subtract(Ndir.Multiplied((3.0 * Dr * Dr / R5) - (D2r / R3)));
++    D2Ndir.Add(Ndir.Multiplied((3.0 * Dr * Dr / R5) - (D2r / R3)));
+     D2Ndir.Multiply(theOffset);
+     // V1 = P' (U) :
+     DNdir.Multiply(theOffset / R);

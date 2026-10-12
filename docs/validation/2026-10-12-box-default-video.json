@@ -1,0 +1,189 @@
+{
+  "feature_id": "OM9-SOLID-012",
+  "latest_user_rule": "Video is default Box, not one of four options: opposite base corners then Height. Explicit3Point stays edge+Width+Height.",
+  "plugin": {
+    "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-default-video-runtime-20261012/bin/OpenMatrix9Gui.pyd",
+    "bytes": 13671936,
+    "sha256": "5f0eec4570b151bf4b9c5622889bda1d421a7b76b06d2e54909ecdec0ba8a773"
+  },
+  "rust_checks": 1049,
+  "rust_log": {
+    "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-video-reference-20261012/rust.log",
+    "bytes": 119203,
+    "sha256": "6761fc190828317d2a0b931b017452b3f3dc64d0cdc393833e8e90f891e839d9"
+  },
+  "native_checks": 652,
+  "native_suites": 10,
+  "native": [
+    {
+      "fixture": "box_default_video",
+      "checks": 23,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-video-reference-20261012\\box_default_video-native02",
+      "receipt": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-video-reference-20261012/box_default_video-native02/results.json",
+        "bytes": 4917,
+        "sha256": "fbfe7b9c3c6fbdfb4685fb6601d0ad7878730091502a8b4f123955b320bbfd39"
+      }
+    },
+    {
+      "fixture": "box_documented_workflow",
+      "checks": 31,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-video-reference-20261012\\box_documented_workflow-native02",
+      "receipt": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-video-reference-20261012/box_documented_workflow-native02/results.json",
+        "bytes": 6672,
+        "sha256": "a34621e534ad00d8cce6ee9639db88aff4c75be1a575f7b4dccf3696967219e1"
+      }
+    },
+    {
+      "fixture": "box_command_options",
+      "checks": 26,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-video-reference-20261012\\box_command_options-native02",
+      "receipt": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-video-reference-20261012/box_command_options-native02/results.json",
+        "bytes": 4493,
+        "sha256": "6315276d14d3999b584898a2c514bdfb4291b8f8e082b5c895ea1574c00946a2"
+      }
+    },
+    {
+      "fixture": "box_command_usability",
+      "checks": 17,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-video-reference-20261012\\box_command_usability-native02",
+      "receipt": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-video-reference-20261012/box_command_usability-native02/results.json",
+        "bytes": 4878,
+        "sha256": "16ce44a458ae888b752413a25dffab9a118908963696805d87337af106055ecc"
+      }
+    },
+    {
+      "fixture": "box_command_history",
+      "checks": 11,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-video-reference-20261012\\box_command_history-native02",
+      "receipt": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-video-reference-20261012/box_command_history-native02/results.json",
+        "bytes": 2835,
+        "sha256": "21c885ea9cf058e28ec036feefee3254786dd3ccf715332e05d2e38fa915a434"
+      }
+    },
+    {
+      "fixture": "solid_commands",
+      "checks": 71,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-video-reference-20261012\\solid_commands-native02",
+      "receipt": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-video-reference-20261012/solid_commands-native02/results.json",
+        "bytes": 7992,
+        "sha256": "10613e3123eee0314c7a6f02b50602520299b7a1ae83138e1070b77029dd5518"
+      }
+    },
+    {
+      "fixture": "solid_options",
+      "checks": 252,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-video-reference-20261012\\solid_options-native02",
+      "receipt": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-video-reference-20261012/solid_options-native02/results.json",
+        "bytes": 40539,
+        "sha256": "6f93046fd5c1749babdf0136d0626b21113c18471ab720f58211a1e03a3a4724"
+      }
+    },
+    {
+      "fixture": "command_mnemonics",
+      "checks": 181,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-video-reference-20261012\\command_mnemonics-native02",
+      "receipt": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-video-reference-20261012/command_mnemonics-native02/results.json",
+        "bytes": 22673,
+        "sha256": "2d5b429997003ab6f5c2137c9c222f96084540960a7bf70e03c9375aec94c499"
+      }
+    },
+    {
+      "fixture": "builder_command_options",
+      "checks": 25,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-video-reference-20261012\\builder_command_options-native02",
+      "receipt": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-video-reference-20261012/builder_command_options-native02/results.json",
+        "bytes": 4115,
+        "sha256": "9ae7b1822820c8ffa0f2e4da9cf520dd7ebcdb0cfbff81a8aab729e358138a2e"
+      }
+    },
+    {
+      "fixture": "rebuild_command_options",
+      "checks": 15,
+      "output": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-video-reference-20261012\\rebuild_command_options-native02",
+      "receipt": {
+        "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-video-reference-20261012/rebuild_command_options-native02/results.json",
+        "bytes": 3237,
+        "sha256": "8a42d556fa4e40070bc0263f05050b73139bda61acd3cd8d10d6927b3f34ee35"
+      }
+    }
+  ],
+  "additional_visual_checks": 23,
+  "actual_screen": {
+    "path": "C:/Users/nguye/AppData/Local/Temp/om9-box-video-reference-20261012/visual01/height-screen.png",
+    "bytes": 149826,
+    "sha256": "4db7b51c5adfd9e23d6921532ecd2115e10948c9d4a2b8969cc0ab81b7e0e2f8"
+  },
+  "manual": {
+    "ready": true,
+    "visible": true,
+    "focused": true,
+    "document": "OM9DefaultBoxVideoTest",
+    "label": "OM9 — Box mặc định theo video (GPU)",
+    "objects": 1,
+    "rebuild_sample": "RebuildSample",
+    "pid": 28188,
+    "prompt": "First corner of base ( Diagonal 3Point Vertical Center ): ",
+    "feature": "OM9-SOLID-012",
+    "module": "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-box-default-video-runtime-20261012\\bin\\OpenMatrix9Gui.pyd",
+    "module_sha256": "5f0eec4570b151bf4b9c5622889bda1d421a7b76b06d2e54909ecdec0ba8a773"
+  },
+  "skill_update": {
+    "authorization": "Previous approval to update Box skill, corrected by the same user in this task",
+    "source": {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/skills/openmatrix9-feature-port/references/solid-box-sphere-contract.md",
+      "bytes": 10666,
+      "sha256": "b6c2a86c81a460a7de2bef759885bd15803bd5b3b344530abd90daf7da463e51"
+    },
+    "installed": {
+      "path": "C:/Users/nguye/.codex/skills/openmatrix9-feature-port/references/solid-box-sphere-contract.md",
+      "bytes": 10666,
+      "sha256": "b6c2a86c81a460a7de2bef759885bd15803bd5b3b344530abd90daf7da463e51"
+    }
+  },
+  "source": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/solid.rs",
+      "bytes": 61856,
+      "sha256": "a7545bcc64034477db2dd3d83e39adec19bc08fd0a95544ab7dffa9433fd6f31"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/SolidController.cpp",
+      "bytes": 39230,
+      "sha256": "ad46f264916b4579db7123d47dac01a26669f837f6aa791cba66297527e770b8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/RustBridge.h",
+      "bytes": 17077,
+      "sha256": "9f683fb5e68d03a748e88630b118993b068ea3c212ec0627e1e16cf5b0d1c689"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/box_default_video.rs",
+      "bytes": 3402,
+      "sha256": "57399a931506110254cfad75b8318ef031af0b8d459851e305fc754ea3a3c3ec"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/box_wire_ffi.rs",
+      "bytes": 1351,
+      "sha256": "d7f5106d982a001ddd158d5d472fdfd292c214b1e1011bd8233b639c57c7ab41"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/box_default_video_smoke.FCMacro",
+      "bytes": 4863,
+      "sha256": "e96ca52915e583ca7e0608cd01375bd9282055ed34b6dd518ccdf8d4b7173ce4"
+    }
+  ],
+  "excluded": [
+    "Initial native fixture needed an active MDI view; corrected without changing geometry assertions",
+    "Initial C++ scene-root type compile error fixed; FFI height-axis RED fixed",
+    "QWidget.grab OpenGL artifacts occur on prior plugin too; actual QScreen capture is clean, so widget-grab images are not visual-parity evidence"
+  ]
+}

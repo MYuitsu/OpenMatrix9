@@ -1,0 +1,128 @@
+"""Owned NURBS face/pcurve support; real shared FreeCAD plugin fixture."""
+import json,os,sys,tempfile,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+temp_root=out/'temporary';temp_root.mkdir(exist_ok=True);tempfile.tempdir=str(temp_root)
+report={'checks':[],'descriptors':{}}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+
+def run():
+    try:
+        import OpenMatrix9Gui as native,ThreeDm
+        report['module']=native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('SupportSnapshot');doc.UndoMode=1
+        s=Part.BSplineSurface()
+        s.buildFromPolesMultsKnots([[App.Vector(0,0,0),App.Vector(0,7,0)],
+                                  [App.Vector(8,0,0),App.Vector(8,7,2)]],
+                                 [2,2],[2,2],[0.,1.],[0.,1.],False,False,1,1,[[1.,2.],[3.,4.]])
+        obj=doc.addObject('Part::Feature','RationalSurface');obj.Shape=s.toShape()
+        outer=Part.makePolygon([App.Vector(0,0,0),App.Vector(20,0,0),App.Vector(20,20,0),App.Vector(0,20,0),App.Vector(0,0,0)])
+        hole=Part.Wire(Part.makeCircle(3,App.Vector(10,10,0)));hole.reverse()
+        trim=doc.addObject('Part::Feature','Hole');trim.Shape=Part.Face([outer,hole])
+        cylinder=doc.addObject('Part::Feature','Cylinder')
+        cylinder.Shape=next(f for f in Part.makeCylinder(4,7).Faces if isinstance(f.Surface,Part.Cylinder))
+        doc.recompute()
+        before=obj.Shape.exportBrepToString();history=(doc.UndoCount,doc.RedoCount)
+        row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));report['descriptors'][obj.Name]=row
+        face=row['topology']['faces'][0]
+        data=face.get('geometry_data')
+        check('common face exposes complete owned rational NURBS support', isinstance(data,dict) and data.get('kind')=='nurbs_surface')
+        check('surface basis preserves U-major poles and explicit weights',data['poles_xyz']==[[0,0,0],[0,7,0],[8,0,0],[8,7,2]] and data['weights']==[1,2,3,4])
+        check('surface full support domains remain separate from trim restriction', data['axes'][0]['full_domain']==[0,1] and data['axes'][1]['full_domain']==[0,1] and face['uv_domain']==[[0,1],[0,1]])
+        check('face support is local with separate native location provenance',face['geometry_data_status']=='copied_validated_basis' and len(face['native_location'])==4)
+        check('owned support inspection preserves source BRep and history',obj.Shape.exportBrepToString()==before and (doc.UndoCount,doc.RedoCount)==history)
+        restricted=doc.addObject('Part::Feature','RestrictedSurface')
+        restricted.Shape=s.toShape(.2,.8,.1,.9)
+        restricted.Placement.Base=App.Vector(13,-4,6)
+        reversed_face=doc.addObject('Part::Feature','ReversedSurface')
+        reversed_shape=Part.Shape(restricted.Shape);reversed_shape.reverse();reversed_face.Shape=reversed_shape
+        periodic_surface=Part.BSplineSurface()
+        periodic_surface.buildFromPolesMultsKnots(
+            [[App.Vector(0,0,0),App.Vector(0,0,7)],
+             [App.Vector(4,0,0),App.Vector(4,0,7)],
+             [App.Vector(0,4,0),App.Vector(0,4,7)]],
+            [1,1,1,1],[2,2],[0.,1.,2.,3.],[0.,1.],True,False,2,1)
+        periodic_face=doc.addObject('Part::Feature','PeriodicSurface');periodic_face.Shape=periodic_surface.toShape()
+        doc.recompute()
+        for extra in [restricted,reversed_face,periodic_face,trim,cylinder]:
+            raw=extra.Shape.exportBrepToString();counts=(doc.UndoCount,doc.RedoCount)
+            observed=json.loads(native.geometryDescriptor(doc.Name,extra.Name));report['descriptors'][extra.Name]=observed
+            check(extra.Name+' inspection retains BRep and Undo/Redo',raw==extra.Shape.exportBrepToString() and counts==(doc.UndoCount,doc.RedoCount))
+        restricted_data=report['descriptors'][restricted.Name]['topology']['faces'][0]
+        check('restricted face keeps full support domains without segmenting the basis',restricted_data['geometry_data']['axes'][0]['full_domain']==[0,1] and restricted_data['geometry_data']['axes'][1]['full_domain']==[0,1] and restricted_data['uv_domain']==[[.2,.8],[.1,.9]])
+        check('located face leaves native-local poles unchanged and records its translation',restricted_data['geometry_data']['poles_xyz']==data['poles_xyz'] and [r[3] for r in restricted_data['native_location'][:3]]==[13,-4,6])
+        reversed_data=report['descriptors'][reversed_face.Name]['topology']['faces'][0]
+        check('reversed face keeps basis with separate face orientation',reversed_data['orientation']=='reversed' and reversed_data['geometry_data']==restricted_data['geometry_data'])
+        check('edge-use reversal is separate from supporting pcurve basis',any(u['orientation']=='reversed' for l in reversed_data['loops'] for u in l['edge_uses']))
+        periodic_data=report['descriptors'][periodic_face.Name]['topology']['faces'][0]['geometry_data']
+        check('native periodic surface retains compact knots and axis flags',periodic_data['axes'][0]['periodic'] is True and periodic_data['axes'][0]['knots']==[0,1,2,3] and periodic_data['axes'][0]['multiplicities']==[1,1,1,1] and periodic_data['axes'][1]['periodic'] is False)
+        check('nonrational surface weights stay absent',periodic_data['weights'] is None)
+        analytic=report['descriptors'][cylinder.Name]['topology']['faces'][0]
+        check('analytic support stays analytic without implicit NURBS conversion',analytic['geometry_data']['kind']=='analytic_surface' and analytic['geometry_data']['analytic_type']=='cylinder' and analytic['geometry_data_status']=='copied_validated_analytic' and analytic['native_class']=='Geom_CylindricalSurface')
+        check('analytic pcurve has native UV metadata',any(u['pcurve']['geometry_data']['kind']=='analytic_curve' and u['pcurve']['geometry_data_status']=='copied_validated_analytic' for l in analytic['loops'] for u in l['edge_uses']))
+        periodic_curve=Part.BSplineCurve()
+        periodic_curve.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(1,2,0),App.Vector(2,0,0)],[1,1,1,1],[0.,1.,2.,3.],True,2)
+        curve=doc.addObject('Part::Feature','RestrictedPeriodicCurve');curve.Shape=periodic_curve.toShape(.25,2.5)
+        rational_curve=doc.addObject('Part::Feature','RationalCircle');rational_curve.Shape=Part.makeCircle(10).toNurbs()
+        doc.recompute()
+        for extra in [curve,rational_curve]:
+            raw=extra.Shape.exportBrepToString();counts=(doc.UndoCount,doc.RedoCount)
+            observed=json.loads(native.geometryDescriptor(doc.Name,extra.Name));report['descriptors'][extra.Name]=observed
+            support=observed.get('geometry_data')
+            check(extra.Name+' exposes Rust-owned 3D curve basis',isinstance(support,dict) and support.get('kind')=='nurbs_curve' and observed['geometry_data_status']=='copied_validated_basis')
+            check(extra.Name+' retains legacy companion values',all(support[k]==observed['basis'][k] for k in ['poles_xyz','weights','axis']))
+            check(extra.Name+' inspection preserves source and history',raw==extra.Shape.exportBrepToString() and counts==(doc.UndoCount,doc.RedoCount))
+        curve_data=report['descriptors'][curve.Name]
+        check('native periodic curve keeps full basis separately from edge restriction',curve_data['geometry_data']['axis']['periodic'] is True and curve_data['geometry_data']['axis']['full_domain']==[0,3] and curve_data['domains']==[[.25,2.5]])
+        check('rational 3D circle retains explicit nonunit weights',any(abs(w-1)>1e-12 for w in report['descriptors'][rational_curve.Name]['geometry_data']['weights']))
+        n=4097
+        large_surface=Part.BSplineSurface()
+        large_surface.buildFromPolesMultsKnots(
+            [[App.Vector(u,v,0) for v in range(n)] for u in range(2)],
+            [2,2],[2]+[1]*(n-2)+[2],[0.,1.],list(range(n)),False,False,1,1)
+        limited=doc.addObject('Part::Feature','LimitedSurface');limited.Shape=large_surface.toShape();doc.recompute()
+        limited_raw=limited.Shape.exportBrepToString();limited_counts=(doc.UndoCount,doc.RedoCount)
+        limited_row=json.loads(native.geometryDescriptor(doc.Name,limited.Name));report['descriptors'][limited.Name]=limited_row
+        check('over-budget face remains uninspected at common and root levels',limited_row['geometry_data'] is None and limited_row['geometry_data_status']=='basis_companion_limit' and limited_row['topology']['faces'][0]['geometry_data'] is None and limited_row['topology']['faces'][0]['geometry_data_status']=='basis_companion_limit')
+        check('over-budget inspection preserves source BRep and history',limited_raw==limited.Shape.exportBrepToString() and limited_counts==(doc.UndoCount,doc.RedoCount))
+        archive=out/'authored-support.3dm'
+        os.environ['OM9_3DM_WORKERS']='1'
+        ThreeDm.export_file(str(archive),[trim,cylinder])
+        target=App.newDocument('ImportedSupport');target.UndoMode=1
+        objects=ThreeDm.import_file(str(archive),target,mode='geometry');target.recompute()
+        rational_pcurves=0
+        for imported in objects:
+            shape_before=imported.Shape.exportBrepToString()
+            descriptor=json.loads(native.geometryDescriptor(target.Name,imported.Name))
+            report['descriptors'][imported.Name]=descriptor
+            for f in descriptor['topology']['faces']:
+                check(imported.Name+' copies the imported supporting surface',isinstance(f['geometry_data'],dict) and f['geometry_data']['kind']=='nurbs_surface')
+                for loop in f['loops']:
+                    for use in loop['edge_uses']:
+                        pc=use['pcurve'];basis=pc['geometry_data']
+                        check(imported.Name+' copies each full NURBS pcurve basis', isinstance(basis,dict) and basis['kind']=='nurbs_curve' and pc['geometry_data_status']=='copied_validated_basis')
+                        check(imported.Name+' pcurve controls remain in UV with zero Z',all(p[2]==0 for p in basis['poles_xyz']))
+                        if basis['weights'] is not None:
+                            rational_pcurves+=1
+                            check('rational hole pcurve retains nonunit weights',any(abs(w-1)>1e-12 for w in basis['weights']))
+            check(imported.Name+' support copying preserves source exact BRep',shape_before==imported.Shape.exportBrepToString())
+        check('fixture actually contains a rational NURBS trim pcurve',rational_pcurves>0)
+        detached=json.dumps(row,sort_keys=True)
+        obj.Shape=Part.makeBox(1,2,3);doc.recompute()
+        check('returned support remains owned after replacement and document close',json.dumps(row,sort_keys=True)==detached)
+        App.closeDocument(doc.Name)
+        check('support payload stays usable after native document closes',data['weights']==[1,2,3,4])
+        report['ok']=True
+    except Exception:
+        report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

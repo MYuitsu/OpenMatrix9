@@ -1,0 +1,37 @@
+"""RCORE-01: staged Explode preserves existing OM9 layer ownership."""
+import os,json,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'module':OM.__file__,'checks':[]}
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def events():QtWidgets.QApplication.processEvents()
+def enter(text=''):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));events()
+def command(name,objects):
+ Gui.Selection.clearSelection()
+ for o in objects:Gui.Selection.addSelection(o)
+ enter(name);enter();dialog=next(q for q in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9EditOptions') if q.isVisible());dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();events()
+def run():
+ global console
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');events();window=Gui.getMainWindow();console=window.findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  d=App.newDocument('EditResultLayer');d.UndoMode=1;events();dock=window.findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar');button=dock.findChild(QtWidgets.QToolButton,'OM9LayerCurrent0');button.click();events()
+  a=d.addObject('Part::Feature','A');a.Shape=Part.makeLine(App.Vector(),App.Vector(5,0,0));b=d.addObject('Part::Feature','B');b.Shape=Part.makeLine(App.Vector(5,0,0),App.Vector(5,3,0));d.recompute()
+  command('Join',[a,b]);joined=next(o for o in d.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOP11-008');layer=next(o for o in d.Objects if getattr(o,'OM9LayerIndex',0)==1 and getattr(o,'OM9LayerSchema','')=='1')
+  check('Join publishes native result in layer one',joined in layer.Group and joined.OM9OutputLayerIndex==1 and bool(joined.OM9GeometryResult));source_name=joined.Name
+  dock.findChild(QtWidgets.QToolButton,'OM9LayerCurrent16').click();events();command('Explode',[joined]);pieces=[o for o in d.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOP11-005'];names=[o.Name for o in pieces]
+  check('Explode creates two valid outputs',len(pieces)==2 and abs(sum(o.Shape.Length for o in pieces)-8)<1e-6)
+  check('Explode preserves source layer while current differs',len(pieces)==2 and all(o in layer.Group and o.OM9OutputLayerIndex==1 for o in pieces))
+  check('Explode persists independent CAD result for each layer member',len(pieces)==2 and all(json.loads(o.OM9GeometryResult)['input_identity']['name']==o.Name for o in pieces))
+  check('Explode consumes source only after publication',d.getObject(source_name) is None)
+  d.undo();check('Explode Undo restores source membership',d.getObject(source_name) in layer.Group and not any(d.getObject(n) for n in names))
+  d.redo();check('Explode Redo restores output membership',len(names)==2 and all(d.getObject(n) in layer.Group and d.getObject(n).OM9OutputLayerIndex==1 for n in names))
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for n in list(App.listDocuments()):App.closeDocument(n)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

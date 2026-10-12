@@ -1,0 +1,137 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""A real output-created observer must not consume Builder's prior Redo on abort."""
+import json
+import os
+import traceback
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+import OpenMatrix9Gui as OM
+from PySide6 import QtCore
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = dict(module=OM.__file__, checks=[], observations=[])
+
+
+def check(name, value):
+    report['checks'].append(dict(name=name, passed=bool(value)))
+
+
+def recipe():
+    return json.dumps(dict(schema=1, evaluator='om9.affine-template', version=1,
+                           settings={}, scale=[1, 1, 1]))
+
+
+def gem(doc, name, width):
+    obj = doc.addObject('Part::Feature', name)
+    obj.Shape = Part.makeBox(width, 2, 4)
+    obj.addProperty('App::PropertyString', 'OM9GemShape')
+    obj.OM9GemShape = 'round'
+    return obj
+
+
+def snapshot(doc):
+    rows = []
+    for obj in doc.Objects:
+        rows.append((obj.Name, obj.Label,
+                     obj.Shape.exportBrepToString() if 'Shape' in obj.PropertiesList else None,
+                     obj.Templates.exportBrepToString() if 'Templates' in obj.PropertiesList else None,
+                     getattr(obj, 'Parameters', None), repr(getattr(obj, 'OutputNames', None)),
+                     getattr(getattr(obj, 'SourceGem', None), 'Name', None),
+                     getattr(getattr(obj, 'ParentRecord', None), 'Name', None),
+                     getattr(obj, 'OM9GeometryResult', None)))
+    return tuple(rows), doc.UndoCount, doc.RedoCount
+
+
+class Observer:
+    def __init__(self, doc, source):
+        self.doc = doc
+        self.source = source
+        self.fired = False
+
+    def slotCreatedObject(self, obj):
+        if obj.Document == self.doc and not self.fired:
+            self.fired = True
+            self.source.Shape = Part.makeBox(7, 2, 4)
+
+
+def run_case(kind):
+    doc = App.newDocument('BuilderPublication' + kind)
+    observer = None
+    try:
+        doc.UndoMode = 1
+        source = gem(doc, 'Gem', 1)
+        seed = doc.addObject('Part::Feature', 'Seed')
+        seed.Shape = Part.makeLine(App.Vector(0, 0, 0), App.Vector(1, 0, 0))
+        witness = doc.addObject('App::FeaturePython', 'Witness')
+        target = None
+        if kind != 'Create':
+            record = OM.createBuilderRecord(source, 'OM9-SETTING-001', recipe(), [seed], True)
+            if kind == 'Restore':
+                doc.openTransaction('Remove output before explicit restore')
+                doc.removeObject(record.OutputNames[0])
+                doc.commitTransaction()
+            else:
+                target = gem(doc, 'Target', 2)
+        doc.recompute()
+        doc.openTransaction('Executable prior Redo')
+        witness.Label = 'Executable Redo'
+        doc.commitTransaction()
+        doc.undo()
+        before = snapshot(doc)
+        observed_source = target if kind == 'Match' else source
+        observer = Observer(doc, observed_source)
+        App.addDocumentObserver(observer)
+        rejected = False
+        error = ''
+        try:
+            if kind == 'Create':
+                OM.createBuilderRecord(source, 'OM9-SETTING-001', recipe(), [seed], True)
+            elif kind == 'Restore':
+                OM.restoreBuilderOutputs(record)
+            else:
+                OM.matchBuilderAttributes(source, [target])
+        except Exception as failure:
+            rejected = True
+            error = str(failure)
+        finally:
+            App.removeDocumentObserver(observer)
+        after = snapshot(doc)
+        report['observations'].append(dict(case=kind, callback=observer.fired,
+            rejected=rejected, error=error, before_undo=before[1], after_undo=after[1],
+            before_redo=before[2], after_redo=after[2], objects_restored=before[0] == after[0]))
+        check(kind + ' real output observer invalidates selected source', observer.fired)
+        check(kind + ' publication rejects with typed operation and source',
+              rejected and 'StaleGeometry' in error and 'Builder' in error
+              and observed_source.Name in error)
+        check(kind + ' abort restores source records links and outputs', before[0] == after[0])
+        check(kind + ' abort leaves no new Undo entry', before[1] == after[1])
+        check(kind + ' abort retains prior Redo count', before[2] == after[2] == 1)
+        if doc.RedoCount:
+            doc.redo()
+        check(kind + ' prior Redo remains executable', witness.Label == 'Executable Redo')
+    finally:
+        if observer is not None:
+            try:
+                App.removeDocumentObserver(observer)
+            except Exception:
+                pass
+        App.closeDocument(doc.Name)
+
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        for kind in ['Create', 'Restore', 'Match']:
+            run_case(kind)
+        report['ok'] = all(row['passed'] for row in report['checks'])
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+
+QtCore.QTimer.singleShot(1200, run)

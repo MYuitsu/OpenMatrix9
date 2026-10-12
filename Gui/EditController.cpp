@@ -46,6 +46,7 @@
 #include <cstring>
 #include <cmath>
 namespace {
+extern "C" bool om9_native_edit_declared(unsigned,unsigned,unsigned);
 Gui::View3DInventor* containing(QObject* object){auto* w=qobject_cast<QWidget*>(object);auto* g=Gui::Application::Instance->activeDocument();if(!w||!g)return nullptr;for(auto* mdi:g->getMDIViews())if(auto* v=dynamic_cast<Gui::View3DInventor*>(mdi);v&&(w==v->getViewer()||v->getViewer()->isAncestorOf(w)))return v;return nullptr;}
 const char* caption(unsigned k){const char* names[]={"","Join","Explode","Trim","BooleanDifference","BooleanIntersection","BooleanUnion","Boolean2Objects"};return names[k];}
 }
@@ -61,7 +62,7 @@ bool EditController::matches(std::size_t i,const QString& text){return handles(i
 void EditController::activate(){enabled=true;qApp->installEventFilter(this);}
 void EditController::deactivate(){enabled=false;cancel();}
 bool EditController::active()const{return document&&om9_edit_phase()!=0;}
-bool EditController::available(std::size_t i)const{auto* d=App::GetApplication().getActiveDocument();auto* g=Gui::Application::Instance->activeDocument();return enabled&&handles(i)&&d&&g&&!g->isAboutToClose()&&!g->getInEdit()&&!dialog&&dynamic_cast<Gui::View3DInventor*>(g->getActiveView())&&Gui::Control().isAllowedAlterDocument(d);}
+bool EditController::available(std::size_t i)const{auto* d=App::GetApplication().getActiveDocument();auto* g=Gui::Application::Instance->activeDocument();const auto k=om9_edit_kind(om9_command_id(i));return enabled&&k&&om9_native_edit_declared(k,k<=3?4:0,0)&&d&&g&&!g->isAboutToClose()&&!g->getInEdit()&&!dialog&&dynamic_cast<Gui::View3DInventor*>(g->getActiveView())&&Gui::Control().isAllowedAlterDocument(d);}
 bool EditController::valid()const{auto* g=Gui::Application::Instance->activeDocument();return enabled&&document==App::GetApplication().getActiveDocument()&&g&&!g->isAboutToClose()&&!g->getInEdit()&&Gui::Control().isAllowedAlterDocument(document);}
 void EditController::prompt(const QString& s){CurveController::instance().setPrompt(s);CurveController::instance().logMessage(s);}
 void EditController::refresh(){QString text=QString::fromUtf8(caption(kind))+": ";switch(om9_edit_phase()){
@@ -115,6 +116,7 @@ void EditController::prepare(){
     connect(buttons,&QDialogButtonBox::accepted,this,[this]{commit();});connect(buttons,&QDialogButtonBox::rejected,this,[this]{cancel();prompt("Edit cancelled. Command:");});connect(dialog,&QDialog::rejected,this,[this]{cancel();prompt("Edit cancelled. Command:");});refresh();if(kind==3)rebuildTrim();else preview();dialog->show();
 }
 void EditController::rebuildTrim(){const bool reset=!trimUndo.empty();clearPreview();try{Base::PyGILStateLocker lock;verifyEditInputs(*document,inputs);fragments.clear();output.clear();removed.clear();trimUndo.clear();
+    validateEditCapabilities(inputs,kind,0);
     fragments=om9_edit_option(2)?splitProjectedEditCurves(inputs,projection,om9_edit_option(1)):splitEditCurves(inputs,om9_edit_option(1));removed.resize(inputs.size());preview();
     if(reset&&status)status->setText("Intersection options changed; previous removal picks were reset. Pick regions again.");
     }catch(const std::exception& e){error(e);}}

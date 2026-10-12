@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""A real finalizer during ordinary document history destruction, outside replay."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']); action=os.environ.get('OM9_CLOSE_FINALIZER_ACTION','clear')
+report=dict(checks=[],events=[])
+def event(value):
+    report['events'].append(value)
+    (out/'events.json').write_text(json.dumps(report,indent=2))
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        import OpenMatrix9Gui as OM
+        report['module']=OM.__file__
+        doc=App.newDocument('CloseFinalizer');doc.UndoMode=1
+        child=doc.addObject('App::FeaturePython','Child')
+        child.addProperty('App::PropertyPythonObject','Payload')
+        class LastValue:
+            def __del__(self):
+                event('started')
+                try:
+                    if action=='clear':doc.clearUndos()
+                    elif action=='remove':doc.removeObject('Child')
+                    elif action=='value':child.Label='during-close'
+                    elif action=='read':event('read:'+child.Label)
+                    elif action=='close_object':App.closeDocument(doc)
+                    else:App.closeDocument(doc.Name)
+                    event('allowed')
+                except Exception as error:event('blocked:'+str(error))
+        child.Payload=LastValue();doc.recompute();doc.clearUndos()
+        doc.openTransaction('Retain old Python value');child.Payload=None;doc.commitTransaction()
+        check('native history retains original sole payload until close',not report['events'])
+        event('before-close')
+        App.closeDocument(doc.Name)
+        event('after-close')
+        check('actual finalizer ran once',report['events'].count('started')==1)
+        check('history destruction rejects reentrant mutation',any(v.startswith('blocked:') for v in report['events']))
+        check('normal close finishes with no live document',not App.listDocuments())
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        # A failed lifecycle fixture must not recurse into another unsafe close.
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

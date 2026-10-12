@@ -1,0 +1,26 @@
+"""A separate host restores original accepted Curve input without a live session."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  source=Path(os.environ['OM9_CURVE_ACCEPTED_ARCHIVE_DIR']);warm=json.loads((source/'results.json').read_text());assert len(warm['observations'])==4
+  check('cold host owns no active Curve input branch',json.loads(OM.geometryCurveCapability(1,2))['status']==100)
+  for expected in warm['observations']:
+   case=expected['case'];doc=App.openDocument(str(source/(case+'.FCStd')));obj=doc.getObject(expected['command']);raw=getattr(obj,'OM9CurveConstruction','') if obj else '';v=json.loads(raw) if raw else {}
+   check(case+' cold restore retains exact owned accepted bytes',bool(raw) and raw==expected['raw'])
+   check(case+' cold restore retains original input events and their context',bool(v.get('accepted_input_events')) and v==expected['construction'])
+   geometry=obj is not None and obj.Shape.isValid() and not obj.Shape.isNull()
+   if geometry:
+    geometry=abs(obj.Shape.Length-16.)<1e-7 if case=='RectangleDirection' else abs(obj.Shape.Edges[0].Curve.MajorRadius-5)<1e-7 and abs(obj.Shape.Edges[0].Curve.MinorRadius-3)<1e-7 if case=='EllipseQuantity' else abs(obj.Shape.Edges[0].Curve.Radius-(1. if case=='FitUndo' else 10.))<1e-7
+   check(case+' cold native geometry agrees with independent expectation',geometry)
+   report['observations'].append(dict(case=case,command=expected['command'],raw=raw,construction=v));App.closeDocument(doc.Name)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

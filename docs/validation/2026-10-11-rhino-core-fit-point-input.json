@@ -1,0 +1,554 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-11T01:08:32+07:00",
+  "scope": "Bounded builtin native point readers shared by Circle/Sphere FitPoints and Circle source/History reads, with Rust cumulative count and existing coordinate admission. Partial RCORE-01 integration.",
+  "chapter_status": "in_progress",
+  "plan_status": "in_progress",
+  "remaining": [
+    "Finish shared operation/type/options policy for Curve/Solid/Rebuild and cage consumers; this point admission is not full C10 closure.",
+    "Computed Link getters, selected getSubShape cache allocation and native explorer depth/stack bounds, constraint support and tangent-plane readers still require integration.",
+    "Complete native GeometryResult/conversion/deviation/parameter/topology maps and original ownership, workers, cache, extrusion/annotation/preservation requirements.",
+    "Full construction-plan regression acceptance and its final source review remain pending; current checks do not replace the earlier full native Edit/prepared-result suites."
+  ],
+  "source_fingerprints": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NativeFitPoints.cpp",
+      "bytes": 9923,
+      "sha256": "c4006e6e406e76d3c4079c9010851980d141f315ff2b26cf054b41cc772c29af"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NativeFitPoints.h",
+      "bytes": 440,
+      "sha256": "4ec4e3af5f79d64205b53fd70a38553eff9d93b552b8e47a1211391a533d4e6c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\SolidReferences.cpp",
+      "bytes": 17965,
+      "sha256": "706cf658fe1a859a54e40f81943a1e5f6dd2081bfe712f03a979c692f4b84875"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\SolidReferences.h",
+      "bytes": 1311,
+      "sha256": "c8a5149aa44026125fbbf51b1df748e160ce0a7bdf9804b3f3bbc8fd55d08f4c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\SolidController.cpp",
+      "bytes": 22505,
+      "sha256": "c75bdd799c2afe54d66e2f15d02e1f269855fa2509b54d6ff40e285de78cb3ad"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CurveCircle.cpp",
+      "bytes": 13111,
+      "sha256": "1d23136968e2966dcc718f1aff05031d532d88c73b2b54024967c98be8a3d90d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CircleHistoryAdapter.cpp",
+      "bytes": 11795,
+      "sha256": "4356b48844ce5cec967cc06f8153d366dcf9135b7819aa43a1b17a94f6191a43"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CircleHistoryAdapter.h",
+      "bytes": 1638,
+      "sha256": "8df5a65dadc0c650eac060072e449ab029d1c4f7ec08765697ac784da8e31a96"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CMakeLists.txt",
+      "bytes": 8478,
+      "sha256": "653c4a8828bfbfacda0ec2411ef5b78c0bf422e123cd431ca95bed02c32f68b1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\fit_point_input.rs",
+      "bytes": 875,
+      "sha256": "2540abad49d69fa282b6c32c2d9fd827535ec111885bc2d3f370198a951a2d92"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\fit_point_input.rs",
+      "bytes": 1131,
+      "sha256": "e11bb82ae47f96c98522e4f7c5b07a7e0c58d48c5a70787f8027b0b310076540"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\lib.rs",
+      "bytes": 2030,
+      "sha256": "afac19b6dfd4a1957b9e78f0f0fce547d660f5433e36dbac6654c6ff9974ea96"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\circle.rs",
+      "bytes": 18407,
+      "sha256": "dc8afd817591fd458b0f1359859ded4f9f8710e87ba91f066b478d8e9de95272"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\circle_fit.rs",
+      "bytes": 4618,
+      "sha256": "8c5691a59d52701e1199f861be88f1635fe5b724f84aab0d1ab1d12a2d7a1868"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\curve.rs",
+      "bytes": 60524,
+      "sha256": "76d2da323ebb276505a1dbbd807b2cdb8dc1dfcd6a01715eb42e7cd7470a3fe8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\curve_ffi.rs",
+      "bytes": 21790,
+      "sha256": "7a903b437d3f368d225e1979ea27d1614e55c63a321eb22f988af38ac286c51f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\solid.rs",
+      "bytes": 38240,
+      "sha256": "723e3b358f85951909ca5c3e79256caa2c4523bfb95145139d153f10e68440d9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_fit_point_input_smoke.FCMacro",
+      "bytes": 9787,
+      "sha256": "f0c70f13e903b786b73daf1e5d5a05ea7e2c5fa5b93e9c0b31e924b61c389cfe"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\circle_advanced_smoke.FCMacro",
+      "bytes": 15764,
+      "sha256": "568beb4f1262ef7466fda3184a62277b00035731872c615a5a896244147e8652"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\circle_spatial_history_smoke.FCMacro",
+      "bytes": 12104,
+      "sha256": "c0db098d3099ff5942b146e9598481603bd7aba55113a45d5f43a179da79e684"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\circle_history_more_smoke.FCMacro",
+      "bytes": 15279,
+      "sha256": "2401edaf0f4474336a774a7a99351172e912262e30a79954108edaf5f5265ba1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\circle_input_context_smoke.FCMacro",
+      "bytes": 5542,
+      "sha256": "0858f9ceeae318b03b4285432f67148255779236f64e33643609e2f1823cd71d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\solid_options_smoke.FCMacro",
+      "bytes": 19138,
+      "sha256": "63f953de35ee83ca697146cefa6d8bee40945f91271f8107ebf1854c6dd219a5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\solid_commands_smoke.FCMacro",
+      "bytes": 15258,
+      "sha256": "273902531613dcb19b5b14258525cc87819675b44bfdcd2fac68a318bd1fed1b"
+    }
+  ],
+  "validation": {
+    "host_checks": 589,
+    "host_runs": [
+      {
+        "case": "admission",
+        "checks": 45,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "D5744C8BBBCEB78F04EC70A57504E25703B4E50D52CC743502D9D997B0DFED0E",
+          "pid": 36228,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/fit-point-input-native-green6-20261011",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-input-native-green6-20261011\\results.json",
+            "bytes": 13332,
+            "sha256": "73ce62a55d30bcb2758148205688e9d9a8a7a815b156bcd57fc3a71dd9025533"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-input-native-green6-20261011\\shared-host-launch.json",
+            "bytes": 540,
+            "sha256": "0afd49acb24ac12d7178a10d510147778b0423e6bb684988c7ca18fa8aab0220"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-input-native-green6-20261011\\select-plugin.FCMacro",
+            "bytes": 953,
+            "sha256": "de5abb209cd751f75a0d678bf260072227e503f308264160ea55cf058c9414e9"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-input-native-green6-20261011\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-input-native-green6-20261011\\host-stderr.log",
+            "bytes": 3469,
+            "sha256": "09b3e3eac3480d1d3d68e51dba91630b350347f945bdc959ddea4d079b4c2e12"
+          }
+        ]
+      },
+      {
+        "case": "circle-advanced",
+        "checks": 64,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "D5744C8BBBCEB78F04EC70A57504E25703B4E50D52CC743502D9D997B0DFED0E",
+          "pid": 77184,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/fit-point-circle-advanced-fitinput1-20261011",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-advanced-fitinput1-20261011\\results.json",
+            "bytes": 7316,
+            "sha256": "dc0687afe6ffa71f2768357feeaa11de45b94bd18912d9d998d44dfe08fbfa9f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-advanced-fitinput1-20261011\\shared-host-launch.json",
+            "bytes": 546,
+            "sha256": "b145f218b53d423d3206878f55bcb8049d903f09405396cca3c9a5d932017797"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-advanced-fitinput1-20261011\\select-plugin.FCMacro",
+            "bytes": 961,
+            "sha256": "bf9191e5fbb77b2473a4f2bd2c0d6c224dc8522befae061ee37e09a1b348504a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-advanced-fitinput1-20261011\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-advanced-fitinput1-20261011\\host-stderr.log",
+            "bytes": 3989,
+            "sha256": "e310292d6b97c75e7eff66b74bdcfc03ab9b8623948d51036409346fa6b2991a"
+          }
+        ]
+      },
+      {
+        "case": "circle-history",
+        "checks": 53,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "D5744C8BBBCEB78F04EC70A57504E25703B4E50D52CC743502D9D997B0DFED0E",
+          "pid": 74120,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/fit-point-circle-history-fitinput2-20261011",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-history-fitinput2-20261011\\results.json",
+            "bytes": 5628,
+            "sha256": "52a894224ff9d7d6b978a50c78c93de8bb7eae1a57b45ffbe9db9e732f210447"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-history-fitinput2-20261011\\shared-host-launch.json",
+            "bytes": 545,
+            "sha256": "f5cc1542d5a5572f7132e4129a57990bf70d021435144d4d347b941f551b0f36"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-history-fitinput2-20261011\\select-plugin.FCMacro",
+            "bytes": 960,
+            "sha256": "fca86d22620a2409973346298e2e2cfc06b4ca2e03f78c6133f988d48048e32e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-history-fitinput2-20261011\\host-stdout.log",
+            "bytes": 4493,
+            "sha256": "ff03ed2a95334dd94fcd3d8a52ec4cba49c2c87f00bd0a2e3d9c18f5f3946b96"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-history-fitinput2-20261011\\host-stderr.log",
+            "bytes": 13170,
+            "sha256": "dd28e6cf56a40abb719319d26efa6e7504f48218b66b128e454d694b604df1d5"
+          }
+        ]
+      },
+      {
+        "case": "circle-history-more",
+        "checks": 89,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "D5744C8BBBCEB78F04EC70A57504E25703B4E50D52CC743502D9D997B0DFED0E",
+          "pid": 61620,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/fit-point-circle-history-more-fitinput2-20261011",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-history-more-fitinput2-20261011\\results.json",
+            "bytes": 19864,
+            "sha256": "a78337c293011f4e8c8048be897279b1ec1e2901d8d3641d694410c83aa0eb1e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-history-more-fitinput2-20261011\\shared-host-launch.json",
+            "bytes": 550,
+            "sha256": "e6165d99fbeaafc45b3f46c0fbf99bb72720f34ad50cbfb9f80fb192070c2b8a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-history-more-fitinput2-20261011\\select-plugin.FCMacro",
+            "bytes": 965,
+            "sha256": "2c96bad3cf7c96189237de99ae51d3214c21b53128d9af79ee6804e308276f60"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-history-more-fitinput2-20261011\\host-stdout.log",
+            "bytes": 13597,
+            "sha256": "3a72f3b52d3b17d1dc12352fca08840c805c3f4503190aa237d576c377fe3a07"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-history-more-fitinput2-20261011\\host-stderr.log",
+            "bytes": 12002,
+            "sha256": "af03bdb26a6b9967264ab2909f1860dbc12c8a742d313a9d6d34e2adb14b04fa"
+          }
+        ]
+      },
+      {
+        "case": "circle-input-context",
+        "checks": 16,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "D5744C8BBBCEB78F04EC70A57504E25703B4E50D52CC743502D9D997B0DFED0E",
+          "pid": 32276,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/fit-point-circle-input-context-fitinput2-20261011",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-input-context-fitinput2-20261011\\results.json",
+            "bytes": 2192,
+            "sha256": "d97a1a27494555fe0cfb55442ca74e3bcdefd3463809f4e0d88ce8b5274fbb9a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-input-context-fitinput2-20261011\\shared-host-launch.json",
+            "bytes": 551,
+            "sha256": "b4a21795df7a0e22255d5488184e31eb2cafeb1e070ad341d394b725561f86e6"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-input-context-fitinput2-20261011\\select-plugin.FCMacro",
+            "bytes": 966,
+            "sha256": "902697f6a309d7b387057c298a4a40b03e868b4b15f3a0f3551bfb192b488413"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-input-context-fitinput2-20261011\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-circle-input-context-fitinput2-20261011\\host-stderr.log",
+            "bytes": 1759,
+            "sha256": "cfce78cce69dde2e966573287f842e242f53e703a62c8d354c534b1f37decd63"
+          }
+        ]
+      },
+      {
+        "case": "solid-options",
+        "checks": 252,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "D5744C8BBBCEB78F04EC70A57504E25703B4E50D52CC743502D9D997B0DFED0E",
+          "pid": 74476,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/fit-point-solid-options-fitinput2-20261011",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-solid-options-fitinput2-20261011\\results.json",
+            "bytes": 42358,
+            "sha256": "d4a797c28de23160a5a7bfa252dcd0a995f3d2f8f474c948c354110c358ffc0f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-solid-options-fitinput2-20261011\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "78a10369d704116c1712da60e03b7af20056f6526a1693c32c8e3c647877d63b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-solid-options-fitinput2-20261011\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "227d891dfe17b21e615fc8cfe60b865d04103570055c9e728a2039e510f32014"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-solid-options-fitinput2-20261011\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-solid-options-fitinput2-20261011\\host-stderr.log",
+            "bytes": 1958,
+            "sha256": "553eb312ba83fbec3a3b9596494fc4b312b2a47c5ee96c86c011f2e6486fe18e"
+          }
+        ]
+      },
+      {
+        "case": "solid-commands",
+        "checks": 70,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "D5744C8BBBCEB78F04EC70A57504E25703B4E50D52CC743502D9D997B0DFED0E",
+          "pid": 61912,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/fit-point-solid-commands-fitinput2-20261011",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-solid-commands-fitinput2-20261011\\results.json",
+            "bytes": 7972,
+            "sha256": "9fc4dbc7c71ed3a41b570b028b1cdc47d024474765963b974be54f1fe92d03bf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-solid-commands-fitinput2-20261011\\shared-host-launch.json",
+            "bytes": 545,
+            "sha256": "2c461e05ffa274e6c6ba43acb28ffde7e358077fe030f552855bdf0f14f22124"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-solid-commands-fitinput2-20261011\\select-plugin.FCMacro",
+            "bytes": 960,
+            "sha256": "765402d478966c4f9fa487fe4810dc1736a22d3d5b4936d42cac24010c5987d4"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-solid-commands-fitinput2-20261011\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\fit-point-solid-commands-fitinput2-20261011\\host-stderr.log",
+            "bytes": 853,
+            "sha256": "99aa5a177d3a49bbc991633164c32def43d5f64ba876b467aa23639e66139000"
+          }
+        ]
+      }
+    ],
+    "full_rust_tests": 695,
+    "full_rust_process_exit_code": 0,
+    "rust_logs": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\fit-point-input-rust-red1-20261011.log",
+        "bytes": 995,
+        "sha256": "d0c6dde4c42251746c63e5e9c942057e152b437e302a29936e005bf029f5fa7d"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\fit-point-input-rust-full2-20261011.log",
+        "bytes": 43,
+        "sha256": "dbf81ccf96fcdc9a9c45f79f2f051471d04f48a1926aa33ebc2834908e605b0b"
+      }
+    ],
+    "red_artifacts": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\fit-point-input-native-red2-20261011\\results.json",
+        "bytes": 6159,
+        "sha256": "5c1f8079d5587a51bc648ecf7579f6928b0a77ecd37ada62fc9ab07b7979eb74"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\fit-point-input-native-red2-20261011\\shared-host-launch.json",
+        "bytes": 538,
+        "sha256": "bb98b57963759f5ed0a7842fd4f4a0d5e9d0f393a9caa60c4a1eb159fa3b95f5"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\fit-point-input-typed-red1-20261011\\results.json",
+        "bytes": 13334,
+        "sha256": "f1181a15beb2210ae438eb1281556ae857345db3ccd8c4e5b81918c2a96339e0"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\fit-point-input-typed-red1-20261011\\shared-host-launch.json",
+        "bytes": 537,
+        "sha256": "58ac52a7f31f43c5ead0464243dc980780a91adef096aef03e0fd62a239cb7cb"
+      }
+    ],
+    "build_log": {
+      "path": "H:\\FreeCAD-src\\build\\fit-point-input-native-build5-20261011.log",
+      "bytes": 2899,
+      "sha256": "167301bd3dce5f7b3de7c297a9dac4665edc223802503e915d15c533973de7d4"
+    },
+    "build_process_exit_code": 0,
+    "public_source_audit": {
+      "source_files": 2376,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    }
+  },
+  "harness_fingerprints": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\record-fit-point-input-progress.py",
+      "bytes": 13783,
+      "sha256": "fbac0af00b41fe30a6bcbe250b2aa878c961b5f6d59a4b990249b700b92bd6c9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\run-fit-point-regressions.ps1",
+      "bytes": 1935,
+      "sha256": "15bf9286efd441e11423bc60cf99dd3165d173f54603b17d894a492d825a7d57"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\run-om9-plugin.ps1",
+      "bytes": 5632,
+      "sha256": "32c9fcd34f6beb2770b4440f0bf3766fd51af49b817b21434c858d4b4a6ab020"
+    }
+  ],
+  "documentation_fingerprints": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\README.md",
+      "bytes": 98614,
+      "sha256": "94c790a829cc93602990e1b69a56c154401b7e0e802765a1d402c9f6431133c0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\IMPLEMENTATION_STATUS.md",
+      "bytes": 39304,
+      "sha256": "df0058027dbd369d8a8171e9f20445aa9499a606444df603ec4189ed79face23"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\README.md",
+      "bytes": 42955,
+      "sha256": "9d3efc94bd326a6d809a6412ac0cb8599bf89928b2caf02b91080e7e47bdf038"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\01-object-model-kernel.md",
+      "bytes": 50138,
+      "sha256": "bd0cd0657c61248cdabb044a6b2ed1f92a01ed5ddc26d19fe5232e2406595ee9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\features\\RCORE-01.md",
+      "bytes": 13521,
+      "sha256": "b40c407261d210f30f4ab65d78fa72b2475625b604cb4679d021a0b5709da286"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\02-curve\\om9-curve-005-circle.md",
+      "bytes": 25987,
+      "sha256": "a3d0e3be958953545066dcaf4a8fc0b7326a6121a70a46378e765d43b319661f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\04-solid\\om9-solid-014-sphere.md",
+      "bytes": 14774,
+      "sha256": "67f950b6e4204285dcdd0cc550ec0ce3363528841de7bb11727beb78358e6bdc"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\validation\\2026-10-11-rhino-core-fit-point-input.md",
+      "bytes": 4618,
+      "sha256": "cb00478e06cd0476ee8b20abc3def1f2846a65a97f9db976a92fb45a953dfa32"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\superpowers\\plans\\2026-10-10-rcore01-native-construction-capabilities.md",
+      "bytes": 18647,
+      "sha256": "7c09d695224bf1e4b64b4a2afec28f9e51a92f20093a4607cf0ee82414694eb0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\openmatrix9-progress.json",
+      "bytes": 225321,
+      "sha256": "b09e639e2883758952528f88aa6e89405a8656f6e85b75f3cacc9e2858cad6af"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\CAPABILITY_LOOKUP.json",
+      "bytes": 93935,
+      "sha256": "d2dd529d9702e9af652386445b8b562c7a3e7262a74abd4cb5fd08514d7a7f2e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\MANIFEST.json",
+      "bytes": 116501,
+      "sha256": "d840a9a99b33879d421f4b6e4f36695097696cf9696cb693341a8a063da2b725"
+    }
+  ]
+}

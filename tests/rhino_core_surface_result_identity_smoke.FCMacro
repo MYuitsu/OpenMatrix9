@@ -1,0 +1,39 @@
+"""RCORE-01: repeated native commands identify their actual committed output."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'module':OM.__file__,'checks':[]}
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def events():QtWidgets.QApplication.processEvents()
+def enter(console):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));events()
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');events();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  d=App.newDocument('SurfaceIdentity');d.UndoMode=1
+  occupied=d.addObject('Part::Feature','Loft');occupied.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(1,0,0))
+  sources=[]
+  for name,x in [('First',0),('Last',10)]:
+   o=d.addObject('Part::Feature',name);o.Shape=Part.makeLine(App.Vector(x,0,0),App.Vector(x,3,0));sources.append(o)
+  d.recompute();before=[o.Name for o in d.Objects]
+  Gui.Selection.clearSelection()
+  for o in sources:Gui.Selection.addSelection(o)
+  Gui.runCommand('OM9_SurfaceLoft');events();enter(console)
+  dialog=next(d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9SurfaceOptions') if d.isVisible())
+  dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();events()
+  h=next(o for o in d.Objects if getattr(o,'OM9FeatureId','')=='OM9-SURFACE-009');value=json.loads(h.OM9GeometryResult)
+  check('collision creates valid independent native output',h.Name=='Loft001' and h.TypeId=='Part::Feature' and h.isValid() and abs(h.Shape.Area-30)<1e-6)
+  check('result identifies actual committed unique name',value['input_identity']['name']==h.Name and value['input_identity']['document_name']==d.Name)
+  check('unrecorded output retains real Surface result',value['operation']=='EditSurface' and len(value['input_snapshots'])==2 and json.loads(value['operation_context']['recipe'])['history']==False)
+  raw=h.OM9GeometryResult;d.undo();check('Undo removes only committed output',[o.Name for o in d.Objects]==before)
+  d.redo();h=d.getObject('Loft001');check('Redo restores same shape and immutable evidence',h is not None and h.OM9GeometryResult==raw and abs(h.Shape.Area-30)<1e-6)
+  d.saveAs(str(out/'surface-result-identity.FCStd'));App.closeDocument(d.Name);d=App.openDocument(str(out/'surface-result-identity.FCStd'));h=d.getObject('Loft001')
+  check('FCStd retains unrecorded output pair',h is not None and h.OM9GeometryResult==raw and abs(h.Shape.Area-30)<1e-6)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for n in list(App.listDocuments()):App.closeDocument(n)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

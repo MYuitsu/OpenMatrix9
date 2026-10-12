@@ -10,6 +10,20 @@ evidence_scope: initial_source_audit_2026-10-09
 
 # RCORE-07 — NURBS editing và modeling
 
+## Cập nhật tiến độ P0 — 2026-10-10
+
+Các fixture nền đã nghiệm thu theo lát cắt: basis/query T01, phân đoạn
+polycurve T05, instance T06, input gate T07, Rebuild publication T08, periodic
+FCStd T09, Circle/Line parameter dependency T10 và mutation ownership T11.
+Các đường này tái sử dụng adapter openNURBS/OCCT, editor và serializer hiện có;
+chúng không tạo một NURBS editor hoặc solver tổng quát. Gate input-tree mới đạt
+92 native checks, 6 CTests và 21 host checks; decode thô, allocator, analytic
+còn lại và các đường cage/worker vẫn mở.
+[Bằng chứng input-tree](../../../docs/validation/2026-10-10-rhino-core-native-mesh-cloud.md),
+[T10](../../../docs/validation/2026-10-10-rhino-core-host-parameter-dependency.md),
+[T08](../../../docs/validation/2026-10-10-rhino-core-delayed-publication.md).
+**RCORE-07 và toàn bộ P0 vẫn đang triển khai.**
+
 <!-- rhino-core-kernel-contract:start -->
 Dùng lại bộ chuyển đổi FreeCAD/OCCT/openNURBS; bổ sung validator basis Rust,
 descriptor chỉ đọc và policy cho inspection/working 3DM. 480 Rust tests;

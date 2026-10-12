@@ -8,10 +8,107 @@ struct State {
     session: CurveSession,
     message: String,
     outline: Vec<[f64; 3]>,
+    generation: u64,
+    generation_exhausted: bool,
+}
+impl State {
+    fn retire_generation(&mut self) {
+        match self.generation.checked_add(1) {
+            Some(next)=>self.generation=next,
+            None=>self.generation_exhausted=true,
+        }
+    }
+    fn publication_generation(&self)->u64 {
+        if self.generation_exhausted {0} else {self.generation}
+    }
 }
 fn state() -> &'static Mutex<State> {
     static S: OnceLock<Mutex<State>> = OnceLock::new();
     S.get_or_init(|| Mutex::new(State::default()))
+}
+type CommandOptionState=(&'static str,std::collections::BTreeMap<String,crate::command_options::OptionValue>,Vec<(&'static str,bool,&'static str)>,u64,u64);
+pub(crate) fn command_option_state()->Option<CommandOptionState>{
+    let s=state().lock().ok()?;let (id,values)=crate::command_option_schemas::curve_state(&s.session)?;
+    let count=s.session.points().len();let name=s.session.name();let mut gates=vec![
+        ("Close",count>=3,"Pick at least three points first"),("Undo",s.session.command_option_undo_available(),"No accepted input to undo"),
+        ("BothSides",count==0,"BothSides is available before the first point"),("Length",count>0,"Pick the first point before Length"),
+        ("Width",count>0,"Pick the first point before Width"),("Sharp",count>=3,"Pick at least three points first"),
+    ];
+    if name!="Polyline" {gates.push(("Mode",count==0,"Choose Mode before the first point"));}else{gates.push(("Mode",count>0,"Pick the first point before Mode"));}
+    if name=="Ellipse"{gates.push(("MarkFoci",matches!(values.get("Mode"),Some(crate::command_options::OptionValue::Choice(v)) if v=="FromFoci"),"MarkFoci requires FromFoci"));}
+    if name=="Circle"||name=="Ellipse"{let mode=if name=="Circle"{s.session.circle_reference_mode()}else{s.session.ellipse_reference_mode()};gates.push(("Curve",matches!(mode,1|3|4),"Choose a native reference mode before selecting a curve"));gates.push(("OnCurve",mode==2,"Select the reference curve first"));}
+    Some((id,values,gates,s.publication_generation(),s.session.native_input_revision()))
+}
+pub(crate) fn apply_command_options(feature_id:&str,generation:u64,revision:u64,changes:&[(String,crate::command_options::OptionValue)],accept:impl FnOnce()->Result<(),String>)->Result<u32,String>{
+    let mut s=state().lock().map_err(|_|"Curve session unavailable")?;let mut proposed=s.session.clone();let mut result=Effect::Waiting;
+    if generation==0||generation!=s.publication_generation()||revision!=s.session.native_input_revision()||crate::command_option_schemas::curve_state(&proposed).is_none_or(|(id,_)|id!=feature_id){return Err("Stale Curve option session".into());}
+    for (key,value) in changes{
+        let input=if key=="Mode"&&proposed.name()!="Polyline"{value.text()}else{
+            let suffix=if matches!(value,crate::command_options::OptionValue::Number(_))&&matches!(key.as_str(),"Length"|"Width"){"mm"}else{""};format!("{}={}{}",key,value.text(),suffix)
+        };
+        result=proposed.input(&input)?;
+    }
+    accept()?;s.session=proposed;Ok(effect(&mut s,Ok(result)))
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_curve_generation()->u64{
+    state().lock().ok().map_or(0,|s|s.publication_generation())
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_curve_input_revision()->u64{
+    state().lock().ok().map_or(0,|s|s.session.native_input_revision())
+}
+/// # Safety
+/// input is one initialized immutable UTF8 allocation of length bytes for this
+/// synchronous call. The caller owns/free its allocation; Rust retains values
+/// only, never the pointer or a native owner. Header checks cannot prove pointer
+/// provenance. Generation/context are checked under the same session lock as
+/// admission. Effects match the existing Curve ABI (0 error,1 wait,2 commit).
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_curve_native_input_json(input:*const u8,length:usize)->u32{
+    if length==0||length>crate::prepared_result::MAX_RESULT_BYTES||length>isize::MAX as usize
+        ||input.is_null()||(input as usize).checked_add(length).is_none(){return 0;}
+    let raw=std::str::from_utf8(unsafe{std::slice::from_raw_parts(input,length)});
+    let Ok(mut s)=state().lock()else{return 0;};
+    if s.generation_exhausted{return 0;}
+    let raw=match raw{Ok(raw)=>raw,Err(_)=>return effect(&mut s,Err("InvalidBasis: Curve native input contains invalid UTF8; source unavailable".into()))};
+    let generation=s.generation;
+    // Catch inside the locked boundary: rejected admission must not poison the
+    // shared state mutex, and the session publishes only a successful clone.
+    let result=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||s.session.accept_native_json(raw,generation)))
+        .unwrap_or_else(|_|Err("KernelFailure: Curve native input/source admission panicked".into()));
+    effect(&mut s,result)
+}
+#[repr(C)]
+#[derive(Debug,Clone,Copy)]
+pub struct ConstructionSummary{pub status:u32,pub reserved:u32,pub needed:usize,pub generation:u64}
+/// # Safety
+/// Caller owns a writable allocation of capacity bytes for this call; no
+/// pointer is retained. Null/capacity0 queries, with generation0 selecting the
+/// current generation. Copy requires the queried nonzero generation. Bounds
+/// and generation checks precede every write under the session lock.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_curve_construction_json(generation:u64,output:*mut u8,capacity:usize)->ConstructionSummary{
+    let rejected=|status,needed,generation|ConstructionSummary{status,reserved:0,needed,generation};
+    if capacity>crate::prepared_result::MAX_RESULT_BYTES||capacity>isize::MAX as usize{return rejected(2,0,0);}
+    if (output.is_null()&&capacity!=0)||(!output.is_null()&&(output as usize).checked_add(capacity).is_none()){
+        return rejected(1,0,0);
+    }
+    std::panic::catch_unwind(||{
+        let Ok(s)=state().lock()else{return rejected(7,0,0);};
+        if s.generation_exhausted||s.generation==0||(generation==0&&!output.is_null())||(generation!=0&&generation!=s.generation){return rejected(5,0,0);}
+        let json=match s.session.construction_evidence(s.generation){Ok(json)=>json,Err(status)=>return rejected(status,0,s.generation)};
+        let needed=json.len();
+        if output.is_null(){return rejected(0,needed,s.generation);}
+        if capacity<needed{return rejected(2,needed,s.generation);}
+        unsafe{std::ptr::copy_nonoverlapping(json.as_ptr(),output,needed);}
+        rejected(0,needed,s.generation)
+    }).unwrap_or_else(|_|rejected(7,0,0))
+}
+pub(crate) fn current_construction_capability(input:crate::geometry_contract::RepresentationKind,
+    stage:crate::native_curve_capability::Stage)
+    ->Option<Result<crate::geometry_contract::OperationCapability,crate::geometry_contract::CapabilityError>>{
+    state().lock().ok().map(|s|s.session.construction_capability(input,stage))
 }
 #[unsafe(no_mangle)]
 pub extern "C" fn om9_curve_input_units(mm_per_unit: f64) -> bool {
@@ -27,7 +124,7 @@ fn effect(s: &mut State, result: Result<Effect, String>) -> u32 {
             match e {
                 Effect::Waiting => 1,
                 Effect::Commit => 2,
-                Effect::Cancelled => 3,
+                Effect::Cancelled => {s.retire_generation();3},
             }
         }
         Err(message) => {
@@ -302,7 +399,7 @@ pub unsafe extern "C" fn om9_circle_validate_plan(input: *const f64, output: *mu
 /// `points` addresses `count * 3` readable doubles, count <= 1024.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn om9_circle_fit_batch(points: *const f64, count: usize) -> u32 {
-    if points.is_null() || count == 0 || count > 1024 {
+    if points.is_null() || count == 0 || !crate::fit_point_input::admit_count(0,count) {
         return 0;
     }
     let Ok(mut s) = state().lock() else {
@@ -434,8 +531,11 @@ pub unsafe extern "C" fn om9_curve_start(text: *const c_char) -> bool {
     let Ok(mut s) = state().lock() else {
         return false;
     };
+    if s.generation_exhausted{return false;}
+    let Some(generation)=s.generation.checked_add(1)else{return false;};
     match s.session.start(text) {
         Ok(()) => {
+            s.generation=generation;
             s.message = s.session.prompt();
             true
         }
@@ -512,6 +612,7 @@ pub extern "C" fn om9_curve_frame(
 pub extern "C" fn om9_curve_cancel() {
     if let Ok(mut s) = state().lock() {
         s.session.cancel();
+        s.retire_generation();
         s.message = s.session.prompt();
     }
 }
@@ -710,6 +811,13 @@ pub unsafe extern "C" fn om9_curve_message(buffer: *mut c_char, capacity: usize)
 #[cfg(test)]
 mod context_key_tests {
     use super::*;
+    #[test]
+    fn cancelling_the_last_generation_retires_it_without_wrapping() {
+        let mut s=State{generation:u64::MAX,..State::default()};
+        s.retire_generation();assert_eq!(s.publication_generation(),0);
+        assert!(s.generation_exhausted);assert_eq!(s.generation,u64::MAX);
+        s.retire_generation();assert_eq!(s.publication_generation(),0);
+    }
     #[test]
     fn native_context_key_buffer_probes_and_short_writes_are_atomic() {
         {

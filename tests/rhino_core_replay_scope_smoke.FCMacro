@@ -1,0 +1,74 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Actual Document journal isolation, callbacks and executable caller history."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def prefix(case,phase):
+ (out/'prefix.json').write_text(json.dumps(dict(case=case,phase=phase,completed=False,checks=len(report['checks']),observations=len(report['observations']))))
+ (out/'partial.json').write_text(json.dumps(dict(report,completed=False)))
+def state(doc):return dict(booked=doc.getBookedTransactionID(),pending=doc.HasPendingTransaction,undo=list(doc.UndoNames),redo=list(doc.RedoNames))
+class Observer:
+ def __init__(self,name,action):self.name=name;self.action=action;self.calls=0;self.rejected=False
+ def slotChangedObject(self,obj,prop):
+  if obj.Document.Name!=self.name or obj.Name!='Child' or prop!='Output' or obj.Output!='replayed-output' or self.calls:return
+  self.calls+=1;doc=App.getDocument(self.name)
+  try:
+   if self.action=='source':doc.getObject('Source').Label='tampered-source'
+   elif self.action=='metadata':obj.Label='tampered-label'
+   elif self.action=='close':App.closeDocument(doc.Name)
+   elif self.action=='remove':doc.removeObject(obj.Name)
+   elif self.action=='create':doc.addObject('App::FeaturePython','Unexpected')
+   elif self.action=='commit':doc.commitTransaction()
+   elif self.action=='abort':doc.abortTransaction()
+   elif self.action=='clear':doc.clearUndos()
+   elif self.action=='undo':doc.undo()
+   elif self.action=='redo':doc.redo()
+   elif self.action=='units':doc.UnitSystem=2
+  except Exception:self.rejected=True
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM;report['module']=OM.__file__;sys.path.insert(0,os.environ['OM9_REPLAY_SCOPE_PROBE']);import OM9ReplayScope as probe;report['probe']=probe.__file__
+  check('native Document replay scope API is available',probe.available())
+  if not probe.available():report['ok']=False;return
+  for undo_mode in [0,1]:
+   for mode in ['plain','booked','active','preserving']:
+    for action in ['explicit','source','metadata','close','remove','create','commit','abort','clear','undo','redo','units','accept']:
+     key=str(undo_mode)+'/'+mode+'/'+action;prefix(key,'setup')
+     doc=App.newDocument('Scope'+str(undo_mode)+mode+action);doc.UndoMode=undo_mode
+     actual_undo_mode=doc.UndoMode
+     check(str(undo_mode)+'/'+mode+'/'+action+' requested UndoMode is implemented',actual_undo_mode==undo_mode)
+     source=doc.addObject('App::FeaturePython','Source');child=doc.addObject('App::FeaturePython','Child');child.addProperty('App::PropertyString','Output');child.Output='original-output';child.Label='original-label';source.Label='original-source';doc.recompute();doc.clearUndos()
+     if actual_undo_mode:
+      doc.openTransaction('Prior redo');source.Label='redo-source';doc.commitTransaction();doc.undo()
+     if mode=='preserving':doc.openTransactionPreservingRedo('Caller')
+     elif mode!='plain':doc.openTransaction('Caller')
+     if mode=='active':source.Label='caller-source';child.Label='caller-label'
+     before=state(doc);label=child.Label;source_label=source.Label;observer=Observer(doc.Name,action)
+     if action not in ['explicit','accept']:App.addDocumentObserver(observer)
+     prefix(key,'before_native');result=probe.run(doc.Name,child.Name,action=='accept');prefix(key,'after_native')
+     if action not in ['explicit','accept']:App.removeDocumentObserver(observer)
+     key=str(undo_mode)+'/'+mode+'/'+action;live=doc.Name in App.listDocuments();check(key+' keeps document alive',live)
+     check(key+' preserves native source and child ownership',live and doc.getObject('Child')is child and doc.getObject('Source')is source and doc.getObject('Unexpected')is None and source.Label==source_label)
+     if action=='accept':
+      check(key+' accepts paired native property result',result['accepted']and result['complete']and child.Label=='replayed-label' and child.Output=='replayed-output')
+      if mode!='plain'and actual_undo_mode:
+       prefix(key,'before_caller_commit');doc.commitTransaction();prefix(key,'before_caller_undo');doc.undo();prefix(key,'after_caller_undo');check(key+' actual caller Undo keeps first-write originals',child.Label=='original-label' and child.Output=='original-output'and source.Label=='original-source');prefix(key,'before_caller_redo');doc.redo();prefix(key,'after_caller_redo');check(key+' actual caller Redo restores accepted replay',child.Label=='replayed-label'and child.Output=='replayed-output'and source.Label==source_label)
+      else:check(key+' no invented user journal',state(doc)==before)
+     else:
+      check(key+' rejects and completes checked rollback cleanup',not result['accepted']and result['rollback']and result['complete']and 'StaleGeometry'in result['error'])
+      check(key+' restores metadata and clears error output',child.Label==label and child.Output=='')
+      check(key+' exact rejection-time caller booking and executable stack',state(doc)==before)
+      if action!='explicit':check(key+' observer attempted once',observer.calls==1)
+      if mode!='plain':doc.abortTransaction()
+      if before['redo']:doc.redo();check(key+' prior native Redo remains executable',source.Label=='redo-source')
+     report['observations'].append(dict(case=key,requested_undo_mode=undo_mode,actual_undo_mode=actual_undo_mode,before=before,after=state(doc),result=result,calls=observer.calls,rejected=observer.rejected));App.closeDocument(doc.Name)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

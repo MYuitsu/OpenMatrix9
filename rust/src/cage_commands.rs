@@ -95,28 +95,31 @@ pub struct Session {
     error: CString,
 }
 impl Session {
+    pub fn capability_request(&self,stage:crate::native_cage_capability::Stage,role:crate::native_cage_capability::Role)
+        ->Result<crate::native_cage_capability::Request,&'static str>{
+        use crate::native_cage_capability::{Request,Role};
+        if self.kind==Kind::None{return Err("Unsupported Cage command");}
+        Ok(Request{kind:self.kind,stage,phase:self.phase,role,input_count:self.inputs.len(),
+            has_control:self.control.is_some(),retained:self.retained||role==Role::RetainedControl,
+            explicit_bounds:false,counts:self.counts,degrees:self.degrees,lo:self.lo,hi:self.hi,
+            local:self.local,falloff:self.falloff})
+    }
     pub fn validate_commit(&self) -> Result<(), &'static str> {
         if !matches!(self.phase, Phase::Options | Phase::Ready) {
             return Err("Complete the Cage selection before committing");
         }
-        Ok(())
+        use crate::{native_cage_capability::{Stage,Role},geometry_contract::*};
+        let role=if self.retained{Role::RetainedControl}else{Role::Geometry};
+        let input=if self.retained{RepresentationKind::Retained}else{RepresentationKind::Brep};
+        let request=self.capability_request(Stage::Construct,role)?;
+        operation_capability(OperationId::NativeCage,input,OperationOptions::NativeCage(request))
+            .map(|_|()).map_err(|_|"UnsupportedOptions: Cage request is incomplete or invalid")
     }
     fn parameters(&mut self, counts: [usize; 3], degrees: [usize; 3]) -> Result<(), &'static str> {
-        let mut total = 1usize;
-        for a in 0..3 {
-            if !(2..=128).contains(&counts[a])
-                || !(1..=16).contains(&degrees[a])
-                || counts[a] <= degrees[a]
-            {
-                return Err(
-                    "Counts must exceed degree; counts must be 2..128; degree must be 1..16",
-                );
-            }
-            total = total
-                .checked_mul(counts[a])
-                .filter(|x| *x <= 1_000_000)
-                .ok_or("Cage exceeds control point budget")?;
-        }
+        crate::cage::box_dimensions(counts,degrees).map_err(|error|match error{
+            crate::cage::Error::Capacity=>"Cage exceeds control point budget",
+            _=>"Counts must exceed degree; counts must be 2..128; degree must be 1..16",
+        })?;
         self.counts = counts;
         self.degrees = degrees;
         Ok(())
@@ -370,6 +373,7 @@ pub unsafe extern "C" fn om9_cage_session_add(
     role: u32,
 ) -> i32 {
     mutate(h, |h| {
+        if role>2{return Err("UnsupportedOptions: unknown Cage input role");}
         if lo.is_null() || hi.is_null() {
             return Err("Null bounds");
         }

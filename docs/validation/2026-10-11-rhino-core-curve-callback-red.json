@@ -1,0 +1,392 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-curve-callback-red-20261011",
+  "updated_at": "2026-10-11T23:09:13+07:00",
+  "status": "in_progress",
+  "scope": "Real native Curve publication callback failure witness, not full chapter acceptance",
+  "native": {
+    "artifact": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-retry-offscreen-20261011",
+    "fixture": "rhino_core_curve_callback_smoke.FCMacro",
+    "checks": 210,
+    "passed": 42,
+    "failures": [
+      "Line/shape complete document and Undo and prior Redo unchanged",
+      "Line/shape no rejected output remains",
+      "Line/shape typed diagnostic identifies actual operation",
+      "Line/shape prior native Redo still executes",
+      "Line/placement complete document and Undo and prior Redo unchanged",
+      "Line/placement no rejected output remains",
+      "Line/placement typed diagnostic identifies actual operation",
+      "Line/placement prior native Redo still executes",
+      "Line/construction complete document and Undo and prior Redo unchanged",
+      "Line/construction no rejected output remains",
+      "Line/construction typed diagnostic identifies actual operation",
+      "Line/construction prior native Redo still executes",
+      "Line/result complete document and Undo and prior Redo unchanged",
+      "Line/result no rejected output remains",
+      "Line/result typed diagnostic identifies actual operation",
+      "Line/result prior native Redo still executes",
+      "Line/units complete document and Undo and prior Redo unchanged",
+      "Line/units no rejected output remains",
+      "Line/units typed diagnostic identifies actual operation",
+      "Line/units prior native Redo still executes",
+      "Line/parent complete document and Undo and prior Redo unchanged",
+      "Line/parent no rejected output remains",
+      "Line/parent typed diagnostic identifies actual operation",
+      "Line/parent prior native Redo still executes",
+      "Line/restart-same complete document and Undo and prior Redo unchanged",
+      "Line/restart-same no rejected output remains",
+      "Line/restart-same typed diagnostic identifies actual operation",
+      "Line/restart-same callback replacement session completes independently",
+      "Polyline/shape complete document and Undo and prior Redo unchanged",
+      "Polyline/shape no rejected output remains",
+      "Polyline/shape typed diagnostic identifies actual operation",
+      "Polyline/shape prior native Redo still executes",
+      "Polyline/placement complete document and Undo and prior Redo unchanged",
+      "Polyline/placement no rejected output remains",
+      "Polyline/placement typed diagnostic identifies actual operation",
+      "Polyline/placement prior native Redo still executes",
+      "Polyline/construction complete document and Undo and prior Redo unchanged",
+      "Polyline/construction no rejected output remains",
+      "Polyline/construction typed diagnostic identifies actual operation",
+      "Polyline/construction prior native Redo still executes",
+      "Polyline/result complete document and Undo and prior Redo unchanged",
+      "Polyline/result no rejected output remains",
+      "Polyline/result typed diagnostic identifies actual operation",
+      "Polyline/result prior native Redo still executes",
+      "Polyline/units complete document and Undo and prior Redo unchanged",
+      "Polyline/units no rejected output remains",
+      "Polyline/units typed diagnostic identifies actual operation",
+      "Polyline/units prior native Redo still executes",
+      "Polyline/parent complete document and Undo and prior Redo unchanged",
+      "Polyline/parent no rejected output remains",
+      "Polyline/parent typed diagnostic identifies actual operation",
+      "Polyline/parent prior native Redo still executes",
+      "Polyline/restart-same complete document and Undo and prior Redo unchanged",
+      "Polyline/restart-same no rejected output remains",
+      "Polyline/restart-same typed diagnostic identifies actual operation",
+      "Polyline/restart-same callback replacement session completes independently",
+      "Rectangle/shape complete document and Undo and prior Redo unchanged",
+      "Rectangle/shape no rejected output remains",
+      "Rectangle/shape typed diagnostic identifies actual operation",
+      "Rectangle/shape prior native Redo still executes",
+      "Rectangle/placement complete document and Undo and prior Redo unchanged",
+      "Rectangle/placement no rejected output remains",
+      "Rectangle/placement typed diagnostic identifies actual operation",
+      "Rectangle/placement prior native Redo still executes",
+      "Rectangle/construction complete document and Undo and prior Redo unchanged",
+      "Rectangle/construction no rejected output remains",
+      "Rectangle/construction typed diagnostic identifies actual operation",
+      "Rectangle/construction prior native Redo still executes",
+      "Rectangle/result complete document and Undo and prior Redo unchanged",
+      "Rectangle/result no rejected output remains",
+      "Rectangle/result typed diagnostic identifies actual operation",
+      "Rectangle/result prior native Redo still executes",
+      "Rectangle/units complete document and Undo and prior Redo unchanged",
+      "Rectangle/units no rejected output remains",
+      "Rectangle/units typed diagnostic identifies actual operation",
+      "Rectangle/units prior native Redo still executes",
+      "Rectangle/parent complete document and Undo and prior Redo unchanged",
+      "Rectangle/parent no rejected output remains",
+      "Rectangle/parent typed diagnostic identifies actual operation",
+      "Rectangle/parent prior native Redo still executes",
+      "Rectangle/restart-same complete document and Undo and prior Redo unchanged",
+      "Rectangle/restart-same no rejected output remains",
+      "Rectangle/restart-same typed diagnostic identifies actual operation",
+      "Rectangle/restart-same callback replacement session completes independently",
+      "Circle/shape complete document and Undo and prior Redo unchanged",
+      "Circle/shape no rejected output remains",
+      "Circle/shape typed diagnostic identifies actual operation",
+      "Circle/shape prior native Redo still executes",
+      "Circle/placement complete document and Undo and prior Redo unchanged",
+      "Circle/placement no rejected output remains",
+      "Circle/placement typed diagnostic identifies actual operation",
+      "Circle/placement prior native Redo still executes",
+      "Circle/construction complete document and Undo and prior Redo unchanged",
+      "Circle/construction no rejected output remains",
+      "Circle/construction typed diagnostic identifies actual operation",
+      "Circle/construction prior native Redo still executes",
+      "Circle/result complete document and Undo and prior Redo unchanged",
+      "Circle/result no rejected output remains",
+      "Circle/result typed diagnostic identifies actual operation",
+      "Circle/result prior native Redo still executes",
+      "Circle/units complete document and Undo and prior Redo unchanged",
+      "Circle/units no rejected output remains",
+      "Circle/units typed diagnostic identifies actual operation",
+      "Circle/units prior native Redo still executes",
+      "Circle/parent complete document and Undo and prior Redo unchanged",
+      "Circle/parent no rejected output remains",
+      "Circle/parent typed diagnostic identifies actual operation",
+      "Circle/parent prior native Redo still executes",
+      "Circle/restart-same complete document and Undo and prior Redo unchanged",
+      "Circle/restart-same no rejected output remains",
+      "Circle/restart-same typed diagnostic identifies actual operation",
+      "Circle/restart-same callback replacement session completes independently",
+      "Ellipse/shape complete document and Undo and prior Redo unchanged",
+      "Ellipse/shape no rejected output remains",
+      "Ellipse/shape typed diagnostic identifies actual operation",
+      "Ellipse/shape prior native Redo still executes",
+      "Ellipse/placement complete document and Undo and prior Redo unchanged",
+      "Ellipse/placement no rejected output remains",
+      "Ellipse/placement typed diagnostic identifies actual operation",
+      "Ellipse/placement prior native Redo still executes",
+      "Ellipse/construction complete document and Undo and prior Redo unchanged",
+      "Ellipse/construction no rejected output remains",
+      "Ellipse/construction typed diagnostic identifies actual operation",
+      "Ellipse/construction prior native Redo still executes",
+      "Ellipse/result complete document and Undo and prior Redo unchanged",
+      "Ellipse/result no rejected output remains",
+      "Ellipse/result typed diagnostic identifies actual operation",
+      "Ellipse/result prior native Redo still executes",
+      "Ellipse/units complete document and Undo and prior Redo unchanged",
+      "Ellipse/units no rejected output remains",
+      "Ellipse/units typed diagnostic identifies actual operation",
+      "Ellipse/units prior native Redo still executes",
+      "Ellipse/parent complete document and Undo and prior Redo unchanged",
+      "Ellipse/parent no rejected output remains",
+      "Ellipse/parent typed diagnostic identifies actual operation",
+      "Ellipse/parent prior native Redo still executes",
+      "Ellipse/restart-same complete document and Undo and prior Redo unchanged",
+      "Ellipse/restart-same no rejected output remains",
+      "Ellipse/restart-same typed diagnostic identifies actual operation",
+      "Ellipse/restart-same callback replacement session completes independently",
+      "InterpCrv/shape complete document and Undo and prior Redo unchanged",
+      "InterpCrv/shape no rejected output remains",
+      "InterpCrv/shape typed diagnostic identifies actual operation",
+      "InterpCrv/shape prior native Redo still executes",
+      "InterpCrv/placement complete document and Undo and prior Redo unchanged",
+      "InterpCrv/placement no rejected output remains",
+      "InterpCrv/placement typed diagnostic identifies actual operation",
+      "InterpCrv/placement prior native Redo still executes",
+      "InterpCrv/construction complete document and Undo and prior Redo unchanged",
+      "InterpCrv/construction no rejected output remains",
+      "InterpCrv/construction typed diagnostic identifies actual operation",
+      "InterpCrv/construction prior native Redo still executes",
+      "InterpCrv/result complete document and Undo and prior Redo unchanged",
+      "InterpCrv/result no rejected output remains",
+      "InterpCrv/result typed diagnostic identifies actual operation",
+      "InterpCrv/result prior native Redo still executes",
+      "InterpCrv/units complete document and Undo and prior Redo unchanged",
+      "InterpCrv/units no rejected output remains",
+      "InterpCrv/units typed diagnostic identifies actual operation",
+      "InterpCrv/units prior native Redo still executes",
+      "InterpCrv/parent complete document and Undo and prior Redo unchanged",
+      "InterpCrv/parent no rejected output remains",
+      "InterpCrv/parent typed diagnostic identifies actual operation",
+      "InterpCrv/parent prior native Redo still executes",
+      "InterpCrv/restart-same complete document and Undo and prior Redo unchanged",
+      "InterpCrv/restart-same no rejected output remains",
+      "InterpCrv/restart-same typed diagnostic identifies actual operation",
+      "InterpCrv/restart-same callback replacement session completes independently"
+    ],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+      "pid": 69172,
+      "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-retry-offscreen-20261011",
+      "exit_code": 0
+    },
+    "plugin": {
+      "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+      "bytes": 16369664,
+      "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+    },
+    "probe": null,
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-retry-offscreen-20261011/results.json",
+        "bytes": 204271,
+        "sha256": "30582b0a162bcdf116a21a304b4e622fd50f91dec067a452390ef3af194283a4"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-retry-offscreen-20261011/shared-host-launch.json",
+        "bytes": 597,
+        "sha256": "a7325d08b3323af18bfb3d148df01b4f7f10d1d1cd9f1eeaf15f3751d0be59b4"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-retry-offscreen-20261011/loaded-native-app.json",
+        "bytes": 227,
+        "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-retry-offscreen-20261011/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-retry-offscreen-20261011/fixture.FCMacro",
+        "bytes": 5795,
+        "sha256": "96dae63b7d971ac0ae3e85036060f5965fffcff9b435464c7e3b974865a8c503"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-retry-offscreen-20261011/host-stdout.log",
+        "bytes": 353,
+        "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-retry-offscreen-20261011/host-stderr.log",
+        "bytes": 42823,
+        "sha256": "a7fd246afea63e7e006ec00f4c917ab26c046a84c61ed74560097cc8e9a27205"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-retry-offscreen-20261011/user.cfg",
+        "bytes": 18066,
+        "sha256": "ab7391a5182e0a737e066f8b0a73a148d70539fc3aaad2330277d70f535d1cb1"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-retry-offscreen-20261011/select-plugin.FCMacro",
+        "bytes": 2832,
+        "sha256": "b0128c5df15c54d13111f8cdb1652f7bc39a313ab233440a4807430ed137ad88"
+      }
+    ]
+  },
+  "passed": 42,
+  "failed": 168,
+  "total": 210,
+  "actual_host_exit": 0,
+  "source_fixture": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_callback_smoke.FCMacro",
+    "bytes": 5795,
+    "sha256": "96dae63b7d971ac0ae3e85036060f5965fffcff9b435464c7e3b974865a8c503"
+  },
+  "matching_production": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve.rs",
+      "bytes": 66469,
+      "sha256": "d934e328a3aafb4457c1d014af6f5f3864be894b1baf3920d0d0d068884e197d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_result.rs",
+      "bytes": 8894,
+      "sha256": "f4d799ee19b542be369d1a88d6be46538980e559518c85cb66bf9c0eda069365"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_result_tests.rs",
+      "bytes": 7511,
+      "sha256": "1dc47232a5fa1d4d9a8ced63bb6cbef44bf10398cb2110bada53f30f6cc39614"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_native_input_tests.rs",
+      "bytes": 19779,
+      "sha256": "96914f8cacb7ba4f0f93c8b846d815eb728a2f4015c2585696cbbaade14eea2a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/prepared_result.rs",
+      "bytes": 22811,
+      "sha256": "6fce8ab8dc49e885e82e5e10afad478d698f2225048cef76d689f9207b4e15b6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveGeometry.h",
+      "bytes": 1433,
+      "sha256": "40f4f5211c58721acfed18dcb105e6c94f81946d51d5b0127b39d74dd6a98ecd"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveGeometry.cpp",
+      "bytes": 8123,
+      "sha256": "fd78e6975c3172d11fa371ae8c6a98834c1a413b4ef184befda1c7679da57761"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveController.cpp",
+      "bytes": 37985,
+      "sha256": "c70821edf36305e8eb7e376318004ec2b08f62b38057df21c7b2e9a8e19af447"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveEllipse.cpp",
+      "bytes": 12399,
+      "sha256": "9c031cb5e6f884470cee722a16d2bd69cc222f28f47768056c02bfb74a4b842e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_result_smoke.FCMacro",
+      "bytes": 5427,
+      "sha256": "1aa7b6815d6cce213cedf7d35bf9559d8a482cc51662bd003b57917b5e3acc9d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_result_native_smoke.FCMacro",
+      "bytes": 7802,
+      "sha256": "ca3e389248e45d35584fe3dbe8c58b921a5b6c746d6bd7cbb5423b4ca3647b5e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_result_cold_smoke.FCMacro",
+      "bytes": 5039,
+      "sha256": "c7d059dd6b55de1a0abe9a8e6af7b6a9257c6361c8064bc7a46fa52eb69e1597"
+    }
+  ],
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+    "bytes": 16369664,
+    "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+  },
+  "shared_sdk_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "prior_result_checkpoint": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-11-rhino-core-curve-result.json",
+    "bytes": 91514,
+    "sha256": "75ae814e3eac26eeda52b43ffa330da413fa6cbc5e8fa6f64763e729eebdd49c"
+  },
+  "prior_scoped_verification": {
+    "path": "H:/FreeCAD-src/build/curve-result-verification52-20261011.json",
+    "bytes": 585,
+    "sha256": "25c0d2384157bdafbdaf808640bf5140f99fc5d0382bcc51a5bf6b944db8f08a"
+  },
+  "excluded_initial_witness": {
+    "reason": "Initial restart assertion could mistake the admitted old output for a successful replacement. Tightened it to require prior rejection and exact document restoration before the new result plus independent literal dimensions. Initial48/210 is exploratory only; authoritative retry42/210.",
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-offscreen-20261011/results.json",
+        "bytes": 204185,
+        "sha256": "bf804f2225391f30eb599c870a0b690426e28b2db01e8eb7968386f8fb60b73d"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-offscreen-20261011/shared-host-launch.json",
+        "bytes": 591,
+        "sha256": "d3a520b0caf4d89ec5292a457bee020fe4a11faf27e1c202bcbdf49735cf3d67"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-callback-red52-offscreen-20261011/fixture.FCMacro",
+        "bytes": 5358,
+        "sha256": "b1b97e26f7de86723ae5d96efdd4d698b47444eda09e9eb8aff98609b618be74"
+      }
+    ]
+  },
+  "root_cause": [
+    "CurveController and CurveEllipse use ordinary openTransaction, which clears prior native Redo on publication attempts.",
+    "After native observers mutate Shape/Placement/construction/result/units/parent, the ordinary commit path does not compare complete actual output to immutable expected evidence.",
+    "The result handler clears units/source/document state after commit or cancels after error without binding that cleanup to the original generation; a restarted same-command session can be erased."
+  ],
+  "remaining": [
+    "Every original RCORE-01 requirement remains required: adapters1–7, C01–C12, T01–T11 and every enabled family/consumer, GeometryRef/Snapshot/Result, rational/periodic basis, trims/pcurves/seam occurrences, independent read/edit/retain/export.",
+    "Task2 remains open: generic native snap/pick provenance, all original numeric/native parameter paths, full subset/index sharing across selection observations, aggregate allocation/traversal/worker/cancellation bounds. Replay currently duplicates construction sources/events in the common result; complete sharing and aggregate cost remain required.",
+    "Task3 main direct Curve results are paired, but Ellipse foci and Circle History recompute/freeze/detach/Rebuild result lifecycle still require implementation and independent native/cold evidence.",
+    "Checked Curve publication remains required: generation/revision/context, full source content/units/frame/locks/owners, layer/output/metadata at callback barriers, with prior executable native Redo preserved on rejection. Existing ordinary transaction abort is not certification.",
+    "Analytic-to-NURBS global deviation/locus and parameter mapping, complete topology maps and output attributes remain unproven. Native validity/master/physical dimensions are scoped observations; conversion exactness remains uninspected and maps null.",
+    "Tangent/native_solution, changed CPlanes/orientation, every numeric mode and explicit non-Circle Undo, repeated/shared sources and revision exhaustion are not established by the six focused Rust tests/nine new native recipes.",
+    "Offscreen evidence does not establish actual mouse, every viewport preview lifetime, OpenGL/render acceptance or all original cache/resource invariants. Production ABI/deployment acceptance remains pending; selected App/GUI host reuses the one SDK.",
+    "Expanded source/resource/test inventories are not exact compiler dependency certificates. Source inspection review establishes no runtime behavior beyond the named executed fixtures."
+  ],
+  "next_action": "Use the existing native openTransactionPreservingRedo API for Curve. Freeze execution command/document/units/generation/admission revision/source guards before callbacks. Recheck session/source/layer/ownership and full output geometry/frame/metadata at creation, metadata, recompute and commit barriers. Keep callback replacement sessions intact on both failure and cleanup; run unchanged RED210 and full matching regressions. Original RCORE-01 scope, auxiliary foci/History/Rebuild, sharing/budgets/conversion/maps remain required.",
+  "full_current_source_matching": false,
+  "source_matching_note": "All checkpoint52 production fingerprints still match. The new callback fixture was added after Runtime52 build; its executed copy is identical. The1407-input postbuild/postnative matching is historical to checkpoint52, not a claim including this new test."
+}

@@ -6,11 +6,13 @@ out=Path(os.environ['OM9_SMOKE_OUTPUT'])
 result={'checks':[]}
 def check(name,value):
     result['checks'].append({'name':name,'passed':bool(value)})
+    (out/'progress.json').write_text(json.dumps(result,indent=2))
     if not value:raise AssertionError(name)
 def run():
     try:
         Gui.activateWorkbench('OpenMatrix9Workbench')
         import ThreeDm, ThreeDmArchiveState as state, OpenMatrix9Gui as native
+        result['module'] = str(Path(native.__file__).resolve())
         invalid=False
         try:state.validate_manifest({'schema_version':1})
         except RuntimeError:invalid=True
@@ -99,5 +101,6 @@ def run():
     except Exception:
         result['ok']=False;result['error']=traceback.format_exc()
     (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
     QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
 QtCore.QTimer.singleShot(1000,run)

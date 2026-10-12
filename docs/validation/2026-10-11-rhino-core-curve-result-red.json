@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-curve-result-red-20261011",
+  "updated_at": "2026-10-11T22:31:24+07:00",
+  "status": "in_progress",
+  "scope": "Task3 actual missing common Curve GeometryResult native witness, not implementation completion",
+  "native": {
+    "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011",
+    "fixture": "rhino_core_curve_result_smoke.FCMacro",
+    "checks": 54,
+    "passed": 12,
+    "failures": [
+      "Line common accepted result has actual constructor identity",
+      "Line owned original numeric points precede solver normalization",
+      "Line independent CAD master preserves physical output and topology",
+      "Line conversion gaps are explicit without fabricated maps",
+      "Line numeric constructor has no invented native source",
+      "Line one Undo Redo restores exact result and Shape",
+      "Line FCStd preserves independently owned result bytes",
+      "Polyline common accepted result has actual constructor identity",
+      "Polyline owned original numeric points precede solver normalization",
+      "Polyline independent CAD master preserves physical output and topology",
+      "Polyline conversion gaps are explicit without fabricated maps",
+      "Polyline numeric constructor has no invented native source",
+      "Polyline one Undo Redo restores exact result and Shape",
+      "Polyline FCStd preserves independently owned result bytes",
+      "Rectangle common accepted result has actual constructor identity",
+      "Rectangle owned original numeric points precede solver normalization",
+      "Rectangle independent CAD master preserves physical output and topology",
+      "Rectangle conversion gaps are explicit without fabricated maps",
+      "Rectangle numeric constructor has no invented native source",
+      "Rectangle one Undo Redo restores exact result and Shape",
+      "Rectangle FCStd preserves independently owned result bytes",
+      "Circle common accepted result has actual constructor identity",
+      "Circle owned original numeric points precede solver normalization",
+      "Circle independent CAD master preserves physical output and topology",
+      "Circle conversion gaps are explicit without fabricated maps",
+      "Circle numeric constructor has no invented native source",
+      "Circle one Undo Redo restores exact result and Shape",
+      "Circle FCStd preserves independently owned result bytes",
+      "Ellipse common accepted result has actual constructor identity",
+      "Ellipse owned original numeric points precede solver normalization",
+      "Ellipse independent CAD master preserves physical output and topology",
+      "Ellipse conversion gaps are explicit without fabricated maps",
+      "Ellipse numeric constructor has no invented native source",
+      "Ellipse one Undo Redo restores exact result and Shape",
+      "Ellipse FCStd preserves independently owned result bytes",
+      "InterpCrv common accepted result has actual constructor identity",
+      "InterpCrv owned original numeric points precede solver normalization",
+      "InterpCrv independent CAD master preserves physical output and topology",
+      "InterpCrv conversion gaps are explicit without fabricated maps",
+      "InterpCrv numeric constructor has no invented native source",
+      "InterpCrv one Undo Redo restores exact result and Shape",
+      "InterpCrv FCStd preserves independently owned result bytes"
+    ],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\curve-native-runtime50-20261011\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "9F90A9E6EB7A3325D59C61B21D62F65E63A736A3D6625EFA367399E0A8766255",
+      "pid": 11252,
+      "module_root": "H:\\FreeCAD-src\\build\\curve-native-runtime50-20261011\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011",
+      "exit_code": 0
+    },
+    "plugin": {
+      "path": "H:/FreeCAD-src/build/curve-native-runtime50-20261011/bin/OpenMatrix9Gui.pyd",
+      "bytes": 16310272,
+      "sha256": "9f90a9e6eb7a3325d59c61b21d62f65e63a736a3d6625efa367399e0a8766255"
+    },
+    "probe": null,
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/results.json",
+        "bytes": 71814,
+        "sha256": "e9de4d9bf97a219156adfbbadc5b7ff1776132ee00d1746c605c3520aca8f74a"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/shared-host-launch.json",
+        "bytes": 589,
+        "sha256": "8a30b5e63ad0e670446c5464f7dc5a216a6170265b12fc40f6f4bd964b08993d"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/loaded-native-app.json",
+        "bytes": 227,
+        "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/fixture.FCMacro",
+        "bytes": 5427,
+        "sha256": "1aa7b6815d6cce213cedf7d35bf9559d8a482cc51662bd003b57917b5e3acc9d"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/host-stdout.log",
+        "bytes": 353,
+        "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/host-stderr.log",
+        "bytes": 9578,
+        "sha256": "85a7e552d6f4ae4997e726bafd916b163692ebca248e425ad85215b636a05a77"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/user.cfg",
+        "bytes": 18050,
+        "sha256": "dc172b84f6e9557878eb18849f7b71f7c6fecda5e3d41c3a52a581716669dbcd"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/select-plugin.FCMacro",
+        "bytes": 2824,
+        "sha256": "99df4cc9020953f3df8665ac4cf98648e29f9a896f6cd936dfd434dd42cdd45e"
+      }
+    ]
+  },
+  "archives": [
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/Circle.FCStd",
+      "bytes": 7467,
+      "sha256": "8b3d2e59a5dbadfff471c14d56ae8f2818a6e3903185202739e506d36eb331af"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/Ellipse.FCStd",
+      "bytes": 7701,
+      "sha256": "4f085eb3ad26d981bd9c0d766274eef7668abab8b25f035c0c889420c2ad2821"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/InterpCrv.FCStd",
+      "bytes": 6178,
+      "sha256": "93854a78f66585fb3dcbb4700bf1c515362fc76a9ce895c73ca8dd006b51a819"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/Line.FCStd",
+      "bytes": 5992,
+      "sha256": "77b5fb73b48d338b60349c856873ab8dab8ed3d29074032a03912d0bce7fd8a1"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/Polyline.FCStd",
+      "bytes": 6110,
+      "sha256": "2a0beebb05ba8a05d98b3454d56041217d236604628cf34e239e3dd02a929024"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-red50-offscreen-20261011/Rectangle.FCStd",
+      "bytes": 6092,
+      "sha256": "28c430b7253653699256bf49add1669ba70813e43ef5db8da940a0d6bf1c8665"
+    }
+  ],
+  "actual_host_exit": 0,
+  "passed": 12,
+  "failed": 42,
+  "total": 54,
+  "source_fixture": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_result_smoke.FCMacro",
+    "bytes": 5427,
+    "sha256": "1aa7b6815d6cce213cedf7d35bf9559d8a482cc51662bd003b57917b5e3acc9d"
+  },
+  "prior_bridge_checkpoint": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-11-rhino-core-curve-native-bridge.json",
+    "bytes": 83096,
+    "sha256": "4501e0c0a138233c6b52aaedc412be5141b9130c00a6e50835f0a8f8ce2610dd"
+  },
+  "remaining": [
+    "All original RCORE-01 requirements remain required: adapters1–7, C01–C12, T01–T11, every enabled consumer, GeometryRef/Snapshot/Result, rational/periodic basis, trims/pcurves/seam occurrences, conversion and complete mapping, independent family read/edit/retain/export.",
+    "Task2 remains open: generic native pick/snap sources for Line/Polyline/Rectangle/InterpCrv and original inputs across every path; full native subset indices, shared full parent snapshots across different selection observations, aggregate allocation/traversal/worker/cancellation bounds.",
+    "Curve OM9CurveConstruction is immutable construction evidence, not a common GeometryResult or current-validity certificate. Exact output CAD master/topology/basis/units, numeric/native input snapshots, auxiliary Ellipse foci, Circle History and Rebuild results remain required.",
+    "Curve checked GUI publication must still revalidate generation/revision/context, complete source content/units/placement/locks/ownership, output and metadata at callback barriers, with real native Undo/Redo preservation. Current source digest guards do not establish every publication barrier.",
+    "Global analytic-to-NURBS deviation/locus and parameter mappings plus full topology maps remain unproven. Native validity and independent physical dimensions do not certify these contracts.",
+    "Offscreen native evidence covers the named command/key/kernel/Undo/FCStd paths only. Actual mouse, preview lifetime in every viewport, OpenGL/render acceptance and all original lifecycle/cache requirements remain open.",
+    "Matching producer inventory includes source/resources/tests selected by extensions, not an exact compiler dependency certificate. Production deployment/ABI acceptance remains pending; the isolated accepted App/GUI host reuses the one SDK."
+  ],
+  "next_action": "Implement Rust ConstructCurve admission/result using existing native_curve_capability and original accepted-input events, with numeric input at0 and native source refs1..N; reuse prepared CAD output capture and existing solvers. Pair OM9GeometryResult/Shape/construction, then implement checked GUI publication and auxiliary foci/History/Rebuild paths. Replay unchanged native RED54 expectations, cold witnesses and matching regressions; preserve every original RCORE-01 requirement.",
+  "full_current_source_matching": false,
+  "source_matching_note": "The fixture was added after Runtime50 build. It is source-identical to the macro executed; production Curve inputs still match Runtime50. Concurrent Gumball edits mean full checkout/plugin matching is false. RED does not invalidate the preserved native bridge517/517 cohort."
+}

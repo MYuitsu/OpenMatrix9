@@ -11,6 +11,8 @@ import Part
 if os.environ.get('OM9_TEST_NATIVE_DIR'):
     sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
 from PySide6 import QtCore, QtGui, QtWidgets
+sys.path.insert(0,'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+from command_options_fixture_support import check_mnemonics
 
 out = Path(os.environ['OM9_SMOKE_OUTPUT'])
 out.mkdir(parents=True, exist_ok=True)
@@ -50,6 +52,11 @@ def start(doc, command, objects):
     d = next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog, 'OM9SurfaceOptions')
               if d.isVisible()), None)
     check(command + ': options open', d is not None)
+    shortcuts={'Closed':'C','SectionMode':'S','History':'H','DynamicPreview':'D','Preview':'V','Automatic':'U','Natural':'N'}
+    if 'Sweep1' in command:shortcuts['Frenet']='F'
+    elif 'Sweep2' in command:shortcuts.update({'MaintainHeight':'M','ContinuityA':'A','ContinuityB':'B'})
+    else:shortcuts.update({'Style':'S','MatchStart':'A','MatchEnd':'E','SectionMode':'O'})
+    check_mnemonics(shortcuts,check,result.setdefault('mnemonic_presentations',[]))
     return d
 
 def control(d, cls, name):
@@ -126,6 +133,7 @@ def run():
             # Contact at the two rail ends and independently measured arch crown.
             crown = App.Vector(4.5, 2 if maintain else 3.6, 10)
             distance = Part.Vertex(crown).distToShape(obj.Shape)[0]
+            result.setdefault('crown_measurements',[]).append({'maintain':maintain,'distance':distance,'options':obj.SurfaceOptions})
             check('OM9-SURFACE-003: crown height independent of width=' + str(maintain), distance < 1e-4)
             for rail in (a,b):
                 check('both original rails retained geometrically', max(Part.Vertex(p).distToShape(obj.Shape)[0]
@@ -290,7 +298,8 @@ def run():
         events()
         ok=d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok)
         check('nonparallel Developable rejected without output',not ok.isEnabled() and len(doc.Objects)==2)
-        style.setCurrentIndex(0)
+        check('Rejected Developable restores accepted Normal',style.currentIndex()==0)
+        enter('Style=Normal')
         events()
         check('failed option recovers with valid Normal style',ok.isEnabled())
         enter('Cancel')

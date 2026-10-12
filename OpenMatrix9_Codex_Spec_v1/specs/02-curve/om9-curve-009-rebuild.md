@@ -15,6 +15,14 @@ sample_status: compiled_and_validation_tests_passed
 
 # OM9-CURVE-009 — Rebuild
 
+<!-- rhino-core-native-rebuild-policy:start -->
+Rebuild hiện có dùng policy operation/type/options Rust chung trước enable,
+copy và solve; kiểm nội dung Compound và giữ solver/source/placement/Undo/Redo.
+383 checks/nine actual host exits0 trên cùng plugin; full Rust702 đạt.
+Các family construction và hợp đồng output/ownership gốc còn mở;
+**RCORE-01 đang triển khai**. [Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-native-rebuild-policy.md).
+<!-- rhino-core-native-rebuild-policy:end -->
+
 <!-- rhino-core-kernel-contract:start -->
 Existing generated spline geometry/limits preserved while Basis.validate delegates to the shared Rust validator; native regression replay passed.
 

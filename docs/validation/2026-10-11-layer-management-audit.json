@@ -1,0 +1,148 @@
+{
+  "feature_id": "OM9-LAYER-001",
+  "reviewed_at": "2026-10-11T06:07:56+07:00",
+  "scope": "Specification and current-source audit; no product behavior changed or native binary rerun.",
+  "implementation_status": "partially_implemented",
+  "validation_status": "source_reviewed_rust_tested",
+  "manual": {
+    "filename": "matrix8_book_1 Copy.pdf",
+    "sha256": "255e36e73d02dd4573b661bf0ee5f1ace443460c9a2b1a6cfcbb2267d75d2e17",
+    "pdf_pages": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "printed_pages": [
+      44,
+      45,
+      46,
+      47
+    ],
+    "chapter": "9 / The Layers Menu",
+    "text_and_visual_review": true
+  },
+  "source_sha256": {
+    "rust/src/layers.rs": "ab2c2be3142bbd549f8783750b9de8c76ca286cdad8780d0d2ae580a8f5640bd",
+    "rust/tests/layers.rs": "071cabb75c0d2ae945072ac2933e99dbdb4784013396e37f83a3756332824820",
+    "Gui/CoreLayers.cpp": "cc55fc23f3d7da716e7988e01ee2298f00da8cb239c28843716fb2a25ab03d92",
+    "Gui/CoreLayers.h": "509d339f080b54fc983efee5efe17482ab47dd240fb7a72d816ae82eb9600f7c",
+    "Gui/MatrixSidebar.cpp": "4d50c05b6213057e22b82057383315589462359ec5d72aea974b7a2811cd2d1c",
+    "Gui/CurveController.cpp": "229942c011380e206fb56fbfa4eb0f37801eb3e3c6682494f56682a4f366723f",
+    "Gui/CurveEllipse.cpp": "456a4e57e54f5a8e68438de895c80c836e886ed87b3f391988c6788aa1c6e603",
+    "Gui/CoreMouse.cpp": "ad0c1eed4e5bd726f2d5469e668dde4a5226a646be8afe8059a68c316cc10196",
+    "Gui/tests/MatrixSidebarTest.cpp": "3af9984242ddb1f588c766a46a9b46f91007f8db17614615622ec653f35a5bef",
+    "tests/circle_layers_smoke.FCMacro": "485c22b7c1d8e58a41af783e47e486e93474e4c6d39ab545dca8891ef1cdfcaa"
+  },
+  "rust_tests": {
+    "command": "cargo test --manifest-path rust/Cargo.toml --locked --offline --test layers",
+    "passed": 6,
+    "failed": 0,
+    "exit_code": 0,
+    "fresh_run": true
+  },
+  "historical_native_report": {
+    "path": "build/circle_layers_smoke-1/04d2073d994748429eafa5eae05e0917/results.json",
+    "sha256": "9838c8aeeae56fa8ecef3d3d419fff6d850ff622208775ccb3c75f633cb1c33c",
+    "ok": true,
+    "checks": 52,
+    "passed": 52,
+    "fresh_run": false,
+    "scope": "OM9-CURVE-005 Circle active-layer slice; not full OM9-LAYER-001 acceptance"
+  },
+  "gaps": [
+    "Assign selection vs current arrow",
+    "swatch right-click selection",
+    "lock protection for pick/region/edit",
+    "independent object-hidden vs layer-off",
+    "group visibility",
+    "Hide/Show left/right",
+    "Advanced collapse and rename",
+    "Advanced color modifier/restriction",
+    "Lights and Matrix Art capability",
+    "footer combo and C A L V C semantics",
+    "all-family output layer policy",
+    "session-time layer generation and hierarchy/import inheritance"
+  ],
+  "documentation_verification": {
+    "ok": true,
+    "checks": [
+      {
+        "name": "Only the Layer catalog entry changed",
+        "passed": true
+      },
+      {
+        "name": "Only the Layer YAML entry changed",
+        "passed": true
+      },
+      {
+        "name": "Layer JSON and YAML entries agree",
+        "passed": true
+      },
+      {
+        "name": "Spec and catalog status agree",
+        "passed": true
+      },
+      {
+        "name": "Validation remains source/Rust limited",
+        "passed": true
+      },
+      {
+        "name": "Spec validation record resolves",
+        "passed": true
+      },
+      {
+        "name": "Other package manifest entries preserved",
+        "passed": true
+      },
+      {
+        "name": "Manifest bytes/hash: FEATURES.json",
+        "passed": true
+      },
+      {
+        "name": "Manifest bytes/hash: FEATURES.yaml",
+        "passed": true
+      },
+      {
+        "name": "Manifest bytes/hash: IMPLEMENTATION_STATUS.md",
+        "passed": true
+      },
+      {
+        "name": "Manifest bytes/hash: specs/01-core/README.md",
+        "passed": true
+      },
+      {
+        "name": "Manifest bytes/hash: specs/01-core/om9-layer-001-layer-management.md",
+        "passed": true
+      },
+      {
+        "name": "Unrelated ledger items preserved",
+        "passed": true
+      },
+      {
+        "name": "Unrelated ledger root context preserved",
+        "passed": true
+      },
+      {
+        "name": "Source fingerprints still match reviewed files",
+        "passed": true
+      },
+      {
+        "name": "Fresh Rust and historical native evidence separated",
+        "passed": true
+      },
+      {
+        "name": "Local links in revised spec and new records resolve",
+        "passed": true
+      }
+    ],
+    "count": 17
+  },
+  "public_source_audit": {
+    "source_files": 2434,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": [],
+    "exit_code": 0
+  }
+}

@@ -1,7 +1,7 @@
 //! OM9-CURVE-005: normalized best-plane algebraic least-squares circle fit.
 use super::{Plan, Point, add, check_point, cross, dot, norm, scale, sub, unit};
 pub fn fit_circle(points: &[Point]) -> Result<(Plan, f64), String> {
-    if !(3..=1024).contains(&points.len()) {
+    if !(3..=crate::fit_point_input::MAX_POINTS).contains(&points.len()) {
         return Err("FitPoints needs 3 through 1024 points".into());
     }
     for &p in points {

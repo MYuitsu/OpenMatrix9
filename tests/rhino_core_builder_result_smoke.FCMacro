@@ -1,0 +1,80 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Native Builder GeometryResult owns CAD/source evidence through History and FCStd."""
+import json, os, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part, OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+report={'module':OM.__file__,'checks':[]}
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def result(child):
+    raw=getattr(child,'OM9GeometryResult','')
+    try:return json.loads(raw)
+    except Exception:return {}
+def master(r):
+    try:
+        s=Part.Shape();s.importBrepFromString(r['output_snapshots'][0]['geometry_data']['native_master']['payload']);return s
+    except Exception:return None
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        d=App.newDocument('BuilderGeometryResult');d.UndoMode=1
+        parent=d.addObject('App::Part','GemFrame');parent.Placement.Base=App.Vector(100,0,0)
+        gem=d.addObject('Part::Feature','Gem');gem.Shape=Part.makeBox(1,2,4);parent.addObject(gem);gem.Placement.Base=App.Vector(3,0,0)
+        gem.addProperty('App::PropertyString','OM9GemShape');gem.OM9GemShape='round'
+        seed=d.addObject('Part::Feature','Seed');seed.Shape=Part.makeBox(1,1,1,App.Vector(105,0,0));seed.Label='Owned seed';seed.Visibility=False
+        seed.ViewObject.ShapeColor=(0.2,0.4,0.6)
+        d.recompute()
+        raw=json.dumps(dict(schema=1,evaluator='om9.affine-template',version=1,settings={}))
+        record=OM.createBuilderRecord(gem,'OM9-SETTING-001',raw,[seed],True)
+        child=d.getObject(record.OutputNames[0]);r=result(child);saved_raw=getattr(child,'OM9GeometryResult','')
+        check('Builder publishes an owned accepted GeometryResult',r.get('schema_version')==1 and r.get('status')=='accepted' and len(r.get('output_snapshots',[]))==1)
+        check('Builder result uses actual operation and native lifetime',r.get('operation')=='NativeBuilder' and r.get('lifetime')=='immutable_native_operation_evidence_not_current_validity')
+        ctx=r.get('operation_context',{})
+        check('Builder result owns exact independent recipe and slot',ctx.get('feature_id')=='OM9-SETTING-001' and ctx.get('recipe')==raw and ctx.get('template_slot')==0 and ctx.get('scale_to_gem') is True)
+        check('Builder result records actual source identity and world frame',ctx.get('source_ref',{}).get('object_name')=='Gem' and ctx.get('source_ref',{}).get('world',[0]*16)[3]==103)
+        attrs=r.get('output_snapshots',[{}])[0].get('source_attributes',{})
+        check('Builder snapshot retains source identity labels and visibility',attrs.get('object_name')=='Seed' and attrs.get('label')=='Owned seed' and attrs.get('visibility') is False)
+        diffuse=attrs.get('shape_appearance',[{}])[0].get('diffuse',[]) if attrs.get('shape_appearance') else []
+        check('Builder snapshot retains inspected native source appearance',len(diffuse)==4 and all(abs(a-b)<1e-6 for a,b in zip(diffuse[:3],[.2,.4,.6])))
+        shape=master(r)
+        check('Builder master is CAD with world transform applied once',shape is not None and shape.isValid() and abs(shape.Volume-1)<1e-9 and abs(shape.CenterOfGravity.x-105.5)<1e-8)
+        check('Builder result keeps topology and native validation',bool(r.get('output_snapshots',[{}])[0].get('topology_data',{}).get('faces')) and r.get('validation',{}).get('native_valid') is True)
+        check('Builder result does not relabel import conversion evidence',all(c.get('phase')!='upstream_archive_conversion' for c in r.get('conversion_reports',[])) and bool(r.get('conversion_reports')))
+        seed.Label='Later unrelated label';seed.ViewObject.ShapeColor=(1.,0.,0.);d.removeObject(seed.Name);d.recompute()
+        check('Stored Builder source metadata is independent of live seed',getattr(child,'OM9GeometryResult','')==saved_raw and result(child).get('output_snapshots',[{}])[0].get('source_attributes',{}).get('label')=='Owned seed')
+        gem.Shape=Part.makeBox(2,2,4);gem.Placement.Base=App.Vector(10,0,0);d.recompute()
+        updated=result(child);updated_master=master(updated)
+        check('History republishes matching shape and GeometryResult',updated_master is not None and abs(updated_master.Volume-2)<1e-8 and abs(updated_master.CenterOfGravity.x-115)<1e-8 and abs(child.Shape.CenterOfGravity.x-115)<1e-8)
+        check('History evidence captures new source revision and plan',updated.get('operation_context',{}).get('source_ref',{}).get('revision')!=ctx.get('source_ref',{}).get('revision') and updated.get('operation_context',{}).get('affine',[0])[0]==2)
+        updated_raw=getattr(child,'OM9GeometryResult','');child_name=child.Name;record_name=record.Name
+        file=out/'builder-results.FCStd';d.saveAs(str(file));App.closeDocument(d.Name);d=App.openDocument(str(file))
+        child=d.getObject(child_name);record=d.getObject(record_name)
+        check('FCStd restores complete immutable Builder evidence',getattr(child,'OM9GeometryResult','')==updated_raw and master(result(child)) is not None)
+        d.openTransaction('Delete output');d.removeObject(child.Name);d.commitTransaction()
+        restored=OM.restoreBuilderOutputs(record)[0];rr=result(restored)
+        check('Explicit restore publishes matching complete result',rr.get('operation')=='NativeBuilder' and master(rr) is not None and abs(master(rr).CenterOfGravity.x-115)<1e-8)
+        target=d.addObject('Part::Feature','Target');target.Shape=Part.makeBox(3,2,4);target.Placement.Base=App.Vector(200,0,0)
+        target.addProperty('App::PropertyString','OM9GemShape');target.OM9GemShape='round';d.recompute()
+        matched=OM.matchBuilderAttributes(d.getObject('Gem'),[target])[0]
+        mc=d.getObject(matched.OutputNames[0]);mr=result(mc);ms=master(mr)
+        check('Match publishes actual target context and geometry',ms is not None and abs(ms.Volume-3)<1e-8 and abs(ms.CenterOfGravity.x-207.5)<1e-8 and mr.get('operation_context',{}).get('source_ref',{}).get('object_name')=='Target')
+        check('Match keeps original immutable seed attributes',mr.get('output_snapshots',[{}])[0].get('source_attributes',{}).get('label')=='Owned seed')
+        good_attributes=getattr(record,'TemplateAttributes','')
+        record.TemplateAttributes='[{}]';d.recompute()
+        check('Invalid persisted attributes invalidate shape and acceptance',restored.Shape.isNull() and not getattr(restored,'OM9GeometryResult',''))
+        record.TemplateAttributes=good_attributes;d.recompute()
+        check('Repair restores paired shape and result',not restored.Shape.isNull() and result(restored).get('status')=='accepted')
+        record.TemplateAttributes='';d.recompute()
+        check('Legacy recipes explicitly identify unavailable metadata',result(restored).get('output_snapshots',[{}])[0].get('source_attributes',{}).get('availability')=='unavailable_legacy_record' and not restored.Shape.isNull())
+        record.TemplateAttributes=good_attributes;d.recompute()
+        group=d.addObject('App::Part','OutputFrame');group.Placement.Base=App.Vector(30,0,0);group.addObject(restored);d.recompute()
+        gr=result(restored);gs=master(gr);parent_world=gr.get('operation_context',{}).get('output_parent_to_world',[0]*16)
+        check('Grouped output evidence carries parent frame exactly once',gs is not None and abs(gs.CenterOfGravity.x+parent_world[3]-115)<1e-8 and abs(gs.Volume-2)<1e-8)
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

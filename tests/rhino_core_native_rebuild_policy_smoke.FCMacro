@@ -1,0 +1,49 @@
+"""Rebuild rejects unsupported sources with typed operation/object context."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh,OpenMatrix9Gui
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+report={'checks':[],'module':OpenMatrix9Gui.__file__,'diagnostics':[]}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def enter(text):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier))
+    QtWidgets.QApplication.processEvents()
+def state(doc,source):
+    geometry=source.Shape.exportBrepToString() if 'Shape' in source.PropertiesList else repr(source.Mesh.Topology)
+    return tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount,geometry
+def rejection(kind):
+    doc=App.newDocument('RebuildPolicy'+kind);doc.UndoMode=1
+    doc.openTransaction('Source')
+    if kind=='Face':
+        source=doc.addObject('Part::Feature','UnsupportedFace');source.Shape=Part.makePlane(2,3)
+    else:
+        source=doc.addObject('Mesh::Feature','UnsupportedMesh')
+        source.Mesh=Mesh.Mesh([(App.Vector(0,0,0),App.Vector(1,0,0),App.Vector(0,1,0))])
+    doc.recompute();doc.commitTransaction()
+    doc.openTransaction('Redo witness');source.Label='Executable Redo';doc.commitTransaction();doc.undo()
+    before=state(doc,source)
+    console.clear();Gui.Selection.clearSelection();Gui.Selection.addSelection(source);enter('Rebuild')
+    text=console.toPlainText();report['diagnostics'].append(dict(kind=kind,text=text))
+    check(kind+' rejection identifies typed error operation and actual source',any(
+        all(token in line for token in ('UnsupportedRepresentation','Rebuild',source.Name)) for line in text.splitlines()))
+    check(kind+' rejection preserves geometry objects Undo and Redo',state(doc,source)==before)
+    doc.redo();check(kind+' rejection preserves executable Redo',source.Label=='Executable Redo')
+    App.closeDocument(doc.Name)
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents()
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        if console is None:raise RuntimeError('Missing shared command console')
+        rejection('Face');rejection('Mesh')
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

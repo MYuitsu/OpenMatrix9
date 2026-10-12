@@ -1,0 +1,38 @@
+"""Real selected native plugin binding for the shared Surface request policy."""
+import json,os,traceback
+from pathlib import Path
+import FreeCADGui as Gui,OpenMatrix9Gui
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+report={'checks':[],'module':OpenMatrix9Gui.__file__}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def run():
+    try:
+        gate=getattr(OpenMatrix9Gui,'geometrySurfaceCapability',None)
+        check('native binding exposes the shared Surface request decision',callable(gate))
+        if callable(gate):
+            def query(kind=3,representation=2,stage=3,flags=128,style=0,mode=0,count=16,tolerance=.01,a=0,b=0,inputs=2,rails=0,slashes=()):
+                return json.loads(gate(kind,representation,stage,flags,style,mode,count,tolerance,a,b,inputs,rails,slashes))
+            for kind,inputs in [(1,2),(2,3),(3,2)]:
+                d=query(kind=kind,inputs=inputs)
+                check('native family '+str(kind)+' shares the OCCT decision',d['allowed'] and d['status']==4 and d['backend']=='occt_edit')
+                check('native declaration '+str(kind)+' can prompt without an input',query(kind=kind,stage=1,inputs=0)['allowed'])
+            for representation in [0,1,4,5,6,8,9,10,13]:
+                d=query(representation=representation)
+                check('native concrete type '+str(representation)+' rejects',not d['allowed'] and d['status']==101)
+            for arguments in [dict(flags=256),dict(stage=0),dict(count=1),dict(tolerance=float('nan')),dict(a=3),dict(mode=3),dict(inputs=0),dict(rails=4)]:
+                d=query(**arguments)
+                check('native malformed request '+str(arguments)+' rejects',not d['allowed'] and d['status']==102)
+            pairs=((.2,.3),(.8,.9))
+            check('native bounded slash values reach the shared policy',query(kind=2,inputs=3,slashes=pairs)['allowed'])
+            check('native decreasing slashes reject',query(kind=2,inputs=3,slashes=((.8,.3),(.2,.9)))['status']==102)
+            check('native oversized slashes reject without staging their values',query(kind=2,inputs=3,slashes=(None,)*65)['status']==102)
+            check('native continuity context keeps the existing supported slice',query(kind=2,inputs=4,a=1,b=2)['allowed'])
+            check('native Match Tangents keeps existing two-profile Normal Loft',query(flags=128|8|16)['allowed'])
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:
+        report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

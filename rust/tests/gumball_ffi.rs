@@ -164,3 +164,16 @@ fn command_abi_owns_only_exact_commands_and_preserves_outputs_on_error() {
         assert_eq!(om9_gumball_command(text.as_ptr(), text.len(), std::ptr::null_mut(), &mut value), 2);
     }
 }
+#[test]
+fn provenance_abi_is_bounded_and_never_writes_a_short_buffer() {
+    unsafe {
+        let h=ready();assert_eq!(om9_gumball_begin(h,&input(),&source(),1),0);
+        let raw=b"5.123456789123 mm";assert_eq!(om9_gumball_input(h,raw.as_ptr(),raw.len()),0);
+        let mut needed=0;assert_eq!(om9_gumball_report(h,std::ptr::null_mut(),0,&mut needed),0);assert!(needed>100&&needed<4096);
+        let mut short=[42u8;10];let mut untouched=99;
+        assert_ne!(om9_gumball_report(h,short.as_mut_ptr(),short.len(),&mut untouched),0);assert_eq!(short,[42;10]);assert_eq!(untouched,99);
+        let mut out=vec![0u8;needed];assert_eq!(om9_gumball_report(h,out.as_mut_ptr(),out.len(),&mut needed),0);
+        assert!(std::str::from_utf8(&out).unwrap().contains("5.123456789123 mm"));assert_eq!(om9_gumball_destroy(h),0);
+        assert_ne!(om9_gumball_report(h,std::ptr::null_mut(),0,&mut untouched),0);assert_eq!(untouched,99);
+    }
+}

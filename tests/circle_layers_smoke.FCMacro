@@ -69,6 +69,7 @@ def run():
         Gui.activateWorkbench('OpenMatrix9Workbench')
         import OpenMatrix9Gui
         result['native_module'] = OpenMatrix9Gui.__file__
+        result['module'] = OpenMatrix9Gui.__file__
         if os.environ.get('OM9_TEST_NATIVE_DIR'):
             check('Selected native module loaded', Path(OpenMatrix9Gui.__file__).parent.resolve() == Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
         window = Gui.getMainWindow(); window.resize(1400,950)
@@ -87,8 +88,8 @@ def run():
         child = doc.addObject('Part::Feature','ImportedCurve'); child.Shape = Part.makeCircle(7)
         child.ViewObject.LineColor = (0.9,0.1,0.8); imported.addObject(child)
         imported_color = tuple(child.ViewObject.LineColor)
-        click('Arrow',5); g = layer(5); group_name = g.Name
-        check('Arrow persists document active index', settings().OM9ActiveLayer == 5)
+        dock.findChild(QtWidgets.QToolButton,'OM9LayersAdvanced').click(); click('Current',17); g = layer(17); group_name = g.Name
+        check('Name persists document active index', settings().OM9ActiveLayer == 17)
         check('Label collision does not reuse imported layer', g != imported and imported.OM9RhinoLayerIndex == 71 and imported.OM9RhinoLayerName == 'Original::Gem 01')
         obj = circle('1,2,3','4',menu=True); obj_name = obj.Name
         check('Menu Circle uses layer group and style', owns(g,obj) and rgb_equal(obj.ViewObject.LineColor,g.OM9LayerColor))
@@ -105,30 +106,30 @@ def run():
             else:
                 QtCore.QTimer.singleShot(100,accept_color)
         QtCore.QTimer.singleShot(100,accept_color)
-        click('Swatch',5); g = layer(5); obj = doc.getObject(obj_name)
+        QtTest.QTest.mouseClick(dock.findChild(QtWidgets.QToolButton,'OM9LayerSwatch16'),QtCore.Qt.RightButton,QtCore.Qt.ShiftModifier); settle(); g = layer(17); obj = doc.getObject(obj_name)
         check('Swatch propagates layer color to owned Circle', dialog_result['accepted'] and rgb_equal(g.OM9LayerColor,(12/255,100/255,180/255)) and rgb_equal(obj.ViewObject.LineColor,g.OM9LayerColor))
         check('Swatch preserves prior root and imported colors', rgb_equal(doc.getObject(root_name).ViewObject.LineColor,root_color) and rgb_equal(child.ViewObject.LineColor,imported_color))
         doc.undo(); settle(); check('Layer color Undo restores group and member', rgb_equal(g.OM9LayerColor,old_color) and rgb_equal(obj.ViewObject.LineColor,old_color))
         doc.redo(); settle(); check('Layer color Redo restores new style', rgb_equal(g.OM9LayerColor,(12/255,100/255,180/255)) and rgb_equal(obj.ViewObject.LineColor,g.OM9LayerColor))
-        click('Lock',5); count = len(doc.Objects); undo = doc.UndoCount
+        click('Lock',17); count = len(doc.Objects); undo = doc.UndoCount
         enter('Circle'); enter('0,0'); enter('5')
         check('Locked active layer rejects with no geometry or Undo entry', len(doc.Objects) == count and doc.UndoCount == undo and 'locked' in command_prompt(window).text().lower())
-        enter('Cancel'); click('Lock',5)
-        click('Visibility',5)
+        enter('Cancel'); click('Lock',17)
+        click('Visibility',17)
         check('Visibility control hides layer and existing members', not g.ViewObject.Visibility and not obj.ViewObject.Visibility)
         hidden = circle('0,0','2'); hidden_name = hidden.Name
         check('Hidden layer accepts new hidden Circle', owns(g,hidden) and not hidden.ViewObject.Visibility and not g.ViewObject.Visibility)
         doc.undo(); settle(); check('Hidden Circle Undo preserves layer state', doc.getObject(hidden_name) is None and not g.ViewObject.Visibility)
         doc.undo(); settle(); check('Visibility Undo restores group and members', g.ViewObject.Visibility and doc.getObject(obj_name).ViewObject.Visibility)
         doc.redo(); settle(); check('Visibility Redo hides group and members', not g.ViewObject.Visibility and not doc.getObject(obj_name).ViewObject.Visibility)
-        click('Visibility',5)
+        click('Visibility',17)
         enter('Layer=Metal 02'); check('CMD resolves stable named layer', settings().OM9ActiveLayer == 2)
-        doc.undo(); settle(); check('Selection Undo restores previous active layer', settings().OM9ActiveLayer == 5)
+        doc.undo(); settle(); check('Selection Undo restores previous active layer', settings().OM9ActiveLayer == 17)
         doc.redo(); settle(); check('Selection Redo restores named active layer', settings().OM9ActiveLayer == 2)
-        enter('Layer=5'); g = layer(5)
+        enter('Layer=17'); g = layer(17)
         malformed_count = len(doc.Objects); undo = doc.UndoCount
-        enter('Layer=Lights'); enter('Layer=33')
-        check('Invalid Layer values do not mutate document', settings().OM9ActiveLayer == 5 and len(doc.Objects) == malformed_count and doc.UndoCount == undo)
+        enter('Layer=34'); enter('Layer=-1')
+        check('Invalid Layer values do not mutate document', settings().OM9ActiveLayer == 17 and len(doc.Objects) == malformed_count and doc.UndoCount == undo)
         deform = circle('Deformable=Yes','Degree=3','PointCount=12','0,0','5')
         check('Deformable Circle keeps layer ownership/style', owns(g,deform) and isinstance(deform.Shape.Edges[0].Curve,Part.BSplineCurve) and rgb_equal(deform.ViewObject.LineColor,g.OM9LayerColor))
         hs = doc.addObject('OpenMatrix9Gui::HistorySettings','OM9HistorySettings'); hs.Record = True; hs.BrokenHistoryWarning = False
@@ -144,10 +145,10 @@ def run():
         enter('Layer=1'); other_state = next(o for o in other.Objects if 'OM9LayerStateSchema' in o.PropertiesList)
         check('Independent document selection persists locally', other_state.OM9ActiveLayer == 1)
         Gui.setActiveDocument(doc.Name); App.setActiveDocument(doc.Name); settle()
-        check('Returning document restores its active layer', settings().OM9ActiveLayer == 5)
+        check('Returning document restores its active layer', settings().OM9ActiveLayer == 17)
         enter('Layer=None'); unlayered = circle('0,0','1')
         check('Explicit Layer=None restores legacy root output', not unlayered.InList and rgb_equal(unlayered.ViewObject.LineColor,root_color))
-        enter('Layer=5'); click('Visibility',5)
+        enter('Layer=17'); click('Visibility',17)
         imported_before_save = doc.getObject('ImportedGemLayer')
         imported_curve_before_save = doc.getObject('ImportedCurve')
         result['imported_before_save'] = {'index': imported_before_save.OM9RhinoLayerIndex, 'name': imported_before_save.OM9RhinoLayerName, 'initial_color': list(imported_color), 'color': list(imported_curve_before_save.ViewObject.LineColor)}
@@ -160,8 +161,8 @@ def run():
             return struct.unpack('f',struct.pack('f',value))[0]
         imported_serialized_color = tuple(float32(math.floor(float32(float32(v)*255.0)+0.5)/255.0) for v in imported_color[:3])
         name = doc.Name; file = out/'circle-layers.FCStd'; doc.saveAs(str(file)); App.closeDocument(name)
-        doc = App.openDocument(str(file)); settle(); g = layer(5)
-        check('FCStd restores active layer, group schema, color and visibility', settings().OM9ActiveLayer == 5 and g.Name == group_name and not g.ViewObject.Visibility and rgb_equal(g.OM9LayerColor,(12/255,100/255,180/255)))
+        doc = App.openDocument(str(file)); settle(); g = layer(17)
+        check('FCStd restores active layer, group schema, color and visibility', settings().OM9ActiveLayer == 17 and g.Name == group_name and not g.ViewObject.Visibility and rgb_equal(g.OM9LayerColor,(12/255,100/255,180/255)))
         h = doc.getObject(history_name)
         check('FCStd preserves layered History membership/source and style', owns(g,h) and h.SourceCurve[0].Name == source_name and rgb_equal(h.ViewObject.LineColor,g.OM9LayerColor))
         saved = circle('0,0','6')

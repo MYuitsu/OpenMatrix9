@@ -40,6 +40,7 @@ protected:
     void unsetupObject() override;
 private:
     bool changing=false;
+    bool initialResultPending=false;
     fastsignals::connection changed,undone,redone;
     void disconnect();
     void refreshPlacements();

@@ -1,0 +1,83 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Camera command admission while a four-viewport document is torn down."""
+import os, json, traceback
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part, OpenMatrix9Gui
+from PySide import QtCore
+from pivy import coin
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = dict(ok=False, module=OpenMatrix9Gui.__file__, checks=[])
+
+def check(name, passed):
+    report['checks'].append(dict(name=name, passed=bool(passed)))
+
+def settle():
+    loop = QtCore.QEventLoop()
+    QtCore.QTimer.singleShot(250, loop.quit)
+    loop.exec()
+
+def run():
+    original_name = None
+    closing_name = None
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        original = App.newDocument('CameraCloseRetained')
+        original_name = original.Name
+        source = original.addObject('Part::Feature', 'Source')
+        source.Shape = Part.makeLine(App.Vector(0,0,0), App.Vector(10,0,0))
+        original.recompute()
+        before = source.Shape.exportBrepToString()
+        settle()
+        for cycle in range(3):
+            closing = App.newDocument('CameraCloseCalibration')
+            closing_name = closing.Name
+            closing.UndoMode = 1
+            copy = closing.addObject('Part::Feature', 'Source')
+            copy.Shape = source.Shape.copy()
+            witness = closing.addObject('App::FeaturePython', 'Witness')
+            closing.recompute()
+            closing.openTransaction('Prior Redo')
+            witness.Label = 'Changed'
+            closing.commitTransaction()
+            closing.undo()
+            settle()
+            roots = [v.getSceneGraph() for v in Gui.getDocument(closing_name).mdiViewsOfType('Gui::View3DInventor')]
+            for root in roots:
+                root.ref()
+            try:
+                check(str(cycle) + ' four native views before close', len(roots) == 4)
+                App.closeDocument(closing_name)
+                settle()
+                check(str(cycle) + ' document really closed', closing_name not in App.listDocuments())
+                check(str(cycle) + ' camera command timer has no escaped exception',
+                      'Unhandled Base::Exception' not in (out/'host-stderr.log').read_text(errors='replace'))
+            finally:
+                for root in roots:
+                    root.unref()
+            App.setActiveDocument(original_name)
+            settle()
+            views = Gui.getDocument(original_name).mdiViewsOfType('Gui::View3DInventor')
+            check(str(cycle) + ' retained views and source remain usable',
+                  len(views) == 4 and all(v.getCamera() for v in views)
+                  and original.getObject('Source') is source and source.Shape.exportBrepToString() == before)
+            Gui.runCommand('Std_PerspectiveCamera', 1)
+            check(str(cycle) + ' healthy perspective command remains available',
+                  'PerspectiveCamera' in Gui.activeDocument().activeView().getCamera())
+            Gui.runCommand('Std_OrthographicCamera', 1)
+            check(str(cycle) + ' healthy orthographic command remains available',
+                  'OrthographicCamera' in Gui.activeDocument().activeView().getCamera())
+        report['ok'] = all(c['passed'] for c in report['checks'])
+    except Exception:
+        report['error'] = traceback.format_exc()
+    finally:
+        if closing_name in App.listDocuments():
+            App.closeDocument(closing_name)
+        if original_name in App.listDocuments():
+            App.closeDocument(original_name)
+        (out/'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1200, run)

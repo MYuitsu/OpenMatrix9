@@ -1,0 +1,368 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-10T11:53:55+07:00",
+  "chapter_status": "in_progress",
+  "scope": "Prepared CAD numeric preflight before topology evaluation and document mutation; built-in synchronous containers, GUI thread. RCORE-01 and full T07 remain open.",
+  "validation": {
+    "host_runs": [
+      {
+        "directory": "H:\\FreeCAD-src\\build\\import-commit-gate-container-green-20261010",
+        "checks": 55,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "A291D4553DD56A7CFAD250B67EB46B8C6548B501F5D5A2BE575DFA931A4B7218",
+          "pid": 80732,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/import-commit-gate-container-green-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\import-commit-gate-container-green-20261010\\results.json",
+            "bytes": 1135223,
+            "sha256": "c231087665b13afb7f2c09f8b35c3b7fca96fb3d6eefedd18392a26ae33ab82f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\import-commit-gate-container-green-20261010\\shared-host-launch.json",
+            "bytes": 545,
+            "sha256": "0b1d75c302b88de9fe58b4a6d5bb1f4908c9fa67c996fd9b04afb8f17081ef65"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\import-commit-gate-container-green-20261010\\select-plugin.FCMacro",
+            "bytes": 956,
+            "sha256": "fb0898253c9da06f3a3ddb1e984c863d29b0870997b939fbe32cd1b3aaa94e0e"
+          }
+        ],
+        "baseline_counts": {
+          "objects": 11,
+          "undo": 1,
+          "redo": 1
+        },
+        "negative_cases": [
+          {
+            "name": "geometry-batch-curve-coordinate-limit",
+            "error": "Native NURBS basis rejected by Rust contract (status 12)",
+            "exact_snapshot_unchanged": true
+          },
+          {
+            "name": "preserved-instance-preview-curve-coordinate-limit",
+            "error": "Native NURBS basis rejected by Rust contract (status 12)",
+            "exact_snapshot_unchanged": true
+          },
+          {
+            "name": "geometry-batch-curve-nan",
+            "error": "Native NURBS basis rejected by Rust contract (status 12)",
+            "exact_snapshot_unchanged": true
+          },
+          {
+            "name": "preserved-instance-preview-curve-nan",
+            "error": "Native NURBS basis rejected by Rust contract (status 12)",
+            "exact_snapshot_unchanged": true
+          },
+          {
+            "name": "geometry-batch-curve-infinity",
+            "error": "Native NURBS basis rejected by Rust contract (status 12)",
+            "exact_snapshot_unchanged": true
+          },
+          {
+            "name": "preserved-instance-preview-curve-infinity",
+            "error": "Native NURBS basis rejected by Rust contract (status 12)",
+            "exact_snapshot_unchanged": true
+          },
+          {
+            "name": "geometry-batch-surface-coordinate-limit",
+            "error": "Native NURBS basis rejected by Rust contract (status 12)",
+            "exact_snapshot_unchanged": true
+          },
+          {
+            "name": "preserved-instance-preview-surface-coordinate-limit",
+            "error": "Native NURBS basis rejected by Rust contract (status 12)",
+            "exact_snapshot_unchanged": true
+          },
+          {
+            "name": "geometry-batch-surface-nan",
+            "error": "Native NURBS basis rejected by Rust contract (status 12)",
+            "exact_snapshot_unchanged": true
+          },
+          {
+            "name": "preserved-instance-preview-surface-nan",
+            "error": "Native NURBS basis rejected by Rust contract (status 12)",
+            "exact_snapshot_unchanged": true
+          },
+          {
+            "name": "geometry-batch-surface-infinity",
+            "error": "Native NURBS basis rejected by Rust contract (status 12)",
+            "exact_snapshot_unchanged": true
+          },
+          {
+            "name": "preserved-instance-preview-surface-infinity",
+            "error": "Native NURBS basis rejected by Rust contract (status 12)",
+            "exact_snapshot_unchanged": true
+          },
+          {
+            "name": "rows-iteration",
+            "error": "Prepared geometry requires a plain list or tuple"
+          },
+          {
+            "name": "pair-length",
+            "error": "Prepared geometry requires plain metadata/native-geometry pairs"
+          },
+          {
+            "name": "metadata-contains",
+            "error": "Prepared geometry metadata requires a plain dictionary"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\import-commit-gate-modeling-green-20261010",
+        "checks": 32,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "A291D4553DD56A7CFAD250B67EB46B8C6548B501F5D5A2BE575DFA931A4B7218",
+          "pid": 35656,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/import-commit-gate-modeling-green-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\import-commit-gate-modeling-green-20261010\\results.json",
+            "bytes": 3461,
+            "sha256": "d505ea6198940200d3db8b406ec8cd02649549da36df1fa7141a1f0fdd35dede"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\import-commit-gate-modeling-green-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "15672c6d1b1e64c5e002eb790cb1c13505ecf78cf859f36c90d41cf42479fd5e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\import-commit-gate-modeling-green-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "092c35d4cc9d1fb573e732b846a230516e3bfdbe1174fb0ac5301c615e2f46a9"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\import-commit-gate-preservation-green-20261010",
+        "checks": 19,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "A291D4553DD56A7CFAD250B67EB46B8C6548B501F5D5A2BE575DFA931A4B7218",
+          "pid": 25520,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/import-commit-gate-preservation-green-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\import-commit-gate-preservation-green-20261010\\results.json",
+            "bytes": 1655,
+            "sha256": "6db108511e7e255ef9bf1e9305c4f7e54848af2416004afdd3f8f80dd64afc44"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\import-commit-gate-preservation-green-20261010\\shared-host-launch.json",
+            "bytes": 548,
+            "sha256": "5d82a2b32ac2e30d259f33b40fb4594d9c66d621abd63e25c80b48852b581bb1"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\import-commit-gate-preservation-green-20261010\\select-plugin.FCMacro",
+            "bytes": 963,
+            "sha256": "585b989ca1d4be08cc17d052abb338726107e107088b8b027f3e9967633e47c1"
+          }
+        ]
+      }
+    ],
+    "host_checks": 106,
+    "rust": {
+      "tests": 47,
+      "suites": [
+        "geometry_contract",
+        "native_input_tree",
+        "native_input_tree_ffi",
+        "nurbs_basis"
+      ],
+      "result": "pass; direct current invocation"
+    },
+    "native": {
+      "input_tree_checks": 92,
+      "focused_ctests": 6,
+      "result": "pass",
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\build\\rcore-native\\native-input-tree-results.json",
+          "bytes": 23410,
+          "sha256": "a16891797918889074f94c25d9c314d8efd42d76abca9773bc006817252d5639"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\build\\rcore-native\\Testing\\Temporary\\LastTest.log",
+          "bytes": 4738,
+          "sha256": "53e63e252ff67af70245262ceab27a3fc74a4a6a47b51f7f6a2799a5318dfad2"
+        }
+      ]
+    },
+    "public_source_audit": {
+      "source_files": 2198,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    },
+    "plugin_build": {
+      "script": "H:/FreeCAD-src/build/build-om9-plugin.ps1",
+      "target": "OpenMatrix9Gui",
+      "sdk": "H:/FreeCAD-src/build/relWithDebInfo",
+      "cache": "H:/FreeCAD-src/build/openmatrix9-history-cage",
+      "result": "pass; final relink after review fixes"
+    }
+  },
+  "red": [
+    {
+      "directory": "H:\\FreeCAD-src\\build\\import-commit-gate-red2-20261010",
+      "reason": "invalid prepared CAD entered document",
+      "failed_checks": [
+        "curve-coordinate-limit rejected by shared native/Rust basis gate"
+      ],
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\build\\import-commit-gate-red2-20261010\\results.json",
+          "bytes": 201435,
+          "sha256": "6c018b8803d1b8b9c5b4f65757607419be7e5d9d5801b9f53a7e8079bf1151eb"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\build\\import-commit-gate-red2-20261010\\shared-host-launch.json",
+          "bytes": 534,
+          "sha256": "b98dabd642555c5b4b75ea1edde9c7f778c15e5b4719d93082256996b858579c"
+        }
+      ]
+    },
+    {
+      "directory": "H:\\FreeCAD-src\\build\\import-commit-thread-red-20261010",
+      "reason": "missing GUI-thread entry guard",
+      "failed_checks": [
+        "worker entry rejects before document/native access with GUI-thread reason"
+      ],
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\build\\import-commit-thread-red-20261010\\results.json",
+          "bytes": 83791,
+          "sha256": "1eb508a55f63396fcd1442ce6bc83c77b58b794e92643dcfefcae5b528af2201"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\build\\import-commit-thread-red-20261010\\shared-host-launch.json",
+          "bytes": 535,
+          "sha256": "48ad419b9e35bc68700c102c0258b33a3106d5ae9ca930110e6b775883db3846"
+        }
+      ]
+    },
+    {
+      "directory": "H:\\FreeCAD-src\\build\\import-commit-container-red-20261010",
+      "reason": "container override bypassed raw native inspection",
+      "failed_checks": [
+        "rows-iteration container overrides reject before unchecked native indexing/binding"
+      ],
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\build\\import-commit-container-red-20261010\\results.json",
+          "bytes": 1134217,
+          "sha256": "1846164c7724f4b68ac9f13fecc1611ee9e64edecc41348b394a0497ab4e833b"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\build\\import-commit-container-red-20261010\\shared-host-launch.json",
+          "bytes": 538,
+          "sha256": "5a76b997091792e83fdb4ab4ea2e5c132c6300f1c21e3d0bb9080755beed84f7"
+        }
+      ]
+    }
+  ],
+  "source_fingerprints": {
+    "Gui/ThreeDmPython.cpp": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\ThreeDmPython.cpp",
+      "bytes": 29874,
+      "sha256": "2c2e8452b5da3babc058c3b9ba804a7bf77397ae1dfd3038c446c8a0ab0ec32f"
+    },
+    "Gui/NativeInputTree.cpp": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NativeInputTree.cpp",
+      "bytes": 22642,
+      "sha256": "3a47989f7c44e5364ca19138157427ad920b9d3f23c3760294a6d27e92ccb268"
+    },
+    "Gui/NativeInputTree.h": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NativeInputTree.h",
+      "bytes": 938,
+      "sha256": "2303af98ff3611dd15bd86113507fdac4a1cccb4ee8a4a56cb43e03d17677f83"
+    },
+    "Gui/NurbsBasisAdapter.cpp": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NurbsBasisAdapter.cpp",
+      "bytes": 20670,
+      "sha256": "341c02c464812a173c3d94a3ff9748f0eff9480fabc83992288e617ce8629f3f"
+    },
+    "Gui/NurbsBasisAdapter.h": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NurbsBasisAdapter.h",
+      "bytes": 3633,
+      "sha256": "1ca7afaf36136083e97ae8b076afc08b43d5de06b7afbf27f66766db78c4c08a"
+    },
+    "ThreeDm.py": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\ThreeDm.py",
+      "bytes": 19835,
+      "sha256": "348f514a53f62199c25ba9fc63d2bbb8fd9da27183b10b761b55000c0298c76d"
+    },
+    "rust/src/native_input_tree.rs": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\native_input_tree.rs",
+      "bytes": 3962,
+      "sha256": "707eddbb504f288a98e75bc5bfaa77433bfc339d1be97b398629d1f9d521a6a8"
+    },
+    "rust/src/native_input_tree_ffi.rs": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\native_input_tree_ffi.rs",
+      "bytes": 2701,
+      "sha256": "457ca16a5b0a96da8d7566b4a4d284ca52d2e43c10e9a3fc727340cd1c534143"
+    },
+    "rust/src/nurbs_basis.rs": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\nurbs_basis.rs",
+      "bytes": 11166,
+      "sha256": "50d4fe44e2a325ff2f614c1f06d263d42cc1f16fc3504e4240863f395e41e916"
+    },
+    "rust/src/nurbs_basis_ffi.rs": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\nurbs_basis_ffi.rs",
+      "bytes": 10423,
+      "sha256": "f6eb1415538ab7d4b6b865652c71d3960e81f3193bc992dec2e072a957729eb5"
+    },
+    "tests/rhino_core_import_commit_gate_smoke.FCMacro": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_import_commit_gate_smoke.FCMacro",
+      "bytes": 10604,
+      "sha256": "391e1e96940e20863a1360d9c90bb797d05265650b8a46747f2be04b4c9d54e9"
+    },
+    "tests/three_dm_smoke.FCMacro": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\three_dm_smoke.FCMacro",
+      "bytes": 12409,
+      "sha256": "1d52b5dc50a5540697cbb2579adf25ddb48f77a5b917743b86e540f7b3ba23f5"
+    },
+    "tests/three_dm_preservation_smoke.FCMacro": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\three_dm_preservation_smoke.FCMacro",
+      "bytes": 6870,
+      "sha256": "163104275f00c7e412f56966ebfcda50b0601ee4b75aa9b22dae7b934a019988"
+    },
+    "tests/modeling_exchange_smoke.FCMacro": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\modeling_exchange_smoke.FCMacro",
+      "bytes": 9134,
+      "sha256": "53c8e706e1bf648f24d4a809b8364e310124d1a2ef5c77a7ef4e6f050d7bef68"
+    }
+  },
+  "review": "docs/reviews/2026-10-10-import-commit-gate-review.md",
+  "completion_audit": "docs/reviews/2026-10-10-rcore01-closure-audit.md",
+  "excluded_attempts": [
+    "Initial snapshot status sorting TypeError before product assertion; fixed intrinsic heterogeneous status ordering.",
+    "Exact floating-point Volume==24 in positive test replaced with the declared 1e-10 bound; source/native property immutability remains exact.",
+    "Initial regression temporary directory/fixture prerequisites and missing legacy macro module metadata; repaired test harness and regenerated authored fixtures.",
+    "Earlier UI regression observation timeouts and library-in-use LNK1168 attempts are excluded; final accepted build and host runs have exit0."
+  ],
+  "remaining": [
+    "Raw ONX_Model::Read/input allocation; process-wide native allocation instrumentation.",
+    "Full metadata/type and prepared mesh/cloud preflight; unexpected binder rollback/pending-transaction policy.",
+    "Aggregate batch/worker budgets and other native owner/cage/analytic lifetimes.",
+    "Common typed topology/representation snapshot, complete conversion reports and uniform command/diagnostic integration."
+  ]
+}

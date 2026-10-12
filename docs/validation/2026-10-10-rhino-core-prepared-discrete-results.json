@@ -1,0 +1,2356 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-10T21:11:14+07:00",
+  "chapter_status": "in_progress",
+  "scope": "Prepared mesh and current float64 PointCloud owned GeometrySnapshots, Rust admission/result assembly, bounded native copies and immutable report persistence; mesh archive correspondence at declared float32 host precision. Full original RCORE-01 remains in progress.",
+  "sources": [
+    "Gui/CoreSupportSnapshot.cpp",
+    "Gui/CoreSupportSnapshot.h",
+    "Gui/CoreGeometryContract.cpp",
+    "Gui/CoreTopologySnapshot.cpp",
+    "Gui/CoreTopologySnapshot.h",
+    "Gui/CMakeLists.txt",
+    "Gui/NurbsBasisAdapter.cpp",
+    "Gui/NurbsBasisAdapter.h",
+    "rust/src/lib.rs",
+    "rust/src/nurbs_basis.rs",
+    "rust/src/nurbs_basis_ffi.rs",
+    "rust/src/support_snapshot.rs",
+    "rust/src/support_snapshot_ffi.rs",
+    "rust/src/analytic_support.rs",
+    "rust/tests/analytic_support.rs",
+    "rust/tests/support_snapshot.rs",
+    "rust/tests/support_snapshot_ffi.rs",
+    "tests/rhino_core_analytic_support_smoke.FCMacro",
+    "tests/rhino_core_support_snapshot_smoke.FCMacro",
+    "tests/rhino_core_topology_snapshot_smoke.FCMacro",
+    "tests/rhino_core_geometry_descriptor_smoke.FCMacro",
+    "tests/rhino_core_import_commit_gate_smoke.FCMacro",
+    "rust/src/geometry_contract.rs",
+    "rust/src/geometry_contract_ffi.rs",
+    "rust/tests/geometry_contract_ffi.rs",
+    "rust/tests/bezier_support.rs",
+    "tests/rhino_core_bezier_support_smoke.FCMacro",
+    "rust/src/derived_support.rs",
+    "rust/src/derived_support_ffi.rs",
+    "rust/tests/derived_support.rs",
+    "tests/rhino_core_derived_support_smoke.FCMacro",
+    "Gui/CoreSourceAttributes.cpp",
+    "Gui/CoreSourceAttributes.h",
+    "rust/src/geometry_frame.rs",
+    "rust/src/geometry_frame_ffi.rs",
+    "rust/src/source_attributes.rs",
+    "rust/src/source_attributes_ffi.rs",
+    "rust/tests/geometry_frame.rs",
+    "rust/tests/source_attributes.rs",
+    "tests/rhino_core_world_attributes_smoke.FCMacro",
+    "Gui/CoreDefinitionSnapshot.cpp",
+    "Gui/CoreDefinitionSnapshot.h",
+    "rust/src/instance_graph.rs",
+    "rust/src/instance_graph_ffi.rs",
+    "rust/tests/instance_graph.rs",
+    "tests/rhino_core_instance_definition_smoke.FCMacro",
+    "Gui/CoreDiscreteSnapshot.cpp",
+    "Gui/CoreDiscreteSnapshot.h",
+    "rust/src/discrete_snapshot.rs",
+    "rust/src/discrete_snapshot_ffi.rs",
+    "rust/tests/discrete_snapshot.rs",
+    "tests/rhino_core_discrete_snapshot_smoke.FCMacro",
+    "tests/rhino_core_discrete_module_loading_smoke.FCMacro",
+    "Gui/CoreEdgeSnapshot.cpp",
+    "Gui/CoreEdgeSnapshot.h",
+    "rust/src/edge_geometry.rs",
+    "rust/src/edge_geometry_ffi.rs",
+    "rust/tests/edge_geometry.rs",
+    "tests/rhino_core_edge_geometry_smoke.FCMacro",
+    "tests/native/edge_geometry_fixture.cpp",
+    "rust/src/array_occurrences.rs",
+    "rust/src/array_occurrences_ffi.rs",
+    "rust/tests/array_occurrences.rs",
+    "tests/rhino_core_instance_array_smoke.FCMacro",
+    "tests/rhino_core_instance_array_boundary_smoke.FCMacro",
+    "rust/src/reference_path.rs",
+    "rust/src/reference_path_ffi.rs",
+    "rust/tests/reference_path.rs",
+    "tests/rhino_core_reference_context_smoke.FCMacro",
+    "rust/src/surface_complex.rs",
+    "rust/tests/surface_complex.rs",
+    "tests/rhino_core_surface_complex_smoke.FCMacro",
+    "rust/src/shape_validation.rs",
+    "rust/tests/shape_validation.rs",
+    "Gui/CoreShapeValidation.cpp",
+    "Gui/CoreShapeValidation.h",
+    "tests/rhino_core_shape_validation_smoke.FCMacro",
+    "Gui/CorePreparedCad.cpp",
+    "Gui/CorePreparedCad.h",
+    "rust/src/prepared_cad.rs",
+    "rust/tests/prepared_cad.rs",
+    "tests/rhino_core_prepared_cad_result_smoke.FCMacro",
+    "tests/rhino_core_prepared_cad_cold_smoke.FCMacro",
+    "tests/rhino_core_prepared_metadata_smoke.FCMacro",
+    "Gui/ThreeDmPython.cpp",
+    "ThreeDm.py",
+    "ThreeDmArchiveState.py",
+    "ThreeDmModeling.py",
+    "Gui/NativeInputTree.cpp",
+    "Gui/NativeInputTree.h",
+    "rust/src/native_input_tree.rs",
+    "tests/modeling_exchange_smoke.FCMacro",
+    "tests/three_dm_preservation_smoke.FCMacro",
+    "Gui/CorePreparedSnapshot.cpp",
+    "Gui/CorePreparedSnapshot.h",
+    "rust/src/prepared_result.rs",
+    "rust/tests/prepared_result.rs",
+    "tests/rhino_core_prepared_snapshot_smoke.FCMacro",
+    "tests/rhino_core_prepared_snapshot_cold_smoke.FCMacro",
+    "Gui/CoreUnits.cpp",
+    "Gui/CoreUnits.h",
+    "rust/src/units.rs",
+    "rust/src/builder_history.rs",
+    "rust/src/prepared_discrete.rs",
+    "rust/tests/prepared_discrete_result.rs",
+    "tests/rhino_core_prepared_discrete_result_smoke.FCMacro",
+    "tests/rhino_core_prepared_discrete_cold_smoke.FCMacro"
+  ],
+  "source_fingerprints": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreSupportSnapshot.cpp",
+      "bytes": 22251,
+      "sha256": "646c5be3c8b6bd84db4de10e57ae7011c5f1dbd2681a36d3ac43e9494a62382d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreSupportSnapshot.h",
+      "bytes": 831,
+      "sha256": "03a6ca670397e5de19e3a86dd138eae1170b31b887df4a6204c95b4aaf5c23c1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreGeometryContract.cpp",
+      "bytes": 29218,
+      "sha256": "fb65d3c7f2c9f2c71759cf3d9b633c27e12d41c1a7dad2e10183c59d538f7305"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreTopologySnapshot.cpp",
+      "bytes": 12669,
+      "sha256": "4b490922323e8f14e01935138a37fcfe990b00167aa08c2e248cebe63f6a2d64"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreTopologySnapshot.h",
+      "bytes": 351,
+      "sha256": "beb34101a9f4e313959ad9ac871e89b53caf1e6d983972429e1518d259b5add3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CMakeLists.txt",
+      "bytes": 8432,
+      "sha256": "dd81a86c3f991a9b93dcbcba5ed6acf7ed53ef2a9b39354811d2e61e03a23ac2"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NurbsBasisAdapter.cpp",
+      "bytes": 20670,
+      "sha256": "341c02c464812a173c3d94a3ff9748f0eff9480fabc83992288e617ce8629f3f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NurbsBasisAdapter.h",
+      "bytes": 3633,
+      "sha256": "1ca7afaf36136083e97ae8b076afc08b43d5de06b7afbf27f66766db78c4c08a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\lib.rs",
+      "bytes": 1938,
+      "sha256": "4aad24ca6e4fa1e755c9a60bda12d80177e80270088771ecd3656f6da4e5160e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\nurbs_basis.rs",
+      "bytes": 11166,
+      "sha256": "50d4fe44e2a325ff2f614c1f06d263d42cc1f16fc3504e4240863f395e41e916"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\nurbs_basis_ffi.rs",
+      "bytes": 10445,
+      "sha256": "a826ec5f2c42a476ca5f1f503c66d6058d71803d493cdcee2ff76c54538393f7"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\support_snapshot.rs",
+      "bytes": 6150,
+      "sha256": "7e6ee4ab579eb7d03aa9e453172861195a32a80a19530eec3a5743028614304e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\support_snapshot_ffi.rs",
+      "bytes": 6469,
+      "sha256": "2d0a9d6fcf33cb69c9b4cc3d4a96b6c1f232fb5f5b34a166ed063fd9b0e1a6eb"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\analytic_support.rs",
+      "bytes": 5022,
+      "sha256": "4f386a88678cea05414833f5b6fd69ce629176e5cfd735f76e930c2d839f7d08"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\analytic_support.rs",
+      "bytes": 3829,
+      "sha256": "4194ece56c8e151e9f73b05c8efe09a99b40b7eec56cfd11a81aeed68df5bc8b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\support_snapshot.rs",
+      "bytes": 2916,
+      "sha256": "b4a9c37e6e78ccb12f4de6e69d08badb8a207bd10f1fbc44dcd1cd038476e28a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\support_snapshot_ffi.rs",
+      "bytes": 3970,
+      "sha256": "6e044be56c231841f4cf4ede0631c383ca6da84ce3f37d434c32a0c11e0d7188"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_analytic_support_smoke.FCMacro",
+      "bytes": 10780,
+      "sha256": "be861299632e4154f12b73db56df54e3e8e5814e3729c9e20a66d2852d296f8f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_support_snapshot_smoke.FCMacro",
+      "bytes": 11400,
+      "sha256": "faf1e09dfdbfde7d8dc8d87bbc54ee711d9c167abd95a2e94ab1fe6706f5969b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_topology_snapshot_smoke.FCMacro",
+      "bytes": 8288,
+      "sha256": "3b5caa79f2df766353a24262cfda414c7821096ad84f72930515bac899a6866a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_geometry_descriptor_smoke.FCMacro",
+      "bytes": 37949,
+      "sha256": "46da23b4b48a164f238e1b4e5852d0b389fd9afece11b45c5365e7015b8e2c9e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_import_commit_gate_smoke.FCMacro",
+      "bytes": 10604,
+      "sha256": "391e1e96940e20863a1360d9c90bb797d05265650b8a46747f2be04b4c9d54e9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_contract.rs",
+      "bytes": 17862,
+      "sha256": "32682f3fcd3a2ce0614eed6b9cfdf866da3282f6db6924bf542c7517b3cf3d75"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_contract_ffi.rs",
+      "bytes": 11390,
+      "sha256": "8a65916645f80097f192e9a5f294a20b7f283699add1d1b6ba2454864b57294d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\geometry_contract_ffi.rs",
+      "bytes": 6393,
+      "sha256": "92df03d48252dd0931703cd8ff94a7a41c81038cc7ac85bec1053b2fc45c2608"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\bezier_support.rs",
+      "bytes": 4769,
+      "sha256": "ee03f8850eba7bffcc4e9bbbd3189ee05598df166c580cc6f308a7b192830ab0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_bezier_support_smoke.FCMacro",
+      "bytes": 8057,
+      "sha256": "f3b6878116d44e4010831dfc92e2d00afa429b5beeacd2253663f562257b2327"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\derived_support.rs",
+      "bytes": 6599,
+      "sha256": "cdd55d8ea988ec67e1ee38da94399c4c5e5ffeba619a040ea93dbd20efa6e4fb"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\derived_support_ffi.rs",
+      "bytes": 4219,
+      "sha256": "b5996a667cf36933da5bf54c563f95e81af89bae8c709fcba7091285f2d2da36"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\derived_support.rs",
+      "bytes": 7674,
+      "sha256": "9895aa682867c342572cac64666d7d92fd0099902c4e11e45593585b0e591024"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_derived_support_smoke.FCMacro",
+      "bytes": 11031,
+      "sha256": "057c7317d47605405372925cd0fdf79072639106f6b8b7863bdc31f95b54857b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreSourceAttributes.cpp",
+      "bytes": 4724,
+      "sha256": "ac1851abf0745793e11904ea22a683f9f1f3aac9881aa5e705a515b4626ee16d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreSourceAttributes.h",
+      "bytes": 326,
+      "sha256": "217641cfd263bc8eb67d000b83555c8091a898069be5060255f653da9d647b16"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_frame.rs",
+      "bytes": 2958,
+      "sha256": "ee4b9130c6d8bb71e515976cdd2ddd00f6975ea7abc1ebdd9b3d13426328552e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_frame_ffi.rs",
+      "bytes": 826,
+      "sha256": "b631d6ca845421b4775b3135e42f750438719f460d0647fb2e1df8704e2d9e96"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\source_attributes.rs",
+      "bytes": 5016,
+      "sha256": "f5624013bdf383d3de1c6d5b9a8c8ebe65563a57c32505ac4329ddbcb4da5b01"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\source_attributes_ffi.rs",
+      "bytes": 3370,
+      "sha256": "3e1902c456f1ccdf9e832c770992c8d9495bbb0be92cec393a8f3c947c0382ff"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\geometry_frame.rs",
+      "bytes": 1831,
+      "sha256": "49ac56fc2ba0644eef681844dc0d01120eb9412d8c5db113ed1a49b4b19d86d1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\source_attributes.rs",
+      "bytes": 5458,
+      "sha256": "cba92971c2c9d9d48215cfb0c0b1037bd9a22b3d8066107f0fef332ad63924fa"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_world_attributes_smoke.FCMacro",
+      "bytes": 13224,
+      "sha256": "8bdd369edf43861cd8fdc01d1620c35db7e93d43f0d05e62fcc836ae00fda68a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreDefinitionSnapshot.cpp",
+      "bytes": 41256,
+      "sha256": "78fc213c7d323c65ea86c983b1be3360c2c94abb7aba2664b8911b79a2038f2f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreDefinitionSnapshot.h",
+      "bytes": 634,
+      "sha256": "090d10767c3c43e82f5f5599bec54b15cc9a120abdaf300c3b240f3993d75056"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\instance_graph.rs",
+      "bytes": 3468,
+      "sha256": "4ffa9fdecd1a3bcf3a4c3081b59a0a605f0d587a4a00c3da280259c77c6c886e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\instance_graph_ffi.rs",
+      "bytes": 1383,
+      "sha256": "4b6b5562027803ca43eeb87cc0231cd1cd7c66011dee15f7602756d11670bf4e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\instance_graph.rs",
+      "bytes": 2892,
+      "sha256": "13bab4e65bd1d7781a7a3bf2c7c226f90f8273a8f351b6f5c81269005ada12b8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_instance_definition_smoke.FCMacro",
+      "bytes": 13357,
+      "sha256": "7c4a0e26473b19c5a33918388d64d00c99c82f3651e59b1a647575c01d50d344"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreDiscreteSnapshot.cpp",
+      "bytes": 5079,
+      "sha256": "d8aaecb5116eb97e19414d87c7ed771561e9e67c44b21d08668d206e288b77ac"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreDiscreteSnapshot.h",
+      "bytes": 456,
+      "sha256": "8060aedc0c21d4fb62d37f67098bef651a773ab0ed6ec3b3ee0088a900fbd02d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\discrete_snapshot.rs",
+      "bytes": 2741,
+      "sha256": "5cbd91f1fa6a5853fda72451367ab84d5bf2be014aad1998352b81db2cfbbbe3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\discrete_snapshot_ffi.rs",
+      "bytes": 2081,
+      "sha256": "62f7f34c47b1dd3e8d422cf50147b8f1eb465dced4571b37e47cf84659fa2077"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\discrete_snapshot.rs",
+      "bytes": 4509,
+      "sha256": "259ac2115167dc4d0ca00ea44213771ff33c37d1b1241749ff00f3354a839d75"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_discrete_snapshot_smoke.FCMacro",
+      "bytes": 10310,
+      "sha256": "3113c35ff6631ff78147f86803b998efaf7f977c82561fea58f0e7eb2512ae78"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_discrete_module_loading_smoke.FCMacro",
+      "bytes": 2432,
+      "sha256": "b31ca89582bf8d6251150b2f613a26c3fc99dd0cf9a7350e6f2ca3c709034e54"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreEdgeSnapshot.cpp",
+      "bytes": 5840,
+      "sha256": "26f82dcc8e6eeb9d65c41c2d1d4a407230ce9b9150af627bd4109ac9167e81b0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreEdgeSnapshot.h",
+      "bytes": 516,
+      "sha256": "dcd83aaa0c5a6b9f5cbf77db2ec61b14b8fee95c58ca0e0f40c630f3d39b9593"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\edge_geometry.rs",
+      "bytes": 4303,
+      "sha256": "3c3bf3bba8d38595236ab63b091193909fc608c63dd1b5d85c3623de60e8f1f9"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\edge_geometry_ffi.rs",
+      "bytes": 2082,
+      "sha256": "722214b44d698a5cc81ce3760c16bafc1e418e1218e87e24d893832235ec93f1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\edge_geometry.rs",
+      "bytes": 5087,
+      "sha256": "bd584bf352dc3aef3ce001548e990074ade46efeffd247f6e158b5d3f67cd688"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_edge_geometry_smoke.FCMacro",
+      "bytes": 15478,
+      "sha256": "3ea31433b6750e53a18d64a452e8df7fc2a4f449a6ca287ab748295e1e5310b1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\native\\edge_geometry_fixture.cpp",
+      "bytes": 4409,
+      "sha256": "ec32f7cba271d5be8c4bcb2eaa8b2a85f700bc57207845fdfbeac753fcae6840"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\array_occurrences.rs",
+      "bytes": 3056,
+      "sha256": "45b86f7aaf1c542028a0de707b7239469b305d192dd52def04c13f2d11d094f0"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\array_occurrences_ffi.rs",
+      "bytes": 1413,
+      "sha256": "3e3743b665fa2dde0cba572c57d4cbb1a35d4d16c5f7d265bdbf86c6e985f30e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\array_occurrences.rs",
+      "bytes": 4067,
+      "sha256": "f22ac2db34ae923a831e32edcfca2f6bb06b6e883c6ab0faa582261c0280c783"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_instance_array_smoke.FCMacro",
+      "bytes": 14920,
+      "sha256": "120c0d518aabe0fb45ed57b3647d560ecccf7dc784c13b8f96e5a5a7c9e4b3bd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_instance_array_boundary_smoke.FCMacro",
+      "bytes": 4070,
+      "sha256": "07fac94fb49c2e5e35cc5059a8395846030916633bd1b53bbdf645d4eac00963"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\reference_path.rs",
+      "bytes": 2739,
+      "sha256": "911b358e81fcec5cc991b9a4d96c0eeab020f901d32fc48cad3439fb423cf483"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\reference_path_ffi.rs",
+      "bytes": 3114,
+      "sha256": "05efe898e3529ca0a901b5035fa870246b32ab9c46d3ec2c68831f1f0ad643ee"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\reference_path.rs",
+      "bytes": 4961,
+      "sha256": "d7d8253c3dd7e4ad42607590a11483c44741d41cdc6f6c5bb02da60b85b75698"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_reference_context_smoke.FCMacro",
+      "bytes": 13934,
+      "sha256": "bdb6c7345bee4f0a499418f5aefd4dfc4355a327db09fae57f2a17fa7e8fc833"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\surface_complex.rs",
+      "bytes": 3098,
+      "sha256": "f2e5981754cdaf659c3e8e4d9e9f37783fae5d8325425f24de6c0677c45808fa"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\surface_complex.rs",
+      "bytes": 4357,
+      "sha256": "9c2fa75b5aa61d897ce4bfccf0d8134fe44b85826828cebc2b1a7a5c4d98358f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_surface_complex_smoke.FCMacro",
+      "bytes": 5281,
+      "sha256": "39fa0fb6827fe47cc22e929b5b0243cbf5a7f0aff56b92d978643ef9585a1ea5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\shape_validation.rs",
+      "bytes": 3171,
+      "sha256": "cd0939171a2d2c7bd6c2bf4fff17eccbd97bb849f73ec7fa9d9af6eea983138a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\shape_validation.rs",
+      "bytes": 3463,
+      "sha256": "ef09b50053ef3023ed8d01e8e27af373ee746d2b2adaadfea7dd353143fcaca4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreShapeValidation.cpp",
+      "bytes": 6299,
+      "sha256": "db323c8c4a1c3b16869e7c435402ee3c68cb6ee335924b7535b01ff6632c1e74"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreShapeValidation.h",
+      "bytes": 465,
+      "sha256": "859916f39c9a79a275778f55e1f6de59610a254b003d61127c047518635a2ede"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_shape_validation_smoke.FCMacro",
+      "bytes": 8583,
+      "sha256": "13eca734b9c7d32d0dfed9b73bc25f547b198785250b82bcbd37272430c37d14"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CorePreparedCad.cpp",
+      "bytes": 26202,
+      "sha256": "05856476d794edadc59f15c5d1fb5952d50dde607400eb7854227500a58c0b67"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CorePreparedCad.h",
+      "bytes": 671,
+      "sha256": "7cbf5a8ffd312a67e00d7b9d530cf8c79e50d4ca4e5ffd2cb77969a68c627e9e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\prepared_cad.rs",
+      "bytes": 2997,
+      "sha256": "cb47f622edb8fd0c5c50bb5730a0d6cfa21e69ff57e8f9a97d3085f16691bf78"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\prepared_cad.rs",
+      "bytes": 2829,
+      "sha256": "b8d91c9f11f8a7c86e3080a8544e1262e8772e9096acf46c23f115708353e303"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_cad_result_smoke.FCMacro",
+      "bytes": 6964,
+      "sha256": "541fabe7b08e2e739e77927f70f33833f7a9993250cdbb3541da1d82cf094ad4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_cad_cold_smoke.FCMacro",
+      "bytes": 1638,
+      "sha256": "b529d5b0ff3a4fe558ac5d7552619c440dae08a234a1b661d8d10455c386522d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_metadata_smoke.FCMacro",
+      "bytes": 5127,
+      "sha256": "6183683faf6f866d633f992ce54b22fc47792437ae364a9e3bdf7ee438680576"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\ThreeDmPython.cpp",
+      "bytes": 29778,
+      "sha256": "c89fcf81375e1d2dbaa7636a85a304e3490b62981acd3a7ca251e3c604d0bad6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\ThreeDm.py",
+      "bytes": 20075,
+      "sha256": "2f825b6f87a2406d10bed0f621709e667daf32f227f9205cf09bea76b3f99f3f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\ThreeDmArchiveState.py",
+      "bytes": 101555,
+      "sha256": "df95561ed2d35b4aee8695ca6b8a1a0fe8ab81ce4b6dbf6502023deb48f1b8a8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\ThreeDmModeling.py",
+      "bytes": 4535,
+      "sha256": "05467c9785e9525766164c0ea400d6fa55d580354106314de7db4166f3ebd967"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NativeInputTree.cpp",
+      "bytes": 22642,
+      "sha256": "3a47989f7c44e5364ca19138157427ad920b9d3f23c3760294a6d27e92ccb268"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NativeInputTree.h",
+      "bytes": 938,
+      "sha256": "2303af98ff3611dd15bd86113507fdac4a1cccb4ee8a4a56cb43e03d17677f83"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\native_input_tree.rs",
+      "bytes": 3962,
+      "sha256": "707eddbb504f288a98e75bc5bfaa77433bfc339d1be97b398629d1f9d521a6a8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\modeling_exchange_smoke.FCMacro",
+      "bytes": 9134,
+      "sha256": "53c8e706e1bf648f24d4a809b8364e310124d1a2ef5c77a7ef4e6f050d7bef68"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\three_dm_preservation_smoke.FCMacro",
+      "bytes": 6870,
+      "sha256": "163104275f00c7e412f56966ebfcda50b0601ee4b75aa9b22dae7b934a019988"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CorePreparedSnapshot.cpp",
+      "bytes": 5603,
+      "sha256": "37847f9dcca053bb1809734838e806bcd9bc223737f8bb4cf525e3befee9e398"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CorePreparedSnapshot.h",
+      "bytes": 707,
+      "sha256": "53e421aa408062d741642cddb5ebf52fbbe9e833193f3e2189e93c792fb15aa6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\prepared_result.rs",
+      "bytes": 8485,
+      "sha256": "106d1fbbac7c9ddef3254f586eac001aacfc7fd4c8c1763cd45b58ccabdbbf55"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\prepared_result.rs",
+      "bytes": 3778,
+      "sha256": "56a2251f378fc09964da128ad1bc2452a5bb784ad5443df00ca56929f44182d6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_snapshot_smoke.FCMacro",
+      "bytes": 6239,
+      "sha256": "37f8886f5cba33ac7203095490dd8e0ff2d441bef226910527225ebf1c3a60e5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_snapshot_cold_smoke.FCMacro",
+      "bytes": 2571,
+      "sha256": "ad2089305311c06e2ebd9095d79d2c19e8293cebaca2da66d4ae115d897b71ea"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreUnits.cpp",
+      "bytes": 7297,
+      "sha256": "43aa730498e4e509c773e0e2eec33a59754e173e66a75a13707aad2f2185a101"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreUnits.h",
+      "bytes": 769,
+      "sha256": "bb5eb42328bc72796b671a9eadc4d4ed76141d7608070c7976e39cec57970e3a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\units.rs",
+      "bytes": 16987,
+      "sha256": "60b488fff3969cf54a103a6988684a2b810c0dbac165187e9874cd852f5f2b89"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\builder_history.rs",
+      "bytes": 15964,
+      "sha256": "836ebdfd672d8114fa421dcb2ab3173006b94a9618de7586a170b4b210d0b1a8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\prepared_discrete.rs",
+      "bytes": 6453,
+      "sha256": "9bd2f861b6e8ae2421fb4a45c87ec3bb65843ca6cb4bfefb9dc4730004caea9a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\prepared_discrete_result.rs",
+      "bytes": 6153,
+      "sha256": "56de2f201238bdc76535e937fe35db78ab174faf4828227ff7afc1f1d2ac0819"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_discrete_result_smoke.FCMacro",
+      "bytes": 8268,
+      "sha256": "feade70634295aa33f4219cf57dca5f75ed5a231f9d689ef268d20cb887dce21"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_prepared_discrete_cold_smoke.FCMacro",
+      "bytes": 2152,
+      "sha256": "15c7386f90ff148fe8e375f27dd7f242c794cd06577ce7eb31562ecfffd4da77"
+    }
+  ],
+  "remaining": [
+    "Upstream exactness/deviation/parameter maps and remaining native channels/attributes/userdata remain uninspected; triangle correspondence at float32 precision is not a float64 conversion or manifold certificate.",
+    "Other enabled operation consumers, source lock/ownership and worker/preview lifecycle paths remain open; retained auxiliary archive clouds are not covered by the current-row result contract.",
+    "Every other original closure-audit requirement remains open except this evidenced prepared mesh/current-cloud scope; arbitrary post-transaction failure Redo restoration and process-wide allocation safety are not established.",
+    "Native mesh reader exceptions currently map to InvalidTopology in prepared admission, and CAD master writer budget exceptions map to KernelFailure. Uniform typed-error coverage remains open."
+  ],
+  "review": "docs/reviews/2026-10-10-prepared-discrete-results-review.md",
+  "review_fingerprint": {
+    "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\reviews\\2026-10-10-prepared-discrete-results-review.md",
+    "bytes": 2086,
+    "sha256": "33cfcaf285acf86fca753e9875d7c2ecc5af3c7295128cc88bd9e910c74b8bbb"
+  },
+  "native_sources": [
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\Link.cpp",
+      "bytes": 103357,
+      "sha256": "bc503697b18aecfcd8b506f0ac40250cf8a6e6c0fb9bfbe0f4c3f1545d47a3ad"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\GroupExtension.cpp",
+      "bytes": 18027,
+      "sha256": "37c72d6431213fb25b16112af03f08457cedcebd24663344cdd5d0623977acb1"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\GeoFeatureGroupExtension.cpp",
+      "bytes": 20571,
+      "sha256": "deaedb1fcab832ff91786c34f62e918eb1c9cbd38bbb60b30467ef906dd7dd8c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\DocumentObjectPyImp.cpp",
+      "bytes": 35415,
+      "sha256": "d404b202ec3d9035f9e1657ac39b8b2f13b2d5fb5eac9e77b47f05dadb1b6e6b"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\PartFeature.cpp",
+      "bytes": 84936,
+      "sha256": "f75b38817bac5a46860c956ea78e76d3561815ad6390bb9f521eb86e2e6056fd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Mesh.h",
+      "bytes": 18095,
+      "sha256": "d1a3a4b84bffaaae6358e9618bd68ba53e248be57ea0675db1c1571d7f32f36a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Core\\MeshKernel.h",
+      "bytes": 27159,
+      "sha256": "69ee7d1f0c2aefb50f65f7c04c117daa4f5b0718890fadb6cc483abcbdc8a246"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\Points.h",
+      "bytes": 8056,
+      "sha256": "c7c08887cc7ac212e823cbe6eb4313efd14188845fe53b211516e6587311bd8c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\PropertyPointKernel.h",
+      "bytes": 3706,
+      "sha256": "57984bcba2e3950a814a946926ba58cdfce8bdb50915d5c335cfe8be4f564759"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\PropertyPointKernel.cpp",
+      "bytes": 6085,
+      "sha256": "677f7916e005bf3ed8159e5c48e427d84a7c2a692fdaf0e2f7949b8e386438ca"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\PointsFeature.cpp",
+      "bytes": 3960,
+      "sha256": "ab040c16751526ee12c2b6f4b4343508408cc7f4f63e55445153ada65038a048"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Points\\App\\AppPoints.cpp",
+      "bytes": 2819,
+      "sha256": "b62ec0416166699c4be8c8d160c8d698ba104aef6fe6c269aad3556074c17813"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRep_Tool.hxx",
+      "bytes": 19882,
+      "sha256": "308217970271349466f7bff4ae0014f81aafcdd311750e8ef5888f93ab003922"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\TopExp.hxx",
+      "bytes": 6627,
+      "sha256": "868d4f55c6e4a008adfc07787e24e5ffff1203e9244599f49dc05452c1e4b5fd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\TopoDS_Shape.hxx",
+      "bytes": 11734,
+      "sha256": "9535f666d49437f72151a484daf9f60d065ac59d0dc765866211427e94085f65"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\TopTools_ShapeMapHasher.hxx",
+      "bytes": 1335,
+      "sha256": "0f10c93946df144fa1cc46433b29c78ead9d87ce991b6968886e8eae01d60b8d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\NCollection_IndexedMap.hxx",
+      "bytes": 24993,
+      "sha256": "4ea642521417dcde1db81fad1f23fe9ea7be3676a289376fa0633dfcc65e41f6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\Geom_BSplineCurve.hxx",
+      "bytes": 38854,
+      "sha256": "6070421a76816696d9c116dc0b184e6a4afe9c63c77240b709ec0d2a690409b8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRep_Builder.hxx",
+      "bytes": 18147,
+      "sha256": "3f6586413a9b7adbdd58ac4f191f3ef700fe6fed796fe24da2ec399f3a50e1b6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepPrimAPI_MakeSphere.hxx",
+      "bytes": 6387,
+      "sha256": "881a123fc884e3fafd18f7556ad5d64a2718ef5d3ea8ba18561f1e16344de891"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\TopoShape.cpp",
+      "bytes": 157707,
+      "sha256": "2f7de58f556e3ce2cb0877ebdb1a83536d1e73be2d8a2b9243056083f0619e5e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Part\\App\\TopoShapePyImp.cpp",
+      "bytes": 93062,
+      "sha256": "db0f1f3fb0fb55e13017c64466d1f916821340810057259a203053c37d4eab0e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Mesh.cpp",
+      "bytes": 67826,
+      "sha256": "87df041474235ae5eaf64b4ede5c9a5d5d5eb2a7885d707dc426c078a686ab1c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\MeshPyImp.cpp",
+      "bytes": 66081,
+      "sha256": "86bc5911998919651d4ad91496083d1dfd11aea844ba66299a393d644bd591cc"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Segment.cpp",
+      "bytes": 6012,
+      "sha256": "436ee8771f3b17946dd17bd5b6aa64cc7a800dfc6848f5449d214b6ca000aed5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Segment.h",
+      "bytes": 4358,
+      "sha256": "2d599a4fd9d553bd943cf3f063bbb874ddc393abbaf8b5751a902e9f14009529"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Core\\MeshKernel.cpp",
+      "bytes": 42166,
+      "sha256": "69d2817b508cf759624af325f55a7bec03443dc6b13ef803e4a7e269698bb577"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Core\\Elements.h",
+      "bytes": 44038,
+      "sha256": "a0c31f0dc9b1b83f0296958404e24dcf10edcb96394c05a2880d88a5c0922d4d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\Mod\\Mesh\\App\\Core\\Definitions.cpp",
+      "bytes": 2664,
+      "sha256": "45835064793063ba27afa2bf4eff52792d44de937722c7c6efa4af10a567a1a5"
+    }
+  ],
+  "native_dependencies": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\Mod\\Mesh\\Mesh.pyd",
+      "bytes": 5714944,
+      "sha256": "7a0dfb3afbdcc5ddfddbbf5d5bb85f2069a67b5f22d27d23d22aed6c7056da76"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\Mod\\Points\\Points.pyd",
+      "bytes": 1630720,
+      "sha256": "37593b045a77451a6a0865c2f7c14f5b449de7f884253360e7b38a8558c22936"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\src\\Mod\\Mesh\\App\\Mesh.lib",
+      "bytes": 1217622,
+      "sha256": "2edf2cf27abfbc90af40390eac8506016d2dfd0bb5477462a8cd4144530dea55"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepCheck_Analyzer.hxx",
+      "bytes": 7461,
+      "sha256": "193f4ba62d6c504836251f9253e6dedda592055da4155349a5a469424285a7a6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepCheck_Solid.hxx",
+      "bytes": 2064,
+      "sha256": "5940b67e6d241bb60c51f0b2c9a84a7c86a5aeaf261743b777a9b3708f71a71a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepClass3d_SolidClassifier.hxx",
+      "bytes": 2342,
+      "sha256": "3916ff3e3109e5cf09d333447e7fdc5d969140d54851207c933c151778106fe8"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepClass3d_SClassifier.hxx",
+      "bytes": 2920,
+      "sha256": "096ff910d9a17eb04e7086d93f5f094866e85385a011761eae4601f460f76444"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\Precision.hxx",
+      "bytes": 19462,
+      "sha256": "73d59b7ca73e6bd2fc5c3f212f34fc9c4ae8a030efccfe80ca794ab9d834cff4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\Standard_Version.hxx",
+      "bytes": 2984,
+      "sha256": "838641a1b3b0834dc1236f132fafe5442872ba0a061b26aa5dd62c60ccaa0303"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\include\\pyerrors.h",
+      "bytes": 12968,
+      "sha256": "d7947aded270de2b45a9cdfa2e3d523d46655f0d8edad3ce69d405e0d9f51d1f"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepBuilderAPI_Copy.hxx",
+      "bytes": 2739,
+      "sha256": "213ecd5816c97c056cb39d496a44ab8cab2d466423526e4f0fd44589bdc8280a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\BRepTools.hxx",
+      "bytes": 18988,
+      "sha256": "204dbe773b11c9a5e23b8946bae83decd6a1814bef84b29fc45d7c631e9b4b10"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\.pixi\\envs\\default\\Library\\include\\opencascade\\TopTools_FormatVersion.hxx",
+      "bytes": 1641,
+      "sha256": "f805759441307be718a765ec237c36370e13491608b7f3c3fd67d4b366bc7dbf"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\src\\Mod\\Mesh\\App\\MeshPy.h",
+      "bytes": 27116,
+      "sha256": "ab43f56e3270e1b12a7972685629dbee3989d57b8744eaf31ece3ca655ef3380"
+    }
+  ],
+  "native_fixture_artifacts": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\generator.exe",
+      "bytes": 84992,
+      "sha256": "970ee7c47807af155cd464030222f2c51fd4127e6f8d0302c782b866b64fca35"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\different-parameter-domains.brep",
+      "bytes": 782,
+      "sha256": "001887d0088318dfa33a7d7bd5a71a2c90a9355f58a0b8973f481d970928fd6e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\missing-curve3d.brep",
+      "bytes": 755,
+      "sha256": "e51327a373e517053573c9e1c70b451cb534edd5ad2ff214f0ef4ae4e759ea6a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\out-of-policy-vertex.brep",
+      "bytes": 209,
+      "sha256": "a4289d038dad4b4ee91018e96f60c4a17b024c427413c33a5572de28534bac8e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\located-null-degenerate-edge.brep",
+      "bytes": 583,
+      "sha256": "d5fbe209f4726af2c66c005fd8725440ff1c4089a572be1e18d3973e5ea73cba"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\edge-geometry-fixtures-20261010\\located-bare-degenerate-edge.brep",
+      "bytes": 475,
+      "sha256": "53bcd2f4633fbb6a55b9ecf6dc919913f0e87a2c756d28ee62d506820f5b9d14"
+    }
+  ],
+  "harness": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\run-om9-plugin.ps1",
+      "bytes": 5287,
+      "sha256": "623aa26fd34a4e1b872766facec1e2c4f23f99ca6c4de6fef650c85c76499cfe"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\build-om9-plugin.ps1",
+      "bytes": 3540,
+      "sha256": "06396c92cbb6643fdff81b7dd92f905e2732326cfe77654d52ca7ffc7e9bb406"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\run-prepared-discrete-regressions.ps1",
+      "bytes": 3998,
+      "sha256": "dac9214ba7bfd4072f9eceac06192ef986ef725cf3445cb6d6d6fff4a29ee716"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\record-prepared-discrete-results.py",
+      "bytes": 21401,
+      "sha256": "5ac77bd56678d357f6eb5e2fab2186f56839fc5fff297fef48f84e7cbf4934c4"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\check-prepared-discrete-results.py",
+      "bytes": 6238,
+      "sha256": "a7c1c5a36fecb21812cf9be5362d5251c482bcf71fa249acf8a24fe46452b881"
+    }
+  ],
+  "documentation_fingerprints": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\README.md",
+      "bytes": 95871,
+      "sha256": "d6250b58d49f8993beeae8f369fd144c73cd1b15fcc1f628f9c8d2e1236663d3"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\IMPLEMENTATION_STATUS.md",
+      "bytes": 36546,
+      "sha256": "fe4b2c2765ca48b22ddfc3239d4e1e1cf02b0efd507ba9a64d3c251d6ab0e130"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\README.md",
+      "bytes": 40167,
+      "sha256": "ea1d5efdc5075cbfe3b5f20f0a6ed7497eef6e24a53a4907fb3f31f2aa7515fa"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\01-object-model-kernel.md",
+      "bytes": 46612,
+      "sha256": "c5ef4e926d9e629f591e51f68ea30c20467601da6c15b132bee30c18119ea704"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\features\\RCORE-01.md",
+      "bytes": 10788,
+      "sha256": "4540c63431238fdae79be3ad00f936c18913072ac4595c9d832325e0c25b417a"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\validation\\2026-10-10-rhino-core-prepared-discrete-results.md",
+      "bytes": 3835,
+      "sha256": "6021a15b7ac3c6261e9e49d6b3b14cd902667f98444267dd05f400cae5755472"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\reviews\\2026-10-10-prepared-discrete-results-review.md",
+      "bytes": 2086,
+      "sha256": "33cfcaf285acf86fca753e9875d7c2ecc5af3c7295128cc88bd9e910c74b8bbb"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\superpowers\\plans\\2026-10-10-rcore01-prepared-discrete-results.md",
+      "bytes": 4497,
+      "sha256": "bd443c8b7eef7b706b90c5386a080f2983c6786dd1cfed5d936e0689c6d6b0ae"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\reviews\\2026-10-10-rcore01-closure-audit.md",
+      "bytes": 25256,
+      "sha256": "8ce8cb476ebea0272e8dd324dc205d669fcbc339865d83db4ef5493605643ffb"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\reviews\\2026-10-10-rcore01-enabled-consumer-audit.md",
+      "bytes": 4007,
+      "sha256": "bc959d8bef8a59bcaa89369e8086ddf51bda5c27138bba239776a3b3ff678e4d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\docs\\openmatrix9-progress.json",
+      "bytes": 205804,
+      "sha256": "bc3bfbb3fb6f42c744444666b17a7afd472ad466997a3670e58c2771161f4021"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\specs\\00-rhino-core\\CAPABILITY_LOOKUP.json",
+      "bytes": 90916,
+      "sha256": "506915a8c69c9c19a68e5bf691f9ebaea8ddb93282ab75144262eafa472b6192"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\OpenMatrix9_Codex_Spec_v1\\MANIFEST.json",
+      "bytes": 116501,
+      "sha256": "1fdc94dee1faa0eb518cbcd3fb117c5d1738721648e09d0f906f784b7661690d"
+    }
+  ],
+  "validation": {
+    "host_runs": [
+      {
+        "case": "discrete-result",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-final2-20261010",
+        "checks": 81,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 55512,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-discrete-result-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-final2-20261010\\results.json",
+            "bytes": 36879,
+            "sha256": "c1b262f3de389f0cca68be92ce645777ae1a047f1a025bd14d112309c2cda77f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-final2-20261010\\shared-host-launch.json",
+            "bytes": 551,
+            "sha256": "92d3946c74d4318fad85f40eef065b73dc663d36cc33b9c57332a5828352dfd7"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 966,
+            "sha256": "ef3d63d3a14087dfa36791de4332cbaa51ac3ec06d3ab308c518acd4567d243b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1031,
+            "sha256": "ca9602003adcd4272ab6c8e28b0e38a3eebf66fa3b2a8c90ef363b6955dd8629"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-final2-20261010\\host-stderr.log",
+            "bytes": 1004,
+            "sha256": "e9e882242d282e20e75f6c6068667d4a992f6502b8f14515f141db38bc76ea05"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-final2-20261010\\prepared-discrete.FCStd",
+            "bytes": 5498,
+            "sha256": "0bbeb51e8fb32ba52e741351d54edadea56a70e43b0f30cfe53fccd2c952dab0"
+          }
+        ]
+      },
+      {
+        "case": "discrete-result-cold",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-cold-final2-20261010",
+        "checks": 8,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 17736,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-discrete-result-cold-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-cold-final2-20261010\\results.json",
+            "bytes": 1082,
+            "sha256": "aa1541f8d3ac106477c9e0a65b81db1d39566bfd15d174938908c8b98bd972d0"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-cold-final2-20261010\\shared-host-launch.json",
+            "bytes": 556,
+            "sha256": "472fb1813b80e485eae10d8e3a27510054fdc023e9170f295d25718dffcce285"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-cold-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 971,
+            "sha256": "d3c1dc3dd631733499c67f6c5e617b616a16a6709feec7f991534f87ce0e1303"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-cold-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1029,
+            "sha256": "8cdeb4bcd4c9db05592449aedc4bbba2bb083f35db5c26d2ee2a6d22d0a11dcc"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-cold-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-result-cold-final2-20261010\\host-stderr.log",
+            "bytes": 1004,
+            "sha256": "15f49ab7413690233310a555b9b4931fd7144408d5fce3b5998fc7c738db917c"
+          }
+        ]
+      },
+      {
+        "case": "snapshot",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-final2-20261010",
+        "checks": 67,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 82776,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-snapshot-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-final2-20261010\\results.json",
+            "bytes": 945557,
+            "sha256": "766bf8b9478b2ad18b2bf85e0c409c8d065378930d287f820cf35cd26f46e6f2"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-final2-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "6e5476ac6642d5347cb746a3e24e367b25b33baeb6fe08e2472b7bc275820f80"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "8d14a33c64198c88c50299e269bcd1f316a7e20f399a78be354ceeabad08593e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1024,
+            "sha256": "1bf9ac91acf5df3f70344bda563a3f2ca18f81b6c245634881175c7a821b53f6"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-final2-20261010\\host-stderr.log",
+            "bytes": 1004,
+            "sha256": "d0ebefd6238e58ee66fff9bb1603f0a41443ff5bed4f1259da05a1cf16e95e94"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-final2-20261010\\prepared-results.FCStd",
+            "bytes": 29808,
+            "sha256": "9335b6c5dcd4c9e4cdc3f9415ec9a0cf624974c334e518baedd48e8e5a225f12"
+          }
+        ]
+      },
+      {
+        "case": "snapshot-cold",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-cold-final2-20261010",
+        "checks": 40,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 60200,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-snapshot-cold-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-cold-final2-20261010\\results.json",
+            "bytes": 10918,
+            "sha256": "65660dcec75da0656206d45ecbe033a26f8e277f9bbfd7e7e3ef77b4110bf4db"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-cold-final2-20261010\\shared-host-launch.json",
+            "bytes": 549,
+            "sha256": "be4bcd4c67284a6f19e66a44e05e15080878e7f9e2e98aa4af7aca1199cf8d13"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-cold-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 964,
+            "sha256": "6ca61bf49694e5c0dfa1d07825e545c4d0a52bbdb118049a35b5115e3df1d488"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-cold-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1029,
+            "sha256": "360111a37977bfec86195039c5416c515a7997b3a43a5ddd9379f8913e3cb9cd"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-cold-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-snapshot-cold-final2-20261010\\host-stderr.log",
+            "bytes": 1004,
+            "sha256": "0251f2c5f540a967602959b3879cdeba81bdc29944901fb3f27e2bb0a4bb880b"
+          }
+        ]
+      },
+      {
+        "case": "metadata",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-metadata-final2-20261010",
+        "checks": 95,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 71812,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-metadata-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-metadata-final2-20261010\\results.json",
+            "bytes": 24295,
+            "sha256": "bcad238aaa5ed55e943073b1f72526b846d697a947411a665a064c05f900441d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-metadata-final2-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "c82e89c70809c1715af9151fed494f460a2c6f15642ab52ae857f84258bdb017"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-metadata-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "83f6ed4061d6b5ae75a81138f2be39b8155fad171c6075a1e10ff258ba3428e7"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-metadata-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1024,
+            "sha256": "d506a985ba048c0ed8bc88b63d2c2d593a97160e2ead44fd1fb02f9c78f2fe7c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-metadata-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-metadata-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "3ff32ad75cb59f3068c72dfb99d07c5401844ba7644e6e1d89652f1b3e2e8cb0"
+          }
+        ]
+      },
+      {
+        "case": "prepared",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-final2-20261010",
+        "checks": 47,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 27080,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-prepared-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-final2-20261010\\results.json",
+            "bytes": 721594,
+            "sha256": "2392b0a31398bf998d0c9afd27d40008d000dafc9e950d46256df8681c0c2e70"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-final2-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "200de7f3de0246cbabc670c98151ca62391911d8fda968aa9cf5da73a1521caf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "2787739b35d2aedd02e3cde9856b37340c33d449deff98eb7537a892a2a3b7b4"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1026,
+            "sha256": "b827ace53dff87481cef745210f1cf92c74e3be2ea0b5aaed3f1705c9cc88457"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-final2-20261010\\host-stderr.log",
+            "bytes": 1404,
+            "sha256": "18c84e85944cf9f75dac9e7f3968f951a05a383c8b19b7b33b9f29da6ec25bd5"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-final2-20261010\\prepared-results.FCStd",
+            "bytes": 33664,
+            "sha256": "32a8b6d89fb7b256e2f5c21cfd7c3ef86dde2034b3d00b282efca0594ae8b762"
+          }
+        ]
+      },
+      {
+        "case": "prepared-cold",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-cold-final2-20261010",
+        "checks": 18,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 61824,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-prepared-cold-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-cold-final2-20261010\\results.json",
+            "bytes": 2108,
+            "sha256": "d78f36c2e6dca197a5ec97a7ca71694dde14019ff9092169f0693ef5e48288e2"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-cold-final2-20261010\\shared-host-launch.json",
+            "bytes": 549,
+            "sha256": "ae10a4be048383f5dd8aaf5d8c9092b66dba73b1e38d17ec66fb2d98ed4100ce"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-cold-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 964,
+            "sha256": "2807ae7d683f442d6ef125c01ca81f7ac3162e6467f04f4e0d0b08013661505c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-cold-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1024,
+            "sha256": "926a486cf6454230206052db4563c927fb76e0033603ce07708d8eb4af4127b3"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-cold-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-prepared-cold-final2-20261010\\host-stderr.log",
+            "bytes": 1004,
+            "sha256": "1c189c64f38b94890a20ce8d7f82fd71fb1ddf672d9fa3986b736dd05545bacf"
+          }
+        ]
+      },
+      {
+        "case": "modeling",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-modeling-final2-20261010",
+        "checks": 32,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 78456,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-modeling-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-modeling-final2-20261010\\results.json",
+            "bytes": 3460,
+            "sha256": "574befb2dba65acb6c2ea1e01a0d758914a8f499fd2e6c85e8dc9b69c89d4ca9"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-modeling-final2-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "dd2da3acabdb6386b3eee4005e3e72933a9ca7c946b820d968f1b134960c77e3"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-modeling-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "cb868744f4503357d9a1d1522eea8264300c85e754d226341ab89eb0c3157a32"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-modeling-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1013,
+            "sha256": "423560a66d4a3d02cb93d85b4cadb83e7e0d96fed91536bd9ad057b104fc45e1"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-modeling-final2-20261010\\host-stdout.log",
+            "bytes": 736,
+            "sha256": "660064718274ee0adcad1da31fdaa00b9e05f04e02a29de55b55ddb4078b6be0"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-modeling-final2-20261010\\host-stderr.log",
+            "bytes": 1404,
+            "sha256": "ee020ba2bf0b68870cb3c6511c4c5bfb61cd3f69b689bc75bea3f5da4cfdd902"
+          }
+        ]
+      },
+      {
+        "case": "preservation",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-preservation-final2-20261010",
+        "checks": 19,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 68088,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-preservation-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-preservation-final2-20261010\\results.json",
+            "bytes": 1655,
+            "sha256": "6db108511e7e255ef9bf1e9305c4f7e54848af2416004afdd3f8f80dd64afc44"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-preservation-final2-20261010\\shared-host-launch.json",
+            "bytes": 548,
+            "sha256": "635b6dd036f87574ee7ec5502c6aad8b3ef7e95425a59831a46445677d490098"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-preservation-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 963,
+            "sha256": "ceaaa77100f6ebff0e1d319120792968fcdb30f423333a304dd41477f2b07616"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-preservation-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1017,
+            "sha256": "869f3b5156ff53d617a628e6d87017836bb557dbaae0f3b083b9d8a5e0ccbb1e"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-preservation-final2-20261010\\host-stdout.log",
+            "bytes": 748,
+            "sha256": "0196004966f1cb6a1fe1fe551dc537bdd17fde78c404cc0bb0d77db714895222"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-preservation-final2-20261010\\host-stderr.log",
+            "bytes": 730,
+            "sha256": "e85b66d1a08101a2bdd9211f7f1eebb9d2f59b9396b2fc873de6c89f20701ab6"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-preservation-final2-20261010\\ThreeDmPreservationTests.exe.log",
+            "bytes": 19,
+            "sha256": "b8434bd41c2ae4443b4d332c3c410a83673fdd5b6456b2f94950e140688f2365"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-preservation-final2-20261010\\ThreeDmInventoryTests.exe.log",
+            "bytes": 128,
+            "sha256": "1760d7a117c31e13d2c0ac009509e75eb515f2f70fe6c605609eab0d63ed35c5"
+          }
+        ]
+      },
+      {
+        "case": "solid",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-solid-final2-20261010",
+        "checks": 220,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 69964,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-solid-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-solid-final2-20261010\\results.json",
+            "bytes": 2195771,
+            "sha256": "9bbed22e0a4b4463433da929ea6534f53b82d5b8aa90493bcc475fb40040bf86"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-solid-final2-20261010\\shared-host-launch.json",
+            "bytes": 541,
+            "sha256": "979dc8178cd41d4ab11c82c6858343d8210f74c145c927610a65672ccc7d5aa2"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-solid-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 956,
+            "sha256": "6e7c8b9d42ce1fcf6da311abace97cbd01bae17208761bfdb8bf17cbf92a1152"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-solid-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1023,
+            "sha256": "205fa2ba4d528eed0a9b4c805835642d226995d52681be0256488e6618edb6e6"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-solid-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-solid-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "aba5b20f1732386b4bffb3fd3fa68550c91525d5165079f276b0a11616093b6b"
+          }
+        ]
+      },
+      {
+        "case": "complex",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-complex-final2-20261010",
+        "checks": 67,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 25280,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-complex-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-complex-final2-20261010\\results.json",
+            "bytes": 1003982,
+            "sha256": "f84b786fb7bd546d7ac27919743d4183bd8ad560424b3fe4461ab177bad86282"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-complex-final2-20261010\\shared-host-launch.json",
+            "bytes": 543,
+            "sha256": "4c2cc139dda8f58a32490cc091cb0430c0711d276cf9396e4092e07d8e238b18"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-complex-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 958,
+            "sha256": "e9413d25fa67be39412028cf43b53f4e6a1539ecff13b2e7f5e8ab3ebe917cd6"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-complex-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1022,
+            "sha256": "888115e603fb2a8fc703e620be0e2e02413022aa8038065ca05b148ded6541ac"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-complex-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-complex-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "42505089d631f5af000a2f5d50f3de8dd393e7c6e312f21cbd70622085d436a8"
+          }
+        ]
+      },
+      {
+        "case": "reference",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-reference-final2-20261010",
+        "checks": 540,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 12036,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-reference-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-reference-final2-20261010\\results.json",
+            "bytes": 2399742,
+            "sha256": "8245c0d527805d2e4f04be439b781ae25f44697307bbfb646bd91e2d5dc7499c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-reference-final2-20261010\\shared-host-launch.json",
+            "bytes": 545,
+            "sha256": "07ee7e495e4091bd7fb777538f6d672c86c8d384cd36b1e11f53ee30700af3b8"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-reference-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 960,
+            "sha256": "f464384d1ce744d238a6e7393b2a77cdb1123c4f8e7214f532c700b1ac4dabd1"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-reference-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1024,
+            "sha256": "fbd4fc5380cdf4956d04babfe090211a574f635d9e4dff81caeb65fe0369ff28"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-reference-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-reference-final2-20261010\\host-stderr.log",
+            "bytes": 3776,
+            "sha256": "7bbdbf87c2ed657ea0afedda2dd718a99ffaf2a924ae67bae31227bf99ef61d6"
+          }
+        ]
+      },
+      {
+        "case": "native",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-native-final2-20261010",
+        "checks": 609,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 76436,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-native-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-native-final2-20261010\\results.json",
+            "bytes": 2278133,
+            "sha256": "7a0dd7882b25141052d8dc4fd08e7d550e3163e5d0b346d0c37d397c129c22dc"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-native-final2-20261010\\shared-host-launch.json",
+            "bytes": 542,
+            "sha256": "53ea1fafee86affe6bfa11d0d44c7413d7a572de3c295139e51634465f3917df"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-native-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 957,
+            "sha256": "ee99ef80ba3b22441c90bbd4103312f3312d7b6209cde6f99ba6faebc0b294e6"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-native-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1021,
+            "sha256": "734c7199f452b95a3177140a8ee38ea92db229303b3de61facc9043112572635"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-native-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-native-final2-20261010\\host-stderr.log",
+            "bytes": 2687,
+            "sha256": "b585a69bc1d37fa5fcb350abe95811314c969955597f0f857776c7214767d481"
+          }
+        ]
+      },
+      {
+        "case": "boundary",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-boundary-final2-20261010",
+        "checks": 10,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 11140,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-boundary-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-boundary-final2-20261010\\results.json",
+            "bytes": 1305,
+            "sha256": "3a5900fc3aa18bce4e80bff69c96abb086644ecd19c50e9d730978c564b9d4c5"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-boundary-final2-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "0f069548ccac3ec9bfc5e590fa35b32baa2c04207e212d15d39892055abad2e2"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-boundary-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "a4d619f7828a10edf9a8a0d368ed49bed027f9a766e4a0b81ed281284f9a0a94"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-boundary-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1030,
+            "sha256": "3f6f34d9cd061d41f868d6b4737f57f33964dfbc230e2298b9cb41854a0c15c8"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-boundary-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-boundary-final2-20261010\\host-stderr.log",
+            "bytes": 733,
+            "sha256": "9777f06a8b211dcd5e872db10fd5d1c33665b0f142341f92c81c0bc98a01f706"
+          }
+        ]
+      },
+      {
+        "case": "edge",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-edge-final2-20261010",
+        "checks": 921,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 82368,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-edge-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-edge-final2-20261010\\results.json",
+            "bytes": 706047,
+            "sha256": "a639e2f73d785b5b811a6ab47e10349a75fbb6a727fc3e7e4c35d65c3188a1b5"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-edge-final2-20261010\\shared-host-launch.json",
+            "bytes": 540,
+            "sha256": "e5a802f1ea6624b46bfeabdec4c85b51d461a9a317b13609d623eab74dad2394"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-edge-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 955,
+            "sha256": "d7bd852ec680958f76d326ca67736e09d9a643cf650819a570c2ab8265b8b7c7"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-edge-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1020,
+            "sha256": "76cdaab6f96211987723b50dd7ec97bd793b1e31d4367ed9325bb6ceec8ec884"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-edge-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-edge-final2-20261010\\host-stderr.log",
+            "bytes": 3014,
+            "sha256": "6ced869665d2ce619922502368befa8c874f7efdce34f574a7183280c8083486"
+          }
+        ]
+      },
+      {
+        "case": "discrete",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-final2-20261010",
+        "checks": 99,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 39908,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-discrete-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-final2-20261010\\results.json",
+            "bytes": 171623,
+            "sha256": "3041b9b5a145ef738711b1175c63114393cc54f661a0f893433dc840275fe551"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-final2-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "d1f3154efe3edafe077e767c5df705a23387be6e10becadcbff2fa072df63cf3"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "9b946f8c115456afc577618a7a4ce0457009f962390afe7f20e93f26499c8ba5"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1024,
+            "sha256": "838ab3dd54c7ddc32c2221f9f8c9b17bf338566ca730a8ee6cfa10ee3b3c8331"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-discrete-final2-20261010\\host-stderr.log",
+            "bytes": 1522,
+            "sha256": "565f729320f60efec819c9f5233b05733c070827049e5e0eb5f017652acd47b9"
+          }
+        ]
+      },
+      {
+        "case": "cold",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-cold-final2-20261010",
+        "checks": 6,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 27160,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-cold-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-cold-final2-20261010\\results.json",
+            "bytes": 731,
+            "sha256": "e65368c4794be2b8aaeb218319fa7024327895db532f27b779d2f992368b160b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-cold-final2-20261010\\shared-host-launch.json",
+            "bytes": 540,
+            "sha256": "413b9bf0ad121db07c74b0c4f009f8f70884bb78c62da03f454f311319ca2221"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-cold-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 955,
+            "sha256": "b832ae95256c1fcb3b451bb78539412a653a8cb88c8c7e9351d4bd74845688fa"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-cold-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1030,
+            "sha256": "9f387c90d86887f3369b0fb57aadb786f6ba48ebc2f423b6be5c4cf112be585b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-cold-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-cold-final2-20261010\\host-stderr.log",
+            "bytes": 555,
+            "sha256": "c9a93a06ef7543aced74af78756b76c3cfd247f484fd2ee17db63c79784d79e3"
+          }
+        ]
+      },
+      {
+        "case": "instance",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-instance-final2-20261010",
+        "checks": 48,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 45788,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-instance-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-instance-final2-20261010\\results.json",
+            "bytes": 571954,
+            "sha256": "b4f959f00e0695d0c4a03626d0911a60291f2924eaf08e9612d6bf9c90cb9a86"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-instance-final2-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "5ccd407c852a1bbe504fce16fa0f016fbd82526c37de8a388174da97d7f80aff"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-instance-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "a66bdadecd64cee6122327a3410b369752837aa6a195ae87c1d5f33d67b6bc1c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-instance-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1026,
+            "sha256": "7c680d5eb741763ca43e814f2c326d6aee6654aa2871191a1af2ebcdae43a2a3"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-instance-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-instance-final2-20261010\\host-stderr.log",
+            "bytes": 2339,
+            "sha256": "5aeac624c5c35339a3ae376d9a272480408f68108ddd586f2e504fb2ec6d5084"
+          }
+        ]
+      },
+      {
+        "case": "world",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-world-final2-20261010",
+        "checks": 85,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 28980,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-world-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-world-final2-20261010\\results.json",
+            "bytes": 439719,
+            "sha256": "691bfa805676422824d1f8f91ea223b3f0a3c12630bd9c86314061fb58a40029"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-world-final2-20261010\\shared-host-launch.json",
+            "bytes": 541,
+            "sha256": "30689e7421d99dd64379646e424925cd378d1ba4bd53902d48c70c804be2cdd3"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-world-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 956,
+            "sha256": "d37424cc555bc466a962884090c6a019896e1a212829bd699ce0f484a61e04f2"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-world-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1023,
+            "sha256": "46d6f32a784bcfec9ff9f4a61c64772075d68bb31905bdd36633f4fde608c30a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-world-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-world-final2-20261010\\host-stderr.log",
+            "bytes": 2090,
+            "sha256": "3a2d1983e201499f37c0e924e96904d28a261ba662f7530eb58797b3787c16e3"
+          }
+        ]
+      },
+      {
+        "case": "derived",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-derived-final2-20261010",
+        "checks": 91,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 55184,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-derived-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-derived-final2-20261010\\results.json",
+            "bytes": 803451,
+            "sha256": "63ecc9dcc1311c86cd1b506f3e24c1233a92d596a551dc4b616c07ba6165d1a3"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-derived-final2-20261010\\shared-host-launch.json",
+            "bytes": 543,
+            "sha256": "fe82d8e095ae575ad4676d2a660e11359510b9957767acbd0c4bd795f9a1457d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-derived-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 958,
+            "sha256": "4f271c101405b86f2f888fac38bfab8eb33393862c2215007861833c74935a2b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-derived-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1022,
+            "sha256": "9741e2ed6cb481b7cf41d5918c575ed3a1be00d81060a01dca036a0eb7af4c2b"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-derived-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-derived-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "e99d8362140983ed636a885eaf99bc50928928e42b56bb6d24d495fbb544c44e"
+          }
+        ]
+      },
+      {
+        "case": "bezier",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-bezier-final2-20261010",
+        "checks": 76,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 33008,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-bezier-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-bezier-final2-20261010\\results.json",
+            "bytes": 250717,
+            "sha256": "de105cd1a89c4aa1fd92789f3bd5eb354179feccc77ed15089badce6736dd37d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-bezier-final2-20261010\\shared-host-launch.json",
+            "bytes": 542,
+            "sha256": "d57368cfe0fb0008d1dc9fd913c63afd429bc9f9b03e75a276346239fbc8fc58"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-bezier-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 957,
+            "sha256": "293a13b9c83526f96a0ed353e65b428f587e6b39b41c777e11db5e7b349a79b3"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-bezier-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1021,
+            "sha256": "ddfbc7f5b9d6ee8e896359736720aec1e81598936170fb93a13f43301d9ac903"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-bezier-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-bezier-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "27ffc1d1d6faf51fa0990752e9add7d76d2c537dd1854bd7850516010b3bb3bc"
+          }
+        ]
+      },
+      {
+        "case": "analytic",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-analytic-final2-20261010",
+        "checks": 174,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 79480,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-analytic-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-analytic-final2-20261010\\results.json",
+            "bytes": 725876,
+            "sha256": "de1d3d8f74e785520880eb6136252c2cd9b8bee5499bf335d04cec8537938c2c"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-analytic-final2-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "75dfd2073ee08be108306f803999f86664c17365065be4b88397467e8807d81f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-analytic-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "69a861beaaed8c6b9a95be3a4e9eb0662187e6ad07b33cdbd41d2c595717cd80"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-analytic-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1023,
+            "sha256": "de9cf5398f3efb7740aa787ae109034e8bd80b8ceb1a21c3c4516ea59839a96a"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-analytic-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-analytic-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "9bee24477b3fffe09b20a4434f09f80777fe59a1d988b19fa9953886019f4654"
+          }
+        ]
+      },
+      {
+        "case": "nurbs",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-nurbs-final2-20261010",
+        "checks": 54,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 8144,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-nurbs-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-nurbs-final2-20261010\\results.json",
+            "bytes": 1698030,
+            "sha256": "16db499cd7a95411a5a4366edd343f18528f25013e7dc596d70efdb3d4814229"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-nurbs-final2-20261010\\shared-host-launch.json",
+            "bytes": 540,
+            "sha256": "7b47e359d85560a0a4bf6176ddb2031af59ba37fc96990a60f3c2d609c6b6966"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-nurbs-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 956,
+            "sha256": "92645a31a4bfd18741c12ec27c1492321b73591fbd875f87e5f0ac90646a04bc"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-nurbs-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1023,
+            "sha256": "36f2bc2195b805473c7a39878f4e6e1320d3512dcb4a45205d941b89b427cd0d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-nurbs-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-nurbs-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "667db5592223cc27ef8c630fad39fa680770c04a2a703ffaf0631f728b7f37b4"
+          }
+        ]
+      },
+      {
+        "case": "topology",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-topology-final2-20261010",
+        "checks": 177,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 68968,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-topology-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-topology-final2-20261010\\results.json",
+            "bytes": 663526,
+            "sha256": "90eff4a36ffa6592b699390dd0c46c87d5c323e28569b929c2949ede68cb23af"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-topology-final2-20261010\\shared-host-launch.json",
+            "bytes": 544,
+            "sha256": "400749b1efe9a7ec3357cc943343bd2621d26bcb78246218d1eecb0be2755069"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-topology-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 959,
+            "sha256": "b9a42342aa00382d866477d55c14282eb928e566580492e8045fd711bcaf7e60"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-topology-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1024,
+            "sha256": "21a1e80788a682eb73da7aade981e8dc9568a823eff7a19b189585ae20dc0177"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-topology-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-topology-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "a4c991015cbf39899c661ced3afc704ef962ba61a7902c22183d396f577ca210"
+          }
+        ]
+      },
+      {
+        "case": "descriptor",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-descriptor-final2-20261010",
+        "checks": 151,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 60928,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-descriptor-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-descriptor-final2-20261010\\results.json",
+            "bytes": 1752213,
+            "sha256": "b249984eb445b04b5218dd08ce1c5ee041f7995aedb1da65f0f38f14e8615fa6"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-descriptor-final2-20261010\\shared-host-launch.json",
+            "bytes": 546,
+            "sha256": "565e3eabba7ab3c86474ec9b346982b2b2fbd453c81b5cf5f5449748c8fcccd1"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-descriptor-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 961,
+            "sha256": "eebda047a27983345b40dda8834db8a7ea83e852eeeea483a474ab862d17aa75"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-descriptor-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1026,
+            "sha256": "2f7ac601901ba58f256161309d3b7906d32c6bc3da4ced46b855f8c500f81939"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-descriptor-final2-20261010\\host-stdout.log",
+            "bytes": 502,
+            "sha256": "e3a6f2d7086466d144789eb6b7f5b2abaa417157cb08dbe429175cacc1b44779"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-descriptor-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "172b3efad5ea776eae1984f600d34c286b32d17b7fc2b30d60ed0cd49f6b8f63"
+          }
+        ]
+      },
+      {
+        "case": "import",
+        "directory": "H:\\FreeCAD-src\\build\\prepared-discrete-import-final2-20261010",
+        "checks": 55,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6F92A07DE16F8A00C565B7E2312279E2FCBA366A8A169DA79CC714343CBAC5F4",
+          "pid": 70876,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/prepared-discrete-import-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-import-final2-20261010\\results.json",
+            "bytes": 1135703,
+            "sha256": "6092310b02d4f2c56b41a24ce8410316f1c92d3ddf7852a25beb4c6e252d696d"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-import-final2-20261010\\shared-host-launch.json",
+            "bytes": 542,
+            "sha256": "a4a124808bd54ee6919ba06dda9b9d7135f30afd4e031490b40bce1386193082"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-import-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 957,
+            "sha256": "da7529a0fd834ec5720739f31536356436380259df1e2bb7e94a1d8edfdd7f32"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-import-final2-20261010\\prepare-test.FCMacro",
+            "bytes": 1025,
+            "sha256": "a9f81dfa0fd66072be96bc9c045246d5d7a07a716430d211f20cc44a3cb41c8f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-import-final2-20261010\\host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\prepared-discrete-import-final2-20261010\\host-stderr.log",
+            "bytes": 604,
+            "sha256": "4afa99fd12a3f2ce253f6dfa06db2cf3ab7d347fb73308bcc2d9e09d2f665e52"
+          }
+        ]
+      }
+    ],
+    "host_checks": 3790,
+    "rust_tests": 675,
+    "rust_log": {
+      "path": "H:\\FreeCAD-src\\build\\prepared-discrete-rust-full3-20261010.log",
+      "bytes": 105682,
+      "sha256": "65956d99baab0aaa1cf393020da72d61f2364bf17c78701c3e2ab75d85eb7de0"
+    },
+    "rust_process_exit_code": 0,
+    "plugin_build": {
+      "target": "OpenMatrix9Gui",
+      "sdk": "H:/FreeCAD-src/build/relWithDebInfo",
+      "cache": "H:/FreeCAD-src/build/openmatrix9-history-cage",
+      "workers": 14,
+      "process_exit_code": 0,
+      "root_rebuild": false
+    },
+    "public_source_audit": {
+      "source_files": 2344,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    },
+    "build_logs": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\prepared-discrete-build2-20261010.log",
+        "bytes": 1248,
+        "sha256": "a0ac4c8a8c83f0a9223379bddf2d4a40642dd3217de1b21ecab9fbdf41e66834"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\prepared-discrete-build3-20261010.log",
+        "bytes": 1248,
+        "sha256": "b17016a8a7a3e1e6786f84e27fb55b89371ffdd424edc18e51b8dfd44eab3052"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\prepared-discrete-build4-20261010.log",
+        "bytes": 683,
+        "sha256": "b1c10c35652e3b6bf58114891e327aea2b8f679b938390b5a25e9af01da36955"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\prepared-discrete-build5-20261010.log",
+        "bytes": 972,
+        "sha256": "0cd1fd25df306e31579d2ea6383db7795d7f2c1516d02aa87e38c6d525eba5f8"
+      }
+    ],
+    "regression_log": {
+      "path": "H:\\FreeCAD-src\\build\\prepared-discrete-regressions-final2-20261010.log",
+      "bytes": 4436,
+      "sha256": "4ce2ebf02892252a3915dcb72600d2d9ca287bee1a679598d4e6fdcf578ee899"
+    },
+    "red_artifacts": [
+      {
+        "path": "H:\\FreeCAD-src\\build\\prepared-discrete-native-red2-20261010\\results.json",
+        "bytes": 8847,
+        "sha256": "621fc17937ebfbb8776fb4100fca2ffdb8a99bdad1ac25a5c169cb1e98180a60"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\prepared-discrete-native-red2-20261010\\shared-host-launch.json",
+        "bytes": 540,
+        "sha256": "57f2ed11029ea118407671c78459bbba807d9ce7ef59e4912d628757c7fdfdba"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\prepared-discrete-segments-red1-20261010\\results.json",
+        "bytes": 31568,
+        "sha256": "6c5b5e7c3d028c09dff15e82b5da7fb18d17388bbf884f8ec7473cc3bb807a49"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\prepared-discrete-segments-red1-20261010\\shared-host-launch.json",
+        "bytes": 542,
+        "sha256": "01d862b5856367d87f249f6d870098002c3acc15061b81d19a0b6286e9fec8f1"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\prepared-discrete-correspondence-red1-20261010\\results.json",
+        "bytes": 34576,
+        "sha256": "89fbc62bf025982993d4ba88f45e7ef7208f40ced852f5e62fa57ea23fe2ec7d"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\prepared-discrete-correspondence-red1-20261010\\shared-host-launch.json",
+        "bytes": 548,
+        "sha256": "71300621fae1e193cf5e6de2ce68a641f89096202fc4db169c9b176b30780dc7"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\prepared-discrete-rust-red1-20261010.log",
+        "bytes": 3718,
+        "sha256": "619bc1f4135c1b5072fae5ecf9712a0c036a616f1a50e6e9eb0873cb0a284c9f"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\prepared-discrete-segment-rust-red1-20261010.log",
+        "bytes": 2299,
+        "sha256": "83fdf939ff49993d01630b3dd316c80884fe7aa9962a2584768295a932623f71"
+      },
+      {
+        "path": "H:\\FreeCAD-src\\build\\prepared-discrete-correspondence-rust-red1-20261010.log",
+        "bytes": 4446,
+        "sha256": "a427ec4e8e109eb4a8de84d3c890d63538d626c860bf8f0016884ea4ddc80c19"
+      }
+    ]
+  }
+}

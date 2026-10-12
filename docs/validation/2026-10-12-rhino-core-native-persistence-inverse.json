@@ -1,0 +1,874 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-native-persistence-inverse-20261012",
+  "status": "in_progress",
+  "goal_complete": false,
+  "updated_at": "2026-10-12T09:38:04+07:00",
+  "sources": [
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.cpp",
+      "bytes": 48770,
+      "sha256": "fd87fefef612fd7d658cb0794969f5929ef1b1102bb1ca906bdd8914948a8856"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.h",
+      "bytes": 16231,
+      "sha256": "3e664750c259995cb769ced03bf2978373c8eaa94b0ec7055436d49a58d3f14c"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/private/PropertyReplay.h",
+      "bytes": 10796,
+      "sha256": "d574a940fbf120da415d17ad1d61d849d342ec5311ce2fd38f97255c6b6d142f"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Document.cpp",
+      "bytes": 161324,
+      "sha256": "c0e0f477bc25f83a585255ce26af2f10c92a0eb7e1dca09a555b341727397ef9"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Document.h",
+      "bytes": 58644,
+      "sha256": "24ed1a2d1d8dae30e10d525ab5e3275d4abfdf1dabc6f3b964f94a1e19c05ac1"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/native/replay_retirement_probe.cpp",
+      "bytes": 5525,
+      "sha256": "1e5b3f8d25e93bc058bd8c5cc524f89f095f557550598c6c96cfb170172790d0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/native/property_merge_probe.cpp",
+      "bytes": 18259,
+      "sha256": "b9fed82498bff2776847cf58a7d41cbd78846e78456096663685941485bf9b28"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_replay_retirement_smoke.FCMacro",
+      "bytes": 2911,
+      "sha256": "825820f12bb7f3917d31fc8e6a799ef44535c7e217f109ae3138a0fd0ee975d2"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_replay_discarded_redo_smoke.FCMacro",
+      "bytes": 2526,
+      "sha256": "a48dfee86ea5ddc0d00c37da306a4d64715ac2bac7411699b4078eaad564d0b5"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistory.cpp",
+      "bytes": 36343,
+      "sha256": "52203b1abdbad0d43df716c96f0481e0847c64cb33df0f23ac16b2c6b6170079"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/superpowers/plans/2026-10-12-circle-history-native-savepoint.md",
+      "bytes": 13584,
+      "sha256": "1f20aa6397f65f0ea750f6bb6d3650b0ee3d3532b66608345f851364d6b3d441"
+    }
+  ],
+  "selected_app": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-inverse154-20261012/FreeCADApp.dll",
+    "bytes": 7842816,
+    "sha256": "564ed90b719a9434bb00a49574a71509173e0c5d140b00ea4a0b166c2f388c8a"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-inverse154-20261012/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "plugin": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-runtime156/bin/OpenMatrix9Gui.pyd",
+    "bytes": 13629952,
+    "sha256": "2d24809f7ad8df021d0f85324eabeff709e5b27f053ad876ee97505ff0488bf2"
+  },
+  "matching_import": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-inverse154-20261012/FreeCADApp.lib",
+    "bytes": 3114722,
+    "sha256": "271e20cc6933b89e54285075737245bf11b3e8b35c25b991dec5dbe2a808f6c6"
+  },
+  "native_manifest": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/native-app-sdk154.json",
+    "bytes": 35290,
+    "sha256": "5c8ccdf7fd83757dcef17d389eb9f6794d3e12e5434b825d84caef6cc9a93051"
+  },
+  "source_candidates_match": true,
+  "compiler_dependency_certificate": false,
+  "native_build": {
+    "exit_code": 0,
+    "inputs": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-inverse154-20261012/inputs.json",
+      "bytes": 44235,
+      "sha256": "f7e1fa82baf6a78a8d6f010269bca59814ce980e4a8528abacb5ce493b8bb90e"
+    },
+    "receipt": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-inverse154-20261012/build.exit.json",
+      "bytes": 136,
+      "sha256": "a3f6af370b245d8fc30796b7fb7bbb9b2c6acd37224294dea4d82fd9c40ffe68"
+    },
+    "compile_log": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-inverse154-20261012/compile.log",
+      "bytes": 482,
+      "sha256": "f73d0bf717b35239f976cb2c4dc37477e77cef666f507cccfcdc7f833981d785"
+    },
+    "link_log": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-inverse154-20261012/link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "source_count": 190,
+    "shared_sdk_outputs_unchanged": [
+      {
+        "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+        "bytes": 9877504,
+        "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/relWithDebInfo/src/App/FreeCADApp.lib",
+        "bytes": 3103284,
+        "sha256": "59b7845e365bdc9f8ada83b2110fbd258c612fa3d0fbf9e2f449e154f51b861c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.pdb",
+        "bytes": 254824448,
+        "sha256": "16cc28a2a42fe4076a2f1b8e5b772fb914e4a363beca1c1c6c8547eae8bb8c57"
+      }
+    ]
+  },
+  "plugin_build": {
+    "exit_code": 0,
+    "receipt": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-build156.log.exit.json",
+      "bytes": 95,
+      "sha256": "d12a1180523e6604ee7cc99fdcf983c1e504517aa562f7634b50112ff2bc1c69"
+    },
+    "log": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-build156.log",
+      "bytes": 17277,
+      "sha256": "02cd4bdcf5ad0bd68e7222287e711ad12534fb37068ad65684a023955e6befd1"
+    },
+    "full_prebuild_source_inventory_frozen": false
+  },
+  "hosts": [
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic158-offscreen-20261012",
+      "checks": 432,
+      "passed": 432,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic158-offscreen-20261012/results.json",
+          "bytes": 186745,
+          "sha256": "ba4d226881b43607a258512694b5edcc8acb29c9d4bc05b859be1c1dd963905d"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic158-offscreen-20261012/shared-host-launch.json",
+          "bytes": 650,
+          "sha256": "c20ad92cdf9f817f61cee588a4889a06a58a8306f1a5910f1f9a8b0f87079dca"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic158-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic158-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic158-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "90059c0c9824946cc90c1c6fe8fc165f6c4b930b262e884725a50cae69b3faaa"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic158-offscreen-20261012/host-stderr.log",
+          "bytes": 66650,
+          "sha256": "399e523da43973f2b4d7fe30c46e67794b41d91f7deeabc69012832e09d9ed58"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic158-offscreen-20261012/startup.log",
+          "bytes": 164605,
+          "sha256": "113ab930667b7f32e7fa3ac12eb0d7419d9b283bc32e0fdd6099aa300ac27672"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close158-offscreen-20261012",
+      "checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close158-offscreen-20261012/results.json",
+          "bytes": 593,
+          "sha256": "b7db334876c2dba35dfb836407d0483de2308e4a837268e7ed787c88db138573"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close158-offscreen-20261012/shared-host-launch.json",
+          "bytes": 649,
+          "sha256": "c41ebf3ec79b529e82ca584870fe2ea6fbc92d1d900c480e7f73f9db7030fc65"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close158-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close158-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close158-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "90059c0c9824946cc90c1c6fe8fc165f6c4b930b262e884725a50cae69b3faaa"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close158-offscreen-20261012/host-stderr.log",
+          "bytes": 2839,
+          "sha256": "fd3bdff1e71be5e796db014af1ec7acd4694ff318b0121830c692c0ca1c35b99"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close158-offscreen-20261012/startup.log",
+          "bytes": 43405,
+          "sha256": "b1a63422db7d8881f563848bc2d5d37a8640772ad4dd4a9204b9d0f696e1b465"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes158-offscreen-20261012",
+      "checks": 109,
+      "passed": 109,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes158-offscreen-20261012/results.json",
+          "bytes": 21970,
+          "sha256": "d602cf5210845534298c30ae506b73ac4ff27c0275a61f90e814d325d721fc27"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes158-offscreen-20261012/shared-host-launch.json",
+          "bytes": 649,
+          "sha256": "8a7739a63412647f812796c22710c900c238e5c061a43aff2ea9bcb82aca9d45"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes158-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes158-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes158-offscreen-20261012/host-stdout.log",
+          "bytes": 15285,
+          "sha256": "08de4eac21dfa9f4d00dabed54ee2cdbe3bb7d916fe4264156e388627acfd221"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes158-offscreen-20261012/host-stderr.log",
+          "bytes": 38333,
+          "sha256": "daf4a5532ec97f0f8736b1cc9d08a21100f5a59460f9ecf6bc92b152856b3521"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes158-offscreen-20261012/startup.log",
+          "bytes": 118680,
+          "sha256": "bc939dd11556821d6e270f8e7afc0a32000a3d3b29a15f03a1c4cef69dd9038d"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result158-offscreen-20261012",
+      "checks": 33,
+      "passed": 33,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result158-offscreen-20261012/results.json",
+          "bytes": 454441,
+          "sha256": "be34f43ab13b6667f214589d229a008f292cbedbcf90d55c5e3e48e245c85080"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result158-offscreen-20261012/shared-host-launch.json",
+          "bytes": 650,
+          "sha256": "bf95214fa95fbfafa73f3a2ca008bcf6780612fb6e66383858025ffc748339da"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result158-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result158-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result158-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "90059c0c9824946cc90c1c6fe8fc165f6c4b930b262e884725a50cae69b3faaa"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result158-offscreen-20261012/host-stderr.log",
+          "bytes": 7155,
+          "sha256": "7d472e5b6f045f5ee8956344e9b341114fa5465785faf5d1dad0cb08a9266570"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result158-offscreen-20261012/startup.log",
+          "bytes": 50384,
+          "sha256": "aaca44abd2dd3287977c525a3ece37ee51085613aa4c33bc54f584f64644939f"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/inverse-own158-offscreen-20261012",
+      "checks": 204,
+      "passed": 204,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own158-offscreen-20261012/results.json",
+          "bytes": 44407,
+          "sha256": "6c1259cad45a261277b811a0b4a50919d2125c866e275f43603eaacddab93afc"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own158-offscreen-20261012/shared-host-launch.json",
+          "bytes": 638,
+          "sha256": "ce7fb3ed3d038704ead240fba7b89297ab5db8bb6e96ef60989c2a255610381f"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own158-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own158-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own158-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "90059c0c9824946cc90c1c6fe8fc165f6c4b930b262e884725a50cae69b3faaa"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own158-offscreen-20261012/host-stderr.log",
+          "bytes": 5941,
+          "sha256": "d201775702ac5936bf7c57d3af999ff3328468ecf0a5bbbb7b1e67b3f42ae5da"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own158-offscreen-20261012/startup.log",
+          "bytes": 56949,
+          "sha256": "569869d4f012b305289f2ab67da9bbb14e4ea8df56dcb6529786992a31bc3181"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/inverse-late158-offscreen-20261012",
+      "checks": 204,
+      "passed": 204,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late158-offscreen-20261012/results.json",
+          "bytes": 44407,
+          "sha256": "6c1259cad45a261277b811a0b4a50919d2125c866e275f43603eaacddab93afc"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late158-offscreen-20261012/shared-host-launch.json",
+          "bytes": 639,
+          "sha256": "2029b6035e398f1a357aafa666b4c9c7de4c368edaf9d2805545e43cab37a4e1"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late158-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late158-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late158-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "90059c0c9824946cc90c1c6fe8fc165f6c4b930b262e884725a50cae69b3faaa"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late158-offscreen-20261012/host-stderr.log",
+          "bytes": 5941,
+          "sha256": "d201775702ac5936bf7c57d3af999ff3328468ecf0a5bbbb7b1e67b3f42ae5da"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late158-offscreen-20261012/startup.log",
+          "bytes": 56960,
+          "sha256": "bcb95b2e89a0106262fbd2b26a3611394bb4f97ab1c86457c177b1d1cf545a33"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking158-offscreen-20261012",
+      "checks": 80,
+      "passed": 80,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking158-offscreen-20261012/results.json",
+          "bytes": 47293,
+          "sha256": "4b75078a31926c68687efe6124646b5fb3b3e0bcfc9b928657923c91c323f623"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking158-offscreen-20261012/shared-host-launch.json",
+          "bytes": 645,
+          "sha256": "b9eb8422822d92da5dcd4c6e8d1ff2aed98190a85f04cf47be67528be4b313c5"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking158-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking158-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking158-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "90059c0c9824946cc90c1c6fe8fc165f6c4b930b262e884725a50cae69b3faaa"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking158-offscreen-20261012/host-stderr.log",
+          "bytes": 5941,
+          "sha256": "d201775702ac5936bf7c57d3af999ff3328468ecf0a5bbbb7b1e67b3f42ae5da"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking158-offscreen-20261012/startup.log",
+          "bytes": 57026,
+          "sha256": "ce882a329c0e3f0a90ef41f191ce17095f7902ffacb614f98848ca01ebaa10af"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture158-offscreen-20261012",
+      "checks": 40,
+      "passed": 40,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture158-offscreen-20261012/results.json",
+          "bytes": 4742,
+          "sha256": "83ffe8597cf33d557de257d7cbd3ede89e1377d7933942efd00b6947d9c8d15e"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture158-offscreen-20261012/shared-host-launch.json",
+          "bytes": 644,
+          "sha256": "ccc7f92282105c783f31f45b82465cddfe7c16f04e6ba0edb90753c586fb21d2"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture158-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture158-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture158-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "90059c0c9824946cc90c1c6fe8fc165f6c4b930b262e884725a50cae69b3faaa"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture158-offscreen-20261012/host-stderr.log",
+          "bytes": 909,
+          "sha256": "c0fd2cde19ad924b5d4b3b7763612274ff506e35c64dbc04801bac17e73e7d99"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture158-offscreen-20261012/startup.log",
+          "bytes": 40220,
+          "sha256": "a5b7f9140317e81d00efeed6fec8ba23a8ab721a3d3aa0831459aebe2938cce5"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope158-offscreen-20261012",
+      "checks": 744,
+      "passed": 744,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope158-offscreen-20261012/results.json",
+          "bytes": 144664,
+          "sha256": "aa5b4352aa5a275127c7f95120f5ce1deabaed325546c48ac9c93b3890eaa58f"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope158-offscreen-20261012/shared-host-launch.json",
+          "bytes": 643,
+          "sha256": "4b2ec68682d57357f39e58bdfd92f2c6ff75a054ca157572e52ac5b1857df34b"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope158-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope158-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope158-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "90059c0c9824946cc90c1c6fe8fc165f6c4b930b262e884725a50cae69b3faaa"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope158-offscreen-20261012/host-stderr.log",
+          "bytes": 16813,
+          "sha256": "3ca08205b17d07c199a6f4767179cb2745a6e639a44537d7cab423b344d3e089"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope158-offscreen-20261012/startup.log",
+          "bytes": 94300,
+          "sha256": "cc1942f22765b64fee0983a6d1270da1951f234f024f6d4a7db376eb9a5391ef"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold159-offscreen-20261012",
+      "checks": 62,
+      "passed": 62,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold159-offscreen-20261012/results.json",
+          "bytes": 6376,
+          "sha256": "420f99f33376a81b164ba32ff3dfbc993db71d93a92fe93e89b4f68f374a526c"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold159-offscreen-20261012/shared-host-launch.json",
+          "bytes": 647,
+          "sha256": "cee615918537d2dbc26b181c7ef3065889ab1d1608bbee6d74215a89a3341f6b"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold159-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold159-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold159-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "90059c0c9824946cc90c1c6fe8fc165f6c4b930b262e884725a50cae69b3faaa"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold159-offscreen-20261012/host-stderr.log",
+          "bytes": 2236,
+          "sha256": "9c700ea8d09a092a468bb4f5a80d123d4d04fcc45f79bf3877d0a81e625bbe21"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold159-offscreen-20261012/startup.log",
+          "bytes": 42172,
+          "sha256": "0a69f0ebca21de860c3d75ae06f24941c7cc6d2ee48152652d2cbb09dee7833d"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy159-offscreen-20261012",
+      "checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy159-offscreen-20261012/results.json",
+          "bytes": 967,
+          "sha256": "2fae4061ce030caf95a3466fed97c98b02237b0835d707358e074575a841d600"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy159-offscreen-20261012/shared-host-launch.json",
+          "bytes": 644,
+          "sha256": "82628706f1471fcfa2f998fb6468d3cc5f24a31ecfae4b04da8dfcdc68aea5cc"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy159-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy159-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy159-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "90059c0c9824946cc90c1c6fe8fc165f6c4b930b262e884725a50cae69b3faaa"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy159-offscreen-20261012/host-stderr.log",
+          "bytes": 4501,
+          "sha256": "94255788b2c0a27e6573eb6c6ebd650d8572d3da9db98263f5f5da4d809f8ff7"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy159-offscreen-20261012/startup.log",
+          "bytes": 46061,
+          "sha256": "d0080c89edc3e64433506f1ce6b487509bd61fbeba71272c52d33cb5d732f621"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold159-offscreen-20261012",
+      "checks": 3,
+      "passed": 3,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold159-offscreen-20261012/results.json",
+          "bytes": 444,
+          "sha256": "b785e5ed880f8a8e716c9fd51cf2b3a8ad42041058cd8ae104bab990993dc11c"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold159-offscreen-20261012/shared-host-launch.json",
+          "bytes": 648,
+          "sha256": "b0aeed4a1c1cb4436aefbfad762729e6f33e36d994113e85d56140af95d66db8"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold159-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold159-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold159-offscreen-20261012/host-stdout.log",
+          "bytes": 373,
+          "sha256": "90059c0c9824946cc90c1c6fe8fc165f6c4b930b262e884725a50cae69b3faaa"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold159-offscreen-20261012/host-stderr.log",
+          "bytes": 2542,
+          "sha256": "3962edda9751dce8240680d15bdbceded1c1996d731a9a4db59e80b667ca94c0"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold159-offscreen-20261012/startup.log",
+          "bytes": 42477,
+          "sha256": "7e2e160faf48c515d59407c1aeaa0ab98559996f6b2401c2b4e4cd6ba68c526d"
+        }
+      ]
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial159-offscreen-20261012",
+      "checks": 65,
+      "passed": 65,
+      "failed": 0,
+      "exit_code": 0,
+      "runtime_gate_clean": true,
+      "unhandled_lines": [],
+      "files": [
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial159-offscreen-20261012/results.json",
+          "bytes": 6723,
+          "sha256": "39ca4f7c712e865a1b6825d446b72fa0a5acb37152f6ce4680a076ff6b0b2e10"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial159-offscreen-20261012/shared-host-launch.json",
+          "bytes": 645,
+          "sha256": "e410722b3ee9b6c7bc84ddd7a5b8ea01c99f61ca23d43d639413c0c209fff77c"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial159-offscreen-20261012/loaded-native-app.json",
+          "bytes": 249,
+          "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial159-offscreen-20261012/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial159-offscreen-20261012/host-stdout.log",
+          "bytes": 5387,
+          "sha256": "ce366e3691b9b72fa012210967374529792d76573984dfd959355c828f38a8d6"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial159-offscreen-20261012/host-stderr.log",
+          "bytes": 15035,
+          "sha256": "68951300b3caeea72b4de2b246c2616a152884a0b44a11ab09a36bc29f555b85"
+        },
+        {
+          "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial159-offscreen-20261012/startup.log",
+          "bytes": 67773,
+          "sha256": "8ead88aa37bd47bff3e855a85e9ffad11b03cbca64f4ffb188b0de3211b2c945"
+        }
+      ]
+    }
+  ],
+  "checks": 1988,
+  "clean_hosts": 13,
+  "prior_final_disposal_red": {
+    "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-late151-offscreen-20261012",
+    "checks": 204,
+    "passed": 128,
+    "failed": 76,
+    "exit_code": 0,
+    "runtime_gate_clean": true,
+    "unhandled_lines": [],
+    "files": [
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-late151-offscreen-20261012/results.json",
+        "bytes": 45036,
+        "sha256": "1337dd60c5e876134c5568e7c1c4e8a4a53529f4b2a477bdfa1c8772e85867e3"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-late151-offscreen-20261012/shared-host-launch.json",
+        "bytes": 645,
+        "sha256": "b407097700bf82022cab6d7b64bacd6ff2b34e6321bdb84be1e7f859f259fdea"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-late151-offscreen-20261012/loaded-native-app.json",
+        "bytes": 252,
+        "sha256": "65cf2a75ac63da5285b1af04caa5f5939626cc68a9ee7fd6f47f01b9ce4f847d"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-late151-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-late151-offscreen-20261012/host-stdout.log",
+        "bytes": 376,
+        "sha256": "e43adbe79cfa970082cb8e4619f4e9d0b7f56ba7eff862894be5fbb567e7a1aa"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-late151-offscreen-20261012/host-stderr.log",
+        "bytes": 9205,
+        "sha256": "bab23c05439d410f4febaaa4e6f8a1abe57bfd1c3b092c92d46ec24ded4e9465"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-late151-offscreen-20261012/startup.log",
+        "bytes": 60492,
+        "sha256": "f942ddd2497fa1acd4f98b102ae42c0a9219c231b56a035a8440f50b6850d305"
+      }
+    ]
+  },
+  "final_disposal_green": {
+    "checks": 204,
+    "cases": 32,
+    "artifact": "C:/Users/nguye/.codex/om9-native-tests/inverse-late158-offscreen-20261012"
+  },
+  "discarded_redo_red": {
+    "artifact": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-red160-offscreen-20261012",
+    "checks": 28,
+    "passed": 12,
+    "failed": 16,
+    "exit_code": 0,
+    "runtime_gate_clean": true,
+    "unhandled_lines": [],
+    "files": [
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-red160-offscreen-20261012/results.json",
+        "bytes": 5684,
+        "sha256": "234ca6c34533adb85fca02aeb5d75b40c3983ac4d453ff253f387c2cf32bbb96"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-red160-offscreen-20261012/shared-host-launch.json",
+        "bytes": 645,
+        "sha256": "5df8c8e790c742b33713444fbb6bc7a6f8e09e32a95f676c531d6ac389b46efe"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-red160-offscreen-20261012/loaded-native-app.json",
+        "bytes": 249,
+        "sha256": "99bacd116b117b238259487890f1743e6493c8e533bb9031182e27e631083585"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-red160-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-red160-offscreen-20261012/host-stdout.log",
+        "bytes": 373,
+        "sha256": "90059c0c9824946cc90c1c6fe8fc165f6c4b930b262e884725a50cae69b3faaa"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-red160-offscreen-20261012/host-stderr.log",
+        "bytes": 1663,
+        "sha256": "b19e5e65ae87e5fee6c7891a19431dab0c7a615374268d1b32f8507ca7709d2f"
+      },
+      {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-red160-offscreen-20261012/startup.log",
+        "bytes": 42466,
+        "sha256": "084c871ca88e4e5e9057f3aef32cfde392c01aa7991410949526ab36a750bb5f"
+      }
+    ]
+  },
+  "redo_cases": 4,
+  "redo_accepted": 0,
+  "redo_rollback_complete": 0,
+  "retirement_probe": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-probe-redo160-20261012/source.cpp",
+    "bytes": 5525,
+    "sha256": "1e5b3f8d25e93bc058bd8c5cc524f89f095f557550598c6c96cfb170172790d0"
+  },
+  "inverse_probe_inputs": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/property-merge-probe-inverse157-20261012/inputs.json",
+    "bytes": 7043,
+    "sha256": "f7506e19bce7e188ef3d4b9edda322f448f2a63a85b375e4e5a1f9d570cc607b"
+  },
+  "rust_rerun": false,
+  "remaining": [
+    "Regular discarded-Redo disposal is RED12/28 across4 native callbacks. Attempted value/close/remove/clear is blocked and replay reports unverified KernelFailure, but exact empty booking/prior executable Redo and paired cleanup fail because caller transfer/disposal is already irreversible. Preserve native Redo transaction/object/property ownership through failed acceptance; do not remove caller states or weaken callback execution.",
+    "Persistence inverse and sealed source now retain usable private rollback through final Property disposal; named32-case registered original and recovery retirement both pass204. Complete all property types, nonpersistent/opaque values, identity-sensitive payloads, dynamic links, Save/Restore/factory/Copy/allocation failures and native status/touch/cache semantics remain open. Inline persistence admission is not proof of lossless recovery for every type.",
+    "Native inverse stream rejects writes beyond configured retained-byte budget, and unit tests cover source destruction, seal/commit, byte rejection and dynamic add/remove. Recovery/preparation/stage/inverse plus history/name capture still need a complete aggregate/peak allocation/traversal preflight. Constructor allocates copied history/name state before fully bounded validation.",
+    "Global/multidocument descriptors, source participants, locks, open/restore/cleanup callbacks and all Application/Document before-mutation entry points require complete acceptance. Cached rollback completion must continue to verify baseline state rather than certify a previous property-only restore when history diverges.",
+    "Named scope744 and all13 current hosts are clean with early selected-native import. Earlier delayed-import macro/workbench deadlocks remain preserved and unresolved; startup still logs duplicate workbench registration for shared SDK plus -M runtime. No all-startup source fix is claimed.",
+    "Every original RCORE01 adapter1-7,C01-C12,T01-T11 stays open until its full audit: stable refs/world-once/ownership; all curve/surface/trim/pcurve/seam families; conversion/deviation/locus/maps; registry and GeometryResult every consumer; workers/sharing/aggregate budgets/cancel; checked publication/History/cache/locks/lifetime; solid validity/manifold/cavities; read/edit/retain/export; generic Snap/mouse/render/persistence/lifecycle.",
+    "Rust suite was not rerun. Raw native offset-D3 discrepancy remains RED. Selected native source/build/loaded hashes are not a complete ABI/compiler dependency or native memory-safety certificate; no full prebuild plugin source inventory was frozen."
+  ],
+  "next_action": "Make discarded regular Redo acceptance preserve native ownership/history through every callback and reject without losing original stacks; pass unchanged4-action RED28 witness including executable Redo. Audit cached rollback verdict, lossless native inverse types/links/status/cache, failures, participants and aggregate preflight, then continue full original RCORE01."
+}

@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-10",
+  "scope": "Bounded post-decode RCORE-01.T07 Explode and NURBS cage preflight. Raw ONX_Model::Read and all-P0 completion remain open.",
+  "source_fingerprints": {
+    "Gui/NativeInputTree.h": { "bytes": 842, "sha256": "760d23c5151baf2a0a85f6b9e64eaf60576c56831ddd8af4ff10a09d08ff80fa" },
+    "Gui/NativeInputTree.cpp": { "bytes": 16408, "sha256": "b3646026c5731a0201bbda6ba400e43094ab590e9e2d63e96ccce26c5b8d07ed" },
+    "Gui/ThreeDmExplode.cpp": { "bytes": 22724, "sha256": "72f05e30e1b5eb28e254008afa70e825c5d45c2ef6158b208f0dab8613e8a041" },
+    "tests/native/CMakeLists.txt": { "bytes": 27519, "sha256": "06c2c75435a50d07f9285aef8c5936e670bd4cf587916d38fa656275592a7a62" },
+    "tests/native/rhino_core_native_input_tree.cpp": { "bytes": 32284, "sha256": "6fa27df7c1ed11a14fda043023c1ac1882282b7fcf8b220fde49fe2ded3334d9" }
+  },
+  "validation": {
+    "red": {
+      "checks": 73,
+      "failures": 1,
+      "result": "expected failure before finite-knot delta/domain-width repair",
+      "failed_clause": "Explode cage rejects finite knot overflow before evaluation"
+    },
+    "native_input_tree": {
+      "checks": 73,
+      "failures": 0,
+      "result": "pass",
+      "file": "H:/FreeCAD-src/build/rcore-native/native-input-tree-results.json",
+      "new_cases": [
+        "Oversized cage control-point grid and overflowing CV stride reject before pointer traversal",
+        "Invalid curve in an exploded block rejects before Duplicate/GetNurbForm",
+        "Non-finite cage control point rejects before IsValid/IsoSurface",
+        "Finite extreme cage knots whose subtraction overflows reject before IsValid/IsoSurface"
+      ]
+    },
+    "related_ctests": {
+      "passed": 6,
+      "failed": 0,
+      "names": [
+        "OM9-FILE-012.CurveOnSurfaceArchive",
+        "RCORE-01.NativeInputTree",
+        "OM9-FILE-012.NativeTransform",
+        "OM9-FILE-012.Preservation",
+        "OM9-FILE-012.Archive",
+        "OM9-FILE-012.Blocks"
+      ],
+      "test_log": "H:/FreeCAD-src/build/rcore-native/Testing/Temporary/LastTest.log"
+    },
+    "positive_explode_integration": {
+      "target": "OM9ThreeDmExplodeTest",
+      "result": "pass",
+      "output": "3DM Explode PASS; text contours available; valid nested transforms, cage boundaries/lattice and morph-control cage retained"
+    },
+    "plugin_build": {
+      "script": "H:/FreeCAD-src/build/build-om9-plugin.ps1",
+      "plugin_cache": "H:/FreeCAD-src/build/openmatrix9-history-cage",
+      "shared_sdk": "H:/FreeCAD-src/build/relWithDebInfo",
+      "runtime": "H:/FreeCAD-src/build/reusable-history-runtime",
+      "result": "OpenMatrix9Gui built successfully; only the plugin target and dependencies were rebuilt; FreeCAD root was not rebuilt",
+      "plugin_sha256": "ab8c29cc1fed70e9f29cf9754725a65cbfc42f77a0eccf496632ca25765d570e"
+    },
+    "freecad_shared_host": {
+      "checks": 21,
+      "failures": 0,
+      "process_exit_code": 0,
+      "host": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+      "plugin": "H:/FreeCAD-src/build/reusable-history-runtime/bin/OpenMatrix9Gui.pyd",
+      "plugin_sha256": "ab8c29cc1fed70e9f29cf9754725a65cbfc42f77a0eccf496632ca25765d570e",
+      "run_directory": "H:/FreeCAD-src/build/native-input-tree-explode-final2-20261010",
+      "results": "H:/FreeCAD-src/build/native-input-tree-explode-final2-20261010/results.json"
+    }
+  },
+  "review": {
+    "result": "independent bounded review approved; no remaining actionable findings",
+    "reviewer": "archive staging reviewer",
+    "closed_finding": "Finite cage knot values can still overflow when adjacent differences or active domain width are computed; both are now checked before OpenNURBS IsValid/IsoSurface."
+  },
+  "reuse_audit": {
+    "line_polyline": "Existing OM9 command/session/controller and Part.makePolygon construction are reused. No duplicate wire constructor or solver was added.",
+    "geometry_conversion": "Existing openNURBS/OCCT converter and shared Rust basis validator remain authoritative."
+  },
+  "remaining_open": [
+    "Raw archive decoding and native allocations inside ONX_Model::Read, including Explode archive input",
+    "Process-wide allocator and aggregate worker-memory instrumentation",
+    "Analytic, mesh and point-cloud input policies",
+    "Other ThreeDmCage/CageGeometry mutation paths, arbitrary custom owner classes, and broader concurrent lifetimes",
+    "Remaining RCORE-01.T07 clauses and all other P0 requirements"
+  ]
+}

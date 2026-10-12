@@ -20,6 +20,7 @@ set(
 set(
     OPENMATRIX9_RUST_TARGET_DIR
     "${CMAKE_CURRENT_BINARY_DIR}/rust-target"
+    CACHE PATH "Rust archive cache for this standalone plugin checkout"
 )
 
 
@@ -127,6 +128,14 @@ set(
     OpenMatrix9Gui_SRCS
     GumballGeometry.cpp
     GumballGeometry.h
+    GumballFrameObjects.cpp
+    GumballFrameObjects.h
+    GumballParametric.cpp
+    GumballParametric.h
+    GumballAssociativeScale.cpp
+    GumballAssociativeScale.h
+    GumballMeshComponents.cpp
+    GumballMeshComponents.h
     GumballFrame.cpp
     GumballFrame.h
     GumballRust.h
@@ -140,6 +149,36 @@ set(
     CoreObjects.h
     CoreGeometryContract.cpp
     CoreGeometryContract.h
+    CageCapability.cpp
+    CageCapability.h
+    CoreTopologySnapshot.cpp
+    CoreTopologySnapshot.h
+    CoreShapeValidation.cpp
+    CoreShapeValidation.h
+    CorePreparedCad.cpp
+    CorePreparedSnapshot.cpp
+    CoreSurfaceResult.cpp
+    CoreSolidResult.cpp
+    CoreCurveNativeInput.cpp
+    CoreCurveNativeInput.h
+    CoreCurvePublication.cpp
+    CoreCurvePublication.h
+    CoreEditResult.cpp
+    CoreBuilderTransform.cpp
+    CoreBuilderTransform.h
+    CorePreparedCad.h
+    CoreEdgeSnapshot.cpp
+    CoreEdgeSnapshot.h
+    CoreSupportSnapshot.cpp
+    CoreSupportSnapshot.h
+    CoreSourceAttributes.cpp
+    CoreSourceAttributes.h
+    CoreDefinitionSnapshot.cpp
+    CoreDefinitionSnapshot.h
+    CoreDiscreteSnapshot.cpp
+    CoreDiscreteSnapshot.h
+    NativeFitPoints.cpp
+    NativeFitPoints.h
     CoreTolerance.cpp
     CoreTolerance.h
     CoreCoordinates.cpp
@@ -223,12 +262,15 @@ set(
     SurfaceConstraints.h
     SurfaceHistory.cpp
     SurfaceHistory.h
+    NativeSurfaceHistoryRequest.h
     CurveGeometry.cpp
     CurveGeometry.h
     CoreRebuild.cpp
     CoreRebuild.h
     CommandConsole.cpp
     CommandConsole.h
+    CommandOptions.cpp
+    CommandOptions.h
     CoreWorkspace.cpp
     CoreWorkspace.h
     CoreViewControls.cpp
@@ -325,6 +367,19 @@ endif()
 if(WIN32)
     target_link_libraries(OpenMatrix9Gui PRIVATE ws2_32 userenv ntdll bcrypt)
 endif()
+# Mesh exports its STL storage readers on MSVC. Reuse the matching SDK module;
+# delay loading keeps the plugin usable before any Mesh module is selected.
+if(TARGET Mesh)
+    target_link_libraries(OpenMatrix9Gui PRIVATE Mesh)
+else()
+    find_library(OM9_MESH_LIBRARY NAMES Mesh
+        HINTS "${FREECAD_SDK_BUILD}/src/Mod/Mesh/App" REQUIRED)
+    target_link_libraries(OpenMatrix9Gui PRIVATE "${OM9_MESH_LIBRARY}")
+endif()
+if(MSVC)
+    target_link_options(OpenMatrix9Gui PRIVATE "/DELAYLOAD:Mesh.pyd")
+    target_link_libraries(OpenMatrix9Gui PRIVATE delayimp)
+endif()
 target_compile_features(OpenMatrix9Gui PRIVATE cxx_std_23)
 foreach(om9_occ_lib TKGeomAlgo TKGeomBase TKG2d TKG3d TKMath TKernel)
     find_library(OM9_${om9_occ_lib}_LIBRARY NAMES ${om9_occ_lib}
@@ -333,6 +388,9 @@ foreach(om9_occ_lib TKGeomAlgo TKGeomBase TKG2d TKG3d TKMath TKernel)
 endforeach()
 if(MSVC)
     target_compile_options(OpenMatrix9Gui PRIVATE /utf-8 /FIFCGlobal.h /FIFCConfig.h)
+    # Rust static archives and the native adapters are linked together. A full
+    # link avoids retaining obsolete type records in the incremental PDB.
+    target_link_options(OpenMatrix9Gui PRIVATE /INCREMENTAL:NO)
 endif()
 
 

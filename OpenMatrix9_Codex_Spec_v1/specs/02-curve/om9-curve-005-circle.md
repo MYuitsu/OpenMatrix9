@@ -1,4 +1,5 @@
 ---
+
 id: OM9-CURVE-005
 name: Circle
 command: Circle
@@ -14,6 +15,241 @@ sample_status: compiled_and_validation_tests_passed
 ---
 
 # OM9-CURVE-005 — Circle
+
+<!-- rhino-core-notification-lock-20261012:start -->
+- [ ] Full RCORE01 còn mở; matched native3375/3375 qua35host sạch log, notification lock witness3/3.
+[Bằng chứng notification lock](../../../docs/validation/2026-10-12-rhino-core-notification-lock.md).
+<!-- rhino-core-notification-lock-20261012:end -->
+
+<!-- rhino-core-snapshot-history-disposal-20261012:start -->
+- [ ] Full RCORE01 còn mở: native snapshot/history admission và disposal3372/3372 qua34host; các bộ phận chưa có evidence vẫn đang triển khai.
+[Bằng chứng snapshot/history](../../../docs/validation/2026-10-12-rhino-core-snapshot-history-disposal.md).
+<!-- rhino-core-snapshot-history-disposal-20261012:end -->
+
+<!-- rhino-core-acceptance-offset-d3-20261012:start -->
+- [ ] Full core acceptance còn mở: approved identity boundary162/logger24,3313 native checks28hosts,OCCT D3 corrected andRust1037green;budgets/participants/lifecycle and full RCORE01open.
+[Bằng chứng acceptance/D3](../../../docs/validation/2026-10-12-rhino-core-acceptance-offset-d3.md).
+<!-- rhino-core-acceptance-offset-d3-20261012:end -->
+
+<!-- rhino-core-native-retirement-verdict-20261012:start -->
+- [ ] Full savepoint/lifecycle vẫn mở:3145 assertion28hosts;commit/error cleanup không báo thành công sau finalizer; original native/Python identity recovery và Rust D3 còn RED.
+[Bằng chứng retirement verdict](../../../docs/validation/2026-10-12-rhino-core-native-retirement-verdict.md).
+<!-- rhino-core-native-retirement-verdict-20261012:end -->
+
+<!-- rhino-core-native-value-snapshots-20261012:start -->
+- [ ] Full savepoint/lifecycle:2607 verified assertions21hosts;Link/XLink/expressions/rename,merge-unwind/retry and refresh journal covered. DetachedobjectRED16/32,Rust121/1RED;Python/source-composition/budgets/participants and fullRCORE01open.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-native-value-snapshots.md).
+<!-- rhino-core-native-value-snapshots-20261012:end -->
+
+<!-- rhino-core-native-persistence-inverse-20261012:start -->
+- [ ] Full savepoint/lifecycle:private disposal204+204 andinverse40 verified;1988checks/13clean hosts. Discarded regular Redo RED12/28;native type/status/cache/participants/budgets/startup and full RCORE01open.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-native-persistence-inverse.md).
+<!-- rhino-core-native-persistence-inverse-20261012:end -->
+
+<!-- rhino-core-native-retirement-20261012:start -->
+- [ ] Full savepoint/lifecycle:original retirement2x204 verified;1982checks/13clean hosts. Final recovery disposal RED128/204,32cases incomplete rollback/paired cleanup;participants/budgets/startup and full RCORE01open.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-native-retirement.md).
+<!-- rhino-core-native-retirement-20261012:end -->
+
+<!-- rhino-core-native-capture-booking-20261012:start -->
+- [ ] Full savepoint/lifecycle remains open:34capture+80native booking policy and578Circle/Curve checks verified;retirement/participants/budgets and initial macro deadlock open.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-native-capture-booking.md).
+<!-- rhino-core-native-capture-booking-20261012:end -->
+
+<!-- rhino-core-circle-native-savepoint-20261012:start -->
+- [ ] Complete full savepoint/lifecycle: Circle integrated;432semantic+4close+109modes+33Curve verified on4 clean hosts. Capture/retirement/booking policy and prior String-scope shutdown remain open.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-circle-native-savepoint.md).
+<!-- rhino-core-circle-native-savepoint-20261012:end -->
+
+<!-- rhino-core-native-replay-scope-20261012:start -->
+- [ ] Complete native savepoint/lifecycle: Doc prototype744assertions,true0/1;GUI shutdown exception open. Circle notintegrated,atomic355/432RED;full RCORE01open.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-native-replay-scope.md).
+<!-- rhino-core-native-replay-scope-20261012:end -->
+
+<!-- rhino-core-native-property-merge-20261012:start -->
+- [ ] Complete native savepoint/lifecycle: staged Transaction property merge29/29;App117 build0,171 positive nativechecks. Document scope andCircle integration absent;atomic355/432RED. Full original RCORE01 remainsopen.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-native-property-merge.md).
+<!-- rhino-core-native-property-merge-20261012:end -->
+
+<!-- rhino-core-initial-curve-owned-contacts-20261012:start -->
+- [ ] Complete source/contact/lifecycle: initial contact/output gate7/7;Rust989+1D3RED;Runtime112 native522/522. Native savepoint approved,baseline355/432RED. All source/snap/families/maps/budgets/lifecycle andfull RCORE01 remainopen.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-initial-curve-owned-contacts.md).
+<!-- rhino-core-initial-curve-owned-contacts-20261012:end -->
+
+<!-- rhino-core-initial-curve-owned-parameters-20261012:start -->
+- [ ] Complete source/contact/lifecycle: initial source/fraction/point/D1 admission5/5;Rust982+1D3RED;Runtime109 native417/417. Initial solved contacts,all source/snap/families/maps/budgets andatomic/lifetime remainopen.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-initial-curve-owned-parameters.md).
+<!-- rhino-core-initial-curve-owned-parameters-20261012:end -->
+
+<!-- rhino-core-initial-curve-owned-selection-20261012:start -->
+- [ ] Complete source/contact/lifecycle: initial CAD FitPoints/native Vertex source checks shared with History;5/5;Rust977+1D3RED;Runtime106 native360/360. Initial path/Tangent,full source/snap/families/maps/budgets andatomic/lifetime remainopen.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-initial-curve-owned-selection.md).
+<!-- rhino-core-initial-curve-owned-selection-20261012:end -->
+
+<!-- rhino-core-circle-history-owned-fit-geometry-20261012:start -->
+- [ ] Complete source/contact/lifecycle: selected History CAD/discrete geometry implemented,7/7 andCurve results56/56;Rust972+1D3RED;Runtime102 native426/426. Initial native input/Tangent,all source families/maps/budgets andatomic/lifetime remainopen.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-circle-history-owned-fit-geometry.md).
+<!-- rhino-core-circle-history-owned-fit-geometry-20261012:end -->
+
+<!-- rhino-core-circle-history-owned-role-replay-20261012:start -->
+- [ ] Complete selected source/role/contact/lifecycle: stored role replay implemented,7/7 andCurve results50/50;Rust965+1D3RED;Runtime97 native236/236. Complete CAD selected-point geometry/Face provenance,initial Tangent,full families/maps/budgets andatomic/lifetime remainopen.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-circle-history-owned-role-replay.md).
+<!-- rhino-core-circle-history-owned-role-replay-20261012:end -->
+
+<!-- rhino-core-circle-history-owned-contact-binding-20261012:start -->
+- [ ] Complete source/contact/lifecycle: History contact binding implemented,5/5 andsource23/23;Rust958+1D3RED;Runtime93 native236/236. Other modes,initial Tangent,full families/maps/budgets andatomic/lifetime remainopen.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-circle-history-owned-contact-binding.md).
+<!-- rhino-core-circle-history-owned-contact-binding-20261012:end -->
+
+<!-- rhino-core-circle-history-owned-source-binding-20261012:start -->
+- [ ] Full source/contact correspondence: owned path/probe/Point binding implemented,source23/23,19 family/183 queries. Rust953+2RED;Runtime91 native171/171. Final Tangent contact,D3,atomic/lifetime and all originalrequirements remainopen.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-circle-history-owned-source-binding.md).
+<!-- rhino-core-circle-history-owned-source-binding-20261012:end -->
+
+<!-- rhino-core-owned-derived-curve-evaluation-20261012:start -->
+- [ ] Full source correspondence:owned trim/offset evaluator;native183 D0-D2/math45 D3 match,raw D3 RED. Rust943+4RED,Runtime86 native229/229. Integration/contact/native higher derivatives and all originalrequirements remainopen.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-owned-derived-curve-evaluation.md).
+<!-- rhino-core-owned-derived-curve-evaluation-20261012:end -->
+
+<!-- rhino-core-owned-curve-evaluation-20261012:start -->
+- [ ] Full source correspondence: owned evaluator matches138 native queries;6/6 focused,full939+3RED;Runtime79 native214/214. Integration,derived support/contact and all original requirements remain open.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-owned-curve-evaluation.md).
+<!-- rhino-core-owned-curve-evaluation-20261012:end -->
+
+<!-- rhino-core-circle-history-source-role-fixes-20261012:start -->
+- [ ] Full source plan correspondence: role/fixed-point/provenance fixes verified;Rust17/20/full933+3RED,native171/171. Three source geometry/parameter cases remain failed;every original family/lifecycle requirement retained.
+[Bằng chứng](../../../docs/validation/2026-10-12-rhino-core-circle-history-source-role-fixes.md).
+<!-- rhino-core-circle-history-source-role-fixes-20261012:end -->
+
+<!-- rhino-core-circle-history-source-binding-red-20261012:start -->
+- [ ] Native plan mustcorrespond toowned path/tangent/fixedpoint sources andparameters:Rust RED4/10/exit101;six false admissions exposed. Preserve current/probe provenance andevery original sourcefamily.
+[Bằng chứng source binding](../../../docs/validation/2026-10-12-rhino-core-circle-history-source-binding-red.md).
+<!-- rhino-core-circle-history-source-binding-red-20261012:end -->
+
+<!-- rhino-core-circle-history-lifetime-red-20261012:start -->
+- [ ] Replay-owner lifetime: close callback removes document;300s timeout/owned host terminal;not a completed gate. Native journal/lifetime design remains proposed.
+[Bằng chứng lifetime](../../../docs/validation/2026-10-12-rhino-core-circle-history-lifetime-red.md).
+<!-- rhino-core-circle-history-lifetime-red-20261012:end -->
+
+<!-- rhino-core-circle-history-atomic-state-20261012:start -->
+- [x] Exact pre-Redo state measured across48 rejected callbacks andthree caller states;RED355/432,actual host0. Raw BREP identity-location oracle corrected.
+- [ ] Checked native replay rollback preserving caller booking/journal,metadata/source andall original History/RCORE-01 contracts.
+[Bằng chứng rejection-time](../../../docs/validation/2026-10-12-rhino-core-circle-history-atomic-state.md).
+<!-- rhino-core-circle-history-atomic-state-20261012:end -->
+
+<!-- rhino-core-circle-history-modes-20261012:start -->
+- [x] Named all-mode/legacy paired results, twenty cold result snapshots and restored source replay verified on Runtime59.
+- [ ] Atomic callback metadata/source/Undo preservation: completed RED50/80; full History and RCORE-01 still required.
+[Bằng chứng và lỗi tiếp theo](../../../docs/validation/2026-10-12-rhino-core-circle-history-modes.md).
+<!-- rhino-core-circle-history-modes-20261012:end -->
+
+<!-- rhino-core-circle-history-result-20261012:start -->
+- [x] Named Runtime59 Circle History current paired results andguarded native publication,cold FCStd andreal Undo/Redo verified.
+- [ ] Complete legacy/all-mode provenance,atomic callback rollback/document lifetime andall original requirements.
+[Bằng chứng vàgiới hạn](../../../docs/validation/2026-10-12-rhino-core-circle-history-result.md).
+<!-- rhino-core-circle-history-result-20261012:end -->
+
+<!-- rhino-core-circle-history-result-red-20261012:start -->
+Circle History common-result witness Runtime57 RED12/36,actual host0/no fixture exception.
+- [ ] Pair refreshed owned inputs/result with current Shape on recompute,invalid clearing,freeze/detach and persistence;complete every original requirement.
+[Bằng chứng và bước sửa](../../../docs/validation/2026-10-12-rhino-core-circle-history-result-red.md).
+<!-- rhino-core-circle-history-result-red-20261012:end -->
+
+<!-- rhino-core-curve-booking-20261012:start -->
+Runtime56: native booking/commit/abort/reopen120/120;matching total1372/1372,24 actual exits0,Rust882.
+- [ ] Complete every original auxiliary result, History/Rebuild, publication/lifetime, sharing/budgets/conversion/maps requirement.
+[Bằng chứng và phần còn mở](../../../docs/validation/2026-10-12-rhino-core-curve-booking.md).
+<!-- rhino-core-curve-booking-20261012:end -->
+
+<!-- rhino-core-curve-publication-20261011:start -->
+Runtime55: named Curve callbacks/Redo/replacement and layer context checked;1252/1252 native,23 exits0,Rust882.
+- [ ] Complete transaction booking/premature close, every callback boundary and all original result/lifecycle contracts.
+Historical RED52 callback evidence below is superseded only for the named tested cases.
+[Bằng chứng và phần còn mở](../../../docs/validation/2026-10-11-rhino-core-curve-publication.md).
+<!-- rhino-core-curve-publication-20261011:end -->
+
+<!-- rhino-core-curve-callback-red-20261011:start -->
+Checked Curve publication Runtime52:RED42/210,actual host exit0;all42 real callbacks fire once.
+- [ ] Reject changed geometry/frame/metadata/owner/session and restore prior executable native Redo.
+Main result662/662 is a separate verified scope.
+[Bằng chứng và bước sửa](../../../docs/validation/2026-10-11-rhino-core-curve-callback-red.md).
+<!-- rhino-core-curve-callback-red-20261011:end -->
+
+<!-- rhino-core-curve-result-20261011:start -->
+Main Curve GeometryResult Runtime52:direct54/native33/cold58;matching662/662,18 actual exits0;Rust880/0/0.
+- [x] Output chính lưu cùng Shape/construction, original numeric/native snapshots và full CAD master; named Undo/Redo/cold FCStd witnesses.
+- [ ] Checked callback publication,auxiliary foci/History/Rebuild,full input sharing/budgets và conversion/maps theo contract gốc.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-curve-result.md).
+<!-- rhino-core-curve-result-20261011:end -->
+
+<!-- rhino-core-curve-result-red-20261011:start -->
+*RED lịch sử Runtime50; main result được bổ sung ở checkpoint Runtime52 phía trên.*
+Common Curve GeometryResult:Runtime50 native RED12/54,actual host exit0.
+Geometry/one Undo của sáu lệnh đạt;result contract còn thiếu.
+- [ ] ConstructCurve common result,input snapshots/output CAD master và paired persistence.
+[Bằng chứng và bước tiếp](../../../docs/validation/2026-10-11-rhino-core-curve-result-red.md).
+<!-- rhino-core-curve-result-red-20261011:end -->
+
+<!-- rhino-core-curve-native-bridge-20261011:start -->
+Native Circle/Ellipse/History source capture đã nối Rust;solver hiện hữu dùng lại.
+Runtime50:517/517 checks,15 exits0;4 cold hosts/18 FCStd;Rust874/0/0.
+- [x] Named native source paths giữ original text/full source/branch và cold bytes trong phạm vi fixture.
+- [ ] Generic pick/snap/full inputs,subset sharing/budgets,Curve GeometryResult/checked publication và full feature.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-curve-native-bridge.md).
+<!-- rhino-core-curve-native-bridge-20261011:end -->
+
+<!-- rhino-core-curve-native-admission-20261011:start -->
+API nhận nguồn native sở hữu dữ liệu đã kiểm trong Rust16/16 và FFI1/1.
+C++ chưa nối; native chưa kiểm chứng trên code mới.
+- [x] Rust gate nguồn/điểm/frame/revision/ranges trong phạm vi đã kiểm.
+- [ ] Capture native, source freshness, GeometryResult/publication và cold persistence đầy đủ.
+[Bằng chứng và phần còn mở](../../../docs/validation/2026-10-11-rhino-core-curve-native-admission.md).
+<!-- rhino-core-curve-native-admission-20261011:end -->
+
+<!-- rhino-core-curve-native-source-20261011:start -->
+Native source witness Runtime45 RED9/18 toàn fixture: hình học/Undo/FCStd
+đạt; original native text và full source snapshots/identity còn thiếu.
+[Bằng chứng và phần cần triển khai](../../../docs/validation/2026-10-11-rhino-core-curve-native-source.md).
+<!-- rhino-core-curve-native-source-20261011:end -->
+
+<!-- rhino-core-curve-accepted-input-20261011:start -->
+Runtime45 giữ accepted values tại Rust entrypoint trước chuẩn hóa; log hữu hạn
+và bounded, Circle Undo phục hồi batch. Native fixture và cold FCStd đã kiểm
+theo phạm vi báo cáo; full native sources/input, common Curve result và toàn bộ
+command vẫn còn mở.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-curve-accepted-input.md).
+<!-- rhino-core-curve-accepted-input-20261011:end -->
+
+<!-- rhino-core-curve-construction-20261011:start -->
+Constructor state đã kiểm trên Runtime44: cùng Shape/Undo, giữ options/plan/basis,
+FCStd warm/cold theo fixture được nêu trong báo cáo. Đây là normalized state;
+original input/native sources, common Curve result và toàn bộ command còn mở.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-curve-construction.md).
+<!-- rhino-core-curve-construction-20261011:end -->
+
+<!-- rhino-core-circle-history-policy-20261011:start -->
+Circle History dùng request Rust từ tùy chọn đã lưu, kiểm trước copy/reader;
+giữ độc lập với lệnh đang nhập, legacy AroundCurve và Mesh/cloud FitPoints.
+1363 checks/27 actual host exits0 trên cùng plugin, gồm cold FCStd; full
+Rust739 đạt. Output results/maps, consumer khác và yêu cầu gốc còn mở;
+**RCORE-01 vẫn đang triển khai**. [Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-circle-history-policy.md).
+<!-- rhino-core-circle-history-policy-20261011:end -->
+
+<!-- rhino-core-native-curve-policy:start -->
+Sáu Curve family hiện có dùng request/options Rust chung từ session ở
+declaration/preview/commit và các capture Circle/Ellipse/FitPoints được nêu trong báo cáo.
+680 checks/15 actual host exits0 trên cùng plugin; full Rust712 đạt.
+Box/Sphere/cage, replay request và các hợp đồng output/ownership gốc còn mở;
+**RCORE-01 đang triển khai**. [Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-native-curve-policy.md).
+<!-- rhino-core-native-curve-policy:end -->
+
+<!-- rhino-core-fit-point-input:start -->
+Circle/Sphere và Circle History dùng reader điểm native có giới hạn Rust trước
+copy, giữ placement/source/Undo/Redo và ngân sách typed+selected. GREEN45;
+589 checks trên cùng plugin,7 actual host exits0;full Rust695 đạt.
+Các policy construction/results và yêu cầu gốc còn mở; **RCORE-01 đang triển khai**.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-fit-point-input.md).
+<!-- rhino-core-fit-point-input:end -->
 
 <!-- rhino-core-extended-input:start -->
 ## Extended numeric input — validated slice

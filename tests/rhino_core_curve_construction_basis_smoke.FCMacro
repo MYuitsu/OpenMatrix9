@@ -1,0 +1,54 @@
+"""Compare retained constructor basis with native CAD, warm and cold hosts."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(text=''):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def near(a,b):return abs(a-b)<=1e-9*max(1.,abs(a),abs(b))
+def inspect(case,obj,raw,expected):
+ value=json.loads(raw) if raw else {};s=value.get('spline');valid=obj is not None and obj.Shape.isValid() and not obj.Shape.isNull()
+ check(case+' existing native solver retains valid geometry',valid)
+ if case.startswith('Boundary'):
+  check(case+' inclusive input boundary remains publishable',bool(value) and value['normalized_points'][0][0]==1e9)
+  check(case+' generated native output retains independent length',valid and near(obj.Shape.Length,20. if case=='BoundaryBothSides' else 10.))
+  check(case+' generated points agree with retained output',valid and len(value.get('output_points',[]))==2 and all(near(a,b) for p,q in zip(value['output_points'],[tuple(v.Point) for v in obj.Shape.Vertexes]) for a,b in zip(p,q)))
+ else:
+  c=obj.Shape.Edges[0].Curve if valid else None
+  poles=[[p.x,p.y,p.z] for p in c.getPoles()] if c else []
+  check(case+' owns complete nonrational constructor basis',bool(s) and len(s['poles'])==len(poles) and s['weights'] is None and s['basis_role']=='nonrational_native_constructor_basis')
+  check(case+' owned poles and native weights agree',bool(s) and len(s['poles'])==len(poles) and all(near(a,b) for p,q in zip(s['poles'],poles) for a,b in zip(p,q)) and all(near(w,1.) for w in c.getWeights()))
+  check(case+' owned knots multiplicities degree domain and periodicity agree',bool(s) and s['degree']==c.Degree and s['periodic']==c.isPeriodic() and s['periodic'] is True and s['multiplicities']==c.getMultiplicities() and len(s['knots'])==len(c.getKnots()) and all(near(a,b) for a,b in zip(s['knots'],c.getKnots())) and all(near(a,b) for a,b in zip(s['domain'],[c.FirstParameter,c.LastParameter])))
+  if case=='PeriodicInterp':check(case+' one-shot closure differs from persistent setting',value.get('options',{}).get('close') is True and value['options'].get('persistent_close') is False)
+ check(case+' saved construction bytes survive exact reload',bool(raw) and raw==expected)
+ report['observations'].append(dict(case=case,raw=raw,construction=value))
+def run():
+ global console
+ try:
+  cold=os.environ.get('OM9_CURVE_BASIS_ARCHIVE_DIR','')
+  if cold:
+   source=Path(cold);warm=json.loads((source/'results.json').read_text());expected={o['case']:o for o in warm['observations']}
+   check('cold basis host has no active constructor',json.loads(OM.geometryCurveCapability(1,2))['status']==100)
+   for case,observation in expected.items():
+    doc=App.openDocument(str(source/(case+'.FCStd')));obj=doc.getObject(observation['construction']['command']);raw=getattr(obj,'OM9CurveConstruction','') if obj else ''
+    inspect(case,obj,raw,observation['raw']);App.closeDocument(doc.Name)
+  else:
+   Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+   cases=[('PeriodicInterp','InterpCrv',['Degree=1','0,0,0','3,0,0','3,4,0','Close']),('DeformCircle','Circle',['Deformable=Yes','0,0,0','5']),('DeformEllipse','Ellipse',['Deformable=Yes','0,0,0','5,0,0','0,3,0']),('BoundaryLine','Line',['1000000000,0,0','999999990,0,0']),('BoundaryBothSides','Line',['BothSides=Yes','1000000000,0,0','999999990,0,0'])]
+   for case,command,texts in cases:
+    doc=App.newDocument(case);doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+    enter(command)
+    for text in texts:enter(text)
+    obj=doc.getObject(command);raw=getattr(obj,'OM9CurveConstruction','') if obj else '';name=doc.Name;doc.saveAs(str(out/(case+'.FCStd')));enter('Cancel');App.closeDocument(name)
+    doc=App.openDocument(str(out/(case+'.FCStd')));obj=doc.getObject(command);restored=getattr(obj,'OM9CurveConstruction','') if obj else ''
+    inspect(case,obj,restored,raw);App.closeDocument(doc.Name)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

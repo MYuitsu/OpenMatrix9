@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenMatrix9 Layers Contract"
+  short_description: "Approved layer gestures, visibility and ownership rules"
+  default_prompt: "Use $openmatrix9-layers-contract to implement or review the approved OpenMatrix9 Layers panel behavior."

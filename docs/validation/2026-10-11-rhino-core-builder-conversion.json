@@ -1,0 +1,878 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-11T06:47:07+07:00",
+  "scope": "Native affine Builder composed topology history, owned input snapshot, measured vertex/edge/trimmed-face queries and explicit unavailable-query evidence; original full RCORE-01 remains in progress.",
+  "chapter_status": "in_progress",
+  "remaining": [
+    "Global conversion deviation bounds and full-domain bidirectional parameter correspondence; sampled queries alone certify neither.",
+    "All remaining GeometryResult consumers, original representation families, attributes/userdata/preservation and operation policies.",
+    "Uniform source lock/revision/generation/cancellation/cache/transaction contracts across every enabled entry point.",
+    "Aggregate native/worker/cache budgets and independently bounded Surface History parsing/recompute.",
+    "Original adapters1–7, C01–C12, T01–T11 final requirement-by-requirement acceptance and independent review."
+  ],
+  "source_fingerprints": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreBuilderTransform.cpp",
+      "bytes": 11788,
+      "sha256": "5ccdb188a3e917a127b7cee1d00911bbd43893aecb2adf8587abb1408e3869fc"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreBuilderTransform.h",
+      "bytes": 828,
+      "sha256": "4a7684bc6cb038b61db51978297002eefb272583f67ca386f596cb46aa8fe346"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/BuilderHistory.cpp",
+      "bytes": 47812,
+      "sha256": "72ee5e352d5083056b94ed27d2f8c1b33ffecd0b720edecf748f49aeeb736b78"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/BuilderHistory.h",
+      "bytes": 3366,
+      "sha256": "dfe6aad3d040a10af582454558bb4756591314f3b28515c565bc2c4cc924ea62"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CorePreparedSnapshot.cpp",
+      "bytes": 6465,
+      "sha256": "0712f294c731bb02101e0218d37ac7a5834cf82e6cd0ff6e5f72972e43d14f10"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CorePreparedSnapshot.h",
+      "bytes": 1018,
+      "sha256": "a504997a08e5c52bff00fa253174efa37a44cc554949212afe3428291376e6ab"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreTopologySnapshot.cpp",
+      "bytes": 13017,
+      "sha256": "435cc3cc3019e9b3f332c14d1748bc579fb0bc1b8725519016272fb4d47c9891"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CMakeLists.txt",
+      "bytes": 8578,
+      "sha256": "b41b28e880f5c2011b81c58075d744a8489a90c18b6aca076ee20d37cbed1bd6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/builder_transform.rs",
+      "bytes": 9250,
+      "sha256": "768869a332cf7be21fcc760d3ba3b5918041492bec73a9089524a61edef31ef6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/prepared_result.rs",
+      "bytes": 16102,
+      "sha256": "cb37983d845a52651abaeeebe3880d30b0a5aafc132d3d90d82dc6cca541bcf8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/builder_history.rs",
+      "bytes": 15975,
+      "sha256": "3929d2440613a0e26ef062b03bb1b9707c83598105b0f2600acbed776f545a35"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/lib.rs",
+      "bytes": 2221,
+      "sha256": "71e4ba45b5e68061947a3c6d81aedecf472598d28ab75edd00e52afe0aaacacd"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/prepared_result.rs",
+      "bytes": 12669,
+      "sha256": "e9e16b9c151025945f33d6c783996185d0f45be5104e09c3f799fb528bba4ff3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_builder_conversion_smoke.FCMacro",
+      "bytes": 5583,
+      "sha256": "1b88f9aaefa7776477a12a696ba014cb5a09e413df25c985e5da9195fcfc726e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_builder_output_smoke.FCMacro",
+      "bytes": 8951,
+      "sha256": "f07e7e829b5ae0e15c678765bab024ab31b7ddb95770eb09183ee97f201d94d6"
+    }
+  ],
+  "runtime": {
+    "plugin": {
+      "path": "H:/FreeCAD-src/build/builder-conversion-runtime1-20261011/bin/OpenMatrix9Gui.pyd",
+      "bytes": 15263744,
+      "sha256": "7d38704944fdfbde406ef9e3c138883475cc62ed8fd70db099bcc4db5c223590"
+    },
+    "host": {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    "worker": {
+      "path": "H:/FreeCAD-src/build/builder-conversion-runtime1-20261011/bin/OM9ThreeDmImportWorker.exe",
+      "bytes": 10256384,
+      "sha256": "946a0332276761666460ed791f73e12c9203537f08c87ae8a6ebada11933d2a4"
+    }
+  },
+  "validation": {
+    "host_checks": 315,
+    "host_runs": [
+      {
+        "directory": "H:\\FreeCAD-src\\build\\builder-conversion-green4-20261011",
+        "checks": 17,
+        "fixture": {
+          "path": "H:/FreeCAD-src/build/builder-conversion-green4-20261011/fixture.FCMacro",
+          "bytes": 5583,
+          "sha256": "1b88f9aaefa7776477a12a696ba014cb5a09e413df25c985e5da9195fcfc726e"
+        },
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-green4-20261011/builder-conversion.FCStd",
+            "bytes": 37859,
+            "sha256": "269c5e1e8c502bace9690450a8731aa14ef4573f1d79223644e98d9ce3019799"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-green4-20261011/fixture.FCMacro",
+            "bytes": 5583,
+            "sha256": "1b88f9aaefa7776477a12a696ba014cb5a09e413df25c985e5da9195fcfc726e"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-green4-20261011/host-stderr.log",
+            "bytes": 268,
+            "sha256": "6ade3fba1c2d1246fe9579e6f1718ded3d8aeb67f6a6a743d60e05b80e6fd54f"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-green4-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-green4-20261011/results.json",
+            "bytes": 1936,
+            "sha256": "2058e51b86009ce973ee79ec1a1671e9ffae8ccd6755fd59968994b0b4c4ac82"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-green4-20261011/select-plugin.FCMacro",
+            "bytes": 946,
+            "sha256": "7850295ca89a3697bac50176a315f4e938280948522fce5e09b5820736dba66d"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-green4-20261011/shared-host-launch.json",
+            "bytes": 560,
+            "sha256": "3ea6a2ea16394e8c1b736805b2844e2b0e80f1110a17ede46142021f5040a54d"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-green4-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-green4-20261011/user.cfg",
+            "bytes": 16472,
+            "sha256": "07c7ab13eb9512f6ec61a414921d037e1c8dc43fe37608d3b31a3d85110d3bc9"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\builder-conversion-result2-20261011",
+        "checks": 20,
+        "fixture": {
+          "path": "H:/FreeCAD-src/build/builder-conversion-result2-20261011/fixture.FCMacro",
+          "bytes": 7851,
+          "sha256": "a240151b7142c2f4bbdad50cac605a608ccadd706ddd629e739ad58dd352f2d1"
+        },
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-result2-20261011/builder-results.FCStd",
+            "bytes": 25600,
+            "sha256": "87d4c98ca6e818c78e28686b62643717a74ee87a378ba255c5bbc1c3935d93c4"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-result2-20261011/fixture.FCMacro",
+            "bytes": 7851,
+            "sha256": "a240151b7142c2f4bbdad50cac605a608ccadd706ddd629e739ad58dd352f2d1"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-result2-20261011/host-stderr.log",
+            "bytes": 377,
+            "sha256": "d37c9f9e37d358b95a3974252d5c89a30e86d46e2bb0dfff8a674d2449f84e36"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-result2-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-result2-20261011/prepare-test.FCMacro",
+            "bytes": 304,
+            "sha256": "124e411d5c3304f145a0d7d448b2c81829d07b3da823078b389881bee3131e22"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-result2-20261011/results.json",
+            "bytes": 2338,
+            "sha256": "3cdc32474b54c44c2337938b0ecb6391cbb2b4c4cbfded363b503e5e4d7f242e"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-result2-20261011/select-plugin.FCMacro",
+            "bytes": 952,
+            "sha256": "3a867de475c5f18314317060f90c4413fdce2e30705b4e093141428bdb3e0d8e"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-result2-20261011/shared-host-launch.json",
+            "bytes": 561,
+            "sha256": "b15a3cd2383dcaeb57bad65caa6f21b9598d67d4a2e4796943b81596bacc90c2"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-result2-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-result2-20261011/user.cfg",
+            "bytes": 16847,
+            "sha256": "a94b896d73f953c99c771d08749747278a456c4d111b3f437fc9b9c714f58de9"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\builder-conversion-output3-20261011",
+        "checks": 29,
+        "fixture": {
+          "path": "H:/FreeCAD-src/build/builder-conversion-output3-20261011/fixture.FCMacro",
+          "bytes": 8951,
+          "sha256": "f07e7e829b5ae0e15c678765bab024ab31b7ddb95770eb09183ee97f201d94d6"
+        },
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-output3-20261011/fixture.FCMacro",
+            "bytes": 8951,
+            "sha256": "f07e7e829b5ae0e15c678765bab024ab31b7ddb95770eb09183ee97f201d94d6"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-output3-20261011/host-stderr.log",
+            "bytes": 268,
+            "sha256": "6ade3fba1c2d1246fe9579e6f1718ded3d8aeb67f6a6a743d60e05b80e6fd54f"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-output3-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-output3-20261011/prepare-test.FCMacro",
+            "bytes": 304,
+            "sha256": "44e472a85404d6cec89dd0af07423d54aff2ee46f178915333fd7f21337beeda"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-output3-20261011/results.json",
+            "bytes": 4848,
+            "sha256": "0d4868175a80cc7461947f03f47e27f7e0addd169aacfa3fc93965ce000ccbb0"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-output3-20261011/select-plugin.FCMacro",
+            "bytes": 952,
+            "sha256": "d4c468d16578a2ceb7b29b6662e43b513353cf15ef670290176b975233d78b3b"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-output3-20261011/shared-host-launch.json",
+            "bytes": 561,
+            "sha256": "957eacc695997c00fa03405ac0f41f2b414d40fb489924cd3cd6a05163c6ac86"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-output3-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-output3-20261011/user.cfg",
+            "bytes": 16474,
+            "sha256": "46fd24259326fe7b64e5dc51107d05ee36b6875f16eb07787c9bdae214bc10af"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\builder-conversion-policy2-20261011",
+        "checks": 61,
+        "fixture": {
+          "path": "H:/FreeCAD-src/build/builder-conversion-policy2-20261011/fixture.FCMacro",
+          "bytes": 10927,
+          "sha256": "6c8adb397d6c9163a6ca15193128a58246cdce671cb69756f3f9ea4495c436b0"
+        },
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-policy2-20261011/fixture.FCMacro",
+            "bytes": 10927,
+            "sha256": "6c8adb397d6c9163a6ca15193128a58246cdce671cb69756f3f9ea4495c436b0"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-policy2-20261011/host-stderr.log",
+            "bytes": 1190,
+            "sha256": "ba510bb32dc3fff2656196704cd8fde0575907baa6ab7f264ec12fe6d16df8cb"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-policy2-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-policy2-20261011/prepare-test.FCMacro",
+            "bytes": 304,
+            "sha256": "318e10ca682e526da0d163c698c78180edce7d793bb7dd6d9946b225e6d93b37"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-policy2-20261011/results.json",
+            "bytes": 10096,
+            "sha256": "ada8b7852672e24bbdebca73ede2cf0f4c93d793a290e8eba34d482aa3f4bea2"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-policy2-20261011/select-plugin.FCMacro",
+            "bytes": 952,
+            "sha256": "9eb3149f4be95287c14678df0890f608d4d7f8733fedbbac138b2c5ff38ed351"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-policy2-20261011/shared-host-launch.json",
+            "bytes": 561,
+            "sha256": "751cf7649282f35e10f6355ff8f2c0c30b2d4d0b261dcde75d3f439266069cd5"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-policy2-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-policy2-20261011/user.cfg",
+            "bytes": 16955,
+            "sha256": "7e334349d3a722be604170dbf360d78ed417d678109a4c293a98ff00e6d6a0ae"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\builder-conversion-warm2-20261011",
+        "checks": 43,
+        "fixture": {
+          "path": "H:/FreeCAD-src/build/builder-conversion-warm2-20261011/fixture.FCMacro",
+          "bytes": 14166,
+          "sha256": "14065f187101514008cdd2257a621e5b2a64a19152a1c462f1b06be7485980ae"
+        },
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-warm2-20261011/builder-history-missing.FCStd",
+            "bytes": 105629,
+            "sha256": "f806cbfb90708b8c2ff004354f0a0354f46efc1ecb81a5631396b38415260095"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-warm2-20261011/builder-history.FCStd",
+            "bytes": 128629,
+            "sha256": "613aca81295059dd07d5120005e695cabda9922ab2411dad53f8409fda59eed3"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-warm2-20261011/fixture.FCMacro",
+            "bytes": 14166,
+            "sha256": "14065f187101514008cdd2257a621e5b2a64a19152a1c462f1b06be7485980ae"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-warm2-20261011/host-stderr.log",
+            "bytes": 622,
+            "sha256": "07dba5bf8c64897412dc3fa40af1b45cf281690dec10167f96dbab3f60a0c342"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-warm2-20261011/host-stdout.log",
+            "bytes": 3629,
+            "sha256": "6946a0a38fd8b3597ffce54ef29659d4788c2d590ef45446bef28bb7eadf1110"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-warm2-20261011/prepare-test.FCMacro",
+            "bytes": 302,
+            "sha256": "c613c945ff5333b0c0a16dda8ce3c5d359520b7752e4c945dad4fdb8421e078a"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-warm2-20261011/results.json",
+            "bytes": 4495,
+            "sha256": "6d37464defef5ced53b464d4e5cdece0170672f3bd34fe0b8023e66e2a70d1dc"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-warm2-20261011/select-plugin.FCMacro",
+            "bytes": 950,
+            "sha256": "1457b5619f686716a7db48807a71deb01ea58857a5e6302a9c2e3426d2312940"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-warm2-20261011/shared-host-launch.json",
+            "bytes": 558,
+            "sha256": "d10915fe08f4052e88d719e44e748ccea02fca8f7dfc75057c3ef37445cd88e0"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-warm2-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-warm2-20261011/user.cfg",
+            "bytes": 16966,
+            "sha256": "2acc9d8098004986361e97f286b6fcfc66c9998ca08651e2b7acc7378a94f9a8"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\builder-conversion-groups2-20261011",
+        "checks": 10,
+        "fixture": {
+          "path": "H:/FreeCAD-src/build/builder-conversion-groups2-20261011/fixture.FCMacro",
+          "bytes": 5453,
+          "sha256": "26a8532c61fb2568a75ab44d83585f45dcdaecce72e6bbeb44910edecb73544e"
+        },
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-groups2-20261011/builder-groups.FCStd",
+            "bytes": 27478,
+            "sha256": "07f838e024c23447b620e06b7b98e2cb6d828569569dfceb00495305cf17cf0f"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-groups2-20261011/fixture.FCMacro",
+            "bytes": 5453,
+            "sha256": "26a8532c61fb2568a75ab44d83585f45dcdaecce72e6bbeb44910edecb73544e"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-groups2-20261011/host-stderr.log",
+            "bytes": 667,
+            "sha256": "ec161ddb8fc177df8a74735a6dab283cf1444a579509619e4728e4c693777631"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-groups2-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-groups2-20261011/prepare-test.FCMacro",
+            "bytes": 304,
+            "sha256": "4b75f16d6f7af3b1d757edc9ca21be8b1690ee4779f35c49065d6b6441c5fd0b"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-groups2-20261011/results.json",
+            "bytes": 1244,
+            "sha256": "3de11107c7bc8ee68e96adb91480e566d5aa7d89606f07b5033a1b3da0711bf7"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-groups2-20261011/select-plugin.FCMacro",
+            "bytes": 952,
+            "sha256": "efb7fbc0dd8dce70a8f1bc07a22de9cf7f54bfdad606dedb8130c817f95a1e20"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-groups2-20261011/shared-host-launch.json",
+            "bytes": 561,
+            "sha256": "2304ab9b25110aaabf87c64ec3435b1d5bedf42c127e3170f4716c3a798f2b10"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-groups2-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-groups2-20261011/user.cfg",
+            "bytes": 16474,
+            "sha256": "78444a78690c0c018de32b32accf119d52ad8e2370a421bc976c126b683b9263"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\builder-conversion-cold2-20261011",
+        "checks": 3,
+        "fixture": {
+          "path": "H:/FreeCAD-src/build/builder-conversion-cold2-20261011/fixture.FCMacro",
+          "bytes": 14166,
+          "sha256": "14065f187101514008cdd2257a621e5b2a64a19152a1c462f1b06be7485980ae"
+        },
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold2-20261011/fixture.FCMacro",
+            "bytes": 14166,
+            "sha256": "14065f187101514008cdd2257a621e5b2a64a19152a1c462f1b06be7485980ae"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold2-20261011/host-stderr.log",
+            "bytes": 219,
+            "sha256": "94fdde754f809fb4ae95c99c21a0c5617d8e75ebff206f9b165f3f009122a8d9"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold2-20261011/host-stdout.log",
+            "bytes": 690,
+            "sha256": "363e3f2a418f3b4773aab59263ccf23473395e0fec6904118afd5b30537cc986"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold2-20261011/prepare-test.FCMacro",
+            "bytes": 451,
+            "sha256": "120e0bd9d8494abaaa9a36968dbf3ac335fdb8e32ce2480374f1c5152de8a3bc"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold2-20261011/results.json",
+            "bytes": 519,
+            "sha256": "d1afbe715466288115b1b66630b1577a39e01a9391595d4982312f91a3f5c758"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold2-20261011/select-plugin.FCMacro",
+            "bytes": 950,
+            "sha256": "1c7f7030a3c0920d835d15f662faa908984073ac32ea7511ac14cf35be6ac596"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold2-20261011/shared-host-launch.json",
+            "bytes": 559,
+            "sha256": "8ee749be879afd3734c7bf123c93fbfae3001abfaaeac56d713eb049ed5534b2"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold2-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold2-20261011/user.cfg",
+            "bytes": 16268,
+            "sha256": "95645800f72d1beb2eb3d29a65767f13ca8d67c1f0ca6a0893284d11597c2d2e"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\builder-conversion-cold-missing2-20261011",
+        "checks": 4,
+        "fixture": {
+          "path": "H:/FreeCAD-src/build/builder-conversion-cold-missing2-20261011/fixture.FCMacro",
+          "bytes": 14166,
+          "sha256": "14065f187101514008cdd2257a621e5b2a64a19152a1c462f1b06be7485980ae"
+        },
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold-missing2-20261011/fixture.FCMacro",
+            "bytes": 14166,
+            "sha256": "14065f187101514008cdd2257a621e5b2a64a19152a1c462f1b06be7485980ae"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold-missing2-20261011/host-stderr.log",
+            "bytes": 219,
+            "sha256": "94fdde754f809fb4ae95c99c21a0c5617d8e75ebff206f9b165f3f009122a8d9"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold-missing2-20261011/host-stdout.log",
+            "bytes": 768,
+            "sha256": "f166f5e95d121370fe9d3ec6f66b44f616beca8166bb500de18358c217b9e3f5"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold-missing2-20261011/prepare-test.FCMacro",
+            "bytes": 467,
+            "sha256": "f9d8c4309a5b1cd26ef548c043f91b48e3b92dae9a21abb29483f4be4b128342"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold-missing2-20261011/results.json",
+            "bytes": 623,
+            "sha256": "d047cf99d5908b3ff89fd34c3fcc71b4402049368f02c6e0b9642e9cb134b8df"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold-missing2-20261011/select-plugin.FCMacro",
+            "bytes": 958,
+            "sha256": "d877194dcaa95365d18f8342e729cce61daca4f941a3f2489cc360bf6004d083"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold-missing2-20261011/shared-host-launch.json",
+            "bytes": 567,
+            "sha256": "f670dde7d981a443a0d8d59f557e1e6cf04eab414834d25fffa7d7161d0ab6b9"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold-missing2-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-cold-missing2-20261011/user.cfg",
+            "bytes": 16284,
+            "sha256": "dbb7da17b6b04f87b66ddb02f75b1db2106fda956f32e6ea26e08e1ebd079c24"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\builder-conversion-prepared-cad2-20261011",
+        "checks": 47,
+        "fixture": {
+          "path": "H:/FreeCAD-src/build/builder-conversion-prepared-cad2-20261011/fixture.FCMacro",
+          "bytes": 6964,
+          "sha256": "541fabe7b08e2e739e77927f70f33833f7a9993250cdbb3541da1d82cf094ad4"
+        },
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-cad2-20261011/fixture.FCMacro",
+            "bytes": 6964,
+            "sha256": "541fabe7b08e2e739e77927f70f33833f7a9993250cdbb3541da1d82cf094ad4"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-cad2-20261011/host-stderr.log",
+            "bytes": 268,
+            "sha256": "6ade3fba1c2d1246fe9579e6f1718ded3d8aeb67f6a6a743d60e05b80e6fd54f"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-cad2-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-cad2-20261011/prepare-test.FCMacro",
+            "bytes": 310,
+            "sha256": "8d0eefba016053f09a239c78cecc7d8a80c35a0d0f018c1e6d091ff277f4c516"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-cad2-20261011/prepared-results.FCStd",
+            "bytes": 33755,
+            "sha256": "bcf923dec10d4cda207b13d20cc5dd8f160b3b8fcc23c8782b49ab69720ca45e"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-cad2-20261011/results.json",
+            "bytes": 724270,
+            "sha256": "5741054377934f24d596bb09a0d4324da58ad8837e157ee39901fa4a2e72919c"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-cad2-20261011/select-plugin.FCMacro",
+            "bytes": 958,
+            "sha256": "5b63633286bd57313cb3b029821947d21de260a514e258baaff9c668580995fa"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-cad2-20261011/shared-host-launch.json",
+            "bytes": 567,
+            "sha256": "88d2f4378c5a856575e76dbaf996b82a592017f93059b0eb4345bd0c2edb9168"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-cad2-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-cad2-20261011/user.cfg",
+            "bytes": 16486,
+            "sha256": "5a2e6aca00160652202ab73e5e93eae77f3d6d32506f08ffa2b28cb7a335a800"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\builder-conversion-prepared-discrete2-20261011",
+        "checks": 81,
+        "fixture": {
+          "path": "H:/FreeCAD-src/build/builder-conversion-prepared-discrete2-20261011/fixture.FCMacro",
+          "bytes": 8268,
+          "sha256": "feade70634295aa33f4219cf57dca5f75ed5a231f9d689ef268d20cb887dce21"
+        },
+        "artifacts": [
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-discrete2-20261011/fixture.FCMacro",
+            "bytes": 8268,
+            "sha256": "feade70634295aa33f4219cf57dca5f75ed5a231f9d689ef268d20cb887dce21"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-discrete2-20261011/host-stderr.log",
+            "bytes": 268,
+            "sha256": "6ade3fba1c2d1246fe9579e6f1718ded3d8aeb67f6a6a743d60e05b80e6fd54f"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-discrete2-20261011/host-stdout.log",
+            "bytes": 268,
+            "sha256": "fc4bc305d441179db15c8dfdcd1721e6ae7ffd4679667fd9664310a763ae7dbf"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-discrete2-20261011/prepare-test.FCMacro",
+            "bytes": 315,
+            "sha256": "ab15ba151cfc2e9e9124d3cdf307a4a1f1b1ba09746aafee9561537f90148b3c"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-discrete2-20261011/prepared-discrete.FCStd",
+            "bytes": 5500,
+            "sha256": "6f4aeb35d6d208961bcb8ccd4bca752d2c7205fe1383d48e034bd849aea7c2a1"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-discrete2-20261011/results.json",
+            "bytes": 37050,
+            "sha256": "9df8e4df64b000f956972e37f3f0ba019818bf661f36d67c79bc5ffaf4a680e4"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-discrete2-20261011/select-plugin.FCMacro",
+            "bytes": 963,
+            "sha256": "5cc7c2e1ed237ad8f81e66d511c7e5524ee27ec009ba2738d6723cc3ee8de78c"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-discrete2-20261011/shared-host-launch.json",
+            "bytes": 572,
+            "sha256": "87da3bd2a2f18a5c0206f318c488a8de3e9c98d320ce0e8d53b9fe67976936f3"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-discrete2-20261011/system.cfg",
+            "bytes": 1100,
+            "sha256": "68d59f8342d609f53a8a43a4ab309fbfa76c0fa48c20a9e8eb729c487370cd24"
+          },
+          {
+            "path": "H:/FreeCAD-src/build/builder-conversion-prepared-discrete2-20261011/user.cfg",
+            "bytes": 16604,
+            "sha256": "5b36f58502b03b61694b644af411f77d0fb0daed54d37797aa7cf7bafcb03618"
+          }
+        ]
+      }
+    ],
+    "native_red_artifacts": [
+      {
+        "path": "H:/FreeCAD-src/build/builder-conversion-red1-20261011/results.json",
+        "bytes": 1707,
+        "sha256": "478b897990e35ad67ae11b5d7b13cc27ae67a4b0642e269564327e25a0f84207"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/builder-conversion-red1-20261011/shared-host-launch.json",
+        "bytes": 550,
+        "sha256": "1e784d4ac4a9a6fce982e1a25cbd990e3578c88e97835787cd8ab55bd1e43826"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/builder-conversion-red1-20261011/fixture.FCMacro",
+        "bytes": 4322,
+        "sha256": "b831b8815eebf7665e424b1f778b10a195deccfc9aade37ff7995dcf1c358003"
+      }
+    ],
+    "full_rust_tests": 758,
+    "full_rust_suites": 108,
+    "logs": [
+      {
+        "path": "H:/FreeCAD-src/build/builder-result-rust-conversion-final-full2-20261011.log",
+        "bytes": 123321,
+        "sha256": "700d9f2e89deb38130d23684cb8721e67b3ce0a0b1dc0941f5fbdb6b99f0c70b"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/builder-result-rust-conversion-final-full2-20261011.log.exit.json",
+        "bytes": 24,
+        "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/builder-conversion-build9-20261011.log",
+        "bytes": 1821,
+        "sha256": "4c084eccc90b7e3217f827c04285fc8261fbc50e4548c1937c9d873eebc22e93"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/builder-conversion-build9-20261011.log.exit.json",
+        "bytes": 99,
+        "sha256": "80f4c20779e1ea31228a716ab348b0062bf747a225aeca1f0d0eed6bac93d537"
+      }
+    ],
+    "public_source_audit": {
+      "source_files": 2445,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    }
+  },
+  "harness_fingerprints": [
+    {
+      "path": "H:/FreeCAD-src/build/record-builder-conversion-progress.py",
+      "bytes": 15599,
+      "sha256": "8afabc5b2c2a9fab0ef5f5e5de361180f4683cca83c6cc29acfe92ce002b74d8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/check-builder-conversion-progress.py",
+      "bytes": 4810,
+      "sha256": "258cba481385e6b21545e3fb8e3c16facecdb0674aa330dd180aa82a645db438"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/run-builder-conversion-acceptance.ps1",
+      "bytes": 2594,
+      "sha256": "11c850295d8fe400768b5a24831e7931903c7e2e6a1cea605db51b6467001510"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/build-builder-conversion.ps1",
+      "bytes": 580,
+      "sha256": "ebb2de98c5ce9d94a69b16143213a67cae996e39f914447d46031bc6b00f81f1"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/run-builder-result-rust.ps1",
+      "bytes": 613,
+      "sha256": "e67a1edd532af18f22f7b39b379297d9514d1f14d2bb8e2c6a42f1564bab5c51"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/build-om9-plugin.ps1",
+      "bytes": 4337,
+      "sha256": "736e748838818017ca216de22b389ac358fec6620e3bce1608bca8557d0ad742"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/run-om9-plugin.ps1",
+      "bytes": 5632,
+      "sha256": "32c9fcd34f6beb2770b4440f0bf3766fd51af49b817b21434c858d4b4a6ab020"
+    }
+  ],
+  "documentation_fingerprints": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/README.md",
+      "bytes": 106153,
+      "sha256": "b4a0ebe04d6936fbb06ce18e9f325f96f61420242837cfa36b9bf608deadca3e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/IMPLEMENTATION_STATUS.md",
+      "bytes": 47183,
+      "sha256": "25401e9fff6a1aac1341da5787e09c16342221bf0946b6984579b4d9ee408169"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/README.md",
+      "bytes": 49484,
+      "sha256": "4787271587c375b6e5ce18f6a232e93ecae50ee72e35ecd8d0e7b49cd027a2b5"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/01-object-model-kernel.md",
+      "bytes": 56667,
+      "sha256": "cf5156ebc7ae2d0c99defd7fbd9c5443f9afd7ec675c2e0f89f9c845c6fae628"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/features/RCORE-01.md",
+      "bytes": 20246,
+      "sha256": "749488b4581273912fb1f0fb7ea331406563d6d26c69bffb16dd0650861dd0e7"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/features/OM9-HISTORY-001.md",
+      "bytes": 4103,
+      "sha256": "e687dc82e330d5df4550039c237daa2a2b6699446c09025362a1a37d389128e6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/01-core/om9-history-001-history-workflow.md",
+      "bytes": 13754,
+      "sha256": "9a9bee9d0a89a8be5b770f68c1465980c3d55a85bb381caafb48a9e8b8449939"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/10-gems/om9-gem-027-match-attributes.md",
+      "bytes": 10473,
+      "sha256": "dbce4b0a5ebd859aa9c51e385529e487c7655ffce5fa1a3da9da7456a2304de3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/09-history-dependencies.md",
+      "bytes": 23697,
+      "sha256": "bf62d9f69d8b078f8a5fac409e19a3eae34e67c48b7fdefc021797a1e160a717"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/features/builder-history-native-contract.md",
+      "bytes": 10987,
+      "sha256": "52e2152d8f0f4186612c6f65aa1b8f176243a63fc263eb2d8341e3a4f9622756"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-11-rhino-core-builder-conversion.md",
+      "bytes": 5026,
+      "sha256": "08f7de251aa06f10b893de7811440081542cd6d486fba8136a40102c928af4d2"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/superpowers/plans/2026-10-10-rcore01-native-construction-capabilities.md",
+      "bytes": 42881,
+      "sha256": "73140362262097eeaa3843d1ec5df927e2e6f118f1e3e56edd9d068af144e757"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/reviews/2026-10-11-builder-conversion-review.md",
+      "bytes": 1598,
+      "sha256": "5ccc74e9968cbe89846c9e747a103de1f140f2f54684212bbd1257a4402e2108"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/openmatrix9-progress.json",
+      "bytes": 254553,
+      "sha256": "71d34dce262615005cd4490e2de9ccf6c61d47ce38d33365883cb7c488298702"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/specs/00-rhino-core/CAPABILITY_LOOKUP.json",
+      "bytes": 100188,
+      "sha256": "23e2870dfcd6fcf149117ef00c9eee15c9cc033685052dad740ea7a0f4f5dff2"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/FEATURES.json",
+      "bytes": 1869992,
+      "sha256": "d06a4689d559d953dd8979873b7b062240359498267992bbaa729b5e735abd9e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/FEATURES.yaml",
+      "bytes": 1496070,
+      "sha256": "721b120f36266c43cbd181e14d3036d975c62978553abfe697c628e177885792"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/OpenMatrix9_Codex_Spec_v1/MANIFEST.json",
+      "bytes": 116505,
+      "sha256": "d83297d5e2601868b1d3acfb61c0be56b7100cce07ccc10c95e68743da6682b3"
+    }
+  ]
+}

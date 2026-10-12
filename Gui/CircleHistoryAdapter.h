@@ -14,8 +14,11 @@ struct CircleHistorySource {
     std::size_t index=0,count=1;
     std::vector<SolidPoint> snapshot;
     App::DocumentObject* identity=nullptr;
+    std::shared_ptr<const CurveNativeSource> nativeEvidence;
 };
-std::vector<SolidPoint> circleHistorySourcePoints(App::Document&,const std::string&,const std::string&);
+std::vector<SolidPoint> circleHistorySourcePoints(App::Document&,const std::string&,const std::string&,
+    std::size_t used=0,const char* operation="Circle",bool currentCurve=false,
+    const std::function<void(unsigned)>& independentAdmission={});
 std::optional<unsigned> circleHistoryNativeInput(App::Document&,const QString&);
 void clearCircleHistoryReferences();
 // Value snapshots only: identities are compared with the live document before

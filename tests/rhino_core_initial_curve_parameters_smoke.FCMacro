@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Initial typed/seeded Curve parameters, independent native D0/D1 and archive."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtTest
+sys.path.insert(0,os.environ['OM9_FIXTURE_HELPER_DIR'])
+from command_console_support import command_input
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(checks=[],records=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def settle():
+ loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(100,loop.quit);loop.exec()
+def enter(text):
+ field.setFocus();field.setText(text);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def run():
+ global field
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM
+  report['module']=OM.__file__;field=command_input(Gui.getMainWindow());doc=App.newDocument('InitialParameters');doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+  path=doc.addObject('Part::Feature','Path');path.Shape=Part.makeLine(App.Vector(10,20,30),App.Vector(10,20,50))
+  a=doc.addObject('Part::Feature','A');a.Shape=Part.makeLine(App.Vector(0,-20,0),App.Vector(0,20,0))
+  b=doc.addObject('Part::Feature','B');b.Shape=Part.makeLine(App.Vector(-20,0,0),App.Vector(20,0,0));doc.recompute()
+  cases=[('CircleTyped',['Circle','AroundCurve','Curve=Path.Edge1','OnCurve=0.2500','2mm'],[.25]),
+   ('CircleSeeded',['Circle','AroundCurve','Curve=Path.Edge1@10,20,35','2mm'],[.25]),
+   ('EllipseTyped',['Ellipse','AroundCurve','Curve=Path.Edge1','OnCurve=0.2500','5mm','3mm'],[.25]),
+   ('CircleTangent',['Circle','Tangent','Curve=A.Edge1@0,4,0','Radius=4','Curve=B.Edge1@4,0,0'],[.6,.6])]
+  for name,tokens,want in cases:
+   before=len(doc.Objects)
+   for text in tokens:enter(text)
+   child=doc.Objects[-1];check(name+' creates one native output',len(doc.Objects)==before+1 and not child.Shape.isNull()and child.Shape.isValid())
+   raw=child.OM9CurveConstruction;value=json.loads(raw);result=json.loads(child.OM9GeometryResult)
+   events=[e for e in value['accepted_input_events']if e.get('kind')=='native_reference'and e.get('reference_kind')in [2,3]]
+   check(name+' retains complete native fraction evidence',len(events)==len(want)and all(abs(e.get('source_curve_fraction',-1)-f)<1e-12 for e,f in zip(events,want)))
+   native_ok=True
+   for e in events:
+    owner=path if e['reference_kind']==2 else a if e['point_world'][0]==0 else b
+    edge=owner.Shape.Edges[0];u=edge.FirstParameter+e['source_curve_fraction']*(edge.LastParameter-edge.FirstParameter)
+    p=edge.valueAt(u);n=edge.tangentAt(u);native_ok=native_ok and(p-App.Vector(*e['point_world'])).Length<1e-6 and(n-App.Vector(*e['normal'])).Length<1e-8
+   check(name+' retained fraction reproduces independent native D0 D1',native_ok)
+   check(name+' publication retains exact parameter events',result['operation_context']['construction']==value)
+   if name!='CircleTangent':check(name+' world center stays at intended native parameter',(child.Shape.Edges[0].Curve.Center-App.Vector(10,20,35)).Length<1e-7)
+   else:check(name+' existing tangent solver keeps physical solution',(child.Shape.Edges[0].Curve.Center-App.Vector(4,4,0)).Length<1e-7)
+   report['records'].append(dict(name=child.Name,raw=raw,result=child.OM9GeometryResult))
+  archive=out/'initial_parameters.FCStd';doc.saveAs(str(archive));App.closeDocument(doc.Name);doc=App.openDocument(str(archive))
+  for row in report['records']:
+   child=doc.getObject(row['name']);check(row['name']+' reopened construction/result bytes retain fractions',child.OM9CurveConstruction==row['raw']and child.OM9GeometryResult==row['result'])
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

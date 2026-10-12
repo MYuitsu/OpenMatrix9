@@ -1,0 +1,46 @@
+"""Distinct selected-point snapshots must remain admissible after budget rejection."""
+import json,math,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(console,text):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def run():
+    doc=None
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        doc=App.newDocument('SolidResultUniqueBudget');doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+        source=doc.addObject('Part::Feature','Source')
+        source.Shape=Part.makeCompound([Part.Vertex(App.Vector(math.cos(i*.01),math.sin(i*.01),0)) for i in range(1000)])
+        doc.recompute();before=(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount)
+        for text in ['Sphere','FitPoints','0,1,0','-1,0,0']:enter(console,text)
+        Gui.Selection.clearSelection()
+        accepted=0;rejected=False;diagnostic=''
+        for attempt in range(128):
+            Gui.Selection.clearSelection();Gui.Selection.addSelection(source,'Vertex'+str(attempt+1))
+            console.clear();enter(console,'Selection');diagnostic=console.toPlainText()
+            if 'budget' in diagnostic.lower():rejected=True;break
+            if any(code+':' in diagnostic for code in ['InvalidBasis','StaleGeometry','KernelFailure','UnsupportedRepresentation']):raise RuntimeError(diagnostic)
+            accepted+=1
+        check('native accumulated evidence exceeds limit after valid earlier batches',rejected and 0<accepted<128)
+        check('budget rejection has typed Solid context',rejected and 'InvalidBasis:' in diagnostic and 'Solid' in diagnostic)
+        check('rejected selection changes no document or native Undo Redo',before==(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount))
+        # Release one complete accepted batch, leaving ample output/result room.
+        enter(console,'Undo');Gui.Selection.clearSelection();enter(console,'');obj=doc.getObject('Sphere')
+        value=json.loads(getattr(obj,'OM9GeometryResult','{}')) if obj else {}
+        recipe=value.get('operation_context',{}).get('construction',{});refs=value.get('operation_context',{}).get('source_refs',[])
+        check('rejected batch never enters Rust and Undo removes one whole accepted batch',bool(value) and len(recipe.get('accepted_points',[]))==2+accepted-1 and len(refs)==accepted-1)
+        check('existing admitted evidence still creates one native solid transaction',obj is not None and obj.Shape.isValid() and obj.Shape.isClosed() and abs(obj.Shape.Volume-4*math.pi/3)<1e-6 and doc.UndoCount==before[1]+1)
+        report['observations'].append(dict(accepted_batches=accepted,rejected=rejected,diagnostic=diagnostic,final_diagnostic=console.toPlainText(),recipe=recipe,refs=len(refs)))
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        Gui.Selection.clearSelection()
+        if doc:App.closeDocument(doc.Name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

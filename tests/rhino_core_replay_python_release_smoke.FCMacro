@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Final inverse release must be included in the native replay verdict."""
+import json,os,sys,traceback,weakref
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE']);import OM9ReplayRetirement as probe
+events=[]
+class LastValue:
+ def __init__(self,child):self.child=child
+ def __del__(self):
+  events.append('started')
+  try:self.child.Value='tampered';events.append('changed')
+  except Exception as error:events.append(str(error))
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench')
+  doc=App.newDocument('LatePythonRelease');doc.UndoMode=1
+  child=doc.getObject(probe.create(doc.Name));child.addProperty('App::PropertyPythonObject','Payload')
+  child.Payload=LastValue(child);original=weakref.ref(child.Payload);doc.recompute();doc.clearUndos()
+  check('fixture Python value has a live native owner and no external strong reference',original()is not None and not events)
+  result=probe.run(doc.Name,'value','python_release',None)
+  check('actual Python finalizer ran during inverse release',len(events)==2 and events[0]=='started')
+  check('attempted finalizer mutation rejected by typed barrier',len(events)==2 and 'StaleGeometry'in events[1])
+  check('late finalizer attempt prevents successful replay verdict',not result['accepted'])
+  check('late rejection completes native rollback cleanup',result['rollback']and result['complete'])
+  check('original Python identity remains available for checked rollback',original()is not None and child.Payload is original())
+  check('original value restored and paired invalid output cleared',child.Value=='original-value'and child.Output=='')
+  check('owner remains alive without invented caller history',doc.Name in App.listDocuments()and doc.getObject('Child')is child and not doc.UndoNames and not doc.RedoNames and doc.getBookedTransactionID()==0)
+  report['observations'].append(dict(result=result,events=list(events),value=child.Value,output=child.Output,original_alive=original()is not None))
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

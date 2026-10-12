@@ -1,0 +1,247 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Real Surface previews release viewport leases on error/cancel/document lifecycle."""
+import gc
+import json
+import os
+import sys
+import traceback
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part
+import OpenMatrix9Gui as OM
+from PySide6 import QtCore, QtGui, QtWidgets
+from pivy import coin
+
+sys.path.insert(0, os.environ['OM9_PUBLICATION_FAULT_DIR'])
+import OM9PublicationFault as Fault
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = dict(module=OM.__file__, probe=Fault.__file__, checks=[], observations=[])
+
+def check(name, value):
+    report['checks'].append(dict(name=name, passed=bool(value)))
+
+def events():
+    QtWidgets.QApplication.processEvents()
+
+def enter(console, text=''):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_End, QtCore.Qt.ControlModifier))
+    if text:
+        QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+            QtCore.QEvent.KeyPress, 0, QtCore.Qt.NoModifier, text))
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_Return, QtCore.Qt.NoModifier))
+    events()
+
+def snapshot(doc):
+    return tuple((obj.Name, obj.Label,
+        tuple(obj.Placement.toMatrix().A) if 'Placement' in obj.PropertiesList else None,
+        obj.Shape.exportBrepToString() if 'Shape' in obj.PropertiesList else None,
+        getattr(obj, 'OM9GeometryResult', None)) for obj in doc.Objects), doc.UndoCount, doc.RedoCount
+
+def settle():
+    loop = QtCore.QEventLoop()
+    QtCore.QTimer.singleShot(180, loop.quit)
+    loop.exec()
+
+def preview_counts(roots):
+    counts = []
+    for root in roots:
+        search = coin.SoSearchAction()
+        search.setName(coin.SbName('OM9SurfacePreview'))
+        search.setInterest(coin.SoSearchAction.ALL)
+        search.setSearchingAll(True)
+        search.apply(root)
+        counts.append(search.getPaths().getLength())
+    return counts
+
+def close_baseline(original, label):
+    """Measure normal viewer release with identical sources and no preview."""
+    original_name = original.Name
+    calibration = App.newDocument('PreviewCloseBaseline')
+    calibration_name = calibration.Name
+    held = []
+    try:
+        calibration.UndoMode = 1
+        for source in original.Objects:
+            obj = calibration.addObject(source.TypeId, source.Name)
+            if 'Shape' in source.PropertiesList:
+                obj.Shape = source.Shape.copy()
+                obj.Placement = source.Placement
+        calibration.recompute()
+        witness = calibration.getObject('Witness')
+        calibration.openTransaction('Prior executable Redo')
+        witness.Label = 'Prior value'
+        calibration.commitTransaction()
+        calibration.undo()
+        settle()
+        held = [view.getSceneGraph() for view in Gui.getDocument(calibration_name).mdiViewsOfType('Gui::View3DInventor')]
+        for root in held:
+            root.ref()
+        before_refs = [root.getRefCount() for root in held]
+        check(label + ' matched close baseline has no preview', bool(held) and not any(preview_counts(held)))
+        App.closeDocument(calibration_name)
+        settle()
+        gc.collect()
+        after_refs = [root.getRefCount() for root in held]
+        check(label + ' matched no-preview document actually closes', calibration_name not in App.listDocuments())
+        return dict(before_refs=before_refs, after_refs=after_refs)
+    finally:
+        if calibration_name in App.listDocuments():
+            App.closeDocument(calibration_name)
+        for root in held:
+            root.unref()
+        App.setActiveDocument(original_name)
+        settle()
+
+def run_case(kind, history, action, console):
+    operation = ['Sweep1', 'Sweep2', 'Loft'][kind - 1]
+    label = operation + (' History ' if history else ' Plain ') + action
+    doc = App.newDocument('PreviewLifecycle' + str(kind) + str(int(history)) + action)
+    doc_name = doc.Name
+    roots = []
+    other = None
+    other_name = None
+    try:
+        doc.UndoMode = 1
+        sources = []
+        def line(name, a, b):
+            obj = doc.addObject('Part::Feature', name)
+            obj.Shape = Part.makeLine(App.Vector(*a), App.Vector(*b))
+            sources.append(obj)
+        if kind == 3:
+            line('First', (0, 0, 0), (0, 3, 0))
+            line('Last', (10, 0, 0), (10, 3, 0))
+        else:
+            line('Rail', (0, 0, 0), (10, 0, 0))
+            if kind == 2:
+                line('SecondRail', (0, 3, 0), (10, 3, 0))
+            line('Profile', (0, 0, 0), (0, 3, 0))
+        witness = doc.addObject('App::FeaturePython', 'Witness')
+        doc.recompute()
+        doc.openTransaction('Prior executable Redo')
+        witness.Label = 'Prior value'
+        doc.commitTransaction()
+        doc.undo()
+        settle()
+        calibration = close_baseline(doc, label) if action == 'Close' else None
+        roots = [view.getSceneGraph() for view in Gui.getDocument(doc.Name).mdiViewsOfType('Gui::View3DInventor')]
+        # Own explicit test leases so post-close observation never dereferences
+        # a viewer-owned node after its viewer has gone away. Release in finally.
+        for root in roots:
+            root.ref()
+        baseline_refs = [root.getRefCount() for root in roots]
+        if calibration is not None:
+            check(label + ' close baseline matches viewport ownership', baseline_refs == calibration['before_refs'])
+        check(label + ' no existing preview before command', bool(roots) and not any(preview_counts(roots)))
+        Gui.Selection.clearSelection()
+        for obj in sources:
+            Gui.Selection.addSelection(obj)
+        console.clear()
+        Gui.runCommand(['OM9_SurfaceSweepSweep1Rail', 'OM9_SurfaceSweepSweep2Rails',
+                        'OM9_SurfaceLoft'][kind - 1])
+        enter(console)
+        settle()
+        dialog = next(widget for widget in Gui.getMainWindow().findChildren(
+            QtWidgets.QDialog, 'OM9SurfaceOptions') if widget.isVisible())
+        dialog.findChild(QtWidgets.QCheckBox, 'OM9SurfaceHistory').setChecked(history)
+        before_counts = preview_counts(roots)
+        before_refs = [root.getRefCount() for root in roots]
+        check(label + ' exactly one real preview per viewport', before_counts == [1] * len(roots))
+        check(label + ' preview owns one root lease per viewport', before_refs == [n + 1 for n in baseline_refs])
+        if action == 'stale':
+            sources[-1].Placement.Base = App.Vector(1, 0, 0)
+            doc.recompute()
+        before = snapshot(doc)
+        identities = [(obj.Name, obj) for obj in doc.Objects]
+        if action in ['before', 'close', 'early']:
+            Fault.arm(action, doc.Name, sources[-1].Name)
+            dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click()
+        elif action == 'stale':
+            dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click()
+        elif action == 'Esc':
+            QtWidgets.QApplication.sendEvent(dialog, QtGui.QKeyEvent(
+                QtCore.QEvent.KeyPress, QtCore.Qt.Key_Escape, QtCore.Qt.NoModifier))
+        elif action == 'Cancel':
+            dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Cancel).click()
+        elif action == 'Close':
+            App.closeDocument(doc.Name)
+        elif action == 'Switch':
+            other = App.newDocument('PreviewOther')
+            other_name = other.Name
+        else:
+            raise AssertionError('Unknown lifecycle action')
+        settle()
+        gc.collect()
+        after_counts = preview_counts(roots)
+        after_refs = [root.getRefCount() for root in roots]
+        error = console.toPlainText()
+        report['observations'].append(dict(case=label, baseline_refs=baseline_refs,
+            preview_counts=before_counts, preview_refs=before_refs,
+            after_counts=after_counts, after_refs=after_refs, error=error,
+            close_baseline=calibration,
+            fault=Fault.status() if action in ['before', 'close', 'early'] else None))
+        check(label + ' preview absent in every retained viewport', not any(after_counts))
+        if action != 'Close':
+            check(label + ' temporary root leases returned exactly', after_refs == baseline_refs)
+            after = snapshot(doc)
+            check(label + ' source geometry metadata and Undo preserved', before[:2] == after[:2])
+            check(label + ' original native input identities preserved',
+                  all(doc.getObject(name) is obj for name, obj in identities))
+            if action in ['before', 'close']:
+                check(label + ' actual native fault once with typed operation/source',
+                      Fault.status() == dict(calls=1, armed=False) and
+                      any('KernelFailure:' in row and operation in row and sources[-1].Name in row for row in error.splitlines()))
+                check(label + ' failed close disposes uncertified Redo', after[2] == 0)
+            else:
+                check(label + ' cancellation or early rejection retains prior Redo', before[2] == after[2])
+                if doc.RedoCount:
+                    doc.redo()
+                    check(label + ' prior Redo still executes', witness.Label == 'Prior value')
+            if action == 'early':
+                check(label + ' actual output fault once with stale diagnostic',
+                      Fault.status() == dict(calls=1, armed=False) and 'StaleGeometry:' in error)
+            if action == 'stale':
+                check(label + ' current source rejected as stale', 'StaleGeometry:' in error)
+        else:
+            check(label + ' document actually closed', doc_name not in App.listDocuments())
+            check(label + ' preview close leases match no-preview closure', after_refs == calibration['after_refs'])
+        # Retry an unchanged-source commit failure through the existing Preview
+        # control, then Esc: cleanup must not disable the supported recovery flow.
+        if action in ['before', 'close']:
+            dialog.findChild(QtWidgets.QPushButton, 'OM9SurfacePreviewButton').click()
+            settle()
+            check(label + ' user can regenerate preview after recoverable failure', preview_counts(roots) == [1] * len(roots))
+            enter(console, 'Cancel')
+            check(label + ' regenerated preview and leases release on Cancel',
+                  not any(preview_counts(roots)) and [root.getRefCount() for root in roots] == baseline_refs)
+    finally:
+        Fault.clear()
+        if doc_name in App.listDocuments():
+            enter(console, 'Cancel')
+            App.closeDocument(doc_name)
+        if other_name is not None and other_name in App.listDocuments():
+            App.closeDocument(other_name)
+        for root in roots:
+            root.unref()
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        events()
+        console = Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript')
+        for kind in [1, 2, 3]:
+            for history in [False, True]:
+                for action in ['before', 'close', 'early', 'stale', 'Esc', 'Cancel', 'Close', 'Switch']:
+                    run_case(kind, history, action, console)
+        report['ok'] = all(row['passed'] for row in report['checks'])
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        (out / 'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1200, run)

@@ -2,6 +2,8 @@
 #include "CageFeature.h"
 #include "CageRust.h"
 #include "CageGeometry.h"
+#include "CageCapability.h"
+#include "NativeInputTree.h"
 #include "HistoryFeature.h"
 #include "RetainedArchive.h"
 #include "ThreeDmCage.h"
@@ -24,11 +26,14 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QApplication>
+#include <QThread>
 #include <algorithm>
 #include <cmath>
 #include <memory>
 #include <set>
 #include <stdexcept>
+#include <type_traits>
 extern "C" bool om9_retained_uuid_normalize(const char*,char*,std::size_t);
 namespace OpenMatrix9Gui {
 PROPERTY_SOURCE(OpenMatrix9Gui::CageControl,Part::Feature)
@@ -50,24 +55,52 @@ void editable(App::Document& d){
 }
 Base::Matrix4D frame(App::DocumentObject* o){return App::GeoFeature::getGlobalPlacement(o).toMatrix();}
 std::array<double,16> array(const Base::Matrix4D& m){std::array<double,16> out{};for(int i=0;i<4;++i)for(int j=0;j<4;++j)out[i*4+j]=m[i][j];return out;}
-std::vector<double> flat(const std::vector<Base::Vector3d>& v){std::vector<double> out;out.reserve(v.size()*3);for(auto p:v){out.push_back(p.x);out.push_back(p.y);out.push_back(p.z);}return out;}
-std::vector<Base::Vector3d> vectors(const std::vector<double>& v){std::vector<Base::Vector3d> out;for(std::size_t i=0;i<v.size();i+=3)out.emplace_back(v[i],v[i+1],v[i+2]);return out;}
-RustCage cageHandle(CageControl& c,const CageBinding* binding=nullptr){
-    if(binding&&std::string(binding->Region.getValue())!="Global"&&std::string(binding->Region.getValue())!="Local")throw std::runtime_error("Unsupported cage region");
-    Om9CageDescriptor desc{};auto count=c.Counts.getValues(),degree=c.Degrees.getValues();
-    if(count.size()!=3||degree.size()!=3)throw std::runtime_error("Cage counts/degrees require three entries");
-    const std::vector<double>* knots[]={&c.UKnots.getValues(),&c.VKnots.getValues(),&c.WKnots.getValues()};
-    for(int a=0;a<3;++a){if(count[a]<2||degree[a]<1)throw std::runtime_error("Invalid cage count/degree");desc.counts[a]=std::size_t(count[a]);desc.degrees[a]=std::size_t(degree[a]);desc.knots[a]=knots[a]->data();desc.knot_lengths[a]=knots[a]->size();}
-    const auto& points=c.ControlPoints.getValues();const auto pose=array(frame(&c));
-    auto coordinates=flat(points);desc.points=coordinates.data();desc.point_count=points.size();desc.weights=c.Weights.getValues().data();desc.weight_count=c.Weights.getValues().size();
-    auto reference=array(c.ReferenceFrame.getValue());std::copy(reference.begin(),reference.end(),desc.world_to_parameter);
-    if(binding&&binding->Region.getValue()==std::string("Local")){
-        desc.region=1;auto lo=binding->LocalMin.getValue(),hi=binding->LocalMax.getValue();for(int i=0;i<3;++i){desc.local_min[i]=lo[i];desc.local_max[i]=hi[i];}desc.falloff=binding->Falloff.getValue();
-    }
-    Om9CageHandle* raw=nullptr;if(om9_cage_create_placed(&desc,pose.data(),&raw)!=0)throw std::runtime_error("Invalid rational NURBS cage, placement or region");return RustCage(raw,om9_cage_destroy);
+// The native value ABI is exactly XYZ doubles, with no padding or inheritance.
+// Rust borrows these initialized immutable records only during a synchronous
+// GUI-thread/GIL call; it never retains their pointers or frees host storage.
+static_assert(std::is_standard_layout_v<Base::Vector3d> && std::is_trivially_copyable_v<Base::Vector3d>);
+static_assert(sizeof(Base::Vector3d)==3*sizeof(double) && alignof(Base::Vector3d)==alignof(double));
+static_assert(offsetof(Base::Vector3d,x)==0 && offsetof(Base::Vector3d,y)==sizeof(double)
+    && offsetof(Base::Vector3d,z)==2*sizeof(double));
+const double* borrowedXYZ(const std::vector<Base::Vector3d>& values){return reinterpret_cast<const double*>(values.data());}
+void cageStatus(int status,const std::string& operation,const std::string& identity){
+    if(status==0)return;
+    const char* code=status==-4?"NonFiniteGeometry":status==-13?"InvalidTopology":status==-8?"KernelFailure":"InvalidBasis";
+    throw std::runtime_error(std::string(code)+": "+operation+" input "+identity+": invalid rational NURBS cage, placement, region or binding ("+std::to_string(status)+")");
 }
-std::vector<Base::Vector3d> batch(const RustCage& handle,const std::vector<Base::Vector3d>& points,bool inverse){
-    auto input=flat(points);std::vector<double> out(input.size());auto status=inverse?om9_cage_inverse(handle.get(),input.data(),points.size(),out.data(),points.size()):om9_cage_evaluate(handle.get(),input.data(),points.size(),out.data(),points.size());
+void savedShapeAdmission(const TopoDS_Shape& shape,const std::string& identity){
+    const std::string context="CageEdit input "+identity+".SourceShape: ";
+    if(shape.IsNull())throw std::runtime_error("InvalidTopology: "+context+"Empty captive shape");
+    try{ThreeDm::InputTree::validate(shape);}
+    catch(const ThreeDm::GeometryRepresentationUnavailable& error){throw std::runtime_error("UnsupportedRepresentation: "+context+error.what());}
+    catch(const Standard_Failure& error){throw std::runtime_error("KernelFailure: "+context+(error.GetMessageString()?error.GetMessageString():"native source inspection failed"));}
+    catch(const std::exception& error){throw std::runtime_error("InvalidBasis: "+context+error.what());}
+}
+std::vector<Base::Vector3d> vectors(const std::vector<double>& v){std::vector<Base::Vector3d> out;for(std::size_t i=0;i<v.size();i+=3)out.emplace_back(v[i],v[i+1],v[i+2]);return out;}
+Om9CageDescriptor cageDescriptor(CageControl& c,const CageBinding* binding,const std::string& operation,const std::string& identity){
+    if(!qApp||QThread::currentThread()!=qApp->thread())throw std::runtime_error("KernelFailure: "+operation+" input "+identity+": native cage requires the GUI thread");
+    Om9CageDescriptor desc{};const auto& count=c.Counts.getValues();const auto& degree=c.Degrees.getValues();
+    if(count.size()!=3||degree.size()!=3)cageStatus(-6,operation,identity);
+    const std::vector<double>* knots[]={&c.UKnots.getValues(),&c.VKnots.getValues(),&c.WKnots.getValues()};
+    for(int a=0;a<3;++a){desc.counts[a]=std::size_t(count[a]);desc.degrees[a]=std::size_t(degree[a]);desc.knots[a]=knots[a]->data();desc.knot_lengths[a]=knots[a]->size();}
+    const auto& points=c.ControlPoints.getValues();
+    desc.points=borrowedXYZ(points);desc.point_count=points.size();desc.weights=c.Weights.getValues().data();desc.weight_count=c.Weights.getValues().size();
+    auto reference=array(c.ReferenceFrame.getValue());std::copy(reference.begin(),reference.end(),desc.world_to_parameter);
+    if(binding){
+        const std::string region=binding->Region.getValue();desc.region=region=="Global"?0:region=="Local"?1:2;
+        if(desc.region==1){auto lo=binding->LocalMin.getValue(),hi=binding->LocalMax.getValue();for(int i=0;i<3;++i){desc.local_min[i]=lo[i];desc.local_max[i]=hi[i];}desc.falloff=binding->Falloff.getValue();}
+    }
+    return desc;
+}
+RustCage cageHandle(CageControl& c,const CageBinding* binding=nullptr){
+    const std::string operation=binding?"CageEdit":"Cage";
+    const std::string identity=binding&&binding->Captive.getValue()?binding->Captive.getValue()->getNameInDocument():c.getNameInDocument();
+    auto desc=cageDescriptor(c,binding,operation,identity);const auto pose=array(frame(&c));
+    Om9CageHandle* raw=nullptr;cageStatus(om9_cage_create_placed(&desc,pose.data(),&raw),operation,identity);return RustCage(raw,om9_cage_destroy);
+}
+std::vector<Base::Vector3d> batch(const RustCage& handle,const std::vector<Base::Vector3d>& points,bool inverse,const std::string& identity){
+    cageStatus(om9_cage_binding_admit(borrowedXYZ(points),points.size(),borrowedXYZ(points),points.size(),nullptr,0,sizeof(long),false),"CageEdit",identity);
+    std::vector<double> out(points.size()*3);auto status=inverse?om9_cage_inverse(handle.get(),borrowedXYZ(points),points.size(),out.data(),points.size()):om9_cage_evaluate(handle.get(),borrowedXYZ(points),points.size(),out.data(),points.size());
     if(status!=0)throw std::runtime_error(inverse?"Cage capture inverse failed, is ambiguous or outside supported bind domain":"Cage evaluation failed");return vectors(out);
 }
 std::optional<std::array<double,16>> affineForBinding(const RustCage& current,CageControl& control){
@@ -106,9 +139,10 @@ void applyShape(App::DocumentObject& object,const TopoDS_Shape& world){
 void applyMesh(App::DocumentObject& object,std::vector<Base::Vector3d> world,const std::vector<long>& triangles){auto inverse=frame(&object);inverse.inverseGauss();for(auto& p:world)inverse.multVec(p,p);setMesh(object,world,triangles);}
 std::vector<CageBinding*> bindingsFor(App::DocumentObject* o){std::vector<CageBinding*> out;if(!o||!o->getDocument())return out;for(auto* candidate:o->getDocument()->getObjects())if(auto* b=dynamic_cast<CageBinding*>(candidate);b&&b->Active.getValue()&&(candidate==o||b->Captive.getValue()==o))out.push_back(b);return out;}
 struct Prepared {App::DocumentObject* object;bool mesh=false;TopoDS_Shape shape;std::vector<Base::Vector3d> vertices,parameters;std::vector<long> faces;};
-Prepared prepare(App::DocumentObject* o,CageControl& control,const RustCage& handle){
+Prepared prepare(App::DocumentObject* o,CageControl& control,const RustCage& handle,const NativeCageRequest& request){
     if(o==&control||o->getDocument()!=control.getDocument()||!o->isValid()||!bindingsFor(o).empty())throw std::runtime_error("Invalid, foreign or already captured object");
     if(hasRecordedHistory(o))throw std::runtime_error("Clear existing object History before capturing it in a cage");
+    validateCageGeometryInput(*o,"CageEdit",[&](unsigned representation){validateNativeCageCapability(representation,request,"CageEdit",o->getNameInDocument());});
     Prepared p{o};if(auto* shape=dynamic_cast<Part::Feature*>(o)){p.shape=worldShape(*shape);if(p.shape.IsNull())throw std::runtime_error("Empty captive shape");p.vertices=cageShapeControlPoints(p.shape);
         if(p.vertices.empty()&&!affineForBinding(handle,control))throw std::runtime_error("This BRep topology supports affine cage deformation only");
     }else{
@@ -119,7 +153,7 @@ Prepared prepare(App::DocumentObject* o,CageControl& control,const RustCage& han
         for(Py_ssize_t i=0;i<PySequence_Size(faces);++i){CurvePyRef face(PySequence_GetItem(faces,i));if(PySequence_Size(face.value)!=3)throw std::runtime_error("Only native triangular mesh captives are supported");for(int j=0;j<3;++j){CurvePyRef index(PySequence_GetItem(face.value,j));auto k=PyLong_AsLong(index.value);if(k<0||std::size_t(k)>=p.vertices.size()||PyErr_Occurred())throw std::runtime_error("Invalid mesh facet");p.faces.push_back(k);}}
         if(p.vertices.empty()||p.faces.empty())throw std::runtime_error("Empty mesh captive");
     }
-    if(!p.vertices.empty())p.parameters=batch(handle,p.vertices,true);return p;
+    if(!p.vertices.empty())p.parameters=batch(handle,p.vertices,true,o->getNameInDocument());return p;
 }
 PyObject* insertBindings(CageControl& c,const std::vector<Prepared>& prepared,const RustCage& handle,const char* region,double falloff){
     auto& d=*c.getDocument();CurvePyRef out(PyList_New(prepared.size()));
@@ -134,8 +168,13 @@ PyObject* capture(PyObject*,PyObject* args){
     if(!PyArg_ParseTuple(args,"OO|sd",&controlObject,&items,&region,&falloff))return nullptr;
     try{
         auto* c=dynamic_cast<CageControl*>(native(controlObject));if(!c)throw std::runtime_error("Expected an OpenMatrix9 native cage");auto& d=*c->getDocument();editable(d);
-        if(std::string(region)!="Global"&&std::string(region)!="Local")throw std::runtime_error("Supported cage regions: Global or Local box");if(!std::isfinite(falloff)||falloff<0)throw std::runtime_error("Falloff must be finite and nonnegative");
-        auto handle=cageHandle(*c);auto selected=objects(items);if(selected.empty())throw std::runtime_error("Select captive objects");std::vector<Prepared> prepared;for(auto* o:selected){auto p=prepare(o,*c,handle);if(std::string(region)=="Local"&&!p.mesh&&p.vertices.empty())throw std::runtime_error("Local cage deformation requires a mesh, single edge or rectangular face");prepared.push_back(std::move(p));}
+        if(std::string(region)!="Global"&&std::string(region)!="Local")throw std::runtime_error(std::string("InvalidBasis: CageEdit input ")+c->getNameInDocument()+": Supported cage regions: Global or Local box");
+        auto selected=objects(items);if(selected.empty())throw std::runtime_error("Select captive objects");
+        NativeCageRequest request;request.kind=2;request.inputCount=selected.size();request.flags=2|(std::string(region)=="Local"?1:0);request.falloff=falloff;
+        auto controlRequest=request;controlRequest.role=1;
+        validateNativeCageControl(*c,"CageEdit",c->getNameInDocument());
+        validateCageGeometryInput(*c,"CageEdit",[&](unsigned representation){validateNativeCageCapability(representation,controlRequest,"CageEdit",c->getNameInDocument());});
+        auto handle=cageHandle(*c);std::vector<Prepared> prepared;for(auto* o:selected){auto p=prepare(o,*c,handle,request);if(std::string(region)=="Local"&&!p.mesh&&p.vertices.empty())throw std::runtime_error("Local cage deformation requires a mesh, single edge or rectangular face");prepared.push_back(std::move(p));}
         // Fully decode and invert before any native transaction or source write.
         d.openTransaction("Cage Edit capture");try{CurvePyRef out(insertBindings(*c,prepared,handle,region,falloff));
             d.recompute();for(Py_ssize_t i=0;i<PyList_Size(out.value);++i){auto* b=native(PyList_GetItem(out.value,i));if(b->isError()){const char* error=d.getErrorDescription(b);throw std::runtime_error(std::string("Cage binding recompute failed: ")+(error?error:"unknown recompute error"));}}d.commitTransaction();auto* result=out.value;out.value=nullptr;return result;
@@ -143,7 +182,10 @@ PyObject* capture(PyObject*,PyObject* args){
     }catch(const Base::Exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(const std::exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(...){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,"Native cage operation failed");return nullptr;}
 }
 PyObject* restoreArchive(PyObject*,PyObject* args){PyObject* source;if(!PyArg_ParseTuple(args,"O",&source))return nullptr;
-    try{auto* original=native(source);auto& d=*original->getDocument();editable(d);const auto verified=verifiedRetainedArchive(source);auto decoded=ThreeDm::cageArchiveRecord(verified.archiveBytes,verified.sourceUuid,verified.scaleMm);
+    try{auto* original=native(source);auto& d=*original->getDocument();editable(d);
+        NativeCageRequest restoreRequest;restoreRequest.kind=2;restoreRequest.role=2;restoreRequest.flags=6;
+        validateNativeCageCapability(13,restoreRequest,"CageEdit",original->getNameInDocument());
+        const auto verified=verifiedRetainedArchive(source);auto decoded=ThreeDm::cageArchiveRecord(verified.archiveBytes,verified.sourceUuid,verified.scaleMm);
         if(std::abs(decoded.scaleMm-verified.scaleMm)>1e-10*std::max(1.,verified.scaleMm))throw std::runtime_error("Archive cage units mismatch");
         std::vector<App::DocumentObject*> captives;
         for(const auto& id:decoded.captiveSourceUuids){App::DocumentObject* match=nullptr;for(auto* o:d.getObjects()){
@@ -152,6 +194,8 @@ PyObject* restoreArchive(PyObject*,PyObject* args){PyObject* source;if(!PyArg_Pa
             if(space&&uuid&&space->getStrValue()==verified.importNamespace&&om9_retained_uuid_normalize(uuid->getValue(),canonical,sizeof canonical)&&std::string(canonical)==id){if(match)throw std::runtime_error("Ambiguous captive UUID in import namespace");match=o;}}
             if(!match||match==original)throw std::runtime_error("Cage captive is missing from the original import namespace");captives.push_back(match);
         }
+        NativeCageRequest captiveRequest;captiveRequest.kind=2;captiveRequest.flags=2;captiveRequest.inputCount=captives.size();
+        for(auto* captive:captives)validateCageGeometryInput(*captive,"CageEdit",[&](unsigned representation){validateNativeCageCapability(representation,captiveRequest,"CageEdit",captive->getNameInDocument());});
         Base::Matrix4D parent=frame(original);std::vector<Base::Vector3d> points;std::vector<double> weights;const auto& data=decoded.currentCage;
         for(int w=0;w<data.counts[2];++w)for(int v=0;v<data.counts[1];++v)for(int u=0;u<data.counts[0];++u){auto i=std::size_t((u*data.counts[1]+v)*data.counts[2]+w);const auto p=data.points.at(i);points.emplace_back(p[0],p[1],p[2]);weights.push_back(data.weights.at(i));}
         Base::Matrix4D reference;
@@ -161,18 +205,25 @@ PyObject* restoreArchive(PyObject*,PyObject* args){PyObject* source;if(!PyArg_Pa
             auto* c=dynamic_cast<CageControl*>(d.addObject("OpenMatrix9Gui::CageControl","Cage"));c->Counts.setValues(std::vector<long>(data.counts.begin(),data.counts.end()));c->Degrees.setValues(std::vector<long>(data.degrees.begin(),data.degrees.end()));c->ControlPoints.setValues(points);c->Weights.setValues(weights);c->UKnots.setValues(data.fullKnots[0]);c->VKnots.setValues(data.fullKnots[1]);c->WKnots.setValues(data.fullKnots[2]);c->ReferenceFrame.setValue(reference);
             c->Placement.setValue(Base::Placement(parent));
             QJsonObject metadata{{"source_record_uuid",QString::fromStdString(verified.sourceUuid)},{"import_namespace",QString::fromStdString(verified.importNamespace)},{"source_class",QString::fromStdString(decoded.sourceClass)},{"bind_geometry","current_archive_output"},{"preserve_structure",decoded.preserveStructure},{"quick_preview",decoded.quickPreview},{"scale_mm",decoded.scaleMm}};
-            c->SourceMetadata.setValue(QJsonDocument(metadata).toJson(QJsonDocument::Compact).constData());auto handle=cageHandle(*c);std::vector<Prepared> prepared;for(auto* captive:captives)prepared.push_back(prepare(captive,*c,handle));CurvePyRef created(insertBindings(*c,prepared,handle,"Global",0));
+            c->SourceMetadata.setValue(QJsonDocument(metadata).toJson(QJsonDocument::Compact).constData());auto handle=cageHandle(*c);NativeCageRequest request;request.kind=2;request.flags=2;request.inputCount=captives.size();std::vector<Prepared> prepared;for(auto* captive:captives)prepared.push_back(prepare(captive,*c,handle,request));CurvePyRef created(insertBindings(*c,prepared,handle,"Global",0));
             d.recompute();if(c->isError())throw std::runtime_error("Archive cage reconstruction failed");for(auto* o:d.getObjects())if(auto* b=dynamic_cast<CageBinding*>(o);b&&b->Control.getValue()==c&&b->isError())throw std::runtime_error("Archive captive reconstruction failed");d.commitTransaction();return c->getPyObject();
         }catch(...){d.abortTransaction();throw;}
     }catch(const Base::Exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(const std::exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(...){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,"Native cage operation failed");return nullptr;}
 }
-PyObject* release(PyObject*,PyObject* args){PyObject* items;if(!PyArg_ParseTuple(args,"O",&items))return nullptr;try{auto selected=objects(items);if(selected.empty())throw std::runtime_error("Select captives to release");auto& d=*selected[0]->getDocument();editable(d);std::vector<CageBinding*> bindings;for(auto* o:selected){if(o->getDocument()!=&d)throw std::runtime_error("Foreign captive");for(auto* b:bindingsFor(o))if(std::find(bindings.begin(),bindings.end(),b)==bindings.end())bindings.push_back(b);}if(bindings.empty())throw std::runtime_error("Selected objects have no active cage binding");d.openTransaction("Release From Cage");try{for(auto* b:bindings)b->detach();d.commitTransaction();}catch(...){d.abortTransaction();throw;}Py_RETURN_NONE;}catch(const Base::Exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(const std::exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(...){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,"Native cage release failed");return nullptr;}}
+PyObject* release(PyObject*,PyObject* args){PyObject* items;if(!PyArg_ParseTuple(args,"O",&items))return nullptr;try{auto selected=objects(items);if(selected.empty())throw std::runtime_error("Select captives to release");auto& d=*selected[0]->getDocument();editable(d);std::vector<CageBinding*> bindings;for(auto* o:selected){if(o->getDocument()!=&d)throw std::runtime_error("Foreign captive");
+    NativeCageRequest request;request.kind=3;request.inputCount=selected.size();request.role=dynamic_cast<CageBinding*>(o)?3:0;
+    // Release consumes the active relationship's recorded representation; it
+    // must remain usable to detach a broken captive without evaluating its data.
+    for(auto* b:bindingsFor(o)){validateNativeCageCapability(b->MeshSource.getValue()?8:7,request,"ReleaseFromCage",o->getNameInDocument());if(std::find(bindings.begin(),bindings.end(),b)==bindings.end())bindings.push_back(b);}
+    }if(bindings.empty())throw std::runtime_error("Selected objects have no active cage binding");d.openTransaction("Release From Cage");try{for(auto* b:bindings)b->detach();d.commitTransaction();}catch(...){d.abortTransaction();throw;}Py_RETURN_NONE;}catch(const Base::Exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(const std::exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(...){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,"Native cage release failed");return nullptr;}}
 std::array<double,3> xyz(PyObject* values){CurvePyRef list(PySequence_Fast(values,"Expected three coordinates"));if(!list.value||PySequence_Fast_GET_SIZE(list.value)!=3)throw std::runtime_error("Expected three coordinates");std::array<double,3> p{};for(int i=0;i<3;++i){p[i]=PyFloat_AsDouble(PySequence_Fast_GET_ITEM(list.value,i));if(!std::isfinite(p[i])||PyErr_Occurred())throw std::runtime_error("Coordinates must be finite");}return p;}
 PyObject* create(PyObject*,PyObject* args){const char* document;PyObject *minimum,*maximum,*countObject=nullptr,*degreeObject=nullptr;
     if(!PyArg_ParseTuple(args,"sOO|OO",&document,&minimum,&maximum,&countObject,&degreeObject))return nullptr;
     try{auto* d=App::GetApplication().getDocument(document);if(!d)throw std::runtime_error("Missing active document");editable(*d);auto lo=xyz(minimum),hi=xyz(maximum);std::array<double,3> counts{2,2,2},degrees{1,1,1};if(countObject)counts=xyz(countObject);if(degreeObject)degrees=xyz(degreeObject);
         std::array<std::size_t,3> nativeCounts{},nativeDegrees{};
-        if(om9_cage_box_parameters(counts.data(),degrees.data(),nativeCounts.data(),nativeDegrees.data())!=0)throw std::runtime_error("Invalid cage integer counts/degrees or point budget");
+        if(om9_cage_box_parameters(counts.data(),degrees.data(),nativeCounts.data(),nativeDegrees.data())!=0)throw std::runtime_error(std::string("InvalidBasis: Cage input ")+document+": Invalid cage integer counts/degrees or point budget");
+        NativeCageRequest request;request.kind=1;request.flags=8;request.counts=nativeCounts;request.degrees=nativeDegrees;request.lo=lo;request.hi=hi;
+        validateNativeCageCapability(7,request,"Cage",document);
         std::vector<long> n(nativeCounts.begin(),nativeCounts.end()),p(nativeDegrees.begin(),nativeDegrees.end());std::array<std::vector<double>,3> k;
         const auto size=nativeCounts[0]*nativeCounts[1]*nativeCounts[2];std::vector<double> coordinates(size*3);std::array<double,16> matrix{};
         for(int i=0;i<3;++i)k[i].resize(nativeCounts[i]+nativeDegrees[i]+1);
@@ -181,6 +232,10 @@ PyObject* create(PyObject*,PyObject* args){const char* document;PyObject *minimu
         d->openTransaction("Create Cage");try{auto* c=dynamic_cast<CageControl*>(d->addObject("OpenMatrix9Gui::CageControl","Cage"));c->Counts.setValues(n);c->Degrees.setValues(p);c->UKnots.setValues(k[0]);c->VKnots.setValues(k[1]);c->WKnots.setValues(k[2]);c->ControlPoints.setValues(points);c->Weights.setValues(std::vector<double>(size,1));c->ReferenceFrame.setValue(reference);d->recompute();if(c->isError())throw std::runtime_error("Cannot build cage");d->commitTransaction();return c->getPyObject();}catch(...){d->abortTransaction();throw;}
     }catch(const Base::Exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(const std::exception& e){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,e.what());return nullptr;}catch(...){PyErr_Clear();PyErr_SetString(PyExc_RuntimeError,"Native cage operation failed");return nullptr;}
 }
+}
+void validateNativeCageControl(CageControl& control,const std::string& operation,const std::string& identity){
+    auto desc=cageDescriptor(control,nullptr,operation,identity);const auto pose=array(frame(&control));
+    cageStatus(om9_cage_validate_descriptor(&desc,pose.data()),operation,identity);
 }
 CageControl::CageControl(){
     ADD_PROPERTY(ControlPoints,(std::vector<Base::Vector3d>()));ADD_PROPERTY(Counts,(std::vector<long>()));ADD_PROPERTY(Degrees,(std::vector<long>()));ADD_PROPERTY(UKnots,(std::vector<double>()));ADD_PROPERTY(VKnots,(std::vector<double>()));ADD_PROPERTY(WKnots,(std::vector<double>()));ADD_PROPERTY(Weights,(std::vector<double>()));ADD_PROPERTY(ReferenceFrame,(Base::Matrix4D()));ADD_PROPERTY(OM9FeatureId,("OM9-TRANSFORM-041"));ADD_PROPERTY(SourceMetadata,(""));OM9FeatureId.setReadOnly(true);
@@ -227,14 +282,20 @@ App::DocumentObjectExecReturn* CageBinding::execute(){
     if(!Active.getValue())return App::DocumentObject::StdReturn;
     auto* control=dynamic_cast<CageControl*>(Control.getValue());auto* target=Captive.getValue();if(!control||!target){if(target)clearInvalidGeometry();return new App::DocumentObjectExecReturn("Missing cage control or captive; Undo restores the relationship",this);}
     const char* stage="validate cage";
-    try{Base::PyGILStateLocker lock;Writing internal(writing);if(control->getDocument()!=getDocument()||target->getDocument()!=getDocument()||!control->isValid())throw std::runtime_error("Missing/invalid cage control");auto handle=cageHandle(*control,this);
-        auto original=flat(SourceVertices.getValues()),parameters=flat(BoundParameters.getValues());if(original.size()!=parameters.size())throw std::runtime_error("Invalid saved cage binding");std::vector<double> result(original.size());
-        stage="evaluate cage coordinates";if(om9_cage_apply(handle.get(),original.data(),parameters.data(),original.size()/3,result.data(),result.size()/3)!=0)throw std::runtime_error("Cage binding evaluation failed");auto mapped=vectors(result);
+    try{Base::PyGILStateLocker lock;Writing internal(writing);if(control->getDocument()!=getDocument()||target->getDocument()!=getDocument()||!control->isValid())throw std::runtime_error("Missing/invalid cage control");
+        NativeCageRequest request;request.kind=2;request.stage=4;request.inputCount=1;request.flags=2|(std::string(Region.getValue())=="Local"?1:0);request.falloff=Falloff.getValue();
+        validateNativeCageCapability(MeshSource.getValue()?8:7,request,"CageEdit",target->getNameInDocument());
+        const auto& original=SourceVertices.getValues();const auto& parameters=BoundParameters.getValues();const auto& triangles=SourceTriangles.getValues();
+        cageStatus(om9_cage_binding_admit(borrowedXYZ(original),original.size(),borrowedXYZ(parameters),parameters.size(),triangles.data(),triangles.size(),sizeof(long),MeshSource.getValue()),"CageEdit",target->getNameInDocument());
+        if(!MeshSource.getValue())savedShapeAdmission(SourceShape.getValue(),target->getNameInDocument());
+        auto handle=cageHandle(*control,this);
+        std::vector<double> result(original.size()*3);
+        stage="evaluate cage coordinates";cageStatus(om9_cage_apply(handle.get(),borrowedXYZ(original),borrowedXYZ(parameters),original.size(),result.data(),original.size()),"CageEdit",target->getNameInDocument());auto mapped=vectors(result);
         auto affine=affineForBinding(handle,*control);
         if(!AffineBind.getValue())affine.reset();
         else if(affine){Base::Matrix4D edited;for(int i=0;i<4;++i)for(int j=0;j<4;++j)edited[i][j]=(*affine)[i*4+j];auto inverse=control->ReferenceFrame.getValue();inverse.inverseGauss();affine=array(edited*inverse*BoundFrame.getValue());}
         stage="write native cage geometry";if(MeshSource.getValue())applyMesh(*target,mapped,SourceTriangles.getValues());
-        else {stage="read native BRep snapshot";auto source=SourceShape.getValue();stage="deform native BRep";auto shape=cageDeformShape(source,mapped,affine);stage="assign native BRep";applyShape(*target,shape);}
+        else {stage="read native BRep snapshot";const auto& source=SourceShape.getValue();stage="deform native BRep";auto shape=cageDeformShape(source,mapped,affine);stage="assign native BRep";applyShape(*target,shape);}
         return App::DocumentObject::StdReturn;
     }catch(const Base::Exception& e){try{clearInvalidGeometry();}catch(...){}return new App::DocumentObjectExecReturn(std::string(stage)+": "+e.what(),this);
     }catch(const std::exception& e){try{clearInvalidGeometry();}catch(...){}return new App::DocumentObjectExecReturn(e.what(),this);

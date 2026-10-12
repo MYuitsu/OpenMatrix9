@@ -1,0 +1,39 @@
+"""Second-process restore of complete native CAD GeometrySnapshot results."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def signature(shape):
+ # TopoShape.BoundBox uses BRepBndLib::Add with display tessellation enabled.
+ # Compare native CAD on detached geometry copies without that display cache.
+ shape=shape.copy(True,False)
+ box=shape.BoundBox
+ return (shape.ShapeType,len(shape.Faces),len(shape.Wires),len(shape.Edges),len(shape.Vertexes),
+         tuple(round(v,9) for v in (box.XMin,box.YMin,box.ZMin,box.XMax,box.YMax,box.ZMax)),
+         tuple(round(edge.Length,9) for edge in shape.Edges))
+def run():
+ try:
+  import OpenMatrix9Gui as native,Part
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+  source=Path(os.environ['OM9_PREPARED_RESULTS']);warm=json.loads(source.read_text());report['source_results']=str(source)
+  doc=App.openDocument(warm['saved_file'])
+  for name,expected in warm['saved_reports'].items():
+   obj=doc.getObject(name);raw=obj.OM9GeometryResult if obj and 'OM9GeometryResult' in obj.PropertiesList else None
+   check(name+' cold report bytes preserved',raw==warm['saved_report_bytes'][name])
+   result=json.loads(raw) if raw else {}
+   check(name+' cold owned evidence preserved',result==expected and result.get('status')=='accepted' and result.get('lifetime')=='immutable_import_evidence_not_current_validity')
+   check(name+' cold native shape restored',obj is not None and not obj.Shape.isNull() and obj.Shape.isValid())
+   snapshot=result['output_snapshots'][0];master=snapshot['geometry_data']['native_master']
+   reconstructed=Part.Shape();reconstructed.importBrepFromString(master['payload'])
+   report.setdefault('signatures',{})[name]={'snapshot':signature(reconstructed),'fcstd':signature(obj.Shape)}
+   check(name+' cold snapshot independently reconstructs CAD',master['encoding']=='occt_brep_ascii_v3' and reconstructed.isValid() and signature(reconstructed)==signature(obj.Shape))
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

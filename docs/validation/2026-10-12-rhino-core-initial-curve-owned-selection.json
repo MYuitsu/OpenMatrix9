@@ -1,0 +1,771 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-initial-curve-owned-selection-20261012",
+  "status": "in_progress",
+  "goal_complete": false,
+  "updated_at": "2026-10-12T05:29:03+07:00",
+  "sources": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/lib.rs",
+      "bytes": 2589,
+      "sha256": "3bd2084e1c335351e059d0bcafc98df354e138837fe83dd9679287fb09f32a9e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history_sources.rs",
+      "bytes": 5404,
+      "sha256": "25508c4b48906d73c4051d26dfc66d5f8bbebec1532905a06246219d55366caa"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history_selection.rs",
+      "bytes": 9436,
+      "sha256": "55619c1332003cc496cfe2190672a7e5aaf9caa5bab27e8f85388379ac5d28b9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history_result.rs",
+      "bytes": 19009,
+      "sha256": "cf05b7c7d6a8c9b791a2dd307288f97a09f8569b556b0ddc06b0e2f52f49f2e3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_native_input.rs",
+      "bytes": 12413,
+      "sha256": "0756fbbf5b9956d00a80907cd64903068507bb9b03c697888ec1dc6b7675f68f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_native_input_tests.rs",
+      "bytes": 20924,
+      "sha256": "a01a2fe15788c37dcb27ecb352acb08a69970c2e142462a38c23f9a426e70587"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_native_selection_tests.rs",
+      "bytes": 6283,
+      "sha256": "882636d6cff2a58fa280cee5d4916f7f3c9819e950fc1909779aa33ee4ed5273"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/curve_native_input_ffi.rs",
+      "bytes": 5241,
+      "sha256": "123a8adf9f1668ef81650286e9a4c7f911bc20c42f993696425673df0ef14873"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_local_world_bounds_smoke.FCMacro",
+      "bytes": 3232,
+      "sha256": "954905833917f76e9a01256a865f9e20b2d3fbfa17d7328ea0609e1c51993162"
+    }
+  ],
+  "scope": "Initial Curve CAD FitPoints/native vertex source correspondence before atomic admission; full chapter retained",
+  "tdd_red": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/initial-selection-red104-20261012.log",
+      "bytes": 2317,
+      "sha256": "73af2ec7bd2d0e5b835d7d4f10f1cc390839f25cb6c37c43616d4b8334c94faf"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/initial-selection-red104-20261012.log.exit.json",
+      "bytes": 136,
+      "sha256": "52375e756652753900e29674ee440458ed754f096a296ce6a494438c616e6ac2"
+    },
+    "passed": 1,
+    "failed": 3,
+    "ignored": 0,
+    "exit_code": 101,
+    "failures": [
+      "curve::native_input_tests::selection_tests::initial_input_owned_selection_binds_native_vertices_for_all_six_constructors",
+      "curve::native_input_tests::selection_tests::initial_input_owned_selection_binds_direction_and_fixed_point_reference_actions",
+      "curve::native_input_tests::selection_tests::initial_input_owned_selection_rejects_stale_fit_geometry_atomically"
+    ]
+  },
+  "local_bounds_red": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/initial-selection-red105-20261012.log",
+      "bytes": 1714,
+      "sha256": "2fed93558a186743586a1242f1c1c46cc09dd8978302fd7d4d8e30b0f55620b0"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/initial-selection-red105-20261012.log.exit.json",
+      "bytes": 136,
+      "sha256": "7125c045109c1d4d96fdbe34a3c29f71a5acc813a5372f9c4d3afb84cb2bf5fc"
+    },
+    "passed": 4,
+    "failed": 1,
+    "ignored": 0,
+    "exit_code": 101,
+    "failures": [
+      "curve::native_input_tests::selection_tests::initial_input_owned_selection_preserves_large_local_basis_with_valid_world_points"
+    ]
+  },
+  "focused_rust": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/initial-selection-green105-20261012.log",
+      "bytes": 1058,
+      "sha256": "284ed28f212d5abb61b47e5303b65aa96896d1cc2ab27bddab260f533465b884"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/initial-selection-green105-20261012.log.exit.json",
+      "bytes": 136,
+      "sha256": "5147d70a901773879893182982be5a57a1628e7bf2e7f935d58fa4f81faca431"
+    },
+    "passed": 5,
+    "failed": 0,
+    "ignored": 0,
+    "exit_code": 0,
+    "failures": []
+  },
+  "full_rust": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/initial-selection-full105-20261012.log",
+      "bytes": 105911,
+      "sha256": "b293748334eb1f4071c0ee75ee88d5d24e27a1ab1339bf29753a43f7be60e142"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/initial-selection-full105-20261012.log.exit.json",
+      "bytes": 137,
+      "sha256": "a1690bb901a5713c89328f51182460265ca45b7133e499addc801f4c1c21586a"
+    },
+    "passed": 977,
+    "failed": 1,
+    "ignored": 0,
+    "exit_code": 101,
+    "failures": [
+      "support_snapshot::evaluation_tests::owned_curve_jets_match_native_value_and_three_derivatives_for_nineteen_families"
+    ]
+  },
+  "initial_full_failure": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/initial-selection-full104-20261012.log",
+      "bytes": 109618,
+      "sha256": "84dbf4c45457883404d3f602000078313079fa4a4b949f85a4f60c67b0c3c43d"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/initial-selection-full104-20261012.log.exit.json",
+      "bytes": 137,
+      "sha256": "3d4c3e2796a54516340855c13822ffa560449ae9bae181070640d74ee03d6b69"
+    },
+    "failures": [
+      "curve::native_input_tests::native_point_sources_are_available_to_existing_line_solver_without_changing_geometry",
+      "curve::native_input_tests::fit_undo_releases_the_entire_native_source_branch_and_preserves_replacement",
+      "curve::native_input_tests::advertised_source_indexing_resolves_owned_native_sources_without_a_numeric_slot",
+      "curve::native_input_tests::repeated_native_batches_share_one_owned_snapshot_with_distinct_ordered_ranges",
+      "curve::native_input_tests::duplicate_snapshots_within_one_batch_are_interned_once",
+      "curve::result_tests::result_replays_fit_undo_branch_without_removed_native_sources",
+      "support_snapshot::evaluation_tests::owned_curve_jets_match_native_value_and_three_derivatives_for_nineteen_families",
+      "native_json_ffi_rejects_bad_headers_and_stale_sessions_and_retains_owned_values"
+    ],
+    "resolution": "Six unit/setup cases and the ABI point fixture omitted native vertices or used impossible Edge1 fit selection. Complete literal vertex/compound geometry now supplies the same independently specified points. Existing native captures are immutable. Raw D3 remains RED."
+  },
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/initial-selection-runtime106-20261012/bin/OpenMatrix9Gui.pyd",
+    "bytes": 16958976,
+    "sha256": "100b15065f3e61cb29c035655d05e35d35e8cbbd4ad81bbe7aea3a074a69ea96"
+  },
+  "selected_app": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "probe": {
+    "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+    "bytes": 50688,
+    "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+  },
+  "shared_sdk_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "unchanged_history_solver": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history.rs",
+    "bytes": 17935,
+    "sha256": "5cbe67ef0016d65b0f206df6f651e904877b041b8e2496ce5f2386736aea6740"
+  },
+  "native_red": {
+    "artifact": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-red105-offscreen-20261011",
+    "fixture": "rhino_core_curve_local_world_bounds_smoke.FCMacro",
+    "checks": 4,
+    "passed": 3,
+    "failures": [
+      "Curve History respects local versus world limits"
+    ],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\history-fit-runtime102-20261012\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "A8882CAAF846DB92189699F657F4619D067EB1DD793D37EC57200B1031C02A85",
+      "pid": 60512,
+      "module_root": "H:\\FreeCAD-src\\build\\history-fit-runtime102-20261012\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-red105-offscreen-20261011",
+      "exit_code": 0
+    },
+    "plugin": {
+      "path": "H:/FreeCAD-src/build/history-fit-runtime102-20261012/bin/OpenMatrix9Gui.pyd",
+      "bytes": 16956416,
+      "sha256": "a8882caaf846db92189699f657f4619d067eb1dd793d37ec57200b1031c02a85"
+    },
+    "probe": null,
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-red105-offscreen-20261011/results.json",
+        "bytes": 146722,
+        "sha256": "a5368733be170942b12ce32477dc5f8c827f840885a41ba00ffe3c6aafd1f72d"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-red105-offscreen-20261011/shared-host-launch.json",
+        "bytes": 601,
+        "sha256": "776a4d521fe88e07fc944f821a3b2c7274aadab4105561453e065e9e69fac201"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-red105-offscreen-20261011/loaded-native-app.json",
+        "bytes": 227,
+        "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-red105-offscreen-20261011/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-red105-offscreen-20261011/fixture.FCMacro",
+        "bytes": 3232,
+        "sha256": "954905833917f76e9a01256a865f9e20b2d3fbfa17d7328ea0609e1c51993162"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-red105-offscreen-20261011/host-stdout.log",
+        "bytes": 353,
+        "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-red105-offscreen-20261011/host-stderr.log",
+        "bytes": 6136,
+        "sha256": "0958689b05236047ae90b67ab73221087d28a64d9087d2fbb1c189c63095b837"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-red105-offscreen-20261011/user.cfg",
+        "bytes": 18197,
+        "sha256": "952c8039908f75e4ab20e151c2d9a1b1fd4b804cfff6aa61c729787789af1035"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-red105-offscreen-20261011/select-plugin.FCMacro",
+        "bytes": 2836,
+        "sha256": "64c44c600ebac7eb0ca377162088f62db0461717906a664911594b047b81d5d1"
+      }
+    ]
+  },
+  "native": [
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-green106-offscreen-20261011",
+      "fixture": "rhino_core_curve_local_world_bounds_smoke.FCMacro",
+      "checks": 4,
+      "passed": 4,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\initial-selection-runtime106-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "100B15065F3E61CB29C035655D05E35D35E8CBBD4AD81BBE7AEA3A074A69EA96",
+        "pid": 77932,
+        "module_root": "H:\\FreeCAD-src\\build\\initial-selection-runtime106-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-green106-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/initial-selection-runtime106-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16958976,
+        "sha256": "100b15065f3e61cb29c035655d05e35d35e8cbbd4ad81bbe7aea3a074a69ea96"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-green106-offscreen-20261011/results.json",
+          "bytes": 186911,
+          "sha256": "1e5248b0cec27f1459c65ba2917c21e95d61cea399acd012799301abd08ba7ba"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-green106-offscreen-20261011/shared-host-launch.json",
+          "bytes": 615,
+          "sha256": "ec563f79ac9938eb0b27b11e05860bccd95a4327d3306c56045ecf7385e6e358"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-green106-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-green106-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-green106-offscreen-20261011/fixture.FCMacro",
+          "bytes": 3232,
+          "sha256": "954905833917f76e9a01256a865f9e20b2d3fbfa17d7328ea0609e1c51993162"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-green106-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-green106-offscreen-20261011/host-stderr.log",
+          "bytes": 6012,
+          "sha256": "c0f2e08a4a7f7f842f6be2ea3910e77aa4b34078887285d0189ff0a4ab4c52a0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-green106-offscreen-20261011/user.cfg",
+          "bytes": 18201,
+          "sha256": "304089a5aa2f79fdca9cb03d73d003ad90dbb646e9a2e62a20c4c637f536a47f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-green106-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2838,
+          "sha256": "ad8d5105a0f6d0905fa0bf79870dc573624c4f270bee58862f3a1a3eace14ff5"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-initial-selection-fit106-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_fit_geometry_archive_smoke.FCMacro",
+      "checks": 70,
+      "passed": 70,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\initial-selection-runtime106-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "100B15065F3E61CB29C035655D05E35D35E8CBBD4AD81BBE7AEA3A074A69EA96",
+        "pid": 3592,
+        "module_root": "H:\\FreeCAD-src\\build\\initial-selection-runtime106-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-initial-selection-fit106-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/initial-selection-runtime106-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16958976,
+        "sha256": "100b15065f3e61cb29c035655d05e35d35e8cbbd4ad81bbe7aea3a074a69ea96"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fit106-offscreen-20261011/results.json",
+          "bytes": 3176177,
+          "sha256": "5c4f0dec8bd9459446ff9e11173aa41d212c3364be9323af55b3f6e0fdccb2f1"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fit106-offscreen-20261011/shared-host-launch.json",
+          "bytes": 606,
+          "sha256": "b7590596e89bfb6b264a77f3a06a5a8e6bbf143c2e5aa6b695dfa477ebfb825a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fit106-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fit106-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fit106-offscreen-20261011/fixture.FCMacro",
+          "bytes": 654,
+          "sha256": "253cb5507efed4b06a7244c33707e36d79a6cd10637276e774df4902397d232f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fit106-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fit106-offscreen-20261011/host-stderr.log",
+          "bytes": 17475,
+          "sha256": "3f94a05ef5613fbe5ba73d62737418506b7f1d0b3ec767ccf5492514c942bb33"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fit106-offscreen-20261011/user.cfg",
+          "bytes": 18230,
+          "sha256": "63c0efaaa8522a51727116fada4f5350b8b711c2f82ba53de8ae187b483fc7b0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fit106-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2830,
+          "sha256": "8e9a34a9a012952b63a1ad9b85055a6bc2ce833cd21fe35685ff65218aadd140"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-initial-selection-fitcold106-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_fit_geometry_cold_smoke.FCMacro",
+      "checks": 50,
+      "passed": 50,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\initial-selection-runtime106-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "100B15065F3E61CB29C035655D05E35D35E8CBBD4AD81BBE7AEA3A074A69EA96",
+        "pid": 5832,
+        "module_root": "H:\\FreeCAD-src\\build\\initial-selection-runtime106-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-initial-selection-fitcold106-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/initial-selection-runtime106-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16958976,
+        "sha256": "100b15065f3e61cb29c035655d05e35d35e8cbbd4ad81bbe7aea3a074a69ea96"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fitcold106-offscreen-20261011/results.json",
+          "bytes": 5776,
+          "sha256": "eb22fa2f3926157ecd6aa3c12b3a61f68cfb059f2525f4638a6dea1d82606d51"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fitcold106-offscreen-20261011/shared-host-launch.json",
+          "bytes": 610,
+          "sha256": "dc36f97286139a9cc9733d92afbef3c1c3f20fe815b7e2b54f251f10df550a2f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fitcold106-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fitcold106-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fitcold106-offscreen-20261011/fixture.FCMacro",
+          "bytes": 3492,
+          "sha256": "b4542fa3c16bc5035adfd01d2110647a27a1167dc315b6987d10aabfd5255b96"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fitcold106-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fitcold106-offscreen-20261011/host-stderr.log",
+          "bytes": 2268,
+          "sha256": "bb7db31877a8b53104e197bd8f41dc586153c55b0292004749fca9bde188529f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fitcold106-offscreen-20261011/user.cfg",
+          "bytes": 18116,
+          "sha256": "b889141174db616921eaef9f61a5eebbe56490610af95a08f320e9c5f0bb2d8d"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-fitcold106-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2834,
+          "sha256": "71cb709ec7a252b7f70b021ed8492852bd3865a1b7ccdfbceddae8daf63aa962"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-initial-selection-modes106-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_modes_result_smoke.FCMacro",
+      "checks": 109,
+      "passed": 109,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\initial-selection-runtime106-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "100B15065F3E61CB29C035655D05E35D35E8CBBD4AD81BBE7AEA3A074A69EA96",
+        "pid": 60740,
+        "module_root": "H:\\FreeCAD-src\\build\\initial-selection-runtime106-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-initial-selection-modes106-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/initial-selection-runtime106-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16958976,
+        "sha256": "100b15065f3e61cb29c035655d05e35d35e8cbbd4ad81bbe7aea3a074a69ea96"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modes106-offscreen-20261011/results.json",
+          "bytes": 21948,
+          "sha256": "b139c33ead86dc88c5eb4067982ac1024dc0ff03f04c9ca2654319c5e721dbb7"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modes106-offscreen-20261011/shared-host-launch.json",
+          "bytes": 609,
+          "sha256": "6b691c16aad644b7eb9a38b90c905719fafe87bf475e27eebe3d8b185a3a25dc"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modes106-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modes106-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modes106-offscreen-20261011/fixture.FCMacro",
+          "bytes": 17219,
+          "sha256": "f5154879b54a9b1af1054f7a6ec33506e6556ac1703f014b7beb845bd1be5134"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modes106-offscreen-20261011/host-stdout.log",
+          "bytes": 15243,
+          "sha256": "8413113fa71dcc9169b9231805d6dd960c3b9aced631da3e9367be759f3c82cd"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modes106-offscreen-20261011/host-stderr.log",
+          "bytes": 37947,
+          "sha256": "5d021873a2d8da428b91640fa3a477e5192c810d8fe7eeaa12564a06c9bc289d"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modes106-offscreen-20261011/user.cfg",
+          "bytes": 18192,
+          "sha256": "58e85f63dc9e8512c573a89fef833f90d3357f05836122957786930000eef0aa"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modes106-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2832,
+          "sha256": "2794413a9b22e49eb21664949a1285eb9a521acb20c2457c6e4b1ac3b9ae6ea2"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-initial-selection-modescold106-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_modes_cold_smoke.FCMacro",
+      "checks": 62,
+      "passed": 62,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\initial-selection-runtime106-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "100B15065F3E61CB29C035655D05E35D35E8CBBD4AD81BBE7AEA3A074A69EA96",
+        "pid": 43956,
+        "module_root": "H:\\FreeCAD-src\\build\\initial-selection-runtime106-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-initial-selection-modescold106-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/initial-selection-runtime106-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16958976,
+        "sha256": "100b15065f3e61cb29c035655d05e35d35e8cbbd4ad81bbe7aea3a074a69ea96"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modescold106-offscreen-20261011/results.json",
+          "bytes": 6366,
+          "sha256": "66f3730c06c2ef5b7eb967f9a5c64bd93a042953e8635a3e11786446a7dd9343"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modescold106-offscreen-20261011/shared-host-launch.json",
+          "bytes": 613,
+          "sha256": "1c07f8798252ee1598db4b22fb06d73d6497095f1571a3ec6ad764db8fe9925b"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modescold106-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modescold106-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modescold106-offscreen-20261011/fixture.FCMacro",
+          "bytes": 2854,
+          "sha256": "27eac9f73e1c8159172d6f9c9bf5b3b650fe976ef455094e5d070a68d2ebb428"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modescold106-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modescold106-offscreen-20261011/host-stderr.log",
+          "bytes": 2240,
+          "sha256": "fd770281361e917dcdfc51a734e4044abec29b994c3eafcde6b1257fcf5b2eac"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modescold106-offscreen-20261011/user.cfg",
+          "bytes": 18075,
+          "sha256": "3921d0eab5ac71d7d2f0d52971f959ee66172a594baaf1a9fbc64eb32cc52cfc"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-modescold106-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2836,
+          "sha256": "226d93da5476a191c5e83a30cc15280256562d2003f457e1564b66ca6725dd78"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-initial-selection-spatial106-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_contacts_spatial_smoke.FCMacro",
+      "checks": 65,
+      "passed": 65,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\initial-selection-runtime106-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "100B15065F3E61CB29C035655D05E35D35E8CBBD4AD81BBE7AEA3A074A69EA96",
+        "pid": 29284,
+        "module_root": "H:\\FreeCAD-src\\build\\initial-selection-runtime106-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-initial-selection-spatial106-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/initial-selection-runtime106-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16958976,
+        "sha256": "100b15065f3e61cb29c035655d05e35d35e8cbbd4ad81bbe7aea3a074a69ea96"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-spatial106-offscreen-20261011/results.json",
+          "bytes": 6703,
+          "sha256": "de98e1511c75b4d6c1760a574ad707d7ad40ae386d84a0e11672b0fe4d2feb62"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-spatial106-offscreen-20261011/shared-host-launch.json",
+          "bytes": 611,
+          "sha256": "61427971ff0ee18e5e2b41cdb74bd9e0241ad8f5f10036a4320e861161939fcf"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-spatial106-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-spatial106-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-spatial106-offscreen-20261011/fixture.FCMacro",
+          "bytes": 1887,
+          "sha256": "ace629311a6e344ec4aebfe441f562917e9e81024a47b566db462d3a307336ff"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-spatial106-offscreen-20261011/host-stdout.log",
+          "bytes": 5347,
+          "sha256": "e3e27c7710a4ac24b32facd1ac0536bc2438ba946b07f8be58e9471bac745433"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-spatial106-offscreen-20261011/host-stderr.log",
+          "bytes": 15027,
+          "sha256": "d63f2908a3a4d43faa744213b7f69378c2a1bc08391587b6f0cd92d125943a41"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-spatial106-offscreen-20261011/user.cfg",
+          "bytes": 18070,
+          "sha256": "e5b83b7a536b771c805baec5383574327091bf3c89aa2f56f70c0988a93693e4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-initial-selection-spatial106-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2834,
+          "sha256": "ee4b064a40aee76e8c8b6c94f0300d07f8e2d6cd70fe8dc002de02cc1007736a"
+        }
+      ]
+    }
+  ],
+  "native_checks": 360,
+  "native_hosts": 6,
+  "build": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/initial-selection-build106-20261012.log",
+      "bytes": 16248,
+      "sha256": "581d0a0082e0b7035be10f78b69f1281116abd2b928e6edef0515e235b2a1da4"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/initial-selection-build106-20261012.log.exit.json",
+      "bytes": 24,
+      "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+    },
+    "exit_code": 0,
+    "target": "OpenMatrix9Gui",
+    "sdk": "H:/FreeCAD-src/build/relWithDebInfo"
+  },
+  "prebuild_inventory": {
+    "path": "H:/FreeCAD-src/build/initial-selection-producers106-20261012.json",
+    "bytes": 177440,
+    "sha256": "98dab296f2fdc649cb8103a802be9ea81496e899cae0724b1993de3e0af57eda"
+  },
+  "prebuild_count": 1496,
+  "postbuild": {
+    "frozen_count": 1496,
+    "current_count": 1496,
+    "inventory_inputs_match": true,
+    "changed": []
+  },
+  "postnative": {
+    "frozen_count": 1496,
+    "current_count": 1496,
+    "inventory_inputs_match": true,
+    "changed": []
+  },
+  "full_inventory_match": true,
+  "compiler_dependency_certificate": false,
+  "local_fixture_provenance": {
+    "schema_version": 1,
+    "source": "H:/FreeCAD-src/build/solid-regression-initial-selection-local-red105-offscreen-20261011/results.json",
+    "source_sha256": "a5368733be170942b12ce32477dc5f8c827f840885a41ba00ffe3c6aafd1f72d",
+    "generator": "H:/FreeCAD-src/build/prepare-initial-selection-local105.py",
+    "generator_sha256": "4dd9f7a2fb9517b408d4d2ca677f4f754e0e6b9b4a76c3714086e8124f4763d2",
+    "scope": "Genuine successful native initial constructors: native vertex normalized to small world geometry; retained NURBS local poles near1e12 with native_location translation-1e12 and selected world points within1e9. Actual native curve History replay is RED. These are saved owned results, not intercepted input requests.",
+    "files": [
+      {
+        "path": "rust/tests/fixtures/curve_native_selection/local_world105.json",
+        "bytes": 112745,
+        "sha256": "63afc82742320dc61d7379ab4b18485960585b5e8e8a47e587c9235edccebb9f"
+      }
+    ]
+  },
+  "original_native_fixtures_preserved": true,
+  "remaining": [
+    "Full original RCORE-01 remains open: stable GeometryRef identity/revision/representation/world, complete owned geometry/topology/attributes/units, adapters1–7, C01–C12, T01–T11, every enabled GeometryResult consumer, and independent read/edit/retain/export of all supported families.",
+    "Initial accept_native_json now reuses owned CAD full FitPoints selection and native VertexN/standalone-point validation before changing session state. Point/reference Direction/fixed Tangent point actions and six constructor vertex API cases pass; construction replay uses that same admission. Discrete explicit subset indices retain their existing independent full-coordinate contract. Generic CAD Edge/Face mouse/snap point inputs are not yet independently bound; initial AroundCurve OnCurve parameter/normal and Tangent curve probe/contact/source publication remain open. Named ten-family input/cold fixtures and local1e12/world±5 witnesses are scoped evidence, not every family/options/backend or full source lifecycle.",
+    "Raw native offset D3 discrepancy remains enabled RED: independent mathematical derivatives match45 queries, native differs at36. No dependency patch/rebuild. Higher-order parity, extreme asymmetric weights, complete UV/retained trim/nested native chains and periodic parameter continuation beyond captured natural basis still require native acceptance evidence.",
+    "Nineteen captured families/183-query synthetic tangent circles pass owned contact admission; live native nonplanar checks exercise retained contacts on actual spatial NURBS History. This is named fixture coverage, not all native solver roots, curve families/options/backends, global conversion or rigorous deviation bounds. The spatial archive is reopened in the same host; independent cold spatial contact acceptance remains separate.",
+    "Circle History atomic rejection/lifetime are unchanged: RED355/432/48 callbacks, caller journal pollution, changed metadata/source state and owner-close recompute hang witness. Native savepoint proposal remains pending human review; no new FreeCAD journal/lifetime interface implemented. All original owner/removal/lock/dependency/cache and Undo/Redo/cancellation/notification invariants remain required.",
+    "Task2/3 remain open: generic snap/pick/mouse/render and parameter provenance; snapshot sharing, aggregate allocation/traversal/worker/cancellation bounds; Rebuild and every other enabled result consumer. Per-basis decoder bounds and sampled tests do not establish full aggregate budgets or lifecycle.",
+    "Global conversion/deviation/locus exactness and complete parameter/topology maps remain unproven, with maps null. Full CAD-versus-mesh solid validity/orientation/manifold/cavity coverage, supported attributes and persistence families remain required.",
+    "Fresh reconstructed Runtime93 packets retain genuine resolved fractions and all20 original recipes/points/plans/roles/probe/path parameters. Old Runtime59 fixtures remain immutable. Historical stored results may retain their old bytes; current recompute obtains new complete evidence. Raw legacy producer requests lacking contact metadata are rejected instead of bypassing verification. This does not replace all historical-format acceptance or production deployment requirements.",
+    "Prebuild1496 candidate inputs match after build/native; not a compiler dependency certificate. Shared SDK/host and C++ adapters/solvers are unchanged. No new FreeCAD journal/lifetime interface, root/dependency rebuild, deployment or Git publication."
+  ],
+  "next_action": "Complete initial native AroundCurve/Tangent parameter, probe/normal and solved-contact provenance against owned sources, first reproduce wrong native source point/normal/fraction admitted by the real input/publication API. Preserve source roles, original parameter text, branch Undo and every existing family. Extend generic CAD edge/face snap provenance and independent cold spatial coverage. Keep raw native D3 RED and pending native savepoint review; continue all original RCORE-01 adapters1–7/C01–C12/T01–T11, consumers, conversions/maps, aggregate budgets, read/edit/retain/export, persistence and lifecycle.",
+  "native_design_review": "Pending; no new native journal/lifetime interface implemented",
+  "prior_checkpoint": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-12-rhino-core-circle-history-owned-fit-geometry.json",
+    "bytes": 43368,
+    "sha256": "aa5659486ee8d7a4de08f7aee8e22a2bad379653aaaa0ead1a6f1014bb8f7e19"
+  }
+}

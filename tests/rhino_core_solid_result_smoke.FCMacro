@@ -1,0 +1,98 @@
+"""Actual Solid commands must publish owned GeometryResult and source evidence."""
+import gc,json,math,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Points,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(160,loop.quit);loop.exec()
+def enter(console,text):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def units(doc):OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+def cloud(doc):
+    group=doc.addObject('App::Part','Group');group.Placement.Base=App.Vector(10,20,30)
+    group.Placement.Rotation=App.Rotation(App.Vector(0,0,1),90)
+    source=doc.addObject('Points::Feature','Source');source.Points=Points.Points([App.Vector(1,0,0),App.Vector(0,1,0),App.Vector(-1,0,0)])
+    group.addObject(source);doc.recompute();return source
+def positive(console,case):
+    doc=App.newDocument('SolidResult'+case);doc.UndoMode=1;name=doc.Name;source=None
+    try:
+        units(doc)
+        if case in ['AroundCurve','AroundPoint']:source=doc.addObject('Part::Feature','Source');source.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0));doc.recompute()
+        elif case=='FitCloud':source=cloud(doc)
+        if case=='BoxCenter':texts=['Box','Center','10,20,30','4','6','8'];kind='Box';volume=192.
+        elif case=='SphereCenter':texts=['Sphere','1,2,3','Radius=2'];kind='Sphere';volume=32*math.pi/3
+        elif case=='AroundCurve':texts=['Sphere','AroundCurve','Path=Source.Edge1','OnCurve=.25','Radius=2'];kind='Sphere';volume=32*math.pi/3
+        elif case=='AroundPoint':texts=['Sphere','AroundCurve','Path=Source.Edge1','OnCurve=.25','2.5,2,0'];kind='Sphere';volume=32*math.pi/3
+        else:
+            Gui.Selection.clearSelection();Gui.Selection.addSelection(source)
+            texts=['Sphere','FitPoints','Selection',''];kind='Sphere';volume=4*math.pi/3
+        before=doc.UndoCount
+        for text in texts:enter(console,text)
+        obj=doc.getObject(kind);raw=getattr(obj,'OM9GeometryResult','') if obj else '';result=json.loads(raw) if raw else {}
+        check(case+' owned result published with native Shape',bool(result) and obj is not None and obj.Shape.isValid() and obj.Shape.isClosed())
+        check(case+' native volume has independent expectation',obj is not None and abs(obj.Shape.Volume-volume)<1e-7)
+        check(case+' genuine operation and accepted generation',result.get('operation')=='ConstructSolid' and result.get('status')=='accepted' and result.get('operation_context',{}).get('construction')==json.loads(getattr(obj,'OM9SolidConstruction','{}')))
+        inputs=result.get('input_snapshots',[]);outputs=result.get('output_snapshots',[]);refs=result.get('operation_context',{}).get('source_refs',[])
+        numeric=inputs[0].get('geometry_data',{}) if inputs else {}
+        check(case+' accepted numeric input is an owned snapshot',numeric.get('representation')=='point_cloud' and numeric.get('coordinates')=='document_world_mm' and numeric.get('points_xyz')==json.loads(getattr(obj,'OM9SolidConstruction','{}')).get('accepted_points'))
+        rebuilt=Part.Shape()
+        if outputs:rebuilt.importBrepFromString(outputs[0]['geometry_data']['native_master']['payload'])
+        check(case+' owned output CAD master reconstructs one valid closed solid',bool(outputs) and rebuilt.isValid() and rebuilt.isClosed() and len(rebuilt.Solids)==1 and abs(rebuilt.Volume-volume)<1e-7)
+        check(case+' no fabricated global conversion or import certificate',bool(result.get('conversion_reports')) and all(r.get('exactness')=='uninspected' and r.get('parameter_map') is None and r.get('deviation_report') is None for r in result.get('conversion_reports',[])) and result.get('topology_map') is None and 'NativeBuilder' not in raw and 'upstream_archive_conversion' not in raw)
+        check(case+' unit revision bound in all input output snapshots',bool(result) and all(s.get('unit_context_snapshot')==obj.OM9UnitContext and s.get('unit_context_revision')=='1' for s in inputs+outputs))
+        if source:
+            check(case+' actual source identity attributes and snapshot retained',len(refs)==1 and len(inputs)==2 and refs[0].get('object_name')=='Source' and inputs[1].get('source_attributes',{}).get('object_name')=='Source')
+            if case in ['AroundCurve','AroundPoint']:
+                rebuilt_source=Part.Shape()
+                if len(inputs)==2:rebuilt_source.importBrepFromString(inputs[1]['geometry_data']['native_master']['payload'])
+                check(case+' bounded world curve master remains native input',len(refs)==1 and refs[0].get('role')=='path' and refs[0].get('subelement')=='Edge1' and len(rebuilt_source.Edges)==1 and abs(rebuilt_source.Length-10)<1e-7)
+            else:
+                expected=[[10,21,30],[9,20,30],[10,19,30]];selected=inputs[1].get('selected_points_world',[]) if len(inputs)>1 else []
+                check(case+' selected batch world frame applied once',len(refs)==1 and refs[0].get('role')=='fit_points' and refs[0].get('point_begin')==0 and refs[0].get('point_end')==3 and len(selected)==3 and all(abs(a-b)<1e-7 for p,q in zip(selected,expected) for a,b in zip(p,q)))
+        else:check(case+' pure numeric command has no invented native source',len(refs)==0 and len(inputs)==1)
+        check(case+' result and Shape have one Undo',doc.UndoCount==before+1)
+        doc.undo();missing=doc.getObject(kind) is None;doc.redo();obj=doc.getObject(kind)
+        check(case+' Undo Redo restores result bytes and native output',missing and obj is not None and bool(raw) and getattr(obj,'OM9GeometryResult','')==raw and abs(obj.Shape.Volume-volume)<1e-7)
+        path=out/(case+'.FCStd');doc.saveAs(str(path));App.closeDocument(name);doc=App.openDocument(str(path));obj=doc.getObject(kind)
+        check(case+' same process FCStd restores owned result bytes',obj is not None and bool(raw) and getattr(obj,'OM9GeometryResult','')==raw)
+        report['observations'].append(dict(case=case,result=result,raw=raw,volume=volume))
+    finally:
+        Gui.Selection.clearSelection();enter(console,'Cancel')
+        if name in App.listDocuments():App.closeDocument(name)
+        for key in list(App.listDocuments()):App.closeDocument(key)
+def stale_fit(console,undo):
+    doc=App.newDocument('SolidResultStaleFit'+str(undo));doc.UndoMode=1
+    try:
+        units(doc);source=cloud(doc);Gui.Selection.clearSelection();Gui.Selection.addSelection(source)
+        for text in ['Sphere','FitPoints','Selection']:enter(console,text)
+        if undo:enter(console,'Undo')
+        source.Points=Points.Points([App.Vector(2,0,0),App.Vector(0,2,0),App.Vector(-2,0,0)]);doc.recompute()
+        Gui.Selection.clearSelection();console.clear();before=(len(doc.Objects),doc.UndoCount,doc.RedoCount)
+        if undo:
+            for text in ['1,0,0','0,1,0','-1,0,0']:enter(console,text)
+        enter(console,'');obj=doc.getObject('Sphere');diagnostic=console.toPlainText()
+        if undo:
+            value=json.loads(getattr(obj,'OM9GeometryResult','{}')) if obj else {}
+            check('FitPoints Undo removes entire batch and its stale native owner',obj is not None and value.get('operation_context',{}).get('source_refs')==[] and len(value.get('input_snapshots',[]))==1)
+        else:
+            check('FitPoints changed source rejects output without Undo',obj is None and (len(doc.Objects),doc.UndoCount,doc.RedoCount)==before)
+            check('FitPoints changed source typed diagnostic keeps operation and source',any('StaleGeometry:' in line and 'Sphere' in line and 'Source' in line for line in diagnostic.splitlines()))
+        report['observations'].append(dict(case='fit_undo' if undo else 'fit_stale',diagnostic=diagnostic))
+    finally:
+        Gui.Selection.clearSelection();enter(console,'Cancel');App.closeDocument(doc.Name)
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');settle();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        for case in ['BoxCenter','SphereCenter','AroundCurve','AroundPoint','FitCloud']:positive(console,case)
+        stale_fit(console,False);stale_fit(console,True)
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

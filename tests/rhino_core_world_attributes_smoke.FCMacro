@@ -1,0 +1,134 @@
+"""Owned frames/attributes: native placement and instance path are applied once."""
+import json,math,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[],'descriptors':{}}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def placement(x,y,z,angle=0):return App.Placement(App.Vector(x,y,z),App.Rotation(App.Vector(1,2,3),angle))
+def transformed(m,p):return App.Vector(*[sum(m[r][c]*[p.x,p.y,p.z][c] for c in range(3))+m[r][3] for r in range(3)])
+def basis(d,t):
+    p=d['poles_xyz'];w=d['weights'] or [1]*len(p);n=d['degree']
+    b=[math.comb(n,i)*t**i*(1-t)**(n-i)*w[i] for i in range(n+1)]
+    return App.Vector(*[sum(p[i][c]*b[i] for i in range(n+1))/sum(b) for c in range(3)])
+def terminal_definition(row):
+    while row['representation']=='instance':row=row['geometry_data']['definition_geometry']
+    return row
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('WorldAttributes');doc.UndoMode=1
+        curve=Part.BezierCurve();curve.setPoles([App.Vector(1,2,3),App.Vector(4,-1,5),App.Vector(7,8,2)]);curve.setWeight(2,.5)
+        outer=doc.addObject('App::Part','Outer');outer.Placement=placement(10,20,30,37)
+        inner=doc.addObject('App::Part','Inner');outer.addObject(inner);inner.Placement=placement(-4,7,2,23)
+        obj=doc.addObject('Part::Feature','Curve');inner.addObject(obj);obj.Shape=curve.toShape();obj.Placement=placement(3,-5,11,41)
+        obj.Label='Nhãn "đá"\n';obj.Label2='Thuộc tính nguồn';obj.Visibility=False;obj.ViewObject.Selectable=False
+        material=App.Material();material.DiffuseColor=(.2,.4,.6,.8);material.AmbientColor=(.1,.2,.3,.4)
+        material.SpecularColor=(.5,.6,.7,.8);material.EmissiveColor=(.4,.3,.2,.1);material.Shininess=.6;material.Transparency=.25
+        obj.ViewObject.ShapeAppearance=[material]
+        doc.recompute()
+        raw=obj.Shape.exportBrepToString();before=(doc.UndoCount,doc.RedoCount,len(doc.Objects))
+        row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));report['descriptors']['direct']=row
+        check('direct copied support has certified world frame',row['coordinates']=='native_local' and isinstance(row['local_to_world'],list))
+        for t in [.1,.5,.9]:
+            expected=obj.getGlobalPlacement().multVec(curve.value(t))
+            check('parent rotations and embedded placement applied once',(transformed(row['local_to_world'],basis(row['geometry_data'],t))-expected).Length<1e-8)
+        attr=row['source_attributes'];check('unicode labels and identity copied',attr['label']==obj.Label and attr['label2']==obj.Label2 and attr['object_name']==obj.Name and attr['native_type']=='Part::Feature')
+        check('visibility and selectability copied',attr['visibility'] is False and attr['selectable'] is False)
+        check('full native appearance copied',len(attr['shape_appearance'])==1 and abs(attr['shape_appearance'][0]['diffuse'][3]-.8)<1e-6 and abs(attr['shape_appearance'][0]['shininess']-.6)<1e-6 and abs(attr['shape_appearance'][0]['transparency']-.25)<1e-6)
+        check('unsupported attributes remain explicit',attr['coverage']=={'other_app_properties':'uninspected','rhino_user_data':'uninspected'})
+        check('inspection preserves native source/history',raw==obj.Shape.exportBrepToString() and before==(doc.UndoCount,doc.RedoCount,len(doc.Objects)))
+        # Distinct native face locations in a compound survive ancestor composition.
+        face=Part.makePlane(5,7);face.Placement=placement(7,-3,2,17)
+        shell=doc.addObject('Part::Feature','Compound');inner.addObject(shell);shell.Shape=Part.makeCompound([face]);shell.Placement=placement(2,4,-1,19);doc.recompute()
+        compound=json.loads(native.geometryDescriptor(doc.Name,shell.Name));report['descriptors']['compound']=compound
+        cf=compound['topology']['faces'][0];native_face=shell.Shape.Faces[0]
+        for u,v in [(1,2),(3,5)]:
+            data=cf['geometry_data'];p=App.Vector(*data['origin_xyz'])+App.Vector(*data['axes_xyz'][0])*u+App.Vector(*data['axes_xyz'][1])*v
+            expected=inner.getGlobalPlacement().multVec(native_face.Surface.value(u,v))
+            check('each face owns support-to-world frame',(transformed(cf['local_to_world'],p)-expected).Length<1e-8 and cf['geometry_coordinates']=='native_local')
+        check('pcurves remain UV and carry no XYZ world matrix',all(use['pcurve']['coordinates']=='face_uv' and 'local_to_world' not in use['pcurve'] for loop in cf['loops'] for use in loop['edge_uses']))
+        sub=json.loads(native.geometryDescriptor(doc.Name,shell.Name,'Face1'));report['descriptors']['face_subobject']=sub
+        check('face subobject reuses identical world frame',sub['local_to_world']==cf['local_to_world'])
+        # The definition's unrelated ancestor must not leak into instance frames.
+        definition=doc.addObject('Part::Feature','Definition');inner.addObject(definition);definition.Shape=curve.toShape();definition.Placement=placement(11,13,17,31);definition.Label='Definition attributes'
+        links=[]
+        for flag in [False,True]:
+            link=doc.addObject('App::Link','Instance'+str(int(flag)));outer.addObject(link);link.setLink(definition);link.LinkTransform=flag
+            link.LinkPlacement=placement(21,-4,6,29);link.ScaleVector=App.Vector(-2,3,.5);link.Label='Instance '+str(flag);links.append(link)
+        for middle in list(links):
+            for flag in [False,True]:
+                nested=doc.addObject('App::Link','Nested'+middle.Name+str(int(flag)));outer.addObject(nested);nested.setLink(middle);nested.LinkTransform=flag
+                nested.LinkPlacement=placement(-2,7,9,13);nested.ScaleVector=App.Vector(.7,1.2,2);links.append(nested)
+        doc.recompute()
+        for link in links:
+            before=(doc.UndoCount,doc.RedoCount,len(doc.Objects));definition_brep=definition.Shape.exportBrepToString()
+            descriptor=json.loads(native.geometryDescriptor(doc.Name,link.Name));report['descriptors'][link.Name]=descriptor
+            check(link.Name+' typed instance retains definition',descriptor['representation']=='instance' and descriptor['topology']['solid'] is None and descriptor['geometry_data']['kind']=='instance')
+            child=terminal_definition(descriptor);resolved,path=link.getLinkedObject(True,App.Matrix(),True)
+            immediate=descriptor['geometry_data']['definition_geometry']
+            check(link.Name+' intermediate link identity retained',immediate['object_name']==link.LinkedObject.Name)
+            check(link.Name+' native path resolves same definition',resolved==definition and child['object_name']==definition.Name)
+            for t in [.1,.5,.9]:
+                expected=outer.getGlobalPlacement().multVec(path.multVec(curve.value(t)))
+                check(link.Name+' mirror/nonuniform path applied once',(transformed(child['local_to_world'],basis(child['geometry_data'],t))-expected).Length<1e-8)
+            check(link.Name+' negative orientation retained',child['world_orientation_sign']==-1)
+            check(link.Name+' attributes separated from definition',descriptor['source_attributes']['label']==link.Label and child['source_attributes']['label']==definition.Label)
+            check(link.Name+' source and history unchanged',definition.Shape.exportBrepToString()==definition_brep and before==(doc.UndoCount,doc.RedoCount,len(doc.Objects)))
+        solid_shape=Part.makeBox(2,3,4);solid=doc.addObject('Part::Feature','SolidDefinition');inner.addObject(solid);solid.Shape=solid_shape;solid.Placement=placement(13,17,19,27)
+        solid_link=doc.addObject('App::Link','SolidInstance');outer.addObject(solid_link);solid_link.setLink(solid);solid_link.LinkTransform=True;solid_link.LinkPlacement=placement(-11,5,9,43);solid_link.ScaleVector=App.Vector(-2,3,.5);doc.recompute()
+        row=json.loads(native.geometryDescriptor(doc.Name,solid_link.Name));report['descriptors']['solid_instance']=row
+        child=row['geometry_data']['definition_geometry'];resolved,path=solid_link.getLinkedObject(True,App.Matrix(),True)
+        check('instance keeps solid classification on separate definition',resolved==solid and row['topology']['solid'] is None and child['representation']=='solid' and child['topology']['solid'] is True)
+        for index,cf in enumerate(child['topology']['faces']):
+            native_face=solid_shape.Faces[index];u0,u1,v0,v1=native_face.ParameterRange;u=(u0+u1)/2;v=(v0+v1)/2
+            d=cf['geometry_data'];p=App.Vector(*d['origin_xyz'])+App.Vector(*d['axes_xyz'][0])*u+App.Vector(*d['axes_xyz'][1])*v
+            expected=outer.getGlobalPlacement().multVec(path.multVec(native_face.Surface.value(u,v)))
+            check('solid instance face '+str(index)+' composed once',(transformed(cf['local_to_world'],p)-expected).Length<1e-8 and cf['world_orientation_sign']==-1)
+        saved_a=json.dumps(report['descriptors'][links[0].Name],sort_keys=True)
+        saved_definition=definition.Shape.exportBrepToString()
+        doc.openTransaction('Move second instance');links[1].LinkPlacement=placement(100,200,300,47);doc.recompute();doc.commitTransaction()
+        check('editing instance B preserves owned A',json.dumps(report['descriptors'][links[0].Name],sort_keys=True)==saved_a)
+        current_a=json.loads(native.geometryDescriptor(doc.Name,links[0].Name));old_a=report['descriptors'][links[0].Name]
+        check('editing B preserves live A frame and canonical definition',current_a['local_to_world']==old_a['local_to_world'] and
+              current_a['geometry_data']['definition_geometry']['local_to_world']==old_a['geometry_data']['definition_geometry']['local_to_world'] and
+              definition.Shape.exportBrepToString()==saved_definition)
+        moved=json.loads(native.geometryDescriptor(doc.Name,links[1].Name));check('new capture follows moved instance',moved['local_to_world']!=report['descriptors'][links[1].Name]['local_to_world'])
+        doc.undo();doc.recompute();undone=json.loads(native.geometryDescriptor(doc.Name,links[1].Name));check('Undo restores world frame',undone['local_to_world']==report['descriptors'][links[1].Name]['local_to_world'])
+        doc.redo();doc.recompute();check('Redo restores changed world frame',json.loads(native.geometryDescriptor(doc.Name,links[1].Name))['local_to_world']==moved['local_to_world'])
+        # Missing references reject atomically; group/member definitions are now
+        # inspected through the owned canonical tree without native shape baking.
+        invalid=doc.addObject('App::Link','MissingDefinition');doc.recompute()
+        grouped=doc.addObject('App::Link','GroupDefinition');grouped.setLink(inner);doc.recompute()
+        member_link=doc.addObject('App::Link','MemberReference');member_link.setLink(shell,'Face1');doc.recompute()
+        for source in [invalid]:
+            before=(doc.UndoCount,doc.RedoCount,len(doc.Objects));rejected=False
+            try:native.geometryDescriptor(doc.Name,source.Name)
+            except (ValueError,RuntimeError):rejected=True
+            check(source.Name+' unsupported reference rejects atomically',rejected and before==(doc.UndoCount,doc.RedoCount,len(doc.Objects)))
+        before=(doc.UndoCount,doc.RedoCount,len(doc.Objects))
+        grouped_row=json.loads(native.geometryDescriptor(doc.Name,grouped.Name))
+        member_row=json.loads(native.geometryDescriptor(doc.Name,member_link.Name))
+        check('group reference owns ordered members',grouped_row['geometry_data']['definition_geometry']['representation']=='group')
+        check('member reference owns selected face',member_row['geometry_data']['definition_geometry']['subelement']=='Face1')
+        check('group and member inspection preserves source history',before==(doc.UndoCount,doc.RedoCount,len(doc.Objects)))
+        doc.openTransaction('Singular instance scale');links[1].ScaleVector=App.Vector(0,3,.5);doc.recompute();doc.commitTransaction()
+        before=(doc.UndoCount,doc.RedoCount,len(doc.Objects));rejected=False
+        try:native.geometryDescriptor(doc.Name,links[1].Name)
+        except (ValueError,RuntimeError):rejected=True
+        check('singular path rejects without mutation',rejected and before==(doc.UndoCount,doc.RedoCount,len(doc.Objects)))
+        doc.undo();doc.recompute()
+        saved=json.dumps(report['descriptors'],sort_keys=True);obj.Label='Changed';obj.Shape=Part.makeBox(1,2,3);doc.recompute();App.closeDocument(doc.Name)
+        check('owned geometry and attributes survive replacement/close',json.dumps(report['descriptors'],sort_keys=True)==saved)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

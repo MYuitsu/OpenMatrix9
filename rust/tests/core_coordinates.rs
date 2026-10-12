@@ -232,10 +232,12 @@ fn t01_t02_box_and_sphere_use_the_same_explicit_frame_grammar() {
         ] {
             let mut session = Session::new(kind);
             session.set_frame(ORIGIN, AXES).unwrap();
+            if kind == Kind::Box {
+                session.input("Diagonal").unwrap();
+            }
             session.input(input).unwrap();
             if kind == Kind::Box {
-                session.input("4").unwrap();
-                session.input("5").unwrap();
+                session.input("r4,5,0").unwrap();
             }
             assert_eq!(session.input("6").unwrap(), Effect::Commit);
             assert_eq!(
@@ -261,6 +263,8 @@ fn t03_box_and_sphere_relative_input_uses_the_previous_world_point() {
             session.set_frame(ORIGIN, AXES).unwrap();
             if kind == Kind::Sphere {
                 session.input("2Point").unwrap();
+            } else {
+                session.input("Diagonal").unwrap();
             }
             assert!(session.input(input).is_err());
             assert_eq!(session.phase(), 1);

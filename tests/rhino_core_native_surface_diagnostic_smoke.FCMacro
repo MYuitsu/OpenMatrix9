@@ -1,0 +1,52 @@
+"""Surface policy failures identify their real native source and operation."""
+import json, os, traceback
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part, OpenMatrix9Gui
+from PySide6 import QtCore
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'checks': [], 'module': OpenMatrix9Gui.__file__}
+def check(name, passed):
+    report['checks'].append({'name': name, 'passed': bool(passed)})
+
+def run():
+    doc = None
+    try:
+        doc = App.newDocument('SurfacePolicyDiagnostic')
+        source = doc.addObject('Part::Feature', 'FirstProfile')
+        source.Shape = Part.makeLine(App.Vector(0,0,0), App.Vector(0,3,0))
+        # Finish initial native feature execution before comparing a later
+        # rejected solve; an untouched newly-created feature is still dirty.
+        doc.recompute()
+        before = source.Shape.exportBrepToString()
+        h = doc.addObject('OpenMatrix9Gui::SurfaceHistory', 'History')
+        h.SourceCurves = [(source, ['Edge1'])]
+        h.SurfaceOptions = json.dumps(dict(
+            version=1, kind=3, style=0, frenet=False, closed=False,
+            maintainHeight=False, preview=True, sectionMode=0, pointCount=16,
+            tolerance=.01, continuityA=0, continuityB=0, matchStart=False,
+            matchEnd=False, slashes=[], history=True, historyCommand=False,
+            inputs=[dict(count=1, chain=False, closed=False, reverse=False, seam=0)]))
+        doc.recompute()
+        message = h.getStatusString()
+        report['diagnostic'] = message
+        report['source_before'] = before
+        report['source_after'] = source.Shape.exportBrepToString()
+        check('one-profile Loft fails before publishing geometry', h.Shape.isNull() and 'Invalid' in h.State)
+        check('shared Surface rejection carries its typed error', 'InvalidBasis' in message)
+        check('shared Surface rejection identifies Loft', 'Loft' in message)
+        check('shared Surface rejection identifies the actual object and subelement', 'FirstProfile.Edge1' in message)
+        check('rejected construction leaves source geometry unchanged', source.Shape.exportBrepToString() == before)
+        check('rejected construction creates no extra document object', len(doc.Objects) == 2)
+        report['ok'] = all(c['passed'] for c in report['checks'])
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        if doc is not None: App.closeDocument(doc.Name)
+        (out/'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1200, run)

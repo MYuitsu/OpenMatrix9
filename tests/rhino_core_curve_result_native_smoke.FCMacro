@@ -1,0 +1,78 @@
+"""RCORE-01: common Curve results retain native sources and independent output masters."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Points,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(text=''):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def cloud(doc,name,radius):
+ obj=doc.addObject('Points::Feature',name);obj.Points=Points.Points([App.Vector(radius,0,0),App.Vector(0,radius,0),App.Vector(-radius,0,0)])
+ obj.Placement.Base=App.Vector(10,20,30);obj.Label='Owned '+name;doc.recompute();return obj
+def run():
+ global console
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  for case,command in [('CirclePath','Circle'),('EllipsePath','Ellipse'),('FitBranch','Circle')]:
+   doc=App.newDocument(case);doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+   if case=='FitBranch':
+    removed=cloud(doc,'RemovedCloud',2.);source=cloud(doc,'AcceptedCloud',1.)
+    Gui.Selection.clearSelection();Gui.Selection.addSelection(removed);before=doc.UndoCount
+    for token in ['Circle','FitPoints','Selection','Undo']:enter(token)
+    Gui.Selection.clearSelection();Gui.Selection.addSelection(source);enter('Selection');enter('')
+    native_text='Selection';expected_center=App.Vector(10,20,30)
+   else:
+    source=doc.addObject('Part::Feature','Path');source.Label='Owned Path'
+    source.Shape=Part.makeCompound([Part.makeLine(App.Vector(10,20,30),App.Vector(10,20,50)),Part.makeLine(App.Vector(0,0,0),App.Vector(100,0,0))]);doc.recompute()
+    before=doc.UndoCount;native_text='OnCurve=0.2500';expected_center=App.Vector(10,20,35)
+    for token in [command,'AroundCurve','Curve=Path.Edge1',native_text]+(['2mm'] if command=='Circle' else ['5mm','3mm']):enter(token)
+   obj=doc.getObject(command);raw=getattr(obj,'OM9CurveConstruction','') if obj else '';value=json.loads(raw) if raw else {}
+   geometry=obj is not None and obj.Shape.isValid() and not obj.Shape.isNull()
+   if geometry:
+    curve=obj.Shape.Edges[0].Curve
+    geometry=(curve.Center-expected_center).Length<1e-7 and (abs(curve.Radius-(1. if case=='FitBranch' else 2.))<1e-7 if command=='Circle' else abs(curve.MajorRadius-5.)<1e-7 and abs(curve.MinorRadius-3.)<1e-7)
+   check(case+' existing solver agrees with independent dimensions and world center',geometry)
+   events=value.get('accepted_input_events',[])
+   check(case+' exact original native parameter or batch token retained',any(e.get('text')==native_text for e in events))
+   refs=value.get('source_refs',[]);snapshots=value.get('source_snapshots',[])
+   identity=len(refs)==1 and refs[0].get('object_name')==source.Name and refs[0].get('subelement','')==('' if case=='FitBranch' else 'Edge1')
+   if identity:
+    ref=refs[0];identity=bool(ref.get('document_uid')) and len(ref.get('world',[]))==16 and all(isinstance(ref.get(k),str) and ref[k].isdigit() for k in ['document','object','generation','revision','epoch'])
+    if case=='FitBranch':identity=identity and ref.get('role')=='fit_points' and ref.get('point_begin')==0 and ref.get('point_end')==3 and 'RemovedCloud' not in json.dumps(refs)
+   check(case+' owned source identity revision frame and surviving batch range retained',identity)
+   complete=len(snapshots)==1 and snapshots[0].get('source_attributes',{}).get('object_name')==source.Name
+   if complete:
+    snapshot=snapshots[0];data=snapshot.get('geometry_data',{})
+    if case=='FitBranch':complete=data.get('representation')=='point_cloud' and len(data.get('points_xyz',[]))==3 and snapshot.get('selected_points_world')==[[11,20,30],[10,21,30],[9,20,30]]
+    else:
+     rebuilt=Part.Shape();payload=data.get('native_master',{}).get('payload','')
+     if payload:rebuilt.importBrepFromString(payload)
+     complete=bool(payload) and rebuilt.isValid() and len(rebuilt.Edges)==2 and abs(rebuilt.Length-120.)<1e-7
+   check(case+' full parent geometry and source attributes owned rather than selected samples only',complete)
+   result_raw=getattr(obj,'OM9GeometryResult','') if obj else '';result=json.loads(result_raw) if result_raw else {};context=result.get('operation_context') or {}
+   check(case+' common result pairs actual operation and construction',result.get('operation')=='ConstructCurve' and result.get('status')=='accepted' and context.get('construction')==value)
+   inputs=result.get('input_snapshots',[]);rrefs=context.get('source_refs',[])
+   paired=len(inputs)==2 and len(rrefs)==1 and rrefs[0].get('input_snapshot_index')==1 and inputs[1].get('source_attributes',{}).get('object_name')==source.Name
+   check(case+' common numeric and native snapshots resolve exact owner',paired)
+   check(case+' common source owns complete geometry attributes and selection',paired and len(snapshots)==1 and inputs[1].get('geometry_data')==snapshots[0].get('geometry_data') and inputs[1].get('source_attributes')==snapshots[0].get('source_attributes') and inputs[1].get('selected_points_world')==snapshots[0].get('selected_points_world'))
+   outputs=result.get('output_snapshots',[]);rebuilt_output=Part.Shape();payload=outputs[0].get('geometry_data',{}).get('native_master',{}).get('payload','') if len(outputs)==1 else ''
+   if payload:rebuilt_output.importBrepFromString(payload)
+   rebuilt_ok=bool(payload) and rebuilt_output.isValid() and len(rebuilt_output.Edges)==1
+   if rebuilt_ok:
+    curve=rebuilt_output.Edges[0].Curve;rebuilt_ok=(curve.Center-expected_center).Length<1e-7 and (abs(curve.Radius-(1. if case=='FitBranch' else 2.))<1e-7 if command=='Circle' else abs(curve.MajorRadius-5.)<1e-7 and abs(curve.MinorRadius-3.)<1e-7)
+   check(case+' common CAD output reconstructs independent world dimensions',rebuilt_ok)
+   one=doc.UndoCount==before+1;doc.undo();missing=doc.getObject(command) is None;doc.redo();obj=doc.getObject(command)
+   check(case+' native input evidence and Shape restore with one Undo Redo',one and missing and obj is not None and bool(raw) and obj.OM9CurveConstruction==raw)
+   path=out/(case+'.FCStd');doc.saveAs(str(path));enter('Cancel');name=doc.Name;App.closeDocument(name);doc=App.openDocument(str(path));obj=doc.getObject(command)
+   check(case+' FCStd preserves exact independently owned native evidence bytes',obj is not None and bool(raw) and getattr(obj,'OM9CurveConstruction','')==raw)
+   check(case+' common result retains exact bytes through Undo Redo and FCStd',obj is not None and bool(result_raw) and getattr(obj,'OM9GeometryResult','')==result_raw)
+   report['observations'].append(dict(case=case,command=command,raw=raw,construction=value,result_raw=result_raw,result=result,diagnostic=console.toPlainText()));Gui.Selection.clearSelection();App.closeDocument(doc.Name)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

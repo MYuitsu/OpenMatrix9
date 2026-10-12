@@ -29,6 +29,7 @@ pub enum RepresentationKind {
     LightweightExtrusion,
     Mesh,
     Instance,
+    Group,
     Annotation,
     SubD,
     Mixed,
@@ -64,12 +65,16 @@ pub enum CurveForm {
     Analytic,
     Nurbs,
     Polyline,
+    Bezier,
+    Derived,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SurfaceForm {
     Analytic,
     Nurbs,
+    Bezier,
+    Derived,
 }
 
 /// The domain can restrict a support without changing that support's facts.
@@ -453,7 +458,12 @@ pub enum OperationId {
     ExportWorkingV5,
     Boolean,
     EditCurve,
+    ConstructCurve,
+    ConstructSolid,
+    NativeCage,
+    NativeBuilder,
     EditSurface,
+    NativeEdit,
     Unrecognized(u32),
 }
 
@@ -474,9 +484,16 @@ pub enum PreservationPolicy {
     RequireAll,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum OperationOptions {
     InspectDescriptor,
+    NativeEdit {kind:u32,flags:u32,mode:u32},
+    NativeSurface(crate::native_surface_capability::Request),
+    NativeRebuild(crate::native_rebuild_capability::Request),
+    NativeCurve(crate::native_curve_capability::Request),
+    NativeSolid(crate::native_solid_capability::Request),
+    NativeCage(crate::native_cage_capability::Request),
+    NativeBuilder(crate::native_builder_capability::Request),
     WorkingExchange {
         archive_version: u32,
         conversion: ConversionPolicy,
@@ -491,6 +508,10 @@ pub enum Backend {
     OcctOpenNurbsExchange,
     MeshOpenNurbsExchange,
     PointCloudOpenNurbsExchange,
+    OcctEdit,
+    MeshOcctEdit,
+    NativeExplodeAdapters,
+    NativeCageAdapters,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -499,9 +520,11 @@ pub enum OperationConstraint {
     ValidateSourceStamp,
     ExistingNativeConverters,
     ReportConversionFacts,
+    ValidateNativeInput,
+    PrivateOwnedInput,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct OperationCapability {
     pub schema_version: u32,
     pub operation: OperationId,
@@ -529,6 +552,34 @@ pub fn operation_capability(
     options: OperationOptions,
 ) -> Result<OperationCapability, CapabilityError> {
     let (backend, constraints, evidence_id) = match operation {
+        OperationId::NativeBuilder => {
+            let OperationOptions::NativeBuilder(ref request)=options else{return Err(CapabilityError::UnsupportedOperation(operation));};
+            crate::native_builder_capability::policy(operation,input,request)?
+        }
+        OperationId::NativeCage => {
+            let OperationOptions::NativeCage(ref request)=options else{return Err(CapabilityError::UnsupportedOperation(operation));};
+            crate::native_cage_capability::policy(operation,input,request)?
+        }
+        OperationId::ConstructSolid => {
+            let OperationOptions::NativeSolid(ref request)=options else{return Err(CapabilityError::UnsupportedOperation(operation));};
+            crate::native_solid_capability::policy(operation,input,request)?
+        }
+        OperationId::ConstructCurve => {
+            let OperationOptions::NativeCurve(ref request)=options else{return Err(CapabilityError::UnsupportedOperation(operation));};
+            crate::native_curve_capability::policy(operation,input,request)?
+        }
+        OperationId::EditCurve => {
+            let OperationOptions::NativeRebuild(ref request)=options else{return Err(CapabilityError::UnsupportedOperation(operation));};
+            crate::native_rebuild_capability::policy(operation,input,request)?
+        }
+        OperationId::EditSurface => {
+            let OperationOptions::NativeSurface(ref request)=options else{return Err(CapabilityError::UnsupportedOperation(operation));};
+            crate::native_surface_capability::policy(operation,input,request)?
+        }
+        OperationId::NativeEdit | OperationId::Boolean => {
+            let OperationOptions::NativeEdit{kind,flags,mode}=options else{return Err(CapabilityError::UnsupportedOperation(operation));};
+            crate::native_edit_capability::policy(operation,input,kind,flags,mode)?
+        }
         OperationId::Inspect => {
             if options != OperationOptions::InspectDescriptor {
                 return Err(CapabilityError::UnsupportedOptions);

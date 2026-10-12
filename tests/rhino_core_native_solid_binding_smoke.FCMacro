@@ -1,0 +1,46 @@
+"""Query real Box/Sphere mode sessions through the selected native plugin."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,OpenMatrix9Gui
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'module':OpenMatrix9Gui.__file__}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def enter(text):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def run():
+    global console
+    try:
+        App.newDocument('SolidCapabilityBinding');Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents()
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        gate=getattr(OpenMatrix9Gui,'geometrySolidCapability',None);check('native binding exposes actual Solid session',callable(gate))
+        if callable(gate):
+            def query(representation=1,stage=2):return json.loads(gate(representation,stage))
+            check('inactive request is unavailable',query()['status']==100)
+            check('malformed stage rejects',query(stage=0)['status']==102)
+            check('unknown representation rejects',query(0)['status']==101)
+            for command,modes in [('Box',('Diagonal','3Point','Vertical','Center','Cube')),
+                ('Sphere',('Center','Vertical','2Point','3Point','4Point','FitPoints','AroundCurve','Tangent'))]:
+                for mode in modes:
+                    enter(command);enter(mode)
+                    for stage in (1,2,4):
+                        d=query(stage=stage);check(command+' '+mode+' stage '+str(stage),d['allowed'] and d['status']==4 and d['backend']=='occt_edit')
+                    check(command+' '+mode+' cannot construct before a plan',query(stage=3)['status']==102)
+                    enter('Cancel');check(command+' '+mode+' Cancel removes request',query()['status']==100)
+            enter('Sphere');enter('FitPoints')
+            for representation in range(1,10):check('FitPoints accepts representation '+str(representation),query(representation)['status']==4)
+            for representation in range(10,14):check('FitPoints rejects representation '+str(representation),query(representation)['status']==101)
+            enter('Cancel')
+            for mode in ('AroundCurve','Tangent'):
+                enter('Sphere');enter(mode)
+                check(mode+' accepts a curve',query(2)['status']==4)
+                check(mode+' rejects Mesh',query(8)['status']==101)
+                check(mode+' rejects PointCloud',query(9)['status']==101);enter('Cancel')
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

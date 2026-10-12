@@ -1,0 +1,872 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-notification-lock-20261012",
+  "status": "in_progress",
+  "goal_complete": false,
+  "updated_at": "2026-10-12T14:20:19+07:00",
+  "selected_app": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-visible273-20261012/FreeCADApp.dll",
+    "bytes": 7904768,
+    "sha256": "feea9824e1db6ba4a33b428db7ded006827c0eb427b853569c63adf78115b858"
+  },
+  "plugin": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-runtime275/bin/OpenMatrix9Gui.pyd",
+    "bytes": 13660160,
+    "sha256": "7acdbb14589554e887e90f90806dff97f1d15befc9eda7575efcdbd543632512"
+  },
+  "kernel": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/atomic-host-app-visible273-20261012/TKG3d.dll",
+    "bytes": 1236992,
+    "sha256": "a41ffbc8542b38b5d3a4bb1f05e84badf835033d2e0442fcbbc9e2db1f557876"
+  },
+  "selected_gui": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/notification-gui287-20261012/FreeCADGui.dll",
+    "bytes": 26240000,
+    "sha256": "3cb8907257edf801c2260d622b1f2c0ab5185e3059289e068d03c9c77f905996"
+  },
+  "source_candidates_match": true,
+  "sources": [
+    {
+      "path": "H:/FreeCAD-src/src/Gui/NotificationArea.cpp",
+      "bytes": 48370,
+      "sha256": "5d1d508eab407225df8a61b83f165ceb5c13a78984d3571f9b2b59e1843c8c57"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_notification_reentrant_log_smoke.FCMacro",
+      "bytes": 2399,
+      "sha256": "110e8c3d954eca745dcc310c6318885794e20bf833b29d19c4e945c991f9fba9"
+    }
+  ],
+  "native_checks": 3375,
+  "native_hosts": 35,
+  "clean_hosts": 35,
+  "runtime_gate_passed": true,
+  "hosts": [
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic291-offscreen-20261012",
+      "checks": 432,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic291-offscreen-20261012/results.json",
+        "bytes": 186745,
+        "sha256": "34b58125cb0a115de72161ea90f57d27e8eddce8db3f2139045aee8683c71553"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 650,
+        "sha256": "cd975b673e233ff6114b9fef254a600402e6872a136ace4cb6400a26d2fdc779"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-atomic291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close291-offscreen-20261012",
+      "checks": 4,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close291-offscreen-20261012/results.json",
+        "bytes": 593,
+        "sha256": "76f693ec23cff599b2440fd5721cec4ae28cdcf7f8f4dfa9d373ab61df13da89"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 649,
+        "sha256": "340c2a7a1e232fe74e0ba759c9cf46dd7adc5847bb5dd66de7fb28b4dab114ba"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-close291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes291-offscreen-20261012",
+      "checks": 109,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes291-offscreen-20261012/results.json",
+        "bytes": 21970,
+        "sha256": "a39af07bffa097c83581277965e99d524c14a6bc01b17ab8fd6662f6b08426ca"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 649,
+        "sha256": "4cb81a60e9a9159c7ece2b3c6df6884983c483cd62377dda711174677ee29a5b"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-modes291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result291-offscreen-20261012",
+      "checks": 33,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result291-offscreen-20261012/results.json",
+        "bytes": 454435,
+        "sha256": "2d9bc025d1c6cbaa70425eab68e037b6e4d0bc034ea40cb7015c245b0acd53fc"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 650,
+        "sha256": "9ca8d0593770784e9b3a964c9c016a63d2368d918a921c7e6e582d0b37febb61"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/circle-savepoint-result291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking291-offscreen-20261012",
+      "checks": 80,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking291-offscreen-20261012/results.json",
+        "bytes": 47284,
+        "sha256": "6cef7c0d0f5b9f4a6b2743a629b95ecf9f1e1f4519872fcb024f7e84482d5d41"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 645,
+        "sha256": "63d58dd383e9306672f586c6154b29d4be023de0749cdad32ff89a488b02d8ee"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-booking291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture291-offscreen-20261012",
+      "checks": 54,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture291-offscreen-20261012/results.json",
+        "bytes": 6371,
+        "sha256": "7a3b3da06dbbe0846b2b3d7ed8eae9224c6f49ff719002bf991811d1472b92e1"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 645,
+        "sha256": "76e2562f3a4229fb132ab75d8585e0f425e9b275be911999c69dfe6b526e9728"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-capture291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope291-offscreen-20261012",
+      "checks": 744,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope291-offscreen-20261012/results.json",
+        "bytes": 144743,
+        "sha256": "1f97d8c93684f0ca384bba081dd9a58eb7dbbda98bb88a18f26c2f35ca518f71"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 643,
+        "sha256": "ad1684c89e22918c1c7a53c1e2d973d419f1fa0bebac16766c96c38a3e9c2cbf"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-scope291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/inverse-own291-offscreen-20261012",
+      "checks": 204,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own291-offscreen-20261012/results.json",
+        "bytes": 52281,
+        "sha256": "1111bdf424e3a5fd9ae1e411093a8f374a17145abbcd6a5764d46515d3d474e8"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 638,
+        "sha256": "eea969f3f93ff6a4d9f05db231f7343dced3092fb87e423042cb437f9f22b666"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-own291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/inverse-late291-offscreen-20261012",
+      "checks": 204,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late291-offscreen-20261012/results.json",
+        "bytes": 52281,
+        "sha256": "1111bdf424e3a5fd9ae1e411093a8f374a17145abbcd6a5764d46515d3d474e8"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 639,
+        "sha256": "f30e592fb531ea80672a9c2c00a1f6a389dbcd649987eecd4cb8706cc5a017c7"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/inverse-late291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-green291-offscreen-20261012",
+      "checks": 28,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-green291-offscreen-20261012/results.json",
+        "bytes": 6724,
+        "sha256": "7d6d412f55136e44406f199b97281e5512526652ad86fc9e0376eb69f84f4e73"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-green291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 647,
+        "sha256": "e19cd1eee9a34fbea60e71419de1d9f002817bb329779d9391265acabdbc3c67"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/discarded-redo-green291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/save-callback291-offscreen-20261012",
+      "checks": 204,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/save-callback291-offscreen-20261012/results.json",
+        "bytes": 52281,
+        "sha256": "1111bdf424e3a5fd9ae1e411093a8f374a17145abbcd6a5764d46515d3d474e8"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/save-callback291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 639,
+        "sha256": "008dcd366f109af3e2f8bb5c07128e8931b0c9027c9cc6db008c80cc199b7e41"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/save-callback291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold291-offscreen-20261012",
+      "checks": 62,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold291-offscreen-20261012/results.json",
+        "bytes": 6376,
+        "sha256": "7ef37a85577e1267cbd0e3cc09e485b2026b53a028e5821325a492901ef3c3cd"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 647,
+        "sha256": "339a332b4572679b4693e190c339578a5cf3f7f543f06e988eefce68fae3b191"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-modescold291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy291-offscreen-20261012",
+      "checks": 8,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy291-offscreen-20261012/results.json",
+        "bytes": 967,
+        "sha256": "c45f0412514b8c3a5bdc2f06c7725b47e26984d2c2857aac9af4aed2ece64ca4"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 644,
+        "sha256": "03d6f41b0bf07166b922cc51b50c6d54799076225a6e59afad622a56ce03a25e"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacy291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold291-offscreen-20261012",
+      "checks": 3,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold291-offscreen-20261012/results.json",
+        "bytes": 444,
+        "sha256": "5a626d48d10846296a6543145937e0db5b7eca21adb6f3ad10d16318a08ca0f3"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 648,
+        "sha256": "cbd0cad15b5ad39dc379531a7c35a37f4c1ddadf96839448cc132f2d5a72178c"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-legacycold291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial291-offscreen-20261012",
+      "checks": 65,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial291-offscreen-20261012/results.json",
+        "bytes": 6723,
+        "sha256": "884fdb2f5e327de070c3f68b296a892c14faeaee5aa06f83a9287615341d77d5"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 645,
+        "sha256": "eafafd940a041a68f37f93b2df4023444e134716bc24282c0bc36627c23231a9"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retirement-spatial291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/redo-links-green291-offscreen-20261012",
+      "checks": 128,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/redo-links-green291-offscreen-20261012/results.json",
+        "bytes": 25869,
+        "sha256": "ed43c9cfebaa7d650b84ca6521d588a873870889fcd2fd073c9afd8b5b1bd568"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/redo-links-green291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 643,
+        "sha256": "283d73925380ae3a635bc04aa9d681a0a903d14cda3b04f1ca4207d3b560f5d5"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/redo-links-green291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/redo-expressions-green291-offscreen-20261012",
+      "checks": 60,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/redo-expressions-green291-offscreen-20261012/results.json",
+        "bytes": 11082,
+        "sha256": "aba385aec3b70bccf7e5b82b8063be2cccd7cef5a3ebd68a833f0a3def4797f9"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/redo-expressions-green291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 649,
+        "sha256": "14dd1945158871e30d6d5581f482961fbde24cf0d4bbe1e08a3a719f2b750fcc"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/redo-expressions-green291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/redo-xlinks-green291-offscreen-20261012",
+      "checks": 112,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/redo-xlinks-green291-offscreen-20261012/results.json",
+        "bytes": 23841,
+        "sha256": "abf61ce0eb5fdacd7faa3cafbdc1fa44dcfa5e4ffe6ae6e39f11391aafd00559"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/redo-xlinks-green291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 644,
+        "sha256": "1e3704df77cce3695f9010e34d4a3657f36c5d88b1532f3d1bcc30e1363ca56c"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/redo-xlinks-green291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/redo-rename-green291-offscreen-20261012",
+      "checks": 32,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/redo-rename-green291-offscreen-20261012/results.json",
+        "bytes": 6802,
+        "sha256": "c38cc7fac80abc66730fadfdca0dd600ccdf1476c3116b82a84705e8d363614c"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/redo-rename-green291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 644,
+        "sha256": "bb4b8a9dbc7dc6bfb2e09e693f427d0635c35ea9ccc75f1c2a09b3c4fb223a81"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/redo-rename-green291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/merge-green291-offscreen-20261012",
+      "checks": 32,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/merge-green291-offscreen-20261012/results.json",
+        "bytes": 6706,
+        "sha256": "55b8ef378c855721c2ddee1791a04061a0dd1f71782d93290f5acc31f15f6d86"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/merge-green291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 638,
+        "sha256": "78017bf959c9984828829c35b5a1c031235da23e82e2fbb5fbd815510456cfb2"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/merge-green291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/retry-green291-offscreen-20261012",
+      "checks": 12,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retry-green291-offscreen-20261012/results.json",
+        "bytes": 2434,
+        "sha256": "8f874b37ba3b84f20ab92a5464ddb44528d060aa82cd7a8bc77ab71cac2b0859"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retry-green291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 638,
+        "sha256": "3c8650b40b0acf55d3a653e715ed26e4e8caf9014cb9485e094e7c4e03ccb65b"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/retry-green291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/python-redo291-offscreen-20261012",
+      "checks": 72,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/python-redo291-offscreen-20261012/results.json",
+        "bytes": 12541,
+        "sha256": "405a95d15a8dd7222ebcbd4a522e66d84defe7d6995e242712bf4f85ac04fa17"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/python-redo291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 638,
+        "sha256": "3b20ae3526441c2fc1eebd6f8441d1d48ba3ac20a6e59e6ab0706610429d5fcc"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/python-redo291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/python-inverse291-offscreen-20261012",
+      "checks": 201,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/python-inverse291-offscreen-20261012/results.json",
+        "bytes": 35991,
+        "sha256": "90bb7c6e5895f2b793f5e64a9a62c4d010f7a6f22cca9612355e22202926f7cb"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/python-inverse291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 641,
+        "sha256": "e93e92ac6d65465ad5c915a63c499be45c1d869f79ac446d857d98e27e73cf84"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/python-inverse291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/python-finalizer291-offscreen-20261012",
+      "checks": 6,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/python-finalizer291-offscreen-20261012/results.json",
+        "bytes": 1401,
+        "sha256": "a2e376f4062fcf2a95d8ad9ad7c48d15a228fa925c7f86262241d4d68ea52c8b"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/python-finalizer291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 643,
+        "sha256": "9a7d1635bec7a179a516951c9c74674622f5f3904bf2baae946a32780372c7e5"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/python-finalizer291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/source-families291-offscreen-20261012",
+      "checks": 180,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/source-families291-offscreen-20261012/results.json",
+        "bytes": 27479,
+        "sha256": "f8a905ad238215738535767dfdb146d928c42acb6832a1612fe6d8a5d10ccdae"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/source-families291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 642,
+        "sha256": "ff95d0a81cda8c8e7414ee3fa3895c19c3fe92a838f6e90f9ebe23a1de686cb1"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/source-families291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/acceptance-boundary291-offscreen-20261012",
+      "checks": 162,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/acceptance-boundary291-offscreen-20261012/results.json",
+        "bytes": 33494,
+        "sha256": "f1d9ba2f84ba2f1828681837eab3429731d42a109f549db82ce86605220b354b"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/acceptance-boundary291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 646,
+        "sha256": "2a48fc96cc1db179efedf6c5f23276c48d88a4c891f5b82d7795bed2dd588bf1"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/acceptance-boundary291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/disposal-logger291-offscreen-20261012",
+      "checks": 24,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/disposal-logger291-offscreen-20261012/results.json",
+        "bytes": 4449,
+        "sha256": "78fa7b06d2e98e84503b17792fc366cf5a725ba31e52fd4ac7c6aaa3b2cc09a0"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/disposal-logger291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 641,
+        "sha256": "1d28f5da67fd1aca436fa22214cf9a8f95eed8692c4b786a682274225d487d20"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/disposal-logger291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/native-jets291-offscreen-20261012",
+      "checks": 58,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/native-jets291-offscreen-20261012/results.json",
+        "bytes": 120383,
+        "sha256": "4b21a2d95e49680f21027311c93340cdc5375b45438b5cc9c4977778820b32cf"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/native-jets291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 638,
+        "sha256": "d6a297feb28e744081b1db54e00ea1b674c3c0b258669779f922c0b5a727ae97"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/native-jets291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/snapshot-budget291-offscreen-20261012",
+      "checks": 38,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/snapshot-budget291-offscreen-20261012/results.json",
+        "bytes": 8398,
+        "sha256": "c4f149721455fbbf8a31aed08785255c7c8d90dd8cbf9d449bec7797542e48f6"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/snapshot-budget291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 642,
+        "sha256": "7e4ab61d1a9c685f69010e9edd01d15bd8debd9ca3802a9a2393568ceaa87359"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/snapshot-budget291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-clear-green291-offscreen-20261012",
+      "checks": 4,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-clear-green291-offscreen-20261012/results.json",
+        "bytes": 697,
+        "sha256": "3443c6c0d005a2563180c1e08e0a9dece231c423377328e4d4510fea0530b9a4"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-clear-green291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 654,
+        "sha256": "747129306fcec6ca19ae1c2858e6eaa9c7dfd209bed1b0f5417e03485efe446d"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-clear-green291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-remove-green291-offscreen-20261012",
+      "checks": 4,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-remove-green291-offscreen-20261012/results.json",
+        "bytes": 701,
+        "sha256": "1bfa244a3b1efe1ddc95a4761b86bfa5a25e4477d3f11b3f62c57c8dd5eef111"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-remove-green291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 655,
+        "sha256": "ed52deed4a427b6f6dad8919c804be2e60ed3b2613472ce4722a5e05a590788c"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-remove-green291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-value-green291-offscreen-20261012",
+      "checks": 4,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-value-green291-offscreen-20261012/results.json",
+        "bytes": 704,
+        "sha256": "6d8661ad88dd74772a4fb7a800d0a0c1af51527113b55dde2f485dc2d854aba3"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-value-green291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 654,
+        "sha256": "20d687266d69104590eae20570bcfa4a6f8c1a2d6345794b305b2892dc29d912"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-value-green291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-close_object-green291-offscreen-20261012",
+      "checks": 4,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-close_object-green291-offscreen-20261012/results.json",
+        "bytes": 698,
+        "sha256": "4ce35145241a51e799a40c952d24e3c48ebbdb9ee5d5e9f113691bd5dda00189"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-close_object-green291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 660,
+        "sha256": "521e57e2053f7260d53641d12c8e19ff1f441974e5b3de152fd04b2ec36927ef"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/close-finalizer-close_object-green291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/empty-redo-green291-offscreen-20261012",
+      "checks": 5,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/empty-redo-green291-offscreen-20261012/results.json",
+        "bytes": 879,
+        "sha256": "bab68a15b4bbe7c6931dbd0d5bc5d8f644e6b5baa9c5a837747d0aedd8967223"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/empty-redo-green291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 643,
+        "sha256": "19b5436cdec6d026b599494f5d3a59ef2688d2aa6e7fb2964f57755a9a371a4a"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/empty-redo-green291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    },
+    {
+      "artifact": "C:/Users/nguye/.codex/om9-native-tests/notification-popup-green291-offscreen-20261012",
+      "checks": 3,
+      "exit_code": 0,
+      "clean_log": true,
+      "report": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/notification-popup-green291-offscreen-20261012/results.json",
+        "bytes": 5477,
+        "sha256": "99acf67fe2f721e4e94b0d9f545e3b231695cd7c07b5d16c93c11a8816eac01b"
+      },
+      "launch": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/notification-popup-green291-offscreen-20261012/shared-host-launch.json",
+        "bytes": 651,
+        "sha256": "3ef10601da991bcbf688d53d09c7fbb65f285af6ceae0b66485f361436b60028"
+      },
+      "loaded_gui": {
+        "path": "C:/Users/nguye/.codex/om9-native-tests/notification-popup-green291-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 187,
+        "sha256": "f2994adaaad693c9a883d065b3a7a21737ae20eae77817ddb73e3d8c8e3d42ba"
+      }
+    }
+  ],
+  "gui_build_receipt": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/notification-gui287-20261012/build.exit.json",
+    "bytes": 115,
+    "sha256": "5fd2480da5ec814e3820277ce779108c1f62b2fba39c77833e5bec4cc037fcce"
+  },
+  "gui_inputs": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/notification-gui287-20261012/inputs.json",
+    "bytes": 37167,
+    "sha256": "f2bd7a49b2d9d08eb5b7dc387d1425c3345fd40d4eac1b4a779286def0c9c7e3"
+  },
+  "native_manifest": {
+    "path": "C:/Users/nguye/.codex/om9-native-tests/native-app-sdk273.json",
+    "bytes": 35261,
+    "sha256": "942d481f5dc8e9372b6d8f9c0843c995755e04c5a0645f4f1582c454813d517b"
+  },
+  "root_cause": {
+    "trace": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/exception-trace284-offscreen-20261012/exception-traces.json",
+      "bytes": 133715,
+      "sha256": "1c7c272846ebd0f02851b4c0dbce06632097626b785cf00a5500ce9179242f88"
+    },
+    "symbol_chain": [
+      "Gui::NotificationArea::showInNotificationArea",
+      "Gui::NotificationBox::showText",
+      "QPlatformWindow::raise",
+      "Console warning",
+      "Gui::NotificationArea::pushNotification",
+      "std::_Throw_Cpp_error"
+    ],
+    "red": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/notification-popup-red290-offscreen-20261012/results.json",
+      "bytes": 5593,
+      "sha256": "bfd0d4fef9b8216add4465ee9b8caa7daaafb9d0e7f90ec606bd3e9ffeb40cc8"
+    },
+    "green": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/notification-popup-green291-offscreen-20261012/results.json",
+      "bytes": 5477,
+      "sha256": "99acf67fe2f721e4e94b0d9f545e3b231695cd7c07b5d16c93c11a8816eac01b"
+    }
+  },
+  "shared_gui_sdk_outputs_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "previous_snapshot_report": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-12-rhino-core-snapshot-history-disposal.json",
+    "bytes": 52899,
+    "sha256": "eb7171204dcaf094ea028afe9eb2840a9f35857b0a7945d9d375bf81ca4d14ec"
+  },
+  "rust_last_verified": {
+    "passed": 1037,
+    "failed": 0,
+    "groups": 134,
+    "exit_code": 0,
+    "log": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/rust-all255.log",
+      "bytes": 115692,
+      "sha256": "204eb1ed3b1a760c7a3c1fd97e6096df3656069e547acefd48c983e1dc48a898"
+    },
+    "receipt": {
+      "path": "C:/Users/nguye/.codex/om9-native-tests/rust-all255.log.exit.json",
+      "bytes": 116,
+      "sha256": "f72670d0e03164026b85d4e8fd70f43979aa94ccbb366d73130d9f4372bfba14"
+    }
+  },
+  "rust_rerun": false,
+  "scope_notes": [
+    "Only NotificationArea.cpp is compiled; accepted camera GUI link inputs and other SDK objects/dependencies are reused. No root configuration, full runtime clone, shared DLL replacement or deployment.",
+    "QString message owns its data before unlock. No notification list/item access occurs after unlock on the popup branch. Warnings remain visible in the actual popup.",
+    "The verified fix covers the specific notification-window reentrant logging deadlock. It is not a certification of every GUI timer/lifetime/allocator or native ABI path."
+  ],
+  "remaining": [
+    "The constructor now bounds aggregate owner-history/property records and logical snapshot/name storage before copies. Simultaneous journal/recovery/merge/inverse peak storage, opaque custom values/closures, allocator metadata and all native status/cache identities remain outside this proved bound.",
+    "History destruction reentrancy is verified for regular native Undo/Redo cleanup and visible/held preserving-group disposal. Other derived-object/member destruction, global/source-participant callbacks and worker cancellation/close boundaries still need targeted lifecycle evidence; a single history fix does not certify every FreeCAD destructor.",
+    "Continue the original representation/conversion/ownership/result-routing requirements with existing accepted fixtures. Historical unchecked rows are not automatically new failures: reconcile C01-C12/T01-T11 against their accepted slices, then fill missing families, maps, provenance, channels/attributes, enabled consumers and structural preservation.",
+    "Original RCORE01 acceptance gaps have been reconciled separately. T01-T11 and several C contracts have accepted slices; their historical rows are not blanket failures. Six remaining groups concern complete conversion/correspondence, consumer/results/diagnostics, identity/ownership/attributes, preservation matrices, aggregate bounds/cancellation, and publication/lifetime/cache coverage."
+  ],
+  "next_action": "Continue remaining native derived-object/member lifecycle witnesses and aggregate preparation budgets, then mesh/special Edit GeometryResult consumers using existing FreeCAD ownership and prepared discrete snapshots."
+}

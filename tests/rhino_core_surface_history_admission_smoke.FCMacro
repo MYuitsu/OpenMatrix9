@@ -1,0 +1,75 @@
+"""Observe independent Surface History JSON admission without changing solver."""
+import json,os,traceback,math
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'module':OM.__file__,'checks':[],'diagnostics':[]}
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def recipe():return dict(version=1,kind=3,style=0,frenet=False,closed=False,maintainHeight=False,preview=True,sectionMode=0,pointCount=16,tolerance=.01,continuityA=0,continuityB=0,matchStart=False,matchEnd=False,slashes=[],history=True,historyCommand=False,inputs=[dict(count=1,chain=False,closed=False,reverse=False,seam=0) for _ in range(2)])
+def one(kind):
+ d=App.newDocument('SurfaceJson'+kind);d.UndoMode=1
+ a=d.addObject('Part::Feature','ProfileA');a.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0))
+ b=d.addObject('Part::Feature','ProfileB');b.Shape=Part.makeLine(App.Vector(0,0,5),App.Vector(10,0,5))
+ h=d.addObject('OpenMatrix9Gui::SurfaceHistory','SavedLoft');h.SourceCurves=[(a,['']),(b,[''])];raw=json.dumps(recipe());h.SurfaceOptions=raw
+ witness=d.addObject('App::FeaturePython','Witness');d.recompute()
+ if h.Shape.isNull() or abs(h.Shape.Area-50)>1e-7:raise RuntimeError('Valid Loft baseline did not initialize')
+ if kind=='Malformed':bad='{}'
+ elif kind=='Bytes':data=recipe();data['padding']='x'*1048576;bad=json.dumps(data)
+ elif kind=='Depth':data=recipe();data['extra']=[0];bad=json.dumps(data);bad=bad[:-1]+',"nested":'+('['*70)+'0'+(']'*70)+'}'
+ elif kind=='Duplicate':bad=raw[:-1]+',"version":1}'
+ elif kind=='Trailing':bad=raw+' null'
+ elif kind=='Seam':data=recipe();data['inputs'][0]['seam']=1;bad=json.dumps(data)
+ elif kind=='Group':data=recipe();data['inputs'][0]['count']=2;bad=json.dumps(data)
+ elif kind=='Options':data=recipe();data['maintainHeight']=True;bad=json.dumps(data)
+ elif kind=='Nodes':data=recipe();data['future']=[0]*16384;bad=json.dumps(data)
+ else:data=recipe();data['extra']={'future':[1,True,None]};h.SurfaceOptions=json.dumps(data);d.recompute();check('Bounded unknown fields retain existing compatibility',h.isValid() and not h.Shape.isNull() and abs(h.Shape.Area-50)<1e-7);App.closeDocument(d.Name);return
+ h.SurfaceOptions=bad;d.openTransaction('Redo witness');witness.Label='Executable Redo';d.commitTransaction();d.undo()
+ before=(tuple(o.Name for o in d.Objects),d.UndoCount,d.RedoCount,h.SurfaceOptions,a.Shape.exportBrepToString(),b.Shape.exportBrepToString(),[(o.Name,subs) for o,subs in h.SourceCurves])
+ d.recompute();message=h.getStatusString();report['diagnostics'].append(dict(case=kind,text=message,raw_bytes=len(bad.encode()),history=h.HistoryEnabled))
+ check(kind+' JSON rejects with typed Surface History child context',not h.isValid() and all(s in message for s in ('InvalidBasis','Surface','History',h.Name)))
+ check(kind+' rejection clears stale output but preserves links',h.Shape.isNull() and h.HistoryEnabled and len(h.SourceCurves)==2)
+ after=(tuple(o.Name for o in d.Objects),d.UndoCount,d.RedoCount,h.SurfaceOptions,a.Shape.exportBrepToString(),b.Shape.exportBrepToString(),[(o.Name,subs) for o,subs in h.SourceCurves])
+ check(kind+' preserves source raw recipe objects Undo Redo',before==after)
+ if d.RedoCount:d.redo()
+ check(kind+' keeps executable Redo',witness.Label=='Executable Redo')
+ h.SurfaceOptions=raw;d.recompute();check(kind+' repair reuses native Loft',h.isValid() and not h.Shape.isNull() and abs(h.Shape.Area-50)<1e-7);App.closeDocument(d.Name)
+def closed_hints(kind):
+ d=App.newDocument('ClosedHint'+str(kind));d.UndoMode=1
+ def feature(name,shape):o=d.addObject('Part::Feature',name);o.Shape=shape;return o
+ a=feature('RailA',Part.makeCircle(5))
+ if kind==1:
+  shape=Part.makeCircle(1,App.Vector(5,0,0),App.Vector(0,1,0));first=feature('First',shape)
+  rotated=shape.copy();rotated.rotate(App.Vector(),App.Vector(0,0,1),180);sources=[a,first,feature('Last',rotated)];target=4*math.pi**2*5
+ else:
+  sources=[a,feature('RailB',Part.makeCircle(9)),feature('First',Part.makeLine(App.Vector(5,0,0),App.Vector(9,0,0))),feature('Last',Part.makeLine(App.Vector(-5,0,0),App.Vector(-9,0,0)))];target=math.pi*(9**2-5**2)
+ d.recompute();h=d.addObject('OpenMatrix9Gui::SurfaceHistory','SavedClosedSweep');h.SourceCurves=[(o,['']) for o in sources]
+ data=recipe();data['kind']=kind;data['closed']=True;data['inputs']=[dict(count=1,chain=False,closed=(i<kind),reverse=False,seam=0) for i in range(len(sources))]
+ h.SurfaceOptions=json.dumps(data);d.recompute();check('Closed Sweep'+str(kind)+' native baseline',h.isValid() and not h.Shape.isNull() and abs(h.Shape.Area-target)<.05)
+ for record in data['inputs']:record['closed']=False
+ raw=json.dumps(data);h.SurfaceOptions=raw;before=([o.Shape.exportBrepToString() for o in sources],d.UndoCount,d.RedoCount)
+ d.recompute();check('Closed Sweep'+str(kind)+' ignores stale saved rail hints',h.isValid() and not h.Shape.isNull() and abs(h.Shape.Area-target)<.05)
+ check('Closed Sweep'+str(kind)+' retains recipe sources links Undo Redo',before==([o.Shape.exportBrepToString() for o in sources],d.UndoCount,d.RedoCount) and h.SurfaceOptions==raw and len(h.SourceCurves)==len(sources));App.closeDocument(d.Name)
+def open_slash_hints():
+ d=App.newDocument('OpenSlashHints');d.UndoMode=1
+ sources=[]
+ for name,shape in [('RailA',Part.makeLine(App.Vector(0,0,0),App.Vector(0,10,0))),('RailB',Part.makeLine(App.Vector(5,0,0),App.Vector(8,10,0))),('Profile',Part.makeLine(App.Vector(0,0,0),App.Vector(5,0,0)))]:
+  o=d.addObject('Part::Feature',name);o.Shape=shape;sources.append(o)
+ d.recompute();h=d.addObject('OpenMatrix9Gui::SurfaceHistory','SavedSlashedSweep');h.SourceCurves=[(o,['']) for o in sources]
+ data=recipe();data['kind']=2;data['slashes']=[[.25,.25],[.75,.75]];data['inputs']=[dict(count=1,chain=False,closed=False,reverse=False,seam=0) for o in sources]
+ h.SurfaceOptions=json.dumps(data);d.recompute();check('Slashed Sweep2 native open-rail baseline',h.isValid() and not h.Shape.isNull());area=h.Shape.Area
+ for record in data['inputs'][:2]:record['closed']=True
+ raw=json.dumps(data);h.SurfaceOptions=raw;before=([o.Shape.exportBrepToString() for o in sources],d.UndoCount,d.RedoCount)
+ d.recompute();check('Slashed Sweep2 ignores stale true rail hints',h.isValid() and not h.Shape.isNull() and abs(h.Shape.Area-area)<1e-7)
+ check('Slashed Sweep2 retains recipe sources links Undo Redo',before==([o.Shape.exportBrepToString() for o in sources],d.UndoCount,d.RedoCount) and h.SurfaceOptions==raw and len(h.SourceCurves)==3);App.closeDocument(d.Name)
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench')
+  for kind in ['Malformed','Bytes','Depth','Duplicate','Trailing','Seam','Group','Options','Nodes','Compatible']:one(kind)
+  for kind in [1,2]:closed_hints(kind)
+  open_slash_hints()
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

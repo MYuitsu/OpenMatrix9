@@ -121,7 +121,8 @@ def run():
         d=new('TangentSolidEdge');source=d.addObject('Part::Feature','SourceBox');source.Shape=Part.makeBox(4,6,8);d.recompute();index=next(i for i,e in enumerate(source.Shape.Edges,1) if all(abs(v.Point.y)<1e-7 and abs(v.Point.z)<1e-7 for v in e.Vertexes))
         enter('Sphere');enter('Tangent');enter('Curve=SourceBox.Edge'+str(index)+'@2,0,0');enter('Point');enter('1,1,0');enter('Point');enter('3,1,0');o=ball(d,'Tangent',(2,1,0),1);persist(d,o,'TangentSolidEdge')
         d=new('TangentBranches');enter('Sphere');enter('Tangent');enter('Point');enter('-1,0,0');enter('Point');enter('1,0,0');enter('Radius=2')
-        check('Tangent equal branches require explicit choice',len(d.Objects)==0 and 'Ambiguous' in str(console.property('om9Prompt')));enter('Solution=1');o=created(d,'OM9-SOLID-014','Tangent');s=o.Shape.Faces[0].Surface
+        history=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandHistoryPane')
+        check('Tangent equal branches require explicit choice',len(d.Objects)==0 and 'Ambiguous' in history.toPlainText() and 'Resolve tangent sphere' in str(console.property('om9Prompt')));enter('Solution=1');o=created(d,'OM9-SOLID-014','Tangent');s=o.Shape.Faces[0].Surface
         check('Tangent explicit branch satisfies both points',abs(s.Radius-2)<1e-7 and abs((s.Center-App.Vector(-1,0,0)).Length-2)<1e-7 and abs((s.Center-App.Vector(1,0,0)).Length-2)<1e-7);persist(d,o,'TangentBranches')
         d=new('InvalidModes');enter('Box');enter('Diagonal');enter('0,0');enter('Length=2');check('Diagonal rejects side length',len(d.Objects)==0);enter('Cancel')
         enter('Sphere');enter('3Point');enter('0,0');enter('1,0');enter('2,0');check('collinear 3Point rejected',len(d.Objects)==0);enter('Cancel')
@@ -130,7 +131,7 @@ def run():
         path=curve(d,'Path',(0,0,0),(10,0,0));enter('Sphere');enter('AroundCurve');enter('Path=Path.Edge1');path.Placement.Base=App.Vector(1,0,0);d.recompute();enter('OnCurve=.5');enter('Radius=2');check('stale AroundCurve blocked',len(d.Objects)==1);enter('Cancel')
         curve(d,'High',(0,0,1),(10,0,1));enter('Sphere');enter('Tangent');enter('Curve=Path.Edge1');enter('Curve=High.Edge1');enter('Point');enter('1,1,0');check('noncoplanar Tangent blocked',len(d.Objects)==2);enter('Cancel')
         App.closeDocument(d.Name)
-        d=new('VerticalMouse');window=Gui.getMainWindow();window.resize(1400,950);enter('Osnap Off');enter('Box');enter('Vertical');enter('0,0,0');enter('4');Gui.activeDocument().activeView().viewFront();settle()
+        d=new('VerticalMouse');window=Gui.getMainWindow();window.resize(1400,950);enter('Osnap Off');enter('Box');enter('Vertical');enter('0,0,0');enter('4,0,0');Gui.activeDocument().activeView().viewFront();settle()
         width=projected((4,0,3),(0,-1,0)).z;click((4,0,3));enter('2');o=created(d,'OM9-SOLID-012','Vertical');check('Vertical mouse width uses perpendicular plane',abs(o.Shape.Volume-8*abs(width))<1e-5);App.closeDocument(d.Name)
         d=new('FitPreview');enter('Sphere');enter('FitPoints');enter('2,0,0');enter('0,2,0');Gui.activeDocument().activeView().viewTop();settle();hover((-2,0,0))
         check('FitPoints hover preview is scene-only',preview_count()==1 and len(d.Objects)==0);enter('Cancel');check('FitPoints cancel removes preview',preview_count()==0 and len(d.Objects)==0);App.closeDocument(d.Name)

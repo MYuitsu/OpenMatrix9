@@ -21,13 +21,13 @@
   },
   {
     "path": "FEATURES.json",
-    "bytes": 1814356,
-    "sha256": "25427f3fa17b6598822dc07f08a4ac68b2d5d7947b8f19935e802812fafe8810"
+    "bytes": 1919203,
+    "sha256": "b0acce7a42dfd2b80ab450c8e8108701b2a64cbc9e6d71bf2c62a5e1b854eab4"
   },
   {
     "path": "FEATURES.yaml",
-    "bytes": 1452439,
-    "sha256": "7280bdbf2776d1352a97ab0a51e88bba061f65911c5badc58f37d2299a102635"
+    "bytes": 1542120,
+    "sha256": "c9ff5c4497927804bd5586e1d043192a07f9d1c4a4948dee696b017934fb32b1"
   },
   {
     "path": "FEATURE_LOOKUP.json",
@@ -46,8 +46,8 @@
   },
   {
     "path": "IMPLEMENTATION_STATUS.md",
-    "bytes": 26054,
-    "sha256": "5ff28567242f21f407f8339eb2dd7a53b0336f0e1e85db1f07088e62f5fc3129"
+    "bytes": 97178,
+    "sha256": "ad5159a39c3e701776b9027012b171d5a052d6e495a32b660ab5df5bb4d6741c"
   },
   {
     "path": "INDEX.md",
@@ -111,8 +111,8 @@
   },
   {
     "path": "specs/00-rhino-core/01-object-model-kernel.md",
-    "bytes": 27960,
-    "sha256": "51482361e3df40a1b57007e9cf7ab7f0ce9446e675b8a2beb8830538e4cea7b1"
+    "bytes": 104386,
+    "sha256": "b7f7f23ce800c20ab8d9be0f38f36635124a32f6763d63c5a89bc9a3736ddc1c"
   },
   {
     "path": "specs/00-rhino-core/02-units-tolerances.md",
@@ -126,23 +126,23 @@
   },
   {
     "path": "specs/00-rhino-core/04-command-engine.md",
-    "bytes": 21960,
-    "sha256": "0d524ca3c0500682abfef743c9068767942af4cc0a4689e10459a45ab769048a"
+    "bytes": 38682,
+    "sha256": "264e48cc8a69b78b0890c7b75e8973e0c6a1f004dbfebdd2a621f8971b1e8e2a"
   },
   {
     "path": "specs/00-rhino-core/05-picking-snapping.md",
-    "bytes": 22692,
-    "sha256": "1985ae6028b9716f700fd82c4dfc903058ec6eba88435c407079e6e583fd1f50"
+    "bytes": 23174,
+    "sha256": "d5d472e2bb2f8ae129e1313ba3e08b858e6ee3632f3cdc6d87695abd6a7fc47b"
   },
   {
     "path": "specs/00-rhino-core/06-selection-organization-blocks.md",
-    "bytes": 25340,
-    "sha256": "097e36db4968f3c8ca5cbffb3322635366a538c34160664fb7427fa19521858b"
+    "bytes": 26067,
+    "sha256": "2165479a30ea8dfb91457873a70bd02877fdb87f2075c1f714aae8305da660f3"
   },
   {
     "path": "specs/00-rhino-core/07-nurbs-editing-modeling.md",
-    "bytes": 31471,
-    "sha256": "f5837443c6c299126104584821081f370adb81d1d9bdbe919116848518d621fb"
+    "bytes": 32402,
+    "sha256": "bda6fa29dda334bb8dbb805b6119a31f77a6cabe621b0990737d0fb4124bd10c"
   },
   {
     "path": "specs/00-rhino-core/08-analysis-repair.md",
@@ -151,13 +151,13 @@
   },
   {
     "path": "specs/00-rhino-core/09-history-dependencies.md",
-    "bytes": 19154,
-    "sha256": "a23567fb8fd5f6289006fac0e87939e56d353e90b810b883b556b31a9e95cac2"
+    "bytes": 25083,
+    "sha256": "71f113103d6b89f54da9601de2ded924959f75c86c1d3cdaaadb5a0e9d86a7cc"
   },
   {
     "path": "specs/00-rhino-core/10-persistence-3dm-clipboard.md",
-    "bytes": 21804,
-    "sha256": "121b0ae7e083ed611c81f2ec9422cde5985c74c016aa99a4ace662de94b76e4e"
+    "bytes": 22730,
+    "sha256": "c7afac0bbd92b8884d1a03a43aa2c69468404d3d7201116828359e6f980033b3"
   },
   {
     "path": "specs/00-rhino-core/11-annotation-layout-print.md",
@@ -171,8 +171,8 @@
   },
   {
     "path": "specs/00-rhino-core/CAPABILITY_LOOKUP.json",
-    "bytes": 78700,
-    "sha256": "d1e87f5d302a9f2a342c8cf7aead29195e027f34e74a9190943cff9bf483f709"
+    "bytes": 101966,
+    "sha256": "a56fef68f827d43a049c5808b2e0d5d46b365f1c2915457f7b0984d623ae10dd"
   },
   {
     "path": "specs/00-rhino-core/DECOMPILE_AUDIT.md",
@@ -181,8 +181,8 @@
   },
   {
     "path": "specs/00-rhino-core/README.md",
-    "bytes": 24653,
-    "sha256": "cdf95c867316f1c3c52be2c5fca3f6b89793de2e396660d8472d2df68c61ee26"
+    "bytes": 94106,
+    "sha256": "7d0d5891f9993e15828539b2bdd37ea12739a812d80a69706a824c5df2f4529c"
   },
   {
     "path": "specs/00-rhino-core/SOURCE_BASELINE.json",
@@ -196,13 +196,13 @@
   },
   {
     "path": "specs/01-core/README.md",
-    "bytes": 14304,
-    "sha256": "fe3507a336ea638f57a7a54807b63e980e4d927eec8fec241782272a86e778f6"
+    "bytes": 14386,
+    "sha256": "78ba9a53a25bc44e593d7fb76802b0e00ee2aae1193cac99e68a4a682c12bd93"
   },
   {
     "path": "specs/01-core/om9-buildercore-001-builder-framework.md",
-    "bytes": 9972,
-    "sha256": "98ccf78a54bfa7583fb25ed94c1d84a398ac874a6a23c249b7d19a90a899da8f"
+    "bytes": 22031,
+    "sha256": "39cfdd230d80eef38d229a63e1c9b890877ecd7a05f50fa07f1ebebd2a7079de"
   },
   {
     "path": "specs/01-core/om9-display-001-preview-shade.md",
@@ -306,13 +306,13 @@
   },
   {
     "path": "specs/01-core/om9-history-001-history-workflow.md",
-    "bytes": 10769,
-    "sha256": "346200da9b0af8fdfc10b1d3fda3d7cb2fa221869a0b71f713cadf934ae1335f"
+    "bytes": 13754,
+    "sha256": "9a9bee9d0a89a8be5b770f68c1465980c3d55a85bb381caafb48a9e8b8449939"
   },
   {
     "path": "specs/01-core/om9-iface-001-matrix-interface.md",
-    "bytes": 9779,
-    "sha256": "aa4f0e2046c31f6227fc7b5191f6b57867f3385ee03f98973f01e9043c97329a"
+    "bytes": 10745,
+    "sha256": "1ec73d5c9a5f588f064f5e19ef1385760d2f04761445331b51bb357675bca872"
   },
   {
     "path": "specs/01-core/om9-info-001-object-properties.md",
@@ -411,28 +411,28 @@
   },
   {
     "path": "specs/01-core/om9-info-020-gumball.md",
-    "bytes": 21174,
-    "sha256": "b87e6f1691523ca3edd42e0af731e93eafaa565518296e60734fe7ce2e11559c"
+    "bytes": 21466,
+    "sha256": "f4a052c57eceefb629ba5b27880d009035ab811f97b988f3e6c4dfc5b553459b"
   },
   {
     "path": "specs/01-core/om9-info-021-gumball-alignment.md",
-    "bytes": 10406,
-    "sha256": "2259c84da093135d868336e9f095445bbf9174e0de8f90a950c3490e39ab6ba9"
+    "bytes": 10566,
+    "sha256": "3b82cf592257507ee8f3d20c113f5e641e7ea142a2f6ebae0c747df98e7d1c24"
   },
   {
     "path": "specs/01-core/om9-info-022-relocate-gumball.md",
-    "bytes": 10943,
-    "sha256": "4d4a210206e53bcdadf8a90d48c423cc5c6b731316da9dcac75a80e5be4424a2"
+    "bytes": 11109,
+    "sha256": "6a8a8847d31bcaa20babcf31049df48e349e63eec1ba47ce417a0f878dcacf78"
   },
   {
     "path": "specs/01-core/om9-layer-001-layer-management.md",
-    "bytes": 10396,
-    "sha256": "b375dd49b6c13146ea442136605e0f6d12ace81d63f43a6f5a1037b4932aeee0"
+    "bytes": 18457,
+    "sha256": "db034d1b94133b925776859784f0ca7762e7aca0cb6ee258453a2b3118352080"
   },
   {
     "path": "specs/01-core/om9-main-001-main-menu.md",
-    "bytes": 8903,
-    "sha256": "9cc7801234b762ec4b5620bd461f50ab353d8991a07de0e8118e6205d8782ec2"
+    "bytes": 9857,
+    "sha256": "0458649680d17a902fe173b373948f314f7bcfb2ca8c043b94a6a68554cd4b20"
   },
   {
     "path": "specs/01-core/om9-measure-001-angle.md",
@@ -636,8 +636,8 @@
   },
   {
     "path": "specs/01-core/om9-top11-005-explode.md",
-    "bytes": 10230,
-    "sha256": "c3b31d24a4d1ea74709beeb814412ad01160ea320e867f106730dd5fdda57832"
+    "bytes": 11176,
+    "sha256": "5654f6ba21c5c4dc7f54d4c810c5196d2b9f721b3229280d196c5cc816ab94ba"
   },
   {
     "path": "specs/01-core/om9-top11-006-move.md",
@@ -651,8 +651,8 @@
   },
   {
     "path": "specs/01-core/om9-top11-008-join.md",
-    "bytes": 9607,
-    "sha256": "795089eff0f7a85c2d9da3c77f459349cfba429ea1ed31937954729a861d6717"
+    "bytes": 10548,
+    "sha256": "acecda3df08eacad9a507077d323b1a2a2a54592e235df7c6a964427a01191cb"
   },
   {
     "path": "specs/01-core/om9-top11-009-split.md",
@@ -661,8 +661,8 @@
   },
   {
     "path": "specs/01-core/om9-top11-010-trim.md",
-    "bytes": 9234,
-    "sha256": "5a5a5c8bec438c4e9475a27a3cb520c3c8bf178a9ab31ffd35873676c990c517"
+    "bytes": 10166,
+    "sha256": "623713c73fd1a9bbcb7f9d2e40a94f10857dddab5e00b9c1e26d317cd1f7ee5e"
   },
   {
     "path": "specs/01-core/om9-top11-011-ring-rail.md",
@@ -856,33 +856,33 @@
   },
   {
     "path": "specs/02-curve/om9-curve-001-polyline.md",
-    "bytes": 11179,
-    "sha256": "0de6a06cc39f653ce542654e494bb1e3029200e66eb177063f1a328c53c3d2c7"
+    "bytes": 16722,
+    "sha256": "49f7d3485d7853e15fbc63f371bb3d390a99b805a438e4d8c65852070558f12a"
   },
   {
     "path": "specs/02-curve/om9-curve-002-line.md",
-    "bytes": 12301,
-    "sha256": "135f676360834cac909d05c2c04eb7b5fd44cd79727e1b615d77370d544a9f9e"
+    "bytes": 17854,
+    "sha256": "902f99b2657cb0c63d7c4c9e7b373b777c87dbf7b1f092d16b84bfda0cd6a4e1"
   },
   {
     "path": "specs/02-curve/om9-curve-003-interp-curve.md",
-    "bytes": 13661,
-    "sha256": "273cfda504ef1ca1b7aadef653c9019bbd493bfb62069c2fc0667b977545570e"
+    "bytes": 19233,
+    "sha256": "b321c0eb6c7465401e4f45c7be77fc7d3540e767a00e28800fc7cdd68d58dd07"
   },
   {
     "path": "specs/02-curve/om9-curve-004-rectangle.md",
-    "bytes": 13495,
-    "sha256": "5e0434b6856ff72a7f9909345c38638360036850a0f2ee8b288db1f65dfb10e4"
+    "bytes": 19077,
+    "sha256": "835c425f02cebb43925978c99f917d87102eb881f6d5606e89a046743b8d11bb"
   },
   {
     "path": "specs/02-curve/om9-curve-005-circle.md",
-    "bytes": 25085,
-    "sha256": "19d2bda518a06d61ee5b65ac5d71c82f2027c1b7d4c3c021e96b0cfd01f79353"
+    "bytes": 44376,
+    "sha256": "74e2e07eb20249c18e9290e8e223c366cd3340f407144fa4117ac4570235f466"
   },
   {
     "path": "specs/02-curve/om9-curve-006-ellipse.md",
-    "bytes": 13160,
-    "sha256": "53fed3bc639c6c560680606d73a2cb0d0836555edac09a78a15ca8dc58b259cc"
+    "bytes": 19654,
+    "sha256": "0c55396967122634e17264cc8cdd66da414dbcab1d94e1b250e9e8b2f91b9357"
   },
   {
     "path": "specs/02-curve/om9-curve-007-arc.md",
@@ -896,8 +896,8 @@
   },
   {
     "path": "specs/02-curve/om9-curve-009-rebuild.md",
-    "bytes": 13294,
-    "sha256": "d73b7de8a232a1f359342fbfa82c68511cb509c7ced576de75157946363991db"
+    "bytes": 14075,
+    "sha256": "b8b059d42bf23dd67aa782e3da97b16e901f6e24acfb096bb62822fdde491f12"
   },
   {
     "path": "specs/02-curve/om9-curve-010-refit-to-tolerance.md",
@@ -1146,28 +1146,28 @@
   },
   {
     "path": "specs/03-surface/README.md",
-    "bytes": 5239,
-    "sha256": "bac36888e296e16a1727e21d2c2f1f75d8ed660b562c323e6fb646e984678d28"
+    "bytes": 6673,
+    "sha256": "63567199b6b41bbce83287cbbdde97a647d3ec52f50f41435314eb2e264acfbd"
   },
   {
     "path": "specs/03-surface/om9-surface-001-sweep-1.md",
-    "bytes": 16689,
-    "sha256": "5f5bfb5f1cbb2c7c719eba99eda0423d67b1c5290834a3ca9b23e42fd9b67b0c"
+    "bytes": 18320,
+    "sha256": "4d1ad79ff0a37d4f714d60bc8a0f60c979d15c40ad2ed03028965554f128ce10"
   },
   {
     "path": "specs/03-surface/om9-surface-002-sweep-1-history.md",
-    "bytes": 8641,
-    "sha256": "40b0b5fe7667732f31968a8ccae663f089aa702c70fdc8849f023036b054be0a"
+    "bytes": 10173,
+    "sha256": "157e17544e277cdfb40a061d02e6841417af2d960fd9a9efbc4a04f54c75ec73"
   },
   {
     "path": "specs/03-surface/om9-surface-003-sweep-2.md",
-    "bytes": 16013,
-    "sha256": "e418ab7909470d70c7258610fd4524d59beb2d07887b4c8f094d373ee20a114c"
+    "bytes": 17633,
+    "sha256": "1fed378d8b6e49d56c6e5b0aeeb182ed483910918bb453b0b9b239b9ce725483"
   },
   {
     "path": "specs/03-surface/om9-surface-004-sweep-2-history.md",
-    "bytes": 8790,
-    "sha256": "0a97970aad02218cd392762911431942b373a4031c13b7c1b76863527263e207"
+    "bytes": 10323,
+    "sha256": "a0ce41d93cbcbb82d23f920eb2f7dd7fb7858fda0e8a45a07198b27c9038cd00"
   },
   {
     "path": "specs/03-surface/om9-surface-005-profile-sweep.md",
@@ -1191,8 +1191,8 @@
   },
   {
     "path": "specs/03-surface/om9-surface-009-loft.md",
-    "bytes": 14952,
-    "sha256": "99fe516f4227361b9cf47c3bf682c8df49964ad162cfa1e77dce5364c01b6523"
+    "bytes": 16562,
+    "sha256": "4a845647dce6991bb95e851aae5795b552d4f0d6758832ea3adb768321e31509"
   },
   {
     "path": "specs/03-surface/om9-surface-010-curve-network.md",
@@ -1356,23 +1356,23 @@
   },
   {
     "path": "specs/04-solid/om9-solid-001-boolean-difference.md",
-    "bytes": 8895,
-    "sha256": "28c6c24006c8438e7f0fee7059999b0979a33409694dfc51501a311234bef12f"
+    "bytes": 9829,
+    "sha256": "6a9c5b0c3753d6771e115a093fdf3055727599e2f2aea4937fa84418b226fe9b"
   },
   {
     "path": "specs/04-solid/om9-solid-002-boolean-intersection.md",
-    "bytes": 8507,
-    "sha256": "368b91c97f63e69da6a7f2c6b7189e21f9e8c3abb5475a71849a14ed58df95bc"
+    "bytes": 9434,
+    "sha256": "36af2db1acc9849173ee2a830819275431f9a0c9c2db5793ee3709cd9f6fa1b7"
   },
   {
     "path": "specs/04-solid/om9-solid-003-boolean-union.md",
-    "bytes": 8268,
-    "sha256": "661513db5e59d4143c72f98800298faaea10513b102def63f1465a61f6d9e494"
+    "bytes": 9193,
+    "sha256": "f350ca6535d3ff91548545ef71ba82ee10d16c6eac681a9d376d5f05d40b557f"
   },
   {
     "path": "specs/04-solid/om9-solid-004-boolean-two-objects.md",
-    "bytes": 9210,
-    "sha256": "d0d5940c78998b2328cbf4620ebd32bbacdfd306b8edba1a59e96f7c0b17cc0f"
+    "bytes": 10145,
+    "sha256": "0464aef37339d05000ba46238e0029b1e2cdc73f262a0f5b8c2097b737533ac5"
   },
   {
     "path": "specs/04-solid/om9-solid-005-cap-planar.md",
@@ -1411,8 +1411,8 @@
   },
   {
     "path": "specs/04-solid/om9-solid-012-box.md",
-    "bytes": 13680,
-    "sha256": "520287cf7c4c7ca8161a23e7ee76817d90b4b8b73ee7558801a99a115daa3e4c"
+    "bytes": 19008,
+    "sha256": "5ab3b6f8dac44d55b4f12ab24417146b5625848439814e8be4c34e0e84890e50"
   },
   {
     "path": "specs/04-solid/om9-solid-013-ellipsoid.md",
@@ -1421,8 +1421,8 @@
   },
   {
     "path": "specs/04-solid/om9-solid-014-sphere.md",
-    "bytes": 14068,
-    "sha256": "90b3befae54c6d49f78654fa33534858ee46b89e49738bc6128c82292eb9e239"
+    "bytes": 16110,
+    "sha256": "e5f124f5b36891a990aece01ba986dd2d360b4c7d9ea4986c1d84d862c7b5024"
   },
   {
     "path": "specs/04-solid/om9-solid-015-torus.md",
@@ -1601,8 +1601,8 @@
   },
   {
     "path": "specs/05-transform/om9-transform-020-cage-edit.md",
-    "bytes": 13699,
-    "sha256": "d7ead3f2d440f109e51219cc2bea9e7e684d263e4820ab37901cdd5564299d3c"
+    "bytes": 15207,
+    "sha256": "6c6e102e45e9826f6f153773fd963bd1507fc617bd47525979875149dcb8ec67"
   },
   {
     "path": "specs/05-transform/om9-transform-021-array-along-curve.md",
@@ -1611,8 +1611,8 @@
   },
   {
     "path": "specs/05-transform/om9-transform-022-releasefromcage.md",
-    "bytes": 6779,
-    "sha256": "a4cada30fb639b06e4c96f79803382e18f27e2bbe98e35ad8991e510f88075a6"
+    "bytes": 8231,
+    "sha256": "211ae06bca22f2b311aadb33047cf6ceaffd87a59d7e0728a8fd4d7d614b7ff7"
   },
   {
     "path": "specs/05-transform/om9-transform-023-array-along-surface.md",
@@ -1706,8 +1706,8 @@
   },
   {
     "path": "specs/05-transform/om9-transform-041-create-cage.md",
-    "bytes": 9969,
-    "sha256": "bb8bed71d8ec269392efb4cf1535b5ac39b701feb70c6114875fd23bb632c056"
+    "bytes": 11454,
+    "sha256": "f9d6cd000ff2093ada6e5433d93663894f0a4ae45e1879503e5fcc61f65210ea"
   },
   {
     "path": "specs/06-tsplines/README.md",
@@ -2551,8 +2551,8 @@
   },
   {
     "path": "specs/10-gems/om9-gem-027-match-attributes.md",
-    "bytes": 7507,
-    "sha256": "24e9c4b64fe8c46cb86d8c0fd403b3c06cf7161904f59ed4d62647ecef74a5db"
+    "bytes": 10473,
+    "sha256": "dbce4b0a5ebd859aa9c51e385529e487c7655ffce5fa1a3da9da7456a2304de3"
   },
   {
     "path": "specs/10-gems/om9-gem-028-save-styles.md",

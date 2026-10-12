@@ -1,0 +1,48 @@
+"""Concrete Compound contents must satisfy the existing curve-only reader."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'module':OpenMatrix9Gui.__file__,'diagnostics':[]}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def enter(text):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier))
+    QtWidgets.QApplication.processEvents()
+def rejection(name,shape,code):
+    doc=App.newDocument('Rebuild'+name);doc.UndoMode=1
+    doc.openTransaction('Source');source=doc.addObject('Part::Feature',name);source.Shape=shape;doc.recompute();doc.commitTransaction()
+    doc.openTransaction('Redo witness');source.Label='Executable Redo';doc.commitTransaction();doc.undo()
+    before=(source.Shape.exportBrepToString(),len(doc.Objects),doc.UndoCount,doc.RedoCount)
+    Gui.Selection.clearSelection();Gui.Selection.addSelection(source);console.clear();enter('Rebuild')
+    text=console.toPlainText();report['diagnostics'].append(dict(source=name,text=text))
+    check(name+' concrete source rejection is typed and identified',any(all(token in line for token in (code,'Rebuild',name)) for line in text.splitlines()))
+    check(name+' source objects Undo Redo are unchanged',before==(source.Shape.exportBrepToString(),len(doc.Objects),doc.UndoCount,doc.RedoCount))
+    doc.redo();check(name+' executable Redo survives rejection',source.Label=='Executable Redo');App.closeDocument(doc.Name)
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents()
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        rejection('CompoundFace',Part.makeCompound([Part.makePlane(2,3)]),'UnsupportedRepresentation')
+        rejection('Disconnected',Part.makeCompound([
+            Part.makeLine(App.Vector(0,0,0),App.Vector(1,0,0)),
+            Part.makeLine(App.Vector(3,0,0),App.Vector(4,0,0))]),'InvalidBasis')
+        doc=App.newDocument('RebuildConnectedCompound')
+        source=doc.addObject('Part::Feature','ConnectedCompound')
+        source.Shape=Part.makeCompound([Part.makePolygon([App.Vector(0,0,0),App.Vector(1,1,0),App.Vector(3,1,0)])]);doc.recompute()
+        before=source.Shape.exportBrepToString();Gui.Selection.clearSelection();Gui.Selection.addSelection(source);enter('Rebuild')
+        dialog=Gui.getMainWindow().findChild(QtWidgets.QDialog,'OM9RebuildDialog')
+        check('connected Compound remains a supported concrete source',dialog is not None and dialog.isVisible())
+        if dialog is None:raise RuntimeError('Connected Compound failed to open existing Rebuild')
+        dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(False)
+        dialog.findChild(QtWidgets.QPushButton,'OM9RebuildOK').click();QtWidgets.QApplication.processEvents()
+        check('connected Compound rebuild uses existing native solver and preserves source',len(doc.Objects)==2 and source.Shape.exportBrepToString()==before and doc.Objects[-1].Shape.isValid())
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

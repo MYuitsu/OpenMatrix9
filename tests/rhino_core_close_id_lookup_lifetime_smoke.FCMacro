@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Both names and numeric IDs cease resolving before native owners are freed."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(checks=[],events=[])
+def event(value):
+    report['events'].append(value);(out/'events.json').write_text(json.dumps(report,indent=2))
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM
+        report['module']=OM.__file__;sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE'])
+        import OM9ReplayRetirement as probe
+        doc=App.newDocument('CloseIdLookup');doc.UndoMode=0
+        objects=[doc.getObject(probe.create_member(doc.Name))for _ in range(2)]
+        ids=[o.ID for o in objects];names=[o.Name for o in objects]
+        class LastValue:
+            def __init__(self,index):self.index=index
+            def __del__(self):
+                event('started:'+str(self.index))
+                peer=1-self.index
+                try:
+                    raw=probe.has_native_id(doc,ids[peer]);event('native-id:'+str(self.index)+':'+('present'if raw else'absent'))
+                    by_id=doc.getObject(ids[peer]);event('id:'+str(self.index)+':'+('absent'if by_id is None else'present'))
+                    by_name=doc.getObject(names[peer]);event('name:'+str(self.index)+':'+('absent'if by_name is None else'present'))
+                    active=doc.ActiveObject;event('active:'+str(self.index)+':'+('absent'if active is None else'present'))
+                except Exception as error:event('error:'+type(error).__name__+':'+str(error))
+        for i,o in enumerate(objects):o.Payload=LastValue(i)
+        event('before-close');App.closeDocument(doc.Name);event('after-close')
+        check('actual native member finalizers both execute once',
+              all(report['events'].count('started:'+str(i))==1 for i in range(2)))
+        check('numeric lookup cannot resolve a retiring or freed owner',
+              all('id:'+str(i)+':absent'in report['events']for i in range(2)))
+        check('native ID map never contains an owner after logical retirement',
+              all('native-id:'+str(i)+':absent'in report['events']for i in range(2)))
+        check('name lookup cannot resolve a retiring owner',
+              all('name:'+str(i)+':absent'in report['events']for i in range(2)))
+        check('active-object pointer cannot survive owner retirement',
+              all('active:'+str(i)+':absent'in report['events']for i in range(2)))
+        check('normal close completes',not App.listDocuments())
+        report['ok']=all(c['passed']for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2));QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

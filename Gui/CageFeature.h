@@ -8,6 +8,7 @@
 #include <Mod/Part/App/PropertyTopoShape.h>
 #include <fastsignals/signal.h>
 #include <vector>
+#include <string>
 namespace OpenMatrix9Gui {
 class CageControl final : public Part::Feature {
     PROPERTY_HEADER_WITH_OVERRIDE(OpenMatrix9Gui::CageControl);
@@ -52,6 +53,8 @@ private:
     fastsignals::connection changed,beforeChanged;
 };
 void initializeCageTypes();void AddCageMethods(PyObject*);
+// GUI-thread borrowed basis validation, before lattice copies/signatures.
+void validateNativeCageControl(CageControl&,const std::string&,const std::string&);
 bool cageHistoryRecorded(App::DocumentObject*);
 std::vector<App::DocumentObject*> cageHistoryParents(App::DocumentObject*);
 void detachCageHistory(App::DocumentObject*);

@@ -1,4 +1,6 @@
 #include "ThreeDmGeometry.h"
+#include "NativeInputTrace.h"
+#include "NativeInputTree.h"
 #include "ThreeDmSolidShells.h"
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
@@ -84,9 +86,10 @@ static int classifiedSolidOrientation(const TopoDS_Shape& shape,double tolerance
     return classifiedBrepSolidOrientation(shape,tolerance);
 }
 TopoDS_Shape importBrep(const ON_Brep& source,double tolerance){
+    InputTree::validate(source);
     // Const SDK topology/proxy queries may populate serialized caches. Work on
     // an independent native copy so a retained archive remains authoritative.
-    ON_Brep native(source);const ON_Brep& b=native;
+    OM9_NATIVE_INPUT_ENTRY("brep.Copy");ON_Brep native(source);const ON_Brep& b=native;
     if(!b.IsValid())throw ExchangeError("Invalid input BRep topology");
     const double constructionTolerance=std::min(tolerance,1e-7);
     BRepBuilderAPI_Sewing sew(tolerance);int faces=0;bool nativeRevolution=false;
@@ -159,9 +162,12 @@ TopoDS_Shape importBrep(const ON_Brep& source,double tolerance){
     return shape;
 }
 int resolvedBrepOrientation(const ON_Brep& source,double tolerance){
+    InputTree::validate(source);
     // Even const SDK queries lazily update native caches. Classification of a
     // preserved archive must therefore operate on an independent working copy.
-    ON_Brep copy(source);int direction=copy.SolidOrientation();
+    OM9_NATIVE_INPUT_ENTRY("brep.orientation.Copy");ON_Brep copy(source);
+    if(!copy.IsValid())throw ExchangeError("Invalid input BRep topology for orientation query");
+    OM9_NATIVE_INPUT_ENTRY("brep.orientation.Query");int direction=copy.SolidOrientation();
     if(direction!=2)return direction;
     try{return classifiedSolidOrientation(importBrep(copy,tolerance),tolerance);}
     catch(const GeometryRepresentationUnavailable& error){
@@ -172,11 +178,12 @@ int resolvedBrepOrientation(const ON_Brep& source,double tolerance){
     }
 }
 std::unique_ptr<ON_Brep> exportBrep(const TopoDS_Shape& source,double tolerance){
+    InputTree::validate(source);
     if(source.IsNull()||!BRepCheck_Analyzer(source).IsValid())throw ExchangeError("Invalid shape for BRep export");
     bool alreadyNurbs=true;
     for(TopExp_Explorer it(source,TopAbs_FACE);it.More();it.Next())if(Handle(Geom_BSplineSurface)::DownCast(BRep_Tool::Surface(TopoDS::Face(it.Current()))).IsNull())alreadyNurbs=false;
     for(TopExp_Explorer it(source,TopAbs_EDGE);it.More();it.Next()){auto edge=TopoDS::Edge(it.Current());if(BRep_Tool::Degenerated(edge))continue;double a,z;if(Handle(Geom_BSplineCurve)::DownCast(BRep_Tool::Curve(edge,a,z)).IsNull())alreadyNurbs=false;}
-    auto shape=alreadyNurbs?source:BRepBuilderAPI_NurbsConvert(source,true).Shape();auto b=std::make_unique<ON_Brep>();
+    OM9_NATIVE_INPUT_ENTRY("brep.ExportOutput");auto shape=alreadyNurbs?source:BRepBuilderAPI_NurbsConvert(source,true).Shape();auto b=std::make_unique<ON_Brep>();
     TopTools_IndexedMapOfShape vertices,edges;TopExp::MapShapes(shape,TopAbs_VERTEX,vertices);TopExp::MapShapes(shape,TopAbs_EDGE,edges);
     for(int i=1;i<=vertices.Extent();++i){auto p=BRep_Tool::Pnt(TopoDS::Vertex(vertices(i)));b->NewVertex(ON_3dPoint(p.X(),p.Y(),p.Z()),tolerance);}
     std::vector<int> edgeIndex(edges.Extent()+1,-1);

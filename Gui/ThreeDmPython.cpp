@@ -11,7 +11,10 @@
 #include "ThreeDmPointCloud.h"
 #include "ThreeDmHatch.h"
 #include "ThreeDmHatchDialog.h"
+#include "NativeInputTree.h"
+#include "CorePreparedCad.h"
 #include "RustBridge.h"
+#include <Mod/Part/App/TopoShapePy.h>
 #include <BRepTools.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepGProp.hxx>
@@ -23,6 +26,8 @@
 #include <QJsonArray>
 #include <QFile>
 #include <QCryptographicHash>
+#include <QApplication>
+#include <QThread>
 #include <cmath>
 #include <cstring>
 #include <memory>
@@ -84,7 +89,7 @@ static PyObject* prepare3dmArchive(PyObject*,PyObject* args){const char *path,*d
             QJsonArray previews;
             if(mode==1)for(auto value:manifest["records"].toArray()){auto record=value.toObject();if(record["class_name"]!="ON_InstanceRef")continue;auto matrix=record["instance_matrix"].toArray();bool rigid=true;for(int a=0;a<3;++a)for(int b=0;b<3;++b){double dot=0;for(int k=0;k<3;++k)dot+=matrix[a*4+k].toDouble()*matrix[b*4+k].toDouble();if(std::abs(dot-(a==b?1:0))>1e-9)rigid=false;}ON_Xform transform;for(int k=0;k<16;++k)transform[k/4][k%4]=matrix[k].toDouble();if(rigid&&std::abs(transform.Determinant()-1)<1e-9)continue;
                 QJsonObject preview{{"source_uuid",record["source_uuid"]}};QJsonArray items;
-                try{auto expanded=readArchive(snapshot,scale,false,false,record["source_uuid"].toString().toStdString());mark("affine_conversion");for(auto& item:expanded.items)items.append(encodeExchangeItem(item,previewStaging,i++));preview["items"]=items;mark("affine_staging");}
+                try{auto expanded=readArchive(snapshot,scale,false,false,record["source_uuid"].toString().toStdString());mark("affine_conversion");for(auto& item:expanded.items){auto row=encodeExchangeItem(item,previewStaging,i++);row["tolerance"]=expanded.tolerance;items.append(row);}preview["items"]=items;mark("affine_staging");}
                 catch(const ExchangeError& error){preview["unavailable_reason"]=error.what();}
                 previews.append(preview);
             }
@@ -189,16 +194,63 @@ static PyObject* writeGeometryStaging3dm(PyObject*,PyObject* args){PyObject* req
     }catch(const Standard_Failure& e){PyErr_SetString(PyExc_RuntimeError,e.GetMessageString());}catch(const std::exception& e){PyErr_SetString(PyExc_RuntimeError,e.what());}return nullptr;
 }
 static PyObject* commit3dm(PyObject*,PyObject* args){const char* name;PyObject* prepared;if(!PyArg_ParseTuple(args,"sO",&name,&prepared))return nullptr;
+    if(!qApp||QThread::currentThread()!=qApp->thread()){PyErr_SetString(PyExc_RuntimeError,"Import commit requires the GUI thread");return nullptr;}
     auto* doc=App::GetApplication().getDocument(name);auto* gui=Gui::Application::Instance->activeDocument();
     if(!doc||doc!=App::GetApplication().getActiveDocument()||!gui||gui->getInEdit()||!Gui::Control().isAllowedAlterDocument(doc)){PyErr_SetString(PyExc_RuntimeError,"The active project is not editable");return nullptr;}
-    doc->openTransaction(std::string("Import Rhino 5 3DM"));
-    auto* module=PyImport_ImportModule("ThreeDm");auto* result=module?PyObject_CallMethod(module,"_insert_prepared","sO",name,prepared):nullptr;Py_XDECREF(module);
-    if(!result){
-        // Rollback invokes Python document observers. Preserve the binding
-        // exception while those callbacks run, then return its original type.
-        PyObject *type=nullptr,*value=nullptr,*trace=nullptr;PyErr_Fetch(&type,&value,&trace);
-        doc->abortTransaction();PyErr_Restore(type,value,trace);return nullptr;
-    }doc->commitTransaction();return result;
+    PyObject* ownedPrepared=nullptr;
+    try{ownedPrepared=OpenMatrix9Gui::prepareOwnedCad(prepared,name);}
+    catch(const OpenMatrix9Gui::PreparedCadFailure& error){OpenMatrix9Gui::setPreparedCadError(error);return nullptr;}
+    catch(const Standard_Failure& error){PyErr_SetString(PyExc_RuntimeError,error.GetMessageString()?error.GetMessageString():"Native import preflight failed");return nullptr;}
+    catch(const std::exception& error){PyErr_SetString(PyExc_RuntimeError,error.what());return nullptr;}
+    catch(...){PyErr_SetString(PyExc_RuntimeError,"Native import preflight failed");return nullptr;}
+    std::unique_ptr<PyObject,decltype(&Py_DecRef)> frozen(ownedPrepared,Py_DecRef);
+    bool transaction=false;
+    auto nativeFailure=[&](const char* reason) noexcept {
+        try{
+            // Roll back before constructing diagnostics, including allocation failures.
+            bool rollbackFailed=false;
+            if(transaction){try{doc->abortTransaction();transaction=false;}catch(...){rollbackFailed=true;}}
+            std::string message(reason);
+            if(rollbackFailed)message+="; native transaction rollback failed";
+            OpenMatrix9Gui::setPreparedCadError(OpenMatrix9Gui::PreparedCadFailure(7,"CommitImport3dm",
+                QJsonObject{{"document_name",QString::fromUtf8(name)}},message));
+        }catch(...){PyErr_SetString(PyExc_RuntimeError,"KernelFailure CommitImport3dm: cannot encode transaction diagnostic");}
+    };
+    try{
+        doc->openTransaction(std::string("Import Rhino 5 3DM"));transaction=true;
+        std::unique_ptr<PyObject,decltype(&Py_DecRef)> module(PyImport_ImportModule("ThreeDm"),Py_DecRef);
+        std::unique_ptr<PyObject,decltype(&Py_DecRef)> result(module?PyObject_CallMethod(module.get(),"_insert_prepared","sO",name,frozen.get()):nullptr,Py_DecRef);
+        if(!result){
+            // Retain the original Python cause while rollback invokes observers.
+            PyObject *type=nullptr,*value=nullptr,*trace=nullptr;PyErr_Fetch(&type,&value,&trace);
+            std::unique_ptr<PyObject,decltype(&Py_DecRef)> causeType(type,Py_DecRef),cause(value,Py_DecRef),causeTrace(trace,Py_DecRef);
+            try{doc->abortTransaction();transaction=false;}
+            catch(...){throw;}
+            std::string reason="Prepared host property binding failed";
+            if(value&&PyExceptionInstance_Check(value)){
+                std::unique_ptr<PyObject,decltype(&Py_DecRef)> arguments(PyException_GetArgs(value),Py_DecRef);
+                // Inspect builtin exception storage, never custom __str__/args accessors.
+                if(arguments&&PyTuple_CheckExact(arguments.get())&&PyTuple_GET_SIZE(arguments.get())>0){
+                    auto* first=PyTuple_GET_ITEM(arguments.get(),0);
+                    if(PyUnicode_CheckExact(first)){
+                        Py_ssize_t size=0;const auto* text=PyUnicode_AsUTF8AndSize(first,&size);
+                        if(text&&size>0){reason+=": ";reason.append(text,static_cast<std::size_t>(std::min<Py_ssize_t>(size,4096)));}
+                    }
+                }
+            }
+            nativeFailure(reason.c_str());
+            PyObject *resultType=nullptr,*resultValue=nullptr,*resultTrace=nullptr;PyErr_Fetch(&resultType,&resultValue,&resultTrace);
+            if(resultValue&&PyExceptionInstance_Check(resultValue)&&value&&PyExceptionInstance_Check(value)){
+                if(trace)PyException_SetTraceback(value,trace);
+                PyException_SetCause(resultValue,cause.release());
+            }
+            PyErr_Restore(resultType,resultValue,resultTrace);return nullptr;
+        }
+        doc->commitTransaction();transaction=false;return result.release();
+    }catch(const Standard_Failure& e){nativeFailure(e.GetMessageString()?e.GetMessageString():"Native import transaction failed");}
+    catch(const std::exception& e){nativeFailure(e.what());}
+    catch(...){nativeFailure("Native import transaction failed");}
+    return nullptr;
 }
 static bool ready3dm(const char* name){auto* doc=App::GetApplication().getDocument(name);auto* gui=Gui::Application::Instance->activeDocument();if(doc&&doc==App::GetApplication().getActiveDocument()&&gui&&!gui->getInEdit()&&Gui::Control().isAllowedAlterDocument(doc))return true;PyErr_SetString(PyExc_RuntimeError,"The active project is not editable");return false;}
 static PyObject* validateDocument(PyObject*,PyObject* args){const char* name;if(!PyArg_ParseTuple(args,"s",&name)||!ready3dm(name))return nullptr;Py_RETURN_NONE;}

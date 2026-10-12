@@ -1,0 +1,43 @@
+"""RCORE-01: bounded native capture errors name the command/source and permit retry."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(text=''):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def run():
+ global console
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  for command in ['Circle','Ellipse']:
+   doc=App.newDocument('CaptureError'+command);doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+   source=doc.addObject('Part::Feature','Source');source.Shape=Part.makeLine(App.Vector(10,20,30),App.Vector(10,20,50));source.Label='L'*65537;doc.recompute()
+   before=doc.UndoCount;enter(command);enter('AroundCurve');enter('Curve=Source.Edge1');diagnostic=str(console.property('om9Prompt'))
+   check(command+' native budget error is typed and names actual operation/source',diagnostic.startswith('InvalidBasis:') and command in diagnostic and 'Source.Edge1' in diagnostic and 'budget' in diagnostic.lower())
+   check(command+' rejected capture publishes no geometry or Undo entry',doc.getObject(command) is None and doc.UndoCount==before)
+   source.Label='Repaired source';doc.recompute();enter('Curve=Source.Edge1');enter('OnCurve=0.2500')
+   for token in (['2mm'] if command=='Circle' else ['5mm','3mm']):enter(token)
+   obj=doc.getObject(command);raw=getattr(obj,'OM9CurveConstruction','') if obj else '';value=json.loads(raw) if raw else {}
+   geometry=obj is not None and obj.Shape.isValid() and (obj.Shape.Edges[0].Curve.Center-App.Vector(10,20,35)).Length<1e-7
+   if geometry:
+    curve=obj.Shape.Edges[0].Curve;geometry=abs(curve.Radius-2.)<1e-7 if command=='Circle' else abs(curve.MajorRadius-5.)<1e-7 and abs(curve.MinorRadius-3.)<1e-7
+   check(command+' repaired source retries same session with independent dimensions',geometry)
+   events=value.get('accepted_input_events',[]);refs=value.get('source_refs',[]);snaps=value.get('source_snapshots',[])
+   check(command+' failed capture is absent from accepted branch',sum(e.get('text')=='Curve=Source.Edge1' for e in events)==1 and len(refs)==1 and len(snaps)==1 and snaps[0].get('source_attributes',{}).get('label')=='Repaired source')
+   linked=False
+   if value.get('source_snapshot_indexing')=='source_snapshots_one_based' and refs:
+    index=refs[0].get('input_snapshot_index');linked=isinstance(index,int) and 1<=index<=len(snaps) and snaps[index-1].get('source_attributes',{}).get('object_name')=='Source'
+   check(command+' advertised source indexing independently resolves owner',linked)
+   one=doc.UndoCount==before+1;doc.undo();missing=doc.getObject(command) is None;doc.redo();obj=doc.getObject(command)
+   check(command+' recovered publication preserves one Undo Redo',one and missing and obj is not None and obj.OM9CurveConstruction==raw)
+   report['observations'].append(dict(command=command,diagnostic=diagnostic,construction=value));enter('Cancel');App.closeDocument(doc.Name)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

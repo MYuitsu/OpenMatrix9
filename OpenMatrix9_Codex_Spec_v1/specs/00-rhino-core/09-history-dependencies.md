@@ -12,6 +12,85 @@ openmatrix9_commit: 52e887ab706dcd5d80e23979fb1f1b62d8d869b0
 
 # RCORE-09 — Associative History và identity bền vững
 
+<!-- rhino-core-surface-result-20261011:start -->
+Loft/Sweep giữ solver hiện có, có GeometryResult EditSurface với recipe,
+source snapshots/attributes/revision và CAD master khớp Shape được công bố.
+History cập nhật/xóa cả Shape và result; freeze/detach, Undo/Redo và FCStd đạt.
+Sửa và kiểm Placement/group cùng tên output duy nhất trước publication.
+Matching848/21 actual host exits0; full Rust791 đạt.
+Global conversion/maps, các consumer và lifecycle toàn family còn mở;
+**RCORE-01 đang triển khai**. [Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-surface-result.md).
+<!-- rhino-core-surface-result-20261011:end -->
+
+<!-- rhino-core-surface-history-admission-20261011:start -->
+Surface History dùng Rust kiểm JSON/options/group metadata trước native capture;
+giữ solver Loft/Sweep và kiểm rail closure từ nguồn hiện tại. Dữ liệu hỏng giữ
+raw/source/links/Redo, xóa output cũ và báo InvalidBasis kèm tên child.
+GREEN55; matching698/13 actual host exits0; full Rust767 đạt.
+Full results/conversion/maps/ownership mọi family còn mở; **RCORE-01 đang triển khai**.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-surface-history-admission.md).
+<!-- rhino-core-surface-history-admission-20261011:end -->
+
+<!-- rhino-core-builder-conversion-20261011:start -->
+Builder giữ native ModifiedShape topology map, template snapshot độc lập và
+điểm đo/parameter queries cho edge và face có trim; Rust kiểm frame/domain/ID
+và sai lệch trước publish. Query native không thực hiện được ghi unavailable
+và diagnostic; không nâng tolerance hoặc xác nhận global parameter map.
+315 checks/10 actual host exits0 trên cùng plugin, full Rust758 đạt.
+Global conversion/maps và hợp đồng mọi family còn mở; **RCORE-01 đang triển khai**.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-builder-conversion.md).
+<!-- rhino-core-builder-conversion-20261011:end -->
+
+<!-- rhino-core-builder-result-20261011:start -->
+Builder có GeometryResult native đúng operation, recipe/slot/source revision,
+CAD master/topology/validation và thuộc tính seed độc lập, giữ qua History/FCStd.
+Create/restore/Match chuẩn bị cả Shape/result trước transaction; metadata hỏng
+bị từ chối, recipe legacy ghi unavailable. 297 checks/9 actual host exits0
+trên cùng plugin; full Rust747 đạt. Conversion/maps, thuộc tính còn lại và
+hợp đồng mọi family còn mở; **RCORE-01 vẫn đang triển khai**.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-builder-result.md).
+<!-- rhino-core-builder-result-20261011:end -->
+
+<!-- rhino-core-builder-output-publication-20261011:start -->
+Builder Create/restore/Match dựng và kiểm toàn bộ output/slot trước transaction;
+lỗi output cuối giữ source, links và executable Redo. Dùng lại solver/native
+frame và policy Rust; dữ liệu dựng sẵn chỉ sống trong lần publish này.
+28 output checks; matching196 checks/7 actual host exits0, gồm Builder cold
+FCStd và prepared CAD; full Rust744 đạt. Results/conversion/maps/attributes,
+aggregate budgets và hợp đồng toàn family còn mở; **RCORE-01 đang triển khai**.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-builder-output.md).
+<!-- rhino-core-builder-output-publication-20261011:end -->
+
+<!-- rhino-core-builder-policy-20261011:start -->
+Builder affine-template hiện có dùng request Rust độc lập, kiểm source/template,
+recipe và kích thước trước copy/transaction; lỗi đầu vào giữ Redo.
+61 policy checks; matching1484 checks/32 actual host exits0, gồm Builder và
+Circle cold FCStd; full Rust744 đạt. Giữ solver/frame/History hiện hữu.
+Results/maps, source-lock-cache và yêu cầu gốc còn mở; **RCORE-01 đang triển khai**.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-builder-policy.md).
+<!-- rhino-core-builder-policy-20261011:end -->
+
+<!-- rhino-core-circle-history-policy-20261011:start -->
+Circle History dùng request Rust từ tùy chọn đã lưu, kiểm trước copy/reader;
+giữ độc lập với lệnh đang nhập, legacy AroundCurve và Mesh/cloud FitPoints.
+1363 checks/27 actual host exits0 trên cùng plugin, gồm cold FCStd; full
+Rust739 đạt. Output results/maps, consumer khác và yêu cầu gốc còn mở;
+**RCORE-01 vẫn đang triển khai**. [Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-circle-history-policy.md).
+<!-- rhino-core-circle-history-policy-20261011:end -->
+
+## Bổ sung kiểm chứng History và persistence — 2026-10-10
+
+T09 xác nhận FCStd warm/cold persistence cho curve periodic cùng face có
+seam/lỗ; T10 xác nhận query/basis/source identity và History được lưu, tính lại
+sau sửa nguồn, Undo và restore cho Circle/Line. T08 kiểm tra chặn Rebuild result
+cũ trước commit, còn T11 kiểm tra owner/deep-copy của Curve/Surface subobject.
+Đây là các family/fixture cụ thể, chưa phải schema, migration hay replay chung.
+[T09](../../../docs/validation/2026-10-10-rhino-core-periodic-persistence.md),
+[T10](../../../docs/validation/2026-10-10-rhino-core-host-parameter-dependency.md),
+[T08](../../../docs/validation/2026-10-10-rhino-core-delayed-publication.md),
+[T11](../../../docs/validation/2026-10-10-rhino-core-subobject-ownership.md).
+**RCORE-09 và toàn bộ P0 vẫn đang triển khai.**
+
 ## Cập nhật triển khai P0 — 2026-10-09
 
 Metadata và bảng source phía dưới ghi baseline audit ban đầu. Policy Rust đã

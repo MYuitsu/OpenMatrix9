@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# OM9-LAYER-001: native visibility must not destroy explicit selection permission.
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+result={'feature_id':'OM9-LAYER-001','checks':[]}
+def check(name,ok):
+    result['checks'].append({'name':name,'passed':bool(ok)})
+    if not ok:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(200,loop.quit);loop.exec()
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui
+        result['module']=OpenMatrix9Gui.__file__
+        check('Selected module',Path(result['module']).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        doc=App.newDocument('LayerPermissions');doc.UndoMode=1;dock=Gui.getMainWindow().findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar');settle()
+        def click(role):dock.findChild(QtWidgets.QToolButton,'OM9Layer'+role+'0').click();settle()
+        a=doc.addObject('Part::Feature','A');a.Shape=Part.makeLine(App.Vector(),App.Vector(5,0,0));doc.recompute();Gui.Selection.addSelection(a);click('Arrow')
+        a.ViewObject.Visibility=False;click('Visibility');click('Visibility');a.ViewObject.Visibility=True
+        check('Tree Show restores visible selectable member',a.ViewObject.Visibility and a.ViewObject.Selectable)
+        click('Visibility');click('Visibility')
+        check('Explicit selectable permission survives another cycle',a.OM9LayerExplicitSelectable and a.ViewObject.Selectable)
+        a.ViewObject.Selectable=False;click('Lock');click('Lock')
+        check('Explicit unselectable permission survives unlock',not a.OM9LayerExplicitSelectable and not a.ViewObject.Selectable)
+        a.ViewObject.Selectable=True;click('Lock');click('Lock')
+        check('Explicit selectable permission restored on unlock',a.OM9LayerExplicitSelectable and a.ViewObject.Selectable)
+        result['ok']=True
+    except Exception:result['ok']=False;result['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(0,QtWidgets.QApplication.instance().quit)
+QtCore.QTimer.singleShot(1400,run)

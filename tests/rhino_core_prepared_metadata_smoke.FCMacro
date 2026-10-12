@@ -1,0 +1,71 @@
+"""Real import rejection must precede publication and preserve executable Redo."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'cases':[]}
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def item(name):return dict(name=name,brep='prepared',tolerance=1e-6,layer='Fixture',locked=False,visible=True,color=[20,40,60])
+def run():
+ try:
+  import OpenMatrix9Gui as native
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+  shape=Part.makeBox(1,1,1);cases=[]
+  for field in ('name','tolerance','layer','locked','visible','color'):
+   meta=item('Missing-'+field);del meta[field];cases.append(('missing-'+field,[(meta,shape)],0,meta.get('name',''),None))
+  for field,value in [('name',None),('layer',None),('tolerance','one'),('color',[1,2]),('color',[1,2,'three']),('wire_density',2**40),('locked',[]),('visible',{}),('geometry_kind',None)]:
+   meta=item('Invalid-'+field);meta[field]=value;cases.append(('invalid-'+field,[(meta,shape)],0,meta.get('name') if type(meta.get('name')) is str else '',None))
+  meta=dict(item('Working'),working_mode=True,geometry_kind=3);cases.append(('missing-working-representation',[(meta,shape)],0,'Working',None))
+  first=dict(item('First'),source_uuid='first')
+  cases.append(('second-row-identity',[(first,shape),(dict(item('Second'),source_uuid='second',extra=object()),shape)],1,'Second','second'))
+  cases.append(('malformed-second-pair',[(first,shape),('bad-pair',)],1,'',None))
+  for index,(name,rows,row_index,label,identity) in enumerate(cases):
+   doc=App.newDocument('PreparedMetadata'+str(index));doc.UndoMode=1
+   doc.openTransaction('Source');source=doc.addObject('Part::Feature','Source');source.Shape=shape;doc.commitTransaction()
+   doc.openTransaction('Redo witness');source.Label='Redo witness';doc.commitTransaction();doc.undo()
+   baseline=(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount,source.Shape.exportBrepToString(),source.Label)
+   class Observer:
+    publications=0
+    def slotCreatedObject(self,obj):self.publications+=1
+   observer=Observer();App.addDocumentObserver(observer);error=None;result={}
+   try:native.commit3dm(doc.Name,rows)
+   except Exception as exc:
+    error=repr(exc)
+    try:result=json.loads(exc.geometry_result)
+    except Exception:pass
+   finally:App.removeDocumentObserver(observer)
+   report['cases'].append(dict(name=name,error=error,result=result,publications=observer.publications))
+   diagnostic=result.get('diagnostics',[{}])[0];actual=diagnostic.get('input_identity',{})
+   check(name+' structured rejection',error is not None and result.get('status')=='rejected' and diagnostic.get('operation')=='CommitImport3dm')
+   check(name+' no publication',observer.publications==0)
+   check(name+' complete current row identity',actual.get('row_index')==row_index and actual.get('name','')==label and actual.get('source_uuid')==identity)
+   if name=='invalid-geometry_kind':check('optional kind rejects as a metadata type error',diagnostic.get('code')=='UnsupportedRepresentation')
+   check(name+' source and Undo/Redo unchanged',(tuple(o.Name for o in doc.Objects),doc.UndoCount,doc.RedoCount,source.Shape.exportBrepToString(),source.Label)==baseline)
+   doc.redo();check(name+' executable Redo',source.Label=='Redo witness')
+   App.closeDocument(doc.Name)
+  # Controlled binding fault after real property publication exercises rollback
+  # and the Python/native exception boundary; it is not a solver replacement.
+  import ThreeDm
+  doc=App.newDocument('PreparedBindingFailure');doc.UndoMode=1;original=ThreeDm._insert_prepared
+  def binding_failure(name,rows):
+   original(name,rows)
+   raise ValueError('Fixture binding failure after publication')
+  ThreeDm._insert_prepared=binding_failure;failure=None;result={}
+  try:native.commit3dm(doc.Name,[(item('BindingFailure'),shape)])
+  except Exception as exc:
+   failure=exc
+   try:result=json.loads(exc.geometry_result)
+   except Exception:pass
+  finally:ThreeDm._insert_prepared=original
+  check('binding failure is structured KernelFailure',result.get('status')=='rejected' and result.get('diagnostics',[{}])[0].get('code')=='KernelFailure')
+  check('binding failure retains original Python cause',failure is not None and isinstance(failure.__cause__,ValueError) and str(failure.__cause__)=='Fixture binding failure after publication')
+  check('binding failure keeps its existing readable reason',failure is not None and 'Fixture binding failure after publication' in str(failure))
+  check('binding failure rolls back published objects',len(doc.Objects)==0 and doc.UndoCount==0)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

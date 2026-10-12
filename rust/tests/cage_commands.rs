@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-#[path = "../src/cage_commands.rs"]
-mod cage_commands;
-use cage_commands::*;
+use openmatrix9_rust::cage_commands::*;
 
 fn input(name: &str) -> Input {
     Input::new(name, "full-topology-and-global-frame", [0.; 3], [10.; 3]).unwrap()

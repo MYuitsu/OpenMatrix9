@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Independent cold host validates retained initial contact records and native geometry."""
+import json,os,traceback,zipfile,xml.etree.ElementTree as ET
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(checks=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM;report['module']=OM.__file__
+  warm=Path(os.environ['OM9_INITIAL_CONTACTS_ARCHIVES']);records=json.loads((warm/'results.json').read_text())['records'];archive=warm/'initial_contacts.FCStd'
+  with zipfile.ZipFile(archive)as z:xml=ET.fromstring(z.read('Document.xml'))
+  doc=App.openDocument(str(archive));check('Cold host opens all three initial contact outputs',len(records)==3 and all(doc.getObject(row['name'])is not None for row in records))
+  for row in records:
+   name=row['case'];child=doc.getObject(row['name']);value=json.loads(row['raw']);event=next(e for e in value['accepted_input_events']if e.get('kind')=='native_solution')
+   properties=next(node for node in xml.findall('.//ObjectData/Object')if node.attrib.get('name')==row['name']).find('Properties')
+   archived={p.attrib['name']:p.find('String').attrib['value'] for p in properties.findall('Property')if p.attrib['name']in ['OM9CurveConstruction','OM9GeometryResult']}
+   check(name+' actual FCStd XML retains exact construction result bytes',archived['OM9CurveConstruction']==row['raw'] and archived['OM9GeometryResult']==row['result'])
+   check(name+' cold native properties retain exact evidence',child.OM9CurveConstruction==row['raw'] and child.OM9GeometryResult==row['result'])
+   check(name+' cold native shape is valid and closed',child.Shape.isValid() and child.Shape.isClosed())
+   center=App.Vector(*event['center']);normal=App.Vector(*event['normal']);radius=event['radius'];valid=True
+   for i,fraction in enumerate(event['resolved_contact_fractions']):
+    if fraction is None:q=doc.getObject('P').Shape.Vertexes[0].Point;valid=valid and abs((q-center).Length-radius)<1e-6;continue
+    reference=next(r for r in value['source_refs']if r['role']=='tangent' and r['role_index']==i);owner=doc.getObject(reference['object_name']);edge=owner.Shape.getElement(reference['subelement']);u=edge.FirstParameter+fraction*(edge.LastParameter-edge.FirstParameter);q=edge.valueAt(u);t=edge.tangentAt(u);delta=q-center
+    valid=valid and 0<=fraction<=1 and abs(delta.Length-radius)<1e-6 and abs(delta.dot(normal))<1e-6 and abs(t.dot(normal))<1e-8 and abs(delta.dot(t)/radius)<1e-8
+   check(name+' cold independent native source contacts satisfy solution',valid)
+   curve=child.Shape.Edges[0].Curve
+   if value['spline']is None:valid=isinstance(curve,Part.Circle) and (curve.Center-center).Length<1e-8 and abs(curve.Radius-radius)<1e-8 and (curve.Axis-normal).Length<1e-8
+   else:
+    spline=value['spline'];valid=isinstance(curve,Part.BSplineCurve) and curve.isPeriodic() and curve.Degree==spline['degree'] and len(curve.getPoles())==len(spline['poles']) and all((q-App.Vector(*r)).Length<1e-8 for q,r in zip(curve.getPoles(),spline['poles']))
+   check(name+' cold physical native output matches checked constructor',valid)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

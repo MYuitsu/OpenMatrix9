@@ -1,8 +1,9 @@
 # Build and validation
 
-Hướng dẫn từng bước bằng tiếng Việt: [build FreeCAD cùng OM9, build riêng OM9
-với SDK, và dùng với FreeCAD installer/portable](build-windows.md). Standalone
-native module cần SDK/ABI khớp; installer runtime đơn lẻ chưa đủ để build.
+Install the published package using the detailed [English](../README.en.md#installation)
+or [Vietnamese](../README.vi.md#installation) instructions. Developer builds use
+the [shared SDK and plugin-only target](build-windows.md). A standalone native
+module requires a matching SDK/ABI; an installer runtime alone is insufficient to build it.
 
 The runtime does not require commercial CAD installations, proprietary resource
 archives, private manuals or this developer's filesystem paths.
@@ -24,21 +25,25 @@ receiving a misleading generic symbol.
 
 ## FreeCAD integration
 
-Build this module inside a matching FreeCAD source/build checkout using
-`cmake/freecad-integration.patch`, or configure the standalone SDK mode on
-Windows. Requirements include Cargo, CMake, a supported C++23 compiler, a matching
-FreeCAD source/build SDK, Qt6, Python and Open CASCADE dependencies.
+Reuse the matching FreeCAD source/build SDK and configure only the standalone
+OM9 plugin on Windows. Requirements include Cargo, CMake, a supported C++23 compiler,
+the FreeCAD SDK, Qt6, Python and Open CASCADE dependencies.
+In the maintained workspace, use `build/build-om9-plugin.ps1` and
+`build/run-om9-plugin.ps1` from the FreeCAD workspace root; keep plugin outputs separate.
 
 Standalone SDK configuration accepts these caller-provided paths:
 
 ```text
-cmake -S . -B build/native -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DFREECAD_SOURCE_DIR=<FreeCAD-source> -DFREECAD_SDK_BUILD=<matching-FreeCAD-build> -DFREECAD_DEPENDENCY_PREFIX=<dependency-prefix>
+cmake -S . -B build/native -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DFREECAD_SOURCE_DIR=<FreeCAD-source> -DFREECAD_SDK_BUILD=<matching-FreeCAD-build> -DFREECAD_DEPENDENCY_PREFIX=<dependency-prefix> -DOPENMATRIX9_RUNTIME_ROOT=<separate-plugin-runtime> -DOPENMATRIX9_RUNTIME_OUTPUT_DIR=<separate-plugin-runtime>/bin
 cmake --build build/native --target OpenMatrix9Gui
 ```
 
 Use the compiler/toolchain environment that built the SDK. The standalone
 configuration currently assumes Windows SDK library naming. openNURBS is fetched
 from its public upstream at a pinned commit; retain its distribution notices.
+
+Reuse each checkout's plugin cache. Rebuild the FreeCAD host only for core,
+generated-header, ABI or matching dependency/toolchain changes.
 
 The resource copy step does not remove stale installed files from a previous
 version. Install into a clean module resource directory or remove old resources

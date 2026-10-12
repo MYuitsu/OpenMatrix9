@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Native frozen source composition survives source destruction across value families."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE']);import OM9ReplayRetirement as probe
+class Opaque:
+ saved=0
+ def __getstate__(self):Opaque.saved+=1;raise RuntimeError('source composition must preserve identity')
+def state(doc):return dict(booked=doc.getBookedTransactionID(),pending=doc.HasPendingTransaction,undo=list(doc.UndoNames),redo=list(doc.RedoNames))
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench')
+  kinds=['Link','LinkSub','LinkList','LinkSubList','XLink','XLinkSub','XLinkList','XLinkSubList','PythonObject','ExpressionEngine']
+  for kind in kinds:
+   for operation in ['merge','recovery','inverse']:
+    label=kind+'/'+operation;doc=App.newDocument('SourceFamilies');doc.UndoMode=1
+    child=doc.getObject(probe.create(doc.Name));external=None
+    if kind=='PythonObject':
+     child.addProperty('App::PropertyPythonObject','Payload');property_name='Payload'
+     original=Opaque();published=Opaque();child.Payload=original
+     mutate=lambda:setattr(child,'Payload',published)
+    elif kind=='ExpressionEngine':
+     child.addProperty('App::PropertyFloat','Input');child.Input=3
+     child.addProperty('App::PropertyFloat','Computed');child.setExpression('Computed','Input + 1')
+     property_name='ExpressionEngine';original=[('Computed','Input + 1')]
+     mutate=lambda:child.setExpression('Computed','Input * 2')
+    else:
+     child.addProperty('App::Property'+kind,'Linked');property_name='Linked'
+     targetDoc=doc
+     if kind.startswith('X'):
+      external=App.newDocument('SourceExternal');targetDoc=external
+     first=targetDoc.addObject('App::FeaturePython','First');second=targetDoc.addObject('App::FeaturePython','Second')
+     if external:external.recompute();external.saveAs(str(out/(kind+'-'+operation+'-external.FCStd')));doc.saveAs(str(out/(kind+'-'+operation+'-owner.FCStd')))
+     def value(target):
+      if kind in ['Link','XLink']:return target
+      if kind in ['LinkSub','XLinkSub']:return(target,['Face1','Edge2'])
+      if kind in ['LinkList','XLinkList']:return[target]
+      return[(target,('Face1','Edge2'))]
+     original=value(first);published=value(second);child.Linked=original
+     mutate=lambda:setattr(child,'Linked',published)
+    doc.recompute();doc.clearUndos();before=state(doc);saved=Opaque.saved
+    result=probe.source_roundtrip(doc.Name,property_name,operation,mutate)
+    check(label+' native preparation survives source retirement',result['prepared'])
+    check(label+' native restoration and checked cleanup complete',result['restored']and result['rollback']and result['complete'])
+    actual=getattr(child,property_name)
+    check(label+' original native identity or expression restored',actual is original if kind=='PythonObject'else actual==original)
+    check(label+' paired native first-write value restored',child.Value=='original-value')
+    check(label+' no caller history or booking pollution',state(doc)==before)
+    check(label+' no serialization of opaque Python payload',Opaque.saved==saved)
+    report['observations'].append(dict(kind=kind,operation=operation,result=result))
+    App.closeDocument(doc.Name)
+    if external:App.closeDocument(external.Name)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -1,0 +1,595 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-circle-history-modes-20261012",
+  "status": "in_progress",
+  "updated_at": "2026-10-12T02:14:10+07:00",
+  "scope": "Runtime59 all-mode/current result, legacy and cold evidence; atomic reject RED; full RCORE-01 retained",
+  "production_sources": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistory.cpp",
+      "bytes": 33958,
+      "sha256": "f69281a23fa308de68b0f46e92f78398b1f5a6ebcfacfdf12a036c3acc22b1f0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistory.h",
+      "bytes": 2013,
+      "sha256": "d466643285cb703d5c6e5b1e85da0f06e3f1bccc7b8abd03d37c1a306c191197"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistoryAdapter.cpp",
+      "bytes": 12845,
+      "sha256": "f6198dc752fc4afc141cdb1759375a61dee8fdb6e41fb1a5118c687b5e3675f8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCurveNativeInput.cpp",
+      "bytes": 10073,
+      "sha256": "60af0889e09a88c17c40e4dec8920d8ff8b5fe2d40838dc93cc9394f98a94675"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCurveNativeInput.h",
+      "bytes": 1356,
+      "sha256": "44286e1bc912592d342f934e242df6cd7ecc9925df75fdddb149ffe1e28fc8f3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveGeometry.cpp",
+      "bytes": 8308,
+      "sha256": "9716b340d0a1be7ac70ff81178a7d71fa6d447aa381c1a45a0036bf18a076cc9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCurvePublication.cpp",
+      "bytes": 11625,
+      "sha256": "c3adef5005a9f23c03f1b10212c0d3e0cd2a9ace058c00dc416385e279326391"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history_result.rs",
+      "bytes": 12575,
+      "sha256": "2d06a974204f93528ba91352ef2d104a05e6db3e78095526b413981949788804"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history.rs",
+      "bytes": 17700,
+      "sha256": "87cd2a31e04628a8898477d58ee3668694d43be773b7421992fd0d31116aeb09"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve.rs",
+      "bytes": 66480,
+      "sha256": "e20e3b3a83a45ef401462eedd5d99b6898cb05c5a5be4b3bfd79ce66111d16cf"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_native_input.rs",
+      "bytes": 11923,
+      "sha256": "826739feb2de333642163f2b69b87d66021a844e2a0b6eb840b3b34367d2d42b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_result.rs",
+      "bytes": 11313,
+      "sha256": "d2df8b9d0df39d95d27793ea2cc5e1a996f54df13e0137a30b0098bdc5177206"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_result_tests.rs",
+      "bytes": 16065,
+      "sha256": "26f810a4b7f11e738ee4459bfdca4decdad133c4461f6b9038698ea85b755ebd"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/prepared_result.rs",
+      "bytes": 23567,
+      "sha256": "c83240c639d697e9097f99c4ecf0f934bf008e4fd719bba16c9e0eb28cba2a30"
+    }
+  ],
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/circle-history-runtime59-20261012/bin/OpenMatrix9Gui.pyd",
+    "bytes": 16758272,
+    "sha256": "b6f3282b2036e6e520e295dd1916a9bfd9c5ddddc52484bacaed641368ba4c1a"
+  },
+  "selected_app": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "probe": {
+    "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+    "bytes": 50688,
+    "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+  },
+  "shared_sdk_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "production_changed": false,
+  "rebuild": false,
+  "rust_rerun": false,
+  "rust_reason": "Native fixture-only changes; Runtime59 source hashes and plugin remain identical to the prior accepted916-test build. Historical Rust evidence is not a new run.",
+  "current": [
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_modes_result_smoke.FCMacro",
+      "checks": 109,
+      "passed": 109,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "B6F3282B2036E6E520E295DD1916A9BFD9C5DDDDC52484BACAED641368BA4C1A",
+        "pid": 27516,
+        "module_root": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/circle-history-runtime59-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16758272,
+        "sha256": "b6f3282b2036e6e520e295dd1916a9bfd9c5ddddc52484bacaed641368ba4c1a"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011/results.json",
+          "bytes": 21942,
+          "sha256": "e376e606ce09b9ca76bb2c1fde76c2ed27559607ec4303d2839d664e86b84ac1"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011/shared-host-launch.json",
+          "bytes": 603,
+          "sha256": "0c34c07aead53ec178faca078245773e82c47cf101dd832d8a5cb54bf1ce0c1d"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011/fixture.FCMacro",
+          "bytes": 17219,
+          "sha256": "f5154879b54a9b1af1054f7a6ec33506e6556ac1703f014b7beb845bd1be5134"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011/host-stdout.log",
+          "bytes": 15237,
+          "sha256": "83fd4208c7fe57aab5af350a54e929be521f1441ba361c781f7d99f3572cd747"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011/host-stderr.log",
+          "bytes": 38230,
+          "sha256": "af99d78fa6fc6f828a32a884bcf2355a595224824ffadda1233c41ee83117a56"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011/user.cfg",
+          "bytes": 18196,
+          "sha256": "b9b85f94f5474a73004579eb95e63096b611a0fa8b5916d0c30c73b75acf9ca0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2834,
+          "sha256": "efc429315abfb868750c1b7e9a31c51450a89d02c395a80c9cb7957f3a0ea4d0"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-circle-history-modes-cold60-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_modes_cold_smoke.FCMacro",
+      "checks": 62,
+      "passed": 62,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "B6F3282B2036E6E520E295DD1916A9BFD9C5DDDDC52484BACAED641368BA4C1A",
+        "pid": 6704,
+        "module_root": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-circle-history-modes-cold60-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/circle-history-runtime59-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16758272,
+        "sha256": "b6f3282b2036e6e520e295dd1916a9bfd9c5ddddc52484bacaed641368ba4c1a"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes-cold60-offscreen-20261011/results.json",
+          "bytes": 6362,
+          "sha256": "211f6879a19c512cafc7c0201851112b13c0123e4dc406673f8f2619926c477a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes-cold60-offscreen-20261011/shared-host-launch.json",
+          "bytes": 601,
+          "sha256": "f39dc428d992538d204a4083bba94251858683086ac6c7f6d79fc1be8a65653f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes-cold60-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes-cold60-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes-cold60-offscreen-20261011/fixture.FCMacro",
+          "bytes": 2854,
+          "sha256": "27eac9f73e1c8159172d6f9c9bf5b3b650fe976ef455094e5d070a68d2ebb428"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes-cold60-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes-cold60-offscreen-20261011/host-stderr.log",
+          "bytes": 2230,
+          "sha256": "9ac27b1d8592bed9cf9fef442d267adef43d3006b8c519e6d50ba6912346d340"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes-cold60-offscreen-20261011/user.cfg",
+          "bytes": 18069,
+          "sha256": "0f9511a674ed94179a1ab68ac8a13d7cc9c9ccc890003587b5559b82bd6640e9"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes-cold60-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2833,
+          "sha256": "1ce4dfeae10e2b21eec5fbb8058b3bdcd716f71d6281d3c6fc321a87a8a60a09"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy60-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_legacy_result_smoke.FCMacro",
+      "checks": 8,
+      "passed": 8,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "B6F3282B2036E6E520E295DD1916A9BFD9C5DDDDC52484BACAED641368BA4C1A",
+        "pid": 24372,
+        "module_root": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy60-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/circle-history-runtime59-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16758272,
+        "sha256": "b6f3282b2036e6e520e295dd1916a9bfd9c5ddddc52484bacaed641368ba4c1a"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy60-offscreen-20261011/results.json",
+          "bytes": 953,
+          "sha256": "44c792b1dabda2327a26cbe7499a81976e00973df0b2c9d7fbb8182ae0863174"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy60-offscreen-20261011/shared-host-launch.json",
+          "bytes": 598,
+          "sha256": "24ad3086482301b87a694362054ec072e236770f88f126bb0cc4b41cb8bafbd2"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy60-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy60-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy60-offscreen-20261011/fixture.FCMacro",
+          "bytes": 4162,
+          "sha256": "dc812ac1a9f4912feb3acc48c49baa8dc6361a3e61f6731b95084092cc840938"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy60-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy60-offscreen-20261011/host-stderr.log",
+          "bytes": 4499,
+          "sha256": "063a98eeae1ef919c813c6584c25db1386eedf4d083d4855954a7070f2776b34"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy60-offscreen-20261011/user.cfg",
+          "bytes": 18061,
+          "sha256": "aad9588eafd6b6a4ac0e638da00c9f0af3dbfd0f3c5e1a6cf657a5f87b254d77"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy60-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2829,
+          "sha256": "12fe8c47058c7725564de39c221b79921ffd41dae6777d5e3e9a89ca4a628cca"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy-cold60-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_legacy_result_smoke.FCMacro",
+      "checks": 3,
+      "passed": 3,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "B6F3282B2036E6E520E295DD1916A9BFD9C5DDDDC52484BACAED641368BA4C1A",
+        "pid": 14252,
+        "module_root": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy-cold60-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/circle-history-runtime59-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16758272,
+        "sha256": "b6f3282b2036e6e520e295dd1916a9bfd9c5ddddc52484bacaed641368ba4c1a"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy-cold60-offscreen-20261011/results.json",
+          "bytes": 430,
+          "sha256": "912cd0be3c431bf92dd5bf02f89c0285cdfc26ea6efae809d50434c23547e4f8"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy-cold60-offscreen-20261011/shared-host-launch.json",
+          "bytes": 603,
+          "sha256": "14497be40ab761deb4e7fbb250ce501fb3c5f9729abae5616902b981fbdbe9af"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy-cold60-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy-cold60-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy-cold60-offscreen-20261011/fixture.FCMacro",
+          "bytes": 4162,
+          "sha256": "dc812ac1a9f4912feb3acc48c49baa8dc6361a3e61f6731b95084092cc840938"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy-cold60-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy-cold60-offscreen-20261011/host-stderr.log",
+          "bytes": 2536,
+          "sha256": "9f0b2726b2781dc3d6a80be9be3817f3dcecd6065492ed0d90f4d5752ef508cd"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy-cold60-offscreen-20261011/user.cfg",
+          "bytes": 18071,
+          "sha256": "e140d014e7feb12015acfc8599161c128379e8b68c4209a222cbc32d78c2a76c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy-cold60-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2834,
+          "sha256": "69ef753adfa993de7489e60d32fbe4c345ea69e218ad225ea431e276527c9ea3"
+        }
+      ]
+    }
+  ],
+  "current_checks": 182,
+  "current_actual_exits_zero": 4,
+  "atomic_red": {
+    "artifact": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red60-offscreen-20261011",
+    "fixture": "rhino_core_circle_history_atomic_result_smoke.FCMacro",
+    "checks": 80,
+    "passed": 50,
+    "failures": [
+      "recipe rejected replay restores recorded metadata",
+      "recipe rejection preserves source and history stacks",
+      "points rejected replay restores recorded metadata",
+      "points rejection preserves source and history stacks",
+      "roles rejected replay restores recorded metadata",
+      "roles rejection preserves source and history stacks",
+      "parameters rejected replay restores recorded metadata",
+      "parameters rejection preserves source and history stacks",
+      "links rejected replay restores recorded metadata",
+      "links rejection preserves source and history stacks",
+      "path rejected replay restores recorded metadata",
+      "path rejection preserves source and history stacks",
+      "fraction rejected replay restores recorded metadata",
+      "fraction rejection preserves source and history stacks",
+      "recorded rejected replay restores recorded metadata",
+      "recorded rejection preserves source and history stacks",
+      "radius rejected replay restores recorded metadata",
+      "radius rejection preserves source and history stacks",
+      "fit rejected replay restores recorded metadata",
+      "fit rejection preserves source and history stacks",
+      "approx rejected replay restores recorded metadata",
+      "approx rejection preserves source and history stacks",
+      "construction rejected replay restores recorded metadata",
+      "construction rejection preserves source and history stacks",
+      "units rejected replay restores recorded metadata",
+      "units rejection preserves source and history stacks",
+      "source rejection preserves source and history stacks",
+      "shape rejection preserves source and history stacks",
+      "placement rejected replay restores recorded metadata",
+      "placement rejection preserves source and history stacks"
+    ],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "B6F3282B2036E6E520E295DD1916A9BFD9C5DDDDC52484BACAED641368BA4C1A",
+      "pid": 18624,
+      "module_root": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red60-offscreen-20261011",
+      "exit_code": 0
+    },
+    "plugin": {
+      "path": "H:/FreeCAD-src/build/circle-history-runtime59-20261012/bin/OpenMatrix9Gui.pyd",
+      "bytes": 16758272,
+      "sha256": "b6f3282b2036e6e520e295dd1916a9bfd9c5ddddc52484bacaed641368ba4c1a"
+    },
+    "probe": null,
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red60-offscreen-20261011/results.json",
+        "bytes": 14318,
+        "sha256": "9c9f23c13f6d2f5617aef6293f24383aeb509b6c74be04b9c9e48e1c94beae3c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red60-offscreen-20261011/shared-host-launch.json",
+        "bytes": 602,
+        "sha256": "59edb0015722e708947ee5a34a65afe5cd3a873055a89e0e50e04238e29933c1"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red60-offscreen-20261011/loaded-native-app.json",
+        "bytes": 227,
+        "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red60-offscreen-20261011/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red60-offscreen-20261011/fixture.FCMacro",
+        "bytes": 5557,
+        "sha256": "ab18683742c83667f39c059353e0967c59a8a9f2792996adbcda403c5c82638e"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red60-offscreen-20261011/host-stdout.log",
+        "bytes": 353,
+        "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red60-offscreen-20261011/host-stderr.log",
+        "bytes": 19814,
+        "sha256": "2a76e4bd4d75ea32f27b38db02b9f4a1bb396c9eda3c08a51760729c3a2e923d"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red60-offscreen-20261011/user.cfg",
+        "bytes": 18069,
+        "sha256": "efbc3ae8cdbdb7d046cede4a5acb21e111c18f7c6569252c18d7e46d03b96fa2"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red60-offscreen-20261011/select-plugin.FCMacro",
+        "bytes": 2833,
+        "sha256": "0cb827483c41e484d973171f4e1403cd92dadbc7335116b37084c9064714a0fa"
+      }
+    ]
+  },
+  "atomic_actual_exit": 0,
+  "atomic_runner_exit": 1,
+  "atomic_check_categories": {
+    "callbacks": 16,
+    "paired_clear": 16,
+    "metadata_restored": 2,
+    "source_and_stack_preserved": 0,
+    "original_redo_executed": 16
+  },
+  "archives": [
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011/history_more.FCStd",
+      "bytes": 195321,
+      "sha256": "90d5a9d7848fd6f4f378c024770eb7b38572bfa563d085bd0f443bb0b4843f36"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy60-offscreen-20261011/Legacy.FCStd",
+      "bytes": 8932,
+      "sha256": "4d6c1ea89dd85f95cbe2dd16fc14f619a13ac88bd7c601a84c24642fbddc5a00"
+    }
+  ],
+  "cold_hosts": 2,
+  "cold_recorded_results": 21,
+  "saved_evidence": [
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011/recorded-results.json",
+      "bytes": 692612,
+      "sha256": "6f68235726a9689da1e587aca4d7a74ad5ffa96ea4054291bb50b4e96de9ba03"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-circle-history-legacy60-offscreen-20261011/saved.json",
+      "bytes": 12735,
+      "sha256": "31fe79f2e6e097377f7a86cf98b7a6dfca31cafea8115a8ba6522b7b2548db82"
+    }
+  ],
+  "excluded_initial": {
+    "reason": "Fixture required OM9UnitContext property without creating explicit units; initial constructor legitimately omits an empty optional context. Source inspection confirms conditional metadata. Corrected fixture sets explicit units before all commands; completed109/109 accepted, initial3/4 excluded.",
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-offscreen-20261011/results.json",
+        "bytes": 1486,
+        "sha256": "6bdcc2c6e13834d56ec8d76025b23f5f87d38f3a376c3cbf0bce348f5644041a"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-offscreen-20261011/shared-host-launch.json",
+        "bytes": 597,
+        "sha256": "7f31bedcbc700628771213abeea127284f4e221b93812924545ea8eff3f38ae9"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-offscreen-20261011/fixture.FCMacro",
+        "bytes": 17160,
+        "sha256": "9a00a1d7116423f56a847723bdd20f13321dd277c7f5691dbe40c6524ce8cb06"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-offscreen-20261011/host-stderr.log",
+        "bytes": 3785,
+        "sha256": "b8ddbca4882347423a56ee6cff2115fe4e4ad38309480223153ec4381959896b"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-offscreen-20261011/host-stdout.log",
+        "bytes": 1713,
+        "sha256": "c6112bd1e643848b253eb87fe1b74812e61f7f0f0d2af74616a45a35367b1dc9"
+      }
+    ]
+  },
+  "prior_checkpoint": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-12-rhino-core-circle-history-result.json",
+    "bytes": 88002,
+    "sha256": "6874acddb9adeabd6885d47bafd45777f862e0647c1d114dc1edfd03f5b543f5"
+  },
+  "remaining": [
+    "The full original RCORE-01 objective remains open: GeometryRef/Snapshot/Result for every enabled consumer; adapters1–7, C01–C12, T01–T11; rational/periodic basis, trims/pcurves/seam occurrences; independent read/edit/retain/export and complete supported attributes.",
+    "Current GeometryResult is now directly checked across the existing all-mode History fixture: numeric/picked Center, oriented/direction, TwoPoint, ThreePoint radius and live endpoint branches, Vertical, constant Area, whole FitPoints with growing topology, deformable Center/Fit/Around/Tangent, bounded native tangent and fixed-contact point dependencies, parent placement, Lock, deletion/Undo, detach/Undo and command source pruning. Twenty recorded results cold reopen and retain exact bytes; legacy empty-recipe AroundCurve also has paired current native/cold evidence. This is named fixture coverage, not every option/backend/representation or complete historical provenance. Native-plan/source correspondence remains required.",
+    "Atomic rejection is contradicted by the completed Runtime59 RED50/80 witness. All16 callbacks reach result and are rejected with paired Shape/result clearing. Fourteen cases retain changed child metadata; all16 fail the combined source/history-stack preservation assertion. All16 original Redo witnesses still execute, so this does not establish destroyed Redo records. Root must preserve exact reject-time stack/source state and restore protected metadata through a checked native journal; document close/removal, lock/owner/dependency/cache and transaction callback safety remain required.",
+    "Task2/3 remain open: generic snap/pick/parameter provenance, snapshot sharing and aggregate allocation/traversal/worker/cancellation bounds, Rebuild and every other enabled GeometryResult consumer.",
+    "Global conversion/deviation/locus and complete parameter/topology maps remain unproven; the current native Circle output contract checks basis, full domain and shared endpoint identity. Full conversion exactness is reported uninspected; maps remain null.",
+    "Four recorded archives were independently reopened in one new native host and replayed again; offscreen evidence does not certify actual mouse, rendering, all viewport/preview/cache lifetime or every original persistence family.",
+    "The inventory was captured before Runtime59 build and relevant Curve/History source hashes match. Full inventory differs due parallel Gumball source and a new test fixture; it is not an exact compiler dependency certificate. Production ABI/deployment acceptance remains pending."
+  ],
+  "next_action": "Instrument exact pre/post-rejection Undo/Redo/source state and implement a checked Circle History native publication journal that restores callback-mutated metadata while preserving source/current ownership and an existing caller booking/executable Redo. Prove failed replay has no extra Undo entry and no silent overwrite, then continue native-plan/provenance, generic input/budgets/Rebuild/maps and every original RCORE-01 requirement."
+}

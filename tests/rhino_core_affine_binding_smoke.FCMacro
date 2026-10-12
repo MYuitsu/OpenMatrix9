@@ -1,0 +1,42 @@
+"""Native archive previews must satisfy the same binding contract as CAD rows."""
+import json,math,os,sys,tempfile,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+# Configure the owned writable staging root before source-storage modules load.
+temp_root=out/'temporary';temp_root.mkdir(parents=True,exist_ok=True)
+tempfile.tempdir=str(temp_root);os.environ['TEMP']=str(temp_root);os.environ['TMP']=str(temp_root)
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  import OpenMatrix9Gui as native,ThreeDm
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents()
+  bind=ThreeDm._insert_prepared
+  def trace_binding(*args):
+   try:return bind(*args)
+   except Exception:report['binding_traceback']=traceback.format_exc();raise
+  ThreeDm._insert_prepared=trace_binding
+  path=Path('H:/FreeCAD-src/Mod/OpenMatrix9/build/edit-special-fixtures/explode-special.3dm')
+  doc=App.newDocument('AffineBinding');doc.UndoMode=1
+  with tempfile.TemporaryDirectory(dir=str(out),prefix='staging-') as staging:
+   prepared=ThreeDm._prepare_import(str(path),staging,0,'preserve')
+   rows=[meta for parts in prepared['host_previews'].values() for meta,_ in parts]
+   report['preview_tolerances']=[meta.get('tolerance') for meta in rows]
+   check('native affine previews retain finite positive converter tolerance',bool(rows) and all(isinstance(meta.get('tolerance'),(int,float)) and not isinstance(meta.get('tolerance'),bool) and math.isfinite(meta['tolerance']) and meta['tolerance']>0 for meta in rows))
+   imported=False
+   try:native.commit3dm(doc.Name,prepared);imported=True
+   except RuntimeError as error:report['admission_error']=str(error)
+   check('preservation import admits legitimate native affine rows',imported)
+   if imported:
+    previews=[o for o in doc.Objects if hasattr(o,'OM9GeometryResult')]
+    check('admitted affine outputs bind structured native result evidence',bool(previews) and all(json.loads(o.OM9GeometryResult)['status']=='accepted' for o in previews))
+    original=len(doc.Objects);doc.undo();check('preservation import remains one Undo transaction',not doc.Objects)
+    doc.redo();check('preservation import Redo restores object inventory',len(doc.Objects)==original)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2));Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

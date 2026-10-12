@@ -1,0 +1,115 @@
+"""Common RCORE-01 topology observation; real OCCT objects, no solver mocks."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore
+sys.path.insert(0, os.environ['OM9_TEST_NATIVE_DIR'])
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+out.mkdir(parents=True, exist_ok=True)
+report = {'checks': [], 'descriptors': {}, 'scope': 'owned face/loop/pcurve observations and edge incidence; not full manifold or Rhino parity'}
+
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+    if not value:
+        raise AssertionError(name)
+
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        report['module'] = native.__file__
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc = App.newDocument('TopologySnapshot')
+        doc.UndoMode = 1
+        def add(name, shape):
+            obj = doc.addObject('Part::Feature', name)
+            obj.Shape = shape
+            return obj
+        outer = Part.makePolygon([App.Vector(0,0,0), App.Vector(20,0,0), App.Vector(20,20,0),
+                                  App.Vector(0,20,0), App.Vector(0,0,0)])
+        hole = Part.Wire(Part.makeCircle(3, App.Vector(10,10,0)))
+        hole.reverse()
+        square = add('SquareHole', Part.Face([outer, hole]))
+        lateral = next(f for f in Part.makeCylinder(4,7).Faces if isinstance(f.Surface, Part.Cylinder))
+        cylinder = add('OpenCylinder', lateral)
+        sphere = add('Sphere', Part.makeSphere(3))
+        hollow = add('HollowBox', Part.makeBox(10,10,10).cut(Part.makeBox(4,4,4,App.Vector(3,3,3))))
+        reverse = square.Shape.copy()
+        reverse.reverse()
+        reversed_face = add('ReversedHole', reverse)
+        duplicate = add('DistinctFaces', Part.makeCompound([square.Shape.copy(), square.Shape.copy()]))
+        located = Part.Shape(square.Shape)
+        located.translate(App.Vector(30,0,0))
+        located_faces = add('LocatedFaces', Part.makeCompound([square.Shape, located]))
+        check('located fixture shares native face storage while changing location', square.Shape.Faces[0].isPartner(located.Faces[0]) and not square.Shape.Faces[0].isSame(located.Faces[0]))
+        doc.recompute()
+        objects = [square,cylinder,sphere,hollow,reversed_face,duplicate,located_faces]
+        baseline = {o.Name: o.Shape.exportBrepToString() for o in objects}
+        history = (doc.UndoCount, doc.RedoCount)
+        for obj in objects:
+            row = json.loads(native.geometryDescriptor(doc.Name, obj.Name))
+            report['descriptors'][obj.Name] = row
+            t = row['topology']
+            check(obj.Name+' exposes complete face observations', isinstance(t['faces'], list) and len(t['faces']) == len(obj.Shape.Faces))
+            check(obj.Name+' exposes owned boundary components', isinstance(t['free_boundary_components'], list))
+            check(obj.Name+' distinguishes edge incidence from full manifold certification', t['manifold'] is None and t['incidence_scope'] == 'recorded_face_edge_uses')
+            for face in t['faces']:
+                check(obj.Name+' has one outer loop per face', sum(l['role']=='outer' for l in face['loops']) == 1)
+                for loop in face['loops']:
+                    uses = loop['edge_uses']
+                    check(obj.Name+' retains a closed ordered vertex chain', bool(uses) and all(a['end_vertex_id']==b['start_vertex_id'] for a,b in zip(uses,uses[1:]+uses[:1])))
+                    for use in uses:
+                        pc = use['pcurve']
+                        check(obj.Name+' records finite ordered pcurve domain', pc['domain'][0] < pc['domain'][1] and len(pc['uv_start']) == 2)
+        rows = report['descriptors']
+        t = rows[square.Name]['topology']
+        check('hole remains a separate trim loop', sorted(l['role'] for l in t['faces'][0]['loops']) == ['hole','outer'])
+        check('square with hole has two boundary components and five edge identities', len(t['free_boundary_components']) == 2 and t['edge_identity_count'] == 5)
+        t = rows[cylinder.Name]['topology']
+        uses = t['faces'][0]['loops'][0]['edge_uses']
+        seams = [u for u in uses if u['seam']]
+        check('open cylinder has two uses of one seam and two distinct pcurves', len(seams)==2 and seams[0]['edge_id']==seams[1]['edge_id'] and seams[0]['pcurve_id']!=seams[1]['pcurve_id'])
+        check('opposed seam uses sample opposite UV sides', abs(seams[0]['pcurve']['uv_start'][0]-seams[1]['pcurve']['uv_end'][0]) > 6)
+        check('periodic open cylinder is not solid or edge-closed and has two boundaries', t['solid'] is False and t['edge_closed'] is False and len(t['free_boundary_components']) == 2)
+        t = rows[sphere.Name]['topology']
+        check('sphere pole degeneracies do not become free boundaries', t['degenerate_use_count']==2 and t['edge_closed'] is True and t['free_boundary_components']==[])
+        t = rows[hollow.Name]['topology']
+        check('hollow solid retains twelve faces without free boundary', len(t['faces'])==12 and t['edge_closed'] is True and t['free_boundary_components']==[])
+        check('reversed face preserves orientation separately from ordered loops', rows[reversed_face.Name]['topology']['faces'][0]['orientation']=='reversed' and rows[square.Name]['topology']['faces'][0]['orientation']=='forward')
+        check('geometrically coincident but separate faces retain separate native identities', rows[duplicate.Name]['topology']['edge_identity_count']==10 and len(rows[duplicate.Name]['topology']['free_boundary_components'])==4)
+        check('located same TShape faces retain distinct edge identities', rows[located_faces.Name]['topology']['edge_identity_count']==10 and len(rows[located_faces.Name]['topology']['free_boundary_components'])==4)
+        repeated = add('RepeatedFace', Part.makeCompound([square.Shape,square.Shape]))
+        doc.recompute()
+        repeated_row = json.loads(native.geometryDescriptor(doc.Name,repeated.Name))
+        report['descriptors'][repeated.Name] = repeated_row
+        t = repeated_row['topology']
+        check('repeated same face does not turn open edges into a closed surface', t['edge_closed'] is False and len(t['free_boundary_components'])==2)
+        check('repeated native face identity is captured once with both occurrences retained', len(t['faces'])==1 and len(t['face_occurrences'])==2 and t['face_occurrences'][0]['face_id']==t['face_occurrences'][1]['face_id'])
+        opposed = Part.Shape(square.Shape)
+        opposed.reverse()
+        opposed_obj = add('OpposedOccurrences', Part.makeCompound([square.Shape,opposed]))
+        doc.recompute()
+        t = json.loads(native.geometryDescriptor(doc.Name,opposed_obj.Name))['topology']
+        check('opposite orientations of shared face remain separate occurrences without false closure',
+              len(t['faces'])==1 and [f['orientation'] for f in t['face_occurrences']]==['forward','reversed'] and
+              t['edge_closed'] is False and len(t['free_boundary_components'])==2)
+        detached = json.loads(native.geometryDescriptor(doc.Name,square.Name))
+        before = json.dumps(detached,sort_keys=True)
+        for obj in objects:
+            check(obj.Name+' inspection preserves exact native BRep bytes', obj.Shape.exportBrepToString()==baseline[obj.Name])
+        check('inspection does not create Undo or consume Redo', (doc.UndoCount,doc.RedoCount)==history)
+        square.Shape = Part.makeBox(1,2,3)
+        doc.recompute()
+        check('returned topology remains independent after source replacement', json.dumps(detached,sort_keys=True)==before and detached['topology']['edge_identity_count']==5)
+        sub = json.loads(native.geometryDescriptor(doc.Name,hollow.Name,'Face1'))
+        check('face subelement uses the same topology contract', sub['representation']=='trimmed_face' and len(sub['topology']['faces'])==1)
+        report['ok'] = True
+    except Exception:
+        report['ok'] = False
+        report['error'] = traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        Gui.getMainWindow().close()
+
+QtCore.QTimer.singleShot(1200,run)

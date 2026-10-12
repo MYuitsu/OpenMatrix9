@@ -1,0 +1,34 @@
+import sys
+sys.path.insert(0,'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+from command_options_fixture_support import *
+import Part
+
+def raw_edit(widget,text):
+    editor=widget.findChild(QtWidgets.QLineEdit);editor.setFocus();editor.selectAll();QtTest.QTest.keyClicks(editor,text);QtTest.QTest.keyClick(editor,QtCore.Qt.Key_Return);settle();return editor
+
+def run():
+    doc=App.newDocument('GenericRebuildOptions');doc.UndoMode=1
+    source=doc.addObject('Part::Feature','Source');source.Shape=Part.makeCircle(3);doc.recompute();Gui.Selection.addSelection(source)
+    source_name=source.Name;command('Rebuild')
+    d=next(x for x in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9RebuildDialog') if x.isVisible())
+    count=d.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount');degree=d.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree');remove=d.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput')
+    check('registered schema and current values','PointCount='+str(count.value()) in prompt() and 'DeleteInput=Yes' in prompt())
+    check('generic adapter uses exact Rebuild feature identity',field().property('om9OptionFeatureId')=='OM9-CURVE-009')
+    accepted=count.value();editor=raw_edit(count,'NaN')
+    check('raw native number reaches Rust without Qt clamp',count.value()==accepted and editor.text()=='NaN' and 'Invalid' in prompt())
+    command('DeleteInput');command();check('unrelated toggle cannot commit unresolved native numeric draft',d.isVisible() and len(doc.Objects)==1)
+    command('DeleteInput')
+    QtTest.QTest.keyClick(editor,QtCore.Qt.Key_Escape);settle();check('raw Escape restores current and retains command',count.value()==accepted and d.isVisible() and editor.text()!='NaN')
+    editor=raw_edit(count,'20');check('native numeric Enter is option acceptance',count.value()==20 and len(doc.Objects)==1 and 'PointCount=20' in prompt())
+    command('DeleteInput');check('CMD toggle synchronized to real Rebuild',remove is not None and not remove.isChecked())
+    remove.setChecked(True);settle();check('Rebuild checkbox synchronized to CMD','DeleteInput=Yes' in prompt())
+    command('Degree');command('3');check('CMD number native degree',degree.value()==3 and len(doc.Objects)==1)
+    command('PointCount=2');check('declared cross-parameter rule preserves state',count.value()==20 and draft()=='PointCount=2')
+    key(QtCore.Qt.Key_Escape);check('error Escape keeps real Rebuild',d.isVisible() and count.value()==20)
+    command('PointCount=24');check('corrected option accepted without commit',count.value()==24 and len(doc.Objects)==1)
+    command();outputs=[o for o in doc.Objects if o.Name!=source_name]
+    check('native Rebuild commits declared values',len(outputs)==1 and outputs[0].Shape.isValid() and outputs[0].Shape.Edges[0].Curve.NbPoles==24)
+    doc.undo();check('native Rebuild single Undo restores source',len(doc.Objects)==1 and doc.Objects[0].Name==source_name)
+    doc.redo();check('native Rebuild Redo restores output',len(doc.Objects)==1 and doc.Objects[0].Shape.isValid())
+
+QtCore.QTimer.singleShot(1800,lambda:execute(run))

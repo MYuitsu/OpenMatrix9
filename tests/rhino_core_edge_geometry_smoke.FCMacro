@@ -1,0 +1,156 @@
+"""Owned native3D edge/vertex geometry, UV association and exact-once frames."""
+import json,math,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[],'descriptors':{}}
+def check(name,value):
+ report['checks'].append({'name':name,'passed':bool(value)})
+ if not value:raise AssertionError(name)
+def transform(m,p):return App.Vector(*[sum(m[r][c]*p[c] for c in range(3))+m[r][3] for r in range(3)])
+def point(data,t):
+ kind=data['kind']
+ if kind=='analytic_curve':
+  typ=data['analytic_type'];p=data['parameters'];a=data['axes_xyz'];o=data['origin_xyz']
+  if typ=='line':v=[t,0,0]
+  elif typ=='circle':v=[p['radius']*math.cos(t),p['radius']*math.sin(t),0]
+  elif typ=='ellipse':v=[p['major_radius']*math.cos(t),p['minor_radius']*math.sin(t),0]
+  else:raise AssertionError('unexpected authored analytic kind '+typ)
+  return [o[i]+sum(a[j][i]*v[j] for j in range(3)) for i in range(3)]
+ if kind=='bezier_curve':
+  n=data['degree'];weights=data['weights'] or [1]*(n+1)
+  terms=[math.comb(n,i)*(1-t)**(n-i)*t**i*weights[i] for i in range(n+1)];den=sum(terms)
+  return [sum(terms[i]*data['poles_xyz'][i][a] for i in range(n+1))/den for a in range(3)]
+ if kind=='nurbs_curve':
+  curve=Part.BSplineCurve();a=data['axis'];args=[[App.Vector(*p) for p in data['poles_xyz']],a['multiplicities'],a['knots'],a['periodic'],a['degree']]
+  if data['weights'] is not None:args.append(data['weights'])
+  curve.buildFromPolesMultsKnots(*args);return list(curve.value(t))
+ raise AssertionError('unsupported authored support '+kind)
+def leaves(row):
+ if row['representation']=='instance':return leaves(row['geometry_data']['definition_geometry'])
+ if row['representation']=='group':return [r for c in row['geometry_data']['members'] for r in leaves(c)]
+ return [row]
+def run():
+ try:
+  import OpenMatrix9Gui as native
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+  doc=App.newDocument('EdgeGeometry');doc.UndoMode=1
+  parent=doc.addObject('App::Part','Parent');parent.Placement=App.Placement(App.Vector(100,200,300),App.Rotation(App.Vector(1,2,3),37))
+  def add(name,shape):
+   obj=doc.addObject('Part::Feature',name);parent.addObject(obj);obj.Shape=shape;return obj
+  outer=Part.makePolygon([App.Vector(0,0,0),App.Vector(20,0,0),App.Vector(20,20,0),App.Vector(0,20,0),App.Vector(0,0,0)])
+  hole=Part.Wire(Part.makeCircle(3,App.Vector(10,10,0)));hole.reverse();face=add('Hole',Part.Face([outer,hole]))
+  face.Placement=App.Placement(App.Vector(11,13,17),App.Rotation(App.Vector(1,3,2),31))
+  cylinder=add('OpenCylinder',next(f for f in Part.makeCylinder(4,7).Faces if isinstance(f.Surface,Part.Cylinder)))
+  sphere=add('Sphere',Part.makeSphere(3));cavity=add('Cavity',Part.makeBox(10,10,10).cut(Part.makeBox(4,4,4,App.Vector(3,3,3))))
+  source=Part.BSplineSurface();source.buildFromPolesMultsKnots([[App.Vector(0,0,0),App.Vector(0,7,0)],[App.Vector(8,0,0),App.Vector(8,7,2)]],[2,2],[2,2],[0.,1.],[0.,1.],False,False,1,1,[[1.,2.],[3.,4.]])
+  rational=add('RationalFace',source.toShape(.2,.8,.1,.9))
+  vertex=add('Point',Part.Vertex(App.Vector(2,3,5)));vertex.Placement=face.Placement
+  line=add('Line',Part.makeLine(App.Vector(1,2,3),App.Vector(4,6,3)))
+  wire=add('Wire',Part.makePolygon([App.Vector(0,0,0),App.Vector(1,2,0),App.Vector(4,2,0)]))
+  spline=Part.BSplineCurve();spline.buildFromPolesMultsKnots([App.Vector(10,0,0),App.Vector(10,10,0),App.Vector(0,10,0)],[3,3],[0.,1.],False,2,[1.,math.sqrt(.5),1.])
+  curve=add('RestrictedRationalCurve',spline.toShape(.2,.8));curve.Placement=face.Placement
+  bezier=Part.BezierCurve();bezier.setPoles([App.Vector(0,0,0),App.Vector(1,2,0),App.Vector(4,1,2)]);bezier.setWeight(2,2)
+  bezier_obj=add('Bezier',bezier.toShape(.1,.9))
+  mixed=add('Mixed',Part.makeCompound([Part.makeLine(App.Vector(40,0,0),App.Vector(40,2,0)),Part.Shape(face.Shape),Part.Vertex(App.Vector(40,7,3))]))
+  doc.recompute();objects=[face,cylinder,sphere,cavity,rational,vertex,line,wire,curve,bezier_obj,mixed]
+  original={o.Name:o.Shape.exportBrepToString() for o in objects};history=(doc.UndoCount,doc.RedoCount)
+  for obj in objects:
+   row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));report['descriptors'][obj.Name]=row;top=row['topology']
+   check(obj.Name+' retains all unique3D edges and vertices',isinstance(top.get('edges_3d'),list) and isinstance(top.get('vertices'),list) and len(top['edges_3d'])==len(obj.Shape.Edges) and len(top['vertices'])==len(obj.Shape.Vertexes))
+   edge_rows={e['edge_id']:e for e in top['edges_3d']};vertex_rows={v['vertex_id']:v for v in top['vertices']}
+   for v in top['vertices']:
+    expected=obj.Shape.Vertexes[int(v['native_topology_index'])-1]
+    check(obj.Name+' vertex location and tolerance match native',(transform(v['native_location'],v['point_xyz'])-expected.Point).Length<1e-9 and v['tolerance']==expected.Tolerance)
+    check(obj.Name+' vertex world placement applied once',(transform(v['local_to_world'],v['point_xyz'])-parent.getGlobalPlacement().multVec(expected.Point)).Length<1e-8)
+   for e in top['edges_3d']:
+    expected=obj.Shape.Edges[int(e['native_topology_index'])-1]
+    check(obj.Name+' canonical endpoints resolve',e['start_vertex_id'] in vertex_rows and e['end_vertex_id'] in vertex_rows)
+    check(obj.Name+' native edge tolerance retained',e['tolerance']==expected.Tolerance and e['parameter_correspondence_certificate'] is None)
+    if not e['curve_present']:
+     check(obj.Name+' degenerate edge has explicit absent3D curve',e['degenerate'] and e['domain'] is None and e['geometry_data'] is None)
+     continue
+    check(obj.Name+' edge restriction matches native',e['domain']==[expected.FirstParameter,expected.LastParameter] and isinstance(e['geometry_data'],dict))
+    for fraction in [.2,.5,.8]:
+     t=e['domain'][0]+fraction*(e['domain'][1]-e['domain'][0]);copied=point(e['geometry_data'],t);q=expected.Curve.value(t)
+     check(obj.Name+' owned3D support matches native parameter',(transform(e['native_location'],copied)-q).Length<1e-8)
+     check(obj.Name+' edge world placement applied once',(transform(e['local_to_world'],copied)-parent.getGlobalPlacement().multVec(q)).Length<1e-8)
+   for f in top['faces']:
+    native_face=obj.Shape.Faces[int(f['face_id'])-1]
+    check(obj.Name+' native face tolerance retained',f['tolerance']==native_face.Tolerance)
+    for loop in f['loops']:
+     for use in loop['edge_uses']:
+      e=edge_rows[use['edge_id']]
+      check(obj.Name+' UV use resolves shared3D edge and endpoints',use['start_vertex_id']==e['start_vertex_id'] and use['end_vertex_id']==e['end_vertex_id'] if use['orientation']=='forward' else use['start_vertex_id']==e['end_vertex_id'] and use['end_vertex_id']==e['start_vertex_id'])
+      if not e['curve_present'] or not e['native_same_parameter'] or not e['native_same_range']:continue
+      check(obj.Name+' native SameRange retains both restriction domains',use['pcurve']['domain']==e['domain'])
+      for fraction in [.25,.75]:
+       t=e['domain'][0]+fraction*(e['domain'][1]-e['domain'][0]);uv=point(use['pcurve']['geometry_data'],t);q=obj.Shape.Edges[int(e['native_topology_index'])-1].Curve.value(t)
+       check(obj.Name+' sampled UV surface agrees with3D edge',(native_face.Surface.value(uv[0],uv[1])-q).Length<max(e['tolerance'],native_face.Tolerance,1e-7)*4)
+   check(obj.Name+' descriptor inspection preserves native BRep',obj.Shape.exportBrepToString()==original[obj.Name])
+  check('all inspection preserves Undo and Redo',(doc.UndoCount,doc.RedoCount)==history)
+  check('standalone point owns numeric payload',report['descriptors'][vertex.Name]['geometry_data']['point_xyz']==[2,3,5] and report['descriptors'][vertex.Name]['coordinates']=='native_local')
+  for obj in [line,curve,bezier_obj]:check(obj.Name+' root reuses owned edge support',report['descriptors'][obj.Name]['geometry_data']==report['descriptors'][obj.Name]['topology']['edges_3d'][0]['geometry_data'])
+  check('restricted rational3D basis retains full domain',report['descriptors'][curve.Name]['topology']['edges_3d'][0]['geometry_data']['axis']['full_domain']==[0,1])
+  check('mixed loose topology is retained without false adjacency',len(report['descriptors'][mixed.Name]['topology']['edges_3d'])==6 and len(report['descriptors'][mixed.Name]['topology']['vertices'])==8 and report['descriptors'][mixed.Name]['topology']['edge_identity_count']==5)
+  fixtures=Path('H:/FreeCAD-src/build/edge-geometry-fixtures-20261010')
+  pole_shape=Part.Shape();pole_shape.read(str(fixtures/'located-null-degenerate-edge.brep'));pole=add('LocatedNullDegenerateEdge',pole_shape);pole.Placement=face.Placement;doc.recompute()
+  pole_before=pole.Shape.exportBrepToString();pole_history=(doc.UndoCount,doc.RedoCount)
+  pole_row=json.loads(native.geometryDescriptor(doc.Name,pole.Name));report['descriptors'][pole.Name]=pole_row;pole_edge=pole_row['topology']['edges_3d'][0]
+  check('standalone null-degenerate edge retains native source location',pole_row['brep_tool_location']==pole_edge['native_location'])
+  check('standalone null-degenerate root world frame agrees with native endpoint',(transform(pole_row['local_to_world'],pole_row['topology']['vertices'][0]['point_xyz'])-parent.getGlobalPlacement().multVec(pole.Shape.Vertexes[0].Point)).Length<1e-8)
+  check('standalone null-degenerate inspection preserves source and history',pole.Shape.exportBrepToString()==pole_before and (doc.UndoCount,doc.RedoCount)==pole_history)
+  bare_shape=Part.Shape();bare_shape.read(str(fixtures/'located-bare-degenerate-edge.brep'));bare_pole=add('LocatedBareDegenerateEdge',bare_shape);bare_pole.Placement=face.Placement;doc.recompute()
+  bare_before=bare_pole.Shape.exportBrepToString();bare_history=(doc.UndoCount,doc.RedoCount)
+  bare_row=json.loads(native.geometryDescriptor(doc.Name,bare_pole.Name));report['descriptors'][bare_pole.Name]=bare_row;bare_edge=bare_row['topology']['edges_3d'][0]
+  check('standalone bare-degenerate edge retains native source location',bare_row['brep_tool_location']==bare_edge['native_location'])
+  check('standalone bare-degenerate root world frame agrees with native endpoint',(transform(bare_row['local_to_world'],bare_row['topology']['vertices'][0]['point_xyz'])-parent.getGlobalPlacement().multVec(bare_pole.Shape.Vertexes[0].Point)).Length<1e-8)
+  check('standalone bare-degenerate inspection preserves source and history',bare_pole.Shape.exportBrepToString()==bare_before and (doc.UndoCount,doc.RedoCount)==bare_history)
+  for label,root_row,edge_row in [('null',pole_row,pole_edge),('bare',bare_row,bare_edge)]:
+   check('standalone '+label+'-degenerate root declares absent support and domain',root_row['geometry_data'] is None and root_row['geometry_data_status']=='absent_degenerate_curve3d' and root_row['domains'] is None and edge_row['domain'] is None)
+  authored=Part.Shape();authored.read(str(fixtures/'different-parameter-domains.brep'));different=add('DifferentParameterDomains',authored);doc.recompute()
+  raw=different.Shape.exportBrepToString();row=json.loads(native.geometryDescriptor(doc.Name,different.Name));report['descriptors'][different.Name]=row
+  changed=[e for e in row['topology']['edges_3d'] if not e['native_same_parameter'] and not e['native_same_range']]
+  check('authored native parameter flags remain false',len(changed)==1 and changed[0]['parameter_correspondence_certificate'] is None)
+  e=changed[0];use=next(u for f in row['topology']['faces'] for l in f['loops'] for u in l['edge_uses'] if u['edge_id']==e['edge_id'])
+  check('distinct3D and UV restrictions are retained independently',use['pcurve']['domain']==[0,1] and e['domain']!=[0,1])
+  for fraction in [.2,.5,.8]:
+   pc_parameter=fraction;edge_parameter=e['domain'][0]+fraction*(e['domain'][1]-e['domain'][0]);uv=point(use['pcurve']['geometry_data'],pc_parameter)
+   native_edge=different.Shape.Edges[int(e['native_topology_index'])-1]
+   check('authored rescaled UV parameters preserve sampled locus',(different.Shape.Surface.value(uv[0],uv[1])-native_edge.Curve.value(edge_parameter)).Length<1e-8)
+  check('observing different parameterization preserves source',different.Shape.exportBrepToString()==raw)
+  for name in ['missing-curve3d','out-of-policy-vertex']:
+   bad=doc.addObject('Part::Feature','Rejected'+name.replace('-',''));bad.ViewObject.Visibility=False;shape=Part.Shape();shape.read(str(fixtures/(name+'.brep')));bad.Shape=shape;doc.recompute()
+   raw=bad.Shape.exportBrepToString();before=(doc.UndoCount,doc.RedoCount);error=None
+   try:native.geometryDescriptor(doc.Name,bad.Name)
+   except (ValueError,RuntimeError) as exc:error=str(exc)
+   check(name+' prepared native data rejects before return',error is not None and 'Rust rejected native3D edge/vertex geometry' in error)
+   check(name+' rejection preserves BRep and history',bad.Shape.exportBrepToString()==raw and (doc.UndoCount,doc.RedoCount)==before)
+   doc.removeObject(bad.Name)
+  for obj in [face,vertex,curve,pole,bare_pole]:
+   for flag in [False,True]:
+    link=doc.addObject('App::Link','Linked'+obj.Name+str(int(flag)));parent.addObject(link);link.setLink(obj);link.LinkTransform=flag;link.LinkPlacement=App.Placement(App.Vector(-7,11,19),App.Rotation(App.Vector(1,1,2),43));link.ScaleVector=App.Vector(-2,3,.5);doc.recompute()
+    before=obj.Shape.exportBrepToString();row=json.loads(native.geometryDescriptor(doc.Name,link.Name));target,path=link.getLinkedObject(True,App.Matrix(),True)
+    leaf=leaves(row)[0];world=parent.getGlobalPlacement().toMatrix().multiply(path).multiply(obj.Placement.inverse().toMatrix())
+    if obj in [pole,bare_pole]:
+     v=leaf['topology']['vertices'][0]
+     check(link.Name+' null-degenerate root frame matches native endpoint',(transform(leaf['local_to_world'],v['point_xyz'])-world.multVec(obj.Shape.Vertexes[0].Point)).Length<1e-8)
+     check(link.Name+' null-degenerate root and edge frames agree',leaf['brep_tool_location']==leaf['topology']['edges_3d'][0]['native_location'] and leaf['local_to_world']==leaf['topology']['edges_3d'][0]['local_to_world'])
+    for v in leaf['topology']['vertices']:
+     native_vertex=obj.Shape.Vertexes[int(v['native_topology_index'])-1]
+     check(link.Name+' vertex occurrence world frame matches native',(transform(v['local_to_world'],v['point_xyz'])-world.multVec(native_vertex.Point)).Length<1e-8)
+    for e in leaf['topology']['edges_3d']:
+     if not e['curve_present']:continue
+     t=sum(e['domain'])/2;p=point(e['geometry_data'],t);native_edge=obj.Shape.Edges[int(e['native_topology_index'])-1]
+     check(link.Name+' edge occurrence world frame matches native',(transform(e['local_to_world'],p)-world.multVec(native_edge.Curve.value(t))).Length<1e-8)
+    check(link.Name+' inspection keeps source',obj.Shape.exportBrepToString()==before)
+  saved=json.dumps(report['descriptors'],sort_keys=True);curve.Shape=Part.makeLine(App.Vector(),App.Vector(1,0,0));doc.recompute();App.closeDocument(doc.Name)
+  check('returned edge and vertex values survive replacement and close',json.dumps(report['descriptors'],sort_keys=True)==saved);report['ok']=True
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

@@ -1,0 +1,9 @@
+{
+  "source": "H:/FreeCAD-src/build/solid-regression-owned-curve-oracle71-offscreen-20261011/results.json",
+  "source_sha256": "4cc333db4792bdbba6446852d4a07626bf5ce668f2107063bdcf6656c698e39c",
+  "fixture": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/fixtures/owned_curve_evaluation/native_oracle.json",
+  "fixture_sha256": "8696a605ef807a08b8d9c9c93605d1622958075d1631b801e065b18d99ba1046",
+  "cases": 9,
+  "queries": 93,
+  "scope": "Authored native OCCT valueAt/derivative1At alongside existing complete geometryDescriptor support. No reconstructed expected values from Rust."
+}

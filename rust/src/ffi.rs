@@ -173,6 +173,15 @@ pub extern "C" fn om9_command_count() -> usize {
     data().map_or(0, |d| d.commands.len())
 }
 #[unsafe(no_mangle)]
+pub extern "C" fn om9_native_curve_declared(index:usize)->bool{
+    std::panic::catch_unwind(||{
+        let Some(id)=command(index).and_then(|c|c.id.to_str().ok()) else{return false;};
+        let mut session=crate::curve::CurveSession::default();
+        session.start(id).is_ok()&&session.construction_capability(crate::geometry_contract::RepresentationKind::Point,
+            crate::native_curve_capability::Stage::Declare).is_ok()
+    }).unwrap_or(false)
+}
+#[unsafe(no_mangle)]
 pub extern "C" fn om9_workspace_command_count() -> usize {
     crate::workspace::ICONS.len()
 }

@@ -165,6 +165,12 @@ PyObject* validateAPI(PyObject*,PyObject* args) {
 }
 }
 
+std::uint64_t documentSession(App::Document& doc) {guiThread();return store().document(doc);}
+ObjectStamp objectIdentity(App::DocumentObject& object) {guiThread();return store().observe(object);}
+bool validateObjectIdentity(App::Document& doc,const std::string& name,const ObjectStamp& stamp) {
+    guiThread();if(doc.testStatus(App::Document::Restoring)||store().document(doc)!=stamp.document||!om9_object_validate(&stamp))return false;
+    auto* object=doc.getObject(name.c_str());return object&&object->getID()>0&&std::uint64_t(object->getID())==stamp.object;
+}
 ObjectSnapshot captureObject(App::Document& doc,const std::string& name,const std::string& sub) {
     guiThread();
     if(doc.testStatus(App::Document::Restoring))throw std::runtime_error("Cannot capture a restoring document");

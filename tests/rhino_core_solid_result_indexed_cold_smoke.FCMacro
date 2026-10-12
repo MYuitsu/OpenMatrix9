@@ -1,0 +1,68 @@
+"""Actual multi-range native source ownership and independent indexed FCStd restore."""
+import json,math,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(console,text):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def near(a,b):return len(a)==len(b) and all(abs(x-y)<1e-7 for x,y in zip(a,b))
+def verify(doc,raw,phase):
+    obj=doc.getObject('Sphere');source=doc.getObject('Source');value=json.loads(raw) if raw else {}
+    context=value.get('operation_context',{});refs=context.get('source_refs',[]);inputs=value.get('input_snapshots',[])
+    points=[[0.,1.,0.],[-1.,0.,0.]]+[[math.cos((i%2)*.01),math.sin((i%2)*.01),0.] for i in range(54)]
+    check(phase+' native sphere has independent volume',obj is not None and obj.Shape.isValid() and obj.Shape.isClosed() and len(obj.Shape.Solids)==1 and abs(obj.Shape.Volume-4*math.pi/3)<1e-6)
+    check(phase+' keeps both distinct selections and shares their full masters',len(inputs)==3 and len(refs)==54 and context.get('source_snapshot_indexing')=='input_snapshots_zero_based_including_numeric_input')
+    check(phase+' all range indices bind the correct selected vertex',len(refs)==54 and all(r.get('input_snapshot_index')==1+i%2 and r.get('subelement')=='Vertex'+str(1+i%2) and r.get('point_begin')==2+i and r.get('point_end')==3+i and r.get('role_index')==i for i,r in enumerate(refs)))
+    accepted=context.get('construction',{}).get('accepted_points',[])
+    check(phase+' complete numeric input survives without point reduction',len(accepted)==56 and all(near(a,b) for a,b in zip(accepted,points)))
+    check(phase+' reference identities and unit revisions remain bound',len(refs)==54 and all(r.get('object_name')=='Source' and r.get('document_uid')==refs[0].get('document_uid') for r in refs) and len(inputs)==3 and all(s.get('unit_context_snapshot')==obj.OM9UnitContext and s.get('unit_context_revision')=='1' for s in inputs+value.get('output_snapshots',[])))
+    for i in range(2):
+        snapshot=inputs[i+1] if len(inputs)==3 else {};master=Part.Shape()
+        payload=snapshot.get('geometry_data',{}).get('native_master',{}).get('payload')
+        if payload:master.importBrepFromString(payload)
+        check(phase+' source snapshot '+str(i+1)+' reconstructs all 1000 native vertices',len(master.Vertexes)==1000 and source is not None and len(source.Shape.Vertexes)==1000)
+        selected=snapshot.get('selected_points_world',[])
+        check(phase+' source snapshot '+str(i+1)+' owns its distinct selected point',len(selected)==1 and near(selected[0],points[i+2]))
+    master=Part.Shape();outputs=value.get('output_snapshots',[])
+    if outputs:master.importBrepFromString(outputs[0]['geometry_data']['native_master']['payload'])
+    check(phase+' output owned CAD master reconstructs the sphere',len(master.Solids)==1 and master.isValid() and master.isClosed() and abs(master.Volume-4*math.pi/3)<1e-6)
+    return value
+def run():
+    doc=None
+    try:
+        root=os.environ.get('OM9_SOLID_INDEXED_ARCHIVE_DIR')
+        if root:
+            check('cold new process starts without a model',not App.listDocuments())
+            expected=json.loads((Path(root)/'results.json').read_text())['observations'][0]['raw']
+            doc=App.openDocument(str(Path(root)/'IndexedSolid.FCStd'));obj=doc.getObject('Sphere');raw=getattr(obj,'OM9GeometryResult','') if obj else ''
+            check('cold exact indexed result bytes match warm archive',bool(raw) and raw==expected)
+            verify(doc,raw,'cold')
+        else:
+            Gui.activateWorkbench('OpenMatrix9Workbench');console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+            doc=App.newDocument('SolidResultIndexedArchive');doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+            source=doc.addObject('Part::Feature','Source');source.Shape=Part.makeCompound([Part.Vertex(App.Vector(math.cos(i*.01),math.sin(i*.01),0)) for i in range(1000)])
+            doc.recompute();before=doc.UndoCount
+            for text in ['Sphere','FitPoints','0,1,0','-1,0,0']:enter(console,text)
+            for i in range(54):
+                Gui.Selection.clearSelection();Gui.Selection.addSelection(source,'Vertex'+str(1+i%2));enter(console,'Selection')
+            Gui.Selection.clearSelection();enter(console,'');obj=doc.getObject('Sphere');raw=getattr(obj,'OM9GeometryResult','') if obj else ''
+            verify(doc,raw,'warm')
+            check('warm result is one native Undo transaction',obj is not None and doc.UndoCount==before+1)
+            if obj:
+                doc.undo();missing=doc.getObject('Sphere') is None;doc.redo();obj=doc.getObject('Sphere')
+                check('warm Undo Redo keeps all indexed result bytes',missing and obj is not None and obj.OM9GeometryResult==raw)
+                doc.saveAs(str(out/'IndexedSolid.FCStd'))
+            else:check('warm Undo Redo keeps all indexed result bytes',False)
+        report['observations'].append(dict(raw=raw,phase='cold' if root else 'warm'));report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        Gui.Selection.clearSelection()
+        if doc:App.closeDocument(doc.Name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

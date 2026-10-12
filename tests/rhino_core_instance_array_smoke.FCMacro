@@ -1,0 +1,151 @@
+"""Owned native instance arrays, no expansion or canonical definition baking."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh,Points
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[],'descriptors':{}}
+def check(name,value):
+ report['checks'].append({'name':name,'passed':bool(value)})
+ if not value:raise AssertionError(name)
+def place(x,y,z,a=0):return App.Placement(App.Vector(x,y,z),App.Rotation(App.Vector(1,2,3),a))
+def transformed(m,p):return App.Vector(*[sum(m[r][c]*[p.x,p.y,p.z][c] for c in range(3))+m[r][3] for r in range(3)])
+def close_matrix(a,b):return all(abs(a[r][c]-b[r][c])<1e-9 for r in range(4) for c in range(4))
+def matrix(m):return [[m.A[4*r+c] for c in range(4)] for r in range(4)]
+def native_state(doc):
+ data={'objects':[o.Name for o in doc.Objects],'history':[doc.UndoCount,doc.RedoCount],
+       'shapes':{o.Name:o.Shape.exportBrepToString() for o in doc.Objects if o.isDerivedFrom('Part::Feature')},
+       'labels':{o.Name:[o.Label,o.Label2] for o in doc.Objects},
+       'meshes':{o.Name:([list(p) for p in o.Mesh.Topology[0]],o.Mesh.Topology[1]) for o in doc.Objects if o.isDerivedFrom('Mesh::Feature')},
+       'clouds':{o.Name:[list(p) for p in o.Points.Points] for o in doc.Objects if o.isDerivedFrom('Points::Feature')},
+       'placements':{o.Name:list(o.Placement.toMatrix().A) for o in doc.Objects if 'Placement' in o.PropertiesList},'arrays':{}}
+ for o in doc.Objects:
+  if 'ElementCount' in o.PropertiesList:
+   data['arrays'][o.Name]=[o.ElementCount,o.ShowElement,[e.Name for e in o.ElementList],[list(p.toMatrix().A) for p in o.PlacementList],[list(s) for s in o.ScaleList],list(o.ScaleVector),o.LinkTransform]
+ return data
+def leaves(row):
+ if row['representation']=='instance':return leaves(row['geometry_data']['definition_geometry'])
+ if row['representation']=='group':return [r for c in row['geometry_data']['members'] for r in leaves(c)]
+ return [row]
+def run():
+ try:
+  import OpenMatrix9Gui as native
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+  doc=App.newDocument('InstanceArrays');doc.UndoMode=1
+  unrelated=doc.addObject('App::Part','Unrelated');unrelated.Placement=place(500,600,700,47)
+  point=doc.addObject('Part::Feature','Point');unrelated.addObject(point);point.Shape=Part.Vertex(App.Vector(2,3,5));point.Placement=place(11,13,17,31)
+  parent=doc.addObject('App::Part','Parent');parent.Placement=place(100,200,300,37)
+  def array(name,target,expanded,flag,count=3):
+   a=doc.addObject('App::Link',name);parent.addObject(a);a.setLink(target);a.ShowElement=expanded;a.LinkTransform=flag;a.ElementCount=count;a.LinkPlacement=place(19,23,29,43);a.ScaleVector=App.Vector(-2,3,.5)
+   if not expanded:
+    a.PlacementList=[place(3+i*7,5-i*3,7+i*2,11+i*13) for i in range(count)]
+    a.ScaleList=[App.Vector(.7+i*.2,1.2+i*.3,2-i*.1) for i in range(count)]
+   else:
+    for i,e in enumerate(a.ElementList):e.Placement=place(3+i*7,5-i*3,7+i*2,11+i*13);e.Scale=.7+i*.4
+   return a
+  arrays=[array('Array'+str(int(expanded))+str(int(flag)),point,expanded,flag) for expanded in [False,True] for flag in [False,True]]
+  definition=doc.addObject('App::Part','Definition');unrelated.addObject(definition);definition.Placement=place(-11,7,13,29)
+  group_point=doc.addObject('Part::Feature','GroupPoint');definition.addObject(group_point);group_point.Shape=Part.Vertex(App.Vector(1,4,2));group_point.Placement=place(3,5,7,17)
+  group_line=doc.addObject('Part::Feature','GroupLine');definition.addObject(group_line);group_line.Shape=Part.makeLine(App.Vector(1,2,3),App.Vector(4,6,8));group_line.Placement=place(-3,2,8,19)
+  group_arrays=[array('GroupArray'+str(int(expanded))+str(int(flag)),definition,expanded,flag,2) for expanded in [False,True] for flag in [False,True]]
+  raw_points=[App.Vector(1,2,3),App.Vector(4,2,3),App.Vector(1,6,3)]
+  mesh_data=Mesh.Mesh([raw_points]);mesh=doc.addObject('Mesh::Feature','MeshDefinition');unrelated.addObject(mesh);mesh.Mesh=mesh_data;mesh.Placement=place(2,4,6,31)
+  cloud_data=Points.Points(raw_points);cloud=doc.addObject('Points::Feature','CloudDefinition');unrelated.addObject(cloud);cloud.Points=cloud_data;cloud.Placement=place(-3,5,7,41)
+  discrete_sources={mesh.Name:('mesh',mesh_data.Topology[0],[list(f) for f in mesh_data.Topology[1]]),cloud.Name:('point_cloud',cloud_data.Points,None)}
+  discrete_arrays=[array('Discrete'+target.Name+str(int(expanded))+str(int(flag)),target,expanded,flag,2) for target in [mesh,cloud] for expanded in [False,True] for flag in [False,True]]
+  nested=array('NestedArray',arrays[0],False,True,2)
+  links=[]
+  for flag in [False,True]:
+   link=doc.addObject('App::Link','ArrayReference'+str(int(flag)));parent.addObject(link);link.setLink(arrays[3]);link.LinkTransform=flag;link.LinkPlacement=place(-13,17,23,19);link.ScaleVector=App.Vector(.3,-2,1.7);links.append(link)
+  doc.recompute();before=native_state(doc)
+  def descriptor(obj,sub=''):return json.loads(native.geometryDescriptor(doc.Name,obj.Name,sub))
+  def compare_leaf(label,row,source,world):
+   check(label+' leaf retains native source identity',row['object_name']==source.Name)
+   if source.Name in discrete_sources:
+    kind,raw,triangles=discrete_sources[source.Name]
+    check(label+' discrete source representation and raw data retained',row['representation']==kind and row['geometry_data']['points_xyz']==[list(p) for p in raw] and row['geometry_data']['triangles']==triangles)
+    for p,copied in zip(raw,row['geometry_data']['points_xyz']):
+     check(label+' discrete world point agrees with native path',(transformed(row['local_to_world'],App.Vector(*copied))-world.multVec(p)).Length<1e-8)
+    return
+   inspected=source.Shape.Faces[int(row['subelement'][4:])-1] if row['subelement'].startswith('Face') else source.Shape
+   for v in row['topology']['vertices']:
+    native_vertex=inspected.Vertexes[int(v['native_topology_index'])-1]
+    raw_point=source.Placement.inverse().multVec(native_vertex.Point)
+    check(label+' vertex world sample agrees with native path',(transformed(v['local_to_world'],App.Vector(*v['point_xyz']))-world.multVec(raw_point)).Length<1e-8)
+  def compare_definition(label,row,target,path):
+   if target.isDerivedFrom('Part::Feature') or target.Name in discrete_sources:compare_leaf(label,row,target,path);return
+   check(label+' group definition hierarchy retained',row['representation']=='group' and len(row['geometry_data']['members'])==len(target.Group))
+   for child in row['geometry_data']['members']:
+    source,relative=target.getSubObject(child['object_name']+'.',1,path,False);source,relative=source.getLinkedObject(True,relative,False)
+    compare_leaf(label+'.'+source.Name,child,source,relative)
+  def compare_array(label,obj,row,base,count):
+   data=row['geometry_data'];metadata=data['array_occurrences'];members=data['members']
+   check(label+' array is an explicit ordered occurrence collection',row['representation']=='group' and data['kind']=='instance_array' and len(members)==count and len(metadata['elements'])==count)
+   check(label+' total count and source array type retained',metadata['total_count']==obj.ElementCount and row['source_attributes']['native_type']=='App::Link')
+   for item,member in zip(metadata['elements'],members):
+    i=item['array_index'];resolved,path=obj.getSubObject(str(i)+'.',1,App.Matrix(),True);target,path=resolved.getLinkedObject(True,path,False);world=base.multiply(path)
+    check(label+' '+str(i)+' native path and occurrence frame retained',item['native_path']==str(i)+'.' and close_matrix(item['definition_object_to_world'],matrix(world)) and close_matrix(member['local_to_world'],matrix(world)))
+    if obj.ShowElement:
+     check(label+' '+str(i)+' physical element identity retained',item['native_element_ref']==member['stamp'] and member['object_name']==obj.ElementList[i].Name)
+    else:
+     check(label+' '+str(i)+' virtual element retains owner and index',item['native_element_ref'] is None and member['stamp']==row['stamp'] and member['object_name']==obj.Name and member['subelement']==str(i)+'.')
+    child=member['geometry_data']['definition_geometry'];check(label+' '+str(i)+' definition stamp retained',item['definition_ref']==child['stamp'])
+    compare_definition(label+'.'+str(i),child,target,world)
+  for a in arrays+group_arrays+discrete_arrays:
+   row=descriptor(a);report['descriptors'][a.Name]=row;compare_array(a.Name,a,row,parent.getGlobalPlacement().toMatrix(),a.ElementCount)
+   check(a.Name+' occurrence graph retains each instance',sum(n['representation']=='instance' for n in row['definition_graph']['nodes'])==a.ElementCount)
+   selected=descriptor(a,'1.');check(a.Name+' selected index preserves original ordinal',selected['geometry_data']['array_occurrences']['elements'][0]['array_index']==1 and len(selected['geometry_data']['members'])==1)
+   compare_array(a.Name+' selected',a,selected,parent.getGlobalPlacement().toMatrix(),1)
+   if a.ShowElement:
+    by_name=descriptor(a,a.ElementList[1].Name+'.');check(a.Name+' native element name selects same occurrence',by_name['geometry_data']['array_occurrences']==selected['geometry_data']['array_occurrences'])
+  for link in links:
+   row=descriptor(link);report['descriptors'][link.Name]=row;child=row['geometry_data']['definition_geometry'];target,path=link.getLinkedObject(False,App.Matrix(),True)
+   base=parent.getGlobalPlacement().toMatrix().multiply(path).multiply(target.Placement.inverse().toMatrix())
+   compare_array(link.Name,target,child,base,target.ElementCount)
+  nested_row=descriptor(nested);report['descriptors'][nested.Name]=nested_row
+  check('nested array preserves both ordered collections',len(nested_row['geometry_data']['members'])==2 and len(leaves(nested_row))==6)
+  for i,instance in enumerate(nested_row['geometry_data']['members']):
+   target,path=nested.getSubObject(str(i)+'.',1,App.Matrix(),True)
+   base=parent.getGlobalPlacement().toMatrix().multiply(path).multiply(target.Placement.inverse().toMatrix())
+   compare_array('nested '+str(i),target,instance['geometry_data']['definition_geometry'],base,target.ElementCount)
+  check('all descriptor inspection preserves native sources and history',native_state(doc)==before)
+  for a,sub in [(arrays[0],'3.'),(arrays[0],'-1.'),(arrays[0],'999999999999999999999999999999999999.'),(arrays[0],'Missing.'),(arrays[0],'1.Vertex999')]:
+   old=native_state(doc);error=None
+   try:descriptor(a,sub)
+   except (ValueError,RuntimeError) as exc:error=str(exc)
+   check('invalid array selector '+sub+' rejects atomically',error is not None and native_state(doc)==old)
+  solid=doc.addObject('Part::Feature','Solid');solid.Shape=Part.makeBox(2,3,4);solid.Placement=place(7,11,13,23)
+  for expanded in [False,True]:
+   a=array('FaceArray'+str(int(expanded)),solid,expanded,True,2);a.setLink(solid,'',['Face1','Face3']);doc.recompute();row=descriptor(a);report['descriptors'][a.Name]=row
+   check(a.Name+' configured subelements retained per occurrence',[[r['subelement'] for r in leaves(m)] for m in row['geometry_data']['members']]==[['Face1','Face3'],['Face1','Face3']])
+   for i,member in enumerate(row['geometry_data']['members']):
+    source,path=a.getSubObject(str(i)+'.',1,App.Matrix(),True);source,path=source.getLinkedObject(True,path,False);world=parent.getGlobalPlacement().toMatrix().multiply(path)
+    for leaf in leaves(member):compare_leaf(a.Name+'.'+str(i),leaf,solid,world)
+  bad=doc.addObject('App::Link','CountRejected');bad.ViewObject.Visibility=False;bad.setLink(point);bad.ShowElement=False;bad.ElementCount=2048;doc.recompute();old=native_state(doc);error=None
+  try:descriptor(bad)
+  except (ValueError,RuntimeError) as exc:error=str(exc)
+  check('array count rejects at preflight before traversal',error is not None and 'array element/count budget' in error and native_state(doc)==old);doc.removeObject(bad.Name)
+  bad=array('SingularRejected',point,False,False,2);bad.ViewObject.Visibility=False;bad.ScaleList=[App.Vector(0,1,1),App.Vector(1,1,1)];doc.recompute();old=native_state(doc);error=None
+  try:descriptor(bad)
+  except (ValueError,RuntimeError) as exc:error=str(exc)
+  check('singular element transform rejects atomically',error is not None and 'transform' in error and native_state(doc)==old);doc.removeObject(bad.Name)
+  large=array('SerializedRejected',point,False,False,70);large.ScaleList=[App.Vector(1,1,1)]*70;large.ViewObject.Visibility=False;large.Label2='x'*65536;original_label=point.Label2;point.Label2='y'*65536;doc.recompute();old=native_state(doc);error=None
+  try:descriptor(large)
+  except (ValueError,RuntimeError) as exc:error=str(exc)
+  report['serialized_rejection']=error
+  check('count-valid array serialized overflow rejects atomically',error is not None and 'serialized payload budget' in error and native_state(doc)==old);point.Label2=original_label;doc.removeObject(large.Name)
+  doc.recompute();stable=descriptor(arrays[1]);source_bytes=point.Shape.exportBrepToString()
+  doc.openTransaction('Move one virtual array occurrence');placements=list(arrays[0].PlacementList);placements[1]=place(101,103,107,41);arrays[0].PlacementList=placements;doc.recompute();doc.commitTransaction()
+  moved=descriptor(arrays[0]);check('moving one occurrence preserves sibling array and canonical source',descriptor(arrays[1])['geometry_data']['array_occurrences']==stable['geometry_data']['array_occurrences'] and point.Shape.exportBrepToString()==source_bytes)
+  doc.undo();doc.recompute();undone=descriptor(arrays[0]);check('Undo restores array occurrence frame',moved['geometry_data']['array_occurrences']['elements'][1]['definition_object_to_world']!=undone['geometry_data']['array_occurrences']['elements'][1]['definition_object_to_world'])
+  doc.redo();doc.recompute();check('Redo restores moved array frame',close_matrix(descriptor(arrays[0])['geometry_data']['array_occurrences']['elements'][1]['definition_object_to_world'],moved['geometry_data']['array_occurrences']['elements'][1]['definition_object_to_world']))
+  saved=json.dumps(report['descriptors'],sort_keys=True);point.Shape=Part.Vertex(App.Vector(7,11,13));doc.recompute();fresh=descriptor(arrays[1]);check('source replacement publishes fresh array definition',fresh['geometry_data']['members'][0]['geometry_data']['definition_geometry']['geometry_data']['point_xyz']==[7,11,13])
+  App.closeDocument(doc.Name);check('returned array metadata and geometry survive source replacement and close',json.dumps(report['descriptors'],sort_keys=True)==saved)
+  report['ok']=True
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

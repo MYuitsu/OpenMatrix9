@@ -19,7 +19,7 @@ fn stable_layer_indexes_cover_all_sidebar_slots() {
     }
     assert_eq!(layers::name(5), Some("Gem 01"));
     assert_eq!(layers::name(21), Some("User 25"));
-    for index in [i32::MIN, -1, 0, 33, i32::MAX] {
+    for index in [i32::MIN, -1, 0, 34, i32::MAX] {
         assert!(layers::default_color(index).is_none());
         assert!(layers::name(index).is_none());
     }
@@ -32,12 +32,12 @@ fn typed_selection_is_bounded_explicit_and_unambiguous() {
         ("Layer = \"Metal 01\"", 1),
         ("Layer=None", 0),
         ("Layer=0", 0),
+        ("Layer=Lights", 33),
     ] {
         assert_eq!(layers::parse_selection(text), Selection::Index(index));
     }
     for text in [
-        "Layer=Lights",
-        "Layer=33",
+        "Layer=34",
         "Layer=-1",
         "Layer",
         "Layer=",
@@ -68,7 +68,7 @@ fn locked_missing_invalid_layers_reject_before_commit() {
     assert_eq!(s.output_plan(), Err(LayerError::Locked));
     s.exists = false;
     assert_eq!(s.output_plan(), Err(LayerError::MissingLayer));
-    s.index = 33;
+    s.index = 34;
     assert_eq!(s.output_plan(), Err(LayerError::InvalidIndex));
     s = snapshot(5);
     s.color[1] = f64::NAN;

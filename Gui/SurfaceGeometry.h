@@ -25,7 +25,10 @@ struct SurfaceOptions {
     std::vector<std::pair<double,double>> slashes;
 };
 // Returned shapes are owned references. Callers hold the GIL while using them.
-PyObject* surfaceWire(App::Document&, const SurfaceInput&);
+const char* surfaceOperation(unsigned kind);
+unsigned surfaceCapabilityStatus(const SurfaceOptions&,unsigned representation,unsigned stage,
+                                 std::size_t inputCount,unsigned railClosed);
+PyObject* surfaceWire(App::Document&, const SurfaceInput&, const char* operation="Surface");
 PyObject* buildSurface(App::Document&, const std::vector<SurfaceInput>&, const SurfaceOptions&);
 void commitSurface(App::Document&, PyObject*, const std::vector<SurfaceInput>&, const SurfaceOptions&);
 }

@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""A failed prepared acceptance rejects commit retry without native memory access."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE']);import OM9ReplayRetirement as probe
+def state(doc):return dict(booked=doc.getBookedTransactionID(),pending=doc.HasPendingTransaction,undo=list(doc.UndoNames),redo=list(doc.RedoNames))
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench')
+  for preserving in [False,True]:
+   label='preserving'if preserving else'regular';doc=App.newDocument('CommitRetry');doc.UndoMode=1
+   child=doc.getObject(probe.create(doc.Name));doc.recompute();doc.clearUndos()
+   doc.openTransaction('Prior redo');child.Output='prior-redo';doc.commitTransaction();doc.undo()
+   if preserving:doc.openTransactionPreservingRedo('Caller')
+   else:doc.openTransaction('Caller')
+   before=state(doc);value=child.Value;result=probe.run(doc.Name,'value','open_retry')
+   check(label+' one actual native open notification exception',result['open_callbacks']==1 and result['callbacks']==0)
+   check(label+' retry rejected by typed replay admission','StaleGeometry'in result['retry_error'])
+   check(label+' rejection completes checked rollback',not result['accepted']and result['rollback']and result['complete'])
+   check(label+' original caller and history preserved',state(doc)==before)
+   check(label+' private values and paired output restored',child.Value==value and child.Output=='')
+   doc.abortTransaction();doc.redo();check(label+' original Redo executable',child.Output=='prior-redo')
+   report['observations'].append(dict(preserving=preserving,result=result))
+   App.closeDocument(doc.Name)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -54,12 +54,18 @@ const COLORS: [u32; COUNT] = [
 ];
 
 pub fn name(index: i32) -> Option<&'static str> {
+    if index == 33 {
+        return Some("Lights");
+    }
     index
         .checked_sub(1)
         .and_then(|i| usize::try_from(i).ok())
         .and_then(|i| NAMES.get(i).copied())
 }
 pub fn default_color(index: i32) -> Option<[f64; 3]> {
+    if index == 33 {
+        return Some([1.0; 3]);
+    }
     let i = usize::try_from(index.checked_sub(1)?).ok()?;
     let rgb = *COLORS.get(i)?;
     Some([
@@ -102,7 +108,7 @@ impl LayerSnapshot {
                 color: ROOT_COLOR,
             });
         }
-        if !(1..=COUNT as i32).contains(&self.index) {
+        if !(1..=33).contains(&self.index) {
             return Err(LayerError::InvalidIndex);
         }
         if !self.exists {
@@ -150,11 +156,14 @@ pub fn parse_selection(text: &str) -> Selection {
         return Selection::Index(0);
     }
     if let Ok(index) = value.parse::<i32>() {
-        return if (1..=COUNT as i32).contains(&index) {
+        return if (1..=33).contains(&index) {
             Selection::Index(index)
         } else {
             Selection::Invalid
         };
+    }
+    if value.eq_ignore_ascii_case("Lights") {
+        return Selection::Index(33);
     }
     NAMES
         .iter()
@@ -164,11 +173,111 @@ pub fn parse_selection(text: &str) -> Selection {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn om9_layer_name(index: i32) -> *const c_char {
+    if index == 33 {
+        return c"Lights".as_ptr();
+    }
     index
         .checked_sub(1)
         .and_then(|i| usize::try_from(i).ok())
         .and_then(|i| C_NAMES.get(i))
         .map_or(std::ptr::null(), |s| s.as_ptr().cast())
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[repr(i32)]
+pub enum ObjectAction {
+    Assign = 1,
+    Select = 2,
+    Hide = 3,
+}
+
+pub fn effective_visible(layer_visible: bool, explicit_visible: bool, hidden: bool) -> bool {
+    layer_visible && explicit_visible && !hidden
+}
+/// Native pick permission stays independent of display. Invisible providers
+/// already suppress picking; changing Visibility must not erase this preference.
+pub fn selectable_permission(explicit_selectable: bool, locked: bool) -> bool {
+    explicit_selectable && !locked
+}
+pub fn effective_selectable(
+    visible: bool,
+    explicit_selectable: bool,
+    hidden: bool,
+    locked: bool,
+) -> bool {
+    visible && !hidden && selectable_permission(explicit_selectable, locked)
+}
+pub fn allows_action(
+    action: ObjectAction,
+    visible: bool,
+    source_locked: bool,
+    target_locked: bool,
+) -> bool {
+    match action {
+        ObjectAction::Assign => !source_locked && !target_locked,
+        ObjectAction::Select => visible && !source_locked,
+        ObjectAction::Hide => true,
+    }
+}
+pub fn valid_name(index: i32, name: &str) -> bool {
+    (17..=32).contains(&index)
+        && !name.trim().is_empty()
+        && name.len() <= 128
+        && !name.chars().any(char::is_control)
+}
+pub fn allows_matrix_art(index: i32) -> bool {
+    (1..=16).contains(&index)
+}
+pub fn group_target_visible(visible: u32, members: u32) -> Option<bool> {
+    (members != 0).then_some(visible & members != members)
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_layer_effective_visible(layer: bool, explicit: bool, hidden: bool) -> bool {
+    effective_visible(layer, explicit, hidden)
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_layer_effective_selectable(
+    visible: bool,
+    explicit: bool,
+    hidden: bool,
+    locked: bool,
+) -> bool {
+    effective_selectable(visible, explicit, hidden, locked)
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_layer_selectable_permission(explicit: bool, locked: bool) -> bool {
+    selectable_permission(explicit, locked)
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_layer_allows_action(
+    action: i32,
+    visible: bool,
+    locked: bool,
+    target_locked: bool,
+) -> bool {
+    let action = match action {
+        1 => ObjectAction::Assign,
+        2 => ObjectAction::Select,
+        3 => ObjectAction::Hide,
+        _ => return false,
+    };
+    allows_action(action, visible, locked, target_locked)
+}
+/// # Safety
+/// Caller supplies readable UTF-8 bytes for this call; length is bounded before borrowing.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn om9_layer_valid_name(index: i32, text: *const u8, len: usize) -> bool {
+    if text.is_null() || len > 128 {
+        return false;
+    }
+    let Ok(name) = std::str::from_utf8(unsafe { std::slice::from_raw_parts(text, len) }) else {
+        return false;
+    };
+    valid_name(index, name)
+}
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_layer_group_target(visible: u32, members: u32) -> i32 {
+    group_target_visible(visible, members).map_or(-1, i32::from)
 }
 #[unsafe(no_mangle)]
 pub extern "C" fn om9_layer_default_color(index: i32, channel: usize) -> f64 {

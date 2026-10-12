@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-10",
+  "scope": "RCORE-01.T07 archive member preflight before geometry staging; raw ONX_Model::Read allocation remains open.",
+  "source_fingerprints": {
+    "Gui/ThreeDmArchive.cpp": {
+      "bytes": 24884,
+      "sha256": "cb829d0790cf2846f772ef6fe3ceffff4a97ac5acae819c0fb6f08404ab86736"
+    },
+    "tests/native/CMakeLists.txt": {
+      "bytes": 27490,
+      "sha256": "484c650cee21995e54b398262d25adc725ac603880149ec41fa1a8795eb05e36"
+    },
+    "tests/native/rhino_core_native_input_tree.cpp": {
+      "bytes": 26679,
+      "sha256": "1abd3a72f91550cb38cdc130c5a4c2085cd83160c4a103ce5d624243f3423ee5"
+    }
+  },
+  "native_archive_fixture": {
+    "target": "ThreeDmNativeInputTreeTests",
+    "result": "pass",
+    "checks": 67,
+    "failures": 0,
+    "red_reproduction": {
+      "path": "H:/FreeCAD-src/build/rcore-native/native-input-tree-results-verified-20261010.json",
+      "checks": 66,
+      "failed_clauses": 2,
+      "evidence": "Invalid transformed block curve reached archive.geometry.Duplicate once; invalid surface reached archive.surface.BrepForm once before converter rejection."
+    },
+    "green_result": "H:/FreeCAD-src/build/rcore-native/native-input-tree-archive-signed-green-20261010.json",
+    "covered_paths": [
+      "Invalid transformed block-member curve rejected with the native basis error before Duplicate and GetNurbForm.",
+      "Invalid surface rejected with the native basis error before BrepForm.",
+      "Invalid NURBS support in a tagged signed-placement BRep rejected before IsSolid/SolidOrientation."
+    ],
+    "instrumentation": "Fixture-only hooks compiled into ThreeDmInputTreeFixture; input setup and ONX_Model::Read allocations are excluded."
+  },
+  "related_ctests": {
+    "result": "pass",
+    "passed": 6,
+    "failed": 0,
+    "names": [
+      "OM9-FILE-012.CurveOnSurfaceArchive",
+      "RCORE-01.NativeInputTree",
+      "OM9-FILE-012.NativeTransform",
+      "OM9-FILE-012.Preservation",
+      "OM9-FILE-012.Archive",
+      "OM9-FILE-012.Blocks"
+    ],
+    "ctest_log": "H:/FreeCAD-src/build/rcore-native/Testing/Temporary/LastTest.log",
+    "test_temp_policy": "Fresh unique TEMP/TMP directory per run to avoid fixed-name artifacts from prior native runs."
+  },
+  "plugin_build": {
+    "result": "pass",
+    "script": "H:/FreeCAD-src/build/build-om9-plugin.ps1",
+    "scope": "OpenMatrix9Gui plugin target only against the shared FreeCAD SDK; ThreeDmArchive.cpp rebuilt; no FreeCAD root reconfigure/build.",
+    "sdk": "H:/FreeCAD-src/build/relWithDebInfo",
+    "cache": "H:/FreeCAD-src/build/openmatrix9-history-cage",
+    "runtime": "H:/FreeCAD-src/build/reusable-history-runtime"
+  },
+  "shared_host": {
+    "checks": 21,
+    "failures": 0,
+    "process_exit_code": 0,
+    "host": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+    "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
+    "plugin": "H:/FreeCAD-src/build/reusable-history-runtime/bin/OpenMatrix9Gui.pyd",
+    "plugin_sha256": "08e9e7ca60f7c557346d4d585534a58403e8278666376b1936c8b3b95c0e3283",
+    "run_directory": "H:/FreeCAD-src/build/native-input-tree-archive-stage-final-20261010",
+    "scope_note": "Host smoke rechecked native input-tree mutation and export behavior. The archive preflight order is directly covered by the C++ readArchive fixtures."
+  },
+  "review": {
+    "report": "docs/reviews/2026-10-10-native-input-tree-archive-stage-review.md",
+    "verdict": "approved after P2 test-coverage fix",
+    "review_scope": "Gate ordering, fixture hooks and real readArchive integration cases; reviewer did not rebuild or rerun tests."
+  },
+  "reuse_audit": {
+    "line_polyline": "Existing Line/Polyline command, session, controller and Part.makePolygon implementation are reused; no duplicate solver or wire constructor was added.",
+    "converters": "Existing openNURBS-to-OCCT converters and shared Rust NURBS validator remain authoritative."
+  },
+  "remaining_open": [
+    "ONX_Model::Read raw archive parsing, native object allocations and archive-size expansion remain unguarded by this member preflight.",
+    "ThreeDmExplode source Duplicate, Extrusion BrepForm and cage extraction remain open.",
+    "Process-wide allocator and aggregate worker-memory bounds remain open.",
+    "Analytic, mesh, point-cloud, cage, custom-owner and broader worker/lifetime policies remain open.",
+    "RCORE-01.T07 and all other P0 requirements remain in progress."
+  ]
+}

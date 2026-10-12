@@ -8,6 +8,7 @@ fn step(s: &mut Session, text: &str) {
 #[test]
 fn box_corner_height_normalizes_negative_extents() {
     let mut s = Session::new(Kind::Box);
+    step(&mut s, "Diagonal");
     step(&mut s, "10,20,30");
     step(&mut s, "6,14,30");
     assert_eq!(s.input("-8").unwrap(), Effect::Commit);
@@ -18,6 +19,7 @@ fn box_corner_height_normalizes_negative_extents() {
 #[test]
 fn box_numeric_enter_defaults_make_cube() {
     let mut s = Session::new(Kind::Box);
+    step(&mut s, "Center");
     step(&mut s, "0,0");
     step(&mut s, "Length=2cm");
     step(&mut s, "");
@@ -53,6 +55,7 @@ fn sphere_mouse_radius_is_world_distance_and_preview_does_not_commit() {
 #[test]
 fn invalid_dimensions_remain_editable_and_undo_restores_phase() {
     let mut s = Session::new(Kind::Box);
+    step(&mut s, "Center");
     step(&mut s, "0,0");
     for text in ["0,2", "NaN", "Length=0", "1e20", "Center"] {
         assert!(s.input(text).is_err());
@@ -73,6 +76,7 @@ fn invalid_dimensions_remain_editable_and_undo_restores_phase() {
 #[test]
 fn cplane_coordinates_and_relative_input_are_transformed_once() {
     let mut s = Session::new(Kind::Box);
+    step(&mut s, "Diagonal");
     s.set_frame([10., 20., 30.], [[0., 1., 0.], [0., 0., 1.], [1., 0., 0.]])
         .unwrap();
     step(&mut s, "1,2,3");
@@ -101,6 +105,7 @@ fn sphere_rejects_zero_negative_nonfinite_and_cancelled_inputs() {
 #[test]
 fn repeated_undo_walks_back_each_input_and_clears_output() {
     let mut s = Session::new(Kind::Box);
+    step(&mut s, "Center");
     step(&mut s, "0,0");
     step(&mut s, "4");
     step(&mut s, "5");
@@ -108,8 +113,10 @@ fn repeated_undo_walks_back_each_input_and_clears_output() {
         step(&mut s, "Undo");
         assert_eq!(s.phase(), phase);
     }
+    step(&mut s, "Undo");
     assert!(s.input("Undo").is_err());
     assert_eq!(s.phase(), 1);
+    assert!(s.input("0").is_ok());
 }
 
 #[test]

@@ -11,7 +11,7 @@
     "description": "Giao diện gồm Icon History, Main Menu, Display, Snaps, Info & Settings, Layers, Projects và Builder phía dưới Projects; vùng còn lại chứa bốn viewport và CMD/feedback. Icon History chứa chín command gần nhất và Undo/Redo. Title bar cho collapse, đổi thứ tự, kéo float hoặc dock hai phía; một số thanh thu gọn vẫn giữ controls quan trọng. Dock bên phải có bề rộng tương thích 300 pixel nhưng UI OM9 phải điều chỉnh theo DPI/màn hình; hỗ trợ nhiều màn hình. Set as Default lưu bố cục người dùng, Reset Menus phục hồi bố cục mặc định, Reload Menus nạp bố cục cấu hình khởi chạy. CMD nhận tên lệnh, số, tùy chọn click hoặc mnemonic và Enter; feedback hiển thị kết quả. Menu ngang bổ sung chức năng host. ",
     "access": "Matrix application workspace",
     "spec_path": "specs/01-core/om9-iface-001-matrix-interface.md",
-    "implementation_status": "not_started",
+    "implementation_status": "partially_implemented",
     "engineering_contracts": [
       "OM9-CMD",
       "OM9-OBJECT",
@@ -46,7 +46,7 @@
       "date": "2026-10-07",
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
-      "native_implementation_status": "not_started"
+      "native_implementation_status": "partially_implemented"
     }
   },
   {
@@ -61,7 +61,7 @@
     "description": "Main Menu chỉ mở một nhóm tại thời điểm, nút scroll tiến hai hàng; tooltip có tại icon và title bar. Click command cập nhật Icon History chín lệnh. Undo/Redo dùng Ctrl+Z/Ctrl+Y, Builder có thể cần undo cấp phiên. Reset Tools kết thúc lệnh đang chạy, phục hồi view, Wireframe, unlock object, show object/layer và bỏ background bitmap. Menu bao gồm File/View/Utilities/Measure, Curve/Surface/Solid/Transform, Builders/Tools/Gems/Settings/Cutters/Render/Matrix Art và Custom. Builders dựng phần tử có parameters/handles; Tools gồm rail/profile, Boolean/mesh/resize/check/weight/placement; Gems gồm gem load/layout/report/Pavé; Settings thêm vật liệu quanh gem; Cutters tạo vật liệu cắt; Render tổ chức m",
     "access": "Upper-left Main Menu",
     "spec_path": "specs/01-core/om9-main-001-main-menu.md",
-    "implementation_status": "not_started",
+    "implementation_status": "partially_implemented",
     "engineering_contracts": [
       "OM9-CMD",
       "OM9-OBJECT",
@@ -96,7 +96,7 @@
       "date": "2026-10-07",
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
-      "native_implementation_status": "not_started"
+      "native_implementation_status": "partially_implemented"
     }
   },
   {
@@ -312,9 +312,9 @@
       "native_implementation_status": "partially_implemented"
     },
     "implementation_validation_status": "validated_supported_slice",
-    "implementation_verified_at": "2026-10-09",
-    "implementation_scope": "Reusable native createBuilderRecord/restoreBuilderOutputs APIs with versioned affine-template recipes, durable parameters, independent output slots, grouped frames and History integration. API foundation only; original per-builder geometry solvers, sliders/handles/profile/Styles UI and .mss interchange remain unsupported and original commands stay disabled. RCORE-09 policy revision (2026-10-09): Record controls new supported links only; Update independently suspends/resumes existing recorded descendants, including when Record is Off. Enabling Record does not retrofit snapshot outputs.",
-    "implementation_validation_record": "../docs/validation/2026-10-09-reusable-builder-cage.md"
+    "implementation_verified_at": "2026-10-12",
+    "implementation_scope": "Reusable native createBuilderRecord/restoreBuilderOutputs APIs with versioned affine-template recipes, durable parameters, independent output slots, grouped frames and History integration. API foundation only; original per-builder geometry solvers, sliders/handles/profile/Styles UI and .mss interchange remain unsupported and original commands stay disabled. RCORE-09 policy revision (2026-10-09): Record controls new supported links only; Update independently suspends/resumes existing recorded descendants, including when Record is Off. Enabling Record does not retrofit snapshot outputs. 2026-10-12 Command Line Options: reusable Rust schemas/reducer and native Rebuild, Sweep1/Sweep2/Loft scalar CMD–Builder bindings support toggles, child choices and raw numeric input, accepted-state rollback and draft/commit guards. Other commands can register schemas/adapters without adding per-command reducer branches. Original Gem-specific solvers and full Builder UI remain unsupported. Common Rust root/choice mnemonic declarations and single-character underline, full-label clicks, phase-scoped shortcuts and CMD–Builder binding; no per-command renderer.",
+    "implementation_validation_record": "../docs/validation/2026-10-12-common-command-mnemonics.md"
   },
   {
     "id": "OM9-STYLE-001",
@@ -1914,7 +1914,27 @@
     "implementation_validation_status": "validated_supported_slice",
     "implementation_verified_at": "2026-10-09",
     "implementation_scope": "Native Join/Surface History and reusable Builder record/output graphs with Record/Update/Lock/Clear, detach, Undo and FCStd persistence; native 3D Cage bindings update independently of global Record/Update. Arbitrary original Gem builders, topology correspondence and full Matrix/Rhino History remain unsupported. RCORE-09 policy revision (2026-10-09): Record controls new supported links only; Update independently suspends/resumes existing recorded descendants, including when Record is Off. Enabling Record does not retrofit snapshot outputs.",
-    "implementation_validation_record": "../docs/validation/2026-10-09-reusable-builder-cage.md"
+    "implementation_validation_record": "../docs/validation/2026-10-09-reusable-builder-cage.md",
+    "implementation_builder_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-builder-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Independent existing affine-template Builder requests use the shared Rust operation/type/options policy before native source/template copy and GUI transactions. Create, persisted validation/recompute, explicit restore and all Match targets reuse the existing affine evaluator, shape tags, frames and slot/History rules."
+    },
+    "implementation_builder_output_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-builder-output.md",
+      "verified_at": "2026-10-11",
+      "scope": "Existing native Builder Create/restore/Match solved-output staging and scoped GUI publication; full RCORE-01 remains open."
+    },
+    "implementation_builder_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-builder-result.md",
+      "verified_at": "2026-10-11",
+      "scope": "Native affine Builder owned result/source attributes and paired Create/restore/Match/History publication; original full RCORE-01 remains in progress."
+    },
+    "implementation_builder_conversion_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-builder-conversion.md",
+      "verified_at": "2026-10-11",
+      "scope": "Native affine Builder composed topology history, owned input snapshot, measured vertex/edge/trimmed-face queries and explicit unavailable-query evidence; original full RCORE-01 remains in progress."
+    }
   },
   {
     "id": "OM9-LAYER-001",
@@ -1925,10 +1945,10 @@
     "module_index": 9,
     "module_slug": "layers",
     "kind": "tool_or_workflow",
-    "description": "Layers tổ chức object theo group màu và visibility/lock; current layer nhận object không có semantic layer chuyên biệt. Vai trò màu Settings tím, Cutters cam, Profiles vàng, Rails nâu đỏ giữ nhận diện nhưng không dùng màu làm loại geometry. In arrow đổi layer selection; right-click swatch chọn objects visible trên layer; lock ngăn pick/region nhưng vẫn hiện; toggle lớp/group bật tắt display. Hide/Show object độc lập layer: Hide giấu selection, Show hiện mọi hidden trong scope phiên, right-Hide giữ selection và ẩn phần khác, right-Show cho chọn một phần hidden để hiện. Job Bag thường lưu selection nên không tự gồm hidden/off-layer; full save/Master lưu mọi object cùng trạng thái. Advanced có ",
+    "description": "Layers organize objects by current/Assign membership, color, independent visibility/Hidden and lock. In arrow assigns selection; right swatch selects permitted visible members. Advanced has sixteen customizable slots, collapsed by default, with Shift+right rename/color. Lights is separate slot33. Footer controls omitted by the user; see spec and fresh native validation for supported output integration and exclusions.",
     "access": "Layers menu",
     "spec_path": "specs/01-core/om9-layer-001-layer-management.md",
-    "implementation_status": "not_started",
+    "implementation_status": "partially_implemented",
     "engineering_contracts": [
       "OM9-CMD",
       "OM9-OBJECT",
@@ -1984,8 +2004,12 @@
       "date": "2026-10-07",
       "scope": "request_validation_and_operation_plan",
       "sample_status": "compiled_and_validation_tests_passed",
-      "native_implementation_status": "not_started"
-    }
+      "native_implementation_status": "partially_implemented"
+    },
+    "implementation_validation_status": "validated_supported_slice",
+    "implementation_reviewed_at": "2026-10-11",
+    "implementation_scope": "32 model slots plus Lights slot33; separate current/Assign, swatch selection, lock and OM9 pick/Region/edit guards, independent Hidden/layer visibility, group toggles, Hide/Show left/right, collapsed Advanced rename/color with modal generation guards. Supported root Curve/Solid/Surface/Edit/Rebuild outputs use current layer; Explode preserves source ownership. Rust and matching-host native workflows validated. MatrixArt/material, general hierarchy/import inheritance and session-time layer binding remain outside this slice. Footer omitted by explicit user request.",
+    "implementation_validation_record": "../docs/validation/2026-10-11-layer-panel-implementation.md"
   },
   {
     "id": "OM9-PROJECT-001",
@@ -3806,6 +3830,12 @@
       "date": "2026-10-09",
       "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
       "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
+    },
+    "implementation_edit_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-edit-result.md",
+      "verified_at": "2026-10-11",
+      "status": "in_progress_native_regressions_unresolved",
+      "scope": "Native CAD Edit results, recompute source isolation and native Dimension full capture/finite guard; prior-Redo and full original all-family contracts remain open. Full original RCORE-01 preserved."
     }
   },
   {
@@ -3979,6 +4009,12 @@
       "date": "2026-10-09",
       "report": "../docs/validation/2026-10-09-rhino-core-tolerance-workers.md",
       "scope": "Curve endpoint midpoint snapping and sewn surface shells with Rust-resolved document/explicit/legacy cutoff, backend floor rejection and persisted actual tolerance/context. Full topology and rich History remain unverified."
+    },
+    "implementation_edit_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-edit-result.md",
+      "verified_at": "2026-10-11",
+      "status": "in_progress_native_regressions_unresolved",
+      "scope": "Native CAD Edit results, recompute source isolation and native Dimension full capture/finite guard; prior-Redo and full original all-family contracts remain open. Full original RCORE-01 preserved."
     }
   },
   {
@@ -4117,6 +4153,12 @@
       "date": "2026-10-09",
       "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
       "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
+    },
+    "implementation_edit_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-edit-result.md",
+      "verified_at": "2026-10-11",
+      "status": "in_progress_native_regressions_unresolved",
+      "scope": "Native CAD Edit results, recompute source isolation and native Dimension full capture/finite guard; prior-Redo and full original all-family contracts remain open. Full original RCORE-01 preserved."
     }
   },
   {
@@ -8052,6 +8094,63 @@
       "report": "../docs/validation/2026-10-09-rhino-core-extended-input.md",
       "scope": "Extended typed point input through existing native geometry; no all-option or all-P0 completion.",
       "verified_at": "2026-10-09"
+    },
+    "implementation_construction_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-native-curve-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Shared Rust current-session operation/type/options policy for existing Line, Polyline, InterpCrv, Rectangle, Circle and Ellipse. Partial RCORE-01 integration."
+    },
+    "implementation_constructor_state_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-construction.md",
+      "verified_at": "2026-10-11",
+      "scope": "Owned normalized direct constructor state paired with Shape; options/analytic plan/nonrational basis and scoped Undo/Redo/FCStd. Original accepted inputs/native sources/common GeometryResult and full command remain open."
+    },
+    "implementation_accepted_input_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-accepted-input.md",
+      "verified_at": "2026-10-11",
+      "scope": "Owned accepted values at Rust entrypoints before normalization; finite/bounded event log and scoped Undo/Redo/FCStd. Full native sources/input, common Curve GeometryResult and full command remain open."
+    },
+    "implementation_native_admission_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-admission.md",
+      "verified_at": "2026-10-11",
+      "status": "implemented_Rust_scope_native_pending",
+      "scope": "Owned native admission Rust16/16 and extern-C1/1; full Rust871/0/0. C++ bridge not connected and native source witness Runtime45 remains RED9/18. Full feature and RCORE-01 remain open."
+    },
+    "implementation_native_bridge_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-bridge.md",
+      "verified_at": "2026-10-11",
+      "status": "validated_native_scope_full_feature_open",
+      "scope": "Matching Runtime50 sources18/cold21 and regressions517/517;15 actual exits0,4 cold hosts/18 FCStd. Named Circle/Ellipse/History native source paths only; generic snapping, complete Curve GeometryResult/publication and original requirements remain open."
+    },
+    "implementation_result_red_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-result-red.md",
+      "verified_at": "2026-10-11",
+      "status": "native_result_contract_missing",
+      "scope": "Runtime50 witness RED12/54 with actual host exit0,no fixture exception. All six existing geometry/one-Undo paths pass;OM9GeometryResult and paired source/output/persistence remain required. Prior bridge517/517 is separate."
+    },
+    "implementation_geometry_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-result.md",
+      "verified_at": "2026-10-11",
+      "status": "main_output_result_verified_partial",
+      "scope": "Runtime52 reused six solvers: direct54/native33/cold58;matching662/662,18 actual exits0,5 cold hosts/27 FCStd;Rust880/0/0. Main Shape/construction/result paired;full callback publication,foci/History/Rebuild,sharing/budgets and conversion/maps remain required."
+    },
+    "implementation_callback_red_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-callback-red.md",
+      "verified_at": "2026-10-11",
+      "status": "native_checked_publication_missing",
+      "scope": "Runtime52 actual document observers RED42/210,host exit0,no fixture exception;all42 callbacks fire once,all attempts admit changed output/lose prior Redo. Prior main result662/662 is separate. Checked publication and original requirements remain required."
+    },
+    "implementation_publication_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-publication.md",
+      "verified_at": "2026-10-11",
+      "status": "partial_checked_native_publication",
+      "scope": "Runtime55 native1252/1252,23 exits0,Rust882;named callback source/output/layer/context/replacement and prior Redo pass. Transaction booking/premature close and all original requirements remain open."
+    },
+    "implementation_booking_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-curve-booking.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_checked_native_booking",
+      "scope": "Runtime56 native1372/1372,24 exits0,Rust882;commit/abort/reopen120 restores document/Undo/prior Redo. Full foci/History/Rebuild/lifetime/sharing/budgets/conversion/maps and original requirements remain open."
     }
   },
   {
@@ -8184,6 +8283,63 @@
       "report": "../docs/validation/2026-10-09-rhino-core-extended-input.md",
       "scope": "Extended typed point input through existing native geometry; no all-option or all-P0 completion.",
       "verified_at": "2026-10-09"
+    },
+    "implementation_construction_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-native-curve-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Shared Rust current-session operation/type/options policy for existing Line, Polyline, InterpCrv, Rectangle, Circle and Ellipse. Partial RCORE-01 integration."
+    },
+    "implementation_constructor_state_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-construction.md",
+      "verified_at": "2026-10-11",
+      "scope": "Owned normalized direct constructor state paired with Shape; options/analytic plan/nonrational basis and scoped Undo/Redo/FCStd. Original accepted inputs/native sources/common GeometryResult and full command remain open."
+    },
+    "implementation_accepted_input_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-accepted-input.md",
+      "verified_at": "2026-10-11",
+      "scope": "Owned accepted values at Rust entrypoints before normalization; finite/bounded event log and scoped Undo/Redo/FCStd. Full native sources/input, common Curve GeometryResult and full command remain open."
+    },
+    "implementation_native_admission_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-admission.md",
+      "verified_at": "2026-10-11",
+      "status": "implemented_Rust_scope_native_pending",
+      "scope": "Owned native admission Rust16/16 and extern-C1/1; full Rust871/0/0. C++ bridge not connected and native source witness Runtime45 remains RED9/18. Full feature and RCORE-01 remain open."
+    },
+    "implementation_native_bridge_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-bridge.md",
+      "verified_at": "2026-10-11",
+      "status": "validated_native_scope_full_feature_open",
+      "scope": "Matching Runtime50 sources18/cold21 and regressions517/517;15 actual exits0,4 cold hosts/18 FCStd. Named Circle/Ellipse/History native source paths only; generic snapping, complete Curve GeometryResult/publication and original requirements remain open."
+    },
+    "implementation_result_red_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-result-red.md",
+      "verified_at": "2026-10-11",
+      "status": "native_result_contract_missing",
+      "scope": "Runtime50 witness RED12/54 with actual host exit0,no fixture exception. All six existing geometry/one-Undo paths pass;OM9GeometryResult and paired source/output/persistence remain required. Prior bridge517/517 is separate."
+    },
+    "implementation_geometry_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-result.md",
+      "verified_at": "2026-10-11",
+      "status": "main_output_result_verified_partial",
+      "scope": "Runtime52 reused six solvers: direct54/native33/cold58;matching662/662,18 actual exits0,5 cold hosts/27 FCStd;Rust880/0/0. Main Shape/construction/result paired;full callback publication,foci/History/Rebuild,sharing/budgets and conversion/maps remain required."
+    },
+    "implementation_callback_red_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-callback-red.md",
+      "verified_at": "2026-10-11",
+      "status": "native_checked_publication_missing",
+      "scope": "Runtime52 actual document observers RED42/210,host exit0,no fixture exception;all42 callbacks fire once,all attempts admit changed output/lose prior Redo. Prior main result662/662 is separate. Checked publication and original requirements remain required."
+    },
+    "implementation_publication_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-publication.md",
+      "verified_at": "2026-10-11",
+      "status": "partial_checked_native_publication",
+      "scope": "Runtime55 native1252/1252,23 exits0,Rust882;named callback source/output/layer/context/replacement and prior Redo pass. Transaction booking/premature close and all original requirements remain open."
+    },
+    "implementation_booking_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-curve-booking.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_checked_native_booking",
+      "scope": "Runtime56 native1372/1372,24 exits0,Rust882;commit/abort/reopen120 restores document/Undo/prior Redo. Full foci/History/Rebuild/lifetime/sharing/budgets/conversion/maps and original requirements remain open."
     }
   },
   {
@@ -8293,6 +8449,63 @@
       "report": "../docs/validation/2026-10-10-rhino-core-kernel-contract.md",
       "scope": "Existing generated spline geometry/limits preserved while Basis.validate delegates to the shared Rust validator; native regression replay passed.",
       "verified_at": "2026-10-10"
+    },
+    "implementation_construction_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-native-curve-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Shared Rust current-session operation/type/options policy for existing Line, Polyline, InterpCrv, Rectangle, Circle and Ellipse. Partial RCORE-01 integration."
+    },
+    "implementation_constructor_state_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-construction.md",
+      "verified_at": "2026-10-11",
+      "scope": "Owned normalized direct constructor state paired with Shape; options/analytic plan/nonrational basis and scoped Undo/Redo/FCStd. Original accepted inputs/native sources/common GeometryResult and full command remain open."
+    },
+    "implementation_accepted_input_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-accepted-input.md",
+      "verified_at": "2026-10-11",
+      "scope": "Owned accepted values at Rust entrypoints before normalization; finite/bounded event log and scoped Undo/Redo/FCStd. Full native sources/input, common Curve GeometryResult and full command remain open."
+    },
+    "implementation_native_admission_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-admission.md",
+      "verified_at": "2026-10-11",
+      "status": "implemented_Rust_scope_native_pending",
+      "scope": "Owned native admission Rust16/16 and extern-C1/1; full Rust871/0/0. C++ bridge not connected and native source witness Runtime45 remains RED9/18. Full feature and RCORE-01 remain open."
+    },
+    "implementation_native_bridge_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-bridge.md",
+      "verified_at": "2026-10-11",
+      "status": "validated_native_scope_full_feature_open",
+      "scope": "Matching Runtime50 sources18/cold21 and regressions517/517;15 actual exits0,4 cold hosts/18 FCStd. Named Circle/Ellipse/History native source paths only; generic snapping, complete Curve GeometryResult/publication and original requirements remain open."
+    },
+    "implementation_result_red_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-result-red.md",
+      "verified_at": "2026-10-11",
+      "status": "native_result_contract_missing",
+      "scope": "Runtime50 witness RED12/54 with actual host exit0,no fixture exception. All six existing geometry/one-Undo paths pass;OM9GeometryResult and paired source/output/persistence remain required. Prior bridge517/517 is separate."
+    },
+    "implementation_geometry_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-result.md",
+      "verified_at": "2026-10-11",
+      "status": "main_output_result_verified_partial",
+      "scope": "Runtime52 reused six solvers: direct54/native33/cold58;matching662/662,18 actual exits0,5 cold hosts/27 FCStd;Rust880/0/0. Main Shape/construction/result paired;full callback publication,foci/History/Rebuild,sharing/budgets and conversion/maps remain required."
+    },
+    "implementation_callback_red_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-callback-red.md",
+      "verified_at": "2026-10-11",
+      "status": "native_checked_publication_missing",
+      "scope": "Runtime52 actual document observers RED42/210,host exit0,no fixture exception;all42 callbacks fire once,all attempts admit changed output/lose prior Redo. Prior main result662/662 is separate. Checked publication and original requirements remain required."
+    },
+    "implementation_publication_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-publication.md",
+      "verified_at": "2026-10-11",
+      "status": "partial_checked_native_publication",
+      "scope": "Runtime55 native1252/1252,23 exits0,Rust882;named callback source/output/layer/context/replacement and prior Redo pass. Transaction booking/premature close and all original requirements remain open."
+    },
+    "implementation_booking_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-curve-booking.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_checked_native_booking",
+      "scope": "Runtime56 native1372/1372,24 exits0,Rust882;commit/abort/reopen120 restores document/Undo/prior Redo. Full foci/History/Rebuild/lifetime/sharing/budgets/conversion/maps and original requirements remain open."
     }
   },
   {
@@ -8397,6 +8610,63 @@
       "report": "../docs/validation/2026-10-09-rhino-core-extended-input.md",
       "scope": "Extended typed point input through existing native geometry; no all-option or all-P0 completion.",
       "verified_at": "2026-10-09"
+    },
+    "implementation_construction_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-native-curve-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Shared Rust current-session operation/type/options policy for existing Line, Polyline, InterpCrv, Rectangle, Circle and Ellipse. Partial RCORE-01 integration."
+    },
+    "implementation_constructor_state_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-construction.md",
+      "verified_at": "2026-10-11",
+      "scope": "Owned normalized direct constructor state paired with Shape; options/analytic plan/nonrational basis and scoped Undo/Redo/FCStd. Original accepted inputs/native sources/common GeometryResult and full command remain open."
+    },
+    "implementation_accepted_input_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-accepted-input.md",
+      "verified_at": "2026-10-11",
+      "scope": "Owned accepted values at Rust entrypoints before normalization; finite/bounded event log and scoped Undo/Redo/FCStd. Full native sources/input, common Curve GeometryResult and full command remain open."
+    },
+    "implementation_native_admission_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-admission.md",
+      "verified_at": "2026-10-11",
+      "status": "implemented_Rust_scope_native_pending",
+      "scope": "Owned native admission Rust16/16 and extern-C1/1; full Rust871/0/0. C++ bridge not connected and native source witness Runtime45 remains RED9/18. Full feature and RCORE-01 remain open."
+    },
+    "implementation_native_bridge_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-bridge.md",
+      "verified_at": "2026-10-11",
+      "status": "validated_native_scope_full_feature_open",
+      "scope": "Matching Runtime50 sources18/cold21 and regressions517/517;15 actual exits0,4 cold hosts/18 FCStd. Named Circle/Ellipse/History native source paths only; generic snapping, complete Curve GeometryResult/publication and original requirements remain open."
+    },
+    "implementation_result_red_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-result-red.md",
+      "verified_at": "2026-10-11",
+      "status": "native_result_contract_missing",
+      "scope": "Runtime50 witness RED12/54 with actual host exit0,no fixture exception. All six existing geometry/one-Undo paths pass;OM9GeometryResult and paired source/output/persistence remain required. Prior bridge517/517 is separate."
+    },
+    "implementation_geometry_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-result.md",
+      "verified_at": "2026-10-11",
+      "status": "main_output_result_verified_partial",
+      "scope": "Runtime52 reused six solvers: direct54/native33/cold58;matching662/662,18 actual exits0,5 cold hosts/27 FCStd;Rust880/0/0. Main Shape/construction/result paired;full callback publication,foci/History/Rebuild,sharing/budgets and conversion/maps remain required."
+    },
+    "implementation_callback_red_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-callback-red.md",
+      "verified_at": "2026-10-11",
+      "status": "native_checked_publication_missing",
+      "scope": "Runtime52 actual document observers RED42/210,host exit0,no fixture exception;all42 callbacks fire once,all attempts admit changed output/lose prior Redo. Prior main result662/662 is separate. Checked publication and original requirements remain required."
+    },
+    "implementation_publication_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-publication.md",
+      "verified_at": "2026-10-11",
+      "status": "partial_checked_native_publication",
+      "scope": "Runtime55 native1252/1252,23 exits0,Rust882;named callback source/output/layer/context/replacement and prior Redo pass. Transaction booking/premature close and all original requirements remain open."
+    },
+    "implementation_booking_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-curve-booking.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_checked_native_booking",
+      "scope": "Runtime56 native1372/1372,24 exits0,Rust882;commit/abort/reopen120 restores document/Undo/prior Redo. Full foci/History/Rebuild/lifetime/sharing/budgets/conversion/maps and original requirements remain open."
     }
   },
   {
@@ -8557,6 +8827,229 @@
       "report": "../docs/validation/2026-10-09-rhino-core-extended-input.md",
       "scope": "Extended typed point input through existing native geometry; no all-option or all-P0 completion. Circle checkpoints retain Radius/Orientation point base, options, frame and native source identities; F4 rejects stale sources before accepting a point.",
       "verified_at": "2026-10-09"
+    },
+    "implementation_construction_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-native-curve-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Shared Rust current-session operation/type/options policy for existing Line, Polyline, InterpCrv, Rectangle, Circle and Ellipse. Partial RCORE-01 integration."
+    },
+    "implementation_history_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-circle-history-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Independent persisted Circle options use the existing shared Rust construction policy before native stored-point copies and source extraction. Replay does not consult or mutate the interactive session; existing analytic/deformable/FitPoints/tangent/legacy AroundCurve solvers and recipes are reused."
+    },
+    "implementation_constructor_state_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-construction.md",
+      "verified_at": "2026-10-11",
+      "scope": "Owned normalized direct constructor state paired with Shape; options/analytic plan/nonrational basis and scoped Undo/Redo/FCStd. Original accepted inputs/native sources/common GeometryResult and full command remain open."
+    },
+    "implementation_accepted_input_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-accepted-input.md",
+      "verified_at": "2026-10-11",
+      "scope": "Owned accepted values at Rust entrypoints before normalization; finite/bounded event log and scoped Undo/Redo/FCStd. Full native sources/input, common Curve GeometryResult and full command remain open."
+    },
+    "implementation_native_source_gap_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-source.md",
+      "verified_at": "2026-10-11",
+      "scope": "Executed native RED: original native input text and complete source snapshots/identity remain missing. Existing geometry, Undo and warm FCStd pass in the named cases. Full command remains open."
+    },
+    "implementation_native_admission_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-admission.md",
+      "verified_at": "2026-10-11",
+      "status": "implemented_Rust_scope_native_pending",
+      "scope": "Owned native admission Rust16/16 and extern-C1/1; full Rust871/0/0. C++ bridge not connected and native source witness Runtime45 remains RED9/18. Full feature and RCORE-01 remain open."
+    },
+    "implementation_native_bridge_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-bridge.md",
+      "verified_at": "2026-10-11",
+      "status": "validated_native_scope_full_feature_open",
+      "scope": "Matching Runtime50 sources18/cold21 and regressions517/517;15 actual exits0,4 cold hosts/18 FCStd. Named Circle/Ellipse/History native source paths only; generic snapping, complete Curve GeometryResult/publication and original requirements remain open."
+    },
+    "implementation_result_red_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-result-red.md",
+      "verified_at": "2026-10-11",
+      "status": "native_result_contract_missing",
+      "scope": "Runtime50 witness RED12/54 with actual host exit0,no fixture exception. All six existing geometry/one-Undo paths pass;OM9GeometryResult and paired source/output/persistence remain required. Prior bridge517/517 is separate."
+    },
+    "implementation_geometry_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-result.md",
+      "verified_at": "2026-10-11",
+      "status": "main_output_result_verified_partial",
+      "scope": "Runtime52 reused six solvers: direct54/native33/cold58;matching662/662,18 actual exits0,5 cold hosts/27 FCStd;Rust880/0/0. Main Shape/construction/result paired;full callback publication,foci/History/Rebuild,sharing/budgets and conversion/maps remain required."
+    },
+    "implementation_callback_red_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-callback-red.md",
+      "verified_at": "2026-10-11",
+      "status": "native_checked_publication_missing",
+      "scope": "Runtime52 actual document observers RED42/210,host exit0,no fixture exception;all42 callbacks fire once,all attempts admit changed output/lose prior Redo. Prior main result662/662 is separate. Checked publication and original requirements remain required."
+    },
+    "implementation_publication_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-publication.md",
+      "verified_at": "2026-10-11",
+      "status": "partial_checked_native_publication",
+      "scope": "Runtime55 native1252/1252,23 exits0,Rust882;named callback source/output/layer/context/replacement and prior Redo pass. Transaction booking/premature close and all original requirements remain open."
+    },
+    "implementation_booking_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-curve-booking.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_checked_native_booking",
+      "scope": "Runtime56 native1372/1372,24 exits0,Rust882;commit/abort/reopen120 restores document/Undo/prior Redo. Full foci/History/Rebuild/lifetime/sharing/budgets/conversion/maps and original requirements remain open."
+    },
+    "implementation_history_result_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-circle-history-result.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_owned_history_results",
+      "scope": "Runtime59 native430/430;current Circle History paired replay,callback/source guards,freeze/detach andfour cold recorded archives with real Undo/Redo. Full History transaction/lifetime,legacy/all-mode provenance andoriginal RCORE-01 remain open."
+    },
+    "implementation_history_mode_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-circle-history-modes.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_modes_with_atomic_red",
+      "scope": "Runtime59 additional182/182 native;twenty all-mode results andlegacy current paired replay/cold archives. Completed atomic RED50/80 rejects callbacks butmetadata/source/Undo-stack restoration remains required;all original RCORE-01 requirements retained."
+    },
+    "implementation_history_atomic_state_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-circle-history-atomic-state.md",
+      "verified_at": "2026-10-12",
+      "status": "atomic_state_red",
+      "scope": "Runtime59 exact rejection-time RED355/432 across48 callbacks/three caller states;metadata restored6/48,source geometry45/48,stack andpending32/48,booking/caller edit/Redo48/48. Raw BREP identity-location difference is not geometry change. Native replay journal required;full RCORE-01 remains open."
+    },
+    "implementation_history_lifetime_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-circle-history-lifetime-red.md",
+      "verified_at": "2026-10-12",
+      "status": "lifetime_failure_witness_design_proposed",
+      "scope": "Runtime59 owner close callback reaches replay result andcloses document;durable prefix owner absent;no return within300s,owned process killed andterminal. No completed gate/natural crash code claimed. Proposed native savepoint requires review;all RCORE-01 remains open."
+    },
+    "implementation_history_source_binding_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-circle-history-source-binding-red.md",
+      "verified_at": "2026-10-12",
+      "status": "source_binding_red",
+      "scope": "Rust RED4/10/exit101;three reconstructed actual native requests pass,six stale source/fraction/role/constraint mutations admitted,mixed-document-token gatepasses. No native rerun/build orproduction fix. Original probe/current input role remains inaccurate;full RCORE-01 retained."
+    },
+    "implementation_history_source_binding_fix_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-circle-history-source-role-fixes.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_role_fixed_constraint_provenance_with_geometry_red",
+      "scope": "Runtime70 standalone build0,native171/171/2 exits0,cold20 exact results;focusedRust17/20/full933passed3failed exit101. Role/path/fixed-circle-plane and probe/anchor corrections;all source families/parameter/contact correspondence and native atomic/lifetime remain open."
+    },
+    "implementation_owned_curve_evaluation_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-owned-curve-evaluation.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_owned_evaluator_source_integration_pending",
+      "scope": "Rust6/6,138 OCCT queries/full939passed3failed;Runtime79 build0/native214/214,3 exits0. Existing command/source capture retained; evaluator not yet integrated; full RCORE-01 remains open."
+    },
+    "implementation_owned_derived_curve_evaluation_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-owned-derived-curve-evaluation.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_owned_derived_evaluator_raw_native_d3_red",
+      "scope": "Native183 D0-D2 andindependent45 D3 mathmatch;36 raw native D3 mismatch,gatekeptRED. Focus10/11/full943passed4failed;Runtime86 build0/native229 capture/History/cold,3 exits0. Source integration andfull RCORE01 remainopen."
+    },
+    "implementation_owned_source_binding_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-circle-history-owned-source-binding.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_owned_path_probe_binding_final_contact_red",
+      "scope": "Source23/23;selected edge/world and History admission each183 queries/19 families. Full953passed2failed;final Tangent contact RED and raw native D3 RED. Runtime91 build0/native171,2 exits0. Atomic/lifetime andfull RCORE01 remainopen."
+    },
+    "implementation_owned_contact_binding_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-circle-history-owned-contact-binding.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_owned_history_contact_binding",
+      "scope": "Contact RED1/3→GREEN5/5;source23/23;synthetic183 contact queries/19 families. Full958passed1 raw D3failed. Runtime93 build0/native236 including65 nonplanar,3 exits0. Other roles/initial Tangent,atomic/lifetime andfull RCORE01 remainopen."
+    },
+    "implementation_owned_role_replay_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-circle-history-owned-role-replay.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_owned_history_role_replay",
+      "scope": "Role RED0/6→GREEN7/7;Curve result50/50. Full965passed1 raw D3failed. Runtime97 build0/native236,3 exits0;1486 inventory match. Complete CAD selected poles/vertex/Face provenance,initial Tangent,atomic/lifetime andfull RCORE01 remainopen."
+    },
+    "implementation_owned_fit_geometry_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-circle-history-owned-fit-geometry.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_owned_history_selected_geometry",
+      "scope": "Native Face RED62/70→GREEN70/70;cold10 families50/50 after correcting intermediate-capture timing oracle41/50. Rust focused7/7,Curve results56/56,full972passed1 raw D3failed. Runtime102 build0/native426,6 exits0;production inputs match,two later test changes. Initial native input/Tangent,full families,atomic/lifetime andfull RCORE01 remainopen."
+    },
+    "implementation_initial_owned_selection_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-initial-curve-owned-selection.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_initial_curve_owned_selection",
+      "scope": "Input RED1/4→GREEN5/5;full977passed1 raw D3failed. Native local/world RED3/4→4/4. Runtime106 build0/native360,6 exits0;1496 candidate inputs match. Initial path/Tangent,generic edge/face snap,atomic/lifetime andfull RCORE01 remainopen."
+    },
+    "implementation_initial_owned_parameters_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-initial-curve-owned-parameters.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_initial_curve_owned_parameters",
+      "scope": "Input RED1/3→GREEN5/5;183 native oracle queries/19 families;full982passed1 raw D3failed. Runtime109 build0/native417,8 exits0;1498 candidate inputs match. Initial solved contacts,generic snap,atomic/lifetime andfull RCORE01 remainopen."
+    },
+    "implementation_initial_owned_contacts_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-initial-curve-owned-contacts.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_initial_curve_owned_contacts",
+      "scope": "Owned contact/source/plan and analytic/Deformable output binding7/7;Rust989passed1 raw D3failed. Runtime112 build0/native522,11 exits0;contact sources match,current full matching false after spatial assertion and concurrent changes. Savepoint approved but unimplemented,baseline355/432RED. Full RCORE01 remainsopen."
+    },
+    "implementation_native_property_merge_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-native-property-merge.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_native_property_journal_merge",
+      "scope": "Native API absenceRED0/1→native29/29;App117 build0,Curve33/Circle109/final171 checks3 host0. SDK DLL/lib/PDB unchanged. Document scope/actual journal routing,visible UndoRedo,observer/lifetime andCircle integration remain absent;atomic355/432RED. Full RCORE01 remainsopen."
+    },
+    "implementation_native_replay_scope_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-native-replay-scope.md",
+      "status": "partial_native_scope_runtime_gate_open",
+      "verified_at": "2026-10-12",
+      "scope": "Document prototype,true0/1,744nativeassertions/104cases;App125 build0,Curve33/Circle109;unhandled GUI shutdownstd::exception remains. Circle notintegrated;atomic355/432RED. FullRCORE01open."
+    },
+    "implementation_circle_native_savepoint_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-circle-native-savepoint.md",
+      "status": "partial_circle_native_savepoint_verified",
+      "verified_at": "2026-10-12",
+      "scope": "Runtime131/App125:432semantic+4close+109Circle+33Curve;4normal clean hosts. Native capture/retirement/booking policy and prior String-scope shutdown remain open;full RCORE01open."
+    },
+    "implementation_native_capture_booking_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-native-capture-booking.md",
+      "status": "partial_capture_booking_assertions_verified_startup_gate_open",
+      "verified_at": "2026-10-12",
+      "scope": "App141/Runtime138:34capture+80nativepolicy+432semantic+4close+109modes+33Curve;692checks/5clean host0. Scope744initial macro deadlock unresolved;retirement/participants/budgets/full RCORE01open."
+    },
+    "implementation_native_retirement_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-native-retirement.md",
+      "status": "partial_original_retirement_verified_final_disposal_red",
+      "verified_at": "2026-10-12",
+      "scope": "App147/Runtime149:1982checks/13clean hosts incl2x204 original retirement;final recovery disposal RED128/204,32cases noaccepted but rollback/cleanup incomplete. Full RCORE01open."
+    },
+    "implementation_native_persistence_inverse_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-native-persistence-inverse.md",
+      "status": "partial_private_disposal_verified_discarded_redo_red",
+      "verified_at": "2026-10-12",
+      "scope": "App154/Runtime156:1988checks/13clean hosts,late204/original204/inverse40. Discarded regular Redo RED12/28,4cases noaccepted but exact history/cleanup incomplete. All original RCORE01open."
+    },
+    "implementation_native_value_snapshot_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-native-value-snapshots.md",
+      "status": "partial_native_value_snapshots_verified_object_disposal_red",
+      "verified_at": "2026-10-12",
+      "scope": "App191/Runtime193:2607/2607 assertions21hosts; native journal51,links128,xlinks112,expressions60,rename32,merge32,retry12. ObjectdisposalRED16/32;Rust121/1RED;all original RCORE01open."
+    },
+    "implementation_native_retirement_verdict_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-native-retirement-verdict.md",
+      "status": "partial_checked_verdict_verified_identity_recovery_red",
+      "verified_at": "2026-10-12",
+      "scope": "App227/Runtime229:3145/3145 assertions28hosts. Verdict50,cleanup14,inverse retention12;Python/frozen-source regressions. Original identity witnesses and Rust OffsetBezier D3 RED;full RCORE01open."
+    },
+    "implementation_acceptance_offset_d3_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-acceptance-offset-d3.md",
+      "status": "partial_approved_acceptance_boundary_and_offset_d3_verified",
+      "verified_at": "2026-10-12",
+      "scope": "App247/plugin254/kernel240:3313 assertions28hosts;boundary162/logger24;OCCT probe12/12,19 families183queries,45 independent offset D3;Rust1037/0. Full RCORE01open."
+    },
+    "implementation_snapshot_history_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-snapshot-history-disposal.md",
+      "status": "partial_native_snapshot_history_verified",
+      "verified_at": "2026-10-12",
+      "scope": "App273/plugin275/kernel240:3372 assertions34hosts; snapshot38, close finalizer16, empty preserving Redo5. Full RCORE01 open; last unchanged Rust full suite1037/0."
+    },
+    "implementation_notification_lock_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-notification-lock.md",
+      "status": "partial_native_notification_lock_verified",
+      "verified_at": "2026-10-12",
+      "scope": "App273/plugin275/GUI287/kernel240:3375 assertions35cleanhosts;popup2/3→3/3,actualnativeexceptiontrace. Full RCORE01 remains open."
     }
   },
   {
@@ -8668,6 +9161,74 @@
       "report": "../docs/validation/2026-10-09-rhino-core-extended-input.md",
       "scope": "Extended typed point input through existing native geometry; no all-option or all-P0 completion.",
       "verified_at": "2026-10-09"
+    },
+    "implementation_construction_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-native-curve-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Shared Rust current-session operation/type/options policy for existing Line, Polyline, InterpCrv, Rectangle, Circle and Ellipse. Partial RCORE-01 integration."
+    },
+    "implementation_constructor_state_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-construction.md",
+      "verified_at": "2026-10-11",
+      "scope": "Owned normalized direct constructor state paired with Shape; options/analytic plan/nonrational basis and scoped Undo/Redo/FCStd. Original accepted inputs/native sources/common GeometryResult and full command remain open."
+    },
+    "implementation_accepted_input_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-accepted-input.md",
+      "verified_at": "2026-10-11",
+      "scope": "Owned accepted values at Rust entrypoints before normalization; finite/bounded event log and scoped Undo/Redo/FCStd. Full native sources/input, common Curve GeometryResult and full command remain open."
+    },
+    "implementation_native_source_gap_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-source.md",
+      "verified_at": "2026-10-11",
+      "scope": "Executed native RED: original native input text and complete source snapshots/identity remain missing. Existing geometry, Undo and warm FCStd pass in the named cases. Full command remains open."
+    },
+    "implementation_native_admission_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-admission.md",
+      "verified_at": "2026-10-11",
+      "status": "implemented_Rust_scope_native_pending",
+      "scope": "Owned native admission Rust16/16 and extern-C1/1; full Rust871/0/0. C++ bridge not connected and native source witness Runtime45 remains RED9/18. Full feature and RCORE-01 remain open."
+    },
+    "implementation_native_bridge_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-native-bridge.md",
+      "verified_at": "2026-10-11",
+      "status": "validated_native_scope_full_feature_open",
+      "scope": "Matching Runtime50 sources18/cold21 and regressions517/517;15 actual exits0,4 cold hosts/18 FCStd. Named Circle/Ellipse/History native source paths only; generic snapping, complete Curve GeometryResult/publication and original requirements remain open."
+    },
+    "implementation_result_red_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-result-red.md",
+      "verified_at": "2026-10-11",
+      "status": "native_result_contract_missing",
+      "scope": "Runtime50 witness RED12/54 with actual host exit0,no fixture exception. All six existing geometry/one-Undo paths pass;OM9GeometryResult and paired source/output/persistence remain required. Prior bridge517/517 is separate."
+    },
+    "implementation_geometry_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-result.md",
+      "verified_at": "2026-10-11",
+      "status": "main_output_result_verified_partial",
+      "scope": "Runtime52 reused six solvers: direct54/native33/cold58;matching662/662,18 actual exits0,5 cold hosts/27 FCStd;Rust880/0/0. Main Shape/construction/result paired;full callback publication,foci/History/Rebuild,sharing/budgets and conversion/maps remain required."
+    },
+    "implementation_callback_red_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-callback-red.md",
+      "verified_at": "2026-10-11",
+      "status": "native_checked_publication_missing",
+      "scope": "Runtime52 actual document observers RED42/210,host exit0,no fixture exception;all42 callbacks fire once,all attempts admit changed output/lose prior Redo. Prior main result662/662 is separate. Checked publication and original requirements remain required."
+    },
+    "implementation_publication_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-curve-publication.md",
+      "verified_at": "2026-10-11",
+      "status": "partial_checked_native_publication",
+      "scope": "Runtime55 native1252/1252,23 exits0,Rust882;named callback source/output/layer/context/replacement and prior Redo pass. Transaction booking/premature close and all original requirements remain open."
+    },
+    "implementation_booking_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-curve-booking.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_checked_native_booking",
+      "scope": "Runtime56 native1372/1372,24 exits0,Rust882;commit/abort/reopen120 restores document/Undo/prior Redo. Full foci/History/Rebuild/lifetime/sharing/budgets/conversion/maps and original requirements remain open."
+    },
+    "implementation_focus_evidence": {
+      "report": "../docs/validation/2026-10-12-rhino-core-curve-focus-result.md",
+      "verified_at": "2026-10-12",
+      "status": "partial_owned_focus_results",
+      "scope": "Runtime57 focus30,cold12,focus callbacks130;total1544/1544,27 exits0. Original source/native point master/units and paired persistence. History/Rebuild,full attributes/lifetime/budgets/maps and all original requirements remain open;full current-source matching false."
     }
   },
   {
@@ -8962,6 +9523,11 @@
       "report": "../docs/validation/2026-10-10-rhino-core-kernel-contract.md",
       "scope": "Existing generated spline geometry/limits preserved while Basis.validate delegates to the shared Rust validator; native regression replay passed.",
       "verified_at": "2026-10-10"
+    },
+    "implementation_construction_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-native-rebuild-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Shared Rust operation/type/options policy for the existing native curve Rebuild adapter, declaration/capture/construct gates and concrete curve-only topology checks before private copy. Partial RCORE-01 integration."
     }
   },
   {
@@ -12143,6 +12709,16 @@
       "date": "2026-10-09",
       "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
       "scope": "Interactive selection and every Chain Edges member keep the accepted runtime guard; source edits require Cancel/reselect even after geometry restoration. Persistent History reconstructs without session tokens."
+    },
+    "implementation_surface_history_admission_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-surface-history-admission.md",
+      "verified_at": "2026-10-11",
+      "scope": "Bounded independent Rust saved Surface History options/group metadata admission, fixed scalar ABI and current-native rail closure before existing Loft/Sweep solvers; full RCORE-01 remains in progress."
+    },
+    "implementation_surface_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-surface-result.md",
+      "verified_at": "2026-10-11",
+      "scope": "Native Loft/Sweep GeometryResult using actual EditSurface recipe, owned source refs/wire snapshots/attributes, actual closure, exact published native master and paired History/FCStd publication. Full RCORE-01 remains in progress."
     }
   },
   {
@@ -12208,7 +12784,17 @@
     },
     "implementation_validation_status": "validated_supported_slice",
     "implementation_verified_at": "2026-10-09",
-    "implementation_scope": "Native gvSweepHistory CMD alias with exact ID, conditional Closed Yes, source/parent recompute, detach/Undo and FCStd; dedicated History menu/F6 and full Matrix workflow remain unverified."
+    "implementation_scope": "Native gvSweepHistory CMD alias with exact ID, conditional Closed Yes, source/parent recompute, detach/Undo and FCStd; dedicated History menu/F6 and full Matrix workflow remain unverified.",
+    "implementation_surface_history_admission_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-surface-history-admission.md",
+      "verified_at": "2026-10-11",
+      "scope": "Bounded independent Rust saved Surface History options/group metadata admission, fixed scalar ABI and current-native rail closure before existing Loft/Sweep solvers; full RCORE-01 remains in progress."
+    },
+    "implementation_surface_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-surface-result.md",
+      "verified_at": "2026-10-11",
+      "scope": "Native Loft/Sweep GeometryResult using actual EditSurface recipe, owned source refs/wire snapshots/attributes, actual closure, exact published native master and paired History/FCStd publication. Full RCORE-01 remains in progress."
+    }
   },
   {
     "id": "OM9-SURFACE-003",
@@ -12341,6 +12927,16 @@
       "date": "2026-10-09",
       "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
       "scope": "Interactive selection and every Chain Edges member keep the accepted runtime guard; source edits require Cancel/reselect even after geometry restoration. Persistent History reconstructs without session tokens."
+    },
+    "implementation_surface_history_admission_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-surface-history-admission.md",
+      "verified_at": "2026-10-11",
+      "scope": "Bounded independent Rust saved Surface History options/group metadata admission, fixed scalar ABI and current-native rail closure before existing Loft/Sweep solvers; full RCORE-01 remains in progress."
+    },
+    "implementation_surface_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-surface-result.md",
+      "verified_at": "2026-10-11",
+      "scope": "Native Loft/Sweep GeometryResult using actual EditSurface recipe, owned source refs/wire snapshots/attributes, actual closure, exact published native master and paired History/FCStd publication. Full RCORE-01 remains in progress."
     }
   },
   {
@@ -12413,7 +13009,17 @@
     },
     "implementation_validation_status": "validated_supported_slice",
     "implementation_verified_at": "2026-10-09",
-    "implementation_scope": "Native gvSweep2History CMD alias with exact ID, one-profile Maintain Height Yes, conditional Closed Yes, source/parent recompute and native persistence; full History/menu parity remains unverified."
+    "implementation_scope": "Native gvSweep2History CMD alias with exact ID, one-profile Maintain Height Yes, conditional Closed Yes, source/parent recompute and native persistence; full History/menu parity remains unverified.",
+    "implementation_surface_history_admission_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-surface-history-admission.md",
+      "verified_at": "2026-10-11",
+      "scope": "Bounded independent Rust saved Surface History options/group metadata admission, fixed scalar ABI and current-native rail closure before existing Loft/Sweep solvers; full RCORE-01 remains in progress."
+    },
+    "implementation_surface_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-surface-result.md",
+      "verified_at": "2026-10-11",
+      "scope": "Native Loft/Sweep GeometryResult using actual EditSurface recipe, owned source refs/wire snapshots/attributes, actual closure, exact published native master and paired History/FCStd publication. Full RCORE-01 remains in progress."
+    }
   },
   {
     "id": "OM9-SURFACE-005",
@@ -12861,6 +13467,16 @@
       "date": "2026-10-09",
       "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
       "scope": "Interactive selection and every Chain Edges member keep the accepted runtime guard; source edits require Cancel/reselect even after geometry restoration. Persistent History reconstructs without session tokens."
+    },
+    "implementation_surface_history_admission_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-surface-history-admission.md",
+      "verified_at": "2026-10-11",
+      "scope": "Bounded independent Rust saved Surface History options/group metadata admission, fixed scalar ABI and current-native rail closure before existing Loft/Sweep solvers; full RCORE-01 remains in progress."
+    },
+    "implementation_surface_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-surface-result.md",
+      "verified_at": "2026-10-11",
+      "scope": "Native Loft/Sweep GeometryResult using actual EditSurface recipe, owned source refs/wire snapshots/attributes, actual closure, exact published native master and paired History/FCStd publication. Full RCORE-01 remains in progress."
     }
   },
   {
@@ -15160,6 +15776,12 @@
       "date": "2026-10-09",
       "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
       "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
+    },
+    "implementation_edit_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-edit-result.md",
+      "verified_at": "2026-10-11",
+      "status": "in_progress_native_regressions_unresolved",
+      "scope": "Native CAD Edit results, recompute source isolation and native Dimension full capture/finite guard; prior-Redo and full original all-family contracts remain open. Full original RCORE-01 preserved."
     }
   },
   {
@@ -15214,6 +15836,12 @@
       "date": "2026-10-09",
       "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
       "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
+    },
+    "implementation_edit_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-edit-result.md",
+      "verified_at": "2026-10-11",
+      "status": "in_progress_native_regressions_unresolved",
+      "scope": "Native CAD Edit results, recompute source isolation and native Dimension full capture/finite guard; prior-Redo and full original all-family contracts remain open. Full original RCORE-01 preserved."
     }
   },
   {
@@ -15262,6 +15890,12 @@
       "date": "2026-10-09",
       "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
       "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
+    },
+    "implementation_edit_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-edit-result.md",
+      "verified_at": "2026-10-11",
+      "status": "in_progress_native_regressions_unresolved",
+      "scope": "Native CAD Edit results, recompute source isolation and native Dimension full capture/finite guard; prior-Redo and full original all-family contracts remain open. Full original RCORE-01 preserved."
     }
   },
   {
@@ -15325,6 +15959,12 @@
       "date": "2026-10-09",
       "report": "../docs/validation/2026-10-09-rhino-core-object-foundations.md",
       "scope": "Shared runtime object guard rejects replaced or revised selections before mutation; existing supported geometry and options are unchanged."
+    },
+    "implementation_edit_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-edit-result.md",
+      "verified_at": "2026-10-11",
+      "status": "in_progress_native_regressions_unresolved",
+      "scope": "Native CAD Edit results, recompute source isolation and native Dimension full capture/finite guard; prior-Redo and full original all-family contracts remain open. Full original RCORE-01 preserved."
     }
   },
   {
@@ -15979,13 +16619,13 @@
     "module_index": 21,
     "module_slug": "solid-tools",
     "kind": "command",
-    "description": "Box dựng solid từ rectangle base và cao. Chọn corner/length, width Enter dùng length, height Enter dùng width. Diagonal dùng hai góc đối diện không hỏi side length; Cube trong Diagonal dùng góc base/top xác định cao và orientation.",
+    "description": "Box mặc định nhận hai góc đáy đối diện rồi Height (3 lần chọn), không bắt buộc chọn option. 3Point/Vertical riêng nhận hai đầu cạnh rồi Width/Height; Center nhận tâm rồi góc hoặc Length. Preview đáy và khối trong bốn view; Top view kéo Height theo hướng lên màn hình.",
     "access": "Access this command from Solid>Box Right-Click Command: Box - 3 Points",
     "spec_path": "specs/04-solid/om9-solid-012-box.md",
     "implementation_status": "partially_implemented",
     "implementation_validation_status": "validated_supported_slice",
-    "implementation_verified_at": "2026-10-09",
-    "implementation_scope": "Native Corners/Diagonal/3Point/Vertical/Center and oriented Cube Box; full dimensions, Enter defaults, signed extents, frozen CPlane, CMD/mouse, right-click shortcut, scene preview and persistence. Associative History/layer/Styles integration remains unverified.",
+    "implementation_verified_at": "2026-10-12",
+    "implementation_scope": "Native default Box: two opposite base corners then Height (three picks), with optional Diagonal/3Point/Vertical/Center and Cube. Explicit 3Point/Vertical retain two edge endpoints then Width/Height. Rust stage wire preview and world-scaled top-view Height drag, all four views; focus, one-character mnemonic links, CMD history, Enter defaults, signed dimensions, frozen CPlane and persistence. Full associative History/Box Builder/Styles compatibility remains unverified.",
     "engineering_contracts": [
       "OM9-CMD",
       "OM9-OBJECT",
@@ -16010,8 +16650,8 @@
           "name": "Mode",
           "kind": "choice",
           "required": false,
-          "meaning": "Corners/Diagonal/3Point/Vertical/Center",
-          "default": "Chưa xác lập; cần lựa chọn tường minh hoặc TODO_EVIDENCE."
+          "meaning": "Diagonal/3Point/Vertical/Center",
+          "default": "Tùy chọn; mặc định hai góc đối diện rồi Height."
         },
         {
           "name": "Length",
@@ -16073,7 +16713,13 @@
       "report": "../docs/validation/2026-10-09-rhino-core-extended-input.md",
       "scope": "Extended typed point input through existing native geometry; no all-option or all-P0 completion. Legacy Solid mm/cm/in callback remains; actual accepted relative base and Undo are repaired.",
       "verified_at": "2026-10-09"
-    }
+    },
+    "implementation_construction_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-native-solid-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Shared Rust current-session operation/type/options policy for existing Box/Sphere, bounded owned output validation and live Sphere reference/FitPoints admission. Partial RCORE-01 integration."
+    },
+    "implementation_validation_record": "../docs/validation/2026-10-12-command-mnemonics.md"
   },
   {
     "id": "OM9-SOLID-013",
@@ -16165,8 +16811,8 @@
     "spec_path": "specs/04-solid/om9-solid-014-sphere.md",
     "implementation_status": "partially_implemented",
     "implementation_validation_status": "validated_supported_slice",
-    "implementation_verified_at": "2026-10-09",
-    "implementation_scope": "Native Center/Diameter, 2Point, 3Point/Radius, 4Point/Radius, Vertical, FitPoints, AroundCurve and planar Tangent Sphere; exact curve references, explicit ambiguous branch selection, native mouse/CMD, preview and persistence. General nonplanar tangent solving and associative History remain unsupported.",
+    "implementation_verified_at": "2026-10-12",
+    "implementation_scope": "Native Center/Diameter, 2Point, 3Point/Radius, 4Point/Radius, Vertical, FitPoints, AroundCurve and planar Tangent Sphere; exact curve references, explicit ambiguous branch selection, native mouse/CMD, preview and persistence. General nonplanar tangent solving and associative History remain unsupported. Common Rust root/choice mnemonic declarations and single-character underline, full-label clicks, phase-scoped shortcuts and CMD–Builder binding; no per-command renderer.",
     "engineering_contracts": [
       "OM9-CMD",
       "OM9-OBJECT",
@@ -16219,7 +16865,13 @@
       "report": "../docs/validation/2026-10-09-rhino-core-extended-input.md",
       "scope": "Extended typed point input through existing native geometry; no all-option or all-P0 completion. Legacy Solid mm/cm/in callback remains; actual accepted relative base and Undo are repaired.",
       "verified_at": "2026-10-09"
-    }
+    },
+    "implementation_construction_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-native-solid-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Shared Rust current-session operation/type/options policy for existing Box/Sphere, bounded owned output validation and live Sphere reference/FitPoints admission. Partial RCORE-01 integration."
+    },
+    "implementation_validation_record": "../docs/validation/2026-10-12-common-command-mnemonics.md"
   },
   {
     "id": "OM9-SOLID-015",
@@ -18768,7 +19420,17 @@
     "implementation_validation_status": "validated_supported_slice",
     "implementation_verified_at": "2026-10-09",
     "implementation_scope": "Native menu/CMD CageEdit and captureCage bind whole captives to one existing native 3D cage with Global/Local and finite falloff; triangular Mesh and exact single-edge/rectangular-face nonlinear deformation, global affine-only general BRep, frozen current bind data and persistent links independent of global Record/Update. Verified retained 3D cage restoration is explicit. 1D/2D controls, Accurate/Fast and general BRep refit remain unsupported.",
-    "implementation_validation_record": "../docs/validation/2026-10-09-reusable-builder-cage.md"
+    "implementation_validation_record": "../docs/validation/2026-10-09-reusable-builder-cage.md",
+    "implementation_cage_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-native-cage-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Common Rust policy for existing Cage/Create/Capture/Release, owned session options and independent API/recompute requests; borrowed Part/Mesh input admission before copy or Topology extraction. Partial RCORE-01 integration."
+    },
+    "implementation_cage_borrowed_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-cage-borrowed-admission.md",
+      "verified_at": "2026-10-11",
+      "scope": "Borrowed rational Cage descriptors and saved binding values are validated by Rust before owned input copies or result buffers; native control selection and independent recompute use typed operation/object errors. Existing deformation/restore/release services are reused."
+    }
   },
   {
     "id": "OM9-TRANSFORM-021",
@@ -18890,7 +19552,17 @@
     "implementation_validation_status": "validated_supported_slice",
     "implementation_verified_at": "2026-10-09",
     "implementation_scope": "Native menu/CMD ReleaseFromCage and releaseFromCage detach selected whole captives in one Undo transaction while preserving current geometry, controls and unselected relationships; native links persist through FCStd. No arbitrary original cage workflow compatibility is claimed.",
-    "implementation_validation_record": "../docs/validation/2026-10-09-reusable-builder-cage.md"
+    "implementation_validation_record": "../docs/validation/2026-10-09-reusable-builder-cage.md",
+    "implementation_cage_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-native-cage-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Common Rust policy for existing Cage/Create/Capture/Release, owned session options and independent API/recompute requests; borrowed Part/Mesh input admission before copy or Topology extraction. Partial RCORE-01 integration."
+    },
+    "implementation_cage_borrowed_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-cage-borrowed-admission.md",
+      "verified_at": "2026-10-11",
+      "scope": "Borrowed rational Cage descriptors and saved binding values are validated by Rust before owned input copies or result buffers; native control selection and independent recompute use typed operation/object errors. Existing deformation/restore/release services are reused."
+    }
   },
   {
     "id": "OM9-TRANSFORM-023",
@@ -20414,7 +21086,17 @@
     "implementation_validation_status": "validated_supported_slice",
     "implementation_verified_at": "2026-10-09",
     "implementation_scope": "Native menu/CMD Cage and createCage create one independent editable 3D CageControl from a World BoundingBox with positive finite X/Y/Z extents, explicit OM9 counts 2/2/2 and degrees 1/1/1, and no automatic captive capture. CPlane/3Point, base-point construction and 1D/2D controls remain unsupported.",
-    "implementation_validation_record": "../docs/validation/2026-10-09-reusable-builder-cage.md"
+    "implementation_validation_record": "../docs/validation/2026-10-09-reusable-builder-cage.md",
+    "implementation_cage_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-native-cage-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Common Rust policy for existing Cage/Create/Capture/Release, owned session options and independent API/recompute requests; borrowed Part/Mesh input admission before copy or Topology extraction. Partial RCORE-01 integration."
+    },
+    "implementation_cage_borrowed_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-cage-borrowed-admission.md",
+      "verified_at": "2026-10-11",
+      "scope": "Borrowed rational Cage descriptors and saved binding values are validated by Rust before owned input copies or result buffers; native control selection and independent recompute use typed operation/object errors. Existing deformation/restore/release services are reused."
+    }
   },
   {
     "id": "OM9-TSPLINE-001",
@@ -34279,7 +34961,27 @@
     "implementation_validation_status": "validated_supported_slice",
     "implementation_verified_at": "2026-10-09",
     "implementation_scope": "Native matchBuilderAttributes API copies all supported durable Builder records atomically to targets with the same explicit nonempty OM9GemShape tag. Original gvMatchAttributes command remains disabled; selective styles popup, arbitrary Gem settings/cutter solvers and .mss interchange remain unsupported.",
-    "implementation_validation_record": "../docs/validation/2026-10-09-reusable-builder-cage.md"
+    "implementation_validation_record": "../docs/validation/2026-10-09-reusable-builder-cage.md",
+    "implementation_builder_capability_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-builder-policy.md",
+      "verified_at": "2026-10-11",
+      "scope": "Independent existing affine-template Builder requests use the shared Rust operation/type/options policy before native source/template copy and GUI transactions. Create, persisted validation/recompute, explicit restore and all Match targets reuse the existing affine evaluator, shape tags, frames and slot/History rules."
+    },
+    "implementation_builder_output_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-builder-output.md",
+      "verified_at": "2026-10-11",
+      "scope": "Existing native Builder Create/restore/Match solved-output staging and scoped GUI publication; full RCORE-01 remains open."
+    },
+    "implementation_builder_result_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-builder-result.md",
+      "verified_at": "2026-10-11",
+      "scope": "Native affine Builder owned result/source attributes and paired Create/restore/Match/History publication; original full RCORE-01 remains in progress."
+    },
+    "implementation_builder_conversion_evidence": {
+      "report": "../docs/validation/2026-10-11-rhino-core-builder-conversion.md",
+      "verified_at": "2026-10-11",
+      "scope": "Native affine Builder composed topology history, owned input snapshot, measured vertex/edge/trimmed-face queries and explicit unavailable-query evidence; original full RCORE-01 remains in progress."
+    }
   },
   {
     "id": "OM9-GEM-028",

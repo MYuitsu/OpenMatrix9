@@ -1,0 +1,83 @@
+"""Independent persisted Circle requests use common options/type admission."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh,Points,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'module':OM.__file__,'diagnostics':[]}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def config():return [2,0,0,2,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,3,8,0,-1,0]
+def enter(text=''):
+    console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def setup(name):
+    d=App.newDocument(name);d.UndoMode=1;d.openTransaction('Sources')
+    source=d.addObject('Part::Feature','CenterSource');source.Shape=Part.Vertex(App.Vector(0,0,0))
+    child=d.addObject('OpenMatrix9Gui::CircleHistory','RecordedCircle');child.Recipe=config();child.Points=[App.Vector(0,0,0)];child.Sources=[(source,['Vertex1'])];child.SourceRoles=[0,0,1];child.SourceParameters=[0]
+    witness=d.addObject('App::FeaturePython','Witness');d.commitTransaction();d.recompute();return d,source,child,witness
+def invalid(kind):
+    d,source,child,witness=setup('HistoryPolicy'+kind)
+    recipe=list(child.Recipe)
+    if kind=='Cardinality':child.Recipe=recipe[:-1]
+    elif kind=='Nonfinite':recipe[18]=float('nan');child.Recipe=recipe
+    elif kind=='FromFirst':recipe[21]=1;child.Recipe=recipe
+    elif kind=='Solution':recipe[22]=0;child.Recipe=recipe
+    elif kind=='PointBudget':child.Points=[App.Vector(0,0,0)]*1025
+    else:child.SourceRoles=[999,0,1]
+    child.Recorded=True
+    d.openTransaction('Redo witness');witness.Label='Executable Redo';d.commitTransaction();d.undo()
+    before=(tuple(o.Name for o in d.Objects),d.UndoCount,d.RedoCount,repr(child.Recipe),repr(child.Points),source.Shape.exportBrepToString())
+    d.recompute();message=child.getStatusString();report['diagnostics'].append(dict(kind=kind,text=message))
+    check(kind+' rejects stored request with typed operation and child',child.Shape.isNull() and 'Circle' in message and child.Name in message and any(code in message for code in ('InvalidBasis','NonFiniteGeometry','UnsupportedRepresentation')))
+    after=(tuple(o.Name for o in d.Objects),d.UndoCount,d.RedoCount,repr(child.Recipe),repr(child.Points),source.Shape.exportBrepToString())
+    report['diagnostics'][-1]['changed_state_fields']=[i for i in range(len(before)) if before[i]!=after[i]]
+    report['diagnostics'][-1]['counts']=[before[1:3],after[1:3]]
+    report['diagnostics'][-1]['recorded']=child.Recorded
+    check(kind+' preserves source recipe objects Undo and Redo',before==after and child.Recorded)
+    d.redo();check(kind+' retains executable Redo',witness.Label=='Executable Redo');App.closeDocument(d.Name)
+def independence():
+    d,source,child,witness=setup('HistoryPolicyIndependent');child.Recorded=True;d.recompute()
+    check('Valid recorded request uses native source',not child.Shape.isNull() and abs(child.Shape.Edges[0].Curve.Radius-2)<1e-9)
+    enter('Line');enter('1,2,3');before=console.toPlainText();source.Shape=Part.Vertex(App.Vector(4,5,6));d.recompute()
+    check('Replay during Line uses stored Circle options',not child.Shape.isNull() and (child.Shape.Edges[0].Curve.Center-App.Vector(4,5,6)).Length<1e-9)
+    check('Replay preserves active command transcript',console.toPlainText()==before)
+    enter('7,8,9');lines=[o for o in d.Objects if o.Name.startswith('Line')]
+    check('Line still completes with original picks',len(lines)==1 and (lines[0].Shape.Vertexes[0].Point-App.Vector(1,2,3)).Length<1e-9 and (lines[0].Shape.Vertexes[-1].Point-App.Vector(7,8,9)).Length<1e-9)
+    App.closeDocument(d.Name)
+def legacy_independence():
+    d=App.newDocument('HistoryPolicyLegacy');source=d.addObject('Part::Feature','PathSource');source.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0))
+    child=d.addObject('OpenMatrix9Gui::CircleHistory','LegacyCircle');child.SourceCurve=(source,['Edge1']);child.PathFraction=.5;child.Radius=2;child.Recorded=True;d.recompute()
+    check('Legacy AroundCurve keeps its original storage',not child.Recipe and not child.Shape.isNull() and abs(child.Shape.Edges[0].Curve.Radius-2)<1e-9)
+    enter('Line');enter('1,2,3');before=console.toPlainText();source.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(20,0,0));d.recompute()
+    check('Legacy AroundCurve replays independent scalar options',not child.Shape.isNull() and (child.Shape.Edges[0].Curve.Center-App.Vector(10,0,0)).Length<1e-9 and not child.Recipe)
+    check('Legacy replay keeps active Line intact',console.toPlainText()==before);enter('Cancel');App.closeDocument(d.Name)
+def discrete_fit(kind):
+    d=App.newDocument('HistoryPolicyFit'+kind);vertices=[App.Vector(1,0,0),App.Vector(0,1,0),App.Vector(-1,0,0)]
+    source=d.addObject('Mesh::Feature' if kind=='Mesh' else 'Points::Feature','FitSource')
+    def assign(values):
+        if kind=='Mesh':source.Mesh=Mesh.Mesh([values])
+        else:source.Points=Points.Points(values)
+    assign(vertices);child=d.addObject('OpenMatrix9Gui::CircleHistory','FitCircle');recipe=config();recipe[1]=5;recipe[3]=0;child.Recipe=recipe;child.Points=vertices;child.Sources=[(source,[''])];child.SourceRoles=[1,0,3];child.SourceParameters=[0];child.Recorded=True;d.recompute()
+    check(kind+' FitPoints recorded source uses concrete type',not child.Shape.isNull() and abs(child.Shape.Edges[0].Curve.Radius-1)<1e-7)
+    enter('Line');enter('1,2,3');before=console.toPlainText();assign([p*2 for p in vertices]);source_data=repr(source.Mesh.Topology) if kind=='Mesh' else repr(source.Points.Points);d.recompute()
+    check(kind+' FitPoints replay stays independent of Line',not child.Shape.isNull() and abs(child.Shape.Edges[0].Curve.Radius-2)<1e-7 and console.toPlainText()==before)
+    current_data=repr(source.Mesh.Topology) if kind=='Mesh' else repr(source.Points.Points)
+    check(kind+' FitPoints keeps recipe and source data',child.Recorded and list(child.SourceRoles)==[1,0,3] and len(d.Objects)==2 and current_data==source_data)
+    enter('Cancel');App.closeDocument(d.Name)
+def wrong_type():
+    d=App.newDocument('HistoryPolicyWrongType');source=d.addObject('Points::Feature','CloudSource');source.Points=Points.Points([App.Vector(0,0,0)])
+    child=d.addObject('OpenMatrix9Gui::CircleHistory','CenterCircle');child.Recipe=config();child.Points=[App.Vector(0,0,0)];child.Sources=[(source,[''])];child.SourceRoles=[0,0,1];child.SourceParameters=[0];child.Recorded=True;d.recompute();message=child.getStatusString()
+    report['diagnostics'].append(dict(kind='WrongType',text=message))
+    check('Center rejects a whole cloud with concrete source identity',child.Shape.isNull() and all(s in message for s in ('UnsupportedRepresentation','Circle',child.Name,source.Name)))
+    check('Wrong type keeps source and recipe',child.Recorded and len(source.Points.Points)==1 and len(d.Objects)==2);App.closeDocument(d.Name)
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        for kind in ('Cardinality','Nonfinite','FromFirst','Solution','PointBudget','SourceRole'):invalid(kind)
+        independence();legacy_independence();discrete_fit('Mesh');discrete_fit('Cloud');wrong_type();report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

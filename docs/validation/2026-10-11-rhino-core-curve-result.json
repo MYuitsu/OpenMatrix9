@@ -1,0 +1,1848 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-curve-result-20261011",
+  "updated_at": "2026-10-11T23:02:30+07:00",
+  "status": "in_progress",
+  "scope": "Common main Curve GeometryResult on reused six solvers; complete original RCORE-01 retained",
+  "production_sources": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve.rs",
+      "bytes": 66469,
+      "sha256": "d934e328a3aafb4457c1d014af6f5f3864be894b1baf3920d0d0d068884e197d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_result.rs",
+      "bytes": 8894,
+      "sha256": "f4d799ee19b542be369d1a88d6be46538980e559518c85cb66bf9c0eda069365"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_result_tests.rs",
+      "bytes": 7511,
+      "sha256": "1dc47232a5fa1d4d9a8ced63bb6cbef44bf10398cb2110bada53f30f6cc39614"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_native_input_tests.rs",
+      "bytes": 19779,
+      "sha256": "96914f8cacb7ba4f0f93c8b846d815eb728a2f4015c2585696cbbaade14eea2a"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/prepared_result.rs",
+      "bytes": 22811,
+      "sha256": "6fce8ab8dc49e885e82e5e10afad478d698f2225048cef76d689f9207b4e15b6"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveGeometry.h",
+      "bytes": 1433,
+      "sha256": "40f4f5211c58721acfed18dcb105e6c94f81946d51d5b0127b39d74dd6a98ecd"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveGeometry.cpp",
+      "bytes": 8123,
+      "sha256": "fd78e6975c3172d11fa371ae8c6a98834c1a413b4ef184befda1c7679da57761"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveController.cpp",
+      "bytes": 37985,
+      "sha256": "c70821edf36305e8eb7e376318004ec2b08f62b38057df21c7b2e9a8e19af447"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveEllipse.cpp",
+      "bytes": 12399,
+      "sha256": "9c031cb5e6f884470cee722a16d2bd69cc222f28f47768056c02bfb74a4b842e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_result_smoke.FCMacro",
+      "bytes": 5427,
+      "sha256": "1aa7b6815d6cce213cedf7d35bf9559d8a482cc51662bd003b57917b5e3acc9d"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_result_native_smoke.FCMacro",
+      "bytes": 7802,
+      "sha256": "ca3e389248e45d35584fe3dbe8c58b921a5b6c746d6bd7cbb5423b4ca3647b5e"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_result_cold_smoke.FCMacro",
+      "bytes": 5039,
+      "sha256": "c7d059dd6b55de1a0abe9a8e6af7b6a9257c6361c8064bc7a46fa52eb69e1597"
+    }
+  ],
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+    "bytes": 16369664,
+    "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+  },
+  "selected_app": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "probe": {
+    "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+    "bytes": 50688,
+    "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+  },
+  "shared_sdk_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "rust": {
+    "passed": 880,
+    "failed": 0,
+    "ignored": 0,
+    "suites": 125,
+    "actual_exit": 0,
+    "log": {
+      "path": "H:/FreeCAD-src/build/curve-result-fullrust52-20261011.log",
+      "bytes": 143638,
+      "sha256": "402a4b19d6582c0de16fd1f5998484052ff0c4eecd5680d5bd8ddfe1c585d191"
+    },
+    "exit": {
+      "path": "H:/FreeCAD-src/build/curve-result-fullrust52-20261011.log.exit.json",
+      "bytes": 24,
+      "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+    }
+  },
+  "build_log": {
+    "path": "H:/FreeCAD-src/build/curve-result-build52-20261011.log",
+    "bytes": 15394,
+    "sha256": "3f280e951a5b366a0621fe115add55df9fa0681e1a33794361b0b699ad273f0f"
+  },
+  "build_exit": {
+    "path": "H:/FreeCAD-src/build/curve-result-build52-20261011.log.exit.json",
+    "bytes": 24,
+    "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+  },
+  "focused": [
+    {
+      "name": "rust-red52-retry",
+      "passed": 0,
+      "failed": 4,
+      "actual_exit": 101,
+      "log": {
+        "path": "H:/FreeCAD-src/build/curve-result-rust-red52-retry-20261011.log",
+        "bytes": 3106,
+        "sha256": "1053b5614858cd7f5132a062db370dd22e16f0171ed38d0a00d4f0a7f122ca87"
+      },
+      "exit": {
+        "path": "H:/FreeCAD-src/build/curve-result-rust-red52-retry-20261011.log.exit.json",
+        "bytes": 26,
+        "sha256": "d0feb6c94c7210b18c93530dade2af6cccd099a8a57900eae5974d1a231e1826"
+      }
+    },
+    {
+      "name": "rust-green52",
+      "passed": 3,
+      "failed": 1,
+      "actual_exit": 101,
+      "log": {
+        "path": "H:/FreeCAD-src/build/curve-result-rust-green52-20261011.log",
+        "bytes": 8771,
+        "sha256": "aa7fe5cc090b569a3229afb2a05c7d70f40b1f88f7247bc8b5640b316b4da9b7"
+      },
+      "exit": {
+        "path": "H:/FreeCAD-src/build/curve-result-rust-green52-20261011.log.exit.json",
+        "bytes": 26,
+        "sha256": "d0feb6c94c7210b18c93530dade2af6cccd099a8a57900eae5974d1a231e1826"
+      }
+    },
+    {
+      "name": "rust-green52-retry",
+      "passed": 6,
+      "failed": 0,
+      "actual_exit": 0,
+      "log": {
+        "path": "H:/FreeCAD-src/build/curve-result-rust-green52-retry-20261011.log",
+        "bytes": 1484,
+        "sha256": "b0a3f1428b2e602a40821e0d8f46bb65542688d142969027aa1934c75d995370"
+      },
+      "exit": {
+        "path": "H:/FreeCAD-src/build/curve-result-rust-green52-retry-20261011.log.exit.json",
+        "bytes": 24,
+        "sha256": "75876e0e3f497cad271143ba85bd4f36569cd81195509043f860dab14265b716"
+      }
+    }
+  ],
+  "excluded_harness": {
+    "log": {
+      "path": "H:/FreeCAD-src/build/curve-result-rust-red52-20261011.log",
+      "bytes": 1713,
+      "sha256": "66166111aa63e9fb3807bae672f05c978c77bc99f6edbf2086a1d19dab5cbab0"
+    },
+    "exit": {
+      "path": "H:/FreeCAD-src/build/curve-result-rust-red52-20261011.log.exit.json",
+      "bytes": 26,
+      "sha256": "d0feb6c94c7210b18c93530dade2af6cccd099a8a57900eae5974d1a231e1826"
+    },
+    "reason": "Initial integration test tried private Json/parser API; compile E0603 is harness failure, not behavioral RED. Moved to private unit module without widening API."
+  },
+  "test_correction": "First implementation green was3/4: test mutated a wrong expected normalized BothSides array. Corrected input literal to [0,10]; generated output endpoints are[-10,10]. Final focused6/6 includes native source/Undo recipes.",
+  "source_inventory": {
+    "path": "H:/FreeCAD-src/build/curve-result-producers52-20261011.json",
+    "bytes": 165867,
+    "sha256": "d0797777061ee405e18ed040423d7540ea060a835a5adb0b2106215912d77789"
+  },
+  "source_comparisons": [
+    {
+      "path": "H:/FreeCAD-src/build/curve-result-producers52-postbuild-20261011.json",
+      "bytes": 109,
+      "sha256": "915c57299f9c9da124fb5dd1c0c8a6de28dad460494a1f5664f89c3480b52a45"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/curve-result-producers52-postnative-20261011.json",
+      "bytes": 109,
+      "sha256": "915c57299f9c9da124fb5dd1c0c8a6de28dad460494a1f5664f89c3480b52a45"
+    }
+  ],
+  "inventory_inputs_match_at_postrun": true,
+  "inventory_inputs_match_current": true,
+  "current_source_drift": [],
+  "inventory_scope": "Expanded candidate source/resource/test inventory; not an exact compiled-input certificate",
+  "current": [
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011",
+      "fixture": "rhino_core_curve_result_smoke.FCMacro",
+      "checks": 54,
+      "passed": 54,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 75464,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/results.json",
+          "bytes": 352133,
+          "sha256": "95d7176e72bd61df6783d48f7f120705be9b05d95ceaac670b56f03410c53518"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 591,
+          "sha256": "a3922bf3e0e78cf3ca7b9d16bf1ee7b0ed4d72c2fd9a096775041627f6ecb4af"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5427,
+          "sha256": "1aa7b6815d6cce213cedf7d35bf9559d8a482cc51662bd003b57917b5e3acc9d"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/host-stderr.log",
+          "bytes": 9580,
+          "sha256": "f5e9bf942dab519c5004abcf7b439203fba50636d3ee640613f66aa87f48bd67"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/user.cfg",
+          "bytes": 18054,
+          "sha256": "2821e10581ad4579dc83b2e5176a0ae4c25b7e20f97deac9ab2255b9c4d4d9d6"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2826,
+          "sha256": "37b8806379a85f5ab60461a62dcc6a6efe8fc5cbc855fc18d05b97e9ff7aed0d"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011",
+      "fixture": "rhino_core_curve_result_native_smoke.FCMacro",
+      "checks": 33,
+      "passed": 33,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 60780,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/results.json",
+          "bytes": 457778,
+          "sha256": "b6f38ed8817f246a329e448ff47f2b9bb3120c3910c50f6adfb252aadb866acc"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 598,
+          "sha256": "604c89f8362fb2afba302b34629717bdb06d1e956a5e4bcc46ee2683c044ddc2"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 7802,
+          "sha256": "ca3e389248e45d35584fe3dbe8c58b921a5b6c746d6bd7cbb5423b4ca3647b5e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/host-stderr.log",
+          "bytes": 7141,
+          "sha256": "d824687da7993317ace8b7879999843baffd57a47af2d934748bf7a347703d8e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/user.cfg",
+          "bytes": 18192,
+          "sha256": "79b28b8b93900f9bf71c82424035083aa8c5666744cbf5ad41418071e0278595"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2833,
+          "sha256": "b53949bc2f878c61f5a28ee17c5f733e6d0b3169c6d2afc02e18cbd47d56ee63"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-cold52-offscreen-20261011",
+      "fixture": "rhino_core_curve_result_cold_smoke.FCMacro",
+      "checks": 58,
+      "passed": 58,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 7164,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-cold52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-cold52-offscreen-20261011/results.json",
+          "bytes": 173222,
+          "sha256": "1bce8a069a04e676b9b4ae07b3a9030f1296f2f221ad9a18e62336b8d7d039a3"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-cold52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 589,
+          "sha256": "d358c249ed36ae363dc6c16a4d21ba7824f973c3309d395e19fdf347dcedcced"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-cold52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-cold52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-cold52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5039,
+          "sha256": "c7d059dd6b55de1a0abe9a8e6af7b6a9257c6361c8064bc7a46fa52eb69e1597"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-cold52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-cold52-offscreen-20261011/host-stderr.log",
+          "bytes": 3830,
+          "sha256": "aed47a846dd59bf5276ce72bd84dd60ce277903d884eff52cbf4de5ce72c74bb"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-cold52-offscreen-20261011/user.cfg",
+          "bytes": 17435,
+          "sha256": "7a042cc8ab20f6361671db803a3125e4232548dcbb8f80683e8f2e41aa886231"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-cold52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2825,
+          "sha256": "c676ed0a5b1fc971908d445b23dc5ce2156d5cd6b585818e10ad3612dbfee891"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-capture-error-green52-offscreen-20261011",
+      "fixture": "rhino_core_curve_native_capture_error_smoke.FCMacro",
+      "checks": 12,
+      "passed": 12,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 29248,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-capture-error-green52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-capture-error-green52-offscreen-20261011/results.json",
+          "bytes": 69523,
+          "sha256": "b89f74da3b88ea987e51373872a5745e23abac7be6f62833b0f9bea989fe90d3"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-capture-error-green52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 605,
+          "sha256": "03043e7888257c0c9ea29ff392e59dc65bafd4526294b62eee3e1012808f5b27"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-capture-error-green52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-capture-error-green52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-capture-error-green52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 4066,
+          "sha256": "a6d8b3addb45d09582d19455050964122f30c32d3519e340038350c161b017be"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-capture-error-green52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-capture-error-green52-offscreen-20261011/host-stderr.log",
+          "bytes": 4449,
+          "sha256": "161f366f24bfcc720e59728f76b33d7d9bf8c9b660cd8eb25a1c816afee981a5"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-capture-error-green52-offscreen-20261011/user.cfg",
+          "bytes": 18083,
+          "sha256": "4a28aaf051feb22e5d93fa22bb86252fc7d42336ba6f3c6c236ec3e024c3a84f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-capture-error-green52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2840,
+          "sha256": "08fdf353aea48de71fedb5b34909de92fdc24d3c9af90a86f51cbec60d7f83ed"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011",
+      "fixture": "rhino_core_curve_native_source_smoke.FCMacro",
+      "checks": 18,
+      "passed": 18,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 84776,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/results.json",
+          "bytes": 158552,
+          "sha256": "64233da0ba61301b1010625521f61ff15b122137c4cf3fe27cac674df32a2560"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 598,
+          "sha256": "c496aae85a3e467057877584274b37f09e65e4b506c4205d6452c097bc6bf686"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5802,
+          "sha256": "b7d4798ace75872e88b5cefe1f9483e99ee7c3b2fa8a7fd27515faed5ed9e862"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/host-stderr.log",
+          "bytes": 6647,
+          "sha256": "6047b2426996a321e23a757d92658d48e83cfb33022c555acc7de916c7f5688f"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/user.cfg",
+          "bytes": 18192,
+          "sha256": "986ed6e8d24b50bc4063671f95280c4a48cca9ab0f076db7819730ae4be3a096"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2833,
+          "sha256": "94425a8556f6ffc0f858fd2761b1edf8990a87f7b4c36929f0ece8ec49dbb172"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-source-cold52-offscreen-20261011",
+      "fixture": "rhino_core_curve_native_source_cold_smoke.FCMacro",
+      "checks": 21,
+      "passed": 21,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 24372,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-source-cold52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-cold52-offscreen-20261011/results.json",
+          "bytes": 45205,
+          "sha256": "921757aa6db9c6b6362b14c01223f051fdea824956ca295bb734268059ea9880"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-cold52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 597,
+          "sha256": "ec4314d371629e257834737fe4249b3b4e4570518f8ddfeafdaae0e5fae9dee1"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-cold52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-cold52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-cold52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 4237,
+          "sha256": "41a221f01b43f99efbfe34757fa517adc4ba193557312ff514d1394b3536c188"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-cold52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-cold52-offscreen-20261011/host-stderr.log",
+          "bytes": 1940,
+          "sha256": "06f2aa37fceaac491ad3c44e93caca7159413829afe3bfbc353010362459d072"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-cold52-offscreen-20261011/user.cfg",
+          "bytes": 17449,
+          "sha256": "90c8320564f57f499d5cd016d50546d271f0893fa2170e6211ca258d23c7f5b6"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-cold52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2832,
+          "sha256": "f020c822728746ac20fe01440b81ca45fe88b335818254c1bcda68d755ed7b6a"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011",
+      "fixture": "rhino_core_curve_accepted_input_smoke.FCMacro",
+      "checks": 24,
+      "passed": 24,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 46688,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/results.json",
+          "bytes": 124532,
+          "sha256": "5a12114c2fa540b264f55576b60486806cbae842b91edf818af6a8db304e135d"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 594,
+          "sha256": "5df157fab49f171875bba2f6800f39b8c1f8f7ea7770e0a51479e8acdebab9f0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 4566,
+          "sha256": "acfd21a4690beb152986f62177f0786b9521ac0336f974b9361777032eb95776"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/host-stderr.log",
+          "bytes": 7319,
+          "sha256": "9da69cb2b05322a62dbd575815785942514a72d42ab9e1a78d0b98d2d448d235"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/user.cfg",
+          "bytes": 18183,
+          "sha256": "79fe6a060d142849e838c16de4ff4045c9fb82d9e596250fe6e99a518419379c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2829,
+          "sha256": "a52b672b1d2560cf14c72f48b953578e4fc3e8d24c5264bb161ae2b766f02802"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted-cold52-offscreen-20261011",
+      "fixture": "rhino_core_curve_accepted_input_cold_smoke.FCMacro",
+      "checks": 13,
+      "passed": 13,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 39676,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted-cold52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted-cold52-offscreen-20261011/results.json",
+          "bytes": 107376,
+          "sha256": "f0a1a994581e4fe8611eac83f28cf6b67aa56268965f4e165cf249faae21af89"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted-cold52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 599,
+          "sha256": "cff9aad7db6ba4527d9ceee8321519e2ebf7b367f4f407a5255d90fdb1c70189"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted-cold52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted-cold52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted-cold52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 2153,
+          "sha256": "d1f5e9b290f98c231d3b71e01835584c678354775cc034c1a76d8c03c8324ba4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted-cold52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted-cold52-offscreen-20261011/host-stderr.log",
+          "bytes": 1858,
+          "sha256": "b7457f638b1c3351043fa404a0693a3c3ef89834270fe2f832f526d68cb217df"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted-cold52-offscreen-20261011/user.cfg",
+          "bytes": 17453,
+          "sha256": "be887192afd4b4e7e1da5f44d3ace5e04b5aae609f54eb2ccd582e4cbbc0e985"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted-cold52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2834,
+          "sha256": "5b686673613e17215963c14fd1b990fdc7fe331bdbd01a0929c7e2f51157bf05"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011",
+      "fixture": "rhino_core_curve_construction_smoke.FCMacro",
+      "checks": 42,
+      "passed": 42,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 73212,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/results.json",
+          "bytes": 116185,
+          "sha256": "a89ec0838c1ffd5ecfb613095ccf7e5bbfe70f280dc2b54870fb55f31eea6f0a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 598,
+          "sha256": "f7e45c3e9e203801436be342099a752287b4fe8a1649d698ec08253c150b32d8"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 4144,
+          "sha256": "d13e1f70e5b9ddf626838ed9e9c8431e9afb7a3f38ada32c615271059eaaea09"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/host-stderr.log",
+          "bytes": 8607,
+          "sha256": "656fd4d88a2cfdfddee9f94c0c543f4f220dca3db4e70837494bc090a20fef02"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/user.cfg",
+          "bytes": 18068,
+          "sha256": "2ab251511b194970ef3601182ee4796ee59fda1fda9a3d5d405736259ab3da44"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2833,
+          "sha256": "8f508ee92acb0c5841f2b5645740e2ac8196f0b7c27960277dceb914ba55f063"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-construction-cold52-offscreen-20261011",
+      "fixture": "rhino_core_curve_construction_cold_smoke.FCMacro",
+      "checks": 19,
+      "passed": 19,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 80968,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-construction-cold52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction-cold52-offscreen-20261011/results.json",
+          "bytes": 94846,
+          "sha256": "40413238e65c10428d09595a4020a9d1a81e7fdc9675376cf6f9f09bf7fc9fa1"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction-cold52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 603,
+          "sha256": "94fbc1ff1638f1ba822fab88d52b34d93733f5a35e0eb9e6d14e923f0d82b684"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction-cold52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction-cold52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction-cold52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 2211,
+          "sha256": "d5afbef7e71a2d04bf47af17ed128c7ea87fe7e00f82951c658f9cd747ebabb4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction-cold52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction-cold52-offscreen-20261011/host-stderr.log",
+          "bytes": 2364,
+          "sha256": "f634d8d28405db42f9d8758f4046ddeb5566d9c9944cf5510dd8c9a90b82a574"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction-cold52-offscreen-20261011/user.cfg",
+          "bytes": 17461,
+          "sha256": "258159ee4ef1977ca121c3b9311a0fbf59a4506f56df423c1d08a7bc8330517a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction-cold52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2838,
+          "sha256": "409125203ecc4f4019dba965a3480fd09a72746bb089b4aa381bbd06751ed501"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011",
+      "fixture": "rhino_core_curve_construction_basis_smoke.FCMacro",
+      "checks": 26,
+      "passed": 26,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 35280,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/results.json",
+          "bytes": 91642,
+          "sha256": "43b1e53fb20b9ff269bf20673d18562343760797d4ec788ea529cf6d85f32f23"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 591,
+          "sha256": "9342dec76dc7c0b3f244e48f50c0d31a590d21c2e72c250294e18b3447ea394b"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5058,
+          "sha256": "b2f9abc993c16ac9fb777eafc3cc56857f4f9bea50ce85e08b3a736dab97f9e4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/host-stderr.log",
+          "bytes": 7637,
+          "sha256": "721b51a04971223d79eb654d9acfd9b984f2a5031eaa825d3cd415598387e042"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/user.cfg",
+          "bytes": 18054,
+          "sha256": "5903acb32c88e38265aa727d18d76599e403965f9e51f24e8a49b24c8ff2cbb2"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2826,
+          "sha256": "dd31d22de70f3bc1e6999ac4c9aa36902304fb0bfec8dc2e74568b5bc5a16be2"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-basis-cold52-offscreen-20261011",
+      "fixture": "rhino_core_curve_construction_basis_smoke.FCMacro",
+      "checks": 27,
+      "passed": 27,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 80328,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-basis-cold52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis-cold52-offscreen-20261011/results.json",
+          "bytes": 91739,
+          "sha256": "0a0b82c3fc5b83b811d9ce530b0e3024492c47b22b1239bf18c06188fd81c3f9"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis-cold52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 596,
+          "sha256": "9ea3eebc95d6d5c366c1f735282b10aa5595efc752f8d0dc6328e6cad33bd2a3"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis-cold52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis-cold52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis-cold52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5058,
+          "sha256": "b2f9abc993c16ac9fb777eafc3cc56857f4f9bea50ce85e08b3a736dab97f9e4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis-cold52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis-cold52-offscreen-20261011/host-stderr.log",
+          "bytes": 2111,
+          "sha256": "fedc5d42808b66fc0e6018a10c481900845afdb0f8a300092cf9c75f65e52932"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis-cold52-offscreen-20261011/user.cfg",
+          "bytes": 17447,
+          "sha256": "185f2105be815b344dca0e2e8638b5c23bab61d5f67065975c41ea106c2b7f34"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis-cold52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2831,
+          "sha256": "b831e14631d6a0cbf09a99781c331d569685c5c1a0d338a260654f3cfcffcea1"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-binding52-offscreen-20261011",
+      "fixture": "rhino_core_native_curve_binding_smoke.FCMacro",
+      "checks": 59,
+      "passed": 59,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 79476,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-binding52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-binding52-offscreen-20261011/results.json",
+          "bytes": 5712,
+          "sha256": "c1ffe50d3e64434b7c21fba8c119cb3e597b424b3a4543db62fdc8b14cfa90db"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-binding52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 593,
+          "sha256": "3e8774fa4ecb844ab1e3349d1c82824c10e35ee47708bba7bc2d67af86f865f6"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-binding52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-binding52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-binding52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 3466,
+          "sha256": "c2983f685e97079ce2111945714a12dc0439fa84e73c28f1aeb36c316296a46e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-binding52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-binding52-offscreen-20261011/host-stderr.log",
+          "bytes": 1669,
+          "sha256": "db151749d6c9d921282d40a2126699c9089db5c8eed125e1f7eeaa5e2dd348c9"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-binding52-offscreen-20261011/user.cfg",
+          "bytes": 17822,
+          "sha256": "e1bee86205c8c1e1763a66ae99482ef45adc2b955aece2f7136c2bc75f184d27"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-binding52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2828,
+          "sha256": "cf287ab3c5c018eeb0f3a8293cea3b128006ea35b70373467d2bdfee89bb26b0"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-policy52-offscreen-20261011",
+      "fixture": "rhino_core_native_curve_policy_smoke.FCMacro",
+      "checks": 36,
+      "passed": 36,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 18044,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-policy52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-policy52-offscreen-20261011/results.json",
+          "bytes": 15726,
+          "sha256": "b4a2edfc00321cd1045e7bc17eeee95e6e98350f21b426a9cde18509cb3e4df8"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-policy52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 592,
+          "sha256": "686144bf5488da6ae8946a681c5ea77343c3bc513b1fa33a8d05db9d3d8f9d76"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-policy52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-policy52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-policy52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 3809,
+          "sha256": "5e8cd557f9dbc30210b5de0e54a98dba714603e613db2c29a1d13c6419f50835"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-policy52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-policy52-offscreen-20261011/host-stderr.log",
+          "bytes": 9085,
+          "sha256": "2a0681233300015a75dc632b9003e50ba786f9d8274b01773cea8972348413bb"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-policy52-offscreen-20261011/user.cfg",
+          "bytes": 17865,
+          "sha256": "91b192a3383a289993ef6733a521d116838cef45d9627e268965cb6a6be8de2e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-policy52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2827,
+          "sha256": "76503ed853c16d57733cc1de88feb0812f79e414d7520ce737274006da5ea724"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-history52-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_policy_smoke.FCMacro",
+      "checks": 33,
+      "passed": 33,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 66616,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-history52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-history52-offscreen-20261011/results.json",
+          "bytes": 6089,
+          "sha256": "da71cc98ab504395edb36a667e34d9d923848fc93c6194bbc93f7c214ddf0198"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-history52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 600,
+          "sha256": "a049096bede18d9d23418891c93d4f72845e833bec28038ca96dc456ae0c475c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-history52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-history52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-history52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 8139,
+          "sha256": "57e6d1ac283836d0c7cdd6b4ec2b41a4096fd0ca586775fdaaf0c9ea14593da5"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-history52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-history52-offscreen-20261011/host-stderr.log",
+          "bytes": 12097,
+          "sha256": "33a3c85a22b5afcee79809401814165d76c568083799bda4f09bfdfd92164e9b"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-history52-offscreen-20261011/user.cfg",
+          "bytes": 18117,
+          "sha256": "ee8f17af45e43064c6744e7d37312f930a55a7d35804ead5c770df7e8221d8ac"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-history52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2835,
+          "sha256": "7ebada114a356a8b8a1a43d767da715a771d323a56b062b08b22e9ec992492ab"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-context52-offscreen-20261011",
+      "fixture": "circle_input_context_smoke.FCMacro",
+      "checks": 16,
+      "passed": 16,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 39040,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-context52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-context52-offscreen-20261011/results.json",
+          "bytes": 2199,
+          "sha256": "32b164b7822e7eda5adee9c0216931621513277732ef98ded9be7e7080ab823e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-context52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 600,
+          "sha256": "17124d492a68c1f9ad6750cda5930fff12358c6b73e39ea06712cb27cd79daf5"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-context52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-context52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-context52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 5542,
+          "sha256": "0858f9ceeae318b03b4285432f67148255779236f64e33643609e2f1823cd71d"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-context52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-context52-offscreen-20261011/host-stderr.log",
+          "bytes": 13799,
+          "sha256": "8289b90d2fe741248342e3db05ad418b56624d7ba46c855af705294677f395f5"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-context52-offscreen-20261011/user.cfg",
+          "bytes": 18072,
+          "sha256": "da4a0b638faa61a8fda8f5547589479ba8434db09797a44aac1e092d8a005cf4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-circle-context52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2835,
+          "sha256": "7b0bc3abaeb7815724acf1cf129d691cbbfbdc8a641d10cad31ce57ca2191dcd"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011",
+      "fixture": "rhino_core_solid_result_smoke.FCMacro",
+      "checks": 61,
+      "passed": 61,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 77440,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/results.json",
+          "bytes": 407712,
+          "sha256": "04702858d64085c90945be853d3509abb5bf8bac7bdb439ce2faa921d7e1af18"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 591,
+          "sha256": "f1ae481e4f49d064ec69db819bec6329dff34f708772354102532c469be791a8"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 9148,
+          "sha256": "21c5851f12c19ffa9d896d51e6f072bd688880ff339082901ff84f643bd26709"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/host-stderr.log",
+          "bytes": 9557,
+          "sha256": "391820acdbe3ee3a3b2db5663f4050aa8174ec322f53e82f3f48f07d7f1e57aa"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/user.cfg",
+          "bytes": 18177,
+          "sha256": "7b0ee82ea6da7b274108fc37a833e9d53a8d52c5133f836a819dce2195313d36"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2826,
+          "sha256": "f549b4ce6aef322d031b2ce3fcfc29133f4a2d5ab9e6f541f8cc038428ad9a2f"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011",
+      "fixture": "rhino_core_edit_result_smoke.FCMacro",
+      "checks": 110,
+      "passed": 110,
+      "failures": [],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "5AEE5555983D420FDE43982E91B5993FC3293C526431D3FA6E9AD7CBB286B740",
+        "pid": 82476,
+        "module_root": "H:\\FreeCAD-src\\build\\curve-result-runtime52-20261011\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/curve-result-runtime52-20261011/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16369664,
+        "sha256": "5aee5555983d420fde43982e91b5993fc3293c526431d3fa6e9ad7cbb286b740"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/results.json",
+          "bytes": 11533,
+          "sha256": "7b4ca9d65a797302e0ecd8997a79c6e6cf77aedd47488168a9c3d04b270b5524"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/shared-host-launch.json",
+          "bytes": 590,
+          "sha256": "76896ff45e60365a734473e1fda294ba06ead53c1e32a750dcdbd000adff37ac"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/fixture.FCMacro",
+          "bytes": 7510,
+          "sha256": "7dff8b4e8a9a60fca7e462a30b875344ebe47fcdd2c686c924e7daf62f7c3d69"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/host-stderr.log",
+          "bytes": 13464,
+          "sha256": "b92b1d03b97785321a746b018f745ac147a1e2470df3a48b8ae4a818c2abbfd9"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/user.cfg",
+          "bytes": 18176,
+          "sha256": "1ee9d05c4ffab5d7d780dcdf8ae7170e53012980c01eb7a42faa8c4a056bffe3"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2825,
+          "sha256": "eda5598e2693bc212b7b79dd781e95759fc504f252eb333b90d596e7caef8340"
+        }
+      ]
+    }
+  ],
+  "current_checks": 662,
+  "current_actual_exits_zero": 18,
+  "cold_hosts": 5,
+  "archives": [
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/Circle.FCStd",
+      "bytes": 9479,
+      "sha256": "b99142a22b14a751223ea7923e9a5a8f12e459d263c320780e1ddaabe9dc3aad"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/Ellipse.FCStd",
+      "bytes": 9648,
+      "sha256": "212d9f9c70ef56b4877cf2f5ce7e9312fcd0a5b7092043568d021f768051d9d2"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/InterpCrv.FCStd",
+      "bytes": 7966,
+      "sha256": "34c7a9ccec513b59c0de12ef3d4800552c523da6653ef8fe29f146c4c12edbf8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/Line.FCStd",
+      "bytes": 7790,
+      "sha256": "2d0343bf85233aaa549478f38753077ae5a549124600d965950b8c6a5b36a215"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/Polyline.FCStd",
+      "bytes": 8100,
+      "sha256": "1a2c0808de841be21440e7a8436e23fafeb7f3e837832a7ea40af4adc3055a24"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/Rectangle.FCStd",
+      "bytes": 8089,
+      "sha256": "506c20a361988fce1444f37531f6111a86376490dc6a7a88430b02968a625d7a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/CirclePath.FCStd",
+      "bytes": 13372,
+      "sha256": "05ffd873063b37adec83cc5de3bfabbc8ac1a33228034729856b54d7e530ee1a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/EllipsePath.FCStd",
+      "bytes": 14080,
+      "sha256": "02b97b895efd1a52a1e8a24dc17b0a61b219333c27a535cf0076754acc2b0434"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/FitBranch.FCStd",
+      "bytes": 11023,
+      "sha256": "0bbd30be4e8aeabe85fa13adbc0632d2052c1ad97135048b63687320c26875dc"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/CirclePath.FCStd",
+      "bytes": 13367,
+      "sha256": "78378bc29de37bcd2f154fccfc0644c659e76b56db909de29eac3e91d16073d9"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/EllipsePath.FCStd",
+      "bytes": 14077,
+      "sha256": "006038edccda9b058b30c3d166f5a96e8702a4b97b1a5d08ad2cad29e00de1e2"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/FitBranch.FCStd",
+      "bytes": 11025,
+      "sha256": "413f84d0aa08452285b16b9efdf750f50f3c05b71d6d5a2eed86a8d231fbbf7f"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/CircleQuantity.FCStd",
+      "bytes": 9364,
+      "sha256": "186fe264e4e6619a6493d8f067c92c24228227b02a5ef4602ff4d25219a6a619"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/EllipseQuantity.FCStd",
+      "bytes": 9687,
+      "sha256": "32fb7a26f18a410c29703ccc3d76e3bd358118e6aa81c56daf11a9edc1e30443"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/FitUndo.FCStd",
+      "bytes": 10656,
+      "sha256": "f096047b4f23a82b54bf7f676b96c321f4594f977215fd4414fb32b095b4967d"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/RectangleDirection.FCStd",
+      "bytes": 8238,
+      "sha256": "249212469ce9121a0350fb1b38fbf7dee9025d605c5a22206832fbcb4272d67c"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/Circle.FCStd",
+      "bytes": 9480,
+      "sha256": "8e808634cb760d1c21c2b4bab4d8f1dd3f4f2a56a177ad1f39a033c50fc29e33"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/Ellipse.FCStd",
+      "bytes": 9648,
+      "sha256": "d3874ccfc59dd683cdd4c0fe79204bc58638704c7f5e31a45083c1e9c4ae8147"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/InterpCrv.FCStd",
+      "bytes": 7964,
+      "sha256": "65e424dba8a493e3fc9706cfcf01c7931bdb0b0975d9870ee4b09b938f9b4414"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/Line.FCStd",
+      "bytes": 7788,
+      "sha256": "157e48bd0f00cbcea141c345b0a0250dbec15067e625fb052cf14b57de022570"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/Polyline.FCStd",
+      "bytes": 8094,
+      "sha256": "9b575901834cb147deab9d64b627bfa4cf8dc999ffb350c5455656f2037127c5"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/Rectangle.FCStd",
+      "bytes": 8087,
+      "sha256": "63e81bf6f261df084744ab44f7197029ed680b205fcf42e76d224861a46eb4dd"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/BoundaryBothSides.FCStd",
+      "bytes": 7826,
+      "sha256": "f18da6849be4f96539a994a9c7b1347e7cb2e08018a2dfb32a1df4f1537238eb"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/BoundaryLine.FCStd",
+      "bytes": 7771,
+      "sha256": "48cbecb65b9f9bee7d8c6fbbaa15c62a158056f8244e7d40fe650dee0202d147"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/DeformCircle.FCStd",
+      "bytes": 10058,
+      "sha256": "399c71e17dfd93622343417f382bf7f4a771475a621378c19f8e775c86e5e7ce"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/DeformEllipse.FCStd",
+      "bytes": 10284,
+      "sha256": "7941e7bfbc111935a1a1089b19b795037075ac7e124f04f6e9c8fc11a7ca85b8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/PeriodicInterp.FCStd",
+      "bytes": 7965,
+      "sha256": "ddeb12bf8a56ef3a45aa311717d56b47a470b1d879842cb8754d279aae003e4c"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/AroundCurve.FCStd",
+      "bytes": 9892,
+      "sha256": "509df1abaa58fea16fb0dfac706639e35764bb1e88efd9119a270c0cd3b64279"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/AroundPoint.FCStd",
+      "bytes": 9910,
+      "sha256": "f2a733ed08be4198812ea65507c8304c9b2aea453ec532e74246422473e88fd2"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/BoxCenter.FCStd",
+      "bytes": 10433,
+      "sha256": "033c88248619001d8a6943f0118f2f4149739c4e2b947ba58c00ef597e3d1f9d"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/FitCloud.FCStd",
+      "bytes": 11660,
+      "sha256": "10c9747b8368d34a3fc2f97d3b42f4f9e37329a25d92194d99bcafaa70b0487c"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-solid52-offscreen-20261011/SphereCenter.FCStd",
+      "bytes": 8253,
+      "sha256": "0a62208221dcb6124310701cc32a4fb0edd097c0f2ec6e3ab3a69c09c1249bb6"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/Boolean2Objects.FCStd",
+      "bytes": 21275,
+      "sha256": "134abd6f06804f0a577ea2beaae591761d4217893b0d13aca8f9cc3b4744d2b4"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/BooleanDifference.FCStd",
+      "bytes": 17383,
+      "sha256": "3fb5f59f393dee920090a7bb58b1f2100689c4760d552a429f268bfdd7f7fa0b"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/BooleanIntersection.FCStd",
+      "bytes": 18736,
+      "sha256": "e14b82eccb4d727f5e826aaee3645903b2e34ec90ecdf28ee06894a265c5212e"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/BooleanUnion.FCStd",
+      "bytes": 21292,
+      "sha256": "a985b15cc58990cdfd6d824523076e4c9141a0de21649e564ff46070a53b015f"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/Explode.FCStd",
+      "bytes": 11442,
+      "sha256": "4a61b3c41ccf7b1b45803aa75cee80291dc7fb9383dc6d4cdc6d7e0fe43de636"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/Join.FCStd",
+      "bytes": 9082,
+      "sha256": "4ea2859c5d53fb412c61e8094555378bd369713f1dfd80bd9c0c3e2c268ed9cf"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-edit52-offscreen-20261011/Trim.FCStd",
+      "bytes": 10666,
+      "sha256": "dfa63900d4bcc2b3f07f8869a25cf2cbfe1cd25adf90ddd7e0706bdc6c4c0330"
+    }
+  ],
+  "cold_archives": [
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/Circle.FCStd",
+      "bytes": 9479,
+      "sha256": "b99142a22b14a751223ea7923e9a5a8f12e459d263c320780e1ddaabe9dc3aad"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/Ellipse.FCStd",
+      "bytes": 9648,
+      "sha256": "212d9f9c70ef56b4877cf2f5ce7e9312fcd0a5b7092043568d021f768051d9d2"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/InterpCrv.FCStd",
+      "bytes": 7966,
+      "sha256": "34c7a9ccec513b59c0de12ef3d4800552c523da6653ef8fe29f146c4c12edbf8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/Line.FCStd",
+      "bytes": 7790,
+      "sha256": "2d0343bf85233aaa549478f38753077ae5a549124600d965950b8c6a5b36a215"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/Polyline.FCStd",
+      "bytes": 8100,
+      "sha256": "1a2c0808de841be21440e7a8436e23fafeb7f3e837832a7ea40af4adc3055a24"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-green52-offscreen-20261011/Rectangle.FCStd",
+      "bytes": 8089,
+      "sha256": "506c20a361988fce1444f37531f6111a86376490dc6a7a88430b02968a625d7a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/CirclePath.FCStd",
+      "bytes": 13372,
+      "sha256": "05ffd873063b37adec83cc5de3bfabbc8ac1a33228034729856b54d7e530ee1a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/EllipsePath.FCStd",
+      "bytes": 14080,
+      "sha256": "02b97b895efd1a52a1e8a24dc17b0a61b219333c27a535cf0076754acc2b0434"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-native-green52-offscreen-20261011/FitBranch.FCStd",
+      "bytes": 11023,
+      "sha256": "0bbd30be4e8aeabe85fa13adbc0632d2052c1ad97135048b63687320c26875dc"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/CirclePath.FCStd",
+      "bytes": 13367,
+      "sha256": "78378bc29de37bcd2f154fccfc0644c659e76b56db909de29eac3e91d16073d9"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/EllipsePath.FCStd",
+      "bytes": 14077,
+      "sha256": "006038edccda9b058b30c3d166f5a96e8702a4b97b1a5d08ad2cad29e00de1e2"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-source-green52-offscreen-20261011/FitBranch.FCStd",
+      "bytes": 11025,
+      "sha256": "413f84d0aa08452285b16b9efdf750f50f3c05b71d6d5a2eed86a8d231fbbf7f"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/CircleQuantity.FCStd",
+      "bytes": 9364,
+      "sha256": "186fe264e4e6619a6493d8f067c92c24228227b02a5ef4602ff4d25219a6a619"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/EllipseQuantity.FCStd",
+      "bytes": 9687,
+      "sha256": "32fb7a26f18a410c29703ccc3d76e3bd358118e6aa81c56daf11a9edc1e30443"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/FitUndo.FCStd",
+      "bytes": 10656,
+      "sha256": "f096047b4f23a82b54bf7f676b96c321f4594f977215fd4414fb32b095b4967d"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-accepted52-offscreen-20261011/RectangleDirection.FCStd",
+      "bytes": 8238,
+      "sha256": "249212469ce9121a0350fb1b38fbf7dee9025d605c5a22206832fbcb4272d67c"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/Circle.FCStd",
+      "bytes": 9480,
+      "sha256": "8e808634cb760d1c21c2b4bab4d8f1dd3f4f2a56a177ad1f39a033c50fc29e33"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/Ellipse.FCStd",
+      "bytes": 9648,
+      "sha256": "d3874ccfc59dd683cdd4c0fe79204bc58638704c7f5e31a45083c1e9c4ae8147"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/InterpCrv.FCStd",
+      "bytes": 7964,
+      "sha256": "65e424dba8a493e3fc9706cfcf01c7931bdb0b0975d9870ee4b09b938f9b4414"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/Line.FCStd",
+      "bytes": 7788,
+      "sha256": "157e48bd0f00cbcea141c345b0a0250dbec15067e625fb052cf14b57de022570"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/Polyline.FCStd",
+      "bytes": 8094,
+      "sha256": "9b575901834cb147deab9d64b627bfa4cf8dc999ffb350c5455656f2037127c5"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-construction52-offscreen-20261011/Rectangle.FCStd",
+      "bytes": 8087,
+      "sha256": "63e81bf6f261df084744ab44f7197029ed680b205fcf42e76d224861a46eb4dd"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/BoundaryBothSides.FCStd",
+      "bytes": 7826,
+      "sha256": "f18da6849be4f96539a994a9c7b1347e7cb2e08018a2dfb32a1df4f1537238eb"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/BoundaryLine.FCStd",
+      "bytes": 7771,
+      "sha256": "48cbecb65b9f9bee7d8c6fbbaa15c62a158056f8244e7d40fe650dee0202d147"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/DeformCircle.FCStd",
+      "bytes": 10058,
+      "sha256": "399c71e17dfd93622343417f382bf7f4a771475a621378c19f8e775c86e5e7ce"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/DeformEllipse.FCStd",
+      "bytes": 10284,
+      "sha256": "7941e7bfbc111935a1a1089b19b795037075ac7e124f04f6e9c8fc11a7ca85b8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/solid-regression-curve-result-basis52-offscreen-20261011/PeriodicInterp.FCStd",
+      "bytes": 7965,
+      "sha256": "ddeb12bf8a56ef3a45aa311717d56b47a470b1d879842cb8754d279aae003e4c"
+    }
+  ],
+  "prior_red_checkpoint": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-11-rhino-core-curve-result-red.json",
+    "bytes": 11263,
+    "sha256": "0ea31938ccb55a2a416ef5549a13c81e8561f4e293a0200bafeff96ed8af458f"
+  },
+  "independent_review": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/reviews/2026-10-11-curve-result-review.md",
+    "bytes": 2285,
+    "sha256": "c821f03e80aa0dcd855b1089241beacdc8ba22eedef6a2bb000200d8c5f0fa82"
+  },
+  "remaining": [
+    "Every original RCORE-01 requirement remains required: adapters1–7, C01–C12, T01–T11 and every enabled family/consumer, GeometryRef/Snapshot/Result, rational/periodic basis, trims/pcurves/seam occurrences, independent read/edit/retain/export.",
+    "Task2 remains open: generic native snap/pick provenance, all original numeric/native parameter paths, full subset/index sharing across selection observations, aggregate allocation/traversal/worker/cancellation bounds. Replay currently duplicates construction sources/events in the common result; complete sharing and aggregate cost remain required.",
+    "Task3 main direct Curve results are paired, but Ellipse foci and Circle History recompute/freeze/detach/Rebuild result lifecycle still require implementation and independent native/cold evidence.",
+    "Checked Curve publication remains required: generation/revision/context, full source content/units/frame/locks/owners, layer/output/metadata at callback barriers, with prior executable native Redo preserved on rejection. Existing ordinary transaction abort is not certification.",
+    "Analytic-to-NURBS global deviation/locus and parameter mapping, complete topology maps and output attributes remain unproven. Native validity/master/physical dimensions are scoped observations; conversion exactness remains uninspected and maps null.",
+    "Tangent/native_solution, changed CPlanes/orientation, every numeric mode and explicit non-Circle Undo, repeated/shared sources and revision exhaustion are not established by the six focused Rust tests/nine new native recipes.",
+    "Offscreen evidence does not establish actual mouse, every viewport preview lifetime, OpenGL/render acceptance or all original cache/resource invariants. Production ABI/deployment acceptance remains pending; selected App/GUI host reuses the one SDK.",
+    "Expanded source/resource/test inventories are not exact compiler dependency certificates. Source inspection review establishes no runtime behavior beyond the named executed fixtures."
+  ],
+  "next_action": "Implement checked Curve publication using existing host transaction/Redo preservation utilities; first reproduce callback source/output/metadata/context mutations in real native witnesses. Pair Ellipse foci and Circle History/Rebuild results, finish generic input/sharing/budgets and every original mapping/lifecycle requirement."
+}

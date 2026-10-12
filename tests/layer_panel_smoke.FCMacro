@@ -1,0 +1,171 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# OM9-LAYER-001: real Qt gestures, durable object/layer state and transactions.
+import json, os, sys, time, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore, QtGui, QtWidgets, QtTest
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input
+out = Path(os.environ['OM9_SMOKE_OUTPUT']); out.mkdir(parents=True, exist_ok=True)
+result = {'feature_id':'OM9-LAYER-001','checks':[]}
+started=time.perf_counter()
+def check(name, ok):
+    result['checks'].append({'name':name,'passed':bool(ok),'elapsed_seconds':round(time.perf_counter()-started,3)})
+    (out/'progress.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+    if not ok: raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop(); QtCore.QTimer.singleShot(180,loop.quit); loop.exec()
+def button(name):
+    obj=dock.findChild(QtWidgets.QToolButton,name)
+    check('Layer control exists: '+name,obj is not None)
+    return obj
+def click(role,slot):
+    button('OM9Layer'+role+str(slot-1)).click(); settle()
+def group(slot):
+    return next(o for o in doc.Objects if 'OM9LayerIndex' in o.PropertiesList and o.OM9LayerIndex==slot)
+def active():
+    return next((o.OM9ActiveLayer for o in doc.Objects if 'OM9ActiveLayer' in o.PropertiesList),0)
+def select(*objects):
+    Gui.Selection.clearSelection()
+    for obj in objects: Gui.Selection.addSelection(obj)
+    settle()
+def enter(text=''):
+    field=command_input(Gui.getMainWindow());field.setFocus();field.setText(text)
+    QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def modal(cls, action):
+    seen={'ok':False,'tries':0}
+    def respond():
+        dialog=next((w for w in QtWidgets.QApplication.topLevelWidgets() if isinstance(w,cls) and w.isVisible()),None)
+        if dialog:
+            seen['ok']=True; action(dialog)
+        elif seen['tries']<20:
+            seen['tries']+=1; QtCore.QTimer.singleShot(100,respond)
+    QtCore.QTimer.singleShot(100,respond)
+    return seen
+def run():
+    global doc, dock
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench'); import OpenMatrix9Gui
+        result['module']=OpenMatrix9Gui.__file__
+        check('Selected plugin',Path(result['module']).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
+        window=Gui.getMainWindow(); window.resize(1400,1000)
+        def diagnostic():
+            dialogs=[{'class':w.metaObject().className(),'title':w.windowTitle(),'text':[x.text() for x in w.findChildren(QtWidgets.QLabel)]} for w in QtWidgets.QApplication.topLevelWidgets() if isinstance(w,QtWidgets.QDialog) and w.isVisible()]
+            (out/'dialogs.json').write_text(json.dumps(dialogs,indent=2),encoding='utf-8')
+            if dialogs:window.grab().save(str(out/'blocked.png'))
+        watchdog=QtCore.QTimer(window);watchdog.setInterval(3000);watchdog.timeout.connect(diagnostic);watchdog.start()
+        doc=App.newDocument('LayerPanel'); doc.UndoMode=1
+        dock=window.findChild(QtWidgets.QDockWidget,'OpenMatrix9Sidebar'); settle()
+        current=button('OM9LayerCurrent16')
+        check('Advanced starts collapsed',dock.findChild(QtWidgets.QWidget,'OM9AdvancedLayers').isHidden())
+        button('OM9LayersAdvanced').click(); settle()
+        check('Advanced expands',not dock.findChild(QtWidgets.QWidget,'OM9AdvancedLayers').isHidden())
+        body=dock.findChild(QtWidgets.QWidget,'OM9AdvancedLayers').parentWidget()
+        check('Layer footer combo omitted per user request',not body.findChildren(QtWidgets.QComboBox))
+        a=doc.addObject('Part::Feature','A'); a.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0))
+        b=doc.addObject('Part::Feature','B'); b.Shape=Part.makeCircle(5)
+        c=doc.addObject('Part::Feature','C'); c.Shape=Part.makeLine(App.Vector(0,10,0),App.Vector(10,10,0)); c.ViewObject.Visibility=False
+        doc.recompute(); select(a); click('Arrow',1); g1=group(1)
+        check('Assign selection retains current layer',a in g1.Group and active()==0)
+        current.click(); settle(); check('Name selects current',active()==17)
+        select(b); click('Arrow',17); g17=group(17)
+        check('Assign metadata/membership',b in g17.Group and b.OM9OutputLayerIndex==17)
+        doc.undo(); settle(); check('Assign Undo',b not in group(17).Group and 'OM9OutputLayerIndex' not in b.PropertiesList)
+        doc.redo(); settle(); check('Assign Redo',b in group(17).Group)
+        click('Lock',17); check('Lock retains display and protects pick',b.ViewObject.Visibility and not b.ViewObject.Selectable and not Gui.Selection.getSelection())
+        doc.undo(); settle(); check('Lock Undo restores selection permission',b.ViewObject.Selectable)
+        doc.redo(); settle(); check('Lock Redo',not b.ViewObject.Selectable)
+        select(a); before=doc.UndoCount;click('Arrow',17)
+        check('Locked target rejects assignment atomically',a in group(1).Group and a not in group(17).Group and doc.UndoCount==before)
+        b.ViewObject.Selectable=True;select(b);before=len(doc.Objects)
+        Gui.runCommand('OM9_Delete');settle()
+        check('Delete rejects forced locked selection',doc.getObject('B') is not None and len(doc.Objects)==before)
+        Gui.runCommand('OM9_SelectAll');settle()
+        check('SelectAll excludes locked members and layer storage',b not in Gui.Selection.getSelection() and all('OM9LayerSchema' not in o.PropertiesList and 'OM9LayerStateSchema' not in o.PropertiesList for o in Gui.Selection.getSelection()))
+        b.ViewObject.Selectable=False
+        Gui.Selection.clearSelection(); QtTest.QTest.mouseClick(button('OM9LayerSwatch16'),QtCore.Qt.RightButton); settle()
+        check('Right swatch excludes locked members',not Gui.Selection.getSelection())
+        click('Lock',17)
+        Gui.Selection.clearSelection(); QtTest.QTest.mouseClick(button('OM9LayerSwatch0'),QtCore.Qt.RightButton); settle()
+        check('Right swatch selects visible layer members',Gui.Selection.getSelection()==[a])
+        button('OM9LayerHide').click(); settle(); check('Hide selection',not a.ViewObject.Visibility)
+        click('Visibility',1); click('Visibility',1)
+        check('Layer Off On preserves object Hidden',not a.ViewObject.Visibility and group(1).ViewObject.Visibility)
+        button('OM9LayerShow').click(); settle(); check('Show restores hidden only',a.ViewObject.Visibility and not c.ViewObject.Visibility)
+        select(b); QtTest.QTest.mouseClick(button('OM9LayerHide'),QtCore.Qt.RightButton); settle()
+        check('Reverse Hide keeps selection',b.ViewObject.Visibility and not a.ViewObject.Visibility)
+        seen=modal(QtWidgets.QDialog,lambda d:d.reject())
+        QtTest.QTest.mouseClick(button('OM9LayerShow'),QtCore.Qt.RightButton); settle()
+        check('Selective Show Cancel inert',seen['ok'] and not a.ViewObject.Visibility)
+        def choose_hidden(d):
+            listing=d.findChild(QtWidgets.QListWidget,'OM9HiddenObjects')
+            for i in range(listing.count()):
+                item=listing.item(i)
+                if item.data(QtCore.Qt.UserRole)=='A': item.setSelected(True)
+            d.accept()
+        seen=modal(QtWidgets.QDialog,choose_hidden)
+        QtTest.QTest.mouseClick(button('OM9LayerShow'),QtCore.Qt.RightButton); settle()
+        check('Selective Show commit',seen['ok'] and a.ViewObject.Visibility and not c.ViewObject.Visibility)
+        original_name=g17.Name
+        seen=modal(QtWidgets.QInputDialog,lambda d:(d.setTextValue('Custom curves'),d.accept()))
+        QtTest.QTest.mouseClick(current,QtCore.Qt.RightButton,QtCore.Qt.ShiftModifier); settle()
+        check('Advanced rename keeps identity',seen['ok'] and group(17).Name==original_name and group(17).Label=='Custom curves' and current.text()=='Custom curves')
+        seen=modal(QtWidgets.QInputDialog,lambda d:(d.setTextValue('Metal 01'),d.accept()))
+        before=doc.UndoCount;QtTest.QTest.mouseClick(current,QtCore.Qt.RightButton,QtCore.Qt.ShiftModifier);settle()
+        check('Reserved duplicate rename rejected',seen['ok'] and group(17).Label=='Custom curves' and doc.UndoCount==before)
+        def switch_document(d):
+            other=App.newDocument('ModalOther');d.setTextValue('Wrong document');d.accept()
+        seen=modal(QtWidgets.QInputDialog,switch_document)
+        QtTest.QTest.mouseClick(current,QtCore.Qt.RightButton,QtCore.Qt.ShiftModifier);settle()
+        check('Rename after document switch is inert',seen['ok'] and group(17).Label=='Custom curves' and not App.activeDocument().Objects)
+        App.closeDocument('ModalOther');App.setActiveDocument(doc.Name);Gui.setActiveDocument(doc.Name);settle()
+        seen=modal(QtWidgets.QColorDialog,lambda d:(d.setCurrentColor(QtGui.QColor(10,100,200)),d.accept()))
+        QtTest.QTest.mouseClick(button('OM9LayerSwatch16'),QtCore.Qt.RightButton,QtCore.Qt.ShiftModifier); settle()
+        check('Advanced color propagates',seen['ok'] and abs(group(17).OM9LayerColor[1]-100/255)<1e-6 and abs(b.ViewObject.LineColor[2]-200/255)<1e-6)
+        undo=doc.UndoCount; old=tuple(group(17).OM9LayerColor)
+        seen=modal(QtWidgets.QColorDialog,lambda d:d.reject())
+        QtTest.QTest.mouseClick(button('OM9LayerSwatch16'),QtCore.Qt.RightButton,QtCore.Qt.ShiftModifier); settle()
+        check('Color Cancel inert',seen['ok'] and doc.UndoCount==undo and tuple(group(17).OM9LayerColor)==old)
+        parent=doc.addObject('App::Part','Placed');parent.Placement.Base=App.Vector(40,50,60)
+        nested=doc.addObject('Part::Feature','Nested');nested.Shape=Part.makeLine(App.Vector(),App.Vector(2,0,0));parent.addObject(nested);doc.recompute()
+        select(a,nested);before=doc.UndoCount;click('Arrow',17)
+        check('Mixed structural assignment rejects whole batch',a in group(1).Group and nested in parent.Group and nested not in group(17).Group and doc.UndoCount==before)
+        doc.removeObject('Nested');doc.removeObject('Placed');doc.recompute()
+        button('OM9LayerGroup0').click(); settle(); check('Group Off',all(not group(i).ViewObject.Visibility for i in range(1,5)))
+        button('OM9LayerGroup0').click(); settle(); check('Group On',all(group(i).ViewObject.Visibility for i in range(1,5)))
+        button('OM9LightsCurrent').click(); settle(); check('Lights current slot',active()==33)
+        select(c); button('OM9LightsArrow').click(); settle(); check('Lights assignment preserves explicit invisible object',c in group(33).Group and not c.ViewObject.Visibility)
+        button('OM9LightsVisibility').click(); button('OM9LightsVisibility').click(); settle()
+        check('Lights visibility preserves member state',not c.ViewObject.Visibility)
+        select();click('Current',1)
+        for command,values in [('Line',['20,0,0','30,0,0']),('Box',['Diagonal','0,0','2,3','4']),('Sphere',['0,0','2'])]:
+            previous={o.Name for o in doc.Objects};enter(command)
+            for value in values:enter(value)
+            outputs=[o for o in doc.Objects if o.Name not in previous and 'Shape' in o.PropertiesList]
+            check(command+' inherits current layer',len(outputs)==1 and outputs[0] in group(1).Group and outputs[0].OM9OutputLayerIndex==1)
+        p=doc.addObject('Part::Feature','ProfileA');p.Shape=Part.Wire([Part.makeCircle(3)])
+        q=doc.addObject('Part::Feature','ProfileB');q.Shape=Part.Wire([Part.makeCircle(3,App.Vector(0,0,8))]);doc.recompute();select(p,q)
+        Gui.runCommand('OM9_SurfaceLoft');settle();enter()
+        dialog=window.findChild(QtWidgets.QDialog,'OM9SurfaceOptions')
+        check('Layered Loft preview opens',dialog is not None and dialog.isVisible())
+        dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        loft=[o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SURFACE-009']
+        check('Loft inherits current layer',len(loft)==1 and loft[0] in group(1).Group and loft[0].Shape.isValid())
+        select();button('OM9LightsCurrent').click();settle()
+        select(a); button('OM9LayerHide').click(); settle(); click('Lock',17)
+        filename=out/'layer-panel.FCStd'; name=doc.Name; doc.saveAs(str(filename)); App.closeDocument(name); doc=App.openDocument(str(filename)); settle()
+        check('FCStd current and name',active()==33 and group(17).Label=='Custom curves')
+        check('FCStd Hidden and Lock',not doc.A.ViewObject.Visibility and not doc.B.ViewObject.Selectable and group(17).OM9LayerLocked)
+        check('FCStd layer membership',doc.B in group(17).Group and doc.C in group(33).Group)
+        dock.findChild(QtWidgets.QToolButton,'OM9LayersAdvanced').setChecked(True)
+        window.grab().save(str(out/'layer-panel.png')); result['ok']=True
+        body.grab().save(str(out/'layers-panel.png'))
+    except Exception:
+        result['ok']=False; result['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):
+            try: App.closeDocument(name)
+            except Exception: pass
+        (out/'results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(0,QtWidgets.QApplication.instance().quit)
+QtCore.QTimer.singleShot(1400,run)

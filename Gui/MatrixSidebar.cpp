@@ -3,8 +3,11 @@
 #include "CoreSnaps.h"
 #include "CoreKeyboard.h"
 #include "CoreLayers.h"
+#include "CoreObjects.h"
 #include <App/Application.h>
 #include <App/Document.h>
+#include <App/DocumentObject.h>
+#include <Gui/Control.h>
 #include <QMainWindow>
 #include <QScrollArea>
 #include <QToolButton>
@@ -24,12 +27,46 @@
 #include <QGridLayout>
 #include <QRegularExpression>
 #include <QColorDialog>
+#include <QInputDialog>
+#include <QDialogButtonBox>
+#include <QListWidget>
+#include <QMouseEvent>
 #include <algorithm>
 #include <limits>
 #include <utility>
 #include <exception>
+#include <map>
 
 namespace {
+// Native exception: Qt mouse gestures and modal widgets stay on the GUI thread.
+class LayerButton final : public QToolButton {
+public:
+    using QToolButton::QToolButton;
+    std::function<void(Qt::KeyboardModifiers)> rightClick;
+protected:
+    void mousePressEvent(QMouseEvent* event) override {
+        if(event->button()==Qt::RightButton){if(rightClick)rightClick(event->modifiers());event->accept();return;}
+        QToolButton::mousePressEvent(event);
+    }
+};
+struct LayerDialogContext {
+    std::string name,uid,group;
+    std::uint64_t session=0;
+    int index=0;
+    OpenMatrix9Gui::ObjectStamp stamp;
+};
+LayerDialogContext layerDialogContext(App::Document& doc,int index=0) {
+    LayerDialogContext c;c.name=doc.getName();c.uid=doc.Uid.getValueStr();c.session=OpenMatrix9Gui::documentSession(doc);c.index=index;
+    if(index){const auto s=OpenMatrix9Gui::CoreLayers::state(index);c.group=s.groupName;if(!c.group.empty())c.stamp=OpenMatrix9Gui::objectIdentity(*doc.getObject(c.group.c_str()));}
+    return c;
+}
+bool sameLayerDocument(const LayerDialogContext& context) {
+    auto* doc=App::GetApplication().getActiveDocument();
+    if(!doc||context.name!=doc->getName()||context.uid!=doc->Uid.getValueStr()||context.session!=OpenMatrix9Gui::documentSession(*doc))return false;
+    if(!context.index)return true;
+    if(context.group.empty())return OpenMatrix9Gui::CoreLayers::state(context.index).objectId==0;
+    return OpenMatrix9Gui::validateObjectIdentity(*doc,context.group,context.stamp);
+}
 class TitleButton final : public QToolButton {
 public:
     using QToolButton::QToolButton;
@@ -191,32 +228,69 @@ MatrixSidebar::MatrixSidebar(QMainWindow* window,const QString& resourceRoot,Hos
     layout->addWidget(section(4,"INFO & SETTINGS",info));
 
     auto* layers=new QWidget(content);auto* layersLayout=new QVBoxLayout(layers);layersLayout->setContentsMargins(1,1,1,1);layersLayout->setSpacing(1);
-    auto* lights=new QWidget(layers);auto* lightsLayout=new QHBoxLayout(lights);lightsLayout->setContentsMargins(0,0,0,0);lightsLayout->setSpacing(1);auto* lightsLabel=new QLabel("Lights",lights);lightsLabel->setFixedWidth(51);lightsLayout->addWidget(lightsLabel);
-    lightsLayout->addWidget(iconButton(lights,"LayerArrow","OM9LightsArrow",QSize(15,15)));auto* lightColor=new QLabel(lights);lightColor->setFixedSize(21,15);lightColor->setStyleSheet("background:white;border:1px solid #bbbbbb;");lightsLayout->addWidget(lightColor);
-    lightsLayout->addWidget(iconButton(lights,"LayerLock","OM9LightsLock",QSize(18,15)));lightsLayout->addWidget(iconButton(lights,"LayerVisibility","OM9LightsVisibility",QSize(26,15)));lightsLayout->addStretch();lightsLayout->addWidget(textButton(lights,"Hide ◉",QSize(55,15)));lightsLayout->addWidget(textButton(lights,"Show ◉",QSize(58,15)));layersLayout->addWidget(lights);
-    for(int block=0;block<2;++block){if(block)layersLayout->addWidget(separator(layers));auto* rows=new QWidget(layers);auto* gridLayout=new QGridLayout(rows);gridLayout->setContentsMargins(0,0,0,0);gridLayout->setSpacing(1);
-        for(int j=0;j<16;++j){int i=block*16+j;auto* row=new QWidget(rows);auto* rowLayout=new QHBoxLayout(row);rowLayout->setContentsMargins(0,0,0,0);rowLayout->setSpacing(0);
-            auto* label=new QLabel(QString("Layer %1").arg(i+1),row);label->setObjectName(QString("OM9LayerName%1").arg(i));label->setFixedSize(51,15);rowLayout->addWidget(label);
-            const auto layerButton=[this,row,i](const QString& key,const QString& role,const QSize& size){
-                auto* button=new QToolButton(row);button->setObjectName(QString("OM9Layer%1%2").arg(role).arg(i));button->setFixedSize(size);button->setIcon(iconForKey(key,size-QSize(1,1)));button->setIconSize(size-QSize(1,1));button->setCheckable(true);return button;
-            };
-            auto* arrow=layerButton("LayerArrow","Arrow",QSize(15,15));rowLayout->addWidget(arrow);
-            connect(arrow,&QToolButton::clicked,this,[this,i]{CoreLayers::select(i+1);refreshLayers();});
-            auto* swatch=new QToolButton(row);swatch->setObjectName(QString("OM9LayerSwatch%1").arg(i));swatch->setFixedSize(21,15);rowLayout->addWidget(swatch);
-            connect(swatch,&QToolButton::clicked,this,[this,i]{
-                auto* original=App::GetApplication().getActiveDocument();if(!original)return;const std::string uid=original->Uid.getValueStr();
-                try {
-                    const auto s=CoreLayers::state(i+1);const auto chosen=QColorDialog::getColor(QColor::fromRgbF(s.color[0],s.color[1],s.color[2]),this,tr("Layer color"),QColorDialog::DontUseNativeDialog);
-                    auto* current=App::GetApplication().getActiveDocument();
-                    if(chosen.isValid()&&current==original&&current->Uid.getValueStr()==uid)CoreLayers::setColor(i+1,{chosen.redF(),chosen.greenF(),chosen.blueF()});
+    const auto makeLayerRow=[this](QWidget* parent,int index) {
+        auto* row=new QWidget(parent);auto* rowLayout=new QHBoxLayout(row);rowLayout->setContentsMargins(0,0,0,0);rowLayout->setSpacing(0);
+        const auto control=[row,rowLayout,index](const QString& role,const QSize& size){
+            auto* b=new LayerButton(row);b->setObjectName(index==33?"OM9Lights"+role:"OM9Layer"+role+QString::number(index-1));b->setFixedSize(size);rowLayout->addWidget(b);return b;
+        };
+        auto* current=control("Current",QSize(51,15));current->setCheckable(true);
+        connect(current,&QToolButton::clicked,this,[this,index]{CoreLayers::select(index);refreshLayers();});
+        current->rightClick=[this,index](Qt::KeyboardModifiers mods){
+            if(index<17||index>32||!mods.testFlag(Qt::ShiftModifier))return;
+            auto* doc=App::GetApplication().getActiveDocument();if(!doc)return;
+            try {const auto context=layerDialogContext(*doc,index);const auto state=CoreLayers::state(index);bool accepted=false;const auto value=QInputDialog::getText(this,tr("Layer name"),tr("Name"),QLineEdit::Normal,state.name,&accepted);
+                if(accepted&&sameLayerDocument(context))CoreLayers::setName(index,value);
+            }catch(const std::exception&){}refreshLayers();
+        };
+        auto* arrow=control("Arrow",QSize(15,15));arrow->setIcon(iconForKey("LayerArrow",QSize(14,14)));arrow->setIconSize(QSize(14,14));
+        connect(arrow,&QToolButton::clicked,this,[this,index]{CoreLayers::assignSelected(index);refreshLayers();});
+        auto* swatch=control("Swatch",QSize(21,15));
+        connect(swatch,&QToolButton::clicked,this,[this,index]{CoreLayers::select(index);refreshLayers();});
+        swatch->rightClick=[this,index](Qt::KeyboardModifiers mods){
+            if(mods.testFlag(Qt::ShiftModifier)) {
+                if(index<17||index>32)return;
+                auto* doc=App::GetApplication().getActiveDocument();if(!doc)return;
+                try {const auto context=layerDialogContext(*doc,index);const auto s=CoreLayers::state(index);const auto chosen=QColorDialog::getColor(QColor::fromRgbF(s.color[0],s.color[1],s.color[2]),this,tr("Layer color"),QColorDialog::DontUseNativeDialog);
+                    if(chosen.isValid()&&sameLayerDocument(context))CoreLayers::setColor(index,{chosen.redF(),chosen.greenF(),chosen.blueF()});
                 }catch(const std::exception&){}
-                refreshLayers();
-            });
-            auto* lock=layerButton("LayerLock","Lock",QSize(18,15));rowLayout->addWidget(lock);
-            connect(lock,&QToolButton::clicked,this,[this,i]{CoreLayers::toggleLocked(i+1);refreshLayers();});
-            auto* visibility=new QToolButton(row);visibility->setText("I");visibility->setFixedSize(26,15);visibility->setCheckable(true);visibility->setObjectName(QString("OM9LayerVisibility%1").arg(i));rowLayout->addWidget(visibility);
-            connect(visibility,&QToolButton::clicked,this,[this,i]{CoreLayers::toggleVisible(i+1);refreshLayers();});gridLayout->addWidget(row,j%8,j/8);}
+            } else CoreLayers::selectMembers(index);
+            refreshLayers();
+        };
+        auto* lock=control("Lock",QSize(18,15));lock->setIcon(iconForKey("LayerLock",QSize(17,14)));lock->setIconSize(QSize(17,14));lock->setCheckable(true);
+        connect(lock,&QToolButton::clicked,this,[this,index]{CoreLayers::toggleLocked(index);refreshLayers();});
+        auto* visible=control("Visibility",QSize(26,15));visible->setIcon(iconForKey("LayerVisibility",QSize(25,14)));visible->setIconSize(QSize(25,14));visible->setCheckable(true);
+        connect(visible,&QToolButton::clicked,this,[this,index]{CoreLayers::toggleVisible(index);refreshLayers();});
+        return row;
+    };
+    auto* lights=new QWidget(layers);auto* lightsLayout=new QHBoxLayout(lights);lightsLayout->setContentsMargins(0,0,0,0);lightsLayout->setSpacing(1);
+    lightsLayout->addWidget(makeLayerRow(lights,33));lightsLayout->addStretch();
+    auto* hide=new LayerButton(lights);hide->setText("Hide ◉");hide->setObjectName("OM9LayerHide");hide->setFixedSize(55,15);lightsLayout->addWidget(hide);
+    connect(hide,&QToolButton::clicked,this,[this]{CoreLayers::hideSelected();refreshLayers();});
+    hide->rightClick=[this](Qt::KeyboardModifiers){CoreLayers::hideSelected(true);refreshLayers();};
+    hide->setToolTip(tr("Hide selection. Right click: keep selection and hide other visible objects."));
+    auto* show=new LayerButton(lights);show->setText("Show ◉");show->setObjectName("OM9LayerShow");show->setFixedSize(58,15);lightsLayout->addWidget(show);
+    connect(show,&QToolButton::clicked,this,[this]{CoreLayers::showHidden();refreshLayers();});
+    show->rightClick=[this](Qt::KeyboardModifiers){
+        auto* doc=App::GetApplication().getActiveDocument();if(!doc)return;
+        const auto context=layerDialogContext(*doc);const auto objects=CoreLayers::hiddenObjects();if(objects.empty())return;
+        std::map<std::string,ObjectStamp> identities;
+        QDialog dialog(this);dialog.setWindowTitle(tr("Show hidden objects"));auto* layout=new QVBoxLayout(&dialog);
+        auto* list=new QListWidget(&dialog);list->setObjectName("OM9HiddenObjects");list->setSelectionMode(QAbstractItemView::ExtendedSelection);layout->addWidget(list);
+        for(const auto& object:objects){auto* item=new QListWidgetItem(object.second,list);item->setData(Qt::UserRole,QString::fromStdString(object.first));identities.emplace(object.first,objectIdentity(*doc->getObject(object.first.c_str())));}
+        auto* buttons=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel,&dialog);layout->addWidget(buttons);
+        connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);
+        if(dialog.exec()==QDialog::Accepted&&sameLayerDocument(context)){std::vector<std::string> names;bool valid=true;auto* current=App::GetApplication().getActiveDocument();for(auto* item:list->selectedItems()){const auto name=item->data(Qt::UserRole).toString().toStdString();if(!validateObjectIdentity(*current,name,identities.at(name))){valid=false;break;}names.push_back(name);}if(valid)CoreLayers::showHidden(names,true);}
+        refreshLayers();
+    };
+    show->setToolTip(tr("Show hidden objects. Right click: choose hidden objects to show."));layersLayout->addWidget(lights);
+    auto* advanced=new QToolButton(layers);advanced->setObjectName("OM9LayersAdvanced");advanced->setText(tr("Advanced"));advanced->setCheckable(true);
+    for(int block=0;block<2;++block){if(block)layersLayout->addWidget(separator(layers));auto* rows=new QWidget(layers);auto* gridLayout=new QGridLayout(rows);gridLayout->setContentsMargins(0,0,0,0);gridLayout->setSpacing(1);
+        for(int j=0;j<16;++j){const int i=block*16+j;gridLayout->addWidget(makeLayerRow(rows,i+1),j%8,(j/8)*2);}
+        for(int j=0;j<4;++j){const int first=block*16+j*4+1;auto* toggle=new QToolButton(rows);toggle->setObjectName(QString("OM9LayerGroup%1").arg(block*4+j));toggle->setFixedSize(9,63);toggle->setText("◉");toggle->setToolTip(tr("Toggle visibility of layers %1–%2").arg(first).arg(first+3));
+            connect(toggle,&QToolButton::clicked,this,[this,first]{CoreLayers::toggleGroupVisible(first);refreshLayers();});gridLayout->addWidget(toggle,(j%2)*4,(j/2)*2+1,4,1);}
+        if(block){rows->setObjectName("OM9AdvancedLayers");rows->hide();connect(advanced,&QToolButton::toggled,rows,&QWidget::setVisible);}
         layersLayout->addWidget(rows);}
+    layersLayout->addWidget(advanced);
     layersLayout->addWidget(separator(layers));layout->addWidget(section(5,"LAYERS",layers));
 
     auto* projects=new QWidget(content);auto* projectLayout=new QVBoxLayout(projects);projectLayout->setContentsMargins(1,1,1,1);projectLayout->setSpacing(1);
@@ -235,7 +309,7 @@ MatrixSidebar::MatrixSidebar(QMainWindow* window,const QString& resourceRoot,Hos
     addAction(restore);setContextMenuPolicy(Qt::ActionsContextMenu);
     connect(restore,&QAction::triggered,this,[this]{om9_sidebar_reset();refreshState();});
     timer=new QTimer(this);timer->setInterval(350);connect(timer,&QTimer::timeout,this,&MatrixSidebar::refreshAvailability);
-    refreshState();hide();
+    refreshState();this->hide();
 }
 QWidget* MatrixSidebar::section(int index,const QString& title,QWidget* body) {
     body->setObjectName("OM9PanelBody");
@@ -327,33 +401,54 @@ void MatrixSidebar::refreshAvailability() {
 }
 void MatrixSidebar::refreshLayers() {
     const bool editable=CoreLayers::available();
-    for(int i=0;i<32;++i) {
-        auto* label=findChild<QLabel*>(QString("OM9LayerName%1").arg(i));
-        auto* arrow=findChild<QToolButton*>(QString("OM9LayerArrow%1").arg(i));
-        auto* lock=findChild<QToolButton*>(QString("OM9LayerLock%1").arg(i));
-        auto* visible=findChild<QToolButton*>(QString("OM9LayerVisibility%1").arg(i));
-        auto* swatch=findChild<QToolButton*>(QString("OM9LayerSwatch%1").arg(i));
+    for(int i=0;i<33;++i) {
+        const auto name=[i](const QString& role){return i==32?"OM9Lights"+role:"OM9Layer"+role+QString::number(i);};
+        auto* label=findChild<QToolButton*>(name("Current"));
+        auto* arrow=findChild<QToolButton*>(name("Arrow"));
+        auto* lock=findChild<QToolButton*>(name("Lock"));
+        auto* visible=findChild<QToolButton*>(name("Visibility"));
+        auto* swatch=findChild<QToolButton*>(name("Swatch"));
         if(!label||!arrow||!lock||!visible||!swatch)continue;
-        for(auto* button:{arrow,lock,visible,swatch})button->setEnabled(editable);
+        for(auto* button:{label,arrow,lock,visible,swatch})button->setEnabled(editable);
         try {
             const auto s=CoreLayers::state(i+1);label->setText(s.name);
-            label->setStyleSheet(s.active?"font-size:10px;background:#759df0;":"font-size:10px;");
-            const QSignalBlocker a(arrow),l(lock),v(visible);arrow->setChecked(s.active);lock->setChecked(s.locked);visible->setChecked(s.visible);visible->setText(s.visible?"I":"—");
-            arrow->setToolTip(tr("Set active layer for new Circles: %1 (Layer=%2)").arg(s.name).arg(i+1));
-            lock->setToolTip(s.locked?tr("Unlock %1 for new Circles").arg(s.name):tr("Lock %1 against new Circles").arg(s.name));
-            visible->setToolTip(s.visible?tr("Hide %1 and its members").arg(s.name):tr("Show %1 and its members; new Circles inherit visibility").arg(s.name));
+            label->setStyleSheet(s.active?"font-size:10px;text-align:left;background:#759df0;":"font-size:10px;text-align:left;");
+            const QSignalBlocker a(label),l(lock),v(visible);label->setChecked(s.active);lock->setChecked(s.locked);visible->setChecked(s.visible);
+            label->setToolTip(tr("Set current layer: %1 (Layer=%2)").arg(s.name).arg(i+1)+(i>=16&&i<32?tr(". Shift + right click: rename."):QString()));
+            arrow->setToolTip(tr("Move selected objects into %1").arg(s.name));
+            lock->setToolTip(s.locked?tr("Unlock %1").arg(s.name):tr("Lock %1 against selection and edits").arg(s.name));
+            visible->setToolTip(s.visible?tr("Turn %1 off").arg(s.name):tr("Turn %1 on; preserve hidden objects").arg(s.name));
             visible->setStyleSheet(s.visible?"background:#789de9;border:1px solid #c5d7ff;color:#162f54;":"background:#555555;border:1px solid #939393;");
             swatch->setStyleSheet("QToolButton{background:"+QColor::fromRgbF(s.color[0],s.color[1],s.color[2]).name()+";border:1px solid #bbbbbb;}");
-            swatch->setToolTip(tr("Set %1 color for its OM9 Circle outputs").arg(s.name));
+            swatch->setToolTip(tr("Current layer: %1. Right click: select visible members.").arg(s.name)+(i>=16&&i<32?tr(" Shift + right click: color."):QString()));
         }catch(const std::exception& e) {
-            for(auto* button:{arrow,lock,visible,swatch}){button->setEnabled(false);button->setToolTip(QString::fromUtf8(e.what()));}
+            for(auto* button:{label,arrow,lock,visible,swatch}){button->setEnabled(false);button->setToolTip(QString::fromUtf8(e.what()));}
         }
     }
+    for(int i=0;i<8;++i)if(auto* b=findChild<QToolButton*>(QString("OM9LayerGroup%1").arg(i))){b->setEnabled(editable);bool all=true;try{for(int j=1;j<=4;++j)all=all&&CoreLayers::state(i*4+j).visible;}catch(...){b->setEnabled(false);}b->setStyleSheet(all?"background:#789de9;border:1px solid #c5d7ff;":"background:#555555;border:1px solid #939393;");}
+    for(const char* name:{"OM9LayerHide","OM9LayerShow"})if(auto* b=findChild<QToolButton*>(name))b->setEnabled(editable);
 }
 void MatrixSidebar::activate() {
     if(active)return;active=true;alteredDocks.clear();
-    for(auto* dock:window->findChildren<QDockWidget*>(QString(),Qt::FindDirectChildrenOnly))if(dock!=this && window->dockWidgetArea(dock)==Qt::LeftDockWidgetArea){alteredDocks.emplace_back(dock,dock->isVisible());dock->hide();}
+    auto* tasks=window->findChild<QDockWidget*>("Tasks");
+    const bool activeTask=Gui::Control().activeDialog()!=nullptr;
+    for(auto* dock:window->findChildren<QDockWidget*>(QString(),Qt::FindDirectChildrenOnly)) {
+        if(dock==this || dock==tasks)continue;
+        if(window->dockWidgetArea(dock)==Qt::LeftDockWidgetArea) {
+            alteredDocks.emplace_back(dock,dock->isVisible());dock->hide();
+        }
+    }
+    // Overlay docking can reparent Tasks away from the main window.
+    if(tasks && !activeTask) {
+        alteredDocks.emplace_back(tasks,!tasks->isHidden());
+    }
     show();window->resizeDocks({this},{300},Qt::Horizontal);refreshState();timer->start();
+    if(tasks && !activeTask) {
+        tasks->hide();
+        QTimer::singleShot(0,this,[this,dock=QPointer<QDockWidget>(tasks)] {
+            if(active && dock && !Gui::Control().activeDialog())dock->hide();
+        });
+    }
 }
 void MatrixSidebar::deactivate() {
     if(!active)return;timer->stop();hide();

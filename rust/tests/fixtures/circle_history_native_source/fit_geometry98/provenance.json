@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "H:/FreeCAD-src/build/solid-regression-history-fit-red98-offscreen-20261011/results.json",
+  "source_sha256": "367e631dfb1cadacfed61a4ebe84031cf594b159f4607ef4c38084d6cbdb3e99",
+  "generator": "H:/FreeCAD-src/build/prepare-history-fit98.py",
+  "generator_sha256": "e7d91b5215566b0583358a5a50de49b7c25383b7e294c37110c1f2c5d0f0b19a",
+  "scope": "Eight saved native replay requests reconstructed from owned results; two Face cases reconstruct synthetic History envelopes from genuine successful native constructors/recorded properties, because actual native replay is RED. No source stamps, geometry, attributes, world transforms or oracle points fabricated. Native kernel classes and explicit source topology indices retained.",
+  "files": [
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/fit_geometry98/cases.json",
+      "bytes": 704445,
+      "sha256": "4fb0d1a448de984cec2904b752f69faa85e8ba27f0fc11c26fc37a7b2db302b8"
+    }
+  ]
+}

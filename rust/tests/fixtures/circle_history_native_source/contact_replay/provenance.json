@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "source": "H:/FreeCAD-src/build/solid-regression-history-contact-modes93-offscreen-20261011/recorded-results.json",
+  "source_sha256": "012dc0278b2ad514468362a2a8d8ac6a693e725d6d4d56eba2ff248fa830763e",
+  "generator": "H:/FreeCAD-src/build/prepare-history-contact94.py",
+  "generator_sha256": "bfa8217aa6ce9cdfed37353a160e3c4cb1c497a1237081c93ddb0610d873510f",
+  "scope": "Fresh Runtime93 authored native saved History results, reconstructed requests rather than intercepted packets. Actual resolved contact fractions are retained. Previous Runtime59 files remain untouched. All20 recipes/current points/resolved plans/roles/probe fractions/path fractions match original cases exactly. Replacement point/line snapshots come from the same fresh native fixture with actual stamps; no native evidence fabricated.",
+  "count": 20,
+  "files": [
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/contact_replay/all_modes.json",
+      "bytes": 902785,
+      "sha256": "c9ca7dda7748842dc74f6fc5d54f73eeb641a693a5d0e8bfb3dbce4b4157a238"
+    },
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/contact_replay/around.json",
+      "bytes": 41305,
+      "sha256": "78e030085d92d209002a2ee9f59d1280d72cf5e9ab1dde0e38e376fac73f30ca"
+    },
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/contact_replay/fixed_contact.json",
+      "bytes": 48366,
+      "sha256": "4ed2080f6cb06963b8fad8b625d4f21e0afd5b45d39f66d13bae71ec941818d6"
+    },
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/contact_replay/replacement_line.json",
+      "bytes": 9456,
+      "sha256": "1de98b64c1daaa440c64e73d8dd7e051e390264153ba6b16c6d17660a1e53ff2"
+    },
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/contact_replay/replacement_point.json",
+      "bytes": 6751,
+      "sha256": "9cfb98463434888f49ccbf5db05670fb93b138142700ad608d08220a87859d0c"
+    },
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/contact_replay/replacement_point_same_document.json",
+      "bytes": 6590,
+      "sha256": "8ba5934e331ed2d342c9099dbcfc6073b4fbffeb73c6ff9ea391350985d2c4f2"
+    },
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/contact_replay/tangent.json",
+      "bytes": 52675,
+      "sha256": "b168d60ff0bbd63a1f4a107d3c7c2aab8b73cc4d31433efa03ad49e77dd37bc7"
+    }
+  ]
+}

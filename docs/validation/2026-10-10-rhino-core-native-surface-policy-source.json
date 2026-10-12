@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-10T23:48:47+07:00",
+  "chapter_status": "in_progress",
+  "status": "source_checked_native_integration_pending",
+  "scope": "Owned typed Surface request in common Rust registry and bounded72-byte synchronous ABI; not consumed by the current native plugin.",
+  "sources": [
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\native_surface_capability.rs",
+      "bytes": 7604,
+      "sha256": "650e84f6ed79c047134cbfeb6ccde932ef611759899d48552f07451705f5b622"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\native_surface_capability.rs",
+      "bytes": 6744,
+      "sha256": "a5b9093f97e64b2c92e43a61c4d97afd85c2c1b4f37ad485dbb2167945bb6bdd"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\native_surface_capability_ffi.rs",
+      "bytes": 3299,
+      "sha256": "764a61ad3289b8fd7717980929405350563c49f5b5b92bca6e70018e3f101470"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_contract.rs",
+      "bytes": 18631,
+      "sha256": "4949656308170fba18af2a36b81f8a81f3314078ef61c5cba039fd9e562eddb5"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\lib.rs",
+      "bytes": 2005,
+      "sha256": "c16c1f25d4731bdc0d1af7863c3d67feae3b6541ac5ec50fd984fd48198c9ceb"
+    }
+  ],
+  "logs": [
+    {
+      "path": "H:\\FreeCAD-src\\build\\native-surface-rust-red1-20261010.log",
+      "bytes": 2383,
+      "sha256": "335bfb54f3f5fe69c34a575396f0438e26c1c6abe41c2eb5c588f75d3b34412e"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\native-surface-rust-green1-20261010.log",
+      "bytes": 39,
+      "sha256": "7864c388bbf4676236a382aa521012fc0005e2ecb000c406d0ca7763267d78b6"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\native-surface-rust-ffi-red1-20261010.log",
+      "bytes": 1370,
+      "sha256": "1b333cbfa83a3ab6ac4fc64c7bab63cabaf2bccee8c0b258116df302e23afb2c"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\native-surface-rust-ffi-green2-20261010.log",
+      "bytes": 39,
+      "sha256": "52f29b3d30af416d682849855e92ad567c687cd367dd464dbd366f19d76da02d"
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\native-surface-rust-full2-20261010.log",
+      "bytes": 43,
+      "sha256": "bb859d09353e3585b12a86037b21055d9bf1841920f3f15aed15ebdb565b35c4"
+    }
+  ],
+  "functional_red": {
+    "policy_passed": 1,
+    "policy_failed": 7,
+    "ffi_passed": 0,
+    "ffi_failed": 4
+  },
+  "validation": {
+    "policy_tests": 8,
+    "ffi_tests": 4,
+    "full_rust_tests": 691,
+    "full_rust_process_exit_code": 0,
+    "native_policy_consumption_verified": false
+  },
+  "plan": "docs/superpowers/plans/2026-10-10-rcore01-native-construction-capabilities.md",
+  "remaining": [
+    "Native controller declaration/capture/build integration and matching standalone plugin/host regressions are pending.",
+    "Other construction families, reference admission, native output/results/conversion and all original RCORE-01 obligations remain open."
+  ]
+}

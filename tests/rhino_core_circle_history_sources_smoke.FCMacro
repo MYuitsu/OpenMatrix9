@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Selected BRep vertices, discrete replay, Update=No creation and scalar callbacks."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(console,text):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier))
+def settle():
+ loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(80,loop.quit);loop.exec()
+def paired(child,center,radius):
+ try:
+  result=json.loads(child.OM9GeometryResult);snapshot=result['output_snapshots'][0];master=Part.Shape();master.importBrepFromString(snapshot['geometry_data']['native_master']['payload'])
+  return all(not s.isNull()and isinstance(s.Edges[0].Curve,Part.Circle)and (s.Edges[0].Curve.Center-center).Length<1e-7 and abs(s.Edges[0].Curve.Radius-radius)<1e-7 for s in [child.Shape,master])and snapshot['unit_context_snapshot']==child.OM9UnitContext
+ except (ValueError,KeyError,IndexError,TypeError):return False
+class UnitsObserver:
+ def __init__(self,name):self.name=name;self.calls=0
+ def slotChangedObject(self,obj,prop):
+  if obj.Document.Name==self.name and obj.Name=='Circle'and prop=='Radius'and not self.calls:
+   self.calls+=1;OM.setUnitContext(self.name,25.4,1.,.01,.001,.01)
+def case(console,kind):
+ doc=App.newDocument('CircleHistorySources');observer=None
+ try:
+  OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01);settings=doc.addObject('OpenMatrix9Gui::HistorySettings','OM9HistorySettings');settings.BrokenHistoryWarning=False
+  if kind=='Mesh':
+   source=doc.addObject('Mesh::Feature','Source')
+   def assign(n):source.Mesh=Mesh.Mesh([[App.Vector(n,0,0),App.Vector(0,n,0),App.Vector(-n,0,0)]])
+  else:
+   source=doc.addObject('Part::Feature','Source')
+   def assign(n):source.Shape=Part.makeBox(1,1,1,App.Vector(3*n,4*n,5*n))if kind=='BoxVertex'else Part.Vertex(App.Vector(3*n,4*n,5*n))
+  assign(1);doc.recompute();args=['Circle','History=Yes']
+  if kind=='InitiallyFrozen':settings.Update=False
+  if kind=='Mesh':Gui.Selection.clearSelection();Gui.Selection.addSelection(source);args+=['FitPoints','Selection','']
+  elif kind=='ScalarUnits':args+=['3,4,5','Radius=2']
+  else:args+=['Point=Source.Vertex1','Radius=2']
+  for text in args:enter(console,text)
+  settle();child=doc.getObject('Circle');check(kind+' initial paired Circle',child is not None and child.Recorded and bool(child.OM9GeometryResult))
+  if kind=='ScalarUnits':
+   observer=UnitsObserver(doc.Name);App.addDocumentObserver(observer);child.touch();doc.recompute();settle();App.removeDocumentObserver(observer);calls=observer.calls;observer=None
+   check(kind+' units callback invalidates both outputs',calls==1 and child.Shape.isNull()and not child.OM9GeometryResult and 'StaleGeometry'in child.getStatusString())
+  else:
+   assign(2);doc.recompute();settle()
+   if kind=='InitiallyFrozen':settings.Update=True;doc.recompute();settle()
+   center=App.Vector()if kind=='Mesh'else source.Shape.Vertexes[0].Point
+   check(kind+' first resumed replay owns current source result',paired(child,center,2))
+  report['observations'].append(dict(case=kind,status=child.getStatusString(),shape_null=child.Shape.isNull()))
+ finally:
+  if observer:App.removeDocumentObserver(observer)
+  enter(console,'Cancel');App.closeDocument(doc.Name)
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');settle();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  for kind in ['BoxVertex','Mesh','InitiallyFrozen','ScalarUnits']:case(console,kind)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

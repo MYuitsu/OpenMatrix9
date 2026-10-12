@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""An earlier retirement veto must retain the available property inverse."""
+import json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App, FreeCADGui as Gui, OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT'])
+report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE'])
+import OM9ReplayRetirement as probe
+def check(name,passed): report['checks'].append(dict(name=name,passed=bool(passed)))
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        for action in ('value','close','remove','clear'):
+            doc=App.newDocument('RetirementInverse');doc.UndoMode=1
+            child=doc.getObject(probe.create(doc.Name));doc.recompute();doc.clearUndos()
+            doc.openTransaction('Prior creation')
+            probe.create(doc.Name,'Retired',True)
+            doc.commitTransaction();doc.undo()
+            doc.openTransaction('Caller')
+            value,output=child.Value,child.Output
+            result=probe.run(doc.Name,action,'redo_object')
+            check(action+' native retirement veto remains typed and unaccepted',result['callbacks']==1 and result['blocked']==1 and not result['accepted'] and 'KernelFailure' in result['error'])
+            check(action+' available inverse restores properties before caller abort',child.Value==value and child.Output==output)
+            check(action+' missing object/history recovery is not reported complete',not result['rollback'] and not result['complete'])
+            report['observations'].append(dict(action=action,result=result,value=child.Value,output=child.Output))
+            doc.abortTransaction();App.closeDocument(doc.Name)
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:
+        report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2))
+        for name in list(App.listDocuments()): App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

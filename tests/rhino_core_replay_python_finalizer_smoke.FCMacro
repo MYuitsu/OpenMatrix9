@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Frozen Python values finalize outside the sidecar index mutex."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+sys.path.insert(0,os.environ['OM9_REPLAY_RETIREMENT_PROBE']);import OM9ReplayRetirement as probe
+events=[]
+class Finalizer:
+ def __init__(self,child):self.child=child
+ def __del__(self):
+  events.append('started')
+  try:self.child.Value='finalized';events.append('changed')
+  except Exception as error:events.append(str(error))
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench')
+  helper=App.newDocument('FinalizerTarget');helper.UndoMode=1
+  helperChild=helper.getObject(probe.create(helper.Name));helper.recompute();helper.clearUndos()
+  doc=App.newDocument('FrozenFinalizer');doc.UndoMode=1
+  child=doc.getObject(probe.create(doc.Name));child.addProperty('App::PropertyPythonObject','Payload')
+  doc.recompute();doc.clearUndos();doc.openTransaction('Prior finalizer')
+  child.Payload=Finalizer(helperChild);child.Value='prior-redo-value';doc.commitTransaction();doc.undo()
+  check('fixture Python value is retained solely by native Redo',child.Payload is None and not events)
+  doc.openTransaction('Caller');result=probe.run(doc.Name,'value','discarded_redo')
+  check('rejected replay freezes native Redo and completes cleanup',not result['accepted']and result['rollback']and result['complete'])
+  check('finalizer did not run during snapshot retention',not events)
+  doc.abortTransaction()
+  helper.openTransaction('Finalizer edit');helperChild.Value='booked-helper-value'
+  (out/'test-started.json').write_text(json.dumps(dict(phase='clear-frozen-history',result=result,events=events)))
+  (out/'partial-results.json').write_text(json.dumps(report,indent=2))
+  doc.clearUndos()
+  check('native history disposal releases the retained Python value',events==['started','changed'])
+  check('finalizer can edit the ordinary materialized native booking',helperChild.Value=='finalized')
+  helper.abortTransaction();check('ordinary caller first-write Undo remains intact',helperChild.Value=='original-value')
+  report['observations'].append(dict(result=result,events=list(events)))
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -1,0 +1,36 @@
+"""Shared SDK module dependencies stay deferred until discrete data is read."""
+import ctypes,json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[]}
+ctypes.windll.kernel32.GetModuleHandleW.argtypes=[ctypes.c_wchar_p]
+ctypes.windll.kernel32.GetModuleHandleW.restype=ctypes.c_void_p
+def check(name,value):
+ report['checks'].append({'name':name,'passed':bool(value)})
+ if not value:raise AssertionError(name)
+def loaded(name):return bool(ctypes.windll.kernel32.GetModuleHandleW(name+'.pyd'))
+def run():
+ try:
+  check('cold host has no discrete module loaded',not loaded('Mesh') and not loaded('Points') and 'Mesh' not in sys.modules and 'Points' not in sys.modules)
+  import OpenMatrix9Gui as native
+  report['module']=native.__file__
+  check('OM9 import defers discrete module dependencies',not loaded('Mesh') and not loaded('Points'))
+  import Part
+  doc=App.newDocument('DiscreteModuleLoading');shape=doc.addObject('Part::Feature','CAD');shape.Shape=Part.makeBox(1,2,3);doc.recompute()
+  check('CAD descriptor works before discrete module load',json.loads(native.geometryDescriptor(doc.Name,shape.Name))['representation']=='solid' and not loaded('Mesh') and not loaded('Points'))
+  import Mesh
+  mesh=doc.addObject('Mesh::Feature','DiscreteMesh');mesh.Mesh=Mesh.Mesh([[App.Vector(0,0,0),App.Vector(1,0,0),App.Vector(0,1,0)]]);doc.recompute()
+  check('mesh descriptor resolves delayed SDK module',loaded('Mesh') and json.loads(native.geometryDescriptor(doc.Name,mesh.Name))['geometry_data']['triangles']==[[0,1,2]])
+  import Points
+  cloud=doc.addObject('Points::Feature','DiscreteCloud');cloud.Points=Points.Points([App.Vector(1,2,3)]);doc.recompute()
+  check('cloud descriptor uses loaded native owner',loaded('Points') and json.loads(native.geometryDescriptor(doc.Name,cloud.Name))['geometry_data']['points_xyz']==[[1,2,3]])
+  check('CAD descriptor stays independent after module load',json.loads(native.geometryDescriptor(doc.Name,shape.Name))['representation']=='solid')
+  report['ok']=True
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

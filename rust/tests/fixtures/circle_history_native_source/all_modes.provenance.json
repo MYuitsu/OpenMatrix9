@@ -1,0 +1,10 @@
+{
+  "source": "H:/FreeCAD-src/build/solid-regression-circle-history-modes60-retry-offscreen-20261011/recorded-results.json",
+  "source_sha256": "6f68235726a9689da1e587aca4d7a74ad5ffa96ea4054291bb50b4e96de9ba03",
+  "fixture": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/tests/fixtures/circle_history_native_source/all_modes.json",
+  "fixture_sha256": "ac073b0d22f5b33b717c7e1d78340a0e03b182829745521f39904966daaf6883",
+  "fixture_bytes": 900577,
+  "count": 20,
+  "intercepted_request": false,
+  "scope": "Reconstructed from authored Runtime59 all-mode replay results; original native data retained, source snapshot slots unchanged."
+}

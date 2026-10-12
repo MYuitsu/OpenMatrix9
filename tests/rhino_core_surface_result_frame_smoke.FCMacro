@@ -1,0 +1,30 @@
+"""RCORE-01: output parent and Placement must describe the published CAD master."""
+import os,json,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'module':OM.__file__,'checks':[]}
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def bounds(s):b=s.BoundBox;return [b.XMin,b.XMax,b.YMin,b.YMax,b.ZMin,b.ZMax]
+def same(a,b):return all(abs(x-y)<1e-6 for x,y in zip(a,b))
+def run():
+ try:
+  d=App.newDocument('SurfaceResultFrames');sourceGroup=d.addObject('App::Part','SourceGroup');sourceGroup.Placement.Base=App.Vector(100,0,0)
+  outputGroup=d.addObject('App::Part','OutputGroup');outputGroup.Placement.Base=App.Vector(-50,20,9)
+  sources=[]
+  for name,x in [('First',0),('Last',10)]:
+   o=d.addObject('Part::Feature',name);sourceGroup.addObject(o);o.Shape=Part.makeLine(App.Vector(x,0,0),App.Vector(x,3,0));sources.append(o)
+  h=d.addObject('OpenMatrix9Gui::SurfaceHistory','SurfaceHistory');outputGroup.addObject(h);h.Placement.Base=App.Vector(7,-4,2)
+  h.SourceCurves=[(o,['']) for o in sources];h.SurfaceOptions=json.dumps(dict(version=1,kind=3,style=0,frenet=False,closed=False,maintainHeight=False,preview=True,sectionMode=0,pointCount=16,tolerance=.01,continuityA=0,continuityB=0,matchStart=False,matchEnd=False,slashes=[],history=True,historyCommand=False,inputs=[dict(count=1,chain=False,closed=False,reverse=False,seam=0) for _ in sources]));h.HistoryEnabled=True;d.recompute()
+  check('grouped surface native output remains valid',h.isValid() and not h.Shape.isNull() and abs(h.Shape.Area-30)<1e-6)
+  value=json.loads(h.OM9GeometryResult);master=Part.Shape();master.importBrepFromString(value['output_snapshots'][0]['geometry_data']['native_master']['payload'])
+  check('snapshot describes actual published local shape',same(bounds(master),bounds(h.Shape)))
+  parent=h.getGlobalPlacement()*h.Placement.inverse();world=h.Shape.copy();world.transformShape(parent.toMatrix())
+  check('output world equals source world exactly once',same(bounds(world),[100,110,0,3,0,0]))
+  check('source and output Placements retained',same([h.Placement.Base.x,h.Placement.Base.y,h.Placement.Base.z],[7,-4,2]) and same([sourceGroup.Placement.Base.x,sourceGroup.Placement.Base.y,sourceGroup.Placement.Base.z],[100,0,0]))
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for n in list(App.listDocuments()):App.closeDocument(n)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

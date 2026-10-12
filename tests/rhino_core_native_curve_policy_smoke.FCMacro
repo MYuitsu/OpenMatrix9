@@ -1,0 +1,60 @@
+"""Real Curve reference rejection retains operation/source and recovery state."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Mesh,Points,OpenMatrix9Gui
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'module':OpenMatrix9Gui.__file__,'diagnostics':[]}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def enter(text):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));QtWidgets.QApplication.processEvents()
+def rejection(command,kind):
+    doc=App.newDocument('CurvePolicy'+command+kind);doc.UndoMode=1
+    doc.openTransaction('Source');identity='Unsupported'+kind
+    witness=doc.addObject('App::FeaturePython','Witness')
+    if kind=='Mesh':
+        source=doc.addObject('Mesh::Feature',identity)
+        source.Mesh=Mesh.Mesh([(App.Vector(0,0,0),App.Vector(1,0,0),App.Vector(0,1,0))])
+        data=lambda:repr(source.Mesh.Topology)
+    elif kind=='Cloud':
+        source=doc.addObject('Points::Feature',identity)
+        source.Points=Points.Points([App.Vector(0,0,0),App.Vector(1,0,0)])
+        data=lambda:repr(source.Points.Points)
+    elif kind=='Group':
+        source=doc.addObject('App::DocumentObjectGroup',identity);source.addObject(witness)
+        data=lambda:[item.Name for item in source.Group]
+    elif kind=='Link':
+        source=doc.addObject('App::Link',identity);source.setLink(witness)
+        data=lambda:source.LinkedObject.Name
+    elif kind=='Owner':
+        source=doc.addObject('App::FeaturePython',identity)
+        source.addProperty('App::PropertyString','Shape');source.Shape='not a native Part shape'
+        data=lambda:source.Shape
+    else:
+        data=lambda:None
+    doc.recompute();doc.commitTransaction()
+    doc.openTransaction('Redo witness');witness.Label='Executable Redo';doc.commitTransaction();doc.undo()
+    def state():return (data(),[o.Name for o in doc.Objects],doc.UndoCount,doc.RedoCount)
+    before=state()
+    Gui.Selection.clearSelection();console.clear();enter(command);enter('AroundCurve');enter('Curve='+identity)
+    text=console.toPlainText();report['diagnostics'].append(dict(command=command,kind=kind,text=text))
+    code='StaleGeometry' if kind=='Missing' else 'UnsupportedRepresentation'
+    label=command+' '+kind
+    check(label+' rejects with operation and source',any(all(token in line for token in (code,command,identity)) for line in text.splitlines()))
+    check(label+' rejection preserves source objects Undo and Redo',before==state())
+    enter('Cancel');doc.redo();check(label+' rejection preserves executable Redo',witness.Label=='Executable Redo');App.closeDocument(doc.Name)
+def run():
+    global console
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');QtWidgets.QApplication.processEvents()
+        console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+        for command in ('Circle','Ellipse'):
+            for kind in ('Mesh','Cloud','Group','Link','Owner','Missing'):rejection(command,kind)
+        report['ok']=all(c['passed'] for c in report['checks'])
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

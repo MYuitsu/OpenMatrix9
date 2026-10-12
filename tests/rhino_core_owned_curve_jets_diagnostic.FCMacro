@@ -1,0 +1,74 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Native values/D1 for owned curve basis; no OM9 evaluation implementation."""
+import json,math,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as native
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=native.__file__,checks=[],cases=[])
+def xyz(p):return [p.x,p.y,p.z]
+def check(name,value):
+    report['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def spline(poles,mults,knots,periodic,degree,weights=None):
+    c=Part.BSplineCurve()
+    args=([App.Vector(*p)for p in poles],mults,knots,periodic,degree)
+    if weights is None:c.buildFromPolesMultsKnots(*args)
+    else:c.buildFromPolesMultsKnots(*args,weights)
+    return c
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('OwnedCurveJetOracle');doc.UndoMode=1
+        triangle=[[0,0,0],[1,2,0],[2,0,0]]
+        cases=[
+            ('RationalArc',spline([[10,0,0],[10,10,0],[0,10,0]],[3,3],[0,1],False,2,[1,math.sqrt(.5),1])),
+            ('Unclamped',spline([[0,0,0],[1,2,1],[3,1,2]],[1]*6,[0,1,2,3,4,5],False,2)),
+            ('RepeatedInterior',spline([[0,0,0],[1,2,1],[2,3,0],[3,1,2],[4,0,1],[5,2,3],[6,1,0]],[4,2,1,4],[0,1,2,3],False,3,[1,2,.5,3,1,.75,2])),
+            ('PeriodicLinear',spline(triangle,[1]*4,[0,1,2,3],True,1)),
+            ('PeriodicQuadratic',spline(triangle,[1]*4,[0,1,2,3],True,2)),
+            ('PeriodicRational',spline(triangle,[1]*4,[0,1,2,3],True,2,[1,2,.5])),
+            ('PeriodicRepeatedSeam',spline([[0,0,0],[2,0,1],[3,2,0],[1,4,1],[-1,2,0]],[2,1,2,2],[0,1,2,3],True,3,[1,2,.5,1.5,1])),
+            ('NativeRationalCircle',Part.makeCircle(10).toNurbs().Edges[0].Curve),
+        ]
+        bezier=Part.BezierCurve();bezier.setPoles([App.Vector(10,0,0),App.Vector(10,10,0),App.Vector(0,10,0)]);bezier.setWeight(2,math.sqrt(.5))
+        cases.append(('RationalBezier',bezier))
+        ellipse=Part.Ellipse();ellipse.MajorRadius=5;ellipse.MinorRadius=2
+        hyperbola=Part.Hyperbola();hyperbola.MajorRadius=3;hyperbola.MinorRadius=2
+        parabola=Part.Parabola();parabola.Focal=2
+        cases.extend([('AnalyticLine',Part.makeLine(App.Vector(1,2,3),App.Vector(4,6,3)).Curve),('AnalyticCircle',Part.Circle(App.Vector(2,3,4),App.Vector(0,0,1),10)),('AnalyticEllipse',ellipse),('AnalyticHyperbola',hyperbola),('AnalyticParabola',parabola)])
+        offset_basis=Part.BezierCurve();offset_basis.setPoles([App.Vector(2,0,1),App.Vector(4,2,3),App.Vector(3,5,6)]);offset_basis.setWeight(2,math.sqrt(.5))
+        offset_nurbs=spline([[2,0,1],[4,2,3],[3,5,6]],[3,3],[0,1],False,2,[1,2,1])
+        cases.extend([
+            ('OffsetBezier',Part.OffsetCurve(offset_basis,-.4,App.Vector(0,0,1))),
+            ('OffsetNurbs',Part.OffsetCurve(offset_nurbs,.3,App.Vector(0,0,1))),
+            ('OffsetCircle',Part.OffsetCurve(Part.Circle(App.Vector(2,3,0),App.Vector(0,0,1),7),1.2,App.Vector(0,0,1))),
+            ('OffsetTrim',Part.OffsetCurve(offset_basis.trim(.1,.9),-.2,App.Vector(0,0,1))),
+            ('OffsetNestedDirection',Part.OffsetCurve(Part.OffsetCurve(offset_basis,.2,App.Vector(0,0,1)),-.1,App.Vector(1,0,0))),
+        ])
+        limits={'OffsetBezier':(.1,.9),'OffsetNurbs':(.1,.9),'OffsetCircle':(.2,2),'OffsetTrim':(.15,.85),'OffsetNestedDirection':(.1,.9),'AnalyticLine' :(0,5),'AnalyticHyperbola':(-1,1),'AnalyticParabola':(-2,2)}
+        for name,curve in cases:
+            obj=doc.addObject('Part::Feature',name);obj.Shape=curve.toShape(*limits.get(name,()));doc.recompute()
+            before=obj.Shape.exportBrepToString();counts=(doc.UndoCount,doc.RedoCount)
+            descriptor=json.loads(native.geometryDescriptor(doc.Name,obj.Name));data=descriptor['geometry_data']
+            check(name+' complete owned basis',data['kind']in ('nurbs_curve','bezier_curve','analytic_curve','offset_curve','trimmed_curve'))
+            edge=obj.Shape.Edges[0];lo,hi=edge.FirstParameter,edge.LastParameter
+            parameters=[lo+(hi-lo)*f for f in [0,.001,.125,.25,.5,.75,.875,.999,1]]
+            if data['kind']=='nurbs_curve':parameters+= [u for u in data['axis']['knots']if lo<=u<=hi]
+            parameters=sorted(set(parameters))
+            queries=[dict(parameter=u,value=xyz(edge.valueAt(u)),derivative=xyz(edge.derivative1At(u)),second=xyz(edge.derivative2At(u)),third=xyz(edge.derivative3At(u)))for u in parameters]
+            check(name+' finite independent OCCT values and D1',all(math.isfinite(v)for q in queries for key in ('value','derivative','second','third')for v in q[key]))
+            check(name+' leaves exact source and Undo/Redo untouched',before==obj.Shape.exportBrepToString()and counts==(doc.UndoCount,doc.RedoCount))
+            diagnostics=[]
+            if name.startswith('Offset'):
+                for u in [lo+(hi-lo)*f for f in [.125,.5,.875]]:
+                    h=1e-5
+                    finite_difference=(edge.derivative2At(u+h)-edge.derivative2At(u-h))*(.5/h)
+                    diagnostics.append(dict(parameter=u,native_third=xyz(edge.derivative3At(u)),central_second_difference=xyz(finite_difference),basis_fourth=xyz(curve.BasisCurve.getDN(u,4)) if hasattr(curve,'BasisCurve') else None))
+            report['cases'].append(dict(name=name,geometry_data=data,domain=[lo,hi],queries=queries,diagnostics=diagnostics))
+        check('all nineteen curve families captured',len(report['cases'])==19)
+        report['ok']=True
+    except Exception:report['ok']=False;report['error']=traceback.format_exc()
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

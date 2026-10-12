@@ -1,0 +1,73 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Real Curve callbacks must not publish changed outputs or erase prior Redo."""
+import json,math,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(console,text):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier))
+def settle():
+ loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(80,loop.quit);loop.exec()
+def snapshot(doc):
+ return dict(objects=[dict(name=o.Name,label=o.Label,shape=o.Shape.exportBrepToString()if 'Shape'in o.PropertiesList else None,
+  placement=list(o.Placement.toMatrix().A)if 'Placement'in o.PropertiesList else None,
+  members=[m.Name for m in o.Group]if 'Group'in o.PropertiesList else None)for o in doc.Objects],undo=doc.UndoCount,redo=doc.RedoCount)
+def physical(obj,command):
+ if obj is None or obj.Shape.isNull()or not obj.Shape.isValid():return False
+ if command=='Ellipse':
+  c=obj.Shape.Edges[0].Curve
+  return isinstance(c,Part.Ellipse)and abs(c.MajorRadius-5)<1e-7 and abs(c.MinorRadius-3)<1e-7 and c.Center.Length<1e-7
+ return abs(obj.Shape.Length-{'Line':10.,'Polyline':12.,'Rectangle':14.,'Circle':4*math.pi,'InterpCrv':7.}[command])<1e-7
+CASES=[('Line',['0,0,0'],'10,0,0'),('Polyline',['0,0,0','3,0,0','3,4,0'],'Close'),
+ ('Rectangle',['0,0,0'],'4,3,0'),('Circle',['0,0,0'],'Radius=2'),
+ ('Ellipse',['0,0,0','5,0,0'],'0,3,0'),('InterpCrv',['Degree=1','0,0,0','3,0,0','3,4,0'],'')]
+class Observer:
+ def __init__(self,doc,console,command,action):self.doc=doc.Name;self.console=console;self.command=command;self.action=action;self.calls=0;self.armed=True
+ def matches(self,obj):return self.armed and obj.Document.Name==self.doc and obj.Name.startswith(self.command)
+ def slotCreatedObject(self,obj):
+  if self.matches(obj):
+   self.armed=False;self.calls+=1;enter(self.console,'Box')
+ def slotChangedObject(self,obj,prop):
+  if self.action=='restart-box-shape'and self.calls==1 and obj.Document.Name==self.doc and obj.Name.startswith(self.command)and prop=='OM9GeometryResult'and getattr(obj,prop,''):
+   self.action='tampered';obj.Shape=Part.makeLine(App.Vector(100,0,0),App.Vector(107,0,0))
+
+def case(console,command,prefix,final,action):
+ label=command+'/'+action;doc=App.newDocument('CurveCallback'+command+action.replace('-',''));observer=None
+ try:
+  doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+  witness=doc.addObject('App::FeaturePython','Witness')
+  if action=='parent':
+   parent=doc.addObject('App::Part','Parent');parent.Placement.Base=App.Vector(20,30,40)
+  doc.recompute();doc.openTransaction('Prior executable Redo');witness.Label='Prior Redo executes';doc.commitTransaction();doc.undo();settle()
+  console.clear();enter(console,command)
+  for text in prefix:enter(console,text)
+  before=snapshot(doc);observer=Observer(doc,console,command,action);App.addDocumentObserver(observer)
+  enter(console,final);settle();calls=observer.calls;App.removeDocumentObserver(observer);observer=None
+  after=snapshot(doc);diagnostic=console.toPlainText()
+  check(label+' real native callback once',calls==1)
+  check(label+' complete document and Undo and prior Redo unchanged',before==after and before['redo']==1)
+  rejected=doc.getObject(command)is None
+  check(label+' no rejected output remains',rejected)
+  check(label+' typed diagnostic identifies actual operation',any('StaleGeometry:'in line and command in line for line in diagnostic.splitlines()))
+  for value in ['0,0,0','1,1,0','1']:enter(console,value)
+  settle();obj=doc.getObject('Box')
+  check(label+' callback replacement Box completes independently',rejected and before==after and obj is not None and obj.Shape.isValid()and abs(obj.Shape.Volume-1.)<1e-7 and bool(getattr(obj,'OM9GeometryResult',''))and doc.UndoCount==before['undo']+1)
+  report['observations'].append(dict(case=label,before=before,after=after,calls=calls,diagnostic=diagnostic))
+ finally:
+  if observer:App.removeDocumentObserver(observer)
+  enter(console,'Cancel');App.closeDocument(doc.Name)
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');settle();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  for command,prefix,final in CASES:
+   for action in ['restart-box','restart-box-shape']:case(console,command,prefix,final,action)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

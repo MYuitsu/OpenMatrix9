@@ -1,0 +1,28 @@
+import sys
+sys.path.insert(0,'H:/FreeCAD-src/Mod/OpenMatrix9/tests')
+from command_options_fixture_support import *
+
+def probe(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def start():Gui.runCommand('OM9_SolidBoxCornertoCornerHeight');settle()
+def run():
+    doc=App.newDocument('BoxCommandHistory');doc.UndoMode=1
+    prefs=App.ParamGet('User parameter:BaseApp/Preferences/Mod/OpenMatrix9/Keyboard')
+    start();command('Ortho');changed=prefs.GetBool('Ortho',False)
+    probe('handled Ortho consumes its draft',draft()=='')
+    key(QtCore.Qt.Key_Return);probe('empty Enter does not repeat accepted Ortho',prefs.GetBool('Ortho',False)==changed)
+    command('Cancel')
+    start();command('Osnap Off');probe('handled Osnap consumes its draft',draft()=='');command('Cancel')
+    start();command('D');command('0,0');key(QtCore.Qt.Key_Up)
+    probe('Up recalls latest accepted point',draft()=='0,0');key(QtCore.Qt.Key_Down)
+    probe('Down restores live empty draft',draft()=='');command('Cancel')
+    start();command('C');before=prompt();key(QtCore.Qt.Key_F4)
+    probe('F4 accepts native point and advances phase','Other corner of base or length' in prompt())
+    probe('F4 retains accepted preceding phase in CMD history',before in field().toPlainText().splitlines()[:-1]);command('Cancel')
+    count=field().toPlainText().count('Command: _Box');start();key(QtCore.Qt.Key_Escape);start()
+    probe('consecutive menu invocations are both retained',field().toPlainText().count('Command: _Box')-count==2)
+    key(QtCore.Qt.Key_Escape);count=field().toPlainText().count('Command: _Box');command('_Box')
+    probe('typed invocation follows clean canonical Command prompt',field().toPlainText().count('Command: _Box')-count==1)
+    command('Cancel');probe('control and history paths create no geometry',not doc.Objects)
+    check('all command history regressions',all(c['passed'] for c in report['checks']))
+
+QtCore.QTimer.singleShot(1800,lambda:execute(run))

@@ -1,0 +1,54 @@
+"""Fresh host reopens six direct and three native Curve common results."""
+import json,math,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def physical(shape,case):
+ if shape.isNull() or not shape.isValid():return False
+ lengths={'Line':20.,'Polyline':12.,'Rectangle':14.,'Circle':2*math.pi,'InterpCrv':7.}
+ if case in lengths:return abs(shape.Length-lengths[case])<1e-7
+ curve=shape.Edges[0].Curve
+ if case=='Ellipse':return isinstance(curve,Part.Ellipse) and abs(curve.MajorRadius-5)<1e-7 and abs(curve.MinorRadius-3)<1e-7 and (curve.Center-App.Vector(1,2,3)).Length<1e-7
+ center=App.Vector(10,20,30 if case=='FitBranch' else 35)
+ if (curve.Center-center).Length>=1e-7:return False
+ return abs(curve.MajorRadius-5)<1e-7 and abs(curve.MinorRadius-3)<1e-7 if case=='EllipsePath' else abs(curve.Radius-(1 if case=='FitBranch' else 2))<1e-7
+def run():
+ try:
+  check('cold common result host has no active constructor',json.loads(OM.geometryCurveCapability(1,2))['status']==100)
+  for key in ['OM9_CURVE_RESULT_ARCHIVE_DIR','OM9_CURVE_RESULT_NATIVE_ARCHIVE_DIR']:
+   folder=Path(os.environ[key]);warm=json.loads((folder/'results.json').read_text());assert warm['ok']
+   for original in warm['observations']:
+    case=original.get('case',original['command']);command=original['command'];doc=App.openDocument(str(folder/(case+'.FCStd')));obj=doc.getObject(command)
+    raw=getattr(obj,'OM9GeometryResult','') if obj else '';expected=original.get('result_raw',original['raw']);value=json.loads(raw) if raw else {};context=value.get('operation_context') or {}
+    check(case+' cold exact common result bytes remain independent',bool(raw) and raw==expected)
+    check(case+' cold construction is paired with actual operation',value.get('operation')=='ConstructCurve' and context.get('construction')==json.loads(getattr(obj,'OM9CurveConstruction','{}')))
+    check(case+' cold native Shape agrees with independent physical dimensions',obj is not None and physical(obj.Shape,case))
+    outputs=value.get('output_snapshots',[]);rebuilt=Part.Shape();payload=outputs[0].get('geometry_data',{}).get('native_master',{}).get('payload','') if len(outputs)==1 else ''
+    if payload:rebuilt.importBrepFromString(payload)
+    check(case+' cold owned CAD master reconstructs independent topology and dimensions',bool(payload) and physical(rebuilt,case) and len(rebuilt.Edges)==len(obj.Shape.Edges) and len(rebuilt.Vertexes)==len(obj.Shape.Vertexes))
+    inputs=value.get('input_snapshots',[]);refs=context.get('source_refs',[])
+    units=getattr(obj,'OM9UnitContext',None) if obj else None
+    check(case+' cold owned inputs and outputs retain unit snapshot revision',bool(inputs) and bool(outputs) and all(s.get('unit_context_snapshot')==units and s.get('unit_context_revision')=='1' for s in inputs+outputs))
+    pairing=len(inputs)==1 and refs==[] if key=='OM9_CURVE_RESULT_ARCHIVE_DIR' else len(inputs)==2 and len(refs)==1 and refs[0].get('input_snapshot_index')==1 and inputs[1].get('source_attributes',{}).get('object_name')==refs[0].get('object_name')
+    check(case+' cold zero-based common input collection resolves sources after numeric slot',context.get('source_snapshot_indexing')=='input_snapshots_zero_based_including_numeric_input' and pairing)
+    if key=='OM9_CURVE_RESULT_NATIVE_ARCHIVE_DIR':
+     snapshot=inputs[1] if len(inputs)==2 else {};data=snapshot.get('geometry_data',{});complete=False
+     if case=='FitBranch':
+      local=data.get('points_xyz',[]);selected=snapshot.get('selected_points_world',[])
+      if local==[[1,0,0],[0,1,0],[-1,0,0]]:
+       location=App.Matrix(*[v for row in snapshot['native_discrete_location']for v in row]);parent=App.Matrix(*snapshot['native_parent_to_world']);world=[parent.multVec(location.multVec(App.Vector(*p)))for p in local]
+       complete=selected==[[11,20,30],[10,21,30],[9,20,30]] and all((p-App.Vector(*q)).Length<1e-7 for p,q in zip(world,selected)) and 'RemovedCloud'not in raw
+     else:
+      source=Part.Shape();source_payload=data.get('native_master',{}).get('payload','')
+      if source_payload:source.importBrepFromString(source_payload)
+      complete=bool(source_payload) and source.isValid() and len(source.Edges)==2 and abs(source.Length-120)<1e-7
+     check(case+' cold full native source reconstructs independently',complete)
+    report['observations'].append(dict(case=case,command=command,raw=raw));App.closeDocument(doc.Name)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

@@ -16,7 +16,10 @@ def settle():
     loop=QtCore.QEventLoop(); QtCore.QTimer.singleShot(180,loop.quit); loop.exec()
 def enter(text=''):
     console.setFocus()
-    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+    # Each fixture step replaces the live suffix, including a retained invalid
+    # draft. Preserve the protected transcript and all native shape assertions.
+    cursor=console.textCursor();cursor.setPosition(int(console.property('om9InputStart')));cursor.movePosition(QtGui.QTextCursor.End,QtGui.QTextCursor.KeepAnchor);console.setTextCursor(cursor)
+    QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Backspace,QtCore.Qt.NoModifier))
     if text: QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
     QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier)); events()
 def preview_count():
@@ -60,7 +63,7 @@ def run():
             for _ in range(3): QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Backspace,QtCore.Qt.NoModifier))
         area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea)
         subs={int(s.widget().property('om9ViewSlot')):s for s in area.subWindowList() if s.widget().property('om9ViewSlot') is not None and s.widget().property('om9DocumentName')==d.Name}
-        area.setActiveSubWindow(subs[0]); events(); enter('Box')
+        area.setActiveSubWindow(subs[0]); events(); enter('Box'); enter('Center')
         area.setActiveSubWindow(subs[3]); events()
         viewer=next(w for w in subs[3].findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer')
         QtWidgets.QApplication.sendEvent(viewer.viewport(),QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_F4,QtCore.Qt.NoModifier)); events()
@@ -73,16 +76,16 @@ def run():
         group.click(); events()
         button=next(b for b in sidebar.findChildren(QtWidgets.QToolButton) if b.property('om9IconKey')=='SolidBoxCornertoCornerHeight' and b.isVisible())
         check('Solid Box button enabled',button.isEnabled()); button.click(); events()
-        check('Box menu starts native point flow','First corner' in str(console.property('om9Prompt')))
+        check('Box menu starts default corner flow','First corner of base' in str(console.property('om9Prompt'))); enter('Diagonal')
         enter('1,2,3'); enter('5,8,3')
         check('Box input does not create document objects',len(d.Objects)==0)
         enter('8'); o=output(d,'OM9-SOLID-012')
         check('Box analytic volume 4*6*8',abs(o.Shape.Volume-192)<1e-7)
         b=o.Shape.BoundBox; check('Box world position',(b.XMin,b.YMin,b.ZMin,b.XMax,b.YMax,b.ZMax)==(1,2,3,5,8,11))
         check('Box commit clears scene preview',preview_count()==0); persist(d,o,'OM9-SOLID-012')
-        d=doc('SolidBoxCMD'); enter('Box'); enter('0,0'); enter('Length=2'); enter(); enter()
+        d=doc('SolidBoxCMD'); enter('Box'); enter('Center'); enter('0,0'); enter('Length=2'); enter(); enter()
         o=output(d,'OM9-SOLID-012'); check('CMD Box Enter defaults yield cube',abs(o.Shape.Volume-8)<1e-7); App.closeDocument(d.Name)
-        d=doc('SolidBoxNegative'); enter('_Box'); enter('10,20,30'); enter('6,14,30'); enter('-8')
+        d=doc('SolidBoxNegative'); enter('_Box'); enter('Diagonal'); enter('10,20,30'); enter('6,14,30'); enter('-8')
         o=output(d,'OM9-SOLID-012'); b=o.Shape.BoundBox
         check('Box negative extents normalize',(b.XMin,b.YMin,b.ZMin,b.XMax,b.YMax,b.ZMax)==(6,14,22,10,20,30)); App.closeDocument(d.Name)
         d=doc('SolidBox3Point'); enter('Box'); enter('3Point'); enter('1,2,3'); enter('1,6,3'); enter('Width=-2'); enter('Height=3')
@@ -97,14 +100,14 @@ def run():
         check('Sphere analytic center and radius',abs(surface.Radius-2)<1e-7 and (surface.Center-App.Vector(1,2,3)).Length<1e-7 and (o.Shape.CenterOfMass-App.Vector(1,2,3)).Length<1e-7); persist(d,o,'OM9-SOLID-014')
         d=doc('SolidSphereCMD'); enter('Sphere'); enter('1,2,3'); enter('1,5,7'); o=output(d,'OM9-SOLID-014')
         check('Sphere point radius is 3D distance',abs(o.Shape.Volume-500*math.pi/3)<1e-6); App.closeDocument(d.Name)
-        d=doc('SolidInvalid'); settle(); history=history_keys(); enter('Box'); enter('0,0'); enter('0,2'); check('zero base is editable','nonzero' in str(console.property('om9Prompt')) and len(d.Objects)==0)
-        enter('2'); enter('3'); enter('Undo'); enter('4'); enter('0'); check('zero height creates nothing',len(d.Objects)==0)
+        d=doc('SolidInvalid'); settle(); history=history_keys(); enter('Box'); enter('Diagonal'); enter('0,0'); enter('0,2'); check('zero base is editable','Error: ' in console.toPlainText() and 'zero' in console.toPlainText().lower() and str(console.property('om9Prompt')).startswith('Other corner of box') and console.toPlainText().endswith('0,2') and len(d.Objects)==0)
+        enter('2,3'); enter('Undo'); enter('2,4'); enter('0'); check('zero height creates nothing',len(d.Objects)==0)
         enter('Cancel'); check('Cancel leaves no geometry',len(d.Objects)==0 and preview_count()==0)
         enter('Sphere'); enter('0,0'); enter('-1'); check('negative radius rejected','positive' in str(console.property('om9Prompt')) and len(d.Objects)==0)
         enter('NaN'); check('nonfinite radius rejected',len(d.Objects)==0); enter('Cancel')
         settle(); result['cancel_history']={'before':history,'after':history_keys()}
         check('failed/cancelled solid inputs do not enter success history',history_keys()==history)
-        for command,steps in [('Box',[]),('Box',['0,0']),('Box',['0,0','4']),('Box',['0,0','4','5']),('Sphere',[]),('Sphere',['0,0'])]:
+        for command,steps in [('Box',[]),('Box',['Center']),('Box',['Center','0,0']),('Box',['Center','0,0','4']),('Box',['Center','0,0','4','5']),('Sphere',[]),('Sphere',['0,0'])]:
             enter(command)
             for value in steps: enter(value)
             QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Escape,QtCore.Qt.NoModifier)); events()
@@ -115,7 +118,7 @@ def run():
         enter() # repeat last successful creation
         check('Enter repeat starts Sphere','Center' in str(console.property('om9Prompt'))); enter('Cancel')
         Gui.activateWorkbench('PartWorkbench'); events(); Gui.activateWorkbench('OpenMatrix9Workbench'); events()
-        enter('Box'); enter('0,0'); enter('2,3'); enter('4'); output(d,'OM9-SOLID-012')
+        enter('Box'); enter('Diagonal'); enter('0,0'); enter('2,3'); enter('4'); output(d,'OM9-SOLID-012')
         App.closeDocument(d.Name)
         # Native mouse projection and unpickable preview at the final input step.
         d=doc('SolidMouse'); window=Gui.getMainWindow(); window.resize(1400,950)
@@ -143,7 +146,7 @@ def run():
         check('mouse Sphere equals independent projected center/radius',(surface.Center-a).Length<1e-5 and abs(surface.Radius-wanted)<1e-5)
         check('mouse commit removes preview',preview_count()==0)
         o.Visibility=False
-        enter('Box'); QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=p0); settle(); QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=p1); settle(); enter('5')
+        enter('Box'); enter('Diagonal'); QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=p0); settle(); QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=p1); settle(); enter('5')
         o=output(d,'OM9-SOLID-012'); expected=abs((b.x-a.x)*(b.y-a.y)*5)
         check('mouse Box base plus CMD height has analytic volume',abs(o.Shape.Volume-expected)<max(1e-5,expected*1e-6))
         # Osnap must use the actual native point, rather than the cursor ray.
@@ -157,7 +160,7 @@ def run():
         enter('Osnap Off')
         # Height is a closest-ray/axis constraint; compare independent projection.
         for obj in d.Objects: obj.Visibility=False
-        enter('Box'); enter('0,0'); enter('2,3')
+        enter('Box'); enter('Diagonal'); enter('0,0'); enter('2,3')
         Gui.activeDocument().activeView().viewAxonometric(); settle()
         pos=center+QtCore.QPoint(20,-60)
         ratio=viewer.devicePixelRatioF(); near,far=Gui.activeDocument().activeView().projectPointToLine(round(pos.x()*ratio),round(target.height()*ratio)-round(pos.y()*ratio)-1)

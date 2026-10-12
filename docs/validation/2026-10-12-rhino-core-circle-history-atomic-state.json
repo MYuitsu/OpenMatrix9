@@ -1,0 +1,5973 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-circle-history-atomic-state-20261012",
+  "status": "in_progress",
+  "updated_at": "2026-10-12T02:29:58+07:00",
+  "scope": "Circle History reject-time state and borrowed transaction diagnostic; full RCORE-01 retained",
+  "production_changed": false,
+  "rebuild": false,
+  "rust_rerun": false,
+  "production_sources": [
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistory.cpp",
+      "bytes": 33958,
+      "sha256": "f69281a23fa308de68b0f46e92f78398b1f5a6ebcfacfdf12a036c3acc22b1f0"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistory.h",
+      "bytes": 2013,
+      "sha256": "d466643285cb703d5c6e5b1e85da0f06e3f1bccc7b8abd03d37c1a306c191197"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CircleHistoryAdapter.cpp",
+      "bytes": 12845,
+      "sha256": "f6198dc752fc4afc141cdb1759375a61dee8fdb6e41fb1a5118c687b5e3675f8"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCurveNativeInput.cpp",
+      "bytes": 10073,
+      "sha256": "60af0889e09a88c17c40e4dec8920d8ff8b5fe2d40838dc93cc9394f98a94675"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCurveNativeInput.h",
+      "bytes": 1356,
+      "sha256": "44286e1bc912592d342f934e242df6cd7ecc9925df75fdddb149ffe1e28fc8f3"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CurveGeometry.cpp",
+      "bytes": 8308,
+      "sha256": "9716b340d0a1be7ac70ff81178a7d71fa6d447aa381c1a45a0036bf18a076cc9"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/Gui/CoreCurvePublication.cpp",
+      "bytes": 11625,
+      "sha256": "c3adef5005a9f23c03f1b10212c0d3e0cd2a9ace058c00dc416385e279326391"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history_result.rs",
+      "bytes": 12575,
+      "sha256": "2d06a974204f93528ba91352ef2d104a05e6db3e78095526b413981949788804"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/circle_history.rs",
+      "bytes": 17700,
+      "sha256": "87cd2a31e04628a8898477d58ee3668694d43be773b7421992fd0d31116aeb09"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve.rs",
+      "bytes": 66480,
+      "sha256": "e20e3b3a83a45ef401462eedd5d99b6898cb05c5a5be4b3bfd79ce66111d16cf"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_native_input.rs",
+      "bytes": 11923,
+      "sha256": "826739feb2de333642163f2b69b87d66021a844e2a0b6eb840b3b34367d2d42b"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_result.rs",
+      "bytes": 11313,
+      "sha256": "d2df8b9d0df39d95d27793ea2cc5e1a996f54df13e0137a30b0098bdc5177206"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/curve_result_tests.rs",
+      "bytes": 16065,
+      "sha256": "26f810a4b7f11e738ee4459bfdca4decdad133c4461f6b9038698ea85b755ebd"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/rust/src/prepared_result.rs",
+      "bytes": 23567,
+      "sha256": "c83240c639d697e9097f99c4ecf0f934bf008e4fd719bba16c9e0eb28cba2a30"
+    }
+  ],
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/circle-history-runtime59-20261012/bin/OpenMatrix9Gui.pyd",
+    "bytes": 16758272,
+    "sha256": "b6f3282b2036e6e520e295dd1916a9bfd9c5ddddc52484bacaed641368ba4c1a"
+  },
+  "selected_app": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADApp.dll",
+    "bytes": 9882624,
+    "sha256": "fa8492ba753eeb9298a9df3491a2f9af049bf3fb6a27b38046e0a9a2a5955176"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "probe": {
+    "path": "H:/FreeCAD-src/build/publication-fault-probe-solid10-20261011/OM9PublicationFault.pyd",
+    "bytes": 50688,
+    "sha256": "9ddd7dea35932a00ea8fecbc96e0d5bd4f71b114589eac1520205ad638aa1530"
+  },
+  "shared_sdk_unchanged": [
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCAD.exe",
+      "bytes": 743936,
+      "sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+      "bytes": 9877504,
+      "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADGui.dll",
+      "bytes": 32807936,
+      "sha256": "6b6b7334bd22349e3f9a5d04ad28cbd1ea2c002260561c834d8fc520d7565f9a"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADBase.dll",
+      "bytes": 5276160,
+      "sha256": "aa25604800ff49620bfefad7116aeb22a7481f4a8af29da3e0dce0440e392b66"
+    }
+  ],
+  "current": {
+    "artifact": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red62-offscreen-20261011",
+    "fixture": "rhino_core_circle_history_atomic_semantic_smoke.FCMacro",
+    "checks": 432,
+    "passed": 355,
+    "failures": [
+      "plain/recipe rejected replay restores recorded metadata",
+      "plain/points rejected replay restores recorded metadata",
+      "plain/roles rejected replay restores recorded metadata",
+      "plain/parameters rejected replay restores recorded metadata",
+      "plain/links rejected replay restores recorded metadata",
+      "plain/path rejected replay restores recorded metadata",
+      "plain/fraction rejected replay restores recorded metadata",
+      "plain/recorded rejected replay restores recorded metadata",
+      "plain/radius rejected replay restores recorded metadata",
+      "plain/fit rejected replay restores recorded metadata",
+      "plain/approx rejected replay restores recorded metadata",
+      "plain/construction rejected replay restores recorded metadata",
+      "plain/units rejected replay restores recorded metadata",
+      "plain/source rejection preserves source",
+      "plain/placement rejected replay restores recorded metadata",
+      "booked/recipe rejected replay restores recorded metadata",
+      "booked/recipe rejection preserves stack counts and names",
+      "booked/recipe rejection preserves pending state",
+      "booked/points rejected replay restores recorded metadata",
+      "booked/points rejection preserves stack counts and names",
+      "booked/points rejection preserves pending state",
+      "booked/roles rejected replay restores recorded metadata",
+      "booked/roles rejection preserves stack counts and names",
+      "booked/roles rejection preserves pending state",
+      "booked/parameters rejected replay restores recorded metadata",
+      "booked/parameters rejection preserves stack counts and names",
+      "booked/parameters rejection preserves pending state",
+      "booked/links rejected replay restores recorded metadata",
+      "booked/links rejection preserves stack counts and names",
+      "booked/links rejection preserves pending state",
+      "booked/path rejected replay restores recorded metadata",
+      "booked/path rejection preserves stack counts and names",
+      "booked/path rejection preserves pending state",
+      "booked/fraction rejected replay restores recorded metadata",
+      "booked/fraction rejection preserves stack counts and names",
+      "booked/fraction rejection preserves pending state",
+      "booked/recorded rejected replay restores recorded metadata",
+      "booked/recorded rejection preserves stack counts and names",
+      "booked/recorded rejection preserves pending state",
+      "booked/radius rejected replay restores recorded metadata",
+      "booked/radius rejection preserves stack counts and names",
+      "booked/radius rejection preserves pending state",
+      "booked/fit rejected replay restores recorded metadata",
+      "booked/fit rejection preserves stack counts and names",
+      "booked/fit rejection preserves pending state",
+      "booked/approx rejected replay restores recorded metadata",
+      "booked/approx rejection preserves stack counts and names",
+      "booked/approx rejection preserves pending state",
+      "booked/construction rejected replay restores recorded metadata",
+      "booked/construction rejection preserves stack counts and names",
+      "booked/construction rejection preserves pending state",
+      "booked/units rejected replay restores recorded metadata",
+      "booked/units rejection preserves stack counts and names",
+      "booked/units rejection preserves pending state",
+      "booked/source rejection preserves source",
+      "booked/source rejection preserves stack counts and names",
+      "booked/source rejection preserves pending state",
+      "booked/shape rejection preserves stack counts and names",
+      "booked/shape rejection preserves pending state",
+      "booked/placement rejected replay restores recorded metadata",
+      "booked/placement rejection preserves stack counts and names",
+      "booked/placement rejection preserves pending state",
+      "active/recipe rejected replay restores recorded metadata",
+      "active/points rejected replay restores recorded metadata",
+      "active/roles rejected replay restores recorded metadata",
+      "active/parameters rejected replay restores recorded metadata",
+      "active/links rejected replay restores recorded metadata",
+      "active/path rejected replay restores recorded metadata",
+      "active/fraction rejected replay restores recorded metadata",
+      "active/recorded rejected replay restores recorded metadata",
+      "active/radius rejected replay restores recorded metadata",
+      "active/fit rejected replay restores recorded metadata",
+      "active/approx rejected replay restores recorded metadata",
+      "active/construction rejected replay restores recorded metadata",
+      "active/units rejected replay restores recorded metadata",
+      "active/source rejection preserves source",
+      "active/placement rejected replay restores recorded metadata"
+    ],
+    "launch": {
+      "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "B6F3282B2036E6E520E295DD1916A9BFD9C5DDDDC52484BACAED641368BA4C1A",
+      "pid": 13584,
+      "module_root": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red62-offscreen-20261011",
+      "exit_code": 0
+    },
+    "plugin": {
+      "path": "H:/FreeCAD-src/build/circle-history-runtime59-20261012/bin/OpenMatrix9Gui.pyd",
+      "bytes": 16758272,
+      "sha256": "b6f3282b2036e6e520e295dd1916a9bfd9c5ddddc52484bacaed641368ba4c1a"
+    },
+    "probe": null,
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red62-offscreen-20261011/results.json",
+        "bytes": 189200,
+        "sha256": "eb7785fc8dca519b8deb1f209c063321a922a10ab3618273bbf45cab2d1eae0b"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red62-offscreen-20261011/shared-host-launch.json",
+        "bytes": 602,
+        "sha256": "ac45894c946e87678b21c5e35e6273aeb4a8c6497465f861d5ed64b150408131"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red62-offscreen-20261011/loaded-native-app.json",
+        "bytes": 227,
+        "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red62-offscreen-20261011/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red62-offscreen-20261011/fixture.FCMacro",
+        "bytes": 7499,
+        "sha256": "7bce865d4c7a42ee6e54f8fb9a95fceecfd05debad969beb153ca18405be92e2"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red62-offscreen-20261011/host-stdout.log",
+        "bytes": 353,
+        "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red62-offscreen-20261011/host-stderr.log",
+        "bytes": 56087,
+        "sha256": "7fbb5200e5ae22739cba87d985861973d4de84fd717cb2251368fe0b334d0d87"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red62-offscreen-20261011/user.cfg",
+        "bytes": 18069,
+        "sha256": "9e1a89e9f44f9c43fa98d5aa01919cff779f162b8b363c56b86100f1c9665ece"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red62-offscreen-20261011/select-plugin.FCMacro",
+        "bytes": 2833,
+        "sha256": "83fb55b4f831411c6c6f1a3dbf2242e27ac2dc97da670807f5c060ae6797b72a"
+      }
+    ]
+  },
+  "current_passed": 355,
+  "current_checks": 432,
+  "current_actual_exit": 0,
+  "current_runner_exit": 1,
+  "current_fixture_exception": null,
+  "categories": {
+    "callback reaches replay result once": 48,
+    "stale replay clears paired output": 48,
+    "rejected replay restores recorded metadata": 6,
+    "rejection preserves source": 45,
+    "rejection preserves stack counts and names": 32,
+    "rejection preserves caller booking": 48,
+    "rejection preserves pending state": 32,
+    "rejection preserves caller edit": 48,
+    "original Redo executes after caller abort": 48
+  },
+  "caller_modes": [
+    "plain",
+    "booked",
+    "active"
+  ],
+  "observations": [
+    {
+      "case": "recipe",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "recipe"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "points",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "points"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "roles",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "roles"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "parameters",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "parameters"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "links",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "sources"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "path",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "path"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "fraction",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "fraction"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "recorded",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "recorded"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "radius",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "radius"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "fit",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "fit"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "approx",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "approx"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "construction",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "construction"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "units",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "units"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "source",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History input Source.Vertex1: Source object changed or was replaced: Source; cancel and reselect before accepting",
+      "changed_metadata": [],
+      "source_equal": false,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            30.0,
+            40.0,
+            50.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -11,10 +15,10 @@",
+        " TShapes 1",
+        " Ve",
+        " 1e-07",
+        "-6 8 10",
+        "+30 40 50"
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "shape",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "placement",
+      "mode": "plain",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "placement"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "recipe",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "recipe"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 52,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 52,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "points",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "points"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 56,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 56,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "roles",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "roles"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 60,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 60,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "parameters",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "parameters"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 64,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 64,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "links",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "sources"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 68,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 68,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "path",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "path"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 72,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 72,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "fraction",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "fraction"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 76,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 76,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "recorded",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "recorded"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 80,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 80,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "radius",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "radius"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 84,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 84,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "fit",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "fit"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 88,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 88,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "approx",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "approx"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 92,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 92,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "construction",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "construction"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 96,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 96,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "units",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "units"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 100,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 100,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "source",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History input Source.Vertex1: Source object changed or was replaced: Source; cancel and reselect before accepting",
+      "changed_metadata": [],
+      "source_equal": false,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            30.0,
+            40.0,
+            50.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -11,10 +15,10 @@",
+        " TShapes 1",
+        " Ve",
+        " 1e-07",
+        "-6 8 10",
+        "+30 40 50"
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 104,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 104,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "shape",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 108,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 108,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "placement",
+      "mode": "booked",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "placement"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 112,
+        "pending": false
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller booked",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 112,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "recipe",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "recipe"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 116,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 116,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "points",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "points"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 120,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 120,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "roles",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "roles"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 124,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 124,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "parameters",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "parameters"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 128,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 128,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "links",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "sources"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 132,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 132,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "path",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "path"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 136,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 136,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "fraction",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "fraction"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 140,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 140,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "recorded",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "recorded"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 144,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 144,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "radius",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "radius"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 148,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 148,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "fit",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "fit"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 152,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 152,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "approx",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "approx"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 156,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 156,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "construction",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "construction"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 160,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 160,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "units",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "units"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 164,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 164,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "source",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History input Source.Vertex1: Source object changed or was replaced: Source; cancel and reselect before accepting",
+      "changed_metadata": [],
+      "source_equal": false,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            30.0,
+            40.0,
+            50.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -11,10 +15,10 @@",
+        " TShapes 1",
+        " Ve",
+        " 1e-07",
+        "-6 8 10",
+        "+30 40 50"
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 168,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 168,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "shape",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 172,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 172,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    },
+    {
+      "case": "placement",
+      "mode": "active",
+      "calls": 1,
+      "status": "StaleGeometry: Circle History input Circle: StaleGeometry: Circle History recipe, units or paired output changed during replay",
+      "changed_metadata": [
+        "placement"
+      ],
+      "source_equal": true,
+      "source_before": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "source_immediately_rejected": {
+        "type": "Vertex",
+        "vertices": [
+          [
+            6.0,
+            8.0,
+            10.0
+          ]
+        ],
+        "edges": 0,
+        "faces": 0,
+        "solids": 0,
+        "placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]",
+        "shape_placement": "Placement [Pos=(0,0,0), Yaw-Pitch-Roll=(0,0,0)]"
+      },
+      "brep_equal": false,
+      "brep_difference": [
+        "--- ",
+        "+++ ",
+        "@@ -1,6 +1,10 @@",
+        " ",
+        " CASCADE Topology V1, (c) Matra-Datavision",
+        "-Locations 0",
+        "+Locations 1",
+        "+1",
+        "+              1               0               0               0 ",
+        "+              0               1               0               0 ",
+        "+              0               0               1               0 ",
+        " Curve2ds 0",
+        " Curves 0",
+        " Polygon3D 0",
+        "@@ -17,4 +21,4 @@",
+        " 1101101",
+        " *",
+        " ",
+        "-+1 0 ",
+        "++1 1 "
+      ],
+      "history_before": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 176,
+        "pending": true
+      },
+      "history_immediately_rejected": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Caller active",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 176,
+        "pending": true
+      },
+      "history_after_caller_abort": {
+        "undo": 2,
+        "redo": 1,
+        "undo_names": [
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [
+          "Prior executable Redo"
+        ],
+        "booked": 0,
+        "pending": false
+      },
+      "history_after_redo": {
+        "undo": 3,
+        "redo": 0,
+        "undo_names": [
+          "Prior executable Redo",
+          "Circle",
+          "OpenMatrix9 document units"
+        ],
+        "redo_names": [],
+        "booked": 0,
+        "pending": false
+      }
+    }
+  ],
+  "raw_brep_diagnostic": {
+    "host": {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red61-offscreen-20261011",
+      "fixture": "rhino_core_circle_history_atomic_transactions_smoke.FCMacro",
+      "checks": 432,
+      "passed": 310,
+      "failures": [
+        "plain/recipe rejected replay restores recorded metadata",
+        "plain/recipe rejection preserves source",
+        "plain/points rejected replay restores recorded metadata",
+        "plain/points rejection preserves source",
+        "plain/roles rejected replay restores recorded metadata",
+        "plain/roles rejection preserves source",
+        "plain/parameters rejected replay restores recorded metadata",
+        "plain/parameters rejection preserves source",
+        "plain/links rejected replay restores recorded metadata",
+        "plain/links rejection preserves source",
+        "plain/path rejected replay restores recorded metadata",
+        "plain/path rejection preserves source",
+        "plain/fraction rejected replay restores recorded metadata",
+        "plain/fraction rejection preserves source",
+        "plain/recorded rejected replay restores recorded metadata",
+        "plain/recorded rejection preserves source",
+        "plain/radius rejected replay restores recorded metadata",
+        "plain/radius rejection preserves source",
+        "plain/fit rejected replay restores recorded metadata",
+        "plain/fit rejection preserves source",
+        "plain/approx rejected replay restores recorded metadata",
+        "plain/approx rejection preserves source",
+        "plain/construction rejected replay restores recorded metadata",
+        "plain/construction rejection preserves source",
+        "plain/units rejected replay restores recorded metadata",
+        "plain/units rejection preserves source",
+        "plain/source rejection preserves source",
+        "plain/shape rejection preserves source",
+        "plain/placement rejected replay restores recorded metadata",
+        "plain/placement rejection preserves source",
+        "booked/recipe rejected replay restores recorded metadata",
+        "booked/recipe rejection preserves source",
+        "booked/recipe rejection preserves stack counts and names",
+        "booked/recipe rejection preserves pending state",
+        "booked/points rejected replay restores recorded metadata",
+        "booked/points rejection preserves source",
+        "booked/points rejection preserves stack counts and names",
+        "booked/points rejection preserves pending state",
+        "booked/roles rejected replay restores recorded metadata",
+        "booked/roles rejection preserves source",
+        "booked/roles rejection preserves stack counts and names",
+        "booked/roles rejection preserves pending state",
+        "booked/parameters rejected replay restores recorded metadata",
+        "booked/parameters rejection preserves source",
+        "booked/parameters rejection preserves stack counts and names",
+        "booked/parameters rejection preserves pending state",
+        "booked/links rejected replay restores recorded metadata",
+        "booked/links rejection preserves source",
+        "booked/links rejection preserves stack counts and names",
+        "booked/links rejection preserves pending state",
+        "booked/path rejected replay restores recorded metadata",
+        "booked/path rejection preserves source",
+        "booked/path rejection preserves stack counts and names",
+        "booked/path rejection preserves pending state",
+        "booked/fraction rejected replay restores recorded metadata",
+        "booked/fraction rejection preserves source",
+        "booked/fraction rejection preserves stack counts and names",
+        "booked/fraction rejection preserves pending state",
+        "booked/recorded rejected replay restores recorded metadata",
+        "booked/recorded rejection preserves source",
+        "booked/recorded rejection preserves stack counts and names",
+        "booked/recorded rejection preserves pending state",
+        "booked/radius rejected replay restores recorded metadata",
+        "booked/radius rejection preserves source",
+        "booked/radius rejection preserves stack counts and names",
+        "booked/radius rejection preserves pending state",
+        "booked/fit rejected replay restores recorded metadata",
+        "booked/fit rejection preserves source",
+        "booked/fit rejection preserves stack counts and names",
+        "booked/fit rejection preserves pending state",
+        "booked/approx rejected replay restores recorded metadata",
+        "booked/approx rejection preserves source",
+        "booked/approx rejection preserves stack counts and names",
+        "booked/approx rejection preserves pending state",
+        "booked/construction rejected replay restores recorded metadata",
+        "booked/construction rejection preserves source",
+        "booked/construction rejection preserves stack counts and names",
+        "booked/construction rejection preserves pending state",
+        "booked/units rejected replay restores recorded metadata",
+        "booked/units rejection preserves source",
+        "booked/units rejection preserves stack counts and names",
+        "booked/units rejection preserves pending state",
+        "booked/source rejection preserves source",
+        "booked/source rejection preserves stack counts and names",
+        "booked/source rejection preserves pending state",
+        "booked/shape rejection preserves source",
+        "booked/shape rejection preserves stack counts and names",
+        "booked/shape rejection preserves pending state",
+        "booked/placement rejected replay restores recorded metadata",
+        "booked/placement rejection preserves source",
+        "booked/placement rejection preserves stack counts and names",
+        "booked/placement rejection preserves pending state",
+        "active/recipe rejected replay restores recorded metadata",
+        "active/recipe rejection preserves source",
+        "active/points rejected replay restores recorded metadata",
+        "active/points rejection preserves source",
+        "active/roles rejected replay restores recorded metadata",
+        "active/roles rejection preserves source",
+        "active/parameters rejected replay restores recorded metadata",
+        "active/parameters rejection preserves source",
+        "active/links rejected replay restores recorded metadata",
+        "active/links rejection preserves source",
+        "active/path rejected replay restores recorded metadata",
+        "active/path rejection preserves source",
+        "active/fraction rejected replay restores recorded metadata",
+        "active/fraction rejection preserves source",
+        "active/recorded rejected replay restores recorded metadata",
+        "active/recorded rejection preserves source",
+        "active/radius rejected replay restores recorded metadata",
+        "active/radius rejection preserves source",
+        "active/fit rejected replay restores recorded metadata",
+        "active/fit rejection preserves source",
+        "active/approx rejected replay restores recorded metadata",
+        "active/approx rejection preserves source",
+        "active/construction rejected replay restores recorded metadata",
+        "active/construction rejection preserves source",
+        "active/units rejected replay restores recorded metadata",
+        "active/units rejection preserves source",
+        "active/source rejection preserves source",
+        "active/shape rejection preserves source",
+        "active/placement rejected replay restores recorded metadata",
+        "active/placement rejection preserves source"
+      ],
+      "launch": {
+        "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "B6F3282B2036E6E520E295DD1916A9BFD9C5DDDDC52484BACAED641368BA4C1A",
+        "pid": 74236,
+        "module_root": "H:\\FreeCAD-src\\build\\circle-history-runtime59-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red61-offscreen-20261011",
+        "exit_code": 0
+      },
+      "plugin": {
+        "path": "H:/FreeCAD-src/build/circle-history-runtime59-20261012/bin/OpenMatrix9Gui.pyd",
+        "bytes": 16758272,
+        "sha256": "b6f3282b2036e6e520e295dd1916a9bfd9c5ddddc52484bacaed641368ba4c1a"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red61-offscreen-20261011/results.json",
+          "bytes": 117962,
+          "sha256": "39c76637628e10335702110a04b0d4ec7cadc1a959c0562b047f31bc7c880bbe"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red61-offscreen-20261011/shared-host-launch.json",
+          "bytes": 602,
+          "sha256": "7c664d471d58faa6677d3b841391e727dc6a1865b3b13036bc11b09d49fbb697"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red61-offscreen-20261011/loaded-native-app.json",
+          "bytes": 227,
+          "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red61-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 172,
+          "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red61-offscreen-20261011/fixture.FCMacro",
+          "bytes": 6860,
+          "sha256": "47c29cd6e4cd5dc9505ed45c90acac4bb449ac8d67f2afb70bd0da73dfbf1c10"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red61-offscreen-20261011/host-stdout.log",
+          "bytes": 353,
+          "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red61-offscreen-20261011/host-stderr.log",
+          "bytes": 55080,
+          "sha256": "caa17ce59b7930dfc773b7a8df5c17312c188e54b7d110314435805cfdd92b7a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red61-offscreen-20261011/user.cfg",
+          "bytes": 18069,
+          "sha256": "3a45cbc7aa26acd024b5dda61abb02016d5fc5f35b33938839660d001bf55964"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-circle-history-atomic-red61-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2833,
+          "sha256": "cbb844e136ab2b7602eb7dfab95e1b5d12cb2f0c45c1fc7cec44871f581e49d1"
+        }
+      ]
+    },
+    "actual_exit": 0,
+    "runner_exit": 1,
+    "passed": 310,
+    "checks": 432,
+    "source_brep_is_geometric_oracle": false,
+    "reason": "The earlier atomic60 combined assertion used raw source BREP text and did not record counts until after Redo. New exact pre-Redo measurements contradict the inference that all cases corrupt the history stack or source geometry: identity-location serialization alone changes BREP45/48 while geometry remains fixed. All16 unmaterialized booked cases do alter the immediate stack/pending state. The original report remains a historical raw assertion failure, not a geometry/history oracle."
+  },
+  "prior_checkpoint": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-12-rhino-core-circle-history-modes.json",
+    "bytes": 31196,
+    "sha256": "790187062dc7c480d8c3a954922d809a16975b15df83096942f29ab0d05c9d6e"
+  },
+  "native_api_evidence": [
+    {
+      "path": "H:/FreeCAD-src/src/App/Document.cpp",
+      "bytes": 158149,
+      "sha256": "f5b75a2c80a0ce9c1bf7720cbfa9da3a984019c9f22196cb27c8657cc41913b4"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Document.h",
+      "bytes": 57560,
+      "sha256": "a17697109d612331dc8cacd78b71810992d8f2cbce78b3db91281a301f54831a"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.h",
+      "bytes": 13263,
+      "sha256": "b40694aba9dffa66f93fe150e9a4368db1a0ecf5baa7097e4419afe8cb079f59"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.cpp",
+      "bytes": 27357,
+      "sha256": "4578a38cdf5bccec6ab68bb8ecc3fb63d46a6ce36d2d193258a19e5a4039b723"
+    }
+  ],
+  "instrumentation": [
+    {
+      "path": "H:/FreeCAD-src/build/prepare-circle-history-atomic61.py",
+      "bytes": 4554,
+      "sha256": "6909150a4c79103b21278e7db0c1d3f87a4eed0dde1da39117136f81aed1fc86"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/prepare-circle-history-atomic62.py",
+      "bytes": 2215,
+      "sha256": "21935afe67473052e4f2ada8601bad036318b0e152c269df549e35fd32b95d66"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/run-circle-history-atomic-red61.ps1",
+      "bytes": 484,
+      "sha256": "cf871b06de4933679d5db40a5491bd1580476c4d300576ba601351ffd7343045"
+    },
+    {
+      "path": "H:/FreeCAD-src/build/run-circle-history-atomic-red62.ps1",
+      "bytes": 480,
+      "sha256": "c4fce30762946f81244e304d6502444f196296263155aaaa647d48be454e6053"
+    }
+  ],
+  "correction": "The earlier atomic60 combined assertion used raw source BREP text and did not record counts until after Redo. New exact pre-Redo measurements contradict the inference that all cases corrupt the history stack or source geometry: identity-location serialization alone changes BREP45/48 while geometry remains fixed. All16 unmaterialized booked cases do alter the immediate stack/pending state. The original report remains a historical raw assertion failure, not a geometry/history oracle.",
+  "remaining": [
+    "The full original RCORE-01 objective remains open: GeometryRef/Snapshot/Result for every enabled consumer; adapters1–7, C01–C12, T01–T11; rational/periodic basis, trims/pcurves/seam occurrences; independent read/edit/retain/export and complete supported attributes.",
+    "Current GeometryResult is now directly checked across the existing all-mode History fixture: numeric/picked Center, oriented/direction, TwoPoint, ThreePoint radius and live endpoint branches, Vertical, constant Area, whole FitPoints with growing topology, deformable Center/Fit/Around/Tangent, bounded native tangent and fixed-contact point dependencies, parent placement, Lock, deletion/Undo, detach/Undo and command source pruning. Twenty recorded results cold reopen and retain exact bytes; legacy empty-recipe AroundCurve also has paired current native/cold evidence. This is named fixture coverage, not every option/backend/representation or complete historical provenance. Native-plan/source correspondence remains required.",
+    "Exact rejection-time Circle History evidence is RED355/432 across48 cases, Runtime59. The three caller states are no booking, unmaterialized preserving-Redo booking, and already materialized preserving-Redo journal with an independent caller edit. Forty-two cases retain tampered metadata; three source callbacks retain changed point geometry. Sixteen booked cases materialize the caller journal (Undo2/Redo1/pendingFalse becomesUndo3/Redo0/pendingTrue); plain/active states retain immediate counts/names/booking/pending. Original executable Redo succeeds48/48 after explicit caller abort where applicable. Identical counts do not prove absence of pollution of an existing journal. A checked native replay savepoint/notification barrier must preserve pre-existing caller edits and booking/journal, reject observer mutations, restore protected metadata/source state and clear paired invalid output. All original close/removal/owner/lock/dependency/cache invariants remain open.",
+    "Task2/3 remain open: generic snap/pick/parameter provenance, snapshot sharing and aggregate allocation/traversal/worker/cancellation bounds, Rebuild and every other enabled GeometryResult consumer.",
+    "Global conversion/deviation/locus and complete parameter/topology maps remain unproven; the current native Circle output contract checks basis, full domain and shared endpoint identity. Full conversion exactness is reported uninspected; maps remain null.",
+    "Four recorded archives were independently reopened in one new native host and replayed again; offscreen evidence does not certify actual mouse, rendering, all viewport/preview/cache lifetime or every original persistence family.",
+    "The inventory was captured before Runtime59 build and relevant Curve/History source hashes match. Full inventory differs due parallel Gumball source and a new test fixture; it is not an exact compiler dependency certificate. Production ABI/deployment acceptance remains pending."
+  ],
+  "next_action": "Implement and verify the necessary native checked replay savepoint or equivalent journal boundary, preserving both an unmaterialized caller booking and an already materialized caller journal. Existing openTransactionPreservingRedo cannot be called unconditionally because it commits/retire the preceding caller transaction. Use the new semantic432-check RED unchanged for comparison, add positive replay/caller Undo/Redo and callback close/remove/dynamic-property/restore-failure coverage, then continue every original RCORE-01 requirement."
+}

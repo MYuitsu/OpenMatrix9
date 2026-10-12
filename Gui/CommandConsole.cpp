@@ -147,29 +147,39 @@ void CommandConsole::updateBoundary(){
 }
 void CommandConsole::stylePrompt(){
     QList<QTextEdit::ExtraSelection> marks;
-    const int open=currentPrompt.indexOf('('),close=currentPrompt.lastIndexOf(')');
-    if(open>=0&&close>open){
-        static const QRegularExpression options("\\b(BothSides|PersistentClose|Close|Mode|Length|Undo)\\b");
-        auto matches=options.globalMatch(currentPrompt,open+1);
-        while(matches.hasNext()){
-            const auto match=matches.next();if(match.capturedStart()>=close)break;
-            QTextEdit::ExtraSelection mark;mark.cursor=QTextCursor(document());mark.cursor.setPosition(promptStart+int(match.capturedStart()));mark.cursor.movePosition(QTextCursor::NextCharacter,QTextCursor::KeepAnchor);mark.format.setFontUnderline(true);marks.append(mark);
+    // ExtraSelection decorations do not shape bold glyphs. Apply the live
+    // question's font to the document, while keeping its plain text unchanged.
+    QTextCursor plain(document());plain.setPosition(promptStart);plain.setPosition(inputStart,QTextCursor::KeepAnchor);
+    QTextCharFormat normal;normal.setFontWeight(QFont::Normal);normal.setFontUnderline(false);plain.mergeCharFormat(normal);
+    if(currentOptions.questionLength>0&&currentOptions.questionLength<=currentPrompt.size()){
+        QTextEdit::ExtraSelection question;question.cursor=QTextCursor(document());question.cursor.setPosition(promptStart);question.cursor.setPosition(promptStart+currentOptions.questionLength,QTextCursor::KeepAnchor);question.format.setFontWeight(QFont::Bold);marks.append(question);
+        question.cursor.mergeCharFormat(question.format);
+    }
+    for(const auto& item:currentOptions.spans){
+        if(item.start<0||item.start+item.length>currentPrompt.size())continue;
+        QTextEdit::ExtraSelection mark;mark.cursor=QTextCursor(document());mark.cursor.setPosition(promptStart+item.start);mark.cursor.setPosition(promptStart+item.start+item.length,QTextCursor::KeepAnchor);
+        if(!item.enabled)mark.format.setForeground(Qt::darkGray);if(item.selected)mark.format.setBackground(QColor(180,215,240));marks.append(mark);
+        // The whole token remains clickable/selected. Only its actual declared
+        // one-character keyboard shortcut receives the underline decoration.
+        const int offset=currentPrompt.mid(item.start,item.length).indexOf(item.mnemonic,0,Qt::CaseInsensitive);
+        if(!item.mnemonic.isEmpty()&&offset>=0&&offset+item.mnemonic.size()<=item.length){
+            auto shortcut=mark;shortcut.cursor.setPosition(promptStart+item.start+offset);shortcut.cursor.setPosition(promptStart+item.start+offset+item.mnemonic.size(),QTextCursor::KeepAnchor);shortcut.format.setFontUnderline(true);marks.append(shortcut);
         }
     }
     setExtraSelections(marks);
+}
+bool CommandConsole::followHistory()const{
+    if(history->verticalScrollBar()->value()==history->verticalScrollBar()->maximum())return true;
+    // The initial blank transcript can have a nonzero scroll range before
+    // docking/font layout settles. Its first real entry must be visible.
+    for(auto block=document()->firstBlock();block.isValid()&&block.position()<promptStart;block=block.next())if(!block.text().trimmed().isEmpty())return false;
+    return true;
 }
 QString CommandConsole::optionAt(const QPoint& point)const{
     const auto cursor=cursorForPosition(point);
     if(!cursorRect(cursor).adjusted(-4,-2,4,2).contains(point))return {};
     const int offset=cursor.position()-promptStart;
-    const int open=currentPrompt.indexOf('('),close=currentPrompt.lastIndexOf(')');
-    if(open<0||offset<=open||offset>=close)return {};
-    static const QRegularExpression options("\\b(BothSides|PersistentClose|Close|Mode|Length|Undo)\\b");
-    auto matches=options.globalMatch(currentPrompt,open+1);
-    while(matches.hasNext()){
-        const auto match=matches.next();
-        if(offset>=match.capturedStart()&&offset<match.capturedEnd())return match.captured()=="Mode"?"Mode=Line":match.captured();
-    }
+    for(const auto& item:currentOptions.spans)if(offset>=item.start&&offset<item.start+item.length)return item.input;
     return {};
 }
 void CommandConsole::mousePressEvent(QMouseEvent* event){
@@ -179,7 +189,7 @@ void CommandConsole::mousePressEvent(QMouseEvent* event){
 void CommandConsole::mouseReleaseEvent(QMouseEvent* event){
     QPlainTextEdit::mouseReleaseEvent(event);
     const auto option=pressedOption;pressedOption.clear();
-    if(!option.isEmpty()&&event->button()==Qt::LeftButton&&event->modifiers()==Qt::NoModifier&&!textCursor().hasSelection()&&inputText().isEmpty()&&optionAt(event->position().toPoint())==option){setInputText(option);if(accepted)accepted();}
+    if(!option.isEmpty()&&event->button()==Qt::LeftButton&&event->modifiers()==Qt::NoModifier&&!textCursor().hasSelection()&&inputText().isEmpty()&&optionAt(event->position().toPoint())==option){if(optionActivated)optionActivated(option);}
 }
 QString CommandConsole::inputText()const{
     QTextCursor c(document());c.setPosition(inputStart);c.movePosition(QTextCursor::End,QTextCursor::KeepAnchor);return c.selectedText();
@@ -193,24 +203,29 @@ void CommandConsole::insertInput(const QString& value){
     editPosition();const auto room=1024-inputText().size()+textCursor().selectedText().size();if(room>0)insertPlainText(inputPrefix(singleLine(value),room));ensureCursorVisible();
 }
 void CommandConsole::setPrompt(const QString& value){
-    const bool follow=history->verticalScrollBar()->value()==history->verticalScrollBar()->maximum();
+    currentOptions={};setProperty("om9OptionPending",false);setProperty("om9OptionFeatureId",QString());
+    const bool follow=followHistory();
     const auto draft=inputText();const auto previous=textCursor();const bool atInput=previous.position()>=inputStart;
     QTextCursor c(document());c.setPosition(promptStart);c.setPosition(inputStart,QTextCursor::KeepAnchor);c.insertText(value);
     currentPrompt=value;promptStart=document()->characterCount()-1-value.size()-draft.size();inputStart=promptStart+value.size();updateBoundary();
     if(follow)history->verticalScrollBar()->setValue(history->verticalScrollBar()->maximum());
     if(atInput){c.movePosition(QTextCursor::End);setTextCursor(c);ensureCursorVisible();}
 }
+void CommandConsole::setOptionSnapshot(const CommandOptionSnapshot& value){
+    setPrompt(value.text);currentOptions=value;setProperty("om9OptionFeatureId",value.featureId);setProperty("om9OptionPending",value.pending);setProperty("om9OptionRevision",qulonglong(value.revision));stylePrompt();
+}
 void CommandConsole::logMessage(const QString& message){
     if(message.isEmpty()||message==lastMessage)return;lastMessage=message;
-    const bool follow=history->verticalScrollBar()->value()==history->verticalScrollBar()->maximum();
+    const bool follow=followHistory();
     const auto draft=inputText();const bool atInput=textCursor().position()>=inputStart;
     QTextCursor c(document());c.setPosition(promptStart);c.insertText(message+"\n");
     promptStart=document()->characterCount()-1-currentPrompt.size()-draft.size();inputStart=promptStart+currentPrompt.size();updateBoundary();
     if(follow)history->verticalScrollBar()->setValue(history->verticalScrollBar()->maximum());
     if(atInput){c.movePosition(QTextCursor::End);setTextCursor(c);ensureCursorVisible();}
 }
+void CommandConsole::logInvocation(const QString& line){lastMessage.clear();logMessage(line);}
 QString CommandConsole::takeInput(){
-    const bool follow=history->verticalScrollBar()->value()==history->verticalScrollBar()->maximum();
+    const bool follow=followHistory();
     const auto value=inputText();QTextCursor c(document());c.movePosition(QTextCursor::End);c.insertText("\n"+currentPrompt);
     promptStart=document()->characterCount()-1-currentPrompt.size();inputStart=promptStart+currentPrompt.size();lastMessage.clear();updateBoundary();if(follow)history->verticalScrollBar()->setValue(history->verticalScrollBar()->maximum());setTextCursor(c);ensureCursorVisible();return value;
 }
@@ -220,6 +235,10 @@ void CommandConsole::keyPressEvent(QKeyEvent* event){
     if(event->matches(QKeySequence::Paste)){insertFromMimeData(QApplication::clipboard()->mimeData());return;}
     if(event->matches(QKeySequence::Cut)){if(editableSelection())QPlainTextEdit::keyPressEvent(event);return;}
     const auto plain=(event->modifiers()&~Qt::KeypadModifier)==Qt::NoModifier;
+    if(plain&&currentOptions.pending){
+        if(event->key()==Qt::Key_Up||event->key()==Qt::Key_Down){if(optionNavigate)optionNavigate(event->key()==Qt::Key_Up?-1:1);return;}
+        if(event->key()==Qt::Key_Tab){for(const auto& item:currentOptions.spans)if(item.selected&&item.enabled){setInputText(item.input);break;}return;}
+    }
     if(plain&&suggestions->isVisible()){
         if(event->key()==Qt::Key_Up||event->key()==Qt::Key_Down){moveCompletion(event->key()==Qt::Key_Up?-1:1);return;}
         if(event->key()==Qt::Key_Escape){dismissedCompletion=inputText();suggestions->hide();return;}

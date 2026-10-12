@@ -7,13 +7,60 @@ module: Solid Tools
 kind: command
 implementation_status: partially_implemented
 implementation_validation_status: validated_supported_slice
-implementation_verified_at: '2026-10-09'
+implementation_verified_at: '2026-10-12'
 guide_date: '2026-10-07'
 guide_scope: engineering_contract_and_request_planner
 sample_status: compiled_and_validation_tests_passed
 ---
 
 # OM9-SOLID-012 — Box
+
+<!-- box-default-video:start -->
+2026-10-12, người dùng làm rõ video minh họa **Box mặc định**, không phải một trong bốn option. Box mở ngay ở First corner; mặc định hai góc đáy đối diện rồi Height (3 lần chọn). Diagonal/3Point/Vertical/Center là lựa chọn tùy chọn. 3Point riêng vẫn là hai đầu cạnh rồi Width/Height. Quy tắc này thay thế yêu cầu chọn phương pháp bắt buộc trước đó.
+
+[Bằng chứng mặc định và preview theo video](../../../docs/validation/2026-10-12-box-default-video.md).
+<!-- box-default-video:end -->
+
+
+2026-10-12, correction theo yêu cầu người dùng: Box bắt buộc chọn phương pháp;
+bỏ Box thường/Corners. 3Point/Vertical nhận hai điểm đầu cạnh rồi Width/Height;
+Center nhận tâm rồi góc hoặc Length. Quy tắc này thay thế ghi chú default/Corners
+và scalar Length ở endpoint trước đây. [Kiểm thử hiện hành](../../../docs/validation/2026-10-12-box-documented-workflow.md).
+
+<!-- command-mnemonics-20261012:start -->
+2026-10-12: chỉ gạch chân một ký tự phím tắt đã khai báo, không gạch chân cả
+tên. Rust cung cấp mnemonic; cả tên vẫn click được, clipboard giữ nguyên.
+Box dùng D/3/V/C; phím3 chỉ chọn3Point trước điểm đầu, sau đó vẫn nhập số3.
+Focus,0 origin và lịch sử dễ đọc đã sửa vẫn giữ. Supported status còn partial.
+[Bằng chứng native](../../../docs/validation/2026-10-12-command-mnemonics.md).
+<!-- command-mnemonics-20261012:end -->
+
+<!-- box-command-usability-20261012:start -->
+2026-10-12: Box icon trái/phải focus CMD; `0` ở bước nhập điểm là gốc CPlane
+và chuyển vào lịch sử khi được nhận. Width/Height giải thích Enter/default mm.
+Lỗi ghi riêng vào lịch sử, prompt sạch và draft sai vẫn sửa được; giới hạn
+geometry giữ nguyên. Focus có guard generation sau cancel; common Curve input
+evidence giữ điểm gốc. Đây là sửa supported slice, status vẫn partial.
+[Bằng chứng native và giới hạn](../../../docs/validation/2026-10-12-box-command-usability.md).
+<!-- box-command-usability-20261012:end -->
+
+<!-- matrix-phase-options-20261012:start -->
+2026-10-12: engine Rust chung có question/options theo phase, span UTF-16,
+ẩn/hiện độc lập gate và revision refresh. Box áp dụng first-corner → Diagonal
+Cube → Width/Height defaults; click và D/d dùng cùng native solver. CMD xanh ghi
+invocation thật, preceding prompt và input đã nhận; Up/Down recall, Esc và draft
+lỗi giữ đúng lifecycle. Đây là supported slice, không hoàn tất mọi command,
+Gem Builder hay associative History.
+[API dùng chung](../../../docs/command-options-adapter.md) · [Bằng chứng native](../../../docs/validation/2026-10-12-box-matrix-command-options.md).
+<!-- matrix-phase-options-20261012:end -->
+
+<!-- rhino-core-native-solid-policy:start -->
+Box/Sphere hiện có dùng request/options Rust chung trước declaration,
+Preview, commit và capture Sphere; kiểm output scalar giữ kích thước có dấu,
+CPlane và solver hiện hữu. 1071 checks/18 actual host exits0 trên cùng plugin;
+full Rust721 đạt. Các hợp đồng kết quả/ownership gốc và cage/replay còn mở;
+**RCORE-01 đang triển khai**. [Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-native-solid-policy.md).
+<!-- rhino-core-native-solid-policy:end -->
 
 <!-- rhino-core-extended-input:start -->
 ## Extended numeric input — validated slice
@@ -30,14 +77,14 @@ Alias tương thích: `Box`. Nhóm: `04-solid`. Trạng thái: `partially_implem
 
 ### Hợp đồng hành vi đề xuất
 
-Box dựng solid từ rectangle base và cao. Chọn corner/length, width Enter dùng length, height Enter dùng width. Diagonal dùng hai góc đối diện không hỏi side length; Cube trong Diagonal dùng góc base/top xác định cao và orientation.
+Box dựng solid từ rectangle base và cao. Mặc định chọn hai góc đáy đối diện rồi Height; không cần chọn option trước điểm đầu. 3Point và Vertical nhận hai đầu cạnh rồi pick/type Width; Center nhận tâm rồi góc hoặc Length. Width Enter dùng length, Height Enter dùng width. Diagonal dùng hai góc đối diện không hỏi side length; Cube trong Diagonal dùng góc base/top xác định cao và orientation. Luồng mặc định được người dùng làm rõ qua video ngày 2026-10-12.
 
 ### Tùy chọn và tương tác
 
-- `Mode`: Corners/Diagonal/3Point/Vertical/Center
+- `Mode`: Diagonal/3Point/Vertical/Center; tùy chọn, độc lập với luồng mặc định
 - `Length/Width/Height`: kích thước box
 - `3Point`: hai đầu cạnh rồi width
-- `Vertical`: base vuông góc C-Plane
+- `Vertical`: hai đầu cạnh rồi pick/type Width; base vuông góc C-Plane
 - `Center`: base quanh tâm
 - `Cube`: chọn diagonal 3D xác định khối lập phương
 
@@ -55,7 +102,7 @@ Mẫu không tự điền default, không kiểm tra miền số hay tập enum 
 
 | Option key | Kiểu mẫu | Ý nghĩa / đơn vị | Default / trạng thái |
 |---|---|---|---|
-| `Mode` | `choice` | Corners/Diagonal/3Point/Vertical/Center | Chưa xác lập; cần lựa chọn tường minh hoặc TODO_EVIDENCE. |
+| `Mode` | `choice` | Diagonal/3Point/Vertical/Center | Tùy chọn; mặc định hai góc đối diện rồi Height. |
 | `Length` | `number` | kích thước box Giá trị độc lập của Length. | Chưa xác lập; cần lựa chọn tường minh hoặc TODO_EVIDENCE. |
 | `Width` | `number` | kích thước box Giá trị độc lập của Width. | Chưa xác lập; cần lựa chọn tường minh hoặc TODO_EVIDENCE. |
 | `Height` | `number` | kích thước box Giá trị độc lập của Height. | Chưa xác lập; cần lựa chọn tường minh hoặc TODO_EVIDENCE. |
@@ -115,16 +162,17 @@ Các ca trên là yêu cầu kiểm thử geometry/state của feature; kết qu
 
 ## OpenMatrix9 implementation notes
 
-Status: **partially_implemented / validated_supported_slice**, verified 2026-10-09. All listed construction modes have native adapters within the explicit host scope below.
+Status: **partially_implemented / validated_supported_slice**, verified 2026-10-12. All listed construction modes have native adapters within the explicit host scope below.
 
 ### Supported construction
 
 - Stable menu ID `OM9_SolidBoxCornertoCornerHeight`; CMD `Box`, `_Box`, stable ID. Right-click the Box icon starts 3Point.
-- `Mode=Corners` (default): two base corners then height, or first corner then typed Length/Width/Height. `3Point`/`3p`: two endpoints of the first edge, then signed width and height; edge projects onto the captured CPlane.
+- Latest user correction, 2026-10-12: Box starts its default two-opposite-base-corners then Height workflow immediately. Diagonal/3Point/Vertical/Center are optional branches. The legacy internal Corners mode represents the default workflow; it is not a fifth displayed option. Default does not accept numeric Length in place of the opposite corner.
+- `3Point`/`3p`: pick the start and end of the first edge, then pick or type signed Width and Height; edge projects onto the captured CPlane. The endpoint step requires a point; bare side length and `Length=` are rejected.
 - `Diagonal`: opposite base corner then height; numeric side length is rejected. `Cube` within Diagonal (also a mode shortcut): two opposite 3D corners define equal edges; a minimal rotation aligns the captured frame's body diagonal with the picked diagonal. The exact half-turn has a deterministic axis. Cube preview reaches both corners.
-- `Vertical`: first edge in the captured CPlane, width along its frozen normal, height perpendicular to that vertical base. Changing viewport after the first point does not change the captured normal. Mouse width projects into the perpendicular base plane.
+- `Vertical`: pick start and end of an edge in the captured CPlane, then pick or type Width along its frozen normal; Height is perpendicular to that vertical base. The endpoint step rejects numeric Length. Changing viewport after the first point does not change the captured normal. Mouse width projects into the perpendicular base plane.
 - `Center`: first point is base center; typed Length/Width are full dimensions, or picked corner doubles the two center-to-corner extents. Height starts at the base plane.
-- `Length=`, `Width=`, `Height=` apply at their respective steps. Enter at Width uses Length; Enter at Height uses Width. Typed Length must be positive; signed width/height and negative picked extents normalize the origin and positive dimensions while preserving a right-handed frame.
+- `Length=` applies only to Center's corner-or-length step. `Width=` and `Height=` apply at their respective numeric steps. Enter at Width uses Length; Enter at Height uses Width. Typed Length must be positive; signed width/height and negative picked extents normalize the origin and positive dimensions while preserving a right-handed frame.
 - Mouse height uses the closest point between mouse ray and the frozen base-normal axis. A parallel ray requires typed Height or a side/perspective view.
 
 ### Output, lifecycle and dependency
@@ -132,9 +180,9 @@ Status: **partially_implemented / validated_supported_slice**, verified 2026-10-
 - Rust owns ordered input state, units, finite bounds and pure construction math. C++/Qt resolves native references and builds one document-root `Part::Feature` using typed Part/OpenCascade calls in one transaction. No CMD text is evaluated as Python.
 - Output must be a valid closed BRep with one solid and positive finite volume; metadata `OM9FeatureId`, `OM9Command`, `SolidParameters` records mode, normalized dimensions/frame and curve reference names. Solid purple is RGB 166,104,209.
 - Standalone snapshot geometry: editing a source after commit does not regenerate the result. Source BRep/global placement is revalidated before commit; changed/deleted inputs create no partial output. Curves/points/meshes are preserved. Associative History, active layers, Builder/Styles and full shared foundation contracts remain unverified.
-- Final-step hover preview is an unpickable Coin scene node; FitPoints also previews the candidate fit with the hovered point. Tangent resolves after its final constraint; it has no live preview of all branches. Commit creates one object; input Undo revisits accepted states, native Undo/Redo revisits the output.
+- Box hover draws unpickable construction edges and point markers in all four views: base after the first corner, full wire box at Height. Top/bottom view height uses world-scaled screen-up drag from the opposite base corner; side/perspective views retain ray/axis projection. Sphere final-step hover preview is an unpickable Coin scene node; FitPoints also previews the candidate fit with the hovered point. Tangent resolves after its final constraint; it has no live preview of all branches. Commit creates one object; input Undo revisits accepted states, native Undo/Redo revisits the output.
 - Cancel/Esc (including unsubmitted CMD text), document switch/close and workbench deactivation discard input and preview. Invalid numbers, singular geometry and stale references leave no document output. Native kernel failure aborts its transaction.
-- Shared menu/CMD and Qt mouse paths use the same controller; successful commands alone enter command history. Native FCStd save/reload preserves geometry, mode and metadata.
+- Shared menu/CMD and Qt mouse paths use the same controller; the CMD transcript records actual starts and accepted input; successful-result history retains its existing rules. Native FCStd save/reload preserves geometry, mode and metadata.
 
 ### Units and host decisions
 
@@ -143,6 +191,8 @@ Status: **partially_implemented / validated_supported_slice**, verified 2026-10-
 - Host thresholds and finite multi-start solving are OpenMatrix9 policies, not inferred Matrix defaults. Full Grid/Ortho/snaps compatibility is not claimed.
 
 ### Validation
+
+- Current method-selection and endpoint contract: [2026-10-12 documented Box workflow](../../../docs/validation/2026-10-12-box-documented-workflow.md), Rust `box_documented_workflow.rs` and actual native `box_documented_workflow_smoke.FCMacro`. This supersedes earlier implicit Corners and typed endpoint-Length behavior; older reports remain historical evidence.
 
 - Exact feature fixtures: `rust/tests/solid_commands.rs`, `solid_session.rs`, `solid_options.rs`; native `tests/solid_commands_smoke.FCMacro` and `solid_options_smoke.FCMacro` exercise the actual shared CMD, menus and Qt mouse events.
 - Native geometry, analytic volumes, source preservation, degenerate inputs, selected-fit placements, branch choice, scene-only preview, input Undo, output Undo/Redo and FCStd reload have evidence.

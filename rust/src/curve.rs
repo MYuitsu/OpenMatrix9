@@ -7,6 +7,23 @@ use crate::rectangle::{Mode, Rectangle};
 use crate::spline::{self, Knots, Spline};
 use std::collections::VecDeque;
 use std::sync::Arc;
+#[path = "curve_evidence.rs"]
+mod evidence;
+#[path = "curve_input_log.rs"]
+mod input_log;
+#[path = "curve_native_input.rs"]
+pub(crate) mod native_input;
+#[path = "curve_result.rs"]
+pub(crate) mod result;
+#[cfg(test)]
+#[path = "curve_accepted_input_tests.rs"]
+mod accepted_input_tests;
+#[cfg(test)]
+#[path = "curve_native_input_tests.rs"]
+mod native_input_tests;
+#[cfg(test)]
+#[path = "curve_result_tests.rs"]
+mod result_tests;
 const UNSUPPORTED_ANGLE_CONSTRAINT: &str =
     "One-shot angle constraints are not supported in this command phase";
 // Keep recent accepted input bounded, including option-only sessions.
@@ -26,6 +43,7 @@ struct CircleInputCheckpoint {
     input_mm_per_unit: f64,
     previous: Option<[f64; 3]>,
     awaiting_option: Option<String>,
+    accepted_input_log: input_log::InputLog,
 }
 #[derive(Default, Clone)]
 pub struct CurveSession {
@@ -54,6 +72,10 @@ pub struct CurveSession {
     ellipse_options: Ellipse,
     ellipse_plan: Option<EllipsePlan>,
     ellipse_approx_deviation: f64,
+    accepted_input_log: input_log::InputLog,
+    // Admission identity is monotonic through Undo; native resource context
+    // keys may restore an earlier branch and cannot serve as a stale guard.
+    native_input_revision: u64,
 }
 pub fn name(icon: &str) -> Option<&'static str> {
     match icon {
@@ -68,6 +90,33 @@ pub fn name(icon: &str) -> Option<&'static str> {
     }
 }
 impl CurveSession {
+    pub fn command_option_undo_available(&self)->bool{if self.name=="Circle"{!self.circle_input_history.is_empty()}else{!self.points.is_empty()||(self.name=="Ellipse"&&self.ellipse_options.reference_mode(&self.points)==2)}}
+    /// Owned current option values only; no point buffer or native owner is copied.
+    pub fn capability_request(&self,stage:crate::native_curve_capability::Stage)
+        ->Option<crate::native_curve_capability::Request>{
+        use crate::native_curve_capability::{Options,Request,Stage};
+        if !self.active&&(self.output.is_empty()||matches!(stage,Stage::Capture|Stage::Preview)){return None;}
+        let options=match self.name{
+            "Line"=>Options::Line{both_sides:self.both_sides,length:self.length},
+            "Polyline"=>Options::Polyline{close:self.persistent_close,length:self.length},
+            "InterpCrv"=>Options::InterpCrv{degree:self.degree,knots:self.knots,close:self.persistent_close},
+            "Rectangle"=>Options::Rectangle(self.rectangle.clone()),
+            "Circle"=>{if self.circle_options.constraints.len()>3{return None;}Options::Circle(self.circle_options.clone())},
+            "Ellipse"=>{let mut e=self.ellipse_options.clone();e.mark_foci=self.ellipse_mark_foci();Options::Ellipse(e)},
+            _=>return None,
+        };
+        let has_plan=match self.name{
+            "Circle"=>self.circle_plan.is_some(),"Ellipse"=>self.ellipse_plan.is_some(),
+            "InterpCrv"=>self.spline.is_some(),_=>self.output.len()>=2,
+        };
+        Some(Request{options,stage,input_count:self.points.len(),output_count:self.output.len(),has_plan,mm_per_unit:self.input_mm_per_unit})
+    }
+    pub fn construction_capability(&self,input:crate::geometry_contract::RepresentationKind,
+        stage:crate::native_curve_capability::Stage)->Result<crate::geometry_contract::OperationCapability,crate::geometry_contract::CapabilityError>{
+        use crate::geometry_contract::*;
+        let r=self.capability_request(stage).ok_or(CapabilityError::UnsupportedOperation(OperationId::ConstructCurve))?;
+        operation_capability(OperationId::ConstructCurve,input,OperationOptions::NativeCurve(r))
+    }
     fn circle_input_checkpoint(&self) -> CircleInputCheckpoint {
         CircleInputCheckpoint {
             native_context_key: self.circle_native_context_key,
@@ -77,6 +126,7 @@ impl CurveSession {
             input_mm_per_unit: self.input_mm_per_unit,
             previous: self.circle_previous,
             awaiting_option: self.awaiting_option.clone(),
+            accepted_input_log: self.accepted_input_log.clone(),
         }
     }
     fn restore_circle_input(&mut self, checkpoint: CircleInputCheckpoint) {
@@ -87,18 +137,19 @@ impl CurveSession {
         self.input_mm_per_unit = checkpoint.input_mm_per_unit;
         self.circle_previous = checkpoint.previous;
         self.awaiting_option = checkpoint.awaiting_option;
+        self.accepted_input_log = checkpoint.accepted_input_log;
     }
     fn with_circle_input_checkpoint(
         &mut self,
-        accept: impl FnOnce(&mut Self) -> Result<Effect, String>,
+        accept: impl FnOnce(&mut Self,Option<u64>) -> Result<Effect, String>,
     ) -> Result<Effect, String> {
         if self.name != "Circle" || !self.active {
-            return accept(self);
+            return accept(self,None);
         }
         let next_key = self.circle_native_context_counter.checked_add(1)
             .ok_or("Circle input context identity exhausted; restart the command")?;
         let checkpoint = self.circle_input_checkpoint();
-        match accept(self) {
+        match accept(self,Some(next_key)) {
             Ok(effect) => {
                 if effect != Effect::Cancelled {
                     self.circle_native_context_counter = next_key;
@@ -132,6 +183,10 @@ impl CurveSession {
     pub fn circle_input_context_key(&self) -> u64 {
         if self.name == "Circle" { self.circle_native_context_key } else { 0 }
     }
+    pub fn native_input_revision(&self)->u64{self.native_input_revision}
+    fn next_native_input_revision(&self)->Result<u64,String>{
+        self.native_input_revision.checked_add(1).ok_or_else(||format!("StaleGeometry: {} native input revision exhausted; restart the command",self.name))
+    }
     /// Authoritative retention policy for the native resource adapter.
     pub fn circle_input_context_keys(&self) -> Vec<u64> {
         if self.name != "Circle" { return Vec::new(); }
@@ -161,6 +216,8 @@ impl CurveSession {
             input_mm_per_unit: 1.0,
             ..Self::default()
         };
+        self.construction_capability(crate::geometry_contract::RepresentationKind::Point,
+            crate::native_curve_capability::Stage::Declare).map_err(|e|format!("UnsupportedOperation: {name} declaration: {e:?}"))?;
         Ok(())
     }
     pub fn active(&self) -> bool {
@@ -172,7 +229,9 @@ impl CurveSession {
                 "Input units must be finite, positive and captured before the first point".into(),
             );
         }
+        let next=self.next_native_input_revision()?;
         self.input_mm_per_unit = scale;
+        self.native_input_revision=next;
         Ok(())
     }
     fn length_value(&self, text: &str) -> Result<f64, String> {
@@ -204,7 +263,9 @@ impl CurveSession {
         if matches!(self.name, "Rectangle" | "Circle" | "Ellipse") && !self.points.is_empty() {
             return Ok(());
         }
+        let next=self.next_native_input_revision()?;
         self.frame = Some(frame);
+        self.native_input_revision=next;
         Ok(())
     }
     pub fn name(&self) -> &'static str {
@@ -246,6 +307,11 @@ impl CurveSession {
         normal: [f64; 3],
         kind: u32,
     ) -> Result<Effect, String> {
+        self.accepted_input_log.admit_count()?;
+        let event=self.input_event("native_reference",[("point_world",input_log::vector(&p)),("normal",input_log::vector(&normal)),("reference_kind",crate::builder_history::Json::Number(kind as f64))]);
+        self.with_input_record(event,None,|s|s.ellipse_native_reference_impl(p,normal,kind))
+    }
+    fn ellipse_native_reference_impl(&mut self,p:[f64;3],normal:[f64;3],kind:u32)->Result<Effect,String>{
         if self.name != "Ellipse" || !self.active {
             return Err("No active Ellipse".into());
         }
@@ -289,6 +355,7 @@ impl CurveSession {
         &self.points
     }
     pub fn cancel(&mut self) -> Effect {
+        self.accepted_input_log=input_log::InputLog::default();
         self.awaiting_length = false;
         self.length = None;
         self.active = false;
@@ -499,9 +566,14 @@ impl CurveSession {
         self.active = false;
         Ok(Effect::Commit)
     }
-    pub fn mouse_point(&mut self, mut p: [f64; 3], ortho: bool) -> Result<Effect, String> {
+    pub fn mouse_point(&mut self,p:[f64;3],ortho:bool)->Result<Effect,String>{
+        self.accepted_input_log.admit_count()?;
+        let event=self.input_event("mouse_point",[("point_world",input_log::vector(&p)),("ortho",crate::builder_history::Json::Boolean(ortho))]);
+        self.with_circle_input_checkpoint(|s,key|s.with_input_record(event,key,|s|s.mouse_point_impl(p,ortho)))
+    }
+    fn mouse_point_impl(&mut self, mut p: [f64; 3], ortho: bool) -> Result<Effect, String> {
         if matches!(self.name, "Circle" | "Ellipse") {
-            return self.point(p);
+            return self.point_impl(p);
         }
         if p.iter().any(|v| !v.is_finite() || v.abs() > 1e9) {
             return Err("Coordinate must be finite and within 1e9 mm".into());
@@ -518,7 +590,7 @@ impl CurveSession {
             let chosen = usize::from(local[1].abs() > local[0].abs());
             p = std::array::from_fn(|i| a[i] + axes[chosen][i] * local[chosen]);
         }
-        self.point(p)
+        self.point_impl(p)
     }
     /// Preview uses the same constraints as a click without changing the session.
     pub fn preview_point(&self, p: [f64; 3], ortho: bool) -> Result<[f64; 3], String> {
@@ -531,7 +603,9 @@ impl CurveSession {
             .ok_or("No preview point".into())
     }
     pub fn point(&mut self, p: [f64; 3]) -> Result<Effect, String> {
-        self.with_circle_input_checkpoint(|session| session.point_impl(p))
+        self.accepted_input_log.admit_count()?;
+        let event=self.input_event("point",[("point_world",input_log::vector(&p))]);
+        self.with_circle_input_checkpoint(|s,key|s.with_input_record(event,key,|s|s.point_impl(p)))
     }
     fn point_impl(&mut self, mut p: [f64; 3]) -> Result<Effect, String> {
         if self.name == "Ellipse" {
@@ -624,7 +698,8 @@ impl CurveSession {
             && self.active
             && (text.trim().eq_ignore_ascii_case("undo") || text.trim().eq_ignore_ascii_case("u"))
         {
-            return self.circle_input_undo();
+            let next=self.next_native_input_revision()?;
+            let effect=self.circle_input_undo()?;self.native_input_revision=next;return Ok(effect);
         }
         if self.name == "Circle"
             && self.active
@@ -635,7 +710,8 @@ impl CurveSession {
             // Enter requests a native solve; it accepts no new input state.
             return self.input_impl(text);
         }
-        self.with_circle_input_checkpoint(|session| session.input_impl(text))
+        let event=self.text_event(text)?;
+        self.with_circle_input_checkpoint(|s,key|s.with_input_record(event,key,|s|s.input_impl(text)))
     }
     fn input_impl(&mut self, text: &str) -> Result<Effect, String> {
         let text = text.trim();
@@ -711,7 +787,7 @@ impl CurveSession {
                         .unwrap()
                         .parse::<usize>()
                         .map_err(|_| "Enter an odd degree from 1 to 11")?;
-                    if !(1..=11).contains(&degree) || degree % 2 == 0 {
+                    if !spline::interpolation_degree_valid(degree) {
                         return Err("Enter an odd degree from 1 to 11".into());
                     }
                     self.degree = degree;
@@ -1083,7 +1159,7 @@ impl CurveSession {
                 }
                 let size = self.length_value(text)?;
                 let p = self.ellipse_options.numeric_point(&self.points, size)?;
-                return self.point(p).map(Some);
+                return self.point_impl(p).map(Some);
             }
         }
         Ok(Some(Effect::Waiting))
@@ -1148,9 +1224,9 @@ impl CurveSession {
         normal: [f64; 3],
         kind: u32,
     ) -> Result<Effect, String> {
-        self.with_circle_input_checkpoint(|session| {
-            session.circle_native_reference_impl(p, normal, kind)
-        })
+        self.accepted_input_log.admit_count()?;
+        let event=self.input_event("native_reference",[("point_world",input_log::vector(&p)),("normal",input_log::vector(&normal)),("reference_kind",crate::builder_history::Json::Number(kind as f64))]);
+        self.with_circle_input_checkpoint(|s,key|s.with_input_record(event,key,|s|s.circle_native_reference_impl(p,normal,kind)))
     }
     fn circle_native_reference_impl(
         &mut self,
@@ -1194,12 +1270,17 @@ impl CurveSession {
         Ok(Effect::Waiting)
     }
     pub fn circle_fit_batch(&mut self, points: &[[f64; 3]]) -> Result<Effect, String> {
-        self.with_circle_input_checkpoint(|session| session.circle_fit_batch_impl(points))
+        self.accepted_input_log.admit_count()?;
+        if points.is_empty()||!crate::fit_point_input::admit_count(self.points.len(),points.len()){
+            return Err("FitPoints selection requires 1 through 1024 total points".into());
+        }
+        let event=self.input_event("native_fit_batch",[("points_world",input_log::points(points))]);
+        self.with_circle_input_checkpoint(|s,key|s.with_input_record(event,key,|s|s.circle_fit_batch_impl(points)))
     }
     fn circle_fit_batch_impl(&mut self, points: &[[f64; 3]]) -> Result<Effect, String> {
         if self.circle_reference_mode() != 4
             || points.is_empty()
-            || self.points.len() + points.len() > 1024
+            || !crate::fit_point_input::admit_count(self.points.len(),points.len())
         {
             return Err("FitPoints selection requires 1 through 1024 total points".into());
         }
@@ -1226,6 +1307,14 @@ impl CurveSession {
         normal: [f64; 3],
         radius: f64,
     ) -> Result<Effect, String> {
+        if self.accepted_input_log.latest_native_role("tangent").is_some(){
+            return Err("InvalidBasis: owned native Tangent solve requires checked contact fractions".into());
+        }
+        self.accepted_input_log.admit_count()?;
+        let event=self.input_event("native_solution",[("center",input_log::vector(&center)),("normal",input_log::vector(&normal)),("radius",crate::builder_history::Json::Number(radius)),("role",crate::prepared_result::string("kernel_output_not_original_user_input"))]);
+        self.with_input_record(event,None,|s|s.circle_accept_spatial_solution_impl(center,normal,radius))
+    }
+    fn circle_accept_spatial_solution_impl(&mut self,center:[f64;3],normal:[f64;3],radius:f64)->Result<Effect,String>{
         if !self.active || !self.circle_options.tangent_ready() {
             return Err("No pending tangent solve".into());
         }

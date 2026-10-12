@@ -64,8 +64,16 @@ def run():
             h = next(o for o in doc.Objects if o.TypeId == 'OpenMatrix9Gui::SurfaceHistory')
             check('cold FCStd restore imports native module', 'OpenMatrix9Gui' in sys.modules and not h.Shape.isNull())
             previous = h.Shape.Area
-            source = h.SourceCurves[-1][0]
-            source.Shape = Part.makeLine(App.Vector(25, 0, 0), App.Vector(25, 3, 0))
+            kind = json.loads(h.SurfaceOptions)['kind']
+            if kind == 3:
+                source = h.SourceCurves[-1][0]
+                source.Shape = Part.makeLine(App.Vector(25, 0, 0), App.Vector(25, 3, 0))
+            else:
+                # Sweep grows along its rail; moving the profile to x=25 was
+                # the Loft-specific edit and did not test this saved recipe.
+                h.SourceCurves[0][0].Shape = Part.makeLine(App.Vector(0, 0, 0), App.Vector(25, 0, 0))
+                if kind == 2:
+                    h.SourceCurves[1][0].Shape = Part.makeLine(App.Vector(0, 3, 0), App.Vector(25, 3, 0))
             doc.recompute()
             check('cold restored source edit rebuilds', not h.Shape.isNull()
                   and abs(h.Shape.Area - previous * 5 / 3) < 1e-5)

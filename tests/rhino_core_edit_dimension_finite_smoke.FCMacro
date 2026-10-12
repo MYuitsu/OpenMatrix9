@@ -1,0 +1,46 @@
+"""Explode rejects nonfinite native Dimension graphics before publication."""
+import json,math,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Draft,OpenMatrix9Gui as OM
+from pivy import coin
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'module':OM.__file__,'checks':[]}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def events():QtWidgets.QApplication.processEvents()
+def state(d,name):
+ source=d.getObject(name)
+ return (tuple(o.Name for o in d.Objects),d.UndoCount,d.RedoCount,repr(source.Start) if source else None,repr(source.End) if source else None,repr(source.Dimline) if source else None)
+def enter(text=''):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier));events()
+def run():
+ global console
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');events();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  for case,value in [('nan',float('nan')),('infinity',float('inf'))]:
+   d=App.newDocument('DimensionNonfinite'+case);d.UndoMode=1
+   d.openTransaction('Source');source=Draft.make_dimension(App.Vector(),App.Vector(10,0,0),App.Vector(0,3,0));source.ViewObject.ArrowTypeStart='None';source.ViewObject.ArrowTypeEnd='None';d.commitTransaction();d.recompute();events()
+   d.openTransaction('Redo witness');source.Label='Redo witness';d.commitTransaction();d.undo();events()
+   source_name=source.Name;baseline=state(d,source_name)
+   # Add an actual displayed native line after the valid Dimension primitives.
+   # A nonfinite segment must never compare equivalent to an earlier finite
+   # segment and disappear during deduplication. Keep this case small; the
+   # original special-types suite separately covers default filled arrows.
+   points=coin.SoVertexProperty();points.vertex.setValues([(value,0.,0.),(value,1.,0.)])
+   line=coin.SoLineSet();line.vertexProperty=points;line.numVertices.setValue(2)
+   node=coin.SoSeparator();node.addChild(line);view_node=source.ViewObject.Proxy.node_wld;view_node.addChild(node)
+   observed=points.vertex[0].getValue()[0]
+   check(case+' fixture contains a nonfinite native line coordinate',math.isnan(observed) if case=='nan' else math.isinf(observed))
+   Gui.Selection.clearSelection();Gui.Selection.addSelection(source);console.clear();enter('Explode');enter();enter()
+   report.setdefault('native_input',[]).append({'case':case,'nonfinite_node_attached':view_node.findChild(node)>=0,'transcript':console.toPlainText()})
+   check(case+' rejects all staged outputs',not any(getattr(o,'OM9FeatureId','')=='OM9-TOP11-005' for o in d.Objects))
+   check(case+' retains source geometry and native Undo/Redo',state(d,source_name)==baseline)
+   check(case+' reports nonfinite error with operation and source',all(s in console.toPlainText() for s in ['NonFiniteGeometry','Explode',source_name]))
+   enter('Cancel');d.redo();witness=d.getObject(source_name);check(case+' retains executable Redo',witness is not None and witness.Label=='Redo witness');App.closeDocument(d.Name);events()
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2));QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

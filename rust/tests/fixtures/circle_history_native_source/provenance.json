@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "source": "H:\\FreeCAD-src\\build\\solid-regression-circle-history-modes60-retry-offscreen-20261011\\recorded-results.json",
+  "source_sha256": "6f68235726a9689da1e587aca4d7a74ad5ffa96ea4054291bb50b4e96de9ba03",
+  "scope": "Authored synthetic FreeCAD fixture output from Runtime59;request reconstruction restores source_snapshots from owned input_snapshots. Not an intercepted producer request. Replacement sources are independently captured complete native snapshots from the same fixture document.",
+  "requests": {
+    "around": {
+      "approx_deviation": 0.000445460668585973,
+      "center": [
+        10,
+        0,
+        0
+      ],
+      "fit_deviation": 0,
+      "normal": [
+        1,
+        0,
+        0
+      ],
+      "radius": 4
+    },
+    "tangent": {
+      "approx_deviation": 0,
+      "center": [
+        5,
+        4,
+        0
+      ],
+      "fit_deviation": 0,
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "radius": 4
+    },
+    "fixed_contact": {
+      "approx_deviation": 0,
+      "center": [
+        5,
+        4,
+        0
+      ],
+      "fit_deviation": 0,
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "radius": 4
+    }
+  },
+  "replacement_point": [
+    1,
+    45,
+    0
+  ],
+  "files": [
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/around.json",
+      "sha256": "d76db0d3b23ac1eb6d6d828c06bf03369e0736af42117d36dad74946878a1a95",
+      "bytes": 41212
+    },
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/fixed_contact.json",
+      "sha256": "906849f25962161946bc23172d25051ec06a83d8e4c68c1a487fa4620ea0b130",
+      "bytes": 48223
+    },
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/replacement_line.json",
+      "sha256": "8434fd51764a6ef10eed8eac156784b0b5493ef9f792f3a432b08bbc47c083ef",
+      "bytes": 9456
+    },
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/replacement_point.json",
+      "sha256": "66f809eed582da0f45f7f6e5d9a56b3f5be71587b878b67a037b3a83989ca67e",
+      "bytes": 6751
+    },
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/tangent.json",
+      "sha256": "a14c7fb89f6368621a638654272c989c3f9eef098cbb30b031c687e6352b5b85",
+      "bytes": 52531
+    },
+    {
+      "path": "rust/tests/fixtures/circle_history_native_source/replacement_point_same_document.json",
+      "sha256": "b02effb500498b07c8b2f411fa3711f548fd646c5b864578cd924bcc3ae49c52",
+      "bytes": 6590
+    }
+  ],
+  "fixed_point_initial_oracle_correction": "Initial replacement_point.json is a complete genuine snapshot with the same document UID butdocument token2;the other tangent reference uses token1. Rejection is the existing mixed-document-token gate,not proof of a fixed-point circle constraint. Preserve it as an identity rejection test. Corrected CircleSide point(0,10,0) uses actual token1/epoch3 and independentlycaptured same-document geometry;no native identity stamp is fabricated.",
+  "same_document_replacement_point": [
+    0,
+    10,
+    0
+  ]
+}

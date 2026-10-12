@@ -1,15 +1,21 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "SurfaceGeometry.h"
+#include "CoreLayers.h"
 #include "SurfaceLoft.h"
 #include "SurfaceSeams.h"
 #include "SurfaceRefit.h"
 #include "SurfaceConstraints.h"
 #include "SurfaceHistory.h"
+#include "CoreSurfaceResult.h"
+#include <Mod/Part/App/TopoShapePy.h>
 #include "CurveGeometry.h"
+#include "CoreGeometryContract.h"
+#include "NativeSurfaceRequest.h"
 #include "RustBridge.h"
 #include <App/Document.h>
 #include <App/DocumentObject.h>
 #include <Base/Interpreter.h>
+#include <Base/Exception.h>
 #include <cmath>
 #include <stdexcept>
 #include <sstream>
@@ -82,31 +88,102 @@ Ref transportedSections(PyObject* part,PyObject* wires,bool maintainHeight,const
 }
 namespace OpenMatrix9Gui {
 namespace {
-void verifySurfaceInput(App::Document& doc,const SurfaceInput& input) {
+void verifySurfaceInput(App::Document& doc,const SurfaceInput& input,const char* operation) {
     // Empty guards are intentional for persistent History reconstruction and
     // transient type probes. Accepted interactive selections always carry guards.
-    for(const auto& guard:input.guards)verifyObject(doc,guard);
+    for(const auto& guard:input.guards)try{verifyObject(doc,guard);}
+    catch(const std::exception& error){throw std::runtime_error(std::string("StaleGeometry: ")+operation+" input "+guard.objectName+(guard.subelement.empty()?"":"."+guard.subelement)+": "+error.what());}
 }
 }
-PyObject* surfaceWire(App::Document& doc,const SurfaceInput& input) {
-    verifySurfaceInput(doc,input);
+const char* surfaceOperation(unsigned kind){return kind==1?"Sweep1":kind==2?"Sweep2":kind==3?"Loft":"Surface";}
+unsigned surfaceCapabilityStatus(const SurfaceOptions& o,unsigned representation,unsigned stage,std::size_t inputCount,unsigned railClosed){
+    std::vector<double> pairs;
+    // The scalar ABI accepts at most64 pairs. Excessive counts are sent to
+    // Rust without staging their values; only Rust decides the rejection.
+    if(o.slashes.size()<=64){pairs.reserve(o.slashes.size()*2);for(const auto& [a,b]:o.slashes){pairs.push_back(a);pairs.push_back(b);}}
+    const unsigned flags=(o.frenet?1U:0U)|(o.closed?2U:0U)|(o.maintainHeight?4U:0U)|
+        (o.matchStart?8U:0U)|(o.matchEnd?16U:0U)|(o.history?32U:0U)|(o.historyCommand?64U:0U)|(o.preview?128U:0U);
+    // Local vector storage is initialized/aligned, immutable during the call,
+    // and remains caller-owned. No document/Python/kernel pointer crosses ABI.
+    return om9_native_surface_capability({o.kind,representation,stage,flags,o.style,o.sectionMode,o.pointCount,
+        o.continuityA,o.continuityB,railClosed,inputCount,o.tolerance,pairs.empty()?nullptr:pairs.data(),o.slashes.size()});
+}
+namespace {
+void surfaceAccepted(unsigned status,const char* operation,const std::string& identity){
+    if(status==4)return;
+    const char* code=status==103?"KernelFailure":status==102?"InvalidBasis":"UnsupportedRepresentation";
+    throw std::runtime_error(std::string(code)+": "+operation+" input "+identity+
+        ": unsupported Surface type/options/context ("+std::to_string(status)+")");
+}
+unsigned surfaceRepresentation(PyObject* shape){
+    const auto type=string(shape,"ShapeType");
+    return type=="Edge"?2U:type=="Wire"?3U:type=="Compound"?7U:0U;
+}
+void surfaceCapture(PyObject* shape,const char* operation,const std::string& identity){
+    const auto kind=om9_surface_kind(operation);
+    if(kind){SurfaceOptions options;options.kind=kind;
+        surfaceAccepted(surfaceCapabilityStatus(options,surfaceRepresentation(shape),2,0,0),operation,identity);}
+    // Generic Surface probes inspect geometry only. Concrete construction is
+    // always checked with the real kind/options before a solver is invoked.
+}
+std::string surfaceInputIdentity(const std::vector<SurfaceInput>& inputs){
+    if(inputs.empty())return "<no input>";
+    const auto& first=inputs.front();
+    std::string identity=first.object;
+    if(!first.sub.empty())identity+="."+first.sub;
+    if(inputs.size()>1)identity+=" (+"+std::to_string(inputs.size()-1)+" other inputs)";
+    return identity;
+}
+// Commit diagnostics use frozen selection names, including chain members.
+// Native failed-close rollback may already have invalidated output objects.
+std::string surfacePublicationContext(const char* operation,const std::vector<SurfaceInput>& inputs){
+    std::string context=std::string("KernelFailure: ")+operation+" input ";
+    bool first=true;
+    const auto append=[&](const std::string& object,const std::string& sub){
+        if(!first)context+=", ";first=false;context+=object;if(!sub.empty())context+="."+sub;
+    };
+    for(const auto& input:inputs){append(input.object,input.sub);for(const auto& member:input.chain)append(member.first,member.second);}
+    return context+": ";
+}
+void commitSurfacePublication(App::Document& doc,const std::string& context){
+    try{doc.commitTransaction();}
+    catch(const Base::Exception& e){throw std::runtime_error(context+e.what());}
+    catch(const std::exception& e){throw std::runtime_error(context+e.what());}
+    catch(...){throw std::runtime_error(context+"native commit failed");}
+}
+void surfaceSolveAccepted(const SurfaceOptions& options,const std::vector<SurfaceInput>& inputs,unsigned railClosed){
+    surfaceAccepted(surfaceCapabilityStatus(options,3,3,inputs.size(),railClosed),surfaceOperation(options.kind),surfaceInputIdentity(inputs));
+}
+}
+PyObject* surfaceWire(App::Document& doc,const SurfaceInput& input,const char* operation) {
+    verifySurfaceInput(doc,input,operation);
     auto* object=doc.getObject(input.object.c_str());if(!object)throw std::runtime_error("An input curve was deleted");
-    Ref part(PyImport_ImportModule("Part"));Ref pyObject(object->getPyObject());Ref original(PyObject_GetAttrString(pyObject.p,"Shape"));Ref shape(PyObject_CallMethod(original.p,"copy","OO",Py_True,Py_False));
-    if(!input.chain.empty()){
+    Ref part(PyImport_ImportModule("Part"));Ref pyObject(object->getPyObject());
+    Ref shape([&]()->PyObject*{
+      if(!input.chain.empty()){
         Ref edges(PyList_New(0));
-        for(const auto& [name,sub]:input.chain){Ref segment(surfaceWire(doc,{name,sub}));Ref items(PyObject_GetAttrString(segment.p,"Edges"));
+        for(const auto& [name,sub]:input.chain){Ref segment(surfaceWire(doc,{name,sub},operation));Ref items(PyObject_GetAttrString(segment.p,"Edges"));
             if(PySequence_Size(items.p)!=1)throw std::runtime_error("Each rail chain reference must contain exactly one edge");
             Ref edge(PySequence_GetItem(items.p,0));if(PyList_Append(edges.p,edge.p)<0)throw std::runtime_error(pythonError());}
-        Ref joined(PyObject_CallMethod(part.p,"Wire","O",edges.p));Py_SETREF(shape.p,joined.release());
-    }else if(PyObject_HasAttrString(pyObject.p,"Placement")&&PyObject_HasAttrString(pyObject.p,"getGlobalPlacement")){
+        return PyObject_CallMethod(part.p,"Wire","O",edges.p);
+      }
+      Ref original(PyObject_GetAttrString(pyObject.p,"Shape"));
+      if(!input.sub.empty()){
+        if(input.sub.rfind("Edge",0)!=0&&input.sub.rfind("Wire",0)!=0)throw std::runtime_error("Select a curve or an edge, not a face or vertex");
+        // Select the borrowed subshape before copying: an unrelated sibling's
+        // basis is not the requested curve and must not be cloned or evaluated.
+        Ref element(PyObject_CallMethod(original.p,"getElement","s",input.sub.c_str()));
+        Py_SETREF(original.p,element.release());
+      }
+      validateNativePartShape(original.p,operation,input.object+"."+input.sub);
+      surfaceCapture(original.p,operation,input.object+"."+input.sub);
+      return PyObject_CallMethod(original.p,"copy","OO",Py_True,Py_False);
+    }());
+    if(input.chain.empty()&&PyObject_HasAttrString(pyObject.p,"Placement")&&PyObject_HasAttrString(pyObject.p,"getGlobalPlacement")){
         // Shape already carries local Placement. Apply only the parent's frame.
         Ref global(PyObject_CallMethod(pyObject.p,"getGlobalPlacement",nullptr)),local(PyObject_GetAttrString(pyObject.p,"Placement"));
         Ref inverse(PyObject_CallMethod(local.p,"inverse",nullptr)),parent(PyNumber_Multiply(global.p,inverse.p)),matrix(PyObject_CallMethod(parent.p,"toMatrix",nullptr));
         Ref transformed(PyObject_CallMethod(shape.p,"transformShape","OO",matrix.p,Py_False));
-    }
-    if(input.chain.empty()&&!input.sub.empty()) {
-        if(input.sub.rfind("Edge",0)!=0&&input.sub.rfind("Wire",0)!=0)throw std::runtime_error("Select a curve or an edge, not a face or vertex");
-        Ref element(PyObject_CallMethod(shape.p,"getElement","s",input.sub.c_str()));Py_SETREF(shape.p,element.release());
     }
     const auto type=string(shape.p,"ShapeType");
     if(type!="Wire"&&type!="Edge"&&type!="Compound")throw std::runtime_error("Select a curve object or a surface edge");
@@ -138,22 +215,24 @@ PyObject* surfaceWire(App::Document& doc,const SurfaceInput& input) {
     return wire.release();
 }
 PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& inputs,const SurfaceOptions& options) {
-    for(const auto& input:inputs)verifySurfaceInput(doc,input);
+    for(const auto& input:inputs)verifySurfaceInput(doc,input,surfaceOperation(options.kind));
     // Spec: OM9-SURFACE-001, OM9-SURFACE-003, OM9-SURFACE-009.
     const unsigned rails=options.kind==1?1:options.kind==2?2:0;
-    if(options.kind<1||options.kind>3||inputs.size()<rails+(rails?1:2))throw std::runtime_error("Not enough input curves");
-    if(!om9_surface_options_valid(options.kind,options.style,options.closed))throw std::runtime_error("Unsupported surface options");
-    if(options.closed&&inputs.size()<rails+(rails?2:3))throw std::runtime_error("Closed Sweep needs two profiles; Closed Loft needs three sections");
-    if(options.maintainHeight&&(options.kind!=2||inputs.size()!=3))throw std::runtime_error("Maintain Height currently requires exactly one Sweep2 profile; clear it for multiple profiles");
-    if(!options.slashes.empty()&&(options.kind!=2||inputs.size()!=3||inputs[0].closed||inputs[1].closed||options.continuityA||options.continuityB))
-        throw std::runtime_error("Add Slash currently requires one Sweep2 profile and two open rails, without face continuity constraints");
-    if(options.sectionMode>2||options.pointCount<2||options.pointCount>256||!std::isfinite(options.tolerance)||options.tolerance<=0||options.tolerance>1e6)throw std::runtime_error("Unsupported section fitting options");
-    if(options.continuityA||options.continuityB||options.matchStart||options.matchEnd)
-        return constrainedSurface(doc,inputs,options);
+    // Capture validates portable options before private source processing.
+    // Construct then uses current native wire closedness, not persisted hints.
+    surfaceAccepted(surfaceCapabilityStatus(options,3,2,inputs.size(),0),surfaceOperation(options.kind),surfaceInputIdentity(inputs));
+    if(options.continuityA||options.continuityB||options.matchStart||options.matchEnd){
+        surfaceSolveAccepted(options,inputs,0);return constrainedSurface(doc,inputs,options);
+    }
     Ref part(PyImport_ImportModule("Part")),wires(PyList_New(0));
+    for(const auto& input:inputs){Ref wire(surfaceWire(doc,input,surfaceOperation(options.kind)));
+        if(PyList_Append(wires.p,wire.p)<0)throw std::runtime_error(pythonError());}
+    unsigned railClosed=0;
+    for(unsigned i=0;i<rails&&i<inputs.size();++i)if(flag(PyList_GetItem(wires.p,i),"isClosed"))railClosed|=1U<<i;
+    surfaceSolveAccepted(options,inputs,railClosed);
     bool profileClosure=false;
     for(std::size_t i=0;i<inputs.size();++i){
-        Ref wire(surfaceWire(doc,inputs[i]));
+        Ref wire(Py_NewRef(PyList_GetItem(wires.p,i)));
         const bool nativeClosed=flag(wire.p,"isClosed");
         if(i==rails)profileClosure=nativeClosed;
         if(i>rails&&nativeClosed!=profileClosure)throw std::runtime_error("Use either all open or all closed profiles");
@@ -183,7 +262,8 @@ PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& input
             if(options.sectionMode==2)certifySurfaceRefit(wire.p,rebuilt.p,options.tolerance);
             Py_SETREF(wire.p,rebuilt.release());
         }
-        if(PyList_Append(wires.p,wire.p)<0)throw std::runtime_error(pythonError());
+        // Replace the already-owned source wire after optional section fitting.
+        if(PyList_SetItem(wires.p,static_cast<Py_ssize_t>(i),wire.release())<0)throw std::runtime_error(pythonError());
     }
     if(options.closed&&rails){
         if(!flag(PyList_GetItem(wires.p,0),"isClosed")||(rails==2&&!flag(PyList_GetItem(wires.p,1),"isClosed")))
@@ -221,16 +301,27 @@ PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& input
 void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceInput>& inputs,const SurfaceOptions& options) {
     const char* name=options.kind==1?"Sweep1":options.kind==2?"Sweep2":"Loft";
     const char* feature=options.kind==1?"OM9-SURFACE-001":options.kind==2?"OM9-SURFACE-003":"OM9-SURFACE-009";
-    for(const auto& input:inputs)verifySurfaceInput(doc,input);
-    doc.openTransaction(name);
+    for(const auto& input:inputs)verifySurfaceInput(doc,input,name);
+    const auto evidence=captureSurfaceEvidence(doc,inputs,options);
+    const auto outputName=doc.getUniqueObjectName(name);
+    const auto prepared=prepareSurfaceOutput(doc,shape,evidence,outputName);
+    const auto layer=CoreLayers::captureCircle(doc);verifySurfaceOutput(doc,prepared);
+    const auto commitContext=surfacePublicationContext(name,inputs);
+    if(!doc.openTransactionPreservingRedo(name))throw std::runtime_error(std::string("StaleGeometry: ")+name+" input "+surfaceInputIdentity(inputs)+": Surface publication transaction could not be opened");
     try {
+        verifySurfaceOutput(doc,prepared);
         if(options.history){
-            auto* feature=createSurfaceHistory(doc,shape,inputs,options);Ref object(feature->getPyObject());
+            auto* feature=createSurfaceHistory(doc,prepared,inputs,options);Ref object(feature->getPyObject());
             Ref view(PyObject_GetAttrString(object.p,"ViewObject")),color(Py_BuildValue("(ddd)",0.0,130.0/255.0,85.0/255.0));set(view.p,"ShapeColor",color.p);set(view.p,"LineColor",color.p);
-            doc.recompute();if(!feature->isValid()||feature->Shape.getShape().isNull())throw std::runtime_error("Surface History recompute failed before commit");
-            doc.commitTransaction();return;
+            if(layer.index)CoreLayers::applyCircle(doc,*feature,layer);
+            doc.recomputeFeature(feature,false);if(!feature->isValid()||feature->Shape.getShape().isNull())throw std::runtime_error("Surface History recompute failed before commit");
+            verifySurfaceOutput(doc,prepared);
+            commitSurfacePublication(doc,commitContext);return;
         }
-        Ref pyDoc(doc.getPyObject()),object(PyObject_CallMethod(pyDoc.p,"addObject","ss","Part::Feature",name));set(object.p,"Shape",shape);
+        Ref pyDoc(doc.getPyObject()),object(PyObject_CallMethod(pyDoc.p,"addObject","ss","Part::Feature",outputName.c_str()));
+        if(string(object.p,"Name")!=prepared.outputName)throw std::runtime_error("StaleGeometry: Surface output name changed before publication");
+        Ref privateShape(new Part::TopoShapePy(new Part::TopoShape(prepared.shape)));set(object.p,"Shape",privateShape.p);
+        Ref result(PyUnicode_FromStringAndSize(prepared.result.data(),prepared.result.size()));property(object.p,"App::PropertyString","OM9GeometryResult",result.p);
         Ref id(PyUnicode_FromString(feature)),command(PyUnicode_FromString(name));property(object.p,"App::PropertyString","OM9FeatureId",id.p);property(object.p,"App::PropertyString","OM9Command",command.p);
         Ref sources(PyList_New(0));std::ostringstream settings;settings.precision(17);settings<<"style="<<options.style<<";frenet="<<options.frenet<<";closed="<<options.closed<<";maintainHeight="<<options.maintainHeight<<";sectionMode="<<options.sectionMode<<";pointCount="<<options.pointCount<<";preview="<<options.preview<<";tolerance="<<options.tolerance<<";continuityA="<<options.continuityA<<";continuityB="<<options.continuityB<<";matchStart="<<options.matchStart<<";matchEnd="<<options.matchEnd;
         for(const auto& [a,b]:options.slashes)settings<<";slash="<<a<<","<<b;
@@ -241,7 +332,10 @@ void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceI
         }
         property(object.p,"App::PropertyLinkSubList","SourceCurves",sources.p);Ref config(PyUnicode_FromString(settings.str().c_str()));property(object.p,"App::PropertyString","SurfaceOptions",config.p);
         Ref view(PyObject_GetAttrString(object.p,"ViewObject")),color(Py_BuildValue("(ddd)",0.0,130.0/255.0,85.0/255.0));set(view.p,"ShapeColor",color.p);set(view.p,"LineColor",color.p);
-        doc.recompute();doc.commitTransaction();
+        if(layer.index){Ref outputName(PyObject_GetAttrString(object.p,"Name"));auto* native=doc.getObject(PyUnicode_AsUTF8(outputName.p));if(!native)throw std::runtime_error("Surface output identity missing");CoreLayers::applyCircle(doc,*native,layer);}
+        Ref actualName(PyObject_GetAttrString(object.p,"Name"));auto* native=doc.getObject(PyUnicode_AsUTF8(actualName.p));
+        if(!native||!doc.recomputeFeature(native,false)||!native->isValid())throw std::runtime_error("Surface output recompute failed before commit");
+        verifySurfaceOutput(doc,prepared);commitSurfacePublication(doc,commitContext);
     }catch(...){doc.abortTransaction();throw;}
 }
 }

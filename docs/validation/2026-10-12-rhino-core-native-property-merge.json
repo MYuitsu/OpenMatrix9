@@ -1,0 +1,758 @@
+{
+  "schema_version": 1,
+  "key": "rhino-core-native-property-merge-20261012",
+  "status": "in_progress",
+  "goal_complete": false,
+  "updated_at": "2026-10-12T06:56:12+07:00",
+  "scope": "Native staged property-only Transaction merge; Document savepoint and full RCORE01 remain open",
+  "sources": [
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.h",
+      "bytes": 14667,
+      "sha256": "77329e67cfb39827dca543a5940b4ec0a84a6d6367c25ab1ce1ae2ae41133fde"
+    },
+    {
+      "path": "H:/FreeCAD-src/src/App/Transactions.cpp",
+      "bytes": 37147,
+      "sha256": "ee74b4bf1e7ad2a03e109a500818161d52a3f1bcd8d74b4ac2011fcae8987c67"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/native/property_merge_probe.cpp",
+      "bytes": 12671,
+      "sha256": "6f16857a6749d11772e122fd730d2132df7b71b66a370c5f2d9bbef92dabdb5f"
+    },
+    {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_property_merge_smoke.FCMacro",
+      "bytes": 969,
+      "sha256": "4a6eb7dd2610cd330c6874aae24d2e853b0bc0e36fc8c4622f45d3de3064c6de"
+    }
+  ],
+  "native_api": {
+    "interface": "Transaction::PropertyMerge/preparePropertyMerge/commitPropertyMerge",
+    "layout_change": "Methods/nested stage added; existing caller record/container instance layout retained through a type alias",
+    "semantics": "Borrow unchanged caller records and first-write properties; copy missing replay values privately; preallocate replacement maps/index; reject changed source/destination before nonallocating/no-Copy/no-Paste/no-notification transfer; never stage a caller New record in an owning Transaction.",
+    "budget": "Explicit logical record/metadata bounds and reported native property sizes; actual larger copy measured before transfer; opaque/allocator/peak Copy accounting incomplete",
+    "lifetime_precondition": "Both journals and property values alive and exclusively protected; future Document scope required"
+  },
+  "red": {
+    "artifact": "H:/FreeCAD-src/build/solid-regression-property-merge-red114-offscreen-20261011",
+    "checks": 1,
+    "passed": 0,
+    "failed": 1,
+    "errors": null,
+    "launch": {
+      "host": "H:/FreeCAD-src/build/camera-close-host-green2-20261011/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "AF1836F636C5DFEC633FA7771B104995B6F3E3391A7DB37F2DEE65349DD8A692",
+      "pid": 54600,
+      "module_root": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/solid-regression-property-merge-red114-offscreen-20261011",
+      "exit_code": 0
+    },
+    "fixture": {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_property_merge_smoke.FCMacro",
+      "bytes": 969,
+      "sha256": "4a6eb7dd2610cd330c6874aae24d2e853b0bc0e36fc8c4622f45d3de3064c6de"
+    },
+    "probe": {
+      "path": "H:/FreeCAD-src/build/property-merge-probe-red114-20261012/OM9PropertyMerge.pyd",
+      "bytes": 29184,
+      "sha256": "ab737772900659548f81bd3759d7b4829d4533959e0e38d7cd0d6af43e3e9ecc"
+    },
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-red114-offscreen-20261011/results.json",
+        "bytes": 339,
+        "sha256": "9dd170d6a5404087b9a208f3eae42e383c627daee393f149ca19afbcc6bf7fe9"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-red114-offscreen-20261011/shared-host-launch.json",
+        "bytes": 602,
+        "sha256": "e5d05ea5f0b87afc719521a05deec21211f1ecc93e167e6a123f5dc0748285a8"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-red114-offscreen-20261011/loaded-native-app.json",
+        "bytes": 227,
+        "sha256": "427c86169e519fa2bb15285da9df4aaaf9c4db9a450bb45cbc3ad6a2cdfb587c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-red114-offscreen-20261011/loaded-native-gui.json",
+        "bytes": 172,
+        "sha256": "eff86c5a05e5d5efd68f701954972deca60c899cc0c32f276cb88dfe52bdf274"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-red114-offscreen-20261011/host-stdout.log",
+        "bytes": 353,
+        "sha256": "9ab3b08a09363df8bcdc9dbff1459c592cde3cae4f7f2c463a1e89bfdefa8337"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-red114-offscreen-20261011/host-stderr.log",
+        "bytes": 900,
+        "sha256": "9066c2e4f4982df2632971eaef62e3fcbc27eca78f2a52f8fb073253b64ff421"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-red114-offscreen-20261011/select-plugin.FCMacro",
+        "bytes": 2827,
+        "sha256": "e7ecfcc7ba60a75854ba8b4a2d9505d433ce48da09049e5fdd5dd749101eed15"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-red114-offscreen-20261011/user.cfg",
+        "bytes": 17202,
+        "sha256": "0aab1156b8757a5dc7491a83f8411422fd4d99a0a963098e1f051881daded044"
+      }
+    ]
+  },
+  "red_interpretation": "Actual old native API absence0/1 with normal host0; no old merge emulation. Semantic production atomic failure separately remains355/432.",
+  "first_green": {
+    "artifact": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012",
+    "checks": 25,
+    "passed": 25,
+    "failed": 0,
+    "errors": null,
+    "launch": {
+      "host": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "AF1836F636C5DFEC633FA7771B104995B6F3E3391A7DB37F2DEE65349DD8A692",
+      "pid": 70116,
+      "module_root": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012",
+      "exit_code": 0
+    },
+    "fixture": {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_property_merge_smoke.FCMacro",
+      "bytes": 969,
+      "sha256": "4a6eb7dd2610cd330c6874aae24d2e853b0bc0e36fc8c4622f45d3de3064c6de"
+    },
+    "probe": {
+      "path": "H:/FreeCAD-src/build/property-merge-probe-green118-20261012/OM9PropertyMerge.pyd",
+      "bytes": 44544,
+      "sha256": "8355a0b573b88e7088e1905cf3a14c92e51fe47bf69534b4b18ff06ce41d63a6"
+    },
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/results.json",
+        "bytes": 2933,
+        "sha256": "dde6d473e9db9fd0fca3aa43eb0e1d4d1256aeba40feeb9f861fee1c76c8f692"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/shared-host-launch.json",
+        "bytes": 597,
+        "sha256": "8fe91ea0ddf36c1bfc102334cce748c838782b840eb2054090cfa286173d1e18"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/loaded-native-app.json",
+        "bytes": 237,
+        "sha256": "e6af99899a6aef45ca7ffe8ac22c6de0b4bce5c1ae27ce12c73c86539c474b6e"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 182,
+        "sha256": "87e748b63a8cac1d9d22cef2493ee78bcad6f7813aeee9a0c0d93d0f6034cee0"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/host-stdout.log",
+        "bytes": 363,
+        "sha256": "660a74b8a36f67296606659d60baa40f20d6cd9f09a1b387ea8845232b2fc179"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/host-stderr.log",
+        "bytes": 1079,
+        "sha256": "dff5ca03005619acc29274f5e907860b7aa1bd6129280ced5efefc17647c6ee6"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/select-plugin.FCMacro",
+        "bytes": 2826,
+        "sha256": "f537306c089f52396a92e8f32a51c95ba8bb544aa1a27789110fc55e110ca86f"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/user.cfg",
+        "bytes": 17172,
+        "sha256": "5107ac72d9d8c8fbf0045ddd55bd949b9987f0b98d19d119a51fe9736d26ec47"
+      }
+    ]
+  },
+  "focused_native": {
+    "artifact": "H:/FreeCAD-src/build/property-merge-green119-offscreen-20261012",
+    "checks": 29,
+    "passed": 29,
+    "failed": 0,
+    "errors": null,
+    "launch": {
+      "host": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "AF1836F636C5DFEC633FA7771B104995B6F3E3391A7DB37F2DEE65349DD8A692",
+      "pid": 12648,
+      "module_root": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/property-merge-green119-offscreen-20261012",
+      "exit_code": 0
+    },
+    "fixture": {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_property_merge_smoke.FCMacro",
+      "bytes": 969,
+      "sha256": "4a6eb7dd2610cd330c6874aae24d2e853b0bc0e36fc8c4622f45d3de3064c6de"
+    },
+    "probe": {
+      "path": "H:/FreeCAD-src/build/property-merge-probe-green119-20261012/OM9PropertyMerge.pyd",
+      "bytes": 48128,
+      "sha256": "978f2e8ce7b75cb5f95ed9f140d18651f045c900577a3ce9e014f052b913c712"
+    },
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green119-offscreen-20261012/results.json",
+        "bytes": 3385,
+        "sha256": "9be3da1eecaeaa2ace7fb6490007a26f18a20ab0236ecf3acb09b2f16c19d64d"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green119-offscreen-20261012/shared-host-launch.json",
+        "bytes": 597,
+        "sha256": "0c29ad6a4c45f3b11e82d4d90b6cf43922e14e1d005823d8c372a80fdee27f6d"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green119-offscreen-20261012/loaded-native-app.json",
+        "bytes": 237,
+        "sha256": "e6af99899a6aef45ca7ffe8ac22c6de0b4bce5c1ae27ce12c73c86539c474b6e"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green119-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 182,
+        "sha256": "87e748b63a8cac1d9d22cef2493ee78bcad6f7813aeee9a0c0d93d0f6034cee0"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green119-offscreen-20261012/host-stdout.log",
+        "bytes": 363,
+        "sha256": "660a74b8a36f67296606659d60baa40f20d6cd9f09a1b387ea8845232b2fc179"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green119-offscreen-20261012/host-stderr.log",
+        "bytes": 1079,
+        "sha256": "dff5ca03005619acc29274f5e907860b7aa1bd6129280ced5efefc17647c6ee6"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green119-offscreen-20261012/select-plugin.FCMacro",
+        "bytes": 2826,
+        "sha256": "f537306c089f52396a92e8f32a51c95ba8bb544aa1a27789110fc55e110ca86f"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green119-offscreen-20261012/user.cfg",
+        "bytes": 17172,
+        "sha256": "b5204aee304c5a529f77f82e9705234beed7be61a6e4eea46102bb9679fbc59b"
+      }
+    ]
+  },
+  "regressions": [
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-property-merge-result118-offscreen-20261011",
+      "checks": 33,
+      "passed": 33,
+      "failed": 0,
+      "errors": null,
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "AF1836F636C5DFEC633FA7771B104995B6F3E3391A7DB37F2DEE65349DD8A692",
+        "pid": 50412,
+        "module_root": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-property-merge-result118-offscreen-20261011",
+        "exit_code": 0
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_curve_result_native_smoke.FCMacro",
+        "bytes": 7802,
+        "sha256": "ca3e389248e45d35584fe3dbe8c58b921a5b6c746d6bd7cbb5423b4ca3647b5e"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-result118-offscreen-20261011/results.json",
+          "bytes": 458247,
+          "sha256": "8d316bc48b863aa3facfa7e8e841df228615f60da5e76d04eb7387645a4587d4"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-result118-offscreen-20261011/shared-host-launch.json",
+          "bytes": 615,
+          "sha256": "04d8f6a360edf3b825a81a57f9c7bd8f1d168e92a38f8b45b5c8e6890bf205f6"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-result118-offscreen-20261011/loaded-native-app.json",
+          "bytes": 237,
+          "sha256": "e6af99899a6aef45ca7ffe8ac22c6de0b4bce5c1ae27ce12c73c86539c474b6e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-result118-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 182,
+          "sha256": "87e748b63a8cac1d9d22cef2493ee78bcad6f7813aeee9a0c0d93d0f6034cee0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-result118-offscreen-20261011/host-stdout.log",
+          "bytes": 363,
+          "sha256": "660a74b8a36f67296606659d60baa40f20d6cd9f09a1b387ea8845232b2fc179"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-result118-offscreen-20261011/host-stderr.log",
+          "bytes": 7137,
+          "sha256": "6f796b5d246a3d8feda31f2d7db159859d8e0e31aeb138816c4d09e16e381f38"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-result118-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2850,
+          "sha256": "84ef7ad470c7dbbd27c02390cebcd86a5b59833b9260f1ff812e2ae284dd8a59"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-result118-offscreen-20261011/user.cfg",
+          "bytes": 18185,
+          "sha256": "5a018939589f54f19104d0984f0a033aa3f4b6281c8a54dc7762ecf9ba598b06"
+        }
+      ]
+    },
+    {
+      "artifact": "H:/FreeCAD-src/build/solid-regression-property-merge-modes118-offscreen-20261011",
+      "checks": 109,
+      "passed": 109,
+      "failed": 0,
+      "errors": null,
+      "launch": {
+        "host": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/OM9NativeGuiTest.exe",
+        "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+        "plugin": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\bin\\OpenMatrix9Gui.pyd",
+        "plugin_sha256": "AF1836F636C5DFEC633FA7771B104995B6F3E3391A7DB37F2DEE65349DD8A692",
+        "pid": 18612,
+        "module_root": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\Mod\\OpenMatrix9",
+        "output": "H:/FreeCAD-src/build/solid-regression-property-merge-modes118-offscreen-20261011",
+        "exit_code": 0
+      },
+      "fixture": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_circle_history_modes_result_smoke.FCMacro",
+        "bytes": 17219,
+        "sha256": "f5154879b54a9b1af1054f7a6ec33506e6556ac1703f014b7beb845bd1be5134"
+      },
+      "probe": null,
+      "files": [
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-modes118-offscreen-20261011/results.json",
+          "bytes": 21943,
+          "sha256": "877a4f913a6cc9809c8263fc894bd5029bc5963797d14ea07b027fd07ef6a415"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-modes118-offscreen-20261011/shared-host-launch.json",
+          "bytes": 614,
+          "sha256": "0a12f1704ae1230c66afd9aa7a4b72ee3245fab33ababfd6f4ede34b36ccb759"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-modes118-offscreen-20261011/loaded-native-app.json",
+          "bytes": 237,
+          "sha256": "e6af99899a6aef45ca7ffe8ac22c6de0b4bce5c1ae27ce12c73c86539c474b6e"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-modes118-offscreen-20261011/loaded-native-gui.json",
+          "bytes": 182,
+          "sha256": "87e748b63a8cac1d9d22cef2493ee78bcad6f7813aeee9a0c0d93d0f6034cee0"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-modes118-offscreen-20261011/host-stdout.log",
+          "bytes": 15248,
+          "sha256": "1d6ae6dd8f4f5fb524e61361d409622c708bd2e2b3f01666f8cbd65d072b57b2"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-modes118-offscreen-20261011/host-stderr.log",
+          "bytes": 37637,
+          "sha256": "faad8770d4717224a3a81a68e5c14243d9891b9d7734d1cb7ad743e691e71b2a"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-modes118-offscreen-20261011/select-plugin.FCMacro",
+          "bytes": 2849,
+          "sha256": "dcf56acabeb4815686d11a2b03dad6747d4376041aa8a22426cfdbd4ffa1cd74"
+        },
+        {
+          "path": "H:/FreeCAD-src/build/solid-regression-property-merge-modes118-offscreen-20261011/user.cfg",
+          "bytes": 18186,
+          "sha256": "c189efd98369a42c09a63b15d9745e6d0d9189552141abe54bcade391206faeb"
+        }
+      ]
+    }
+  ],
+  "final_native_checks": 171,
+  "final_native_hosts": 3,
+  "earlier_native25": {
+    "artifact": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012",
+    "checks": 25,
+    "passed": 25,
+    "failed": 0,
+    "errors": null,
+    "launch": {
+      "host": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "AF1836F636C5DFEC633FA7771B104995B6F3E3391A7DB37F2DEE65349DD8A692",
+      "pid": 70116,
+      "module_root": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012",
+      "exit_code": 0
+    },
+    "fixture": {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_property_merge_smoke.FCMacro",
+      "bytes": 969,
+      "sha256": "4a6eb7dd2610cd330c6874aae24d2e853b0bc0e36fc8c4622f45d3de3064c6de"
+    },
+    "probe": {
+      "path": "H:/FreeCAD-src/build/property-merge-probe-green118-20261012/OM9PropertyMerge.pyd",
+      "bytes": 44544,
+      "sha256": "8355a0b573b88e7088e1905cf3a14c92e51fe47bf69534b4b18ff06ce41d63a6"
+    },
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/results.json",
+        "bytes": 2933,
+        "sha256": "dde6d473e9db9fd0fca3aa43eb0e1d4d1256aeba40feeb9f861fee1c76c8f692"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/shared-host-launch.json",
+        "bytes": 597,
+        "sha256": "8fe91ea0ddf36c1bfc102334cce748c838782b840eb2054090cfa286173d1e18"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/loaded-native-app.json",
+        "bytes": 237,
+        "sha256": "e6af99899a6aef45ca7ffe8ac22c6de0b4bce5c1ae27ce12c73c86539c474b6e"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/loaded-native-gui.json",
+        "bytes": 182,
+        "sha256": "87e748b63a8cac1d9d22cef2493ee78bcad6f7813aeee9a0c0d93d0f6034cee0"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/host-stdout.log",
+        "bytes": 363,
+        "sha256": "660a74b8a36f67296606659d60baa40f20d6cd9f09a1b387ea8845232b2fc179"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/host-stderr.log",
+        "bytes": 1079,
+        "sha256": "dff5ca03005619acc29274f5e907860b7aa1bd6129280ced5efefc17647c6ee6"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/select-plugin.FCMacro",
+        "bytes": 2826,
+        "sha256": "f537306c089f52396a92e8f32a51c95ba8bb544aa1a27789110fc55e110ca86f"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/property-merge-green118-offscreen-20261012/user.cfg",
+        "bytes": 17172,
+        "sha256": "5107ac72d9d8c8fbf0045ddd55bd949b9987f0b98d19d119a51fe9736d26ec47"
+      }
+    ]
+  },
+  "atomic_baseline": {
+    "artifact": "H:/FreeCAD-src/build/solid-regression-property-merge-atomic118-offscreen-20261011",
+    "checks": 432,
+    "passed": 355,
+    "failed": 77,
+    "errors": null,
+    "launch": {
+      "host": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/OM9NativeGuiTest.exe",
+      "host_sha256": "EDACC467A1BBF247B7339496EA3E7A6FD81D73DD0DCA1E33647AA3A6ABD351DA",
+      "plugin": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\bin\\OpenMatrix9Gui.pyd",
+      "plugin_sha256": "AF1836F636C5DFEC633FA7771B104995B6F3E3391A7DB37F2DEE65349DD8A692",
+      "pid": 68796,
+      "module_root": "H:\\FreeCAD-src\\build\\initial-contacts-runtime112-20261012\\Mod\\OpenMatrix9",
+      "output": "H:/FreeCAD-src/build/solid-regression-property-merge-atomic118-offscreen-20261011",
+      "exit_code": 0
+    },
+    "fixture": {
+      "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/rhino_core_circle_history_atomic_semantic_smoke.FCMacro",
+      "bytes": 7499,
+      "sha256": "7bce865d4c7a42ee6e54f8fb9a95fceecfd05debad969beb153ca18405be92e2"
+    },
+    "probe": null,
+    "files": [
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-atomic118-offscreen-20261011/results.json",
+        "bytes": 189203,
+        "sha256": "544831380d0039cd2b5ed8bd288cd934061b457d65491a179fae394173c85cb7"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-atomic118-offscreen-20261011/shared-host-launch.json",
+        "bytes": 615,
+        "sha256": "10217238e0115ba893b8306cb4da67df88f8a1ac4f0a80f7da02bae0ee898c5b"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-atomic118-offscreen-20261011/loaded-native-app.json",
+        "bytes": 237,
+        "sha256": "e6af99899a6aef45ca7ffe8ac22c6de0b4bce5c1ae27ce12c73c86539c474b6e"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-atomic118-offscreen-20261011/loaded-native-gui.json",
+        "bytes": 182,
+        "sha256": "87e748b63a8cac1d9d22cef2493ee78bcad6f7813aeee9a0c0d93d0f6034cee0"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-atomic118-offscreen-20261011/host-stdout.log",
+        "bytes": 363,
+        "sha256": "660a74b8a36f67296606659d60baa40f20d6cd9f09a1b387ea8845232b2fc179"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-atomic118-offscreen-20261011/host-stderr.log",
+        "bytes": 55112,
+        "sha256": "b0df90b082e7a83c9de038337290bdf0eaca1e2e2e92ccbc363337a5ecdec513"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-atomic118-offscreen-20261011/select-plugin.FCMacro",
+        "bytes": 2850,
+        "sha256": "7082b1e9d9bb8a6efb609411fb64c3b290d1c874a84af85d677d530422f0c5ab"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/solid-regression-property-merge-atomic118-offscreen-20261011/user.cfg",
+        "bytes": 18063,
+        "sha256": "90360a89bb89b50486eb45e1e371e441642d90bfa68ba6e2dbbb54c9b04f2259"
+      }
+    ]
+  },
+  "atomic_callbacks": 48,
+  "selected_app": {
+    "path": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/FreeCADApp.dll",
+    "bytes": 9934336,
+    "sha256": "0d61f7b8cca103ef5bd619cab5be2a2f66cb4f6088c61be491e2a31cb9e05329"
+  },
+  "selected_gui": {
+    "path": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/FreeCADGui.dll",
+    "bytes": 26239488,
+    "sha256": "8819fc482151dfef1964d7d3071ebd67ab3137a5a9d660b99a708ce13c395677"
+  },
+  "host_executable": {
+    "path": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/OM9NativeGuiTest.exe",
+    "bytes": 743424,
+    "sha256": "edacc467a1bbf247b7339496ea3e7a6fd81d73dd0dca1e33647aa3a6abd351da"
+  },
+  "plugin": {
+    "path": "H:/FreeCAD-src/build/initial-contacts-runtime112-20261012/bin/OpenMatrix9Gui.pyd",
+    "bytes": 16990720,
+    "sha256": "af1836f636c5dfec633fa7771b104995b6f3e3391a7db37f2dee65349dd8a692"
+  },
+  "probe": {
+    "path": "H:/FreeCAD-src/build/property-merge-probe-green119-20261012/OM9PropertyMerge.pyd",
+    "bytes": 48128,
+    "sha256": "978f2e8ce7b75cb5f95ed9f140d18651f045c900577a3ce9e014f052b913c712"
+  },
+  "probe_builds": [
+    {
+      "folder": "H:/FreeCAD-src/build/property-merge-probe-red114-20261012",
+      "inputs": {
+        "path": "H:/FreeCAD-src/build/property-merge-probe-red114-20261012/inputs.json",
+        "bytes": 6860,
+        "sha256": "64810dcead4f4650f5ddf9e5c6e3bb770451ecfe42e2e94b67bb35bd01190dcf"
+      },
+      "compile_log": {
+        "path": "H:/FreeCAD-src/build/property-merge-probe-red114-20261012/compile.log",
+        "bytes": 127025,
+        "sha256": "8b2ea1fb670e13145d835a8a1d1eeef20456364ae8d498115b37980d50f485c9"
+      },
+      "link_log": {
+        "path": "H:/FreeCAD-src/build/property-merge-probe-red114-20261012/link.log",
+        "bytes": 168,
+        "sha256": "5f8d73dad333f865574282f1f6b142482503023c84614784e0b5413d7d15fa7f"
+      },
+      "outcome": "compile_link_succeeded",
+      "historical_source": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/native/property_merge_probe.cpp",
+        "bytes": 9919,
+        "sha256": "6f421718eb360dd282f9e47847f4aeb33054c18e7fe515926d8a95fe0cfcc487"
+      },
+      "historical_native_header": {
+        "path": "H:/FreeCAD-src/src/App/Transactions.h",
+        "bytes": 13263,
+        "sha256": "b40694aba9dffa66f93fe150e9a4368db1a0ecf5baa7097e4419afe8cb079f59"
+      }
+    },
+    {
+      "folder": "H:/FreeCAD-src/build/property-merge-probe-green117-20261012",
+      "inputs": {
+        "path": "H:/FreeCAD-src/build/property-merge-probe-green117-20261012/inputs.json",
+        "bytes": 6889,
+        "sha256": "1698fb48483608babca6203b06493c73bffe12dc1de5f12e9bdead26bcb5bcfa"
+      },
+      "compile_log": {
+        "path": "H:/FreeCAD-src/build/property-merge-probe-green117-20261012/compile.log",
+        "bytes": 128258,
+        "sha256": "ecf31b030b50891b263adfa7f3b25c97f03b2c759b481ab63001244936725d13"
+      },
+      "link_log": null,
+      "outcome": "compile_failed_test_pointer_expression",
+      "historical_source": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/native/property_merge_probe.cpp",
+        "bytes": 10370,
+        "sha256": "66a273efbf6493832086f6ffb4f91fa91007026cce8b409eeaac622d82eb2eed"
+      },
+      "historical_native_header": {
+        "path": "H:/FreeCAD-src/src/App/Transactions.h",
+        "bytes": 14667,
+        "sha256": "77329e67cfb39827dca543a5940b4ec0a84a6d6367c25ab1ce1ae2ae41133fde"
+      }
+    },
+    {
+      "folder": "H:/FreeCAD-src/build/property-merge-probe-green118-20261012",
+      "inputs": {
+        "path": "H:/FreeCAD-src/build/property-merge-probe-green118-20261012/inputs.json",
+        "bytes": 6889,
+        "sha256": "f765d8ab228723e026261ec7e988cbc168ba6aed321cc87f7b797ffcbc9e15cc"
+      },
+      "compile_log": {
+        "path": "H:/FreeCAD-src/build/property-merge-probe-green118-20261012/compile.log",
+        "bytes": 127025,
+        "sha256": "8b2ea1fb670e13145d835a8a1d1eeef20456364ae8d498115b37980d50f485c9"
+      },
+      "link_log": {
+        "path": "H:/FreeCAD-src/build/property-merge-probe-green118-20261012/link.log",
+        "bytes": 172,
+        "sha256": "238d7409a928a08f38b06c378f28c0378aa474843f02348e67d422efbebf7ced"
+      },
+      "outcome": "compile_link_succeeded",
+      "historical_source": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/native/property_merge_probe.cpp",
+        "bytes": 10371,
+        "sha256": "d077948362ad69ee9f5d36f26c341fba599c244627db58eca1df7a894308d23c"
+      },
+      "historical_native_header": {
+        "path": "H:/FreeCAD-src/src/App/Transactions.h",
+        "bytes": 14667,
+        "sha256": "77329e67cfb39827dca543a5940b4ec0a84a6d6367c25ab1ce1ae2ae41133fde"
+      }
+    },
+    {
+      "folder": "H:/FreeCAD-src/build/property-merge-probe-green119-20261012",
+      "inputs": {
+        "path": "H:/FreeCAD-src/build/property-merge-probe-green119-20261012/inputs.json",
+        "bytes": 6889,
+        "sha256": "38b2e5d77cdbb8422dd68895b409ec44ec5016236469d553dfe93259c9346673"
+      },
+      "compile_log": {
+        "path": "H:/FreeCAD-src/build/property-merge-probe-green119-20261012/compile.log",
+        "bytes": 127025,
+        "sha256": "8b2ea1fb670e13145d835a8a1d1eeef20456364ae8d498115b37980d50f485c9"
+      },
+      "link_log": {
+        "path": "H:/FreeCAD-src/build/property-merge-probe-green119-20261012/link.log",
+        "bytes": 172,
+        "sha256": "d2a9c3c97f20ebbdb3ed74ca46fce541df93c691f3bd85a1ae05c6602f82b54c"
+      },
+      "outcome": "compile_link_succeeded",
+      "historical_source": {
+        "path": "H:/FreeCAD-src/Mod/OpenMatrix9/tests/native/property_merge_probe.cpp",
+        "bytes": 12671,
+        "sha256": "6f16857a6749d11772e122fd730d2132df7b71b66a370c5f2d9bbef92dabdb5f"
+      },
+      "historical_native_header": {
+        "path": "H:/FreeCAD-src/src/App/Transactions.h",
+        "bytes": 14667,
+        "sha256": "77329e67cfb39827dca543a5940b4ec0a84a6d6367c25ab1ce1ae2ae41133fde"
+      }
+    }
+  ],
+  "native_build": {
+    "inputs": {
+      "path": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/inputs.json",
+      "bytes": 43984,
+      "sha256": "917e33391da4731bd1cc342aef07c6d53dbd63bfd75cfdcadfce127b0c4fa769"
+    },
+    "receipt": {
+      "path": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/build.exit.json",
+      "bytes": 104,
+      "sha256": "34099a12dcc9a6f0718920566d85f4ca81a0d493ac6733bc692b750a144ccd88"
+    },
+    "compile_log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/compile.log",
+      "bytes": 238,
+      "sha256": "8f536ec4afd5166382abcee463568f374d6dd7d8e02389a2ea8c0fb149bb2178"
+    },
+    "link_log": {
+      "path": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "exit_code": 0,
+    "target": "Native FreeCADApp object phony target and redirected DLL/lib/PDB link",
+    "object_candidates": 102,
+    "source_candidates": 189,
+    "source_candidates_match": true,
+    "compiler_dependency_certificate": false,
+    "shared_outputs_unchanged": [
+      {
+        "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.dll",
+        "bytes": 9877504,
+        "sha256": "c13df12404f5ab5ab22158190e1181bce81e8182a34c9bd6b9ae0879ee0b9020"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/relWithDebInfo/src/App/FreeCADApp.lib",
+        "bytes": 3103284,
+        "sha256": "59b7845e365bdc9f8ada83b2110fbd258c612fa3d0fbf9e2f449e154f51b861c"
+      },
+      {
+        "path": "H:/FreeCAD-src/build/relWithDebInfo/bin/FreeCADApp.pdb",
+        "bytes": 254824448,
+        "sha256": "16cc28a2a42fe4076a2f1b8e5b772fb914e4a363beca1c1c6c8547eae8bb8c57"
+      }
+    ]
+  },
+  "failed_native_builds": [
+    {
+      "folder": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge115-20261012",
+      "inputs": {
+        "path": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge115-20261012/inputs.json",
+        "bytes": 43984,
+        "sha256": "5a70f34511ad3167f09369fab2d53a0de5ce4786fc75a8928741fd40b1404c89"
+      },
+      "compile_log": {
+        "path": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge115-20261012/compile.log",
+        "bytes": 4998,
+        "sha256": "00b371a09dbddfffffb9b9e158cec9c883353d7624a2d46722cfb508795e376d"
+      },
+      "observed_exit_code": 1,
+      "reason": "MSVC initializer-list pointer type inference; replaced with explicit bounded string charges"
+    },
+    {
+      "folder": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge116-20261012",
+      "inputs": {
+        "path": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge116-20261012/inputs.json",
+        "bytes": 43984,
+        "sha256": "4e70ce9a0c5c484d46a927a1bc3c2cc2b89de69ce3f8cb79e0f58e33cd38615a"
+      },
+      "compile_log": {
+        "path": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge116-20261012/compile.log",
+        "bytes": 8559,
+        "sha256": "558a8097d68295d499145020dc722364be7b0b6eaf78b16936dac901b9a3493c"
+      },
+      "observed_exit_code": 1,
+      "reason": "std::vector inferred copying Edit containing unique_ptr; made Edit explicitly movable and noncopyable"
+    }
+  ],
+  "host_selection": {
+    "path": "H:/FreeCAD-src/build/atomic-host-app-savepoint-merge117-20261012/test-host-selection118.json",
+    "bytes": 1698,
+    "sha256": "c96ab9f47010036926fb8b5d8764e3d1b715cafa04a0727c58d849c8bb7ebe42"
+  },
+  "native_design_approved": true,
+  "document_scope_implemented": false,
+  "circle_integrated": false,
+  "rust_rerun": false,
+  "remaining": [
+    "Full original RCORE-01 remains open: stable GeometryRef identity/revision/representation/world, complete owned geometry/topology/attributes/units, adapters1–7, C01–C12, T01–T11, every enabled GeometryResult consumer, and independent read/edit/retain/export of all supported families.",
+    "Initial Tangent now binds actual solved contact fractions to the retained owned selected curves, separately from probes; verifies circle/plane/D1/radial tangency/FromFirst/fixed-point null slots before session and common result publication. Checked analytic output and Deformable native spline basis are bound to the replayed plan. Live line/fixed/FromFirst/spline and genuinely nonplanar NURBS fixtures pass; this does not certify all native solver roots/families/options/backends. Generic CAD Edge/Face snap provenance, every other output consumer and complete old-format acceptance remain required. Raw old owned native_solution packets without contact metadata are rejected; historical saved result bytes remain until current recompute. Pure legacy numeric direct solution paths are retained and are not certified by this checked-contact output gate.",
+    "Raw native offset D3 discrepancy remains enabled RED: independent mathematical derivatives match45 queries, native differs at36. No dependency patch/rebuild. Higher-order parity, extreme asymmetric weights, complete UV/retained trim/nested native chains and periodic parameter continuation beyond captured natural basis still require native acceptance evidence.",
+    "Nineteen captured families/183-query synthetic tangent circles pass owned contact admission; live native nonplanar checks exercise retained contacts on actual spatial NURBS History. This is named fixture coverage, not all native solver roots, curve families/options/backends, global conversion or rigorous deviation bounds. The spatial archive is reopened in the same host; independent cold spatial contact acceptance remains separate.",
+    "Native Transaction staged property merge is implemented and tested, but App::Document::PropertyReplayTransaction, private replay routing, observer/lifetime/history barriers, checked rollback/error cleanup, booking materialization and recipe-v2/legacy Circle integration remain absent. Current new App117 unchanged semantic fixture remains RED355/432,48 callbacks,normal host exit0. Standalone journal tests use real native Transaction/Property with a native tracked test object; they do not prove visible Document Undo/Redo, source/child graph ownership or full consumer/lifecycle semantics. The approved full savepoint contract remains required.",
+    "Task2/3 remain open: generic snap/pick/mouse/render and parameter provenance; snapshot sharing, aggregate allocation/traversal/worker/cancellation bounds; Rebuild and every other enabled result consumer. Per-basis decoder bounds and sampled tests do not establish full aggregate budgets or lifecycle.",
+    "Global conversion/deviation/locus exactness and complete parameter/topology maps remain unproven, with maps null. Full CAD-versus-mesh solid validity/orientation/manifold/cavity coverage, supported attributes and persistence families remain required.",
+    "Fresh reconstructed Runtime93 packets retain genuine resolved fractions and all20 original recipes/points/plans/roles/probe/path parameters. Old Runtime59 fixtures remain immutable. Historical stored results may retain their old bytes; current recompute obtains new complete evidence. Raw legacy producer requests lacking contact metadata are rejected instead of bypassing verification. This does not replace all historical-format acceptance or production deployment requirements.",
+    "Prebuild1503 candidate inputs preserve production candidates at postbuild/postnative checkpoints. Full inventory match is false: one spatial assertion wrapper was corrected after build to inspect initial evidence only while the result is ConstructCurve, avoiding subsequently changed History sources. After postnative, concurrent work changed/added rust/src/command_options.rs, rust/src/lib.rs, rust/tests/command_options.rs. Current entire production source is therefore not certified by Runtime112; selected contact sources/actual fixture bytes still match their launch checkpoint. This is not an exact compiler dependency certificate. Shared SDK/App/Gui/host/solver reused; no native root rebuild, deployment or Git publication.",
+    "Journal admission bounds logical metadata/record traversal and native Property::getMemSize accounting before transfer; unusually larger copies are rejected after copying. Native allocator/container overhead, opaque kernel resources and peak Copy allocation are not fully certified. Both journals/property values must remain alive and exclusively protected; the future Document scope must provide that protection, including Copy/Paste/destruction callbacks. The staged API alone is not a complete atomic replay or worker memory-safety boundary.",
+    "Only native App objects were rebuilt in the single SDK cache, with DLL/import-lib/PDB link outputs redirected. Shared SDK binaries remain byte-identical; one unchanged test launcher was copied and Gui hard-linked for the isolated App test. Current plugin Runtime112 is unchanged and does not call the new API; an explicit matching App SDK import override and complete production ABI/deployment acceptance still remain for Document integration. Rust was not rerun for this native-only component; prior989/1 is historical, not current whole-source certification."
+  ],
+  "next_action": "Implement App::Document::PropertyReplayTransaction and before-mutation observer/lifetime/history barriers with private property journal routing before caller booking materializes; use staged merge, checked rollback and protected invalid-output cleanup. Integrate Circle recipe-v2/legacy and matching native App import/host selection, then pass unchanged432/owner-close plus actual Document Undo/Redo/booking and Copy/Paste/cleanup callbacks. Preserve every original RCORE01 requirement; no scope or full goal completion from journal tests.",
+  "prior_checkpoint": {
+    "path": "H:/FreeCAD-src/Mod/OpenMatrix9/docs/validation/2026-10-12-rhino-core-initial-curve-owned-contacts.json",
+    "bytes": 69669,
+    "sha256": "e95de282ca87be17685e1a0ac751e56e2e2ab2f4a4848854112c19a98a65a514"
+  }
+}

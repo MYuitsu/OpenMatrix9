@@ -1,0 +1,95 @@
+"""RCORE-01 native validity, shell/solid policy and immutable orientation frames."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[],'descriptors':{},'native_oracles':{}}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def leaves(row):
+ if row['representation']=='instance':return leaves(row['geometry_data']['definition_geometry'])
+ if row['representation']=='group':return [r for c in row['geometry_data']['members'] for r in leaves(c)]
+ return [row]
+def state(doc):
+ return ([o.Name for o in doc.Objects],doc.UndoCount,doc.RedoCount,
+  {o.Name:(o.Shape.exportBrepToString(),list(o.Placement.toMatrix().A),o.Label,o.Label2) for o in doc.Objects if o.isDerivedFrom('Part::Feature')})
+def run():
+ try:
+  import OpenMatrix9Gui as native
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+  doc=App.newDocument('ShapeValidation');doc.UndoMode=1
+  box=Part.makeBox(2,3,4);reverse=Part.Shape(box);reverse.reverse()
+  outer=Part.makeBox(10,10,10);inner=Part.makeBox(4,4,4,App.Vector(3,3,3))
+  hollow_container=outer.cut(inner)
+  hollow=hollow_container.Solids[0]
+  lateral=next(f for f in Part.makeCylinder(4,7).Faces if isinstance(f.Surface,Part.Cylinder))
+  open_shell=Part.makeShell([lateral]);open_solid=Part.makeSolid(open_shell)
+  reversed_face=Part.Shape(box.Faces[0]);reversed_face.reverse()
+  wrong=Part.makeShell([reversed_face]+box.Faces[1:])
+  other=Part.makeBox(2,3,4,App.Vector(-2,-3,-4))
+  va=next(v for v in box.Vertexes if v.Point.Length<1e-8)
+  vb=next(v for v in other.Vertexes if v.Point.Length<1e-8)
+  joined=other.replaceShape([(vb,va)]);pinch=Part.makeCompound([box,joined])
+  wrong_cavity=Part.makeSolid(Part.makeCompound([outer.Shells[0],inner.Shells[0]]))
+  detached=Part.makeSolid(Part.makeCompound([box.Shells[0],Part.makeBox(1,1,1,App.Vector(20,20,20)).Shells[0]]))
+  cases=[('Box',box,True,True,True,'outward'),('Sphere',Part.makeSphere(3),True,True,True,'outward'),
+   ('Cone',Part.makeCone(3,0,5),True,True,True,'outward'),('Torus',Part.makeTorus(5,2),True,True,True,'outward'),
+   ('Hollow',hollow,True,True,True,'outward'),('Reversed',reverse,True,True,True,'inward'),
+   ('OpenShell',open_shell,True,False,False,None),('OpenSolid',open_solid,True,False,False,None),
+   ('WrongOrientation',wrong,True,True,False,None),('VertexPinch',pinch,False,True,False,None),
+   ('LooseEdge',Part.makeCompound([box,Part.makeLine(App.Vector(20,0,0),App.Vector(21,0,0))]),False,False,False,None),
+   ('LooseVertex',Part.makeCompound([box,Part.Vertex(App.Vector(20,0,0))]),False,False,False,None),
+   ('RepeatedFace',Part.makeCompound([box,box.Faces[0]]),None,None,False,None),
+   ('WrongCavity',wrong_cavity,True,True,False,None),('DetachedShells',detached,True,True,False,None),
+   ('ClosedShell',box.Shells[0],True,True,False,None),
+   ('CompoundSolid',hollow_container,True,True,False,None),
+   ('Curve',Part.makeLine(App.Vector(0,0,0),App.Vector(1,0,0)),None,None,False,None)]
+  objects=[]
+  for name,shape,*_ in cases:
+   obj=doc.addObject('Part::Feature',name);obj.Shape=shape;objects.append(obj)
+  doc.recompute()
+  check('hollow fixture has outer and cavity shells',len(hollow.Shells)==2 and hollow.isInside(App.Vector(1,1,1),1e-7,True) and not hollow.isInside(App.Vector(5,5,5),1e-7,True))
+  check('compound wrapper is distinct from its contained cavity solid',hollow_container.ShapeType=='Compound' and len(hollow_container.Solids)==1 and hollow.ShapeType=='Solid')
+  check('invalid solid tags are genuinely authored',open_solid.ShapeType=='Solid' and not open_solid.isValid() and wrong_cavity.ShapeType=='Solid' and not wrong_cavity.isValid() and not detached.isValid())
+  for (name,shape,manifold,closed,solid,orientation),obj in zip(cases,objects):
+   before=state(doc);row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));report['descriptors'][name]=row
+   r=row['topology'].get('validation',{});report['native_oracles'][name]={'valid':shape.isValid(),'shells':len(shape.Shells),'volume':shape.Volume,'kind':shape.ShapeType}
+   check(name+' native validity matches separate FreeCAD query',r.get('native_valid')==shape.isValid())
+   check(name+' scoped manifold policy',r.get('manifold')==manifold and 'manifold' in r)
+   check(name+' scoped closed boundary policy',r.get('closed')==closed and 'closed' in r)
+   check(name+' solid requires validity and full boundary',r.get('valid_solid')==solid)
+   check(name+' retains native orientation',r.get('native_solid_orientation')==orientation and 'native_solid_orientation' in r)
+   check(name+' direct world orientation matches native',r.get('world_solid_orientation')==orientation and r.get('world_orientation_sign')==1)
+   check(name+' shell count includes cavities',r.get('shell_count')==len(shape.Shells))
+   check(name+' method and conditional exact scope are explicit',r.get('native_method',{}).get('analyzer')=='BRepCheck_Analyzer' and r.get('native_method',{}).get('exact_curve_on_surface_requested') is True and r.get('native_method',{}).get('exact_curve_on_surface_scope')=='SameParameter_edges')
+   check(name+' report identifies operation and source',r.get('operation')=='InspectGeometry' and r.get('input_identity',{}).get('object_name')==obj.Name and r.get('input_identity',{}).get('document_uid')==row['document_uid'])
+   check(name+' does not repair or overstate a global certificate',r.get('conversion_performed') is False and r.get('source_modified') is False and r.get('global_self_intersection_certificate') is None and 'global_self_intersection_certificate' in r)
+   check(name+' preserves source and history',state(doc)==before)
+  check('pinch rejection explicitly names vertex nonmanifold','vertex_nonmanifold' in report['descriptors']['VertexPinch']['topology'].get('validation',{}).get('reasons',[]))
+  check('invalid tagged solids keep provenance separate',all(report['descriptors'][name]['topology'].get('native_shape_is_solid') is True and report['descriptors'][name]['topology'].get('validation',{}).get('valid_solid') is False for name in ['OpenSolid','WrongCavity','DetachedShells']))
+  link=doc.addObject('App::Link','Mirror');link.setLink(objects[0]);link.ScaleVector=App.Vector(-2,.3,1.4)
+  nested=doc.addObject('App::Link','NestedMirror');nested.setLink(link)
+  double=doc.addObject('App::Link','DoubleMirror');double.setLink(link);double.ScaleVector=App.Vector(-1,1,1)
+  group=doc.addObject('App::Part','Group');group.addObject(nested);doc.recompute();before=state(doc)
+  for obj,expected in [(link,'inward'),(nested,'inward'),(double,'outward'),(group,'inward')]:
+   row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));r=leaves(row)[0]['topology'].get('validation',{})
+   check(obj.Name+' native orientation is immutable through frames',r.get('native_solid_orientation')=='outward')
+   check(obj.Name+' world orientation composes exactly once',r.get('world_solid_orientation')==expected)
+   check(obj.Name+' frame retains solid validity',r.get('valid_solid') is True)
+  check('nested/mirrored inspection preserves all sources/history',state(doc)==before)
+  array=doc.addObject('App::Link','Array');array.setLink(objects[5]);array.ElementCount=2;array.ShowElement=False
+  array.ScaleVector=App.Vector(-1,1,1);doc.recompute();before_array=state(doc)
+  rows=leaves(json.loads(native.geometryDescriptor(doc.Name,array.Name)))
+  check('array inward definition remains inward native',len(rows)==2 and all(r['topology'].get('validation',{}).get('native_solid_orientation')=='inward' for r in rows))
+  check('array mirrored inward definition becomes outward world',len(rows)==2 and all(r['topology'].get('validation',{}).get('world_solid_orientation')=='outward' for r in rows))
+  check('array validation preserves source/history',state(doc)==before_array)
+  saved=json.dumps(report['descriptors']['Hollow'],sort_keys=True);objects[4].Shape=Part.makeSphere(1);doc.recompute();App.closeDocument(doc.Name)
+  check('owned reports survive replacement and document close',json.dumps(report['descriptors']['Hollow'],sort_keys=True)==saved)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

@@ -1,0 +1,72 @@
+"""RCORE-01: owned native Surface results, replay failure and saved evidence."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+ report['checks'].append(dict(name=name,passed=bool(value)))
+ if not value:raise AssertionError(name)
+def result(h):return json.loads(h.OM9GeometryResult)
+def native(snapshot):
+ s=Part.Shape();s.importBrepFromString(snapshot['geometry_data']['native_master']['payload']);return s
+def inspect(h,sources,kind,area):
+ value=result(h);snapshots=value['output_snapshots'];inputs=value['input_snapshots'];context=value['operation_context']
+ check('actual Surface operation and exact feature',value['schema_version']==1 and value['status']=='accepted' and value['operation']=='EditSurface' and context['feature_id']=={1:'OM9-SURFACE-002',2:'OM9-SURFACE-004',3:'OM9-SURFACE-009'}[kind])
+ check('independent CAD master restores actual surface',len(snapshots)==1 and native(snapshots[0]).isValid() and abs(native(snapshots[0]).Area-area)<1e-6)
+ check('output has geometry topology attributes',all(k in snapshots[0] for k in ['geometry_data','topology_data','source_attributes','unit_context_revision']))
+ check('constructed output attributes not invented',snapshots[0]['source_attributes']==dict(schema_version=1,availability='not_applicable_constructed_output'))
+ check('owned ordered source snapshots',len(inputs)==len(sources) and all(native(s).isValid() and not native(s).Faces for s in inputs))
+ check('source identity labels and revisions retained',all(r['object_name']==o.Name and s['source_attributes']['object_name']==o.Name and s['source_attributes']['label']==o.Label and all(int(r[k])>0 for k in ['document','object','generation','revision','epoch']) for r,s,o in zip(context['source_refs'],inputs,sources)))
+ check('recipe and world observations retained',json.loads(context['recipe'])==json.loads(h.SurfaceOptions) and context['rail_closed']==0 and context['source_snapshot_frame']=='document_world' and len(context['output_parent_to_world'])==16)
+ check('no import or Builder provenance',all(r['phase']=='native_surface_construction' for r in value['conversion_reports']))
+ check('no invented global correspondence',value['topology_map'] is None and all(r['exactness']=='uninspected' and r['parameter_map'] is None and r['deviation_report'] is None for r in value['conversion_reports']))
+ check('evidence lifetime explicit',value['lifetime']=='immutable_native_operation_evidence_not_current_validity')
+def run():
+ global Part
+ try:
+  if os.environ.get('OM9_SURFACE_RESULT_RESTORE'):
+   check('cold process has no preimported OM9','OpenMatrix9Gui' not in sys.modules)
+   d=App.openDocument(os.environ['OM9_SURFACE_RESULT_RESTORE']);import Part,OpenMatrix9Gui as OM
+   report['module']=OM.__file__;h=d.getObject('SurfaceHistory');sources=[o for o,subs in h.SourceCurves];kind=json.loads(h.SurfaceOptions)['kind']
+   check('cold restore retains saved pair',h.isValid() and not h.Shape.isNull() and bool(h.OM9GeometryResult));inspect(h,sources,kind,60)
+   source=sources[-1] if kind==3 else sources[0]
+   source.Shape=Part.makeLine(App.Vector(30,0,0),App.Vector(30,3,0)) if kind==3 else Part.makeLine(App.Vector(0,0,0),App.Vector(30,0,0))
+   if kind==2:sources[1].Shape=Part.makeLine(App.Vector(0,3,0),App.Vector(30,3,0))
+   d.recompute();check('cold replay refreshes both shape and result',h.isValid() and abs(h.Shape.Area-90)<1e-6 and abs(native(result(h)['output_snapshots'][0]).Area-90)<1e-6)
+  else:
+   import Part,OpenMatrix9Gui as OM
+   report['module']=OM.__file__;Gui.activateWorkbench('OpenMatrix9Workbench')
+   for kind in [1,2,3]:
+    d=App.newDocument('SurfaceResult'+str(kind));d.UndoMode=1;sources=[]
+    def line(name,a,b):
+     o=d.addObject('Part::Feature',name);o.Shape=Part.makeLine(App.Vector(*a),App.Vector(*b));o.Label='Owned '+name;sources.append(o)
+    if kind==3:
+     line('First',(0,0,0),(0,3,0));line('Last',(10,0,0),(10,3,0))
+    else:
+     line('Rail',(0,0,0),(10,0,0))
+     if kind==2:line('RailB',(0,3,0),(10,3,0))
+     line('Profile',(0,0,0),(0,3,0))
+    d.recompute();h=d.addObject('OpenMatrix9Gui::SurfaceHistory','SurfaceHistory');h.SourceCurves=[(s,['']) for s in sources]
+    h.SurfaceOptions=json.dumps(dict(version=1,kind=kind,style=0,frenet=False,closed=False,maintainHeight=False,preview=True,sectionMode=0,pointCount=16,tolerance=.01,continuityA=0,continuityB=0,matchStart=False,matchEnd=False,slashes=[],history=True,historyCommand=(kind!=3),inputs=[dict(count=1,chain=False,closed=False,reverse=False,seam=0) for s in sources]))
+    d.recompute();check('existing native solver remains valid',h.isValid() and not h.Shape.isNull() and abs(h.Shape.Area-30)<1e-6);inspect(h,sources,kind,30)
+    old=h.OM9GeometryResult;h.UpdateHistory=False
+    source=sources[-1] if kind==3 else sources[0]
+    source.Shape=Part.makeLine(App.Vector(20,0,0),App.Vector(20,3,0)) if kind==3 else Part.makeLine(App.Vector(0,0,0),App.Vector(20,0,0))
+    if kind==2:sources[1].Shape=Part.makeLine(App.Vector(0,3,0),App.Vector(20,3,0))
+    d.recompute();check('frozen shape and evidence remain paired',abs(h.Shape.Area-30)<1e-6 and h.OM9GeometryResult==old)
+    h.UpdateHistory=True;d.recompute();check('resume replaces pair after source edit',h.isValid() and abs(h.Shape.Area-60)<1e-6 and h.OM9GeometryResult!=old);inspect(h,sources,kind,60)
+    good=h.SurfaceOptions;d.openTransaction('invalid saved metadata');h.SurfaceOptions='{"version":1';d.recompute();d.commitTransaction()
+    check('failed replay clears shape and result together',h.Shape.isNull() and h.OM9GeometryResult=='')
+    d.undo();d.recompute();check('Undo restores executable valid pair',h.SurfaceOptions==good and h.isValid() and abs(h.Shape.Area-60)<1e-6 and bool(h.OM9GeometryResult))
+    d.redo();d.recompute();check('Redo reproduces failure without stale evidence',h.Shape.isNull() and h.OM9GeometryResult=='')
+    d.undo();d.recompute();d.saveAs(str(out/('surface-result-'+str(kind)+'.FCStd')))
+    frozen=h.OM9GeometryResult;h.HistoryEnabled=False;sources[-1].Label='Changed after detach';d.recompute()
+    check('detach retains immutable historical evidence',h.OM9GeometryResult==frozen and not h.SourceCurves)
+    App.closeDocument(d.Name)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

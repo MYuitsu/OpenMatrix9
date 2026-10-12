@@ -10,6 +10,18 @@ date: 2026-10-09
 
 # RCORE-06 — Selection và tổ chức mô hình
 
+<!-- rhino-core-instance-isolation:start -->
+## Bổ sung đã kiểm chứng — App::Link instance isolation — 2026-10-10
+
+T06 dùng lại App::Link, mirror/scale không đều và exporter hiện có; fixture xác
+nhận tọa độ và giữ definition/member/instance A khi chỉ sửa B. Đạt 146 native
+checks, 98 FreeCAD checks và 4 native regression suites. Đây là fixture hai
+instance có phạm vi; chưa đóng selection/subelement, permission/layer policy
+xuyên family hoặc mọi kiểu instance.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-10-rhino-core-instance-isolation.md).
+**RCORE-06 và toàn bộ P0 vẫn đang triển khai.**
+<!-- rhino-core-instance-isolation:end -->
+
 <!-- rhino-core-object-foundations:start -->
 ## Bổ sung nền tảng object snapshot — 2026-10-09
 

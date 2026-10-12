@@ -1,0 +1,257 @@
+{
+  "key": "rhino-core-checked-rollback-20261011",
+  "updated_at": "2026-10-11T11:47:17+07:00",
+  "status": "in_progress",
+  "final_native_acceptance": false,
+  "scope": "Additive native checked-rollback prerequisite; not preserving-Redo or whole RCORE-01 acceptance.",
+  "native": {
+    "red2": {
+      "artifact": "H:\\FreeCAD-src\\build\\atomic-host-tests-red2-20261011",
+      "tests": 13,
+      "passed": 5,
+      "failed": [
+        "DocumentTest.AtomicTransactionAPIIsExplicit",
+        "DocumentTest.AtomicAbortPreservesExactRedoIDsAndExecutableOrder",
+        "DocumentTest.AtomicAbortPreservesDetachedCreationOwner",
+        "DocumentTest.AtomicSharedIDAbortRestoresBothDocumentsRedo",
+        "DocumentTest.AtomicDetachedRedoOwnerRejectsPropertyWritesBeforeRecording",
+        "DocumentTest.AtomicCheckedRollbackDetectsMissingRenamedProperty",
+        "DocumentTest.AtomicCheckedRollbackDetectsCaughtPasteException",
+        "DocumentTest.AtomicCheckedRollbackDetectsCaughtUnknownPasteException"
+      ],
+      "skipped": [],
+      "checked_cases": 4,
+      "disabled": [],
+      "checked_failed": [
+        "AtomicCheckedRollbackDetectsMissingRenamedProperty",
+        "AtomicCheckedRollbackDetectsCaughtPasteException",
+        "AtomicCheckedRollbackDetectsCaughtUnknownPasteException"
+      ],
+      "exit_code": 1
+    },
+    "checked1": {
+      "artifact": "H:\\FreeCAD-src\\build\\atomic-host-tests-checked1-20261011",
+      "tests": 13,
+      "passed": 8,
+      "failed": [
+        "DocumentTest.AtomicTransactionAPIIsExplicit",
+        "DocumentTest.AtomicAbortPreservesExactRedoIDsAndExecutableOrder",
+        "DocumentTest.AtomicAbortPreservesDetachedCreationOwner",
+        "DocumentTest.AtomicSharedIDAbortRestoresBothDocumentsRedo",
+        "DocumentTest.AtomicDetachedRedoOwnerRejectsPropertyWritesBeforeRecording"
+      ],
+      "skipped": [],
+      "checked_cases": 4,
+      "disabled": [],
+      "checked_failed": [],
+      "exit_code": 1
+    },
+    "red3": {
+      "artifact": "H:\\FreeCAD-src\\build\\atomic-host-tests-red3-20261011",
+      "tests": 14,
+      "passed": 8,
+      "failed": [
+        "DocumentTest.AtomicTransactionAPIIsExplicit",
+        "DocumentTest.AtomicAbortPreservesExactRedoIDsAndExecutableOrder",
+        "DocumentTest.AtomicAbortPreservesDetachedCreationOwner",
+        "DocumentTest.AtomicSharedIDAbortRestoresBothDocumentsRedo",
+        "DocumentTest.AtomicDetachedRedoOwnerRejectsPropertyWritesBeforeRecording",
+        "DocumentTest.AtomicCheckedRollbackRejectsRefusedRemovalWithoutChangingBacklinks"
+      ],
+      "skipped": [],
+      "checked_cases": 5,
+      "disabled": [],
+      "checked_failed": [
+        "AtomicCheckedRollbackRejectsRefusedRemovalWithoutChangingBacklinks"
+      ],
+      "exit_code": 1
+    },
+    "red4": {
+      "artifact": "H:\\FreeCAD-src\\build\\atomic-host-tests-red4-20261011",
+      "tests": 16,
+      "passed": 9,
+      "failed": [
+        "DocumentTest.AtomicTransactionAPIIsExplicit",
+        "DocumentTest.AtomicAbortPreservesExactRedoIDsAndExecutableOrder",
+        "DocumentTest.AtomicAbortPreservesDetachedCreationOwner",
+        "DocumentTest.AtomicSharedIDAbortRestoresBothDocumentsRedo",
+        "DocumentTest.AtomicDetachedRedoOwnerRejectsPropertyWritesBeforeRecording",
+        "DocumentTest.AtomicCheckedRollbackRejectsRefusedRemovalWithoutChangingBacklinks",
+        "DocumentTest.AtomicCheckedRollbackDistinguishesMissingMoveFromDelegation"
+      ],
+      "skipped": [],
+      "checked_cases": 7,
+      "disabled": [],
+      "checked_failed": [
+        "AtomicCheckedRollbackRejectsRefusedRemovalWithoutChangingBacklinks",
+        "AtomicCheckedRollbackDistinguishesMissingMoveFromDelegation"
+      ],
+      "exit_code": 1
+    },
+    "checked2": {
+      "artifact": "H:\\FreeCAD-src\\build\\atomic-host-tests-checked2-20261011",
+      "tests": 16,
+      "passed": 11,
+      "failed": [
+        "DocumentTest.AtomicTransactionAPIIsExplicit",
+        "DocumentTest.AtomicAbortPreservesExactRedoIDsAndExecutableOrder",
+        "DocumentTest.AtomicAbortPreservesDetachedCreationOwner",
+        "DocumentTest.AtomicSharedIDAbortRestoresBothDocumentsRedo",
+        "DocumentTest.AtomicDetachedRedoOwnerRejectsPropertyWritesBeforeRecording"
+      ],
+      "skipped": [],
+      "checked_cases": 7,
+      "disabled": [],
+      "checked_failed": [],
+      "exit_code": 1
+    },
+    "red5": {
+      "artifact": "H:\\FreeCAD-src\\build\\atomic-host-tests-red5-20261011",
+      "tests": 17,
+      "passed": 11,
+      "failed": [
+        "DocumentTest.AtomicTransactionAPIIsExplicit",
+        "DocumentTest.AtomicAbortPreservesExactRedoIDsAndExecutableOrder",
+        "DocumentTest.AtomicAbortPreservesDetachedCreationOwner",
+        "DocumentTest.AtomicSharedIDAbortRestoresBothDocumentsRedo",
+        "DocumentTest.AtomicDetachedRedoOwnerRejectsPropertyWritesBeforeRecording",
+        "DocumentTest.AtomicCheckedRollbackRejectsOccupiedRestorationName"
+      ],
+      "skipped": [],
+      "checked_cases": 8,
+      "disabled": [],
+      "checked_failed": [
+        "AtomicCheckedRollbackRejectsOccupiedRestorationName"
+      ],
+      "exit_code": 1
+    },
+    "red6b": {
+      "artifact": "H:\\FreeCAD-src\\build\\atomic-host-tests-red6b-20261011",
+      "tests": 18,
+      "passed": 11,
+      "failed": [
+        "DocumentTest.AtomicTransactionAPIIsExplicit",
+        "DocumentTest.AtomicAbortPreservesExactRedoIDsAndExecutableOrder",
+        "DocumentTest.AtomicAbortPreservesDetachedCreationOwner",
+        "DocumentTest.AtomicSharedIDAbortRestoresBothDocumentsRedo",
+        "DocumentTest.AtomicDetachedRedoOwnerRejectsPropertyWritesBeforeRecording",
+        "DocumentTest.AtomicCheckedRollbackRejectsOccupiedRestorationName",
+        "DocumentTest.AtomicCheckedRollbackDetectsObserverRemovingRestoredObject"
+      ],
+      "skipped": [],
+      "checked_cases": 9,
+      "disabled": [],
+      "checked_failed": [
+        "AtomicCheckedRollbackRejectsOccupiedRestorationName",
+        "AtomicCheckedRollbackDetectsObserverRemovingRestoredObject"
+      ],
+      "exit_code": 1
+    },
+    "checked3": {
+      "artifact": "H:\\FreeCAD-src\\build\\atomic-host-tests-checked3-20261011",
+      "tests": 18,
+      "passed": 13,
+      "failed": [
+        "DocumentTest.AtomicTransactionAPIIsExplicit",
+        "DocumentTest.AtomicAbortPreservesExactRedoIDsAndExecutableOrder",
+        "DocumentTest.AtomicAbortPreservesDetachedCreationOwner",
+        "DocumentTest.AtomicSharedIDAbortRestoresBothDocumentsRedo",
+        "DocumentTest.AtomicDetachedRedoOwnerRejectsPropertyWritesBeforeRecording"
+      ],
+      "skipped": [],
+      "checked_cases": 9,
+      "disabled": [],
+      "checked_failed": [],
+      "exit_code": 1
+    }
+  },
+  "app_suite": {
+    "artifact": "H:\\FreeCAD-src\\build\\atomic-host-tests-checked3-20261011",
+    "tests": 576,
+    "passed": 569,
+    "failed": [
+      "DocumentTest.AtomicTransactionAPIIsExplicit",
+      "DocumentTest.AtomicAbortPreservesExactRedoIDsAndExecutableOrder",
+      "DocumentTest.AtomicAbortPreservesDetachedCreationOwner",
+      "DocumentTest.AtomicSharedIDAbortRestoresBothDocumentsRedo",
+      "DocumentTest.AtomicDetachedRedoOwnerRejectsPropertyWritesBeforeRecording"
+    ],
+    "skipped": [
+      "BackupPolicyTest.StandardWithZeroFilesDeletesExisting",
+      "BackupPolicyTest.TimestampWithZeroFilesDeletesExisting"
+    ],
+    "checked_cases": 9,
+    "disabled": [
+      "BackupPolicyTest.DISABLED_TimestampWithInvalidFormatStringThrows",
+      "BackupPolicyTest.DISABLED_TimestampWithAbsurdlyLongFormatStringThrows",
+      "DISABLED_DocumentObserverTest.hasSubObject",
+      "DISABLED_DocumentObserverTest.hasSubElement",
+      "DISABLED_DocumentObserverTest.normalize",
+      "DISABLED_DocumentObserverTest.normalized",
+      "ExpressionParserTest.DISABLED_expressionsParseAsPyObjectWrapper"
+    ],
+    "checked_failed": [],
+    "exit_code": 1
+  },
+  "selected_inputs": [
+    {
+      "path": "H:\\FreeCAD-src\\tests\\src\\App\\Document.cpp",
+      "sha256": "5348ba44ddfb321d4f58687564c63af01db9e58e6aab466fdd2a6ca908859d25",
+      "bytes": 21182
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\Document.h",
+      "sha256": "e80203c5fd612e2ffea460e3edee48bad0666258af6e666b70e9fad42a8a6e4a",
+      "bytes": 56643
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\Transactions.h",
+      "sha256": "070ec22db0a32ddfd5f51a05383fd2d1032751d653f4af14fa862b81b78f0509",
+      "bytes": 13213
+    },
+    {
+      "path": "H:\\FreeCAD-src\\src\\App\\Transactions.cpp",
+      "sha256": "2c0919f1930c2b45288848ab9a596d29445e79b4c7d941fbd5fa0e14b109f6b4",
+      "bytes": 25909
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCADApp.dll",
+      "sha256": "1867227d753f9f7e24c52e77e565d840f36d52442d791dca232eae424cd2e77b",
+      "bytes": 9827840
+    },
+    {
+      "path": "H:\\FreeCAD-src\\build\\atomic-host-tests-checked3-20261011\\sdk-test-main.cpp",
+      "sha256": "ea0458b6529fffa699dbf40228d981b35bf505672225dcb48e2ed2ac123913a2",
+      "bytes": 425
+    }
+  ],
+  "selected_binary": {
+    "path": "H:\\FreeCAD-src\\build\\atomic-host-tests-checked3-20261011\\App_tests_run.exe",
+    "bytes": 3817472,
+    "sha256": "8dedd873d3cfbd04deb13906ffa70a6e408b04086bc4469645a655c158f875c2"
+  },
+  "build": {
+    "target": "FreeCADApp",
+    "sdk": "H:/FreeCAD-src/build/relWithDebInfo",
+    "workers": 14,
+    "observed_terminal_exit_code": 0,
+    "log": {
+      "path": "H:\\FreeCAD-src\\build\\atomic-host-checked3-build-20261011.log",
+      "bytes": 410,
+      "sha256": "54473d8756cb87e6d41cf83a0f16586f1968e27713881400474e388c2c72e89a"
+    },
+    "command": "rtk proxy cmd /c H:/FreeCAD-src/build/build-atomic-host-checked3.cmd"
+  },
+  "source_review": "Existing edit_result_review: native deletion/move/restoration findings addressed; final read-only review reported no further actionable findings in this prerequisite.",
+  "preserved_evidence": {
+    "plugin_runtime15": "Historical native proof predates this App DLL update; no claim of a newly verified host/plugin pair.",
+    "harness_failure": "checked1 full suite:571 tests,539 passed,29 failed,3 skipped; isolated executable inferred the wrong module home and sandbox temporary paths rejected renames. Corrected SDK DLL bootstrap and workspace temp/profile remove those failures in checked2/3.",
+    "compile_fixture_error": "red6 compile failed because fixture called protected Document methods. No native result was produced; corrected red6b uses public removeObject and cleanup Undo."
+  },
+  "remaining": [
+    "Implement explicit Document/Python preserving-Redo API, real native history ownership, detached-owner prewrite rejection, and group-wide checked rollback gate.",
+    "Protect native document/owner lifetime during rollback observers and close/replacement; validate original five callback assertions and Python lifecycle fixture on matching rebuilt host/plugin.",
+    "Broader checked rollback edge cases, including nested verdicts and aggregate postconditions, remain subject to host integration proof.",
+    "All original RCORE-01 families/consumers, parameter/topology maps, measured global conversion bounds, attributes, export/persistence, budgets/workers/ownership/cancellation/cache, eight typed diagnostics, adapters1-7, C01-C12 and T01-T11 remain required."
+  ]
+}

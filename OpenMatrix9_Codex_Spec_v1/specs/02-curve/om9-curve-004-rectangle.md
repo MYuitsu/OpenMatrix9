@@ -15,6 +15,80 @@ sample_status: compiled_and_validation_tests_passed
 
 # OM9-CURVE-004 — Rectangle
 
+<!-- rhino-core-curve-booking-20261012:start -->
+Runtime56: native booking/commit/abort/reopen120/120;matching total1372/1372,24 actual exits0,Rust882.
+- [ ] Complete every original auxiliary result, History/Rebuild, publication/lifetime, sharing/budgets/conversion/maps requirement.
+[Bằng chứng và phần còn mở](../../../docs/validation/2026-10-12-rhino-core-curve-booking.md).
+<!-- rhino-core-curve-booking-20261012:end -->
+
+<!-- rhino-core-curve-publication-20261011:start -->
+Runtime55: named Curve callbacks/Redo/replacement and layer context checked;1252/1252 native,23 exits0,Rust882.
+- [ ] Complete transaction booking/premature close, every callback boundary and all original result/lifecycle contracts.
+Historical RED52 callback evidence below is superseded only for the named tested cases.
+[Bằng chứng và phần còn mở](../../../docs/validation/2026-10-11-rhino-core-curve-publication.md).
+<!-- rhino-core-curve-publication-20261011:end -->
+
+<!-- rhino-core-curve-callback-red-20261011:start -->
+Checked Curve publication Runtime52:RED42/210,actual host exit0;all42 real callbacks fire once.
+- [ ] Reject changed geometry/frame/metadata/owner/session and restore prior executable native Redo.
+Main result662/662 is a separate verified scope.
+[Bằng chứng và bước sửa](../../../docs/validation/2026-10-11-rhino-core-curve-callback-red.md).
+<!-- rhino-core-curve-callback-red-20261011:end -->
+
+<!-- rhino-core-curve-result-20261011:start -->
+Main Curve GeometryResult Runtime52:direct54/native33/cold58;matching662/662,18 actual exits0;Rust880/0/0.
+- [x] Output chính lưu cùng Shape/construction, original numeric/native snapshots và full CAD master; named Undo/Redo/cold FCStd witnesses.
+- [ ] Checked callback publication,auxiliary foci/History/Rebuild,full input sharing/budgets và conversion/maps theo contract gốc.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-curve-result.md).
+<!-- rhino-core-curve-result-20261011:end -->
+
+<!-- rhino-core-curve-result-red-20261011:start -->
+*RED lịch sử Runtime50; main result được bổ sung ở checkpoint Runtime52 phía trên.*
+Common Curve GeometryResult:Runtime50 native RED12/54,actual host exit0.
+Geometry/one Undo của sáu lệnh đạt;result contract còn thiếu.
+- [ ] ConstructCurve common result,input snapshots/output CAD master và paired persistence.
+[Bằng chứng và bước tiếp](../../../docs/validation/2026-10-11-rhino-core-curve-result-red.md).
+<!-- rhino-core-curve-result-red-20261011:end -->
+
+<!-- rhino-core-curve-native-bridge-20261011:start -->
+Native Circle/Ellipse/History source capture đã nối Rust;solver hiện hữu dùng lại.
+Runtime50:517/517 checks,15 exits0;4 cold hosts/18 FCStd;Rust874/0/0.
+- [x] Named native source paths giữ original text/full source/branch và cold bytes trong phạm vi fixture.
+- [ ] Generic pick/snap/full inputs,subset sharing/budgets,Curve GeometryResult/checked publication và full feature.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-curve-native-bridge.md).
+<!-- rhino-core-curve-native-bridge-20261011:end -->
+
+<!-- rhino-core-curve-native-admission-20261011:start -->
+API nhận nguồn native sở hữu dữ liệu đã kiểm trong Rust16/16 và FFI1/1.
+C++ chưa nối; native chưa kiểm chứng trên code mới.
+- [x] Rust gate nguồn/điểm/frame/revision/ranges trong phạm vi đã kiểm.
+- [ ] Capture native, source freshness, GeometryResult/publication và cold persistence đầy đủ.
+[Bằng chứng và phần còn mở](../../../docs/validation/2026-10-11-rhino-core-curve-native-admission.md).
+<!-- rhino-core-curve-native-admission-20261011:end -->
+
+<!-- rhino-core-curve-accepted-input-20261011:start -->
+Runtime45 giữ accepted values tại Rust entrypoint trước chuẩn hóa; log hữu hạn
+và bounded, Circle Undo phục hồi batch. Native fixture và cold FCStd đã kiểm
+theo phạm vi báo cáo; full native sources/input, common Curve result và toàn bộ
+command vẫn còn mở.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-curve-accepted-input.md).
+<!-- rhino-core-curve-accepted-input-20261011:end -->
+
+<!-- rhino-core-curve-construction-20261011:start -->
+Constructor state đã kiểm trên Runtime44: cùng Shape/Undo, giữ options/plan/basis,
+FCStd warm/cold theo fixture được nêu trong báo cáo. Đây là normalized state;
+original input/native sources, common Curve result và toàn bộ command còn mở.
+[Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-curve-construction.md).
+<!-- rhino-core-curve-construction-20261011:end -->
+
+<!-- rhino-core-native-curve-policy:start -->
+Sáu Curve family hiện có dùng request/options Rust chung từ session ở
+declaration/preview/commit và các capture Circle/Ellipse/FitPoints được nêu trong báo cáo.
+680 checks/15 actual host exits0 trên cùng plugin; full Rust712 đạt.
+Box/Sphere/cage, replay request và các hợp đồng output/ownership gốc còn mở;
+**RCORE-01 đang triển khai**. [Bằng chứng và giới hạn](../../../docs/validation/2026-10-11-rhino-core-native-curve-policy.md).
+<!-- rhino-core-native-curve-policy:end -->
+
 <!-- rhino-core-extended-input:start -->
 ## Extended numeric input — validated slice
 

@@ -1,0 +1,60 @@
+"""Vertex links and oriented surface-complex facts; real FreeCAD shapes."""
+import json,os,sys,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+sys.path.insert(0,os.environ['OM9_TEST_NATIVE_DIR'])
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+report={'checks':[],'descriptors':{},'native_oracles':{}}
+def check(name,value):report['checks'].append({'name':name,'passed':bool(value)})
+def leaves(row):
+ if row['representation']=='instance':return leaves(row['geometry_data']['definition_geometry'])
+ if row['representation']=='group':return [r for c in row['geometry_data']['members'] for r in leaves(c)]
+ return [row]
+def state(doc):return ([o.Name for o in doc.Objects],doc.UndoCount,doc.RedoCount,{o.Name:(o.Shape.exportBrepToString(),list(o.Placement.toMatrix().A),o.Label,o.Label2) for o in doc.Objects if o.isDerivedFrom('Part::Feature')})
+def run():
+ try:
+  import OpenMatrix9Gui as native
+  report['module']=native.__file__;Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('SurfaceComplex');doc.UndoMode=1
+  group=doc.addObject('App::Part','Group')
+  box=Part.makeBox(2,3,4)
+  other=Part.makeBox(2,3,4,App.Vector(-2,-3,-4))
+  va=next(v for v in box.Vertexes if v.Point.Length<1e-8);vb=next(v for v in other.Vertexes if v.Point.Length<1e-8)
+  joined=other.replaceShape([(vb,va)])
+  check('vertex-pinch fixture shares exactly one native vertex',sum(a.isSame(b) for a in box.Vertexes for b in joined.Vertexes)==1)
+  pinch=Part.makeCompound([box,joined])
+  face=box.Faces[0];reversed_face=Part.Shape(face);reversed_face.reverse()
+  wrong=Part.makeShell([reversed_face]+box.Faces[1:])
+  cases=[('Box',box,True,True,0),('Sphere',Part.makeSphere(3),True,True,0),('Cone',Part.makeCone(3,0,5),True,True,0),('Torus',Part.makeTorus(5,2),True,True,0),('Hollow',Part.makeBox(10,10,10).cut(Part.makeBox(4,4,4,App.Vector(3,3,3))),True,True,0),('OpenCylinder',next(f for f in Part.makeCylinder(4,7).Faces if isinstance(f.Surface,Part.Cylinder)),True,True,2),('Pinch',pinch,False,True,0),('WrongOrientation',wrong,True,False,0)]
+  outer=Part.makePolygon([App.Vector(0,0,0),App.Vector(20,0,0),App.Vector(20,20,0),App.Vector(0,20,0),App.Vector(0,0,0)]);hole=Part.Wire(Part.makeCircle(3,App.Vector(10,10,0)));hole.reverse()
+  reverse=Part.Shape(box);reverse.reverse()
+  cases += [('SquareHole',Part.Face([outer,hole]),True,True,5),('ReversedBox',reverse,True,True,0)]
+  objects=[]
+  for name,shape,manifold,oriented,boundary in cases:
+   obj=doc.addObject('Part::Feature',name);obj.Shape=shape;group.addObject(obj);objects.append(obj)
+  doc.recompute()
+  for (name,shape,manifold,oriented,boundary),obj in zip(cases,objects):
+   report['native_oracles'][name]={'vertices':len(shape.Vertexes),'native_valid':shape.isValid()}
+   before=state(doc);row=json.loads(native.geometryDescriptor(doc.Name,obj.Name));report['descriptors'][name]=row;t=row['topology'];c=t.get('surface_complex',{})
+   check(name+' vertex links match authored topology',c.get('vertex_manifold')==manifold)
+   check(name+' face orientation is independent of manifoldness',c.get('face_oriented')==oriented)
+   check(name+' all face vertices are inspected',c.get('vertex_count')==len(shape.Vertexes))
+   check(name+' boundary vertex links are intervals',c.get('boundary_vertex_count')==boundary)
+   check(name+' scoped surface facts do not certify geometric validity',c.get('scope')=='recorded_unique_native_face_complex' and t['manifold'] is None)
+   check(name+' preserves exact source and history',state(doc)==before)
+  check('vertex pinch is edge closed and edge manifold',report['descriptors']['Pinch']['topology']['edge_closed'] and report['descriptors']['Pinch']['topology']['edge_manifold'])
+  before=state(doc);rows=leaves(json.loads(native.geometryDescriptor(doc.Name,group.Name)))
+  check('group retains distinct validation for pinched and oriented members',[r['topology'].get('surface_complex',{}).get('vertex_manifold') for r in rows]==[m for _,_,m,_,_ in cases])
+  check('group inspection preserves all sources and history',state(doc)==before)
+  link=doc.addObject('App::Link','Mirrored');link.setLink(objects[0]);link.ScaleVector=App.Vector(-2,.3,1.4);doc.recompute();before=state(doc);row=json.loads(native.geometryDescriptor(doc.Name,link.Name));leaf=leaves(row)[0]
+  check('mirrored nonuniform instance retains source-topology validation',leaf['topology'].get('surface_complex',{}).get('vertex_manifold') is True and leaf['topology'].get('surface_complex',{}).get('face_oriented') is True and leaf['world_orientation_sign']==-1)
+  check('instance validation preserves sources and history',state(doc)==before)
+  owned=report['descriptors']['Pinch'];saved=json.dumps(owned,sort_keys=True);objects[6].Shape=Part.makeSphere(1);doc.recompute();App.closeDocument(doc.Name)
+  check('owned validation survives replacement and close',json.dumps(owned,sort_keys=True)==saved)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  (out/'results.json').write_text(json.dumps(report,indent=2))
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  Gui.getMainWindow().close()
+QtCore.QTimer.singleShot(1200,run)

@@ -1,0 +1,195 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Real publication observers must not replace a session or corrupt its output."""
+import gc, json, os, sys, traceback
+from pathlib import Path
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part, OpenMatrix9Gui as OM
+from PySide6 import QtCore, QtGui, QtWidgets
+sys.path.insert(0, os.environ['OM9_PUBLICATION_FAULT_DIR'])
+import OM9PublicationFault as Fault
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = dict(module=OM.__file__, probe=Fault.__file__, checks=[], observations=[])
+
+def check(name, value):
+    report['checks'].append(dict(name=name, passed=bool(value)))
+
+def enter(console, text):
+    console.setFocus()
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_End, QtCore.Qt.ControlModifier))
+    if text:
+        QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+            QtCore.QEvent.KeyPress, 0, QtCore.Qt.NoModifier, text))
+    QtWidgets.QApplication.sendEvent(console, QtGui.QKeyEvent(
+        QtCore.QEvent.KeyPress, QtCore.Qt.Key_Return, QtCore.Qt.NoModifier))
+
+def settle():
+    loop = QtCore.QEventLoop()
+    QtCore.QTimer.singleShot(160, loop.quit)
+    loop.exec()
+
+def snapshot(doc):
+    return [(o.Name, o.Label, o.Shape.exportBrepToString() if 'Shape' in o.PropertiesList else None,
+             tuple(o.Placement.toMatrix().A) if 'Placement' in o.PropertiesList else None,
+             getattr(o, 'SolidParameters', None), [member.Name for member in o.Group] if 'Group' in o.PropertiesList else None)
+            for o in doc.Objects], doc.UndoCount, doc.RedoCount
+
+class Observer:
+    def __init__(self, doc, console, operation, action):
+        self.doc, self.console, self.operation, self.action = doc.Name, console, operation, action
+        self.calls, self.armed = 0, True
+    def matches(self, obj):
+        return self.armed and obj.Document.Name == self.doc and obj.Name not in ['Source', 'Witness']
+    def slotCreatedObject(self, obj):
+        if self.matches(obj) and self.action.startswith('restart'):
+            self.armed = False
+            self.calls += 1
+            replacement = ('Line' if self.action == 'restart-line' else
+                           self.operation if self.action == 'restart-same' else 'Sphere')
+            Gui.runCommand('Line' if replacement == 'Line' else
+                           'OM9_SolidBoxCornertoCornerHeight' if replacement == 'Box'
+                           else 'OM9_SolidSphereCenterRadius')
+    def slotChangedObject(self, obj, prop):
+        if self.action == 'shape-root':
+            return
+        if self.matches(obj) and prop == 'SolidParameters' and getattr(obj, prop, '').startswith('mm;'):
+            self.armed = False
+            self.calls += 1
+            if self.action == 'shape':
+                obj.Shape = Part.makeBox(7, 8, 9)
+            elif self.action == 'placement':
+                obj.Placement.Base = App.Vector(50, 60, 70)
+            elif self.action == 'metadata':
+                obj.SolidParameters = 'tampered publication'
+            elif self.action == 'nan-placement':
+                obj.Placement.Base = App.Vector(float('nan'), 0, 0)
+            elif self.action == 'parent':
+                obj.Document.getObject('Parent').addObject(obj)
+            elif self.action == 'tolerance':
+                obj.Shape.fixTolerance(0.01)
+            elif self.action == 'orientation':
+                Fault.mutate_output(self.doc,obj.Name,'orientation')
+            elif self.action.startswith('remove-'):
+                obj.removeProperty({'remove-command':'OM9Command','remove-feature':'OM9FeatureId','remove-parameters':'SolidParameters'}[self.action])
+    def slotRecomputedObject(self, obj):
+        if self.action == 'shape-root' and self.matches(obj):
+            self.armed = False
+            self.calls += 1
+            Fault.mutate_output(self.doc,obj.Name,'root')
+
+def case(operation, action, console):
+    label = operation + '/' + action
+    doc = App.newDocument('SolidCallback' + operation + action.replace('-', ''))
+    observer = None
+    try:
+        doc.UndoMode = 1
+        source = doc.addObject('Part::Feature', 'Source')
+        source.Shape = Part.makeLine(App.Vector(), App.Vector(10, 0, 0))
+        witness = doc.addObject('App::FeaturePython', 'Witness')
+        if action == 'parent':
+            parent = doc.addObject('App::Part', 'Parent')
+            parent.Placement.Base = App.Vector(20, 30, 40)
+        doc.recompute()
+        doc.openTransaction('Prior Redo')
+        witness.Label = 'Executable prior Redo'
+        doc.commitTransaction()
+        doc.undo()
+        settle()
+        console.clear()
+        enter(console, operation)
+        if operation == 'Box':
+            enter(console, 'Diagonal')
+        enter(console, '0,0,0')
+        if operation == 'Box':
+            enter(console, '2,3,0')
+        before = snapshot(doc)
+        observer = Observer(doc, console, operation, action)
+        App.addDocumentObserver(observer)
+        Fault.arm('observe', doc.Name, source.Name)
+        enter(console, '4' if operation == 'Box' else 'Radius=2')
+        settle()
+        calls = observer.calls
+        App.removeDocumentObserver(observer)
+        observer = None
+        QtCore.QCoreApplication.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+        gc.collect()
+        tracked = Fault.counts()
+        # PyObjectBase's ATTR_TRACKING lets DocumentPy retain the last object
+        # whose .Document the observer read. Rebind that native attribute owner
+        # to the surviving source; an actual leaked result still fails refcount1.
+        source_document = source.Document
+        check(label + ' native document attribute owner rebound to live source', source_document is doc)
+        del source_document
+        after, captured, text = snapshot(doc), Fault.counts(), console.toPlainText()
+        report['observations'].append(dict(case=label, before=before, after=after,
+            calls=calls, captured=captured, native_attribute_tracking=tracked, diagnostic=text))
+        check(label + ' real publication callback once', calls == 1)
+        check(label + ' source and Undo and prior Redo unchanged', before == after and before[2] == 1)
+        category = 'NonFiniteGeometry:' if action == 'nan-placement' else 'StaleGeometry:'
+        check(label + ' typed diagnostic identifies original operation', any(
+            category in line and operation in line for line in text.splitlines()))
+        check(label + ' rejected output invalidated and native wrapper released',
+              len(captured) == 1 and not captured[0]['valid'] and captured[0]['refcount'] == 1)
+        if action.startswith('restart'):
+            # Rejected old work must not cancel the callback's newer session.
+            if action == 'restart-line':
+                enter(console, '0,0,0');settle()
+                enter(console, '1,0,0')
+                settle()
+                outputs = [o for o in doc.Objects if o.Name not in ['Source', 'Witness']
+                           and 'Shape' in o.PropertiesList]
+                report['observations'].append(dict(case=label+'/replacement',
+                    prompt=console.property('om9Prompt'),objects=[o.Name for o in doc.Objects],
+                    lengths=[o.Shape.Length for o in outputs],undo=doc.UndoCount))
+                check(label + ' newer non-solid prompt and command survive', len(outputs) == 1
+                      and len(outputs[0].Shape.Edges) == 1 and abs(outputs[0].Shape.Length - 1.) < 1e-7
+                      and doc.UndoCount == before[1] + 1)
+            else:
+                if operation == 'Box' and action == 'restart-same':
+                    enter(console, 'Diagonal')
+                enter(console, '0,0,0')
+                if operation == 'Box' and action == 'restart-same':
+                    enter(console, '1,1,0')
+                    enter(console, '1')
+                    expected, volume = 'Box', 1.0
+                else:
+                    enter(console, 'Radius=1')
+                    expected, volume = 'Sphere', 4.0 * 3.141592653589793 / 3.0
+                settle()
+                outputs = [o for o in doc.Objects if getattr(o, 'OM9Command', None) == expected]
+                check(label + ' replacement session completes independently', len(outputs) == 1
+                      and abs(outputs[0].Shape.Volume - volume) < 1e-7 and doc.UndoCount == before[1] + 1)
+        else:
+            executed = False
+            if doc.RedoCount:
+                doc.redo()
+                executed = witness.Label == 'Executable prior Redo'
+            check(label + ' prior Redo still executes', executed)
+    finally:
+        if observer:
+            App.removeDocumentObserver(observer)
+        Fault.clear()
+        enter(console, 'Cancel')
+        App.closeDocument(doc.Name)
+
+def run():
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        settle()
+        console = Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit, 'OM9CommandTranscript')
+        for operation in ['Box', 'Sphere']:
+            for action in ['restart-same', 'shape', 'placement', 'metadata', 'nan-placement', 'parent', 'tolerance', 'orientation', 'shape-root', 'remove-command', 'remove-feature', 'remove-parameters']:
+                case(operation, action, console)
+        case('Box', 'restart-other', console)
+        case('Box', 'restart-line', console)
+        report['ok'] = all(c['passed'] for c in report['checks'])
+    except Exception:
+        report['ok'], report['error'] = False, traceback.format_exc()
+    finally:
+        for name in list(App.listDocuments()):
+            App.closeDocument(name)
+        (out/'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+        QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1200, run)

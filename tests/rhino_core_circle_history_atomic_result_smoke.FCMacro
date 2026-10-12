@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""Rejected replay preserves recorded metadata and an existing executable Redo."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(console,text):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier))
+def settle():
+ loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(80,loop.quit);loop.exec()
+def metadata(child):
+ return dict(recipe=list(child.Recipe),points=[list(p)for p in child.Points],roles=list(child.SourceRoles),parameters=list(child.SourceParameters),sources=[(o.Name,subs)for o,subs in child.Sources],path=None if not child.SourceCurve else(child.SourceCurve[0].Name,child.SourceCurve[1]),fraction=child.PathFraction,recorded=child.Recorded,radius=child.Radius.Value,fit=child.FitDeviation,approx=child.ApproxDeviation,construction=child.OM9CurveConstruction,units=child.OM9UnitContext,placement=repr(child.Placement))
+class Observer:
+ def __init__(self,name,action):self.name=name;self.action=action;self.calls=0
+ def slotChangedObject(self,obj,prop):
+  if obj.Document.Name!=self.name or obj.Name!='Circle'or prop!='OM9GeometryResult'or not obj.OM9GeometryResult or self.calls:return
+  self.calls+=1;doc=App.getDocument(self.name)
+  if self.action=='recipe':obj.Recipe=[2]
+  elif self.action=='points':obj.Points=[App.Vector(100,0,0)]
+  elif self.action=='roles':obj.SourceRoles=[999,0,1]
+  elif self.action=='parameters':obj.SourceParameters=[.7]
+  elif self.action=='links':obj.Sources=[]
+  elif self.action=='path':obj.SourceCurve=(doc.getObject('Path'),['Edge1'])
+  elif self.action=='fraction':obj.PathFraction=.7
+  elif self.action=='recorded':obj.Recorded=False
+  elif self.action=='radius':obj.Radius=7
+  elif self.action=='fit':obj.FitDeviation=9
+  elif self.action=='approx':obj.ApproxDeviation=11
+  elif self.action=='construction':obj.OM9CurveConstruction='tampered construction'
+  elif self.action=='units':obj.OM9UnitContext='tampered units'
+  elif self.action=='source':doc.getObject('Source').Shape=Part.Vertex(App.Vector(30,40,50))
+  elif self.action=='shape':obj.Shape=Part.makeCircle(7,App.Vector(100,0,0))
+  elif self.action=='placement':obj.Placement.Base=App.Vector(50,60,70)
+def case(console,action):
+ doc=App.newDocument('CircleHistoryAtomic');observer=None
+ try:
+  doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01);settings=doc.addObject('OpenMatrix9Gui::HistorySettings','OM9HistorySettings');settings.BrokenHistoryWarning=False
+  source=doc.addObject('Part::Feature','Source');source.Shape=Part.Vertex(App.Vector(3,4,5));path=doc.addObject('Part::Feature','Path');path.Shape=Part.makeLine(App.Vector(),App.Vector(10,0,0));witness=doc.addObject('App::FeaturePython','Witness');doc.recompute()
+  for text in ['Circle','History=Yes','Point=Source.Vertex1','Radius=2']:enter(console,text)
+  settle();child=doc.getObject('Circle');source.Shape=Part.Vertex(App.Vector(6,8,10))
+  doc.openTransaction('Prior executable Redo');witness.Label='Executable Redo';doc.commitTransaction();doc.undo()
+  before=metadata(child);source_before=source.Shape.exportBrepToString();history_before=(doc.UndoCount,doc.RedoCount);observer=Observer(doc.Name,action);App.addDocumentObserver(observer)
+  child.touch();doc.recompute();settle();calls=observer.calls;App.removeDocumentObserver(observer);observer=None;after=metadata(child);status=child.getStatusString()
+  check(action+' callback reaches replay result once',calls==1)
+  check(action+' stale replay clears paired output',child.Shape.isNull()and not child.OM9GeometryResult and 'StaleGeometry'in status)
+  check(action+' rejected replay restores recorded metadata',before==after)
+  check(action+' rejection preserves source and history stacks',source.Shape.exportBrepToString()==source_before and (doc.UndoCount,doc.RedoCount)==history_before)
+  doc.redo();check(action+' original Redo still executes',witness.Label=='Executable Redo')
+  report['observations'].append(dict(case=action,calls=calls,status=status,changed_metadata=[k for k in before if before[k]!=after[k]],history_before=history_before,history_after=(doc.UndoCount,doc.RedoCount)))
+ finally:
+  if observer:App.removeDocumentObserver(observer)
+  enter(console,'Cancel');App.closeDocument(doc.Name)
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');settle();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  for action in ['recipe','points','roles','parameters','links','path','fraction','recorded','radius','fit','approx','construction','units','source','shape','placement']:case(console,action)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

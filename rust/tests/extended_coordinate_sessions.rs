@@ -219,6 +219,9 @@ fn sphere_spherical_center_and_polar_radius_keep_last_accepted_world_point() {
 fn solid_extended_points_keep_the_existing_length_callback_policy() {
     for kind in [Kind::Box, Kind::Sphere] {
         let mut s = SolidSession::new(kind);
+        if kind == Kind::Box {
+            s.input("Center").unwrap();
+        }
         for unsupported in ["1ft<0", "1/2<0", "1m<0"] {
             assert!(s.input(unsupported).is_err(), "{unsupported}");
             assert_eq!(s.phase(), 1);
@@ -233,7 +236,14 @@ fn solid_extended_points_keep_the_existing_length_callback_policy() {
             assert_eq!(s.input("Height=4mm").unwrap(), SolidEffect::Commit);
             near(s.output().unwrap()[12..].try_into().unwrap(), [20., 3., 4.]);
         }
-        near(s.output().unwrap()[..3].try_into().unwrap(), [10., 0., 0.]);
+        near(
+            s.output().unwrap()[..3].try_into().unwrap(),
+            if kind == Kind::Box {
+                [0., -1.5, 0.]
+            } else {
+                [10., 0., 0.]
+            },
+        );
     }
 }
 

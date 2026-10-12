@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+"""A stored Circle replay cannot retain output changed inside its result callback."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtGui,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def enter(console,text):
+ console.setFocus();QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_End,QtCore.Qt.ControlModifier))
+ if text:QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,0,QtCore.Qt.NoModifier,text))
+ QtWidgets.QApplication.sendEvent(console,QtGui.QKeyEvent(QtCore.QEvent.KeyPress,QtCore.Qt.Key_Return,QtCore.Qt.NoModifier))
+def settle():
+ loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(80,loop.quit);loop.exec()
+class Observer:
+ def __init__(self,doc,action):self.doc=doc.Name;self.action=action;self.calls=0;self.armed=True
+ def slotChangedObject(self,obj,prop):
+  if not self.armed or obj.Document.Name!=self.doc or obj.Name!='Circle'or prop!='OM9GeometryResult'or not getattr(obj,prop,''):return
+  self.armed=False;self.calls+=1;doc=App.getDocument(self.doc)
+  if self.action=='shape':obj.Shape=Part.makeCircle(7,App.Vector(100,0,0))
+  elif self.action=='placement':obj.Placement.Base=App.Vector(50,60,70)
+  elif self.action=='result':obj.OM9GeometryResult='tampered result'
+  elif self.action=='units':obj.OM9UnitContext='tampered units'
+  elif self.action=='source':doc.getObject('Source').Shape=Part.Vertex(App.Vector(30,40,50))
+  elif self.action=='radius':obj.Radius=7
+  elif self.action=='fit':obj.FitDeviation=9
+  elif self.action=='approx':obj.ApproxDeviation=11
+  elif self.action=='recorded':obj.Recorded=False
+  elif self.action=='recipe':obj.Recipe=[2]
+  elif self.action=='construction':obj.OM9CurveConstruction='tampered construction'
+def case(console,action):
+ doc=App.newDocument('CircleHistoryCallback');observer=None
+ try:
+  doc.UndoMode=1;OM.setUnitContext(doc.Name,1.,1.,.01,.001,.01)
+  settings=doc.addObject('OpenMatrix9Gui::HistorySettings','OM9HistorySettings');settings.BrokenHistoryWarning=False
+  source=doc.addObject('Part::Feature','Source');source.Shape=Part.Vertex(App.Vector(3,4,5));doc.recompute()
+  for text in ['Circle','History=Yes','Point=Source.Vertex1','Radius=2']:enter(console,text)
+  settle();child=doc.getObject('Circle');initial=getattr(child,'OM9GeometryResult','');observer=Observer(doc,action);App.addDocumentObserver(observer)
+  source.Shape=Part.Vertex(App.Vector(6,8,10));doc.recompute();settle();calls=observer.calls;App.removeDocumentObserver(observer);observer=None
+  status=child.getStatusString();raw=getattr(child,'OM9GeometryResult','')
+  check(action+' callback reaches fresh result once',bool(initial)and calls==1)
+  check(action+' rejected Shape and result clear together',child.Shape.isNull()and not raw)
+  check(action+' stale diagnostic names actual replay child',all(s in status for s in ['StaleGeometry','Circle','History',child.Name]))
+  report['observations'].append(dict(case=action,calls=calls,status=status,result=raw,shape_null=child.Shape.isNull()))
+ finally:
+  if observer:App.removeDocumentObserver(observer)
+  enter(console,'Cancel');App.closeDocument(doc.Name)
+def run():
+ try:
+  Gui.activateWorkbench('OpenMatrix9Workbench');settle();console=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript')
+  for action in ['shape','placement','result','units','source','radius','fit','approx','recorded','recipe','construction']:case(console,action)
+  report['ok']=all(c['passed']for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

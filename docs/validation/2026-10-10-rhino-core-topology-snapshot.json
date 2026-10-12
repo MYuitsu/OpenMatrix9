@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-10T12:19:06+07:00",
+  "chapter_status": "in_progress",
+  "scope": "Common owned face/loop/ordered edge-use and pcurve domain/UV observations; Rust checked topology and free-boundary connectivity. Full RCORE-01 remains open.",
+  "validation": {
+    "host_runs": [
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-snapshot-final2-20261010",
+        "checks": 177,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6B794FB818029DD1DA7295EC66B0898F1F0618645C852811684D92EA84C178D1",
+          "pid": 60184,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-snapshot-final2-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-snapshot-final2-20261010\\results.json",
+            "bytes": 169520,
+            "sha256": "9597c8648258c9d69e386feedec933fc981a953a5deb3d89324e4bec09b65a5f"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-snapshot-final2-20261010\\shared-host-launch.json",
+            "bytes": 535,
+            "sha256": "52ef45b656dbc5036a2c07f98201cad00c2e755904d373909e16f8506834ed69"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-snapshot-final2-20261010\\select-plugin.FCMacro",
+            "bytes": 955,
+            "sha256": "195a8969d94b4df6b523c3e953866cebac84f91d9763d6140016982b8925cf0d"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-snapshot-import-control-20261010",
+        "checks": 55,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6B794FB818029DD1DA7295EC66B0898F1F0618645C852811684D92EA84C178D1",
+          "pid": 80544,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-snapshot-import-control-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-snapshot-import-control-20261010\\results.json",
+            "bytes": 1135223,
+            "sha256": "bca99dfd74958edadc11f2b748b491d4c27533a550a10a53ca92029cedb644ee"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-snapshot-import-control-20261010\\shared-host-launch.json",
+            "bytes": 543,
+            "sha256": "9f471e71a96497d034fe3478b96a18971d341a1a9ddcb228ad97fb9f25beaa78"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-snapshot-import-control-20261010\\select-plugin.FCMacro",
+            "bytes": 956,
+            "sha256": "fb0898253c9da06f3a3ddb1e984c863d29b0870997b939fbe32cd1b3aaa94e0e"
+          }
+        ]
+      },
+      {
+        "directory": "H:\\FreeCAD-src\\build\\topology-snapshot-descriptor-final-20261010",
+        "checks": 151,
+        "launch": {
+          "host": "H:\\FreeCAD-src\\build\\relWithDebInfo\\bin\\FreeCAD.exe",
+          "host_sha256": "98EEF899354A8AA84CFA2934E6E1A3C8558C7E6FFF3B89C347C06731F06018A8",
+          "plugin": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\bin\\OpenMatrix9Gui.pyd",
+          "plugin_sha256": "6B794FB818029DD1DA7295EC66B0898F1F0618645C852811684D92EA84C178D1",
+          "pid": 63124,
+          "module_root": "H:\\FreeCAD-src\\build\\reusable-history-runtime\\Mod\\OpenMatrix9",
+          "output": "H:/FreeCAD-src/build/topology-snapshot-descriptor-final-20261010",
+          "exit_code": 0
+        },
+        "artifacts": [
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-snapshot-descriptor-final-20261010\\results.json",
+            "bytes": 325981,
+            "sha256": "f0443c097454e4f404021ee458f312940c5ac6a63920a8d002d7bafe0f55d751"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-snapshot-descriptor-final-20261010\\shared-host-launch.json",
+            "bytes": 545,
+            "sha256": "5bf3108b6f2f65ad8a72983e39d5ba026f389a248631bf4a3aa6bffc4e335612"
+          },
+          {
+            "path": "H:\\FreeCAD-src\\build\\topology-snapshot-descriptor-final-20261010\\select-plugin.FCMacro",
+            "bytes": 960,
+            "sha256": "8864f5f3513b892f36d0100d21262da8627e42cd24f1f8842176ba490af641ab"
+          }
+        ]
+      }
+    ],
+    "host_checks": 383,
+    "rust": {
+      "tests": 585,
+      "result": "full cargo test passed",
+      "log": {
+        "path": "H:\\FreeCAD-src\\build\\topology-snapshot-rust-20261010.log",
+        "bytes": 87054,
+        "sha256": "df3d8645b4e2a6f028926f4188e26d28bc2143724bb781399ca935e5bc5b524c"
+      }
+    },
+    "public_source_audit": {
+      "source_files": 2209,
+      "icon_bindings": 511,
+      "svg_files": 510,
+      "errors": []
+    },
+    "plugin_build": {
+      "result": "pass",
+      "target": "OpenMatrix9Gui",
+      "sdk": "H:/FreeCAD-src/build/relWithDebInfo",
+      "cache": "H:/FreeCAD-src/build/openmatrix9-history-cage"
+    }
+  },
+  "red": [
+    {
+      "directory": "H:\\FreeCAD-src\\build\\topology-snapshot-red-20261010",
+      "failed_checks": [
+        "SquareHole exposes complete face observations"
+      ],
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\build\\topology-snapshot-red-20261010\\results.json",
+          "bytes": 3501,
+          "sha256": "9e596f1be4d71f69fa6d8f6ebf1c18d663116fd1152e28f969bc901606463873"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\build\\topology-snapshot-red-20261010\\shared-host-launch.json",
+          "bytes": 532,
+          "sha256": "85e14f9c4e1cf06a64562c2434046d923cf4141e569d894150d97667c2338284"
+        }
+      ]
+    },
+    {
+      "directory": "H:\\FreeCAD-src\\build\\topology-snapshot-repeated-red-20261010",
+      "failed_checks": [
+        "repeated same face does not turn open edges into a closed surface"
+      ],
+      "artifacts": [
+        {
+          "path": "H:\\FreeCAD-src\\build\\topology-snapshot-repeated-red-20261010\\results.json",
+          "bytes": 167001,
+          "sha256": "dd60187054d930b83f2e39b95084875ed97a28d5aaf5143e37809655f091cb6a"
+        },
+        {
+          "path": "H:\\FreeCAD-src\\build\\topology-snapshot-repeated-red-20261010\\shared-host-launch.json",
+          "bytes": 540,
+          "sha256": "c82f3538055fb5cb3256b1aa284b7d6a87940df510ead9c63ebf764b2cba8112"
+        }
+      ]
+    }
+  ],
+  "review": "docs/reviews/2026-10-10-topology-snapshot-review.md",
+  "completion_audit": "docs/reviews/2026-10-10-rcore01-closure-audit.md",
+  "source_fingerprints": {
+    "Gui/CoreTopologySnapshot.cpp": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreTopologySnapshot.cpp",
+      "bytes": 10169,
+      "sha256": "e456531f8f6a1342aec2d4eeb077f1e428f94049768b9aea2ac5c33437745572"
+    },
+    "Gui/CoreTopologySnapshot.h": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreTopologySnapshot.h",
+      "bytes": 351,
+      "sha256": "beb34101a9f4e313959ad9ac871e89b53caf1e6d983972429e1518d259b5add3"
+    },
+    "Gui/CoreGeometryContract.cpp": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CoreGeometryContract.cpp",
+      "bytes": 20805,
+      "sha256": "0886222ad4039d6073f56fb353cc31072025fb2b3da2cdc110a24ea72f1ebcf4"
+    },
+    "Gui/CMakeLists.txt": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\CMakeLists.txt",
+      "bytes": 7461,
+      "sha256": "9dc0f274123181a792bf0c17b6e14f65ca4649b07f2d18342b691024299af36f"
+    },
+    "Gui/NativeInputTree.cpp": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NativeInputTree.cpp",
+      "bytes": 22642,
+      "sha256": "3a47989f7c44e5364ca19138157427ad920b9d3f23c3760294a6d27e92ccb268"
+    },
+    "Gui/NurbsBasisAdapter.cpp": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\Gui\\NurbsBasisAdapter.cpp",
+      "bytes": 20670,
+      "sha256": "341c02c464812a173c3d94a3ff9748f0eff9480fabc83992288e617ce8629f3f"
+    },
+    "rust/src/lib.rs": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\lib.rs",
+      "bytes": 1301,
+      "sha256": "b555b52878a4ec5a8b2a9a1aad3dbb22397e7e4152e3d3fe3267bf113e3e3450"
+    },
+    "rust/src/topology_snapshot.rs": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\topology_snapshot.rs",
+      "bytes": 9109,
+      "sha256": "6997f747b01fd86072aeaa1dd6693180b444db9e29545c40f027f9f00c41f8cd"
+    },
+    "rust/src/topology_snapshot_ffi.rs": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\topology_snapshot_ffi.rs",
+      "bytes": 3407,
+      "sha256": "591908aecb95a8a3c599956574ffc1515837d2993c17a0cacdad2c57676aeb7c"
+    },
+    "rust/src/geometry_contract.rs": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\src\\geometry_contract.rs",
+      "bytes": 17801,
+      "sha256": "25d4ad12b4a17228aa492fe17e548c660334649f79df3e3f658880bbf473f59e"
+    },
+    "rust/tests/topology_snapshot.rs": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\topology_snapshot.rs",
+      "bytes": 4566,
+      "sha256": "75ed43d73f254a3acc66ff382459a6f631c1b722d2842168a781c7bc0f1400ec"
+    },
+    "rust/tests/topology_snapshot_ffi.rs": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\rust\\tests\\topology_snapshot_ffi.rs",
+      "bytes": 2591,
+      "sha256": "47e6fffbd6a435c74e61b9d842fd19c6ae511d5fbaf29b00376c23484d09a170"
+    },
+    "tests/rhino_core_topology_snapshot_smoke.FCMacro": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_topology_snapshot_smoke.FCMacro",
+      "bytes": 8288,
+      "sha256": "3b5caa79f2df766353a24262cfda414c7821096ad84f72930515bac899a6866a"
+    },
+    "tests/rhino_core_geometry_descriptor_smoke.FCMacro": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_geometry_descriptor_smoke.FCMacro",
+      "bytes": 37282,
+      "sha256": "96b6697171d6911cbc7f084ed257aa7ea648051b73ba4db9f11672ac387396fe"
+    },
+    "tests/rhino_core_import_commit_gate_smoke.FCMacro": {
+      "path": "H:\\FreeCAD-src\\Mod\\OpenMatrix9\\tests\\rhino_core_import_commit_gate_smoke.FCMacro",
+      "bytes": 10604,
+      "sha256": "391e1e96940e20863a1360d9c90bb797d05265650b8a46747f2be04b4c9d54e9"
+    }
+  },
+  "excluded_attempts": [
+    "First build lacked the explicit TopoDS_Wire definition; header corrected before final build.",
+    "Located fixture initially mutated an immutable PropertyShape wrapper; Part.Shape provides a shallow mutable value while retaining native partner identity.",
+    "Legacy descriptor control first used a sandbox temp directory unavailable to native OCCT; final isolated bootstrap uses workspace temporary storage.",
+    "Rust test error precedence initially combined inconsistent endpoints with disconnected/seam conditions; isolated fixtures now test each independent rejection."
+  ],
+  "remaining": [
+    "Full face/pcurve supporting geometry, analytic/UV basis and source attributes in the shared snapshot.",
+    "Composed local/world coordinates, native validity, vertex-link manifoldness and solid/cavity orientation certificates.",
+    "Complete conversion reports, uniform operation/type/options and typed diagnostic integration.",
+    "Raw ONX_Model::Read/input allocations, remaining native numeric owners, metadata/type and aggregate worker budgets.",
+    "Uniform commit/stale/cancel/close/ownership/cache contracts across all supported operation families."
+  ]
+}

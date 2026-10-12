@@ -1,5 +1,14 @@
 # OM9-SOLID-004 — Boolean2Objects
 
+<!-- rhino-core-edit-result-20261011:start -->
+Rust admission và native CAD Edit GeometryResult đã triển khai trên solver sẵn có.
+Runtime14/15 đã đạt các hồi quy CAD/lệnh/guard và cold reload; callback abort còn thất bại 2/5 kiểm tra Redo.
+Runtime15: Dimension NaN/Infinity 10/10, callback font/đồ họa và lỗi đúng Explode/source 12/12; dùng lại kiểm finite Rust.
+Full Rust 808 đạt; bằng chứng native giữ riêng theo plugin, không suy thành nghiệm thu toàn chương.
+**RCORE-01 đang triển khai**, không đóng consumer/lifecycle hay yêu cầu gốc.
+[Bằng chứng, lỗi đang mở và bước tiếp](../validation/2026-10-11-rhino-core-edit-result.md).
+<!-- rhino-core-edit-result-20261011:end -->
+
 Source engineering contract: `specs/04-solid/om9-solid-004-boolean-two-objects.md`. Matrix 8 Book 1 PDF pp.224
 re-read through continuation to the next command heading on 2026-10-09.
 Original PDF remains an ignored reference, excluded from runtime resources.

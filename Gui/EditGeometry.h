@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <set>
+#include <functional>
 namespace OpenMatrix9Gui {
 using EditShape=std::shared_ptr<CurvePyRef>;
 using EditShapes=std::vector<EditShape>;
@@ -16,7 +17,14 @@ struct EditProjection {
 };
 EditInput editInput(App::Document&,const std::string&,unsigned kind,bool allowBlocks=false);
 // Native BRep snapshot in world placement, without an Edit command's type policy.
-EditInput nativeShapeInput(App::Document&,const std::string&);
+// Optional synchronous native consumer admission, invoked on the borrowed owner
+// before private copy; neither the callback nor its borrowed argument is retained.
+struct NativeShapeAdmission{const char* operation;std::function<void(PyObject*,bool)> check;};
+EditInput nativeShapeInput(App::Document&,const std::string&,const NativeShapeAdmission* admission=nullptr);
+// Borrowed native leaf admission before special adapters extract/copy geometry.
+// A scalar curve inside a block intentionally keeps the special adapter policy.
+void validateExplodeNativeLeaf(PyObject*,const std::string& identity);
+void validateEditCapabilities(const std::vector<EditInput>&,unsigned kind,unsigned mode);
 void verifyEditInputs(App::Document&,const std::vector<EditInput>&);
 ToleranceSnapshot editJoinTolerance(const std::string& context,const std::vector<EditInput>&,const std::optional<double>& overrideMm);
 EditShapes buildEdit(const std::vector<EditInput>&,unsigned kind,std::size_t first,unsigned mode,double tolerance=1e-7);

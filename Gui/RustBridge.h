@@ -3,10 +3,55 @@
 #include <cstddef>
 #include <cstdint>
 extern "C" {
+// Synchronous bounded caller-owned buffers; Rust retains no foreign pointer.
+struct Om9OptionValue {std::uint32_t kind,choice;double number;};
+struct Om9OptionItem {std::uint32_t start,length,enabled,selected;};
+static_assert(sizeof(Om9OptionValue)==16&&sizeof(Om9OptionItem)==16);
+std::uint64_t om9_options_open(unsigned,double);
+std::uint64_t om9_options_begin(const unsigned char*,std::size_t,double);
+bool om9_options_define(std::uint64_t,const unsigned char*,std::size_t,unsigned,double,double,bool,const unsigned char*,std::size_t,const unsigned char*,std::size_t,unsigned);
+bool om9_options_initial(std::uint64_t,const unsigned char*,std::size_t,unsigned,double,const unsigned char*,std::size_t);
+bool om9_options_choice(std::uint64_t,const unsigned char*,std::size_t,const unsigned char*,std::size_t,const unsigned char*,std::size_t,bool,const unsigned char*,std::size_t);
+bool om9_options_alias(std::uint64_t,const unsigned char*,std::size_t,const unsigned char*,std::size_t);
+bool om9_options_greater(std::uint64_t,const unsigned char*,std::size_t,const unsigned char*,std::size_t,const unsigned char*,std::size_t);
+bool om9_options_seal(std::uint64_t);
+void om9_options_close(std::uint64_t);
+unsigned om9_options_event(std::uint64_t,unsigned,const unsigned char*,std::size_t,double,std::uint64_t*);
+bool om9_options_accept(std::uint64_t,std::uint64_t,bool);
+std::size_t om9_options_snapshot(std::uint64_t,unsigned char*,std::size_t);
+std::size_t om9_options_item_count(std::uint64_t);
+std::uint64_t om9_options_revision(std::uint64_t);
+std::size_t om9_options_change_count(std::uint64_t,std::uint64_t);
+std::size_t om9_options_choice_name(std::uint64_t,const unsigned char*,std::size_t,std::size_t,unsigned char*,std::size_t);
+std::size_t om9_options_change_text(std::uint64_t,std::uint64_t,std::size_t,unsigned char*,std::size_t);
+bool om9_options_item(std::uint64_t,std::size_t,Om9OptionItem*);
+std::size_t om9_options_item_text(std::uint64_t,std::size_t,unsigned,unsigned char*,std::size_t);
+std::size_t om9_options_message(std::uint64_t,unsigned,unsigned char*,std::size_t);
+bool om9_options_value(std::uint64_t,const unsigned char*,std::size_t,std::uint64_t,Om9OptionValue*);
+bool om9_options_gate(std::uint64_t,const unsigned char*,std::size_t,bool,const unsigned char*,std::size_t);
+bool om9_options_visible(std::uint64_t,const unsigned char*,std::size_t);
+std::uint64_t om9_options_open_named(unsigned,double,const unsigned char*,std::size_t);
+bool om9_options_sync_curve(std::uint64_t);
+bool om9_options_sync_solid(std::uint64_t);
+std::size_t om9_options_question_length(std::uint64_t);
+std::size_t om9_options_invocation_line(const unsigned char*,std::size_t,unsigned char*,std::size_t);
+bool om9_options_question(std::uint64_t,const unsigned char*,std::size_t);
+bool om9_options_shown(std::uint64_t,const unsigned char*,std::size_t,bool);
+unsigned om9_options_accept_curve(std::uint64_t,std::uint64_t);
+}
+extern "C" {
 // Synchronous immutable UTF8 bytes; Rust retains no pointer. Status0 accepts
 // bounded current-loop NURBS input, not native ownership or topology.
 unsigned int om9_hatch_loop_input(const unsigned char* bytes,std::size_t length);
 bool om9_curve_input_units(double);
+// Synchronous caller-owned UTF8 bytes; query returns a nonzero session
+// generation and copy requires that generation. No pointer retained.
+struct Om9CurveConstructionSummary {std::uint32_t status,reserved;std::size_t needed;std::uint64_t generation;};
+Om9CurveConstructionSummary om9_curve_construction_json(std::uint64_t,unsigned char*,std::size_t);
+std::uint64_t om9_curve_generation();
+std::uint64_t om9_curve_input_revision();
+unsigned om9_curve_native_input_json(const unsigned char*,std::size_t);
+static_assert(sizeof(Om9CurveConstructionSummary)==24);
 std::size_t om9_command_repeat_candidate();
 bool om9_command_repeatable(std::size_t);
 unsigned int om9_snap_effective_state();
@@ -19,6 +64,13 @@ extern "C" {
 unsigned int om9_solid_kind(const char*);
 bool om9_solid_start(const char*);
 void om9_solid_cancel();
+std::uint64_t om9_solid_generation();
+// Caller-owned UTF8 bytes; query/copy is generation-bound and retains no pointer.
+struct Om9SolidConstructionSummary {std::uint32_t status,reserved;std::size_t needed;};
+Om9SolidConstructionSummary om9_solid_construction_json(std::uint64_t,unsigned char*,std::size_t);
+std::size_t om9_prepared_result_limit();
+struct Om9SolidPublicationFrame { double expected[16],actual[16]; };
+unsigned int om9_solid_publication_frame(Om9SolidPublicationFrame);
 unsigned int om9_solid_phase();
 unsigned int om9_solid_reference_mode();
 const char* om9_solid_mode_name();
@@ -34,6 +86,8 @@ unsigned int om9_solid_input(const char*);
 unsigned int om9_solid_point(double,double,double,bool);
 bool om9_solid_frame(const double*);
 bool om9_solid_geometry(double*,bool,double,double,double,bool);
+unsigned int om9_solid_wire_preview(double*,double*,double,double,double,bool);
+bool om9_solid_height_drag(double*,const double*,const double*);
 bool om9_solid_height_axis(double*);
 std::size_t om9_solid_message(char*,std::size_t);
 }
@@ -108,6 +162,14 @@ bool om9_curve_preview_spline(const double* hover);
 bool om9_curve_preview_spline_closed(const double* hover,bool close);
 bool om9_spline_rebuild(const double* xyz,std::size_t count,std::size_t poles,std::size_t degree,bool closed);
 bool om9_spline_options(std::size_t poles,std::size_t degree);
+// Synchronous scalar request; Rust retains no caller storage or native owner.
+unsigned om9_native_rebuild_capability(unsigned representation,unsigned stage,
+    std::size_t inputCount,std::size_t pointCount,std::size_t degree,unsigned flags);
+bool om9_native_rebuild_declared();
+unsigned om9_native_curve_capability(unsigned representation,unsigned stage);
+bool om9_native_curve_declared(std::size_t commandIndex);
+unsigned om9_native_solid_capability(unsigned representation,unsigned stage);
+bool om9_native_solid_declared(unsigned kind);
 std::size_t om9_spline_degree();
 bool om9_spline_periodic();
 std::size_t om9_spline_pole_count();

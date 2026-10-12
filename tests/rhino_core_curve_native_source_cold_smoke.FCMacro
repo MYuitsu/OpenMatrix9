@@ -1,0 +1,49 @@
+"""RCORE-01: fresh host reconstructs full Curve source evidence from FCStd."""
+import json,os,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,OpenMatrix9Gui as OM
+from PySide6 import QtCore,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);archives=Path(os.environ['OM9_CURVE_NATIVE_ARCHIVE_DIR'])
+report=dict(module=OM.__file__,checks=[],observations=[])
+def check(name,value):report['checks'].append(dict(name=name,passed=bool(value)))
+def matrix(value):return App.Matrix(*[v for row in value for v in row])
+def run():
+ try:
+  original=json.loads((archives/'results.json').read_text())
+  assert original['ok'] and len(original['observations'])==3
+  for observation in original['observations']:
+   case=observation['case'];command=observation['command'];doc=App.openDocument(str(archives/(case+'.FCStd')))
+   obj=doc.getObject(command);raw=getattr(obj,'OM9CurveConstruction','') if obj else '';value=json.loads(raw) if raw else {}
+   check(case+' cold exact construction bytes retain accepted values',raw==observation['raw'] and bool(raw))
+   center=App.Vector(10,20,30 if case=='FitBranch' else 35);curve=obj.Shape.Edges[0].Curve if obj else None
+   geometry=obj is not None and obj.Shape.isValid() and (curve.Center-center).Length<1e-7
+   if geometry:geometry=abs(curve.Radius-(1 if case=='FitBranch' else 2))<1e-7 if command=='Circle' else abs(curve.MajorRadius-5)<1e-7 and abs(curve.MinorRadius-3)<1e-7
+   check(case+' cold output has independent physical dimensions',geometry)
+   refs=value.get('source_refs',[]);snapshots=value.get('source_snapshots',[])
+   check(case+' cold source indexes and immutable stamps remain paired',len(refs)==len(snapshots)==1 and refs[0].get('input_snapshot_index')==1 and all(isinstance(refs[0].get(k),str) and refs[0][k].isdigit() for k in ['document','object','generation','revision','epoch']))
+   linked=False
+   if value.get('source_snapshot_indexing')=='source_snapshots_one_based' and refs:
+    index=refs[0].get('input_snapshot_index');linked=isinstance(index,int) and 1<=index<=len(snapshots) and snapshots[index-1].get('source_attributes',{}).get('object_name')==refs[0].get('object_name')
+   check(case+' cold consumer follows advertised collection and base to the owner',linked)
+   snapshot=snapshots[0] if len(snapshots)==1 else {};data=snapshot.get('geometry_data',{});attrs=snapshot.get('source_attributes',{})
+   check(case+' cold source attributes and units remain independent values',attrs.get('label')==('Owned AcceptedCloud' if case=='FitBranch' else 'Owned Path') and attrs.get('document_uid')==refs[0].get('document_uid') and snapshot.get('unit_context_snapshot')==refs[0].get('unit_context_snapshot'))
+   complete=False
+   if case=='FitBranch':
+    local=data.get('points_xyz',[]);selected=snapshot.get('selected_points_world',[])
+    if local==[[1,0,0],[0,1,0],[-1,0,0]]:
+     location=matrix(snapshot['native_discrete_location']);parent=App.Matrix(*snapshot['native_parent_to_world']);world=[parent.multVec(location.multVec(App.Vector(*p))) for p in local]
+     complete=selected==[[11,20,30],[10,21,30],[9,20,30]] and all((p-App.Vector(*q)).Length<1e-7 for p,q in zip(world,selected))
+   else:
+    rebuilt=Part.Shape();payload=data.get('native_master',{}).get('payload','')
+    if payload:rebuilt.importBrepFromString(payload)
+    complete=bool(payload) and rebuilt.isValid() and len(rebuilt.Edges)==2 and abs(rebuilt.Length-120)<1e-7
+   check(case+' cold owned parent geometry reconstructs independently',complete)
+   token='Selection' if case=='FitBranch' else 'OnCurve=0.2500'
+   check(case+' cold original native token and surviving branch remain intact',any(e.get('text')==token for e in value.get('accepted_input_events',[])) and 'RemovedCloud' not in json.dumps(refs))
+   report['observations'].append(dict(case=case,raw=raw));App.closeDocument(doc.Name)
+  report['ok']=all(c['passed'] for c in report['checks'])
+ except Exception:report['ok']=False;report['error']=traceback.format_exc()
+ finally:
+  for name in list(App.listDocuments()):App.closeDocument(name)
+  (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8');QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)
