@@ -1350,13 +1350,13 @@
     native_implementation_status: validated_supported_slice
   native_implementation_status: validated_supported_slice
   implementation_date: "2026-10-12"
-  implementation_notes: "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Stock GitHub Actions CI is pending."
+  implementation_notes: "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Stock build/test status is authoritative in the exact commit GitHub Action and artifacts."
   validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
   candidate_status: "validated"
   candidate_date: '2026-10-12'
   candidate_validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
   approved_scope_complete: true
-  stock_ci_status: "pending"
+  stock_ci_status: "exact_commit_action_authoritative"
 - id: OM9-INFO-021
   name: Gumball Alignment
   command: GumballAlignment
@@ -1399,13 +1399,13 @@
     native_implementation_status: validated_supported_slice
   native_implementation_status: validated_supported_slice
   implementation_date: "2026-10-12"
-  implementation_notes: "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Stock GitHub Actions CI is pending."
+  implementation_notes: "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Stock build/test status is authoritative in the exact commit GitHub Action and artifacts."
   validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
   candidate_status: "validated"
   candidate_date: '2026-10-12'
   candidate_validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
   approved_scope_complete: true
-  stock_ci_status: "pending"
+  stock_ci_status: "exact_commit_action_authoritative"
 - id: OM9-INFO-022
   name: Relocate Gumball
   command: RelocateGumball
@@ -1453,13 +1453,13 @@
     native_implementation_status: validated_supported_slice
   native_implementation_status: validated_supported_slice
   implementation_date: "2026-10-12"
-  implementation_notes: "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Stock GitHub Actions CI is pending."
+  implementation_notes: "Approved OM9 core scope completed against the exact30 native suite: native primitive dimensions/expressions, standard FreeCAD Link/Scale with native OM9 Compound-derived helpers preserving admitted definitions/dependencies/subelements/Body trees and presentation across Undo/Redo/FCStd, bounded native input settling before fresh gestures after Undo with unchanged history and callback cancellation, actual Mesh Ctrl+Shift component picking, typed document Camera/Light physical frames, shared four-view Relocate and process-local cache. Native host limits and unsupported graph/frame cases remain explicit. Clayoo/SmartTargets, Rhino internal roll, full original-host parity, full Render and live host camera widgets are excluded. Stock build/test status is authoritative in the exact commit GitHub Action and artifacts."
   validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
   candidate_status: "validated"
   candidate_date: '2026-10-12'
   candidate_validation_report: "../docs/validation/2026-10-12-gumball-core-completion.md"
   approved_scope_complete: true
-  stock_ci_status: "pending"
+  stock_ci_status: "exact_commit_action_authoritative"
 - id: OM9-HISTORY-001
   name: History Workflow
   command: null

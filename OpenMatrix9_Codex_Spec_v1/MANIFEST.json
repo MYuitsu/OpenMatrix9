@@ -21,13 +21,13 @@
   },
   {
     "path": "FEATURES.json",
-    "bytes": 1816402,
-    "sha256": "962b4a25d04ee2949fee58cdff2ce17ba8ae106cd6e999b47dde8458d3deab06"
+    "bytes": 1816642,
+    "sha256": "21fcafbb184a14f2b488f14e897247056ce723cc073bff6f386f793b7f3071ef"
   },
   {
     "path": "FEATURES.yaml",
-    "bytes": 1454416,
-    "sha256": "05f798e7415fc5a094cc66dd7b41e67fc3d3ca66fcf5e14207b4dcda67e9cd91"
+    "bytes": 1454656,
+    "sha256": "4cf537b00777ea6c72b0e05f8dee99a2d746c5c11e3b304bfb24b68034af2123"
   },
   {
     "path": "FEATURE_LOOKUP.json",

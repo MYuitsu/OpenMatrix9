@@ -43,6 +43,14 @@ if 'OpenMatrix9Workbench' in Gui.listWorkbenches():
     Gui.removeWorkbench('OpenMatrix9Workbench')
 init_gui = module_root / 'InitGui.py'
 exec(compile(init_gui.read_bytes(), str(init_gui), 'exec'), dict(__name__='__main__', __file__=str(init_gui)))
+# A hidden Win32 launch can leave Qt's window unexposed while isVisible is true.
+# Expose the owned test window before fixtures take handle/viewport snapshots.
+from PySide6 import QtTest
+main_window = Gui.getMainWindow()
+main_window.hide()
+main_window.show()
+if not QtTest.QTest.qWaitForWindowExposed(main_window, 5000):
+    raise RuntimeError('The isolated native test window was never exposed')
 script = Path($macroLiteral)
 sys.path.insert(0, str(script.parent))
 exec(compile(script.read_bytes(), str(script), 'exec'), dict(__name__='__main__', __file__=str(script)))

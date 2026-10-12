@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 // FreeCAD object/property ownership bridge. Rust validates exact affine policy.
 #include "GumballAssociativeScale.h"
+#include <string_view>
 #include <App/Application.h>
 #include <App/Document.h>
 #include <App/DocumentObject.h>
@@ -160,18 +161,18 @@ bool incomingWritable(const App::DocumentObject& owner,const std::string& key,
     // Admit that exact built-in input without clearing any property flags;
     // arbitrary read-only, immutable, static read-only and output fields stay
     // protected. Legacy ShapeBinder.Support is normally writable already.
-    return owner.getTypeId().getName()=="PartDesign::SubShapeBinder"&&key=="Support"
+    return std::string_view(owner.getTypeId().getName())=="PartDesign::SubShapeBinder"&&key=="Support"
         &&property.getContainer()==&owner
-        &&property.getTypeId().getName()=="App::PropertyXLinkSubList"
+        &&std::string_view(property.getTypeId().getName())=="App::PropertyXLinkSubList"
         &&property.getType()==App::Prop_None
         &&!property.testStatus(App::Property::Immutable)
         &&!property.testStatus(App::Property::Output);
 }
 bool legacyShapeSupport(const App::DocumentObject& owner,const std::string& key,
     const App::Property& property){
-    return owner.getTypeId().getName()=="PartDesign::ShapeBinder"&&key=="Support"
+    return std::string_view(owner.getTypeId().getName())=="PartDesign::ShapeBinder"&&key=="Support"
         &&property.getContainer()==&owner
-        &&property.getTypeId().getName()=="App::PropertyLinkSubListGlobal";
+        &&std::string_view(property.getTypeId().getName())=="App::PropertyLinkSubListGlobal";
 }
 std::string placementExpression(App::DocumentObject& object){
     const std::string name=object.getNameInDocument();

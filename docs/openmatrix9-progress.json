@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-11T22:43:47+07:00",
+  "updated_at": "2026-10-12T08:24:29+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -2510,6 +2510,59 @@
       "plugin_sha256": "559e0dca08e3535174879dd81c598d4a894e70e43989d22dba8b6d77a8db6b20",
       "host_sha256": "98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8",
       "version_label": "0.3.4-202610120606"
+    },
+    {
+      "id": "gumball-stock-rendering-and-parametric-clipping-20261012",
+      "date": "2026-10-12",
+      "status": "validated",
+      "scope": "approved_gumball_core_stock_runtime_repair",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "summary": "Official stock FreeCAD native cohort passes after shared bundled Mesa selection, exposed owned Qt windows and native FBO captures. Perspective clip-plane changes retain numeric Scale; real zoom/rotation still cancel. Native Binder names use value comparisons on stock and development APIs, preserving all permission flags. Primitive dimensions, expressions, admitted associative dependencies and Object Alignment remain covered by the full cohort.",
+      "evidence": [
+        "docs/validation/2026-10-12-gumball-stock-rendering.md"
+      ],
+      "tests": [
+        {
+          "command": "tools/ci/run-gumball.ps1 against an isolated official stock host",
+          "result": "pass; 30 native processes / 955 named checks; one host/plugin hash; DPI100/150/200; real pointer, Undo/Redo and warm/cold FCStd"
+        },
+        {
+          "command": "Parametric clipping regression, previous and rebuilt plugins",
+          "result": "red reproduced; green 22 checks; real perspective zoom/rotation still cancel without model changes"
+        },
+        {
+          "command": "CI renderer/profile deployment regression",
+          "result": "17 checks pass; isolated fake hosts; matching alias, ownership, conflict and reparse guards"
+        },
+        {
+          "command": "Native Binder compatibility regression",
+          "result": "red reproduced; green 127 checks; exact type-name value comparisons; ReadOnly retained and unsupported protected properties rejected"
+        },
+        {
+          "command": "Development SDK syntax checks for GumballOverlay.cpp and GumballAssociativeScale.cpp",
+          "result": "pass; syntax only; no development-host DLL rebuild claimed"
+        },
+        {
+          "command": "Public package/version/source-audit regressions",
+          "result": "4 package + 3 version + 11 audit tests pass"
+        }
+      ],
+      "native_processes": 30,
+      "native_checks": 955,
+      "plugin_sha256": "71f8431d71f6abfb36c45e9fd2a128f1d8f232368e2e5c1faf5dd3a6ff58b987",
+      "suite_sha256": "800c4c9730f85c20582eee1b352cfb4701520e74d03c1acb2e78b7dff0b9ee7a",
+      "version_label": "0.3.4-202610120606",
+      "stock_ci_status": "exact_commit_action_authoritative",
+      "uncertainties": [
+        "Local stock results do not certify the exact GitHub runner build; its actual Action and artifacts are authoritative.",
+        "Approved native host limits remain as documented in the core completion report."
+      ],
+      "next_document": "docs/validation/2026-10-12-gumball-stock-rendering.md",
+      "next_action": "Push the reviewed candidate and verify the exact commit GitHub Action and packaged plugin/SetupLauncher artifacts."
     }
   ],
   "merge_context": {

@@ -56,4 +56,4 @@ tiến trình, cache này kết thúc; mở lại FCStd giữ geometry/native ob
 không khôi phục widget pivot. Reset hoặc chọn Alignment rõ sẽ đặt lại frame.
 [Candidate, phạm vi và gates](validation/2026-10-12-gumball-core-release-candidate.md).
 
-[Phạm vi core đã kiểm chứng và giới hạn host](validation/2026-10-12-gumball-core-completion.md). Stock CI đang chờ kết quả GitHub Actions thực tế.
+[Phạm vi core đã kiểm chứng và giới hạn host](validation/2026-10-12-gumball-core-completion.md). Xem trạng thái build và kiểm thử trên FreeCAD bản cài đặt tại [GitHub Actions](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml) của đúng commit.
