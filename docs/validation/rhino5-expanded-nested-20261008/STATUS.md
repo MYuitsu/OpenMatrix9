@@ -1,0 +1,1 @@
+90 independently generated controls: six outer surfaces x five parameter curves x three UV maps (sheared bilinear, rational bilinear, nonrational bicubic). Native decoded fields and17 samples pass. Actual Rhino5 result pending; public V5 guards remain. No general mapping certification.

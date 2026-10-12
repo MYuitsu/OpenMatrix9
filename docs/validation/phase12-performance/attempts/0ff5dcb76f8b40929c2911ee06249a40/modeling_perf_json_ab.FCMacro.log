@@ -1,0 +1,389 @@
+{
+  "checks": [
+    {
+      "name": "JSON preserves every value baseline0",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline0",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate0",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate0",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate1",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate1",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline1",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline1",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline2",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline2",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate2",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate2",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate3",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate3",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline3",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline3",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline4",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline4",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate4",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate4",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate5",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate5",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline5",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline5",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline6",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline6",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate6",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate6",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value candidate7",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality candidate7",
+      "passed": true
+    },
+    {
+      "name": "JSON preserves every value baseline7",
+      "passed": true
+    },
+    {
+      "name": "native archive current mesh equality baseline7",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh baseline0",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh candidate0",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh candidate1",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh baseline1",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh baseline2",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh candidate2",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh candidate3",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh baseline3",
+      "passed": true
+    },
+    {
+      "name": "actual clipboard independent mesh baseline4",
+      "passed": true
+    }
+  ],
+  "runs": [
+    {
+      "mode": "baseline",
+      "pair": 0,
+      "warmup": true,
+      "bytes": 2285668,
+      "encode_seconds": 0.043187799979932606,
+      "write_seconds": 0.7643247999949381,
+      "total_seconds": 0.8075125999748707
+    },
+    {
+      "mode": "candidate",
+      "pair": 0,
+      "warmup": true,
+      "bytes": 2025652,
+      "encode_seconds": 0.04331069998443127,
+      "write_seconds": 0.7867887000320479,
+      "total_seconds": 0.8300994000164792
+    },
+    {
+      "mode": "candidate",
+      "pair": 1,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.04288219998124987,
+      "write_seconds": 0.7619678999762982,
+      "total_seconds": 0.8048500999575481
+    },
+    {
+      "mode": "baseline",
+      "pair": 1,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.043399800022598356,
+      "write_seconds": 0.7700967999990098,
+      "total_seconds": 0.8134966000216082
+    },
+    {
+      "mode": "baseline",
+      "pair": 2,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.04426730005070567,
+      "write_seconds": 0.7717813999624923,
+      "total_seconds": 0.816048700013198
+    },
+    {
+      "mode": "candidate",
+      "pair": 2,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.043407400022260845,
+      "write_seconds": 0.7679968000156805,
+      "total_seconds": 0.8114042000379413
+    },
+    {
+      "mode": "candidate",
+      "pair": 3,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.04561829997692257,
+      "write_seconds": 0.7814690000377595,
+      "total_seconds": 0.8270873000146821
+    },
+    {
+      "mode": "baseline",
+      "pair": 3,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.04684050002833828,
+      "write_seconds": 0.785210800007917,
+      "total_seconds": 0.8320513000362553
+    },
+    {
+      "mode": "baseline",
+      "pair": 4,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.0463904999778606,
+      "write_seconds": 0.7791552999988198,
+      "total_seconds": 0.8255457999766804
+    },
+    {
+      "mode": "candidate",
+      "pair": 4,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.04609229997731745,
+      "write_seconds": 0.7766252000001259,
+      "total_seconds": 0.8227174999774434
+    },
+    {
+      "mode": "candidate",
+      "pair": 5,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.04414690000703558,
+      "write_seconds": 0.7751698999782093,
+      "total_seconds": 0.8193167999852449
+    },
+    {
+      "mode": "baseline",
+      "pair": 5,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.04604260000633076,
+      "write_seconds": 0.7972329999902286,
+      "total_seconds": 0.8432755999965593
+    },
+    {
+      "mode": "baseline",
+      "pair": 6,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.04825610003899783,
+      "write_seconds": 0.7968281999928877,
+      "total_seconds": 0.8450843000318855
+    },
+    {
+      "mode": "candidate",
+      "pair": 6,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.04518469999311492,
+      "write_seconds": 0.8012624999973923,
+      "total_seconds": 0.8464471999905072
+    },
+    {
+      "mode": "candidate",
+      "pair": 7,
+      "warmup": false,
+      "bytes": 2025652,
+      "encode_seconds": 0.044412600051146,
+      "write_seconds": 0.7836762999650091,
+      "total_seconds": 0.8280889000161551
+    },
+    {
+      "mode": "baseline",
+      "pair": 7,
+      "warmup": false,
+      "bytes": 2285668,
+      "encode_seconds": 0.04464979999465868,
+      "write_seconds": 0.7796336999745108,
+      "total_seconds": 0.8242834999691695
+    }
+  ],
+  "pid": 32104,
+  "macro_sha256": "4263e5967cd12f33a7cb1e0d16cdf6b2ee210783b2aba1276b4b1d2c8402a8ab",
+  "clipboard_runs": [
+    {
+      "mode": "baseline",
+      "pair": 0,
+      "warmup": true,
+      "copy_seconds": 1.6035587000078522,
+      "paste_seconds": 0.5038012000150047
+    },
+    {
+      "mode": "candidate",
+      "pair": 0,
+      "warmup": true,
+      "copy_seconds": 1.0687544000102207,
+      "paste_seconds": 0.459365299961064
+    },
+    {
+      "mode": "candidate",
+      "pair": 1,
+      "warmup": false,
+      "copy_seconds": 1.1199061999795958,
+      "paste_seconds": 0.4528155000298284
+    },
+    {
+      "mode": "baseline",
+      "pair": 1,
+      "warmup": false,
+      "copy_seconds": 1.069653799990192,
+      "paste_seconds": 0.4190663000335917
+    },
+    {
+      "mode": "baseline",
+      "pair": 2,
+      "warmup": false,
+      "copy_seconds": 1.0774661999894306,
+      "paste_seconds": 0.4404185999883339
+    },
+    {
+      "mode": "candidate",
+      "pair": 2,
+      "warmup": false,
+      "copy_seconds": 1.085648600012064,
+      "paste_seconds": 0.4115730000194162
+    },
+    {
+      "mode": "candidate",
+      "pair": 3,
+      "warmup": false,
+      "copy_seconds": 1.0933478999650106,
+      "paste_seconds": 0.4643342000199482
+    },
+    {
+      "mode": "baseline",
+      "pair": 3,
+      "warmup": false,
+      "copy_seconds": 1.0759755999897607,
+      "paste_seconds": 0.41407699999399483
+    },
+    {
+      "mode": "baseline",
+      "pair": 4,
+      "warmup": false,
+      "copy_seconds": 1.0561978000332601,
+      "paste_seconds": 0.4436850000056438
+    }
+  ],
+  "ok": false,
+  "error": "Traceback (most recent call last):\n  File \"H:/FreeCAD-src/build/om9-perf-dev/tests/modeling_perf_json_ab.FCMacro\", line 45, in run\n    start=time.perf_counter();pasted=ThreeDmClipboard.paste_selection();paste_time=time.perf_counter()-start\n                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"H:\\FreeCAD-src\\build\\om9-perf-sdk\\Mod\\OpenMatrix9\\ThreeDmClipboard.py\", line 183, in paste_selection\n    payload=capture_payload()\n  File \"H:\\FreeCAD-src\\build\\om9-perf-sdk\\Mod\\OpenMatrix9\\ThreeDmClipboard.py\", line 53, in capture_payload\n    if not user.OpenClipboard(None):raise RuntimeError('Windows clipboard is busy; try Paste again')\n                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: Windows clipboard is busy; try Paste again\n"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_perf_json_ab-1\d7337fbe16734521a82cfbbf78c8690b
+Exception: H:\FreeCAD-src\build\om9-perf-dev\tests\run_menu_smoke.ps1:33
+Line |
+  33 |          if(-not $result.ok){throw 'Runtime smoke failed'}
+     |                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Runtime smoke failed

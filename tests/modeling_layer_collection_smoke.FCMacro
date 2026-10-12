@@ -1,0 +1,65 @@
+"""Actual native whole-document collection includes locked/hidden current geometry."""
+import os,json,traceback,tempfile
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def reject(work,text=None):
+    try:work()
+    except RuntimeError as error:
+        report.setdefault('rejections',[]).append(str(error));return text is None or text in str(error)
+    return False
+def run():
+    try:
+        import OpenMatrix9Gui as native,ThreeDm,ThreeDmPointCloud
+        check('Rust-owned native scope collector registered',hasattr(native,'collectLayerTransfer3dm'))
+        doc=App.newDocument('SessionCollection');doc.UndoMode=1
+        a=doc.addObject('Part::Feature','CurrentRing');a.Shape=Part.makeBox(2,3,4);a.Placement.Base=App.Vector(20,0,0)
+        b=doc.addObject('Part::Feature','HiddenCurve');b.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0));b.ViewObject.Visibility=False
+        c=doc.addObject('Mesh::Feature','NativeMesh');c.Mesh=Mesh.Mesh([[(0,0,0),(1,0,0),(0,1,0)]])
+        cloud=doc.addObject('App::FeaturePython','NativeCloud');ThreeDmPointCloud.bind(cloud,dict(points=[[1,2,3],[4,5,6]],normals=[],colors=[],values=[],plane=list(App.Matrix().A),ordered=False,has_plane=False))
+        group=doc.addObject('App::DocumentObjectGroup','Models');group.addObject(a);group.addObject(b)
+        nested=doc.addObject('App::DocumentObjectGroup','Nested');nested.addObject(c);group.addObject(nested)
+        # A native object has one ordinary group owner: a second addObject(c)
+        # moves it out of Nested. Select parent plus Nested to exercise a real
+        # overlapping selection without changing the fixture's graph.
+        empty=doc.addObject('App::DocumentObjectGroup','Empty');doc.recompute()
+        check('fixture retains actual nested group ownership',list(group.Group)==[a,b,nested] and list(nested.Group)==[c])
+        initial=json.loads(native.layerDocumentSnapshot(doc.Name));native.initializeLayerDocument(doc.Name,json.dumps(initial))
+        layer=initial['snapshot']['layers'][0]['source_id'];native.layerDocumentCommand(doc.Name,json.dumps(dict(operation='set_locked',layer_id=layer,locked=True)))
+        raw=next(o.OM9LayerSnapshot for o in doc.Objects if 'OM9LayerSnapshot' in o.PropertiesList);undo=doc.UndoCount
+        original_fields=ThreeDmPointCloud.fields
+        def no_point_read(*args,**kwargs):raise AssertionError('collector extracted cloud arrays')
+        ThreeDmPointCloud.fields=no_point_read
+        try:models=native.collectLayerTransfer3dm(doc.Name,[],2)
+        finally:ThreeDmPointCloud.fields=original_fields
+        check('Session collects each current model once including hidden and locked', [o.Name for o in models]==[a.Name,b.Name,c.Name,cloud.Name])
+        check('collector reads no cloud arrays and preserves canonical bytes Undo and selection',next(o.OM9LayerSnapshot for o in doc.Objects if 'OM9LayerSnapshot' in o.PropertiesList)==raw and doc.UndoCount==undo and not Gui.Selection.getSelection())
+        check('transparent nested group expands current geometry in deterministic order',[o.Name for o in native.collectLayerTransfer3dm(doc.Name,[group],1)]==[a.Name,b.Name,c.Name])
+        check('empty selected scope supports palette-only transfer',native.collectLayerTransfer3dm(doc.Name,[],1)==[] and native.collectLayerTransfer3dm(doc.Name,[empty],1)==[])
+        check('overlapping groups and duplicate selected objects reject',reject(lambda:native.collectLayerTransfer3dm(doc.Name,[group,nested],1)) and reject(lambda:native.collectLayerTransfer3dm(doc.Name,[a,a],1)))
+        metadata=next(o for o in doc.Objects if 'OM9LayerSnapshot' in o.PropertiesList)
+        check('selected metadata rejects rather than becoming a model',reject(lambda:native.collectLayerTransfer3dm(doc.Name,[metadata],1)))
+        with tempfile.TemporaryDirectory() as stage:
+            prepared=ThreeDm._stage_current_geometry(models,stage);path=out/'locked-hidden-current.3dm';ThreeDm._write_geometry_atomic(native,prepared,str(path))
+        reread=out/'reread';reread.mkdir();data=json.loads(native.read3dm(str(path),str(reread)))
+        check('collected native models export with complete empty palette',len(data['items'])==4 and len(data['layer_session']['snapshot']['layers'])==32)
+        own=data['layer_session']['snapshot']['objects'];check('canonical own lock and hidden state are not flattened by collection',all(not row['locked'] for row in own) and sum(not row['visible'] for row in own)==1)
+        row=next(r for r in data['items'] if r['name']==a.Label);shape=Part.Shape();shape.read(row['brep'])
+        check('Session staging exports current edited world geometry',abs(shape.BoundBox.XMin-20)<1e-8 and abs(shape.Volume-24)<1e-8)
+        unsupported=doc.addObject('App::FeaturePython','UnsupportedModel');unsupported.Label='Unsupported retained object'
+        check('Session reports unrecognized model with type and name before serialization',reject(lambda:native.collectLayerTransfer3dm(doc.Name,[],2),unsupported.Name))
+        check('Selected can still transfer its exact supported subset',[o.Name for o in native.collectLayerTransfer3dm(doc.Name,[a],1)]==[a.Name])
+        other=App.newDocument('OtherSession');foreign=other.addObject('Part::Feature',a.Name);foreign.Shape=Part.makeSphere(1);App.setActiveDocument(doc.Name)
+        check('foreign same-name object cannot enter collection',reject(lambda:native.collectLayerTransfer3dm(doc.Name,[foreign],1)))
+        check('collection validates scope and avoids silently ignoring Session selection',reject(lambda:native.collectLayerTransfer3dm(doc.Name,[a],2)) and reject(lambda:native.collectLayerTransfer3dm(doc.Name,[],99)))
+        report.update(ok=True,module=native.__file__,scope='working native collection and explicit unsupported inventory; retained archive/block role proof and command routing pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

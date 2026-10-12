@@ -1,0 +1,33 @@
+MSBuild version 17.14.10+8b8e13593 for .NET Framework
+
+  Checking File Globs
+  -- GLOB mismatch!
+  The following files were added:
+    +C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/Mod/OpenMatrix9/rust/src/layer_collection.rs
+  1>Checking Build System
+  CMake is re-running because C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/CMakeFiles/generate.stamp is out-of-date.
+    the file 'C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/CMakeFiles/cmake.verify_globs'
+    is newer than 'C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/CMakeFiles/generate.stamp.depend'
+    result='-1'
+  -- Selecting Windows SDK version 10.0.22621.0 to target Windows 10.0.26300.
+  -- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+  -- Configuring done (0.1s)
+  -- Generating done (0.4s)
+  -- Build files have been written to: C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi
+  Generating rust-target/release/openmatrix9_rust.lib
+     Compiling openmatrix9_rust v0.1.0 (C:\Users\nguye\.codex\worktrees\layer-session-handoff\FreeCAD-src\Mod\OpenMatrix9\rust)
+      Finished `release` profile [optimized] target(s) in 17.92s
+  OM9LayerArchiveCandidate.vcxproj -> C:\Users\nguye\.codex\worktrees\layer-session-handoff\FreeCAD-src\build\layer-abi\Release\OM9LayerArchiveCandidate.lib
+  LayerRustAbiTests.vcxproj -> C:\Users\nguye\.codex\worktrees\layer-session-handoff\FreeCAD-src\build\layer-abi\Release\LayerRustAbiTests.exe
+     Creating library C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerArchiveTests.lib and object C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerArchiveTests.exp
+     Creating library C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerStagingTests.lib and object C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerStagingTests.exp
+     Creating library C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerLegacyBlockTests.lib and object C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerLegacyBlockTests.exp
+     Creating library C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerLegacyArchiveTests.lib and object C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerLegacyArchiveTests.exp
+     Creating library C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerClipboardTests.lib and object C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerClipboardTests.exp
+  LayerExchangeNativeTests.vcxproj -> C:\Users\nguye\.codex\worktrees\layer-session-handoff\FreeCAD-src\build\layer-abi\Release\LayerExchangeNativeTests.exe
+  LayerRetainedNativeTests.vcxproj -> C:\Users\nguye\.codex\worktrees\layer-session-handoff\FreeCAD-src\build\layer-abi\Release\LayerRetainedNativeTests.exe
+  LayerArchiveTests.vcxproj -> C:\Users\nguye\.codex\worktrees\layer-session-handoff\FreeCAD-src\build\layer-abi\Release\LayerArchiveTests.exe
+  LayerStagingTests.vcxproj -> C:\Users\nguye\.codex\worktrees\layer-session-handoff\FreeCAD-src\build\layer-abi\Release\LayerStagingTests.exe
+  LayerLegacyBlockTests.vcxproj -> C:\Users\nguye\.codex\worktrees\layer-session-handoff\FreeCAD-src\build\layer-abi\Release\LayerLegacyBlockTests.exe
+  LayerLegacyArchiveTests.vcxproj -> C:\Users\nguye\.codex\worktrees\layer-session-handoff\FreeCAD-src\build\layer-abi\Release\LayerLegacyArchiveTests.exe
+  LayerClipboardTests.vcxproj -> C:\Users\nguye\.codex\worktrees\layer-session-handoff\FreeCAD-src\build\layer-abi\Release\LayerClipboardTests.exe

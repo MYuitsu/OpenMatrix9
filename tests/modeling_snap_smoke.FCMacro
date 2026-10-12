@@ -1,0 +1,63 @@
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os, json, traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']); report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value: raise AssertionError(name)
+def run():
+    try:
+        import Part, Mesh, OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('SnapClassifier')
+        cad=doc.addObject('Part::Feature','CAD'); cad.Shape=Part.makeBox(2,3,4)
+        cad.addProperty('App::PropertyInteger','OM9GeometryKind');cad.OM9GeometryKind=4
+        cad.Shape.tessellate(0.1)
+        info=json.loads(native.classifySnap3dm(doc.Name,cad.Name))
+        check('cad_with_render_mesh_remains_cad',info['kind']==3 and info['native_cad'] and info['display_mesh_state']=='present' and info['eligible_modes']&2)
+        mesh=doc.addObject('Mesh::Feature','Mesh');mesh.Mesh=Mesh.Mesh([((0,0,0),(1,0,0),(0,1,0))])
+        cloud=doc.addObject('App::FeaturePython','Cloud');cloud.addProperty('App::PropertyVectorList','OM9CloudPoints');cloud.OM9CloudPoints=[App.Vector(1,2,3)]
+        class Poison:
+            def __getattr__(self,name):
+                if name in ('Points','Vertexes','Edges'): raise AssertionError('Heavy accessor read: '+name)
+                raise AttributeError(name)
+        cloud.Proxy=Poison()
+        for obj,kind in [(mesh,4),(cloud,5)]:
+            info=json.loads(native.classifySnap3dm(doc.Name,obj.Name))
+            check(obj.Name+' default snap ineligible',info['kind']==kind and info['eligible_modes']==0)
+            for mode in [2,4,8]:
+                result=json.loads(native.snapObjectCandidates3dm(doc.Name,obj.Name,mode,2048))
+                check(obj.Name+' zero heavy reads mode'+str(mode),result['complete'] and result['points']==[] and result['read_mesh_vertices']==0 and result['read_cloud_points']==0)
+        result=json.loads(native.snapObjectCandidates3dm(doc.Name,cad.Name,2,3))
+        check('native topology caps before materialization',len(result['points'])<=3 and not result['complete'] and result['visited_topology']<=4)
+        point=doc.addObject('Part::Feature','Point');point.Shape=Part.Vertex(App.Vector(3,4,5))
+        result=json.loads(native.snapObjectCandidates3dm(doc.Name,point.Name,8,2048))
+        check('standalone CAD Point mode',result['points']==[[3,4,5]] and result['complete'])
+        guide=doc.addObject('Part::Feature','Guide');guide.Shape=Part.makeLine(App.Vector(1,2,3),App.Vector(4,5,6))
+        parent=doc.addObject('App::Part','Parent');parent.addObject(guide);parent.Placement.Base=App.Vector(10,20,30)
+        doc.recompute()
+        result=json.loads(native.snapObjectCandidates3dm(doc.Name,guide.Name,2,2048))
+        check('nested parent placement once',result['points']==[[11,22,33],[14,25,36]])
+        first=doc.addObject('App::Link','First');first.setLink(guide);first.Placement.Base=App.Vector(50,0,0)
+        second=doc.addObject('App::Link','Second');second.setLink(first);second.Placement.Base=App.Vector(0,60,0);doc.recompute()
+        result=json.loads(native.snapObjectCandidates3dm(doc.Name,second.Name,2,2048))
+        expected=[list(v.Point) for v in second.getSubObject('').Vertexes]
+        check('nested links native transform exactly once',len(result['points'])==len(expected) and all(abs(a-b)<1e-8 for p,q in zip(result['points'],expected) for a,b in zip(p,q)))
+        second.Scale=-1;doc.recompute()
+        result=json.loads(native.snapObjectCandidates3dm(doc.Name,second.Name,2,2048));expected=[list(v.Point) for v in second.getSubObject('').Vertexes]
+        report['reflection']={'actual':result['points'],'expected':expected}
+        check('reflected nested Link native transform exactly once',len(result['points'])==len(expected) and all(any(all(abs(a-b)<1e-8 for a,b in zip(p,q)) for q in expected) for p in result['points']))
+        large=doc.addObject('Part::Feature','LargeCAD');large.Shape=Part.makeCompound([Part.makeLine(App.Vector(i,0,0),App.Vector(i,1,0)) for i in range(10000)])
+        result=json.loads(native.snapObjectCandidates3dm(doc.Name,large.Name,2,2048))
+        check('large CAD topology bounded before Python materialization',not result['complete'] and len(result['points'])==2048 and result['visited_topology']==2049)
+        first_face=Part.makePlane(2,2);second_face=Part.makePlane(2,2,App.Vector(5,0,0));second_face.tessellate(0.1)
+        partial=doc.addObject('Part::Feature','PartiallyMeshed');partial.Shape=Part.makeCompound([first_face,second_face])
+        partial_info=json.loads(native.classifySnap3dm(doc.Name,partial.Name))
+        check('partial tessellation not certified absent',partial_info['native_cad'] and partial_info['display_mesh_state'] in ('unknown','present'))
+        report.update(ok=True,module=native.__file__)
+    except Exception: report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

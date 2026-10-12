@@ -1,0 +1,74 @@
+{
+  "ok": true,
+  "release": "https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.3",
+  "source_commit": "2330e20af4aa5b050eaa928f7728766c02a3924d",
+  "assets": [
+    {
+      "name": "OpenMatrix9-0.0.3-FreeCAD-1.1.4-Windows-x64.zip",
+      "sha256": "882b4c4bc505a11fc009c23f113428b3e2c37cf6b5eae698af3bf007df9ff2de",
+      "bytes": 12338226
+    },
+    {
+      "name": "OpenMatrix9-0.0.3-SetupLauncher-Windows-x64.zip",
+      "sha256": "c30ece976e08d2678a4ba77f3e6fead7607cb18e5fc1d43773f6883b53ebd466",
+      "bytes": 12492071
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "sha256": "095b9f3adf4de25180558c014be6d3746addc8dbe14cbcaa84387cf07ab89d16",
+      "bytes": 230
+    }
+  ],
+  "identical_plugin_payload_files": 541,
+  "validation": {
+    "build_url": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/38096298917",
+    "native_reports": [
+      {
+        "checks": 14,
+        "macro": "native-smoke.FCMacro"
+      },
+      {
+        "checks": 5,
+        "macro": "worker-smoke.FCMacro"
+      }
+    ],
+    "brep_fixtures": 8,
+    "rust_tests": 262,
+    "plugin_sha256": "74aa40df6ee7aed8f5ebf903bd3080f88d9592df661d8e942c088afbb62f5a87",
+    "host": "Official FreeCAD 1.1.4 Windows x64",
+    "source_commit": "2330e20af4aa5b050eaa928f7728766c02a3924d",
+    "ok": true,
+    "worker_sha256": "dbc66f67cd343bd0b399b9cb87b989711716fa500a7666f566ac0f369755a3ae"
+  },
+  "provenance_verified": 2,
+  "notes_english_first": true,
+  "desktop_opengl": {
+    "major": 4,
+    "minor": 6,
+    "software": false
+  },
+  "downloaded_desktop_reports": [
+    {
+      "macro": "native-smoke.FCMacro",
+      "checks": 14,
+      "ok": true,
+      "graphics_exceptions": false
+    },
+    {
+      "macro": "worker-smoke.FCMacro",
+      "checks": 5,
+      "ok": true,
+      "graphics_exceptions": false
+    }
+  ],
+  "downloaded_launcher": {
+    "ok": true,
+    "checks": 21,
+    "actual_gui_starts": 4,
+    "update_status": "current"
+  },
+  "limits": [
+    "Hosted software OpenGL still logs Coin warnings and handled access violations; full viewport rendering is not certified.",
+    "Historical reference-tooling regressions and complete interactive Matrix/Rhino compatibility are outside this release gate."
+  ]
+}

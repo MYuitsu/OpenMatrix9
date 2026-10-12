@@ -1,0 +1,72 @@
+"""Alternating same-binary default/compact request A/B and real Copy/Paste."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json, os, traceback, time, statistics, hashlib, ctypes
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'runs':[],'pid':os.getpid(),'macro_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def clipboard_call(function):
+    retries=0
+    while True:
+        try:return function(),retries
+        except RuntimeError as error:
+            if 'clipboard is busy' not in str(error).lower() or retries==5:raise
+            retries+=1
+            loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(20,loop.quit);loop.exec()
+def run():
+    try:
+        import Mesh,Part,ThreeDm,ThreeDmClipboard,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('PerfMesh');doc.UndoMode=1
+        obj=doc.addObject('Mesh::Feature','Mesh');obj.Label='Đá oval 中文'
+        obj.Mesh=Mesh.Mesh([[(i%200,i//200,0),(i%200+.8,i//200,0),(i%200,i//200+.8,0)] for i in range(20000)]);doc.recompute()
+        obj.Placement.Base=App.Vector(13,17,2)
+        staging=out/'staging';staging.mkdir()
+        prepared=ThreeDm._stage_current_geometry([obj],str(staging));original_dump=ThreeDm.json.dumps
+        output_signature=None
+        for pair in range(8):
+            modes=['baseline','candidate'] if pair%2==0 else ['candidate','baseline']
+            for mode in modes:
+                begin=time.perf_counter();payload=original_dump(prepared) if mode=='baseline' else original_dump(prepared,separators=(',',':'));encoded=time.perf_counter()-begin
+                check('JSON preserves every value '+mode+str(pair),json.loads(payload)==prepared)
+                target=out/(mode+'-'+str(pair)+'.3dm');begin=time.perf_counter();native.write3dm(payload,str(target));written=time.perf_counter()-begin
+                # Native independent archive inspection plus actual import validates geometry.
+                target_doc=App.newDocument('Reread');objects=ThreeDm.import_file(str(target),target_doc,mode='modeling');restored=objects[0].Mesh
+                signature=sorted(tuple(sorted(tuple(round(v,7) for v in p) for p in facet.Points)) for facet in restored.Facets)
+                if output_signature is None:output_signature=signature
+                check('native archive current mesh equality '+mode+str(pair),len(objects)==1 and objects[0].Label==obj.Label and signature==output_signature and restored.CountFacets==20000)
+                App.closeDocument(target_doc.Name);App.setActiveDocument(doc.Name)
+                report['runs'].append({'mode':mode,'pair':pair,'warmup':pair==0,'bytes':len(payload.encode()),'encode_seconds':encoded,'write_seconds':written,'total_seconds':encoded+written})
+        # Full Copy/Paste A/B through unchanged clipboard producer/consumer.
+        report['clipboard_runs']=[]
+        for pair in range(6):
+            for mode in (['baseline','candidate'] if pair%2==0 else ['candidate','baseline']):
+                def dump(value,*args,**kwargs):
+                    kwargs.pop('separators',None)
+                    if mode=='candidate':kwargs['separators']=(',',':')
+                    return original_dump(value,*args,**kwargs)
+                ThreeDm.json.dumps=dump
+                try:
+                    Gui.Selection.clearSelection();Gui.Selection.addSelection(obj)
+                    start=time.perf_counter();_,copy_retries=clipboard_call(ThreeDmClipboard.copy_selection);copy_time=time.perf_counter()-start
+                    start=time.perf_counter();pasted,paste_retries=clipboard_call(ThreeDmClipboard.paste_selection);paste_time=time.perf_counter()-start
+                finally:ThreeDm.json.dumps=original_dump
+                check('actual clipboard independent mesh '+mode+str(pair),len(pasted)==1 and pasted[0]!=obj and pasted[0].Mesh.CountFacets==20000)
+                report['clipboard_runs'].append({'mode':mode,'pair':pair,'warmup':pair==0,'copy_seconds':copy_time,'paste_seconds':paste_time,'copy_retries':copy_retries,'paste_retries':paste_retries})
+                for item in pasted:doc.removeObject(item.Name)
+                doc.recompute()
+        report['summaries']={}
+        for group in ['runs','clipboard_runs']:
+            report['summaries'][group]={}
+            for mode in ['baseline','candidate']:
+                rows=[r for r in report[group] if r['mode']==mode and not r['warmup']]
+                keys=['bytes','encode_seconds','write_seconds','total_seconds'] if group=='runs' else ['copy_seconds','paste_seconds']
+                report['summaries'][group][mode]={key:statistics.median(r[key] for r in rows) for key in keys}
+        check('request bytes reduced',report['summaries']['runs']['candidate']['bytes']<report['summaries']['runs']['baseline']['bytes'])
+        report.update(ok=True,module=native.__file__,fixture={'mesh_facets':20000,'placement':[13,17,2]})
+    except:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

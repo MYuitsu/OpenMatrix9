@@ -88,3 +88,23 @@ pub mod gumball_component;
 pub mod gumball_component_ffi;
 
 pub mod gumball_associative;
+
+pub mod phase2_curve;
+pub mod phase2_ffi;
+pub mod phase2_session;
+pub mod phase2_snap;
+mod phase2_snap_ffi;
+pub mod phase3_ffi;
+pub mod phase3_modeling;
+pub mod layer_clipboard;
+pub mod layer_codec;
+pub mod layer_collection;
+pub mod layer_document;
+pub mod layer_exchange;
+pub mod layer_ffi;
+pub mod layer_legacy;
+pub mod layer_lifecycle;
+pub mod layer_native;
+pub mod layer_retained;
+pub mod layer_source_payload;
+pub mod layer_state;

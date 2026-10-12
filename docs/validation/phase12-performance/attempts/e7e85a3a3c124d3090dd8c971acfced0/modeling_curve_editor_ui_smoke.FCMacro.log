@@ -1,0 +1,51 @@
+{
+  "checks": [
+    {
+      "name": "original PointsOn menu available for selected owning curve",
+      "passed": true
+    },
+    {
+      "name": "PointsOn opens typed CV editor only for selection",
+      "passed": true
+    },
+    {
+      "name": "typed CV numeric fields",
+      "passed": true
+    },
+    {
+      "name": "UI CV edit commits native shape",
+      "passed": true
+    },
+    {
+      "name": "CMD PointsOn shares editor",
+      "passed": true
+    },
+    {
+      "name": "UI invalid weight stays open without mutation",
+      "passed": true
+    },
+    {
+      "name": "UI Cancel no transaction",
+      "passed": true
+    },
+    {
+      "name": "workbench change cancels CV dialog",
+      "passed": true
+    }
+  ],
+  "cmd_diagnostic": {
+    "selected": [
+      "Rational"
+    ],
+    "dialogs": [
+      [
+        "OM9CurveCVDialog",
+        true
+      ]
+    ],
+    "prompt": "Command: "
+  },
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_curve_editor_ui_smoke-1\26cab970dbaa4a8c88b8ec72f4295d2c

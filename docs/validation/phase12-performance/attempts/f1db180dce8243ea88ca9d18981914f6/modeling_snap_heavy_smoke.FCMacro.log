@@ -1,0 +1,57 @@
+{
+  "checks": [
+    {
+      "name": "million-point mesh and cloud fixtures",
+      "passed": true
+    },
+    {
+      "name": "End Mid Point zero reads mode2",
+      "passed": true
+    },
+    {
+      "name": "End Mid Point zero reads mode4",
+      "passed": true
+    },
+    {
+      "name": "End Mid Point zero reads mode8",
+      "passed": true
+    },
+    {
+      "name": "End Mid Point zero reads mode14",
+      "passed": true
+    },
+    {
+      "name": "million-point 500 warm query p95 16ms",
+      "passed": true
+    },
+    {
+      "name": "real mouse End snap with million mesh and cloud",
+      "passed": true
+    },
+    {
+      "name": "budget incomplete permits manual plane fallback",
+      "passed": true
+    },
+    {
+      "name": "budget incomplete permits typed coordinates",
+      "passed": true
+    }
+  ],
+  "fixtures": {
+    "cloud_points": 1000000,
+    "mesh_points": 1000002,
+    "mesh_facets": 333334
+  },
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd",
+  "performance": {
+    "p95_ms": 0.02340000355616212,
+    "median_ms": 0.021099986042827368,
+    "queries": 500
+  },
+  "hardware": {
+    "logical_cpu": 24,
+    "platform": "Windows-11-10.0.26300-SP0"
+  }
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_snap_heavy_smoke-1\dc8ef64982e047979e44c385927e604b

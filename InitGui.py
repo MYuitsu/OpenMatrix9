@@ -20,6 +20,14 @@ class OpenMatrix9Workbench(Gui.Workbench):
         # Link Python shell tới native Workbench.
         return "OpenMatrix9Gui::Workbench"
 
+    def Activated(self):
+        from ThreeDmClipboard import install_shortcuts
+        install_shortcuts()
+
+    def Deactivated(self):
+        from ThreeDmClipboard import remove_shortcuts
+        remove_shortcuts()
+
 
 # FreeCAD's loader may own __file__; resolve the actual workbench source.
 _om9_root = os.path.dirname(OpenMatrix9Workbench.Initialize.__code__.co_filename)

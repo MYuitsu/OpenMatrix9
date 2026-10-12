@@ -1,3 +1,4 @@
+#include "LayerController.h"
 #include "CurveController.h"
 #include "CoreUnits.h"
 #include "CommandConsole.h"
@@ -269,6 +270,7 @@ void CurveController::submit(const QString& text) {
     if(!input.isEmpty()){if(inputHistory.isEmpty()||inputHistory.back()!=input)inputHistory.append(input);if(inputHistory.size()>1000)inputHistory.removeFirst();}
     historyPosition=-1;historyDraft.clear();
     if(GumballController::instance().submit(input))return;
+    if(LayerController::submit(input))return;
     QString layerError;if(CoreLayers::submit(input,layerError)){if(!layerError.isEmpty()){setPrompt(layerError);logMessage(layerError);}else if(om9_curve_active())refresh();else setPrompt("Current layer updated");return;}
     if(SolidController::instance().active()){SolidController::instance().submit(input);return;}
     for(std::size_t i=0;i<om9_command_count();++i)if(SolidController::matches(i,input)){SolidController::instance().start(i);return;}

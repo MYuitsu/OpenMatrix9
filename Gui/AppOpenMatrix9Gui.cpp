@@ -1,3 +1,4 @@
+#include "CoreNotes.h"
 #include "Workbench.h"
 #include "GumballGeometry.h"
 #include "GumballController.h"
@@ -25,6 +26,10 @@
 
 void CreateOpenMatrix9Commands();
 void AddThreeDmMethods(PyObject*);
+void AddLayerDocumentMethods(PyObject*);
+void AddModelingSnapMethods(PyObject*);
+void AddSnapQueryMethods(PyObject*);
+void AddModelingCurveMethods(PyObject*);
 void AddThreeDmRegistryMethods(PyObject*);
 
 
@@ -85,7 +90,12 @@ PyMOD_INIT_FUNC(OpenMatrix9Gui)
     Py_DECREF(part);
     OpenMatrix9Gui::GumballScaleCompound::init();
     OpenMatrix9Gui::SurfaceHistory::init();
+    OpenMatrix9Gui::CoreNotes::registerTypes();
     AddThreeDmMethods(module);
+    AddLayerDocumentMethods(module);
+    AddModelingSnapMethods(module);
+    AddSnapQueryMethods(module);
+    AddModelingCurveMethods(module);
     AddThreeDmRegistryMethods(module);
     OpenMatrix9Gui::initializeHistoryTypes();
     OpenMatrix9Gui::initializeCurveParameterTypes();

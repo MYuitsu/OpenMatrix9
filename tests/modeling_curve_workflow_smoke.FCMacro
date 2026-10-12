@@ -1,0 +1,62 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtGui,QtTest
+from pathlib import Path
+import json,os,traceback,sys
+sys.path.insert(0,str(Path(__file__).parent))
+from command_console_support import command_input
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(100,loop.quit);loop.exec()
+def cmd(value):
+    field.setText(value);QtTest.QTest.keyClick(field,QtCore.Qt.Key_Return);settle()
+def run():
+    global field
+    try:
+        import Part,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('CurveWorkflow');doc.UndoMode=1;settle()
+        window=Gui.getMainWindow();field=command_input(window)
+        action=window.findChild(QtGui.QAction,'InterpCrv')
+        check('imported_curve_command_routes registered',action is not None and action.isEnabled())
+        action.trigger();settle()
+        for value in ['0,0,0','2,3,1','5,2,0','8,0,0','']:cmd(value)
+        created=doc.getObject('InterpCrv')
+        check('menu and CMD create native spline',created is not None and created.Shape.isValid() and created.Shape.Edges[0].Curve.Degree==3)
+        before=len(doc.Objects);cmd('InterpCrv');cmd('1,1,1');cmd('Cancel')
+        check('curve cancellation leaves document unchanged',len(doc.Objects)==before)
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(created)
+        rebuild=window.findChild(QtGui.QAction,'Rebuild')
+        check('Rebuild original command registered',rebuild is not None and rebuild.isEnabled())
+        rebuild.trigger();settle();dialog=window.findChild(QtWidgets.QDialog,'OM9RebuildDialog')
+        check('Rebuild selected current native curve dialog',dialog is not None)
+        count=dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount');degree=dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildDegree')
+        count.setValue(12);degree.setValue(3)
+        dialog.findChild(QtWidgets.QCheckBox,'OM9RebuildDeleteInput').setChecked(False)
+        buttons=dialog.findChild(QtWidgets.QDialogButtonBox);buttons.button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        outputs=[o for o in doc.Objects if o is not created and hasattr(o,'Shape')]
+        check('Rebuild native output exact requested structure',len(outputs)==1 and outputs[0].Shape.Edges[0].Curve.NbPoles==12 and outputs[0].Shape.Edges[0].Curve.Degree==3)
+        check('DeleteInput=false preserves Rebuild input',doc.getObject(created.Name) is not None)
+        doc.undo();check('Rebuild Undo atomic',len(doc.Objects)==before);doc.redo();check('Rebuild Redo restores output',len(doc.Objects)==before+1)
+        cmd('Line');cmd('0,0,0');cmd('3,0,0');check('legacy Line still works',doc.getObject('Line') is not None)
+        cmd('Polyline');cmd('0,0,0');cmd('1,1,0');cmd('2,1,0');cmd('');check('legacy Polyline still works',doc.getObject('Polyline') is not None)
+        window.show();area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
+        view=Gui.activeDocument().activeView();view.viewTop();Gui.updateGui();settle()
+        viewer=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer' and w.isVisible());target=viewer.viewport();center=target.rect().center()
+        action.trigger();settle();expected=[]
+        for delta in [QtCore.QPoint(-60,20),QtCore.QPoint(-20,-30),QtCore.QPoint(25,-15),QtCore.QPoint(70,20)]:
+            position=center+delta;ratio=viewer.devicePixelRatioF();a,b=view.projectPointToLine(round(position.x()*ratio),round(target.height()*ratio)-round(position.y()*ratio)-1);direction=b-a;expected.append(a+direction*(-a.z/direction.z))
+            QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=position);settle()
+        QtTest.QTest.keyClick(target,QtCore.Qt.Key_Return);settle();mouse=doc.getObject('InterpCrv001')
+        check('InterpCrv mouse route commits native cubic',mouse is not None and mouse.Shape.isValid() and mouse.Shape.Edges[0].Curve.Degree==3)
+        count=len(doc.Objects);cmd('InterpCrv')
+        for p in expected:cmd('{:.12g},{:.12g},{:.12g}'.format(p.x,p.y,p.z))
+        cmd('');typed=doc.getObject('InterpCrv002')
+        check('InterpCrv mouse CMD equivalent native geometry',len(doc.Objects)==count+1 and abs(mouse.Shape.Length-typed.Shape.Length)<1e-7 and all((a-b).Length<1e-7 for a,b in zip(mouse.Shape.Edges[0].Curve.getPoles(),typed.Shape.Edges[0].Curve.getPoles())))
+        report.update(ok=True,module=native.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

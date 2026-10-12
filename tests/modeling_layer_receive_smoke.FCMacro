@@ -1,0 +1,100 @@
+"""Actual public file receive keeps source palette and one geometry/state Undo."""
+import json,os,tempfile,traceback,hashlib
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def rejected(work):
+    try:work()
+    except RuntimeError:return True
+    return False
+def run():
+    docs=[]
+    try:
+        import OpenMatrix9Gui as native,ThreeDm
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        fixtures=Path(native.__file__).parents[2]/'layer-abi/archive-fixtures'
+        source_file=fixtures/'layer-source.3dm';source_hash=hashlib.sha256(source_file.read_bytes()).hexdigest()
+        doc=App.newDocument('LayerReceive');docs.append(doc.Name);doc.UndoMode=1
+        keep=doc.addObject('Part::Feature','Keep');keep.Shape=Part.makeBox(2,3,4)
+        exception=doc.addObject('Part::Feature','Exception');exception.Shape=Part.makeLine(App.Vector(10,0,0),App.Vector(13,0,0));doc.recompute()
+        def layer(id,path,rgb,parent=None):return dict(source_id=id,parent_id=parent,name=path[-1],path_components=path,rgb=rgb,locked=False,visible=True,persistent_locked=None,persistent_visible=None)
+        state=dict(document_id=str(doc.Uid),generation='3',active_layer='keep-layer',layers=[layer('keep-layer',['Parent'],[180,181,182]),layer('destination-only',['Parent','Destination only'],[31,32,33],'keep-layer'),layer('work',['Work'],[101,102,103])],objects=[dict(id=keep.Name,layer_id='keep-layer',locked=False,visible=True,color_source='ByLayer',rgb=[9,9,9]),dict(id=exception.Name,layer_id='work',locked=False,visible=True,color_source='ByObject',rgb=[51,52,53])])
+        native.initializeLayerDocument(doc.Name,json.dumps(dict(version=1,snapshot=state)))
+        snapshot=lambda:json.loads(native.layerDocumentSnapshot(doc.Name))
+        rgb=lambda obj:tuple(round(c*255) for c in obj.ViewObject.ShapeColor[:3])
+        def measures(obj):
+            shape=obj.Shape;b=shape.BoundBox
+            return [shape.Volume,shape.Area,shape.Length,b.XMin,b.YMin,b.ZMin,b.XMax,b.YMax,b.ZMax]
+        signatures={o.Name:o.Shape.hashCode() for o in [keep,exception]};geometryMetrics={o.Name:measures(o) for o in [keep,exception]};before=snapshot();undo=doc.UndoCount
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(exception);selection=[o.Name for o in Gui.Selection.getSelection()]
+        with tempfile.TemporaryDirectory() as directory:
+            prepared=ThreeDm._prepare_import(str(fixtures/'layer-source.3dm'),directory,0,'modeling')
+            check('public preparation keeps schema2 full palette and host bindings',isinstance(prepared,dict) and 'layer_session' in prepared and 'host_geometry' in prepared)
+            source=prepared['layer_session']['snapshot'];sourceRows={r['id']:r for r in source['objects']}
+            check('source fixture includes empty layer and distinct own state',len(source['layers'])==4 and len(sourceRows)==2)
+            objects=native.commit3dm(doc.Name,prepared);after=snapshot();rows={r['id']:r for r in after['snapshot']['objects']};layers={tuple(r['path_components']):r for r in after['snapshot']['layers']}
+            report['source']=source;report['after']=after
+            check('receive adds exactly source geometry without layer helper models',len(objects)==2 and len(after['snapshot']['objects'])==4 and len(doc.Objects)==5)
+            check('full source palette wins exact RGB/local/persistent flags',all(all(layers[tuple(src['path_components'])][key]==src[key] for key in ['name','rgb','locked','visible','persistent_locked','persistent_visible']) for src in source['layers']))
+            check('destination-only nested layer survives receive',layers[('Parent','Destination only')]['rgb']==[31,32,33] and layers[('Parent','Destination only')]['parent_id']=='keep-layer')
+            check('preexisting ByLayer reflects source-wins parent color and lock',keep.OM9LayerId=='keep-layer' and rgb(keep)==tuple(layers[('Parent',)]['rgb']) and keep.OM9Locked and not rows[keep.OM9LayerObjectId]['locked'])
+            check('preexisting ByObject exception and geometry are unchanged',rgb(exception)==(51,52,53) and all(doc.getObject(name).Shape.hashCode()==value for name,value in signatures.items()))
+            for obj,(item,geometry) in zip(objects,prepared['host_geometry']):
+                src=sourceRows[item['layer_object_id']];row=rows[obj.OM9LayerObjectId]
+                check('incoming own state remains separate '+obj.Label,all(row[key]==src[key] for key in ['locked','visible','color_source','rgb']) and obj.OM9LayerObjectId!=src['id'])
+            names=[o.Name for o in objects];check('receive owns one geometry/full-state Undo',doc.UndoCount==undo+1 and not doc.HasPendingTransaction)
+            doc.undo();Gui.updateGui();check('receive Undo restores preexisting state and removes additions together',snapshot()==before and all(doc.getObject(name) is None for name in names) and rgb(keep)==(180,181,182) and keep.ViewObject.Selectable)
+            check('Import Undo keeps original source file bytes on disk',source_file.is_file() and hashlib.sha256(source_file.read_bytes()).hexdigest()==source_hash)
+            doc.redo();Gui.updateGui();check('receive Redo restores complete source-wins state and additions',snapshot()==after and all(doc.getObject(name) is not None for name in names))
+            check('Import Redo keeps original source file bytes on disk',source_file.is_file() and hashlib.sha256(source_file.read_bytes()).hexdigest()==source_hash)
+        # Preparation/validation happens outside a transaction; a malformed
+        # binding must fail before adding geometry or an Undo record.
+        with tempfile.TemporaryDirectory() as directory:
+            prepared=ThreeDm._prepare_import(str(fixtures/'layer-source.3dm'),directory,0,'geometry');stable=snapshot();undo=doc.UndoCount;count=len(doc.Objects)
+            prepared['host_geometry'][0][0]['layer_object_id']='missing-source-row'
+            check('missing geometry metadata binding fails preflight',rejected(lambda:native.commit3dm(doc.Name,prepared)))
+            check('invalid binding leaves all current geometry/state/Undo',snapshot()==stable and len(doc.Objects)==count and doc.UndoCount==undo)
+        with tempfile.TemporaryDirectory() as directory:
+            prepared=ThreeDm._prepare_import(str(fixtures/'layer-source.3dm'),directory,0,'geometry');old=ThreeDm._insert_prepared;stable=snapshot();undo=doc.UndoCount;count=len(doc.Objects)
+            Gui.Selection.clearSelection();Gui.Selection.addSelection(exception);selection=[o.Name for o in Gui.Selection.getSelection()]
+            def fail(name,packet,create_layer_groups=True):
+                created=old(name,packet,create_layer_groups);report['failure_added_geometry']=len(created)
+                Gui.Selection.clearSelection();raise RuntimeError('injected binding failure after geometry add')
+            ThreeDm._insert_prepared=fail
+            try:check('binding failure after additions is reported',rejected(lambda:native.commit3dm(doc.Name,prepared)))
+            finally:ThreeDm._insert_prepared=old
+            check('injected failure actually followed native geometry binding',report.get('failure_added_geometry')==2)
+            check('failed receive restores state geometry Undo and selection',snapshot()==stable and len(doc.Objects)==count and doc.UndoCount==undo and [o.Name for o in Gui.Selection.getSelection()]==selection and not doc.HasPendingTransaction)
+        with tempfile.TemporaryDirectory() as directory:
+            prepared=ThreeDm._prepare_import(str(fixtures/'layer-source.3dm'),directory,0,'geometry');stable=snapshot();undo=doc.UndoCount;count=len(doc.Objects)
+            doc.openTransaction('Keep unrelated user draft');exception.Label='Keep user label'
+            undo=doc.UndoCount
+            check('receive refuses unrelated transaction',rejected(lambda:native.commit3dm(doc.Name,prepared)))
+            report['foreign_draft']={'pending':doc.HasPendingTransaction,'label':exception.Label,'state_unchanged':snapshot()==stable,'object_count':len(doc.Objects),'expected_object_count':count,'undo':doc.UndoCount,'expected_undo':undo,'transaction':native.layerDocumentTransactionFacts(doc.Name)}
+            check('foreign draft remains pending and intact',doc.HasPendingTransaction and exception.Label=='Keep user label' and snapshot()==stable and len(doc.Objects)==count and doc.UndoCount==undo)
+            doc.abortTransaction()
+        with tempfile.TemporaryDirectory() as directory:
+            prepared=ThreeDm._prepare_import(str(fixtures/'layer-palette.3dm'),directory,0,'modeling');beforePalette=snapshot();undo=doc.UndoCount;count=len(doc.Objects)
+            objects=native.commit3dm(doc.Name,prepared);paletteAfter=snapshot()
+            check('palette-only public receive supports zero geometry',objects==[] and len(doc.Objects)==count and doc.UndoCount==undo+1)
+            check('palette-only receive retains all layers and old object states',len(paletteAfter['snapshot']['layers'])==len(beforePalette['snapshot']['layers']) and paletteAfter['snapshot']['objects']==beforePalette['snapshot']['objects'])
+            doc.undo();check('palette-only Undo restores exact before-state',snapshot()==beforePalette)
+            doc.redo();check('palette-only Redo restores exact after-state',snapshot()==paletteAfter)
+        saved=output/'received-layer-session.FCStd';doc.saveAs(str(saved));App.closeDocument(doc.Name);doc=App.openDocument(str(saved));docs.append(doc.Name);Gui.updateGui()
+        report['reopen']={'state_equal':snapshot()==paletteAfter,'geometry_hashes':{name:doc.getObject(name).Shape.hashCode() for name in signatures},'expected_hashes':signatures}
+        check('FCStd reopens complete received canonical layer state',snapshot()==paletteAfter and all(doc.getObject(name).Shape.isValid() and all(abs(a-b)<1e-7 for a,b in zip(measures(doc.getObject(name)),expected)) for name,expected in geometryMetrics.items()))
+        report.update(ok=True,module=native.__file__,scope='public file geometry/modeling canonical receive; retained graph, native mutation hooks, full collection/Matrix acceptance still pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in docs:
+            if name in App.listDocuments():
+                doc=App.getDocument(name)
+                if doc.HasPendingTransaction:doc.abortTransaction()
+                App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

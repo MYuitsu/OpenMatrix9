@@ -1,0 +1,369 @@
+{
+  "checks": [
+    {
+      "name": "cylinder-seam fixture binding",
+      "passed": true
+    },
+    {
+      "name": "cylinder-seam native CAD valid",
+      "passed": true
+    },
+    {
+      "name": "cylinder-seam analytic area",
+      "passed": true
+    },
+    {
+      "name": "cylinder-seam native topology",
+      "passed": true
+    },
+    {
+      "name": "cylinder-seam analytic material",
+      "passed": true
+    },
+    {
+      "name": "cylinder-seam FCStd retains current native CAD",
+      "passed": true
+    },
+    {
+      "name": "sphere-poles fixture binding",
+      "passed": true
+    },
+    {
+      "name": "sphere-poles native CAD valid",
+      "passed": true
+    },
+    {
+      "name": "sphere-poles analytic area",
+      "passed": true
+    },
+    {
+      "name": "sphere-poles native topology",
+      "passed": true
+    },
+    {
+      "name": "sphere-poles analytic material",
+      "passed": true
+    },
+    {
+      "name": "sphere-poles FCStd retains current native CAD",
+      "passed": true
+    },
+    {
+      "name": "torus fixture binding",
+      "passed": true
+    },
+    {
+      "name": "torus native CAD valid",
+      "passed": true
+    },
+    {
+      "name": "torus analytic area",
+      "passed": true
+    },
+    {
+      "name": "torus native topology",
+      "passed": true
+    },
+    {
+      "name": "torus analytic material",
+      "passed": true
+    },
+    {
+      "name": "torus FCStd retains current native CAD",
+      "passed": true
+    },
+    {
+      "name": "cavity fixture binding",
+      "passed": true
+    },
+    {
+      "name": "cavity native CAD valid",
+      "passed": true
+    },
+    {
+      "name": "cavity analytic area",
+      "passed": true
+    },
+    {
+      "name": "cavity native topology",
+      "passed": true
+    },
+    {
+      "name": "cavity analytic material",
+      "passed": true
+    },
+    {
+      "name": "cavity FCStd retains current native CAD",
+      "passed": true
+    },
+    {
+      "name": "open-cylinder-face fixture binding",
+      "passed": true
+    },
+    {
+      "name": "open-cylinder-face native CAD valid",
+      "passed": true
+    },
+    {
+      "name": "open-cylinder-face analytic area",
+      "passed": true
+    },
+    {
+      "name": "open-cylinder-face native topology",
+      "passed": true
+    },
+    {
+      "name": "open-cylinder-face FCStd retains current native CAD",
+      "passed": true
+    },
+    {
+      "name": "planar-hole fixture binding",
+      "passed": true
+    },
+    {
+      "name": "planar-hole native CAD valid",
+      "passed": true
+    },
+    {
+      "name": "planar-hole analytic area",
+      "passed": true
+    },
+    {
+      "name": "planar-hole native topology",
+      "passed": true
+    },
+    {
+      "name": "planar-hole FCStd retains current native CAD",
+      "passed": true
+    },
+    {
+      "name": "edited-cylinder-knots fixture binding",
+      "passed": true
+    },
+    {
+      "name": "edited-cylinder-knots native CAD valid",
+      "passed": true
+    },
+    {
+      "name": "edited-cylinder-knots analytic area",
+      "passed": true
+    },
+    {
+      "name": "edited-cylinder-knots native topology",
+      "passed": true
+    },
+    {
+      "name": "edited-cylinder-knots analytic material",
+      "passed": true
+    },
+    {
+      "name": "edited-cylinder-knots FCStd retains current native CAD",
+      "passed": true
+    },
+    {
+      "name": "open-cylinder-shell fixture binding",
+      "passed": true
+    },
+    {
+      "name": "open-cylinder-shell native CAD valid",
+      "passed": true
+    },
+    {
+      "name": "open-cylinder-shell analytic area",
+      "passed": true
+    },
+    {
+      "name": "open-cylinder-shell native topology",
+      "passed": true
+    },
+    {
+      "name": "open-cylinder-shell FCStd retains current native CAD",
+      "passed": true
+    }
+  ],
+  "fixtures": [
+    {
+      "area": 188.49555921538757,
+      "bounds": [
+        -3,
+        -3,
+        0,
+        3,
+        3,
+        7
+      ],
+      "closed": true,
+      "faces": 3,
+      "input": "H:/FreeCAD-src/build/om9-phase3-native/modeling-brep-fixtures/cylinder-seam.3dm",
+      "name": "cylinder-seam",
+      "sha256": "9b5a7f9c3cee201b1acd06bd00eb2c8c8fe53a8cbae5ad83fa262c6b2389a9cf",
+      "volume": 197.92033717615698,
+      "object_name": "cylinder-seam",
+      "output": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\modeling_brep_smoke-709e521f889b4290b4e48eaa1a917f1a\\cylinder-seam-current.3dm",
+      "output_sha256": "ba6e858d989fd0fdfc1e8163da03ead3d64f9c42dd4ad6062d51fc1f0be7c2d4"
+    },
+    {
+      "area": 314.1592653589793,
+      "bounds": [
+        -4.999999999998707,
+        -5,
+        -5,
+        5,
+        5,
+        5
+      ],
+      "closed": true,
+      "faces": 1,
+      "input": "H:/FreeCAD-src/build/om9-phase3-native/modeling-brep-fixtures/sphere-poles.3dm",
+      "name": "sphere-poles",
+      "sha256": "77b1f7a2ba23303260d2ee4862265fbc85441936237a166a63aef083e72cffee",
+      "volume": 523.5987755982989,
+      "object_name": "sphere-poles",
+      "output": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\modeling_brep_smoke-709e521f889b4290b4e48eaa1a917f1a\\sphere-poles-current.3dm",
+      "output_sha256": "5ccd3ebd442951bb698863261e75a10781f4e7a65d2e0952fe5e37a0e7fba774"
+    },
+    {
+      "area": 789.5683520871486,
+      "bounds": [
+        -12,
+        -12,
+        -2,
+        12,
+        12,
+        2
+      ],
+      "closed": true,
+      "faces": 1,
+      "input": "H:/FreeCAD-src/build/om9-phase3-native/modeling-brep-fixtures/torus.3dm",
+      "name": "torus",
+      "sha256": "1bf01c693eac3be07b073129c9b9fd96048fb86cf752d476c869aa4a4e949c69",
+      "volume": 789.5683520871486,
+      "object_name": "torus",
+      "output": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\modeling_brep_smoke-709e521f889b4290b4e48eaa1a917f1a\\torus-current.3dm",
+      "output_sha256": "8230fe1fff5cadfab31706a6f8ff8d03d1dd0ec2518894018acf3e6fe8d5af73"
+    },
+    {
+      "area": 427.2566008882119,
+      "bounds": [
+        -4.999999999998707,
+        -5,
+        -5,
+        5,
+        5,
+        5
+      ],
+      "closed": true,
+      "faces": 2,
+      "input": "H:/FreeCAD-src/build/om9-phase3-native/modeling-brep-fixtures/cavity.3dm",
+      "name": "cavity",
+      "sha256": "a65c2e00af5e234fc483c0a868c93a9c5a7a7ce65a279c97af95f75b4d939fe3",
+      "volume": 410.5014400690663,
+      "object_name": "cavity",
+      "output": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\modeling_brep_smoke-709e521f889b4290b4e48eaa1a917f1a\\cavity-current.3dm",
+      "output_sha256": "2cdca5a10821abf756a3f00b79417c0228f005096e17dfb6baafc01db1731437"
+    },
+    {
+      "area": 131.94689145077132,
+      "bounds": [
+        -3,
+        -3,
+        0,
+        3,
+        3,
+        7
+      ],
+      "closed": false,
+      "faces": 1,
+      "input": "H:/FreeCAD-src/build/om9-phase3-native/modeling-brep-fixtures/open-cylinder-face.3dm",
+      "name": "open-cylinder-face",
+      "sha256": "6c2202b11098f9b86893f2bb59f8806fce1613bb6796fd247a33fa6deaadf7f3",
+      "volume": 0,
+      "object_name": "open-cylinder-face",
+      "output": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\modeling_brep_smoke-709e521f889b4290b4e48eaa1a917f1a\\open-cylinder-face-current.3dm",
+      "output_sha256": "341415fdfbd9de8eb533095e343d42c872dbcb7bbde0d485ae5bef641663cc81"
+    },
+    {
+      "area": 84,
+      "bounds": [
+        0,
+        0,
+        0,
+        10,
+        10,
+        0
+      ],
+      "closed": false,
+      "faces": 1,
+      "input": "H:/FreeCAD-src/build/om9-phase3-native/modeling-brep-fixtures/planar-hole.3dm",
+      "name": "planar-hole",
+      "sha256": "77d2390e0e45dd5c4e32e547f88949938925fef86dbdbebb7e7312c93429c06e",
+      "volume": 0,
+      "object_name": "planar-hole",
+      "output": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\modeling_brep_smoke-709e521f889b4290b4e48eaa1a917f1a\\planar-hole-current.3dm",
+      "output_sha256": "f44ae86cb877edea2480ac61171b0ba525d1830b4fd541ea7212ebf0dfcb6deb"
+    },
+    {
+      "area": 753.9822368615503,
+      "bounds": [
+        -6,
+        -6,
+        0,
+        6,
+        6,
+        14
+      ],
+      "closed": true,
+      "faces": 3,
+      "input": "H:/FreeCAD-src/build/om9-phase3-native/modeling-brep-fixtures/edited-cylinder-knots.3dm",
+      "name": "edited-cylinder-knots",
+      "sha256": "8ba9c6dd42ba8e23fcaa0a3adfc263c236a00ba85d968de8ce867b24806a86de",
+      "volume": 1583.3626974092558,
+      "object_name": "edited-cylinder-knots",
+      "output": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\modeling_brep_smoke-709e521f889b4290b4e48eaa1a917f1a\\edited-cylinder-knots-current.3dm",
+      "output_sha256": "a5ede685d66bce469209ae706a574b85bbf22972948a922fa9dc49edc3d46253"
+    },
+    {
+      "area": 160.22122533307945,
+      "bounds": [
+        -3,
+        -3,
+        0,
+        3,
+        3,
+        7
+      ],
+      "closed": false,
+      "faces": 2,
+      "input": "H:/FreeCAD-src/build/om9-phase3-native/modeling-brep-fixtures/open-cylinder-shell.3dm",
+      "name": "open-cylinder-shell",
+      "sha256": "a887db3305b6f2e6a30d4b7d68cf7638b3478e203f53eee4764b519727afeb64",
+      "volume": 0,
+      "object_name": "open-cylinder-shell",
+      "output": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\verification\\modeling_brep_smoke-709e521f889b4290b4e48eaa1a917f1a\\open-cylinder-shell-current.3dm",
+      "output_sha256": "b19956b72bf451d3cdfdf5f4bfd9f713ce8ed77ead7b8c26ff3735d2375ac1da"
+    }
+  ],
+  "measurement": {
+    "area": 160.22122518706146,
+    "area_nurbs": 160.22122518706146,
+    "area_default": 160.56555821816107,
+    "volume": 158.33626959490755,
+    "volume_nurbs": 158.33626959490755,
+    "faces": 2,
+    "bounds": [
+      -3,
+      -3,
+      0,
+      3,
+      3,
+      7
+    ],
+    "area_raw_adaptive": 160.22122518706146,
+    "volume_raw_adaptive": 158.33626959490755,
+    "brep_sha256": "a23a7cc78924695a15ae679ef92bde1eff5edddbb2d604bf58cda128dd8364c9",
+    "oracle_sha256": "8114722e0d6bf39960bae83924dc21aac9486e1fc9f83599c9582c1560fad007"
+  },
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\runtime\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+  "python_module": "H:\\FreeCAD-src\\build\\om9-stock-freecad-1.1\\runtime\\Mod\\OpenMatrix9\\ThreeDm.py"
+}

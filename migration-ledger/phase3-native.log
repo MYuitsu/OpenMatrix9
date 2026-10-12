@@ -1,0 +1,24 @@
+-- OM9 audited PolyEdgeSegment Read reversed flag repair; original SDK source unchanged
+-- OM9 audited CurveOnSurface child Read repair for opennurbsStatic; original SDK source unchanged
+-- OM9 audited resource-free Rhino5 RDK3 writer; original SDK source unchanged
+-- Configuring done (0.1s)
+-- Generating done (0.2s)
+-- Build files have been written to: H:/FreeCAD-src/build/om9-phase3-native
+[0/2] Re-checking globbed directories...
+[1/3] Building CXX object CMakeFiles\ThreeDmModelingBrepTests.dir\three_dm_modeling_brep.cpp.obj
+[2/3] Linking CXX executable ThreeDmModelingBrepTests.exe
+Test project H:/FreeCAD-src/build/om9-phase3-native
+    Start  1: OM9-MODELING.Phase3RustAbi
+1/5 Test  #1: OM9-MODELING.Phase3RustAbi ..............   Passed    0.01 sec
+    Start  5: OM9-MODELING.Brep
+2/5 Test  #5: OM9-MODELING.Brep .......................   Passed    0.79 sec
+    Start  8: OM9-FILE-012.TrimInteriorMapping
+3/5 Test  #8: OM9-FILE-012.TrimInteriorMapping ........   Passed    0.40 sec
+    Start 11: OM9-FILE-012.SurfaceCurveTargetMatrix
+4/5 Test #11: OM9-FILE-012.SurfaceCurveTargetMatrix ...   Passed    0.95 sec
+    Start 12: OM9-FILE-012.CurvedShells
+5/5 Test #12: OM9-FILE-012.CurvedShells ...............   Passed    1.39 sec
+
+100% tests passed out of 5
+
+Total Test time (real) =   3.55 sec

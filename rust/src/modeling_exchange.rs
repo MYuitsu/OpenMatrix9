@@ -1,4 +1,23 @@
 //! Working-geometry exchange policy. Display tessellation never changes kind.
+pub fn worker_target(available: u32) -> u32 {
+    // Integer arithmetic, round down, no overflow and no fixed four-thread cap.
+    (available / 5 * 3 + available % 5 * 3 / 5).max(1)
+}
+
+pub fn bounded_workers(available: u32, tasks: u32, ram_slots: u32) -> u32 {
+    worker_target(available).min(tasks).min(ram_slots)
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_modeling_worker_target(available: u32) -> u32 {
+    worker_target(available)
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_modeling_workers(available: u32, tasks: u32, ram_slots: u32) -> u32 {
+    bounded_workers(available, tasks, ram_slots)
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u32)]
 pub enum GeometryKind {
@@ -47,8 +66,8 @@ pub fn capabilities(kind: GeometryKind) -> Capabilities {
         select: exchange,
         snap: matches!(kind, CadPoint | CadCurve | CadBrep),
         transform: exchange,
-        // Direct curve/surface editing belongs to subsequent phases.
-        curve_edit: false,
+        // Phase2 owns native curve CV editing; surfaces remain a later phase.
+        curve_edit: kind == CadCurve,
         surface_edit: false,
         boolean: kind == CadBrep,
         export_v5: exchange,
@@ -60,6 +79,26 @@ pub fn preflight(kinds: &[GeometryKind]) -> Result<(), &'static str> {
         return Err("Working exchange requires independently supported geometry");
     }
     Ok(())
+}
+
+pub fn snap_allowed(kind: GeometryKind, native_cad: bool, preview: bool, mode: u32) -> bool {
+    native_cad
+        && !preview
+        && match mode {
+            2 | 4 => matches!(kind, GeometryKind::CadCurve | GeometryKind::CadBrep),
+            8 => matches!(kind, GeometryKind::CadPoint | GeometryKind::CadBrep),
+            _ => false,
+        }
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn om9_modeling_snap_allowed(
+    kind: u32,
+    native_cad: bool,
+    preview: bool,
+    mode: u32,
+) -> bool {
+    snap_allowed(kind.into(), native_cad, preview, mode)
 }
 
 #[unsafe(no_mangle)]

@@ -1,0 +1,65 @@
+"""Native clipboard carrier and protected staging files; document commit is separate."""
+import json,os,traceback,uuid,ctypes
+from pathlib import Path
+import FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def rejected(work):
+    try:work()
+    except RuntimeError:return True
+    return False
+def run():
+    clipboard=QtWidgets.QApplication.clipboard();previous=QtCore.QMimeData();old=clipboard.mimeData();owned=0
+    sequence=ctypes.WinDLL('user32').GetClipboardSequenceNumber
+    if old:
+        for name in old.formats():previous.setData(name,old.data(name))
+        if old.hasImage():previous.setImageData(old.imageData())
+    try:
+        import OpenMatrix9Gui as native
+        check('native clipboard API registered',hasattr(native,'publishLayerClipboard3dm') and hasattr(native,'captureLayerClipboard3dm'))
+        fixtures=Path(native.__file__).parents[2]/'layer-abi'/'archive-fixtures';stage=output/'prepared';stage.mkdir()
+        prepared=json.loads(native.prepareModeling3dm(str(fixtures/'layer-source.3dm'),str(stage)))
+        prepared['layer_session']['snapshot']['document_id']='clipboard-host-'+uuid.uuid4().hex
+        prepared['layer_session']['snapshot']['generation']=str(2**64-1)
+        geometry=output/'source-current.3dm';native.write3dm(json.dumps(prepared),str(geometry));body=geometry.read_bytes()
+        info=json.loads(native.publishLayerClipboard3dm(body,json.dumps(prepared['layer_session']),2));owned=sequence()
+        check('extended publish session scope',info['evidence']==2 and info['scope']==2)
+        captured=output/'captured.3dm';metadata=output/'captured.layer.json'
+        receipt=json.loads(native.captureLayerClipboard3dm(str(captured),str(metadata)));owned=sequence()
+        check('exact geometry native capture',captured.read_bytes()==body and receipt['geometry_bytes']==len(body))
+        state=json.loads(metadata.read_text(encoding='utf-8'))['snapshot']
+        check('full palette and own records',len(state['layers'])==4 and len(state['objects'])==2)
+        check('full u64 generation preserved',state['generation']==str(2**64-1))
+        incoming=output/'incoming-prepared';incoming.mkdir()
+        received=json.loads(native.prepareModeling3dm(str(captured),str(incoming),0,str(metadata)))
+        receivedState=received['layer_session']['snapshot']
+        check('captured exact pair prepares with source context',receivedState['document_id']==state['document_id'] and receivedState['generation']==state['generation'])
+        check('captured palette local flags and active layer preserved',receivedState['layers']==state['layers'] and receivedState['active_layer']==state['active_layer'])
+        check('captured geometry binds received own metadata',received['clipboard']['evidence']==2 and {r['layer_object_id'] for r in received['items']}=={r['id'] for r in receivedState['objects']})
+        objects={row['layer_id']:row for row in state['objects']};layers={tuple(row['path_components']):row for row in state['layers']}
+        check('inherited lock stays layer-owned',layers[('Parent',)]['locked'] and not objects[layers[('Parent','Child')]['source_id']]['locked'])
+        check('empty custom color retained',layers[('Empty',)]['rgb']==[7,89,143])
+        protected=output/'protected.3dm';protected.write_bytes(b'keep geometry')
+        check('existing capture target rejects',rejected(lambda:native.captureLayerClipboard3dm(str(protected),str(output/'unused.json'))))
+        check('existing geometry unchanged',protected.read_bytes()==b'keep geometry')
+        protectedMeta=output/'protected.json';protectedMeta.write_bytes(b'keep metadata');failedGeometry=output/'failed-capture.3dm'
+        check('metadata target collision rejects',rejected(lambda:native.captureLayerClipboard3dm(str(failedGeometry),str(protectedMeta))))
+        check('owned staging rollback only',not failedGeometry.exists() and protectedMeta.read_bytes()==b'keep metadata')
+        check('invalid schema rejects before publish',rejected(lambda:native.publishLayerClipboard3dm(body,'{"version":2}',2)))
+        check('truncated geometry rejects before publish',rejected(lambda:native.publishLayerClipboard3dm(b'x'*32,json.dumps(prepared['layer_session']),2)))
+        after=output/'after-failure.3dm';afterMeta=output/'after-failure.json';native.captureLayerClipboard3dm(str(after),str(afterMeta));owned=sequence()
+        check('failed publish keeps exact pair',after.read_bytes()==body and afterMeta.read_bytes()==metadata.read_bytes())
+        native.publishLayerClipboard3dm(body,None,0);owned=sequence();nativeFile=output/'native-only.3dm';unused=output/'native-only.json'
+        nativeReceipt=json.loads(native.captureLayerClipboard3dm(str(nativeFile),str(unused)));owned=sequence()
+        check('native-only reduced evidence',nativeReceipt['evidence']==1 and nativeReceipt['scope']==0)
+        check('native-only does not invent metadata',nativeFile.read_bytes()==body and not unused.exists())
+        report.update(ok=True,module=native.__file__,scope='native clipboard carrier; document-layer commit/Matrix session acceptance pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        if owned and sequence()==owned:clipboard.setMimeData(previous)
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -32,7 +32,7 @@ def same_serialized_ledger(a,b,path=''):
     return a==b
 def ledger(shape):
     # Independent geometry copy prevents read/evaluation caches touching source.
-    copied=shape.copy(copyGeom=True,copyMesh=False)
+    copied=shape.copy(True,False)
     if copied.ShapeType!='Wire':return {'type':copied.ShapeType,'edge_count':len(copied.Edges),'segments':[]}
     edges=copied.Wires[0].OrderedEdges
     segments=[]
@@ -75,6 +75,7 @@ def run():
         import OpenMatrix9Gui as native, ThreeDm
         Gui.activateWorkbench('OpenMatrix9Workbench')
         report['native_module']=str(native.__file__)
+        report['module']=str(native.__file__)
         report['native_sha256']=hashlib.sha256(Path(native.__file__).read_bytes()).hexdigest()
         cold=os.environ.get('OM9_POLYCURVE_COLD_FILE')
         if cold:
@@ -102,10 +103,10 @@ def run():
             arc=Part.ArcOfCircle(Part.Circle(App.Vector(0,10,0),App.Vector(0,0,1),10),-math.pi/2,0).toShape().toNurbs()
             wire=Part.Wire([line,arc])
             source=doc.addObject('Part::Feature','Source');source.Shape=wire
-            sibling=doc.addObject('Part::Feature','Sibling');sibling.Shape=wire.copy(copyGeom=True,copyMesh=False)
+            sibling=doc.addObject('Part::Feature','Sibling');sibling.Shape=wire.copy(True,False)
             doc.recompute();source_hash=digest(source.Shape);sibling_hash=digest(sibling.Shape)
             verify('native-forward',ledger(source.Shape),False)
-            planned=source.Shape.copy(copyGeom=True,copyMesh=False).reversed()
+            planned=source.Shape.copy(True,False).reversed()
             doc.openTransaction('Reverse native polycurve fixture')
             target=doc.addObject('Part::Feature','Reversed');target.Shape=planned
             doc.recompute();doc.commitTransaction()
@@ -113,7 +114,7 @@ def run():
             check('native reverse leaves source and sibling bytes unchanged',digest(source.Shape)==source_hash and digest(sibling.Shape)==sibling_hash)
             doc.undo();check('one Undo removes planned reversed output only',doc.getObject('Reversed') is None and doc.getObject('Source') is not None and doc.getObject('Sibling') is not None)
             doc.redo();target=doc.getObject('Reversed');verify('native-redo',ledger(target.Shape),True)
-            verify('native-double-reversed',ledger(target.Shape.copy(copyGeom=True,copyMesh=False).reversed()),False)
+            verify('native-double-reversed',ledger(target.Shape.copy(True,False).reversed()),False)
             saved=out/'mixed-polycurve.FCStd';doc.saveAs(str(saved))
             report['fcstd']=str(saved);report['fcstd_sha256']=hashlib.sha256(saved.read_bytes()).hexdigest()
             # Persist the reusable native baseline before the decisive exchange RED.

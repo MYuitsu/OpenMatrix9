@@ -98,7 +98,7 @@ Gui::MenuItem* Workbench::setupMenuBar() const
     openMatrixMenu->setCommand(
         "&OpenMatrix9"
     );
-    *openMatrixMenu << "Import3dm" << "Export3dm" << "Separator";
+    *openMatrixMenu << "Import3dm" << "Export3dm" << "Copy3dm" << "Paste3dm" << "ExportLayerSelection3dm" << "ExportSession3dm" << "CopySession3dm" << "Separator";
     auto* workspaceMenu=new Gui::MenuItem();workspaceMenu->setCommand("Workspace");
     for(std::size_t i=0;i<om9_workspace_command_count();++i)
         *workspaceMenu << om9_command_id(om9_workspace_command(i));
@@ -127,7 +127,8 @@ Gui::MenuItem* Workbench::setupMenuBar() const
             new Gui::MenuItem();
 
         submenu->setCommand(title);
-        if(std::string(title)=="File")*submenu << "Import3dm" << "Export3dm";
+        if(std::string(title)=="File")*submenu << "Import3dm" << "Export3dm" << "Copy3dm" << "Paste3dm" << "ExportLayerSelection3dm" << "ExportSession3dm" << "CopySession3dm";
+        if(std::string(title)=="Curve")*submenu << "PointsOn";
         if(std::string(title)=="Transform")*submenu << "OM9_ReleaseFromCage";
 
         const std::size_t commandCount =
@@ -165,7 +166,7 @@ Gui::ToolBarItem* Workbench::setupToolBars() const
     auto* root=Gui::StdWorkbench::setupToolBars();
     auto* exchange=new Gui::ToolBarItem(root);
     exchange->setCommand("3DM");
-    *exchange << "Import3dm" << "Export3dm";
+    *exchange << "Import3dm" << "Export3dm" << "Copy3dm" << "Paste3dm" << "ExportLayerSelection3dm" << "ExportSession3dm" << "CopySession3dm";
     return root;
 }
 

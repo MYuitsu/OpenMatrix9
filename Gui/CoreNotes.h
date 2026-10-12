@@ -4,6 +4,7 @@ namespace App {class DocumentObject;}
 namespace OpenMatrix9Gui {
 class CoreNotes {
 public:
+    static void registerTypes();
     static void activate();
     static void deactivate();
     static bool handles(std::size_t command);

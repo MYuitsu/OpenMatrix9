@@ -1,0 +1,95 @@
+[0/2] Re-checking globbed directories...
+ninja: no work to do.
+Test project H:/FreeCAD-src/build/3dm-preserve-native
+      Start  1: OM9-FILE-012.CoverageRuntime
+ 1/44 Test  #1: OM9-FILE-012.CoverageRuntime .....................   Passed    0.47 sec
+      Start  2: OM9-FILE-012.TrimInteriorMapping
+ 2/44 Test  #2: OM9-FILE-012.TrimInteriorMapping .................   Passed    0.42 sec
+      Start  3: OM9-FILE-012.MultiShellSolid
+ 3/44 Test  #3: OM9-FILE-012.MultiShellSolid .....................   Passed    3.08 sec
+      Start  4: OM9-FILE-012.CoherentReferenceTarget
+ 4/44 Test  #4: OM9-FILE-012.CoherentReferenceTarget .............   Passed    0.54 sec
+      Start  5: OM9-FILE-012.SurfaceCurveTargetMatrix
+ 5/44 Test  #5: OM9-FILE-012.SurfaceCurveTargetMatrix ............   Passed    1.02 sec
+      Start  6: OM9-FILE-012.CurvedShells
+ 6/44 Test  #6: OM9-FILE-012.CurvedShells ........................   Passed    1.46 sec
+      Start  7: OM9-FILE-012.SourceRingOrientation
+ 7/44 Test  #7: OM9-FILE-012.SourceRingOrientation ...............   Passed    9.03 sec
+      Start  8: OM9-FILE-012.SignedSolidOrientation
+ 8/44 Test  #8: OM9-FILE-012.SignedSolidOrientation ..............   Passed    2.34 sec
+      Start  9: OM9-FILE-012.RevolutionParameterization
+ 9/44 Test  #9: OM9-FILE-012.RevolutionParameterization ..........   Passed    2.17 sec
+      Start 10: OM9-FILE-012.RdkLegacyDocument
+10/44 Test #10: OM9-FILE-012.RdkLegacyDocument ...................   Passed    0.65 sec
+      Start 12: OM9-FILE-012.TrimDomains
+11/44 Test #12: OM9-FILE-012.TrimDomains .........................   Passed    0.63 sec
+      Start 13: OM9-FILE-012.ReferenceGraphIntegrity
+12/44 Test #13: OM9-FILE-012.ReferenceGraphIntegrity .............   Passed    0.47 sec
+      Start 14: OM9-FILE-012.NativeReferenceResolution
+13/44 Test #14: OM9-FILE-012.NativeReferenceResolution ...........   Passed    0.52 sec
+      Start 17: OM9-FILE-012.CurveOnSurfaceSchema
+14/44 Test #17: OM9-FILE-012.CurveOnSurfaceSchema ................   Passed    0.57 sec
+      Start 11: OM9-FILE-012.NativeReferenceInteroperability
+15/44 Test #11: OM9-FILE-012.NativeReferenceInteroperability .....   Passed    2.19 sec
+      Start 15: OM9-FILE-012.StandaloneReferences
+16/44 Test #15: OM9-FILE-012.StandaloneReferences ................   Passed    0.94 sec
+      Start 16: OM9-FILE-012.MixedReferences
+17/44 Test #16: OM9-FILE-012.MixedReferences .....................   Passed    0.67 sec
+      Start 18: OM9-FILE-012.CurveOnSurfaceTransform.Nurbs
+18/44 Test #18: OM9-FILE-012.CurveOnSurfaceTransform.Nurbs .......   Passed    0.45 sec
+      Start 19: OM9-FILE-012.CurveOnSurfaceTransform.Plane
+19/44 Test #19: OM9-FILE-012.CurveOnSurfaceTransform.Plane .......   Passed    0.41 sec
+      Start 20: OM9-FILE-012.CurveOnSurfaceTransform.Rev
+20/44 Test #20: OM9-FILE-012.CurveOnSurfaceTransform.Rev .........   Passed    0.42 sec
+      Start 21: OM9-FILE-012.CurveOnSurfaceTransform.Sum
+21/44 Test #21: OM9-FILE-012.CurveOnSurfaceTransform.Sum .........   Passed    0.41 sec
+      Start 22: OM9-FILE-012.CurveOnSurfaceTransform.Extrusion
+22/44 Test #22: OM9-FILE-012.CurveOnSurfaceTransform.Extrusion ...   Passed    0.41 sec
+      Start 23: OM9-FILE-012.CurveOnSurfaceArchive
+23/44 Test #23: OM9-FILE-012.CurveOnSurfaceArchive ...............   Passed    0.72 sec
+      Start 24: OM9-FILE-012.Merge
+24/44 Test #24: OM9-FILE-012.Merge ...............................   Passed    2.27 sec
+      Start 25: OM9-FILE-012.SurfaceCurveV5Profile
+25/44 Test #25: OM9-FILE-012.SurfaceCurveV5Profile ...............   Passed    4.16 sec
+      Start 26: OM9-FILE-012.NativeTransform
+26/44 Test #26: OM9-FILE-012.NativeTransform .....................   Passed    0.73 sec
+      Start 27: OM9-FILE-012.TextDot
+27/44 Test #27: OM9-FILE-012.TextDot .............................   Passed    0.59 sec
+      Start 28: OM9-FILE-012.PointCloud
+28/44 Test #28: OM9-FILE-012.PointCloud ..........................   Passed    0.55 sec
+      Start 29: OM9-FILE-012.CloudGeometry
+29/44 Test #29: OM9-FILE-012.CloudGeometry .......................   Passed    0.50 sec
+      Start 30: OM9-FILE-012.Hatch
+30/44 Test #30: OM9-FILE-012.Hatch ...............................   Passed    0.46 sec
+      Start 31: OM9-FILE-012.LegacyPointCloud
+31/44 Test #31: OM9-FILE-012.LegacyPointCloud ....................   Passed    0.51 sec
+      Start 32: OM9-FILE-012.LegacyHatch
+32/44 Test #32: OM9-FILE-012.LegacyHatch .........................   Passed    1.63 sec
+      Start 42: OM9-FILE-012.HatchLoops
+33/44 Test #42: OM9-FILE-012.HatchLoops ..........................   Passed    0.50 sec
+      Start 33: OM9-FILE-012.LegacyLoops
+34/44 Test #33: OM9-FILE-012.LegacyLoops .........................   Passed    1.16 sec
+      Start 34: OM9-FILE-012.Preservation
+35/44 Test #34: OM9-FILE-012.Preservation ........................   Passed    0.44 sec
+      Start 35: OM9-FILE-012.Inventory
+36/44 Test #35: OM9-FILE-012.Inventory ...........................   Passed    0.46 sec
+      Start 36: OM9-FILE-012.Geometry
+37/44 Test #36: OM9-FILE-012.Geometry ............................   Passed    0.48 sec
+      Start 37: OM9-FILE-012.Archive
+38/44 Test #37: OM9-FILE-012.Archive .............................   Passed    0.78 sec
+      Start 38: OM9-FILE-012.UserRing
+39/44 Test #38: OM9-FILE-012.UserRing ............................   Passed    6.77 sec
+      Start 39: OM9-FILE-012.Blocks
+40/44 Test #39: OM9-FILE-012.Blocks ..............................   Passed    0.55 sec
+      Start 40: OM9-FILE-012.HatchAffine
+41/44 Test #40: OM9-FILE-012.HatchAffine .........................   Passed    1.19 sec
+      Start 41: OM9-FILE-012.HatchCurrent
+42/44 Test #41: OM9-FILE-012.HatchCurrent ........................   Passed    0.52 sec
+      Start 43: OM9-FILE-012.HatchLoopEdit
+43/44 Test #43: OM9-FILE-012.HatchLoopEdit .......................   Passed    0.67 sec
+      Start 44: OM9-FILE-012.Unmeshed
+44/44 Test #44: OM9-FILE-012.Unmeshed ............................   Passed   21.56 sec
+
+100% tests passed out of 44
+
+Total Test time (real) =  76.51 sec

@@ -1,0 +1,1172 @@
+{
+  "TopIconMirror": {
+    "feature_id": "OM9-TOP11-004",
+    "file": "01-core/om9-top11-004-mirror.png",
+    "feature_name": "Mirror",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TopIconExplode": {
+    "feature_id": "OM9-TOP11-005",
+    "file": "01-core/om9-top11-005-explode.png",
+    "feature_name": "Explode",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TopIconJoin": {
+    "feature_id": "OM9-TOP11-008",
+    "file": "01-core/om9-top11-008-join.png",
+    "feature_name": "Join",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TopIconSplit": {
+    "feature_id": "OM9-TOP11-009",
+    "file": "01-core/om9-top11-009-split.png",
+    "feature_name": "Split",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TopIconRingRail": {
+    "feature_id": "OM9-TOP11-011",
+    "file": "01-core/om9-top11-011-ring-rail.png",
+    "feature_name": "Ring Rail",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "FileExportSelected": {
+    "feature_id": "OM9-FILE-001",
+    "file": "01-core/om9-file-001-export-selected.png",
+    "feature_name": "Export Selected",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "FileImport": {
+    "feature_id": "OM9-FILE-004",
+    "file": "01-core/om9-file-004-import.png",
+    "feature_name": "Import",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "FileNotes": {
+    "feature_id": "OM9-FILE-008",
+    "file": "01-core/om9-file-008-notes.png",
+    "feature_name": "Notes",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "ViewBackgroundBitmapPictureFrame": {
+    "feature_id": "OM9-VIEW-001",
+    "file": "01-core/om9-view-001-picture-frame.png",
+    "feature_name": "Picture Frame",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "ViewRestoreViewports": {
+    "feature_id": "OM9-VIEW-002",
+    "file": "01-core/om9-view-002-restore-viewports.png",
+    "feature_name": "Restore Viewports",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "ViewCaptureToFile": {
+    "feature_id": "OM9-VIEW-005",
+    "file": "01-core/om9-view-005-viewport-to-file.png",
+    "feature_name": "Viewport to File",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "OthersSetCrosshairs": {
+    "feature_id": "OM9-VIEW-009",
+    "file": "01-core/om9-view-009-set-crosshairs.png",
+    "feature_name": "Set Crosshairs",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "ViewSetCameraCenterViewport": {
+    "feature_id": "OM9-VIEW-012",
+    "file": "01-core/om9-view-012-center-viewport.png",
+    "feature_name": "Center Viewport",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "AnalyzeDirection": {
+    "feature_id": "OM9-UTIL-001",
+    "file": "01-core/om9-util-001-direction.png",
+    "feature_name": "Direction",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "AnalyzeDiagnosticsCheck": {
+    "feature_id": "OM9-UTIL-002",
+    "file": "01-core/om9-util-002-check.png",
+    "feature_name": "Check",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "AnalyzeEdgeToolsMergeEdge": {
+    "feature_id": "OM9-UTIL-005",
+    "file": "01-core/om9-util-005-merge-edge.png",
+    "feature_name": "Merge Edge",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "AnalyzeEdgeToolsJoin2NakedEdges": {
+    "feature_id": "OM9-UTIL-007",
+    "file": "01-core/om9-util-007-join-2-naked-edges.png",
+    "feature_name": "Join 2 Naked Edges",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "AnalyzeBoundingBox": {
+    "feature_id": "OM9-UTIL-010",
+    "file": "01-core/om9-util-010-bounding-box.png",
+    "feature_name": "Bounding Box",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "OthersExtractBadSurface": {
+    "feature_id": "OM9-UTIL-013",
+    "file": "01-core/om9-util-013-extract-bad-surface.png",
+    "feature_name": "Extract Bad Surface",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "MeshMeshRepairToolsAlignMeshVertices": {
+    "feature_id": "OM9-UTIL-016",
+    "file": "01-core/om9-util-016-align-mesh-vertices.png",
+    "feature_name": "Align Mesh Vertices",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "MeshApplyMeshUVN": {
+    "feature_id": "OM9-UTIL-020",
+    "file": "01-core/om9-util-020-apply-mesh-uvn.png",
+    "feature_name": "Apply Mesh UVN",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "MeshMeshEditToolsExtractRenderMesh": {
+    "feature_id": "OM9-UTIL-022",
+    "file": "01-core/om9-util-022-extract-render-mesh.png",
+    "feature_name": "Extract Render Mesh",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "AnalyzeAngle": {
+    "feature_id": "OM9-MEASURE-001",
+    "file": "01-core/om9-measure-001-angle.png",
+    "feature_name": "Angle",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "DimensionAngleDimension": {
+    "feature_id": "OM9-MEASURE-007",
+    "file": "01-core/om9-measure-007-angle-dimension.png",
+    "feature_name": "Angle Dimension",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "DimensionAlignedDimension": {
+    "feature_id": "OM9-MEASURE-009",
+    "file": "01-core/om9-measure-009-aligned-dimension.png",
+    "feature_name": "Aligned Dimension",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "DimensionLeader": {
+    "feature_id": "OM9-MEASURE-012",
+    "file": "01-core/om9-measure-012-leader.png",
+    "feature_name": "Leader",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurvePolylinePolyline": {
+    "feature_id": "OM9-CURVE-001",
+    "file": "02-curve-surface/om9-curve-001-polyline.png",
+    "feature_name": "PolyLine",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveCurveEditToolsRefitToTolerance": {
+    "feature_id": "OM9-CURVE-010",
+    "file": "02-curve-surface/om9-curve-010-refit-to-tolerance.png",
+    "feature_name": "Refit to Tolerance",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveBlendCurvesBlendCrv": {
+    "feature_id": "OM9-CURVE-012",
+    "file": "02-curve-surface/om9-curve-012-adjustable-curve-blend.png",
+    "feature_name": "Adjustable Curve Blend",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveCurveFrom2Views": {
+    "feature_id": "OM9-CURVE-013",
+    "file": "02-curve-surface/om9-curve-013-curve-from-2-views.png",
+    "feature_name": "Curve from 2 Views",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveCurveFromObjectsIntersection": {
+    "feature_id": "OM9-CURVE-017",
+    "file": "02-curve-surface/om9-curve-017-intersection.png",
+    "feature_name": "Intersection",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveFilletCurves": {
+    "feature_id": "OM9-CURVE-021",
+    "file": "02-curve-surface/om9-curve-021-fillet-curves.png",
+    "feature_name": "Fillet Curves",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveChamferCurves": {
+    "feature_id": "OM9-CURVE-022",
+    "file": "02-curve-surface/om9-curve-022-chamfer-curves.png",
+    "feature_name": "Chamfer Curves",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveCurveFromObjectsApplyUVCurves": {
+    "feature_id": "OM9-CURVE-024",
+    "file": "02-curve-surface/om9-curve-024-apply-uv-curves.png",
+    "feature_name": "Apply UV Curves",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveExtendCurveExtendCurve": {
+    "feature_id": "OM9-CURVE-027",
+    "file": "02-curve-surface/om9-curve-027-extend-curve.png",
+    "feature_name": "Extend Curve",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveSpiral": {
+    "feature_id": "OM9-CURVE-029",
+    "file": "02-curve-surface/om9-curve-029-spiral.png",
+    "feature_name": "Spiral",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveHelix": {
+    "feature_id": "OM9-CURVE-030",
+    "file": "02-curve-surface/om9-curve-030-helix.png",
+    "feature_name": "Helix",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveCurveEditToolsAdjustClosedCurveSeam": {
+    "feature_id": "OM9-CURVE-031",
+    "file": "02-curve-surface/om9-curve-031-adjust-closed-curve-seam.png",
+    "feature_name": "Adjust Closed Curve Seam",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveCurveEditToolsCurveBoolean": {
+    "feature_id": "OM9-CURVE-037",
+    "file": "02-curve-surface/om9-curve-037-curve-boolean.png",
+    "feature_name": "Curve Boolean",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveCurveFromObjectsDuplicateBorder": {
+    "feature_id": "OM9-CURVE-039",
+    "file": "02-curve-surface/om9-curve-039-duplicate-border.png",
+    "feature_name": "Duplicate Border",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveFreeFormContinueCurve": {
+    "feature_id": "OM9-CURVE-041",
+    "file": "02-curve-surface/om9-curve-041-continue-control-point-curve.png",
+    "feature_name": "Continue Control Point Curve",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveCrossSectionProfiles": {
+    "feature_id": "OM9-CURVE-043",
+    "file": "02-curve-surface/om9-curve-043-cross-section-profiles.png",
+    "feature_name": "Cross Section Profiles",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveFreeFormSketch": {
+    "feature_id": "OM9-CURVE-045",
+    "file": "02-curve-surface/om9-curve-045-sketch.png",
+    "feature_name": "Sketch",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveConvertCurveToLines": {
+    "feature_id": "OM9-CURVE-050",
+    "file": "02-curve-surface/om9-curve-050-curve-to-lines.png",
+    "feature_name": "Curve to Lines",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveCurveEditToolsMatch": {
+    "feature_id": "OM9-CURVE-052",
+    "file": "02-curve-surface/om9-curve-052-match.png",
+    "feature_name": "Match",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveCurveFromObjectsSilhouette": {
+    "feature_id": "OM9-CURVE-053",
+    "file": "02-curve-surface/om9-curve-053-silhouette.png",
+    "feature_name": "Silhouette",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveCurveFromObjectsExtractWireframe": {
+    "feature_id": "OM9-CURVE-054",
+    "file": "02-curve-surface/om9-curve-054-extract-wire-frame.png",
+    "feature_name": "Extract Wire Frame",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveCurveFromObjectsIntersectTwoSets": {
+    "feature_id": "OM9-CURVE-058",
+    "file": "02-curve-surface/om9-curve-058-intersect-two-sets.png",
+    "feature_name": "Intersect Two Sets",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "OthersSurfaceRebuild": {
+    "feature_id": "OM9-SURFACE-006",
+    "file": "02-curve-surface/om9-surface-006-rebuild.png",
+    "feature_name": "Rebuild",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceBlendSurface": {
+    "feature_id": "OM9-SURFACE-007",
+    "file": "02-curve-surface/om9-surface-007-blend-surface.png",
+    "feature_name": "Blend Surface",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceVariableFilletBlendChamferVariableBlendSurfaces": {
+    "feature_id": "OM9-SURFACE-008",
+    "file": "02-curve-surface/om9-surface-008-variable-blend-surfaces.png",
+    "feature_name": "Variable Blend Surfaces",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceLoft": {
+    "feature_id": "OM9-SURFACE-009",
+    "file": "02-curve-surface/om9-surface-009-loft.png",
+    "feature_name": "Loft",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceCurveNetwork": {
+    "feature_id": "OM9-SURFACE-010",
+    "file": "02-curve-surface/om9-surface-010-curve-network.png",
+    "feature_name": "Curve Network",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfacePatch": {
+    "feature_id": "OM9-SURFACE-011",
+    "file": "02-curve-surface/om9-surface-011-patch.png",
+    "feature_name": "Patch",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfacePlanarCurves": {
+    "feature_id": "OM9-SURFACE-013",
+    "file": "02-curve-surface/om9-surface-013-planar-curves.png",
+    "feature_name": "Planar Curves",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceEdgeCurves": {
+    "feature_id": "OM9-SURFACE-014",
+    "file": "02-curve-surface/om9-surface-014-edge-curves.png",
+    "feature_name": "Edge Curves",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceRailRevolve": {
+    "feature_id": "OM9-SURFACE-019",
+    "file": "02-curve-surface/om9-surface-019-rail-revolve.png",
+    "feature_name": "Rail Revolve",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceVariableFilletBlendChamferVariableFilletSurfaces": {
+    "feature_id": "OM9-SURFACE-022",
+    "file": "02-curve-surface/om9-surface-022-variable-fillet-surfaces.png",
+    "feature_name": "Variable Fillet Surfaces",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceVariableFilletBlendChamferVariableChamferSurfaces": {
+    "feature_id": "OM9-SURFACE-024",
+    "file": "02-curve-surface/om9-surface-024-variable-chamfer-surfaces.png",
+    "feature_name": "Variable Chamfer Surfaces",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceTweenSurfaces": {
+    "feature_id": "OM9-SURFACE-027",
+    "file": "02-curve-surface/om9-surface-027-tween-surfaces.png",
+    "feature_name": "Tween Surfaces",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceDrape": {
+    "feature_id": "OM9-SURFACE-030",
+    "file": "02-curve-surface/om9-surface-030-drape.png",
+    "feature_name": "Drape",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceHeightfieldfromImage": {
+    "feature_id": "OM9-SURFACE-031",
+    "file": "02-curve-surface/om9-surface-031-heightfield-from-image.png",
+    "feature_name": "Heightfield from Image",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceExtendSurface": {
+    "feature_id": "OM9-SURFACE-033",
+    "file": "02-curve-surface/om9-surface-033-extend-surface.png",
+    "feature_name": "Extend Surface",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceSurfaceEditToolsSoftEdit": {
+    "feature_id": "OM9-SURFACE-037",
+    "file": "02-curve-surface/om9-surface-037-soft-edit.png",
+    "feature_name": "Soft Edit",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceSurfaceEditToolsAdjustClosedSurfaceSeam": {
+    "feature_id": "OM9-SURFACE-038",
+    "file": "02-curve-surface/om9-surface-038-adjust-closed-surface-seam.png",
+    "feature_name": "Adjust Closed Surface Seam",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SurfaceSurfaceEditToolsSetSurfaceTangent": {
+    "feature_id": "OM9-SURFACE-040",
+    "file": "02-curve-surface/om9-surface-040-set-surface-tangent.png",
+    "feature_name": "Set Surface Tangent",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SolidBooleanTwoObjects": {
+    "feature_id": "OM9-SOLID-004",
+    "file": "03-solid-transform/om9-solid-004-boolean-two-objects.png",
+    "feature_name": "Boolean Two Objects",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SolidExtractSurface": {
+    "feature_id": "OM9-SOLID-006",
+    "file": "03-solid-transform/om9-solid-006-extract-surface.png",
+    "feature_name": "Extract Surface",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SolidText": {
+    "feature_id": "OM9-SOLID-008",
+    "file": "03-solid-transform/om9-solid-008-text.png",
+    "feature_name": "Text",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SolidPipe": {
+    "feature_id": "OM9-SOLID-011",
+    "file": "03-solid-transform/om9-solid-011-pipe.png",
+    "feature_name": "Pipe",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SolidTorus": {
+    "feature_id": "OM9-SOLID-015",
+    "file": "03-solid-transform/om9-solid-015-torus.png",
+    "feature_name": "Torus",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SolidCylinder": {
+    "feature_id": "OM9-SOLID-016",
+    "file": "03-solid-transform/om9-solid-016-cylinder.png",
+    "feature_name": "Cylinder",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SolidTube": {
+    "feature_id": "OM9-SOLID-017",
+    "file": "03-solid-transform/om9-solid-017-tube.png",
+    "feature_name": "Tube",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SolidPyramid": {
+    "feature_id": "OM9-SOLID-018",
+    "file": "03-solid-transform/om9-solid-018-pyramid.png",
+    "feature_name": "Pyramid",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SolidBoss": {
+    "feature_id": "OM9-SOLID-021",
+    "file": "03-solid-transform/om9-solid-021-boss.png",
+    "feature_name": "Boss",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SolidSolidEditToolsHolesMakeHole": {
+    "feature_id": "OM9-SOLID-023",
+    "file": "03-solid-transform/om9-solid-023-make-hole.png",
+    "feature_name": "Make Hole",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SolidSolidEditToolsHolesArrayHole": {
+    "feature_id": "OM9-SOLID-025",
+    "file": "03-solid-transform/om9-solid-025-array-hole.png",
+    "feature_name": "Array Hole",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SolidSolidEditToolsHolesArrayHolePolar": {
+    "feature_id": "OM9-SOLID-026",
+    "file": "03-solid-transform/om9-solid-026-array-hole-polar.png",
+    "feature_name": "Array Hole Polar",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "SolidSolidEditToolsFacesMoveFace": {
+    "feature_id": "OM9-SOLID-028",
+    "file": "03-solid-transform/om9-solid-028-move-face.png",
+    "feature_name": "Move Face",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformOrient2Points": {
+    "feature_id": "OM9-TRANSFORM-005",
+    "file": "03-solid-transform/om9-transform-005-orient-2-points.png",
+    "feature_name": "Orient 2 Points",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformBend": {
+    "feature_id": "OM9-TRANSFORM-007",
+    "file": "03-solid-transform/om9-transform-007-bend.png",
+    "feature_name": "Bend",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformArrayPolar": {
+    "feature_id": "OM9-TRANSFORM-009",
+    "file": "03-solid-transform/om9-transform-009-array-polar.png",
+    "feature_name": "Array Polar",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformProjecttoCPlane": {
+    "feature_id": "OM9-TRANSFORM-010",
+    "file": "03-solid-transform/om9-transform-010-project-to-c-plane.png",
+    "feature_name": "Project To C-Plane",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "gvSmartFlowRigid": {
+    "feature_id": "OM9-TRANSFORM-012",
+    "file": "03-solid-transform/om9-transform-012-smart-flow-rigid.png",
+    "feature_name": "Smart Flow Rigid",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformOrientOnSurface": {
+    "feature_id": "OM9-TRANSFORM-013",
+    "file": "03-solid-transform/om9-transform-013-orient-on-surface.png",
+    "feature_name": "Orient on Surface",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformOrientPerpendiculartoCurve": {
+    "feature_id": "OM9-TRANSFORM-016",
+    "file": "03-solid-transform/om9-transform-016-orient-perpendicular-to-curve.png",
+    "feature_name": "Orient Perpendicular to Curve",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformSolidPtOn": {
+    "feature_id": "OM9-TRANSFORM-019",
+    "file": "03-solid-transform/om9-transform-019-solid-points-on.png",
+    "feature_name": "Solid Points ON",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformCageEditingCageEdit": {
+    "feature_id": "OM9-TRANSFORM-020",
+    "file": "03-solid-transform/om9-transform-020-cage-edit.png",
+    "feature_name": "Cage Edit",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformArrayAlongCurve": {
+    "feature_id": "OM9-TRANSFORM-021",
+    "file": "03-solid-transform/om9-transform-021-array-along-curve.png",
+    "feature_name": "Array Along Curve",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformArrayAlongSurface": {
+    "feature_id": "OM9-TRANSFORM-023",
+    "file": "03-solid-transform/om9-transform-023-array-along-surface.png",
+    "feature_name": "Array Along Surface",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformFlowAlongSurface": {
+    "feature_id": "OM9-TRANSFORM-028",
+    "file": "03-solid-transform/om9-transform-028-flow-along-surface.png",
+    "feature_name": "Flow Along Surface",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformSetPoints": {
+    "feature_id": "OM9-TRANSFORM-030",
+    "file": "03-solid-transform/om9-transform-030-set-points.png",
+    "feature_name": "Set Points",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformScaleScaleByPlane": {
+    "feature_id": "OM9-TRANSFORM-031",
+    "file": "03-solid-transform/om9-transform-031-scale-by-plane.png",
+    "feature_name": "Scale By Plane",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformTaper": {
+    "feature_id": "OM9-TRANSFORM-033",
+    "file": "03-solid-transform/om9-transform-033-taper.png",
+    "feature_name": "Taper",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformShear": {
+    "feature_id": "OM9-TRANSFORM-034",
+    "file": "03-solid-transform/om9-transform-034-shear.png",
+    "feature_name": "Shear",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformMaelstrom": {
+    "feature_id": "OM9-TRANSFORM-035",
+    "file": "03-solid-transform/om9-transform-035-maelstrom.png",
+    "feature_name": "Maelstrom",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderMakeDownFacing": {
+    "feature_id": "OM9-TRANSFORM-037",
+    "file": "03-solid-transform/om9-transform-037-make-down-facing.png",
+    "feature_name": "Make Down Facing",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformMoveUVN": {
+    "feature_id": "OM9-TRANSFORM-039",
+    "file": "03-solid-transform/om9-transform-039-moveuvn.png",
+    "feature_name": "MoveUVN",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TransformCageEditingCreateCage": {
+    "feature_id": "OM9-TRANSFORM-041",
+    "file": "03-solid-transform/om9-transform-041-create-cage.png",
+    "feature_name": "Create Cage",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "EmbossMatrixArt": {
+    "feature_id": "OM9-ART-001",
+    "file": "04-tsplines-matrix-art/om9-art-001-matrix-art.png",
+    "feature_name": "Matrix Art",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderEternity": {
+    "feature_id": "OM9-BUILDER-001",
+    "file": "05-builders-tools/om9-builder-001-eternity-band-builder.png",
+    "feature_name": "Eternity Band Builder",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderSignet": {
+    "feature_id": "OM9-BUILDER-002",
+    "file": "05-builders-tools/om9-builder-002-signet-builder.png",
+    "feature_name": "Signet Builder",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderAwardRingBuilder": {
+    "feature_id": "OM9-BUILDER-005",
+    "file": "05-builders-tools/om9-builder-005-award-ring-builder.png",
+    "feature_name": "Award Ring Builder",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderNautilusBuilder": {
+    "feature_id": "OM9-BUILDER-010",
+    "file": "05-builders-tools/om9-builder-010-nautilus-builder.png",
+    "feature_name": "Nautilus Builder",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderProfilePlacer": {
+    "feature_id": "OM9-TOOLS-002",
+    "file": "05-builders-tools/om9-tools-002-profile-placer.png",
+    "feature_name": "Profile Placer",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderOutsideRingRail": {
+    "feature_id": "OM9-TOOLS-003",
+    "file": "05-builders-tools/om9-tools-003-outside-ring-rail.png",
+    "feature_name": "Outside Ring Rail",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderCustomRail": {
+    "feature_id": "OM9-TOOLS-004",
+    "file": "05-builders-tools/om9-tools-004-custom-rail.png",
+    "feature_name": "Custom Rail",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderMetalWeights": {
+    "feature_id": "OM9-TOOLS-006",
+    "file": "05-builders-tools/om9-tools-006-metal-weights.png",
+    "feature_name": "Metal Weights",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderSurfacePullback": {
+    "feature_id": "OM9-TOOLS-008",
+    "file": "05-builders-tools/om9-tools-008-surface-pullback.png",
+    "feature_name": "Surface Pullback",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderBermarkLibrary": {
+    "feature_id": "OM9-TOOLS-009",
+    "file": "05-builders-tools/om9-tools-009-bermark-library.png",
+    "feature_name": "Bermark Library",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "gvSmartTarget": {
+    "feature_id": "OM9-TOOLS-011",
+    "file": "05-builders-tools/om9-tools-011-smart-target.png",
+    "feature_name": "Smart Target",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "gvSmartBlend": {
+    "feature_id": "OM9-TOOLS-012",
+    "file": "05-builders-tools/om9-tools-012-smart-blend.png",
+    "feature_name": "Smart Blend",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "gvSmartMSR": {
+    "feature_id": "OM9-TOOLS-015",
+    "file": "05-builders-tools/om9-tools-015-smart-msr.png",
+    "feature_name": "Smart MSR",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderImageTrace": {
+    "feature_id": "OM9-TOOLS-016",
+    "file": "05-builders-tools/om9-tools-016-image-trace.png",
+    "feature_name": "Image Trace",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderObjectChecker": {
+    "feature_id": "OM9-TOOLS-018",
+    "file": "05-builders-tools/om9-tools-018-object-checker.png",
+    "feature_name": "Object Checker",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "Builder3dPrinting": {
+    "feature_id": "OM9-TOOLS-019",
+    "file": "05-builders-tools/om9-tools-019-3d-printing.png",
+    "feature_name": "3D Printing",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderProfileEndCap": {
+    "feature_id": "OM9-TOOLS-033",
+    "file": "05-builders-tools/om9-tools-033-profile-end-cap.png",
+    "feature_name": "Profile End Cap",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderCustomRailAdvanced": {
+    "feature_id": "OM9-TOOLS-035",
+    "file": "05-builders-tools/om9-tools-035-custom-rail-advanced.png",
+    "feature_name": "Custom Rail Advanced",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderMeshReducer": {
+    "feature_id": "OM9-TOOLS-037",
+    "file": "05-builders-tools/om9-tools-037-mesh-reducer.png",
+    "feature_name": "Mesh Reducer",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemLoader": {
+    "feature_id": "OM9-GEM-001",
+    "file": "06-gems-settings-cutters/om9-gem-001-gem-loader.png",
+    "feature_name": "Gem Loader",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemOnCrv": {
+    "feature_id": "OM9-GEM-002",
+    "file": "06-gems-settings-cutters/om9-gem-002-gem-on-curve.png",
+    "feature_name": "Gem on Curve",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemOnCrvAdvanced": {
+    "feature_id": "OM9-GEM-003",
+    "file": "06-gems-settings-cutters/om9-gem-003-gem-on-curve-advanced.png",
+    "feature_name": "Gem on Curve Advanced",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemCountOnCrv": {
+    "feature_id": "OM9-GEM-004",
+    "file": "06-gems-settings-cutters/om9-gem-004-gem-count-on-curve.png",
+    "feature_name": "Gem Count on Curve",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemListOnCrv": {
+    "feature_id": "OM9-GEM-005",
+    "file": "06-gems-settings-cutters/om9-gem-005-gem-list-on-curve.png",
+    "feature_name": "Gem List on Curve",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemOnCrvMulti": {
+    "feature_id": "OM9-GEM-006",
+    "file": "06-gems-settings-cutters/om9-gem-006-gem-on-curve-multi.png",
+    "feature_name": "Gem on Curve Multi",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemGuides": {
+    "feature_id": "OM9-GEM-008",
+    "file": "06-gems-settings-cutters/om9-gem-008-gem-guides.png",
+    "feature_name": "Gem Guides",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderOrientToGem": {
+    "feature_id": "OM9-GEM-009",
+    "file": "06-gems-settings-cutters/om9-gem-009-orient-to-gem.png",
+    "feature_name": "Orient to Gem",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemOnSurface": {
+    "feature_id": "OM9-GEM-011",
+    "file": "06-gems-settings-cutters/om9-gem-011-gem-on-surface.png",
+    "feature_name": "Gem on Surface",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderEmerald": {
+    "feature_id": "OM9-GEM-013",
+    "file": "06-gems-settings-cutters/om9-gem-013-emerald-builder.png",
+    "feature_name": "Emerald Builder",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderBaguette": {
+    "feature_id": "OM9-GEM-014",
+    "file": "06-gems-settings-cutters/om9-gem-014-baguette-builder.png",
+    "feature_name": "Baguette Builder",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderTaperBagChannel": {
+    "feature_id": "OM9-GEM-015",
+    "file": "06-gems-settings-cutters/om9-gem-015-baguette-channel.png",
+    "feature_name": "Baguette Channel",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemMap": {
+    "feature_id": "OM9-GEM-018",
+    "file": "06-gems-settings-cutters/om9-gem-018-gem-map.png",
+    "feature_name": "Gem Map",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemFollow": {
+    "feature_id": "OM9-GEM-024",
+    "file": "06-gems-settings-cutters/om9-gem-024-gem-follow.png",
+    "feature_name": "Gem Follow",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemControl": {
+    "feature_id": "OM9-GEM-026",
+    "file": "06-gems-settings-cutters/om9-gem-026-gem-control.png",
+    "feature_name": "Gem Control",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "OthersMatchAttributes": {
+    "feature_id": "OM9-GEM-027",
+    "file": "06-gems-settings-cutters/om9-gem-027-match-attributes.png",
+    "feature_name": "Match Attributes",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGVDGemFlow": {
+    "feature_id": "OM9-GEM-029",
+    "file": "06-gems-settings-cutters/om9-gem-029-gem-flow.png",
+    "feature_name": "Gem Flow",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGVDGemSplop": {
+    "feature_id": "OM9-GEM-031",
+    "file": "06-gems-settings-cutters/om9-gem-031-gem-splop.png",
+    "feature_name": "Gem Splop",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemPositioner": {
+    "feature_id": "OM9-GEM-033",
+    "file": "06-gems-settings-cutters/om9-gem-033-gem-positioner-msr.png",
+    "feature_name": "Gem Positioner (MSR)",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderPullToRail": {
+    "feature_id": "OM9-SETTING-005",
+    "file": "06-gems-settings-cutters/om9-setting-005-pull-object-to-rail.png",
+    "feature_name": "Pull Object to Rail",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderProngAdder": {
+    "feature_id": "OM9-SETTING-007",
+    "file": "06-gems-settings-cutters/om9-setting-007-prong-builder.png",
+    "feature_name": "Prong Builder",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderProngEditor": {
+    "feature_id": "OM9-SETTING-008",
+    "file": "06-gems-settings-cutters/om9-setting-008-prong-editor.png",
+    "feature_name": "Prong Editor",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderProngOnSurface": {
+    "feature_id": "OM9-SETTING-009",
+    "file": "06-gems-settings-cutters/om9-setting-009-prong-on-surface.png",
+    "feature_name": "Prong on Surface",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderBeadOnSurface": {
+    "feature_id": "OM9-SETTING-010",
+    "file": "06-gems-settings-cutters/om9-setting-010-bead-on-surface.png",
+    "feature_name": "Bead on Surface",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderMetalPiece": {
+    "feature_id": "OM9-SETTING-011",
+    "file": "06-gems-settings-cutters/om9-setting-011-metal-from-gems.png",
+    "feature_name": "Metal from Gems",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderBeadOnCrv": {
+    "feature_id": "OM9-SETTING-012",
+    "file": "06-gems-settings-cutters/om9-setting-012-bead-on-curve.png",
+    "feature_name": "Bead on Curve",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderChannelBorderCurve": {
+    "feature_id": "OM9-SETTING-013",
+    "file": "06-gems-settings-cutters/om9-setting-013-channel-border-curve.png",
+    "feature_name": "Channel Border Curve",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemCutter": {
+    "feature_id": "OM9-CUTTER-001",
+    "file": "06-gems-settings-cutters/om9-cutter-001-gem-cutter.png",
+    "feature_name": "Gem Cutter",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderGemCutterLibrary": {
+    "feature_id": "OM9-CUTTER-002",
+    "file": "06-gems-settings-cutters/om9-cutter-002-gem-cutter-library.png",
+    "feature_name": "Gem Cutter Library",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderChannelBuilder": {
+    "feature_id": "OM9-CUTTER-003",
+    "file": "06-gems-settings-cutters/om9-cutter-003-channel-builder.png",
+    "feature_name": "Channel Builder",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderMicroProngCutter": {
+    "feature_id": "OM9-CUTTER-004",
+    "file": "06-gems-settings-cutters/om9-cutter-004-micro-prong-cutter.png",
+    "feature_name": "Micro Prong Cutter",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderBrightCutChannel": {
+    "feature_id": "OM9-CUTTER-005",
+    "file": "06-gems-settings-cutters/om9-cutter-005-bright-cut-channel-builder.png",
+    "feature_name": "Bright Cut Channel Builder",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderBrightCutter": {
+    "feature_id": "OM9-CUTTER-006",
+    "file": "06-gems-settings-cutters/om9-cutter-006-bright-cutter.png",
+    "feature_name": "Bright Cutter",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderBezelCutter": {
+    "feature_id": "OM9-CUTTER-007",
+    "file": "06-gems-settings-cutters/om9-cutter-007-bezel-cutter-builder.png",
+    "feature_name": "Bezel Cutter Builder",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "OthersCuttoFingerRail": {
+    "feature_id": "OM9-CUTTER-008",
+    "file": "06-gems-settings-cutters/om9-cutter-008-cut-to-finger-rail.png",
+    "feature_name": "Cut to Finger Rail",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "RenderCreateSpotlight": {
+    "feature_id": "OM9-RENDER-009",
+    "file": "07-render/om9-render-009-create-spotlight.png",
+    "feature_name": "Create Spotlight",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "RenderCreateDirectionalLight": {
+    "feature_id": "OM9-RENDER-010",
+    "file": "07-render/om9-render-010-create-directional-light.png",
+    "feature_name": "Create Directional Light",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "RenderCreateLinearLight": {
+    "feature_id": "OM9-RENDER-014",
+    "file": "07-render/om9-render-014-create-linear-light.png",
+    "feature_name": "Create Linear Light",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "RenderEffectsApplyEdgeSoftening": {
+    "feature_id": "OM9-RENDER-017",
+    "file": "07-render/om9-render-017-apply-edge-softening.png",
+    "feature_name": "Apply Edge Softening",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderAnimationBuilder": {
+    "feature_id": "OM9-RENDER-019",
+    "file": "07-render/om9-render-019-animation-builder.png",
+    "feature_name": "Animation Builder",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderAnimationBuilderAdvanced": {
+    "feature_id": "OM9-RENDER-020",
+    "file": "07-render/om9-render-020-animation-builder-advanced.png",
+    "feature_name": "Animation Builder Advanced",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "MatrixMovieMaker": {
+    "feature_id": "OM9-RENDER-021",
+    "file": "07-render/om9-render-021-matrix-movie-maker.png",
+    "feature_name": "Matrix Movie Maker",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderRenderEditor": {
+    "feature_id": "OM9-RENDER-022",
+    "file": "07-render/om9-render-022-render-editor.png",
+    "feature_name": "Render Editor",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderBatchRender": {
+    "feature_id": "OM9-RENDER-023",
+    "file": "07-render/om9-render-023-batch-render.png",
+    "feature_name": "Batch Render",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderLayoutTools": {
+    "feature_id": "OM9-RENDER-024",
+    "file": "07-render/om9-render-024-layout-tools.png",
+    "feature_name": "Layout Tools",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderFourViewCapture": {
+    "feature_id": "OM9-RENDER-025",
+    "file": "07-render/om9-render-025-4-view-capture.png",
+    "feature_name": "4 View Capture",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "BuilderRenderScheduler": {
+    "feature_id": "OM9-RENDER-026",
+    "file": "07-render/om9-render-026-render-scheduler.png",
+    "feature_name": "Render Scheduler",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "gvAlphaErase": {
+    "feature_id": "OM9-RENDER-027",
+    "file": "07-render/om9-render-027-alpha-erase.png",
+    "feature_name": "Alpha Erase",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "RenderSaveRenderWindowAs": {
+    "feature_id": "OM9-RENDER-029",
+    "file": "07-render/om9-render-029-saverenderwindowas.png",
+    "feature_name": "SaveRenderWindowAs",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "ClayooEditInset": {
+    "feature_id": "OM9-SUBD-008",
+    "file": "08-subd-emboss-matrix-tools/om9-subd-008-inset.png",
+    "feature_name": "Inset",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "ClayooCreationClayooBezel": {
+    "feature_id": "OM9-SUBD-016",
+    "file": "08-subd-emboss-matrix-tools/om9-subd-016-clayoo-bezel.png",
+    "feature_name": "Clayoo Bezel",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "ClayooEditCollapse": {
+    "feature_id": "OM9-SUBD-022",
+    "file": "08-subd-emboss-matrix-tools/om9-subd-022-collapse.png",
+    "feature_name": "Collapse",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "EmbossHeightfieldImage": {
+    "feature_id": "OM9-EMBOSS-013",
+    "file": "08-subd-emboss-matrix-tools/om9-emboss-013-heightfield-image.png",
+    "feature_name": "Heightfield Image",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "EmbossClayEmbossResources": {
+    "feature_id": "OM9-EMBOSS-014",
+    "file": "08-subd-emboss-matrix-tools/om9-emboss-014-clay-emboss-resources.png",
+    "feature_name": "Clay Emboss Resources",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "EmbossDecimator": {
+    "feature_id": "OM9-EMBOSS-015",
+    "file": "08-subd-emboss-matrix-tools/om9-emboss-015-decimator.png",
+    "feature_name": "Decimator",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "CurveFreeFormInterpolatePoints": {
+    "feature_id": "OM9-CURVE-003",
+    "file": "02-curve-surface/om9-curve-003-interp-curve.png",
+    "feature_name": "Interp Curve",
+    "evidence": "unique-name-or-command-suffix-within-matching-menu"
+  },
+  "TopIconControlPointsOn": {
+    "file": "01-core/om9-top11-001-control-points-on.png",
+    "feature_id": "OM9-TOP11-001",
+    "feature_name": "Control Points On",
+    "evidence": "explicit-INI-feature-semantic-binding"
+  },
+  "FileStullerSubmit": {
+    "file": "01-core/om9-file-011-stuller-studio-cam-services.png",
+    "feature_id": "OM9-FILE-011",
+    "feature_name": "Stuller Studio Cam Services",
+    "evidence": "explicit-INI-feature-semantic-binding"
+  },
+  "DimensionTextBlock": {
+    "file": "01-core/om9-measure-013-text-block.png",
+    "feature_id": "OM9-MEASURE-013",
+    "feature_name": "Text Block",
+    "evidence": "explicit-INI-feature-semantic-binding"
+  },
+  "ObjectProperties": {
+    "feature_id": "OM9-INFO-001",
+    "file": "01-core/om9-info-001-object-properties.png",
+    "feature_name": "Object Properties",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "AllObjectInfo": {
+    "feature_id": "OM9-INFO-003",
+    "file": "01-core/om9-info-003-all-object-info.png",
+    "feature_name": "All Object Info",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "ProjectNotes": {
+    "feature_id": "OM9-INFO-006",
+    "file": "01-core/om9-info-006-project-notes.png",
+    "feature_name": "Project Notes",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "InfoSettingsBoxEdit": {
+    "feature_id": "OM9-INFO-009",
+    "file": "01-core/om9-info-009-box-edit-menu.png",
+    "feature_name": "Box Edit Menu",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "InfoSettingsLibraries": {
+    "feature_id": "OM9-INFO-011",
+    "file": "01-core/om9-info-011-library-menu.png",
+    "feature_name": "Library Menu",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "InfoSettingsDesignReport": {
+    "feature_id": "OM9-INFO-014",
+    "file": "01-core/om9-info-014-design-report.png",
+    "feature_name": "Design Report",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "RhinoHistoryON": {
+    "feature_id": "OM9-INFO-015",
+    "file": "01-core/om9-info-015-rhino-history.png",
+    "feature_name": "Rhino History",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "InfoSettingsGVClearHistory": {
+    "feature_id": "OM9-INFO-016",
+    "file": "01-core/om9-info-016-matrix-clear-object-history.png",
+    "feature_name": "Matrix Clear Object History",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "InfoSettingsGumballON": {
+    "feature_id": "OM9-INFO-020",
+    "file": "01-core/om9-info-020-gumball.png",
+    "feature_name": "Gumball",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "InfoSettingsGumballAlignment": {
+    "feature_id": "OM9-INFO-021",
+    "file": "01-core/om9-info-021-gumball-alignment.png",
+    "feature_name": "Gumball Alignment",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "PreviewShadeON": {
+    "feature_id": "OM9-DISPLAY-001",
+    "file": "01-core/om9-display-001-preview-shade.png",
+    "feature_name": "Preview Shade",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "GVGemView_1": {
+    "feature_id": "OM9-DISPLAY-005",
+    "file": "01-core/om9-display-005-gem-view.png",
+    "feature_name": "Gem View",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "Dial_Shaded": {
+    "feature_id": "OM9-DISPLAY-008",
+    "file": "01-core/om9-display-008-shade-mode.png",
+    "feature_name": "Shade Mode",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "ToolsObjectSnapCenter": {
+    "feature_id": "OM9-SNAP-001",
+    "file": "01-core/om9-snap-001-center-snap.png",
+    "feature_name": "Center Snap",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "ToolsObjectSnapIntersection": {
+    "feature_id": "OM9-SNAP-005",
+    "file": "01-core/om9-snap-005-intersection-snap.png",
+    "feature_name": "Intersection Snap",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "SnapBetween": {
+    "feature_id": "OM9-SNAP-009",
+    "file": "01-core/om9-snap-009-between.png",
+    "feature_name": "Between",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  },
+  "GridSnapON": {
+    "feature_id": "OM9-SNAP-013",
+    "file": "01-core/om9-snap-013-grid-snap.png",
+    "feature_name": "Grid Snap",
+    "evidence": "reviewed-user-authored-feature-for-sidebar-control"
+  }
+}

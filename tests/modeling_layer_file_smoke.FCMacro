@@ -1,0 +1,44 @@
+"""Public native schema2 file handoff; document/UI/clipboard are separate gates."""
+import json,os,traceback,tempfile
+from pathlib import Path
+import FreeCADGui as Gui
+from PySide6 import QtCore
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        fixtures=Path(native.__file__).parents[2]/'layer-abi'/'archive-fixtures'
+        for source,count in [('layer-source.3dm',2),('layer-palette.3dm',0)]:
+            with tempfile.TemporaryDirectory() as directory:
+                stage=Path(directory);first=stage/'first';first.mkdir()
+                prepared=json.loads(native.prepareModeling3dm(str(fixtures/source),str(first)))
+                incoming=stage/'incoming';incoming.mkdir()
+                read=json.loads(native.read3dm(str(fixtures/source),str(incoming)))
+                check(source+' read3dm returns schema2 full palette',read['schema_version']==2 and len(read['layer_session']['snapshot']['layers'])==4)
+                target=output/(source+'.handoff.3dm')
+                native.write3dm(json.dumps(prepared),str(target))
+                rereadStage=stage/'reread';rereadStage.mkdir()
+                current=json.loads(native.read3dm(str(target),str(rereadStage)))
+                state=current['layer_session']['snapshot'];objects={row['id']:row for row in state['objects']}
+                check(source+' V5 full-palette reread',len(state['layers'])==4 and len(objects)==count)
+                layers={tuple(row['path_components']):row for row in state['layers']}
+                check(source+' exact empty source color',layers[('Empty',)]['rgb']==[7,89,143])
+                check(source+' layer flags stay layer-owned',layers[('Parent',)]['locked'] and not layers[('Parent','Child')]['locked'])
+                if count:
+                    byName={row['name']:objects[row['layer_object_id']] for row in current['items']}
+                    check('ByLayer object does not gain own lock',not byName['inherited']['locked'] and byName['inherited']['color_source']=='ByLayer')
+                    check('ByObject fields retained',byName['own']['locked'] and not byName['own']['visible'] and byName['own']['rgb']==[23,24,25])
+                    protected=output/'protected-schema2.3dm';protected.write_bytes(b'previous destination')
+                    invalid=json.loads(json.dumps(prepared));invalid['items'][0]['layer_object_id']='missing'
+                    try:native.write3dm(json.dumps(invalid),str(protected))
+                    except RuntimeError:check('missing canonical binding rejects',True)
+                    else:check('missing canonical binding rejects',False)
+                    check('failed canonical write preserves target',protected.read_bytes()==b'previous destination')
+        report.update(ok=True,module=native.__file__,scope='native file schema2; UI/clipboard/Matrix application handoff pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

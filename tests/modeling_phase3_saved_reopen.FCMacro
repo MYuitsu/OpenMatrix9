@@ -1,0 +1,40 @@
+"""Fresh-process FCStd reopen and selected current V5, then native reread."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,sys,traceback,tempfile,hashlib
+sys.path.insert(0,str(Path(__file__).parent))
+from phase3_oracle import measure
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);(out/'temp').mkdir(exist_ok=True);tempfile.tempdir=str(out/'temp')
+report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def compare(shape,before,label):
+    after=measure(shape,out/(label+'.brep'));box=shape.optimalBoundingBox(False,False)
+    bounds=[box.XMin,box.YMin,box.ZMin,box.XMax,box.YMax,box.ZMax]
+    check(label+' valid native CAD',shape.isValid() and len(shape.Faces)==before['faces'] and len(shape.Solids)==before['solids'])
+    check(label+' exact current bounds',max(abs(x-y) for x,y in zip(bounds,before['bounds']))<=.001)
+    check(label+' current material area',abs(after['area']-before['area'])<=max(.001,.0001*abs(before['area'])))
+    if before['solids']:check(label+' current material volume',abs(after['volume']-before['volume'])<=max(.001,.0001*abs(before['volume'])))
+def run():
+    try:
+        import ThreeDm,Part,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        source=Path(os.environ['OM9_PHASE3_RING_REPORT']);prior=json.loads(source.read_text())
+        check('consumed successful ring workflow report',prior['ok'] and not (Path(prior['fcstd']).parent/'independent-ring-source.3dm').exists())
+        doc=App.openDocument(prior['fcstd']);objects=[doc.getObject(n) for n in prior['selected_names']]
+        check('fresh process loads current geometry after source deletion',all(o is not None for o in objects))
+        for i,(o,before) in enumerate(zip(objects,prior['expected'])):compare(o.Shape,before,'FCStd-'+str(i))
+        target=out/'ring-fresh-reopened-v5.3dm';ThreeDm.export_file(str(target),objects,modeling=True)
+        check('fresh reopened selected output V5',json.loads(native.inspect3dm(str(target)))['source_version']==50)
+        reread=App.newDocument('Reread');rows=ThreeDm.import_file(str(target),reread,mode='modeling')
+        check('fresh selected reread only modified plus new',len(rows)==2)
+        for i,(o,before) in enumerate(zip(rows,prior['expected'])):compare(o.Shape,before,'V5-'+str(i))
+        expected=[dict(before,object_name=o.Label) for o,before in zip(objects,prior['expected'])]
+        report.update(ok=True,module=native.__file__,python_module=ThreeDm.__file__,workflow_report=str(source),workflow_report_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),output=str(target),expected=expected)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for n in list(App.listDocuments()):App.closeDocument(n)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

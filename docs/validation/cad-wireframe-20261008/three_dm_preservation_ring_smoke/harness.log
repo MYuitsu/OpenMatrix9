@@ -1,0 +1,47 @@
+{
+    "checks":  [
+                   {
+                       "name":  "Oval-twist-ring.3dm original identity graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Oval-twist-ring.3dm valid CAD",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Oval-twist-ring.3dm complete manifest",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Oval-twist-ring.3dm exact snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Oval-twist-ring.3dm snapshot reopened",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Oval-twist-ring-fixed.3dm original identity graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Oval-twist-ring-fixed.3dm valid CAD",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Oval-twist-ring-fixed.3dm complete manifest",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Oval-twist-ring-fixed.3dm exact snapshot",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Oval-twist-ring-fixed.3dm snapshot reopened",
+                       "passed":  true
+                   }
+               ],
+    "ok":  true
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\three_dm_preservation_ring_smoke-1\cfd03843400c403b9523287904a38c0c
+

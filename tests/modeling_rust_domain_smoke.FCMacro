@@ -1,0 +1,39 @@
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets,QtGui
+from pathlib import Path
+import json,os,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(220,loop.quit);loop.exec()
+    QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('RustDomain');doc.UndoMode=1
+        c=Part.BSplineCurve();c.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(3,4,0),App.Vector(7,2,0),App.Vector(10,0,0)],[4,4],[0.,1.],False,3,[1.,2.,0.7,1.])
+        obj=doc.addObject('Part::Feature','Curve');obj.Shape=c.toShape();doc.recompute();Gui.Selection.addSelection(obj);settle()
+        before=json.loads(native.curveBasis3dm(doc.Name,obj.Name));window=Gui.getMainWindow();action=window.findChild(QtGui.QAction,'PointsOn')
+        def editor():
+            action.trigger();settle();d=window.findChild(QtWidgets.QDialog,'OM9CurveCVDialog')
+            return d,d.findChild(QtWidgets.QDoubleSpinBox,'OM9CurveCVFirst'),d.findChild(QtWidgets.QDoubleSpinBox,'OM9CurveCVLast')
+        d,first,last=editor();check('owned active-domain numeric controls present',first is not None and last is not None and first.value()==before['first'] and last.value()==before['last'])
+        first.setValue(.2);last.setValue(.8);d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        basis=json.loads(native.curveBasis3dm(doc.Name,obj.Name));check('UI trim domain commits one native transaction',abs(basis['first']-.2)<1e-12 and abs(basis['last']-.8)<1e-12 and len(doc.UndoNames)==1)
+        doc.undo();settle();restored=json.loads(native.curveBasis3dm(doc.Name,obj.Name));keys=['degree','periodic','poles','weights','knots','multiplicities','first','last']
+        check('UI trim Undo restores exact rational basis',all(restored[k]==before[k] for k in keys))
+        d,first,last=editor();first.setValue(.9);last.setValue(.1);shape=obj.Shape.exportBrepToString();count=len(doc.UndoNames)
+        d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        check('invalid active domain stays open without mutation',d.isVisible() and bool(d.findChild(QtWidgets.QLabel,'OM9CurveCVError').text()) and shape==obj.Shape.exportBrepToString() and len(doc.UndoNames)==count)
+        first.setValue(2.);last.setValue(3.);knots=d.findChild(QtWidgets.QTableWidget,'OM9CurveCVKnots');knots.cellWidget(0,0).setValue(2.);knots.cellWidget(1,0).setValue(3.)
+        d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle();basis=json.loads(native.curveBasis3dm(doc.Name,obj.Name))
+        check('UI knot and domain remap accepts complete rational curve',basis['knots']==[2.,3.] and basis['first']==2. and basis['last']==3. and basis['poles']==before['poles'] and basis['weights']==before['weights'])
+        doc.undo();settle();restored=json.loads(native.curveBasis3dm(doc.Name,obj.Name));check('UI domain remap Undo restores exact original',all(restored[k]==before[k] for k in keys))
+        report.update(ok=True,module=native.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

@@ -6,14 +6,14 @@
 ### Cài đặt nhanh / Install in 3 steps
 
 1. Cài **[FreeCAD 1.1.4 chính thức](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4)** / Install official FreeCAD 1.1.4 and open it once.
-2. Mở **[build Gumball trên GitHub Actions](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml?query=branch%3Acodex%2Fgumball-release-0.3.4)**, chọn lần chạy thành công của nhánh `codex/gumball-release-0.3.4`, rồi tải artifact **om9-release-files**. GitHub có thể yêu cầu đăng nhập. / Choose the successful candidate branch run and download its artifact; sign in to GitHub if required.
-3. Giải nén ZIP artifact, rồi giải nén ZIP **OpenMatrix9-…-SetupLauncher…-Windows-x64.zip** bên trong. Bấm **Start-OM9.cmd**: launcher cài OM9, tạo icon **OpenMatrix9** trên Desktop và mở workbench. / Extract both ZIP layers, then run Start-OM9.cmd. Use the Desktop icon afterwards.
+2. Mở **[trang Releases](https://github.com/MYuitsu/OpenMatrix9/releases)**. Trong bản **0.3.4-202610120606**, mở mục **Assets** và tải **OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip**. / Open Releases, expand Assets and download the SetupLauncher ZIP for this version.
+3. Giải nén ZIP SetupLauncher vào một thư mục rồi bấm **Start-OM9.cmd**: launcher cài OM9, tạo icon **OpenMatrix9** trên Desktop và mở workbench. / Extract the SetupLauncher ZIP, run Start-OM9.cmd, then use the Desktop icon afterwards.
 
-Giữ thư mục **OpenMatrix9**, **launcher-manifest.json** và các file **Start-OM9** cùng nhau sau khi giải nén gói SetupLauncher. Kiểm tra hai ZIP bằng **SHA256SUMS.txt** trong artifact. Không cần Rust, Visual Studio hay quyền Administrator để dùng OM9. / Keep the bundled OpenMatrix9 folder, manifest and Start-OM9 files together.
+Giữ thư mục **OpenMatrix9**, **launcher-manifest.json** và các file **Start-OM9** cùng nhau sau khi giải nén gói SetupLauncher. Kiểm tra hai ZIP bằng **SHA256SUMS.txt** trong cùng release. Không cần Rust, Visual Studio hay quyền Administrator để dùng OM9. / Keep the bundled OpenMatrix9 folder, manifest and Start-OM9 files together.
 
-**Kiểm thử và build:** Gumball đã đạt **30 ca / 955 kiểm tra trên máy** với FreeCAD stock. Theo yêu cầu ngày 12/10/2026, GitHub Actions chỉ build và đóng gói; CI không chạy lại bộ test. Gói tải xuống ghi rõ commit, SHA256 và `tests_executed: false`. [Bằng chứng và quy trình](docs/validation/2026-10-12-local-tests-ci-build-only.md).
+**Kiểm thử và build:** Gumball đã đạt **30 ca / 955 kiểm tra trên máy** với FreeCAD stock. Theo yêu cầu ngày 12/10/2026, GitHub Actions chỉ build và đóng gói; CI không chạy lại bộ test. Gói tải xuống ghi rõ commit, SHA256 và `tests_executed: false`. [Bằng chứng và quy trình](docs/validation/2026-10-12-gumball-main-release.md).
 
-**Candidate build:** nhánh Gumball cung cấp artifact sau khi build CI đạt; đây chưa phải tag hay GitHub Release đã phát hành. Các bản đã phát hành nằm ở [Releases](https://github.com/MYuitsu/OpenMatrix9/releases), gồm prerelease.
+**Bản phát hành:** Releases cung cấp ZIP SetupLauncher để cài tự động, ZIP plugin để cài thủ công và **SHA256SUMS.txt**. Các bản thử được ghi **Pre-release**. Artifact trong Actions dành cho kiểm tra build; tải bản cài đặt ở Releases.
 
 [Hướng dẫn tiếng Việt](INSTALL.vi.md) · [English install guide](INSTALL.en.md) · [Tiến độ](README.vi.md) · [Build from source](docs/build-windows.md)
 <!-- om9-install-entry:end -->

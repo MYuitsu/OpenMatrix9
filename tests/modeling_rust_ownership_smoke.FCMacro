@@ -1,0 +1,47 @@
+import FreeCAD as App, FreeCADGui as Gui, Part
+from PySide6 import QtCore,QtWidgets,QtGui
+import json,os,traceback,sys,builtins
+from pathlib import Path
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(250,loop.quit);loop.exec()
+    QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def run():
+    original_import=builtins.__import__
+    try:
+        import OpenMatrix9Gui as native
+        check('native runtime exposes Rust-owned curve path',hasattr(native,'phase2Ownership3dm'))
+        ownership=json.loads(native.phase2Ownership3dm());check('curve validation/session owners are Rust',ownership['curve']=='rust' and ownership['session']=='rust')
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('RustOwnedCV');doc.UndoMode=1
+        c=Part.BSplineCurve();c.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(3,4,0),App.Vector(7,2,0),App.Vector(10,0,0)],[4,4],[0.,1.],False,3,[1.,2.,0.7,1.])
+        obj=doc.addObject('Part::Feature','Curve');obj.Shape=c.toShape();doc.recompute();Gui.Selection.addSelection(obj);settle()
+        def block_editor(name,*args,**kwargs):
+            if name=='ModelingCurveEditor':raise AssertionError('production Python PointsOn dependency used')
+            return original_import(name,*args,**kwargs)
+        builtins.__import__=block_editor
+        window=Gui.getMainWindow();action=window.findChild(QtGui.QAction,'PointsOn');action.trigger();settle()
+        dialog=window.findChild(QtWidgets.QDialog,'OM9CurveCVDialog');check('PointsOn uses native Qt with Rust session without Python editor',dialog is not None and dialog.isVisible() and int(dialog.property('om9RustSession'))>0 and 'ModelingCurveEditor' not in sys.modules)
+        table=dialog.findChild(QtWidgets.QTableWidget,'OM9CurveCVPoles');table.cellWidget(1,1).setValue(6.)
+        dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        check('Rust-backed edit commits once',abs(obj.Shape.Edges[0].Curve.getPole(2).y-6.)<1e-9 and len(doc.UndoNames)==1)
+        action.trigger();settle();dialog=window.findChild(QtWidgets.QDialog,'OM9CurveCVDialog');before=obj.Shape.exportBrepToString()
+        table=dialog.findChild(QtWidgets.QTableWidget,'OM9CurveCVPoles');table.cellWidget(1,3).setValue(-1.)
+        dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        check('Rust validation preserves draft/transaction on invalid weight',dialog.isVisible() and bool(dialog.findChild(QtWidgets.QLabel,'OM9CurveCVError').text()) and before==obj.Shape.exportBrepToString() and len(doc.UndoNames)==1)
+        dialog.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Cancel).click();settle()
+        action.trigger();settle();action.trigger();settle()
+        check('repeated PointsOn replaces prior editor and its Rust session',len([d for d in window.findChildren(QtWidgets.QDialog,'OM9CurveCVDialog') if d.isVisible()])==1)
+        doc.undo();settle()
+        check('Undo invalidates native session even when object identity survives',not any(d.isVisible() for d in window.findChildren(QtWidgets.QDialog,'OM9CurveCVDialog')))
+        Gui.Selection.clearSelection();Gui.Selection.addSelection(obj);settle();action.trigger();settle();doc.removeObject(obj.Name);doc.recompute();settle()
+        check('deleted native curve cancels Rust session',not any(d.isVisible() for d in window.findChildren(QtWidgets.QDialog,'OM9CurveCVDialog')))
+        report.update(ok=True,module=native.__file__,ownership=ownership)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:builtins.__import__=original_import
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

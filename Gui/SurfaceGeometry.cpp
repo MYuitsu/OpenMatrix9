@@ -1,3 +1,4 @@
+#include "LayerDocumentAdapter.h"
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "SurfaceGeometry.h"
 #include "SurfaceLoft.h"
@@ -86,6 +87,7 @@ void verifySurfaceInput(App::Document& doc,const SurfaceInput& input) {
     // Empty guards are intentional for persistent History reconstruction and
     // transient type probes. Accepted interactive selections always carry guards.
     for(const auto& guard:input.guards)verifyObject(doc,guard);
+    for(const auto& guard:input.phase3Guards)verifyPhase3Object(doc,guard);
 }
 }
 PyObject* surfaceWire(App::Document& doc,const SurfaceInput& input) {
@@ -139,6 +141,8 @@ PyObject* surfaceWire(App::Document& doc,const SurfaceInput& input) {
 }
 PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& inputs,const SurfaceOptions& options) {
     for(const auto& input:inputs)verifySurfaceInput(doc,input);
+    std::vector<Om9Phase3Facts> facts;for(const auto& input:inputs){Ref wire(surfaceWire(doc,input));facts.push_back(phase3ShapeFacts(wire.p));}phase3Validate(options.kind==1?8:options.kind==2?9:10,facts);
+    phase3Require(om9_phase3_surface_options(options.kind,options.style,options.closed,options.sectionMode,options.pointCount,options.tolerance,inputs.size()));
     // Spec: OM9-SURFACE-001, OM9-SURFACE-003, OM9-SURFACE-009.
     const unsigned rails=options.kind==1?1:options.kind==2?2:0;
     if(options.kind<1||options.kind>3||inputs.size()<rails+(rails?1:2))throw std::runtime_error("Not enough input curves");
@@ -204,6 +208,7 @@ PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& input
     }else {
         Ref api(PyObject_GetAttrString(part.p,"BRepOffsetAPI"));Ref constructor(PyObject_GetAttrString(api.p,"MakePipeShell"));
         Ref pipe(PyObject_CallFunctionObjArgs(constructor.p,PyList_GetItem(wires.p,0),nullptr));
+        const double accuracy=om9_phase3_kernel_tolerance();Ref precision(PyObject_CallMethod(pipe.p,"setTolerance","ddd",accuracy,accuracy,accuracy));
         Ref mode(PyObject_CallMethod(pipe.p,"setFrenetMode","O",options.frenet?Py_True:Py_False));
         if(rails==2){
             Ref auxiliary(PyObject_CallMethod(pipe.p,"setAuxiliarySpine","OOi",PyList_GetItem(wires.p,1),Py_True,int(om9_surface_sweep2_contact(inputs.size()-rails))));
@@ -219,15 +224,19 @@ PyObject* buildSurface(App::Document& doc,const std::vector<SurfaceInput>& input
     return shape.release();
 }
 void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceInput>& inputs,const SurfaceOptions& options) {
+    requireLayerGeometryEditable(doc);
     const char* name=options.kind==1?"Sweep1":options.kind==2?"Sweep2":"Loft";
     const char* feature=options.kind==1?"OM9-SURFACE-001":options.kind==2?"OM9-SURFACE-003":"OM9-SURFACE-009";
     for(const auto& input:inputs)verifySurfaceInput(doc,input);
-    om9OpenTransaction(doc,name);
+    const int transaction=om9OpenTransaction(doc,name);
     try {
+        std::unique_ptr<LayerGeometryTransaction> layers;if(hasCanonicalLayerDocument(doc))layers=std::make_unique<LayerGeometryTransaction>(doc,transaction);
         if(options.history){
             auto* feature=createSurfaceHistory(doc,shape,inputs,options);Ref object(feature->getPyObject());
             Ref view(PyObject_GetAttrString(object.p,"ViewObject")),color(Py_BuildValue("(ddd)",0.0,130.0/255.0,85.0/255.0));set(view.p,"ShapeColor",color.p);set(view.p,"LineColor",color.p);
             doc.recompute();if(!feature->isValid()||feature->Shape.getShape().isNull())throw std::runtime_error("Surface History recompute failed before commit");
+            if(layers)layers->finish();
+            if(!ownsLayerGeometryTransaction(doc,transaction))throw std::runtime_error("Surface transaction ownership changed");
             om9CommitTransaction(doc);return;
         }
         Ref pyDoc(doc.getPyObject()),object(PyObject_CallMethod(pyDoc.p,"addObject","ss","Part::Feature",name));set(object.p,"Shape",shape);
@@ -241,7 +250,9 @@ void commitSurface(App::Document& doc,PyObject* shape,const std::vector<SurfaceI
         }
         property(object.p,"App::PropertyLinkSubList","SourceCurves",sources.p);Ref config(PyUnicode_FromString(settings.str().c_str()));property(object.p,"App::PropertyString","SurfaceOptions",config.p);
         Ref view(PyObject_GetAttrString(object.p,"ViewObject")),color(Py_BuildValue("(ddd)",0.0,130.0/255.0,85.0/255.0));set(view.p,"ShapeColor",color.p);set(view.p,"LineColor",color.p);
-        doc.recompute();om9CommitTransaction(doc);
-    }catch(...){om9AbortTransaction(doc);throw;}
+        doc.recompute();if(layers)layers->finish();
+        if(!ownsLayerGeometryTransaction(doc,transaction))throw std::runtime_error("Surface transaction ownership changed");
+        om9CommitTransaction(doc);
+    }catch(...){if(ownsLayerGeometryTransaction(doc,transaction))om9AbortTransaction(doc);throw;}
 }
 }

@@ -1,3 +1,7 @@
+> **OpenMatrix9 0.0.2 (thử nghiệm, Windows x64)**: [Tải release](https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.0.2) · [Hướng dẫn cài](INSTALL.vi.md). Dùng **FreeCAD 1.1.4 chính thức**, đặt OM9 trong thư mục Mod của người dùng. [Bằng chứng tương thích và giới hạn](docs/validation/2026-10-10-stock-freecad-1.1.4.md); các báo cáo dev cũ bên dưới chưa nghiệm thu mọi luồng trên bản stock.
+
+[Tải launcher r2](https://github.com/MYuitsu/OpenMatrix9/releases/download/v0.0.2/OpenMatrix9-0.0.2-SetupLauncher-r2-Windows-x64.zip): giải nén rồi chạy **Start-OM9.cmd** để tự cài/cập nhật và tạo icon Desktop + Start Menu. Launcher tự kiểm tra bản mới; cập nhật bằng script trong gói mới.
+
 # OpenMatrix9 — Tiếng Việt
 
 <!-- rhino-core-object-foundations:start -->

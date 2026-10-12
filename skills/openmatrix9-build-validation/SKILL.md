@@ -22,8 +22,6 @@ Record the exact command/environment/result and runtime artifacts in `docs/valid
 
 Update the live progress ledger only to the level supported by evidence. Rust passing alone cannot validate the native workbench; successful loading alone cannot validate feature geometry. Read only the relevant feature/UI specs for expected behavior. Use openmatrix9-native-mapping only when a specific original behavior must be resolved, not for normal compiler errors.
 
-After checks, follow [progress synchronization](../openmatrix9-workflow/references/progress.md) before reporting completion: check relevant Spec v1 acceptance items and align implementation status, the project README and the ledger with the verified slice and remaining untested behavior.
-
 Finish within existing authorization. Keep unrelated user changes and original reference inputs intact; stage only the selected source/docs/artifacts when committing.
 
 ## Cập nhật nghiệp vụ sau khi code

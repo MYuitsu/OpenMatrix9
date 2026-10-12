@@ -1,3 +1,4 @@
+#include "LayerDocumentAdapter.h"
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "EditGeometry.h"
 #include "CoreUnits.h"
@@ -56,10 +57,11 @@ EditInput editInput(App::Document& doc,const std::string& name,unsigned kind,boo
         Ref global(PyObject_CallMethod(object.value,"getGlobalPlacement",nullptr)),local(PyObject_GetAttrString(object.value,"Placement")),inverse(PyObject_CallMethod(local.value,"inverse",nullptr)),parent(PyNumber_Multiply(global.value,inverse.value)),matrix(PyObject_CallMethod(parent.value,"toMatrix",nullptr));
         if(mesh)set(shape->value,"Placement",global.value);else{Ref moved(PyObject_CallMethod(shape->value,"transformShape","OO",matrix.value,Py_False));}
     }
-    return {name,signature(object.value),shape,mesh,{},std::move(guard)};
+    Phase3Snapshot phase3Guard;if(!mesh&&!o->getPropertyByName("OM9SourceUUID"))phase3Guard=capturePhase3Object(doc,name);
+    return {name,signature(object.value),shape,mesh,{},std::move(guard),std::move(phase3Guard)};
 }
 EditInput nativeShapeInput(App::Document& doc,const std::string& name){return editInput(doc,name,0);}
-void verifyEditInputs(App::Document& doc,const std::vector<EditInput>& inputs){for(const auto& i:inputs){verifyObject(doc,i.guard);auto* o=doc.getObject(i.name.c_str());if(!o)throw std::runtime_error("An edit input was deleted; cancel and reselect");Ref object(o->getPyObject());if(signature(object.value)!=i.signature)throw std::runtime_error("An edit input changed; cancel and reselect");}}
+void verifyEditInputs(App::Document& doc,const std::vector<EditInput>& inputs){for(const auto& i:inputs){verifyObject(doc,i.guard);if(i.phase3Guard)verifyPhase3Object(doc,i.phase3Guard);auto* o=doc.getObject(i.name.c_str());if(!o)throw std::runtime_error("An edit input was deleted; cancel and reselect");Ref object(o->getPyObject());if(signature(object.value)!=i.signature)throw std::runtime_error("An edit input changed; cancel and reselect");}}
 ToleranceSnapshot editJoinTolerance(const std::string& context,const std::vector<EditInput>& inputs,const std::optional<double>& overrideMm){
     if(inputs.empty())throw std::runtime_error("Select Join inputs before resolving tolerance");
     const bool surfaces=count(inputs.front().shape->value,"Faces")!=0;double bound=0;
@@ -78,6 +80,8 @@ EditShapes buildEdit(const std::vector<EditInput>& inputs,unsigned kind,std::siz
     if(inputs.empty()||kind<1||kind>7)throw std::runtime_error("Select input objects");
     for(const auto& i:inputs)if(kind!=2&&i.mesh!=inputs[0].mesh)throw std::runtime_error("Mesh and BRep input types cannot be mixed in one Edit operation");
     if(inputs[0].mesh&&kind>=4){auto converted=inputs;for(auto& i:converted){i.shape=meshEditSolid(i.shape->value);i.mesh=false;}auto solids=buildEdit(converted,kind,first,mode,tolerance);EditShapes meshes;for(auto& s:solids)meshes.push_back(meshEditResult(s->value));return meshes;}
+    const bool phase3=std::all_of(inputs.begin(),inputs.end(),[](const EditInput& input){return bool(input.phase3Guard)&&!input.mesh;}) && !(kind>=4&&surfaceOnly(inputs[0].shape->value));
+    if(phase3){std::vector<Om9Phase3Facts> facts;for(const auto& input:inputs)facts.push_back(phase3ShapeFacts(input.shape->value));phase3Validate(kind,facts);}
     Ref part(PyImport_ImportModule("Part"));EditShapes output;
     if(kind==1){
         bool curves=count(inputs[0].shape->value,"Faces")==0;Ref list(PyList_New(0));
@@ -145,6 +149,7 @@ void verifyEditPickBoundary(const EditShapes& shapes,const std::set<std::size_t>
     }
 }
 void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const EditShapes& shapes,unsigned kind,bool remove,unsigned mode,std::size_t first,const EditProjection* projection,const ToleranceSnapshot* toleranceContext){
+    requireLayerGeometryEditable(doc);
     const double tolerance=toleranceContext?toleranceContext->values.effectiveMm:om9_edit_tolerance();
     if(toleranceContext&&unitContextSnapshot(doc)!=toleranceContext->context)throw std::runtime_error("Join unit/tolerance context changed; cancel and reselect");
     verifyEditInputs(doc,inputs);for(const auto& s:shapes)if(isExplodedText(s->value))continue;else if(isEditMesh(s->value))validateEditMesh(s->value,kind>=4);else valid(s->value);
@@ -154,8 +159,9 @@ void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const Ed
         if(dependent->isDerivedFrom(Base::Type::fromName("App::Part"))||dependent->isDerivedFrom(Base::Type::fromName("App::DocumentObjectGroup"))||hasRecordedHistory(dependent))continue;
         throw std::runtime_error("DeleteInput is unsafe for referenced objects; retain inputs or detach their dependents");
     }}
-    om9OpenTransaction(doc,name(kind));
-    try{breakHistoryForEdit(doc,deleting);Ref pyDoc(doc.getPyObject()),id(PyUnicode_FromString(feature(kind))),command(PyUnicode_FromString(name(kind))),sources(PyList_New(0));
+    phase3Require(om9_phase3_result_count(shapes.size()));
+    const int transaction=om9OpenTransaction(doc,name(kind));
+    try{std::unique_ptr<LayerGeometryTransaction> layers;if(hasCanonicalLayerDocument(doc))layers=std::make_unique<LayerGeometryTransaction>(doc,transaction);verifyEditInputs(doc,inputs);breakHistoryForEdit(doc,deleting);Ref pyDoc(doc.getPyObject()),id(PyUnicode_FromString(feature(kind))),command(PyUnicode_FromString(name(kind))),sources(PyList_New(0));
         for(const auto& i:inputs){Ref n(PyUnicode_FromString(i.name.c_str()));append(sources.value,n.value);}
         std::vector<std::size_t> owners;if(kind==2)for(std::size_t i=0;i<inputs.size();++i){auto pieces=buildEdit({inputs[i]},2,0,0,tolerance);owners.insert(owners.end(),pieces.size(),i);}
         for(std::size_t index=0;index<shapes.size();++index){auto shape=shapes[index];const bool mesh=isEditMesh(shape->value),textOutput=isExplodedText(shape->value);EditShapes groups;Ref source(kind==2?doc.getObject(inputs[owners.at(index)].name.c_str())->getPyObject():Py_NewRef(Py_None));
@@ -171,7 +177,9 @@ void commitEdit(App::Document& doc,const std::vector<EditInput>& inputs,const Ed
                 if(projection){Ref frame(PyList_New(0));for(const auto& row:{projection->eye,projection->right,projection->up,projection->forward})for(double value:row){Ref v(PyFloat_FromDouble(value));append(frame.value,v.value);}property(o.value,"App::PropertyFloatList","TrimProjectionFrame",frame.value);property(o.value,"App::PropertyBool","TrimPerspectiveProjection",projection->perspective?Py_True:Py_False);}}
             if(kind==2){Ref sv(PyObject_GetAttrString(source.value,"ViewObject")),ov(PyObject_GetAttrString(o.value,"ViewObject"));for(const char* key:{"ShapeColor","LineColor","PointColor","Transparency","LineWidth","PointSize","DisplayMode","TextColor"})if(PyObject_HasAttrString(sv.value,key)&&PyObject_HasAttrString(ov.value,key)){Ref style(PyObject_GetAttrString(sv.value,key));if(std::string(key)=="DisplayMode"){Ref modes(PyObject_CallMethod(ov.value,"listDisplayModes",nullptr));if(PySequence_Contains(modes.value,style.value)!=1)continue;}set(ov.value,key,style.value);}for(auto& group:groups){Ref added(PyObject_CallMethod(group->value,"addObject","O",o.value));}applyExplodeMetadata(o.value,shapes[index]);}
         }
-        for(const auto& n:deleting)doc.removeObject(n.c_str());doc.recompute();om9CommitTransaction(doc);
-    }catch(...){om9AbortTransaction(doc);throw;}
+        for(const auto& n:deleting)doc.removeObject(n.c_str());doc.recompute();if(layers)layers->finish();
+        if(!ownsLayerGeometryTransaction(doc,transaction))throw std::runtime_error("BRep edit transaction ownership changed");
+        om9CommitTransaction(doc);
+    }catch(...){if(ownsLayerGeometryTransaction(doc,transaction))om9AbortTransaction(doc);throw;}
 }
 }

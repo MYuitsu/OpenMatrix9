@@ -1,0 +1,142 @@
+{
+  "checks": [
+    {
+      "name": "modeling manifest carries finite positive tolerance",
+      "passed": true
+    },
+    {
+      "name": "working import includes curve BRep and native mesh",
+      "passed": true
+    },
+    {
+      "name": "new identity has no strict source archive dependency",
+      "passed": true
+    },
+    {
+      "name": "CAD kind independent of display tessellation",
+      "passed": true
+    },
+    {
+      "name": "cloud and mesh vertex snap disabled by shared Rust policy",
+      "passed": true
+    },
+    {
+      "name": "import Undo removes all imported geometry and layers",
+      "passed": true
+    },
+    {
+      "name": "import Redo restores working objects",
+      "passed": true
+    },
+    {
+      "name": "selected output contains only edited curve and new circle",
+      "passed": true
+    },
+    {
+      "name": "current placement exported instead of stale source",
+      "passed": true
+    },
+    {
+      "name": "new exact rational circle radius preserved",
+      "passed": true
+    },
+    {
+      "name": "selected output is V5",
+      "passed": true
+    },
+    {
+      "name": "invalid geometry preflight refuses export",
+      "passed": true
+    },
+    {
+      "name": "failed export leaves target bytes unchanged",
+      "passed": true
+    },
+    {
+      "name": "container plus member overlap is rejected",
+      "passed": true
+    },
+    {
+      "name": "duplicate object selection is rejected",
+      "passed": true
+    },
+    {
+      "name": "FCStd works after deleting source file",
+      "passed": true
+    },
+    {
+      "name": "reopened geometry exports with no source archive",
+      "passed": true
+    },
+    {
+      "name": "mm arc radius scaled once",
+      "passed": true
+    },
+    {
+      "name": "mm NURBS pole scaled once",
+      "passed": true
+    },
+    {
+      "name": "mm BRep trims and volume remain valid",
+      "passed": true
+    },
+    {
+      "name": "mm point cloud stays native-points",
+      "passed": true
+    },
+    {
+      "name": "cm arc radius scaled once",
+      "passed": true
+    },
+    {
+      "name": "cm NURBS pole scaled once",
+      "passed": true
+    },
+    {
+      "name": "cm BRep trims and volume remain valid",
+      "passed": true
+    },
+    {
+      "name": "cm point cloud stays native-points",
+      "passed": true
+    },
+    {
+      "name": "opaque geometry preflight rejects entire archive",
+      "passed": true
+    },
+    {
+      "name": "failed import leaves document unchanged",
+      "passed": true
+    },
+    {
+      "name": "native transaction propagates binder failure",
+      "passed": true
+    },
+    {
+      "name": "binder failure aborts created objects",
+      "passed": true
+    },
+    {
+      "name": "edited cloud current fields and placement exported",
+      "passed": true
+    },
+    {
+      "name": "physical parent and local placement scaled once",
+      "passed": true
+    },
+    {
+      "name": "source and independently placed link are both exportable",
+      "passed": true
+    }
+  ],
+  "timings": [
+    {
+      "case": "small-modeling-import",
+      "seconds": 0.04385680000996217
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd",
+  "python_module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\Mod\\OpenMatrix9\\ThreeDm.py"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_exchange_smoke-1\c528c1fff405449a89974140121a84b4

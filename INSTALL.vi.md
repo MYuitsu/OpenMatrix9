@@ -5,12 +5,12 @@ Bản thử nghiệm này dành cho **Windows x64, FreeCAD 1.1.4 chính thức**
 ## 1. Cài FreeCAD và mở OM9 bằng launcher
 
 1. Cài Windows x64 từ **[release FreeCAD 1.1.4 chính thức](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4)**, rồi mở FreeCAD một lần. Kiểm tra Help → About FreeCAD: **1.1.4**; tên thư mục có thể chỉ ghi `FreeCAD 1.1`.
-2. Mở **[workflow Gumball candidate](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml?query=branch%3Acodex%2Fgumball-release-0.3.4)**, chọn lần chạy **thành công** của nhánh `codex/gumball-release-0.3.4` đúng commit muốn cài. Tải **om9-release-files** trong Artifacts; GitHub có thể yêu cầu đăng nhập. Không dùng lần chạy đang chờ, lỗi hay commit cũ. Khi Action chưa qua, bản candidate trên host stock vẫn chưa được xác nhận.
-3. Giải nén ZIP artifact, rồi giải nén ZIP **OpenMatrix9-…-SetupLauncher…-Windows-x64.zip** bên trong vào một thư mục. Giữ thư mục **OpenMatrix9**, **launcher-manifest.json** và các file **Start-OM9** cùng nhau, rồi bấm **Start-OM9.cmd**. Launcher đọc thư mục OpenMatrix9 đã giải nén.
+2. Mở **[trang Releases](https://github.com/MYuitsu/OpenMatrix9/releases)**. Chọn bản **0.3.4-202610120606**, mở **Assets** và tải **OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip**.
+3. Giải nén ZIP SetupLauncher vào một thư mục. Giữ thư mục **OpenMatrix9**, **launcher-manifest.json** và các file **Start-OM9** cùng nhau, rồi bấm **Start-OM9.cmd**. Launcher đọc thư mục OpenMatrix9 đã giải nén.
 
 Launcher tự cài/cập nhật trong `%APPDATA%\FreeCAD\v1-1\Mod\OpenMatrix9`, tạo icon **OpenMatrix9** trên Desktop và Start Menu rồi mở workbench. Những lần sau dùng icon Desktop; không cần giữ thư mục giải nén. Không cần Administrator, source FreeCAD, Rust hay Visual Studio.
 
-So checksum của cả hai ZIP bên trong với **SHA256SUMS.txt** từ cùng artifact trước khi cài. Nhánh này tạo artifact candidate, chưa phải tag hay GitHub Release đã phát hành. Các gói đã phát hành, kể cả prerelease, có ở **[trang Releases](https://github.com/MYuitsu/OpenMatrix9/releases)**.
+Tải **SHA256SUMS.txt** từ cùng release để đối chiếu checksum của gói trước khi cài. ZIP SetupLauncher dùng để cài tự động; ZIP FreeCAD-1.1.4 dùng để cài plugin thủ công. Không cần tải Source code hay artifact trong Actions.
 
 Cập nhật bằng Start-OM9.cmd từ gói mới. Bản cũ được giữ ngoài Mod trong `v1-1\OM9-backups`; gói không đổi thì không chép lại plugin. Nếu plugin đang được dùng và cần thay, lưu và đóng FreeCAD rồi chạy lại. Launcher không tự đóng ứng dụng; gói thiếu hoặc lỗi cache giữ lại bản đã cài. Log ở `v1-1\OM9-launcher`.
 
@@ -21,7 +21,7 @@ Ví dụ FreeCAD đã cài: `C:\Program Files\FreeCAD 1.1\bin\FreeCAD.exe`. Các
 ## 2. Tải OM9 và đặt đúng thư mục
 
 1. Đóng các cửa sổ FreeCAD trước khi thay plugin.
-2. Tải [plugin ZIP FreeCAD-1.1.4-Windows-x64 từ cùng artifact candidate đã build thành công](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml?query=branch%3Acodex%2Fgumball-release-0.3.4).
+2. Tải **OpenMatrix9-0.3.4-202610120606-FreeCAD-1.1.4-Windows-x64.zip** trong **Assets** ở [trang Releases](https://github.com/MYuitsu/OpenMatrix9/releases).
 3. Giải nén; bên trong có thư mục **OpenMatrix9**.
 4. Nhấn **Win + R**, dán `%APPDATA%\FreeCAD\v1-1\Mod` rồi Enter. Nếu chưa có thư mục này, tạo nó.
 5. Chép thư mục **OpenMatrix9** vào đó. Nếu đã có bản cũ, chuyển bản cũ ra ngoài thư mục `Mod` trước để có thể khôi phục.
@@ -54,7 +54,7 @@ Giữ clipboard yên khi trao đổi. Các script kiểm chứng Matrix trong so
 
 ## Phạm vi v0.0.3 lịch sử và giới hạn host còn áp dụng
 
-Các mục dưới mô tả checkpoint v0.0.3 đã phát hành. Candidate Gumball có bằng chứng native riêng; xem Action của đúng commit để biết kết quả CI stock. Các ghi chú lịch sử này không xác nhận candidate.
+Các mục dưới mô tả checkpoint v0.0.3 đã phát hành. Bản Gumball có bằng chứng kiểm thử cục bộ riêng; CI chỉ build/đóng gói theo yêu cầu. Xem [quy trình và bằng chứng](docs/validation/2026-10-12-local-tests-ci-build-only.md). Các ghi chú lịch sử không xác nhận toàn bộ bản mới.
 
 - `0.0.3` bổ sung build công khai trên GitHub và launcher mới, trên nền tương thích FreeCAD chính thức của `0.0.2`. Xem [phạm vi CI và lỗi tooling lịch sử còn lại](docs/validation/2026-10-11-release003-ci.md). Bằng chứng Rhino/Matrix của các nhánh dev trước không phải chứng nhận lại toàn bộ bản stock này.
 - Chỉnh curve, bảng layer, Copy/Paste, BRep trong các mẫu đã kiểm tra, worker import và thao tác viewport có báo cáo kèm release. Full openNURBS, mọi thuật toán trang sức và chuyển đầy đủ bảng màu/khóa bằng thao tác Matrix sản phẩm vẫn chưa được nghiệm thu toàn bộ.

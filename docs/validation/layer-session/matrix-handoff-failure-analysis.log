@@ -1,0 +1,29 @@
+offline-harness8
+Failed to find real location of H:\FreeCAD-src\.pixi\envs\default\python.exe
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.031s
+
+OK
+
+installed-ironpython4-and-ps
+SDK readable property: Int32 DocumentId
+SDK readable property: Boolean Modified
+SDK readable property: Rhino.DocObjects.Tables.LayerTable Layers
+SDK readable property: Int32 Count
+SDK readable property: Int32 CurrentLayerIndex
+SDK readable property: System.String CommandHistoryWindowText
+SDK native dynamic-command registration available; actual command runtime still pending.
+Installed Rhino5 IronPython syntax PASS: H:\FreeCAD-src\build\om9-layer-edits\tests\rhino5_verify_matrix_om9_handoff.py
+Installed Rhino5 IronPython syntax PASS: H:\FreeCAD-src\build\om9-layer-edits\tests\matrix_om9_handoff_support.py
+Installed Rhino5 IronPython syntax PASS: H:\FreeCAD-src\build\om9-layer-edits\tests\rhino5_verify_layer_command_api.py
+Installed Rhino5 IronPython syntax PASS: H:\FreeCAD-src\build\om9-layer-edits\tests\rhino5_inspect_matrix_handoff.py
+SDK/compile checks only; actual Matrix runtime and full handoff remain separate.
+Two-application launcher PowerShell syntax PASS; native Matrix handoff pending.
+
+installed-ironpython-actual-snapshot-json
+Installed IronPython CLR RGB report serialization PASS
+
+companion-syntax
+Failed to find real location of H:\FreeCAD-src\.pixi\envs\default\python.exe
+

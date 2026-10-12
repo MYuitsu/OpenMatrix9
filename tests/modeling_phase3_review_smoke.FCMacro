@@ -1,0 +1,114 @@
+"""Real host regressions for independent whole-change findings; test glue only."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtGui,QtTest
+from pathlib import Path
+import os,json,traceback,sys
+sys.path.insert(0,'H:/FreeCAD-src/build/om9-phase3-dev/tests')
+from command_console_support import command_input
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'observations':{}}
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(250,loop.quit);loop.exec()
+    QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.DeferredDelete)
+def enter(text=''):
+    f=command_input(Gui.getMainWindow());f.setText(text);QtTest.QTest.keyClick(f,QtCore.Qt.Key_Return);settle()
+def require(value,message):
+    if not value:raise AssertionError(message)
+def dialog(name):return next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,name) if d.isVisible()),None)
+def selected(rows):
+    Gui.Selection.clearSelection()
+    for row in rows:Gui.Selection.addSelection(row)
+    settle()
+def snapshot(doc):return ([(o.Name,o.TypeId,o.Shape.exportBrepToString() if o.isDerivedFrom('Part::Feature') else None) for o in doc.Objects],list(doc.UndoNames),list(doc.RedoNames))
+def imported(doc,shapes):
+    import ThreeDm
+    source=[]
+    for shape in shapes:
+        o=doc.addObject('Part::Feature','Source');o.Shape=shape;source.append(o)
+    doc.recompute();path=out/(doc.Name+'.3dm');ThreeDm.export_file(str(path),source,modeling=True)
+    for o in source:doc.removeObject(o.Name)
+    return ThreeDm.import_file(str(path),doc,mode='modeling')
+def feature(doc,shape):
+    o=doc.addObject('Part::Feature','Input');o.Shape=shape;doc.recompute();return o
+def run():
+    import Part,OpenMatrix9Gui as native
+    Gui.activateWorkbench('OpenMatrix9Workbench')
+    def case(name,fn):
+        try:fn();report['checks'].append({'name':name,'passed':True})
+        except Exception:report['checks'].append({'name':name,'passed':False,'error':traceback.format_exc()})
+        finally:enter('Cancel')
+    def polycurve():
+        doc=App.newDocument('WholePolycurve');doc.UndoMode=1
+        wires=[Part.makePolygon([App.Vector(0,0,z),App.Vector(4,0,z),App.Vector(4,3,z),App.Vector(0,3,z),App.Vector(0,0,z)]) for z in [0,5]]
+        rows=imported(doc,wires)
+        # 3DM working import represents a polyline as one piecewise spline edge.
+        # Restore an equivalent current Wire, as native curve editing can do.
+        for row,wire in zip(rows,wires):
+            require(abs(row.Shape.Length-14)<1e-6,'imported closed profile physical perimeter')
+            row.Shape=wire
+        doc.recompute()
+        require(all(len(o.Shape.Edges)==4 for o in rows),'current closed profiles have four native edges')
+        window=Gui.getMainWindow();window.show();window.resize(1500,1000);settle()
+        area=window.findChild(QtWidgets.QMdiArea);sub=next(s for s in area.subWindowList() if s.widget().property('om9ViewSlot')==0);area.setActiveSubWindow(sub);settle()
+        view=Gui.activeDocument().activeView();view.viewFront();view.fitAll();Gui.updateGui();settle()
+        target=next(w for w in sub.widget().findChildren(QtWidgets.QWidget) if w.metaObject().className()=='Gui::View3DInventorViewer').viewport()
+        Gui.Selection.clearSelection();settle();action=window.findChild(QtGui.QAction,'OM9_SurfaceLoft');require(action and action.isEnabled(),'actual Loft action enabled');action.trigger();settle()
+        for z in [0,5]:
+            p=view.getPointOnScreen(App.Vector(2,0,z));QtTest.QTest.mouseClick(target,QtCore.Qt.LeftButton,pos=QtCore.QPoint(round(p[0]),target.height()-round(p[1])));settle()
+        enter();d=dialog('OM9SurfaceOptions');require(d is not None,'real polycurve clicks reach native options');enter('OK')
+        result=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SURFACE-009')
+        report['observations']['polycurve']={'faces':len(result.Shape.Faces),'area':result.Shape.Area}
+        require(result.Shape.isValid() and len(result.Shape.Faces)==4 and abs(result.Shape.Area-70)<1e-6,'mouse must retain whole closed polycurve; analytic area70')
+    def trim_all():
+        doc=App.newDocument('EmptyTrim');doc.UndoMode=1
+        rows=imported(doc,[Part.makePlane(10,10)])
+        rows.append(feature(doc,Part.makePlane(10,10,App.Vector(5,0,-5),App.Vector(1,0,0),App.Vector(0,1,0))))
+        _,mapping=rows[0].Shape.generalFuse([rows[1].Shape],0.0)
+        require([sum(len(piece.Faces) for piece in pieces) for pieces in mapping]==[2,2],'independent fixture produces exactly two regions per input')
+        before=snapshot(doc);selected(rows);enter('Trim');enter();require(dialog('OM9EditOptions') is not None,'Trim fixture has split regions')
+        require(dialog('OM9EditOptions').findChild(QtWidgets.QLabel,'OM9EditStatus').text().startswith('Valid native'),'actual split must succeed before removing all regions')
+        for row,points in [(rows[0],[(2,5,0),(8,5,0)]),(rows[1],[(5,5,-2.5),(5,5,2.5)])]:
+            for p in points:enter(row.Name+'@'+','.join(map(str,p)))
+        d=dialog('OM9EditOptions');report['observations']['empty_trim_status']=d.findChild(QtWidgets.QLabel,'OM9EditStatus').text()
+        enabled=d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).isEnabled();enter('OK')
+        require(not enabled and snapshot(doc)==before,'empty Trim output must disable preview/accept and preserve every input/transaction')
+    def mixed(surface=False):
+        doc=App.newDocument('MixedSurface' if surface else 'MixedEdit');doc.UndoMode=1
+        shapes=[Part.makeLine(App.Vector(0,y,0),App.Vector(10,y,0)) for y in [0,4]] if surface else [Part.makePolygon([App.Vector(0,0,0),App.Vector(4,0,0),App.Vector(4,3,0)])]
+        if surface:rows=imported(doc,shapes)
+        else:
+            import ThreeDm
+            rows=ThreeDm.import_file('H:/FreeCAD-src/build/om9-phase3-native/modeling-brep-fixtures/open-cylinder-shell.3dm',doc,mode='modeling')
+            require(rows[0].Shape.ShapeType=='Shell' and len(rows[0].Shape.Faces)==2,'valid-enough actual imported polysurface')
+        bad=doc.addObject('Mesh::Feature','UnsupportedMesh');doc.recompute();before=snapshot(doc)
+        selected(rows+[bad]);enter('Loft' if surface else 'Explode');enter();enter('OK')
+        require(snapshot(doc)==before,'unsupported preselection must reject whole set rather than commit valid subset')
+    def join_tolerance():
+        doc=App.newDocument('JoinTolerance');doc.UndoMode=1
+        rows=imported(doc,[Part.makePlane(10,10),Part.makePlane(10,10,App.Vector(10.05,0,0))]);before=snapshot(doc)
+        selected(rows);enter('Join');enter();d=dialog('OM9EditOptions');require(d is not None,'Join tolerance options available')
+        enter('Tolerance=0.01');require(not d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).isEnabled() and snapshot(doc)==before,'gap above tolerance must reject without mutation')
+        enter('Tolerance=0.1');require(d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).isEnabled(),'larger explicit tolerance must reach native sewing')
+        enter('OK');result=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOP11-008')
+        report['observations']['join']={'type':result.Shape.ShapeType,'faces':len(result.Shape.Faces),'edges':len(result.Shape.Edges),'tolerance':result.JoinTolerance}
+        require(result.Shape.isValid() and result.Shape.ShapeType=='Shell' and len(result.Shape.Faces)==2 and len(result.Shape.Edges)==7 and abs(result.JoinTolerance-0.1)<1e-10,'native sewn connected shell uses chosen tolerance')
+    def protected_batch(surface=False):
+        doc=App.newDocument('ProtectedSurfaceBatch' if surface else 'ProtectedEditBatch');doc.UndoMode=1
+        shapes=[Part.makeLine(App.Vector(0,y,0),App.Vector(10,y,0)) for y in [0,4,8]] if surface else [Part.makePlane(10,10,App.Vector(x,0,0)) for x in [0,10,20]]
+        rows=imported(doc,shapes);rows[-1].setPropertyStatus('Shape','ReadOnly');before=snapshot(doc)
+        selected(rows);enter('Loft' if surface else 'Join');enter();enter('OK')
+        require(snapshot(doc)==before and dialog('OM9SurfaceOptions' if surface else 'OM9EditOptions') is None,'protected initial selection must cancel atomically')
+    try:
+        case('mouse Loft preserves whole imported polycurve',polycurve)
+        case('Trim-all empty output preserves inputs and transaction',trim_all)
+        case('Edit mixed unsupported preselection rejects whole set',mixed)
+        case('Surface mixed unsupported preselection rejects whole set',lambda:mixed(True))
+        case('surface Join applies chosen kernel tolerance',join_tolerance)
+        case('Edit protected preselection rejects whole set',protected_batch)
+        case('Surface protected preselection rejects whole set',lambda:protected_batch(True))
+        report.update(ok=all(c['passed'] for c in report['checks']),module=native.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    report['transcript']=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript').toPlainText()
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

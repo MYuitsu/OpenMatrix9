@@ -73,7 +73,7 @@ def run():
     global OM,window
     try:
         Gui.activateWorkbench('OpenMatrix9Workbench');import OpenMatrix9Gui as OM
-        window=Gui.getMainWindow();result['native_module']=OM.__file__
+        window=Gui.getMainWindow();result['native_module']=OM.__file__;result['module']=str(OM.__file__)
         check('exact native module loaded',Path(OM.__file__).parent.resolve()==Path(os.environ['OM9_TEST_NATIVE_DIR']).resolve())
         stats('hold')
         doc,source,dialog=prepared('Unchanged');baseline,before,held=solved(doc,dialog,'unchanged')
@@ -102,6 +102,25 @@ def run():
         doc,source=authored('DelayedParent');parent=doc.addObject('App::Part','Parent');parent.addObject(source);doc.recompute();dialog=begin(source)
         baseline,before,held=solved(doc,dialog,'parent-placement');parent.Placement.Base=App.Vector(5,0,0);doc.recompute();changed=inventory(doc)
         delivered_record('parent-placement',before,held,stats('oldest'),doc,changed);finish(doc,dialog)
+        for label,mutation,nested in [('linked-unchanged','none',False),('linked-target-edit','edit',False),('linked-target-edit-restore','restore',False),('linked-target-placement','target-placement',False),('linked-intermediate-placement','intermediate-placement',True)]:
+            doc,target=authored('Delayed'+label)
+            intermediate=doc.addObject('App::Link','Intermediate') if nested else target
+            if nested:intermediate.LinkedObject=target
+            occurrence=doc.addObject('App::Link','Occurrence');occurrence.LinkedObject=intermediate;doc.recompute();dialog=begin(occurrence)
+            baseline,before,held=solved(doc,dialog,label);original=target.Shape
+            # Target and intermediate events must invalidate a solved occurrence
+            # immediately; no recompute may propagate _LinkTouched to that link.
+            if mutation in ('edit','restore'):
+                target.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(9,1,2))
+                if mutation=='restore':
+                    target.Shape=original
+                    check(label+': target geometry restored without erasing mutation stamp',inventory(doc)['shapes']==baseline['shapes'])
+            elif mutation=='target-placement':target.Placement.Base=App.Vector(5,0,0)
+            elif mutation=='intermediate-placement':intermediate.Placement.Base=App.Vector(5,0,0)
+            changed=inventory(doc);delivered=stats('oldest')
+            delivered_record(label,before,held,delivered,doc,changed,'previewed' if mutation=='none' else 'rejected')
+            if mutation!='none':check(label+': strict resolved-source revision rejection',delivered['last_reason'].startswith('Source object changed or was replaced:'))
+            finish(doc,dialog)
         doc,source,dialog=prepared('Newer');baseline,before,held=solved(doc,dialog,'older')
         dialog.findChild(QtWidgets.QSpinBox,'OM9RebuildPointCount').setValue(10);click(dialog,'OM9RebuildPreview');settle();two=stats()
         check('newer: two distinct native results held in order',two['held']==2 and two['live_envelopes']==2 and two['held_results'][1]['ticket']>two['held_results'][0]['ticket'])

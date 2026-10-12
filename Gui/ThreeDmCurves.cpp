@@ -21,7 +21,7 @@ struct PreparedCurve {
     std::array<double,2> getNurbFormDomain{};
     bool beforeClampPeriodic = false;
 };
-static PreparedCurve nurbs(const ON_Curve& c,double tolerance=0.){
+static PreparedCurve nurbs(const ON_Curve& c,double tolerance=0.,bool preservePeriodic=false){
     if(auto raw=ON_NurbsCurve::Cast(&c))BasisContract::checkedBasis(*raw);
     PreparedCurve prepared;auto& n=prepared.basis;
     if(!c.IsValid())throw ExchangeError("Invalid or unsupported curve");
@@ -30,12 +30,15 @@ static PreparedCurve nurbs(const ON_Curve& c,double tolerance=0.){
     BasisContract::checkedBasis(n);
     prepared.getNurbFormDomain={n.Domain().Min(),n.Domain().Max()};
     prepared.beforeClampPeriodic=n.IsPeriodic();
-    if(!n.ClampEnd(2))throw ExchangeError("Cannot clamp NURBS curve");
+    if((!preservePeriodic||!n.IsPeriodic())&&!n.ClampEnd(2))throw ExchangeError("Cannot clamp NURBS curve");
     BasisContract::checkedBasis(n);return prepared;
 }
 static void knots(const ON_NurbsCurve& n,std::vector<double>& k,std::vector<int>& m){
     auto append=[&](double v){if(!std::isfinite(v))throw ExchangeError("Nonfinite knot");if(k.empty()||v!=k.back()){k.push_back(v);m.push_back(1);}else ++m.back();};
-    append(n.Knot(0));for(int i=0;i<n.KnotCount();++i)append(n.Knot(i));append(n.Knot(n.KnotCount()-1));
+    const bool periodic=n.IsPeriodic();const int unique=n.CVCount()-n.Degree();const double period=n.Domain().Length();
+    append(periodic?n.Knot(unique-1)-period:n.Knot(0));
+    for(int i=0;i<n.KnotCount();++i)append(n.Knot(i));
+    append(periodic?n.Knot(n.KnotCount()-unique)+period:n.Knot(n.KnotCount()-1));
 }
 static Handle(Geom_Curve) curve3dFromNurbs(const ON_NurbsCurve& n){
     std::vector<double> k;std::vector<int> m;knots(n,k,m);
@@ -44,8 +47,10 @@ static Handle(Geom_Curve) curve3dFromNurbs(const ON_NurbsCurve& n){
     for(int i=0;i<int(k.size());++i){ks.SetValue(i+1,k[i]);ms.SetValue(i+1,m[i]);}
     return new Geom_BSplineCurve(p,w,ks,ms,n.Degree(),false);
 }
-Handle(Geom_Curve) curve3d(const ON_Curve& c){
-    auto prepared=nurbs(c);return curve3dFromNurbs(prepared.basis);
+Handle(Geom_Curve) curve3d(const ON_Curve& c,bool preservePeriodic){
+    auto prepared=nurbs(c,0.,preservePeriodic);auto target=curve3dFromNurbs(prepared.basis);
+    if(preservePeriodic&&c.IsPeriodic())Handle(Geom_BSplineCurve)::DownCast(target)->SetPeriodic();
+    return target;
 }
 Handle(Geom2d_Curve) curve2d(const ON_Curve& c){
     auto prepared=nurbs(c);const auto& n=prepared.basis;std::vector<double> k;std::vector<int> m;knots(n,k,m);
@@ -55,7 +60,7 @@ Handle(Geom2d_Curve) curve2d(const ON_Curve& c){
     return new Geom2d_BSplineCurve(p,w,ks,ms,n.Degree(),false);
 }
 static TopoDS_Shape curveEdge(const Handle(Geom_Curve)& n,const ON_Interval& d){BRepBuilderAPI_MakeEdge edge(n,d.Min(),d.Max());if(!edge.IsDone())throw ExchangeError("Curve edge construction failed");return edge.Edge();}
-TopoDS_Shape importCurve(const ON_Curve& c,double){return curveEdge(curve3d(c),c.Domain());}
+TopoDS_Shape importCurve(const ON_Curve& c,double){return curveEdge(curve3d(c,true),c.Domain());}
 CurveConversion::ObservedCurve CurveConversion::importCurveObserved(
     const ON_Curve& c,Options options,std::span<const double> parameters){
     try {
@@ -86,7 +91,14 @@ template<class Curve> static std::unique_ptr<ON_Curve> toON(const Curve& n,int d
 }
 std::unique_ptr<ON_Curve> curveON(const Handle(Geom_Curve)& c,double a,double b){
     if(auto raw=Handle(Geom_BSplineCurve)::DownCast(c);!raw.IsNull())BasisContract::checkedBasis(raw);
-    auto n=GeomConvert::CurveToBSplineCurve(new Geom_TrimmedCurve(c,a,b));BasisContract::checkedBasis(n);if(n->IsPeriodic())n->SetNotPeriodic();return toON(n,3);
+    auto spline=Handle(Geom_BSplineCurve)::DownCast(c);
+    Handle(Geom_BSplineCurve) n;
+    if(!spline.IsNull()){
+        n=Handle(Geom_BSplineCurve)::DownCast(spline->Copy());
+        const double tolerance=1e-10*std::max({1.0,std::abs(a),std::abs(b)});
+        if(std::abs(a-n->FirstParameter())>tolerance||std::abs(b-n->LastParameter())>tolerance)n->Segment(a,b);
+    }else n=GeomConvert::CurveToBSplineCurve(new Geom_TrimmedCurve(c,a,b));
+    BasisContract::checkedBasis(n);if(n->IsPeriodic())n->SetNotPeriodic();return toON(n,3);
 }
 std::unique_ptr<ON_Curve> curveON(const Handle(Geom2d_Curve)& c,double a,double b){
     auto spline=Handle(Geom2d_BSplineCurve)::DownCast(c);

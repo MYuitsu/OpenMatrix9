@@ -1,0 +1,39 @@
+"""Registered metadata identity must not silently hide augmented model payload."""
+import os,json,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def rejection(work,field):
+    try:work()
+    except RuntimeError as exc:
+        report.setdefault('rejections',[]).append(str(exc));return field in str(exc)
+    return False
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        doc=App.newDocument('MetadataPayload');doc.UndoMode=1
+        obj=doc.addObject('Part::Feature','Ring');obj.Shape=Part.makeBox(2,3,4);doc.recompute()
+        initial=native.layerDocumentSnapshot(doc.Name);native.initializeLayerDocument(doc.Name,initial)
+        storage=next(o for o in doc.Objects if 'OM9LayerSnapshot' in o.PropertiesList)
+        raw=storage.OM9LayerSnapshot;volume=obj.Shape.Volume
+        storage.addProperty('Part::PropertyPartShape','Shape');storage.Shape=Part.makeBox(3,4,5)
+        check('canonical inventory rejects geometry-bearing metadata with an explicit field',rejection(lambda:native.layerDocumentSnapshot(doc.Name),'Shape'))
+        check('selected export rejects the same whole-document contradiction',rejection(lambda:native.exportLayerSelection3dm(doc.Name,[obj]),'Shape'))
+        check('failed preflight preserves canonical bytes and both geometries',storage.OM9LayerSnapshot==raw and obj.Shape.Volume==volume and storage.Shape.Volume==60)
+        storage.removeProperty('Shape')
+        check('removing contradiction restores exact canonical inventory',native.layerDocumentSnapshot(doc.Name)==raw)
+        storage.addProperty('App::PropertyString','OM9NativeGeometry');storage.OM9NativeGeometry='unsupported retained payload'
+        check('unknown retained payload on metadata is never silently omitted',rejection(lambda:native.layerDocumentSnapshot(doc.Name),'OM9NativeGeometry'))
+        storage.removeProperty('OM9NativeGeometry')
+        check('payload rejection never changes model or canonical palette',native.layerDocumentSnapshot(doc.Name)==raw and obj.Shape.Volume==volume)
+        report.update(ok=True,module=native.__file__,scope='layer storage payload contradiction preflight; full Session collector still pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

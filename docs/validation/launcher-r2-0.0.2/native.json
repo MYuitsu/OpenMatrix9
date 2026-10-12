@@ -1,0 +1,113 @@
+{
+  "checks": [
+    {
+      "passed": true,
+      "name": "actual GUI activates OM9 workbench"
+    },
+    {
+      "passed": true,
+      "name": "actual host version remains 1.1.4"
+    },
+    {
+      "passed": true,
+      "name": "module loads from installed isolated user directory"
+    },
+    {
+      "passed": true,
+      "name": "icon shortcut is created"
+    },
+    {
+      "passed": true,
+      "name": "shortcut points to persistent installed launcher"
+    },
+    {
+      "passed": true,
+      "name": "shortcut has OM9 icon"
+    },
+    {
+      "passed": true,
+      "name": "Start Menu icon shortcut is created"
+    },
+    {
+      "passed": true,
+      "name": "Start Menu and Desktop target the same cached launcher"
+    },
+    {
+      "passed": true,
+      "name": "Windows decodes the ICO image"
+    },
+    {
+      "passed": true,
+      "name": "installed native hash matches package"
+    },
+    {
+      "passed": true,
+      "name": "actual GUI activates OM9 workbench"
+    },
+    {
+      "passed": true,
+      "name": "actual host version remains 1.1.4"
+    },
+    {
+      "passed": true,
+      "name": "module loads from installed isolated user directory"
+    },
+    {
+      "passed": true,
+      "name": "actual GUI activates OM9 workbench"
+    },
+    {
+      "passed": true,
+      "name": "actual host version remains 1.1.4"
+    },
+    {
+      "passed": true,
+      "name": "module loads from installed isolated user directory"
+    },
+    {
+      "passed": true,
+      "name": "rerunning extracted bundle does not recopy unchanged plugin"
+    },
+    {
+      "passed": true,
+      "name": "automatic background update check completes without interrupting GUI"
+    },
+    {
+      "passed": true,
+      "name": "actual GUI activates OM9 workbench"
+    },
+    {
+      "passed": true,
+      "name": "actual host version remains 1.1.4"
+    },
+    {
+      "passed": true,
+      "name": "module loads from installed isolated user directory"
+    }
+  ],
+  "update_status": "current",
+  "ok": true,
+  "output": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-33c4d46be60c469c9800b50352c5b740",
+  "startup": [
+    {
+      "module": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-33c4d46be60c469c9800b50352c5b740\\profile\\v1-1\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+      "workbench": "OpenMatrix9Workbench",
+      "report": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-33c4d46be60c469c9800b50352c5b740\\profile\\v1-1\\OM9-launcher\\start-3007caaa05d7422bbc5c7f0e1298ae83.json"
+    },
+    {
+      "module": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-33c4d46be60c469c9800b50352c5b740\\profile\\v1-1\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+      "workbench": "OpenMatrix9Workbench",
+      "report": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-33c4d46be60c469c9800b50352c5b740\\profile\\v1-1\\OM9-launcher\\start-0d1a6c057fab479bae0a4ca981f0b497.json"
+    },
+    {
+      "module": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-33c4d46be60c469c9800b50352c5b740\\profile\\v1-1\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+      "workbench": "OpenMatrix9Workbench",
+      "report": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-33c4d46be60c469c9800b50352c5b740\\profile\\v1-1\\OM9-launcher\\start-908b70358efb408fb738474315f9eb6b.json"
+    },
+    {
+      "module": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-33c4d46be60c469c9800b50352c5b740\\profile\\v1-1\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+      "workbench": "OpenMatrix9Workbench",
+      "report": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-33c4d46be60c469c9800b50352c5b740\\profile\\v1-1\\OM9-launcher\\start-7c64b672c1d3451a84e2367eba45a16c.json"
+    }
+  ]
+}

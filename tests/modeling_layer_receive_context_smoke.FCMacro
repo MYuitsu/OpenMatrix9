@@ -1,0 +1,63 @@
+"""Reentrant native receive protects switched/closed documents and user drafts."""
+import json,os,tempfile,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]};docs=[]
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def rejected(work):
+    try:work()
+    except RuntimeError as error:report.setdefault('errors',[]).append(str(error));return True
+    return False
+def run():
+    old=None
+    try:
+        import OpenMatrix9Gui as native,ThreeDm
+        Gui.activateWorkbench('OpenMatrix9Workbench');fixtures=Path(native.__file__).parents[2]/'layer-abi/archive-fixtures'
+        doc=App.newDocument('ReceiveContext');docs.append(doc.Name);doc.UndoMode=1
+        keep=doc.addObject('Part::Feature','Keep');keep.Shape=Part.makeBox(2,3,4);doc.recompute()
+        native.layerDocumentCommand(doc.Name,json.dumps(dict(operation='set_current',layer_id='om9-preset-7')))
+        stable=json.loads(native.layerDocumentSnapshot(doc.Name));undo=doc.UndoCount;count=len(doc.Objects);shape=keep.Shape.hashCode()
+        foreign=App.newDocument('ForeignReceiveDraft');docs.append(foreign.Name);foreign.UndoMode=1
+        other=foreign.addObject('Part::Feature','Other');other.Shape=Part.makeBox(1,2,3);foreign.recompute()
+        foreign.openTransaction('Keep unrelated other-document draft');other.Label='Keep foreign label';foreignUndo=foreign.UndoCount
+        App.setActiveDocument(doc.Name);Gui.setActiveDocument(doc.Name)
+        with tempfile.TemporaryDirectory() as directory:
+            packet=ThreeDm._prepare_import(str(fixtures/'layer-source.3dm'),directory,0,'geometry');old=ThreeDm._insert_prepared
+            def switched(name,prepared,groups=True):
+                created=old(name,prepared,groups);report['switched_added']=len(created)
+                App.setActiveDocument(foreign.Name);Gui.setActiveDocument(foreign.Name);return created
+            ThreeDm._insert_prepared=switched
+            try:check('receive refuses target document switched during binding',rejected(lambda:native.commit3dm(doc.Name,packet)))
+            finally:ThreeDm._insert_prepared=old
+            check('switched target actually bound detached geometry before rejection',report.get('switched_added')==2)
+            check('switched receive rolls back only its own geometry/state',json.loads(native.layerDocumentSnapshot(doc.Name))==stable and len(doc.Objects)==count and doc.UndoCount==undo and keep.Shape.hashCode()==shape and not doc.HasPendingTransaction)
+            check('other active user draft remains intact',App.ActiveDocument==foreign and foreign.HasPendingTransaction and other.Label=='Keep foreign label' and foreign.UndoCount==foreignUndo)
+        # The owned target may be closed by a native callback. There must be no
+        # dereference of the old App::Document pointer after the callback returns.
+        foreign.abortTransaction();App.setActiveDocument(doc.Name);Gui.setActiveDocument(doc.Name)
+        with tempfile.TemporaryDirectory() as directory:
+            packet=ThreeDm._prepare_import(str(fixtures/'layer-source.3dm'),directory,0,'geometry');name=doc.Name
+            def closed(target,prepared,groups=True):
+                created=old(target,prepared,groups);report['closed_added']=len(created)
+                App.closeDocument(target);App.setActiveDocument(foreign.Name);Gui.setActiveDocument(foreign.Name);return created
+            ThreeDm._insert_prepared=closed
+            try:check('closed native target produces controlled receive failure',rejected(lambda:native.commit3dm(name,packet)))
+            finally:ThreeDm._insert_prepared=old
+            check('closed-target fixture really closed the owned document',name not in App.listDocuments() and report.get('closed_added')==2)
+            check('closed-target handling leaves remaining geometry unchanged',App.ActiveDocument==foreign and abs(other.Shape.Volume-6)<1e-7 and other.Label=='Other' and not foreign.HasPendingTransaction)
+        report.update(ok=True,module=native.__file__,scope='reentrant public receive target and native document lifetime; full Matrix/collection/hooks remain pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        if old is not None:
+            import ThreeDm;ThreeDm._insert_prepared=old
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in docs:
+            if name in App.listDocuments():
+                doc=App.getDocument(name)
+                if doc.HasPendingTransaction:doc.abortTransaction()
+                App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

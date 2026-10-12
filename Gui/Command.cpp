@@ -1,3 +1,5 @@
+#include "ModelingCurveEditor.h"
+#include "LayerDocumentAdapter.h"
 #include "RustBridge.h"
 #include "GumballController.h"
 #include "CoreThreeDm.h"
@@ -75,7 +77,15 @@ bool om9NativeCommandAvailable(std::size_t index) {
     if(!Gui::Application::Instance || !qApp || QThread::currentThread()!=qApp->thread())return false;
     if(OpenMatrix9Gui::HistoryController::handles(index))return OpenMatrix9Gui::HistoryController::instance().available(index);
     if(OpenMatrix9Gui::CageController::handles(index))return OpenMatrix9Gui::CageController::instance().available(index);
-    if(auto operation=om9_3dm_operation(index)) {auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();return doc&&gui&&!gui->getInEdit()&&om9AlterDocument(doc)&&(operation==1||Gui::Selection().hasSelection(doc->getName()));}
+    if(auto operation=om9_3dm_operation(index)) {
+        auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
+        if(!doc||!gui||gui->getInEdit()||!om9AlterDocument(doc))return false;
+        if(operation<3)return operation==1||Gui::Selection().hasSelection(doc->getName());
+        Base::PyGILStateLocker lock;auto* module=PyImport_ImportModule("ThreeDmClipboard");
+        auto* result=module?PyObject_CallMethod(module,"available","i",static_cast<int>(operation)):nullptr;
+        Py_XDECREF(module);if(!result){PyErr_Clear();return false;}bool allowed=PyObject_IsTrue(result)==1;Py_DECREF(result);return allowed;
+    }
+    if(std::string(om9_command_id(index))=="PointsOn")return OpenMatrix9Gui::modelingCurveEditorAvailable();
     if(OpenMatrix9Gui::CoreKeyboard::handles(index))return OpenMatrix9Gui::CoreKeyboard::instance().available(index);
     if(OpenMatrix9Gui::CoreSnaps::handles(index))return OpenMatrix9Gui::CoreSnaps::available();
     if(OpenMatrix9Gui::CoreDistance::handles(index))return OpenMatrix9Gui::CoreDistance::instance().available();
@@ -108,6 +118,7 @@ bool om9NativeCommandAvailable(std::size_t index) {
     return command && command->isActive();
 }
 bool om9ExecuteNativeCommand(std::size_t index) {
+    if(std::string(om9_command_id(index))=="PointsOn")return OpenMatrix9Gui::startModelingCurveEditor();
     if(OpenMatrix9Gui::GumballController::handles(index))return OpenMatrix9Gui::GumballController::instance().execute(index);
     if(OpenMatrix9Gui::HistoryController::handles(index))return OpenMatrix9Gui::HistoryController::instance().start(index);
     if(OpenMatrix9Gui::CageController::handles(index))return OpenMatrix9Gui::CageController::instance().start(index);
@@ -142,7 +153,7 @@ bool om9ExecuteNativeCommand(std::size_t index) {
             Gui::Selection().clearSelection(name.c_str());
             if(auto* current=App::GetApplication().getDocument(name.c_str())) {
                 std::vector<App::DocumentObject*> objects;
-                for(auto* object:current->getObjects())if(!OpenMatrix9Gui::CoreNotes::isStorageObject(object)&&!dynamic_cast<OpenMatrix9Gui::HistorySettings*>(object)&&!OpenMatrix9Gui::isBuilderStorageObject(object)&&!OpenMatrix9Gui::isCageStorageObject(object))objects.push_back(object);
+                for(auto* object:current->getObjects())if(!OpenMatrix9Gui::CoreNotes::isStorageObject(object)&&!OpenMatrix9Gui::isLayerStorageObject(object)&&!dynamic_cast<OpenMatrix9Gui::HistorySettings*>(object)&&!OpenMatrix9Gui::isBuilderStorageObject(object)&&!OpenMatrix9Gui::isCageStorageObject(object))objects.push_back(object);
                 Gui::Selection().setSelection(name.c_str(),objects);
             }
         }

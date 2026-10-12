@@ -1,0 +1,45 @@
+{
+    "checks":  [
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm two imports have independent namespaces and copied source roots",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm imported/copy complete staged native graph",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord001 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord002 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm imported/copyRhinoRetainedRecord003 exact namespace owner binding",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "standalone-kind-0-owner-0-reversed-0.3dm deleted current owner is rejected before restoring snapshot",
+                       "passed":  false
+                   }
+               ],
+    "cases":  [
+
+              ],
+    "ok":  false,
+    "error":  "Traceback (most recent call last):\n  File \"H:/FreeCAD-src/build/om9-dev/tests/three_dm_reference_remap_smoke.FCMacro\", line 44, in run\n    check(source.name+\u0027 deleted current owner is rejected before restoring snapshot\u0027, \u0027Deleted native reference owner\u0027 in error)\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:/FreeCAD-src/build/om9-dev/tests/three_dm_reference_remap_smoke.FCMacro\", line 10, in check\n    if not value:raise AssertionError(name)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: standalone-kind-0-owner-0-reversed-0.3dm deleted current owner is rejected before restoring snapshot\n"
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\three_dm_reference_remap_smoke-1\ea1646dc3a9945c08d785563e50065dc
+Runtime smoke failed
+At H:\FreeCAD-src\build\om9-dev\tests\run_menu_smoke.ps1:31 char:29
++         if(-not $result.ok){throw 'Runtime smoke failed'}
++                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Runtime smoke failed:String) [], RuntimeException
+    + FullyQualifiedErrorId : Runtime smoke failed
+ 

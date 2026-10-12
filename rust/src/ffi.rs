@@ -232,7 +232,8 @@ pub extern "C" fn om9_command_permissions(i: usize) -> u32 {
     }
     match crate::core_3dm::om9_3dm_operation(i) {
         1 => return 1,
-        2 => return 0,
+        2 | 3 | 5 | 6 | 7 => return 0,
+        4 => return 1,
         _ => (),
     }
     if command(i).and_then(|c| c.icon.to_str().ok()) == Some("ViewBackgroundBitmapPictureFrame") {

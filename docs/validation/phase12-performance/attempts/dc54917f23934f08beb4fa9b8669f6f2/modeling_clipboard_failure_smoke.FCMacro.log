@@ -1,0 +1,93 @@
+{
+  "checks": [
+    {
+      "name": "Paste without active project",
+      "passed": true
+    },
+    {
+      "name": "post-publication persistence error is reported",
+      "passed": true
+    },
+    {
+      "name": "failed publication restores previous clipboard",
+      "passed": true
+    },
+    {
+      "name": "rollback exercises different native archives",
+      "passed": true
+    },
+    {
+      "name": "native publication persistence error is reported",
+      "passed": true
+    },
+    {
+      "name": "failed publication restores native geometry",
+      "passed": true
+    },
+    {
+      "name": "publication verification failure reported",
+      "passed": true
+    },
+    {
+      "name": "rollback preserves newer clipboard owner",
+      "passed": true
+    },
+    {
+      "name": "independent process owns clipboard lock",
+      "passed": true
+    },
+    {
+      "name": "busy clipboard rejected before document change",
+      "passed": true
+    },
+    {
+      "name": "busy clipboard leaves active document empty",
+      "passed": true
+    },
+    {
+      "name": "cancel actual native preparation",
+      "passed": true
+    },
+    {
+      "name": "cancel leaves no partial objects",
+      "passed": true
+    },
+    {
+      "name": "GUI receives events while native job runs",
+      "passed": true
+    },
+    {
+      "name": "cancel joins and removes owned staging",
+      "passed": true
+    },
+    {
+      "name": "cancel does not change source clipboard",
+      "passed": true
+    },
+    {
+      "name": "async completion rejects switched target",
+      "passed": true
+    },
+    {
+      "name": "old and new project remain empty",
+      "passed": true
+    },
+    {
+      "name": "switch failure joins and cleans staging",
+      "passed": true
+    }
+  ],
+  "rollback_initial": {
+    "sequence": 3065,
+    "expected_text": true
+  },
+  "rollback_publication_sequence": 3069,
+  "rollback_after": {
+    "sequence": 3078,
+    "expected_text": false,
+    "native_geometry": false
+  },
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_clipboard_failure_smoke-1\c4b5e93f161544d28bc58ea07b392521

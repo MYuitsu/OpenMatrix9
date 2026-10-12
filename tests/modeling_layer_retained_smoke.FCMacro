@@ -1,0 +1,114 @@
+"""Canonical palette through the actual preservation writer; native block context stays native."""
+import json,os,traceback,uuid,copy
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def reject(work):
+    try:work()
+    except RuntimeError:return True
+    return False
+def run():
+    try:
+        import OpenMatrix9Gui as native,Part
+        fixture=Path(native.__file__).parents[2]/'layer-abi'/'retained-layer-fixtures'/'retained-layer-block.3dm'
+        inventory=json.loads(native.inspect3dm(str(fixture)))
+        (out/'source-inventory.json').write_text(json.dumps(inventory,indent=2),encoding='utf-8')
+        root=next(row for row in inventory['records'] if row['class_name']=='ON_InstanceRef')
+        member=next(row for row in inventory['records'] if row['role']=='definition-member')
+        stage=out/'source-read';stage.mkdir();source=json.loads(native.read3dm(str(fixture),str(stage)))['layer_session']
+        state=source['snapshot'];state['document_id']='retained-host-'+uuid.uuid4().hex;state['generation']=str(2**64-1)
+        metal=next(row for row in state['layers'] if row['path_components']==['METAL'])
+        metal['name']='Metal';metal['path_components']=['Metal'];metal['rgb']=[101,102,103]
+        for row in state['layers']:
+            if row['path_components'][0]=='METAL':row['path_components'][0]='Metal'
+        state['layers'].append({'source_id':str(uuid.uuid4()),'parent_id':None,'name':'Session empty purple','path_components':['Session empty purple'],'rgb':[93,45,177],'locked':False,'visible':False,'persistent_locked':None,'persistent_visible':None})
+        state['objects']=[{'id':'handoff-root','layer_id':metal['source_id'],'locked':False,'visible':True,'rgb':[8,9,10],'color_source':'ByLayer'}]
+        namespace=str(uuid.uuid4());matrix=[1,0,0,10,0,1,0,0,0,0,1,0,0,0,0,1]
+        request={'schema_version':2,'layer_session':source,'sources':[{'namespace':namespace,'snapshot':str(fixture),'archive_sha256':inventory['archive_sha256'],'scale_mm':inventory['scale_mm']}],'selected':[{'namespace':namespace,'source_uuid':root['source_uuid'],'host_id':'selected-root','layer_object_id':'handoff-root','action':'instance','instance_matrix':matrix}]}
+        target=out/'retained-current.3dm';native.writePreserved3dm(json.dumps(request),str(target))
+        reread=out/'reread';reread.mkdir();current=json.loads(native.read3dm(str(target),str(reread)))
+        palette={tuple(row['path_components']):row for row in current['layer_session']['snapshot']['layers']}
+        check('retained writer carries all six live layers',len(palette)==6 and ('Session empty purple',) in palette)
+        check('retained unused palette RGB visibility survive',palette[('Session empty purple',)]['rgb']==[93,45,177] and not palette[('Session empty purple',)]['visible'])
+        check('retained source wins native UUID RGB spelling and lock',palette[('Metal',)]['source_id']==metal['source_id'] and palette[('Metal',)]['rgb']==[101,102,103] and palette[('Metal',)]['locked'])
+        check('retained current active layer preserved',current['layer_session']['snapshot']['active_layer']==state['active_layer'])
+        shape=Part.Shape();shape.read(current['items'][0]['brep'])
+        check('retained export uses current edited instance geometry',(shape.Vertexes[0].Point-App.Vector(11,2,3)).Length<1e-8)
+        after=json.loads(native.inspect3dm(str(target)));rows={row['source_uuid']:row for row in after['records']}
+        check('retained block definition and member survive',len(rows)==2 and rows[root['source_uuid']]['class_name']=='ON_InstanceRef' and rows[member['source_uuid']]==member)
+        check('retained inherited color remains native ByParent context',current['items'][0]['color']==[101,102,103])
+        tags={row['key']:row['value'] for row in rows[root['source_uuid']]['attribute_user_strings']}
+        check('retained object lock stays own false with binding tag',tags['OpenMatrix9.Locked']=='0' and tags['OpenMatrix9.LayerObjectId']=='handoff-root')
+        original=target.read_bytes();bad=copy.deepcopy(request);bad['selected'][0]['layer_object_id']='unknown'
+        check('bad retained binding rejects atomically',reject(lambda:native.writePreserved3dm(json.dumps(bad),str(target))) and target.read_bytes()==original)
+        bad=copy.deepcopy(request);bad['layer_session']['version']=2
+        check('unknown canonical metadata version rejects atomically',reject(lambda:native.writePreserved3dm(json.dumps(bad),str(target))) and target.read_bytes()==original)
+        bad=copy.deepcopy(request);bad['schema_version']=1
+        check('canonical metadata cannot silently downgrade to flat schema',reject(lambda:native.writePreserved3dm(json.dumps(bad),str(target))) and target.read_bytes()==original)
+        legacy=copy.deepcopy(request);legacy['schema_version']=1;legacy.pop('layer_session');legacy['selected'][0].pop('layer_object_id');legacyTarget=out/'legacy.3dm'
+        native.writePreserved3dm(json.dumps(legacy),str(legacyTarget))
+        check('legacy preservation writer still exports current native graph',len(json.loads(native.inspect3dm(str(legacyTarget)))['records'])==2)
+        paletteOnly=copy.deepcopy(request);paletteOnly['selected']=[];paletteOnly['layer_session']['snapshot']['objects']=[]
+        paletteTarget=out/'palette-only.3dm';native.writePreserved3dm(json.dumps(paletteOnly),str(paletteTarget))
+        paletteStage=out/'palette-read';paletteStage.mkdir();paletteRead=json.loads(native.read3dm(str(paletteTarget),str(paletteStage)))
+        check('palette-only source export keeps six layers without geometry',len(paletteRead['layer_session']['snapshot']['layers'])==6 and not paletteRead['items'])
+        fresh=copy.deepcopy(paletteOnly);fresh['sources']=[];fresh['document_namespace']=namespace
+        freshTarget=out/'fresh-palette.3dm';native.writePreserved3dm(json.dumps(fresh),str(freshTarget))
+        freshStage=out/'fresh-palette-read';freshStage.mkdir();freshRead=json.loads(native.read3dm(str(freshTarget),str(freshStage)))
+        check('palette-only new document requires no source geometry',len(freshRead['layer_session']['snapshot']['layers'])==6 and not freshRead['items'])
+        check('new palette export adds no synthetic default layer',{tuple(row['path_components']) for row in freshRead['layer_session']['snapshot']['layers']}==set(palette))
+        newState=copy.deepcopy(fresh);newState['layer_session']['snapshot']['objects']=[{'id':'new-curve','layer_id':metal['source_id'],'locked':False,'visible':True,'rgb':[12,34,56],'color_source':'ByObject'}]
+        brep=out/'new-curve.brep';Part.makeLine(App.Vector(30,40,50),App.Vector(60,70,80)).exportBrep(str(brep))
+        newState['new_geometry']=[{'namespace':namespace,'source_uuid':str(uuid.uuid4()),'host_id':'new-host-curve','role':'top-level','brep':str(brep),'layer_object_id':'new-curve','metadata':{'name':'Current new curve','color':[101,102,103],'locked':True,'visible':False,'layer':'Wrong effective projection'}}]
+        newTarget=out/'new-current.3dm';native.writePreserved3dm(json.dumps(newState),str(newTarget))
+        newStage=out/'new-read';newStage.mkdir();newRead=json.loads(native.read3dm(str(newTarget),str(newStage)))
+        check('new current geometry exports with full palette',len(newRead['items'])==1 and len(newRead['layer_session']['snapshot']['layers'])==6)
+        own=newRead['layer_session']['snapshot']['objects'][0]
+        check('canonical own flags and ByObject override flat effective projections',not own['locked'] and own['visible'] and own['color_source']=='ByObject' and own['rgb']==[12,34,56])
+        check('new geometry name stays current',newRead['items'][0]['name']=='Current new curve')
+        currentShape=Part.Shape();currentShape.read(newRead['items'][0]['brep'])
+        check('new geometry shape stays current',abs(currentShape.BoundBox.XMin-30)<1e-8 and abs(currentShape.BoundBox.ZMax-80)<1e-8)
+        multi=copy.deepcopy(request);secondNamespace=str(uuid.uuid4());secondSource=copy.deepcopy(multi['sources'][0]);secondSource['namespace']=secondNamespace;multi['sources'].append(secondSource)
+        second=copy.deepcopy(multi['selected'][0]);second.update(namespace=secondNamespace,host_id='second-block',layer_object_id=root['source_uuid'],instance_matrix=[1,0,0,20,0,1,0,0,0,0,1,0,0,0,0,1]);multi['selected'].append(second)
+        secondOwn=copy.deepcopy(state['objects'][0]);secondOwn.update(id=root['source_uuid'],color_source='ByObject',rgb=[55,66,77],locked=True,visible=False);multi['layer_session']['snapshot']['objects'].append(secondOwn)
+        multiTarget=out/'two-namespaces.3dm';native.writePreserved3dm(json.dumps(multi),str(multiTarget))
+        multiStage=out/'multi-read';multiStage.mkdir();multiRead=json.loads(native.read3dm(str(multiTarget),str(multiStage)))
+        multiInventory=json.loads(native.inspect3dm(str(multiTarget)))
+        check('namespace roots append with unique native block identities',len(multiRead['items'])==2 and len(multiInventory['records'])==4 and len({row['source_uuid'] for row in multiInventory['records']})==4)
+        check('namespace palettes merge fullpath without duplicate suffixed layers',{tuple(row['path_components']) for row in multiRead['layer_session']['snapshot']['layers']}==set(palette))
+        metalComponent=next(row for row in multiInventory['components'] if row['class_name']=='ON_Layer' and row['name']=='Metal')
+        check('shared layer native user metadata survives namespace merge',{'key':'CAD.Note','value':'source stock'} in metalComponent['user_strings'])
+        check('native custom layer pattern dependency survives merge',any(row['class_name']=='ON_Linetype' and row['name']=='Jewelry dash' and row['source_uuid'] in metalComponent['dependencies'] for row in multiInventory['components']))
+        checks=[]
+        for item in multiRead['items']:
+            value=Part.Shape();value.read(item['brep']);checks.append(round(value.Vertexes[0].Point.x,8))
+        check('namespace current instance transforms both survive',sorted(checks)==[11,21])
+        multiRoots=[row for row in multiInventory['records'] if row['role']=='top-level'];multiTags=[{tag['key']:tag['value'] for tag in row['attribute_user_strings']} for row in multiRoots]
+        check('logical UUID binding survives physical namespace remap',{tags['OpenMatrix9.LayerObjectId'] for tags in multiTags}=={'handoff-root',root['source_uuid']})
+        check('two namespace object own flags stay separate',any(tags['OpenMatrix9.Locked']=='1' for tags in multiTags) and any(tags['OpenMatrix9.Locked']=='0' for tags in multiTags))
+        check('native ByParent uses each current root color',sorted(tuple(item['color']) for item in multiRead['items'])==[(55,66,77),(101,102,103)])
+        baseline=multiTarget.read_bytes();bad=copy.deepcopy(multi);bad['layer_session']['snapshot']['objects'].append(dict(secondOwn,id='unused-global-object'))
+        check('extra global metadata cannot vanish during namespace partition',reject(lambda:native.writePreserved3dm(json.dumps(bad),str(multiTarget))) and multiTarget.read_bytes()==baseline)
+        bad=copy.deepcopy(multi);bad['selected'][1]['layer_object_id']='handoff-root'
+        check('cross namespace duplicate logical binding rejects atomically',reject(lambda:native.writePreserved3dm(json.dumps(bad),str(multiTarget))) and multiTarget.read_bytes()==baseline)
+        mixed=copy.deepcopy(multi);newInventory=json.loads(native.inspect3dm(str(newTarget)));newRecord=newInventory['records'][0]
+        mixed['sources'][1]={'namespace':secondNamespace,'snapshot':str(newTarget),'archive_sha256':newInventory['archive_sha256'],'scale_mm':newInventory['scale_mm']}
+        mixed['selected'][1]={'namespace':secondNamespace,'source_uuid':newRecord['source_uuid'],'host_id':'mixed-curve','layer_object_id':'new-curve','action':'unchanged'}
+        mixed['layer_session']['snapshot']['objects'][1]=copy.deepcopy(newState['layer_session']['snapshot']['objects'][0])
+        mixedTarget=out/'two-independent-sources.3dm';native.writePreserved3dm(json.dumps(mixed),str(mixedTarget))
+        mixedStage=out/'mixed-read';mixedStage.mkdir();mixedRead=json.loads(native.read3dm(str(mixedTarget),str(mixedStage)))
+        check('independent source hashes hand off current geometry and one palette',len(mixedRead['items'])==2 and len(mixedRead['layer_session']['snapshot']['layers'])==6)
+        legacyMulti=copy.deepcopy(multi);legacyMulti['schema_version']=1;legacyMulti.pop('layer_session')
+        for row in legacyMulti['selected']:row.pop('layer_object_id')
+        legacyMultiTarget=out/'legacy-two-namespaces.3dm';native.writePreserved3dm(json.dumps(legacyMulti),str(legacyMultiTarget))
+        check('legacy two namespace preservation contract still works',len(json.loads(native.inspect3dm(str(legacyMultiTarget)))['records'])==4)
+        report.update(ok=True,module=native.__file__,scope='canonical retained file palette and native block context; document controller/Matrix application pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

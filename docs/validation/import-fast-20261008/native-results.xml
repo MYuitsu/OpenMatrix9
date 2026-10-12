@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="(empty)"
+	tests="7"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname=""
+	time="34"
+	timestamp="2026-10-08T15:59:55"
+	>
+	<testcase name="OM9-FILE-012.Preservation" classname="OM9-FILE-012.Preservation" time="0.440027" status="run">
+		<properties/>
+		<system-out>preservation PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Inventory" classname="OM9-FILE-012.Inventory" time="0.45516" status="run">
+		<properties/>
+		<system-out>inventory PASS; fixture "H:\\FreeCAD-src\\build\\3dm-preservation-sdk\\test-temp\\om9-inventory.3dm"
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Geometry" classname="OM9-FILE-012.Geometry" time="0.464764" status="run">
+		<properties/>
+		<system-out>curved volumes 502.655 502.655
+curved volumes 268.083 268.083
+OM9-FILE-012 geometry PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Archive" classname="OM9-FILE-012.Archive" time="0.775834" status="run">
+		<properties/>
+		<system-out>metadata PASS
+inch written
+extrusion volume 502.65482465286311 expected 502.6548245743669
+OM9-FILE-012 archive PASS; fixtures "H:\\FreeCAD-src\\build\\3dm-preservation-sdk\\test-temp\\om9-3dm-native"
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.UserRing" classname="OM9-FILE-012.UserRing" time="7.05514" status="run">
+		<properties/>
+		<system-out>OM9-FILE-012 user ring PASS: 101 objects
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Blocks" classname="OM9-FILE-012.Blocks" time="0.53647" status="run">
+		<properties/>
+		<system-out>nested and mixed shear blocks PASS
+</system-out>
+	</testcase>
+	<testcase name="OM9-FILE-012.Unmeshed" classname="OM9-FILE-012.Unmeshed" time="24.4597" status="run">
+		<properties/>
+		<system-out>count 135 tolerance 0.001 scale 1
+Accurate volume object 5: 59.44329333599798 -&gt; 59.44329333778601 difference 1.788031056548789e-09
+Accurate volume object 6: 59.44329333599798 -&gt; 59.44329333778601 difference 1.788031056548789e-09
+unmeshed fixture PASS
+</system-out>
+	</testcase>
+</testsuite>

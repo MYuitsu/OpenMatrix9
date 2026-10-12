@@ -1,5 +1,3 @@
-> Public packaging: raw forms, vendor manuals, original INI files and screenshots mentioned below require the owner's private reference archive. Resolve private inputs through the ignored `docs/openmatrix9-reference-locations.json` registry and the [private reference policy](../../../docs/private-reference-policy.md). Use `Resources/menu` for public executable menu definitions and `docs/features/` or `OpenMatrix9_Codex_Spec_v1/` for authored feature contracts.
-
 # Read by UI component
 
 Paths below are relative to the OpenMatrix9 checkout. Form filenames are inside `ref/matrix9/vb6-lite/Matrix90/`; feature IDs resolve through the workflow helper `feature ID`.
@@ -12,14 +10,14 @@ For an entire small UI family, request enough bounded search results: `search OM
 |---|---|---|
 | Overall startup/sidebar | Accepted menu design, OM9-IFACE-001; selected screenshot; `frmMaster.frm` only for shell/control identity | Sidebar order, document editing, dock restoration |
 | ICON HISTORY | `frmMenuIconHistory.frm`, accepted design | Latest successful commands only, capacity 20 in current design, host Undo/Redo availability |
-| MAIN MENU | `ref/MainMenu.ini`, OM9-MAIN-001, `frmMenuTools.frm` | Current INI: 18 groups, 11 quick icons, Custom and Reset; remeasure if changed |
+| MAIN MENU | `Resources/menu/MainMenu.ini`, OM9-MAIN-001, `frmMenuTools.frm` | Current INI: 18 groups, 11 quick icons, Custom and Reset; remeasure if changed |
 | DISPLAY | `frmCMenuDisplay.frm`; search `OM9-DISPLAY` within `01-core` then select one ID | Native view mode/grid command identity and document requirements |
 | SNAPS | `frmMenuSnaps.frm`; search `OM9-SNAP` within `01-core` then select one ID | Actual geometric snapping integration; a toggle drawing alone is insufficient |
 | INFO & SETTINGS | `frmMenuInfoSettings.frm`; specific `OM9-INFO` spec | FreeCAD property/options equivalents; no execution of Rhino macro text |
 | LAYERS | `frmMenuLayers.frm`, OM9-LAYER-001 | Visibility, selection, color and save behavior; leave unsupported semantics disabled |
 | PROJECTS | `frmMenuProjects.frm`, OM9-PROJECT-001; OM9-PROJECTDB-001 only when implementing database behavior | Files/database are a separate behavior slice |
 | F6/context menu | OM9-F6-001, `ref/ContextMenu.xml`, `ref/RightClick.ini` | Selection-sensitive command availability |
-| Four views/grid/theme | OM9-VIEWPORT-001, [accepted command/grid theme](command-grid-theme.md), private reference screenshot resolved through the registry and live FreeCAD view APIs | Real camera/model interaction, black canvases, world-space major/minor grid and theme restoration |
+| Four views/grid/theme | OM9-VIEWPORT-001, [accepted command/grid theme](command-grid-theme.md), packaged reference screenshot and live FreeCAD view APIs | Real camera/model interaction, black canvases, world-space major/minor grid and theme restoration |
 | Command region | [accepted command/grid theme](command-grid-theme.md), OM9-IFACE-001 and CommandHistory spec | Top green transcript + inline input, shared native geometry, recall/draft/Esc and focus guards |
 | Section title styling | `ctrTitleBar.123`, `.ctx` | Parent/control units, font, color encoding and runtime dimensions |
 | One icon | `ref/Matrix.rui` macro/GUID/bitmap metadata; selected `.frx`/`.ctx` pointer from form | Resource identity and image dimensions match the command |

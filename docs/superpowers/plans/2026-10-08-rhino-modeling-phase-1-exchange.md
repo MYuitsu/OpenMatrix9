@@ -1,6 +1,6 @@
 # Phase 1 — Nhận geometry qua 3DM và tạo bản làm việc: Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Import/Export Selected qua file 3DM cho bản geometry độc lập, không yêu cầu history/render.
 
@@ -10,7 +10,7 @@
 
 **Spec:** [Thiết kế chung](../specs/2026-10-08-rhino-modeling-five-phase-design.md).
 
-**Status:** draft để review theo yêu cầu chia5 phase; không phải authorization triển khai, chưa có task mới được chạy.
+**Status:** complete_scoped; implementation_verified=true; application_accepted=true — APP-GATE-P1 đạt2026-10-09 trên matching runtime:10 actual Rhino5 cases,4 FreeCAD reimport reports/230 checks; nhẫn369 Rhino checks. Xem ../../validation/modeling-phase-1/application-evidence.json.
 
 ## Global Constraints
 
@@ -28,7 +28,7 @@
 
 ## Baseline và dependencies
 
-File/menu/API exchange, Wireframe và worker import có scoped evidence. Modeling mode và combined selected geometry mới chưa được implement.
+Baseline trước khi thực hiện: file/menu/API exchange, Wireframe và worker import có scoped evidence. Kết quả hiện tại: modeling mode/current selected export đã implement và nghiệm thu trên cùng runtime; chi tiết requirement proof trong báo cáo.
 Không phụ thuộc phase mới trước đó; matching SDK/source preflight bắt buộc.
 
 ## Review Focus
@@ -41,7 +41,7 @@ Không phụ thuộc phase mới trước đó; matching SDK/source preflight b�
 
 ## Task file map và bước thực hiện
 
-Các file ghi Create là đề xuất mới, chưa tồn tại. API ghi ở Interfaces là thiết kế mới trừ khi chỉ rõ reuse.
+File map dưới đây giữ thiết kế ban đầu. Các file implementation/tests đã được tạo; writer reuse được ghi rõ trong ledger thay vì duplicate writeModelingArchive. Đối chiếu source thực tế và requirements.json.
 Tất cả relative paths lấy H:/FreeCAD-src/build/om9-dev làm root; file tích hợp từ checkout chính được ghi absolute path riêng.
 
 ### Task P1.1: Runtime thống nhất và báo capability theo object
@@ -50,11 +50,11 @@ Tất cả relative paths lấy H:/FreeCAD-src/build/om9-dev làm root; file tí
 
 **Interfaces:** Script run_modeling_phase.ps1 -Phase [1..5] -FreeCADExe <absolute path> -DependencyPrefix <absolute path>; Rust GeometryKind tags1..9 và OperationCapabilities như spec. Script chọn đúng macro phase, xác minh module/script hashes rồi gọi run_menu_smoke.ps1.
 
-- [ ] **Step 1 — Viết regression cho P1.1.** Các assertions bắt buộc: test_modeling_scope_excludes_history_render_but_not_geometry: unknown geometry = preflight error; excluded history/render = report-only. modeling_baseline_smoke: matching native module và scripts cùng source; failure nếu runtime khác source. Worker failure giữ document object count/hash.
-- [ ] **Step 2 — Chạy targeted check trước thay đổi.** Run: `rtk cargo test --manifest-path rust/Cargo.toml --test modeling_exchange_policy`. RED phải gắn với named behavioral assertion hoặc API mới đang thiếu, không phải sai SDK/path. Nếu existing implementation đã đáp ứng, record baseline và reuse; không tạo giả RED.
-- [ ] **Step 3 — Implement tối thiểu theo Interfaces.** Stage matching SDK vào runtime mới, không sửa runtime đang mở. Capture source/module/scripts hashes. Capability registry là một nguồn dùng chung cho UI/import/snap; unknown không mặc định editable.
-- [ ] **Step 4 — Chạy lại targeted check và relevant runtime.** Run cùng command ở Step2; PASS = tất cả named assertions đạt, process exit0; runtime có results.json ok=true và source/module hashes matching. Native target phải chạy executable/ctest sau build; compile-only chưa là PASS hành vi.
-- [ ] **Step 5 — Review, evidence và scoped integration.** Record task requirement/proof/limits vào docs/validation/modeling-phase-1/requirements.json. Review diff và unresolved cases; chỉ commit files của task nếu execution context cho phép, không stage unrelated changes. Không push.
+- [x] **Step 1 — Viết regression cho P1.1.** Các assertions bắt buộc: test_modeling_scope_excludes_history_render_but_not_geometry: unknown geometry = preflight error; excluded history/render = report-only. modeling_baseline_smoke: matching native module và scripts cùng source; failure nếu runtime khác source. Worker failure giữ document object count/hash.
+- [x] **Step 2 — Chạy targeted check trước thay đổi.** Run: `rtk cargo test --manifest-path rust/Cargo.toml --test modeling_exchange_policy`. RED phải gắn với named behavioral assertion hoặc API mới đang thiếu, không phải sai SDK/path. Nếu existing implementation đã đáp ứng, record baseline và reuse; không tạo giả RED.
+- [x] **Step 3 — Implement tối thiểu theo Interfaces.** Stage matching SDK vào runtime mới, không sửa runtime đang mở. Capture source/module/scripts hashes. Capability registry là một nguồn dùng chung cho UI/import/snap; unknown không mặc định editable.
+- [x] **Step 4 — Chạy lại targeted check và relevant runtime.** Run cùng command ở Step2; PASS = tất cả named assertions đạt, process exit0; runtime có results.json ok=true và source/module hashes matching. Native target phải chạy executable/ctest sau build; compile-only chưa là PASS hành vi.
+- [x] **Step 5 — Review, evidence và scoped integration.** Record task requirement/proof/limits vào docs/validation/modeling-phase-1/requirements.json. Review diff và unresolved cases; chỉ commit files của task nếu execution context cho phép, không stage unrelated changes. Không push.
 
 ### Task P1.2: Modeling import và geometry làm việc độc lập
 
@@ -62,11 +62,11 @@ Tất cả relative paths lấy H:/FreeCAD-src/build/om9-dev làm root; file tí
 
 **Interfaces:** prepare_modeling(path: str, staging: str, scale: float) -> dict; prepareModelingArchive(const std::filesystem::path&, const std::filesystem::path&, double customUnitMm) -> QJsonObject. ThreeDm.import_file(..., mode='modeling') thêm mode mới.
 
-- [ ] **Step 1 — Viết regression cho P1.2.** Các assertions bắt buộc: test_modeling_import_units_and_opaque_preflight: mm/cm control points, arc radius, trims và bbox đúng; opaque selected geometry từ chối trước transaction. test_display_mesh_does_not_change_cad_kind: tessellated BRep vẫn native-cad. Real runtime mở curve/BRep/mesh/cloud và xóa nguồn rồi FCStd reopen.
-- [ ] **Step 2 — Chạy targeted check trước thay đổi.** Run: `rtk proxy python -m unittest discover -s tools/tests -p test_modeling_exchange.py`. RED phải gắn với named behavioral assertion hoặc API mới đang thiếu, không phải sai SDK/path. Nếu existing implementation đã đáp ứng, record baseline và reuse; không tạo giả RED.
-- [ ] **Step 3 — Implement tối thiểu theo Interfaces.** Reuse ONX reader, typed converter và existing worker orchestration. Bind fresh working identity/provenance, không attach strict full-archive export dependency vào working geometry. Không bỏ unknown geometry âm thầm.
-- [ ] **Step 4 — Chạy lại targeted check và relevant runtime.** Run cùng command ở Step2; PASS = tất cả named assertions đạt, process exit0; runtime có results.json ok=true và source/module hashes matching. Native target phải chạy executable/ctest sau build; compile-only chưa là PASS hành vi.
-- [ ] **Step 5 — Review, evidence và scoped integration.** Record task requirement/proof/limits vào docs/validation/modeling-phase-1/requirements.json. Review diff và unresolved cases; chỉ commit files của task nếu execution context cho phép, không stage unrelated changes. Không push.
+- [x] **Step 1 — Viết regression cho P1.2.** Các assertions bắt buộc: test_modeling_import_units_and_opaque_preflight: mm/cm control points, arc radius, trims và bbox đúng; opaque selected geometry từ chối trước transaction. test_display_mesh_does_not_change_cad_kind: tessellated BRep vẫn native-cad. Real runtime mở curve/BRep/mesh/cloud và xóa nguồn rồi FCStd reopen.
+- [x] **Step 2 — Chạy targeted check trước thay đổi.** Run: `rtk proxy python -m unittest discover -s tools/tests -p test_modeling_exchange.py`. RED phải gắn với named behavioral assertion hoặc API mới đang thiếu, không phải sai SDK/path. Nếu existing implementation đã đáp ứng, record baseline và reuse; không tạo giả RED.
+- [x] **Step 3 — Implement tối thiểu theo Interfaces.** Reuse ONX reader, typed converter và existing worker orchestration. Bind fresh working identity/provenance, không attach strict full-archive export dependency vào working geometry. Không bỏ unknown geometry âm thầm.
+- [x] **Step 4 — Chạy lại targeted check và relevant runtime.** Run cùng command ở Step2; PASS = tất cả named assertions đạt, process exit0; runtime có results.json ok=true và source/module hashes matching. Native target phải chạy executable/ctest sau build; compile-only chưa là PASS hành vi.
+- [x] **Step 5 — Review, evidence và scoped integration.** Record task requirement/proof/limits vào docs/validation/modeling-phase-1/requirements.json. Review diff và unresolved cases; chỉ commit files của task nếu execution context cho phép, không stage unrelated changes. Không push.
 
 ### Task P1.3: Export selection từ geometry hiện tại
 
@@ -74,25 +74,27 @@ Tất cả relative paths lấy H:/FreeCAD-src/build/om9-dev làm root; file tí
 
 **Interfaces:** stage_modeling_selection(objects: list, staging: str) -> dict; writeModelingArchive(const QJsonObject&, const std::filesystem::path&) -> void. ThreeDm.export_file(..., modeling=True) giữ geometry_only=False mặc định của callers cũ.
 
-- [ ] **Step 1 — Viết regression cho P1.3.** Các assertions bắt buộc: test_modeling_export_current_and_new_geometry: move imported curve + add native circle; decoded V5 contains current placement and circle exactly, no deleted original. test_failed_export_keeps_existing_destination: target bytes unchanged. Duplicate container/member selection bị báo rõ.
-- [ ] **Step 2 — Chạy targeted check trước thay đổi.** Run: `rtk proxy pwsh -NoProfile -File tests/run_modeling_phase.ps1 -Phase 1 -FreeCADExe H:/FreeCAD-src/build/om9-modeling-sdk/bin/FreeCAD.exe -DependencyPrefix H:/FreeCAD-src/.pixi/envs/default/Library`. RED phải gắn với named behavioral assertion hoặc API mới đang thiếu, không phải sai SDK/path. Nếu existing implementation đã đáp ứng, record baseline và reuse; không tạo giả RED.
-- [ ] **Step 3 — Implement tối thiểu theo Interfaces.** Build request từ current shape/mesh/cloud, geometry dependencies và basic layers; bỏ history/render theo scope. Stage V5, reread decoded geometry rồi QSaveFile atomic commit; xuất cùng file cho object nhập và object mới.
-- [ ] **Step 4 — Chạy lại targeted check và relevant runtime.** Run cùng command ở Step2; PASS = tất cả named assertions đạt, process exit0; runtime có results.json ok=true và source/module hashes matching. Native target phải chạy executable/ctest sau build; compile-only chưa là PASS hành vi.
-- [ ] **Step 5 — Review, evidence và scoped integration.** Record task requirement/proof/limits vào docs/validation/modeling-phase-1/requirements.json. Review diff và unresolved cases; chỉ commit files của task nếu execution context cho phép, không stage unrelated changes. Không push.
+- [x] **Step 1 — Viết regression cho P1.3.** Các assertions bắt buộc: test_modeling_export_current_and_new_geometry: move imported curve + add native circle; decoded V5 contains current placement and circle exactly, no deleted original. test_failed_export_keeps_existing_destination: target bytes unchanged. Duplicate container/member selection bị báo rõ.
+- [x] **Step 2 — Chạy targeted check trước thay đổi.** Run: `rtk proxy pwsh -NoProfile -File tests/run_modeling_phase.ps1 -Phase 1 -FreeCADExe H:/FreeCAD-src/build/om9-modeling-sdk/bin/FreeCAD.exe -DependencyPrefix H:/FreeCAD-src/.pixi/envs/default/Library`. RED phải gắn với named behavioral assertion hoặc API mới đang thiếu, không phải sai SDK/path. Nếu existing implementation đã đáp ứng, record baseline và reuse; không tạo giả RED.
+- [x] **Step 3 — Implement tối thiểu theo Interfaces.** Build request từ current shape/mesh/cloud, geometry dependencies và basic layers; bỏ history/render theo scope. Stage V5, reread decoded geometry rồi QSaveFile atomic commit; xuất cùng file cho object nhập và object mới.
+- [x] **Step 4 — Chạy lại targeted check và relevant runtime.** Run cùng command ở Step2; PASS = tất cả named assertions đạt, process exit0; runtime có results.json ok=true và source/module hashes matching. Native target phải chạy executable/ctest sau build; compile-only chưa là PASS hành vi.
+- [x] **Step 5 — Review, evidence và scoped integration.** Record task requirement/proof/limits vào docs/validation/modeling-phase-1/requirements.json. Review diff và unresolved cases; chỉ commit files của task nếu execution context cho phép, không stage unrelated changes. Không push.
 
 
 ## Exit gate Phase 1
 
-P1.1–P1.3 đạt: import, select, add geometry, selected export, unit fixtures, failure atomicity và source-deleted FCStd trên cùng runtime. Clipboard không thuộc gate.
+P1.1–P1.3 và APP-GATE-P1 đã đạt native/FreeCAD/version/actual Rhino5 trên runtime được ghi hash. Các hành vi đã chứng minh: import, select, add geometry, selected export, unit fixtures, failure atomicity và source-deleted FCStd trên cùng runtime. Clipboard không thuộc gate.
 
-- [ ] Tất cả promised requirements có native/host/version evidence tương ứng.
-- [ ] Không có source/binary mismatch hoặc unresolved critical finding.
-- [ ] Failure/cancel/Undo/Redo/FCStd và current geometry export được chứng minh.
-- [ ] Review Focus cases được exercised bởi regression trong các task trên.
-- [ ] Báo phạm vi đạt, phạm vi chưa đạt và next action; không chuyển task count thành coverage percentage.
+- [x] Tất cả promised requirements có native/host/version evidence tương ứng.
+- [x] Không có source/binary mismatch hoặc unresolved critical finding.
+- [x] Failure/cancel/Undo/Redo/FCStd và current geometry export được chứng minh.
+- [x] Review Focus cases được exercised bởi regression trong các task trên.
+- [x] Báo phạm vi đạt, phạm vi chưa đạt và next action; không chuyển task count thành coverage percentage.
+
+- [x] **APP-GATE-P1:** FreeCAD/OpenMatrix9 + actual Rhino target ứng dụng đều đạt trên runtime của phase; Rhino SaveAs output được FreeCAD reimport; evidence theo [ma trận ứng dụng](../../validation/modeling-application-gates.md).
 
 ## Handoff
 
 Phase2 dùng GeometryKind/capabilities và modeling current writer từ Phase1.
-Lượt hiện tại chỉ tạo tài liệu. Review thiết kế và plan trước khi chọn execution method; không suy ra task đã chạy từ checkbox/nguồn có sẵn.
+Phase1 được thực hiện inline theo user authorization. Phase2–5 vẫn pending; gate Phase1 không chứng nhận full openNURBS. Source/runtime/requirements evidence: ../../validation/modeling-phase-1/summary.json. No commits/push or primary integration.
 

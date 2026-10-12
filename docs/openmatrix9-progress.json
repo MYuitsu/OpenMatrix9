@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T09:32:13+07:00",
+  "updated_at": "2026-10-12T13:31:55+07:00",
   "implementation_target": "Rust owns catalog/state/behavior; C++/Qt hosts FreeCAD integration.",
   "active_item": null,
   "items": [
@@ -2636,6 +2636,40 @@
       ],
       "next_document": "docs/validation/2026-10-12-local-tests-ci-build-only.md",
       "next_action": "Push reviewed source; verify exact-commit build-only Action and both actual ZIP artifacts."
+    },
+    {
+      "id": "gumball-main-integration-release-20261012",
+      "date": "2026-10-12",
+      "status": "validated",
+      "scope": "merged_gumball_release_and_selected_regressions",
+      "feature_ids": [
+        "OM9-INFO-020",
+        "OM9-INFO-021",
+        "OM9-INFO-022"
+      ],
+      "summary": "Merged candidate with current main; preserves CAD modules, canonical Layer/clipboard and Phase2/3. Verified native helper identities, independent Selectable intent, legacy output RGB/Off/lock metadata, native Rebuild, periodic and segmented exchange. Source review found no remaining scoped blockers.",
+      "evidence": [
+        "docs/validation/2026-10-12-gumball-main-release.md",
+        "docs/validation/2026-10-12-gumball-main-local-evidence.json",
+        "docs/validation/2026-10-12-main-pre-gumball-progress.json"
+      ],
+      "native_processes": 46,
+      "native_checks": 1564,
+      "gumball_native_processes": 30,
+      "gumball_native_checks": 955,
+      "rust_tests": 846,
+      "plugin_sha256": "e2a65fa874b294ad3e873188d63d1ac6513f7a02b1d4397f6b4fbd49ceb61717",
+      "host_sha256": "7b38c5d5aa2c74f830539c1c5c44cbf6e3e8e157292c718f9ee24ac6d3e12cf6",
+      "version_label": "0.3.4-202610120606",
+      "uncertainties": [
+        "Local reports do not certify CI DLL runtime execution. GitHub Actions only builds and packages.",
+        "Selected stock FCStd fixtures record and clear stale Windows CRT errno before save; ordinary stock empty-document reproduction confirms host Writer limitation. No host save fix is claimed.",
+        "Stock FreeCAD automatically commits another document draft before starting a native transaction. The new creation fixture explicitly completes the foreign draft first; the original dev multi-pending fixture remains intact.",
+        "Full P0/core catalog, full Rhino/Matrix parity, Clayoo/SubD and SmartTargets are not part of this acceptance."
+      ],
+      "stock_ci_status": "build_only_action_authoritative",
+      "next_document": "docs/validation/2026-10-12-gumball-main-release.md",
+      "next_action": "Push reviewed merge on main; publish matching version tag; verify actual Action ZIPs and public Release digests separately."
     }
   ],
   "merge_context": {

@@ -1,0 +1,78 @@
+"""Current geometry export carries the entire canonical palette and own flags."""
+import json,os,tempfile,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part,Mesh
+from PySide6 import QtCore
+output=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]};docs=[]
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def rejected(work):
+    try:work()
+    except RuntimeError:return True
+    return False
+def run():
+    try:
+        import OpenMatrix9Gui as native,ThreeDm
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('LayerExport');docs.append(doc.Name);doc.UndoMode=1
+        box=doc.addObject('Part::Feature','RingCurrent');box.Shape=Part.makeBox(2,3,4)
+        mesh=doc.addObject('Mesh::Feature','MeshException');mesh.Mesh=Mesh.Mesh([(App.Vector(0,0,0),App.Vector(3,0,0),App.Vector(0,4,0))])
+        curve=doc.addObject('Part::Feature','ContinueCurve');curve.Shape=Part.makeLine(App.Vector(10,0,0),App.Vector(13,0,0));doc.recompute()
+        state=json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']
+        for i,row in enumerate(state['layers']):row['rgb']=[(11+i*5)%256,(47+i*3)%256,(79+i*7)%256]
+        state['layers'][4]['rgb']=state['layers'][5]['rgb']=[17,18,19]
+        def layer(id,path,rgb,parent=None):return dict(source_id=id,parent_id=parent,name=path[-1],path_components=path,rgb=rgb,locked=False,visible=True,persistent_locked=None,persistent_visible=None)
+        state['layers'] += [layer('a',['Custom A'],[51,52,53]),layer('a-leaf',['Custom A','Same leaf'],[81,82,83],'a'),layer('b',['Custom B'],[61,62,63]),layer('b-leaf',['Custom B','Same leaf'],[81,82,83],'b'),layer('empty',['Empty transfer'],[7,89,143])]
+        state['layers'][0]['locked']=True;state['layers'][0]['persistent_locked']=True
+        state['layers'][32]['visible']=False;state['layers'][33]['persistent_visible']=True
+        first=state['layers'][0]['source_id'];active=state['layers'][7]['source_id'];state['active_layer']=active
+        state['objects']=[dict(id=obj.Name,layer_id=layerId,locked=locked,visible=visible,color_source=color,rgb=rgb) for obj,layerId,locked,visible,color,rgb in [(box,first,False,True,'ByLayer',[9,8,7]),(mesh,'a-leaf',True,False,'ByObject',[23,24,25]),(curve,active,False,True,'ByLayer',[6,5,4])]]
+        native.initializeLayerDocument(doc.Name,json.dumps(dict(version=1,snapshot=state)))
+        box.Placement.Base=App.Vector(20,0,0);doc.recompute();before=json.loads(native.layerDocumentSnapshot(doc.Name));undo=doc.UndoCount;objects=len(doc.Objects);shape=box.Shape.hashCode()
+        target=output/'selected-current-layer-v5.3dm';ThreeDm.export_file(str(target),[box,mesh],modeling=True)
+        with tempfile.TemporaryDirectory() as directory:
+            reread=json.loads(native.read3dm(str(target),directory));received=reread['layer_session']['snapshot']
+            boxItem=next(row for row in reread['items'] if row['name']==box.Label)
+            shapeRead=Part.Shape();shapeRead.read(boxItem['brep']);bounds=shapeRead.BoundBox
+        byPath={tuple(row['path_components']):row for row in received['layers']};sourceByPath={tuple(row['path_components']):row for row in state['layers']}
+        report['reread']=reread
+        check('selected export carries all source layers including empty palette',len(received['layers'])==37 and set(byPath)==set(sourceByPath))
+        check('full source layer RGB/local/persistent fields survive V5',all(all(byPath[path][key]==row[key] for key in ['rgb','locked','visible','persistent_locked','persistent_visible']) for path,row in sourceByPath.items()))
+        check('equal RGB slots and nested duplicate leaves stay distinct',len([row for row in received['layers'] if row['rgb']==[17,18,19]])==2 and byPath[('Custom A','Same leaf')]['source_id']!=byPath[('Custom B','Same leaf')]['source_id'])
+        rows={row['id']:row for row in received['objects']};items={row['name']:row for row in reread['items']}
+        inherited=rows[items[box.Label]['layer_object_id']];own=rows[items[mesh.Label]['layer_object_id']]
+        check('selected geometry subset has exactly two rows',len(rows)==2 and set(items)=={box.Label,mesh.Label})
+        check('inherited lock is not flattened into exported own object lock',not inherited['locked'] and inherited['visible'] and inherited['color_source']=='ByLayer')
+        check('own mesh flags and ByObject RGB survive current export',own['locked'] and not own['visible'] and own['color_source']=='ByObject' and own['rgb']==[23,24,25])
+        check('current edited BRep exports current world placement',shapeRead.isValid() and abs(shapeRead.Volume-24)<1e-7 and abs(bounds.XMin-20)<1e-7 and abs(bounds.XMax-22)<1e-7)
+        check('mesh stays mesh without CAD conversion',items[mesh.Label]['geometry_kind']==4 and len(items[mesh.Label]['vertices'])==3 and len(items[mesh.Label]['faces'])==1)
+        activeRow=next(row for row in received['layers'] if row['source_id']==received['active_layer'])
+        check('active layer maps through V5 by exact source path',activeRow['path_components']==state['layers'][7]['path_components'])
+        check('export is a nonmutating metadata/geometry read',json.loads(native.layerDocumentSnapshot(doc.Name))==before and doc.UndoCount==undo and len(doc.Objects)==objects and box.Shape.hashCode()==shape and box.Placement.Base.x==20)
+        # Empty object subset still carries the full palette for session handoff.
+        with tempfile.TemporaryDirectory() as directory:
+            packet=ThreeDm._stage_current_geometry([],directory);palette=output/'palette-only-current-v5.3dm';ThreeDm._write_geometry_atomic(native,packet,str(palette))
+        with tempfile.TemporaryDirectory() as directory:
+            empty=json.loads(native.read3dm(str(palette),directory));emptyState=empty['layer_session']['snapshot']
+        check('palette-only current export has full table and zero geometry',len(emptyState['layers'])==37 and emptyState['objects']==[] and empty['items']==[])
+        # Native input identity is checked before a foreign object can be
+        # serialized using an identically named active-document object's row.
+        foreign=App.newDocument('ForeignExport');docs.append(foreign.Name);other=foreign.addObject('Part::Feature',box.Name);other.Shape=Part.makeBox(1,1,1);foreign.recompute()
+        App.setActiveDocument(doc.Name);Gui.setActiveDocument(doc.Name)
+        check('same-name foreign native object is rejected',rejected(lambda:native.exportLayerSelection3dm(doc.Name,[other])))
+        owner=next(o for o in doc.Objects if o.TypeId=='OpenMatrix9Gui::LayerDocumentObject')
+        check('trusted layer metadata is not an export model',rejected(lambda:native.exportLayerSelection3dm(doc.Name,[owner])))
+        check('duplicate native selection rejects before geometry serialization',rejected(lambda:native.exportLayerSelection3dm(doc.Name,[box,box])))
+        with tempfile.TemporaryDirectory() as directory:
+            packet=ThreeDm._stage_current_geometry([box],directory);protected=output/'protected-export.3dm';protected.write_bytes(b'old destination')
+            packet['items'][0]['layer_object_id']='missing-source-binding'
+            check('invalid canonical binding fails atomic writer',rejected(lambda:ThreeDm._write_geometry_atomic(native,packet,str(protected))))
+            check('failed canonical write retains previous target bytes',protected.read_bytes()==b'old destination')
+        report.update(ok=True,module=native.__file__,scope='canonical selected/palette current geometry file export; Session collector/retained graph/extended clipboard/actual Matrix still pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (output/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in docs:
+            if name in App.listDocuments():App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

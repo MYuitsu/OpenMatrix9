@@ -1,6 +1,6 @@
 ---
 name: openmatrix9-feature-port
-description: Use when implementing or specifying an OM9 feature such as Box/Sphere, Gem Loader, builders, settings, cutters, render, Clayoo/SubD or Emboss from the Matrix9 functional catalog into Rust and FreeCAD.
+description: Use when implementing or specifying OM9 features in Rust and FreeCAD, including Rhino 5 3DM exchange, Copy/Paste and worker defaults, Gem Loader, builders, settings, cutters, render, Clayoo/SubD or Emboss.
 ---
 
 # One feature at a time
@@ -21,9 +21,9 @@ If the manual is absent, identify the exact file/page and leave unproven semanti
 
 After implementation and checks, follow [progress synchronization](../openmatrix9-workflow/references/progress.md): check the exact Spec v1 acceptance items, update implementation status and the project README, then reconcile the live ledger and its next document. An unchanged catalog `implementation_status: not_started` is not evidence that code is absent. Keep Clayoo/SubD (`14-subd`) distinct from T-Splines (`06-tsplines`), and Emboss (`15-emboss`) distinct from Matrix Art (`07-matrix-art`).
 
-## Box/Sphere — OM9-SOLID-012 / OM9-SOLID-014
+## Rhino 5 3DM exchange — OM9-FILE-012
 
-Khi triển khai, sửa hoặc kiểm chứng Box/Sphere, đọc [nghiệp vụ dựng Solid đã được duyệt](references/solid-box-sphere-contract.md). Áp dụng trong phạm vi OpenMatrix9: frame/kích thước/Cube, coplanar FitPoints, native AroundCurve và planar Tangent/chọn nghiệm; đối chiếu spec hiện hành trước khi nâng phạm vi hỗ trợ. Đây là lựa chọn host có evidence, không phải defaults Matrix gốc.
+Khi triển khai hoặc kiểm tra import/export 3DM, Copy/Paste Rhino 5 ↔ OM9, phân loại CAD/mesh/cloud để xét lệnh khả dụng hoặc worker đa luồng, đọc [quy tắc 3DM, clipboard và worker đã được duyệt](references/rhino5-3dm-contract.md). Áp dụng trong phạm vi OpenMatrix9; không coi đây là hành vi Matrix gốc hoặc bằng chứng đã hỗ trợ toàn bộ openNURBS.
 
 ## Cập nhật nghiệp vụ sau khi code
 

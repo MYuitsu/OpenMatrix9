@@ -1,0 +1,357 @@
+{
+  "tests": 99,
+  "failures": 37,
+  "errors": 33,
+  "items": [
+    {
+      "test": "test_builder_icons.BuilderExportTests.test_redraw_wins_over_legacy_images",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_curve_icons.CurveIconExportTests.test_curve_svg_survives_reexport_with_legacy_images_enabled",
+      "kind": "failure",
+      "reason": "AssertionError: False is not true : icons/rgb-plus5/ButtonIcons/CurveLineSingleLine_1.png"
+    },
+    {
+      "test": "test_cutters_icons.CuttersExportTests.test_authored_cutters_precede_legacy_png (key='BuilderGemCutter')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_cutters_icons.CuttersExportTests.test_authored_cutters_precede_legacy_png (key='BuilderChannelBuilder')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_cutters_icons.CuttersExportTests.test_authored_cutters_precede_legacy_png (key='BuilderMicroProngCutter')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_cutters_icons.CuttersExportTests.test_authored_cutters_precede_legacy_png (key='BuilderQuadFlip')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_emboss_icons.EmbossExportTests.test_redraw_wins_over_legacy_images",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_gems_icons.GemsExportTests.test_authored_gems_and_special_accents_precede_legacy_png (key='BuilderGemLoader')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_gems_icons.GemsExportTests.test_authored_gems_and_special_accents_precede_legacy_png (key='BuilderGemOnCrv')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_gems_icons.GemsExportTests.test_authored_gems_and_special_accents_precede_legacy_png (key='BuilderCustomGem')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_gems_icons.GemsExportTests.test_authored_gems_and_special_accents_precede_legacy_png (key='BuilderGemMap')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_gems_icons.GemsExportTests.test_authored_gems_and_special_accents_precede_legacy_png (key='OthersSaveStyle')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_render_icons.RenderExportTests.test_render_color_roles_precede_legacy_png (key='BuilderRenderEditor')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_render_icons.RenderExportTests.test_render_color_roles_precede_legacy_png (key='RenderCreatePointLight')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_render_icons.RenderExportTests.test_render_color_roles_precede_legacy_png (key='AnalyzeSurfaceEnvironmentMap')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_render_icons.RenderExportTests.test_render_color_roles_precede_legacy_png (key='RenderSaveRenderWindowAs')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_settings_icons.SettingsExportTests.test_setting_symbols_and_palette_precede_legacy_png (key='BuilderHead')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_settings_icons.SettingsExportTests.test_setting_symbols_and_palette_precede_legacy_png (key='BuilderBezelCutter')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_settings_icons.SettingsExportTests.test_setting_symbols_and_palette_precede_legacy_png (key='BuilderBeadOnCrv')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_settings_icons.SettingsExportTests.test_setting_symbols_and_palette_precede_legacy_png (key='BuilderBezel')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_skill_reference_index.ReferenceIndexTests.test_exact_feature_resolves_source_page_and_existing_spec",
+      "kind": "failure",
+      "reason": "AssertionError: 2 != 0 :"
+    },
+    {
+      "test": "test_skill_reference_index.ReferenceIndexTests.test_search_keeps_subd_distinct_from_tsplines",
+      "kind": "failure",
+      "reason": "AssertionError: 2 != 0 :"
+    },
+    {
+      "test": "test_skill_reference_index.ReferenceIndexTests.test_ui_route_does_not_require_full_ghidra_export",
+      "kind": "failure",
+      "reason": "AssertionError: False is not true"
+    },
+    {
+      "test": "test_skill_reference_index.ReferenceIndexTests.test_unknown_feature_is_a_clear_error",
+      "kind": "failure",
+      "reason": "AssertionError: 'OM9-UNKNOWN-999' not found in \"Cannot read H:\\\\FreeCAD-src\\\\build\\\\om9-stock-freecad-1.1\\\\plugin-source\\\\ref\\\\matrix9\\\\OpenMatrix9_Codex_Spec_v1\\\\FEATURES.json: [Errno 2] No such file or directory: 'H:\\\\\\\\FreeCAD-src\\\\\\\\build\\\\\\\\om9-stock-freecad-1.1\\\\\\\\plugin-source\\\\\\\\ref\\\\\\\\matrix9\\\\\\\\OpenMatrix9_Codex_Spec_v1\\\\\\\\FEATURES.json'\""
+    },
+    {
+      "test": "test_solid_icons.SolidIconExportTests.test_solid_redraw_precedes_legacy_art_on_reexport",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_subd_icons.SubDExportTests.test_redraw_and_special_colors_win_over_legacy_images (key='ClayooEditDivide')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_subd_icons.SubDExportTests.test_redraw_and_special_colors_win_over_legacy_images (key='ClayooEditCrease')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_subd_icons.SubDExportTests.test_redraw_and_special_colors_win_over_legacy_images (key='ClayooSelectionSelectNaked')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_subd_icons.SubDExportTests.test_redraw_and_special_colors_win_over_legacy_images (key='ClayooCreationFromTSplines')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_subd_icons.SubDExportTests.test_shared_ring_artwork_remains_the_builder_asset",
+      "kind": "failure",
+      "reason": "+ icons/builder-minimal/ClayooCreationRing.svg"
+    },
+    {
+      "test": "test_surface_icons.SurfaceExportTests.test_redraw_wins_over_legacy_images",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_tools_icons.ToolsExportTests.test_authored_tools_and_command_colors_win_over_legacy_png (key='BuilderRingRail')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_tools_icons.ToolsExportTests.test_authored_tools_and_command_colors_win_over_legacy_png (key='gvSmartTarget')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_tools_icons.ToolsExportTests.test_authored_tools_and_command_colors_win_over_legacy_png (key='BuilderImageTrace')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_tools_icons.ToolsExportTests.test_authored_tools_and_command_colors_win_over_legacy_png (key='BuilderProfile')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_tools_icons.ToolsExportTests.test_authored_tools_and_command_colors_win_over_legacy_png (key='gvJoinHistory')",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_transform_icons.TransformExportTests.test_redraw_wins_over_legacy_images",
+      "kind": "failure",
+      "reason": "+ OpenMatrix9-authored-svg"
+    },
+    {
+      "test": "test_curved_exchange_evidence.CurvedEvidenceTests.test_actual_reports_bind_without_rewriting_failed_raw_comparison",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_curved_exchange_evidence.CurvedEvidenceTests.test_changed_numeric_measurement_is_rejected_even_when_passed_flag_true",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_curved_exchange_evidence.CurvedEvidenceTests.test_modified_saved_bytes_are_rejected",
+      "kind": "error",
+      "reason": "StopIteration"
+    },
+    {
+      "test": "test_opennurbs_coverage.CoverageTests.test_actual_sdk_catalog_matches_runtime_without_promoting_exchange",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_exact_public_guide_and_reference_metadata_pass",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_private_directory_and_unbound_bitmap_fail",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_public_guide_other_paths_fail (path='ref/rhino5/other.pdf')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_public_guide_other_paths_fail (path='ref/other/windows_pdf_user_s_guide.pdf')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_public_guide_other_paths_fail (path='docs/windows_pdf_user_s_guide.pdf')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_public_guide_same_size_tampering_fails",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_public_guide_truncation_fails",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_reference_exception_keeps_credential_and_binary_checks",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_reference_metadata_rejects_binary_and_invalid_json (name='README.md', data=b'raw\\x00resource')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_reference_metadata_rejects_binary_and_invalid_json (name='README.md', data=b'\\xff')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_reference_metadata_rejects_binary_and_invalid_json (name='SOURCES.json', data=b'not JSON')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_reference_metadata_rejects_binary_and_invalid_json (name='CORE_REFERENCE_INDEX.json', data=b'[]')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_reference_screenshot_in_skill_assets_is_rejected",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_tampered_svg_and_path_escape_fail",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_directories_fail_even_if_excluded (path='ref/private')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_directories_fail_even_if_excluded (path='ref/rhino5/private')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_directories_fail_even_if_excluded (path='ref/rhino5/build')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_directories_fail_even_if_excluded (path='ref/rhino5/.git')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_directories_fail_even_if_excluded (path='ref/rhino5/__pycache__')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_directories_fail_even_if_excluded (path='ref/rhino5/README.md')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_files_fail (path='ref/private.md')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_files_fail (path='Ref/rhino5/private.md')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_files_fail (path='ref/rhino5/private.md')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_files_fail (path='ref/rhino5/private.json')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_files_fail (path='ref/rhino5/recovered.py')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_files_fail (path='ref/rhino5/recovered.cpp')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_files_fail (path='ref/rhino5/resources.svg')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "test_public_source_audit.PublicSourceAuditTests.test_unapproved_reference_files_fail (path='ref/rhino5/private.dll')",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    },
+    {
+      "test": "setUpClass (test_rhino5_gui_mass_measurement.MassMeasurementTests)",
+      "kind": "error",
+      "reason": "Required local/reference fixture is absent from the public checkout"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+"""Imported shell and singular trimmed faces; independent analytic oracles."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore,QtWidgets,QtTest
+from pathlib import Path
+import json,os,sys,traceback,math,tempfile
+sys.path.insert(0,'H:/FreeCAD-src/build/om9-phase3-dev/tests')
+from command_console_support import command_input
+from phase3_oracle import measure
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[],'fixtures':[],'exchange_cases':[]};(out/'temp').mkdir(exist_ok=True);tempfile.tempdir=str(out/'temp')
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(200,loop.quit);loop.exec()
+def enter(text=''):
+    f=command_input(Gui.getMainWindow());f.setText(text);QtTest.QTest.keyClick(f,QtCore.Qt.Key_Return);settle()
+def select(rows):
+    Gui.Selection.clearSelection()
+    for o in rows:Gui.Selection.addSelection(o)
+    settle()
+def dialog():return next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9EditOptions') if d.isVisible()),None)
+def accept():
+    d=dialog();report['status']=d.findChild(QtWidgets.QLabel,'OM9EditStatus').text() if d else None;report['transcript']=Gui.getMainWindow().findChild(QtWidgets.QPlainTextEdit,'OM9CommandTranscript').toPlainText();check('Edit actual valid preview',d is not None and d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+    d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+def feature(doc,name,shape):
+    o=doc.addObject('Part::Feature',name);o.Shape=shape;doc.recompute();return o
+def imported(doc,name,shapes):
+    temp=App.newDocument('IndependentSource');rows=[feature(temp,name,s) for s in shapes];p=out/(name+'.3dm');ThreeDm.export_file(str(p),rows,modeling=True);App.closeDocument(temp.Name);App.setActiveDocument(doc.Name)
+    return ThreeDm.import_file(str(p),doc,mode='modeling')
+def exchange(name,obj,area,bounds):
+    import hashlib
+    p=out/(name+'-current-v5.3dm');ThreeDm.export_file(str(p),[obj],modeling=True)
+    report['exchange_cases'].append({'name':name,'input':str(p),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'expected':[{'object_name':obj.Label,'area':area,'volume':0,'solids':0,'faces':len(obj.Shape.Faces),'bounds':bounds}]})
+def run():
+    global ThreeDm
+    try:
+        import Part,ThreeDm,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('Supplement');doc.UndoMode=1
+        shell=ThreeDm.import_file('H:/FreeCAD-src/build/om9-phase3-native/modeling-brep-fixtures/open-cylinder-shell.3dm',doc,mode='modeling')[0]
+        cutter=feature(doc,'Cutter',Part.makeBox(10,10,10,App.Vector(-5,-5,-1)));before=(len(doc.Objects),len(doc.UndoNames),shell.Shape.exportBrepToString())
+        select([shell]);enter('BooleanDifference');enter();enter(cutter.Name);enter()
+        check('imported open shell Boolean rejected without mutation',dialog() is None and before==(len(doc.Objects),len(doc.UndoNames),shell.Shape.exportBrepToString()));enter('Cancel')
+        select([shell]);enter('Explode');enter();accept();pieces=[o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOP11-005']
+        check('imported polysurface Explode preserves two native faces',len(pieces)==2 and all(o.Shape.isValid() and o.Shape.ShapeType=='Face' for o in pieces) and abs(sum(measure(o.Shape,out/(o.Name+'.brep'))['area'] for o in pieces)-51*math.pi)<1e-5)
+        select(pieces);enter('Join');enter();accept();joined=[o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOP11-008'][-1]
+        check('imported open faces Join preserves original shell',joined.Shape.isValid() and joined.Shape.ShapeType=='Shell' and not joined.Shape.isClosed() and abs(measure(joined.Shape,out/'joined.brep')['area']-51*math.pi)<1e-5)
+        # Both rail and profile are genuine rational arcs received through 3DM.
+        arc=Part.makeCircle(10,App.Vector(),App.Vector(0,0,1),0,90)
+        section=Part.makeCircle(1,App.Vector(10,0,0),App.Vector(0,1,0))
+        rail,profile=imported(doc,'rational-rail-profile',[arc,section]);select([rail,profile]);enter('Sweep1');enter()
+        d=next((d for d in Gui.getMainWindow().findChildren(QtWidgets.QDialog,'OM9SurfaceOptions') if d.isVisible()),None);check('imported rational rail and profile Sweep preview',d is not None and d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
+        d.findChild(QtWidgets.QDialogButtonBox).button(QtWidgets.QDialogButtonBox.Ok).click();settle()
+        sweep=next(o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-SURFACE-001');m=measure(sweep.Shape,out/'rational-sweep.brep');report['rational_sweep']=m
+        check('rational quarter torus Sweep analytic area',sweep.Shape.isValid() and abs(m['area']-10*math.pi*math.pi)<1e-5)
+        exchange('rational-sweep',sweep,10*math.pi*math.pi,[0,0,-1,11,11,1])
+        sphere=Part.makeSphere(5,App.Vector(),App.Vector(0,0,1),-90,90,180)
+        sphere_face=max(sphere.Faces,key=lambda f:f.Area)
+        for name,shape,expected,pick in [('pole-trim',sphere_face,25*math.pi,App.Vector(3,4,0)),('seam-trim',Part.makeCylinder(3,7).Faces[0],21*math.pi,App.Vector(0,3,3))]:
+            target=imported(doc,name,[shape])[0]
+            plane=feature(doc,'TrimPlane',Part.makePlane(40,40,App.Vector(0,-20,-20),App.Vector(1,0,0),App.Vector(0,1,0)) if name=='pole-trim' else Part.makePlane(40,40,App.Vector(-20,0,20),App.Vector(0,1,0),App.Vector(1,0,0)))
+            select([target,plane]);enter('Trim');enter();check(name+' singular preview valid',dialog() is not None)
+            enter(target.Name+'@'+','.join(str(v) for v in pick));accept()
+            output=[o for o in doc.Objects if getattr(o,'OM9FeatureId','')=='OM9-TOP11-010' and len(o.Shape.Faces)>0 and (o.Shape.BoundBox.XMax<1e-5 if name=='pole-trim' else o.Shape.BoundBox.YMax<1e-5)]
+            matches=[]
+            for o in output:
+                m=measure(o.Shape,out/(name+'-'+o.Name+'.brep'))
+                if abs(m['area']-expected)<1e-5:matches.append((o,m))
+            check(name+' complementary material and singular topology',len(matches)==1 and matches[0][0].Shape.isValid() and not matches[0][0].Shape.Solids)
+            report['fixtures'].append({'name':name,'area':matches[0][1]['area'],'expected_area':expected})
+            exchange(name,matches[0][0],expected,[-5,0,-5,0,5,5] if name=='pole-trim' else [-3,-3,0,3,0,7])
+        # Poison values fail if native availability/capture touches geometry arrays.
+        reads=[]
+        class Poison:
+            def __getattribute__(self,key):reads.append(key);raise AssertionError('Heavy payload fetched: '+key)
+        for prop in ['Mesh','Points','OM9CloudPoints']:
+            o=doc.addObject('App::FeaturePython','Heavy');o.addProperty('App::PropertyPythonObject','Shape');o.Shape=Poison();o.addProperty('App::PropertyPythonObject',prop);setattr(o,prop,Poison());before=(len(doc.Objects),len(doc.UndoNames));reads.clear()
+            select([o]);enter('Loft');enter();enter('Cancel');select([o,joined]);enter('Join');enter();enter('Cancel')
+            check(prop+' metadata rejection reads zero heavy arrays',not reads and before==(len(doc.Objects),len(doc.UndoNames)));doc.removeObject(o.Name)
+        invalid=feature(doc,'InvalidCAD',Part.Shape());before=(len(doc.Objects),len(doc.UndoNames),joined.Shape.exportBrepToString())
+        select([invalid,joined]);enter('Join');enter()
+        check('invalid native CAD never opens committable preview',dialog() is None and before==(len(doc.Objects),len(doc.UndoNames),joined.Shape.exportBrepToString()));enter('Cancel')
+        report.update(ok=True,module=native.__file__,python_module=ThreeDm.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

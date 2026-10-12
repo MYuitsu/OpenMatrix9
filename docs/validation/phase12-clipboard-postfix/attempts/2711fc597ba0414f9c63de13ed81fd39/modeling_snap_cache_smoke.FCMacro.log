@@ -1,0 +1,105 @@
+{
+  "checks": [
+    {
+      "name": "native End picks projected CAD endpoint",
+      "passed": true
+    },
+    {
+      "name": "unchanged query reuses screen index",
+      "passed": true
+    },
+    {
+      "name": "placement invalidates index and native candidate cache",
+      "passed": true
+    },
+    {
+      "name": "Undo invalidates snap cache",
+      "passed": true
+    },
+    {
+      "name": "Redo invalidates snap cache",
+      "passed": true
+    },
+    {
+      "name": "hidden parent excluded",
+      "passed": true
+    },
+    {
+      "name": "visibility restore invalidates cache",
+      "passed": true
+    },
+    {
+      "name": "camera invalidates projected index",
+      "passed": true
+    },
+    {
+      "name": "combined per-object candidate budget",
+      "passed": true
+    },
+    {
+      "name": "larger budget does not reuse truncated cache",
+      "passed": true
+    },
+    {
+      "name": "total budget incomplete not certified",
+      "passed": true
+    },
+    {
+      "name": "native allocations obey total cap before output",
+      "passed": true
+    },
+    {
+      "name": "Shape edits invalidate native candidate cache",
+      "passed": true
+    },
+    {
+      "name": "linked source edit invalidates instance candidates",
+      "passed": true
+    },
+    {
+      "name": "document replacement has no dangling snap rows",
+      "passed": true
+    },
+    {
+      "name": "viewport resize invalidates projected index",
+      "passed": true
+    }
+  ],
+  "moved_query": {
+    "candidates": [
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        12,
+        0,
+        0
+      ]
+    ],
+    "complete": true,
+    "elapsed_us": 42,
+    "generated_candidates": 2,
+    "index_objects": 10,
+    "index_rebuilt": true,
+    "max_per_object": 2,
+    "picked": true,
+    "point": [
+      2,
+      0,
+      0
+    ],
+    "read_cloud_points": 0,
+    "read_mesh_vertices": 0,
+    "reason": "",
+    "state_owner": "rust",
+    "viewport_height": 382,
+    "viewport_width": 747,
+    "visited_objects": 1,
+    "visited_topology": 2
+  },
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_snap_cache_smoke-1\0dc3df6ab112448b8ed93a1e12bd3066

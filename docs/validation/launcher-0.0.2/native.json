@@ -1,0 +1,62 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "passed": true,
+      "name": "actual GUI activates OM9 workbench"
+    },
+    {
+      "passed": true,
+      "name": "actual host version remains 1.1.4"
+    },
+    {
+      "passed": true,
+      "name": "module loads from installed isolated user directory"
+    },
+    {
+      "passed": true,
+      "name": "icon shortcut is created"
+    },
+    {
+      "passed": true,
+      "name": "shortcut points to persistent installed launcher"
+    },
+    {
+      "passed": true,
+      "name": "shortcut has OM9 icon"
+    },
+    {
+      "passed": true,
+      "name": "Windows decodes the ICO image"
+    },
+    {
+      "passed": true,
+      "name": "installed native hash matches package"
+    },
+    {
+      "passed": true,
+      "name": "actual GUI activates OM9 workbench"
+    },
+    {
+      "passed": true,
+      "name": "actual host version remains 1.1.4"
+    },
+    {
+      "passed": true,
+      "name": "module loads from installed isolated user directory"
+    }
+  ],
+  "output": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-0a961df71e4041338c79db2bfc7a53e9",
+  "startup": [
+    {
+      "report": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-0a961df71e4041338c79db2bfc7a53e9\\profile\\v1-1\\OM9-launcher\\start-0f602fbac8ad42ca9478fe8fbbf84fa5.json",
+      "module": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-0a961df71e4041338c79db2bfc7a53e9\\profile\\v1-1\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+      "workbench": "OpenMatrix9Workbench"
+    },
+    {
+      "report": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-0a961df71e4041338c79db2bfc7a53e9\\profile\\v1-1\\OM9-launcher\\start-e3f47ba3e2674f5b9e5b3c6351237d81.json",
+      "module": "H:\\FreeCAD-src\\build\\om9-launcher-package-20261011\\native-0a961df71e4041338c79db2bfc7a53e9\\profile\\v1-1\\Mod\\OpenMatrix9\\bin\\OpenMatrix9Gui.pyd",
+      "workbench": "OpenMatrix9Workbench"
+    }
+  ]
+}

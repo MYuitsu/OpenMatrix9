@@ -60,12 +60,14 @@ add_custom_command(
         "CARGO_TARGET_DIR=${OPENMATRIX9_RUST_TARGET_DIR}"
         ${CARGO_EXECUTABLE}
         build
+        --locked
         --release
         --manifest-path
         "${OPENMATRIX9_RUST_DIR}/Cargo.toml"
 
     DEPENDS
         "${OPENMATRIX9_RUST_DIR}/Cargo.toml"
+        "${OPENMATRIX9_RUST_DIR}/Cargo.lock"
         "${CMAKE_CURRENT_SOURCE_DIR}/../Resources/menu/MainMenu.ini"
         "${CMAKE_CURRENT_SOURCE_DIR}/../Resources/menu/CommandNames.txt"
         ${OPENMATRIX9_RUST_SOURCES}
@@ -114,7 +116,7 @@ add_dependencies(
 # the import helper and standalone consumers as well as the GUI module.
 target_link_libraries(OM9ThreeDm PUBLIC OpenMatrix9RustLib)
 if(WIN32)
-    target_link_libraries(OM9ThreeDm PUBLIC ws2_32 userenv ntdll bcrypt)
+    target_link_libraries(OM9ThreeDm PUBLIC ws2_32 userenv ntdll bcrypt ole32 user32)
 endif()
 
 
@@ -159,9 +161,33 @@ set(
     CoreCPlanes.cpp
     CoreCPlanes.h
 
+    LayerClipboard.cpp
+    LayerClipboard.h
+    LayerClipboardPython.cpp
+    LayerDocumentAdapter.cpp
+    LayerCollectionAdapter.cpp
+    LayerCollectionAdapter.h
+    LayerCollectionAbi.h
+    LayerSourceArchiveAdapter.cpp
+    LayerSourceArchiveAdapter.h
+    LayerSourcePayloadAbi.h
+    LayerDocumentAdapter.h
+    LayerDocumentPython.cpp
+    LayerController.cpp
+    LayerController.h
+    Phase3Inputs.cpp
+    ModelingCurveEditor.cpp
+    ModelingCurveEditor.h
+    ModelingCurveEditorDialog.cpp
+    ModelingCurveEditorDialog.h
+    CurveBasisTransfer.h
+    Phase2Rust.h
+    SnapObjectInfo.cpp
+    SnapObjectInfo.h
+    SnapQueryIndex.cpp
+    SnapQueryIndex.h
     AppOpenMatrix9Gui.cpp
     ThreeDmPython.cpp
-    ThreeDmModeling.cpp
     ThreeDmModeling.h
     ThreeDmHatchDialog.cpp
     ThreeDmHatchDialog.h
@@ -345,7 +371,7 @@ if(MSVC)
     target_link_options(OpenMatrix9Gui PRIVATE "/DELAYLOAD:Mesh.pyd")
 endif()
 if(WIN32)
-    target_link_libraries(OpenMatrix9Gui PRIVATE ws2_32 userenv ntdll bcrypt)
+    target_link_libraries(OpenMatrix9Gui PRIVATE ws2_32 userenv ntdll bcrypt ole32 user32)
 endif()
 target_compile_features(OpenMatrix9Gui PRIVATE cxx_std_23)
 foreach(om9_occ_lib TKGeomAlgo TKGeomBase TKG2d TKG3d TKMath TKernel)
@@ -411,3 +437,9 @@ install(
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}
 )
+
+# Exchange worker shares the one Rust layer and geometry policy core.
+target_link_libraries(OM9ThreeDm PUBLIC OpenMatrix9RustLib)
+if(WIN32)
+    target_link_libraries(OM9ThreeDm PUBLIC ws2_32 userenv ntdll bcrypt)
+endif()

@@ -44,12 +44,7 @@ const ON_ClassId ON_Legacy::m_rtti("ON_Legacy", "ON_ArcCurve", MakeLegacy, "0000
         project = TOOL.parents[1]
         historical = json.loads((project / 'docs/3dm-coverage.json').read_text())
         sdk = project.parent / 'dependencies/opennurbs'
-        runtime_path = project.parent / '3dm-preserve-native/coverage-runtime.json'
-        slices = json.loads((project / 'docs/3dm-capability-slices.json').read_text())
-        evidence = [project / item for row in slices['slices'] for item in row['evidence']]
-        if not sdk.is_dir() or not runtime_path.is_file() or not all(p.is_file() for p in evidence):
-            self.skipTest('Optional SDK/runtime/raw validation evidence is not distributed with public source')
-        runtime = json.loads(runtime_path.read_text())
+        runtime = json.loads((project.parent / '3dm-preserve-native/coverage-runtime.json').read_text())
         result = module.normalize(project, sdk, historical, runtime)
         self.assertEqual(len(result['classes']), 131)
         self.assertEqual(result['runtime_count'], 128)

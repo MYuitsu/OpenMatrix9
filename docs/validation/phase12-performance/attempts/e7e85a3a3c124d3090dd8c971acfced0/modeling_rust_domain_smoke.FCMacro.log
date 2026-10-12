@@ -1,0 +1,31 @@
+{
+  "checks": [
+    {
+      "name": "owned active-domain numeric controls present",
+      "passed": true
+    },
+    {
+      "name": "UI trim domain commits one native transaction",
+      "passed": true
+    },
+    {
+      "name": "UI trim Undo restores exact rational basis",
+      "passed": true
+    },
+    {
+      "name": "invalid active domain stays open without mutation",
+      "passed": true
+    },
+    {
+      "name": "UI knot and domain remap accepts complete rational curve",
+      "passed": true
+    },
+    {
+      "name": "UI domain remap Undo restores exact original",
+      "passed": true
+    }
+  ],
+  "ok": true,
+  "module": "H:\\FreeCAD-src\\build\\om9-perf-sdk\\bin\\OpenMatrix9Gui.pyd"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_rust_domain_smoke-1\1a500af7b26e44f4964464e71dbd3a03

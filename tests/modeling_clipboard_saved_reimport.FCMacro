@@ -1,0 +1,41 @@
+"""Actual Rhino clipboard Paste/SaveAs -> editable FreeCAD reimport gate."""
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os,json,hashlib,traceback,tempfile,struct,shutil
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);proof_path=Path(os.environ['OM9_RHINO_CLIPBOARD_REPORT'])
+report={'checks':[],'cases':[],'rhino_report':str(proof_path)}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def digest(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+helper=Path('H:/FreeCAD-src/build/om9-phase3-dev/tests/modeling_rhino5_saved_reimport.FCMacro').read_text()
+helpers=dict(App=App,Gui=Gui,Path=Path,os=os,json=json,hashlib=hashlib,tempfile=tempfile,struct=struct,check=check)
+exec(helper[helper.index('def measurements('):helper.index('\ndef run(')],helpers)
+def run():
+    try:
+        import ThreeDm,OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        proof=json.loads(proof_path.read_text())
+        check('completed actual Rhino clipboard matrix',proof['ok'] and len(proof['cases'])==11)
+        check('same candidate binary',digest(native.__file__)==proof['module_sha256'])
+        for case in proof['cases']:
+            name=case['name'];saved=Path(case['output'])
+            check(name+' Rhino saved archive bound',digest(saved)==case['output_sha256'])
+            host=json.loads(Path(case['freecad_report']).read_text());expected=host['expected']
+            owned=out/(name+'.3dm');shutil.copyfile(saved,owned)
+            doc=App.newDocument('RhinoSaved');objects=ThreeDm.import_file(str(owned),doc,mode='modeling')
+            measured=helpers['measurements'](objects)
+            check(name+' edited/new geometry survives Rhino SaveAs',helpers['equal'](expected,measured))
+            object_names=[o.Name for o in objects];fcstd=out/(name+'.FCStd');doc.saveAs(str(fcstd));App.closeDocument(doc.Name);owned.unlink()
+            reopened=App.openDocument(str(fcstd))
+            check(name+' FCStd editable without own source archive',helpers['equal'](measured,helpers['measurements']([reopened.getObject(n) for n in object_names])))
+            App.closeDocument(reopened.Name)
+            check(name+' Rhino saved source unchanged',digest(saved)==case['output_sha256'])
+            report['cases'].append({'name':name,'ok':True,'object_count':len(measured),'fcstd':str(fcstd),'source_sha256':case['output_sha256']})
+        report.update(ok=True,module_sha256=digest(native.__file__))
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

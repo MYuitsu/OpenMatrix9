@@ -1,0 +1,81 @@
+"""Old Notes factory compatibility, canonical metadata filtering and no geometry skip."""
+import os,json,traceback
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]};docs=[]
+def check(name,value):
+    report['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(200,loop.quit);loop.exec()
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('LegacyProjectNotes');docs.append(doc.Name);doc.UndoMode=1
+        model=doc.addObject('Part::Feature','Ring');model.Shape=Part.makeBox(2,3,4)
+        spoof=doc.addObject('Part::Feature','NotesMarkerGeometry');spoof.Shape=Part.makeBox(3,4,5)
+        spoof.addProperty('App::PropertyString','OM9NotesSchema');spoof.OM9NotesSchema='1';spoof.addProperty('App::PropertyString','Notes');spoof.Notes='Old project notes'
+        old=doc.addObject('App::FeaturePython','OM9ProjectNotesData')
+        old.addProperty('App::PropertyString','OM9NotesSchema','OpenMatrix9','',0,True,True);old.OM9NotesSchema='1'
+        old.addProperty('App::PropertyString','Notes','OpenMatrix9','',0,False,True);old.Notes='Old project notes'
+        old.ViewObject.Visibility=False;old.ViewObject.ShowInTree=False;doc.recompute()
+        # A previous partial layer build could have cached the old helper as an
+        # object. Recreate that persisted state before setting the factory Meta.
+        cached=json.loads(native.layerDocumentSnapshot(doc.Name));state=cached['snapshot']
+        check('unbound marker alone does not prove internal helper identity',old.Name in {r['id'] for r in state['objects']})
+        native.initializeLayerDocument(doc.Name,json.dumps(cached))
+        helperrow=next(r for r in state['objects'] if r['id']==old.Name)
+        native.layerDocumentCommand(doc.Name,json.dumps(dict(operation='set_locked',layer_id=helperrow['layer_id'],locked=True)))
+        owner=next(o for o in doc.Objects if 'OM9LayerSnapshot' in o.PropertiesList)
+        raw=owner.OM9LayerSnapshot;rawstate=json.loads(raw)['snapshot'];undo=doc.UndoCount
+        doc.Meta={'OpenMatrix9.ProjectNotesStorage':'v1','OpenMatrix9.ProjectNotes':old.Notes}
+        old.ViewObject.Visibility=False;old.ViewObject.ShowInTree=False
+        report['legacy_identity']=dict(type=old.TypeId,name=old.Name,tag_type=old.getTypeOfProperty('OM9NotesSchema'),tag_status=old.getPropertyStatus('OM9NotesSchema'),properties=old.PropertiesList)
+        current=json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']
+        check('verified old factory helper is excluded even when its cached row is locked',set(r['id'] for r in current['objects'])=={model.Name,spoof.Name})
+        check('metadata filtering preserves full palette active layer generation and model own flags',current==dict(rawstate,objects=[r for r in rawstate['objects'] if r['id']!=old.Name]))
+        check('preview filtering does not write raw canonical metadata or add Undo',owner.OM9LayerSnapshot==raw and doc.UndoCount==undo)
+        try:native.exportLayerSelection3dm(doc.Name,[old]);reject=False
+        except RuntimeError:reject=True
+        check('legacy metadata cannot be exported as selected geometry',reject)
+        native.layerDocumentCommand(doc.Name,json.dumps(dict(operation='set_locked',layer_id=helperrow['layer_id'],locked=False)))
+        committed=owner.OM9LayerSnapshot
+        check('next owned operation persists filtered state without removing helper',len(json.loads(committed)['snapshot']['objects'])==2 and doc.getObject(old.Name) is old)
+        check('unlock does not reveal or recolor old helper',not old.ViewObject.Visibility and not old.ViewObject.ShowInTree)
+        doc.undo()
+        check('one Undo restores previous raw state while preview still filters verified metadata',owner.OM9LayerSnapshot==raw and len(json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']['objects'])==2)
+        doc.redo();check('Redo keeps filtered state and old notes',owner.OM9LayerSnapshot==committed and old.Notes=='Old project notes')
+        Gui.runCommand('OM9_SelectAll');settle()
+        check('Select All excludes only verified old helper',set(o.Name for o in Gui.Selection.getSelection())=={model.Name,spoof.Name})
+        def enter():
+            dialog=Gui.getMainWindow().findChild(QtWidgets.QDialog,'OM9ProjectNotes')
+            if dialog is None:report['callback_error']='notes dialog absent';return
+            dialog.findChild(QtWidgets.QPlainTextEdit,'OM9NotesText').setPlainText('Continued old notes')
+            dialog.findChild(QtWidgets.QPushButton,'OM9NotesDone').click()
+        QtCore.QTimer.singleShot(200,enter);Gui.runCommand('OM9_ProjectNotes');settle()
+        check('Notes edits legacy helper without creating a duplicate',not report.get('callback_error') and old.Notes=='Continued old notes' and len([o for o in doc.Objects if 'Notes' in o.PropertiesList and o.TypeId=='App::FeaturePython'])==1)
+        doc.undo();check('Notes Undo restores old text and Meta',old.Notes=='Old project notes' and doc.Meta['OpenMatrix9.ProjectNotes']=='Old project notes')
+        doc.redo();check('Notes Redo restores continued text',old.Notes=='Continued old notes' and doc.Meta['OpenMatrix9.ProjectNotes']=='Continued old notes')
+        path=out/'legacy-notes.FCStd';name=doc.Name;doc.saveAs(str(path));App.closeDocument(name);docs.remove(name)
+        doc=App.openDocument(str(path));docs.append(doc.Name);old=doc.getObject('OM9ProjectNotesData');settle()
+        report['reopened_legacy']=dict(notes=old.Notes,visible=old.ViewObject.Visibility,show_in_tree=old.ViewObject.ShowInTree,meta=doc.Meta,view_type=old.ViewObject.TypeId)
+        check('FCStd keeps legacy notes text and hidden helper',old.Notes=='Continued old notes' and not old.ViewObject.Visibility and not old.ViewObject.ShowInTree)
+        check('FCStd reopened canonical inventory excludes metadata and retains real models',len(json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']['objects'])==2)
+        volumes={o.Name:o.Shape.Volume for o in doc.Objects if hasattr(o,'Shape')}
+        old.addProperty('Part::PropertyPartShape','Shape');old.Shape=Part.makeBox(4,5,6)
+        current=json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']
+        check('geometry added to a legacy-looking object is never silently omitted',any(r['id']==old.Name for r in current['objects']))
+        old.removeProperty('Shape');old.addProperty('App::PropertyString','OM9NativeGeometry');old.OM9NativeGeometry='unsupported retained payload'
+        check('unknown retained payload on helper is included for explicit export preflight',any(r['id']==old.Name for r in json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']['objects']))
+        old.removeProperty('OM9NativeGeometry');doc.Meta={'OpenMatrix9.ProjectNotesStorage':'v1','OpenMatrix9.ProjectNotes':'unrelated notes'}
+        check('text binding mismatch cannot silently hide an object',any(r['id']==old.Name for r in json.loads(native.layerDocumentSnapshot(doc.Name))['snapshot']['objects']))
+        check('compatibility and metadata lifecycle leave geometry unchanged',all(abs(doc.getObject(n).Shape.Volume-v)<1e-9 for n,v in volumes.items()))
+        report.update(ok=True,module=native.__file__,scope='legacy Notes identity and Rust-owned semantic inventory filtering; full session acceptance pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in docs:
+            if name in App.listDocuments():App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

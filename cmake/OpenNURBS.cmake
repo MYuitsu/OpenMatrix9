@@ -23,6 +23,9 @@ om9_repair_rdk_document_write(opennurbsStatic "${om9_opennurbs_SOURCE_DIR}")
 find_package(OpenCASCADE REQUIRED COMPONENTS FoundationClasses ModelingData ModelingAlgorithms)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 add_library(OM9ThreeDm STATIC
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmModeling.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmThreadPool.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../Gui/LayerExchangeAdapter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmStaging.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmImportJobs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../Gui/ThreeDmCurves.cpp

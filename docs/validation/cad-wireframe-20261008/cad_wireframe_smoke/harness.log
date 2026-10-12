@@ -1,0 +1,116 @@
+{
+    "checks":  [
+                   {
+                       "name":  "CAD Wireframe has no face tessellation diagonals",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Wireframe does not pick invisible face interiors",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "native CAD edge remains pickable",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "Shaded fills same CAD face",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "local Wireframe preserves neighboring Shaded pixels",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "display does not change Shape or Undo",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "dark native CAD edges remain visible on black background",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "contrast fallback does not change stored line color",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "native mesh keeps polygon Wireframe distinct from filled Shaded",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "curved CAD surface has display-only isocurves",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "isocurve overlay is not a document object",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "isocurves contain curved surface polylines",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "boundary-only density suppresses isocurves",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "increasing density adds interior surface curves",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "shape edit invalidates isocurve cache",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "trimmed isocurve vertices remain on CAD faces outside cut holes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "display density survives FCStd reopen",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "density zero retains interior NURBS knot wire",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "density one adds wire only in knot-free direction",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "density three subdivides knot spans",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "imported CAD line colors follow source colors",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "preserved CAD density matches native Rhino object attributes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "source file unchanged",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "render preserves imported CAD shape hashes",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "workbench exit removes transient CAD presentation nodes",
+                       "passed":  true
+                   }
+               ],
+    "box_interior_lit_pixels":  0,
+    "wire_center_pick":  null,
+    "wire_center_screen":  [
+                               374,
+                               191
+                           ],
+    "ok":  true,
+    "module":  "H:\\FreeCAD-src\\build\\om9-cad-wire-sdk\\bin\\OpenMatrix9Gui.pyd",
+    "source_sha256":  "5cdd84533c2dca20ef441fcbe2f1edd0226cc3ab02805caa4af60ef3dbba9997",
+    "top_level_objects":  29
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\cad_wireframe_smoke-1\bdc2788d11a34e33b60047412e5977c3
+

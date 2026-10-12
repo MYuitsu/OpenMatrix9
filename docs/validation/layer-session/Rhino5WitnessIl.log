@@ -1,0 +1,90 @@
+Rhino.Runtime.CommonObject
+Void EnsurePrivateCopy()
+0000 ldarg.0 
+0001 callvirt Void NonConstOperation()
+0006 ret 
+Rhino.Runtime.CommonObject
+Boolean _SetUserString(System.String, System.String)
+0000 ldarg.0 
+0001 call IntPtr ConstPointer()
+0006 stloc.0 
+0007 ldloc.0 
+0008 ldarg.1 
+0009 ldarg.2 
+000a call Boolean ON_Object_SetUserString(IntPtr, System.String, System.String)
+000f stloc.1 
+0010 ldloc.1 
+0011 ret 
+Rhino.DocObjects.Layer
+Boolean CommitChanges()
+0000 ldarg.0 
+0001 ldfld System.Guid m_set_render_material
+0006 ldsfld System.Guid Empty
+000b call Boolean op_Inequality(System.Guid, System.Guid)
+0010 brtrue.s 8
+0012 ldarg.0 
+0013 ldfld Boolean m_set_render_material_to_null
+0018 brfalse.s 40
+001a ldarg.0 
+001b ldfld Rhino.RhinoDoc m_doc
+0020 brfalse.s 32
+0022 ldarg.0 
+0023 ldfld Rhino.RhinoDoc m_doc
+0028 callvirt Int32 get_DocumentId()
+002d stloc.0 
+002e ldarg.0 
+002f call Int32 get_LayerIndex()
+0034 stloc.1 
+0035 ldloc.0 
+0036 ldloc.1 
+0037 ldarg.0 
+0038 ldfld System.Guid m_set_render_material
+003d call Void Rdk_RenderContent_SetLayerMaterialInstanceId(UInt32, Int32, System.Guid)
+0042 ldarg.0 
+0043 ldsfld System.Guid Empty
+0048 stfld System.Guid m_set_render_material
+004d ldarg.0 
+004e ldc.i4.0 
+004f stfld Boolean m_set_render_material_to_null
+0054 ldarg.0 
+0055 ldfld System.Guid m_id
+005a ldsfld System.Guid Empty
+005f call Boolean op_Equality(System.Guid, System.Guid)
+0064 brtrue.s 8
+0066 ldarg.0 
+0067 callvirt Boolean get_IsDocumentControlled()
+006c brfalse.s 2
+006e ldc.i4.0 
+006f ret 
+0070 ldarg.0 
+0071 callvirt IntPtr NonConstPointer()
+0076 stloc.2 
+0077 ldarg.0 
+0078 ldfld Rhino.RhinoDoc m_doc
+007d ldfld Int32 m_docId
+0082 ldloc.2 
+0083 ldarg.0 
+0084 ldfld System.Guid m_id
+0089 call Boolean CRhinoLayerTable_CommitChanges(Int32, IntPtr, System.Guid)
+008e stloc.3 
+008f ldloc.3 
+0090 ret 
+Rhino.DocObjects.Layer
+IntPtr NonConstPointer()
+0000 ldarg.0 
+0001 ldfld System.Object m__parent
+0006 isinst 33554572
+000b brfalse.s 7
+000d ldarg.0 
+000e callvirt IntPtr _InternalGetConstPointer()
+0013 ret 
+0014 ldarg.0 
+0015 call IntPtr NonConstPointer()
+001a ret 
+Rhino.DocObjects.Layer
+Boolean SetUserString(System.String, System.String)
+0000 ldarg.0 
+0001 ldarg.1 
+0002 ldarg.2 
+0003 call Boolean _SetUserString(System.String, System.String)
+0008 ret 

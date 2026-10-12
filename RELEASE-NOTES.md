@@ -1,17 +1,35 @@
-# OpenMatrix9 0.3.4-202610120606
+# OpenMatrix9 0.3.4-202610120606 — Gumball
 
-The three approved core Gumball specifications (OM9-INFO-020/021/022) are implemented: parametric object Scale, Object Alignment and Relocate Gumball. Primitive dimensions and supported expressions remain editable. Associative Scale preserves admitted source definitions and dependencies; native Compound-derived helpers keep their appearance through Undo/Redo and fresh-process FCStd reopening. Mesh alignment uses actual vertex, edge and planar-facet input. All four viewports share the Gumball frame.
+Hoàn tất ba specs Gumball lõi **OM9-INFO-020/021/022** trong phạm vi đã duyệt:
+Scale object tham số, Object Alignment và Relocate Gumball. Scale giữ kích thước,
+expression và dependency được hỗ trợ. Bật bằng lệnh **Gumball** trong Command;
+bốn viewport dùng chung frame.
 
-Development-host validation after the Gumball expression and viewport API corrections: **30 native processes / 955 checks**, one plugin SHA256 `559e0dca08e3535174879dd81c598d4a894e70e43989d22dba8b6d77a8db6b20` and one host SHA256 `98eef899354a8aa84cfa2934e6e1a3c8558c7e6fff3b89c347c06731f06018a8`. [Detailed checks and supported limits](docs/validation/2026-10-12-gumball-core-completion.md).
+## Cài đặt trong 3 bước
 
-Stock GUI compatibility also passes syntax checks for all 94 GUI translation units and the four changed development-host branches. Local native reports provide runtime evidence; the exact Action run establishes build identity and package integrity.
+1. Cài [FreeCAD 1.1.4 chính thức](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4) trên Windows x64.
+2. Tải **OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip** ở **Assets** bên dưới, rồi giải nén.
+3. Chạy **Start-OM9.cmd**. Launcher cài OM9, tạo icon Desktop và mở workbench.
 
-Version accounting starts from 0.0.3: `aa` stays 0, `bb` increases by three completed specifications, and `cc` increases by one completed task. The suffix records Asia/Saigon time after the passing local cohort. The patch counter is retained when the specification counter increases.
+Giữ thư mục OpenMatrix9, launcher-manifest.json và các file Start-OM9 cùng nhau
+trong thư mục đã giải nén. ZIP FreeCAD-1.1.4 dành cho cài thủ công;
+**SHA256SUMS.txt** kiểm tra cả hai ZIP.
 
-Current local stock validation: **30 native processes / 955 checks**, plugin SHA256 `71f8431d71f6abfb36c45e9fd2a128f1d8f232368e2e5c1faf5dd3a6ff58b987`. [Logical-window fixture evidence](docs/validation/2026-10-12-gumball-ci-window-fixture.md).
+[Hướng dẫn tiếng Việt](https://github.com/MYuitsu/OpenMatrix9/blob/main/INSTALL.vi.md) · [English installation](https://github.com/MYuitsu/OpenMatrix9/blob/main/INSTALL.en.md).
 
-GitHub Actions builds OM9 against official FreeCAD 1.1.4 Windows x64 with Python 3.11. The candidate branch is `codex/gumball-release-0.3.4`. At the user's request on 2026-10-12, tests run locally; the workflow only builds, records provenance and packages. Both ZIPs explicitly record `validation_kind: build_only` and `tests_executed: false`, with the actual source commit and binary hashes. Packaging rejects changed binaries, version or release metadata. The exact build result comes from its actual Action run. [Policy and evidence](docs/validation/2026-10-12-local-tests-ci-build-only.md).
+## Kiểm tra và build
 
-Download **om9-release-files** from the successful candidate [GitHub Actions run](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml?query=branch%3Acodex%2Fgumball-release-0.3.4). It contains the plugin ZIP, SetupLauncher ZIP and shared SHA256SUMS. Extract the artifact ZIP and then the SetupLauncher ZIP; run **Start-OM9.cmd**. [Hướng dẫn tiếng Việt](INSTALL.vi.md) · [English installation](INSTALL.en.md).
+Bản đã hợp vào **main** giữ các thay đổi Layers, clipboard và native geometry
+của hai nhánh. Kiểm thử cục bộ: **30 ca Gumball / 955 kiểm tra**,
+**46 tiến trình native / 1564 kiểm tra tổng cộng**,
+**846 Rust tests**. [Phạm vi, hash và giới hạn host](https://github.com/MYuitsu/OpenMatrix9/blob/main/docs/validation/2026-10-12-gumball-main-release.md).
 
-These are build-only branch artifacts; a tag or GitHub Release is not created by a branch build. Tagged publication remains gated on metadata and main ancestry. Save and close FreeCAD before updating its loaded plugin. The launcher preserves previous plugin backups and user models.
+Theo yêu cầu, GitHub Actions **chỉ build và đóng gói**. Gói ghi đúng commit,
+SHA256 và `validation_kind: build_only`, `tests_executed: false`; kết quả test
+cục bộ không được gán cho DLL CI. Workflow kiểm tag/version và commit trên main
+trước khi tạo GitHub Release.
+
+Version bắt đầu từ 0.0.3: **aa giữ 0**, **bb tăng 3 specs**, **cc tăng 1 task**;
+suffix dùng Asia/Saigon. Giữ cùng version cho các sửa trong tác vụ phát hành này.
+Đây là bản thử **Pre-release**. Full P0/core catalog, Clayoo/SubD, SmartTargets
+và tương thích tuyệt đối với Rhino/Matrix nằm ngoài phạm vi nghiệm thu này.

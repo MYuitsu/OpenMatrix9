@@ -5,12 +5,12 @@ This experimental package targets **Windows x64 and official FreeCAD 1.1.4**, wi
 ## Automatic installation and Desktop icon (recommended)
 
 1. Install the Windows x64 build from the **[official FreeCAD 1.1.4 release](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4)** and open FreeCAD once. Check Help → About FreeCAD for **1.1.4**; its folder may simply be named `FreeCAD 1.1`.
-2. Open the **[Gumball candidate workflow](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml?query=branch%3Acodex%2Fgumball-release-0.3.4)**. Choose a **successful** run of `codex/gumball-release-0.3.4` for the intended commit, then download **om9-release-files** under Artifacts. GitHub may require sign-in. A queued, failed or older run is not the candidate package. Until the Action passes, its stock-host build remains unverified.
-3. Extract the downloaded artifact ZIP. From it, extract **OpenMatrix9-…-SetupLauncher…-Windows-x64.zip** into a folder. Keep the bundled **OpenMatrix9** folder, **launcher-manifest.json** and **Start-OM9** files together, then double-click **Start-OM9.cmd**. The launcher reads the extracted OpenMatrix9 folder.
+2. Open the **[Releases page](https://github.com/MYuitsu/OpenMatrix9/releases)**. Find **0.3.4-202610120606**, expand **Assets**, and download **OpenMatrix9-0.3.4-202610120606-SetupLauncher-Windows-x64.zip**.
+3. Extract the SetupLauncher ZIP into a folder. Keep the bundled **OpenMatrix9** folder, **launcher-manifest.json** and **Start-OM9** files together, then double-click **Start-OM9.cmd**. The launcher reads the extracted OpenMatrix9 folder.
 
 The launcher installs or updates OM9 in `%APPDATA%\FreeCAD\v1-1\Mod\OpenMatrix9`, creates **OpenMatrix9** shortcuts on Desktop and in Start Menu, and opens the workbench. Use the Desktop icon afterwards; the extracted folder is no longer needed. No Administrator access, FreeCAD source, Rust or Visual Studio is required.
 
-Compare both inner ZIPs with **SHA256SUMS.txt** from the same artifact before installation. This branch produces candidate build artifacts; it is not a published release or release tag. Published builds, including prereleases, remain listed on the **[Releases page](https://github.com/MYuitsu/OpenMatrix9/releases)**.
+Download **SHA256SUMS.txt** from the same release to check package integrity. The SetupLauncher ZIP installs automatically; the FreeCAD-1.1.4 ZIP is for manual plugin installation. Source code downloads and Actions artifacts are unnecessary for installation.
 
 To update, extract a new SetupLauncher bundle and run its Start-OM9.cmd. Previous modules are backed up outside `Mod` in `v1-1\OM9-backups`; an unchanged module is not recopied. Save and close the FreeCAD instance using this installation when its plugin needs replacing. Incomplete packages or failed cache updates preserve the previous installation. Logs are in `v1-1\OM9-launcher`.
 
@@ -20,7 +20,7 @@ The launcher checks published GitHub releases in the background at startup. It p
 
 1. Download the Windows x64 installer from the [official FreeCAD 1.1.4 release](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4). Install and start FreeCAD once. Check Help → About FreeCAD: **1.1.4**. The installation directory may simply be named `FreeCAD 1.1`.
 2. Close FreeCAD before replacing a plugin.
-3. Download [FreeCAD-1.1.4-Windows-x64 plugin ZIP from the same successful candidate artifact](https://github.com/MYuitsu/OpenMatrix9/actions/workflows/release-windows.yml?query=branch%3Acodex%2Fgumball-release-0.3.4) and extract its **OpenMatrix9** folder.
+3. Download **OpenMatrix9-0.3.4-202610120606-FreeCAD-1.1.4-Windows-x64.zip** under **Assets** on the [Releases page](https://github.com/MYuitsu/OpenMatrix9/releases) and extract its **OpenMatrix9** folder.
 4. Press **Win + R**, enter `%APPDATA%\FreeCAD\v1-1\Mod` and create the directory if needed. Place **OpenMatrix9** inside it. Move an older installation outside `Mod` as a backup first.
 5. Restart your installed FreeCAD and select **OpenMatrix9** from the workbench selector.
 

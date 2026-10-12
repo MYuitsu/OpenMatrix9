@@ -1,6 +1,6 @@
 # Rhino → OpenMatrix9: lộ trình 5 phase
 
-Ngày: 2026-10-08. Trạng thái: tài liệu lập kế hoạch đã viết; implementation/acceptance của scope mới chưa bắt đầu.
+Ngày:2026-10-08. Phase1 implementation/native/FreeCAD verified; application acceptance pending Rhino5. Phase2–5 chưa triển khai. Actual application gate bắt buộc ở từng phase theo yêu cầu mới của user.
 [Thiết kế chung](../specs/2026-10-08-rhino-modeling-five-phase-design.md).
 Source lập kế hoạch: H:/FreeCAD-src/build/om9-dev.
 
@@ -16,7 +16,7 @@ Source lập kế hoạch: H:/FreeCAD-src/build/om9-dev.
 
 | Phase | Deliverable | Gate thực tế | Status kế thừa |
 |---|---|---|---|
-| [1 — Nhận geometry](2026-10-08-rhino-modeling-phase-1-exchange.md) | Modeling import/export, current geometry, basic metadata và một runtime thống nhất | 3DM→FCStd→selected V5, input mới+sửa, nguồn bị xóa vẫn dùng được | File exchange/display có proof; modeling mode planned |
+| [1 — Nhận geometry](2026-10-08-rhino-modeling-phase-1-exchange.md) | Modeling import/export, current geometry, basic metadata và một runtime thống nhất | 3DM→FCStd→selected V5, input mới+sửa, nguồn bị xóa vẫn dùng được | Implementation + FreeCAD proof đạt; actual Rhino5 gate pending |
 | [2 — Phân loại/snap/curves](2026-10-08-rhino-modeling-phase-2-classification-snap-curves.md) | CAD/Mesh/cloud/subd classification, bounded snap, curve commands/CV editing | Default snap reads0 mesh/cloud points; curves nhập sửa/xuất đúng | Basic snap/CAD curves có code; index/classifier/combined editor planned |
 | [3 — BRep dựng tiếp](2026-10-08-rhino-modeling-phase-3-brep-modeling.md) | Imported surfaces/solids dùng Loft/Sweep/Trim/Join/Boolean | Nhẫn→cutter mới→cut→chi tiết mới→save/export/reimport | BRep edited profiles đã có scoped proof; workflow nhẫn planned |
 | [4 — Blocks/references](2026-10-08-rhino-modeling-phase-4-blocks-references.md) | Independent copy/member editing, materialized blocks, exact reference curves | Copy sửa độc lập; nested transform/owner/selection đúng | Preservation graph có proof; modeling semantics còn thiếu |
@@ -31,7 +31,7 @@ Mỗi phase có file map, API đề xuất, regression cases, lệnh chạy và 
 Tổng16 task kế hoạch. Con số này không phải số prepared test batches, số geometry types hoặc phần trăm support.
 Future native/host/Rhino batch count: unknown cho tới khi fixture matrix được liệt kê.
 
-Các task mới chưa được chạy; tất cả checkbox còn mở. Existing proof chỉ tái dùng làm baseline có hash; không thay proof mới.
+P1.1–P1.3 đã chạy và có proof mới; gate ứng dụngPhase1 còn mở. TasksPhase2–5 chưa chạy. Existing proof không thay actual application evidence mới của từng phase.
 Gộp source chọn lọc từ Mod/OpenMatrix9 vào dev ở P2/P3; nghiệm thu lại trên binary đồng nhất, không ghép kết quả của nhiều runtime.
 Không đổi execution ledger8 packages của full-exchange cũ. Scope mới có requirements/evidence riêng; làm measurement thật mới cập nhật ledger.
 
@@ -83,3 +83,7 @@ Source-deleted FCStd, one transaction, Undo/Redo, Cancel, no stale snapshots và
 - Gate5 không đánh dấu missing promised geometry adapter là supported.
 - Không thay status/proof lịch sử, không claim đã implement từ tài liệu.
 
+
+## Actual application gate — user revision
+
+User yêu cầu xác thực ứng dụng ở từng phase. [Ma trận bắt buộc](../../validation/modeling-application-gates.md) và APP-GATE-P1..P5 trong từng plan là điều kiện đóng phase. Compile/native/SDK proof vẫn riêng; thiếu report ứng dụng giữ gate pending.

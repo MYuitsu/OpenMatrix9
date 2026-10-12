@@ -70,10 +70,10 @@ void SurfaceController::deactivate(){enabled=false;cancel();}
 bool SurfaceController::active()const{return document&&om9_surface_phase()!=0;}
 bool SurfaceController::available(std::size_t i)const{
     auto* doc=App::GetApplication().getActiveDocument();auto* gui=Gui::Application::Instance->activeDocument();
-    return enabled&&handles(i)&&doc&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&!dialog&&dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())&&om9AlterDocument(doc);
+    return enabled&&handles(i)&&doc&&!om9ReadOnlyFile(*doc)&&!doc->testStatus(App::Document::Restoring)&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&!dialog&&dynamic_cast<Gui::View3DInventor*>(gui->getActiveView())&&om9AlterDocument(doc);
 }
 bool SurfaceController::valid()const{
-    auto* gui=Gui::Application::Instance->activeDocument();return enabled&&document==App::GetApplication().getActiveDocument()&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&om9AlterDocument(document);
+    auto* gui=Gui::Application::Instance->activeDocument();return enabled&&document&&!om9ReadOnlyFile(*document)&&!document->testStatus(App::Document::Restoring)&&document==App::GetApplication().getActiveDocument()&&gui&&!gui->isAboutToClose()&&!gui->getInEdit()&&om9AlterDocument(document);
 }
 void SurfaceController::prompt(const QString& text){CurveController::instance().setPrompt(text);CurveController::instance().logMessage(text);}
 void SurfaceController::refresh(){
@@ -94,7 +94,7 @@ bool SurfaceController::start(std::size_t i,const QString& invoked){
     qApp->installEventFilter(this);refresh();
     // FreeCAD preserves ordered selection entries; subedges remain individual inputs.
     const auto selected=Gui::Selection().getSelection(document->getName());
-    for(const auto& sel:selected)add(sel.FeatName,sel.SubName?sel.SubName:"");
+    for(const auto& sel:selected)if(!add(sel.FeatName,sel.SubName?sel.SubName:"")){cancel();prompt("Preselection rejected as a whole; correct the selection and restart");break;}
     return false; // History is recorded only after a successful geometry commit.
 }
 void SurfaceController::clearPreview(){for(const auto& [root,node]:previews){if(root->findChild(node)>=0)root->removeChild(node);root->unref();}previews.clear();}
@@ -103,21 +103,21 @@ void SurfaceController::cancel(){
     if(dialog){auto* old=dialog.data();dialog=nullptr;old->disconnect(this);old->hide();old->deleteLater();}status=nullptr;buttons=nullptr;
 }
 void SurfaceController::error(const std::exception& e){const auto text=QString::fromUtf8(e.what());prompt(text);if(status)status->setText(text);if(buttons)buttons->button(QDialogButtonBox::Ok)->setEnabled(false);Base::Console().warning("OpenMatrix9 surface: %s\n",e.what());}
-void SurfaceController::add(const std::string& object,const std::string& sub){
-    if(!active()||!valid()||om9_surface_phase()==4)return;
+bool SurfaceController::add(const std::string& object,const std::string& sub){
+    if(!active()||!valid()||om9_surface_phase()==4)return false;
     try{
-        Base::PyGILStateLocker lock;SurfaceInput input{object,sub};input.guards.push_back(captureObject(*document,object,sub));ShapeRef wire(surfaceWire(*document,input));ShapeRef closed(PyObject_CallMethod(wire.p,"isClosed",nullptr));
+        Base::PyGILStateLocker lock;SurfaceInput input{object,sub};input.guards.push_back(captureObject(*document,object,sub));input.phase3Guards.push_back(capturePhase3Object(*document,object,sub));ShapeRef wire(surfaceWire(*document,input));ShapeRef closed(PyObject_CallMethod(wire.p,"isClosed",nullptr));
         if(!closed.p){PyErr_Clear();throw std::runtime_error("Cannot inspect curve closure");}input.closed=PyObject_IsTrue(closed.p)==1;
         const auto key=object+"."+sub;
         if(om9_surface_phase()==5){
             ShapeRef edges(PyObject_GetAttrString(wire.p,"Edges"));
             if(!edges.p||PySequence_Size(edges.p)!=1)throw std::runtime_error("Chain Edges requires one edge per pick");
-            if(!om9_surface_chain_add(key.c_str())){prompt(message());return;}
-            chainInputs.push_back(input);refresh();return;
+            if(!om9_surface_chain_add(key.c_str())){prompt(message());return false;}
+            chainInputs.push_back(input);refresh();return true;
         }
-        if(!om9_surface_add(key.c_str(),input.closed)){prompt(message());return;}
-        inputs.push_back(input);CurveController::instance().logMessage("Selected: "+QString::fromStdString(key));refresh();
-    }catch(const std::exception& e){error(e);}
+        if(!om9_surface_add(key.c_str(),input.closed)){prompt(message());return false;}
+        inputs.push_back(input);CurveController::instance().logMessage("Selected: "+QString::fromStdString(key));refresh();return true;
+    }catch(const std::exception& e){error(e);return false;}
 }
 void SurfaceController::submit(const QString& text){
     if(!active())return;if(!valid()){cancel();return;}const auto input=text.trimmed();

@@ -1,0 +1,134 @@
+Start testing: Oct 10 10:30 SE Asia Standard Time
+----------------------------------------------------------
+1/8 Testing: OM9-LAYER-001.RustAbi
+1/8 Test: OM9-LAYER-001.RustAbi
+Command: "C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerRustAbiTests.exe"
+Directory: C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi
+"OM9-LAYER-001.RustAbi" start time: Oct 10 10:30 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+{"ok":true,"checks":43,"scope":"native C++ to Rust layer ABI"}
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-LAYER-001.RustAbi" end time: Oct 10 10:30 SE Asia Standard Time
+"OM9-LAYER-001.RustAbi" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/8 Testing: OM9-LAYER-001.NativePalette
+2/8 Test: OM9-LAYER-001.NativePalette
+Command: "C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerExchangeNativeTests.exe"
+Directory: C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi
+"OM9-LAYER-001.NativePalette" start time: Oct 10 10:30 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+{"ok":true,"checks":62,"fixtures":2,"scope":"native3DM palette metadata; no host UI claim"}
+<end of output>
+Test time =   0.47 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-LAYER-001.NativePalette" end time: Oct 10 10:30 SE Asia Standard Time
+"OM9-LAYER-001.NativePalette" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/8 Testing: OM9-LAYER-001.NativeRetainedPalette
+3/8 Test: OM9-LAYER-001.NativeRetainedPalette
+Command: "C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerRetainedNativeTests.exe"
+Directory: C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi
+"OM9-LAYER-001.NativeRetainedPalette" start time: Oct 10 10:30 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Layer retained native PASS; checks=18; fixtures=1
+<end of output>
+Test time =   0.45 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-LAYER-001.NativeRetainedPalette" end time: Oct 10 10:30 SE Asia Standard Time
+"OM9-LAYER-001.NativeRetainedPalette" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/8 Testing: OM9-LAYER-001.NativeArchive
+4/8 Test: OM9-LAYER-001.NativeArchive
+Command: "C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerArchiveTests.exe"
+Directory: C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi
+"OM9-LAYER-001.NativeArchive" start time: Oct 10 10:30 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Layer archive PASS; checks=38; fixtures=7
+<end of output>
+Test time =   0.56 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-LAYER-001.NativeArchive" end time: Oct 10 10:30 SE Asia Standard Time
+"OM9-LAYER-001.NativeArchive" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/8 Testing: OM9-LAYER-001.NativeStaging
+5/8 Test: OM9-LAYER-001.NativeStaging
+Command: "C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerStagingTests.exe"
+Directory: C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi
+"OM9-LAYER-001.NativeStaging" start time: Oct 10 10:30 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Layer staging PASS; checks=30
+<end of output>
+Test time =   0.54 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-LAYER-001.NativeStaging" end time: Oct 10 10:30 SE Asia Standard Time
+"OM9-LAYER-001.NativeStaging" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/8 Testing: OM9-LAYER-001.NativeClipboard
+6/8 Test: OM9-LAYER-001.NativeClipboard
+Command: "C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerClipboardTests.exe"
+Directory: C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi
+"OM9-LAYER-001.NativeClipboard" start time: Oct 10 10:30 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+Layer clipboard PASS; checks=23; actual_3dm_fixtures=1
+<end of output>
+Test time =   0.69 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-LAYER-001.NativeClipboard" end time: Oct 10 10:30 SE Asia Standard Time
+"OM9-LAYER-001.NativeClipboard" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/8 Testing: OM9-FILE-012.LayerLegacyArchive
+7/8 Test: OM9-FILE-012.LayerLegacyArchive
+Command: "C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerLegacyArchiveTests.exe"
+Directory: C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi
+"OM9-FILE-012.LayerLegacyArchive" start time: Oct 10 10:30 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+metadata PASS
+inch written
+extrusion volume 502.65482465286311 expected 502.6548245743669
+OM9-FILE-012 archive PASS; fixtures "C:\\Users\\nguye\\AppData\\Local\\Temp\\om9-3dm-native"
+<end of output>
+Test time =   0.83 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.LayerLegacyArchive" end time: Oct 10 10:30 SE Asia Standard Time
+"OM9-FILE-012.LayerLegacyArchive" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/8 Testing: OM9-FILE-012.LayerLegacyBlocks
+8/8 Test: OM9-FILE-012.LayerLegacyBlocks
+Command: "C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi/Release/LayerLegacyBlockTests.exe"
+Directory: C:/Users/nguye/.codex/worktrees/layer-session-handoff/FreeCAD-src/build/layer-abi
+"OM9-FILE-012.LayerLegacyBlocks" start time: Oct 10 10:30 SE Asia Standard Time
+Output:
+----------------------------------------------------------
+nested and mixed shear blocks PASS
+<end of output>
+Test time =   0.58 sec
+----------------------------------------------------------
+Test Passed.
+"OM9-FILE-012.LayerLegacyBlocks" end time: Oct 10 10:30 SE Asia Standard Time
+"OM9-FILE-012.LayerLegacyBlocks" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 10 10:30 SE Asia Standard Time

@@ -1,0 +1,51 @@
+import FreeCAD as App,FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import json,os,traceback
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import Part,OpenMatrix9Gui as native,ThreeDm
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('CurveEditor');doc.UndoMode=1
+        curve=Part.BSplineCurve();curve.buildFromPolesMultsKnots([App.Vector(0,0,0),App.Vector(3,4,0),App.Vector(7,2,0),App.Vector(10,0,0)],[4,4],[0.,1.],False,3,[1.,2.,0.7,1.])
+        obj=doc.addObject('Part::Feature','Rational');obj.Shape=curve.toShape();doc.recompute()
+        basis=json.loads(native.curveBasis3dm(doc.Name,obj.Name));before=obj.Shape.copy()
+        report['pre_edit_shape_copy_identity_equal']=obj.Shape.isEqual(before)
+        request=dict(basis);request['poles']=[p[:] for p in basis['poles']];request['poles'][1][1]+=2
+        native.editModelingCurve3dm(doc.Name,obj.Name,json.dumps(request));doc.recompute()
+        edited=obj.Shape.Edges[0].Curve
+        check('curve_edit_preserves_rational_basis',edited.Degree==basis['degree'] and edited.getWeights()==basis['weights'] and edited.getKnots()==basis['knots'] and edited.getMultiplicities()==basis['multiplicities'] and abs(edited.getPole(2).y-6)<1e-9)
+        check('one typed CV edit transaction',len(doc.UndoNames)==1)
+        doc.undo();restored=json.loads(native.curveBasis3dm(doc.Name,obj.Name))
+        report['undo_basis']=restored
+        check('CV edit Undo exact original',all(restored[k]==basis[k] for k in ['degree','periodic','poles','weights','knots','multiplicities','first','last']))
+        doc.redo();check('CV edit Redo current geometry',abs(obj.Shape.Edges[0].Curve.getPole(2).y-6)<1e-9)
+        for field,value in [('weights',[1.,-1.,0.7,1.]),('knots',[1.,0.]),('degree',50)]:
+            req=json.loads(native.curveBasis3dm(doc.Name,obj.Name));req[field]=value;old=obj.Shape.exportBrepToString();undos=len(doc.UndoNames);failed=False
+            try:native.editModelingCurve3dm(doc.Name,obj.Name,json.dumps(req))
+            except (ValueError,RuntimeError):failed=True
+            check('invalid '+field+' rejected atomically',failed and obj.Shape.exportBrepToString()==old and len(doc.UndoNames)==undos)
+        old=obj.Shape.exportBrepToString();failed=False
+        try:native.editModelingCurve3dm(doc.Name,obj.Name,json.dumps(request))
+        except (ValueError,RuntimeError):failed=True
+        check('stale curve request rejected',failed and obj.Shape.exportBrepToString()==old)
+        oriented=json.loads(native.curveBasis3dm(doc.Name,obj.Name));shape=obj.Shape.copy();shape.reverse();obj.Shape=shape;doc.recompute()
+        old=obj.Shape.exportBrepToString();undos=len(doc.UndoNames);failed=False
+        try:native.editModelingCurve3dm(doc.Name,obj.Name,json.dumps(oriented))
+        except (ValueError,RuntimeError):failed=True
+        check('orientation changed request rejected atomically',failed and obj.Shape.exportBrepToString()==old and len(doc.UndoNames)==undos)
+        shape=obj.Shape.copy();shape.reverse();obj.Shape=shape;doc.recompute()
+        saved=out/'current.FCStd';doc.saveAs(str(saved));App.closeDocument(doc.Name);doc=App.openDocument(str(saved));obj=doc.getObject('Rational')
+        check('FCStd reopens edited rational basis',abs(obj.Shape.Edges[0].Curve.getPole(2).y-6)<1e-9 and obj.Shape.Edges[0].Curve.getWeights()==basis['weights'])
+        exported=out/'edited-curve-v5.3dm';ThreeDm.export_file(str(exported),[obj],modeling=True)
+        reimport=App.newDocument('CurveReread');objects=ThreeDm.import_file(str(exported),reimport,mode='modeling')
+        check('current curve V5 export reimport',len(objects)==1 and abs(objects[0].Shape.Edges[0].Curve.getPole(2).y-6)<1e-9)
+        report.update(ok=True,module=native.__file__,exported=str(exported))
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

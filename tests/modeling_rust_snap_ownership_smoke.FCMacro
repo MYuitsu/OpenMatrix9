@@ -1,0 +1,23 @@
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore
+import json,os,traceback
+from pathlib import Path
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append({'name':name,'passed':bool(value)})
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import OpenMatrix9Gui as native
+        ownership=json.loads(native.phase2Ownership3dm());check('native snap delegates index cache budget and ranking to Rust',ownership['snap']=='rust')
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('RustSnap');obj=doc.addObject('Part::Feature','Line');obj.Shape=Part.makeLine(App.Vector(0,0,0),App.Vector(10,0,0));doc.recompute();Gui.activeDocument().activeView().viewTop();Gui.activeDocument().activeView().fitAll();Gui.updateGui()
+        view=Gui.activeDocument().activeView();initial=json.loads(native.querySnap3dm(0,0,2));p=view.getPointOnScreen(App.Vector(0,0,0));y=initial['viewport_height']-int(p[1]);first=json.loads(native.querySnap3dm(int(p[0]),y,2));second=json.loads(native.querySnap3dm(int(p[0]),y,2))
+        check('Rust index publishes complete native snapshot and picks endpoint',first['complete'] and first['picked'] and first['point']==[0,0,0] and initial['index_rebuilt'])
+        check('Rust candidate cache reuses only matching geometry generation',second['complete'] and second['picked'] and not second['index_rebuilt'] and second['generated_candidates']==0)
+        bad=json.loads(native.querySnap3dm(int(p[0]),y,16));check('Rust rejects unsupported query before native extraction',not bad['complete'] and not bad['picked'] and bad['generated_candidates']==0)
+        report.update(ok=True,module=native.__file__)
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

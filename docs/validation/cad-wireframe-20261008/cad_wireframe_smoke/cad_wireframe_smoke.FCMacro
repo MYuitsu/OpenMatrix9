@@ -1,0 +1,97 @@
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtGui,QtWidgets
+from pathlib import Path
+from pivy import coin
+import os,json,traceback,hashlib
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);result={'checks':[]}
+def check(name,value):
+    result['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def settle():
+    loop=QtCore.QEventLoop();QtCore.QTimer.singleShot(400,loop.quit);loop.exec()
+def mode(sub,name):
+    menu=sub.widget().findChild(QtWidgets.QMenu,'OM9ViewportMenu')
+    next(a for a in menu.actions() if a.text()==name).trigger();settle()
+def capture(sub,name):
+    area.setActiveSubWindow(sub);settle();view=Gui.activeDocument().activeView()
+    view.saveImage(str(out/(name+'.png')),800,800,'Current');return QtGui.QImage(str(out/(name+'.png')))
+def run():
+    global area
+    try:
+        Gui.activateWorkbench('OpenMatrix9Workbench');doc=App.newDocument('CadWire');doc.UndoMode=1
+        box=doc.addObject('Part::Box','Box');box.Length=box.Width=box.Height=10;box.ViewObject.LineColor=(1.,1.,1.);doc.recompute();settle()
+        area=Gui.getMainWindow().findChild(QtWidgets.QMdiArea);subs={int(s.widget().property('om9ViewSlot')):s for s in area.subWindowList() if s.widget().property('om9DocumentName')==doc.Name}
+        Gui.runCommand('ShowGrid');area.setActiveSubWindow(subs[0]);view=Gui.activeDocument().activeView();view.viewFront();view.fitAll();settle()
+        before=box.Shape.hashCode();undos=doc.UndoCount
+        wire=capture(subs[0],'box-wire');center=wire.copy(340,340,120,120)
+        lit=sum(center.pixelColor(x,y).red()>30 for x in range(center.width()) for y in range(center.height()))
+        result['box_interior_lit_pixels']=lit
+        check('CAD Wireframe has no face tessellation diagonals',lit==0)
+        centerpos=view.getPointOnScreen(App.Vector(5,0,5));info=view.getObjectInfo((int(centerpos[0]),int(centerpos[1])))
+        result['wire_center_pick']=info;result['wire_center_screen']=list(centerpos)
+        check('Wireframe does not pick invisible face interiors',not info)
+        edgepos=view.getPointOnScreen(App.Vector(0,0,5));info=view.getObjectInfo((int(edgepos[0]),int(edgepos[1])))
+        check('native CAD edge remains pickable',bool(info) and str(info.get('Component','')).startswith('Edge'))
+        mode(subs[1],'Shaded');neighbor=capture(subs[1],'neighbor-shaded');mode(subs[0],'Shaded');shaded=capture(subs[0],'box-shaded')
+        check('Shaded fills same CAD face',shaded!=wire)
+        mode(subs[0],'Wireframe');check('local Wireframe preserves neighboring Shaded pixels',capture(subs[1],'neighbor-after')==neighbor)
+        check('display does not change Shape or Undo',box.Shape.hashCode()==before and doc.UndoCount==undos)
+        box.ViewObject.LineColor=(0.,0.,0.);dark=capture(subs[0],'dark-color-wire').copy(120,120,560,560)
+        check('dark native CAD edges remain visible on black background',any(dark.pixelColor(x,y).red()>30 for x in range(dark.width()) for y in range(dark.height())))
+        check('contrast fallback does not change stored line color',box.ViewObject.LineColor[:3]==(0.,0.,0.))
+        import Mesh
+        box.Visibility=False;mesh=doc.addObject('Mesh::Feature','Mesh');mesh.Mesh=Mesh.Mesh([[(0,0,0),(10,0,0),(10,10,0)],[(0,0,0),(10,10,0),(0,10,0)]]);mesh.ViewObject.ShapeColor=(1.,1.,1.);doc.recompute();settle()
+        area.setActiveSubWindow(subs[0]);view=Gui.activeDocument().activeView();view.viewTop();view.fitAll();settle();mesh_wire=capture(subs[0],'mesh-wire');mode(subs[0],'Shaded');mesh_shaded=capture(subs[0],'mesh-shaded')
+        check('native mesh keeps polygon Wireframe distinct from filled Shaded',mesh_wire!=mesh_shaded)
+        mode(subs[0],'Wireframe');mesh.Visibility=False
+        box.Visibility=False;cylinder=doc.addObject('Part::Feature','Cylinder');cylinder.Shape=Part.makeCylinder(5,10);cylinder.ViewObject.LineColor=(1.,.5,.5);doc.recompute();settle()
+        area.setActiveSubWindow(subs[0]);view=Gui.activeDocument().activeView();view.viewAxonometric();view.fitAll();settle();capture(subs[0],'cylinder-wire')
+        def nodes(node):
+            yield node
+            if node.isOfType(coin.SoGroup.getClassTypeId()):
+                for child in node.getChildren():yield from nodes(child)
+        overlays=[n for n in nodes(cylinder.ViewObject.RootNode) if str(n.getName())=='OM9CadIsocurves']
+        check('curved CAD surface has display-only isocurves',len(overlays)==1)
+        check('isocurve overlay is not a document object',len(doc.Objects)==3)
+        def iso_points(obj):
+            overlay=next(n for n in nodes(obj.ViewObject.RootNode) if str(n.getName())=='OM9CadIsocurves')
+            coords=next(n for n in nodes(overlay) if n.isOfType(coin.SoCoordinate3.getClassTypeId()))
+            lines=next(n for n in nodes(overlay) if n.isOfType(coin.SoLineSet.getClassTypeId()))
+            return [App.Vector(*coords.point[i].getValue()) for i in range(coords.point.getNum())],list(lines.numVertices.getValues())
+        first_points,first_lengths=iso_points(cylinder);check('isocurves contain curved surface polylines',len(first_points)>4 and len(first_lengths)>0)
+        cylinder.ViewObject.addProperty('App::PropertyInteger','OM9IsoCurveDensity','Rhino display');cylinder.ViewObject.OM9IsoCurveDensity=-1;settle()
+        check('boundary-only density suppresses isocurves',not iso_points(cylinder)[0])
+        cylinder.ViewObject.OM9IsoCurveDensity=3;settle();dense_points,dense_lengths=iso_points(cylinder)
+        check('increasing density adds interior surface curves',len(dense_lengths)>len(first_lengths))
+        cylinder.Shape=Part.makeCylinder(7,10);doc.recompute();settle();changed_points,_=iso_points(cylinder)
+        check('shape edit invalidates isocurve cache',max(abs(p.x) for p in changed_points)>6.9)
+        cylinder.Shape=Part.makeCylinder(5,10).cut(Part.makeCylinder(1,20,App.Vector(-10,0,5),App.Vector(1,0,0)));doc.recompute();settle();trim_points,_=iso_points(cylinder)
+        check('trimmed isocurve vertices remain on CAD faces outside cut holes',len(trim_points)>4 and max(Part.Vertex(p).distToShape(cylinder.Shape)[0] for p in trim_points)<1e-6)
+        capture(subs[0],'trim-hole-wire')
+        saved=out/'display-density.FCStd';doc.saveAs(str(saved));App.closeDocument(doc.Name);doc=App.openDocument(str(saved));settle()
+        check('display density survives FCStd reopen',doc.Cylinder.ViewObject.OM9IsoCurveDensity==3 and bool(iso_points(doc.Cylinder)[0]))
+        doc.Cylinder.Visibility=False
+        surface=Part.BSplineSurface();surface.buildFromPolesMultsKnots([[App.Vector(x*2,y*4,[0,1,-1,0][x]) for y in range(2)] for x in range(4)],[3,1,3],[2,2],[0,1,2],[0,1],False,False,2,1)
+        knot=doc.addObject('Part::Feature','KnotSurface');knot.Shape=surface.toShape();knot.ViewObject.addProperty('App::PropertyInteger','OM9IsoCurveDensity','Rhino display');knot.ViewObject.OM9IsoCurveDensity=0;doc.recompute();settle()
+        check('density zero retains interior NURBS knot wire',len(iso_points(knot)[1])==1)
+        knot.ViewObject.OM9IsoCurveDensity=1;settle();check('density one adds wire only in knot-free direction',len(iso_points(knot)[1])==2)
+        knot.ViewObject.OM9IsoCurveDensity=3;settle();check('density three subdivides knot spans',len(iso_points(knot)[1])==7)
+        source=Path('C:/Users/nguye/Downloads/nhan oval 11.91x8.37x4.97.3dm');digest=hashlib.sha256(source.read_bytes()).hexdigest()
+        import ThreeDm,OpenMatrix9Gui as native
+        ring=App.newDocument('UserRingCadWire');objects=ThreeDm.import_file(str(source),ring,mode='preserve');ring.recompute();settle()
+        hashes={o.Name:o.Shape.hashCode() for o in ring.Objects if o.isDerivedFrom('Part::Feature')}
+        check('imported CAD line colors follow source colors',all(o.ViewObject.LineColor[:3]==o.ViewObject.ShapeColor[:3] for o in ring.Objects if o.isDerivedFrom('Part::Feature')))
+        records={r['source_uuid']:r for r in json.loads(native.inspect3dm(str(source)))['records']}
+        check('preserved CAD density matches native Rhino object attributes',all(o.ViewObject.OM9IsoCurveDensity==records[o.OM9SourceUUID]['wire_density'] for o in ring.Objects if o.isDerivedFrom('Part::Feature') and hasattr(o,'OM9SourceUUID')))
+        view=Gui.activeDocument().activeView();view.viewAxonometric();view.fitAll();settle();view.saveImage(str(out/'user-ring-wire-iso.png'),1100,900,'Current')
+        view.viewFront();view.fitAll();settle();view.saveImage(str(out/'user-ring-wire-front.png'),1100,900,'Current')
+        check('source file unchanged',hashlib.sha256(source.read_bytes()).hexdigest()==digest)
+        check('render preserves imported CAD shape hashes',hashes=={o.Name:o.Shape.hashCode() for o in ring.Objects if o.isDerivedFrom('Part::Feature')})
+        Gui.activateWorkbench('PartWorkbench');settle()
+        check('workbench exit removes transient CAD presentation nodes',not any(str(n.getName()).startswith('OM9Cad') for o in ring.Objects if o.isDerivedFrom('Part::Feature') for n in nodes(o.ViewObject.RootNode)))
+        result.update(ok=True,module=native.__file__,source_sha256=digest,top_level_objects=len(objects))
+    except Exception:result.update(ok=False,error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(result,indent=2))
+    for name in list(App.listDocuments()):App.closeDocument(name)
+    QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1200,run)

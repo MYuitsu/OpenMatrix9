@@ -1,0 +1,567 @@
+{
+  "checks": [
+    {
+      "name": "completed actual Rhino clipboard matrix",
+      "passed": true
+    },
+    {
+      "name": "same candidate binary",
+      "passed": true
+    },
+    {
+      "name": "current-ring Rhino saved archive bound",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Diamond_Round/Diamond_Round",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject002",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject003",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject004",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject005",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject006",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject007",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject008",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject009",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject010",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject011",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject017",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Diamond_Oval/Diamond_Oval",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid NewRingCircle",
+      "passed": true
+    },
+    {
+      "name": "current-ring edited/new geometry survives Rhino SaveAs",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Diamond_Round/Diamond_Round",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject002",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject003",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject004",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject005",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject006",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject007",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject008",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject009",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject010",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject011",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject017",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Diamond_Oval/Diamond_Oval",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid NewRingCircle",
+      "passed": true
+    },
+    {
+      "name": "current-ring FCStd editable without own source archive",
+      "passed": true
+    },
+    {
+      "name": "current-ring Rhino saved source unchanged",
+      "passed": true
+    },
+    {
+      "name": "edited-and-new Rhino saved archive bound",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Original curve",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid NewCircle",
+      "passed": true
+    },
+    {
+      "name": "edited-and-new edited/new geometry survives Rhino SaveAs",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Original curve",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid NewCircle",
+      "passed": true
+    },
+    {
+      "name": "edited-and-new FCStd editable without own source archive",
+      "passed": true
+    },
+    {
+      "name": "edited-and-new Rhino saved source unchanged",
+      "passed": true
+    },
+    {
+      "name": "edited-cloud Rhino saved archive bound",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "edited-cloud edited/new geometry survives Rhino SaveAs",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "edited-cloud FCStd editable without own source archive",
+      "passed": true
+    },
+    {
+      "name": "edited-cloud Rhino saved source unchanged",
+      "passed": true
+    },
+    {
+      "name": "placed-cad Rhino saved archive bound",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid PlacedCurve",
+      "passed": true
+    },
+    {
+      "name": "placed-cad edited/new geometry survives Rhino SaveAs",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid PlacedCurve",
+      "passed": true
+    },
+    {
+      "name": "placed-cad FCStd editable without own source archive",
+      "passed": true
+    },
+    {
+      "name": "placed-cad Rhino saved source unchanged",
+      "passed": true
+    },
+    {
+      "name": "mm Rhino saved archive bound",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Arc",
+      "passed": true
+    },
+    {
+      "name": "mm edited/new geometry survives Rhino SaveAs",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Arc",
+      "passed": true
+    },
+    {
+      "name": "mm FCStd editable without own source archive",
+      "passed": true
+    },
+    {
+      "name": "mm Rhino saved source unchanged",
+      "passed": true
+    },
+    {
+      "name": "cm-converted-mm Rhino saved archive bound",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Arc",
+      "passed": true
+    },
+    {
+      "name": "cm-converted-mm edited/new geometry survives Rhino SaveAs",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Arc",
+      "passed": true
+    },
+    {
+      "name": "cm-converted-mm FCStd editable without own source archive",
+      "passed": true
+    },
+    {
+      "name": "cm-converted-mm Rhino saved source unchanged",
+      "passed": true
+    },
+    {
+      "name": "source-and-link Rhino saved archive bound",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid PlacedCurve",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid CurveCopy",
+      "passed": true
+    },
+    {
+      "name": "source-and-link edited/new geometry survives Rhino SaveAs",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid PlacedCurve",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid CurveCopy",
+      "passed": true
+    },
+    {
+      "name": "source-and-link FCStd editable without own source archive",
+      "passed": true
+    },
+    {
+      "name": "source-and-link Rhino saved source unchanged",
+      "passed": true
+    },
+    {
+      "name": "current-point Rhino saved archive bound",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Point",
+      "passed": true
+    },
+    {
+      "name": "current-point edited/new geometry survives Rhino SaveAs",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Point",
+      "passed": true
+    },
+    {
+      "name": "current-point FCStd editable without own source archive",
+      "passed": true
+    },
+    {
+      "name": "current-point Rhino saved source unchanged",
+      "passed": true
+    },
+    {
+      "name": "current-extrusion Rhino saved archive bound",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject001",
+      "passed": true
+    },
+    {
+      "name": "current-extrusion edited/new geometry survives Rhino SaveAs",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid RhinoObject001",
+      "passed": true
+    },
+    {
+      "name": "current-extrusion FCStd editable without own source archive",
+      "passed": true
+    },
+    {
+      "name": "current-extrusion Rhino saved source unchanged",
+      "passed": true
+    },
+    {
+      "name": "current-mesh Rhino saved archive bound",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "current-mesh edited/new geometry survives Rhino SaveAs",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "current-mesh FCStd editable without own source archive",
+      "passed": true
+    },
+    {
+      "name": "current-mesh Rhino saved source unchanged",
+      "passed": true
+    },
+    {
+      "name": "native-cm Rhino saved archive bound",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Arc",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Nurbs",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Box",
+      "passed": true
+    },
+    {
+      "name": "native-cm edited/new geometry survives Rhino SaveAs",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid ClipboardNewCircle",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Arc",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Nurbs",
+      "passed": true
+    },
+    {
+      "name": "working CAD valid Box",
+      "passed": true
+    },
+    {
+      "name": "native-cm FCStd editable without own source archive",
+      "passed": true
+    },
+    {
+      "name": "native-cm Rhino saved source unchanged",
+      "passed": true
+    }
+  ],
+  "cases": [
+    {
+      "name": "current-ring",
+      "ok": true,
+      "object_count": 15,
+      "fcstd": "H:\\FreeCAD-src\\build\\om9-perf-dev\\build\\modeling_clipboard_saved_reimport-1\\0bcb9b951b204bd9a69049147dff1867\\current-ring.FCStd",
+      "source_sha256": "b47f4bfabd625267388f24bcd4450a7b0c087f32071717294db6806203d0f10b"
+    },
+    {
+      "name": "edited-and-new",
+      "ok": true,
+      "object_count": 3,
+      "fcstd": "H:\\FreeCAD-src\\build\\om9-perf-dev\\build\\modeling_clipboard_saved_reimport-1\\0bcb9b951b204bd9a69049147dff1867\\edited-and-new.FCStd",
+      "source_sha256": "1a2a14b2f710e96137b5ce47dd472ee778785cfec02931995563e8d9e5d11b1f"
+    },
+    {
+      "name": "edited-cloud",
+      "ok": true,
+      "object_count": 2,
+      "fcstd": "H:\\FreeCAD-src\\build\\om9-perf-dev\\build\\modeling_clipboard_saved_reimport-1\\0bcb9b951b204bd9a69049147dff1867\\edited-cloud.FCStd",
+      "source_sha256": "aa761ffe202db123341e8f5f5028d789a2dc26dde4346e64dd6c54bd71ec970f"
+    },
+    {
+      "name": "placed-cad",
+      "ok": true,
+      "object_count": 2,
+      "fcstd": "H:\\FreeCAD-src\\build\\om9-perf-dev\\build\\modeling_clipboard_saved_reimport-1\\0bcb9b951b204bd9a69049147dff1867\\placed-cad.FCStd",
+      "source_sha256": "502c757250be77bb525ae4df87c62c96dded9749c1fc708d52d6f2745a3075f1"
+    },
+    {
+      "name": "mm",
+      "ok": true,
+      "object_count": 3,
+      "fcstd": "H:\\FreeCAD-src\\build\\om9-perf-dev\\build\\modeling_clipboard_saved_reimport-1\\0bcb9b951b204bd9a69049147dff1867\\mm.FCStd",
+      "source_sha256": "9fbb9b974be4411bc3fb8248c04e90e446f20a46c8408d56abb09e6f3cca80fa"
+    },
+    {
+      "name": "cm-converted-mm",
+      "ok": true,
+      "object_count": 3,
+      "fcstd": "H:\\FreeCAD-src\\build\\om9-perf-dev\\build\\modeling_clipboard_saved_reimport-1\\0bcb9b951b204bd9a69049147dff1867\\cm-converted-mm.FCStd",
+      "source_sha256": "f3a9316c8ef63d6731fbc7691e3044399f30ff71f248f5e50a188b34b11e6825"
+    },
+    {
+      "name": "source-and-link",
+      "ok": true,
+      "object_count": 3,
+      "fcstd": "H:\\FreeCAD-src\\build\\om9-perf-dev\\build\\modeling_clipboard_saved_reimport-1\\0bcb9b951b204bd9a69049147dff1867\\source-and-link.FCStd",
+      "source_sha256": "a68b8bfa7a5f2ea59aef8917e315e87e6ab5f329f5ce2e72ee0c26e375a5bad8"
+    },
+    {
+      "name": "current-point",
+      "ok": true,
+      "object_count": 2,
+      "fcstd": "H:\\FreeCAD-src\\build\\om9-perf-dev\\build\\modeling_clipboard_saved_reimport-1\\0bcb9b951b204bd9a69049147dff1867\\current-point.FCStd",
+      "source_sha256": "d2c91f296f0e96d03a3eb18bbbdb1d912c5276a39294063520ad4800d530d35f"
+    },
+    {
+      "name": "current-extrusion",
+      "ok": true,
+      "object_count": 2,
+      "fcstd": "H:\\FreeCAD-src\\build\\om9-perf-dev\\build\\modeling_clipboard_saved_reimport-1\\0bcb9b951b204bd9a69049147dff1867\\current-extrusion.FCStd",
+      "source_sha256": "67fce54e0f67a8ac95b4a9dfd7e1aec04ad9923cf068ddaa815db1585ec6a1b6"
+    },
+    {
+      "name": "current-mesh",
+      "ok": true,
+      "object_count": 2,
+      "fcstd": "H:\\FreeCAD-src\\build\\om9-perf-dev\\build\\modeling_clipboard_saved_reimport-1\\0bcb9b951b204bd9a69049147dff1867\\current-mesh.FCStd",
+      "source_sha256": "6c5e924ed4779746c5e3e2d6e1d7b9a53ee08df8e66478ee7598f408e189ce08"
+    },
+    {
+      "name": "native-cm",
+      "ok": true,
+      "object_count": 5,
+      "fcstd": "H:\\FreeCAD-src\\build\\om9-perf-dev\\build\\modeling_clipboard_saved_reimport-1\\0bcb9b951b204bd9a69049147dff1867\\native-cm.FCStd",
+      "source_sha256": "7483f2e945816c08b7a45e86854ae9070e2deab76f8b4e2bd808a914de4d0a89"
+    }
+  ],
+  "rhino_report": "H:\\FreeCAD-src\\build\\rhino5-phase12-perf-clipboard\\1c020512e08247ce92a47499246affac\\rhino5-results.json",
+  "ok": true,
+  "module_sha256": "187f5c55baf2ca715409194464c76ea938c919d35ade6f3781da58cb43d3835a"
+}
+Artifacts: H:\FreeCAD-src\build\om9-perf-dev\build\modeling_clipboard_saved_reimport-1\0bcb9b951b204bd9a69049147dff1867

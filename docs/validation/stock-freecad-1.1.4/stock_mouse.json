@@ -1,0 +1,323 @@
+{
+  "checks": [
+    {
+      "name": "Shift right drag pans without rotating slot 0",
+      "passed": true
+    },
+    {
+      "name": "right drag navigates slot 0",
+      "passed": true
+    },
+    {
+      "name": "plain right drag rotates only Perspective slot 0",
+      "passed": true
+    },
+    {
+      "name": "Ctrl right drag zooms slot 0",
+      "passed": true
+    },
+    {
+      "name": "wheel zooms in slot 0",
+      "passed": true
+    },
+    {
+      "name": "Shift right drag pans without rotating slot 1",
+      "passed": true
+    },
+    {
+      "name": "right drag navigates slot 1",
+      "passed": true
+    },
+    {
+      "name": "plain right drag rotates only Perspective slot 1",
+      "passed": true
+    },
+    {
+      "name": "Ctrl right drag zooms slot 1",
+      "passed": true
+    },
+    {
+      "name": "wheel zooms in slot 1",
+      "passed": true
+    },
+    {
+      "name": "Shift right drag pans without rotating slot 2",
+      "passed": true
+    },
+    {
+      "name": "right drag navigates slot 2",
+      "passed": true
+    },
+    {
+      "name": "plain right drag rotates only Perspective slot 2",
+      "passed": true
+    },
+    {
+      "name": "Ctrl right drag zooms slot 2",
+      "passed": true
+    },
+    {
+      "name": "wheel zooms in slot 2",
+      "passed": true
+    },
+    {
+      "name": "Shift right drag pans without rotating slot 3",
+      "passed": true
+    },
+    {
+      "name": "right drag navigates slot 3",
+      "passed": true
+    },
+    {
+      "name": "plain right drag rotates only Perspective slot 3",
+      "passed": true
+    },
+    {
+      "name": "Ctrl right drag zooms slot 3",
+      "passed": true
+    },
+    {
+      "name": "wheel zooms in slot 3",
+      "passed": true
+    },
+    {
+      "name": "Ctrl Shift right forces parallel orbit",
+      "passed": true
+    },
+    {
+      "name": "Alt right dollies along camera direction",
+      "passed": true
+    },
+    {
+      "name": "Shift Alt right tilts camera",
+      "passed": true
+    },
+    {
+      "name": "Ctrl Alt right turns camera at same position",
+      "passed": true
+    },
+    {
+      "name": "left click selects whole native object",
+      "passed": true
+    },
+    {
+      "name": "Shift left adds selection",
+      "passed": true
+    },
+    {
+      "name": "Ctrl left click removes without zoom",
+      "passed": true
+    },
+    {
+      "name": "left to right box contains whole object",
+      "passed": true
+    },
+    {
+      "name": "right to left box selects crossed object",
+      "passed": true
+    },
+    {
+      "name": "window excludes partly crossed object",
+      "passed": true
+    },
+    {
+      "name": "Ctrl Shift window adds contained edge and retains previous edge",
+      "passed": true
+    },
+    {
+      "name": "right click completes Polyline via shared CMD geometry",
+      "passed": true
+    },
+    {
+      "name": "Ctrl left zoom retains active Curve and adds no point",
+      "passed": true
+    },
+    {
+      "name": "Curve continues after mouse navigation",
+      "passed": true
+    },
+    {
+      "name": "idle right click repeats last shared command",
+      "passed": true
+    },
+    {
+      "name": "navigation retains Distance and right click accepts CMD text",
+      "passed": true
+    },
+    {
+      "name": "right click executes pending CMD command before repeating",
+      "passed": true
+    },
+    {
+      "name": "Esc rolls back native mouse navigation",
+      "passed": true
+    },
+    {
+      "name": "middle click opens recent command menu",
+      "passed": true
+    },
+    {
+      "name": "middle button can use persisted pan mapping",
+      "passed": true
+    },
+    {
+      "name": "holding right button opens shared F6 context",
+      "passed": true
+    },
+    {
+      "name": "closing held-right menu restores mouse hover",
+      "passed": true
+    },
+    {
+      "name": "restricted task blocks mouse camera changes",
+      "passed": true
+    },
+    {
+      "name": "lost capture stops navigation on no-button hover",
+      "passed": true
+    },
+    {
+      "name": "missing held button cancels gesture without camera motion",
+      "passed": true
+    },
+    {
+      "name": "application deactivation cancels pending held-right menu",
+      "passed": true
+    }
+  ],
+  "camera_probe": "#Inventor V2.1 ascii\n\n\nOrthographicCamera {\n  viewportMapping ADJUST_CAMERA\n  position -0 -0 100\n  orientation 0 0 1  0\n  nearDistance 0.1\n  farDistance 1000\n  aspectRatio 1\n  focalDistance 100\n  height 50\n\n}\n",
+  "visibility": [
+    [
+      "First",
+      true,
+      "Flat Lines"
+    ],
+    [
+      "Second",
+      true,
+      "Flat Lines"
+    ]
+  ],
+  "selection_probe": {
+    "a": [
+      255,
+      180
+    ],
+    "b": [
+      320,
+      180
+    ],
+    "widget": [
+      597,
+      362
+    ],
+    "viewport": [
+      597,
+      362
+    ],
+    "native_pick": {
+      "x": -6.0,
+      "y": 0.0,
+      "z": 1.0,
+      "Document": "MatrixMouse",
+      "Object": "First",
+      "Component": "Edge2"
+    },
+    "selected": [
+      [
+        "First",
+        []
+      ]
+    ]
+  },
+  "edge_window_selection": [
+    [
+      "LongWire",
+      [
+        "Edge2",
+        "Edge1"
+      ]
+    ]
+  ],
+  "polyline_probe": {
+    "objects": [
+      [
+        "First",
+        "Part::Feature",
+        56.0
+      ],
+      [
+        "Second",
+        "Part::Feature",
+        56.0
+      ],
+      [
+        "LongWire",
+        "Part::Feature",
+        24.0
+      ],
+      [
+        "Polyline",
+        "Part::Feature",
+        2.0
+      ],
+      [
+        "OM9LayerState",
+        "OpenMatrix9Gui::LayerDocumentObject",
+        null
+      ]
+    ],
+    "prompt": "Command: ",
+    "pending": false,
+    "input": ""
+  },
+  "cancel_camera": {
+    "before": [
+      -0.0,
+      -0.0,
+      100.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      100.0,
+      54.499290466308594
+    ],
+    "after": [
+      -0.0,
+      -0.0,
+      100.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      100.0,
+      54.499290466308594
+    ]
+  },
+  "restricted_camera": {
+    "before": [
+      -3.0160634517669678,
+      2.264512777328491,
+      100.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      100.0,
+      54.499290466308594
+    ],
+    "after": [
+      -3.0160634517669678,
+      2.264512777328491,
+      100.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      100.0,
+      54.499290466308594
+    ]
+  },
+  "ok": true
+}

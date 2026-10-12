@@ -1,3 +1,4 @@
+#include <Mod/Part/App/PartFeature.h>
 #include "CoreMouse.h"
 #include "CoreKeyboard.h"
 #include "CoreViewControls.h"
@@ -114,7 +115,9 @@ void CoreMouse::select(const QPoint& point,bool rectangle){
             const QRect rect=QRect(anchor,point).normalized();auto selected=selectionTargets(name);
             for(const auto& selection:selected){if((modifiers&1)&&std::find(previous.begin(),previous.end(),selection)!=previous.end())continue;auto* object=selection.getObject();if(!object)continue;auto* provider=dynamic_cast<Gui::ViewProviderDocumentObject*>(target->getGuiDocument()->getViewProvider(object));if(!provider)continue;
 #if defined(OM9_STOCK_FREECAD)
-                const auto bounds=provider->getBoundingBox(selection.getSubName().c_str(),true,target);
+                auto bounds=provider->getBoundingBox(selection.getSubName().c_str(),true,target);
+                if(!selection.getSubName().empty() && Part::Feature::hasShapeOwner(object,selection.getSubName().c_str()))
+                    bounds=Part::Feature::getTopoShape(object,Part::ShapeOption::NeedSubElement|Part::ShapeOption::ResolveLink|Part::ShapeOption::Transform,selection.getSubName().c_str()).getBoundBox();
 #else
                 const auto bounds=provider->getBoundingBox(selection.getSubName().c_str(),nullptr,true,viewer);
 #endif

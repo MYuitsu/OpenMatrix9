@@ -1,0 +1,102 @@
+"""Actual ring: current selected V5 and source-independent FCStd lifecycle."""
+import FreeCAD as App, FreeCADGui as Gui
+from PySide6 import QtCore
+from pathlib import Path
+import os, json, hashlib, traceback, tempfile, math
+
+out = Path(os.environ['OM9_SMOKE_OUTPUT'])
+report = {'checks': [], 'geometry': []}
+
+def check(name, value):
+    report['checks'].append({'name': name, 'passed': bool(value)})
+    if not value:
+        raise AssertionError(name)
+
+def metrics(shape):
+    import OpenMatrix9Gui as native
+    box = shape.optimalBoundingBox(False, False)
+    with tempfile.TemporaryDirectory() as staging:
+        path=Path(staging)/'measurement.brep'
+        shape.exportBrep(str(path))
+        measure=native.measure3dmBrep(str(path),1e-10)
+    return {'bounds': [box.XMin, box.YMin, box.ZMin, box.XMax, box.YMax, box.ZMax],
+            'area': measure['area'], 'volume': measure['volume'], 'valid': shape.isValid(),
+            'edges': len(shape.Edges), 'faces': len(shape.Faces), 'solids': len(shape.Solids)}
+
+def run():
+    try:
+        import ThreeDm, Part, OpenMatrix9Gui as native
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        source = Path('C:/Users/nguye/Downloads/nhan oval 11.91x8.37x4.97.3dm')
+        digest = hashlib.sha256(source.read_bytes()).hexdigest()
+        copy = out / 'ring-working-copy.3dm'
+        copy.write_bytes(source.read_bytes())
+        doc = App.newDocument('RingWorkingRoundtrip')
+        doc.UndoMode = 1
+        objects = ThreeDm.import_file(str(copy), doc, mode='modeling')
+        check('actual ring imports all 29 native CAD objects', len(objects) == 29 and all(o.OM9Representation == 'native-cad' for o in objects))
+        curve = next(o for o in objects if o.OM9GeometryKind == 2)
+        solid = next(o for o in objects if o.OM9GeometryKind == 3 and o.Shape.Faces)
+        for obj, sub in [(curve, 'Edge1'), (solid, 'Face1')]:
+            Gui.Selection.clearSelection()
+            Gui.Selection.addSelection(doc.Name, obj.Name, sub)
+            selected = Gui.Selection.getSelectionEx()
+            check('native subelement selection ' + sub, len(selected) == 1 and selected[0].Object.Name == obj.Name and sub in selected[0].SubElementNames)
+        Gui.Selection.clearSelection()
+        modes = solid.ViewObject.listDisplayModes()
+        for mode in ['Wireframe', 'Flat Lines']:
+            check('native CAD display mode available ' + mode, mode in modes)
+            solid.ViewObject.DisplayMode = mode
+            check('native CAD display mode applied ' + mode, solid.ViewObject.DisplayMode == mode)
+        curve.Placement.Base = curve.Placement.Base + App.Vector(3, 2, 1)
+        removed = next(o for o in objects if o is not curve and o is not solid)
+        deleted_name = removed.Name
+        doc.removeObject(deleted_name)
+        objects = [o for o in objects if o is not removed]
+        circle = doc.addObject('Part::Feature', 'NewRingCircle')
+        circle.Shape = Part.makeCircle(2, App.Vector(17, 4, 1))
+        objects.append(circle)
+        doc.recompute()
+        names = [o.Name for o in objects]
+        expected = [metrics(o.Shape) for o in objects]
+        check('current selection has valid moved imported and new geometry', len(objects) == 29 and all(m['valid'] for m in expected))
+        saved = out / 'ring-working.FCStd'
+        doc.saveAs(str(saved))
+        App.closeDocument(doc.Name)
+        copy.unlink()
+        doc = App.openDocument(str(saved))
+        objects = [doc.getObject(name) for name in names]
+        check('actual ring FCStd has no deleted object or source dependency', not copy.exists() and doc.getObject(deleted_name) is None and all(o is not None for o in objects))
+        target = out / 'ring-current-and-new-v5.3dm'
+        ThreeDm.export_file(str(target), objects, modeling=True)
+        check('current ring output targets V5', json.loads(native.inspect3dm(str(target)))['source_version'] == 50)
+        with tempfile.TemporaryDirectory() as staging:
+            rows = json.loads(native.read3dm(str(target), staging))['items']
+            check('selected ring output includes exactly 29 current objects', len(rows) == len(expected))
+            for index, (row, before) in enumerate(zip(rows, expected)):
+                shape = Part.Shape()
+                shape.read(row['brep'])
+                after = metrics(shape)
+                bounds_error = max(abs(a-b) for a,b in zip(before['bounds'], after['bounds']))
+                area_error = abs(before['area']-after['area'])
+                volume_error = abs(before['volume']-after['volume'])
+                report['geometry'].append({'index': index, 'name': names[index], 'expected': before, 'actual': after,
+                    'bounds_error_mm': bounds_error, 'area_error_mm2': area_error, 'volume_error_mm3': volume_error})
+                check('current selected object fidelity ' + str(index), after['valid'] and bounds_error <= 0.001
+                    and area_error <= max(0.001, 0.0001*abs(before['area']))
+                    and volume_error <= max(0.001, 0.0001*abs(before['volume']))
+                    and all(before[k] == after[k] for k in ['edges', 'faces', 'solids']))
+                if names[index] == 'NewRingCircle':
+                    check('new ring circle exact geometric radius', all(abs((p-App.Vector(17,4,1)).Length-2) < 1e-7 for p in shape.Edges[0].discretize(Number=33)) and abs(shape.Length-4*math.pi) < 1e-7)
+        check('original user ring remains immutable', hashlib.sha256(source.read_bytes()).hexdigest() == digest)
+        report.update(ok=True, module=native.__file__, source_sha256=digest,
+                      measurement='OCCT AddOptimal without triangulation; adaptive native GProp integration precision 1e-10',
+                      tolerance={'bounds_mm': 0.001, 'area_volume_absolute': 0.001, 'area_volume_relative': 0.0001})
+    except Exception:
+        report.update(ok=False, error=traceback.format_exc())
+    (out/'results.json').write_text(json.dumps(report, indent=2))
+    for name in list(App.listDocuments()):
+        App.closeDocument(name)
+    QtCore.QTimer.singleShot(100, Gui.getMainWindow().close)
+
+QtCore.QTimer.singleShot(1000, run)

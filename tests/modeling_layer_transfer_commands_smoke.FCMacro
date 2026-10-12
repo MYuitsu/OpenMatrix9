@@ -1,0 +1,114 @@
+"""Actual public Selected/Session file and paired clipboard handoff commands."""
+import os,json,traceback,tempfile,copy
+from pathlib import Path
+import FreeCAD as App,FreeCADGui as Gui,Part
+from PySide6 import QtCore,QtWidgets
+out=Path(os.environ['OM9_SMOKE_OUTPUT']);report={'checks':[]}
+def check(name,value):
+    report['checks'].append(dict(name=name,passed=bool(value)))
+    if not value:raise AssertionError(name)
+def run():
+    try:
+        import OpenMatrix9Gui as native,ThreeDm,ThreeDmClipboard as clip
+        Gui.activateWorkbench('OpenMatrix9Workbench')
+        doc=App.newDocument('TransferSource');doc.UndoMode=1
+        state=json.loads(native.layerDocumentSnapshot(doc.Name))
+        state['snapshot']['layers'][0]['rgb']=[12,34,56]
+        native.initializeLayerDocument(doc.Name,json.dumps(state))
+        before=json.loads(native.layerDocumentSnapshot(doc.Name));undo=doc.UndoCount
+        Gui.Selection.clearSelection()
+        # This was the real public failure: the old working_selection rejected
+        # empty geometry even though canonical palette-only transfer is valid.
+        try:clip.copy_selection();palette_error=None
+        except RuntimeError as error:palette_error=str(error)
+        report['palette_copy_error']=palette_error
+        check('public Copy Selected supports empty geometry with full palette',palette_error is None)
+        palette=out/'palette.3dm';meta=out/'palette.json'
+        receipt=json.loads(native.captureLayerClipboard3dm(str(palette),str(meta)))
+        captured=json.loads(meta.read_text())
+        check('public Copy Selected publishes exact extended scope and all32 colors',receipt['scope']==1 and receipt['evidence']==2 and captured['snapshot']==before['snapshot'])
+        check('Copy palette creates no document edit or Undo',json.loads(native.layerDocumentSnapshot(doc.Name))==before and doc.UndoCount==undo and not doc.HasPendingTransaction)
+        target=App.newDocument('PaletteTarget');target.UndoMode=1
+        palette_objects=clip.paste_selection();received=json.loads(native.layerDocumentSnapshot(target.Name))
+        check('public Paste adds palette without synthetic geometry',palette_objects==[] and received['snapshot']['layers'][0]['rgb']==[12,34,56] and len(received['snapshot']['layers'])==32 and len(received['snapshot']['objects'])==0)
+        App.setActiveDocument(doc.Name)
+        a=doc.addObject('Part::Feature','CurrentSolid');a.Shape=Part.makeBox(2,3,4);a.Placement.Base=App.Vector(20,0,0)
+        b=doc.addObject('Part::Feature','HiddenCurve');b.Shape=Part.makeLine(App.Vector(3,0,0),App.Vector(9,0,0));b.ViewObject.Visibility=False
+        group=doc.addObject('App::DocumentObjectGroup','Models');group.addObject(a);group.addObject(b);doc.recompute()
+        current=json.loads(native.layerDocumentSnapshot(doc.Name));layer=current['snapshot']['layers'][0]['source_id']
+        native.layerDocumentCommand(doc.Name,json.dumps(dict(operation='set_locked',layer_id=layer,locked=True)))
+        current=json.loads(native.layerDocumentSnapshot(doc.Name));undo=doc.UndoCount
+        check('Session commands are registered alongside original shortcuts',all(name in Gui.listCommands() for name in ['Copy3dm','Paste3dm','CopySession3dm','ExportSession3dm','ExportLayerSelection3dm']))
+        Gui.Selection.clearSelection();Gui.runCommand('CopySession3dm')
+        body=out/'session.3dm';metadata=out/'session.json';info=json.loads(native.captureLayerClipboard3dm(str(body),str(metadata)))
+        layer_data=json.loads(metadata.read_text())
+        check('actual Copy Session collects locked hidden models without selection',info['scope']==2 and len(layer_data['snapshot']['objects'])==2 and not Gui.Selection.getSelection())
+        check('Copy Session keeps layer flags and object own flags separate',layer_data['snapshot']['layers'][0]['locked'] and all(not row['locked'] for row in layer_data['snapshot']['objects']) and sum(not row['visible'] for row in layer_data['snapshot']['objects'])==1)
+        check('Copy Session preserves source state and Undo',json.loads(native.layerDocumentSnapshot(doc.Name))==current and doc.UndoCount==undo)
+        file=out/'session-file.3dm';ThreeDm.export_session(str(file))
+        folder=out/'file-read';folder.mkdir();file_model=json.loads(native.read3dm(str(file),str(folder)))
+        check('public Export Session carries all32 layers and exact model count',len(file_model['items'])==2 and len(file_model['layer_session']['snapshot']['layers'])==32)
+        shape=Part.Shape();shape.read(next(r['brep'] for r in file_model['items'] if r['name']==a.Label))
+        check('public Session file exports current edited world geometry',abs(shape.BoundBox.XMin-20)<1e-8 and abs(shape.Volume-24)<1e-8)
+        selected_file=out/'selected-palette.3dm';Gui.Selection.clearSelection();ThreeDm.export_layer_selection(str(selected_file))
+        selected_folder=out/'selected-read';selected_folder.mkdir();selected_model=json.loads(native.read3dm(str(selected_file),str(selected_folder)))
+        check('public Selected file supports palette-only even with unselected models',not selected_model['items'] and len(selected_model['layer_session']['snapshot']['layers'])==32)
+        def export_command(command,filename):
+            target_file=out/filename;seen=[];attempts=[0];active=[True]
+            def choose():
+                if not active[0]:return
+                attempts[0]+=1
+                for dialog in QtWidgets.QApplication.topLevelWidgets():
+                    if isinstance(dialog,QtWidgets.QFileDialog) and dialog.isVisible():
+                        seen.append(dialog.windowTitle());dialog.setDirectory(str(target_file.parent));dialog.selectFile(target_file.name)
+                        edit=dialog.findChild(QtWidgets.QLineEdit,'fileNameEdit')
+                        if edit:edit.setText(target_file.name)
+                        (out/'dialog-progress.json').write_text(json.dumps(dict(command=command,attempt=attempts[0],title=dialog.windowTitle(),directory=dialog.directory().absolutePath(),filename=edit.text() if edit else None)),encoding='utf-8')
+                        if attempts[0]>=100:dialog.reject();return
+                        dialog.accept()
+                QtCore.QTimer.singleShot(50,choose)
+            QtCore.QTimer.singleShot(50,choose)
+            try:Gui.runCommand(command)
+            finally:active[0]=False
+            check('native file command opens dialog and writes '+command,bool(seen) and target_file.is_file())
+            folder=out/(filename+'-read');folder.mkdir();return json.loads(native.read3dm(str(target_file),str(folder)))
+        menu_session=export_command('ExportSession3dm','menu-session.3dm')
+        menu_selected=export_command('ExportLayerSelection3dm','menu-selected.3dm')
+        check('file command dispatch uses Session and Selected scopes',len(menu_session['items'])==2 and not menu_selected['items'] and len(menu_selected['layer_session']['snapshot']['layers'])==32)
+        App.setActiveDocument(target.Name);before_receive=json.loads(native.layerDocumentSnapshot(target.Name));count=target.UndoCount
+        objects=clip.paste_selection();after_receive=json.loads(native.layerDocumentSnapshot(target.Name));names=[o.Name for o in objects]
+        check('public paired Paste receives current models and palette in one Undo',len(objects)==2 and target.UndoCount==count+1 and len(after_receive['snapshot']['objects'])==2 and after_receive['snapshot']['layers'][0]['locked'])
+        target.undo();check('Paste Undo restores full destination and removes models',json.loads(native.layerDocumentSnapshot(target.Name))==before_receive and all(target.getObject(n) is None for n in names))
+        target.redo();check('Paste Redo restores received state and geometry together',json.loads(native.layerDocumentSnapshot(target.Name))==after_receive and all(target.getObject(n) is not None for n in names))
+        App.setActiveDocument(doc.Name);unknown=doc.addObject('App::FeaturePython','UnsupportedModel');prior_body=body.read_bytes();prior_meta=metadata.read_bytes()
+        failed=False
+        try:clip.copy_session()
+        except RuntimeError as error:failed=unknown.Name in str(error)
+        check('Session unsupported inventory fails before replacing clipboard',failed)
+        protected_body=out/'protected.3dm';protected_meta=out/'protected.json';native.captureLayerClipboard3dm(str(protected_body),str(protected_meta))
+        check('failed public Session retains exact previous geometry metadata pair',protected_body.read_bytes()==prior_body and protected_meta.read_bytes()==prior_meta)
+        App.setActiveDocument(target.Name);stable=json.loads(native.layerDocumentSnapshot(target.Name));undos=target.UndoCount;object_count=len(target.Objects)
+        def pair(data,meta):
+            mime=QtCore.QMimeData();mime.setData(clip.MIME,QtCore.QByteArray(data))
+            mime.setData('application/x-qt-windows-mime;value="OM9.LayerSession.v1"',QtCore.QByteArray(meta))
+            QtWidgets.QApplication.clipboard().setMimeData(mime)
+        def rejected_paste():
+            try:clip.paste_selection()
+            except RuntimeError as error:report.setdefault('paste_rejections',[]).append(str(error));return True
+            return False
+        corrupted=bytearray(prior_body);corrupted[-1]^=1;pair(bytes(corrupted),prior_meta)
+        check('public Paste rejects mismatched extended geometry digest',rejected_paste())
+        bad=json.loads(prior_meta);bad['version']=99;pair(prior_body,json.dumps(bad).encode())
+        check('public Paste rejects unknown metadata version without native-only downgrade',rejected_paste())
+        pair(prior_body,b'')
+        check('public Paste rejects present truncated metadata without native-only downgrade',rejected_paste())
+        check('all metadata failures preserve document state Undo and worker lifecycle',json.loads(native.layerDocumentSnapshot(target.Name))==stable and target.UndoCount==undos and len(target.Objects)==object_count and not target.HasPendingTransaction and not clip._busy)
+        native.publishLayerClipboard3dm(prior_body,None,0);native_objects=clip.paste_selection()
+        check('native-only public Paste reports reduced evidence explicitly',len(native_objects)==2 and clip.last_result['clipboard']['evidence']==1)
+        report.update(ok=True,module=native.__file__,scope='public working-object Selected/Session file and clipboard; retained/native Matrix product bridge and complete goal pending')
+    except Exception:report.update(ok=False,error=traceback.format_exc())
+    finally:
+        (out/'results.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+        for name in list(App.listDocuments()):App.closeDocument(name)
+        QtCore.QTimer.singleShot(100,Gui.getMainWindow().close)
+QtCore.QTimer.singleShot(1000,run)

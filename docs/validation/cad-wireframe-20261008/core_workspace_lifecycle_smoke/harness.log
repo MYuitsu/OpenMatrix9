@@ -1,0 +1,15 @@
+{
+    "checks":  [
+                   {
+                       "name":  "workspace creates four native views",
+                       "passed":  true
+                   },
+                   {
+                       "name":  "document close removes model document",
+                       "passed":  true
+                   }
+               ],
+    "ok":  true
+}
+Artifacts: H:\FreeCAD-src\build\om9-dev\build\core_workspace_lifecycle_smoke-1\256ea6290c934f52aac0bc48f12674e8
+

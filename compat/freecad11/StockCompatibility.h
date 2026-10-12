@@ -44,6 +44,6 @@ inline bool om9ReadOnlyFile(const App::Document& doc) {
     const QFileInfo file(QString::fromUtf8(doc.FileName.getValue()));
     return file.exists()&&!file.isWritable();
 }
-inline bool om9AlterDocument(App::Document*) {return Gui::Control().isAllowedAlterDocument();}
-inline bool om9AlterView(App::Document*) {return Gui::Control().isAllowedAlterView();}
-inline bool om9AlterSelection(App::Document*) {return Gui::Control().isAllowedAlterSelection();}
+inline bool om9AlterDocument(const App::Document*) {return Gui::Control().isAllowedAlterDocument();}
+inline bool om9AlterView(const App::Document*) {return Gui::Control().isAllowedAlterView();}
+inline bool om9AlterSelection(const App::Document*) {return Gui::Control().isAllowedAlterSelection();}
